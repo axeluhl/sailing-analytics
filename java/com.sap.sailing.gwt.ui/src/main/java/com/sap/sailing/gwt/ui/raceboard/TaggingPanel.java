@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.raceboard;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ButtonCell;
@@ -34,27 +35,30 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
+import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TagListProvider;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.raceboard.TaggingPanel.TagPanelResources.TagPanelStyle;
+import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
-import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentWithoutSettings;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.security.ui.client.UserService;
 
-public class TaggingPanel extends ComponentWithoutSettings implements TimeListener {
+public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesInfoProviderListener {
 
     public interface TagPanelResources extends ClientBundle {
         public static final TagPanelResources INSTANCE = GWT.create(TagPanelResources.class);
@@ -150,10 +154,10 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
             htmlBuilder.append(cell);
         }
     }
-    
-    private class TagButton extends Button{
-        private String tag, imageURL, comment; 
-        
+
+    private class TagButton extends Button {
+        private String tag, imageURL, comment;
+
         public TagButton(String buttonName, String tag, String imageURL, String comment) {
             super(buttonName);
             this.tag = tag;
@@ -179,27 +183,27 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
             return comment;
         }
     }
-    
-    private class TagCreationPanel extends VerticalPanel{
+
+    private class TagCreationPanel extends VerticalPanel {
         protected Button createTagFromTextBoxes, editCustomTagButtons;
         protected Panel customButtonsPanel = new FlowPanel();
-        private final TagCreationInputPanel inputPanel;
-        
+        private final TagCreationInputPanel inputPanel;  
         public TagCreationPanel(StringMessages stringMessages) {    
             inputPanel = new TagCreationInputPanel(stringMessages);
             add(inputPanel);
-                     
+
             createTagFromTextBoxes = new Button(stringMessages.tagAddButton());
             createTagFromTextBoxes.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
                     if (isAuthorized()) {
-                        addNewTag(inputPanel.getTagValue(), inputPanel.getCommentValue(), inputPanel.getImageURLValue());
+                        addNewTag(inputPanel.getTagValue(), inputPanel.getCommentValue(),
+                                inputPanel.getImageURLValue());
                     }
                 }
             });
             add(createTagFromTextBoxes);
-           
+
             editCustomTagButtons = new Button(stringMessages.tagEditCustomTagButtons());
             editCustomTagButtons.addClickHandler(new ClickHandler() {
                 @Override
@@ -211,10 +215,10 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
                 }
             });
             add(editCustomTagButtons);
-            
+
             add(customButtonsPanel);
         }
-        
+
         private void updateButtons() {
             customButtonsPanel.clear();
             customTagButtons.forEach(button -> {
@@ -229,9 +233,8 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
         public EditCustomTagsDialog(Panel customButtonsPanel) {
             super(stringMessages.tagEditCustomTagsButtonDialogHeader(), "", stringMessages.ok(), stringMessages.cancel(), null, null);
             this.customButtonsPanel = customButtonsPanel; 
-            
         }
-        
+
         @Override
         protected Widget getAdditionalWidget() {
             Panel mainPanel = new HorizontalPanel();
@@ -291,7 +294,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
                 }
             });
             rightPanel.add(addCustomTagButton);
-                        
+
             return mainPanel;
         }
 
@@ -301,7 +304,6 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
             return null;
         }
     }
-    
 
     private final HeaderPanel panel;
     private final TagCreationPanel tagCreationPanel;
@@ -317,14 +319,15 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
     private final SailingServiceAsync sailingService;
     private final UserService userService;
     private final Timer timer;
+    private final RaceTimesInfoProvider raceTimesInfoProvider;
 
     private String leaderboardName = null;
     private RaceColumnDTO raceColumn = null;
     private FleetDTO fleet = null;
-    private TimePoint lastReceivedTag = null;
 
     public TaggingPanel(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages,
-            SailingServiceAsync sailingService, UserService userService, Timer timer) {
+            SailingServiceAsync sailingService, UserService userService, Timer timer,
+            RaceTimesInfoProvider raceTimesInfoProvider) {
         super(parent, context);
 
         TagPanelResources.INSTANCE.style().ensureInjected();
@@ -339,21 +342,23 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
         tagSelectionModel = new SingleSelectionModel<TagDTO>();
 
         contentPanel = new ScrollPanel();
-        tagCreationPanel = new TagCreationPanel(stringMessages);    
+        tagCreationPanel = new TagCreationPanel(stringMessages);
 
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.userService = userService;
         this.timer = timer;
-        timer.addTimeListener(this);
+        this.raceTimesInfoProvider = raceTimesInfoProvider;
+        raceTimesInfoProvider.addRaceTimesInfoProviderListener(this);
 
         initializePanel();
     }
 
     public TaggingPanel(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages,
-            SailingServiceAsync sailingService, UserService userService, Timer timer, String leaderboardName,
-            RaceColumnDTO raceColumn, FleetDTO fleet) {
-        this(parent, context, stringMessages, sailingService, userService, timer);
+            SailingServiceAsync sailingService, UserService userService, Timer timer,
+            RaceTimesInfoProvider raceTimesInfoProvider, String leaderboardName, RaceColumnDTO raceColumn,
+            FleetDTO fleet) {
+        this(parent, context, stringMessages, sailingService, userService, timer, raceTimesInfoProvider);
         updateRace(leaderboardName, raceColumn, fleet);
     }
 
@@ -439,37 +444,33 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
     }
 
     @Override
-    public void timeChanged(Date newTime, Date oldTime) {
-        if (leaderboardName != null && raceColumn != null && fleet != null && panel.isAttached() && panel.isVisible()
-                && oldTime != null) {
-            // load tags since last received tag => decrease required bandwidth as only difference in tags will be sent
-            // over network
-            sailingService.getTags(leaderboardName, raceColumn.getName(), fleet.getName(), lastReceivedTag,
-                    new AsyncCallback<List<TagDTO>>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            Notification.notify(stringMessages.tagNotLoaded(), NotificationType.ERROR);
+    public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo,
+            long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest, long clientTimeWhenResponseWasReceived) {
+        raceTimesInfo.forEach((raceIdentifier, raceInfo) -> {
+            boolean addedTag = false;
+            boolean updatedLatestTag = false;
+            if (raceIdentifier.equals(raceInfo.getRaceIdentifier())) {
+                List<TagDTO> currentTags = tagListProvider.getAllTags();
+                TimePoint latestReceivedTagTime = raceTimesInfoProvider.getLatestReceivedTag(raceIdentifier);
+                for (TagDTO tag : raceInfo.getTags()) {
+                    if (!currentTags.contains(tag)) {
+                        currentTags.add(tag);
+                        addedTag = true;
+                        if (latestReceivedTagTime == null || (latestReceivedTagTime != null
+                                && latestReceivedTagTime.before(tag.getCreatedAt()))) {
+                            latestReceivedTagTime = tag.getCreatedAt();
+                            updatedLatestTag = true;
                         }
-
-                        @Override
-                        public void onSuccess(List<TagDTO> result) {
-                            if (result != null) {
-                                List<TagDTO> tags = tagListProvider.getAllTags();
-                                for (TagDTO tag : result) {
-                                    if (!tags.contains(tag)) {
-                                        tags.add(tag);
-                                        if (lastReceivedTag == null) {
-                                            lastReceivedTag = tag.getCreatedAt();
-                                        } else if (lastReceivedTag.before(tag.getCreatedAt())) {
-                                            lastReceivedTag = tag.getCreatedAt();
-                                        }
-                                        updateContent();
-                                    }
-                                }
-                            }
-                        }
-                    });
-        }
+                    }
+                }
+                if (updatedLatestTag) {
+                    raceTimesInfoProvider.setLatestReceivedTagTime(raceIdentifier, latestReceivedTagTime);
+                }
+                if (addedTag) {
+                    updateContent();
+                }
+            }
+        });
     }
 
     @Override

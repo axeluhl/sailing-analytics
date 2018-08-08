@@ -2063,7 +2063,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public RaceTimesInfoDTO getRaceTimesInfo(RegattaAndRaceIdentifier raceIdentifier) {
+    public RaceTimesInfoDTO getRaceTimesInfo(RegattaAndRaceIdentifier raceIdentifier, TimePoint latestReceivedTagTime) {
         RaceTimesInfoDTO raceTimesInfo = null;
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
 
@@ -2073,6 +2073,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             raceTimesInfo.setLegInfos(legInfos);
             List<MarkPassingTimesDTO> markPassingTimesDTOs = new ArrayList<MarkPassingTimesDTO>();
             raceTimesInfo.setMarkPassingTimes(markPassingTimesDTOs);
+            List<TagDTO> tags = new ArrayList<TagDTO>();
+            raceTimesInfo.setTags(tags);
 
             raceTimesInfo.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
             raceTimesInfo.startOfTracking = trackedRace.getStartOfTracking() == null ? null : trackedRace.getStartOfTracking().asDate();
@@ -2125,6 +2127,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             } finally {
                 trackedRace.getRace().getCourse().unlockAfterRead();
             }
+
+            Iterable<RaceLog> raceLogs = trackedRace.getAttachedRaceLogs();
+            for (RaceLog raceLog : raceLogs) {
+                TagFinder tagFinder = new TagFinder(raceLog, latestReceivedTagTime);
+                List<RaceLogTagEvent> foundTagEvents = tagFinder.analyze();
+                for (RaceLogTagEvent tagEvent : foundTagEvents) {
+                    tags.add(new TagDTO(tagEvent.getTag(), tagEvent.getComment(), tagEvent.getImageURL(),
+                            tagEvent.getUsername(), tagEvent.getLogicalTimePoint(), tagEvent.getCreatedAt()));
+                }
+            }
         }   
         if (raceTimesInfo != null) {
             raceTimesInfo.currentServerTime = new Date();
@@ -2133,10 +2145,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public List<RaceTimesInfoDTO> getRaceTimesInfos(Collection<RegattaAndRaceIdentifier> raceIdentifiers) {
+    public List<RaceTimesInfoDTO> getRaceTimesInfos(Collection<RegattaAndRaceIdentifier> raceIdentifiers, Map<RegattaAndRaceIdentifier, TimePoint> latestReceivedTagTimes) {
         List<RaceTimesInfoDTO> raceTimesInfos = new ArrayList<RaceTimesInfoDTO>();
         for (RegattaAndRaceIdentifier raceIdentifier : raceIdentifiers) {
-            RaceTimesInfoDTO raceTimesInfo = getRaceTimesInfo(raceIdentifier);
+            RaceTimesInfoDTO raceTimesInfo = getRaceTimesInfo(raceIdentifier, latestReceivedTagTimes.get(raceIdentifier));
             if (raceTimesInfo != null) {
                 raceTimesInfos.add(raceTimesInfo);
             }
@@ -6033,7 +6045,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 getService().getServerAuthor(), raceLog.getCurrentPassId(), course, CourseDesignerMode.ADMIN_CONSOLE);
         raceLog.add(event);
     }
-    
+
+    @Override
+    public void addTagToRaceLog(String leaderboardName, String raceColumnName, String fleetName, String tag,
+            String comment, String imageURL, TimePoint raceTimepoint) {
+        RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
+        raceLog.add(new RaceLogTagEventImpl(tag, comment, imageURL, raceTimepoint, getService().getServerAuthor(),
+                raceLog.getCurrentPassId()));
+    }
+
     /**
      * @param trackedRace
      *            if <code>null</code>, no position data will be attached to the {@link MarkDTO}s
@@ -7894,27 +7914,5 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 ShardingContext.clearShardingConstraint(identifiedShardingType);
             }
         }
-    }
-    
-    @Override
-    public void addTagToRaceLog(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment, String imageURL, TimePoint raceTimepoint) {
-        RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
-        raceLog.add(new RaceLogTagEventImpl(tag, comment, imageURL, raceTimepoint, getService().getServerAuthor(), raceLog.getCurrentPassId()));
-    }
-    
-    @Override
-    /**
-     * @param from may be null, results in loading every tag since the race start
-     */
-    public List<TagDTO> getTags(String leaderboardName, String raceColumnName, String fleetName, TimePoint from) {
-        RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
-        TagFinder tagFinder = new TagFinder(raceLog, from);
-        List<RaceLogTagEvent> foundTagEvents = tagFinder.analyze();
-        
-        List<TagDTO> result = new ArrayList<>();
-        for(RaceLogTagEvent tagEvent : foundTagEvents) {
-            result.add(new TagDTO(tagEvent.getTag(), tagEvent.getComment(), tagEvent.getImageURL(), tagEvent.getUsername(), tagEvent.getLogicalTimePoint(), tagEvent.getCreatedAt()));
-        }
-        return result;
     }
 }
