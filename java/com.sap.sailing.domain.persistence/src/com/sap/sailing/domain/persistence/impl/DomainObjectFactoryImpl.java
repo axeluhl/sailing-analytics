@@ -1863,6 +1863,25 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             if (competitorDisplayName == null) {
                 competitorDisplayName = "loaded competitor";
             }
+            String competitorShortName = (String) dbObject.get(FieldNames.COMPETITOR_SHORT_NAME.name());
+            // The Competitor short name is a new field in the list. Therefore the short name might be null for existing
+            // events. In this case a standard short name is set.
+            if (competitorShortName == null) {
+                competitorShortName = "loaded competitor short";
+            }
+            String competitorBoatName = (String) dbObject.get(FieldNames.COMPETITOR_BOAT_NAME.name());
+            // The Competitor boat is a new field in the list. Therefore the name might be null for existing events.
+            // In this case a standard boat name is set.
+            if (competitorBoatName == null) {
+                competitorBoatName = "loaded competitor boat";
+            }
+            String competitorBoatSailId = (String) dbObject.get(FieldNames.COMPETITOR_BOAT_SAIL_ID.name());
+            // The Competitor boat is a new field in the list. Therefore the boat id might be null for existing events.
+            // In this case a standard name is set.
+            if (competitorBoatSailId == null) {
+                competitorBoatSailId = "loaded competitor boat id";
+            }
+            
             // At this point we do not retrieve the competitor object since at any point in time, especially after a
             // server restart, the DomainFactory and its competitor
             // cache might be empty. But at this time the race log is loaded from database, so the competitor would be
@@ -1886,8 +1905,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             } else {
                 mergeState = MergeState.valueOf(mergeStateAsString);
             }
-            CompetitorResultImpl positionedCompetitor = new CompetitorResultImpl(
-                    competitorId, competitorDisplayName, rank == null ? rankCounter : rank, maxPointsReason, score, finishingTime, comment, mergeState);
+            CompetitorResultImpl positionedCompetitor = new CompetitorResultImpl(competitorId, competitorDisplayName,
+                    competitorShortName, competitorBoatName, competitorBoatSailId, rank == null ? rankCounter : rank,
+                            maxPointsReason, score, finishingTime, comment, mergeState);
             positionedCompetitors.add(positionedCompetitor);
             rankCounter++;
         }
