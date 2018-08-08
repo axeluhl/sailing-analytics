@@ -7,7 +7,6 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.Widget;
@@ -44,30 +43,10 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
     @UiField
     DivElement notificationsTextUi;
 
-    private SailorProfileEntry entry;
-
-    public EditSailorProfile(SharedSailorProfileView.Presenter presenter) {
-        FlagImageResolver.get(new AsyncCallback<FlagImageResolver>() {
-
-            @Override
-            public void onSuccess(FlagImageResolver flagImageResolver) {
-                competitorSelectionUi = new CompetitorDisplayImpl(presenter.getFavoriteCompetitorsDataProvider(),
-                        flagImageResolver).selectionUi;
-                initWidget(uiBinder.createAndBindUi(EditSailorProfile.this));
-                setEntryWhenReady();
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-            }
-        });
-        // TODO hide notificationsTextUi if the user's mail address is already verified
-    }
-
-    private void setEntryWhenReady() {
-        if (competitorSelectionUi != null && entry != null) {
-            competitorSelectionUi.setSelectedItems(entry.getCompetitors());
-        }
+    public EditSailorProfile(SharedSailorProfileView.Presenter presenter, FlagImageResolver flagImageResolver) {
+        competitorSelectionUi = new CompetitorDisplayImpl(presenter.getFavoriteCompetitorsDataProvider(),
+                flagImageResolver).selectionUi;
+        initWidget(uiBinder.createAndBindUi(EditSailorProfile.this));
     }
 
     public void setEdgeToEdge(boolean edgeToEdge) {
@@ -104,7 +83,6 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
     }
 
     public void setEntry(SailorProfileEntry entry) {
-        this.entry = entry;
-        setEntryWhenReady();
+        competitorSelectionUi.setSelectedItems(entry.getCompetitors());
     }
 }

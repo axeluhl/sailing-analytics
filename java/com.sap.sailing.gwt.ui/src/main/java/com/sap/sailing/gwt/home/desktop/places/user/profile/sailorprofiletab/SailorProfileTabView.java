@@ -43,7 +43,7 @@ public class SailorProfileTabView extends Composite implements UserProfileTabVie
         if (uuid != null) {
             final SailorProfileDetails sailorView = new SailorProfileDetails();
             view = sailorView;
-            currentPresenter = new SailorProfileOverviewImplPresenter(view, ownPresenter);
+            currentPresenter = new SailorProfileOverviewImplPresenter(view, ownPresenter, flagImageResolver);
             contentArea.setWidget(view);
             currentPresenter.getSharedSailorProfilePresenter().getDataProvider().findSailorProfileById(uuid,
                     new AsyncCallback<SailorProfileEntry>() {
@@ -60,7 +60,7 @@ public class SailorProfileTabView extends Composite implements UserProfileTabVie
                     });
         } else {
             view = new SailorProfileOverviewImpl(flagImageResolver);
-            this.currentPresenter = new SailorProfileOverviewImplPresenter(view, ownPresenter);
+            this.currentPresenter = new SailorProfileOverviewImplPresenter(view, ownPresenter, flagImageResolver);
             contentArea.setWidget(view);
         }
     }

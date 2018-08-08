@@ -42,7 +42,8 @@ public class SailorProfileDetails extends Composite implements SailorProfileDeta
     @Override
     public void setPresenter(SailingProfileOverviewPresenter presenter) {
         decoratorUi = new AuthorizedContentDecoratorDesktop(presenter);
-        editSailorProfileUi = new EditSailorProfile(presenter.getSharedSailorProfilePresenter());
+        editSailorProfileUi = new EditSailorProfile(presenter.getSharedSailorProfilePresenter(),
+                presenter.getFlagImageResolver());
         initWidget(uiBinder.createAndBindUi(this));
         propagateEntryIfNecessary();
     }
