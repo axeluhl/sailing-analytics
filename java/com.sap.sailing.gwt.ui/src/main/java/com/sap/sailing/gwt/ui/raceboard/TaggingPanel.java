@@ -276,7 +276,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
             mainPanel.add(rightPanel);
             mainPanel.add(customTagButtonsTable);
             
-            inputPanel = new TagCreationInputPanel();
+            inputPanel = new TagCreationInputPanel(stringMessages);
             rightPanel.add(inputPanel);
             
             addCustomTagButton = new Button(stringMessages.tagAddCustomTagButton());
