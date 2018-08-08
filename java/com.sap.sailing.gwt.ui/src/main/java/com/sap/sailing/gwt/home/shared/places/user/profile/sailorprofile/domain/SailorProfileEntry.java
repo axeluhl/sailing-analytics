@@ -1,19 +1,20 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 
 public class SailorProfileEntry {
 
-    private final String key;
+    private final UUID key;
     private final String name;
     private final List<SimpleCompetitorWithIdDTO> competitors;
     private final List<BadgeDTO> badges;
     private final List<BoatClassDTO> boatclasses;
 
-    public SailorProfileEntry(String key, String name, List<SimpleCompetitorWithIdDTO> competitors,
+    public SailorProfileEntry(UUID key, String name, List<SimpleCompetitorWithIdDTO> competitors,
             List<BadgeDTO> badges,
             List<BoatClassDTO> boatclasses) {
         super();
@@ -24,7 +25,7 @@ public class SailorProfileEntry {
         this.boatclasses = boatclasses;
     }
 
-    public String getKey() {
+    public UUID getKey() {
         return key;
     }
 

@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab;
 
 import java.util.Collection;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.ButtonCell;
@@ -61,7 +60,7 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
             @Override
             public void update(int index, SailorProfileEntry entry, String value) {
                 presenter.getClientFactory().getPlaceController()
-                        .goTo(new SailorProfilePlace(UUID.fromString(entry.getKey())));
+                        .goTo(new SailorProfilePlace(entry.getKey()));
             }
         });
     }

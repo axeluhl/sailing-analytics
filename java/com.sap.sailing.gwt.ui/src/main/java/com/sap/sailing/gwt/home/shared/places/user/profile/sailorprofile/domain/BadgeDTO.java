@@ -1,17 +1,19 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain;
 
+import java.util.UUID;
+
 public class BadgeDTO {
 
-    private final String key;
+    private final UUID key;
     private final String name;
 
-    public BadgeDTO(String key, String name) {
+    public BadgeDTO(UUID key, String name) {
         super();
         this.key = key;
         this.name = name;
     }
 
-    public String getKey() {
+    public UUID getKey() {
         return key;
     }
 

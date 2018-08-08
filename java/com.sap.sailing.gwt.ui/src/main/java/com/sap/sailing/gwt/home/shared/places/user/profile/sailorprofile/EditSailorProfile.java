@@ -47,6 +47,7 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
         competitorSelectionUi = new CompetitorDisplayImpl(presenter.getFavoriteCompetitorsDataProvider(),
                 flagImageResolver).selectionUi;
         initWidget(uiBinder.createAndBindUi(EditSailorProfile.this));
+        GWT.log("init-finished");
     }
 
     public void setEdgeToEdge(boolean edgeToEdge) {
