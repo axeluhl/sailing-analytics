@@ -25,6 +25,7 @@ import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -143,15 +144,78 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
             htmlBuilder.append(cell);
         }
     }
+    
+    private class TagButton extends Button{
+        
+        public TagButton(String buttonName, String tag, String imageURL, String comment) {
+            super(buttonName);
+            
+            addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    addNewTag(tag, comment, imageURL);
+                }
+            });
+        }
+    }
+    
+    private class TagCreationPanel extends VerticalPanel{
+        protected Button createTagFromTextBoxes, editCustomTagButtons;
+        protected List<TagButton> customTagButtons = new ArrayList<TagButton>();
+        protected Panel customButtonsPanel = new FlowPanel();
+        private final TagCreationInputPanel inputPanel = new TagCreationInputPanel();
+        
+        public TagCreationPanel() {    
+            setHeight("4cm");
+            
+            add(inputPanel);
+                     
+            createTagFromTextBoxes = new Button("Create Tag from Formular");
+            createTagFromTextBoxes.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    addNewTag(inputPanel.getTagValue(), inputPanel.getCommentValue(), inputPanel.getImageURLValue());
+                }
+            });
+            add(createTagFromTextBoxes);
+           
+            editCustomTagButtons = new Button("Edit Custom Tags");
+            editCustomTagButtons.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    if (leaderboardName == null || raceColumn == null || fleet == null) {
+                        Notification.notify(stringMessages.tagNotAdded(), NotificationType.ERROR);
+                        return;
+                    }
+                    if (userService.getCurrentUser() == null) {
+                        Notification.notify(stringMessages.tagNotLoggedIn(), NotificationType.WARNING);
+                        return;
+                    }
+                    TagButton button = new TagButton(inputPanel.getTagValue(), inputPanel.getTagValue(), inputPanel.getCommentValue(), inputPanel.getImageURLValue());
+                    customTagButtons.add(button);
+                    updateButtons();
+                }
+            });
+            add(editCustomTagButtons);
+            
+            add(customButtonsPanel);
+        }
+        
+        private void updateButtons() {
+            customButtonsPanel.clear();
+            customTagButtons.forEach(button -> {
+                customButtonsPanel.add(button);
+            });
+        }
+    }
 
     private final HeaderPanel panel;
+    private final TagCreationPanel tagCreationPanel;
     private final Panel filterbarPanel;
     private final Panel contentPanel;
     private final CellList<TagDTO> tagCellList;
     private final SingleSelectionModel<TagDTO> tagSelectionModel;
-    private final Panel buttonsPanel;
 
-    private final List<Button> buttons;
     private final TagListProvider tagListProvider;
 
     private final StringMessages stringMessages;
@@ -179,9 +243,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
         tagSelectionModel = new SingleSelectionModel<TagDTO>();
 
         contentPanel = new ScrollPanel();
-        buttonsPanel = new FlowPanel();
-
-        buttons = new ArrayList<Button>();        
+        tagCreationPanel = new TagCreationPanel();    
 
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
@@ -201,20 +263,12 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
 
     private void initializePanel() {
         // Panel
-        panel.setTitle(stringMessages.tagPanel());
+        //panel.setTitle(stringMessages.tagPanel());
         panel.setStyleName(TagPanelResources.INSTANCE.style().tagPanel());
 
         // Searchbar
         panel.setHeaderWidget(filterbarPanel);
-
-        // Buttons
-        buttons.add(new Button(stringMessages.tagAddButton(), new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                addNewTagButton();
-            }
-        }));
-        panel.setFooterWidget(buttonsPanel);
+        panel.setFooterWidget(tagCreationPanel);
 
         // Content (tags)
         tagListProvider.addDataDisplay(tagCellList);
@@ -234,7 +288,6 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
         contentPanel.getElement().getStyle().setPaddingTop(10, Unit.PX);
 
         panel.setContentWidget(contentPanel);
-        updateButtons();
         updateContent();
     }
 
@@ -249,54 +302,35 @@ public class TaggingPanel extends ComponentWithoutSettings implements TimeListen
             this.raceColumn = raceColumn;
         }
     }
+    
+    private void addNewTag(String tag, String comment, String imageURL) {
+        if (leaderboardName == null || raceColumn == null || fleet == null) {
+            Notification.notify(stringMessages.tagNotAdded(), NotificationType.ERROR);
+            return;
+        }
+        if (userService.getCurrentUser() == null) {
+            Notification.notify(stringMessages.tagNotLoggedIn(), NotificationType.WARNING);
+            return;
+        }
+        sailingService.addTagToRaceLog(leaderboardName, raceColumn.getName(), fleet.getName(),
+                tag, comment, imageURL,
+                new MillisecondsTimePoint(timer.getTime()), new AsyncCallback<Void>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Notification.notify(stringMessages.tagNotAdded(), NotificationType.ERROR);
+                    }
 
-    private void addNewTagButton() {
-        Button tagButton = new Button("Tag-Button");
-        tagButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                if (leaderboardName == null || raceColumn == null || fleet == null) {
-                    Notification.notify(stringMessages.tagNotAdded(), NotificationType.ERROR);
-                    return;
-                }
-                if (userService.getCurrentUser() == null) {
-                    Notification.notify(stringMessages.tagNotLoggedIn(), NotificationType.WARNING);
-                    return;
-                }
-
-                sailingService.addTagToRaceLog(leaderboardName, raceColumn.getName(), fleet.getName(),
-                        "Super Duper Tag!", "Fancy comment...", "https://localhost:8080/image/abc.png",
-                        new MillisecondsTimePoint(timer.getTime()), new AsyncCallback<Void>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                Notification.notify(stringMessages.tagNotAdded(), NotificationType.ERROR);
-                            }
-
-                            @Override
-                            public void onSuccess(Void result) {
-                                Notification.notify(stringMessages.tagAddedSuccessfully(), NotificationType.INFO);
-                                // tagListProvider.addTag(tag);
-                                updateContent();
-                            }
-                        });
-            }
-        });
-
-        buttons.add(tagButton);
-        updateButtons();
+                    @Override
+                    public void onSuccess(Void result) {
+                        Notification.notify(stringMessages.tagAddedSuccessfully(), NotificationType.INFO);
+                    }
+         });
     }
 
     private void updateContent() {
         tagListProvider.updateFilteredTags();
         tagCellList.setVisibleRange(0, tagListProvider.getFilteredTagsListSize());
         tagListProvider.refresh();
-    }
-
-    private void updateButtons() {
-        buttonsPanel.clear();
-        buttons.forEach(button -> {
-            buttonsPanel.add(button);
-        });
     }
 
     @Override

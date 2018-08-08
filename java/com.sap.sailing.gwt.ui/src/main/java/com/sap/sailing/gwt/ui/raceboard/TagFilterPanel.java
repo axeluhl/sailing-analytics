@@ -66,7 +66,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
         submitButton.addStyleName(css.searchButtonBackgroundImage());
 
         searchTextBox = new TextBox();
-        searchTextBox.getElement().setAttribute("placeholder", stringMessages.searchTags());
+        searchTextBox.getElement().setAttribute("placeholder", stringMessages.tagSearchTags());
         searchTextBox.addKeyUpHandler(this);
         searchTextBox.setStyleName(css.searchInput());
 
