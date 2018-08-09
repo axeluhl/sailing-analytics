@@ -28,6 +28,7 @@ import com.google.gwt.user.client.ui.HTMLTable.ColumnFormatter;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -79,7 +80,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private TextBox jsonURLTextBox;
     private TextBox tracTracUpdateURITextBox;
     private TextBox tractracUsernameTextBox;
-    private TextBox tractracPasswordTextBox;
+    private PasswordTextBox tractracPasswordTextBox;
     private Label loadingMessageLabel;
 
     private LabeledAbstractFilterablePanel<TracTracRaceRecordDTO> racesFilterablePanel;
@@ -199,7 +200,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         grid.setWidget(6, 1, tractracUsernameTextBox);
         
         // TracTrac Password
-        tractracPasswordTextBox = new TextBox();
+        tractracPasswordTextBox = new PasswordTextBox();
         tractracPasswordTextBox.ensureDebugId("TracTracPasswordTextBox");
         tractracPasswordTextBox.setVisibleLength(40);
         
@@ -222,10 +223,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             }
         });
         grid.setWidget(9, 1, listRacesButton);
-        
         loadingMessageLabel = new Label();
         grid.setWidget(9, 2, loadingMessageLabel);
-
         return connectionsPanel;
     }
 

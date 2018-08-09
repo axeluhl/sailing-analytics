@@ -1,8 +1,9 @@
 package com.sap.sailing.selenium.core;
 
 import java.lang.reflect.Field;
+import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -10,8 +11,6 @@ import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.pagefactory.ElementLocator;
 import org.openqa.selenium.support.ui.FluentWait;
-
-import com.google.common.base.Function;
 
 /**
  * <p>An element locator, which will lazily locate and wait for an element or an element list to appear, by polling the
@@ -66,8 +65,8 @@ public class SeleniumElementLocator implements ElementLocator {
         this.context = context;
 
         this.wait = new FluentWait<>(this.context);
-        this.wait.withTimeout(timeOutSeconds, TimeUnit.SECONDS);
-        this.wait.pollingEvery(intervalMillis, TimeUnit.MILLISECONDS);
+        this.wait.withTimeout(Duration.ofSeconds(timeOutSeconds));
+        this.wait.pollingEvery(Duration.ofMillis(intervalMillis));
         this.wait.ignoring(NoSuchElementException.class);
 
         Annotations annotations = new Annotations(field);
