@@ -190,8 +190,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
     private TagsFilterSets createAndAddDefaultTagsFilter() {
         TagsFilterSets filterSets = new TagsFilterSets();
 
-        FilterSet<TagDTO, FilterWithUI<TagDTO>> defaultTagFilterSet = new FilterSet<>("Default empty filter");
-        filterSets.addFilterSet(defaultTagFilterSet);
+        //TODO add standard filters here
 
         return filterSets;
     }
