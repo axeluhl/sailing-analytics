@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.shared.partials.editable;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -32,6 +33,14 @@ public class InlineEditLabel extends Composite implements HasText {
 
     public InlineEditLabel() {
         initWidget(uiBinder.createAndBindUi(this));
+        textBox.addKeyUpHandler((event) -> {
+            if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+                updateState(false);
+            }
+        });
+        label.addClickHandler((event) -> {
+            updateState(true);
+        });
         updateState(false);
     }
 
@@ -46,10 +55,13 @@ public class InlineEditLabel extends Composite implements HasText {
             label.setVisible(false);
             textBox.setVisible(true);
             textBox.setText(label.getText());
+            textBox.setFocus(true);
+            button.setText("Save");
         } else {
             label.setVisible(true);
             textBox.setVisible(false);
             label.setText(textBox.getText());
+            button.setText("Edit");
 
         }
         this.state = newState;
