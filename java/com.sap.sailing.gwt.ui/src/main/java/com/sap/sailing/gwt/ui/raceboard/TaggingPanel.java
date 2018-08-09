@@ -23,6 +23,7 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -50,7 +51,6 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
-import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentWithoutSettings;
@@ -227,20 +227,20 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
         }
     }
     
-    private class EditCustomTagsDialog extends DataEntryDialog<List<TagButton>>{
-        private final Panel customButtonsPanel;
+    private class EditCustomTagsDialog extends DialogBox{
         
+        private final Button closeButton;
+        private final Panel mainPanel;
+        private final CellTable<TagButton> customTagButtonsTable;
+        private final TagCreationInputPanel inputPanel;
+        private final Button addCustomTagButton;
+
         public EditCustomTagsDialog(Panel customButtonsPanel) {
-            super(stringMessages.tagEditCustomTagsButtonDialogHeader(), "", stringMessages.ok(), stringMessages.cancel(), null, null);
-            this.customButtonsPanel = customButtonsPanel; 
-        }
+            setText(stringMessages.tagEditCustomTagsButtonDialogHeader());
 
-        @Override
-        protected Widget getAdditionalWidget() {
-            Panel mainPanel = new VerticalPanel();
+            mainPanel = new VerticalPanel();
 
-            CellTable<TagButton> customTagButtonsTable = new CellTable<TagButton>();
-            // add table header
+            customTagButtonsTable = new CellTable<TagButton>();
             TextColumn<TagButton> tagColumn = new TextColumn<TagButton>() {
                 @Override
                 public String getValue(TagButton button) {
@@ -282,9 +282,9 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
             customTagButtonsTable.addColumn(actionsColumn, "Actions");
             customTagButtonsTable.setRowData(customTagButtons);
             
-            TagCreationInputPanel inputPanel = new TagCreationInputPanel(stringMessages);
+            inputPanel = new TagCreationInputPanel(stringMessages);
             
-            Button addCustomTagButton = new Button(stringMessages.tagAddCustomTagButton());
+            addCustomTagButton = new Button(stringMessages.tagAddCustomTagButton());
             addCustomTagButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -300,19 +300,28 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
                 }
             });
             
+            closeButton = new Button(stringMessages.close());
+            closeButton.getElement().getStyle().setMargin(3, Unit.PX);
+            
+            closeButton.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    hideDialog();
+                }
+            });
+            
             mainPanel.add(customTagButtonsTable);            
             mainPanel.add(inputPanel);
             mainPanel.add(addCustomTagButton);
-
-
-            return mainPanel;
+            mainPanel.add(closeButton);
+            
+            setWidget(mainPanel);     
+        }
+        
+        private void hideDialog() {
+            this.hide();
         }
 
-        @Override
-        protected List<TagButton> getResult() {
-            // TODO Auto-generated method stub
-            return null;
-        }
     }
 
     private final HeaderPanel panel;
