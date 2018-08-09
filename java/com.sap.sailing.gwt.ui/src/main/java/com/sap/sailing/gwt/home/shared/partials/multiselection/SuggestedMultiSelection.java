@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.shared.partials.multiselection;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import com.google.gwt.core.client.GWT;
@@ -30,7 +31,7 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
 
     interface SuggestedMultiSelectionUiBinder extends UiBinder<Widget, SuggestedMultiSelection<?>> {
     }
-    
+
     @UiField SpanElement headerTitleUi;
     @UiField FlowPanel notificationToggleContainerUi;
     @UiField(provided = true) AbstractFilterWidget<T, T> suggestionWidgetUi;
@@ -38,6 +39,7 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
     @UiField FlowPanel itemContainerUi;
     private final SuggestedMultiSelectionDataProvider<T, ?> dataProvider;
     private final WidgetProvider<T> widgetProvider;
+    private final Collection<SelectionChangeHandler<T>> selectionChangeHandlers = new ArrayList<>();
 
     private SuggestedMultiSelection(SuggestedMultiSelectionDataProvider<T, ?> dataProvider,
             WidgetProvider<T> widgetProvider, String title) {
@@ -71,16 +73,22 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
         return notification;
     }
     
+    public void addSelectionChangeHandler(SelectionChangeHandler<T> handler) {
+        this.selectionChangeHandlers.add(handler);
+    }
+
     @UiHandler("removeAllButtonUi")
     void onRemoveAllButtonClicked(ClickEvent event) {
         dataProvider.clearSelection();
         itemContainerUi.clear();
+        selectionChangeHandlers.forEach(h -> h.onClear());
         this.updateUiState();
     }
     
     @Override
     public void setSelectedItems(Collection<T> selectedItemsToSet) {
         itemContainerUi.clear();
+        selectionChangeHandlers.forEach(h -> h.onClear());
         for (final T item : selectedItemsToSet) {
             this.addSelectedItem(item);
         }
@@ -88,6 +96,7 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
     
     private void addSelectedItem(final T selectedItem) {
         itemContainerUi.add(new SuggestedMultiSelectionItem() {
+
             @Override
             protected IsWidget getItemDescriptionWidget() {
                 return widgetProvider.getItemDescriptionWidget(selectedItem);
@@ -98,8 +107,10 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
                 dataProvider.removeSelection(selectedItem);
                 this.removeFromParent();
                 updateUiState();
+                selectionChangeHandlers.forEach(h -> h.onRemove(selectedItem));
             }
         });
+        selectionChangeHandlers.forEach(h -> h.onAdd(selectedItem));
         this.updateUiState();
     }
     
@@ -144,6 +155,14 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
         }
     }
     
+    public interface SelectionChangeHandler<S> {
+        void onAdd(S selectedItems);
+
+        void onRemove(S selectedItem);
+
+        void onClear();
+    }
+
     public interface NotificationCallback {
         void onNotificationToggled(boolean enabled);
     }
