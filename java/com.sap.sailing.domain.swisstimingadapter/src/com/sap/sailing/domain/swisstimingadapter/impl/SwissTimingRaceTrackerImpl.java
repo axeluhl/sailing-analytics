@@ -155,6 +155,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
                 connectivityParams.getRaceID(), connectivityParams.getRaceName(), connectivityParams.getRaceDescription(), connectivityParams.getBoatClass());
         this.domainFactory = domainFactory;
         this.raceID = connectivityParams.getRaceID();
+        // start out with an empty course, so we don't depend on receiving the CCG message before the timeout
+        this.course = new CourseImpl(this.raceID, /* start with empty marks list */ Collections.emptyList());
         this.raceName = connectivityParams.getRaceName();
         this.startList = connectivityParams.getStartList();
         this.startListFromManage2Sail = connectivityParams.getStartList() != null;
