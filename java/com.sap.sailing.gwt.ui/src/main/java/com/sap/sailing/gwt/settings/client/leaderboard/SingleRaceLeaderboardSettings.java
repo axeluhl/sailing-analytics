@@ -10,8 +10,8 @@ public class SingleRaceLeaderboardSettings extends LeaderboardSettings {
 
     private BooleanSetting showRaceRankColumn;
     
-    public SingleRaceLeaderboardSettings() {
-        super();
+    public SingleRaceLeaderboardSettings(boolean showCompetitorBoatInfoColumnDefault) {
+        super(showCompetitorBoatInfoColumnDefault);
     }
 
     public SingleRaceLeaderboardSettings(Collection<DetailType> maneuverDetailsToShow,

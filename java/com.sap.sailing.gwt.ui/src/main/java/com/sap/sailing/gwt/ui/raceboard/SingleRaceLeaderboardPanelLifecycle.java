@@ -34,19 +34,17 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
         raceDetails.add(DetailType.NUMBER_OF_MANEUVERS);
         raceDetails.add(DetailType.RACE_DISPLAY_LEGS);
         List<DetailType> overallDetails = new ArrayList<>();
-        SingleRaceLeaderboardSettings defaultSettings = new SingleRaceLeaderboardSettings();
+        SingleRaceLeaderboardSettings defaultSettings = new SingleRaceLeaderboardSettings(canBoatsOfCompetitorsChangePerRace);
 
         // don't show competitor fullName column if even leaderboard isn't shown initially
         final boolean showCompetitorFullNameColumn = isScreenLargeEnoughToInitiallyDisplayLeaderboard;
-        // the boat info is usually only interesting when boats of competitors can change per race
-        final boolean showCompetitorBoatInfoColumn = canBoatsOfCompetitorsChangePerRace;
         SingleRaceLeaderboardSettings settings = new SingleRaceLeaderboardSettings(
                 defaultSettings.getManeuverDetailsToShow(), defaultSettings.getLegDetailsToShow(),
                 defaultSettings.getRaceDetailsToShow(), overallDetails, DEFAULT_REFRESH_INTERVAL,
                 defaultSettings.isShowAddedScores(),
                 /* showCompetitorShortNameColumn */ true,
                 showCompetitorFullNameColumn, 
-                showCompetitorBoatInfoColumn,
+                /* showCompetitorBoatInfoColumn */ canBoatsOfCompetitorsChangePerRace,
                 /* isCompetitorNationalityColumnVisible */ false, 
                 /* showRaceRankColumn */ false);
         SettingsUtil.copyDefaultsFromValues(settings, settings);
