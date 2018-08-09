@@ -22,8 +22,8 @@ public class MultipleMultiLeaderboardPanelLifecycle extends MultiRaceLeaderboard
     }
 
     @Override
-    public MultiRaceLeaderboardSettings extractDocumentSettings(MultiRaceLeaderboardSettings leaderboardSettings) {
-        return createDefaultSettings();
+    public MultiRaceLeaderboardSettings extractDocumentSettings(MultiRaceLeaderboardSettings currentLeaderboardSettings) {
+        return currentLeaderboardSettings.withDefaultNamesOfRaceColumnsToShow(Collections.emptyList());
     }
 
     @Override
