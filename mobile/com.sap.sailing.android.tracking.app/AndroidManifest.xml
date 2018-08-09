@@ -26,7 +26,7 @@
         android:required="true" />
 
     <application
-        android:name="com.sap.sailing.android.tracking.app.application.BranchApplication"
+        android:name="com.sap.sailing.android.shared.application.LoggableApplication"
         android:allowBackup="true"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"

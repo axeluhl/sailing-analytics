@@ -2,6 +2,7 @@ package com.sap.sailing.android.shared.application;
 
 import java.lang.ref.WeakReference;
 
+import com.sap.sailing.android.shared.BuildConfig;
 import com.sap.sailing.android.shared.R;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.logging.LifecycleLogger;
@@ -11,6 +12,8 @@ import com.sap.sailing.android.shared.util.PrefUtils;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+
+import io.branch.referral.Branch;
 
 /**
  * <p>Registers an additional exception handler for uncaught exception to have some crash logging.</p>
@@ -38,6 +41,12 @@ public class LoggableApplication extends Application {
         LifecycleLogger.enableLifecycleLogging(PrefUtils.getBoolean(this, R.string.preference_enableLifecycleLogging_key,
                 R.bool.preference_enableLifecycleLogging_default));
         stringContext = new StringContext(new WeakReference<Context>(getApplicationContext()));
+
+        if (BuildConfig.DEBUG) {
+            Branch.enableLogging();
+        }
+        Branch.getAutoInstance(this);
+
     }
     
     public static void restartApp(Context context) {

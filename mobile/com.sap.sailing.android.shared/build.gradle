@@ -55,6 +55,9 @@ dependencies {
     /* license dialog */
     compile("de.psdev.licensesdialog:licensesdialog:${rootProject.ext.license_dialog}")
 
+    /* Branch.io */
+    compile group: 'io.branch.sdk.android', name: 'library', version: '2.19.0'
+
     /* all local jar-libs */
     compile fileTree(dir: "libs", include: ["*.jar"])
 

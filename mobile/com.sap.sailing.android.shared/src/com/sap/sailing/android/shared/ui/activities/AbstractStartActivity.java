@@ -14,6 +14,14 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import io.branch.referral.Branch;
+import io.branch.referral.BranchError;
+
+import static io.branch.referral.Defines.Jsonkey.Clicked_Branch_Link;
+
 public abstract class AbstractStartActivity<C extends BaseCheckinData> extends CheckinDataActivity<C> {
 
     private final static String TAG = AbstractStartActivity.class.getName();
@@ -38,20 +46,44 @@ public abstract class AbstractStartActivity<C extends BaseCheckinData> extends C
     public void onStart() {
         super.onStart();
 
-        // get url if launched via url intent-filter
+        Branch.getInstance().initSession(new Branch.BranchReferralInitListener() {
+            @Override
+            public void onInitFinished(JSONObject referringParams, BranchError error) {
+                if (error == null) {
+                    try {
+                        Boolean clickedBranchLink = referringParams.getBoolean(Clicked_Branch_Link.getKey());
+                        if (!clickedBranchLink) {
+                            AbstractStartActivity.this.handleLegacyStart();
+                            return;
+                        }
+                        ExLog.i(AbstractStartActivity.this, "BRANCH SDK", referringParams.toString());
+                        String checkinUrl = referringParams.getString("checkinUrl");
+                        if (checkinUrl != null) {
+                            ExLog.i(AbstractStartActivity.this, TAG, "handling branch.io deeplink.");
+                            getHomeFragment().handleScannedOrUrlMatchedUri(Uri.parse(checkinUrl));
+                            // if we don't clear the intent data here the next onStart cycle
+                            // will error in the legacy start procedure while trying to interpret
+                            // the branch.io deeplink as legacy link
+                            AbstractStartActivity.this.getIntent().setData(null);
+                        }
+                    } catch (JSONException e) {
+                        ExLog.ex(AbstractStartActivity.this, TAG, e);
+                    }
+                } else {
+                    ExLog.i(AbstractStartActivity.this, "BRANCH SDK", error.getMessage());
+                }
+            }
+        }, this.getIntent().getData(), this);
 
+    }
+
+    private void handleLegacyStart() {
         Intent intent = getIntent();
         Uri uri = intent.getData();
-
         if (uri != null) {
-            if (BuildConfig.DEBUG) {
-                ExLog.i(this, TAG, "Matched URL, handling scanned or matched URL.");
-            }
-
+            ExLog.i(this, TAG, "Matched URL, handling scanned or matched URL.");
             getHomeFragment().handleScannedOrUrlMatchedUri(uri);
-
         }
-
         intent.setData(null);
     }
 

@@ -24,18 +24,11 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import org.json.JSONObject;
-
-import io.branch.referral.Branch;
-import io.branch.referral.BranchError;
-import io.branch.referral.validators.IntegrationValidator;
-
-public class StartActivity extends AbstractBranchStartActivity<CheckinData> {
+public class StartActivity extends AbstractStartActivity<CheckinData> {
 
     private AppPreferences prefs;
     private final String TAG = StartActivity.class.getName();

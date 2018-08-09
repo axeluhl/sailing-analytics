@@ -79,9 +79,6 @@ dependencies {
     /* license dialog */
     compile("de.psdev.licensesdialog:licensesdialog:${rootProject.ext.license_dialog}")
 
-    /* Branch.id */
-    compile group: 'io.branch.sdk.android', name: 'library', version: '2.19.0'
-
     /* local dependencies */
     compile project(":mobile:com.sap.sailing.android.shared")
 
