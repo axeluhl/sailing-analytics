@@ -239,7 +239,6 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<MultiRaceL
             } else {
                 toMerge = loadedSettings;
             }
-
             
             MultiRaceLeaderboardPanel newSelectedLeaderboardPanel = new MultiRaceLeaderboardPanel(this, getComponentContext(),
                     sailingServiceFactory.apply(newSelectedLeaderboardName),
