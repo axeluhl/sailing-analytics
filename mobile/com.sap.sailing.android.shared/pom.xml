@@ -99,6 +99,20 @@
     		<version>1.8.0</version>
     		<type>aar</type>
 		</dependency>
+		
+		<dependency>
+			<groupId>io.branch.sdk.android</groupId>
+			<artifactId>library</artifactId>
+			<version>2.19.0</version>
+			<type>aar</type>
+			<exclusions>
+				<exclusion>
+					<groupId>com.crashlytics.sdk.android</groupId>
+					<artifactId>answers-shim</artifactId>
+				</exclusion>
+			</exclusions> 
+		</dependency>
+		
     </dependencies>
 
     <build>
