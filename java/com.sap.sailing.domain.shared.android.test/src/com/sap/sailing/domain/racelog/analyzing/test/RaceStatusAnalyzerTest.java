@@ -24,6 +24,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer.Clock;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogRaceStatusEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartProcedureChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
@@ -76,25 +77,33 @@ public class RaceStatusAnalyzerTest extends PassAwareRaceLogAnalyzerTest<RaceSta
 
     @Test
     public void testMostRecent() {
-        RaceLogRaceStatusEvent event1 = createEvent(RaceLogRaceStatusEvent.class, 1);
-        when(event1.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHING);
-        RaceLogRaceStatusEvent event2 = createEvent(RaceLogRaceStatusEvent.class, 2);
-        when(event2.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHED);
-        doAnswer(new StatusVisitorAnswer()).when(event2).accept(any(RaceLogEventVisitor.class));
-        
+        LogEventAuthorImpl author = new LogEventAuthorImpl("author", 0);
+        RaceLogRaceStatusEvent event1 = new RaceLogRaceStatusEventImpl(
+                new MillisecondsTimePoint(1), author, /* passId */ 1, RaceLogRaceStatus.FINISHING);
+        RaceLogRaceStatusEvent event2 = new RaceLogRaceStatusEventImpl(
+                new MillisecondsTimePoint(2), author, /* passId */ 1, RaceLogRaceStatus.FINISHED);
         raceLog.add(event1);
         raceLog.add(event2);
-
         assertEquals(event2.getNextStatus(), analyzer.analyze().getA());
     }
     
     @Test
+    public void testFinishingWithFinishedInFuture() {
+        now = new MillisecondsTimePoint(2);
+        LogEventAuthorImpl author = new LogEventAuthorImpl("author", 0);
+        RaceLogRaceStatusEvent event1 = new RaceLogRaceStatusEventImpl(
+                new MillisecondsTimePoint(1), author, /* passId */ 1, RaceLogRaceStatus.FINISHING);
+        RaceLogRaceStatusEvent event2 = new RaceLogRaceStatusEventImpl(
+                new MillisecondsTimePoint(3), author, /* passId */ 1, RaceLogRaceStatus.FINISHED);
+        raceLog.add(event1);
+        raceLog.add(event2);
+        assertEquals(event1.getNextStatus(), analyzer.analyze().getA());
+    }
+    
+    @Test
     public void testStartphaseNotYetActive() {
-        when(racingProcedure.isStartphaseActive(any(TimePoint.class), any(TimePoint.class))).thenReturn(false);
-        
         RaceLogStartTimeEvent event = createStartTimeEvent(MillisecondsTimePoint.now().plus(20000).asMillis(), true);
         raceLog.add(event);
-        
         assertEquals(RaceLogRaceStatus.SCHEDULED, analyzer.analyze().getA());
     }
     

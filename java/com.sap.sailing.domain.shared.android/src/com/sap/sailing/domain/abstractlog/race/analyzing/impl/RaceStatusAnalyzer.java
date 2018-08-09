@@ -1,5 +1,9 @@
 package com.sap.sailing.domain.abstractlog.race.analyzing.impl;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
@@ -49,6 +53,8 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<Pair<RaceLogRaceStatus, 
         this.racingProcedure = racingProcedure;
     }
 
+    private static final Set<RaceLogRaceStatus> statusTypesToIgnoreIfEventNotValidYet = new HashSet<>(Arrays.asList(
+            new RaceLogRaceStatus[] { RaceLogRaceStatus.FINISHED, RaceLogRaceStatus.FINISHING }));
     @Override
     protected Pair<RaceLogRaceStatus, TimePoint> performAnalysis() {
         ArrayListNavigableSet<RaceLogRaceStatusEvent> statusEvents = new ArrayListNavigableSet<>(
@@ -60,10 +66,24 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<Pair<RaceLogRaceStatus, 
         }
         final TimePoint now = clock.now();
         final EventDispatcher eventDispatcher = new EventDispatcher(now, racingProcedure);
+        Set<RaceLogRaceStatus> statusesToIgnore = new HashSet<>();
         RaceLogRaceStatus result = RaceLogRaceStatus.UNSCHEDULED;
         for (RaceLogRaceStatusEvent event : statusEvents.descendingSet()) {
-            // consider race log status events that are valid already at the time point we use as "now"
-            if (!event.getLogicalTimePoint().after(now)) {
+            // We need to read across a not yet valid FINISHED event and record that other FINISHED
+            // events need to be ignored; if we find a not yet valid FINISHING event, ignore further FINISHING
+            // events; but dispatch all other events (particularly start-related events) to the dispatcher:
+            final boolean dispatch;
+            if (statusTypesToIgnoreIfEventNotValidYet.contains(event.getNextStatus())) {
+                if (event.getLogicalTimePoint().after(now)) { // event not valid yet
+                    statusesToIgnore.add(event.getNextStatus()); // but ignore events of same status with lesser relevance
+                    dispatch = false;
+                } else {
+                    dispatch = true;
+                }
+            } else {
+                dispatch = true;
+            }
+            if (dispatch) {
                 event.accept(eventDispatcher);
                 result = eventDispatcher.nextStatus;
                 break;
