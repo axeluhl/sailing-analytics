@@ -23,7 +23,9 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer.Clock;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartProcedureChangedEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
@@ -34,15 +36,18 @@ import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-public class RaceStatusAnalyzerTest extends PassAwareRaceLogAnalyzerTest<RaceStatusAnalyzer, RaceLogRaceStatus> {
+public class RaceStatusAnalyzerTest extends PassAwareRaceLogAnalyzerTest<RaceStatusAnalyzer, Pair<RaceLogRaceStatus, TimePoint>> {
 
     private RacingProcedure racingProcedure = mock(RacingProcedure.class);
+    private TimePoint now = MillisecondsTimePoint.now();
+    private Clock constantTimeClock = ()->now;
     
     @Override
     protected RaceStatusAnalyzer createAnalyzer(RaceLog raceLog) {
-        return new RaceStatusAnalyzer(mock(RaceLogResolver.class), raceLog, racingProcedure);
+        return new RaceStatusAnalyzer(mock(RaceLogResolver.class), raceLog, constantTimeClock, racingProcedure);
     }
 
     @Override
@@ -50,7 +55,7 @@ public class RaceStatusAnalyzerTest extends PassAwareRaceLogAnalyzerTest<RaceSta
         RaceLogRaceStatusEvent event = createEvent(RaceLogRaceStatusEvent.class, 1, passId, author);
         when(event.getNextStatus()).thenReturn(RaceLogRaceStatus.RUNNING);
         doAnswer(new StatusVisitorAnswer()).when(event).accept(any(RaceLogEventVisitor.class));
-        return new TargetPair(Arrays.asList(event), event.getNextStatus());
+        return new TargetPair(Arrays.asList(event), new Pair<>(event.getNextStatus(), now));
     }
     
     @Override
@@ -59,14 +64,14 @@ public class RaceStatusAnalyzerTest extends PassAwareRaceLogAnalyzerTest<RaceSta
         RaceLogRaceStatusEvent event = createEvent(RaceLogRaceStatusEvent.class, 1, passId, author);
         when(event.getNextStatus()).thenReturn(RaceLogRaceStatus.FINISHING);
         doAnswer(new StatusVisitorAnswer()).when(event).accept(any(RaceLogEventVisitor.class));
-        return new TargetPair(Arrays.asList(event), event.getNextStatus());
+        return new TargetPair(Arrays.asList(event), new Pair<>(event.getNextStatus(), now));
     }
     
     @Test
     public void testUnscheduldedForNone() {
         RaceLogEvent event1 = createEvent(RaceLogEvent.class, 1);
         raceLog.add(event1);
-        assertEquals(RaceLogRaceStatus.UNSCHEDULED, analyzer.analyze());
+        assertEquals(RaceLogRaceStatus.UNSCHEDULED, analyzer.analyze().getA());
     }
 
     @Test
@@ -80,7 +85,7 @@ public class RaceStatusAnalyzerTest extends PassAwareRaceLogAnalyzerTest<RaceSta
         raceLog.add(event1);
         raceLog.add(event2);
 
-        assertEquals(event2.getNextStatus(), analyzer.analyze());
+        assertEquals(event2.getNextStatus(), analyzer.analyze().getA());
     }
     
     @Test
@@ -90,7 +95,7 @@ public class RaceStatusAnalyzerTest extends PassAwareRaceLogAnalyzerTest<RaceSta
         RaceLogStartTimeEvent event = createStartTimeEvent(MillisecondsTimePoint.now().plus(20000).asMillis(), true);
         raceLog.add(event);
         
-        assertEquals(RaceLogRaceStatus.SCHEDULED, analyzer.analyze());
+        assertEquals(RaceLogRaceStatus.SCHEDULED, analyzer.analyze().getA());
     }
     
     @Test
@@ -100,7 +105,7 @@ public class RaceStatusAnalyzerTest extends PassAwareRaceLogAnalyzerTest<RaceSta
         RaceLogStartTimeEvent event = createStartTimeEvent(MillisecondsTimePoint.now().plus(20000).asMillis(), true);
         raceLog.add(event);
         
-        assertEquals(RaceLogRaceStatus.STARTPHASE, analyzer.analyze());
+        assertEquals(RaceLogRaceStatus.STARTPHASE, analyzer.analyze().getA());
     }
     
     @Test
@@ -110,7 +115,7 @@ public class RaceStatusAnalyzerTest extends PassAwareRaceLogAnalyzerTest<RaceSta
         RaceLogStartTimeEvent event = createStartTimeEvent(0, false);
         raceLog.add(event);
         
-        assertEquals(RaceLogRaceStatus.RUNNING, analyzer.analyze());
+        assertEquals(RaceLogRaceStatus.RUNNING, analyzer.analyze().getA());
     }
     
     @Test
@@ -125,7 +130,7 @@ public class RaceStatusAnalyzerTest extends PassAwareRaceLogAnalyzerTest<RaceSta
         when(racingProcedure.isStartphaseActive(any(TimePoint.class), any(TimePoint.class))).thenReturn(false);
         RaceLogStartTimeEvent event = createStartTimeEvent(startTime);
         raceLog.add(event);
-        assertEquals(RaceLogRaceStatus.SCHEDULED, analyzer.analyze());
+        assertEquals(RaceLogRaceStatus.SCHEDULED, analyzer.analyze().getA());
     }
 
     @Test
@@ -137,19 +142,32 @@ public class RaceStatusAnalyzerTest extends PassAwareRaceLogAnalyzerTest<RaceSta
                 return timeForClock[0];
             }
         };
+        final int analyzeAndUpdateCachedRaceStatusCalls[] = new int[1];
         ReadonlyRaceState raceState = new ReadonlyRaceStateImpl(mock(RaceLogResolver.class), raceLog,
                 new SimpleRaceLogIdentifierImpl("regatta", "column", "fleet"), clock, new ReadonlyRacingProcedureFactory(
-                new EmptyRegattaConfiguration()), Collections.emptyMap()) {};
+                new EmptyRegattaConfiguration()), Collections.emptyMap()) {
+                    @Override
+                    protected void analyzeAndUpdateCachedRaceStatus() {
+                        analyzeAndUpdateCachedRaceStatusCalls[0]++;
+                        super.analyzeAndUpdateCachedRaceStatus();
+                    }
+        };
         RaceLogStartProcedureChangedEvent startProcedureEvent = new RaceLogStartProcedureChangedEventImpl(
                 timeForClock[0], mock(AbstractLogEventAuthor.class), /* passId */ 0, RacingProcedureType.RRS26);
         raceLog.add(startProcedureEvent);
-        RaceLogStartTimeEvent event = createStartTimeEvent(timeForClock[0].plus(Duration.ONE_MINUTE.times(10)));
+        final TimePoint startTime = timeForClock[0].plus(Duration.ONE_MINUTE.times(10));
+        RaceLogStartTimeEvent event = createStartTimeEvent(startTime);
         raceLog.add(event);
+        assertEquals(startTime, raceState.getStartTime());
         assertEquals(RaceLogRaceStatus.SCHEDULED, raceState.getStatus());
         timeForClock[0] = timeForClock[0].plus(Duration.ONE_MINUTE.times(9)); // one minute before start; we should be in STARTPHASE
         assertEquals(RaceLogRaceStatus.STARTPHASE, raceState.getStatus());
         timeForClock[0] = timeForClock[0].plus(Duration.ONE_MINUTE.times(2)); // one minute after start; we should be RUNNING
         assertEquals(RaceLogRaceStatus.RUNNING, raceState.getStatus());
+        timeForClock[0] = timeForClock[0].plus(Duration.ONE_MINUTE.times(2)); // three minutes after start; we should still be RUNNING, without recalculating
+        final int analyzeAndUpdateCachedRaceStatusCallsBefore = analyzeAndUpdateCachedRaceStatusCalls[0];
+        assertEquals(RaceLogRaceStatus.RUNNING, raceState.getStatus());
+        assertEquals(analyzeAndUpdateCachedRaceStatusCalls[0], analyzeAndUpdateCachedRaceStatusCallsBefore);
     }
 
     @Test
@@ -172,7 +190,7 @@ public class RaceStatusAnalyzerTest extends PassAwareRaceLogAnalyzerTest<RaceSta
         raceLog.add(event1);
         raceLog.add(event2);
 
-        assertEquals(event2.getNextStatus(), analyzer.analyze());
+        assertEquals(event2.getNextStatus(), analyzer.analyze().getA());
     }
 
     private static RaceLogStartTimeEvent createStartTimeEvent(long startTimeAsMillis, boolean isGreater) {
@@ -186,10 +204,7 @@ public class RaceStatusAnalyzerTest extends PassAwareRaceLogAnalyzerTest<RaceSta
     }
     
     private static RaceLogStartTimeEvent createStartTimeEvent(TimePoint startTime) {
-        RaceLogStartTimeEvent event = createEvent(RaceLogStartTimeEvent.class, 1);
-        when(event.getStartTime()).thenReturn(startTime);
-        doAnswer(new StartTimeVisitorAnswer()).when(event).accept(any(RaceLogEventVisitor.class));
-        return event;
+        return new RaceLogStartTimeEventImpl(startTime, new LogEventAuthorImpl("Author", /* priority */ 0), /* pass */ 0, startTime);
     }
     
     private static class StartTimeVisitorAnswer implements Answer<Void> {

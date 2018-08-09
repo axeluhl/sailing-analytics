@@ -2,6 +2,8 @@ package com.sap.sailing.domain.abstractlog.race.state.impl;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
@@ -44,6 +46,8 @@ import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.util.WeakIdentityHashMap;
 
 /**
@@ -139,7 +143,8 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     private RaceStateEventScheduler scheduler;
 
     /**
-     * We need one for each change in {@link RacingProcedureType}.
+     * We need one for each change in {@link RacingProcedureType}. The analyzer uses the {@link #statusAnalyzerClock}
+     * as its time source.
      */
     private RaceStatusAnalyzer statusAnalyzer;
     private final RacingProcedureTypeAnalyzer racingProcedureAnalyzer;
@@ -168,6 +173,22 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     private RacingProcedureType cachedRacingProcedureTypeNoFallback;
 
     private RaceLogRaceStatus cachedRaceStatus;
+    
+    /**
+     * The time taken from {@link #statusAnalyzerClock} when the race status was last updated. Set to a valid
+     * value whenever {@link #cachedRaceStatus} is set.
+     */
+    private TimePoint clockTimePointWhenCachedRaceStatusWasSet;
+    
+    /**
+     * Time points determined during {@link #updateCachedRaceStatusAndValidity(RaceLogRaceStatus)} at which
+     * the race status may change. If the time range between {@link #clockTimePointWhenCachedRaceStatusWasSet} and
+     * the current {@link #statusAnalyzerClock clock} time point spans any of these, the {@link #cachedRaceStatus}
+     * is to be considered invalid and needs to be re-calculated. Set to a valid but possibly empty iterable
+     * whenever {@link #cachedRaceStatus} is set.
+     */
+    private Iterable<TimePoint> timePointsWhenRaceStatusMayChange;
+    
     private int cachedPassId;
     private StartTimeFinderResult cachedStartTimeFinderResult;
     private TimePoint cachedFinishingTime;
@@ -323,8 +344,29 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     @Override
     public RaceLogRaceStatus getStatus() {
         // TODO bug4713: check clock and invalidate/recalculate if clock passed status invalidation time point
+        final TimePoint timePointForAnalysis = statusAnalyzerClock.now();
+        final TimeRange timeRangeSinceLastStatusUpdate = new TimeRangeImpl(clockTimePointWhenCachedRaceStatusWasSet, timePointForAnalysis);
+        if (overlapsTimePointForPotentialStatusChange(timeRangeSinceLastStatusUpdate)) {
+            analyzeAndUpdateCachedRaceStatus();
+        }
         return cachedRaceStatus;
     }
+
+    /**
+     * Finds out whether any of the time points in {@link #timePointsWhenRaceStatusMayChange} falls into the time range
+     * provided. In this case we assume that a race status update may have happened between the time point when the
+     * {@link #cachedRaceStatus} was updated last and the current request time point, forming the time range provided
+     * as parameter here.
+     */
+    private boolean overlapsTimePointForPotentialStatusChange(TimeRange timeRangeSinceLastStatusUpdate) {
+        for (final TimePoint e : timePointsWhenRaceStatusMayChange) {
+            if (timeRangeSinceLastStatusUpdate.includes(e)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     @Override
     public TimePoint getStartTime() {
@@ -461,11 +503,6 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             recreateRacingProcedure(dependentRaceStates);
             changedListeners.onRacingProcedureChanged(this);
         }
-        RaceLogRaceStatus status = statusAnalyzer.analyze();
-        if (!Util.equalsWithNull(cachedRaceStatus, status)) {
-            cachedRaceStatus = status;
-            changedListeners.onStatusChanged(this);
-        }
         int passId = raceLog.getCurrentPassId();
         if (cachedPassId != passId) {
             cachedPassId = passId;
@@ -480,6 +517,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             changedListeners.onStartTimeChanged(this);
         }
         adjustObserverForRelativeStartTime(startTimeFinderResult, dependentRaceStates);
+        analyzeAndUpdateCachedRaceStatus();
         TimePoint finishingTime = finishingTimeAnalyzer.analyze();
         if (!Util.equalsWithNull(cachedFinishingTime, finishingTime)) {
             cachedFinishingTime = finishingTime;
@@ -517,6 +555,43 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             cachedWindFix = windFix;
             changedListeners.onWindFixChanged(this);
         }
+    }
+
+    /**
+     * This method has protected visibility (and not private) to allow instrumenting by test cases
+     */
+    protected void analyzeAndUpdateCachedRaceStatus() {
+        Pair<RaceLogRaceStatus, TimePoint> statusAndTimePoint = statusAnalyzer.analyze();
+        if (!Util.equalsWithNull(cachedRaceStatus, statusAndTimePoint)) {
+            updateCachedRaceStatusAndValidity(statusAndTimePoint);
+        }
+    }
+
+    /**
+     * Updates the {@link #cachedRaceStatus} and calculates and remembers its validity, based on
+     * {@link ReadonlyRacingProcedure#createStartStateEvents(TimePoint)} and which of those have already
+     * passed at the current clock time and which ones are still lying ahead.
+     */
+    private void updateCachedRaceStatusAndValidity(Pair<RaceLogRaceStatus, TimePoint> statusAndTimePoint) {
+        cachedRaceStatus = statusAndTimePoint.getA();
+        clockTimePointWhenCachedRaceStatusWasSet = statusAndTimePoint.getB();
+        if (getStartTimeFinderResult() == null || getStartTime() == null) {
+            timePointsWhenRaceStatusMayChange = Collections.emptyList();
+        } else {
+            final TimePoint startTime = getStartTime();
+            List<TimePoint> newTimePointsWhenRaceStatusMayChange = new LinkedList<>();
+            for (final RaceStateEvent e : racingProcedure.createStartStateEvents(startTime)) {
+                newTimePointsWhenRaceStatusMayChange.add(e.getTimePoint());
+            }
+            if (getFinishingTime() != null) {
+                newTimePointsWhenRaceStatusMayChange.add(getFinishingTime());
+            }
+            if (getFinishedTime() != null) {
+                newTimePointsWhenRaceStatusMayChange.add(getFinishedTime());
+            }
+            timePointsWhenRaceStatusMayChange = newTimePointsWhenRaceStatusMayChange;
+        }
+        changedListeners.onStatusChanged(this);
     }
 
     private void recreateRacingProcedure(Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates) {

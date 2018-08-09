@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.abstractlog.race.state.racingprocedure.league.impl;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -81,7 +80,7 @@ public class LeagueRacingProcedureImpl extends BaseRacingProcedure implements Le
     }
 
     @Override
-    public Collection<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
+    public Iterable<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
         // Remark: We are reusing here CLASS_UP, STARTMODE_UP and STARTMODE_DOWN from the RRS26 procedure
         // The question is why there are no generic CLASS_UP, STARTMODE_UP and STARTMODE_DOWN events
         return Arrays.<RaceStateEvent> asList(

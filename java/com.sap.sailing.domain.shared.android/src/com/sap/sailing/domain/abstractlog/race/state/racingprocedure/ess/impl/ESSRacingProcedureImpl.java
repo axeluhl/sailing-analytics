@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ess.impl;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -64,7 +63,7 @@ public class ESSRacingProcedureImpl extends BaseRacingProcedure implements ESSRa
     }
 
     @Override
-    public Collection<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
+    public Iterable<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
         return Arrays.<RaceStateEvent> asList(new RaceStateEventImpl(startTime.minus(startPhaseAPDownInterval),
                 RaceStateEvents.ESS_AP_DOWN), new RaceStateEventImpl(startTime.minus(startPhaseESSThreeUpInterval),
                 RaceStateEvents.ESS_THREE_UP), new RaceStateEventImpl(startTime.minus(startPhaseESSTwoUpInterval),

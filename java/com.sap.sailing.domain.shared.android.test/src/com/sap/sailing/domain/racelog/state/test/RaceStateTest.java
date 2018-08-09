@@ -140,33 +140,33 @@ public class RaceStateTest {
     }
 
     @Test
-    public void testAdvancePass() {
+    public void testAdvancePass() throws InterruptedException {
         state.addChangedListener(listener);
         int oldPassId = raceLog.getCurrentPassId();
-        
+        Thread.sleep(1); // ensure that a status update is triggered due to the calculation time stamps between set-up and pass advance vary
         state.setAdvancePass(mock(TimePoint.class));
-        
         assertEquals(oldPassId + 1, raceLog.getCurrentPassId());
         verify(listener).onAdvancePass(state);
+        verify(listener).onStatusChanged(state);
         verifyNoMoreInteractions(listener);
     }
     
     @Test
-    public void testAbort() {
+    public void testAbort() throws InterruptedException {
         state.addChangedListener(listener);
-        
+        Thread.sleep(1); // ensure that a status update is triggered due to the calculation time stamps between set-up and pass advance vary        
         state.setAborted(mock(TimePoint.class), false, Flags.NONE);
-        
+        verify(listener).onStatusChanged(state);
         // TODO: change test when interface is complete
         verifyNoMoreInteractions(listener);
     }
     
     @Test
-    public void testGeneralRecall() {
+    public void testGeneralRecall() throws InterruptedException {
         state.addChangedListener(listener);
-        
+        Thread.sleep(1); // ensure that a status update is triggered due to the calculation time stamps between set-up and pass advance vary
         state.setGeneralRecall(mock(TimePoint.class));
-        
+        verify(listener).onStatusChanged(state);
         // TODO: change test when interface is complete
         verifyNoMoreInteractions(listener);
     }
@@ -174,20 +174,21 @@ public class RaceStateTest {
     @Test
     public void testInvalidateAfterAdvancePass() throws InterruptedException {
         state.addChangedListener(listener);
-        
+        Thread.sleep(1); // ensure that a status update is triggered due to the calculation time stamps between set-up and pass advance vary
         state.forceNewStartTime(nowMock, new MillisecondsTimePoint(1));
         Thread.sleep(100);
+        Thread.sleep(1); // ensure that a status update is triggered due to the calculation time stamps between set-up and pass advance vary
         state.setFinishedTime(new MillisecondsTimePoint(10));
+        Thread.sleep(1); // ensure that a status update is triggered due to the calculation time stamps between set-up and pass advance vary
         state.setCourseDesign(nowMock, mock(CourseBase.class), CourseDesignerMode.ADMIN_CONSOLE);
-        
+        Thread.sleep(1); // ensure that a status update is triggered due to the calculation time stamps between set-up and pass advance vary
         state.setAdvancePass(mock(TimePoint.class));
-        
         assertNull(state.getStartTime());
         assertEquals(RaceLogRaceStatus.UNSCHEDULED, state.getStatus());
         verify(listener, times(1)).onAdvancePass(state);
         verify(listener, times(2)).onStartTimeChanged(state);
         verify(listener, times(2)).onFinishedTimeChanged(state);
-        verify(listener, times(3)).onStatusChanged(state);
+        verify(listener, times(5)).onStatusChanged(state);
         verify(listener, times(1)).onCourseDesignChanged(state);
         verifyNoMoreInteractions(listener);
     }

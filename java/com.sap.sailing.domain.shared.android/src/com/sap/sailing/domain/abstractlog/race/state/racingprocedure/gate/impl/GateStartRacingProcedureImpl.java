@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.abstractlog.race.state.racingprocedure.gate.impl;
 
 import java.util.Arrays;
-import java.util.Collection;
 
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -119,7 +118,7 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
     }
 
     @Override
-    public Collection<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
+    public Iterable<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
         return Arrays.<RaceStateEvent> asList(
                 new RaceStateEventImpl(startTime.minus(startPhaseClassOverGolfUpInterval),
                         RaceStateEvents.GATE_CLASS_OVER_GOLF_UP),
