@@ -8,7 +8,12 @@ import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.server.rpc.SerializationPolicy;
 import com.sap.sailing.domain.common.dto.CachableRPCResult;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.gwt.dispatch.servlets.ProxiedRemoteServiceServlet;
 
+/**
+ * {@link ProxiedRemoteServiceServlet} that automatically caches serialized RPC results for result objects that
+ * implement {@link CachableRPCResult}.
+ */
 public class ResultCachingProxiedRemoteServiceServlet extends DelegatingProxiedRemoteServiceServlet {
 
     private static final long serialVersionUID = -4245484615349695611L;
