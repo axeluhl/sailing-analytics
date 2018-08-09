@@ -376,6 +376,8 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         ExtractionFunctionWithContext statistic = new ExtractionFunctionWithContext(retrieverChain, extractionFunction);
         int index = availableExtractionFunctions.indexOf(statistic);
         if (index != -1) {
+            setSettings(retrieverChain, queryDefinition.getRetrieverSettings());
+            
             statistic = availableExtractionFunctions.get(index);
             DataRetrieverChainDefinitionDTO oldRetrieverChain = getDataRetrieverChainDefinition();
             extractionFunctionSuggestBox.setExtractionFunction(statistic);
@@ -392,6 +394,21 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
                     extractionFunction.getDisplayName());
             callback.accept(Collections.singleton(errorMessage));
         }
+    }
+
+    private void setSettings(DataRetrieverChainDefinitionDTO retrieverChain, HashMap<DataRetrieverLevelDTO, SerializableSettings> settings) {
+        HashMap<DataRetrieverLevelDTO, SerializableSettings> newSettings = new HashMap<>();
+        for (int level = 0; level < retrieverChain.getLevelAmount(); level++) {
+            DataRetrieverLevelDTO retrieverLevel = retrieverChain.getRetrieverLevel(level);
+            if (retrieverLevel.hasSettings()) {
+                SerializableSettings levelSettings = settings.get(retrieverLevel);
+                if (levelSettings == null) {
+                    levelSettings = retrieverLevel.getDefaultSettings();
+                }
+                newSettings.put(retrieverLevel, levelSettings);
+            }
+        }
+        settingsMap.put(retrieverChain, newSettings);
     }
 
     private void setAggregator(AggregationProcessorDefinitionDTO aggregator, Consumer<Iterable<String>> callback) {
