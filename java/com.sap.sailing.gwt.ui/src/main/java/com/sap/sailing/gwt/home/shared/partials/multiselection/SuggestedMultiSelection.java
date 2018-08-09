@@ -37,27 +37,41 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
     @UiField(provided = true) AbstractFilterWidget<T, T> suggestionWidgetUi;
     @UiField Button removeAllButtonUi;
     @UiField FlowPanel itemContainerUi;
-    private final SuggestedMultiSelectionDataProvider<T, ?> dataProvider;
     private final WidgetProvider<T> widgetProvider;
     private final Collection<SelectionChangeHandler<T>> selectionChangeHandlers = new ArrayList<>();
 
     private SuggestedMultiSelection(SuggestedMultiSelectionDataProvider<T, ?> dataProvider,
             WidgetProvider<T> widgetProvider, String title) {
         SuggestedMultiSelectionResources.INSTANCE.css().ensureInjected();
-        this.dataProvider = dataProvider;
         this.widgetProvider = widgetProvider;
         this.suggestionWidgetUi = widgetProvider.getSuggestBoxFilter(new SelectionCallback<T>() {
             @Override
             public void onSuggestionSelected(T selectedItem) {
-                SuggestedMultiSelection.this.dataProvider.addSelection(selectedItem);
                 SuggestedMultiSelection.this.addSelectedItem(selectedItem);
             }
         });
         initWidget(uiBinder.createAndBindUi(this));
         headerTitleUi.setInnerText(title);
         this.updateUiState();
+        selectionChangeHandlers.add(new SelectionChangeHandler<T>() {
+
+            @Override
+            public void onAdd(T selectedItem) {
+                dataProvider.addSelection(selectedItem);
+            }
+
+            @Override
+            public void onRemove(T selectedItem) {
+                dataProvider.removeSelection(selectedItem);
+            }
+
+            @Override
+            public void onClear() {
+                dataProvider.clearSelection();
+            }
+        });
     }
-    
+
     public SuggestedMultiSelectionNotificationToggle addNotificationToggle(final NotificationCallback callback,
             String label) {
         final SuggestedMultiSelectionNotificationToggle notification =
@@ -79,7 +93,6 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
 
     @UiHandler("removeAllButtonUi")
     void onRemoveAllButtonClicked(ClickEvent event) {
-        dataProvider.clearSelection();
         itemContainerUi.clear();
         selectionChangeHandlers.forEach(h -> h.onClear());
         this.updateUiState();
@@ -104,7 +117,6 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
             
             @Override
             protected void onRemoveItemRequsted() {
-                dataProvider.removeSelection(selectedItem);
                 this.removeFromParent();
                 updateUiState();
                 selectionChangeHandlers.forEach(h -> h.onRemove(selectedItem));
