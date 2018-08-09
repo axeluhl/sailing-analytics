@@ -517,7 +517,6 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             changedListeners.onStartTimeChanged(this);
         }
         adjustObserverForRelativeStartTime(startTimeFinderResult, dependentRaceStates);
-        analyzeAndUpdateCachedRaceStatus();
         TimePoint finishingTime = finishingTimeAnalyzer.analyze();
         if (!Util.equalsWithNull(cachedFinishingTime, finishingTime)) {
             cachedFinishingTime = finishingTime;
@@ -528,6 +527,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             cachedFinishedTime = finishedTime;
             changedListeners.onFinishedTimeChanged(this);
         }
+        analyzeAndUpdateCachedRaceStatus(); // do this after start and finishing times have been updated
         TimeRange protest = protestTimeAnalyzer.analyze();
         if (!Util.equalsWithNull(cachedProtest, protest)) {
             cachedProtest = protest;
@@ -573,6 +573,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
      * passed at the current clock time and which ones are still lying ahead.
      */
     private void updateCachedRaceStatusAndValidity(Pair<RaceLogRaceStatus, TimePoint> statusAndTimePoint) {
+        final RaceLogRaceStatus oldRaceStatus = cachedRaceStatus;
         cachedRaceStatus = statusAndTimePoint.getA();
         clockTimePointWhenCachedRaceStatusWasSet = statusAndTimePoint.getB();
         if (getStartTimeFinderResult() == null || getStartTime() == null) {
@@ -591,7 +592,9 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             }
             timePointsWhenRaceStatusMayChange = newTimePointsWhenRaceStatusMayChange;
         }
-        changedListeners.onStatusChanged(this);
+        if (!Util.equalsWithNull(oldRaceStatus, cachedRaceStatus)) {
+            changedListeners.onStatusChanged(this);
+        }
     }
 
     private void recreateRacingProcedure(Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates) {
