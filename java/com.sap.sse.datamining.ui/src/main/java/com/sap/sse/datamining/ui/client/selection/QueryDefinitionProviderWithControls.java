@@ -69,8 +69,10 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 public class QueryDefinitionProviderWithControls extends AbstractQueryDefinitionProvider<AdvancedDataMiningSettings>
         implements WithControls {
 
-    private static final double HeaderPanelHeight = 45;
-    private static final double FooterPanelHeight = 50;
+    private static final double HeaderPanelHeight = 41;
+    private static final double InitialQueryDefinitionViewerWidth = 600;
+    private static final double InitialStatisticProviderWidth = 800;
+    private static final double FooterPanelHeight = 60;
     private static final int SplitterSize = 10;
 
     private final Panel mainPanel;
@@ -103,7 +105,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         providerListener = new ProviderListener();
         // Creating the header panel, that contains the retriever chain provider and the controls
         controlsPanel = new FlowPanel();
-        controlsPanel.addStyleName("definitionProviderControls");
+        controlsPanel.addStyleName("dataMiningMarginBase");
 
         this.settingsControl = settingsControl;
         addControl(this.settingsControl.getEntryWidget());
@@ -144,7 +146,8 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
 
         statisticProvider = new SuggestBoxStatisticProvider(parent, context, dataMiningService,
                                                             errorReporter, settingsControl, settingsManager);
-        statisticProvider.getEntryWidget().addStyleName("statisticProvider");
+        Widget statisticProviderWidget = statisticProvider.getEntryWidget();
+        statisticProviderWidget.addStyleName("dataMiningMarginBase");
         statisticProvider.addStatisticChangedListener(providerListener);
         
         groupingProvider = new MultiDimensionalGroupingProvider(parent, context, dataMiningService,
@@ -159,7 +162,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         
         filterSplitPanel = new SplitLayoutPanel(SplitterSize);
         filterSplitPanel.addSouth(groupingProvider.getEntryWidget(), FooterPanelHeight);
-        filterSplitPanel.addEast(queryDefinitionViewer.getEntryWidget(), 600);
+        filterSplitPanel.addEast(queryDefinitionViewer.getEntryWidget(), InitialQueryDefinitionViewerWidth);
         filterSplitPanel.setWidgetHidden(queryDefinitionViewer.getEntryWidget(), true);
         filterSplitPanel.add(filterSelectionProvider.getEntryWidget());
         
@@ -172,8 +175,7 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         applyQueryBusyIndicator.add(labeledBusyIndicator);
 
         SplitLayoutPanel headerPanel = new SplitLayoutPanel(SplitterSize);
-        headerPanel.addStyleName("dataMiningMarginBase");
-        headerPanel.addWest(statisticProvider.getEntryWidget(), 800);
+        headerPanel.addWest(statisticProviderWidget, InitialStatisticProviderWidth);
         headerPanel.add(controlsPanel);
         
         DockLayoutPanel contentPanel = new DockLayoutPanel(Unit.PX);

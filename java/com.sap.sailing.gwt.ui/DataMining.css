@@ -211,13 +211,23 @@ input.magnifier {
     border-bottom: 1px solid rgba(0, 0, 0, 0.25);
 }
 
+.definitionProviderControlsElements {
+    margin: 2px;
+}
+
 .settingsAnchor {
 	position: relative;
-	top: 9px;
+	top: 7.5px;
 }
 
 .groupingProvider {
     padding: 3px 0px;
+    overflow-y: auto;
+}
+
+.groupingProviderLabel{
+	margin: 2px 2px 2px 0px;
+    display: inline-block;
 }
 
 .groupingProviderElement {
@@ -226,12 +236,24 @@ input.magnifier {
 }
 
 .statisticProvider {
-    padding: 5px 0px 0px 0px;
+    padding: 5px 0px;
+    display: table;
+}
+
+.statisticProviderLabel {
+    display: table-cell;
+    white-space: nowrap;
 }
 
 .statisticProviderElement {
-	margin: 2px;
-	display: inline-block;
+    display: table-cell;
+    width: auto;
+}
+
+.statisticSuggestBoxContainer {
+	width: 100%;
+	min-width: 300px;
+	padding: 0px 3px;
 }
 
 .statisticSuggestBoxPopup {
@@ -240,18 +262,6 @@ input.magnifier {
 .statisticSuggestBoxPopup .suggestPopupContent {
     max-height: 700px;
     overflow-y: scroll;
-}
-
-.definitionProviderControls {
-	margin: 2px;
-}
-
-.definitionProviderControlsElements {
-	margin: 2px;
-}
-
-.queryProviderElementLabel {
-    margin-left: 0px;
 }
 
 .queryDefinitionViewerContent {

@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.SuggestBox.DefaultSuggestionDisplay;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -62,7 +63,10 @@ import com.sap.sse.gwt.client.suggestion.CustomSuggestBox;
 public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<CompositeSettings>
         implements StatisticProvider {
 
-    private static final String STATISTIC_PROVIDER_ELEMENT_STYLE = "statisticProviderElement";
+    private static final String StatisticProviderStyle = "statisticProvider";
+    private static final String StatisticProviderLabelStyle = "statisticProviderLabel";
+    private static final String StatisticProviderElementStyle = "statisticProviderElement";
+    private static final String SuggestBoxContainerStyle = "statisticSuggestBoxContainer";
 
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
@@ -103,9 +107,9 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         retrieverLevelSettingsComponents = new ArrayList<>();
 
         mainPanel = new FlowPanel();
+        mainPanel.addStyleName(StatisticProviderStyle);
         Label label = new Label(getDataMiningStringMessages().calculateThe());
-        label.addStyleName(STATISTIC_PROVIDER_ELEMENT_STYLE);
-        label.addStyleName("queryProviderElementLabel");
+        label.addStyleName(StatisticProviderLabelStyle);
         label.addStyleName("emphasizedLabel");
         mainPanel.add(label);
 
@@ -130,13 +134,17 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
             }
         });
         extractionFunctionSuggestBox.setLimit(Integer.MAX_VALUE);
-        extractionFunctionSuggestBox.addStyleName(STATISTIC_PROVIDER_ELEMENT_STYLE);
-        extractionFunctionSuggestBox.setWidth("540px");
-        mainPanel.add(extractionFunctionSuggestBox);
+        extractionFunctionSuggestBox.addStyleName(StatisticProviderElementStyle);
+        extractionFunctionSuggestBox.setWidth("100%");
+        
+        SimplePanel suggestBoxContainer = new SimplePanel(extractionFunctionSuggestBox);
+        suggestBoxContainer.addStyleName(StatisticProviderElementStyle);
+        suggestBoxContainer.addStyleName(SuggestBoxContainerStyle);
+        mainPanel.add(suggestBoxContainer);
 
         availableAggregators = new ArrayList<>();
         aggregatorListBox = createAggregatorListBox();
-        aggregatorListBox.addStyleName(STATISTIC_PROVIDER_ELEMENT_STYLE);
+        aggregatorListBox.addStyleName(StatisticProviderElementStyle);
         mainPanel.add(aggregatorListBox);
     }
 
