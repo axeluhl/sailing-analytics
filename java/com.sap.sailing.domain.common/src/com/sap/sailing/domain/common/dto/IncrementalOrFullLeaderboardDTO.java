@@ -10,7 +10,7 @@ import java.util.Date;
  * @author Axel Uhl (d043530)
  *
  */
-public interface IncrementalOrFullLeaderboardDTO extends Serializable {
+public interface IncrementalOrFullLeaderboardDTO extends Serializable, CachableRPCResult {
     /**
      * Produces the leaderboard DTO by providing the previous version relative to which a delta was requested.
      * If <code>null</code> was used to identify the previous version, <code>null</code> may be passed for
