@@ -88,6 +88,8 @@ import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
+import com.sap.sailing.domain.common.security.Permission;
+import com.sap.sailing.domain.common.security.Permission.Mode;
 import com.sap.sailing.domain.common.sharding.ShardingType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -535,8 +537,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             @QueryParam("startoftrackingasmillis") Long startOfTrackingAsMillis,
             @QueryParam("endoftracking") String endOfTrackingAsISO,
             @QueryParam("endoftrackingasmillis") Long endOfTrackingAsMillis) throws InvalidDateException {
-        // SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE,
-        // leaderboardName));
+        SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
         final LeaderboardAndRaceColumnAndFleetAndResponse leaderboardAndRaceColumnAndFleetAndResponse = getLeaderboardAndRaceColumnAndFleet(leaderboardName, raceColumnName, fleetName);
         final Response result;
         if (leaderboardAndRaceColumnAndFleetAndResponse.getFleet() != null) {
@@ -569,8 +570,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             @QueryParam(RaceLogServletConstants.PARAMS_TRACK_WIND) Boolean trackWind,
             @QueryParam(RaceLogServletConstants.PARAMS_CORRECT_WIND_DIRECTION_BY_MAGNETIC_DECLINATION) Boolean correctWindDirectionByMagneticDeclination)
                     throws NotDenotedForRaceLogTrackingException, Exception {
-        // SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE,
-        // leaderboardName));
+        SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
         final LeaderboardAndRaceColumnAndFleetAndResponse leaderboardAndRaceColumnAndFleetAndResponse = getLeaderboardAndRaceColumnAndFleet(leaderboardName, raceColumnName, fleetName);
         final Response result;
         if (leaderboardAndRaceColumnAndFleetAndResponse.getFleet() != null) {
@@ -637,8 +637,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
     public Response setAutoCourse(@PathParam("leaderboardName") String leaderboardName,
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName) throws MalformedURLException, IOException, InterruptedException {
-        // SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE,
-        // leaderboardName));
+        SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
         final LeaderboardAndRaceColumnAndFleetAndResponse leaderboardAndRaceColumnAndFleetAndResponse = getLeaderboardAndRaceColumnAndFleet(leaderboardName, raceColumnName, fleetName);
         final Response result;
         if (leaderboardAndRaceColumnAndFleetAndResponse.getFleet() != null) {
@@ -852,8 +851,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
     public Response stopTracking(@PathParam("leaderboardName") String leaderboardName,
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName) throws MalformedURLException, IOException, InterruptedException {
-        // SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE,
-        // leaderboardName));
+        SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         final Response result;
         if (leaderboard == null) {
@@ -1233,8 +1231,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
-            // SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE,
-            // leaderboard.getName()));
+            SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboard.getName()));
             final RaceColumn raceColumn;
             raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
             if (raceColumn == null) {
@@ -1256,7 +1253,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             @QueryParam("raceColumnName") String raceColumnName, @QueryParam("fleetName") String fleetName,
             @QueryParam("raceName") String raceName) throws NotFoundException, NotDenotableForRaceLogTrackingException {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        // SecurityUtils.getSubject().checkPermission(Permission.MANAGE_TRACKED_RACES.getStringPermission(Mode.UPDATE));
+        SecurityUtils.getSubject().checkPermission(Permission.MANAGE_TRACKED_RACES.getStringPermission(Mode.UPDATE));
         if (leaderboard == null) {
             throw new NotFoundException("leaderboard with name " + leaderboardName + " not found");
         }
@@ -1274,13 +1271,13 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         return (result ? Response.ok() : Response.notModified()).build();
     }
 
-    @GET
+    @POST
     @Path("{leaderboardName}/enableRaceLogForCompetitorRegistration")
     public Response enableRaceLogForCompetitorRegistration(@PathParam("leaderboardName") String leaderboardName,
             @QueryParam("raceColumnName") String raceColumnName, @QueryParam("fleetName") String fleetName,
             @QueryParam("raceName") String raceName) throws NotFoundException, NotDenotableForRaceLogTrackingException {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        // SecurityUtils.getSubject().checkPermission(Permission.MANAGE_ALL_COMPETITORS.getStringPermission(Mode.UPDATE));
+        SecurityUtils.getSubject().checkPermission(Permission.MANAGE_ALL_COMPETITORS.getStringPermission(Mode.UPDATE));
         if (leaderboard == null) {
             throw new NotFoundException("leaderboard with name " + leaderboardName + " not found");
         }

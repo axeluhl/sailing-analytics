@@ -16,6 +16,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -45,6 +46,8 @@ import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
+import com.sap.sailing.domain.common.security.Permission;
+import com.sap.sailing.domain.common.security.Permission.Mode;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -71,7 +74,7 @@ public class MarkRessource extends AbstractSailingServerResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces("application/json;charset=UTF-8")
     public Response addMarkToRegatta(String json) throws Exception {
-        // SecurityUtils.getSubject().checkPermission(Permission.MANAGE_COURSE_LAYOUT.getStringPermission(Mode.CREATE));
+        SecurityUtils.getSubject().checkPermission(Permission.MANAGE_COURSE_LAYOUT.getStringPermission(Mode.CREATE));
 
         Object requestBody = JSONValue.parseWithException(json);
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
@@ -98,7 +101,7 @@ public class MarkRessource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     public Response addMarkFix(String json)
             throws DoesNotHaveRegattaLogException, ParseException, JsonDeserializationException {
-        // SecurityUtils.getSubject().checkPermission(Permission.MANAGE_MARK_POSITIONS.getStringPermission(Mode.CREATE));
+        SecurityUtils.getSubject().checkPermission(Permission.MANAGE_MARK_POSITIONS.getStringPermission(Mode.CREATE));
 
         Object requestBody = JSONValue.parseWithException(json);
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
@@ -141,7 +144,7 @@ public class MarkRessource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     public Response addCourseDefinitionToRaceLog(String json)
             throws DoesNotHaveRegattaLogException, NotFoundException, ParseException, JsonDeserializationException {
-        // SecurityUtils.getSubject().checkPermission(Permission.MANAGE_COURSE_LAYOUT.getStringPermission(Mode.CREATE));
+        SecurityUtils.getSubject().checkPermission(Permission.MANAGE_COURSE_LAYOUT.getStringPermission(Mode.CREATE));
 
         Object requestBody = JSONValue.parseWithException(json);
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
@@ -224,7 +227,7 @@ public class MarkRessource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     public Response addCompetitorToRace(String json) throws DoesNotHaveRegattaLogException, NotFoundException,
             ParseException, JsonDeserializationException, CompetitorRegistrationOnRaceLogDisabledException {
-        // SecurityUtils.getSubject().checkPermission(Permission.MANAGE_COURSE_LAYOUT.getStringPermission(Mode.CREATE));
+        SecurityUtils.getSubject().checkPermission(Permission.MANAGE_COURSE_LAYOUT.getStringPermission(Mode.CREATE));
         Object requestBody = JSONValue.parseWithException(json);
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
 
