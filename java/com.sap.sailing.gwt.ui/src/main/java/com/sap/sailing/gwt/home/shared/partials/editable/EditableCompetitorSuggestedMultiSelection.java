@@ -148,6 +148,8 @@ public final class EditableCompetitorSuggestedMultiSelection extends Composite {
         item.getElement().getStyle().setPaddingTop(0.333333333333333333, Unit.EM);
         item.getElement().getStyle().setPaddingBottom(0.333333333333333333, Unit.EM);
         item.getElement().getStyle().setPaddingLeft(0.333333333333333333, Unit.EM);
+        DOM.getChild(item.getElement(), 1).getStyle().setPosition(Position.RELATIVE);
+        DOM.getChild(item.getElement(), 1).getStyle().setTop(-0.333333333333333333, Unit.EM);
         DOM.getChild(item.getElement(), 2).getStyle().setPosition(Position.RELATIVE);
         DOM.getChild(item.getElement(), 2).getStyle().setTop(-0.333333333333333333, Unit.EM);
         tableElements.put(comp.getIdAsString(), item);

@@ -29,8 +29,8 @@ public class SailorProfileDataProviderImpl implements SailorProfileDataProvider 
         badges2.add(b2);
 
         List<SimpleCompetitorWithIdDTO> competitors = new ArrayList<>();
-        SimpleCompetitorWithIdDTO c1 = new SimpleCompetitorWithIdDTO("0000", "EZ Competition", "", "", "");
-        SimpleCompetitorWithIdDTO c2 = new SimpleCompetitorWithIdDTO("0001", "Hard Competition", "", "", "");
+        SimpleCompetitorWithIdDTO c1 = new SimpleCompetitorWithIdDTO("0000", "EZ Competition", "EZC", "DE", "");
+        SimpleCompetitorWithIdDTO c2 = new SimpleCompetitorWithIdDTO("0001", "Hard Competition", "HC", "SE", "");
         competitors.add(c1);
         competitors.add(c2);
 
