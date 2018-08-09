@@ -201,8 +201,8 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
                 @Override
                 public void onClick(ClickEvent event) {
                     if (isAuthorized()) {
-                        addNewTag(inputPanel.getTagValue(), inputPanel.getCommentValue(),
-                                inputPanel.getImageURLValue());
+                        addNewTag(inputPanel.getTagValue(), inputPanel.getCommentValue(), inputPanel.getImageURLValue());
+                        inputPanel.clearAllValues();
                     }
                 }
             });
@@ -293,6 +293,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
                 public void onClick(ClickEvent event) {
                     if (inputPanel.getTagValue().length() > 0) {
                         TagButton tagButton = new TagButton(inputPanel.getTagValue(), inputPanel.getTagValue(), inputPanel.getImageURLValue(), inputPanel.getCommentValue());
+                        inputPanel.clearAllValues();
                         customTagButtons.add(tagButton);
                         customButtonsPanel.add(tagButton);
                         customTagButtonsTable.setRowData(customTagButtons);
