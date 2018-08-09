@@ -7,7 +7,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
-import com.sap.sailing.gwt.home.shared.partials.editable.EditableCompetitorSuggestedMultiSelection;
+import com.sap.sailing.gwt.home.shared.partials.editable.EditableSuggestedMultiSelectionCompetitor;
 import com.sap.sailing.gwt.home.shared.partials.editable.InlineEditLabel;
 import com.sap.sailing.gwt.home.shared.partials.listview.BoatClassListView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.SailorProfileEntry;
@@ -33,14 +33,14 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
     @UiField
     SharedResources res;
     @UiField(provided = true)
-    EditableCompetitorSuggestedMultiSelection competitorSelectionUi;
+    EditableSuggestedMultiSelectionCompetitor competitorSelectionUi;
     @UiField
     InlineEditLabel titleUi;
     @UiField
     BoatClassListView boatClassesUi;
 
     public EditSailorProfile(SharedSailorProfileView.Presenter presenter, FlagImageResolver flagImageResolver) {
-        competitorSelectionUi = new EditableCompetitorSuggestedMultiSelection(presenter, flagImageResolver);
+        competitorSelectionUi = new EditableSuggestedMultiSelectionCompetitor(presenter, flagImageResolver);
         initWidget(uiBinder.createAndBindUi(this));
         boatClassesUi.setText("Boatclasses");
         // TODO hide notificationsTextUi if the user's mail address is already verified
