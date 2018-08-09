@@ -31,11 +31,15 @@ public class SwissTimingTrackingConnectivityParameters extends AbstractRaceTrack
     private final long delayToLiveInMillis;
     private final StartList startList;
     private final boolean useInternalMarkPassingAlgorithm;
+    private final String updateURL;
+    private final String updateUsername;
+    private final String updatePassword;
     
     public SwissTimingTrackingConnectivityParameters(String hostname, int port, String raceID, String raceName,
             String raceDescription, BoatClass boatClass, StartList startList, long delayToLiveInMillis,
             SwissTimingFactory swissTimingFactory, DomainFactory domainFactory, RaceLogStore raceLogStore,
-            RegattaLogStore regattaLogStore, boolean useInternalMarkPassingAlgorithm, boolean trackWind, boolean correctWindDirectionByMagneticDeclination) {
+            RegattaLogStore regattaLogStore, boolean useInternalMarkPassingAlgorithm, boolean trackWind,
+            boolean correctWindDirectionByMagneticDeclination, String updateURL, String updateUsername, String updatePassword) {
         super(trackWind, correctWindDirectionByMagneticDeclination);
         this.hostname = hostname;
         this.port = port;
@@ -50,6 +54,9 @@ public class SwissTimingTrackingConnectivityParameters extends AbstractRaceTrack
         this.raceLogStore = raceLogStore;
         this.regattaLogStore = regattaLogStore;
         this.useInternalMarkPassingAlgorithm = useInternalMarkPassingAlgorithm;
+        this.updateURL = updateURL;
+        this.updateUsername = updateUsername;
+        this.updatePassword = updatePassword;
     }
     
     @Override
@@ -60,18 +67,15 @@ public class SwissTimingTrackingConnectivityParameters extends AbstractRaceTrack
     @Override
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
             RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds) throws Exception {
-        return swissTimingFactory.createRaceTracker(raceID, raceName, raceDescription, boatClass, hostname, port,
-                startList, delayToLiveInMillis, raceLogStore, regattaLogStore, windStore,
-                useInternalMarkPassingAlgorithm,
-                domainFactory, trackedRegattaRegistry, raceLogResolver, this);
+        return swissTimingFactory.createRaceTracker(raceLogStore, regattaLogStore, windStore, domainFactory, trackedRegattaRegistry, raceLogResolver,
+                this);
     }
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry,
             WindStore windStore, RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds) throws Exception {
-        return swissTimingFactory.createRaceTracker(regatta, raceID, raceName, raceDescription, boatClass, hostname,
-                port, startList, delayToLiveInMillis, windStore, useInternalMarkPassingAlgorithm,
-                domainFactory, trackedRegattaRegistry, raceLogResolver, raceLogStore, regattaLogStore, this);
+        return swissTimingFactory.createRaceTracker(regatta, windStore, domainFactory, trackedRegattaRegistry, raceLogResolver, raceLogStore,
+                regattaLogStore, this);
     }
 
     @Override
@@ -90,6 +94,18 @@ public class SwissTimingTrackingConnectivityParameters extends AbstractRaceTrack
 
     public int getPort() {
         return port;
+    }
+
+    public String getUpdateURL() {
+        return updateURL;
+    }
+
+    public String getUpdateUsername() {
+        return updateUsername;
+    }
+
+    public String getUpdatePassword() {
+        return updatePassword;
     }
 
     public String getRaceID() {

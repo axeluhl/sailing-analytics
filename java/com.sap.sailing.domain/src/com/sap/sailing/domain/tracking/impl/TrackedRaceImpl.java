@@ -50,7 +50,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesFinde
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogGateLineOpeningTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
-import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
+import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.ReadonlyRacingProcedure;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDefinedMarkAnalyzer;
@@ -2975,7 +2975,7 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         synchronized (raceStates) {
             result = raceStates.get(raceLog);
             if (result == null) {
-                result = RaceStateImpl.create(raceLogResolver, raceLog);
+                result = ReadonlyRaceStateImpl.getOrCreate(raceLogResolver, raceLog);
                 raceStates.put(raceLog, result);
             }
         }

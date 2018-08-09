@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.tractracadapter.impl;
+package com.sap.sailing.domain.tracking.impl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,13 +23,14 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.tracking.StartTimeChangedListener;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.util.LaxRedirectStrategyForAllRedirectResponseCodes;
 
-public class TracTracStartTimeUpdateHandler extends UpdateHandler implements StartTimeChangedListener {
-    private final static Logger logger = Logger.getLogger(TracTracStartTimeUpdateHandler.class.getName());
+public class StartTimeUpdateHandler extends UpdateHandler implements StartTimeChangedListener {
+    private final static Logger logger = Logger.getLogger(StartTimeUpdateHandler.class.getName());
 
     private final static String ACTION = "update_race_start_time";
     private final static String ACTION_START_TRACKING = "start_tracking";
@@ -41,10 +42,13 @@ public class TracTracStartTimeUpdateHandler extends UpdateHandler implements Sta
      * a new start time is received.
      */
     private final Regatta regatta;
+
+    private final RaceAbortedHandler raceAbortedHandler;
     
-    public TracTracStartTimeUpdateHandler(URI updateURI, String tracTracUsername, String tracTracPassword,
+    public StartTimeUpdateHandler(URI updateURI, String username, String password,
             Serializable tracTracEventId, Serializable raceId, Regatta regatta) {
-        super(updateURI, ACTION, tracTracUsername, tracTracPassword, tracTracEventId, raceId);
+        super(updateURI, ACTION, username, password, tracTracEventId, raceId);
+        this.raceAbortedHandler = new RaceAbortedHandler(updateURI, username, password, tracTracEventId, raceId);
         this.regatta = regatta;
     }
 
@@ -52,20 +56,12 @@ public class TracTracStartTimeUpdateHandler extends UpdateHandler implements Sta
     public void startTimeChanged(TimePoint newStartTime) throws MalformedURLException, IOException, URISyntaxException {
         if (isActive()) {
             if (newStartTime == null) {
-                /*
-                 * Do not reset start time based on request by Jorge from TracTrac:
-                 * 
-                 * """
-                 * We have detected that when you want to update the race start time your
-                 * system sends before a message to reset the race start time. When your
-                 * system invokes the first service our system changes the race start time
-                 * to null and this value causes some secondary effects in our side.
-                 * 
-                 * Can you just send the update_race_start_time without the
-                 * reset_race_start_time? The reset_race_start_time service has to be used
-                 * if you want to set the value to null.
-                 * """
+                /* notify race status as POSTPONED according to Jorge's comment https://bugzilla.sapsailing.com/bugzilla/show_bug.cgi?id=4708#c5 :
+                 * The method that @frank has commented has to work:
+                 *    http://em.aws.tractrac.com/update_race_status?eventid=5f2f20f0-6cb2-0136-9eca-60a44ce903c3&raceid=81c082a0-7b1f-0136-166e-028f184941da&username=trac%40sapsailing.com&password=sap0912&race_status=POSTPONED
+                 * This method changes the race start time to null.
                  */
+                raceAbortedHandler.raceAborted(Flags.AP); // will send POSTPONED
             } else {
                 HashMap<String, String> additionalParameters = new HashMap<String, String>();
                 additionalParameters.put(FIELD_RACE_START_TIME, String.valueOf(newStartTime.asMillis()));
