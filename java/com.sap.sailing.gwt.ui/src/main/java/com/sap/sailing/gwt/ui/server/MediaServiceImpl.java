@@ -16,6 +16,7 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.nio.channels.ByteChannel;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.StandardCharsets;
@@ -33,7 +34,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.shiro.SecurityUtils;
+import org.mp4parser.AbstractBoxParser;
 import org.mp4parser.IsoFile;
+import org.mp4parser.PropertyBoxParserImpl;
 import org.mp4parser.boxes.UserBox;
 import org.mp4parser.boxes.iso14496.part12.MediaDataBox;
 import org.mp4parser.boxes.iso14496.part12.MovieBox;
@@ -213,8 +216,9 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
         connection.setRequestMethod("GET");
         connection.setRequestProperty("Range", range);
         try (InputStream inStream = connection.getInputStream()) {
-            DataInputStream dataInStream = new DataInputStream(inStream);
-            dataInStream.readFully(store);
+            try (DataInputStream dataInStream = new DataInputStream(inStream)) {
+                dataInStream.readFully(store);
+            }
         } finally {
             connection.disconnect();
         }
@@ -223,46 +227,37 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     private VideoMetadataDTO checkMetadataByFullFileDownload(URL input)
             throws ParserConfigurationException, SAXException, IOException {
         final File tmp = File.createTempFile("upload", "metadataCheck");
+        VideoMetadataDTO result;
         try {
-            final ReadableByteChannel rbc = Channels.newChannel(input.openStream());
-            try (FileOutputStream fos = new FileOutputStream(tmp)) {
-                fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-                try (IsoFile isof = new IsoFile(tmp)) {
-                    final boolean canDownload = true;
-                    final Date recordStartedTimer = determineRecordingStart(isof);
-                    final Duration duration = determineDuration(isof);
-                    final boolean spherical = determine360(isof);
-                    removeTempFiles(isof);
-                    return new VideoMetadataDTO(canDownload, duration, spherical, recordStartedTimer, "");
+            try (final ReadableByteChannel rbc = Channels.newChannel(input.openStream())) {
+                try (FileOutputStream fos = new FileOutputStream(tmp)) {
+                    fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+                    try {
+                        result = checkMetadata(tmp);
+                    } catch (Exception e) {
+                        result = new VideoMetadataDTO(true, null, false, null, e.getMessage());
+                    }
+                } catch (Exception e) {
+                    result = new VideoMetadataDTO(false, null, false, null, e.getMessage());
                 }
             }
         } finally {
             Files.delete(tmp.toPath());
         }
+        return result;
     }
 
     @Override
     public VideoMetadataDTO checkMetadata(byte[] start, byte[] end, Long skipped) {
         ensureUserCanManageMedia();
         File tmp = null;
-        boolean spherical = false;
-        Duration duration = null;
-        Date recordStartedTimer = null;
-        String message = "";
+        VideoMetadataDTO result;
         try {
             tmp = createFileFromData(start, end, skipped);
-            try (IsoFile isof = new IsoFile(tmp)) {
-                try {
-                    recordStartedTimer = determineRecordingStart(isof);
-                    spherical = determine360(isof);
-                    duration = determineDuration(isof);
-                } finally {
-                    removeTempFiles(isof);
-                }
-            }
+            result = checkMetadata(tmp);
         } catch (Exception e) {
             logger.log(Level.WARNING, "Error in video analysis ", e);
-            message = e.getMessage();
+            result = new VideoMetadataDTO(true, null, false, null, e.getMessage());
         } finally {
             if (tmp != null) {
                 try {
@@ -272,7 +267,23 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
                 }
             }
         }
-        return new VideoMetadataDTO(true, duration, spherical, recordStartedTimer, message);
+        return result;
+    }
+
+    private VideoMetadataDTO checkMetadata(File tmp) throws ParserConfigurationException, SAXException, IOException {
+        try (ByteChannel inChannel = Files.newByteChannel(tmp.toPath())) {
+            AbstractBoxParser boxParserImpl = new PropertyBoxParserImpl();
+            try (IsoFile isof = new IsoFile(inChannel, boxParserImpl)) {
+                try {
+                    Date recordStartedTimer = determineRecordingStart(isof);
+                    boolean spherical = determine360(isof);
+                    Duration duration = determineDuration(isof);
+                    return new VideoMetadataDTO(true, duration, spherical, recordStartedTimer, "");
+                } finally {
+                    removeTempFiles(isof);
+                }
+            }
+        }
     }
 
     /**
