@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.home.shared.partials.editable;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
@@ -17,10 +19,12 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasEnabled;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelection;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelection.NotificationCallback;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelection.SelectionChangeHandler;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorItemDescription;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileView;
@@ -54,13 +58,36 @@ public final class EditableCompetitorSuggestedMultiSelection extends Composite {
 
     private final FlagImageResolver flagImageResolver;
     private boolean editMode = false;
+    private Map<String, IsWidget> tableElements = new HashMap<>();
 
     public EditableCompetitorSuggestedMultiSelection(SharedSailorProfileView.Presenter presenter,
             FlagImageResolver flagImageResolver) {
         this.flagImageResolver = flagImageResolver;
         multiSelect = new CompetitorDisplayImpl(presenter.getFavoriteCompetitorsDataProvider(),
                 flagImageResolver).selectionUi;
+
         initWidget(uiBinder.createAndBindUi(this));
+
+        multiSelect.addSelectionChangeHandler(new SelectionChangeHandler<SimpleCompetitorWithIdDTO>() {
+
+            @Override
+            public void onClear() {
+                itemContainerUi.clear();
+            }
+
+            @Override
+            public void onAdd(SimpleCompetitorWithIdDTO selectedItem) {
+                addListItem(selectedItem);
+            }
+
+            @Override
+            public void onRemove(SimpleCompetitorWithIdDTO selectedItem) {
+                IsWidget w = tableElements.remove(selectedItem.getIdAsString());
+                if (w != null) {
+                    w.asWidget().removeFromParent();
+                }
+            }
+        });
         multiSelect.getElement().removeFromParent();
         headerTitleUi.setInnerText("Competitors");
     }
@@ -123,12 +150,11 @@ public final class EditableCompetitorSuggestedMultiSelection extends Composite {
         item.getElement().getStyle().setPaddingLeft(0.333333333333333333, Unit.EM);
         DOM.getChild(item.getElement(), 2).getStyle().setPosition(Position.RELATIVE);
         DOM.getChild(item.getElement(), 2).getStyle().setTop(-0.333333333333333333, Unit.EM);
+        tableElements.put(comp.getIdAsString(), item);
     }
 
     public void setSelectedItems(List<SimpleCompetitorWithIdDTO> competitors) {
-        multiSelect.setSelectedItems(competitors);
         itemContainerUi.clear();
-        competitors.forEach(c -> addListItem(c));
+        multiSelect.setSelectedItems(competitors);
     }
-
 }
