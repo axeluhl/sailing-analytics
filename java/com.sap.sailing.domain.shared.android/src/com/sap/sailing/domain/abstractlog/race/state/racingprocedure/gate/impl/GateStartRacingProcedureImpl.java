@@ -119,7 +119,7 @@ public class GateStartRacingProcedureImpl extends BaseRacingProcedure implements
     }
 
     @Override
-    protected Collection<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
+    public Collection<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
         return Arrays.<RaceStateEvent> asList(
                 new RaceStateEventImpl(startTime.minus(startPhaseClassOverGolfUpInterval),
                         RaceStateEvents.GATE_CLASS_OVER_GOLF_UP),

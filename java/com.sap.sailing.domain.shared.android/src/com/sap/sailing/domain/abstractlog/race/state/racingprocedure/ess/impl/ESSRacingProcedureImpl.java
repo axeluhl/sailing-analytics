@@ -64,7 +64,7 @@ public class ESSRacingProcedureImpl extends BaseRacingProcedure implements ESSRa
     }
 
     @Override
-    protected Collection<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
+    public Collection<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
         return Arrays.<RaceStateEvent> asList(new RaceStateEventImpl(startTime.minus(startPhaseAPDownInterval),
                 RaceStateEvents.ESS_AP_DOWN), new RaceStateEventImpl(startTime.minus(startPhaseESSThreeUpInterval),
                 RaceStateEvents.ESS_THREE_UP), new RaceStateEventImpl(startTime.minus(startPhaseESSTwoUpInterval),

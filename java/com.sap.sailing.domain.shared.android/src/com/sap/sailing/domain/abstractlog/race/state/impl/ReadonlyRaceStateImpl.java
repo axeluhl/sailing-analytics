@@ -187,7 +187,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             SimpleRaceLogIdentifier forRaceLogIdentifier, RacingProcedureFactory procedureFactory,
             Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates) {
         this(raceLogResolver, raceLog, forRaceLogIdentifier, new RaceStatusAnalyzer.StandardClock(),
-                procedureFactory, dependentRaceStates, /* update */true);
+                procedureFactory, dependentRaceStates);
     }
 
     /**
@@ -196,14 +196,11 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
      *            new race state. This can help avoid endless recursions because this race state can be passed along
      *            together with the identifier so that when again along a dependent call chain a race state is required
      *            for that race log identifier, this one can be used.
-     * @param update
-     *            if <code>true</code>, the race state will be updated whenever the underlying <code>raceLog</code>
-     *            changes.
      */
     protected ReadonlyRaceStateImpl(RaceLogResolver raceLogResolver, RaceLog raceLog,
             SimpleRaceLogIdentifier forRaceLogIdentifier, Clock analyzersClock,
             RacingProcedureFactory procedureFactory,
-            final Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates, boolean update) {
+            final Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates) {
         this.raceLog = raceLog;
         this.raceLogResolver = raceLogResolver;
         this.procedureFactory = procedureFactory;
@@ -325,6 +322,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
 
     @Override
     public RaceLogRaceStatus getStatus() {
+        // TODO bug4713: check clock and invalidate/recalculate if clock passed status invalidation time point
         return cachedRaceStatus;
     }
 
@@ -463,13 +461,11 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             recreateRacingProcedure(dependentRaceStates);
             changedListeners.onRacingProcedureChanged(this);
         }
-
         RaceLogRaceStatus status = statusAnalyzer.analyze();
         if (!Util.equalsWithNull(cachedRaceStatus, status)) {
             cachedRaceStatus = status;
             changedListeners.onStatusChanged(this);
         }
-
         int passId = raceLog.getCurrentPassId();
         if (cachedPassId != passId) {
             cachedPassId = passId;
@@ -478,38 +474,32 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
             cachedRacingProcedureType = null;
             cachedRacingProcedureTypeNoFallback = null;
         }
-
         StartTimeFinderResult startTimeFinderResult = startTimeAnalyzer.analyze();
         if (!Util.equalsWithNull(cachedStartTimeFinderResult, startTimeFinderResult)) {
             cachedStartTimeFinderResult = startTimeFinderResult;
             changedListeners.onStartTimeChanged(this);
         }
         adjustObserverForRelativeStartTime(startTimeFinderResult, dependentRaceStates);
-
         TimePoint finishingTime = finishingTimeAnalyzer.analyze();
         if (!Util.equalsWithNull(cachedFinishingTime, finishingTime)) {
             cachedFinishingTime = finishingTime;
             changedListeners.onFinishingTimeChanged(this);
         }
-
         TimePoint finishedTime = finishedTimeAnalyzer.analyze();
         if (!Util.equalsWithNull(cachedFinishedTime, finishedTime)) {
             cachedFinishedTime = finishedTime;
             changedListeners.onFinishedTimeChanged(this);
         }
-
         TimeRange protest = protestTimeAnalyzer.analyze();
         if (!Util.equalsWithNull(cachedProtest, protest)) {
             cachedProtest = protest;
             changedListeners.onProtestTimeChanged(this);
         }
-
         CompetitorResults positionedCompetitors = finishPositioningListAnalyzer.analyze();
         if (!Util.equalsWithNull(cachedPositionedCompetitors, positionedCompetitors)) {
             cachedPositionedCompetitors = positionedCompetitors;
             changedListeners.onFinishingPositioningsChanged(this);
         }
-
         CompetitorResults confirmedPositionedCompetitors = confirmedFinishPositioningListAnalyzer.analyze();
         if (!Util.equalsWithNull(cachedConfirmedPositionedCompetitors, confirmedPositionedCompetitors)) {
             cachedConfirmedPositionedCompetitors = confirmedPositionedCompetitors;
@@ -517,13 +507,11 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
                 changedListeners.onFinishingPositionsConfirmed(this);
             }
         }
-
         CourseBase courseDesign = courseDesignerAnalyzer.analyze();
         if (!Util.equalsWithNull(cachedCourseDesign, courseDesign)) {
             cachedCourseDesign = courseDesign;
             changedListeners.onCourseDesignChanged(this);
         }
-
         Wind windFix = lastWindFixAnalyzer.analyze();
         if (!Util.equalsWithNull(cachedWindFix, windFix)) {
             cachedWindFix = windFix;
@@ -539,10 +527,8 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         racingProcedure = procedureFactory.createRacingProcedure(cachedRacingProcedureType, raceLog, raceLogResolver);
         racingProcedure.setStateEventScheduler(scheduler);
         addChangedListener(racingProcedure);
-
         statusAnalyzer = new RaceStatusAnalyzer(raceLogResolver, raceLog, statusAnalyzerClock, racingProcedure);
         // let's do an update because status might have changed with new procedure
         update(dependentRaceStates);
     }
-
 }

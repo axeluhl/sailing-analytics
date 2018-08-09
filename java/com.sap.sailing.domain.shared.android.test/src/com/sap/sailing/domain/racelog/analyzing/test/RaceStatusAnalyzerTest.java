@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -18,11 +19,20 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRaceStatusEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceStatusAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartProcedureChangedEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
+import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.RacingProcedure;
+import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.ReadonlyRacingProcedureFactory;
+import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -112,13 +122,34 @@ public class RaceStatusAnalyzerTest extends PassAwareRaceLogAnalyzerTest<RaceSta
                 return startTime.minus(1);
             }
         }, racingProcedure);
-        
         when(racingProcedure.isStartphaseActive(any(TimePoint.class), any(TimePoint.class))).thenReturn(false);
-        
         RaceLogStartTimeEvent event = createStartTimeEvent(startTime);
         raceLog.add(event);
-        
         assertEquals(RaceLogRaceStatus.SCHEDULED, analyzer.analyze());
+    }
+
+    @Test
+    public void testRaceStateStatusUpdateWithoutNewRaceLogEvent() throws InterruptedException {
+        final TimePoint[] timeForClock = { MillisecondsTimePoint.now() };
+        final RaceStatusAnalyzer.Clock clock = new RaceStatusAnalyzer.Clock() {
+            @Override
+            public TimePoint now() {
+                return timeForClock[0];
+            }
+        };
+        ReadonlyRaceState raceState = new ReadonlyRaceStateImpl(mock(RaceLogResolver.class), raceLog,
+                new SimpleRaceLogIdentifierImpl("regatta", "column", "fleet"), clock, new ReadonlyRacingProcedureFactory(
+                new EmptyRegattaConfiguration()), Collections.emptyMap()) {};
+        RaceLogStartProcedureChangedEvent startProcedureEvent = new RaceLogStartProcedureChangedEventImpl(
+                timeForClock[0], mock(AbstractLogEventAuthor.class), /* passId */ 0, RacingProcedureType.RRS26);
+        raceLog.add(startProcedureEvent);
+        RaceLogStartTimeEvent event = createStartTimeEvent(timeForClock[0].plus(Duration.ONE_MINUTE.times(10)));
+        raceLog.add(event);
+        assertEquals(RaceLogRaceStatus.SCHEDULED, raceState.getStatus());
+        timeForClock[0] = timeForClock[0].plus(Duration.ONE_MINUTE.times(9)); // one minute before start; we should be in STARTPHASE
+        assertEquals(RaceLogRaceStatus.STARTPHASE, raceState.getStatus());
+        timeForClock[0] = timeForClock[0].plus(Duration.ONE_MINUTE.times(2)); // one minute after start; we should be RUNNING
+        assertEquals(RaceLogRaceStatus.RUNNING, raceState.getStatus());
     }
 
     @Test
