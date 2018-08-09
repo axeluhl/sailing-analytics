@@ -96,6 +96,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     private final ListDataProvider<DimensionWithContext> filteredFilterDimensions;
     
     private final DockLayoutPanel mainPanel;
+    private final Button clearSelectionButton;
     
     private final AbstractFilterablePanel<DimensionWithContext> filterFilterDimensionsPanel;
     private final MultiSelectionModel<DimensionWithContext> filterDimensionSelectionModel;
@@ -135,10 +136,11 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
         filterDimensionsSelectionTitleLabel.addStyleName("dataMiningMarginLeft");
         filterDimensionsSelectionTitleLabel.addStyleName("filterDimensionsTitleLabel");
 
-        Button clearSelectionButton = new Button(stringMessages.clear());
+        clearSelectionButton = new Button(stringMessages.clear());
         clearSelectionButton.addStyleName("floatRight");
         clearSelectionButton.addStyleName("dataMiningMarginRight");
         clearSelectionButton.addClickHandler(e -> clearSelection());
+        clearSelectionButton.setEnabled(false);
 
         DataMiningDataGridResources resources = GWT.create(DataMiningDataGridResources.class);
         filterDimensionsList = new DataGrid<>(Integer.MAX_VALUE, resources);
@@ -161,6 +163,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
         filterFilterDimensionsPanel.setHeight("100%");
         filterFilterDimensionsPanel.getTextBox().setWidth("100%");
         filterFilterDimensionsPanel.getTextBox().getElement().setPropertyString("placeholder", stringMessages.filterShownDimensions());
+        filterFilterDimensionsPanel.getTextBox().setEnabled(false);
         
         filterDimensionSelectionModel = new MultiSelectionModel<>();
         filterDimensionSelectionModel.addSelectionChangeHandler(this::selectedFilterDimensionsChanged);
@@ -229,11 +232,15 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO newDataRetrieverChainDefinition) {
         if (!Objects.equals(retrieverChain, newDataRetrieverChainDefinition)) {
             retrieverChain = newDataRetrieverChainDefinition;
+            clearSelectionButton.setEnabled(retrieverChain != null);
+            filterFilterDimensionsPanel.getTextBox().setEnabled(retrieverChain != null);
+            
             if (!isAwaitingReload && retrieverChain != null) {
                 updateFilterDimensions();
             } else if (!isAwaitingReload) {
                 clearContent();
                 selectionToBeApplied = null;
+                selectionCallback = null;
             }
         }
     }

@@ -7,6 +7,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.common.Util;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
@@ -59,12 +60,14 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
         this.dataMiningService = dataMiningService;
         this.errorReporter = errorReporter;
         counter = new SimpleManagedDataMiningQueriesCounter();
+        queryDefinitionProvider.addQueryDefinitionChangedListener(this);
 
         this.settings = new QueryRunnerSettings();
         this.queryDefinitionProvider = queryDefinitionProvider;
         this.resultsPresenter = resultsPresenter;
 
         runButton = new Button(getDataMiningStringMessages().run());
+        runButton.setEnabled(false);
         runButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -78,9 +81,6 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
                 SimpleQueryRunner.this.run(queryDefinitionProvider.getQueryDefinition());
             }
         };
-        if (this.settings.isRunAutomatically()) {
-            queryDefinitionProvider.addQueryDefinitionChangedListener(this);
-        }
     }
 
     @Override
@@ -113,18 +113,17 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
     public void updateSettings(QueryRunnerSettings newSettings) {
         if (settings.isRunAutomatically() != newSettings.isRunAutomatically()) {
             settings = newSettings;
-            if (settings.isRunAutomatically()) {
-                queryDefinitionProvider.addQueryDefinitionChangedListener(this);
-            } else {
-                queryDefinitionProvider.removeQueryDefinitionChangedListener(this);
-            }
         }
     }
 
     @Override
     public void queryDefinitionChanged(StatisticQueryDefinitionDTO newQueryDefinition) {
-        // See javadoc of queryReleaseTimer
-        queryReleaseTimer.schedule(queryBufferTimeInMillis);
+        Iterable<String> errors = queryDefinitionProvider.validateQueryDefinition(newQueryDefinition);
+        boolean isValid = Util.isEmpty(errors);
+        runButton.setEnabled(isValid);
+        if (isValid && settings.isRunAutomatically()) {
+            queryReleaseTimer.schedule(queryBufferTimeInMillis);
+        }
     }
 
     @Override

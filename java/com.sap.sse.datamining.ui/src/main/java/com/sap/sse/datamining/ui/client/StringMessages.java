@@ -87,5 +87,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String keepChangesChangeLossStrategyName();
     String keepChangesChangeLossStrategyTooltip();
     String applyingQuery();
+    String searchAvailableStatistics();
     
 }

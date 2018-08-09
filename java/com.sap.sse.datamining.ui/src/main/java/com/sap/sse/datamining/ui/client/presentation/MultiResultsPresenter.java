@@ -8,6 +8,7 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.DeckLayoutPanel;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ValueListBox;
@@ -44,6 +45,7 @@ public class MultiResultsPresenter extends AbstractDataMiningComponent<Settings>
 
         controlsPanel = new HorizontalPanel();
         controlsPanel.setSpacing(5);
+        controlsPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         controlsPanel.add(new Label(getDataMiningStringMessages().choosePresentation() + ":"));
         presentersListBox = new ValueListBox<>(new AbstractObjectRenderer<PresenterDescriptor<? extends Object>>() {
             @Override

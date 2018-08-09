@@ -3,11 +3,13 @@ package com.sap.sse.datamining.ui.client.presentation;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DeckLayoutPanel;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
@@ -45,6 +47,7 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings>
         mainPanel = new DockLayoutPanel(Unit.PX);
         controlsPanel = new HorizontalPanel();
         controlsPanel.setSpacing(5);
+        controlsPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         mainPanel.addNorth(controlsPanel, 40);
         Button exportButton = new Button("Export");
         exportButton.setEnabled(false);
@@ -89,9 +92,6 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings>
             updateCurrentResultInfo();
             internalShowResults(getCurrentResult());
         } else {
-            this.currentResult = null;
-            this.currentQueryDefinition = null;
-            updateCurrentResultInfo();
             showError(getDataMiningStringMessages().noDataFound() + ".");
         }
     }
@@ -102,15 +102,7 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings>
 
     @Override
     public void showError(String error) {
-        if (state != ResultsPresenterState.ERROR) {
-            mainPanel.setWidgetHidden(controlsPanel, true);
-            errorLabel.setHTML(SafeHtmlUtils.fromString(error).asString());
-            state = ResultsPresenterState.ERROR;
-        }
-        currentResult = null;
-        currentQueryDefinition = null;
-        updateCurrentResultInfo();
-        presentationPanel.setWidget(errorLabel);
+        showError(SafeHtmlUtils.fromString(error));
     }
 
     @Override
@@ -120,7 +112,19 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings>
             errorBuilder.append("<li>" + detailedError + "</li>");
         }
         errorBuilder.append("</ul>");
-        showError(errorBuilder.toString());
+        showError(SafeHtmlUtils.fromTrustedString(errorBuilder.toString()));
+    }
+
+    private void showError(SafeHtml error) {
+        if (state != ResultsPresenterState.ERROR) {
+            mainPanel.setWidgetHidden(controlsPanel, true);
+            presentationPanel.setWidget(errorLabel);
+            state = ResultsPresenterState.ERROR;
+        }
+        errorLabel.setHTML(error);
+        currentResult = null;
+        currentQueryDefinition = null;
+        updateCurrentResultInfo();
     }
 
     @Override

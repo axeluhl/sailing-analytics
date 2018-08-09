@@ -264,6 +264,10 @@ input.magnifier {
     overflow-y: scroll;
 }
 
+.dataMiningListBox {
+	min-width: 120px;
+}
+
 .queryDefinitionViewerContent {
 	background-color: white;
 	padding: 5px;

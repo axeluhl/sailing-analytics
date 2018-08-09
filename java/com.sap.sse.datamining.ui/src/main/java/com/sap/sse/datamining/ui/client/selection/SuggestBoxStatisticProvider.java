@@ -133,6 +133,7 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
                 extractionFunctionSuggestBox.setFocus(false);
             }
         });
+        extractionFunctionSuggestBox.getElement().setPropertyString("placeholder", getDataMiningStringMessages().searchAvailableStatistics());
         extractionFunctionSuggestBox.setLimit(Integer.MAX_VALUE);
         extractionFunctionSuggestBox.addStyleName(StatisticProviderElementStyle);
         extractionFunctionSuggestBox.setWidth("100%");
@@ -145,6 +146,7 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         availableAggregators = new ArrayList<>();
         aggregatorListBox = createAggregatorListBox();
         aggregatorListBox.addStyleName(StatisticProviderElementStyle);
+        aggregatorListBox.addStyleName("dataMiningListBox");
         mainPanel.add(aggregatorListBox);
     }
 
@@ -233,12 +235,7 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         if (awaitingRetrieverChainStatistics == 0) {
             Collections.sort(availableExtractionFunctions);
             extractionFunctionSuggestBox.setSelectableValues(availableExtractionFunctions);
-
-            // TODO Do not pre-select the first element. The other UI components have to be able to handle "empty content"
-            ExtractionFunctionWithContext currentValue = extractionFunctionSuggestBox.getExtractionFunction();
-            ExtractionFunctionWithContext valueToBeSelected = availableExtractionFunctions.contains(currentValue)
-                    ? currentValue : Util.first(availableExtractionFunctions);
-            extractionFunctionSuggestBox.setExtractionFunction(valueToBeSelected);
+            updateAggregators();
         }
     }
 
@@ -280,12 +277,14 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
 
         listBox.setValue(valueToBeSelected, true);
         listBox.setAcceptableValues(acceptableValues);
+        listBox.setEnabled(!acceptableValues.isEmpty());
     }
 
     @Override
     public HashMap<DataRetrieverLevelDTO, SerializableSettings> getRetrieverSettings() {
-        if (settingsMap.containsKey(getDataRetrieverChainDefinition())) {
-            return settingsMap.get(getDataRetrieverChainDefinition());
+        DataRetrieverChainDefinitionDTO retrieverChain = getDataRetrieverChainDefinition();
+        if (retrieverChain != null && settingsMap.containsKey(retrieverChain)) {
+            return settingsMap.get(retrieverChain);
         } else {
             return new HashMap<>();
         }
@@ -293,7 +292,8 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
 
     @Override
     public boolean hasSettings() {
-        return getDataRetrieverChainDefinition().hasSettings();
+        DataRetrieverChainDefinitionDTO retrieverChain = getDataRetrieverChainDefinition();
+        return retrieverChain != null && retrieverChain.hasSettings();
     }
 
     @Override
@@ -353,27 +353,28 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
     @Override
     public CompositeSettings getSettings() {
         Map<String, Settings> settings = new HashMap<>();
-        for (Entry<DataRetrieverLevelDTO, SerializableSettings> retrieverLevelSettings : settingsMap
-                .get(getDataRetrieverChainDefinition()).entrySet()) {
-            final DataRetrieverLevelDTO retrieverLevel = retrieverLevelSettings.getKey();
-            final Class<?> settingsType = retrieverLevelSettings.getValue().getClass();
-            DataMiningSettingsInfo settingsInfo = settingsManager.getSettingsInfo(settingsType);
-            RetrieverLevelSettingsComponent c = new RetrieverLevelSettingsComponent(this, getComponentContext(),
-                    retrieverLevel, settingsInfo.getId(),
-                    settingsInfo.getLocalizedName()) {
-                @Override
-                public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent(
-                        SerializableSettings settings) {
-                    return null;
-                }
+        DataRetrieverChainDefinitionDTO retrieverChain = getDataRetrieverChainDefinition();
+        if (retrieverChain != null) {
+            for (Entry<DataRetrieverLevelDTO, SerializableSettings> retrieverLevelSettings : settingsMap
+                    .get(retrieverChain).entrySet()) {
+                final DataRetrieverLevelDTO retrieverLevel = retrieverLevelSettings.getKey();
+                final Class<?> settingsType = retrieverLevelSettings.getValue().getClass();
+                DataMiningSettingsInfo settingsInfo = settingsManager.getSettingsInfo(settingsType);
+                RetrieverLevelSettingsComponent c = new RetrieverLevelSettingsComponent(this, getComponentContext(),
+                        retrieverLevel, settingsInfo.getId(), settingsInfo.getLocalizedName()) {
+                    @Override
+                    public SettingsDialogComponent<SerializableSettings> getSettingsDialogComponent(
+                            SerializableSettings settings) {
+                        return null;
+                    }
 
-                @Override
-                public void updateSettings(SerializableSettings newSettings) {
-                }
-            };
-            settings.put(c.getId(), c.hasSettings() ? c.getSettings() : null);
+                    @Override
+                    public void updateSettings(SerializableSettings newSettings) {
+                    }
+                };
+                settings.put(c.getId(), c.hasSettings() ? c.getSettings() : null);
+            }
         }
-
         return new CompositeSettings(settings);
     }
 

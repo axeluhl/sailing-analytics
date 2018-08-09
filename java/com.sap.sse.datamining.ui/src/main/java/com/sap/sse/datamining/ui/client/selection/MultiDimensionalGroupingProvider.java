@@ -160,6 +160,7 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
             ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
             addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);
             dimensionsToSelect = null;
+            selectionCallback = null;
         }
     }
 
@@ -187,6 +188,7 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
 
     private ValueListBox<FunctionDTO> createDimensionToGroupByBox() {
         ValueListBox<FunctionDTO> dimensionToGroupByBox = createDimensionToGroupByBoxWithoutEventHandler();
+        dimensionToGroupByBox.addStyleName("dataMiningListBox");
         dimensionToGroupByBox.addValueChangeHandler(new ValueChangeHandler<FunctionDTO>() {
             private boolean firstChange = true;
 
@@ -238,8 +240,12 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
             if (dimensionToGroupByBox.getValue() != null) {
                 acceptableValues.add(dimensionToGroupByBox.getValue());
             }
-            acceptableValues.add(null);
-            Collections.sort(acceptableValues, DimensionComparator);
+            if (!acceptableValues.isEmpty()) {
+                acceptableValues.add(null);
+                Collections.sort(acceptableValues, DimensionComparator);
+            } else {
+                dimensionToGroupByBox.setEnabled(false);
+            }
             dimensionToGroupByBox.setAcceptableValues(acceptableValues);
         }
     }
