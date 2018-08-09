@@ -102,6 +102,13 @@ public abstract class AbstractHomeFragment extends BaseFragment {
     protected void handleQRCode(String qrCode) {
         ExLog.i(getActivity(), TAG, "Parsing URI: " + qrCode);
         Uri uri = Uri.parse(qrCode);
+        // if we use the app (and not an external QR code reader) to scan a QR code which contains
+        // a branch.io deeplink, we have to extract the checkin url from this deeplink here
+        String checkinUrl = uri.getQueryParameter("checkinUrl");
+        if (checkinUrl != null) {
+            handleScannedOrUrlMatchedUri(Uri.parse(checkinUrl));
+            return;
+        }
         handleScannedOrUrlMatchedUri(uri);
     }
 
