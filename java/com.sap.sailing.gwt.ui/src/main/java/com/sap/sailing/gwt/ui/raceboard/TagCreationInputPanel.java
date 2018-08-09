@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -12,19 +11,20 @@ public class TagCreationInputPanel extends VerticalPanel{
     
     public TagCreationInputPanel(StringMessages stringMessages) {
         VerticalPanel mainPanel = new VerticalPanel();
-        HorizontalPanel subPanel = new HorizontalPanel();
         
         tagTextBox = new TextBox();
+        tagTextBox.setWidth("100%");
         tagTextBox.setTitle(stringMessages.tagLabelTag());
         tagTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelTag());
-        subPanel.add(tagTextBox);
+        mainPanel.add(tagTextBox);
         
         urlTextBox = new TextBox();
+        urlTextBox.setWidth("100%");
         urlTextBox.setTitle(stringMessages.tagLabelImageURL());
         urlTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelImageURL());
-        subPanel.add(urlTextBox);
+        mainPanel.add(urlTextBox);
         
-        mainPanel.add(subPanel);
+        //resize must be set to none by css
         commentTextBox = new TextArea();
         commentTextBox.setWidth("100%");
         commentTextBox.setVisibleLines(4);
