@@ -17,6 +17,7 @@ import javax.imageio.ImageIO;
 import javax.mail.MessagingException;
 
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.mail.SerializableDefaultMimeBodyPartSupplier;
@@ -99,13 +100,13 @@ class RaceLogTrackingInvitationMailBuilder {
     }
     
     RaceLogTrackingInvitationMailBuilder addSailInsightDeeplink(final String checkinUrl) {
-    	String deeplink = String.format("%s?checkinUrl=%s", SAIL_INSIGHT_BRANCH_DEEPLINK, NonGwtUrlHelper.INSTANCE.encodeQueryString(checkinUrl));
+    	String deeplink = String.format("%s?%s=%s", SAIL_INSIGHT_BRANCH_DEEPLINK, DeviceMappingConstants.URL_CHECKIN_URL, NonGwtUrlHelper.INSTANCE.encodeQueryString(checkinUrl));
     	this.addDeeplink(deeplink, RaceLogTrackingI18n::register);
     	return this;
     }
     
     RaceLogTrackingInvitationMailBuilder addBuoyPingerDeeplink(final String checkinUrl) {
-    	String deeplink = String.format("%s?checkinUrl=%s", BUOY_PINGER_BRANCH_DEEPLINK, NonGwtUrlHelper.INSTANCE.encodeQueryString(checkinUrl));
+    	String deeplink = String.format("%s?%s=%s", BUOY_PINGER_BRANCH_DEEPLINK, DeviceMappingConstants.URL_CHECKIN_URL, NonGwtUrlHelper.INSTANCE.encodeQueryString(checkinUrl));
     	this.addDeeplink(deeplink, RaceLogTrackingI18n::register);
     	return this;
     }

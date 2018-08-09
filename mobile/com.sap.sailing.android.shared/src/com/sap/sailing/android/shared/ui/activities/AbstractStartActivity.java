@@ -8,6 +8,7 @@ import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.customviews.OpenSansToolbar;
 import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
+import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 
 import android.app.Dialog;
 import android.content.Intent;
@@ -63,7 +64,7 @@ public abstract class AbstractStartActivity<C extends BaseCheckinData> extends C
                             return;
                         }
                         ExLog.i(AbstractStartActivity.this, "BRANCH SDK", referringParams.toString());
-                        String checkinUrl = referringParams.getString("checkinUrl");
+                        String checkinUrl = referringParams.getString(DeviceMappingConstants.URL_CHECKIN_URL);
                         if (checkinUrl != null) {
                             ExLog.i(AbstractStartActivity.this, TAG, "handling branch.io deeplink.");
                             getHomeFragment().handleScannedOrUrlMatchedUri(Uri.parse(checkinUrl));

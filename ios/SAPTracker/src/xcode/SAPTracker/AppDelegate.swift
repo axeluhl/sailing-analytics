@@ -41,7 +41,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         setup()
         Branch.getInstance().initSession(launchOptions: launchOptions) { (params, error) in
             guard let data = params as? [String: AnyObject] else { return }
-            if let checkinUrl = data["checkinUrl"] as? String {
+            if let checkinUrl = data["checkin_url"] as? String {
                 Preferences.newCheckInURL = checkinUrl.removingPercentEncoding
             }
         }
