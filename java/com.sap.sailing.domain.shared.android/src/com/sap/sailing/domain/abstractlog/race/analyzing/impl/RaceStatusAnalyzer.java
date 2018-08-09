@@ -62,9 +62,12 @@ public class RaceStatusAnalyzer extends RaceLogAnalyzer<Pair<RaceLogRaceStatus, 
         final EventDispatcher eventDispatcher = new EventDispatcher(now, racingProcedure);
         RaceLogRaceStatus result = RaceLogRaceStatus.UNSCHEDULED;
         for (RaceLogRaceStatusEvent event : statusEvents.descendingSet()) {
-            event.accept(eventDispatcher);
-            result = eventDispatcher.nextStatus;
-            break;
+            // consider race log status events that are valid already at the time point we use as "now"
+            if (!event.getLogicalTimePoint().after(now)) {
+                event.accept(eventDispatcher);
+                result = eventDispatcher.nextStatus;
+                break;
+            }
         }
         return new Pair<>(result, now);
     }

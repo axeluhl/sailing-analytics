@@ -343,7 +343,6 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
 
     @Override
     public RaceLogRaceStatus getStatus() {
-        // TODO bug4713: check clock and invalidate/recalculate if clock passed status invalidation time point
         final TimePoint timePointForAnalysis = statusAnalyzerClock.now();
         final TimeRange timeRangeSinceLastStatusUpdate = new TimeRangeImpl(clockTimePointWhenCachedRaceStatusWasSet, timePointForAnalysis);
         if (overlapsTimePointForPotentialStatusChange(timeRangeSinceLastStatusUpdate)) {
