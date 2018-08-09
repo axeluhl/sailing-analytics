@@ -2,7 +2,9 @@ package com.sap.sailing.gwt.home.shared.places.error;
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceTokenizer;
+import com.google.gwt.user.client.Window.Location;
 import com.sap.sailing.gwt.common.client.AbstractBasePlace;
+import com.sap.sailing.gwt.home.shared.app.AbstractPlaceNavigator;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 
 public class ErrorPlace extends AbstractBasePlace implements HasMobileVersion {
@@ -66,7 +68,11 @@ public class ErrorPlace extends AbstractBasePlace implements HasMobileVersion {
 
         @Override
         public ErrorPlace getPlace(String token) {
-            return new ErrorPlace("");
+            // we do never want an error place to be caused by an url alone, as this is most likely a refresh from a
+            // prior error page.
+            // Redirect to the main page instead.
+            Location.assign(AbstractPlaceNavigator.DEFAULT_SAPSAILING_SERVER_URL);
+            return null;
         }
     }
 
