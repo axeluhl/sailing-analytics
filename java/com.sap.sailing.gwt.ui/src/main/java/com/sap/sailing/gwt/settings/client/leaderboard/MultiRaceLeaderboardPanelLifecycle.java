@@ -13,8 +13,14 @@ public class MultiRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecycl
     
     public MultiRaceLeaderboardPanelLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages,
             Iterable<DetailType> availableDetailTypes) {
+        this(leaderboard != null ? leaderboard.getNamesOfRaceColumns() : new ArrayList<String>(), stringMessages,
+                availableDetailTypes);
+    }
+    
+    protected MultiRaceLeaderboardPanelLifecycle(List<String> namesOfRaceColumns, StringMessages stringMessages,
+            Iterable<DetailType> availableDetailTypes) {
         super(stringMessages, availableDetailTypes);
-        this.namesOfRaceColumns = leaderboard != null ? leaderboard.getNamesOfRaceColumns() : new ArrayList<String>();
+        this.namesOfRaceColumns = namesOfRaceColumns;
     }
     
     @Override
