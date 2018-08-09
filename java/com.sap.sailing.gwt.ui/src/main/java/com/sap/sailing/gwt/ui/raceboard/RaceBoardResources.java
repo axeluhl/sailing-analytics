@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.resources.client.ImageResource;
 import com.sap.sse.gwt.common.CommonSharedResources;
 import com.sap.sse.security.ui.authentication.generic.resource.AuthenticationResources;
 
@@ -13,6 +14,11 @@ public interface RaceBoardResources extends CommonSharedResources, Authenticatio
     
     @Source({CommonSharedResources.MEDIA, "raceboard-media.gss"})
     RaceBoardMediaCss mediaCss();
+    
+    //TODO image is stored in wrong folder
+    @Source("com/sap/sailing/gwt/ui/client/images/edit.png")
+    ImageResource editIcon();
+
     
     public interface RaceBoardMainCss extends CommonMainCss {
         String button();
