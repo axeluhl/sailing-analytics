@@ -2,13 +2,9 @@ package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-
 import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style.Unit;
@@ -24,14 +20,11 @@ import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HeaderPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -39,16 +32,11 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
-import com.sap.sailing.gwt.ui.adminconsole.EditCompetitorsDialog;
 import com.sap.sailing.gwt.ui.adminconsole.ImagesBarColumn;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigImagesBarCell;
-import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -57,14 +45,12 @@ import com.sap.sailing.gwt.ui.client.TagListProvider;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.raceboard.TaggingPanel.TagPanelResources.TagPanelStyle;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
-import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentWithoutSettings;
@@ -251,8 +237,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
 
         @Override
         protected Widget getAdditionalWidget() {
-            Panel mainPanel = new HorizontalPanel();
-            Panel rightPanel = new VerticalPanel();
+            Panel mainPanel = new VerticalPanel();
 
             CellTable<TagButton> customTagButtonsTable = new CellTable<TagButton>();
             // add table header
@@ -296,11 +281,8 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
             customTagButtonsTable.addColumn(imageURLColumn, stringMessages.tagLabelImageURL());
             customTagButtonsTable.addColumn(actionsColumn, "Actions");
             customTagButtonsTable.setRowData(customTagButtons);
-            mainPanel.add(rightPanel);
-            mainPanel.add(customTagButtonsTable);
             
             TagCreationInputPanel inputPanel = new TagCreationInputPanel(stringMessages);
-            rightPanel.add(inputPanel);
             
             Button addCustomTagButton = new Button(stringMessages.tagAddCustomTagButton());
             addCustomTagButton.addClickHandler(new ClickHandler() {
@@ -317,7 +299,11 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
                     }
                 }
             });
-            rightPanel.add(addCustomTagButton);
+            
+            mainPanel.add(customTagButtonsTable);            
+            mainPanel.add(inputPanel);
+            mainPanel.add(addCustomTagButton);
+
 
             return mainPanel;
         }
