@@ -35,6 +35,8 @@ public interface SharedSailorProfileView extends IsWidget {
         SuggestedMultiSelectionBoatClassDataProvider getFavoriteBoatClassesDataProvider();
 
         SuggestedMultiSelectionCompetitorDataProvider getFavoriteCompetitorsDataProvider();
+
+        SuggestedMultiSelectionCompetitorDataProvider getCompetitorsDataProvider();
     }
 
 }

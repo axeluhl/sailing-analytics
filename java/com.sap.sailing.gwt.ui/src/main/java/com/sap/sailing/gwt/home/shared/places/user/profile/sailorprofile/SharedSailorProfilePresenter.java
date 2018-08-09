@@ -39,6 +39,15 @@ public class SharedSailorProfilePresenter<C extends ClientFactoryWithDispatch & 
 
     private final SailorProfileDataProvider sailorProfileDataProvider = new SailorProfileDataProviderImpl();
 
+    private SuggestedMultiSelectionCompetitorDataProvider adjustedCompetitorDataProvider = null;
+
+    private SuggestedMultiSelectionCompetitorDataProvider createDataProviderIfNecessary() {
+        if (adjustedCompetitorDataProvider == null) {
+            adjustedCompetitorDataProvider = new SharedSailorProfileCompetitorDataProvider(competitorDataProvider);
+        }
+        return adjustedCompetitorDataProvider;
+    }
+
     public SharedSailorProfilePresenter(C clientFactory) {
         this.clientFactory = clientFactory;
     }
@@ -128,6 +137,11 @@ public class SharedSailorProfilePresenter<C extends ClientFactoryWithDispatch & 
     @Override
     public SailorProfileDataProvider getDataProvider() {
         return sailorProfileDataProvider;
+    }
+
+    @Override
+    public SuggestedMultiSelectionCompetitorDataProvider getCompetitorsDataProvider() {
+        return createDataProviderIfNecessary();
     }
 
 }

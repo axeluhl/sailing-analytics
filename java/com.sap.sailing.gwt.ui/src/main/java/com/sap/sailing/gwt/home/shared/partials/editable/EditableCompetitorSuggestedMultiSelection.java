@@ -56,6 +56,7 @@ public final class EditableCompetitorSuggestedMultiSelection extends Composite {
     @UiField
     Button toggleEditButtonUi;
 
+    private final SuggestedMultiSelectionCompetitorDataProvider dataProvider;
     private final FlagImageResolver flagImageResolver;
     private boolean editMode = false;
     private Map<String, IsWidget> tableElements = new HashMap<>();
@@ -63,7 +64,8 @@ public final class EditableCompetitorSuggestedMultiSelection extends Composite {
     public EditableCompetitorSuggestedMultiSelection(SharedSailorProfileView.Presenter presenter,
             FlagImageResolver flagImageResolver) {
         this.flagImageResolver = flagImageResolver;
-        multiSelect = new CompetitorDisplayImpl(presenter.getFavoriteCompetitorsDataProvider(),
+        this.dataProvider = presenter.getCompetitorsDataProvider();
+        multiSelect = new CompetitorDisplayImpl(dataProvider,
                 flagImageResolver).selectionUi;
 
         initWidget(uiBinder.createAndBindUi(this));
