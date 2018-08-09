@@ -38,17 +38,20 @@ public class SailorProfileDataProviderImpl implements SailorProfileDataProvider 
         competitors2.add(c1);
 
         List<BoatClassDTO> boatclasses = new ArrayList<>();
-        BoatClassDTO bc1 = new BoatClassDTO("49er", null, null);
-        BoatClassDTO bc2 = new BoatClassDTO("5O5", null, null);
+        BoatClassDTO bc1 = new BoatClassDTO("J/70", null, null);
+        BoatClassDTO bc2 = new BoatClassDTO("12 Meter", null, null);
+        BoatClassDTO bc3 = new BoatClassDTO("5O5", null, null);
         boatclasses.add(bc1);
         boatclasses.add(bc2);
+        boatclasses.add(bc3);
 
         List<BoatClassDTO> boatclasses2 = new ArrayList<>();
         boatclasses2.add(bc2);
+        boatclasses2.add(bc3);
 
         UUID uid1 = UUID.fromString("f92aa40e-5870-4f0c-9435-90a9069b0e65");
         UUID uid2 = UUID.fromString("71dd204f-376b-4129-a8ef-ad190e49ed02");
-        SailorProfileEntry e1 = new SailorProfileEntry(uid1, "My Favourite Guy", competitors, badges, boatclasses);
+        SailorProfileEntry e1 = new SailorProfileEntry(uid1, "My Favorite Guy", competitors, badges, boatclasses);
         SailorProfileEntry e2 = new SailorProfileEntry(uid2, "This Other Guy", competitors2, badges2, boatclasses2);
 
         entries = new HashMap<>();
