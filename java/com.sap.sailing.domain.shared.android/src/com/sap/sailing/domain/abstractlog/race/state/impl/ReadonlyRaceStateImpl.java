@@ -71,6 +71,13 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
      * See also bug4704.
      */
     public static ReadonlyRaceState getOrCreate(RaceLogResolver raceLogResolver, RaceLog raceLog) {
+        return getOrCreate(raceLogResolver, raceLog, /* forRaceLogIdentifier */null,
+                Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState> emptyMap());
+    }
+    
+    public static ReadonlyRaceState getOrCreate(RaceLogResolver raceLogResolver, RaceLog raceLog,
+            SimpleRaceLogIdentifier forRaceLogIdentifier,
+            Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates) {
         WeakIdentityHashMap<RaceLogResolver, ReadonlyRaceState> raceStatesForRaceLog;
         ReadonlyRaceState result = null;
         synchronized (raceStateCache) {
@@ -82,7 +89,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
                 result = raceStatesForRaceLog.get(raceLogResolver);
             }
             if (result == null) {
-                result = createInternal(raceLogResolver, raceLog);
+                result = createInternal(raceLogResolver, raceLog, forRaceLogIdentifier, dependentRaceStates);
                 raceStatesForRaceLog.put(raceLogResolver, result);
             }
         }
@@ -90,9 +97,10 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
     }
         
         
-    private static final ReadonlyRaceState createInternal(RaceLogResolver raceLogResolver, RaceLog raceLog) {
-        return create(raceLogResolver, raceLog, /* forRaceLogIdentifier */null,
-                Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState> emptyMap());
+    private static final ReadonlyRaceState createInternal(RaceLogResolver raceLogResolver, RaceLog raceLog,
+            SimpleRaceLogIdentifier forRaceLogIdentifier,
+            Map<SimpleRaceLogIdentifier, ReadonlyRaceState> dependentRaceStates) {
+        return create(raceLogResolver, raceLog, forRaceLogIdentifier, dependentRaceStates);
     }
 
     /**
@@ -473,7 +481,7 @@ public class ReadonlyRaceStateImpl implements ReadonlyRaceState, RaceLogChangedL
         } else {
             RaceLog resolvedRaceLog = raceLogResolver.resolve(dependentOnRaceIdentifier);
             if (resolvedRaceLog != null) {
-                raceStateToObserve = ReadonlyRaceStateImpl.create(raceLogResolver, resolvedRaceLog,
+                raceStateToObserve = ReadonlyRaceStateImpl.getOrCreate(raceLogResolver, resolvedRaceLog,
                         dependentOnRaceIdentifier, dependentRaceStates);
                 raceStateToObserve.addChangedListener(raceStateToObserveListener);
             }
