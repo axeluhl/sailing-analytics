@@ -51,7 +51,7 @@ public class TagsFilterSetsDialog extends DataEntryDialog<TagsFilterSets> {
     }
 
     public TagsFilterSetsDialog(TagsFilterSets tagsFilterSets, StringMessages stringMessages, DialogCallback<TagsFilterSets> callback) {
-        super(stringMessages.competitorsFilter(), null, stringMessages.ok(), stringMessages.cancel(), new TagsFilterSetsValidator(), callback);
+        super(stringMessages.tagsFilter(), null, stringMessages.ok(), stringMessages.cancel(), new TagsFilterSetsValidator(), callback);
         this.tagsFilterSets = tagsFilterSets;
         this.stringMessages = stringMessages; 
         filterNothingFiltersetName = stringMessages.filterNothing();

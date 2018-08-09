@@ -2117,4 +2117,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String tagEditCustomTagsButtonDialogHeader();
     String tagAddCustomTagButton();
     String tagNotSpecified();
+    String tagFilterDialogHeader();
+    String tagEditFilter();
 }
