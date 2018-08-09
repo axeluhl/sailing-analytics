@@ -186,14 +186,17 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
     }
 
     private class TagCreationPanel extends VerticalPanel {
-        protected Button createTagFromTextBoxes, editCustomTagButtons;
-        protected Panel customButtonsPanel = new FlowPanel();
-        private final TagCreationInputPanel inputPanel;  
+        private final Panel customButtonsPanel;
+ 
         public TagCreationPanel(StringMessages stringMessages) {    
-            inputPanel = new TagCreationInputPanel(stringMessages);
+            TagCreationInputPanel inputPanel = new TagCreationInputPanel(stringMessages);
+            Panel standardButtonsPanel = new FlowPanel(); 
+            customButtonsPanel = new FlowPanel(); 
             add(inputPanel);
-
-            createTagFromTextBoxes = new Button(stringMessages.tagAddButton());
+            add(standardButtonsPanel);
+            add(customButtonsPanel);
+            
+            Button createTagFromTextBoxes = new Button(stringMessages.tagAddButton());
             createTagFromTextBoxes.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -203,9 +206,9 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
                     }
                 }
             });
-            add(createTagFromTextBoxes);
+            standardButtonsPanel.add(createTagFromTextBoxes);
 
-            editCustomTagButtons = new Button(stringMessages.tagEditCustomTagButtons());
+            Button editCustomTagButtons = new Button(stringMessages.tagEditCustomTagButtons());
             editCustomTagButtons.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -215,9 +218,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
                     }
                 }
             });
-            add(editCustomTagButtons);
-
-            add(customButtonsPanel);
+            standardButtonsPanel.add(editCustomTagButtons);
         }
 
         private void updateButtons() {
