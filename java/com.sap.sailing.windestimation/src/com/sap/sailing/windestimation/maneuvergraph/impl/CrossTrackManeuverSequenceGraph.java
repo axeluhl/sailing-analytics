@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.windestimation.maneuvergraph.ManeuverNodesLevelFactory;
 import com.sap.sailing.windestimation.maneuvergraph.impl.bestpath.BestPathsCalculator;
 import com.sap.sailing.windestimation.maneuvergraph.impl.bestpath.MultipleBoatClassBestsPathEvaluator;
 
@@ -13,14 +14,14 @@ import com.sap.sailing.windestimation.maneuvergraph.impl.bestpath.MultipleBoatCl
  * @author Vladislav Chumak (D069712)
  *
  */
-public class CrossTrackManeuverSequenceGraph
-        extends AbstractManeuverSequenceGraphImpl<CrossTrackManeuverNodesLevel, SingleTrackManeuverNodesLevel> {
+public class CrossTrackManeuverSequenceGraph<T extends AbstractCrossTrackManeuverNodesLevel<T>>
+        extends AbstractManeuverSequenceGraphImpl<T, SingleTrackManeuverNodesLevel> {
 
     public CrossTrackManeuverSequenceGraph(Iterable<SingleTrackManeuverSequenceGraph> singleTrackManeuverSequenceGraphs,
+            ManeuverNodesLevelFactory<T, SingleTrackManeuverNodesLevel> maneuverNodesLevelFactory,
             PolarDataService polarService) {
-        super(getSingleTrackManeuverNodeLevels(singleTrackManeuverSequenceGraphs),
-                CrossTrackManeuverNodesLevel.getFactory(), polarService, new BestPathsCalculator<>(),
-                new MultipleBoatClassBestsPathEvaluator<>());
+        super(getSingleTrackManeuverNodeLevels(singleTrackManeuverSequenceGraphs), maneuverNodesLevelFactory,
+                polarService, new BestPathsCalculator<>(), new MultipleBoatClassBestsPathEvaluator<>());
     }
 
     private static List<SingleTrackManeuverNodesLevel> getSingleTrackManeuverNodeLevels(
@@ -39,9 +40,9 @@ public class CrossTrackManeuverSequenceGraph
     }
 
     @Override
-    protected CrossTrackManeuverNodesLevel recomputeTransitionProbabilitiesAtLevelsWhereNeeded() {
-        CrossTrackManeuverNodesLevel currentLevel = this.getLastGraphLevel();
-        CrossTrackManeuverNodesLevel lastReadjustedLevel = null;
+    protected T recomputeTransitionProbabilitiesAtLevelsWhereNeeded() {
+        T currentLevel = this.getLastGraphLevel();
+        T lastReadjustedLevel = null;
         while (currentLevel != null) {
             SingleTrackManeuverNodesLevel singleTrackManeuverNodesLevel = currentLevel
                     .getSingleTrackManeuverNodesLevel();

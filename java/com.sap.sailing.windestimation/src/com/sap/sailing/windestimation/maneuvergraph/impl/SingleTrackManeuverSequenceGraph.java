@@ -8,10 +8,11 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.windestimation.maneuvergraph.impl.bestpath.BestPathsCalculator;
+import com.sap.sailing.windestimation.maneuvergraph.impl.bestpath.BestPathsEvaluator;
 import com.sap.sailing.windestimation.maneuvergraph.impl.bestpath.SameBoatClassBestPathsEvaluator;
-import com.sap.sailing.windestimation.maneuvergraph.impl.classifier.RulesBasedManeuverClassifierImpl;
 import com.sap.sailing.windestimation.maneuvergraph.impl.classifier.ManeuverClassificationResult;
 import com.sap.sailing.windestimation.maneuvergraph.impl.classifier.ManeuverClassifier;
+import com.sap.sailing.windestimation.maneuvergraph.impl.classifier.RulesBasedManeuverClassifierImpl;
 
 /**
  * 
@@ -23,15 +24,20 @@ public class SingleTrackManeuverSequenceGraph
 
     public SingleTrackManeuverSequenceGraph(BoatClass boatClass, PolarDataService polarService,
             Iterable<CompleteManeuverCurveWithEstimationData> maneuverSequence) {
-        super(getClassificationResults(boatClass, polarService, maneuverSequence),
-                SingleTrackManeuverNodesLevel.getFactory(boatClass), polarService, new BestPathsCalculator<>(),
-                new SameBoatClassBestPathsEvaluator<>());
+        this(getClassificationResults(boatClass, polarService, maneuverSequence), polarService,
+                new BestPathsCalculator<>(), new SameBoatClassBestPathsEvaluator<>());
     }
 
-    private static List<ManeuverClassificationResult> getClassificationResults(BoatClass boatClass,
+    public SingleTrackManeuverSequenceGraph(Iterable<ManeuverClassificationResult> maneuverClassificationResults,
+            PolarDataService polarService, BestPathsCalculator<SingleTrackManeuverNodesLevel> bestPathsCalculator,
+            BestPathsEvaluator<SingleTrackManeuverNodesLevel> bestPathsEvaluator) {
+        super(maneuverClassificationResults, SingleTrackManeuverNodesLevel.getFactory(), polarService,
+                bestPathsCalculator, bestPathsEvaluator);
+    }
+
+    public static List<ManeuverClassificationResult> getClassificationResults(BoatClass boatClass,
             PolarDataService polarService, Iterable<CompleteManeuverCurveWithEstimationData> maneuverSequence) {
-        ManeuverClassifier singleManeuverClassifier = new RulesBasedManeuverClassifierImpl(boatClass,
-                polarService);
+        ManeuverClassifier singleManeuverClassifier = new RulesBasedManeuverClassifierImpl(boatClass, polarService);
         List<ManeuverClassificationResult> result = new ArrayList<>();
         Iterator<CompleteManeuverCurveWithEstimationData> iterator = maneuverSequence.iterator();
         CompleteManeuverCurveWithEstimationData previousManeuver = null;

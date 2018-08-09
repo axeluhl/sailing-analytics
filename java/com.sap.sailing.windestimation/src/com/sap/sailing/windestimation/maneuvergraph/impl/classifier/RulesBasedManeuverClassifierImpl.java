@@ -94,7 +94,7 @@ public class RulesBasedManeuverClassifierImpl implements ManeuverClassifier {
         } else {
             Arrays.fill(likelihoodPerManeuverType, 1);
         }
-        return new ManeuverClassificationResult(maneuver, likelihoodPerManeuverType, cleanManeuverBeginning,
+        return new ManeuverClassificationResult(maneuver, boatClass, likelihoodPerManeuverType, cleanManeuverBeginning,
                 cleanManeuverEnd);
     }
 

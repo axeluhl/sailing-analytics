@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.windestimation.maneuvergraph.FineGrainedPointOfSail;
@@ -51,16 +52,26 @@ public abstract class AbstractManeuverSequenceGraphImpl<T extends ManeuverNodesL
 
     protected void appendManeuverAsGraphLevel(R nodeLevelReference) {
         T newManeuverNodesLevel = maneuverNodesLevelFactory.createNewManeuverNodesLevel(nodeLevelReference);
-        if (firstGraphLevel == null) {
-            firstGraphLevel = newManeuverNodesLevel;
-            lastGraphLevel = newManeuverNodesLevel;
-
-        } else {
-            lastGraphLevel.appendNextManeuverNodesLevel(newManeuverNodesLevel);
-            lastGraphLevel = newManeuverNodesLevel;
+        if(!isNodeLevelIgnorable(newManeuverNodesLevel)) {
+            if (firstGraphLevel == null) {
+                firstGraphLevel = newManeuverNodesLevel;
+                lastGraphLevel = newManeuverNodesLevel;
+    
+            } else {
+                lastGraphLevel.appendNextManeuverNodesLevel(newManeuverNodesLevel);
+                lastGraphLevel = newManeuverNodesLevel;
+            }
+            newManeuverNodesLevel.computeProbabilitiesFromPreviousLevelToThisLevel();
+            bestPathsCalculator.computeBestPathsToNextLevel(newManeuverNodesLevel);
         }
-        newManeuverNodesLevel.computeProbabilitiesFromPreviousLevelToThisLevel();
-        bestPathsCalculator.computeBestPathsToNextLevel(newManeuverNodesLevel);
+    }
+    
+    public boolean isNodeLevelIgnorable(T nodeLevel) {
+        CompleteManeuverCurveWithEstimationData maneuver = nodeLevel.getManeuver();
+        if(Math.abs(maneuver.getMainCurve().getDirectionChangeInDegrees()) < 30) {
+            return true;
+        }
+        return false;
     }
 
     @Override

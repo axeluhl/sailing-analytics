@@ -1,8 +1,6 @@
 package com.sap.sailing.windestimation.maneuvergraph.impl;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.common.LegType;
-import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.windestimation.maneuvergraph.FineGrainedPointOfSail;
 import com.sap.sailing.windestimation.maneuvergraph.ManeuverNodesLevelFactory;
@@ -16,14 +14,11 @@ import com.sap.sailing.windestimation.maneuvergraph.impl.classifier.ManeuverClas
 public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<SingleTrackManeuverNodesLevel> {
 
     private final ManeuverClassificationResult maneuverClassificationResult;
-    private final BoatClass boatClass;
     private boolean calculationOfTransitionProbabilitiesNeeded = true;
 
-    public SingleTrackManeuverNodesLevel(ManeuverClassificationResult singleManeuverClassificationResult,
-            BoatClass boatClass) {
+    public SingleTrackManeuverNodesLevel(ManeuverClassificationResult singleManeuverClassificationResult) {
         super(singleManeuverClassificationResult.getManeuver());
         maneuverClassificationResult = singleManeuverClassificationResult;
-        this.boatClass = boatClass;
     }
 
     @Override
@@ -64,43 +59,20 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
         return 1;
     }
 
-    private double getNodeTransitionPenaltyFactor(FineGrainedPointOfSail previousNode,
-            FineGrainedPointOfSail currentNode) {
-        double courseDifference = getPreviousLevel().getCourseAfter().getDifferenceTo(getCourseAfter()).getDegrees();
-        FineGrainedPointOfSail targetPointOfSail = previousNode.getNextPointOfSail(courseDifference);
-        if (targetPointOfSail == currentNode) {
-            return 1;
-        }
-        double windCourseDeviation = targetPointOfSail.getDifferenceInDegrees(currentNode);
-        if (targetPointOfSail.getCoarseGrainedPointOfSail() == currentNode.getCoarseGrainedPointOfSail()) {
-            return 1 / (1 + Math.abs(windCourseDeviation / 45));
-        }
-        if (targetPointOfSail.getTack() == currentNode.getTack() && (targetPointOfSail.getLegType() == LegType.REACHING
-                || currentNode.getLegType() == LegType.REACHING)) {
-            return 1 / (1 + Math.abs(windCourseDeviation / 30));
-        }
-        if (targetPointOfSail.getNextPointOfSail(NauticalSide.STARBOARD) == currentNode
-                || targetPointOfSail.getNextPointOfSail(NauticalSide.PORT) == currentNode) {
-            return 1 / (1 + Math.abs((windCourseDeviation) / 15));
-        }
-        return 1 / (1 + Math.pow((windCourseDeviation) / 15, 2));
-    }
-
-    public static ManeuverNodesLevelFactory<SingleTrackManeuverNodesLevel, ManeuverClassificationResult> getFactory(
-            BoatClass boatClass) {
+    public static ManeuverNodesLevelFactory<SingleTrackManeuverNodesLevel, ManeuverClassificationResult> getFactory() {
         return new ManeuverNodesLevelFactory<SingleTrackManeuverNodesLevel, ManeuverClassificationResult>() {
 
             @Override
             public SingleTrackManeuverNodesLevel createNewManeuverNodesLevel(
                     ManeuverClassificationResult singleManeuverClassificationResult) {
-                return new SingleTrackManeuverNodesLevel(singleManeuverClassificationResult, boatClass);
+                return new SingleTrackManeuverNodesLevel(singleManeuverClassificationResult);
             }
         };
     }
 
     @Override
     public BoatClass getBoatClass() {
-        return boatClass;
+        return maneuverClassificationResult.getBoatClass();
     }
 
     @Override

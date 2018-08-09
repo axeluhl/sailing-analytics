@@ -1,5 +1,7 @@
 package com.sap.sailing.windestimation.maneuvergraph.impl;
 
+import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.windestimation.maneuvergraph.FineGrainedPointOfSail;
 import com.sap.sailing.windestimation.maneuvergraph.ManeuverNodesLevel;
@@ -55,6 +57,28 @@ public abstract class AbstractManeuverNodesLevel<SelfType extends AbstractManeuv
                 }
             }
         }
+    }
+
+    protected double getNodeTransitionPenaltyFactor(FineGrainedPointOfSail previousNode,
+            FineGrainedPointOfSail currentNode) {
+        double courseDifference = getPreviousLevel().getCourseAfter().getDifferenceTo(getCourseAfter()).getDegrees();
+        FineGrainedPointOfSail targetPointOfSail = previousNode.getNextPointOfSail(courseDifference);
+        if (targetPointOfSail == currentNode) {
+            return 1;
+        }
+        double windCourseDeviation = targetPointOfSail.getDifferenceInDegrees(currentNode);
+        if (targetPointOfSail.getCoarseGrainedPointOfSail() == currentNode.getCoarseGrainedPointOfSail()) {
+            return 1 / (1 + Math.abs(windCourseDeviation / 45));
+        }
+        if (targetPointOfSail.getTack() == currentNode.getTack() && (targetPointOfSail.getLegType() == LegType.REACHING
+                || currentNode.getLegType() == LegType.REACHING)) {
+            return 1 / (1 + Math.abs(windCourseDeviation / 30));
+        }
+        if (targetPointOfSail.getNextPointOfSail(NauticalSide.STARBOARD) == currentNode
+                || targetPointOfSail.getNextPointOfSail(NauticalSide.PORT) == currentNode) {
+            return 1 / (1 + Math.abs((windCourseDeviation) / 15));
+        }
+        return 1 / (1 + Math.pow((windCourseDeviation) / 15, 2));
     }
 
     protected void normalizeNodeTransitions() {

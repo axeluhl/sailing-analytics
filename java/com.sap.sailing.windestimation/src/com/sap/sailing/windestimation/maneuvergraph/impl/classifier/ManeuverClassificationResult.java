@@ -2,6 +2,7 @@ package com.sap.sailing.windestimation.maneuvergraph.impl.classifier;
 
 import java.util.Collection;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
@@ -24,10 +25,12 @@ public class ManeuverClassificationResult {
     private double tackProbabilityBonus = 0.0;
     private final boolean cleanManeuverBeginning;
     private final boolean cleanManeuverEnd;
+    private final BoatClass boatClass;
 
-    public ManeuverClassificationResult(CompleteManeuverCurveWithEstimationData maneuver,
+    public ManeuverClassificationResult(CompleteManeuverCurveWithEstimationData maneuver, BoatClass boatClass,
             double[] likelihoodPerManeuverType, boolean cleanManeuverBeginning, boolean cleanManeuverEnd) {
         this.maneuver = maneuver;
+        this.boatClass = boatClass;
         this.likelihoodPerManeuverType = likelihoodPerManeuverType;
         this.cleanManeuverBeginning = cleanManeuverBeginning;
         this.cleanManeuverEnd = cleanManeuverEnd;
@@ -246,6 +249,10 @@ public class ManeuverClassificationResult {
 
     public double getTackProbabilityBonus() {
         return tackProbabilityBonus;
+    }
+    
+    public BoatClass getBoatClass() {
+        return boatClass;
     }
 
 }
