@@ -1,8 +1,8 @@
 package com.sap.sailing.gwt.ui.server;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.server.rpc.SerializationPolicy;
@@ -19,10 +19,10 @@ public class ResultCachingProxiedRemoteServiceServlet extends DelegatingProxiedR
     private static final long serialVersionUID = -4245484615349695611L;
     
     /**
-     * FIXME: This is not the final solution but just a prototype! It's not thread save and it does not free results
+     * FIXME: This is not the final solution but just a prototype! It does not evict results
      * ever. Just good enough for local tests with a single user.
      */
-    private Map<CacheKey, String> resultCache = new HashMap<>();
+    private Map<CacheKey, String> resultCache = new ConcurrentHashMap<>();
     
     @Override
     protected String encodeResponseForSuccess(Method serviceMethod, SerializationPolicy serializationPolicy, int flags,
