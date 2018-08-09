@@ -20,7 +20,7 @@
         }
     </ui:style>
     <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">
-        <div ui:field="titleUi" class="{style.header}" />
+        <ms:InlineEditLabel ui:field="titleUi" addStyleNames="{style.header}" />
         <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6} {res.mainCss.spacermargintopmediumsmall}">
             <ms:EditableCompetitorSuggestedMultiSelection ui:field="competitorSelectionUi"/>
         </div>

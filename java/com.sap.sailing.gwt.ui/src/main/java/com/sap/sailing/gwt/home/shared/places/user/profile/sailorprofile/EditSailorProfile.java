@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -9,6 +8,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.shared.partials.editable.EditableCompetitorSuggestedMultiSelection;
+import com.sap.sailing.gwt.home.shared.partials.editable.InlineEditLabel;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.SailorProfileEntry;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 
@@ -34,7 +34,7 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
     @UiField(provided = true)
     EditableCompetitorSuggestedMultiSelection competitorSelectionUi;
     @UiField
-    DivElement titleUi;
+    InlineEditLabel titleUi;
 
     public EditSailorProfile(SharedSailorProfileView.Presenter presenter, FlagImageResolver flagImageResolver) {
         competitorSelectionUi = new EditableCompetitorSuggestedMultiSelection(presenter, flagImageResolver);
@@ -49,6 +49,6 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
 
     public void setEntry(SailorProfileEntry entry) {
         competitorSelectionUi.setSelectedItems(entry.getCompetitors());
-        titleUi.setInnerText(entry.getName());
+        titleUi.setText(entry.getName());
     }
 }
