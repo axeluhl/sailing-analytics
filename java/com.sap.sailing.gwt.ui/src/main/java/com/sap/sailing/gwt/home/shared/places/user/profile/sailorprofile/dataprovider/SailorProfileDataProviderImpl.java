@@ -38,8 +38,8 @@ public class SailorProfileDataProviderImpl implements SailorProfileDataProvider 
         competitors2.add(c1);
 
         List<BoatClassDTO> boatclasses = new ArrayList<>();
-        BoatClassDTO bc1 = new BoatClassDTO("Class-A", null, null);
-        BoatClassDTO bc2 = new BoatClassDTO("Class-B", null, null);
+        BoatClassDTO bc1 = new BoatClassDTO("49er", null, null);
+        BoatClassDTO bc2 = new BoatClassDTO("5O5", null, null);
         boatclasses.add(bc1);
         boatclasses.add(bc2);
 

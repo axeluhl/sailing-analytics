@@ -1,13 +1,10 @@
-<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
- xmlns:g='urn:import:com.google.gwt.user.client.ui'
- xmlns:um="urn:import:com.sap.sailing.gwt.home.shared.usermanagement.decorator"
- xmlns:up="urn:import:com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile"
- xmlns:c="urn:import:com.google.gwt.user.cellview.client">
- <ui:with field="i18n"
-  type="com.sap.sailing.gwt.ui.client.StringMessages" />
- <ui:with field="res"
-  type="com.sap.sailing.gwt.common.client.SharedResources" />
- <ui:style>
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'
+    xmlns:um="urn:import:com.sap.sailing.gwt.home.shared.usermanagement.decorator"
+    xmlns:up="urn:import:com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile"
+    xmlns:c="urn:import:com.google.gwt.user.cellview.client">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:style>
         .table {
             width: 100%;
         }
@@ -16,19 +13,18 @@
             font-style: italic;
             line-height: 2em;
         }
+        .table td {
+            vertical-align: middle;
+        }
     </ui:style>
- <g:HTMLPanel
-  addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">
+    <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">
 
-  <div
-   class="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopmediumsmall}">
-   <c:CellTable ui:field="sailorProfilesTable"
-    addStyleNames="{style.table}">
-    <c:emptyTableWidget>
-     <g:Label text="{i18n.noDataFound}"
-      addStyleNames="{style.empty}" />
-    </c:emptyTableWidget>
-   </c:CellTable>
-  </div>
- </g:HTMLPanel>
+        <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopmediumsmall}">
+            <c:CellTable ui:field="sailorProfilesTable" addStyleNames="{style.table}">
+                <c:emptyTableWidget>
+                    <g:Label text="{i18n.noDataFound}" addStyleNames="{style.empty}" />
+                </c:emptyTableWidget>
+            </c:CellTable>
+        </div>
+    </g:HTMLPanel>
 </ui:UiBinder>

@@ -3,16 +3,19 @@ package com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
+import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
 import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableResources;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.BadgeDTO;
@@ -79,14 +82,22 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
             return "-";
         }
     };
-    private final Column<SailorProfileEntry, String> boatClassColumn = new Column<SailorProfileEntry, String>(
-            new TextCell()) {
+    private final Column<SailorProfileEntry, SailorProfileEntry> boatClassColumn = new Column<SailorProfileEntry, SailorProfileEntry>(
+            new AbstractCell<SailorProfileEntry>() {
+                @Override
+                public void render(Context context, SailorProfileEntry value, SafeHtmlBuilder sb) {
+                    for (BoatClassDTO boatclass : value.getBoatclasses()) {
+                        sb.appendHtmlConstant(
+                                "<div style=\"height: 40px; width: 40px; margin-left: 5px; display: inline-block; background-size: cover; background-image: url('"
+                                + BoatClassImageResolver
+                                        .getBoatClassIconResource(boatclass.getName()).getSafeUri().asString()
+                                + "');\"></div>");
+                    }
+                }
+            }) {
         @Override
-        public String getValue(SailorProfileEntry entry) {
-            if (entry != null && entry.getBoatclasses() != null) {
-                return entry.getBoatclasses().stream().map(BoatClassDTO::getName).collect(Collectors.joining(", "));
-            }
-            return "-";
+        public SailorProfileEntry getValue(SailorProfileEntry object) {
+            return object;
         }
     };
     private final Column<SailorProfileEntry, String> competitorColumn = new Column<SailorProfileEntry, String>(
