@@ -41,27 +41,28 @@
 
         <activity
             android:name=".ui.activities.StartActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
+
             <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
+                <data android:scheme="comsapsailingbuoypositioning" />
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
 
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-
-                <data
-                    android:host="*"
-                    android:pathPattern="/buoy-tender/checkin.*"
-                    android:scheme="http"/>
-                <data
-                    android:host="*"
-                    android:pathPattern="/buoy-tender/checkin.*"
-                    android:scheme="https"/>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="a0by.app.link" />
+                <data android:scheme="https" android:host="a0by-alternate.app.link" />
             </intent-filter>
         </activity>
         <activity
@@ -98,5 +99,8 @@
             android:name=".provider.AnalyticsProvider"
             android:authorities="com.sap.sailing.android.buoy.positioning.app.provider.db"
             android:exported="false"/>
+
+        <meta-data android:name="io.branch.sdk.BranchKey" android:value="key_live_jlwXLVWLSF02yReHSLbH3leitFbvlnQp" />
+
     </application>
 </manifest>

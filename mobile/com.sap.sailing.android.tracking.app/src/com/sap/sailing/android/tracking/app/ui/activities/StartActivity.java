@@ -71,11 +71,6 @@ public class StartActivity extends AbstractStartActivity<CheckinData> {
     }
 
     @Override
-    public void onNewIntent(Intent intent) {
-        this.setIntent(intent);
-    }
-
-    @Override
     public AbstractHomeFragment getHomeFragment() {
         return (HomeFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
     }
