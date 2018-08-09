@@ -1,6 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
             xmlns:um="urn:import:com.sap.sailing.gwt.home.shared.usermanagement.decorator"
+            xmlns:lv="urn:import:com.sap.sailing.gwt.home.shared.partials.listview"
             xmlns:ms="urn:import:com.sap.sailing.gwt.home.shared.partials.editable">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
@@ -15,14 +16,22 @@
             font-size: 1.866666666666667em;
             font-weight: bold;
             color: #333;
-            margin-top: 10px;
-            margin-left: 50px;
+            margin-top: 0.3333333em;
+            margin-left: 3em;
+        }
+        .competitors {
+            margin-left: 3em;
+        }
+        .boatclasses {
+            margin-left: 3em;
         }
     </ui:style>
     <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">
         <ms:InlineEditLabel ui:field="titleUi" addStyleNames="{style.header}" />
-        <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium6} {res.mainCss.spacermargintopmediumsmall}">
-            <ms:EditableCompetitorSuggestedMultiSelection ui:field="competitorSelectionUi"/>
+        <div class="{res.mediaCss.column} {res.mainCss.spacermargintopmediumsmall}">
+            <ms:EditableCompetitorSuggestedMultiSelection ui:field="competitorSelectionUi" addStyleNames="{res.mediaCss.column} {res.mainCss.spacermargintopmediumsmall} {res.mediaCss.small6}"/>
+            <lv:BoatClassListView ui:field="boatClassesUi" addStyleNames="{res.mediaCss.column} {res.mainCss.spacermargintopmediumsmall} {res.mediaCss.small6}"/>
+            
         </div>
     </g:HTMLPanel>
 </ui:UiBinder> 

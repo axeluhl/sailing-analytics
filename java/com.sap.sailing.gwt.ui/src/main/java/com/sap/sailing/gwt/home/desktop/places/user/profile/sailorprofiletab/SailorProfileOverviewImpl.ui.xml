@@ -19,7 +19,7 @@
     </ui:style>
     <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">
 
-        <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopmediumsmall}">
+        <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium12} {res.mediaCss.large12} {res.mainCss.spacermargintopmediumsmall}">
             <c:CellTable ui:field="sailorProfilesTable" addStyleNames="{style.table}">
                 <c:emptyTableWidget>
                     <g:Label text="{i18n.noDataFound}" addStyleNames="{style.empty}" />

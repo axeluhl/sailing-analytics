@@ -9,6 +9,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.shared.partials.editable.EditableCompetitorSuggestedMultiSelection;
 import com.sap.sailing.gwt.home.shared.partials.editable.InlineEditLabel;
+import com.sap.sailing.gwt.home.shared.partials.listview.BoatClassListView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.SailorProfileEntry;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 
@@ -35,10 +36,13 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
     EditableCompetitorSuggestedMultiSelection competitorSelectionUi;
     @UiField
     InlineEditLabel titleUi;
+    @UiField
+    BoatClassListView boatClassesUi;
 
     public EditSailorProfile(SharedSailorProfileView.Presenter presenter, FlagImageResolver flagImageResolver) {
         competitorSelectionUi = new EditableCompetitorSuggestedMultiSelection(presenter, flagImageResolver);
         initWidget(uiBinder.createAndBindUi(this));
+        boatClassesUi.setText("Boatclasses");
         // TODO hide notificationsTextUi if the user's mail address is already verified
     }
 
@@ -50,5 +54,6 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
     public void setEntry(SailorProfileEntry entry) {
         competitorSelectionUi.setSelectedItems(entry.getCompetitors());
         titleUi.setText(entry.getName());
+        boatClassesUi.setItems(entry.getBoatclasses());
     }
 }
