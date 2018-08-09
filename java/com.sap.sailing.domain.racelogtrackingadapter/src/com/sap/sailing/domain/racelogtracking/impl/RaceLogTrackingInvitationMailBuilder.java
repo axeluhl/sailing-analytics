@@ -24,6 +24,7 @@ import com.sap.sse.mail.SerializableFileMimeBodyPartSupplier;
 import com.sap.sse.mail.SerializableMultipartMimeBodyPartSupplier;
 import com.sap.sse.mail.SerializableMultipartSupplier;
 import com.sap.sse.shared.media.ImageDescriptor;
+import com.sap.sse.util.impl.NonGwtUrlHelper;
 
 /**
  * Builder to create invitation mails for competitor and buoy tracking. This class ensures that the mail is being sent
@@ -98,13 +99,13 @@ class RaceLogTrackingInvitationMailBuilder {
     }
     
     RaceLogTrackingInvitationMailBuilder addSailInsightDeeplink(final String checkinUrl) {
-    	String deeplink = String.format("%s?checkinUrl=%s", SAIL_INSIGHT_BRANCH_DEEPLINK, checkinUrl);
+    	String deeplink = String.format("%s?checkinUrl=%s", SAIL_INSIGHT_BRANCH_DEEPLINK, NonGwtUrlHelper.INSTANCE.encodeQueryString(checkinUrl));
     	this.addDeeplink(deeplink, RaceLogTrackingI18n::register);
     	return this;
     }
     
     RaceLogTrackingInvitationMailBuilder addBuoyPingerDeeplink(final String checkinUrl) {
-    	String deeplink = String.format("%s?checkinUrl=%s", BUOY_PINGER_BRANCH_DEEPLINK, checkinUrl);
+    	String deeplink = String.format("%s?checkinUrl=%s", BUOY_PINGER_BRANCH_DEEPLINK, NonGwtUrlHelper.INSTANCE.encodeQueryString(checkinUrl));
     	this.addDeeplink(deeplink, RaceLogTrackingI18n::register);
     	return this;
     }
