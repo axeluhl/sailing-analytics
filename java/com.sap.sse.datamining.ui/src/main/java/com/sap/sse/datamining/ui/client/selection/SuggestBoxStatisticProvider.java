@@ -82,6 +82,7 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
     private final List<Component<?>> retrieverLevelSettingsComponents;
 
     private final FlowPanel mainPanel;
+    private FunctionDTO identityFunction;
     private final List<ExtractionFunctionWithContext> availableExtractionFunctions;
     private final ExtractionFunctionSuggestBox extractionFunctionSuggestBox;
     private final ValueListBox<AggregationProcessorDefinitionDTO> aggregatorListBox;
@@ -223,6 +224,16 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
                             .reportError("Error fetching the retriever chain definitions: " + caught.getMessage());
                 }
             });
+        dataMiningService.getIdentityFunction(localeName, new AsyncCallback<FunctionDTO>() {
+            @Override
+            public void onSuccess(FunctionDTO identityFunction) {
+                SuggestBoxStatisticProvider.this.identityFunction = identityFunction;
+            }
+            @Override
+            public void onFailure(Throwable caught) {
+                errorReporter.reportError("Error fetching the identity function: " + caught.getMessage());
+            }
+        });
     }
 
     private void collectStatistics(DataRetrieverChainDefinitionDTO retrieverChain,
@@ -483,8 +494,17 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
 
     @Override
     public FunctionDTO getExtractionFunction() {
+        FunctionDTO function = null;
+        
+        AggregationProcessorDefinitionDTO aggregator = getAggregatorDefinition();
         ExtractionFunctionWithContext extractionFunction = extractionFunctionSuggestBox.getExtractionFunction();
-        return extractionFunction == null ? null : extractionFunction.getExtractionFunction();
+        
+        if (aggregator != null && aggregator.getExtractedTypeName().equals(Object.class.getName())) {
+            function = identityFunction;
+        } else if (extractionFunction != null) {
+            function = extractionFunction.getExtractionFunction();
+        }
+        return function;
     }
 
     @Override
