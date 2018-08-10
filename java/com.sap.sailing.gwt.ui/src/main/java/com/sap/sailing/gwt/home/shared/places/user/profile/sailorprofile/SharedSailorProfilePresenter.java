@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile;
 
+import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.CompetitorSuggestionResult;
@@ -10,6 +11,7 @@ import com.sap.sailing.gwt.home.communication.user.profile.GetCompetitorSuggesti
 import com.sap.sailing.gwt.home.communication.user.profile.GetFavoritesAction;
 import com.sap.sailing.gwt.home.communication.user.profile.SaveFavoriteBoatClassesAction;
 import com.sap.sailing.gwt.home.communication.user.profile.SaveFavoriteCompetitorsAction;
+import com.sap.sailing.gwt.home.desktop.app.TabletAndDesktopApplicationClientFactory;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggestedMultiSelectionBoatClassDataProvider;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggestedMultiSelectionCompetitorDataProvider;
@@ -142,6 +144,15 @@ public class SharedSailorProfilePresenter<C extends ClientFactoryWithDispatch & 
     @Override
     public SuggestedMultiSelectionCompetitorDataProvider getCompetitorsDataProvider() {
         return createDataProviderIfNecessary();
+    }
+
+    @Override
+    public PlaceController getPlaceController() {
+        if (clientFactory instanceof TabletAndDesktopApplicationClientFactory) {
+            return ((TabletAndDesktopApplicationClientFactory) clientFactory).getPlaceController();
+        } else {
+            return null;
+        }
     }
 
 }

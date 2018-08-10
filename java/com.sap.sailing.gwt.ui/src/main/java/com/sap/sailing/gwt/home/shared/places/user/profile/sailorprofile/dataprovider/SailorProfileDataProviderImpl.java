@@ -11,11 +11,15 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.BadgeDTO;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.ParticipatedEventDTO;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.ParticipatedRegattaDTO;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.SailorProfileEntry;
 
 public class SailorProfileDataProviderImpl implements SailorProfileDataProvider {
 
     private Map<UUID, SailorProfileEntry> entries;
+
+    private Collection<ParticipatedEventDTO> events;
 
     public SailorProfileDataProviderImpl() {
 
@@ -57,6 +61,21 @@ public class SailorProfileDataProviderImpl implements SailorProfileDataProvider 
         entries = new HashMap<>();
         entries.put(uid1, e1);
         entries.put(uid2, e2);
+
+        // init events
+        ParticipatedRegattaDTO r1 = new ParticipatedRegattaDTO("Hello-Regatta", 1, c1, "Supa Klub", "1337", "1338", 27);
+        ParticipatedRegattaDTO r2 = new ParticipatedRegattaDTO("Ciao-Regatta", 4, c2, "Subba Clubba", "139", "136", 25);
+        ParticipatedRegattaDTO r3 = new ParticipatedRegattaDTO("Lurch-Regatta", 25, c1, "Supa Klub", "1335", "134", 85);
+
+        Collection<ParticipatedRegattaDTO> p = new ArrayList<>();
+        p.add(r1);
+        p.add(r2);
+        p.add(r3);
+
+        ParticipatedEventDTO pe1 = new ParticipatedEventDTO("Cooles Event", "01", p);
+
+        events = new ArrayList<>();
+        events.add(pe1);
     }
 
     @Override
@@ -67,6 +86,11 @@ public class SailorProfileDataProviderImpl implements SailorProfileDataProvider 
     @Override
     public void findSailorProfileById(UUID uuid, AsyncCallback<SailorProfileEntry> asyncCallback) {
         asyncCallback.onSuccess(entries.get(uuid));
+    }
+
+    @Override
+    public void getEvents(UUID key, AsyncCallback<Collection<ParticipatedEventDTO>> asyncCallback) {
+        asyncCallback.onSuccess(events);
     }
 
 }

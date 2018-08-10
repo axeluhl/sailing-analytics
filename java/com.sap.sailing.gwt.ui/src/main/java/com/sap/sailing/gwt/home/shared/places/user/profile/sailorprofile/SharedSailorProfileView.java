@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile;
 
+import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionBoatClassDataProvider;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider;
@@ -37,6 +38,8 @@ public interface SharedSailorProfileView extends IsWidget {
         SuggestedMultiSelectionCompetitorDataProvider getFavoriteCompetitorsDataProvider();
 
         SuggestedMultiSelectionCompetitorDataProvider getCompetitorsDataProvider();
+
+        PlaceController getPlaceController();
     }
 
 }
