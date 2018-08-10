@@ -8,6 +8,7 @@ import java.util.Map;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.ValueUpdater;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
@@ -291,7 +292,15 @@ public class TaggingPanel extends ComponentWithoutSettings
                 @Override
                 public void onClick(ClickEvent event) {
                     if (isAuthorizedAndRaceLogAvailable()) {
-                        new EditCustomTagButtonsDialog(customButtonsPanel).show();
+                        EditCustomTagButtonsDialog editCustomTagButtonsDialog = new EditCustomTagButtonsDialog(customButtonsPanel);
+
+                        //scheduler is used because otherwise DialogBox would not be centered properly  
+                        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() { 
+                            public void execute() {
+                                editCustomTagButtonsDialog.show();
+                                editCustomTagButtonsDialog.center();
+                            }
+                        });  
                         updateButtons();
                     }
                 }
@@ -316,6 +325,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         private final Button addCustomTagButton;
 
         public EditCustomTagButtonsDialog(Panel customButtonsPanel) {
+            setGlassEnabled(true);
             TagButtonDialogResources.INSTANCE.style().ensureInjected();
             setText(stringMessages.tagEditCustomTagsButtonDialogHeader());
 
@@ -352,7 +362,15 @@ public class TaggingPanel extends ComponentWithoutSettings
                         customTagButtonsTable.setRowData(customTagButtons);  
                     } 
                     else if (LeaderboardConfigImagesBarCell.ACTION_EDIT.equals(value)) {
-                        new EditTagButtonDialog(button, customTagButtonsTable, stringMessages).show();
+                        EditTagButtonDialog editCustomTagButtonDialog = new EditTagButtonDialog(button, customTagButtonsTable, stringMessages);
+                        //scheduler is used because otherwise DialogBox would not be centered properly  
+
+                        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() { 
+                            public void execute() {
+                                editCustomTagButtonDialog.show();
+                                editCustomTagButtonDialog.center();
+                            }
+                        });  
                     } 
                 }
             });
@@ -383,7 +401,6 @@ public class TaggingPanel extends ComponentWithoutSettings
             
             closeButton = new Button(stringMessages.close());
             closeButton.setStyleName(TagButtonDialogResources.INSTANCE.style().button());
-            //closeButton.getElement().getStyle().setMargin(3, Unit.PX);
             
             closeButton.addClickHandler(new ClickHandler() {
                 @Override
@@ -397,7 +414,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             mainPanel.add(addCustomTagButton);
             mainPanel.add(closeButton);
             
-            setWidget(mainPanel);     
+            setWidget(mainPanel);
         }
         
         private void hideDialog() {
