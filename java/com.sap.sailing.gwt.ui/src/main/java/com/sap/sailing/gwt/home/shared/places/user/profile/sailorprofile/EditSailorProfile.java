@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile;
 
-import java.util.Collection;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -79,16 +77,14 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
         titleUi.setText(entry.getName());
         boatClassesUi.setItems(entry.getBoatclasses());
 
-        presenter.getDataProvider().getEvents(entry.getKey(), new AsyncCallback<Collection<ParticipatedEventDTO>>() {
-
+        presenter.getDataProvider().getEvents(entry.getKey(), new AsyncCallback<Iterable<ParticipatedEventDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
-                // TODO Auto-generated method stub
-
+                GWT.log(caught.getMessage(), caught);
             }
 
             @Override
-            public void onSuccess(Collection<ParticipatedEventDTO> result) {
+            public void onSuccess(Iterable<ParticipatedEventDTO> result) {
                 for (ParticipatedEventDTO dto : result) {
                     SailorProfileEventsTable table = new SailorProfileEventsTable();
                     table.setController(presenter.getPlaceController());

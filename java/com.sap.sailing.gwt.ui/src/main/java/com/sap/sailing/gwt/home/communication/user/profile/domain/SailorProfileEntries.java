@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.home.communication.user.profile.domain;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.dispatch.shared.commands.Result;
@@ -20,7 +20,7 @@ public class SailorProfileEntries implements Result, Serializable {
         Util.addAll(entries, this.entries);
     }
 
-    public Collection<SailorProfileEntry> getEntries() {
+    public List<SailorProfileEntry> getEntries() {
         return entries;
     }
 

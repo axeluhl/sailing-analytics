@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.dataprovider;
 
-import java.util.Collection;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -12,7 +11,7 @@ public interface SailorProfileDataProvider {
 
     void findSailorProfileById(UUID uuid, AsyncCallback<SailorProfileEntry> asyncCallback);
 
-    void getEvents(UUID key, AsyncCallback<Collection<ParticipatedEventDTO>> asyncCallback);
+    void getEvents(UUID key, AsyncCallback<Iterable<ParticipatedEventDTO>> asyncCallback);
 
     void loadSailorProfiles(AsyncCallback<SailorProfileEntries> callback);
 
