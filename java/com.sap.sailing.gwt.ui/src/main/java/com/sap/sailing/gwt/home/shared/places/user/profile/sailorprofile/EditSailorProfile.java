@@ -7,6 +7,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
+import com.sap.sailing.gwt.home.shared.partials.desktopaccordion.DesktopAccordion;
 import com.sap.sailing.gwt.home.shared.partials.editable.EditableSuggestedMultiSelectionCompetitor;
 import com.sap.sailing.gwt.home.shared.partials.editable.InlineEditLabel;
 import com.sap.sailing.gwt.home.shared.partials.listview.BoatClassListView;
@@ -39,10 +40,20 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
     @UiField
     BoatClassListView boatClassesUi;
 
+    @UiField
+    DesktopAccordion accordionEventsUi;
+    @UiField
+    DesktopAccordion accordionStatisticsUi;
+    @UiField
+    DesktopAccordion accordionPolarDiagramUi;
+
     public EditSailorProfile(SharedSailorProfileView.Presenter presenter, FlagImageResolver flagImageResolver) {
         competitorSelectionUi = new EditableSuggestedMultiSelectionCompetitor(presenter, flagImageResolver);
         initWidget(uiBinder.createAndBindUi(this));
         boatClassesUi.setText("Boatclasses");
+        accordionEventsUi.setTitle("Events");
+        accordionStatisticsUi.setTitle("Statistics");
+        accordionPolarDiagramUi.setTitle("Polar Diagram");
         // TODO hide notificationsTextUi if the user's mail address is already verified
     }
 
