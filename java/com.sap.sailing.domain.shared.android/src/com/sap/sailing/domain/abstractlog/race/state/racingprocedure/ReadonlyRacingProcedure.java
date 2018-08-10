@@ -4,6 +4,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
+import com.sap.sailing.domain.abstractlog.race.state.RaceStateEvent;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEventProcessor;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateEventScheduler;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -121,6 +122,13 @@ public interface ReadonlyRacingProcedure extends RaceStateEventProcessor, RaceSt
      */
     RacingProcedurePrerequisite checkPrerequisitesForStart(TimePoint now, TimePoint startTime,
             RacingProcedurePrerequisite.FulfillmentFunction function);
+
+
+    /**
+     * Delivers the time points and types of the events around the start, each optionally
+     * leading to a change in race status.
+     */
+    Iterable<RaceStateEvent> createStartStateEvents(TimePoint startTime);
 
     /**
      * This method is called by the framework. You don't need to call it.
