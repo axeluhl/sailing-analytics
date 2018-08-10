@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.CheckboxCell;
@@ -72,14 +73,17 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDataMiningComponent<SerializableSettings> implements FilterSelectionProvider {
     
-    private final static String DimensionListSubheaderAttribute = "subheader";
+    private static final Logger logger = Logger.getLogger(HierarchicalDimensionListFilterSelectionProvider.class.getSimpleName());
     
+    private static final String DimensionListSubheaderAttribute = "subheader";
     private static final Unit LayoutUnit = Unit.PX;
     private static final double SelectionPresenterHeight = 100;
     private static final double DimensionSelectionWidth = 350;
     private static final double DimensionSelectionHeaderHeight = 30;
     private static final double FilterFilterDimensionsHeight = 40;
     private static final double FilterSelectionTableWidth = 250;
+    
+    private static final Consumer<Iterable<String>> EmptyCallback = m -> { };
 
     private final DataMiningSession session;
     private final DataMiningServiceAsync dataMiningService;
@@ -140,7 +144,6 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
         clearSelectionButton.addStyleName("floatRight");
         clearSelectionButton.addStyleName("dataMiningMarginRight");
         clearSelectionButton.addClickHandler(e -> clearSelection());
-        clearSelectionButton.setEnabled(false);
 
         DataMiningDataGridResources resources = GWT.create(DataMiningDataGridResources.class);
         filterDimensionsList = new DataGrid<>(Integer.MAX_VALUE, resources);
@@ -163,7 +166,6 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
         filterFilterDimensionsPanel.setHeight("100%");
         filterFilterDimensionsPanel.getTextBox().setWidth("100%");
         filterFilterDimensionsPanel.getTextBox().getElement().setPropertyString("placeholder", stringMessages.filterShownDimensions());
-        filterFilterDimensionsPanel.getTextBox().setEnabled(false);
         
         filterDimensionSelectionModel = new MultiSelectionModel<>();
         filterDimensionSelectionModel.addSelectionChangeHandler(this::selectedFilterDimensionsChanged);
@@ -209,6 +211,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
         mainPanel.setWidgetHidden(filterSelectionPresenterContainer, true);
         mainPanel.addWest(filterDimensionsSelectionPanel, DimensionSelectionWidth);
         mainPanel.add(dimensionFilterSelectionProvidersPanel);
+        updateControls();
     }
     
     @Override
@@ -232,13 +235,22 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO newDataRetrieverChainDefinition) {
         if (!Objects.equals(retrieverChain, newDataRetrieverChainDefinition)) {
             retrieverChain = newDataRetrieverChainDefinition;
-            clearSelectionButton.setEnabled(retrieverChain != null);
-            filterFilterDimensionsPanel.getTextBox().setEnabled(retrieverChain != null);
-            
             if (!isAwaitingReload && retrieverChain != null) {
+                HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> currentSelection = getSelection();
+                if (!currentSelection.isEmpty()) {
+                    selectionToBeApplied = currentSelection;
+                    selectionCallback = messages -> {
+                        String joinedMessages = "";
+                        for (String message : messages) {
+                            joinedMessages += "\n\t" + message;
+                        }
+                        logger.info("Unable to retain the following selection:" + joinedMessages);
+                    };
+                }
                 updateFilterDimensions();
             } else if (!isAwaitingReload) {
                 clearContent();
+                updateControls();
                 selectionToBeApplied = null;
                 selectionCallback = null;
             }
@@ -260,7 +272,8 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
                 }
                 availableFilterDimensions.sort(null);
                 filterFilterDimensionsPanel.updateAll(availableFilterDimensions);
-                
+
+                updateControls();
                 if (selectionToBeApplied != null) {
                     ignoreSelectionChangedNotifications = true;
                     setSelection(selectionToBeApplied, selectionCallback);
@@ -272,6 +285,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError("Error fetching the dimensions of the retriever chain from the server: " + caught.getMessage());
+                updateControls();
                 selectionToBeApplied = null;
                 selectionCallback = null;
                 isUpdatingFilterDimensions = false;
@@ -284,6 +298,12 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
         availableFilterDimensions.clear();
         filterDimensionSelectionModel.clear();
         filterFilterDimensionsPanel.removeAll();
+    }
+
+    private void updateControls() {
+        boolean controlsEnabled = !availableFilterDimensions.isEmpty();
+        clearSelectionButton.setEnabled(controlsEnabled);
+        filterFilterDimensionsPanel.getTextBox().setEnabled(controlsEnabled);
     }
     
     @Override
@@ -398,7 +418,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
 
         if (dimensionToChange != null) {
             ignoreSelectionChangedNotifications = true;
-            setDimensionSelection(dimensionToChange, Collections.singleton(filterValue), m -> { });
+            setDimensionSelection(dimensionToChange, Collections.singleton(filterValue), EmptyCallback);
             ignoreSelectionChangedNotifications = false;
             updateAvailableFilterValues(dimensionToChange.getRetrieverLevel(), dimensionToChange, onCompletion);
         }
