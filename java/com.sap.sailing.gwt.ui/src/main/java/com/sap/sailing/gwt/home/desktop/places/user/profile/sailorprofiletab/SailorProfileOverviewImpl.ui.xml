@@ -5,26 +5,30 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:style>
-        .table {
-            width: 100%;
-        }
-        .table .empty {
-            margin: 1.033333333333333em;
-            font-style: italic;
-            line-height: 2em;
-        }
-        .table td {
-            vertical-align: middle;
-        }
+                .tablex {
+                width: 100%;
+                }
+                .tablex .empty {
+                margin: 1.033333333333333em;
+                font-style: italic;
+                line-height: 2em;
+                }
+                .tablex td {
+                vertical-align: middle;
+                }
     </ui:style>
-    <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">
-
-        <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mediaCss.medium12} {res.mediaCss.large12} {res.mainCss.spacermargintopmediumsmall}">
-            <c:CellTable ui:field="sailorProfilesTable" addStyleNames="{style.table}">
-                <c:emptyTableWidget>
-                    <g:Label text="{i18n.noDataFound}" addStyleNames="{style.empty}" />
-                </c:emptyTableWidget>
-            </c:CellTable>
-        </div>
-    </g:HTMLPanel>
+    <um:AuthorizedContentDecoratorDesktop ui:field="decoratorUi">
+        <um:content>
+            <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">
+                <div
+                    class="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopmediumsmall}">
+                    <c:CellTable ui:field="sailorProfilesTable" addStyleNames=" {style.tablex} {res.mediaCss.column} {res.mediaCss.small12}">
+                        <c:emptyTableWidget>
+                            <g:Label text="{i18n.noDataFound}" addStyleNames="{style.empty}" />
+                        </c:emptyTableWidget>
+                    </c:CellTable>
+                </div>
+            </g:HTMLPanel>
+        </um:content>
+    </um:AuthorizedContentDecoratorDesktop>
 </ui:UiBinder>

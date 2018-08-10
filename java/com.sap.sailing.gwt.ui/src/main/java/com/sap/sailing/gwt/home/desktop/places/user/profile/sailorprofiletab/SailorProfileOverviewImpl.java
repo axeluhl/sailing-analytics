@@ -20,8 +20,8 @@ import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableRes
 import com.sap.sailing.gwt.home.communication.user.profile.domain.BadgeDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEntry;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
+import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorDesktop;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
-import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
 public class SailorProfileOverviewImpl extends Composite implements SailorProfileOverview {
@@ -36,9 +36,13 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
     final SortedCellTable<SailorProfileEntry> sailorProfilesTable = new SortedCellTable<>(0,
             DesignedCellTableResources.INSTANCE);
 
+    @UiField(provided = true)
+    AuthorizedContentDecoratorDesktop decoratorUi;
+
     @Override
     public void setPresenter(SailingProfileOverviewPresenter presenter) {
         this.presenter = presenter;
+        decoratorUi = new AuthorizedContentDecoratorDesktop(presenter);
         initWidget(uiBinder.createAndBindUi(this));
         setupTable();
     }
@@ -89,9 +93,9 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
                     for (BoatClassDTO boatclass : value.getBoatclasses()) {
                         sb.appendHtmlConstant(
                                 "<div style=\"height: 40px; width: 40px; margin-left: 5px; display: inline-block; background-size: cover; background-image: url('"
-                                + BoatClassImageResolver
-                                        .getBoatClassIconResource(boatclass.getName()).getSafeUri().asString()
-                                + "');\"></div>");
+                                        + BoatClassImageResolver.getBoatClassIconResource(boatclass.getName())
+                                                .getSafeUri().asString()
+                                        + "');\"></div>");
                     }
                 }
             }) {
@@ -120,10 +124,6 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
 
     @Override
     public NeedsAuthenticationContext getAuthenticationContext() {
-        return new NeedsAuthenticationContext() {
-            @Override
-            public void setAuthenticationContext(AuthenticationContext authenticationContext) {
-            }
-        };
+        return decoratorUi;
     }
 }

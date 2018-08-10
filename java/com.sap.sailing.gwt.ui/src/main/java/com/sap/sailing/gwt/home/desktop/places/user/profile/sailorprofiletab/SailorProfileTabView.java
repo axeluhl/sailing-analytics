@@ -68,9 +68,7 @@ public class SailorProfileTabView extends Composite implements UserProfileTabVie
     @Override
     public void setAuthenticationContext(AuthenticationContext authenticationContext) {
         currentPresenter.setAuthenticationContext(authenticationContext);
-        if (view instanceof SailorProfileDetails) {
-            view.getAuthenticationContext().setAuthenticationContext(authenticationContext);
-        }
+        view.getAuthenticationContext().setAuthenticationContext(authenticationContext);
     }
 
     @Override
