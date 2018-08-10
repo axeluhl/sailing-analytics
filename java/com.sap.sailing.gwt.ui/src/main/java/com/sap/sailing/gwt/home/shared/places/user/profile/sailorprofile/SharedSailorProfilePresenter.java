@@ -11,7 +11,6 @@ import com.sap.sailing.gwt.home.communication.user.profile.GetCompetitorSuggesti
 import com.sap.sailing.gwt.home.communication.user.profile.GetFavoritesAction;
 import com.sap.sailing.gwt.home.communication.user.profile.SaveFavoriteBoatClassesAction;
 import com.sap.sailing.gwt.home.communication.user.profile.SaveFavoriteCompetitorsAction;
-import com.sap.sailing.gwt.home.desktop.app.TabletAndDesktopApplicationClientFactory;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggestedMultiSelectionBoatClassDataProvider;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggestedMultiSelectionCompetitorDataProvider;
@@ -22,17 +21,18 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.datapro
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.mvp.ClientFactory;
 import com.sap.sse.gwt.dispatch.shared.commands.VoidResult;
 
 /**
  * Reusable implementation of {@link SharedSailorProfileView.Presenter} which handles the selections and notification
  * toggles of a {@link SharedSailorProfileView}. It only require an appropriate client factory which implements
- * {@link ClientFactoryWithDispatch} and {@link ErrorAndBusyClientFactory}.
+ * {@link ClientFactoryWithDispatch}, {@link ErrorAndBusyClientFactory} and {@link ClientFactory}.
  * 
  * @param <C>
  *            the provided client factory type
  */
-public class SharedSailorProfilePresenter<C extends ClientFactoryWithDispatch & ErrorAndBusyClientFactory>
+public class SharedSailorProfilePresenter<C extends ClientFactoryWithDispatch & ErrorAndBusyClientFactory & ClientFactory>
         implements SharedSailorProfileView.Presenter {
 
     private final SuggestedMultiSelectionCompetitorDataProvider competitorDataProvider = new SuggestedMultiSelectionCompetitorDataProviderImpl();
@@ -148,11 +148,7 @@ public class SharedSailorProfilePresenter<C extends ClientFactoryWithDispatch & 
 
     @Override
     public PlaceController getPlaceController() {
-        if (clientFactory instanceof TabletAndDesktopApplicationClientFactory) {
-            return ((TabletAndDesktopApplicationClientFactory) clientFactory).getPlaceController();
-        } else {
-            return null;
-        }
+        return clientFactory.getPlaceController();
     }
 
 }
