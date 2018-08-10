@@ -286,7 +286,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
                         customTagButtonsTable.setRowData(customTagButtons);  
                     } 
                     else if (LeaderboardConfigImagesBarCell.ACTION_EDIT.equals(value)) {
-                        new EditTagButtonDialog(button, customTagButtonsTable).show();
+                        new EditTagButtonDialog(button, customTagButtonsTable, stringMessages).show();
                     } 
                 }
             });
@@ -344,8 +344,8 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
         private final VerticalPanel mainPanel;
         private final HorizontalPanel saveAndClosePanel;
         
-        public EditTagButtonDialog(TagButton tagButton, CellTable<TagButton> customTagButtonsTable) {
-            
+        public EditTagButtonDialog(TagButton tagButton, CellTable<TagButton> customTagButtonsTable, StringMessages stringMessages) {
+            setText(stringMessages.tagEditCustomTagButton());
             mainPanel = new VerticalPanel();
             
             inputPanel = new TagCreationInputPanel(stringMessages);
