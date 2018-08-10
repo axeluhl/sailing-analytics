@@ -575,6 +575,7 @@ import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.impl.ReplicaDescriptor;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
+import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.MediaUtils;
 import com.sap.sse.shared.media.VideoDescriptor;
@@ -6052,6 +6053,26 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
         raceLog.add(new RaceLogTagEventImpl(tag, comment, imageURL, raceTimepoint, getService().getServerAuthor(),
                 raceLog.getCurrentPassId()));
+    }
+    
+    @Override
+    public SuccessInfo removeTagFromRaceLog(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag) {
+        SuccessInfo successInfo = new SuccessInfo(true, null, null, null);
+        RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
+        TagFinder tagFinder = new TagFinder(raceLog, tag.getCreatedAt().minus(1), tag.getCreatedAt().plus(1));
+        List<RaceLogTagEvent> foundTagEvents = tagFinder.analyze();
+        for (RaceLogTagEvent tagEvent : foundTagEvents) {
+            if (tagEvent.getTag().equals(tag.getTag())
+                    && tagEvent.getComment().equals(tag.getComment())
+                    && tagEvent.getImageURL().equals(tag.getImageURL())) {
+                try {
+                    raceLog.revokeEvent(tagEvent.getAuthor(), tagEvent);
+                } catch (NotRevokableException e) {
+                    successInfo = new SuccessInfo(false, "Could not remove tag! " + e.getMessage(), null, null);
+                }
+            }
+        }
+        return successInfo;
     }
 
     /**
