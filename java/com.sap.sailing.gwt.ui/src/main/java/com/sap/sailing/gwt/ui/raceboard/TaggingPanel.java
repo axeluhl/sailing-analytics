@@ -6,7 +6,11 @@ import java.util.List;
 import java.util.Map;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.shared.GWT;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.EventTarget;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -57,8 +61,12 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentWithoutSettings;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.UserStatusEventHandler;
+import com.sap.sse.security.ui.shared.SuccessInfo;
+import com.sap.sse.security.ui.shared.UserDTO;
 
-public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesInfoProviderListener {
+public class TaggingPanel extends ComponentWithoutSettings
+        implements RaceTimesInfoProviderListener, UserStatusEventHandler {
 
     public interface TagPanelResources extends ClientBundle {
         public static final TagPanelResources INSTANCE = GWT.create(TagPanelResources.class);
@@ -94,28 +102,33 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
     }
 
     public interface TagCellTemplate extends SafeHtmlTemplates {
-        @Template("<div class='{0}'><div class='{1}'>{5}</div><div class='{2}'>(created by <b>{6}</b> at {7})</div><div class='{3}'><img src='{8}'/></div><div class='{4}'>{9}</div></div>")
-        SafeHtml cell(String styleTag, String styleTagHeading, String styleTagCreated, String styleTagImage,
-                String styleTagComment, SafeHtml tag, SafeHtml author, SafeHtml createdAt, SafeUri imageURL,
+        @Template("<div class='{0}'><div class='{1}'>{3}</div><div class='{2}'>(created by <b>{4}</b> at {5})</div>{6}</div>")
+        SafeHtml cell(String styleTag, String styleTagHeading, String styleTagCreated, SafeHtml tag, SafeHtml author,
+                SafeHtml createdAt, SafeHtml content);
+
+        @Template("<div class='{0}'><div class='{1}'>{3}<button>X</button></div><div class='{2}'>(created by <b>{4}</b> at {5})</div>{6}</div>")
+        SafeHtml cellRemovable(String styleTag, String styleTagHeading, String styleTagCreated, SafeHtml tag,
+                SafeHtml author, SafeHtml createdAt, SafeHtml content);
+
+        @Template("<div class='{0}'><img src='{2}'/></div><div class='{1}'>{3}</div>")
+        SafeHtml contentWithCommentWithImage(String styleTagImage, String styleTagComment, SafeUri imageURL,
                 SafeHtml comment);
 
-        @Template("<div class='{0}'><div class='{1}'>{4}</div><div class='{2}'>(created by <b>{5}</b> at {6})</div><div class='{3}'>{7}</div></div>")
-        SafeHtml cellWithCommentWithoutImage(String styleTag, String styleTagHeading, String styleTagCreated,
-                String styleTagComment, SafeHtml tag, SafeHtml author, SafeHtml createdAt, SafeHtml comment);
+        @Template("<div class='{0}'>{1}</div>")
+        SafeHtml contentWithCommentWithoutImage(String styleTagComment, SafeHtml comment);
 
-        @Template("<div class='{0}'><div class='{1}'>{4}</div><div class='{2}'>(created by <b>{5}</b> at {6})</div><div class='{3}'><img src='{7}'/></div></div>")
-        SafeHtml cellWithoutCommentWithImage(String styleTag, String styleTagHeading, String styleTagCreated,
-                String styleTagImage, SafeHtml tag, SafeHtml author, SafeHtml createdAt, SafeUri imageURL);
-
-        @Template("<div class='{0}'><div class='{1}'>{3}</div><div class='{2}'>(created by <b>{4}</b> at {5})</div></div>")
-        SafeHtml cellWithoutCommentWithoutImage(String styleTag, String styleTagHeading, String styleTagCreated,
-                SafeHtml tag, SafeHtml author, SafeHtml createdAt);
+        @Template("<div class='{0}'><img src='{1}'/></div>")
+        SafeHtml contentWithoutCommentWithImage(String styleTagImage, SafeUri imageURL);
     }
 
     private class TagCell extends AbstractCell<TagDTO> {
         private final TagCellTemplate tagCellTemplate = GWT.create(TagCellTemplate.class);
         private final TagPanelResources tagPanelRes = GWT.create(TagPanelResources.class);
         private final TagPanelStyle tagPanelStyle = tagPanelRes.style();
+
+        public TagCell() {
+            super("click");
+        }
 
         @Override
         public void render(Context context, TagDTO tag, SafeHtmlBuilder htmlBuilder) {
@@ -130,28 +143,41 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
             SafeHtml safeComment = SafeHtmlUtils.fromString(tag.getComment());
             SafeUri trustedImageURL = UriUtils.fromTrustedString(tag.getImageURL());
 
-            SafeHtml cell = null;
-            if (tag.getComment().length() <= 0 && tag.getImageURL().length() <= 0) {
-                // no comment & no image
-                cell = tagCellTemplate.cellWithoutCommentWithoutImage(tagPanelStyle.tag(), tagPanelStyle.tagHeading(),
-                        tagPanelStyle.tagCreated(), safeTag, safeAuthor, safeCreatedAt);
-            } else if (tag.getComment().length() > 0 && tag.getImageURL().length() <= 0) {
-                // comment & no image
-                cell = tagCellTemplate.cellWithCommentWithoutImage(tagPanelStyle.tag(), tagPanelStyle.tagHeading(),
-                        tagPanelStyle.tagCreated(), tagPanelStyle.tagComment(), safeTag, safeAuthor, safeCreatedAt,
-                        safeComment);
+            SafeHtml content = SafeHtmlUtils.EMPTY_SAFE_HTML;
+            if (tag.getComment().length() > 0 && tag.getImageURL().length() <= 0) {
+                content = tagCellTemplate.contentWithCommentWithoutImage(tagPanelStyle.tagComment(), safeComment);
             } else if (tag.getComment().length() <= 0 && tag.getImageURL().length() > 0) {
-                // no comment & image
-                cell = tagCellTemplate.cellWithoutCommentWithImage(tagPanelStyle.tag(), tagPanelStyle.tagHeading(),
-                        tagPanelStyle.tagCreated(), tagPanelStyle.tagImage(), safeTag, safeAuthor, safeCreatedAt,
-                        trustedImageURL);
+                content = tagCellTemplate.contentWithoutCommentWithImage(tagPanelStyle.tagImage(), trustedImageURL);
+            } else if (tag.getComment().length() > 0 && tag.getImageURL().length() > 0) {
+                content = tagCellTemplate.contentWithCommentWithImage(tagPanelStyle.tagImage(),
+                        tagPanelStyle.tagComment(), trustedImageURL, safeComment);
+            }
+
+            SafeHtml cell;
+            if (userService.getCurrentUser() != null
+                    && tag.getUsername().equals(userService.getCurrentUser().getName())) {
+                cell = tagCellTemplate.cellRemovable(tagPanelStyle.tag(), tagPanelStyle.tagHeading(),
+                        tagPanelStyle.tagCreated(), safeTag, safeAuthor, safeCreatedAt, content);
             } else {
-                // comment & image
                 cell = tagCellTemplate.cell(tagPanelStyle.tag(), tagPanelStyle.tagHeading(), tagPanelStyle.tagCreated(),
-                        tagPanelStyle.tagImage(), tagPanelStyle.tagComment(), safeTag, safeAuthor, safeCreatedAt,
-                        trustedImageURL, safeComment);
+                        safeTag, safeAuthor, safeCreatedAt, content);
             }
             htmlBuilder.append(cell);
+        }
+
+        @Override
+        public void onBrowserEvent(Context context, Element parent, TagDTO tag, NativeEvent event,
+                ValueUpdater<TagDTO> valueUpdater) {
+            super.onBrowserEvent(context, parent, tag, event, valueUpdater);
+            if ("click".equals(event.getType())) {
+                EventTarget eventTarget = event.getEventTarget();
+                if (!Element.is(eventTarget)) {
+                    return;
+                }
+                if (parent.getElementsByTagName("button").getItem(0).isOrHasChild(Element.as(eventTarget))) {
+                    removeTagFromRaceLog(tag);
+                }
+            }
         }
     }
 
@@ -166,7 +192,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
             addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    addNewTag(getTag(), getComment(), getImageURL());
+                    addTagToRaceLog(getTag(), getComment(), getImageURL());
                 }
             });
         }
@@ -213,8 +239,9 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
             createTagFromTextBoxes.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    if (isAuthorized()) {
-                        addNewTag(inputPanel.getTagValue(), inputPanel.getCommentValue(), inputPanel.getImageURLValue());
+                    if (isAuthorizedAndRaceLogAvailable()) {
+                        addTagToRaceLog(inputPanel.getTagValue(), inputPanel.getCommentValue(),
+                                inputPanel.getImageURLValue());
                         inputPanel.clearAllValues();
                     }
                 }
@@ -225,7 +252,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
             editCustomTagButtons.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    if (isAuthorized()) {
+                    if (isAuthorizedAndRaceLogAvailable()) {
                         new EditCustomTagButtonsDialog(customButtonsPanel).show();
                         updateButtons();
                     }
@@ -431,6 +458,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.userService = userService;
+        userService.addUserStatusEventHandler(this);
         this.timer = timer;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(this);
@@ -463,6 +491,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 // set time slider to corresponding position
+                GWT.log(event.getSource().toString());
                 timer.setTime(tagSelectionModel.getSelectedObject().getRaceTimepoint().asMillis());
             }
         });
@@ -487,8 +516,8 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
         }
     }
 
-    private void addNewTag(String tag, String comment, String imageURL) {
-        if (isAuthorized()) {
+    private void addTagToRaceLog(String tag, String comment, String imageURL) {
+        if (isAuthorizedAndRaceLogAvailable()) {
             if (tag.length() > 0) {
                 sailingService.addTagToRaceLog(leaderboardName, raceColumn.getName(), fleet.getName(), tag, comment,
                         imageURL, new MillisecondsTimePoint(timer.getTime()), new AsyncCallback<Void>() {
@@ -509,7 +538,24 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
 
     }
 
-    private boolean isAuthorized() {
+    private void removeTagFromRaceLog(TagDTO tag) {
+        sailingService.removeTagFromRaceLog(leaderboardName, raceColumn.getName(), fleet.getName(), tag,
+                new AsyncCallback<SuccessInfo>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Notification.notify("Could not remove tag!", NotificationType.ERROR);
+                    }
+
+                    @Override
+                    public void onSuccess(SuccessInfo result) {
+                        tagListProvider.getAllTags().remove(tag);
+                        updateContent();
+                        Notification.notify("Removed tag successfully", NotificationType.SUCCESS);
+                    }
+                });
+    }
+
+    private boolean isAuthorizedAndRaceLogAvailable() {
         if (leaderboardName == null || raceColumn == null || fleet == null) {
             Notification.notify(stringMessages.tagNotAdded(), NotificationType.ERROR);
             return false;
@@ -558,6 +604,11 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
     }
 
     @Override
+    public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
+        updateContent();
+    }
+
+    @Override
     public String getId() {
         return "TaggingPanel";
     }
@@ -586,4 +637,5 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
     public String getDependentCssClassName() {
         return "tags";
     }
+
 }

@@ -25,6 +25,12 @@ b {
 	font-weight: bold;
 }
 
+.tagHeading button {
+	float: right;
+    border: none;
+    background: transparent;
+}
+
 .tagImage {
     text-align: center;
     margin: 0 -5px;

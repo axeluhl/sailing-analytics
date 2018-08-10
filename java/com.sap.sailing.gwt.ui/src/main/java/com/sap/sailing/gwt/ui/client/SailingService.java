@@ -101,6 +101,7 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
+import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
@@ -123,6 +124,7 @@ import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtService;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.gwt.client.replication.RemoteReplicationService;
+import com.sap.sse.security.ui.shared.SuccessInfo;
 
 /**
  * The client side stub for the RPC service. Usually, when a <code>null</code> date is passed to
@@ -539,7 +541,9 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     void addTagToRaceLog(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment,
             String imageURL, TimePoint raceTimepoint);
-    
+
+    SuccessInfo removeTagFromRaceLog(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag);
+
     RaceCourseDTO getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException;
     
     /**
