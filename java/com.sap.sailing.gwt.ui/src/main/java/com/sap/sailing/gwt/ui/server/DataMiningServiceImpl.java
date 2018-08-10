@@ -84,6 +84,14 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ));
         return getDataMiningServer().getComponentsChangedTimepoint();
     }
+    
+    @Override
+    public FunctionDTO getIdentityFunction(String localeInfoName) {
+        SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ));
+        DataMiningServer server = getDataMiningServer();
+        Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
+        return dtoFactory.createFunctionDTO(server.getIdentityFunction(), server.getStringMessages(), locale);
+    }
 
     @Override
     public HashSet<FunctionDTO> getAllStatistics(String localeInfoName) {

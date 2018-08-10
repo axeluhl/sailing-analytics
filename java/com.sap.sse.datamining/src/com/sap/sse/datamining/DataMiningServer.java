@@ -36,6 +36,7 @@ public interface DataMiningServer {
     Date getComponentsChangedTimepoint();
 
     FunctionProvider getFunctionProvider();
+    Function<?> getIdentityFunction();
     Iterable<Function<?>> getAllStatistics();
     Iterable<Function<?>> getFunctionsFor(Class<?> sourceType);
     Iterable<Function<?>> getStatisticsFor(Class<?> sourceType);

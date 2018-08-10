@@ -24,6 +24,8 @@ public interface DataMiningServiceAsync {
 
     public void getComponentsChangedTimepoint(AsyncCallback<Date> asyncCallback);
 
+    void getIdentityFunction(String localeInfoName, AsyncCallback<FunctionDTO> callback);
+    
     void getAllStatistics(String localeInfoName, AsyncCallback<HashSet<FunctionDTO>> callback);
 
     void getStatisticsFor(DataRetrieverChainDefinitionDTO currentRetrieverChainDefinition, String localeName,
