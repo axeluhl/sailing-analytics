@@ -13,7 +13,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.CheckboxCell;
@@ -72,8 +71,6 @@ import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDataMiningComponent<SerializableSettings> implements FilterSelectionProvider {
-    
-    private static final Logger logger = Logger.getLogger(HierarchicalDimensionListFilterSelectionProvider.class.getSimpleName());
     
     private static final String DimensionListSubheaderAttribute = "subheader";
     private static final Unit LayoutUnit = Unit.PX;
