@@ -47,6 +47,18 @@ public class TagCreationInputPanel extends VerticalPanel{
         return urlTextBox.getValue();
     }
     
+    public void setTagValue(String tag) {
+        tagTextBox.setValue(tag);
+    }
+    
+    public void setCommentValue(String comment) {
+        commentTextBox.setValue(comment);
+    }
+    
+    public void setImageURLValue(String imageURL) {
+        urlTextBox.setValue(imageURL);
+    }
+    
     public void clearAllValues() {
         tagTextBox.setText("");
         urlTextBox.setText("");

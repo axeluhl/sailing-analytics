@@ -26,6 +26,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HeaderPanel;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -181,6 +182,20 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
         public String getComment() {
             return comment;
         }
+
+        public void setTag(String tag) {
+            this.tag = tag;
+        }
+
+        public void setImageURL(String imageURL) {
+            this.imageURL = imageURL;
+        }
+
+        public void setComment(String comment) {
+            this.comment = comment;
+        }
+        
+        
     }
 
     private class TagCreationPanel extends VerticalPanel {
@@ -211,7 +226,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
                 @Override
                 public void onClick(ClickEvent event) {
                     if (isAuthorized()) {
-                        new EditCustomTagsDialog(customButtonsPanel).show();
+                        new EditCustomTagButtonsDialog(customButtonsPanel).show();
                         updateButtons();
                     }
                 }
@@ -227,7 +242,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
         }
     }
     
-    private class EditCustomTagsDialog extends DialogBox{
+    private class EditCustomTagButtonsDialog extends DialogBox{
         
         private final Button closeButton;
         private final Panel mainPanel;
@@ -235,7 +250,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
         private final TagCreationInputPanel inputPanel;
         private final Button addCustomTagButton;
 
-        public EditCustomTagsDialog(Panel customButtonsPanel) {
+        public EditCustomTagButtonsDialog(Panel customButtonsPanel) {
             setText(stringMessages.tagEditCustomTagsButtonDialogHeader());
 
             mainPanel = new VerticalPanel();
@@ -271,7 +286,7 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
                         customTagButtonsTable.setRowData(customTagButtons);  
                     } 
                     else if (LeaderboardConfigImagesBarCell.ACTION_EDIT.equals(value)) {
-
+                        new EditTagButtonDialog(button, customTagButtonsTable).show();
                     } 
                 }
             });
@@ -295,13 +310,13 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
                         customButtonsPanel.add(tagButton);
                         customTagButtonsTable.setRowData(customTagButtons);
                     } else {
-                        Notification.notify(stringMessages.tagNotSpecified(), NotificationType.ERROR);
+                        Notification.notify(stringMessages.tagNotSpecified(), NotificationType.WARNING);
                     }
                 }
             });
             
             closeButton = new Button(stringMessages.close());
-            closeButton.getElement().getStyle().setMargin(3, Unit.PX);
+            //closeButton.getElement().getStyle().setMargin(3, Unit.PX);
             
             closeButton.addClickHandler(new ClickHandler() {
                 @Override
@@ -321,7 +336,57 @@ public class TaggingPanel extends ComponentWithoutSettings implements RaceTimesI
         private void hideDialog() {
             this.hide();
         }
+    }
+    
+    private final class EditTagButtonDialog extends DialogBox{
+        private final Button saveButton, cancelButton;
+        private final TagCreationInputPanel inputPanel;
+        private final VerticalPanel mainPanel;
+        private final HorizontalPanel saveAndClosePanel;
+        
+        public EditTagButtonDialog(TagButton tagButton, CellTable<TagButton> customTagButtonsTable) {
+            
+            mainPanel = new VerticalPanel();
+            
+            inputPanel = new TagCreationInputPanel(stringMessages);
+            inputPanel.setTagValue(tagButton.getTag());
+            inputPanel.setCommentValue(tagButton.getComment());
+            inputPanel.setImageURLValue(tagButton.getImageURL());
+            
+            saveButton = new Button("save");
+            saveButton.addClickHandler(new ClickHandler() {
 
+                @Override
+                public void onClick(ClickEvent event) {
+                    tagButton.setTag(inputPanel.getTagValue());
+                    tagButton.setComment(inputPanel.getCommentValue());
+                    tagButton.setImageURL(inputPanel.getImageURLValue());
+                    customTagButtonsTable.redraw();
+                    hideDialog();
+                }
+                
+            });
+            
+            cancelButton = new Button(stringMessages.cancel());         
+            cancelButton.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    hideDialog();
+                }
+            });
+            
+            saveAndClosePanel = new HorizontalPanel();     
+            saveAndClosePanel.add(saveButton);
+            saveAndClosePanel.add(cancelButton);
+            
+            mainPanel.add(inputPanel);
+            mainPanel.add(saveAndClosePanel);
+            setWidget(mainPanel);
+        }
+        
+        private void hideDialog() {
+            this.hide();
+        }
     }
 
     private final HeaderPanel panel;
