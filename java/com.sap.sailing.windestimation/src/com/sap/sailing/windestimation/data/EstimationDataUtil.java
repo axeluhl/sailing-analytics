@@ -155,6 +155,11 @@ public class EstimationDataUtil {
                 ? maneuver.getMainCurve().getSpeedWithBearingBefore().getKnots()
                         / maneuver.getMainCurve().getHighestSpeed().getKnots()
                 : 0;
+        double lowestSpeedVsExitingSpeedRatio = maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter()
+                .getKnots() > 0
+                        ? maneuver.getCurveWithUnstableCourseAndSpeed().getLowestSpeed().getKnots()
+                                / maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getKnots()
+                        : 0;
         Double deviationFromOptimalTackAngleInDegrees = maneuver.getTargetTackAngleInDegrees() == null ? null
                 : Math.abs(maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees())
                         - maneuver.getTargetTackAngleInDegrees();
@@ -225,8 +230,9 @@ public class EstimationDataUtil {
         ManeuverCategory maneuverCategory = getManeuverCategory(maneuver);
         ManeuverForClassification maneuverForClassification = new ManeuverForClassificationImpl(maneuverType,
                 absoluteTotalCourseChangeInDegrees, speedInSpeedOutRatio, oversteeringInDegrees, speedLossRatio,
-                speedGainRatio, maneuver.getMainCurve().getMaxTurningRateInDegreesPerSecond(),
-                deviationFromOptimalTackAngleInDegrees, deviationFromOptimalJibeAngleInDegrees,
+                speedGainRatio, lowestSpeedVsExitingSpeedRatio,
+                maneuver.getMainCurve().getMaxTurningRateInDegreesPerSecond(), deviationFromOptimalTackAngleInDegrees,
+                deviationFromOptimalJibeAngleInDegrees,
                 highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees,
                 mainCurveDurationInSeconds, maneuverDurationInSeconds, recoveryPhaseDurationInSeconds,
                 timeLossInSeconds, clean, maneuverCategory);

@@ -13,6 +13,7 @@ public class ManeuverForClassificationJsonSerializer implements JsonSerializer<M
     public static final String OVERSTEERING_IN_DEGREES = "oversteeringInDegrees";
     public static final String SPEED_LOSS_RATIO = "speedLossRatio";
     public static final String SPEED_GAIN_RATIO = "speedGainRatio";
+    public static final String LOWEST_SPEED_VS_EXITING_SPEED_RATIO = "lowestSpeedVsExitingSpeed";
     public static final String MAXIMAL_TURNING_RATE_IN_DEGREES_PER_SECOND = "maximalTurningRateInDegreesPerSecond";
     public static final String DEVIATION_FROM_OPTIMAL_TACK_ANGLE_IN_DEGREES = "deviationFromOptimalTackAngleInDegrees";
     public static final String DEVIATION_FROM_OPTIMAL_JIBE_ANGLE_IN_DEGREES = "deviationFromOptimalJibeAngleInDegrees";
@@ -32,7 +33,8 @@ public class ManeuverForClassificationJsonSerializer implements JsonSerializer<M
         json.put(SPEED_IN_SPEED_OUT_RATIO, maneuver.getSpeedInSpeedOutRatio());
         json.put(OVERSTEERING_IN_DEGREES, maneuver.getOversteeringInDegrees());
         json.put(SPEED_LOSS_RATIO, maneuver.getSpeedLossRatio());
-        json.put(SPEED_GAIN_RATIO, maneuver.getSpeedGainRatio());
+        json.put(SPEED_GAIN_RATIO, maneuver.getSpeedGainRatioWithinMainCurve());
+        json.put(LOWEST_SPEED_VS_EXITING_SPEED_RATIO, maneuver.getLowestSpeedVsExitingSpeedRatio());
         json.put(MAXIMAL_TURNING_RATE_IN_DEGREES_PER_SECOND, maneuver.getMaximalTurningRateInDegreesPerSecond());
         json.put(DEVIATION_FROM_OPTIMAL_TACK_ANGLE_IN_DEGREES, maneuver.getDeviationFromOptimalTackAngleInDegrees());
         json.put(DEVIATION_FROM_OPTIMAL_JIBE_ANGLE_IN_DEGREES, maneuver.getDeviationFromOptimalJibeAngleInDegrees());

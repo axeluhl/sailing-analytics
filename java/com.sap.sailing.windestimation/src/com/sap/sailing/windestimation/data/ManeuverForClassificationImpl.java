@@ -18,11 +18,13 @@ public class ManeuverForClassificationImpl implements ManeuverForClassification 
     private final double timeLossInSeconds;
     private boolean clean;
     private ManeuverCategory maneuverCategory;
+    private double lowestSpeedVsExitingSpeedRatio;
 
     public ManeuverForClassificationImpl(ManeuverTypeForClassification maneuverType,
-            double absoluteTotalCourseChangeInDegrees, double speedInSpeedOutRatio, double oversteeringInDegrees, double speedLossRatio,
-            double speedGainRatio, double maximalTurningRateInDegreesPerSecond,
-            Double deviationFromOptimalTackAngleInDegrees, Double deviationFromOptimalJibeAngleInDegrees,
+            double absoluteTotalCourseChangeInDegrees, double speedInSpeedOutRatio, double oversteeringInDegrees,
+            double speedLossRatio, double speedGainRatio, double lowestSpeedVsExitingSpeedRatio,
+            double maximalTurningRateInDegreesPerSecond, Double deviationFromOptimalTackAngleInDegrees,
+            Double deviationFromOptimalJibeAngleInDegrees,
             Double highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees,
             double mainCurveDurationInSeconds, double maneuverDurationInSeconds, double recoveryPhaseDurationInSeconds,
             double timeLossInSeconds, boolean clean, ManeuverCategory maneuverCategory) {
@@ -32,6 +34,7 @@ public class ManeuverForClassificationImpl implements ManeuverForClassification 
         this.oversteeringInDegrees = oversteeringInDegrees;
         this.speedLossRatio = speedLossRatio;
         this.speedGainRatio = speedGainRatio;
+        this.lowestSpeedVsExitingSpeedRatio = lowestSpeedVsExitingSpeedRatio;
         this.maximalTurningRateInDegreesPerSecond = maximalTurningRateInDegreesPerSecond;
         this.deviationFromOptimalTackAngleInDegrees = deviationFromOptimalTackAngleInDegrees;
         this.deviationFromOptimalJibeAngleInDegrees = deviationFromOptimalJibeAngleInDegrees;
@@ -53,7 +56,7 @@ public class ManeuverForClassificationImpl implements ManeuverForClassification 
     public double getSpeedInSpeedOutRatio() {
         return speedInSpeedOutRatio;
     }
-    
+
     @Override
     public double getOversteeringInDegrees() {
         return oversteeringInDegrees;
@@ -65,8 +68,13 @@ public class ManeuverForClassificationImpl implements ManeuverForClassification 
     }
 
     @Override
-    public double getSpeedGainRatio() {
+    public double getSpeedGainRatioWithinMainCurve() {
         return speedGainRatio;
+    }
+
+    @Override
+    public double getLowestSpeedVsExitingSpeedRatio() {
+        return lowestSpeedVsExitingSpeedRatio;
     }
 
     @Override

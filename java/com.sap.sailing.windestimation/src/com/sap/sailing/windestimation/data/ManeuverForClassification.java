@@ -12,7 +12,9 @@ public interface ManeuverForClassification {
 
     double getSpeedLossRatio();
 
-    double getSpeedGainRatio();
+    double getSpeedGainRatioWithinMainCurve();
+    
+    double getLowestSpeedVsExitingSpeedRatio();
 
     double getMaximalTurningRateInDegreesPerSecond();
 
