@@ -92,7 +92,10 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
                 for (ParticipatedEventDTO dto : result) {
                     SailorProfileEventsTable table = new SailorProfileEventsTable();
                     table.setController(presenter.getPlaceController());
-                    table.setEvents(dto.getParticipatedRegattas());
+                    table.setEvent(dto);
+                    table.addStyleName(SharedResources.INSTANCE.mediaCss().column());
+                    table.addStyleName(SharedResources.INSTANCE.mediaCss().small12());
+                    table.addStyleName(SharedResources.INSTANCE.mainCss().spacermargintopmediumsmall());
                     accordionEventsUi.addWidget(table);
                 }
             }

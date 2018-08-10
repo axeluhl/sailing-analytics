@@ -1,13 +1,12 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.events;
 
-import java.util.Collection;
-
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.NumberCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -17,6 +16,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableResources;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab.RegattaLeaderboardPlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.ParticipatedEventDTO;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.ParticipatedRegattaDTO;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 
@@ -33,6 +33,9 @@ public class SailorProfileEventsTable extends Composite {
     final SortedCellTable<ParticipatedRegattaDTO> sailorProfilesTable = new SortedCellTable<>(0,
             DesignedCellTableResources.INSTANCE);
 
+    @UiField
+    SpanElement titleUi;
+
     public SailorProfileEventsTable() {
     }
 
@@ -42,9 +45,10 @@ public class SailorProfileEventsTable extends Composite {
         setupTable();
     }
 
-    public void setEvents(Collection<ParticipatedRegattaDTO> entries) {
-        sailorProfilesTable.setPageSize(entries.size());
-        sailorProfilesTable.setList(entries);
+    public void setEvent(ParticipatedEventDTO event) {
+        titleUi.setInnerText(event.getEventName());
+        sailorProfilesTable.setPageSize(event.getParticipatedRegattas().size());
+        sailorProfilesTable.setList(event.getParticipatedRegattas());
     }
 
     private void setupTable() {

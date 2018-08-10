@@ -67,15 +67,20 @@ public class SailorProfileDataProviderImpl implements SailorProfileDataProvider 
         ParticipatedRegattaDTO r2 = new ParticipatedRegattaDTO("Ciao-Regatta", 4, c2, "Subba Clubba", "139", "136", 25);
         ParticipatedRegattaDTO r3 = new ParticipatedRegattaDTO("Lurch-Regatta", 25, c1, "Supa Klub", "1335", "134", 85);
 
-        Collection<ParticipatedRegattaDTO> p = new ArrayList<>();
-        p.add(r1);
-        p.add(r2);
-        p.add(r3);
+        Collection<ParticipatedRegattaDTO> p1 = new ArrayList<>();
+        p1.add(r1);
+        p1.add(r2);
 
-        ParticipatedEventDTO pe1 = new ParticipatedEventDTO("Cooles Event", "01", p);
+        ParticipatedEventDTO pe1 = new ParticipatedEventDTO("Cooles Event", "01", p1);
+
+        Collection<ParticipatedRegattaDTO> p2 = new ArrayList<>();
+        p2.add(r1);
+        p2.add(r3);
+        ParticipatedEventDTO pe2 = new ParticipatedEventDTO("Super Cooles Event", "02", p2);
 
         events = new ArrayList<>();
         events.add(pe1);
+        events.add(pe2);
     }
 
     @Override
