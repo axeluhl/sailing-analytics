@@ -24,8 +24,8 @@ public class TagCreationInputPanel extends VerticalPanel{
         urlTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelImageURL());
         mainPanel.add(urlTextBox);
         
-        //resize must be set to none by css
         commentTextBox = new TextArea();
+        commentTextBox.getElement().getStyle().setProperty("resize", "none");
         commentTextBox.setWidth("100%");
         commentTextBox.setVisibleLines(4);
         commentTextBox.setTitle(stringMessages.tagLabelComment());
