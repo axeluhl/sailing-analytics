@@ -52,3 +52,59 @@ b {
 .tagComment {
 	font-size: 85%;
 }
+
+
+.button {
+	background-color: #fff;
+    border: 1px solid #cecece;
+    margin-left: 5px;
+    margin-bottom: 5px;
+    padding: 4px 4px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.footerButton {
+	background-color: #fff;
+    border: 1px solid #cecece;
+    margin-left: 5px;
+    margin-bottom: 5px;
+    padding: 4px 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    float: right;
+}
+
+.footerPanel {
+	float: right;
+}
+
+.tagButtonTable {
+    margin-top: 5px;
+    margin-bottom: -1px;
+    border-radius: 4px 4px 4px 4px; 
+    border: 1px solid #cecece;
+    padding: 2px;
+}
+
+.inputPanelTag {
+	margin-top: 5px;
+    margin-bottom: -1px;
+	border-radius: 4px 4px 0px 0px; 
+	border: 1px solid #cecece;
+	padding: 2px;
+}
+
+.inputPanelImageURL {
+    border: 1px solid #cecece;
+    padding: 2px;
+}
+
+.inputPanelComment {
+	padding: 2px;
+	border: 1px solid #cecece;
+	margin-top: -1px;
+	resize: none;
+    margin-bottom: 5px;
+    border-radius: 0px 0px 4px 4px; 
+}
