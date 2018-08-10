@@ -91,7 +91,18 @@ public class TaggingPanel extends ComponentWithoutSettings
             String tagImage();
         }
     }
+    
+    public interface TagButtonDialogResources extends ClientBundle {
+        public static final TagButtonDialogResources INSTANCE = GWT.create(TagButtonDialogResources.class);
 
+        @Source("tagging-buttondialog.css")
+        public TagButtonDialogStyle style();
+
+        public interface TagButtonDialogStyle extends CssResource {
+            String button();
+        }
+    }
+    
     public interface CellListResources extends CellList.Resources {
         public static final CellListResources INSTANCE = GWT.create(CellListResources.class);
 
@@ -107,7 +118,8 @@ public class TaggingPanel extends ComponentWithoutSettings
             String cellListSelectedItem();
             String cellListKeyboardSelectedItem();
         }
-    }
+    } 
+    
 
     public interface TagCellTemplate extends SafeHtmlTemplates {
         @Template("<div class='{0}'><div class='{1}'>{3}</div><div class='{2}'>(created by <b>{4}</b> at {5})</div>{6}</div>")
@@ -304,6 +316,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         private final Button addCustomTagButton;
 
         public EditCustomTagButtonsDialog(Panel customButtonsPanel) {
+            TagButtonDialogResources.INSTANCE.style().ensureInjected();
             setText(stringMessages.tagEditCustomTagsButtonDialogHeader());
 
             mainPanel = new VerticalPanel();
@@ -369,6 +382,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             });
             
             closeButton = new Button(stringMessages.close());
+            closeButton.setStyleName(TagButtonDialogResources.INSTANCE.style().button());
             //closeButton.getElement().getStyle().setMargin(3, Unit.PX);
             
             closeButton.addClickHandler(new ClickHandler() {
@@ -398,6 +412,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         private final HorizontalPanel saveAndClosePanel;
         
         public EditTagButtonDialog(TagButton tagButton, CellTable<TagButton> customTagButtonsTable, StringMessages stringMessages) {
+            TagButtonDialogResources.INSTANCE.style().ensureInjected();
             setText(stringMessages.tagEditCustomTagButton());
             mainPanel = new VerticalPanel();
             
