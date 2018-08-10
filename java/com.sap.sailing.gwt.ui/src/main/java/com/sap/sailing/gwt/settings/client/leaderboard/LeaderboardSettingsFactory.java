@@ -44,7 +44,7 @@ public class LeaderboardSettingsFactory {
     }
  
     public SingleRaceLeaderboardSettings createNewSettingsWithCustomRaceDetails(List<DetailType> raceDetailsToShow) {
-        SingleRaceLeaderboardSettings defaultSettings = new SingleRaceLeaderboardSettings(true);
+        SingleRaceLeaderboardSettings defaultSettings = new SingleRaceLeaderboardSettings(false);
         return new SingleRaceLeaderboardSettings(
                 defaultSettings.getManeuverDetailsToShow(),
                 defaultSettings.getLegDetailsToShow(),
