@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -7,6 +8,9 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -18,8 +22,7 @@ import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSets;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSetsDialog;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSetsJsonDeSerializer;
-import com.sap.sailing.gwt.ui.leaderboard.CompetitorFilterResources;
-import com.sap.sailing.gwt.ui.leaderboard.CompetitorFilterResources.CompetitorFilterCss;
+import com.sap.sailing.gwt.ui.raceboard.TagFilterPanel.TagFilterResources.TagFilterCss;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -30,10 +33,50 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
  * 
  */
 public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWithUI<TagDTO> {
+    
+    public interface TagFilterResources extends ClientBundle {
+        public static final TagFilterResources INSTANCE = GWT.create(TagFilterResources.class);
+        
+        @Source("com/sap/sailing/gwt/ui/client/images/SAP_RV_Clear.png")
+        ImageResource clearButton();
+
+        @Source("com/sap/sailing/gwt/ui/client/images/SAP_RV_CompetitorsFilter_INACTIVE.png")
+        ImageResource filterInactiveButton();
+
+        @Source("com/sap/sailing/gwt/ui/client/images/SAP_RV_CompetitorsFilter_ACTIVE.png")
+        ImageResource filterActiveButton();
+
+        @Source("com/sap/sailing/gwt/ui/client/images/SAP_RV_Search.png")
+        ImageResource searchButton();
+
+        @Source("com/sap/sailing/gwt/ui/client/images/SAP_RV_Settings.png")
+        ImageResource settingsButton();
+
+        @Source("tagging-filter.css")
+        TagFilterCss css();
+
+        public interface TagFilterCss extends CssResource {
+            String button();
+            String hiddenButton();
+            String clearButton();
+            String searchButton();
+            String settingsButton();
+            String filterButton();
+            String tagFilterContainer();
+            String searchBox();
+            String searchInput();
+            String filterInactiveButtonBackgroundImage();
+            String filterActiveButtonBackgroundImage();
+            String clearButtonBackgroundImage();
+            String searchButtonBackgroundImage();
+            String settingsButtonBackgroundImage();
+        }
+
+    }
 
     private final static String LOCAL_STORAGE_TAGS_FILTER_SETS_KEY = "sailingAnalytics.raceBoard.tagsFilterSets";
 
-    private final static CompetitorFilterCss css = CompetitorFilterResources.INSTANCE.css();
+    private final static TagFilterCss css = TagFilterResources.INSTANCE.css();
     private final TextBox searchTextBox;
     private final Button clearTextBoxButton;
     private final Button filterSettingsButton;
@@ -48,7 +91,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
         css.ensureInjected();
         this.stringMessages = stringMessages;
         this.tagProvider = tagProvider;
-        this.setStyleName(css.competitorFilterContainer());
+        this.setStyleName(css.tagFilterContainer());
 
         TagsFilterSets loadedTagsFilterSets = loadTagsFilterSets();
         if (loadedTagsFilterSets != null) {
