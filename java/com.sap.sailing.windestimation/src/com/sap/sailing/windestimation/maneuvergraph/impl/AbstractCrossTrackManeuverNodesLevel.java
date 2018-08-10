@@ -30,13 +30,8 @@ public abstract class AbstractCrossTrackManeuverNodesLevel<SelfType extends Abst
     }
 
     @Override
-    public boolean isManeuverBeginningClean() {
-        return singleTrackManeuverNodesLevel.isManeuverBeginningClean();
-    }
-
-    @Override
-    public boolean isManeuverEndClean() {
-        return singleTrackManeuverNodesLevel.isManeuverEndClean();
+    public boolean isManeuverClean() {
+        return singleTrackManeuverNodesLevel.isManeuverClean();
     }
 
     @Override

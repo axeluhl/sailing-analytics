@@ -421,9 +421,11 @@ public class ManeuverDetectorWithEstimationDataSupportDecoratorImpl
         Distance result = null;
         for (Mark mark : waypoint.getMarks()) {
             Position markPosition = markPositionAtTimePointCache.getEstimatedPosition(mark);
-            Distance distance = markPosition.getDistance(maneuverPosition);
-            if (result == null || distance.compareTo(result) < 0) {
-                result = distance;
+            if(markPosition != null) {
+                Distance distance = markPosition.getDistance(maneuverPosition);
+                if (result == null || distance.compareTo(result) < 0) {
+                    result = distance;
+                }
             }
         }
         return result;

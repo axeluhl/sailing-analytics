@@ -184,14 +184,18 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
                 competitorTracks.add(competitorTrack);
                 CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData> competitorTrackWithEstimationData = competitorTrackWithEstimationDataJsonDeserializer
                         .deserialize(competitorTrack);
-                competitorTrack.put("clean", competitorTrackWithEstimationData.isClean());
+                competitorTrack.put("clean",
+                        competitorTrackWithEstimationData.isClean()
+                                && competitorTrackWithEstimationData
+                                        .getWaypointsCount() == competitorTrackWithEstimationData.getMarkPassingsCount()
+                                && competitorTrackWithEstimationData.getMarkPassingsCount() > 1);
                 competitorTracksWithEstimationData.add(competitorTrackWithEstimationData);
                 maneuversCount += maneuverCurves.size();
             }
         }
         try {
             completeManeuverCurvePersistanceManager.addRace(regattaName, trackedRaceName, competitorTracks);
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         List<CompetitorTrackWithEstimationData<ManeuverForClassification>> competitorTracksWithManeuversForClassification = EstimationDataUtil

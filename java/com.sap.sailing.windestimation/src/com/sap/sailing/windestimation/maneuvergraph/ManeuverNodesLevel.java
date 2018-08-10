@@ -110,13 +110,7 @@ public interface ManeuverNodesLevel<SelfType extends ManeuverNodesLevel<SelfType
         throw new IllegalStateException();
     }
 
-    default boolean isCleanManeuver() {
-        return isManeuverBeginningClean() && isManeuverEndClean();
-    }
-
-    boolean isManeuverBeginningClean();
-
-    boolean isManeuverEndClean();
+    boolean isManeuverClean();
 
     CompleteManeuverCurveWithEstimationData getPreviousManeuverOfSameTrack();
 

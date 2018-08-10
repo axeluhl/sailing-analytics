@@ -140,7 +140,7 @@ public class SameBoatClassBestPathsEvaluator<T extends ManeuverNodesLevel<T>> im
             Pair<T, FineGrainedPointOfSail> pair = iterator.next();
             T currentLevel = pair.getA();
             FineGrainedPointOfSail pointOfSailAfterCurrentManeuver = pair.getB();
-            if (currentLevel.isCleanManeuver() && !currentLevel.getManeuver().isMarkPassing()) {
+            if (currentLevel.isManeuverClean() && !currentLevel.getManeuver().isMarkPassing()) {
                 averageStatistics.addRecordToStatistics(currentLevel, pointOfSailAfterCurrentManeuver);
 
             }

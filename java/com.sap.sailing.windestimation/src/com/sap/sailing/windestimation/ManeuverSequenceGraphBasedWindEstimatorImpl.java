@@ -1,5 +1,6 @@
 package com.sap.sailing.windestimation;
 
+import java.util.Iterator;
 import java.util.List;
 
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
@@ -27,6 +28,25 @@ public class ManeuverSequenceGraphBasedWindEstimatorImpl
         AllManeuversOfRaceManeuverSequenceGraph maneuverGraph = new AllManeuversOfRaceManeuverSequenceGraph(
                 filteredCompetitorTracks, getPolarService());
         return maneuverGraph.estimateWindTrack();
+    }
+
+    @Override
+    protected void filterOutIrrelevantElementsFromCompetitorTracks(
+            List<CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData>> filteredCompetitorTracks) {
+        for (CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData> track : filteredCompetitorTracks) {
+            CompleteManeuverCurveWithEstimationData previousManeuver = null, currentManeuver = null;
+            for (Iterator<CompleteManeuverCurveWithEstimationData> iterator = track.getElements().iterator(); iterator
+                    .hasNext();) {
+                CompleteManeuverCurveWithEstimationData nextManeuver = iterator.next();
+                if (currentManeuver != null
+                        && Math.abs(currentManeuver.getMainCurve().getDirectionChangeInDegrees()) < 30
+                        || !currentManeuver.isManeuverClean(previousManeuver, nextManeuver)) {
+                    iterator.remove();
+                }
+                previousManeuver = currentManeuver;
+                currentManeuver = nextManeuver;
+            }
+        }
     }
 
 }

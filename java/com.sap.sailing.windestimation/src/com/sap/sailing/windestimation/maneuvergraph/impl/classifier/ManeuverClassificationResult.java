@@ -23,17 +23,15 @@ public class ManeuverClassificationResult {
     private final double[] likelihoodPerManeuverType;
     private final CompleteManeuverCurveWithEstimationData maneuver;
     private double tackProbabilityBonus = 0.0;
-    private final boolean cleanManeuverBeginning;
-    private final boolean cleanManeuverEnd;
     private final BoatClass boatClass;
+    private final boolean maneuverClean;
 
     public ManeuverClassificationResult(CompleteManeuverCurveWithEstimationData maneuver, BoatClass boatClass,
-            double[] likelihoodPerManeuverType, boolean cleanManeuverBeginning, boolean cleanManeuverEnd) {
+            double[] likelihoodPerManeuverType, boolean maneuverClean) {
         this.maneuver = maneuver;
         this.boatClass = boatClass;
         this.likelihoodPerManeuverType = likelihoodPerManeuverType;
-        this.cleanManeuverBeginning = cleanManeuverBeginning;
-        this.cleanManeuverEnd = cleanManeuverEnd;
+        this.maneuverClean = maneuverClean;
         computeLikelihoodsForPointOfSailAfterManeuver();
     }
 
@@ -235,22 +233,14 @@ public class ManeuverClassificationResult {
         return false;
     }
 
-    public boolean isCleanManeuverBoundaries() {
-        return cleanManeuverBeginning && cleanManeuverEnd;
-    }
-
-    public boolean isCleanManeuverBeginning() {
-        return cleanManeuverBeginning;
-    }
-
-    public boolean isCleanManeuverEnd() {
-        return cleanManeuverEnd;
+    public boolean isManeuverClean() {
+        return maneuverClean;
     }
 
     public double getTackProbabilityBonus() {
         return tackProbabilityBonus;
     }
-    
+
     public BoatClass getBoatClass() {
         return boatClass;
     }

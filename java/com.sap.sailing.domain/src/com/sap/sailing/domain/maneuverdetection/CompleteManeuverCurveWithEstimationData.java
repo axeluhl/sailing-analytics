@@ -97,11 +97,11 @@ public interface CompleteManeuverCurveWithEstimationData extends Timed, Position
      * boundaries, the boundaries of the curve with unstable course and speed are used.
      */
     Bearing getRelativeBearingToNextMarkAfterManeuver();
-    
+
     Distance getDistanceToClosestMark();
-    
+
     Double getTargetTackAngleInDegrees();
-    
+
     Double getTargetJibeAngleInDegrees();
 
     /**
@@ -114,31 +114,44 @@ public interface CompleteManeuverCurveWithEstimationData extends Timed, Position
         ManeuverCurveWithUnstableCourseAndSpeedWithEstimationData curveWithUnstableCourseAndSpeed = getCurveWithUnstableCourseAndSpeed();
         double secondsToNextManeuver = curveWithUnstableCourseAndSpeed.getDurationFromManeuverEndToNextManeuverStart()
                 .asSeconds();
-        if (curveWithUnstableCourseAndSpeed.getSpeedWithBearingBefore().getKnots() > 1
-                && curveWithUnstableCourseAndSpeed.getSpeedWithBearingAfter().getKnots() > 1
-                && Math.abs(curveWithUnstableCourseAndSpeed.getDirectionChangeInDegrees()
-                        - getMainCurve().getDirectionChangeInDegrees()) < 30
-                && (secondsToNextManeuver >= 4
-                        && getCurveWithUnstableCourseAndSpeed().getIntervalBetweenLastFixOfCurveAndNextFix()
-                                .asSeconds() < 8
-                        || nextManeuver != null
-                                && Math.abs(nextManeuver.getMainCurve().getDirectionChangeInDegrees()) < Math
-                                        .abs(getMainCurve().getDirectionChangeInDegrees()) * 0.3)) {
+        if (curveWithUnstableCourseAndSpeed.getSpeedWithBearingAfter().getKnots() > 2
+                && curveWithUnstableCourseAndSpeed.getIntervalBetweenLastFixOfCurveAndNextFix().asSeconds() <= 4
+                && secondsToNextManeuver * 1.0
+                        / curveWithUnstableCourseAndSpeed.getGpsFixesCountFromManeuverEndToNextManeuverStart() >= 8
+                && (secondsToNextManeuver >= 4 || nextManeuver != null
+                        && Math.abs(nextManeuver.getMainCurve().getDirectionChangeInDegrees()) < Math
+                                .abs(getMainCurve().getDirectionChangeInDegrees()) * 0.3)) {
             return true;
         }
         return false;
     }
 
     default boolean isManeuverBeginningClean(CompleteManeuverCurveWithEstimationData previousManeuver) {
-        double secondsToPreviousManeuver = getCurveWithUnstableCourseAndSpeed()
+        ManeuverCurveWithUnstableCourseAndSpeedWithEstimationData curveWithUnstableCourseAndSpeed = getCurveWithUnstableCourseAndSpeed();
+        double secondsToPreviousManeuver = curveWithUnstableCourseAndSpeed
                 .getDurationFromPreviousManeuverEndToManeuverStart().asSeconds();
-        if (getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getKnots() > 1
-                && (secondsToPreviousManeuver >= 4
-                        && getCurveWithUnstableCourseAndSpeed().getIntervalBetweenFirstFixOfCurveAndPreviousFix()
-                                .asSeconds() < 8
-                        || previousManeuver != null
-                                && Math.abs(previousManeuver.getMainCurve().getDirectionChangeInDegrees()) < Math
-                                        .abs(getMainCurve().getDirectionChangeInDegrees()) * 0.3)) {
+        if (curveWithUnstableCourseAndSpeed.getSpeedWithBearingBefore().getKnots() > 2
+                && curveWithUnstableCourseAndSpeed.getIntervalBetweenFirstFixOfCurveAndPreviousFix().asSeconds() <= 4
+                && secondsToPreviousManeuver * 1.0
+                        / curveWithUnstableCourseAndSpeed.getGpsFixesCountFromPreviousManeuverEndToManeuverStart() >= 8
+                && (secondsToPreviousManeuver >= 4 || previousManeuver != null
+                        && Math.abs(previousManeuver.getMainCurve().getDirectionChangeInDegrees()) < Math
+                                .abs(getMainCurve().getDirectionChangeInDegrees()) * 0.3)) {
+            return true;
+        }
+        return false;
+    }
+
+    default boolean isManeuverClean(CompleteManeuverCurveWithEstimationData previousManeuver,
+            CompleteManeuverCurveWithEstimationData nextManeuver) {
+        double speedInSpeedOutRatio = getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getKnots() < 0.1
+                ? 0
+                : getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getKnots()
+                        / getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getKnots();
+        if ((Math.abs(getMainCurve().getDirectionChangeInDegrees()) >= 120
+                || (speedInSpeedOutRatio < 3 && speedInSpeedOutRatio > 0.33333333))
+                && getCurveWithUnstableCourseAndSpeed().getLongestIntervalBetweenTwoFixes().asSeconds() <= 4
+                && isManeuverBeginningClean(previousManeuver) && isManeuverEndClean(nextManeuver)) {
             return true;
         }
         return false;

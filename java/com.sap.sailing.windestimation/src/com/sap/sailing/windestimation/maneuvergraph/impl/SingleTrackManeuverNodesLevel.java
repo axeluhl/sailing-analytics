@@ -97,21 +97,12 @@ public class SingleTrackManeuverNodesLevel extends AbstractManeuverNodesLevel<Si
     }
 
     @Override
-    public boolean isManeuverBeginningClean() {
+    public boolean isManeuverClean() {
         ManeuverClassificationResult maneuverClassificationResult = this.maneuverClassificationResult;
         if (maneuverClassificationResult == null) {
-            return getManeuver().isManeuverBeginningClean(getPreviousManeuverOfSameTrack());
+            return getManeuver().isManeuverClean(getPreviousManeuverOfSameTrack(), getNextManeuverOfSameTrack());
         }
-        return maneuverClassificationResult.isCleanManeuverBeginning();
-    }
-
-    @Override
-    public boolean isManeuverEndClean() {
-        ManeuverClassificationResult maneuverClassificationResult = this.maneuverClassificationResult;
-        if (maneuverClassificationResult == null) {
-            return getManeuver().isManeuverEndClean(getNextManeuverOfSameTrack());
-        }
-        return maneuverClassificationResult.isCleanManeuverEnd();
+        return maneuverClassificationResult.isManeuverClean();
     }
 
 }

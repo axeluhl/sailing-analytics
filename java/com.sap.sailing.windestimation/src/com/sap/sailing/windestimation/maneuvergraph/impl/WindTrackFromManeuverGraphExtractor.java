@@ -42,13 +42,14 @@ public class WindTrackFromManeuverGraphExtractor<T extends ManeuverNodesLevel<T>
 
         List<WindWithConfidence<TimePoint>> windTrack = getWindTrackWithLastNodeOfLastLevelConsideringMiddleCoursesOfCleanTacksAndJibes(
                 bestPath, bestPathConfidence);
-        if (windTrack.isEmpty()) {
-            windTrack = getWindTrackWithLastNodeOfLastLevelConsideringStableCourses(bestPath, bestPathConfidence * 0.5);
-        }
-        if (windTrack.isEmpty()) {
-            windTrack = getWindTrackWithLastNodeOfLastLevelConsideringPointOfSailsWithoutWindSpeed(bestPath,
-                    bestPathConfidence * 0.5);
-        }
+        // TODO use the unused methods for estimation based on curve fitting with actual and target polars
+        // if (windTrack.isEmpty()) {
+        // windTrack = getWindTrackWithLastNodeOfLastLevelConsideringStableCourses(bestPath, bestPathConfidence * 0.5);
+        // }
+        // if (windTrack.isEmpty()) {
+        // windTrack = getWindTrackWithLastNodeOfLastLevelConsideringPointOfSailsWithoutWindSpeed(bestPath,
+        // bestPathConfidence * 0.5);
+        // }
         return windTrack;
     }
 
@@ -64,8 +65,8 @@ public class WindTrackFromManeuverGraphExtractor<T extends ManeuverNodesLevel<T>
             if (pointOfSailBeforeManeuver.getCoarseGrainedPointOfSail().getLegType() == currentNode
                     .getCoarseGrainedPointOfSail().getLegType()
                     && pointOfSailBeforeManeuver.getTack() != currentNode.getTack()
-                    && Math.abs(currentLevel.getManeuver().getMainCurve().getDirectionChangeInDegrees()) < 110
-                    && currentLevel.isCleanManeuver() && !currentLevel.getManeuver().isMarkPassing()) {
+                    && Math.abs(currentLevel.getManeuver().getMainCurve().getDirectionChangeInDegrees()) < 120
+                    && currentLevel.isManeuverClean() && !currentLevel.getManeuver().isMarkPassing()) {
                 ManeuverType tackOrJibe;
                 if (currentNode.getCoarseGrainedPointOfSail().getLegType() == LegType.UPWIND) {
                     tackOrJibe = ManeuverType.TACK;

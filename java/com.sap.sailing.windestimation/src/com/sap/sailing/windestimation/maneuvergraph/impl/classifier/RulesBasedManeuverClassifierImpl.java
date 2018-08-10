@@ -35,9 +35,8 @@ public class RulesBasedManeuverClassifierImpl implements ManeuverClassifier {
         double[] likelihoodPerManeuverType = new double[CoarseGrainedManeuverType.values().length];
 
         double absCourseChangeDegMainCurve = Math.abs(maneuver.getMainCurve().getDirectionChangeInDegrees());
-        boolean cleanManeuverBeginning = maneuver.isManeuverBeginningClean(previousManeuver);
-        boolean cleanManeuverEnd = maneuver.isManeuverEndClean(nextManeuver);
-        if (cleanManeuverBeginning && cleanManeuverEnd) {
+        boolean cleanManeuver = maneuver.isManeuverClean(previousManeuver, nextManeuver);
+        if (cleanManeuver) {
             if (absCourseChangeDegMainCurve <= 15) {
                 // jibe, bear away, head up - hard to distinguish
                 double bearAwayLikelihoodBonus = limitProbabilityBonus(computeBearAwayLikelihoodBonus(maneuver) / 4,
@@ -94,8 +93,7 @@ public class RulesBasedManeuverClassifierImpl implements ManeuverClassifier {
         } else {
             Arrays.fill(likelihoodPerManeuverType, 1);
         }
-        return new ManeuverClassificationResult(maneuver, boatClass, likelihoodPerManeuverType, cleanManeuverBeginning,
-                cleanManeuverEnd);
+        return new ManeuverClassificationResult(maneuver, boatClass, likelihoodPerManeuverType, cleanManeuver);
     }
 
     private double computeJibeLikelihoodBonus(CompleteManeuverCurveWithEstimationData maneuver) {
