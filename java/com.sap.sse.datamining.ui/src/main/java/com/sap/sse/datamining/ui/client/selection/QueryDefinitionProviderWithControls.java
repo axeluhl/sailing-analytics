@@ -77,11 +77,12 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
 
     private final Panel mainPanel;
     private final FlowPanel controlsPanel;
+    private final DataMiningSettingsControl settingsControl;
+    private final AdvancedDataMiningSettings settings;
+    private final Button reloadComponentsButton;
     private final ToggleButton queryDefinitionViewerToggleButton;
     private final QueryDefinitionViewer queryDefinitionViewer;
     private final PredefinedQueryRunner predefinedQueryRunner;
-    private final DataMiningSettingsControl settingsControl;
-    private final AdvancedDataMiningSettings settings;
 
     private final ProviderListener providerListener;
     private final Collection<DataMiningComponentProvider<?>> providers;
@@ -128,16 +129,16 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         predefinedQueryRunner = new PredefinedQueryRunner(parent, context, getDataMiningStringMessages(),
                                                           dataMiningService, errorReporter, this, queryRunner);
 
-        Button reloadButton = new Button(getDataMiningStringMessages().reload());
-        reloadButton.addClickHandler(new ClickHandler() {
+        reloadComponentsButton = new Button(getDataMiningStringMessages().reloadComponents());
+        reloadComponentsButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 reloadComponents();
             }
         });
-        addControl(reloadButton);
 
         if (settings.isDeveloperOptions()) {
+            addControl(reloadComponentsButton);
             addControl(queryDefinitionViewerToggleButton);
             addControl(predefinedQueryRunner.getEntryWidget());
         }
@@ -484,12 +485,14 @@ public class QueryDefinitionProviderWithControls extends AbstractQueryDefinition
         if (settings.isDeveloperOptions() != newSettings.isDeveloperOptions()) {
             settings.setDeveloperOptions(newSettings.isDeveloperOptions());
             if (settings.isDeveloperOptions()) {
+                addControl(reloadComponentsButton);
                 addControl(queryDefinitionViewerToggleButton);
                 boolean queryDefinitionViewerActive = queryDefinitionViewerToggleButton.isDown();
                 filterSplitPanel.setWidgetHidden(queryDefinitionViewer.getEntryWidget(), !queryDefinitionViewerActive);
                 queryDefinitionViewer.setActive(queryDefinitionViewerActive);
                 addControl(predefinedQueryRunner.getEntryWidget());
             } else {
+                removeControl(reloadComponentsButton);
                 removeControl(queryDefinitionViewerToggleButton);
                 filterSplitPanel.setWidgetHidden(queryDefinitionViewer.getEntryWidget(), true);
                 queryDefinitionViewer.setActive(false);
