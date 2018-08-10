@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -48,12 +50,14 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TagListProvider;
+import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.raceboard.TaggingPanel.TagPanelResources.TagPanelStyle;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.player.Timer;
@@ -70,6 +74,10 @@ public class TaggingPanel extends ComponentWithoutSettings
 
     public interface TagPanelResources extends ClientBundle {
         public static final TagPanelResources INSTANCE = GWT.create(TagPanelResources.class);
+        
+        //TODO image is stored in wrong folder
+        @Source("com/sap/sailing/gwt/ui/client/images/edit.png")
+        ImageResource editIcon();
 
         @Source("tagging-panel.css")
         public TagPanelStyle style();
@@ -178,6 +186,24 @@ public class TaggingPanel extends ComponentWithoutSettings
                     removeTagFromRaceLog(tag);
                 }
             }
+        }
+    }
+    
+    private class EditTagButtonsImagesBarCell extends ImagesBarCell {
+        public static final String ACTION_REMOVE = "ACTION_REMOVE";
+        public static final String ACTION_EDIT = "ACTION_EDIT";
+        private final StringMessages stringMessages;
+        
+        public EditTagButtonsImagesBarCell(StringMessages stringMessages) {
+            this.stringMessages = stringMessages;
+        }
+
+
+        @Override
+        protected Iterable<ImageSpec> getImageSpecs() {
+            return Arrays.asList(
+                    new ImageSpec(ACTION_EDIT, stringMessages.actionEdit(), makeImagePrototype(TagPanelResources.INSTANCE.editIcon())),
+                    new ImageSpec(ACTION_REMOVE, stringMessages.actionRemove(), makeImagePrototype(IconResources.INSTANCE.removeIcon())));
         }
     }
 
