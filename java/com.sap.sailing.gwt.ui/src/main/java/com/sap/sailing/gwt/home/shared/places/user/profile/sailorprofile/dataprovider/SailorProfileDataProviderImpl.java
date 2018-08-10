@@ -95,8 +95,13 @@ public class SailorProfileDataProviderImpl implements SailorProfileDataProvider 
     }
 
     @Override
-    public void findSailorProfileById(UUID uuid, AsyncCallback<SailorProfileEntry> asyncCallback) {
-        asyncCallback.onSuccess(entries.get(uuid));
+    public void findSailorProfileById(UUID uuid, AsyncCallback<SailorProfileEntry> callback) {
+        clientFactory.getDispatch().execute(new GetSailorProfilesAction(uuid),
+                new AsyncCallback<SailorProfileEntries>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        callback.onFailure(caught);
                     }
 
                     @Override

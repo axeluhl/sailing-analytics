@@ -23,6 +23,13 @@ public class GetSailorProfilesAction implements SailingAction<SailorProfileEntri
 
     private HashMap<UUID, SailorProfileEntry> entries;
 
+    private UUID uuid;
+
+    public GetSailorProfilesAction(UUID uuid) {
+        this();
+        this.uuid = uuid;
+    }
+
     public GetSailorProfilesAction() {
         List<BadgeDTO> badges = new ArrayList<>();
         BadgeDTO b1 = new BadgeDTO(UUID.randomUUID(), "Best Sailor Ever");
@@ -67,7 +74,15 @@ public class GetSailorProfilesAction implements SailingAction<SailorProfileEntri
     @Override
     @GwtIncompatible
     public SailorProfileEntries execute(SailingDispatchContext ctx) throws DispatchException {
-        return new SailorProfileEntries(entries.values());
+        SailorProfileEntries result;
+        if (uuid == null) {
+            result = new SailorProfileEntries(entries.values());
+        } else {
+            List<SailorProfileEntry> list = new ArrayList<>();
+            list.add(entries.get(uuid));
+            result = new SailorProfileEntries(list);
+        }
+        return result;
     }
 
 }
