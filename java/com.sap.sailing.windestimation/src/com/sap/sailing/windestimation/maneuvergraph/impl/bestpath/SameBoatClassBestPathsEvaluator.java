@@ -188,34 +188,20 @@ public class SameBoatClassBestPathsEvaluator<T extends ManeuverNodesLevel<T>> im
         public void addRecordToStatistics(T maneuverLevel, FineGrainedPointOfSail pointOfSailAfterManeuver) {
             CompleteManeuverCurveWithEstimationData maneuver = maneuverLevel.getManeuver();
             FineGrainedManeuverType maneuverType = maneuverLevel.getTypeOfCleanManeuver(pointOfSailAfterManeuver);
-            boolean maneuverDataAdded = false;
-            if (maneuver.getMainCurve().getLongestIntervalBetweenTwoFixes().asSeconds() < 6) {
-                // maneuver data
-                sumOfAbsCourseChangesInDegreesPerManeuverType[maneuverType.ordinal()] += Math
-                        .abs(maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees());
-                sumOfTurningRatesPerManeuverType[maneuverType.ordinal()] += maneuver.getMainCurve()
-                        .getMaxTurningRateInDegreesPerSecond();
-                sumOfRatiosBetweenLowestSpeedAndManeuverEnteringSpeedPerManeuverType[maneuverType.ordinal()] += maneuver
-                        .getMainCurve().getLowestSpeed().getKnots()
-                        / maneuver.getMainCurve().getSpeedWithBearingBefore().getKnots();
-                maneuversCountPerManeuverType[maneuverType.ordinal()]++;
-                maneuverDataAdded = true;
-            }
-            boolean speedDataAdded = false;
-            if (1.0 * maneuver.getCurveWithUnstableCourseAndSpeed().getGpsFixesCountFromManeuverEndToNextManeuverStart()
-                    / maneuver.getCurveWithUnstableCourseAndSpeed().getDurationFromManeuverEndToNextManeuverStart()
-                            .asSeconds() > 1.0
-                                    / maneuverLevel.getBoatClass().getApproximateManeuverDuration().asSeconds()) {
-                // speed data
-                sumOfAverageSpeedsPerPointOfSail[pointOfSailAfterManeuver.ordinal()] += maneuver
-                        .getCurveWithUnstableCourseAndSpeed().getAverageSpeedWithBearingAfter().getKnots();
-                trackCountPerPointOfSail[pointOfSailAfterManeuver.ordinal()]++;
-                speedDataAdded = true;
-            }
-            if (maneuverDataAdded || speedDataAdded) {
-                cleanManeuvers.add(new Triple<>(maneuverLevel, maneuverDataAdded ? maneuverType : null,
-                        speedDataAdded ? pointOfSailAfterManeuver : null));
-            }
+            // maneuver data
+            sumOfAbsCourseChangesInDegreesPerManeuverType[maneuverType.ordinal()] += Math
+                    .abs(maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees());
+            sumOfTurningRatesPerManeuverType[maneuverType.ordinal()] += maneuver.getMainCurve()
+                    .getMaxTurningRateInDegreesPerSecond();
+            sumOfRatiosBetweenLowestSpeedAndManeuverEnteringSpeedPerManeuverType[maneuverType.ordinal()] += maneuver
+                    .getMainCurve().getLowestSpeed().getKnots()
+                    / maneuver.getMainCurve().getSpeedWithBearingBefore().getKnots();
+            maneuversCountPerManeuverType[maneuverType.ordinal()]++;
+            // speed data
+            sumOfAverageSpeedsPerPointOfSail[pointOfSailAfterManeuver.ordinal()] += maneuver
+                    .getCurveWithUnstableCourseAndSpeed().getAverageSpeedWithBearingAfter().getKnots();
+            trackCountPerPointOfSail[pointOfSailAfterManeuver.ordinal()]++;
+            cleanManeuvers.add(new Triple<>(maneuverLevel, maneuverType, pointOfSailAfterManeuver));
         }
 
         public List<Triple<T, FineGrainedManeuverType, FineGrainedPointOfSail>> getCleanManeuvers() {
