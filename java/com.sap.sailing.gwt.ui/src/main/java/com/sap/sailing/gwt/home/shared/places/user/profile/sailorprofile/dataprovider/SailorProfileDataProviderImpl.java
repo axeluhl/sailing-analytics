@@ -10,10 +10,13 @@ import java.util.UUID;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.BadgeDTO;
+import com.sap.sailing.gwt.home.communication.user.profile.GetSailorProfilesAction;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.BadgeDTO;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEntries;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEntry;
+import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.ParticipatedEventDTO;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.ParticipatedRegattaDTO;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.SailorProfileEntry;
 
 public class SailorProfileDataProviderImpl implements SailorProfileDataProvider {
 
@@ -21,7 +24,10 @@ public class SailorProfileDataProviderImpl implements SailorProfileDataProvider 
 
     private Collection<ParticipatedEventDTO> events;
 
-    public SailorProfileDataProviderImpl() {
+    private final ClientFactoryWithDispatch clientFactory;
+
+    public SailorProfileDataProviderImpl(ClientFactoryWithDispatch clientFactory) {
+        this.clientFactory = clientFactory;
 
         List<BadgeDTO> badges = new ArrayList<>();
         BadgeDTO b1 = new BadgeDTO(UUID.randomUUID(), "Best Sailor Ever");
@@ -84,8 +90,8 @@ public class SailorProfileDataProviderImpl implements SailorProfileDataProvider 
     }
 
     @Override
-    public Collection<SailorProfileEntry> loadSailorProfiles() {
-        return entries.values();
+    public void loadSailorProfiles(AsyncCallback<SailorProfileEntries> callback) {
+        clientFactory.getDispatch().execute(new GetSailorProfilesAction(), callback);
     }
 
     @Override

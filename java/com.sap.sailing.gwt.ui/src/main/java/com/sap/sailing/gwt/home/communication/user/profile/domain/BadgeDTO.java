@@ -1,11 +1,17 @@
-package com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain;
+package com.sap.sailing.gwt.home.communication.user.profile.domain;
 
+import java.io.Serializable;
 import java.util.UUID;
 
-public class BadgeDTO {
+public class BadgeDTO implements Serializable {
+    private static final long serialVersionUID = 2374312724838738559L;
 
-    private final UUID key;
-    private final String name;
+    private UUID key;
+    private String name;
+
+    protected BadgeDTO() {
+
+    }
 
     public BadgeDTO(UUID key, String name) {
         super();

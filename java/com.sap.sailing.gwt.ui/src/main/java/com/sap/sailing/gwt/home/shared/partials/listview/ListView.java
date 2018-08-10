@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.shared.partials.listview;
 
-import java.util.List;
 import java.util.function.Function;
 
 import com.google.gwt.core.client.GWT;
@@ -65,7 +64,7 @@ public class ListView<T> extends Composite implements HasText {
         }
     }
 
-    public void setItems(List<T> competitors) {
+    public void setItems(Iterable<T> competitors) {
         itemContainerUi.clear();
         competitors.forEach(c -> addListItem(c));
     }

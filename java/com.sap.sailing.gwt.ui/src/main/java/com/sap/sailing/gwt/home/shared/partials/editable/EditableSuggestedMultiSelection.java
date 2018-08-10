@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.shared.partials.editable;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -117,7 +116,7 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
         tableElements.put(listItem, item);
     }
 
-    public void setSelectedItems(List<T> competitors) {
+    public void setSelectedItems(Iterable<T> competitors) {
         itemContainerUi.clear();
         multiSelect.setSelectedItems(competitors);
     }

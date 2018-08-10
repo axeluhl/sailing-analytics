@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab;
 
 import java.util.Collection;
 
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.SailorProfileEntry;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEntry;
 
 public interface SailorProfileOverview extends SailorProfileView {
 

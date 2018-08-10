@@ -99,7 +99,7 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
     }
     
     @Override
-    public void setSelectedItems(Collection<T> selectedItemsToSet) {
+    public void setSelectedItems(Iterable<T> selectedItemsToSet) {
         itemContainerUi.clear();
         selectionChangeHandlers.forEach(h -> h.onClear());
         for (final T item : selectedItemsToSet) {

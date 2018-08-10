@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.preferences;
 
-import java.util.Collection;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.resources.client.CssResource;
@@ -72,7 +70,7 @@ public class UserPreferences extends Composite implements UserPreferencesView {
         }
         
         @Override
-        public void setSelectedItems(Collection<SimpleCompetitorWithIdDTO> selectedItems) {
+        public void setSelectedItems(Iterable<SimpleCompetitorWithIdDTO> selectedItems) {
             selectionUi.setSelectedItems(selectedItems);
         }
 
@@ -105,7 +103,7 @@ public class UserPreferences extends Composite implements UserPreferencesView {
         }
         
         @Override
-        public void setSelectedItems(Collection<BoatClassDTO> selectedItems) {
+        public void setSelectedItems(Iterable<BoatClassDTO> selectedItems) {
             selectionUi.setSelectedItems(selectedItems);
         }
         

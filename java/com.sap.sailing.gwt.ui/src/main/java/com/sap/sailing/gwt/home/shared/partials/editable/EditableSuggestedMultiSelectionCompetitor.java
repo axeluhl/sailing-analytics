@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.shared.partials.editable;
 
-import java.util.Collection;
 import java.util.function.Function;
 
 import com.google.gwt.user.client.ui.HasEnabled;
@@ -48,7 +47,7 @@ public class EditableSuggestedMultiSelectionCompetitor
         }
 
         @Override
-        public void setSelectedItems(Collection<SimpleCompetitorWithIdDTO> selectedItems) {
+        public void setSelectedItems(Iterable<SimpleCompetitorWithIdDTO> selectedItems) {
             selectionUi.setSelectedItems(selectedItems);
         }
 

@@ -39,7 +39,7 @@ public class SharedSailorProfilePresenter<C extends ClientFactoryWithDispatch & 
     private final SuggestedMultiSelectionBoatClassDataProvider boatClassDataProvider = new SuggestedMultiSelectionBoatClassDataProviderImpl();
     private final C clientFactory;
 
-    private final SailorProfileDataProvider sailorProfileDataProvider = new SailorProfileDataProviderImpl();
+    private final SailorProfileDataProvider sailorProfileDataProvider;
 
     private SuggestedMultiSelectionCompetitorDataProvider adjustedCompetitorDataProvider = null;
 
@@ -52,6 +52,7 @@ public class SharedSailorProfilePresenter<C extends ClientFactoryWithDispatch & 
 
     public SharedSailorProfilePresenter(C clientFactory) {
         this.clientFactory = clientFactory;
+        this.sailorProfileDataProvider = new SailorProfileDataProviderImpl(clientFactory);
     }
 
     @Override
