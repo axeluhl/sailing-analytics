@@ -239,13 +239,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
                 HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> currentSelection = getSelection();
                 if (!currentSelection.isEmpty()) {
                     selectionToBeApplied = currentSelection;
-                    selectionCallback = messages -> {
-                        String joinedMessages = "";
-                        for (String message : messages) {
-                            joinedMessages += "\n\t" + message;
-                        }
-                        logger.info("Unable to retain the following selection:" + joinedMessages);
-                    };
+                    selectionCallback = EmptyCallback;
                 }
                 updateFilterDimensions();
             } else if (!isAwaitingReload) {
