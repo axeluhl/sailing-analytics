@@ -10,17 +10,20 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 public class MultiRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecycle<MultiRaceLeaderboardSettings> {
 
     protected final List<String> namesOfRaceColumns;
+    private final boolean canBoatInfoBeShown;
     
     public MultiRaceLeaderboardPanelLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages,
             Iterable<DetailType> availableDetailTypes) {
-        this(leaderboard != null ? leaderboard.getNamesOfRaceColumns() : new ArrayList<String>(), stringMessages,
+        this(leaderboard != null ? leaderboard.getNamesOfRaceColumns() : new ArrayList<String>(),
+                leaderboard != null ? !leaderboard.canBoatsOfCompetitorsChangePerRace : false, stringMessages,
                 availableDetailTypes);
     }
     
-    protected MultiRaceLeaderboardPanelLifecycle(List<String> namesOfRaceColumns, StringMessages stringMessages,
+    protected MultiRaceLeaderboardPanelLifecycle(List<String> namesOfRaceColumns, boolean canBoatInfoBeShown, StringMessages stringMessages,
             Iterable<DetailType> availableDetailTypes) {
         super(stringMessages, availableDetailTypes);
         this.namesOfRaceColumns = namesOfRaceColumns;
+        this.canBoatInfoBeShown = canBoatInfoBeShown;
     }
     
     @Override
@@ -31,7 +34,8 @@ public class MultiRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecycl
     
     @Override
     public MultiRaceLeaderboardSettingsDialogComponent getSettingsDialogComponent(MultiRaceLeaderboardSettings settings) {
-        return new MultiRaceLeaderboardSettingsDialogComponent(settings, namesOfRaceColumns, stringMessages, availableDetailTypes, false);
+        return new MultiRaceLeaderboardSettingsDialogComponent(settings, namesOfRaceColumns, stringMessages,
+                availableDetailTypes, canBoatInfoBeShown);
     }
 
     @Override

@@ -13,7 +13,7 @@ public class MultipleMultiLeaderboardPanelLifecycle extends MultiRaceLeaderboard
     public static final String MID = "mlb";
 
     public MultipleMultiLeaderboardPanelLifecycle(StringMessages stringMessages, Iterable<DetailType> availableDetailTypes) {
-        super(Collections.emptyList(), stringMessages, availableDetailTypes);
+        super(Collections.emptyList(), false, stringMessages, availableDetailTypes);
     }
 
     @Override
