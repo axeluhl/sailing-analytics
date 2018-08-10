@@ -41,34 +41,26 @@ public abstract class DelegatingProxiedRemoteServiceServlet extends ProxiedRemot
         if (serviceMethod == null) {
             throw new NullPointerException("serviceMethod");
         }
-
         if (serializationPolicy == null) {
             throw new NullPointerException("serializationPolicy");
         }
-
         String responsePayload;
         try {
             Object result = serviceMethod.invoke(target, args);
-
             responsePayload = encodeResponseForSuccess(serviceMethod, serializationPolicy, flags, result);
         } catch (IllegalAccessException e) {
-            SecurityException securityException = new SecurityException(
-                    formatIllegalAccessErrorMessage(target, serviceMethod));
+            SecurityException securityException = new SecurityException(formatIllegalAccessErrorMessage(target, serviceMethod));
             securityException.initCause(e);
             throw securityException;
         } catch (IllegalArgumentException e) {
-            SecurityException securityException = new SecurityException(
-                    formatIllegalArgumentErrorMessage(target, serviceMethod, args));
+            SecurityException securityException = new SecurityException(formatIllegalArgumentErrorMessage(target, serviceMethod, args));
             securityException.initCause(e);
             throw securityException;
         } catch (InvocationTargetException e) {
             // Try to encode the caught exception
-            //
             Throwable cause = e.getCause();
-
             responsePayload = RPC.encodeResponseForFailure(serviceMethod, cause, serializationPolicy, flags);
         }
-
         return responsePayload;
     }
 
