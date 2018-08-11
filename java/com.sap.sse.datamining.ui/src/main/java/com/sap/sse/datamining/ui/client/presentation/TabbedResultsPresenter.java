@@ -116,11 +116,11 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
         try {
             if (result != null) {
                 if (registeredResultPresenterMap.containsKey(result.getResultType())) {
-                    addTabAndFocus(registeredResultPresenterMap.get(result.getResultType()));
+                    presenterId = addTabAndFocus(registeredResultPresenterMap.get(result.getResultType()));
                     removeTab(oldTab);
                 } else {
                     if (!(oldTab.getPresenter() instanceof MultiResultsPresenter)) {
-                        addTabAndFocus(new MultiResultsPresenter(this, getComponentContext(), drillDownCallback));
+                        presenterId = addTabAndFocus(new MultiResultsPresenter(this, getComponentContext(), drillDownCallback));
                         removeTab(oldTab);
                     }
                 }
@@ -207,7 +207,7 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
         return tabsMappedById.get(id);
     }
 
-    protected void addTabAndFocus(ResultsPresenter<?> tabPresenter) {
+    protected String addTabAndFocus(ResultsPresenter<?> tabPresenter) {
         String tabId = IdPrefix + idCounter.getAndIncrement();
         CloseablePresenterTab tabHeader = new CloseablePresenterTab(tabId, tabPresenter);
         tabsMappedById.put(tabId, tabHeader);
@@ -216,6 +216,7 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
         int presenterIndex = tabPanel.getWidgetIndex(tabPresenter.getEntryWidget());
         tabPanel.selectTab(presenterIndex);
         tabPanel.scrollToTab(presenterIndex);
+        return tabId;
     }
 
     protected void removeTab(CloseablePresenterTab tab) {
