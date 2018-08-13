@@ -49,10 +49,6 @@ public class StartActivity extends AbstractStartActivity<CheckinData> {
         replaceFragment(R.id.content_frame, new HomeFragment());
         refreshDatabase();
 
-        if (!EulaHelper.with(this).isEulaAccepted()) {
-            EulaHelper.with(this).showEulaDialog(R.style.AppTheme_AlertDialog);
-        }
-
         Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
         int smallIcon = R.drawable.ic_directions_boat;
         CharSequence title = getText(R.string.app_name);
