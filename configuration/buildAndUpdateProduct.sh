@@ -634,7 +634,10 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             SDK_MANAGER="$ANDROID_HOME/tools/bin/sdkmanager.bat"
         fi
         
-        mobile_extra="-P -with-not-android-relevant -P with-mobile -P use-staged-third-party-artifacts -Dmaven.repo.local=C:/tmp/temp_maven_repo"
+	# Uncomment the following line for testing an artifact stages in the SAP-central Nexus system:
+        # mobile_extra="-P -with-not-android-relevant -P with-mobile -P use-staged-third-party-artifacts -Dmaven.repo.local=${TMP}/temp_maven_repo"
+	# Use the following line for regular builds with no staged Nexus artifacts:
+        mobile_extra="-P -with-not-android-relevant -P with-mobile"
         
         if [ $testing -eq 0 ]; then
             echo "INFO: Skipping tests"
