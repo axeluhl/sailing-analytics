@@ -2,8 +2,6 @@ package com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab;
 
 import java.util.UUID;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
@@ -49,19 +47,7 @@ public class SailorProfileTabView extends Composite implements UserProfileTabVie
                 SailorProfileEntry newEntry = new SailorProfileEntry(UUID.randomUUID(), "New Sailor Profile");
                 sailorView.setEntry(newEntry);
             } else {
-            currentPresenter.getSharedSailorProfilePresenter().getDataProvider().findSailorProfileById(uuid,
-                    new AsyncCallback<SailorProfileEntry>() {
-
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            GWT.log(caught.getMessage(), caught);
-                        }
-
-                        @Override
-                        public void onSuccess(SailorProfileEntry result) {
-                            sailorView.setEntry(result);
-                        }
-                    });
+                currentPresenter.getSharedSailorProfilePresenter().refreshSailorProfileEntry(uuid, sailorView);
             }
         } else {
             view = new SailorProfileOverviewImpl();

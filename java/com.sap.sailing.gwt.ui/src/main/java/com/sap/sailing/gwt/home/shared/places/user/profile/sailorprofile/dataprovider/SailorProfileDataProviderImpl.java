@@ -11,12 +11,14 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.GetSailorProfilesAction;
+import com.sap.sailing.gwt.home.communication.user.profile.SaveSailorProfileAction;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.BadgeDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEntries;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEntry;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.ParticipatedEventDTO;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.ParticipatedRegattaDTO;
+import com.sap.sse.gwt.dispatch.shared.commands.VoidResult;
 
 public class SailorProfileDataProviderImpl implements SailorProfileDataProvider {
 
@@ -114,6 +116,24 @@ public class SailorProfileDataProviderImpl implements SailorProfileDataProvider 
     @Override
     public void getEvents(UUID key, AsyncCallback<Iterable<ParticipatedEventDTO>> asyncCallback) {
         asyncCallback.onSuccess(events);
+    }
+
+    @Override
+    public void updateOrCreateSailorProfile(SailorProfileEntry sailorProfile,
+            AsyncCallback<SailorProfileEntries> callback) {
+        clientFactory.getDispatch().execute(new SaveSailorProfileAction(sailorProfile),
+                new AsyncCallback<VoidResult>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        callback.onFailure(caught);
+                    }
+
+                    @Override
+                    public void onSuccess(VoidResult result) {
+                    }
+                });
+        clientFactory.getDispatch().execute(new GetSailorProfilesAction(sailorProfile.getKey()), callback);
     }
 
 }

@@ -15,4 +15,6 @@ public interface SailorProfileDataProvider {
 
     void loadSailorProfiles(AsyncCallback<SailorProfileEntries> callback);
 
+    void updateOrCreateSailorProfile(SailorProfileEntry sailorProfile, AsyncCallback<SailorProfileEntries> callback);
+
 }
