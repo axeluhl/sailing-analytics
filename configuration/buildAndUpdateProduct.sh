@@ -634,7 +634,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             SDK_MANAGER="$ANDROID_HOME/tools/bin/sdkmanager.bat"
         fi
         
-        mobile_extra="-P -with-not-android-relevant -P with-mobile"
+        mobile_extra="-P -with-not-android-relevant -P with-mobile -P use-staged-third-party-artifacts -Dmaven.repo.local=C:/tmp/temp_maven_repo"
         
         if [ $testing -eq 0 ]; then
             echo "INFO: Skipping tests"
