@@ -29,7 +29,7 @@ ext {
     // regular
     buildTools = "22.0.1"
     compileSdk = 22
-    minSdk = 15
+    minSdk = 16
     targetSdk = 22
 
     support = "22.2.1"
