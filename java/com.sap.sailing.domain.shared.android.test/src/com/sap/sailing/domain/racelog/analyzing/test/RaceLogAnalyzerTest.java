@@ -30,7 +30,8 @@ public abstract class RaceLogAnalyzerTest<AnalyzerType extends RaceLogAnalyzer<?
     protected abstract AnalyzerType createAnalyzer(RaceLog raceLog);
     
     protected static <T extends RaceLogEvent> T createEvent(Class<T> type, long milliseconds) {
-        return createEvent(/* priority */ 0, type, milliseconds);
+        final T result = createEvent(/* priority */ 0, type, milliseconds);
+        return result;
     }
     
     protected static <T extends RaceLogEvent> T createEvent(int priority, Class<T> type, long milliseconds) {
