@@ -1,5 +1,10 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -24,6 +29,9 @@ import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSetsDialog;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSetsJsonDeSerializer;
 import com.sap.sailing.gwt.ui.raceboard.TagFilterPanel.TagFilterResources.TagFilterCss;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.filter.AbstractListFilter;
+import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
@@ -84,6 +92,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
     private final FlowPanel searchBoxPanel;
     private final StringMessages stringMessages;
     private final TagListProvider tagProvider;
+    private final AbstractListFilter<TagDTO> filter;
 
     private FilterSet<TagDTO, FilterWithUI<TagDTO>> lastActiveTagFilterSet;
 
@@ -101,6 +110,14 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
             tagFilterSets = createAndAddDefaultTagsFilter();
             storeTagsFilterSets(tagFilterSets);
         }
+        
+        filter = new AbstractListFilter<TagDTO>() {
+            @Override
+            public Iterable<String> getStrings(TagDTO tag) {
+                final List<String> result = new ArrayList<>(Arrays.asList(tag.getTag().toLowerCase(), tag.getComment()));
+                return result;
+            }
+        };
 
         Button submitButton = new Button();
         submitButton.setStyleName(css.button());
@@ -245,9 +262,9 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
     }
 
     @Override
-    public boolean matches(TagDTO object) {
-        // TODO Auto-generated method stub
-        return false;
+    public boolean matches(TagDTO tag) {
+        final Iterable<String> lowercaseKeywords = Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(searchTextBox.getText().toLowerCase());
+        return !Util.isEmpty(filter.applyFilter(lowercaseKeywords, Collections.singleton(tag)));
     }
 
     @Override
@@ -284,9 +301,47 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
         return null;
     }
 
+    /**
+     * @param event ignored; may be <code>null</code>
+     */
     @Override
     public void onKeyUp(KeyUpEvent event) {
-        // TODO Auto-generated method stub
+        String newValue = searchTextBox.getValue();
+        if (newValue.trim().isEmpty()) {
+            removeSearchFilter();
+            clearTextBoxButton.addStyleName(css.hiddenButton());
+        } else {
+            if (newValue.length() >= 2) {
+                clearTextBoxButton.removeStyleName(css.hiddenButton());
+                ensureSearchFilterIsSet();
+                tagProvider.setTagsFilterSet(tagProvider.getTagsFilterSet()); // 
+            }
+        }
+    }
+    
+    private void ensureSearchFilterIsSet() {
+        if (tagProvider.getTagsFilterSet() == null || !Util.contains(tagProvider.getTagsFilterSet().getFilters(), this)) {
+            FilterSet<TagDTO, Filter<TagDTO>> newFilterSetWithThis = new FilterSet<>(getName());
+            if (tagProvider.getTagsFilterSet() != null) {
+                for (Filter<TagDTO> oldFilter : tagProvider.getTagsFilterSet().getFilters()) {
+                    newFilterSetWithThis.addFilter(oldFilter);
+                }
+            }
+            newFilterSetWithThis.addFilter(this);
+            tagProvider.setTagsFilterSet(newFilterSetWithThis);
+        }
+    }
 
+    private void removeSearchFilter() {
+        if (tagProvider.getTagsFilterSet() != null
+                && Util.contains(tagProvider.getTagsFilterSet().getFilters(), this)) {
+            FilterSet<TagDTO, Filter<TagDTO>> newFilterSetWithThis = new FilterSet<>(tagProvider.getTagsFilterSet().getName());
+            for (Filter<TagDTO> oldFilter : tagProvider.getTagsFilterSet().getFilters()) {
+                if (oldFilter != this) {
+                    newFilterSetWithThis.addFilter(oldFilter);
+                }
+            }
+            tagProvider.setTagsFilterSet(newFilterSetWithThis);
+        }
     }
 }
