@@ -28,7 +28,7 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
 
     
     public MultiRaceLeaderboardSettings() {
-        super();
+        super(false);
     }
 
     public MultiRaceLeaderboardSettings(Collection<DetailType> maneuverDetailsToShow,
@@ -48,6 +48,7 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
     }
 
     public MultiRaceLeaderboardSettings(Iterable<String> namesOfRaceColumnsToShow) {
+        super(false);
        this.namesOfRaceColumnsToShow.setValues(namesOfRaceColumnsToShow);
     }
     
@@ -63,6 +64,7 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
         newSettings.showAddedScores.setValue(this.isShowAddedScores());
         newSettings.showCompetitorShortNameColumn.setValue(this.isShowCompetitorShortNameColumn());
         newSettings.showCompetitorFullNameColumn.setValue(this.isShowCompetitorFullNameColumn());
+        newSettings.showCompetitorBoatInfoColumn.setValue(this.isShowCompetitorBoatInfoColumn());
         newSettings.isShowCompetitorNationality.setValue(this.isShowCompetitorNationality());
         newSettings.namesOfRaceColumnsToShow.setValues(this.getNamesOfRaceColumnsToShow());
         newSettings.namesOfRaceColumnsToShow.setDefaultValues(namesOfRaceColumns);

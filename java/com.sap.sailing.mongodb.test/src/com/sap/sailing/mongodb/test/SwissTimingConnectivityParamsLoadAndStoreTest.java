@@ -53,7 +53,8 @@ public class SwissTimingConnectivityParamsLoadAndStoreTest extends AbstractConne
         final SwissTimingTrackingConnectivityParameters stParams = new SwissTimingTrackingConnectivityParameters(
                 hostname, port, raceID, raceName, raceDescription, boatClass, startList, delayToLiveInMillis,
                 SwissTimingFactory.INSTANCE, new SwissTimingAdapterFactoryImpl().getOrCreateSwissTimingAdapter(domainObjectFactory.getBaseDomainFactory()).getSwissTimingDomainFactory(),
-                /* raceLogStore */ null, /* regattaLogStore */ null, useInternalMarkPassingAlgorithm, trackWind, correctWindDirectionByMagneticDeclination);
+                /* raceLogStore */ null, /* regattaLogStore */ null, useInternalMarkPassingAlgorithm, trackWind, correctWindDirectionByMagneticDeclination,
+                /* updateURL */ null, /* updateUsername */ null, /* updatePassword */ null);
         // store
         mongoObjectFactory.addConnectivityParametersForRaceToRestore(stParams);
         // load
@@ -103,7 +104,8 @@ public class SwissTimingConnectivityParamsLoadAndStoreTest extends AbstractConne
         final SwissTimingTrackingConnectivityParameters stParams = new SwissTimingTrackingConnectivityParameters(
                 hostname, port, raceID, raceName, raceDescription, boatClass, startList, delayToLiveInMillis,
                 SwissTimingFactory.INSTANCE, new SwissTimingAdapterFactoryImpl().getOrCreateSwissTimingAdapter(domainObjectFactory.getBaseDomainFactory()).getSwissTimingDomainFactory(),
-                /* raceLogStore */ null, /* regattaLogStore */ null, useInternalMarkPassingAlgorithm, trackWind, correctWindDirectionByMagneticDeclination);
+                /* raceLogStore */ null, /* regattaLogStore */ null, useInternalMarkPassingAlgorithm, trackWind, correctWindDirectionByMagneticDeclination,
+                /* updateURL */ null, /* updateUsername */ null, /* updatePassword */ null);
         // store
         mongoObjectFactory.addConnectivityParametersForRaceToRestore(stParams);
         // load
