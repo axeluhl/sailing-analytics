@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.settings.client.leaderboard;
 
 import java.util.Collection;
+import java.util.List;
 
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sse.common.settings.generic.BooleanSetting;
@@ -34,5 +35,12 @@ public class SingleRaceLeaderboardSettings extends LeaderboardSettings {
     protected void addChildSettings() {
         super.addChildSettings();
         showRaceRankColumn = new BooleanSetting("racerank", this, false);
+    }
+
+    public static SingleRaceLeaderboardSettings createNewWithDefaultsAndwithRaceDetailsToShow(
+            List<DetailType> raceDetailsToShow) {
+        SingleRaceLeaderboardSettings defaultSettings = new SingleRaceLeaderboardSettings(false);
+        defaultSettings.raceDetailsToShow.setValues(raceDetailsToShow);
+        return defaultSettings;
     }
 }

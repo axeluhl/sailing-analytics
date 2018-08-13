@@ -20,7 +20,6 @@ import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultipleMultiLeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionModel;
@@ -235,7 +234,7 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<MultiRaceL
 
             MultiRaceLeaderboardSettings toMerge = contextStore.get(newSelectedLeaderboardName);
             if (toMerge != null) {
-                toMerge = mergeContext(loadedSettings, toMerge);
+                toMerge = loadedSettings.withRaceColumnSelectionFrom(toMerge);
             } else {
                 toMerge = loadedSettings;
             }
@@ -263,10 +262,6 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<MultiRaceL
             }
         }
         this.selectedLeaderboardName = newSelectedLeaderboardName;
-    }
-
-    private MultiRaceLeaderboardSettings mergeContext(MultiRaceLeaderboardSettings settings, MultiRaceLeaderboardSettings toMerge) {
-        return LeaderboardSettingsFactory.getInstance().mergeLeaderboardSettings(toMerge, settings);
     }
 
     @Override

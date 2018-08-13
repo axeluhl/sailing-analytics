@@ -102,4 +102,23 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
         return activeRaceColumnSelectionStrategy.getValue();
     }
 
+    public MultiRaceLeaderboardSettings withRaceColumnSelectionFrom(
+            MultiRaceLeaderboardSettings settingsWithRaceColunSelection) {
+        MultiRaceLeaderboardSettings newSettings = new MultiRaceLeaderboardSettings();
+        SettingsUtil.copyValuesAndDefaults(this, this, newSettings);
+        newSettings.activeRaceColumnSelectionStrategy
+                .setValue(settingsWithRaceColunSelection.getActiveRaceColumnSelectionStrategy());
+        newSettings.numberOfLastRacesToShow.setValue(settingsWithRaceColunSelection.getNumberOfLastRacesToShow());
+        newSettings.namesOfRaceColumnsToShow.setValues(settingsWithRaceColunSelection.getNamesOfRaceColumnsToShow());
+        return newSettings;
+    }
+
+    public static MultiRaceLeaderboardSettings createDefaultSettingsWithLastNMode(int numberOfLastRacesToShow) {
+        MultiRaceLeaderboardSettings newSettings = new MultiRaceLeaderboardSettings();
+        newSettings.namesOfRaceColumnsToShow.setValues(null);
+        newSettings.numberOfLastRacesToShow.setValue(numberOfLastRacesToShow);
+        newSettings.activeRaceColumnSelectionStrategy.setValue(RaceColumnSelectionStrategies.LAST_N);
+        return newSettings;
+    }
+
 }

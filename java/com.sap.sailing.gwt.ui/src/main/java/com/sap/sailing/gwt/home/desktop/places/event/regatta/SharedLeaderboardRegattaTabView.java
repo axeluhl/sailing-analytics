@@ -6,7 +6,6 @@ import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.gwt.home.desktop.places.Consumer;
-import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsFactory;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardUrlSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
@@ -20,9 +19,9 @@ import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.settings.PipelineLevel;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorageAndAdditionalSettingsLayers.OnSettingsReloadedCallback;
 import com.sap.sse.security.ui.settings.PlaceBasedComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.StoredSettingsLocation;
+import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorageAndAdditionalSettingsLayers.OnSettingsReloadedCallback;
 
 /**
  * An abstract regatta tabView with some shared functions between the leaderboard tab and competitors chart tab 
@@ -73,9 +72,8 @@ public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventReg
                                 initialLeaderboardSizeCalculated = true;
                                 if (newWidth > 0 && newHeight > 0 && newWidth > 1500) {
                                     final int numberOfLastRacesToShow = (1500 - 600) / 50;
-                                    final MultiRaceLeaderboardSettings newSettings = LeaderboardSettingsFactory.getInstance()
-                                            .createNewDefaultSettingsWithLastN(numberOfLastRacesToShow);
-
+                                    MultiRaceLeaderboardSettings newSettings = MultiRaceLeaderboardSettings
+                                            .createDefaultSettingsWithLastNMode(numberOfLastRacesToShow);
                                     componentContext.addAdditionalSettingsLayerForComponent(leaderboardPanel,
                                             PipelineLevel.SYSTEM_DEFAULTS, newSettings,
                                             new OnSettingsReloadedCallback<MultiRaceLeaderboardSettings>() {

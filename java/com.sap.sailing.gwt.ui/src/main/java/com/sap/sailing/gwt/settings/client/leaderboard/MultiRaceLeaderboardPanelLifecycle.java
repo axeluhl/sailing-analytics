@@ -6,6 +6,7 @@ import java.util.List;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.settings.generic.support.SettingsUtil;
 
 public class MultiRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecycle<MultiRaceLeaderboardSettings> {
 
@@ -40,7 +41,8 @@ public class MultiRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecycl
 
     @Override
     public MultiRaceLeaderboardSettings createDefaultSettings() {
-        return LeaderboardSettingsFactory.getInstance()
-                .createNewDefaultSettingsWithRaceColumns(namesOfRaceColumns);
+        MultiRaceLeaderboardSettings leaderboardSettings = new MultiRaceLeaderboardSettings(namesOfRaceColumns);
+        SettingsUtil.copyDefaultsFromValues(leaderboardSettings, leaderboardSettings);
+        return leaderboardSettings;
     }
 }
