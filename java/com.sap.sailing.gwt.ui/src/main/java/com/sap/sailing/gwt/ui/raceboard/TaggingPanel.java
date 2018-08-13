@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -77,8 +78,8 @@ public class TaggingPanel extends ComponentWithoutSettings
 
     public interface TagPanelResources extends ClientBundle {
         public static final TagPanelResources INSTANCE = GWT.create(TagPanelResources.class);
-        
-        //TODO image is stored in wrong folder
+
+        // TODO image is stored in wrong folder
         @Source("com/sap/sailing/gwt/ui/client/images/edit.png")
         ImageResource editIcon();
 
@@ -92,7 +93,6 @@ public class TaggingPanel extends ComponentWithoutSettings
             String tagCreated();
             String tagComment();
             String tagImage();
-            
             String button();
             String footerButton();
             String tagButtonTable();
@@ -102,7 +102,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             String footerPanel();
         }
     }
-    
+
     public interface CellListResources extends CellList.Resources {
         public static final CellListResources INSTANCE = GWT.create(CellListResources.class);
 
@@ -118,8 +118,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             String cellListSelectedItem();
             String cellListKeyboardSelectedItem();
         }
-    } 
-    
+    }
 
     public interface TagCellTemplate extends SafeHtmlTemplates {
         @Template("<div class='{0}'><div class='{1}'>{3}</div><div class='{2}'>(created by <b>{4}</b> at {5})</div>{6}</div>")
@@ -200,22 +199,23 @@ public class TaggingPanel extends ComponentWithoutSettings
             }
         }
     }
-    
+
     private class EditTagButtonsImagesBarCell extends ImagesBarCell {
         public static final String ACTION_REMOVE = "ACTION_REMOVE";
         public static final String ACTION_EDIT = "ACTION_EDIT";
         private final StringMessages stringMessages;
-        
+
         public EditTagButtonsImagesBarCell(StringMessages stringMessages) {
             this.stringMessages = stringMessages;
         }
 
-
         @Override
         protected Iterable<ImageSpec> getImageSpecs() {
             return Arrays.asList(
-                    new ImageSpec(ACTION_EDIT, stringMessages.actionEdit(), makeImagePrototype(TagPanelResources.INSTANCE.editIcon())),
-                    new ImageSpec(ACTION_REMOVE, stringMessages.actionRemove(), makeImagePrototype(IconResources.INSTANCE.removeIcon())));
+                    new ImageSpec(ACTION_EDIT, stringMessages.actionEdit(),
+                            makeImagePrototype(TagPanelResources.INSTANCE.editIcon())),
+                    new ImageSpec(ACTION_REMOVE, stringMessages.actionRemove(),
+                            makeImagePrototype(IconResources.INSTANCE.removeIcon())));
         }
     }
 
@@ -259,26 +259,25 @@ public class TaggingPanel extends ComponentWithoutSettings
         public void setComment(String comment) {
             this.comment = comment;
         }
-        
-        
+
     }
 
     private class TagCreationPanel extends VerticalPanel {
         private final Panel customButtonsPanel;
         private final Panel standardButtonsPanel;
         private final TagCreationInputPanel inputPanel;
- 
-        public TagCreationPanel(StringMessages stringMessages) {  
+
+        public TagCreationPanel(StringMessages stringMessages) {
             setWidth("100%");
             inputPanel = new TagCreationInputPanel(stringMessages);
-            standardButtonsPanel = new FlowPanel(); 
+            standardButtonsPanel = new FlowPanel();
             standardButtonsPanel.setStyleName(TagPanelResources.INSTANCE.style().footerPanel());
-            customButtonsPanel = new FlowPanel(); 
+            customButtonsPanel = new FlowPanel();
             customButtonsPanel.setStyleName(TagPanelResources.INSTANCE.style().footerPanel());
             add(inputPanel);
             add(standardButtonsPanel);
             add(customButtonsPanel);
-            
+
             Button createTagFromTextBoxes = new Button(stringMessages.tagAddButton());
             createTagFromTextBoxes.setStyleName(TagPanelResources.INSTANCE.style().button());
             createTagFromTextBoxes.addClickHandler(new ClickHandler() {
@@ -299,15 +298,16 @@ public class TaggingPanel extends ComponentWithoutSettings
                 @Override
                 public void onClick(ClickEvent event) {
                     if (isAuthorizedAndRaceLogAvailable()) {
-                        EditCustomTagButtonsDialog editCustomTagButtonsDialog = new EditCustomTagButtonsDialog(customButtonsPanel);
+                        EditCustomTagButtonsDialog editCustomTagButtonsDialog = new EditCustomTagButtonsDialog(
+                                customButtonsPanel);
 
-                        //scheduler is used because otherwise DialogBox would not be centered properly  
-                        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() { 
+                        // scheduler is used because otherwise DialogBox would not be centered properly
+                        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
                             public void execute() {
                                 editCustomTagButtonsDialog.show();
                                 editCustomTagButtonsDialog.center();
                             }
-                        });  
+                        });
                         updateButtons();
                     }
                 }
@@ -322,31 +322,30 @@ public class TaggingPanel extends ComponentWithoutSettings
             });
         }
     }
-    
-    
-    public class TagCreationInputPanel extends VerticalPanel{
+
+    public class TagCreationInputPanel extends VerticalPanel {
         private TextBox tagTextBox, urlTextBox;
-        private TextArea commentTextBox; 
-        
+        private TextArea commentTextBox;
+
         public TagCreationInputPanel(StringMessages stringMessages) {
             setWidth("100%");
             VerticalPanel mainPanel = new VerticalPanel();
             mainPanel.setWidth("100%");
-            
+
             tagTextBox = new TextBox();
             tagTextBox.setWidth("100%");
             tagTextBox.setStyleName(TagPanelResources.INSTANCE.style().inputPanelTag());
             tagTextBox.setTitle(stringMessages.tagLabelTag());
             tagTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelTag());
             mainPanel.add(tagTextBox);
-            
+
             urlTextBox = new TextBox();
             urlTextBox.setWidth("100%");
             urlTextBox.setStyleName(TagPanelResources.INSTANCE.style().inputPanelImageURL());
             urlTextBox.setTitle(stringMessages.tagLabelImageURL());
             urlTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelImageURL());
             mainPanel.add(urlTextBox);
-            
+
             commentTextBox = new TextArea();
             commentTextBox.setWidth("100%");
             commentTextBox.setStyleName(TagPanelResources.INSTANCE.style().inputPanelComment());
@@ -355,42 +354,42 @@ public class TaggingPanel extends ComponentWithoutSettings
             commentTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelComment());
             mainPanel.add(commentTextBox);
             add(mainPanel);
-            
+
         }
-        
+
         public String getTagValue() {
             return tagTextBox.getValue();
         }
-        
+
         public String getCommentValue() {
             return commentTextBox.getValue();
         }
-        
+
         public String getImageURLValue() {
             return urlTextBox.getValue();
         }
-        
+
         public void setTagValue(String tag) {
             tagTextBox.setValue(tag);
         }
-        
+
         public void setCommentValue(String comment) {
             commentTextBox.setValue(comment);
         }
-        
+
         public void setImageURLValue(String imageURL) {
             urlTextBox.setValue(imageURL);
         }
-        
+
         public void clearAllValues() {
             tagTextBox.setText("");
             urlTextBox.setText("");
             commentTextBox.setText("");
         }
     }
-    
-    private class EditCustomTagButtonsDialog extends DialogBox{
-        
+
+    private class EditCustomTagButtonsDialog extends DialogBox {
+
         private final Button closeButton;
         private final Panel mainPanel;
         private final CellTable<TagButton> customTagButtonsTable;
@@ -424,7 +423,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                     return button.getImageURL();
                 }
             };
-            
+
             ImagesBarColumn<TagButton, EditTagButtonsImagesBarCell> actionsColumn = new ImagesBarColumn<TagButton, EditTagButtonsImagesBarCell>(
                     new EditTagButtonsImagesBarCell(stringMessages));
             actionsColumn.setFieldUpdater(new FieldUpdater<TagButton, String>() {
@@ -433,37 +432,38 @@ public class TaggingPanel extends ComponentWithoutSettings
                     if (LeaderboardConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
                         customTagButtons.remove(button);
                         customButtonsPanel.remove(button);
-                        customTagButtonsTable.setRowData(customTagButtons);  
-                    } 
-                    else if (LeaderboardConfigImagesBarCell.ACTION_EDIT.equals(value)) {
-                        EditTagButtonDialog editCustomTagButtonDialog = new EditTagButtonDialog(button, customTagButtonsTable, stringMessages);
-                        //scheduler is used because otherwise DialogBox would not be centered properly  
+                        customTagButtonsTable.setRowData(customTagButtons);
+                    } else if (LeaderboardConfigImagesBarCell.ACTION_EDIT.equals(value)) {
+                        EditTagButtonDialog editCustomTagButtonDialog = new EditTagButtonDialog(button,
+                                customTagButtonsTable, stringMessages);
+                        // scheduler is used because otherwise DialogBox would not be centered properly
 
-                        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() { 
+                        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
                             public void execute() {
                                 editCustomTagButtonDialog.show();
                                 editCustomTagButtonDialog.center();
                             }
-                        });  
-                    } 
+                        });
+                    }
                 }
             });
-            
+
             customTagButtonsTable.addColumn(tagColumn, stringMessages.tagLabelTag());
             customTagButtonsTable.addColumn(commentColumn, stringMessages.tagLabelComment());
             customTagButtonsTable.addColumn(imageURLColumn, stringMessages.tagLabelImageURL());
             customTagButtonsTable.addColumn(actionsColumn, "Actions");
             customTagButtonsTable.setRowData(customTagButtons);
-            
+
             inputPanel = new TagCreationInputPanel(stringMessages);
-            
+
             addCustomTagButton = new Button(stringMessages.tagAddCustomTagButton());
             addCustomTagButton.setStyleName(TagPanelResources.INSTANCE.style().footerButton());
             addCustomTagButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
                     if (inputPanel.getTagValue().length() > 0) {
-                        TagButton tagButton = new TagButton(inputPanel.getTagValue(), inputPanel.getTagValue(), inputPanel.getImageURLValue(), inputPanel.getCommentValue());
+                        TagButton tagButton = new TagButton(inputPanel.getTagValue(), inputPanel.getTagValue(),
+                                inputPanel.getImageURLValue(), inputPanel.getCommentValue());
                         inputPanel.clearAllValues();
                         customTagButtons.add(tagButton);
                         customButtonsPanel.add(tagButton);
@@ -473,45 +473,46 @@ public class TaggingPanel extends ComponentWithoutSettings
                     }
                 }
             });
-            
+
             closeButton = new Button(stringMessages.close());
             closeButton.setStyleName(TagPanelResources.INSTANCE.style().footerButton());
-            
+
             closeButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
                     hideDialog();
                 }
             });
-            
-            mainPanel.add(customTagButtonsTable);            
+
+            mainPanel.add(customTagButtonsTable);
             mainPanel.add(inputPanel);
             mainPanel.add(addCustomTagButton);
             mainPanel.add(closeButton);
-            
+
             setWidget(mainPanel);
         }
-        
+
         private void hideDialog() {
             this.hide();
         }
     }
-    
-    private final class EditTagButtonDialog extends DialogBox{
+
+    private final class EditTagButtonDialog extends DialogBox {
         private final Button saveButton, cancelButton;
         private final TagCreationInputPanel inputPanel;
         private final VerticalPanel mainPanel;
         private final HorizontalPanel saveAndClosePanel;
-        
-        public EditTagButtonDialog(TagButton tagButton, CellTable<TagButton> customTagButtonsTable, StringMessages stringMessages) {
+
+        public EditTagButtonDialog(TagButton tagButton, CellTable<TagButton> customTagButtonsTable,
+                StringMessages stringMessages) {
             setText(stringMessages.tagEditCustomTagButton());
             mainPanel = new VerticalPanel();
-            
+
             inputPanel = new TagCreationInputPanel(stringMessages);
             inputPanel.setTagValue(tagButton.getTag());
             inputPanel.setCommentValue(tagButton.getComment());
             inputPanel.setImageURLValue(tagButton.getImageURL());
-            
+
             saveButton = new Button("save");
             saveButton.setStyleName(TagPanelResources.INSTANCE.style().footerButton());
             saveButton.addClickHandler(new ClickHandler() {
@@ -524,10 +525,10 @@ public class TaggingPanel extends ComponentWithoutSettings
                     customTagButtonsTable.redraw();
                     hideDialog();
                 }
-                
+
             });
-            
-            cancelButton = new Button(stringMessages.cancel()); 
+
+            cancelButton = new Button(stringMessages.cancel());
             cancelButton.setStyleName(TagPanelResources.INSTANCE.style().footerButton());
             cancelButton.addClickHandler(new ClickHandler() {
                 @Override
@@ -535,17 +536,17 @@ public class TaggingPanel extends ComponentWithoutSettings
                     hideDialog();
                 }
             });
-            
+
             saveAndClosePanel = new HorizontalPanel();
             saveAndClosePanel.setStyleName(TagPanelResources.INSTANCE.style().footerPanel());
             saveAndClosePanel.add(saveButton);
             saveAndClosePanel.add(cancelButton);
-            
+
             mainPanel.add(inputPanel);
             mainPanel.add(saveAndClosePanel);
             setWidget(mainPanel);
         }
-        
+
         private void hideDialog() {
             this.hide();
         }
