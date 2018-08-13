@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.ui.raceboard;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import com.google.gwt.cell.client.AbstractCell;
@@ -322,28 +323,58 @@ public class TaggingPanel extends ComponentWithoutSettings
         }
     }
 
+    public class TagPreviewPanel extends Panel {
+        private final CellList<TagDTO> tagPreviewCellList;
+        private TagDTO previewTag;
+        private List<TagDTO> listContainingPreviewTag;
+        private final TagCreationInputPanel inputField;
+
+        public TagPreviewPanel(TagCreationInputPanel inputField) {
+            tagPreviewCellList = new CellList<TagDTO>(new TagCell(), CellListResources.INSTANCE);
+            this.inputField = inputField;
+            add(tagPreviewCellList);
+            renderPreview();
+        }
+
+        public void renderPreview() {
+            previewTag = new TagDTO(inputField.getTagValue(), inputField.getCommentValue(), inputField.getImageURLValue(), "Author", new MillisecondsTimePoint(timer.getTime()), new MillisecondsTimePoint(timer.getTime()));
+            listContainingPreviewTag = new ArrayList<TagDTO>();
+            listContainingPreviewTag.add(previewTag);
+            tagPreviewCellList.setRowData(listContainingPreviewTag);
+        }
+
+        @Override
+        public Iterator<Widget> iterator() {
+            return null;
+        }
+
+        @Override
+        public boolean remove(Widget child) {
+            return false;
+        }
+
+    }
+
     public class TagCreationInputPanel extends VerticalPanel {
         private TextBox tagTextBox, urlTextBox;
         private TextArea commentTextBox;
 
         public TagCreationInputPanel(StringMessages stringMessages) {
             setWidth("100%");
-            VerticalPanel mainPanel = new VerticalPanel();
-            mainPanel.setWidth("100%");
 
             tagTextBox = new TextBox();
             tagTextBox.setWidth("100%");
             tagTextBox.setStyleName(TagPanelResources.INSTANCE.style().inputPanelTag());
             tagTextBox.setTitle(stringMessages.tagLabelTag());
             tagTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelTag());
-            mainPanel.add(tagTextBox);
+            add(tagTextBox);
 
             urlTextBox = new TextBox();
             urlTextBox.setWidth("100%");
             urlTextBox.setStyleName(TagPanelResources.INSTANCE.style().inputPanelImageURL());
             urlTextBox.setTitle(stringMessages.tagLabelImageURL());
             urlTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelImageURL());
-            mainPanel.add(urlTextBox);
+            add(urlTextBox);
 
             commentTextBox = new TextArea();
             commentTextBox.setWidth("100%");
@@ -351,8 +382,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             commentTextBox.setVisibleLines(4);
             commentTextBox.setTitle(stringMessages.tagLabelComment());
             commentTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelComment());
-            mainPanel.add(commentTextBox);
-            add(mainPanel);
+            add(commentTextBox);
 
         }
 
@@ -497,15 +527,18 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     private final class EditTagButtonDialog extends DialogBox {
-        private final Button saveButton, cancelButton;
+        private final HorizontalPanel mainPanel;
+        private final TagPreviewPanel tagPreviewPanel;
+        private final VerticalPanel leftPanel;
         private final TagCreationInputPanel inputPanel;
-        private final VerticalPanel mainPanel;
         private final HorizontalPanel saveAndClosePanel;
+        private final Button saveButton, cancelButton;
 
-        public EditTagButtonDialog(TagButton tagButton, CellTable<TagButton> customTagButtonsTable,
-                StringMessages stringMessages) {
+
+        public EditTagButtonDialog(TagButton tagButton, CellTable<TagButton> customTagButtonsTable, StringMessages stringMessages) {
             setText(stringMessages.tagEditCustomTagButton());
-            mainPanel = new VerticalPanel();
+            mainPanel = new HorizontalPanel();
+            leftPanel = new VerticalPanel();
 
             inputPanel = new TagCreationInputPanel(stringMessages);
             inputPanel.setTagValue(tagButton.getTag());
@@ -524,7 +557,6 @@ public class TaggingPanel extends ComponentWithoutSettings
                     customTagButtonsTable.redraw();
                     hideDialog();
                 }
-
             });
 
             cancelButton = new Button(stringMessages.cancel());
@@ -535,14 +567,19 @@ public class TaggingPanel extends ComponentWithoutSettings
                     hideDialog();
                 }
             });
+            
+            tagPreviewPanel = new TagPreviewPanel(inputPanel);
 
             saveAndClosePanel = new HorizontalPanel();
             saveAndClosePanel.setStyleName(TagPanelResources.INSTANCE.style().footerPanel());
             saveAndClosePanel.add(saveButton);
             saveAndClosePanel.add(cancelButton);
 
-            mainPanel.add(inputPanel);
-            mainPanel.add(saveAndClosePanel);
+            leftPanel.add(inputPanel);
+            leftPanel.add(saveAndClosePanel);
+            
+            mainPanel.add(leftPanel);
+            mainPanel.add(tagPreviewPanel);
             setWidget(mainPanel);
         }
 
