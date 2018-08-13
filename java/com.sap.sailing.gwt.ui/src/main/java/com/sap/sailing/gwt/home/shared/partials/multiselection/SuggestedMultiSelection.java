@@ -25,18 +25,24 @@ import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.suggestion.AbstractSuggestOracle;
 
-public final class SuggestedMultiSelection<T> extends Composite implements SuggestedMultiSelectionDataProvider.Display<T> {
+public final class SuggestedMultiSelection<T> extends Composite
+        implements SuggestedMultiSelectionDataProvider.Display<T> {
 
     private static SuggestedMultiSelectionUiBinder uiBinder = GWT.create(SuggestedMultiSelectionUiBinder.class);
 
     interface SuggestedMultiSelectionUiBinder extends UiBinder<Widget, SuggestedMultiSelection<?>> {
     }
 
-    @UiField SpanElement headerTitleUi;
-    @UiField FlowPanel notificationToggleContainerUi;
-    @UiField(provided = true) AbstractFilterWidget<T, T> suggestionWidgetUi;
-    @UiField Button removeAllButtonUi;
-    @UiField FlowPanel itemContainerUi;
+    @UiField
+    SpanElement headerTitleUi;
+    @UiField
+    FlowPanel notificationToggleContainerUi;
+    @UiField(provided = true)
+    AbstractFilterWidget<T, T> suggestionWidgetUi;
+    @UiField
+    Button removeAllButtonUi;
+    @UiField
+    FlowPanel itemContainerUi;
     private final WidgetProvider<T> widgetProvider;
     private final Collection<SelectionChangeHandler<T>> selectionChangeHandlers = new ArrayList<>();
 
@@ -74,8 +80,8 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
 
     public SuggestedMultiSelectionNotificationToggle addNotificationToggle(final NotificationCallback callback,
             String label) {
-        final SuggestedMultiSelectionNotificationToggle notification =
-                new SuggestedMultiSelectionNotificationToggle(label);
+        final SuggestedMultiSelectionNotificationToggle notification = new SuggestedMultiSelectionNotificationToggle(
+                label);
         notification.toggleButtonUi.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -86,7 +92,7 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
         notificationToggleContainerUi.add(notification);
         return notification;
     }
-    
+
     public void addSelectionChangeHandler(SelectionChangeHandler<T> handler) {
         this.selectionChangeHandlers.add(handler);
     }
@@ -97,24 +103,28 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
         selectionChangeHandlers.forEach(h -> h.onClear());
         this.updateUiState();
     }
-    
+
     @Override
     public void setSelectedItems(Iterable<T> selectedItemsToSet) {
         itemContainerUi.clear();
-        selectionChangeHandlers.forEach(h -> h.onClear());
         for (final T item : selectedItemsToSet) {
-            this.addSelectedItem(item);
+            this.addSelectedItem(item, true);
         }
     }
-    
+
     private void addSelectedItem(final T selectedItem) {
+        addSelectedItem(selectedItem, false);
+    }
+
+    private void addSelectedItem(final T selectedItem, boolean suppressEvents) {
+
         itemContainerUi.add(new SuggestedMultiSelectionItem() {
 
             @Override
             protected IsWidget getItemDescriptionWidget() {
                 return widgetProvider.getItemDescriptionWidget(selectedItem);
             }
-            
+
             @Override
             protected void onRemoveItemRequsted() {
                 this.removeFromParent();
@@ -122,14 +132,16 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
                 selectionChangeHandlers.forEach(h -> h.onRemove(selectedItem));
             }
         });
-        selectionChangeHandlers.forEach(h -> h.onAdd(selectedItem));
+        if (!suppressEvents) {
+            selectionChangeHandlers.forEach(h -> h.onAdd(selectedItem));
+        }
         this.updateUiState();
     }
-    
+
     private void updateUiState() {
         removeAllButtonUi.setEnabled(itemContainerUi.getWidgetCount() > 0);
     }
-    
+
     private static class SuggestedMultiSelectionFilter<T> extends AbstractAsyncSuggestBoxFilter<T, T> {
         private final SelectionCallback<T> selectionCallback;
 
@@ -159,14 +171,14 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
             }, placeholderText);
             this.selectionCallback = selectionCallback;
         }
-        
+
         @Override
         protected final void onSuggestionSelected(T selectedItem) {
             SuggestedMultiSelectionFilter.this.clear();
             selectionCallback.onSuggestionSelected(selectedItem);
         }
     }
-    
+
     public interface SelectionChangeHandler<S> {
         void onAdd(S selectedItems);
 
@@ -178,16 +190,17 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
     public interface NotificationCallback {
         void onNotificationToggled(boolean enabled);
     }
-    
+
     private interface SelectionCallback<T> {
         void onSuggestionSelected(T selectedItem);
     }
-    
+
     private interface WidgetProvider<T> {
         IsWidget getItemDescriptionWidget(T item);
+
         AbstractSuggestBoxFilter<T, T> getSuggestBoxFilter(SelectionCallback<T> selectionCallback);
     }
-    
+
     public static SuggestedMultiSelection<SimpleCompetitorWithIdDTO> forCompetitors(
             final SuggestedMultiSelectionDataProvider<SimpleCompetitorWithIdDTO, ?> dataProvider, String headerTitle,
             FlagImageResolver flagImageResolver) {
@@ -200,12 +213,12 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
             @Override
             public AbstractSuggestBoxFilter<SimpleCompetitorWithIdDTO, SimpleCompetitorWithIdDTO> getSuggestBoxFilter(
                     SelectionCallback<SimpleCompetitorWithIdDTO> selectionCallback) {
-                return new SuggestedMultiSelectionFilter<SimpleCompetitorWithIdDTO>(dataProvider,
-                        selectionCallback, StringMessages.INSTANCE.add(StringMessages.INSTANCE.competitor()));
+                return new SuggestedMultiSelectionFilter<SimpleCompetitorWithIdDTO>(dataProvider, selectionCallback,
+                        StringMessages.INSTANCE.add(StringMessages.INSTANCE.competitor()));
             }
         }, headerTitle);
     }
-    
+
     public static SuggestedMultiSelection<BoatClassDTO> forBoatClasses(
             final SuggestedMultiSelectionDataProvider<BoatClassDTO, ?> dataProvider, String headerTitle) {
         return new SuggestedMultiSelection<>(dataProvider, new WidgetProvider<BoatClassDTO>() {

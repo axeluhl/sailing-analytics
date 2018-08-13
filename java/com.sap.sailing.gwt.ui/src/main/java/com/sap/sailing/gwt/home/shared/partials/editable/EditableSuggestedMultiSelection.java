@@ -118,6 +118,7 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
 
     public void setSelectedItems(Iterable<T> competitors) {
         itemContainerUi.clear();
+        competitors.forEach(c -> addListItem(c));
         multiSelect.setSelectedItems(competitors);
     }
 
