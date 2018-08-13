@@ -5,6 +5,12 @@
     <ui:with field="local_res"
         type="com.sap.sailing.gwt.home.desktop.partials.eventsrecent.EventsOverviewRecentResources" />
     <ui:with field="shr" type="com.sap.sailing.gwt.home.shared.resources.SharedHomeResources" />
+
+    <ui:style>
+        .panel {
+            float: none;
+        }
+    </ui:style>
     <g:HTMLPanel addStyleNames="{local_res.css.eventsoverviewrecent_year}">
         <g:HTMLPanel ui:field="headerDivUi"
             addStyleNames="{local_res.css.eventsoverviewrecent_year_header} {local_res.css.accordion_trigger}">
@@ -33,8 +39,9 @@
             </div>
         </g:HTMLPanel>
         <div ui:field="contentDivUi"
-            class="{local_res.css.eventsoverviewrecent_year_content} {local_res.css.accordion_content} {res.mediaCss.column} {res.mediaCss.small12}">
-            <g:FlowPanel ui:field="contentPanelUi" styleName="{res.mediaCss.grid} {res.mediaCss.column} {res.mediaCss.small12}">
+            class="{local_res.css.eventsoverviewrecent_year_content} {local_res.css.accordion_content} {res.mediaCss.column} {res.mediaCss.small12} {style.panel}">
+            <g:FlowPanel ui:field="contentPanelUi"
+                styleName="{res.mediaCss.grid} {res.mediaCss.column} {res.mediaCss.small12}">
             </g:FlowPanel>
         </div>
     </g:HTMLPanel>
