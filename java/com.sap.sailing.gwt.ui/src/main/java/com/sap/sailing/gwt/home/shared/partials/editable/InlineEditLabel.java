@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.home.shared.partials.editable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -20,6 +23,10 @@ public class InlineEditLabel extends Composite implements HasText {
     interface InlineEditTextfieldUiBinder extends UiBinder<Widget, InlineEditLabel> {
     }
 
+    public static interface TextChangeHandler {
+        void onTextChanged(String text);
+    }
+
     @UiField
     Button button;
 
@@ -30,6 +37,8 @@ public class InlineEditLabel extends Composite implements HasText {
     Label label;
 
     private boolean state = false;
+
+    private final List<TextChangeHandler> changeHandlers = new ArrayList<>();
 
     public InlineEditLabel() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -65,6 +74,7 @@ public class InlineEditLabel extends Composite implements HasText {
 
         }
         this.state = newState;
+        changeHandlers.forEach(c -> c.onTextChanged(label.getText()));
     }
 
     @Override
@@ -75,5 +85,9 @@ public class InlineEditLabel extends Composite implements HasText {
     @Override
     public String getText() {
         return label.getText();
+    }
+
+    public void addTextChangeHandler(TextChangeHandler handler) {
+        changeHandlers.add(handler);
     }
 }
