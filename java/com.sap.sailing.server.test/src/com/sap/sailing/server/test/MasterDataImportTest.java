@@ -927,10 +927,16 @@ public class MasterDataImportTest {
         // Add a competitor-related race log event to ensure that no competitor resolution is attempted while receiving
         TimePoint logTimePoint2 = logTimePoint.plus(10);
         CompetitorResults positionedCompetitors = new CompetitorResultsImpl();
+        Boat storedBoat = DomainFactory.INSTANCE.getOrCreateBoat(UUID.randomUUID(), "SAP Extreme Sailing Team",
+                new BoatClassImpl("X40", false), "123", Color.RED);
         positionedCompetitors.add(new CompetitorResultImpl(
-                competitor.getId(), competitor.getName(), /* rank */ 1, MaxPointsReason.DNS, /* score */ null, /* finishingTime */ null, /* comment */ null, MergeState.OK));
+                competitor.getId(), competitor.getName(), competitor.getShortName(), storedBoat.getName(),
+                storedBoat.getSailID(), /* rank */ 1, MaxPointsReason.DNS, /* score */ null, /* finishingTime */ null,
+                /* comment */ null, MergeState.OK));
         positionedCompetitors.add(new CompetitorResultImpl(
-                competitor2.getId(), competitor2.getName(), /* rank */ 2, MaxPointsReason.NONE, /* score */ null, /* finishingTime */ null, /* comment */ null, MergeState.OK));
+                competitor2.getId(), competitor2.getName(), competitor.getShortName(), storedBoat.getName(),
+                storedBoat.getSailID(), /* rank */ 2, MaxPointsReason.NONE, /* score */ null, /* finishingTime */ null,
+                /* comment */ null, MergeState.OK));
         RaceLogFinishPositioningConfirmedEvent finishPositioningConfirmedEvent = new RaceLogFinishPositioningConfirmedEventImpl(
                 logTimePoint2, author, 1, positionedCompetitors);
         raceColumn.getRaceLog(testFleet1).add(finishPositioningConfirmedEvent);
