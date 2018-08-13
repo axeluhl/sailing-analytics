@@ -18,6 +18,8 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
@@ -101,6 +103,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             String inputPanelComment();
             String inputPanelImageURL();
             String footerPanel();
+            String tagPreviewPanel();
         }
     }
 
@@ -323,16 +326,41 @@ public class TaggingPanel extends ComponentWithoutSettings
         }
     }
 
-    public class TagPreviewPanel extends Panel {
+    public class TagPreviewPanel extends VerticalPanel {
         private final CellList<TagDTO> tagPreviewCellList;
         private TagDTO previewTag;
         private List<TagDTO> listContainingPreviewTag;
         private final TagCreationInputPanel inputField;
 
         public TagPreviewPanel(TagCreationInputPanel inputField) {
-            tagPreviewCellList = new CellList<TagDTO>(new TagCell(), CellListResources.INSTANCE);
             this.inputField = inputField;
+            tagPreviewCellList = new CellList<TagDTO>(new TagCell(), CellListResources.INSTANCE);
+            
+            setStyleName(TagPanelResources.INSTANCE.style().tagPreviewPanel());
+            
             add(tagPreviewCellList);
+            
+            inputField.getTagTextBox().addValueChangeHandler(new ValueChangeHandler<String>() {
+                @Override
+                public void onValueChange(ValueChangeEvent<String> event) {
+                    renderPreview();
+                }
+
+            });
+            inputField.getImageURLTextBox().addValueChangeHandler(new ValueChangeHandler<String>() {
+                @Override
+                public void onValueChange(ValueChangeEvent<String> event) {
+                    renderPreview();
+                }
+
+            });
+            inputField.getCommentTextArea().addValueChangeHandler(new ValueChangeHandler<String>() {
+                @Override
+                public void onValueChange(ValueChangeEvent<String> event) {
+                    renderPreview();
+                }
+
+            });
             renderPreview();
         }
 
@@ -356,8 +384,8 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     public class TagCreationInputPanel extends VerticalPanel {
-        private TextBox tagTextBox, urlTextBox;
-        private TextArea commentTextBox;
+        private TextBox tagTextBox, imageURLTextBox;
+        private TextArea commentTextArea;
 
         public TagCreationInputPanel(StringMessages stringMessages) {
             setWidth("100%");
@@ -369,21 +397,33 @@ public class TaggingPanel extends ComponentWithoutSettings
             tagTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelTag());
             add(tagTextBox);
 
-            urlTextBox = new TextBox();
-            urlTextBox.setWidth("100%");
-            urlTextBox.setStyleName(TagPanelResources.INSTANCE.style().inputPanelImageURL());
-            urlTextBox.setTitle(stringMessages.tagLabelImageURL());
-            urlTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelImageURL());
-            add(urlTextBox);
+            imageURLTextBox = new TextBox();
+            imageURLTextBox.setWidth("100%");
+            imageURLTextBox.setStyleName(TagPanelResources.INSTANCE.style().inputPanelImageURL());
+            imageURLTextBox.setTitle(stringMessages.tagLabelImageURL());
+            imageURLTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelImageURL());
+            add(imageURLTextBox);
 
-            commentTextBox = new TextArea();
-            commentTextBox.setWidth("100%");
-            commentTextBox.setStyleName(TagPanelResources.INSTANCE.style().inputPanelComment());
-            commentTextBox.setVisibleLines(4);
-            commentTextBox.setTitle(stringMessages.tagLabelComment());
-            commentTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelComment());
-            add(commentTextBox);
+            commentTextArea = new TextArea();
+            commentTextArea.setWidth("100%");
+            commentTextArea.setStyleName(TagPanelResources.INSTANCE.style().inputPanelComment());
+            commentTextArea.setVisibleLines(4);
+            commentTextArea.setTitle(stringMessages.tagLabelComment());
+            commentTextArea.getElement().setPropertyString("placeholder", stringMessages.tagLabelComment());
+            add(commentTextArea);
 
+        }
+
+        public TextBox getTagTextBox() {
+            return tagTextBox;
+        }
+        
+        public TextBox getImageURLTextBox() {
+            return imageURLTextBox;
+        }
+        
+        public TextArea getCommentTextArea() {
+            return commentTextArea;
         }
 
         public String getTagValue() {
@@ -391,11 +431,11 @@ public class TaggingPanel extends ComponentWithoutSettings
         }
 
         public String getCommentValue() {
-            return commentTextBox.getValue();
+            return commentTextArea.getValue();
         }
 
         public String getImageURLValue() {
-            return urlTextBox.getValue();
+            return imageURLTextBox.getValue();
         }
 
         public void setTagValue(String tag) {
@@ -403,17 +443,17 @@ public class TaggingPanel extends ComponentWithoutSettings
         }
 
         public void setCommentValue(String comment) {
-            commentTextBox.setValue(comment);
+            commentTextArea.setValue(comment);
         }
 
         public void setImageURLValue(String imageURL) {
-            urlTextBox.setValue(imageURL);
+            imageURLTextBox.setValue(imageURL);
         }
 
         public void clearAllValues() {
             tagTextBox.setText("");
-            urlTextBox.setText("");
-            commentTextBox.setText("");
+            imageURLTextBox.setText("");
+            commentTextArea.setText("");
         }
     }
 

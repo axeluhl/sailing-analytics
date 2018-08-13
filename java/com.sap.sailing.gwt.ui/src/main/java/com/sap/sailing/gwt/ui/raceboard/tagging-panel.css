@@ -13,6 +13,10 @@ b {
 	margin-bottom: 0;
 }
 
+.tagPreviewPanel{
+	margin: 5px;
+}
+
 .tag {
     box-shadow: 2px 2px 3px lightgrey;
     margin-bottom: 5px;
