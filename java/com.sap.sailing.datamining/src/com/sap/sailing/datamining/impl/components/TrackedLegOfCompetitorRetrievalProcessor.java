@@ -22,6 +22,9 @@ public class TrackedLegOfCompetitorRetrievalProcessor extends AbstractRetrievalP
     protected Iterable<HasTrackedLegOfCompetitorContext> retrieveData(HasTrackedLegContext element) {
         Collection<HasTrackedLegOfCompetitorContext> trackedLegOfCompetitorsWithContext = new ArrayList<>();
         for (Competitor competitor : element.getTrackedRaceContext().getTrackedRace().getRace().getCompetitors()) {
+            if (isAborted()) {
+                break;
+            }
             HasTrackedLegOfCompetitorContext trackedLegOfCompetitorWithContext = new TrackedLegOfCompetitorWithContext(element, element.getTrackedLeg().getTrackedLeg(competitor));
             trackedLegOfCompetitorsWithContext.add(trackedLegOfCompetitorWithContext);
         }

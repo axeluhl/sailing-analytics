@@ -79,7 +79,7 @@ public class DynamicTrackedRaceLogListener extends BaseRaceLogEventVisitor {
             logger.severe("Trying to add " + this + " as listener to a null race log for tracked race " + trackedRace.getRace());
         } else {
             raceLog.addListener(this);
-            final ReadonlyRaceState raceState = ReadonlyRaceStateImpl.create(trackedRace.getRaceLogResolver(), raceLog);
+            final ReadonlyRaceState raceState = ReadonlyRaceStateImpl.getOrCreate(trackedRace.getRaceLogResolver(), raceLog);
             raceLogs.put(raceLog, raceState);
             raceState.addChangedListener(new BaseRaceStateChangedListener() {
                 @Override

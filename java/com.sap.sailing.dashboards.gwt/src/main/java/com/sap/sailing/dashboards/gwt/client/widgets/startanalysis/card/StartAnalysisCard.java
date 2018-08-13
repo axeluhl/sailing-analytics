@@ -38,6 +38,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapResources;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
+import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 
@@ -70,8 +71,9 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
     private StartAnalysisDTO startAnalysisDTO;
     private RaceMap raceMap;
 
-    private SailingServiceAsync sailingServiceAsync;
-    private StringMessages stringMessages;
+    private final SailingServiceAsync sailingServiceAsync;
+    private final ErrorReporter errorReporter;
+    private final StringMessages stringMessages;
     private final RaceCompetitorSelectionModel competitorSelectionModel;
     
     private final double WIND_LINE_ADVANTAGE_DIV_WIDTH_IN_PT = 185;
@@ -80,9 +82,11 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
     
     private RaceMapResources raceMapResources;
     
-    public StartAnalysisCard(double leftCSSProperty, int cardId, StartAnalysisDTO startAnalysisDTO, SailingServiceAsync sailingServiceAsync, RaceMapResources raceMapResources) {
+    public StartAnalysisCard(double leftCSSProperty, int cardId, StartAnalysisDTO startAnalysisDTO,
+            SailingServiceAsync sailingServiceAsync, ErrorReporter errorReporter, RaceMapResources raceMapResources) {
         stringMessages = StringMessages.INSTANCE;
         this.sailingServiceAsync = sailingServiceAsync;
+        this.errorReporter = errorReporter;
         this.raceMapResources = raceMapResources;
         competitorSelectionModel = new RaceCompetitorSelectionModel(/* hasMultiSelection */true);
         competitorSelectionModel.setCompetitors(startAnalysisDTO.getCompetitorDTOsFromStartAnaylsisCompetitorDTOs(), raceMap);
@@ -167,10 +171,11 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
 
         
         RaceTimesInfoProvider raceTimesInfoProvider = new RaceTimesInfoProvider(sailingServiceAsync,
-                asyncActionsExecutor, null, Collections.singletonList(startAnalysisDTO.regattaAndRaceIdentifier), 5000l /* requestInterval */);
+                asyncActionsExecutor, errorReporter,
+                Collections.singletonList(startAnalysisDTO.regattaAndRaceIdentifier), 5000l /* requestInterval */);
         raceMap = new RaceMap(null, null, new RaceMapLifecycle(StringMessages.INSTANCE), raceMapSettings,
                 sailingServiceAsync,
-                asyncActionsExecutor, null, timer, competitorSelectionModel, 
+                asyncActionsExecutor, errorReporter, timer, competitorSelectionModel,
                 new RaceCompetitorSet(competitorSelectionModel), StringMessages.INSTANCE,
                 startAnalysisDTO.regattaAndRaceIdentifier, raceMapResources, /* showHeaderPanel */ true, new DefaultQuickRanksDTOProvider());
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(raceMap);

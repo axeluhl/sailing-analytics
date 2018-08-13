@@ -23,6 +23,9 @@ public class TrackedLegRetrievalProcessor extends AbstractRetrievalProcessor<Has
         Collection<HasTrackedLegContext> trackedLegsWithContext = new ArrayList<>();
         int legNumber = 1;
         for (TrackedLeg trackedLeg : element.getTrackedRace().getTrackedLegs()) {
+            if (isAborted()) {
+                break;
+            }
             HasTrackedLegContext trackedLegWithContext = new TrackedLegWithContext(element, trackedLeg, legNumber);
             trackedLegsWithContext.add(trackedLegWithContext);
             legNumber++;

@@ -19,6 +19,7 @@ public class RaceTimesInfoDTO implements IsSerializable {
     public Date startOfTracking;
     public Date endOfTracking;
     public Date endOfRace;
+    public Date raceFinishedTime;
     public Date newestTrackingEvent;
     
     /**
@@ -83,6 +84,10 @@ public class RaceTimesInfoDTO implements IsSerializable {
     public Date getEndOfRace() {
         return endOfRace;
     }
+    
+    public Date getFinishedTime() {
+        return raceFinishedTime;
+    }
 
     public void setEndOfRace(Date endOfRace) {
         this.endOfRace = endOfRace;
@@ -118,7 +123,7 @@ public class RaceTimesInfoDTO implements IsSerializable {
 				+ ", legInfos=" + legInfos + ", markPassingTimes="
 				+ markPassingTimes + ", startOfRace=" + startOfRace
 				+ ", startOfTracking=" + startOfTracking + ", endOfTracking="
-				+ endOfTracking + ", endOfRace=" + endOfRace
+				+ endOfTracking + ", endOfRace=" + endOfRace + ", finishedTime=" + raceFinishedTime
 				+ ", newestTrackingEvent=" + newestTrackingEvent
                                 + ", currentServerTime=" + currentServerTime
 				+ ", delayToLiveInMs=" + delayToLiveInMs + "]";

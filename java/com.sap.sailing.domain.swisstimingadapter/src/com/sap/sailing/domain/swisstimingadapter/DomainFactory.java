@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.swisstimingadapter;
 
 import java.io.Serializable;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +19,7 @@ import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.swisstimingadapter.impl.DomainFactoryImpl;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -70,10 +72,17 @@ public interface DomainFactory {
     RaceTrackingConnectivityParameters createTrackingConnectivityParameters(String hostname, int port, String raceID,
             String raceName, String raceDescription, BoatClass boatClass, StartList startList,
             long delayToLiveInMillis, SwissTimingFactory swissTimingFactory, DomainFactory domainFactory,
-            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, boolean useInternalMarkPassingAlgorithm, boolean trackWind, boolean correctWindDirectionByMagneticDeclination);
+            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, boolean useInternalMarkPassingAlgorithm, boolean trackWind, boolean correctWindDirectionByMagneticDeclination, String updateURL, String updateUsername, String updatePassword);
 
     ControlPoint getOrCreateControlPoint(String description, Iterable<Serializable> deviceIds, MarkType markType);
 
     RaceDefinition createRaceDefinition(Regatta regatta, String swissTimingRaceID, Map<Competitor, Boat> competitorsAndBoats,
             List<ControlPoint> courseDefinition, String raceName, String raceIdForRaceDefinition);
+
+    /**
+     * Adds update handlers that forward events about a race, such as start time changes, course changes
+     * or postponents, to an update URL using specific REST requests.
+     */
+    void addUpdateHandlers(String updateURL, String username, String password, Serializable eventId,
+            RaceDefinition raceDefinition, DynamicTrackedRace trackedRace) throws URISyntaxException;
 }

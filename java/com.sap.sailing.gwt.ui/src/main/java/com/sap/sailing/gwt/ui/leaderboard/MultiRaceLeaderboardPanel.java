@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
@@ -96,8 +95,7 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
 
     @Override
     protected boolean canShowCompetitorBoatInfo() {
-        boolean isMetaLeaderboard = leaderboard.type == LeaderboardType.FlexibleMetaLeaderboard || leaderboard.type == LeaderboardType.RegattaMetaLeaderboard;
-        return this.leaderboard.canBoatsOfCompetitorsChangePerRace == false && !isMetaLeaderboard;
+        return !this.leaderboard.canBoatsOfCompetitorsChangePerRace && !leaderboard.type.isMetaLeaderboard();
     }
 
     @Override
@@ -152,8 +150,8 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
     @Override
     public SettingsDialogComponent<MultiRaceLeaderboardSettings> getSettingsDialogComponent(
             MultiRaceLeaderboardSettings useTheseSettings) {
-        return new MultiRaceLeaderboardSettingsDialogComponent((MultiRaceLeaderboardSettings) useTheseSettings,
-                leaderboard.getNamesOfRaceColumns(), stringMessages, availableDetailTypes, !leaderboard.canBoatsOfCompetitorsChangePerRace);
+        return new MultiRaceLeaderboardSettingsDialogComponent(useTheseSettings, leaderboard.getNamesOfRaceColumns(),
+                stringMessages, availableDetailTypes, canShowCompetitorBoatInfo());
     }
 
     @Override
