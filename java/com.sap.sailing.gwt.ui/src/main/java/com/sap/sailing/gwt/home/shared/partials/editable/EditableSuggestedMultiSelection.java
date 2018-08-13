@@ -130,4 +130,8 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
     public void setText(String text) {
         headerTitleUi.setInnerText(text);
     }
+
+    public void addSelectionChangeHandler(SelectionChangeHandler<T> handler) {
+        multiSelect.addSelectionChangeHandler(handler);
+    }
 }
