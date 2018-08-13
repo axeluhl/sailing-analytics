@@ -976,8 +976,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      * positions. Updating the results of this call is done in
      * {@link #updateBoatPositions(Date, long, Map, Iterable, Map, boolean)}.
      * <p>
-     * 
-     * @param isRedraw
      */
     private void callGetRaceMapDataForAllOverlappingAndTipsOfNonOverlappingAndGetBoatPositionsForAllOthers(
             final Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap,
