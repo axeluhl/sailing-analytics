@@ -193,7 +193,8 @@ public class TaggingPanel extends ComponentWithoutSettings
                 if (!Element.is(eventTarget)) {
                     return;
                 }
-                if (parent.getElementsByTagName("button").getItem(0).isOrHasChild(Element.as(eventTarget))) {
+                Element button = parent.getElementsByTagName("button").getItem(0);
+                if (button != null && button.isOrHasChild(Element.as(eventTarget))) {
                     removeTagFromRaceLog(tag);
                 }
             }
