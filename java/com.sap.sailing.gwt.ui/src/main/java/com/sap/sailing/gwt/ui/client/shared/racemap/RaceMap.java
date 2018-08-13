@@ -886,9 +886,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     @Override
     public void timeChanged(final Date newTime, final Date oldTime) {
         boolean isRedraw = oldTime == null;
-        if(!isRedraw){
-            GWT.debugger(); 
-        }
         if (newTime != null && isMapInitialized) {
             if (raceIdentifier != null) {
                 RegattaAndRaceIdentifier race = raceIdentifier;
