@@ -17,6 +17,7 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
@@ -55,7 +56,6 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TagListProvider;
 import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
-import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.raceboard.TaggingPanel.TagPanelResources.TagPanelStyle;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
@@ -121,13 +121,13 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     public interface TagCellTemplate extends SafeHtmlTemplates {
-        @Template("<div class='{0}'><div class='{1}'>{3}</div><div class='{2}'>(created by <b>{4}</b> at {5})</div>{6}</div>")
-        SafeHtml cell(String styleTag, String styleTagHeading, String styleTagCreated, SafeHtml tag, SafeHtml author,
-                SafeHtml createdAt, SafeHtml content);
+        @Template("<div class='{0}'><div class='{1}'>{3}</div><div class='{2}'>{4}</div>{5}</div>")
+        SafeHtml cell(String styleTag, String styleTagHeading, String styleTagCreated, SafeHtml tag, SafeHtml createdAt,
+                SafeHtml content);
 
-        @Template("<div class='{0}'><div class='{1}'>{3}<button>X</button></div><div class='{2}'>(created by <b>{4}</b> at {5})</div>{6}</div>")
+        @Template("<div class='{0}'><div class='{1}'>{3}<button>X</button></div><div class='{2}'>{4}</div>{5}</div>")
         SafeHtml cellRemovable(String styleTag, String styleTagHeading, String styleTagCreated, SafeHtml tag,
-                SafeHtml author, SafeHtml createdAt, SafeHtml content);
+                SafeHtml createdAt, SafeHtml content);
 
         @Template("<div class='{0}'><img src='{2}'/></div><div class='{1}'>{3}</div>")
         SafeHtml contentWithCommentWithImage(String styleTagImage, String styleTagComment, SafeUri imageURL,
@@ -156,9 +156,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             }
 
             SafeHtml safeTag = SafeHtmlUtils.fromString(tag.getTag());
-            SafeHtml safeAuthor = SafeHtmlUtils.fromString(tag.getUsername());
-            SafeHtml safeCreatedAt = SafeHtmlUtils
-                    .fromString(DateAndTimeFormatterUtil.shortTimeFormatter.render(tag.getRaceTimepoint().asDate()));
+            SafeHtml safeCreated = SafeHtmlUtils.fromString(stringMessages.tagCreated(tag.getUsername(), DateTimeFormat.getFormat("E d/M/y, HH:mm").format(tag.getRaceTimepoint().asDate())));
             SafeHtml safeComment = SafeHtmlUtils.fromString(tag.getComment());
             SafeUri trustedImageURL = UriUtils.fromTrustedString(tag.getImageURL());
 
@@ -176,10 +174,10 @@ public class TaggingPanel extends ComponentWithoutSettings
             if (userService.getCurrentUser() != null
                     && tag.getUsername().equals(userService.getCurrentUser().getName())) {
                 cell = tagCellTemplate.cellRemovable(tagPanelStyle.tag(), tagPanelStyle.tagHeading(),
-                        tagPanelStyle.tagCreated(), safeTag, safeAuthor, safeCreatedAt, content);
+                        tagPanelStyle.tagCreated(), safeTag, safeCreated, content);
             } else {
                 cell = tagCellTemplate.cell(tagPanelStyle.tag(), tagPanelStyle.tagHeading(), tagPanelStyle.tagCreated(),
-                        safeTag, safeAuthor, safeCreatedAt, content);
+                        safeTag, safeCreated, content);
             }
             htmlBuilder.append(cell);
         }
@@ -279,7 +277,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             add(standardButtonsPanel);
             add(customButtonsPanel);
 
-            Button createTagFromTextBoxes = new Button(stringMessages.tagAddButton());
+            Button createTagFromTextBoxes = new Button(stringMessages.tagAddTag());
             createTagFromTextBoxes.setStyleName(TagPanelResources.INSTANCE.style().button());
             createTagFromTextBoxes.addClickHandler(new ClickHandler() {
                 @Override
@@ -399,7 +397,7 @@ public class TaggingPanel extends ComponentWithoutSettings
 
         public EditCustomTagButtonsDialog(Panel customButtonsPanel) {
             setGlassEnabled(true);
-            setText(stringMessages.tagEditCustomTagsButtonDialogHeader());
+            setText(stringMessages.tagEditCustomTagButtons());
 
             mainPanel = new VerticalPanel();
             mainPanel.setWidth("100px");
@@ -514,7 +512,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             inputPanel.setCommentValue(tagButton.getComment());
             inputPanel.setImageURLValue(tagButton.getImageURL());
 
-            saveButton = new Button("save");
+            saveButton = new Button(stringMessages.tagSaveCustomTagButton());
             saveButton.setStyleName(TagPanelResources.INSTANCE.style().footerButton());
             saveButton.addClickHandler(new ClickHandler() {
 
@@ -669,7 +667,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                             }
                         });
             } else {
-                Notification.notify(stringMessages.tagNotSpecified(), NotificationType.ERROR);
+                Notification.notify(stringMessages.tagNotSpecified(), NotificationType.WARNING);
             }
         }
 
@@ -693,15 +691,7 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     private boolean isAuthorizedAndRaceLogAvailable() {
-        if (leaderboardName == null || raceColumn == null || fleet == null) {
-            Notification.notify(stringMessages.tagNotAdded(), NotificationType.ERROR);
-            return false;
-        }
-        if (userService.getCurrentUser() == null) {
-            Notification.notify(stringMessages.tagNotLoggedIn(), NotificationType.WARNING);
-            return false;
-        }
-        return true;
+        return !(userService.getCurrentUser() == null || leaderboardName == null || raceColumn == null && fleet == null);
     }
 
     private void updateContent() {
