@@ -19,9 +19,9 @@ import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.settings.PipelineLevel;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorageAndAdditionalSettingsLayers.OnSettingsReloadedCallback;
 import com.sap.sse.security.ui.settings.PlaceBasedComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.StoredSettingsLocation;
-import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorageAndAdditionalSettingsLayers.OnSettingsReloadedCallback;
 
 /**
  * An abstract regatta tabView with some shared functions between the leaderboard tab and competitors chart tab 
@@ -33,38 +33,37 @@ public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventReg
     public SharedLeaderboardRegattaTabView() {
     }
 
-    public void createSharedLeaderboardPanel(String leaderboardName, RegattaAnalyticsDataManager regattaAnalyticsManager, UserService userService,
-            String placeToken, final Consumer<MultiRaceLeaderboardPanel> consumer, Iterable<DetailType> availableDetailTypes) {
-        
+    public void createSharedLeaderboardPanel(String leaderboardName,
+            RegattaAnalyticsDataManager regattaAnalyticsManager, UserService userService, String placeToken,
+            final Consumer<MultiRaceLeaderboardPanel> consumer, Iterable<DetailType> availableDetailTypes) {
+
         // FIXME remove
-        boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(
-                LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
-        
-        
-        
-        final PlaceBasedComponentContextWithSettingsStorage<MultiRaceLeaderboardSettings> componentContext = createLeaderboardComponentContext(leaderboardName, userService,
-                placeToken, availableDetailTypes);
+        boolean autoExpandLastRaceColumn = GwtHttpRequestUtils
+                .getBooleanParameter(LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
+
+        final PlaceBasedComponentContextWithSettingsStorage<MultiRaceLeaderboardSettings> componentContext = createLeaderboardComponentContext(
+                leaderboardName, userService, placeToken, availableDetailTypes);
         componentContext.getInitialSettings(new DefaultOnSettingsLoadedCallback<MultiRaceLeaderboardSettings>() {
             @Override
             public void onSuccess(MultiRaceLeaderboardSettings leaderboardSettings) {
-                final MultiRaceLeaderboardPanel leaderboardPanel = regattaAnalyticsManager.createMultiRaceLeaderboardPanel(null, componentContext, //
-                        leaderboardSettings, //
-                        "leaderboardGroupName", // TODO: keep using magic string? ask frank!
-                        leaderboardName, //
-                        true,
-                        autoExpandLastRaceColumn, availableDetailTypes);
+                final MultiRaceLeaderboardPanel leaderboardPanel = regattaAnalyticsManager
+                        .createMultiRaceLeaderboardPanel(null, componentContext, //
+                                leaderboardSettings, //
+                                "leaderboardGroupName", // TODO: keep using magic string? ask frank!
+                                leaderboardName, //
+                                true, autoExpandLastRaceColumn, availableDetailTypes);
                 leaderboardPanel.addAttachHandler(new Handler() {
 
                     @Override
                     public void onAttachOrDetach(AttachEvent event) {
-                        if(!event.isAttached()) {
+                        if (!event.isAttached()) {
                             componentContext.dispose();
                         }
                     }
-                    
+
                 });
-                
-                if(ElementSizeMutationObserver.isSupported()) {
+
+                if (ElementSizeMutationObserver.isSupported()) {
                     ElementSizeMutationObserver observer = new ElementSizeMutationObserver(new DomMutationCallback() {
                         @Override
                         public void onSizeChanged(int newWidth, int newHeight) {
@@ -78,15 +77,16 @@ public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventReg
                                             PipelineLevel.SYSTEM_DEFAULTS, newSettings,
                                             new OnSettingsReloadedCallback<MultiRaceLeaderboardSettings>() {
                                                 @Override
-                                                public void onSettingsReloaded(MultiRaceLeaderboardSettings patchedSettings) {
+                                                public void onSettingsReloaded(
+                                                        MultiRaceLeaderboardSettings patchedSettings) {
                                                     GWT.log("Switching to last_n mode with settings" + patchedSettings);
                                                     leaderboardPanel.updateSettings(patchedSettings);
-                            }
+                                                }
                                             });
                                 }
                             }
                         }
-                    }); 
+                    });
                     observer.observe(leaderboardPanel.getLeaderboardTable().getElement());
                 }
                 consumer.consume(leaderboardPanel);
