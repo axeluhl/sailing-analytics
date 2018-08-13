@@ -704,6 +704,7 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     private void updateContent() {
+        tagCreationPanel.setVisible(userService.getCurrentUser() != null);
         tagListProvider.updateFilteredTags();
         tagCellList.setVisibleRange(0, tagListProvider.getFilteredTagsListSize());
         tagListProvider.refresh();
