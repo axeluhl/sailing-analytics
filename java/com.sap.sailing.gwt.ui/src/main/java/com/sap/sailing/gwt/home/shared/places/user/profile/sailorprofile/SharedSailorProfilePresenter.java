@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile;
 
+import java.util.UUID;
+
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
@@ -11,6 +14,8 @@ import com.sap.sailing.gwt.home.communication.user.profile.GetCompetitorSuggesti
 import com.sap.sailing.gwt.home.communication.user.profile.GetFavoritesAction;
 import com.sap.sailing.gwt.home.communication.user.profile.SaveFavoriteBoatClassesAction;
 import com.sap.sailing.gwt.home.communication.user.profile.SaveFavoriteCompetitorsAction;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEntry;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.SailorProfileDetailsView;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggestedMultiSelectionBoatClassDataProvider;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggestedMultiSelectionCompetitorDataProvider;
@@ -150,6 +155,22 @@ public class SharedSailorProfilePresenter<C extends ClientFactoryWithDispatch & 
     @Override
     public PlaceController getPlaceController() {
         return clientFactory.getPlaceController();
+    }
+
+    @Override
+    public void refreshSailorProfileEntry(UUID uuid, SailorProfileDetailsView sailorView) {
+        getDataProvider().findSailorProfileById(uuid, new AsyncCallback<SailorProfileEntry>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log(caught.getMessage(), caught);
+            }
+
+            @Override
+            public void onSuccess(SailorProfileEntry result) {
+                sailorView.setEntry(result);
+            }
+        });
     }
 
 }
