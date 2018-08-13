@@ -50,7 +50,7 @@ public class InlineEditLabel extends Composite implements HasText {
         label.addClickHandler((event) -> {
             updateState(true);
         });
-        updateState(false);
+        updateState(false, true);
     }
 
     @UiHandler("button")
@@ -59,6 +59,10 @@ public class InlineEditLabel extends Composite implements HasText {
     }
 
     private void updateState(boolean newState) {
+        updateState(newState, false);
+    }
+
+    private void updateState(boolean newState, boolean suppressEvents) {
         if (newState) {
             textBox.setWidth((label.getOffsetWidth() + 7) + "px");
             label.setVisible(false);
@@ -67,14 +71,18 @@ public class InlineEditLabel extends Composite implements HasText {
             textBox.setFocus(true);
             button.setText("Save");
         } else {
+            boolean unchanged = textBox.getText().equals(label.getText());
+
             label.setVisible(true);
             textBox.setVisible(false);
             label.setText(textBox.getText());
             button.setText("Edit");
 
+            if (!suppressEvents && !unchanged) {
+                changeHandlers.forEach(c -> c.onTextChanged(label.getText()));
+            }
         }
         this.state = newState;
-        changeHandlers.forEach(c -> c.onTextChanged(label.getText()));
     }
 
     @Override
