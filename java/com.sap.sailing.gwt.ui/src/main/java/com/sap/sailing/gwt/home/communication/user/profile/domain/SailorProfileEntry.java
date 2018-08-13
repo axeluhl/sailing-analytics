@@ -19,7 +19,7 @@ public class SailorProfileEntry implements Result, Serializable {
     private ArrayList<BadgeDTO> badges = new ArrayList<>();
     private ArrayList<BoatClassDTO> boatclasses = new ArrayList<>();
 
-    public static final UUID SAILOR_PROFILE_KEY_NEW = UUID.fromString("00000000-00000000-00000000-00000001");
+    public static final UUID SAILOR_PROFILE_KEY_NEW = UUID.fromString("00000000-0000-0000-0000-0000000000001");
 
     protected SailorProfileEntry() {
 

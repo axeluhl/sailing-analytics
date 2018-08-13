@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.communication.user.profile;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
@@ -21,8 +22,6 @@ import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
  */
 public class GetSailorProfilesAction implements SailingAction<SailorProfileEntries> {
 
-    private HashMap<UUID, SailorProfileEntry> entries;
-
     private UUID uuid;
 
     public GetSailorProfilesAction(UUID uuid) {
@@ -31,6 +30,10 @@ public class GetSailorProfilesAction implements SailingAction<SailorProfileEntri
     }
 
     public GetSailorProfilesAction() {
+    }
+
+    private HashMap<UUID, SailorProfileEntry> generateDummyData() {
+
         List<BadgeDTO> badges = new ArrayList<>();
         BadgeDTO b1 = new BadgeDTO(UUID.randomUUID(), "Best Sailor Ever");
         BadgeDTO b2 = new BadgeDTO(UUID.randomUUID(), "100 Miles Sailed");
@@ -66,15 +69,17 @@ public class GetSailorProfilesAction implements SailingAction<SailorProfileEntri
         SailorProfileEntry e1 = new SailorProfileEntry(uid1, "My Favorite Guy", competitors, badges, boatclasses);
         SailorProfileEntry e2 = new SailorProfileEntry(uid2, "This Other Guy", competitors2, badges2, boatclasses2);
 
-        entries = new HashMap<>();
+        HashMap<UUID, SailorProfileEntry> entries = new HashMap<>();
         entries.put(uid1, e1);
         entries.put(uid2, e2);
+        return entries;
     }
 
     @Override
     @GwtIncompatible
     public SailorProfileEntries execute(SailingDispatchContext ctx) throws DispatchException {
         SailorProfileEntries result;
+        Map<UUID, SailorProfileEntry> entries = generateDummyData();
         if (uuid == null) {
             result = new SailorProfileEntries(entries.values());
         } else {
