@@ -1,20 +1,32 @@
 package com.sap.sailing.server.impl.preferences.model;
 
-import com.sap.sailing.domain.base.DomainFactory;
+import java.util.UUID;
+
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.SailorProfile;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
+import com.sap.sse.common.settings.generic.StringSetting;
+import com.sap.sse.common.settings.generic.UUIDSetting;
 
 public class SailorProfilePreference extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = 8324742146089597693L;
-    private transient SailorProfileSetting sailorProfile;
 
-    public SailorProfilePreference(DomainFactory domainFactory) {
-        sailorProfile = new SailorProfileSetting("sailorProfile", this, domainFactory);
+    private transient UUIDSetting uuid;
+    private transient StringSetting name;
+
+    private transient CompetitorSetSetting competitors;
+
+    public SailorProfilePreference(CompetitorAndBoatStore store) {
+        uuid = new UUIDSetting("uuid", this);
+        name = new StringSetting("name", this);
+        competitors = new CompetitorSetSetting("competitors", this, store);
     }
 
-    public SailorProfilePreference(DomainFactory domainFactory, SailorProfile sailorProfile) {
-        this(domainFactory);
-        this.sailorProfile.setValue(sailorProfile);
+    public SailorProfilePreference(CompetitorAndBoatStore store, SailorProfile sailorProfile) {
+        this(store);
+        uuid.setValue(sailorProfile.getUuid());
+        name.setValue(sailorProfile.getName());
+        competitors.setValues(sailorProfile.getCompetitors());
     }
 
     @Override
@@ -26,9 +38,7 @@ public class SailorProfilePreference extends AbstractGenericSerializableSettings
         // The usage of Java Serialization isn't planned by now, either.
     }
 
-    public SailorProfile getSailorProfile() {
-        return sailorProfile.getValue();
+    public UUID getUuid() {
+        return uuid.getValue();
     }
-
-
 }
