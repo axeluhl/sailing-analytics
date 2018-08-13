@@ -56,4 +56,9 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
     public void accept(RaceLogEventVisitor visitor) {
         visitor.visit(this);
     }
+    
+    @Override
+    public String getShortInfo() {
+        return "tag=" + tag + ", comment=" + comment;
+    }
 }
