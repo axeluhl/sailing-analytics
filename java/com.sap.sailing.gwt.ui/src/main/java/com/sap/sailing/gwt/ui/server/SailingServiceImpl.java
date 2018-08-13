@@ -6066,7 +6066,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     && tagEvent.getComment().equals(tag.getComment())
                     && tagEvent.getImageURL().equals(tag.getImageURL())) {
                 try {
-                    raceLog.revokeEvent(tagEvent.getAuthor(), tagEvent);
+                    raceLog.revokeEvent(tagEvent.getAuthor(), tagEvent, "Revoked");
                 } catch (NotRevokableException e) {
                     successInfo = new SuccessInfo(false, "Could not remove tag! " + e.getMessage(), null, null);
                 }

@@ -78,7 +78,7 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     private RaceStateImpl(RaceLogResolver raceLogResolver, RaceLog raceLog, AbstractLogEventAuthor author, RaceStatusAnalyzer.Clock analyzersClock,
             RacingProcedureFactory procedureFactory) {
         super(raceLogResolver, raceLog, /* forRaceLogIdentifier */ null, analyzersClock, procedureFactory,
-                Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState>emptyMap(), /* update */ true);
+                Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState>emptyMap());
         this.author = author;
     }
     
