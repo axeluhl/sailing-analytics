@@ -5,9 +5,6 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:style>
-                .tablex {
-                width: 100%;
-                }
                 .tablex .empty {
                 margin: 1.033333333333333em;
                 font-style: italic;
@@ -20,9 +17,9 @@
     <um:AuthorizedContentDecoratorDesktop ui:field="decoratorUi">
         <um:content>
             <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">
-                <div
-                    class="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopmediumsmall}">
-                    <c:CellTable ui:field="sailorProfilesTable" addStyleNames=" {style.tablex} {res.mediaCss.column} {res.mediaCss.small12}">
+                <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopmediumsmall}">
+                    <c:CellTable ui:field="sailorProfilesTable"
+                        addStyleNames=" {style.tablex} {res.mediaCss.small12}">
                         <c:emptyTableWidget>
                             <g:Label text="{i18n.noDataFound}" addStyleNames="{style.empty}" />
                         </c:emptyTableWidget>
