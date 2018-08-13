@@ -9,4 +9,6 @@ public interface SailorProfile extends NamedWithID, IsManagedByCache<SharedDomai
     String getName();
 
     UUID getUuid();
+
+    Iterable<Competitor> getCompetitors();
 }
