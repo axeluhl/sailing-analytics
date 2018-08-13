@@ -19,8 +19,15 @@ public class SailorProfileEntry implements Result, Serializable {
     private ArrayList<BadgeDTO> badges = new ArrayList<>();
     private ArrayList<BoatClassDTO> boatclasses = new ArrayList<>();
 
+    public static final UUID SAILOR_PROFILE_KEY_NEW = UUID.fromString("00000000-00000000-00000000-00000001");
+
     protected SailorProfileEntry() {
 
+    }
+
+    public SailorProfileEntry(UUID key, String name) {
+        this.key = key;
+        this.name = name;
     }
 
     public SailorProfileEntry(UUID key, String name, Iterable<SimpleCompetitorWithIdDTO> competitors,
@@ -76,6 +83,10 @@ public class SailorProfileEntry implements Result, Serializable {
         } else if (!key.equals(other.key))
             return false;
         return true;
+    }
+
+    public void setName(String newName) {
+        this.name = newName;
     }
 
 }

@@ -45,6 +45,10 @@ public class SailorProfileTabView extends Composite implements UserProfileTabVie
             currentPresenter = new SailorProfileOverviewImplPresenter(sailorView, ownPresenter, flagImageResolver);
             contentArea.setWidget(sailorView);
             view = sailorView;
+            if (uuid == SailorProfileEntry.SAILOR_PROFILE_KEY_NEW) {
+                SailorProfileEntry newEntry = new SailorProfileEntry(UUID.randomUUID(), "New Sailor Profile");
+                sailorView.setEntry(newEntry);
+            } else {
             currentPresenter.getSharedSailorProfilePresenter().getDataProvider().findSailorProfileById(uuid,
                     new AsyncCallback<SailorProfileEntry>() {
 
@@ -58,6 +62,7 @@ public class SailorProfileTabView extends Composite implements UserProfileTabVie
                             sailorView.setEntry(result);
                         }
                     });
+            }
         } else {
             view = new SailorProfileOverviewImpl();
             this.currentPresenter = new SailorProfileOverviewImplPresenter(view, ownPresenter, flagImageResolver);

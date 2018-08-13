@@ -8,11 +8,13 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
+import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEntry;
 import com.sap.sailing.gwt.home.shared.partials.desktopaccordion.DesktopAccordion;
 import com.sap.sailing.gwt.home.shared.partials.editable.EditableSuggestedMultiSelectionCompetitor;
 import com.sap.sailing.gwt.home.shared.partials.editable.InlineEditLabel;
 import com.sap.sailing.gwt.home.shared.partials.listview.BoatClassListView;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelection.SelectionChangeHandler;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.ParticipatedEventDTO;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.events.SailorProfileEventsTable;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
@@ -52,19 +54,49 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
 
     private final SharedSailorProfileView.Presenter presenter;
 
+    private SailorProfileEntry entry;
+
     public EditSailorProfile(SharedSailorProfileView.Presenter presenter, FlagImageResolver flagImageResolver) {
         this.presenter = presenter;
         competitorSelectionUi = new EditableSuggestedMultiSelectionCompetitor(presenter, flagImageResolver);
         initWidget(uiBinder.createAndBindUi(this));
         boatClassesUi.setText("Boatclasses");
         setupAccordions();
+        setupTitleChangeListener();
+    }
+
+    private void setupTitleChangeListener() {
+        // setup title change handler
+        titleUi.addTextChangeHandler((text) -> {
+            entry.setName(text);
+        });
+    }
+
+    private void setupCompetitorChangeListener() {
+        // setup competitor change handler
+        competitorSelectionUi.addSelectionChangeHandler(new SelectionChangeHandler<SimpleCompetitorWithIdDTO>() {
+
+            @Override
+            public void onRemove(SimpleCompetitorWithIdDTO selectedItem) {
+                entry.getCompetitors().remove(selectedItem);
+            }
+
+            @Override
+            public void onClear() {
+                entry.getCompetitors().clear();
+            }
+
+            @Override
+            public void onAdd(SimpleCompetitorWithIdDTO selectedItem) {
+                entry.getCompetitors().add(selectedItem);
+            }
+        });
     }
 
     private void setupAccordions() {
         accordionEventsUi.setTitle("Events");
         accordionStatisticsUi.setTitle("Statistics");
         accordionPolarDiagramUi.setTitle("Polar Diagram");
-
     }
 
     public void setEdgeToEdge(boolean edgeToEdge) {
@@ -73,10 +105,13 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
     }
 
     public void setEntry(SailorProfileEntry entry) {
+        this.entry = entry;
         competitorSelectionUi.setSelectedItems(entry.getCompetitors());
         titleUi.setText(entry.getName());
         boatClassesUi.setItems(entry.getBoatclasses());
+        setupCompetitorChangeListener();
 
+        // Get events
         presenter.getDataProvider().getEvents(entry.getKey(), new AsyncCallback<Iterable<ParticipatedEventDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
