@@ -58,12 +58,10 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
     protected static class ImageParameterValidator implements Validator<ImageDTO> {
         private StringMessages stringMessages;
         private List<CheckBox> doResize;
-        private Label doResizeLabel;
         
-        public ImageParameterValidator(StringMessages stringMessages, ArrayList<CheckBox> doResize, Label doResizeLabel) {
+        public ImageParameterValidator(StringMessages stringMessages, ArrayList<CheckBox> doResize) {
             this.stringMessages = stringMessages;
             this.doResize = doResize;
-            this.doResizeLabel = doResizeLabel;
         }
         
         @Override
@@ -136,23 +134,10 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
                     checkBox.setValue(false);
                 }
             }
-            if (checkBoxIsVisible()) {
-                doResizeLabel.setVisible(true);
-            } else {
-                doResizeLabel.setVisible(false);
-            }
             if (errorMessage.equals("")) {
                errorMessage = null;
             }
             return errorMessage;
-        }
-        
-        private boolean checkBoxIsVisible() {
-            for(CheckBox checkBox : doResize) {
-                if(checkBox.isVisible())
-                    return true;
-            }
-            return false;
         }
 
         private CheckBox getCheckBoxForTag(String tag, ImageDTO imageToValidate) {
@@ -202,16 +187,15 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
         }
     }
     public ImageDialog(Date creationDate, SailingServiceAsync sailingService, StringMessages stringMessages, DialogCallback<ImageDTO> callback) {
-        this(creationDate, sailingService, stringMessages, new ArrayList<>(), new Label(stringMessages.allowResizing()), callback);
+        this(creationDate, sailingService, stringMessages, new ArrayList<>(), stringMessages.allowResizing(), callback);
     }
     
-    private ImageDialog(Date creationDate, SailingServiceAsync sailingService, StringMessages stringMessages, ArrayList<CheckBox> doResize, Label doResizeLabel, DialogCallback<ImageDTO> callback) {
-        super(stringMessages.image(), null, stringMessages.ok(), stringMessages.cancel(), new ImageParameterValidator(stringMessages, doResize, doResizeLabel), callback);
-        this.sailingService = sailingService;
+    private ImageDialog(Date creationDate, SailingServiceAsync sailingService, StringMessages stringMessages, ArrayList<CheckBox> doResize, String resizeStringMessage, DialogCallback<ImageDTO> callback) {
+        super(stringMessages.image(), null, stringMessages.ok(), stringMessages.cancel(), new ImageParameterValidator(stringMessages, doResize), callback);
         this.stringMessages = stringMessages;
+        this.sailingService = sailingService;
         this.creationDate = creationDate;
         this.doResize = doResize;
-        this.doResizeLabel = doResizeLabel;
         getDialogBox().getWidget().setWidth("730px");
         busyIndicator = new SimpleBusyIndicator();
         imageURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
@@ -246,10 +230,9 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
             }
         });
         
-        doResizeLabel.setVisible(false);
         tagsListEditor = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new GenericStringListInlineEditorWithCheckboxesComposite.ExpandedUi<String>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
-                        MediaConstants.imageTagSuggestions, stringMessages.enterTagsForTheImage(), 30, doResize,doResizeLabel,new ClickHandler() {
+                        MediaConstants.imageTagSuggestions, stringMessages.enterTagsForTheImage(), 30, doResize, stringMessages.allowResizing(), new ClickHandler() {
                             
                             @Override
                             public void onClick(ClickEvent event) {
@@ -260,7 +243,6 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
                                 } else {
                                     checkBox.getElement().getStyle().setBackgroundColor("red");
                                 }  
-                                
                             }
                         }));
         tagsListEditor.addValueChangeHandler(new ValueChangeHandler<Iterable<String>>() {
@@ -278,7 +260,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
             tags.add(tag);
         }
         HashMap<String,Boolean> map = new HashMap<String, Boolean>();
-        for (int i= 0; i < doResize.size(); i++) {
+        for (int i= 0; i < tags.size(); i++) {
             if (tags.get(i).equals(MediaTagConstants.LOGO) || tags.get(i).equals(MediaTagConstants.TEASER) || tags.get(i).equals(MediaTagConstants.STAGE) || tags.get(i).equals(MediaTagConstants.GALLERY)) {
                 map.put(tags.get(i), doResize.get(i).getValue());
             }
