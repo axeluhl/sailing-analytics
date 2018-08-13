@@ -9,7 +9,9 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEntries;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEntry;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.SailorProfileDetailsView;
 import com.sap.sailing.gwt.home.shared.partials.desktopaccordion.DesktopAccordion;
 import com.sap.sailing.gwt.home.shared.partials.editable.EditableSuggestedMultiSelectionCompetitor;
 import com.sap.sailing.gwt.home.shared.partials.editable.InlineEditLabel;
@@ -56,7 +58,8 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
 
     private SailorProfileEntry entry;
 
-    public EditSailorProfile(SharedSailorProfileView.Presenter presenter, FlagImageResolver flagImageResolver) {
+    public EditSailorProfile(SharedSailorProfileView.Presenter presenter, FlagImageResolver flagImageResolver,
+            SailorProfileDetailsView parent) {
         this.presenter = presenter;
         competitorSelectionUi = new EditableSuggestedMultiSelectionCompetitor(presenter, flagImageResolver);
         initWidget(uiBinder.createAndBindUi(this));
@@ -69,6 +72,21 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
         // setup title change handler
         titleUi.addTextChangeHandler((text) -> {
             entry.setName(text);
+            onChange();
+        });
+    }
+
+    private void onChange() {
+        this.presenter.getDataProvider().updateOrCreateSailorProfile(entry, new AsyncCallback<SailorProfileEntries>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log(caught.getMessage(), caught);
+            }
+
+            @Override
+            public void onSuccess(SailorProfileEntries result) {
+                setEntry(result.getEntries().get(0));
+            }
         });
     }
 
@@ -79,16 +97,22 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
             @Override
             public void onRemove(SimpleCompetitorWithIdDTO selectedItem) {
                 entry.getCompetitors().remove(selectedItem);
+                onChange();
             }
 
             @Override
             public void onClear() {
+                final boolean fireEvent = entry.getCompetitors().size() == 0;
                 entry.getCompetitors().clear();
+                if (fireEvent) {
+                    onChange();
+                }
             }
 
             @Override
             public void onAdd(SimpleCompetitorWithIdDTO selectedItem) {
                 entry.getCompetitors().add(selectedItem);
+                onChange();
             }
         });
     }
