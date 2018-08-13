@@ -8,11 +8,15 @@ import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style.Cursor;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
@@ -36,6 +40,9 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
     final SortedCellTable<SailorProfileEntry> sailorProfilesTable = new SortedCellTable<>(0,
             DesignedCellTableResources.INSTANCE);
 
+    @UiField
+    FlowPanel footerUi;
+
     @UiField(provided = true)
     AuthorizedContentDecoratorDesktop decoratorUi;
 
@@ -45,6 +52,7 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
         decoratorUi = new AuthorizedContentDecoratorDesktop(presenter);
         initWidget(uiBinder.createAndBindUi(this));
         setupTable();
+        createFooter();
     }
 
     @Override
@@ -66,6 +74,17 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
             public void update(int index, SailorProfileEntry entry, String value) {
                 presenter.getClientFactory().getPlaceController().goTo(new SailorProfilePlace(entry.getKey()));
             }
+        });
+    }
+
+    private void createFooter() {
+        Label lab = new Label("+ Add a new Sailor Profile");
+        lab.getElement().getStyle().setCursor(Cursor.POINTER);
+        lab.getElement().getStyle().setDisplay(Display.INLINE);
+        footerUi.add(lab);
+        lab.addClickHandler((event) -> {
+            presenter.getClientFactory().getPlaceController()
+                    .goTo(new SailorProfilePlace(SailorProfileEntry.SAILOR_PROFILE_KEY_NEW));
         });
     }
 
