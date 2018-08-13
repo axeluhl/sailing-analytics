@@ -2100,7 +2100,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String tagPanel();
     String tagCreated(String author, String time);
     String tagNoTagsFound();
-    String tagAddButton();
+    String tagAddTag();
     String tagAddedSuccessfully();
     String tagNotAdded();
     String tagNotLoaded();
@@ -2114,10 +2114,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String tagLabelImageURL();
     String tagCreateTag();
     String tagEditCustomTagButtons();
-    String tagEditCustomTagsButtonDialogHeader();
     String tagAddCustomTagButton();
     String tagNotSpecified();
-    String tagFilterDialogHeader();
     String tagEditFilter();
     String tagEditCustomTagButton();
+    String tagSaveCustomTagButton();
 }
