@@ -335,7 +335,7 @@ public class LoginActivity extends BaseActivity
         backdrop = findViewById(R.id.login_view_backdrop);
 
         if (!EulaHelper.with(this).isEulaAccepted()) {
-            EulaHelper.with(this).showEulaDialog(R.style.AppTheme_AlertDialog);
+            EulaHelper.with(this).showEulaDialog(R.style.AppTheme_AlertDialog, null);
         }
 
         Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
