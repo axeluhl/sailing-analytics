@@ -6,7 +6,6 @@ import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.CompetitorSuggestionResult;
 import com.sap.sailing.gwt.home.communication.user.profile.FavoriteCompetitorsDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.GetCompetitorSuggestionAction;
-import com.sap.sailing.gwt.home.communication.user.profile.SaveFavoriteCompetitorsAction;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggestedMultiSelectionCompetitorDataProvider;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.dataprovider.StatefulSailorProfileDataProvider;
@@ -14,7 +13,6 @@ import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.mvp.ClientFactory;
-import com.sap.sse.gwt.dispatch.shared.commands.VoidResult;
 
 /**
  * Reusable implementation of {@link EditSailorProfileView.Presenter} which handles the sailor profiles. It only require
@@ -31,21 +29,11 @@ public class EditSailorProfilePresenter<C extends ClientFactoryWithDispatch & Er
 
     private final StatefulSailorProfileDataProvider sailorProfileDataProvider;
 
-    private SharedSailorProfileCompetitorDataProvider adjustedCompetitorDataProvider = null;
-
     public EditSailorProfilePresenter(C clientFactory) {
         this.clientFactory = clientFactory;
-        this.sailorProfileDataProvider = new StatefulSailorProfileDataProvider(clientFactory);
+        this.sailorProfileDataProvider = new StatefulSailorProfileDataProvider(clientFactory,
+                new SuggestedMultiSelectionCompetitorDataProviderImpl());
     }
-
-    private SharedSailorProfileCompetitorDataProvider createDataProviderIfNecessary() {
-        if (adjustedCompetitorDataProvider == null) {
-            adjustedCompetitorDataProvider = new SharedSailorProfileCompetitorDataProvider(
-                    new SuggestedMultiSelectionCompetitorDataProviderImpl());
-        }
-        return adjustedCompetitorDataProvider;
-    }
-
 
     private class SuggestedMultiSelectionCompetitorDataProviderImpl
             extends AbstractSuggestedMultiSelectionCompetitorDataProvider {
@@ -69,29 +57,13 @@ public class EditSailorProfilePresenter<C extends ClientFactoryWithDispatch & Er
 
         @Override
         protected void persist(FavoriteCompetitorsDTO favorites) {
-            clientFactory.getDispatch().execute(new SaveFavoriteCompetitorsAction(favorites), new SaveAsyncCallback());
-        }
-    }
-
-    private class SaveAsyncCallback implements AsyncCallback<VoidResult> {
-        @Override
-        public void onFailure(Throwable caught) {
-            clientFactory.createErrorView("Error while saving notification preferences!", caught);
-        }
-
-        @Override
-        public void onSuccess(VoidResult result) {
+            /** persistence is done in {@link StatefulSailorProfileDataProvider} */
         }
     }
 
     @Override
     public StatefulSailorProfileDataProvider getDataProvider() {
         return sailorProfileDataProvider;
-    }
-
-    @Override
-    public SharedSailorProfileCompetitorDataProvider getCompetitorsDataProvider() {
-        return createDataProviderIfNecessary();
     }
 
     @Override

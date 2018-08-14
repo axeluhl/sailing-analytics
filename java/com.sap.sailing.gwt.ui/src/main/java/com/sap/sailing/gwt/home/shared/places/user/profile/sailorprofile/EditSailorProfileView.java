@@ -11,8 +11,6 @@ public interface EditSailorProfileView extends IsWidget {
 
         StatefulSailorProfileDataProvider getDataProvider();
 
-        SharedSailorProfileCompetitorDataProvider getCompetitorsDataProvider();
-
         PlaceController getPlaceController();
     }
 

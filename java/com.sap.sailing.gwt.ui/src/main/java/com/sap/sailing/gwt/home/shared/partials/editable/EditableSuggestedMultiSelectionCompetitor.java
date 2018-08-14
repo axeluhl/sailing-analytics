@@ -6,9 +6,10 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelection;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider.Display;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorItemDescription;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionDataProvider;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileCompetitorDataProvider;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -24,14 +25,15 @@ public class EditableSuggestedMultiSelectionCompetitor
                 return new SuggestedMultiSelectionCompetitorItemDescription(t, flagImageResolver);
             }
 
-        }, new CompetitorDisplayImpl(presenter.getCompetitorsDataProvider(), flagImageResolver).selectionUi);
+        }, new CompetitorDisplayImpl(presenter.getDataProvider(), flagImageResolver).selectionUi);
         super.setText("Competitors");
     }
 
     private static class CompetitorDisplayImpl implements SuggestedMultiSelectionCompetitorDataProvider.Display {
         private final SuggestedMultiSelection<SimpleCompetitorWithIdDTO> selectionUi;
 
-        private CompetitorDisplayImpl(final SharedSailorProfileCompetitorDataProvider dataProvider,
+        private CompetitorDisplayImpl(
+                final SuggestedMultiSelectionDataProvider<SimpleCompetitorWithIdDTO, Display> dataProvider,
                 FlagImageResolver flagImageResolver) {
             selectionUi = SuggestedMultiSelection.forCompetitors(dataProvider, StringMessages.INSTANCE.competitors(),
                     flagImageResolver);

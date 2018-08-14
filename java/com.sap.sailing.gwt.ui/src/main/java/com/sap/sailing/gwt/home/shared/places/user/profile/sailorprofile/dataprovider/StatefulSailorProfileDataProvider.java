@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.dataprovider;
 
+import java.util.Collection;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GWT;
@@ -8,19 +9,26 @@ import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfilesDTO;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider.Display;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionDataProvider;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.ParticipatedEventDTO;
 
-public class StatefulSailorProfileDataProvider {
+public class StatefulSailorProfileDataProvider
+        implements SuggestedMultiSelectionDataProvider<SimpleCompetitorWithIdDTO, Display> {
 
     private SailorProfileDataProvider sailorProfileDataProvider;
+    private final SuggestedMultiSelectionCompetitorDataProvider competitorDataProvider;
 
     private SailorProfileDTO sailorProfile;
 
     private EditSailorProfileView sailorView;
 
-    public StatefulSailorProfileDataProvider(ClientFactoryWithDispatch clientFactory) {
+    public StatefulSailorProfileDataProvider(ClientFactoryWithDispatch clientFactory,
+            SuggestedMultiSelectionCompetitorDataProvider competitorDataProvider) {
         sailorProfileDataProvider = new SailorProfileDataProviderImpl(clientFactory);
+        this.competitorDataProvider = competitorDataProvider;
     }
 
     public void setView(EditSailorProfileView sailorView) {
@@ -65,17 +73,20 @@ public class StatefulSailorProfileDataProvider {
     }
 
     public void removeCompetitor(SimpleCompetitorWithIdDTO selectedItem) {
+        GWT.log("remove");
         sailorProfile.getCompetitors().remove(selectedItem);
         sendUpdateToBackend();
 
     }
 
     public void clearCompetitors() {
+        GWT.log("clear");
         sailorProfile.getCompetitors().clear();
         sendUpdateToBackend();
     }
 
     public void addCompetitor(SimpleCompetitorWithIdDTO selectedItem) {
+        GWT.log("add");
         sailorProfile.getCompetitors().add(selectedItem);
         sendUpdateToBackend();
     }
@@ -91,6 +102,66 @@ public class StatefulSailorProfileDataProvider {
     public void createNewEntry(SailorProfileDTO newSailorProfile) {
         sailorProfile = newSailorProfile;
         sendUpdateToBackend();
+    }
+
+    @Override
+    public Object getKey(SimpleCompetitorWithIdDTO item) {
+        return competitorDataProvider.getKey(item);
+    }
+
+    @Override
+    public void addSelection(SimpleCompetitorWithIdDTO item) {
+        GWT.log("add2");
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void removeSelection(SimpleCompetitorWithIdDTO item) {
+        GWT.log("remove2");
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void clearSelection() {
+        GWT.log("clear2");
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void getSuggestionItems(Iterable<String> queryTokens, int limit,
+            SuggestionItemsCallback<SimpleCompetitorWithIdDTO> callback) {
+        competitorDataProvider.getSuggestionItems(queryTokens, limit, callback);
+    }
+
+    @Override
+    public String createSuggestionKeyString(SimpleCompetitorWithIdDTO value) {
+        return competitorDataProvider.createSuggestionKeyString(value);
+    }
+
+    @Override
+    public void addDisplay(
+            com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider.Display display) {
+        competitorDataProvider.addDisplay(display);
+    }
+
+    @Override
+    public void persist() {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void initSelectedItems(Collection<SimpleCompetitorWithIdDTO> selectedItems) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public String createSuggestionAdditionalDisplayString(SimpleCompetitorWithIdDTO value) {
+        return competitorDataProvider.createSuggestionAdditionalDisplayString(value);
     }
 
 }
