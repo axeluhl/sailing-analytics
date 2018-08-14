@@ -1,11 +1,11 @@
 package com.sap.sailing.gwt.home.shared.partials.multiselection;
 
 import java.util.Collection;
+import java.util.function.Consumer;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -44,29 +44,18 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
         SuggestedMultiSelectionResources.INSTANCE.css().ensureInjected();
         this.dataProvider = dataProvider;
         this.widgetProvider = widgetProvider;
-        this.suggestionWidgetUi = widgetProvider.getSuggestBoxFilter(new SelectionCallback<T>() {
-            @Override
-            public void onSuggestionSelected(T selectedItem) {
-                SuggestedMultiSelection.this.dataProvider.addSelection(selectedItem);
-                SuggestedMultiSelection.this.addSelectedItem(selectedItem);
-            }
+        this.suggestionWidgetUi = widgetProvider.getSuggestBoxFilter(selectedItem -> {
+            SuggestedMultiSelection.this.dataProvider.addSelection(selectedItem);
+            SuggestedMultiSelection.this.addSelectedItem(selectedItem);
         });
         initWidget(uiBinder.createAndBindUi(this));
         headerTitleUi.setInnerText(title);
         this.updateUiState();
     }
     
-    public SuggestedMultiSelectionNotificationToggle addNotificationToggle(final NotificationCallback callback,
-            String label) {
-        final SuggestedMultiSelectionNotificationToggle notification =
-                new SuggestedMultiSelectionNotificationToggle(label);
-        notification.toggleButtonUi.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                final boolean enabled = notification.isEnabled();
-                callback.onNotificationToggled(enabled);
-            }
-        });
+    public SuggestedMultiSelectionNotificationToggle addNotificationToggle(Consumer<Boolean> callback, String label) {
+        SuggestedMultiSelectionNotificationToggle notification = new SuggestedMultiSelectionNotificationToggle(label);
+        notification.toggleButtonUi.addClickHandler(event -> callback.accept(notification.isEnabled()));
         notificationToggleContainerUi.add(notification);
         return notification;
     }
@@ -108,10 +97,10 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
     }
     
     private static class SuggestedMultiSelectionFilter<T> extends AbstractAsyncSuggestBoxFilter<T, T> {
-        private final SelectionCallback<T> selectionCallback;
+        private final Consumer<T> selectionCallback;
 
         private SuggestedMultiSelectionFilter(final SuggestedMultiSelectionDataProvider<T, ?> dataProvider,
-                SelectionCallback<T> selectionCallback, String placeholderText) {
+                Consumer<T> selectionCallback, String placeholderText) {
             super(new AbstractSuggestOracle<T>() {
                 @Override
                 protected void getSuggestions(final Request request, final Callback callback,
@@ -140,21 +129,14 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
         @Override
         protected final void onSuggestionSelected(T selectedItem) {
             SuggestedMultiSelectionFilter.this.clear();
-            selectionCallback.onSuggestionSelected(selectedItem);
+            selectionCallback.accept(selectedItem);
         }
-    }
-    
-    public interface NotificationCallback {
-        void onNotificationToggled(boolean enabled);
-    }
-    
-    private interface SelectionCallback<T> {
-        void onSuggestionSelected(T selectedItem);
     }
     
     private interface WidgetProvider<T> {
         IsWidget getItemDescriptionWidget(T item);
-        AbstractSuggestBoxFilter<T, T> getSuggestBoxFilter(SelectionCallback<T> selectionCallback);
+
+        AbstractSuggestBoxFilter<T, T> getSuggestBoxFilter(Consumer<T> selectionCallback);
     }
     
     public static SuggestedMultiSelection<SimpleCompetitorWithIdDTO> forCompetitors(
@@ -168,7 +150,7 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
 
             @Override
             public AbstractSuggestBoxFilter<SimpleCompetitorWithIdDTO, SimpleCompetitorWithIdDTO> getSuggestBoxFilter(
-                    SelectionCallback<SimpleCompetitorWithIdDTO> selectionCallback) {
+                    Consumer<SimpleCompetitorWithIdDTO> selectionCallback) {
                 return new SuggestedMultiSelectionFilter<SimpleCompetitorWithIdDTO>(dataProvider,
                         selectionCallback, StringMessages.INSTANCE.add(StringMessages.INSTANCE.competitor()));
             }
@@ -185,7 +167,7 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
 
             @Override
             public AbstractSuggestBoxFilter<BoatClassDTO, BoatClassDTO> getSuggestBoxFilter(
-                    SelectionCallback<BoatClassDTO> selectionCallback) {
+                    Consumer<BoatClassDTO> selectionCallback) {
                 return new SuggestedMultiSelectionFilter<BoatClassDTO>(dataProvider, selectionCallback,
                         StringMessages.INSTANCE.add(StringMessages.INSTANCE.boatClass()));
             }

@@ -14,7 +14,6 @@ import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelection;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelection.NotificationCallback;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionBoatClassDataProvider;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
@@ -62,12 +61,8 @@ public class UserPreferences extends Composite implements UserPreferencesView {
         
         private CompetitorDisplayImpl(final SuggestedMultiSelectionCompetitorDataProvider dataProvider, FlagImageResolver flagImageResolver) {
             selectionUi = SuggestedMultiSelection.forCompetitors(dataProvider, StringMessages.INSTANCE.favoriteCompetitors(), flagImageResolver);
-            notifyAboutResultsUi = selectionUi.addNotificationToggle(new NotificationCallback() {
-                @Override
-                public void onNotificationToggled(boolean enabled) {
-                    dataProvider.setNotifyAboutResults(enabled);
-                }
-            }, StringMessages.INSTANCE.notificationAboutNewResults());
+            notifyAboutResultsUi = selectionUi.addNotificationToggle(dataProvider::setNotifyAboutResults,
+                    StringMessages.INSTANCE.notificationAboutNewResults());
             dataProvider.addDisplay(this);
         }
         
@@ -89,18 +84,10 @@ public class UserPreferences extends Composite implements UserPreferencesView {
         
         private BoatClassDisplayImpl(final SuggestedMultiSelectionBoatClassDataProvider dataProvider) {
             selectionUi = SuggestedMultiSelection.forBoatClasses(dataProvider, StringMessages.INSTANCE.favoriteBoatClasses());
-            notifyAboutUpcomingRacesUi = selectionUi.addNotificationToggle(new NotificationCallback() {
-                @Override
-                public void onNotificationToggled(boolean enabled) {
-                    dataProvider.setNotifyAboutUpcomingRaces(enabled);
-                }
-            }, StringMessages.INSTANCE.notificationAboutUpcomingRaces());
-            notifyAboutResultsUi = selectionUi.addNotificationToggle(new NotificationCallback() {
-                @Override
-                public void onNotificationToggled(boolean enabled) {
-                    dataProvider.setNotifyAboutResults(enabled);
-                }
-            }, StringMessages.INSTANCE.notificationAboutNewResults());
+            notifyAboutUpcomingRacesUi = selectionUi.addNotificationToggle(dataProvider::setNotifyAboutUpcomingRaces,
+                    StringMessages.INSTANCE.notificationAboutUpcomingRaces());
+            notifyAboutResultsUi = selectionUi.addNotificationToggle(dataProvider::setNotifyAboutResults,
+                    StringMessages.INSTANCE.notificationAboutNewResults());
             dataProvider.addDisplay(this);
         }
         
