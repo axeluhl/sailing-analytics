@@ -224,7 +224,7 @@ public class TaggingPanel extends ComponentWithoutSettings
 
             SafeHtml cell;
             if (userService.getCurrentUser() != null
-                    && tag.getUsername().equals(userService.getCurrentUser().getName())) {
+                    && (tag.getUsername().equals(userService.getCurrentUser().getName()) || userService.getCurrentUser().hasRole("admin"))) {
                 cell = tagCellTemplate.cellRemovable(tagPanelStyle.tag(), tagPanelStyle.tagHeading(),
                         tagPanelStyle.tagCreated(), safeTag, safeCreated, content);
             } else {
@@ -334,7 +334,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             createTagFromTextBoxes.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    if (isAuthorizedAndRaceLogAvailable()) {
+                    if (isLoggedInAndRaceLogAvailable()) {
                         addTagToRaceLog(inputPanel.getTagValue(), inputPanel.getCommentValue(),
                                 inputPanel.getImageURLValue());
                         inputPanel.clearAllValues();
@@ -348,7 +348,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             editCustomTagButtons.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    if (isAuthorizedAndRaceLogAvailable()) {
+                    if (isLoggedInAndRaceLogAvailable()) {
                         EditCustomTagButtonsDialog editCustomTagButtonsDialog = new EditCustomTagButtonsDialog(
                                 customButtonsPanel);
 
@@ -1048,18 +1048,22 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     private void addTagToRaceLog(String tag, String comment, String imageURL) {
-        if (isAuthorizedAndRaceLogAvailable()) {
+        if (isLoggedInAndRaceLogAvailable()) {
             if (tag.length() > 0) {
                 sailingService.addTagToRaceLog(leaderboardName, raceColumn.getName(), fleet.getName(), tag, comment,
-                        imageURL, new MillisecondsTimePoint(timer.getTime()), new AsyncCallback<Void>() {
+                        imageURL, new MillisecondsTimePoint(timer.getTime()), new AsyncCallback<SuccessInfo>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                Notification.notify(stringMessages.tagNotAdded(), NotificationType.ERROR);
+                                Notification.notify(stringMessages.tagNotAddedReason(caught.toString()), NotificationType.ERROR);
                             }
 
                             @Override
-                            public void onSuccess(Void result) {
-                                Notification.notify(stringMessages.tagAddedSuccessfully(), NotificationType.INFO);
+                            public void onSuccess(SuccessInfo result) {
+                                if (result.isSuccessful()) {                                    
+                                    Notification.notify(stringMessages.tagAddedSuccessfully(), NotificationType.INFO);
+                                } else {
+                                    Notification.notify(stringMessages.tagNotAddedReason(result.getMessage()), NotificationType.ERROR);
+                                }
                             }
                         });
             } else {
@@ -1074,20 +1078,25 @@ public class TaggingPanel extends ComponentWithoutSettings
                 new AsyncCallback<SuccessInfo>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        Notification.notify("Could not remove tag!", NotificationType.ERROR);
+                        Notification.notify(stringMessages.tagNotRemoved(), NotificationType.ERROR);
+                        GWT.log(caught.toString());
                     }
 
                     @Override
                     public void onSuccess(SuccessInfo result) {
-                        tagListProvider.getAllTags().remove(tag);
-                        updateContent();
-                        Notification.notify("Removed tag successfully", NotificationType.SUCCESS);
+                        if (result.isSuccessful()) {                            
+                            tagListProvider.getAllTags().remove(tag);
+                            updateContent();
+                            Notification.notify(stringMessages.tagRemovedSuccessfully(), NotificationType.SUCCESS);
+                        } else {
+                            Notification.notify(stringMessages.tagNotRemoved() + " " + result.getMessage(), NotificationType.ERROR);
+                        }
                     }
                 });
     }
 
-    private boolean isAuthorizedAndRaceLogAvailable() {
-        return !(userService.getCurrentUser() == null || leaderboardName == null || raceColumn == null && fleet == null);
+    private boolean isLoggedInAndRaceLogAvailable() {
+        return !(userService.getCurrentUser() == null || leaderboardName == null || raceColumn == null || fleet == null);
     }
 
     private void updateContent() {
