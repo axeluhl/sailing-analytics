@@ -82,6 +82,7 @@ b {
 
 .footerPanel {
 	float: right;
+	width: 100%;
 }
 
 .tagButtonTable {
@@ -98,11 +99,13 @@ b {
 	border-radius: 4px 4px 0px 0px; 
 	border: 1px solid #cecece;
 	padding: 2px;
+	width: 100%;
 }
 
 .inputPanelImageURL {
     border: 1px solid #cecece;
     padding: 2px;
+    width: 100%;
 }
 
 .inputPanelComment {
@@ -112,6 +115,7 @@ b {
 	resize: none;
     margin-bottom: 5px;
     border-radius: 0px 0px 4px 4px; 
+    width: 100%;
 }
 
 /**************************** Tag filtering ****************************/

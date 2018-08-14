@@ -15,7 +15,6 @@ import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -50,7 +49,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -278,7 +276,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             this.tag = tag;
             this.imageURL = imageURL;
             this.comment = comment;
-            setStyleName(TagPanelResources.INSTANCE.style().button());
+            setStyleName(TagPanelResources.INSTANCE.style().footerButton());
             addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -313,10 +311,11 @@ public class TaggingPanel extends ComponentWithoutSettings
 
     }
 
-    private class TagCreationPanel extends VerticalPanel {
+    private class TagCreationPanel extends FlowPanel {
         private final Panel customButtonsPanel;
         private final Panel standardButtonsPanel;
         private final TagCreationInputPanel inputPanel;
+        private final Button createTagFromTextBoxes, editCustomTagButtons;
 
         public TagCreationPanel(StringMessages stringMessages) {
             setWidth("100%");
@@ -328,23 +327,9 @@ public class TaggingPanel extends ComponentWithoutSettings
             add(inputPanel);
             add(standardButtonsPanel);
             add(customButtonsPanel);
-
-            Button createTagFromTextBoxes = new Button(stringMessages.tagAddTag());
-            createTagFromTextBoxes.setStyleName(TagPanelResources.INSTANCE.style().button());
-            createTagFromTextBoxes.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    if (isAuthorizedAndRaceLogAvailable()) {
-                        addTagToRaceLog(inputPanel.getTagValue(), inputPanel.getCommentValue(),
-                                inputPanel.getImageURLValue());
-                        inputPanel.clearAllValues();
-                    }
-                }
-            });
-            standardButtonsPanel.add(createTagFromTextBoxes);
-
-            Button editCustomTagButtons = new Button(stringMessages.tagEditCustomTagButtons());
-            editCustomTagButtons.setStyleName(TagPanelResources.INSTANCE.style().button());
+            
+            editCustomTagButtons = new Button(stringMessages.tagEditCustomTagButtons());
+            editCustomTagButtons.setStyleName(TagPanelResources.INSTANCE.style().footerButton());
             editCustomTagButtons.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -363,7 +348,21 @@ public class TaggingPanel extends ComponentWithoutSettings
                     }
                 }
             });
-            standardButtonsPanel.add(editCustomTagButtons);
+            standardButtonsPanel.add(editCustomTagButtons);         
+            
+            createTagFromTextBoxes = new Button(stringMessages.tagAddTag());
+            createTagFromTextBoxes.setStyleName(TagPanelResources.INSTANCE.style().footerButton());
+            createTagFromTextBoxes.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    if (isAuthorizedAndRaceLogAvailable()) {
+                        addTagToRaceLog(inputPanel.getTagValue(), inputPanel.getCommentValue(),
+                                inputPanel.getImageURLValue());
+                        inputPanel.clearAllValues();
+                    }
+                }
+            });
+            standardButtonsPanel.add(createTagFromTextBoxes);
         }
 
         private void updateButtons() {
@@ -374,7 +373,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         }
     }
 
-    public class TagPreviewPanel extends VerticalPanel {
+    public class TagPreviewPanel extends FlowPanel {
         private final CellList<TagDTO> tagPreviewCellList;
         private TagDTO previewTag;
         private List<TagDTO> listContainingPreviewTag;
@@ -426,7 +425,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         }
     }
 
-    public class TagCreationInputPanel extends VerticalPanel {
+    public class TagCreationInputPanel extends FlowPanel {
         private TextBox tagTextBox, imageURLTextBox;
         private TextArea commentTextArea;
 
@@ -434,21 +433,18 @@ public class TaggingPanel extends ComponentWithoutSettings
             setWidth("100%");
 
             tagTextBox = new TextBox();
-            tagTextBox.setWidth("100%");
             tagTextBox.setStyleName(TagPanelResources.INSTANCE.style().inputPanelTag());
             tagTextBox.setTitle(stringMessages.tagLabelTag());
             tagTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelTag());
             add(tagTextBox);
 
             imageURLTextBox = new TextBox();
-            imageURLTextBox.setWidth("100%");
             imageURLTextBox.setStyleName(TagPanelResources.INSTANCE.style().inputPanelImageURL());
             imageURLTextBox.setTitle(stringMessages.tagLabelImageURL());
             imageURLTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelImageURL());
             add(imageURLTextBox);
 
             commentTextArea = new TextArea();
-            commentTextArea.setWidth("100%");
             commentTextArea.setStyleName(TagPanelResources.INSTANCE.style().inputPanelComment());
             commentTextArea.setVisibleLines(4);
             commentTextArea.setTitle(stringMessages.tagLabelComment());
@@ -503,7 +499,7 @@ public class TaggingPanel extends ComponentWithoutSettings
     private class EditCustomTagButtonsDialog extends DialogBox {
 
         private final Button closeButton, saveChangesButton, cancelChangesButton;
-        private final Panel mainPanel;
+        private final FlowPanel mainPanel;
         private final CellTable<TagButton> customTagButtonsTable;
         private final TagCreationInputPanel inputPanel;
         private final Button addCustomTagButton;
@@ -517,7 +513,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             setText(stringMessages.tagEditCustomTagButtons());
             setWidth("350px");
 
-            mainPanel = new VerticalPanel();
+            mainPanel = new FlowPanel();
             mainPanel.setWidth("100%");
             
             //Table with tag buttons
