@@ -18,6 +18,13 @@
                   <li>A setting has been added to prevent that changes are lost, when a different query should be
                      displayed. The default setting is to ask, if the changes should be discarded or kept (preventing
                      that the query is displayed).</li>
+                  <li>The available statistics are now filtered by the selected aggregator. Aggregators become
+                     grayed out, if they aren't supported by the selected statistic. You can select &lt;Any&gt;
+                     as aggregator to show all available statistics, select the desired one and select a specific
+                     supported aggregator afterwards.</li>
+                  <li>Counting aggregators now work directly on the retrieved data elements and don't require the
+                     selection of a specific statistic. Changing to a counting aggregator when a statistic is selected
+                     automatically changes it to the corresponding data type.</li>
                </ul>
             </li>
          </ul>
