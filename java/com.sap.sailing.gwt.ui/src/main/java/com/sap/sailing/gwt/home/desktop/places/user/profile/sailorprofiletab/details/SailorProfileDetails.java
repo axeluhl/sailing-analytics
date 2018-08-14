@@ -5,7 +5,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEntry;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailingProfileOverviewPresenter;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfile;
 import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorDesktop;
@@ -23,7 +23,7 @@ public class SailorProfileDetails extends Composite implements SailorProfileDeta
     @UiField(provided = true)
     EditSailorProfile editSailorProfileUi;
 
-    private SailorProfileEntry entry;
+    private SailorProfileDTO entry;
 
     private void propagateEntryIfNecessary() {
         if (this.entry != null && editSailorProfileUi != null) {
@@ -32,7 +32,7 @@ public class SailorProfileDetails extends Composite implements SailorProfileDeta
     }
 
     @Override
-    public void setEntry(SailorProfileEntry entry) {
+    public void setEntry(SailorProfileDTO entry) {
         this.entry = entry;
         propagateEntryIfNecessary();
     }

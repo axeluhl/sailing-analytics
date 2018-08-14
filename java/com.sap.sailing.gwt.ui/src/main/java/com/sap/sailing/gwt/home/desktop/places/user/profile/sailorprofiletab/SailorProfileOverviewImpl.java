@@ -22,7 +22,7 @@ import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
 import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableResources;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.BadgeDTO;
-import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEntry;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorDesktop;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
@@ -37,7 +37,7 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
     private SailingProfileOverviewPresenter presenter;
 
     @UiField(provided = true)
-    final SortedCellTable<SailorProfileEntry> sailorProfilesTable = new SortedCellTable<>(0,
+    final SortedCellTable<SailorProfileDTO> sailorProfilesTable = new SortedCellTable<>(0,
             DesignedCellTableResources.INSTANCE);
 
     @UiField
@@ -56,7 +56,7 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
     }
 
     @Override
-    public void setProfileList(Collection<SailorProfileEntry> entries) {
+    public void setProfileList(Collection<SailorProfileDTO> entries) {
         sailorProfilesTable.setPageSize(entries.size());
         sailorProfilesTable.setList(entries);
     }
@@ -69,9 +69,9 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
         sailorProfilesTable.addColumn(showColumn, "");
 
         showColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
-        showColumn.setFieldUpdater(new FieldUpdater<SailorProfileEntry, String>() {
+        showColumn.setFieldUpdater(new FieldUpdater<SailorProfileDTO, String>() {
             @Override
-            public void update(int index, SailorProfileEntry entry, String value) {
+            public void update(int index, SailorProfileDTO entry, String value) {
                 presenter.getClientFactory().getPlaceController().goTo(new SailorProfilePlace(entry.getKey()));
             }
         });
@@ -84,31 +84,31 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
         footerUi.add(lab);
         lab.addClickHandler((event) -> {
             presenter.getClientFactory().getPlaceController()
-                    .goTo(new SailorProfilePlace(SailorProfileEntry.SAILOR_PROFILE_KEY_NEW));
+                    .goTo(new SailorProfilePlace(SailorProfileDTO.SAILOR_PROFILE_KEY_NEW));
         });
     }
 
-    private final Column<SailorProfileEntry, String> profileNameColumn = new Column<SailorProfileEntry, String>(
+    private final Column<SailorProfileDTO, String> profileNameColumn = new Column<SailorProfileDTO, String>(
             new TextCell()) {
         @Override
-        public String getValue(SailorProfileEntry entry) {
+        public String getValue(SailorProfileDTO entry) {
             return entry.getName();
         }
     };
-    private final Column<SailorProfileEntry, String> badgeColumn = new Column<SailorProfileEntry, String>(
+    private final Column<SailorProfileDTO, String> badgeColumn = new Column<SailorProfileDTO, String>(
             new TextCell()) {
         @Override
-        public String getValue(SailorProfileEntry entry) {
+        public String getValue(SailorProfileDTO entry) {
             if (entry != null && entry.getBadges() != null) {
                 return entry.getBadges().stream().map(BadgeDTO::getName).collect(Collectors.joining(", "));
             }
             return "-";
         }
     };
-    private final Column<SailorProfileEntry, SailorProfileEntry> boatClassColumn = new Column<SailorProfileEntry, SailorProfileEntry>(
-            new AbstractCell<SailorProfileEntry>() {
+    private final Column<SailorProfileDTO, SailorProfileDTO> boatClassColumn = new Column<SailorProfileDTO, SailorProfileDTO>(
+            new AbstractCell<SailorProfileDTO>() {
                 @Override
-                public void render(Context context, SailorProfileEntry value, SafeHtmlBuilder sb) {
+                public void render(Context context, SailorProfileDTO value, SafeHtmlBuilder sb) {
                     for (BoatClassDTO boatclass : value.getBoatclasses()) {
                         sb.appendHtmlConstant(
                                 "<div style=\"height: 40px; width: 40px; margin-left: 5px; display: inline-block; background-size: cover; background-image: url('"
@@ -119,24 +119,24 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
                 }
             }) {
         @Override
-        public SailorProfileEntry getValue(SailorProfileEntry object) {
+        public SailorProfileDTO getValue(SailorProfileDTO object) {
             return object;
         }
     };
-    private final Column<SailorProfileEntry, String> competitorColumn = new Column<SailorProfileEntry, String>(
+    private final Column<SailorProfileDTO, String> competitorColumn = new Column<SailorProfileDTO, String>(
             new TextCell()) {
         @Override
-        public String getValue(SailorProfileEntry entry) {
+        public String getValue(SailorProfileDTO entry) {
             if (entry != null && entry.getCompetitors() != null) {
                 return entry.getCompetitors().stream().map(c -> c.getName()).collect(Collectors.joining(", "));
             }
             return "-";
         }
     };
-    private final Column<SailorProfileEntry, String> showColumn = new Column<SailorProfileEntry, String>(
+    private final Column<SailorProfileDTO, String> showColumn = new Column<SailorProfileDTO, String>(
             new ButtonCell()) {
         @Override
-        public String getValue(SailorProfileEntry entry) {
+        public String getValue(SailorProfileDTO entry) {
             return ">";
         }
     };

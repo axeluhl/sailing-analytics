@@ -5,7 +5,7 @@ import java.util.UUID;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
-import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEntry;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileTabView;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.SailorProfileDetails;
@@ -43,11 +43,11 @@ public class SailorProfileTabView extends Composite implements UserProfileTabVie
             currentPresenter = new SailorProfileOverviewImplPresenter(sailorView, ownPresenter, flagImageResolver);
             contentArea.setWidget(sailorView);
             view = sailorView;
-            if (uuid == SailorProfileEntry.SAILOR_PROFILE_KEY_NEW) {
-                SailorProfileEntry newEntry = new SailorProfileEntry(UUID.randomUUID(), "New Sailor Profile");
+            if (uuid == SailorProfileDTO.SAILOR_PROFILE_KEY_NEW) {
+                SailorProfileDTO newEntry = new SailorProfileDTO(UUID.randomUUID(), "New Sailor Profile");
                 sailorView.setEntry(newEntry);
             } else {
-                currentPresenter.getSharedSailorProfilePresenter().refreshSailorProfileEntry(uuid, sailorView);
+                currentPresenter.getSharedSailorProfilePresenter().refreshSailorProfile(uuid, sailorView);
             }
         } else {
             view = new SailorProfileOverviewImpl();

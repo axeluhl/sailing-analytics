@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab;
 
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEntries;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfilesDTO;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileClientFactory;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfilePresenter;
@@ -43,10 +43,10 @@ public class SailorProfileOverviewImplPresenter implements SailingProfileOvervie
     public void setAuthenticationContext(AuthenticationContext authenticationContext) {
         if (authenticationContext.isLoggedIn() && view instanceof SailorProfileOverview) {
             sharedSailorProfilePresenter.getDataProvider()
-                    .loadSailorProfiles(new AsyncCallback<SailorProfileEntries>() {
+                    .loadSailorProfiles(new AsyncCallback<SailorProfilesDTO>() {
 
                         @Override
-                        public void onSuccess(SailorProfileEntries result) {
+                        public void onSuccess(SailorProfilesDTO result) {
                             ((SailorProfileOverview) view).setProfileList(result.getEntries());
                         }
 

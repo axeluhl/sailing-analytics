@@ -44,7 +44,7 @@ public interface SharedSailorProfileView extends IsWidget {
 
         PlaceController getPlaceController();
 
-        void refreshSailorProfileEntry(UUID uuid, SailorProfileDetailsView sailorView);
+        void refreshSailorProfile(UUID uuid, SailorProfileDetailsView sailorView);
     }
 
 }

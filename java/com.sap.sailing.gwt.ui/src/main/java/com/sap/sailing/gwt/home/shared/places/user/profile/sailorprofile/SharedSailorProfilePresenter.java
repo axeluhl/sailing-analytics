@@ -14,7 +14,7 @@ import com.sap.sailing.gwt.home.communication.user.profile.GetCompetitorSuggesti
 import com.sap.sailing.gwt.home.communication.user.profile.GetFavoritesAction;
 import com.sap.sailing.gwt.home.communication.user.profile.SaveFavoriteBoatClassesAction;
 import com.sap.sailing.gwt.home.communication.user.profile.SaveFavoriteCompetitorsAction;
-import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEntry;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.SailorProfileDetailsView;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggestedMultiSelectionBoatClassDataProvider;
@@ -158,8 +158,8 @@ public class SharedSailorProfilePresenter<C extends ClientFactoryWithDispatch & 
     }
 
     @Override
-    public void refreshSailorProfileEntry(UUID uuid, SailorProfileDetailsView sailorView) {
-        getDataProvider().findSailorProfileById(uuid, new AsyncCallback<SailorProfileEntry>() {
+    public void refreshSailorProfile(UUID uuid, SailorProfileDetailsView sailorView) {
+        getDataProvider().findSailorProfileById(uuid, new AsyncCallback<SailorProfileDTO>() {
 
             @Override
             public void onFailure(Throwable caught) {
@@ -167,7 +167,7 @@ public class SharedSailorProfilePresenter<C extends ClientFactoryWithDispatch & 
             }
 
             @Override
-            public void onSuccess(SailorProfileEntry result) {
+            public void onSuccess(SailorProfileDTO result) {
                 sailorView.setEntry(result);
             }
         });

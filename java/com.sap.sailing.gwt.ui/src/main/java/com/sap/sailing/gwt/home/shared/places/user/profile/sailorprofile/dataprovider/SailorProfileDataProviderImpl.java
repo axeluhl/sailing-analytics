@@ -13,8 +13,8 @@ import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.GetSailorProfilesAction;
 import com.sap.sailing.gwt.home.communication.user.profile.SaveSailorProfileAction;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.BadgeDTO;
-import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEntries;
-import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEntry;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfilesDTO;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.ParticipatedEventDTO;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.ParticipatedRegattaDTO;
@@ -22,7 +22,7 @@ import com.sap.sse.gwt.dispatch.shared.commands.VoidResult;
 
 public class SailorProfileDataProviderImpl implements SailorProfileDataProvider {
 
-    private Map<UUID, SailorProfileEntry> entries;
+    private Map<UUID, SailorProfileDTO> entries;
 
     private Collection<ParticipatedEventDTO> events;
 
@@ -63,8 +63,8 @@ public class SailorProfileDataProviderImpl implements SailorProfileDataProvider 
 
         UUID uid1 = UUID.fromString("f92aa40e-5870-4f0c-9435-90a9069b0e65");
         UUID uid2 = UUID.fromString("71dd204f-376b-4129-a8ef-ad190e49ed02");
-        SailorProfileEntry e1 = new SailorProfileEntry(uid1, "My Favorite Guy", competitors, badges, boatclasses);
-        SailorProfileEntry e2 = new SailorProfileEntry(uid2, "This Other Guy", competitors2, badges2, boatclasses2);
+        SailorProfileDTO e1 = new SailorProfileDTO(uid1, "My Favorite Guy", competitors, badges, boatclasses);
+        SailorProfileDTO e2 = new SailorProfileDTO(uid2, "This Other Guy", competitors2, badges2, boatclasses2);
 
         entries = new HashMap<>();
         entries.put(uid1, e1);
@@ -92,14 +92,14 @@ public class SailorProfileDataProviderImpl implements SailorProfileDataProvider 
     }
 
     @Override
-    public void loadSailorProfiles(AsyncCallback<SailorProfileEntries> callback) {
+    public void loadSailorProfiles(AsyncCallback<SailorProfilesDTO> callback) {
         clientFactory.getDispatch().execute(new GetSailorProfilesAction(), callback);
     }
 
     @Override
-    public void findSailorProfileById(UUID uuid, AsyncCallback<SailorProfileEntry> callback) {
+    public void findSailorProfileById(UUID uuid, AsyncCallback<SailorProfileDTO> callback) {
         clientFactory.getDispatch().execute(new GetSailorProfilesAction(uuid),
-                new AsyncCallback<SailorProfileEntries>() {
+                new AsyncCallback<SailorProfilesDTO>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
@@ -107,7 +107,7 @@ public class SailorProfileDataProviderImpl implements SailorProfileDataProvider 
                     }
 
                     @Override
-                    public void onSuccess(SailorProfileEntries result) {
+                    public void onSuccess(SailorProfilesDTO result) {
                         callback.onSuccess(result.getEntries().get(0));
                     }
                 });
@@ -119,8 +119,8 @@ public class SailorProfileDataProviderImpl implements SailorProfileDataProvider 
     }
 
     @Override
-    public void updateOrCreateSailorProfile(SailorProfileEntry sailorProfile,
-            AsyncCallback<SailorProfileEntries> callback) {
+    public void updateOrCreateSailorProfile(SailorProfileDTO sailorProfile,
+            AsyncCallback<SailorProfilesDTO> callback) {
         clientFactory.getDispatch().execute(new SaveSailorProfileAction(sailorProfile),
                 new AsyncCallback<VoidResult>() {
 

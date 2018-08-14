@@ -15,8 +15,8 @@ import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.BadgeDTO;
-import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEntries;
-import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEntry;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfilesDTO;
 import com.sap.sailing.server.impl.preferences.model.SailorProfilePreference;
 import com.sap.sailing.server.impl.preferences.model.SailorProfilePreferences;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
@@ -25,7 +25,7 @@ import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
  * {@link SailingAction} implementation to load sailor profiles for the currently logged in user to bee shown on the
  * sailor profiles overview page, preparing the appropriate data structure.
  */
-public class GetSailorProfilesAction implements SailingAction<SailorProfileEntries> {
+public class GetSailorProfilesAction implements SailingAction<SailorProfilesDTO> {
 
     private UUID uuid;
 
@@ -39,24 +39,24 @@ public class GetSailorProfilesAction implements SailingAction<SailorProfileEntri
 
     @Override
     @GwtIncompatible
-    public SailorProfileEntries execute(SailingDispatchContext ctx) throws DispatchException {
+    public SailorProfilesDTO execute(SailingDispatchContext ctx) throws DispatchException {
         SailorProfilePreferences preferences = ctx.getPreferenceForCurrentUser(SailorProfilePreferences.PREF_NAME);
-        SailorProfileEntries result;
-        List<SailorProfileEntry> list = new ArrayList<>();
+        SailorProfilesDTO result;
+        List<SailorProfileDTO> list = new ArrayList<>();
 
         // 1) check if uuid is null -> show all sailor profiles, else show sailor profile with corresponding UUID
-        // 2) build SailorProfileEntries based on CompetitorStore and UUID
+        // 2) build SailorProfilesDTO based on CompetitorStore and UUID
         StreamSupport.stream(preferences.getSailorProfiles().spliterator(), false)
                 .filter(e -> uuid == null || (uuid != null && uuid.equals(e.getUuid())))
                 .forEach(s -> list.add(convertToDto(s, ctx.getRacingEventService().getCompetitorAndBoatStore())));
-        result = new SailorProfileEntries(list);
+        result = new SailorProfilesDTO(list);
         return result;
     }
 
-    /** converts SailorProfilePreference to SailorProfileEntry */
+    /** converts SailorProfilePreference to SailorProfileDTO */
     @GwtIncompatible
-    private SailorProfileEntry convertToDto(final SailorProfilePreference pref, final CompetitorAndBoatStore store) {
-        return new SailorProfileEntry(pref.getUuid(), pref.getName(), convertCompetitors(pref.getCompetitors()),
+    private SailorProfileDTO convertToDto(final SailorProfilePreference pref, final CompetitorAndBoatStore store) {
+        return new SailorProfileDTO(pref.getUuid(), pref.getName(), convertCompetitors(pref.getCompetitors()),
                 new ArrayList<BadgeDTO>(), getCorrespondingBoats(pref.getCompetitors(), store));
     }
 

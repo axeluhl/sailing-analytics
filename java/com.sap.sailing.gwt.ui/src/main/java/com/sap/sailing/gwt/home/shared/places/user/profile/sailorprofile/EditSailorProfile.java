@@ -9,8 +9,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
-import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEntries;
-import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEntry;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfilesDTO;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.SailorProfileDetailsView;
 import com.sap.sailing.gwt.home.shared.partials.desktopaccordion.DesktopAccordion;
 import com.sap.sailing.gwt.home.shared.partials.editable.EditableSuggestedMultiSelectionCompetitor;
@@ -56,7 +56,7 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
 
     private final SharedSailorProfileView.Presenter presenter;
 
-    private SailorProfileEntry entry;
+    private SailorProfileDTO entry;
 
     private boolean suppressEvents = false;
 
@@ -82,14 +82,14 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
     private void onChange() {
         if (!suppressEvents) {
             this.presenter.getDataProvider().updateOrCreateSailorProfile(entry,
-                    new AsyncCallback<SailorProfileEntries>() {
+                    new AsyncCallback<SailorProfilesDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             GWT.log(caught.getMessage(), caught);
                         }
 
                         @Override
-                        public void onSuccess(SailorProfileEntries result) {
+                        public void onSuccess(SailorProfilesDTO result) {
                             setEntry(result.getEntries().get(0));
                         }
                     });
@@ -134,7 +134,7 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
         competitorSelectionUi.getElement().getParentElement().removeClassName(res.mediaCss().column());
     }
 
-    public void setEntry(SailorProfileEntry entry) {
+    public void setEntry(SailorProfileDTO entry) {
         suppressEvents = true;
         this.entry = entry;
         competitorSelectionUi.setSelectedItems(entry.getCompetitors());

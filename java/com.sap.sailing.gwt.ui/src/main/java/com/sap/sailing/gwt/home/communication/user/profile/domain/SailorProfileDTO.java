@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.dispatch.shared.commands.Result;
 
-public class SailorProfileEntry implements Result, Serializable {
+public class SailorProfileDTO implements Result, Serializable {
     private static final long serialVersionUID = -5957161570595861618L;
 
     private UUID key;
@@ -21,16 +21,16 @@ public class SailorProfileEntry implements Result, Serializable {
 
     public static final UUID SAILOR_PROFILE_KEY_NEW = UUID.fromString("00000000-0000-0000-0000-0000000000001");
 
-    protected SailorProfileEntry() {
+    protected SailorProfileDTO() {
 
     }
 
-    public SailorProfileEntry(UUID key, String name) {
+    public SailorProfileDTO(UUID key, String name) {
         this.key = key;
         this.name = name;
     }
 
-    public SailorProfileEntry(UUID key, String name, Iterable<SimpleCompetitorWithIdDTO> competitors,
+    public SailorProfileDTO(UUID key, String name, Iterable<SimpleCompetitorWithIdDTO> competitors,
             Iterable<BadgeDTO> badges, Iterable<BoatClassDTO> boatclasses) {
         super();
         this.key = key;
@@ -76,7 +76,7 @@ public class SailorProfileEntry implements Result, Serializable {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        SailorProfileEntry other = (SailorProfileEntry) obj;
+        SailorProfileDTO other = (SailorProfileDTO) obj;
         if (key == null) {
             if (other.key != null)
                 return false;
