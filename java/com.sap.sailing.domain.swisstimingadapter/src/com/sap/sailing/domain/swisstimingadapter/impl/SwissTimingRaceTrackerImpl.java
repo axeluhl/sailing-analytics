@@ -128,7 +128,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
             WindStore windStore, DomainFactory domainFactory, SwissTimingFactory factory,
             TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver,
             SwissTimingTrackingConnectivityParameters connectivityParams)
-            throws InterruptedException, UnknownHostException, IOException, ParseException {
+            throws InterruptedException, UnknownHostException, IOException, ParseException, URISyntaxException {
         this(/* regatta */ null, windStore, domainFactory, factory, trackedRegattaRegistry, raceLogStore, regattaLogStore, raceLogResolver, connectivityParams);
     }
 
@@ -136,7 +136,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
             SwissTimingFactory factory, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, RaceLogResolver raceLogResolver,
             SwissTimingTrackingConnectivityParameters connectivityParams)
-            throws InterruptedException, UnknownHostException, IOException, ParseException {
+            throws InterruptedException, UnknownHostException, IOException, ParseException, URISyntaxException {
         super(connectivityParams);
         this.raceLogResolver = raceLogResolver;
         this.tmdMessageQueue = new TMDMessageQueue(this);
@@ -172,6 +172,9 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
         this.updateURL = connectivityParams.getUpdateURL();
         this.updateUsername = connectivityParams.getUpdateUsername();
         this.updatePassword = connectivityParams.getUpdatePassword();
+        if (connectivityParams.getStartList() != null) {
+            createRaceDefinition(course);
+        }
     }
 
     @Override
