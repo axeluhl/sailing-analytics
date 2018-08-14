@@ -7,14 +7,8 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.SailorProfileDetailsView;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionBoatClassDataProvider;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionDataProvider;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.dataprovider.SailorProfileDataProvider;
 
-/**
- * Interface for the user preferences UI. To support desktop as well as mobile version, an
- * {@link #setEdgeToEdge(boolean) edge-to-edge} flag can be provided, in order to meet the respective layout
- * requirements.
- */
 public interface SharedSailorProfileView extends IsWidget {
 
     /**
@@ -26,10 +20,6 @@ public interface SharedSailorProfileView extends IsWidget {
      */
     public void setEdgeToEdge(boolean edgeToEdge);
 
-    /**
-     * Presenter interface for the user preferences UI, providing methods to load preferences and to access the required
-     * {@link SuggestedMultiSelectionDataProvider}s.
-     */
     public interface Presenter {
 
         SailorProfileDataProvider getDataProvider();

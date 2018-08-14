@@ -30,9 +30,9 @@ import com.sap.sse.gwt.client.mvp.ClientFactory;
 import com.sap.sse.gwt.dispatch.shared.commands.VoidResult;
 
 /**
- * Reusable implementation of {@link SharedSailorProfileView.Presenter} which handles the selections and notification
- * toggles of a {@link SharedSailorProfileView}. It only require an appropriate client factory which implements
- * {@link ClientFactoryWithDispatch}, {@link ErrorAndBusyClientFactory} and {@link ClientFactory}.
+ * Reusable implementation of {@link SharedSailorProfileView.Presenter} which handles the sailor profiles. It only
+ * require an appropriate client factory which implements // * {@link ClientFactoryWithDispatch},
+ * {@link ErrorAndBusyClientFactory} and {@link ClientFactory}.
  * 
  * @param <C>
  *            the provided client factory type

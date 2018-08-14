@@ -9,8 +9,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
-import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfilesDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfilesDTO;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.SailorProfileDetailsView;
 import com.sap.sailing.gwt.home.shared.partials.desktopaccordion.DesktopAccordion;
 import com.sap.sailing.gwt.home.shared.partials.editable.EditableSuggestedMultiSelectionCompetitor;
@@ -22,8 +22,7 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.events.
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 
 /**
- * Implementation of {@link SharedSailorProfileView} where users can change their preferred selections and
- * notifications.
+ * Implementation of {@link SharedSailorProfileView} where users can view the details of a SailorProfile and edit them.
  */
 public class EditSailorProfile extends Composite implements SharedSailorProfileView {
 
@@ -81,18 +80,17 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
 
     private void onChange() {
         if (!suppressEvents) {
-            this.presenter.getDataProvider().updateOrCreateSailorProfile(entry,
-                    new AsyncCallback<SailorProfilesDTO>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            GWT.log(caught.getMessage(), caught);
-                        }
+            this.presenter.getDataProvider().updateOrCreateSailorProfile(entry, new AsyncCallback<SailorProfilesDTO>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    GWT.log(caught.getMessage(), caught);
+                }
 
-                        @Override
-                        public void onSuccess(SailorProfilesDTO result) {
-                            setEntry(result.getEntries().get(0));
-                        }
-                    });
+                @Override
+                public void onSuccess(SailorProfilesDTO result) {
+                    setEntry(result.getEntries().get(0));
+                }
+            });
         }
     }
 
