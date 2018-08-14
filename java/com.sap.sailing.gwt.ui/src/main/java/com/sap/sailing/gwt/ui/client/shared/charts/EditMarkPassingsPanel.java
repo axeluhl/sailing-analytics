@@ -11,11 +11,11 @@ import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
@@ -43,6 +43,8 @@ import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
@@ -133,7 +135,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
                 };
             }
         }, stringMessages.waypoint());
-        final DateTimeFormat timeFormat = DateTimeFormat.getFormat("HH:mm:ss");
+        final DateTimeFormat timeFormat = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_FULL);
         wayPointSelectionTable.addColumn(new Column<Util.Pair<Integer, Date>, SafeHtml>(new AnchorCell()) {
             @Override
             public SafeHtml getValue(final Pair<Integer, Date> object) {
@@ -216,7 +218,7 @@ public class EditMarkPassingsPanel extends AbstractCompositeComponent<AbstractSe
                         }
                     });
                     } else {
-                        Window.alert(stringMessages.warningSettingFixedPassing(currentWaypoints.get(waypoint).getName()));
+                        Notification.notify(stringMessages.warningSettingFixedPassing(currentWaypoints.get(waypoint).getName()), NotificationType.WARNING);
                 }
             }
             }

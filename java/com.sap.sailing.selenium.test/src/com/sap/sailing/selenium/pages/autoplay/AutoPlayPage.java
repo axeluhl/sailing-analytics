@@ -4,7 +4,9 @@ import java.io.UnsupportedEncodingException;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import com.google.common.base.Function;
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
 import com.sap.sailing.selenium.pages.HostPage;
@@ -20,9 +22,6 @@ public class AutoPlayPage extends HostPage {
     
     @FindBy(how = BySeleniumId.class, using = "AutoPlayStartView")
     private WebElement autoPlayStartView;
-    
-    @FindBy(how = BySeleniumId.class, using = "LeaderboardView")
-    private WebElement autoPlayLeaderboardView;
     
     @FindBy(how = BySeleniumId.class, using = "IdleNextUpView")
     private WebElement idleNextUpView;
@@ -76,7 +75,22 @@ public class AutoPlayPage extends HostPage {
 
     public AutoPlayLeaderboardView goToAutoPlayClassicUrl(WebDriver driver, String url) {
         driver.get(url); //$NON-NLS-1$
-        return new AutoPlayLeaderboardView(driver, autoPlayLeaderboardView);
+        final WebElement leaderboardViewElement = new WebDriverWait(driver, 30).until(new Function<WebDriver, WebElement>() {
+            @Override
+            public WebElement apply(WebDriver driver) {
+                final WebElement leaderboardViewElement = findElementOrNullBySeleniumId("LeaderboardView");
+                if (leaderboardViewElement != null) {
+                    if (isElementEntirelyVisible(leaderboardViewElement)) {
+                        return leaderboardViewElement;
+                    } else {
+                        return null;
+                    }
+                } else {
+                    return null;
+                }
+            }
+        });
+        return new AutoPlayLeaderboardView(driver, leaderboardViewElement);
     }
 
     public AutoPlayUpcomingView goToAutoPlaySixtyInchUrl(WebDriver webDriver, String url) {

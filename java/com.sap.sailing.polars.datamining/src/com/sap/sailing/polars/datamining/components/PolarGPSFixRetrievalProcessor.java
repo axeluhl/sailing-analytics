@@ -59,6 +59,9 @@ public class PolarGPSFixRetrievalProcessor extends AbstractRetrievalProcessor<Ha
             try {
                 Iterable<GPSFixMoving> fixes = track.getFixes(startTime, true, finishTime, false);
                 for (GPSFixMoving fix : fixes) {
+                    if (isAborted()) {
+                        break;
+                    }
                     WindWithConfidence<Pair<Position, TimePoint>> wind = trackedRace.getWindWithConfidence(
                             fix.getPosition(),
                             fix.getTimePoint(),

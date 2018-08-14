@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.swisstimingadapter.impl;
 
 import java.io.Serializable;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -50,9 +52,14 @@ import com.sap.sailing.domain.swisstimingadapter.RaceType;
 import com.sap.sailing.domain.swisstimingadapter.RaceType.OlympicRaceCode;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sailing.domain.tracking.impl.CourseDesignUpdateHandler;
+import com.sap.sailing.domain.tracking.impl.FinishTimeUpdateHandler;
+import com.sap.sailing.domain.tracking.impl.RaceAbortedHandler;
+import com.sap.sailing.domain.tracking.impl.StartTimeUpdateHandler;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -402,9 +409,29 @@ public class DomainFactoryImpl implements DomainFactory {
             String raceID, String raceName, String raceDescription, BoatClass boatClass, StartList startList,
             long delayToLiveInMillis, SwissTimingFactory swissTimingFactory, DomainFactory domainFactory,
             RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, boolean useInternalMarkPassingAlgorithm,
-            boolean trackWind, boolean correctWindDirectionByMagneticDeclination) {
+            boolean trackWind, boolean correctWindDirectionByMagneticDeclination, String updateURL,
+            String updateUsername, String updatePassword) {
         return new SwissTimingTrackingConnectivityParameters(hostname, port, raceID, raceName, raceDescription,
                 boatClass, startList, delayToLiveInMillis, swissTimingFactory, domainFactory, raceLogStore,
-                regattaLogStore, useInternalMarkPassingAlgorithm, trackWind, correctWindDirectionByMagneticDeclination);
+                regattaLogStore, useInternalMarkPassingAlgorithm, trackWind, correctWindDirectionByMagneticDeclination,
+                updateURL, updateUsername, updatePassword);
+    }
+
+    @Override
+    public void addUpdateHandlers(String updateURL, String username, String password, Serializable eventId,
+            RaceDefinition raceDefinition, DynamicTrackedRace trackedRace) throws URISyntaxException {
+        final URI updateURI = new URI(updateURL);
+        CourseDesignUpdateHandler courseDesignHandler = new CourseDesignUpdateHandler(
+                updateURI, username, password, eventId, raceDefinition.getId());
+        StartTimeUpdateHandler startTimeHandler = new StartTimeUpdateHandler(
+                updateURI, username, password, eventId,
+                raceDefinition.getId(), trackedRace.getTrackedRegatta().getRegatta());
+        RaceAbortedHandler raceAbortedHandler = new RaceAbortedHandler(
+                updateURI, username, password, eventId,
+                raceDefinition.getId());
+        final FinishTimeUpdateHandler finishTimeUpdateHandler = new FinishTimeUpdateHandler(updateURI, username, password, eventId,
+                raceDefinition.getId(), trackedRace.getTrackedRegatta().getRegatta());
+        baseDomainFactory.addUpdateHandlers(trackedRace, courseDesignHandler, startTimeHandler, raceAbortedHandler,
+                finishTimeUpdateHandler);
     }
 }

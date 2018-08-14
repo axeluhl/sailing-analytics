@@ -21,9 +21,14 @@ import com.sap.sailing.domain.common.dto.TrackedRaceStatisticsDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sailing.domain.tracking.impl.CourseDesignUpdateHandler;
+import com.sap.sailing.domain.tracking.impl.FinishTimeUpdateHandler;
+import com.sap.sailing.domain.tracking.impl.RaceAbortedHandler;
+import com.sap.sailing.domain.tracking.impl.StartTimeUpdateHandler;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
@@ -101,4 +106,11 @@ public interface DomainFactory extends SharedDomainFactory {
      */
     void updateRaceDTOWithTrackedRaceData(TrackedRace trackedRace, RaceDTO raceDTO);
 
+    /**
+     * Adds update handlers to a {@link TrackedRace} which can send updates to a REST service about race status
+     * changes such as a start time change, a course change, or a postponement.
+     */
+    void addUpdateHandlers(DynamicTrackedRace trackedRace, CourseDesignUpdateHandler courseDesignHandler,
+            StartTimeUpdateHandler startTimeHandler, RaceAbortedHandler raceAbortedHandler,
+            final FinishTimeUpdateHandler finishTimeUpdateHandler);
 }

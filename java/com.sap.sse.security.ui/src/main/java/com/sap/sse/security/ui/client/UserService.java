@@ -8,13 +8,14 @@ import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Random;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.Storage;
 import com.sap.sse.gwt.client.StorageEvent;
 import com.sap.sse.gwt.client.StorageEvent.Handler;
@@ -129,7 +130,7 @@ public class UserService {
 
             @Override
             public void onFailure(Throwable caught) {
-                Window.alert(caught.getMessage());
+                Notification.notify(caught.getMessage(), NotificationType.ERROR);
             }
         }));
     }
@@ -180,7 +181,7 @@ public class UserService {
         userManagementService.logout(new AsyncCallback<SuccessInfo>() {
             @Override
             public void onFailure(Throwable caught) {
-                Window.alert(stringMessages.couldNotSignOut(caught.getMessage()));
+                Notification.notify(stringMessages.couldNotSignOut(caught.getMessage()), NotificationType.ERROR);
             }
     
             @Override

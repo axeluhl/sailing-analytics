@@ -31,6 +31,9 @@ public class WindTrackRetrievalProcessor extends AbstractRetrievalProcessor<HasT
         Collection<HasWindTrackContext> windTracksWithContext = new ArrayList<>();
         final TrackedRace trackedRace = element.getTrackedRace();
         for (final WindSource windSource : trackedRace.getWindSources()) {
+            if (isAborted()) {
+                break;
+            }
             if (!trackedRace.getWindSourcesToExclude().contains(windSource)) {
                 final WindTrack windTrack = trackedRace.getOrCreateWindTrack(windSource);
                 windTracksWithContext.add(new WindTrackWithContext(element, windTrack, windSource));

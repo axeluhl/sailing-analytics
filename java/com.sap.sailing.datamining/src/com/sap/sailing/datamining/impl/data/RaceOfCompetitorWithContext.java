@@ -1,5 +1,9 @@
 package com.sap.sailing.datamining.impl.data;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import com.sap.sailing.datamining.Activator;
@@ -25,9 +29,12 @@ import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sse.common.Distance;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
@@ -240,50 +247,56 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
 
     @Override
     public int getNumberOfManeuvers() {
-        return getNumberOfTacks() + getNumberOfJibes();
+        Set<ManeuverType> maneuverTypes = new HashSet<>();
+        maneuverTypes.add(ManeuverType.TACK);
+        maneuverTypes.add(ManeuverType.JIBE);
+        return getNumberOf(maneuverTypes);
     }
 
     @Override
     public int getNumberOfTacks() {
-        return getNumberOf(ManeuverType.TACK);
+        return getNumberOf(Collections.singleton(ManeuverType.TACK));
     }
 
     @Override
     public int getNumberOfJibes() {
-        return getNumberOf(ManeuverType.JIBE);
+        return getNumberOf(Collections.singleton(ManeuverType.JIBE));
     }
 
     @Override
     public int getNumberOfPenaltyCircles() {
-        return getNumberOf(ManeuverType.PENALTY_CIRCLE);
+        return getNumberOf(Collections.singleton(ManeuverType.PENALTY_CIRCLE));
     }
 
-    private int getNumberOf(ManeuverType maneuverType) {
+    private int getNumberOf(Set<ManeuverType> maneuverTypes) {
         int number = 0;
         TrackedRace trackedRace = getTrackedRace();
         if (trackedRace != null) {
+            TimePoint from = null;
+            TimePoint to = null;
+            Competitor competitor = getCompetitor();
             Course course = trackedRace.getRace().getCourse();
-            Waypoint startWaypoint = course.getFirstWaypoint();
-            MarkPassing startPassing = trackedRace.getMarkPassing(getCompetitor(), startWaypoint);
-            TimePoint start = startPassing != null ? startPassing.getTimePoint() : trackedRace.getStartOfRace();
+            List<Waypoint> waypoints = Util.createList(course.getWaypoints());
             
-            Waypoint finishWaypoint = course.getLastWaypoint();
-            MarkPassing finishPassing = trackedRace.getMarkPassing(getCompetitor(), finishWaypoint);
-            TimePoint end;
-            if (finishPassing != null) {
-                end = finishPassing.getTimePoint();
-            } else {
-                end = trackedRace.getEndOfRace();
-                if (end == null) {
-                    TimePoint endOfTracking = trackedRace.getEndOfTracking();
-                    TimePoint now = MillisecondsTimePoint.now();
-                    end = endOfTracking != null && endOfTracking.before(now) ? endOfTracking : now;
+            int fromIndex = 0;
+            while (fromIndex < waypoints.size()) {
+                MarkPassing markPassing = trackedRace.getMarkPassing(competitor, waypoints.get(fromIndex));
+                TimePoint passingTime = markPassing != null ? markPassing.getTimePoint() : null;
+                if (passingTime != null) {
+                    if (from == null) {
+                        from = passingTime;
+                    } else {
+                        to = passingTime;
+                    }
                 }
+                fromIndex++;
             }
             
-            for (Maneuver maneuver : trackedRace.getManeuvers(getCompetitor(), start, end, false)) {
-                if (maneuver.getType() == maneuverType) {
-                    number++;
+            if (from != null && to != null) {
+                for (Maneuver maneuver : trackedRace.getManeuvers(getCompetitor(), from, to, false)) {
+                    if (maneuverTypes.contains(maneuver.getType())) {
+                        number++;
+                    }
                 }
             }
         }
@@ -344,6 +357,20 @@ public class RaceOfCompetitorWithContext implements HasRaceOfCompetitorContext {
         TimePoint competitorStartTime = firstTrackedLegOfCompetitor.getStartTime();
         Double length = trackedRace.getStartLine(competitorStartTime).getLength().getMeters();
         return distance / length;
+    }
+    
+    @Override
+    public Duration getDuration() {
+        Duration duration = null;
+        TrackedRace race = getTrackedRace();
+        Course course = race.getRace().getCourse();
+        MarkPassing startPassing = race.getMarkPassing(competitor, course.getFirstWaypoint());
+        MarkPassing finishPassing = race.getMarkPassing(competitor, course.getLastWaypoint());
+        if (startPassing != null && finishPassing != null) {
+            long durationMillis = finishPassing.getTimePoint().asMillis() - startPassing.getTimePoint().asMillis();
+            duration = new MillisecondsDurationImpl(durationMillis);
+        }
+        return duration;
     }
     
 }
