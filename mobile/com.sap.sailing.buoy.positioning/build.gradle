@@ -14,6 +14,23 @@ android {
         targetCompatibility rootProject.ext.targetCompatibilityVersion
     }
 
+    /**
+     * Copies apk into www apps directory and create version file
+     */
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def newName = outputFileName.replace(".apk", "-v" + variant.versionName + ".apk");
+            newName = newName.replace("-" + variant.buildType.name, "");
+            outputFileName = new File(newName)
+            def outputDir = "$buildDir/outputs/apk/${output.baseName.replace("-", "/")}/";
+            // Create version file
+            def versionFile = new File(outputDir + "$packageName." + "version")
+            versionFile.text = "$packageName" + ".apk=$verCode"
+            def taskName = variant.name.capitalize()
+            tasks["assemble$taskName"].finalizedBy = [rootProject.ext.createCopyTask('buoy', outputDir, output)]
+        }
+    }
+
     defaultConfig {
         applicationId packageName
         minSdkVersion rootProject.ext.minSdk
@@ -96,22 +113,4 @@ clean.doLast {
     ant.delete() {
         fileset(dir: file("../../java/com.sap.sailing.www/apps"), includes: "$packageName*")
     }
-}
-
-/**
- * Copies apk into www apps directory and create version file
- */
-build.doLast {
-    // Copy APK file
-    copy {
-        from("build/outputs/apk") {
-            include "**/*debug.apk"
-        }
-        into "../../java/com.sap.sailing.www/apps"
-        rename { String fileName -> fileName.replace("-debug", "") }
-    }
-
-    // Create version file
-    def versionFile = file("../../java/com.sap.sailing.www/apps/$packageName." + "version")
-    versionFile.text = "$packageName" + ".apk=$verCode"
 }
