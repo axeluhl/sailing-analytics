@@ -336,7 +336,9 @@ public class TaggingPanel extends ComponentWithoutSettings
         public TagPreviewPanel(TagCreationInputPanel inputField) {
             this.inputField = inputField;
             tagPreviewCellList = new CellList<TagDTO>(new TagCell(), CellListResources.INSTANCE);
+            tagPreviewCellList.setVisibleRange(0, 1);
             previewLabel = new Label(stringMessages.tagPreview());
+            listContainingPreviewTag = new ArrayList<TagDTO>();
             
             setStyleName(TagPanelResources.INSTANCE.style().tagPreviewPanel());
             add(previewLabel);
@@ -367,22 +369,11 @@ public class TaggingPanel extends ComponentWithoutSettings
         }
 
         public void renderPreview() {
-            previewTag = new TagDTO(inputField.getTagValue(), inputField.getCommentValue(), inputField.getImageURLValue(), "Author", new MillisecondsTimePoint(timer.getTime()), new MillisecondsTimePoint(timer.getTime()));
-            listContainingPreviewTag = new ArrayList<TagDTO>();
+            listContainingPreviewTag.removeAll(listContainingPreviewTag);
+            previewTag = new TagDTO(inputField.getTagValue(), inputField.getCommentValue(), inputField.getImageURLValue(), "Author", new MillisecondsTimePoint(timer.getTime()), new MillisecondsTimePoint(timer.getTime()));        
             listContainingPreviewTag.add(previewTag);
             tagPreviewCellList.setRowData(listContainingPreviewTag);
         }
-
-        @Override
-        public Iterator<Widget> iterator() {
-            return null;
-        }
-
-        @Override
-        public boolean remove(Widget child) {
-            return false;
-        }
-
     }
 
     public class TagCreationInputPanel extends VerticalPanel {
@@ -466,6 +457,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         private final CellTable<TagButton> customTagButtonsTable;
         private final TagCreationInputPanel inputPanel;
         private final Button addCustomTagButton;
+        private final TagPreviewPanel tagPreviewPanel;
 
         public EditCustomTagButtonsDialog(Panel customButtonsPanel) {
             setGlassEnabled(true);
@@ -554,10 +546,13 @@ public class TaggingPanel extends ComponentWithoutSettings
                     hideDialog();
                 }
             });
+            
+            tagPreviewPanel = new TagPreviewPanel(inputPanel);
 
             mainPanel.add(customTagButtonsTable);
             mainPanel.add(inputPanel);
             mainPanel.add(addCustomTagButton);
+            mainPanel.add(tagPreviewPanel);
             mainPanel.add(closeButton);
 
             setWidget(mainPanel);
