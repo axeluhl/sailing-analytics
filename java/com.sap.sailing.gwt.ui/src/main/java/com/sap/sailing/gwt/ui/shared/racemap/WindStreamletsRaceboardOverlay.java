@@ -28,6 +28,7 @@ import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
 import com.sap.sailing.gwt.ui.simulator.StreamletParameters;
 import com.sap.sailing.gwt.ui.simulator.racemap.MovingCanvasOverlay;
+import com.sap.sailing.gwt.ui.simulator.streamlets.ColorMapperChangedListener;
 import com.sap.sailing.gwt.ui.simulator.streamlets.Swarm;
 import com.sap.sailing.gwt.ui.simulator.streamlets.VectorField;
 import com.sap.sailing.gwt.ui.simulator.streamlets.WindInfoForRaceVectorField;
@@ -46,7 +47,7 @@ import com.sap.sse.gwt.client.player.Timer;
  * @author Axel Uhl (D043530)
  * 
  */
-public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implements SwarmMinMaxSpeedChangedListener{
+public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implements ColorMapperChangedListener{
     public static final String LOAD_WIND_STREAMLET_DATA_CATEGORY = "loadWindStreamletData";
     private static final int animationIntervalMillis = 40;
     private static final long RESOLUTION_IN_MILLIS = 5000;
@@ -143,8 +144,8 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
                 final double y = 16;
                 final double w = 1;
                 final double h = 20;
-                final double speed_max = swarm.getMaxParticleSpeedInKnots();
-                final double speed_min = swarm.getMinParticleSpeedInKnots();
+                final double speed_max = swarm.getValueRange().getMaxRight();
+                final double speed_min = swarm.getValueRange().getMinLeft();
                 final double speed_spread = speed_max - speed_min;
                 final int scale_spread;
                 if (speed_spread < 0.5) {
@@ -157,7 +158,6 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
                     scale_spread = 50;
                 }
                 final int maxIdx = 300;
-//                final colors[] = swarm.getColorsForSteps(maxIdx);
                 Context2d context2d = streamletLegend.getContext2d();
                 context2d.setFillStyle("rgba(0,0,0,.3)");
                 context2d.setLineWidth(1.0);
@@ -172,7 +172,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
                 context2d.fillText(label, x + (w * maxIdx - txtmet.getWidth()) / 2.0, y - 5.0);
                 for (int idx = 0; idx <= maxIdx; idx++) {
                     final double speedSteps = speed_min + idx * (speed_max - speed_min) / maxIdx;
-                    context2d.setFillStyle(swarm.getColorWithSpectrumBoundaries(speedSteps));
+                    context2d.setFillStyle(swarm.getColorMapper().getColor(speedSteps));
                     context2d.beginPath();
                     context2d.fillRect(x + idx * w, y, w, h);
                     context2d.closePath();
@@ -204,7 +204,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
         initCanvasOrigin();
         this.swarm.setColors(colored);
         this.swarm.start(animationIntervalMillis);
-        this.swarm.addSwarmMinMaxSpeedChangedListener(this);
+        this.swarm.getColorMapper().addListener(this);
     }
 
     private void scheduleWindDataRefresh() {
@@ -229,7 +229,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
     private void stopStreamlets() {
         if (this.swarm != null) {
             this.swarm.stop();
-            this.swarm.removeSwarmMinMaxSpeedChangedListener(this);
+            this.swarm.getColorMapper().removeListener(this);
         }
     }
     
@@ -363,8 +363,10 @@ private boolean colored;
             swarm.onBoundsChanged(zoomChanged, swarmPause);
         }
     }
-    
-    public void onSwarmMinMaxSpeedChanged() {
+
+    @Override
+    public void onColorMappingChanged() {
         drawLegend();
     }
+    
 }
