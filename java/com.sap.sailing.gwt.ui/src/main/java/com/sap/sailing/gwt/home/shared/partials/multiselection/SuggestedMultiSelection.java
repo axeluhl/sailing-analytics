@@ -14,6 +14,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
@@ -99,9 +100,9 @@ public final class SuggestedMultiSelection<T> extends Composite
      *            {@link String Label} for the added checkbox
      * @return reference on the added checkbox
      */
-    public SuggestedMultiSelectionNotificationToggle addNotificationToggle(Consumer<Boolean> callback, String label) {
+    public HasValue<Boolean> addNotificationToggle(Consumer<Boolean> callback, String label) {
         SuggestedMultiSelectionNotificationToggle notification = new SuggestedMultiSelectionNotificationToggle(label);
-        notification.toggleButtonUi.addClickHandler(event -> callback.accept(notification.isEnabled()));
+        notification.addValueChangeHandler(event -> callback.accept(event.getValue()));
         notificationToggleContainerUi.add(notification);
         UIObject.setVisible(contentSeparatorUi, true);
         return notification;

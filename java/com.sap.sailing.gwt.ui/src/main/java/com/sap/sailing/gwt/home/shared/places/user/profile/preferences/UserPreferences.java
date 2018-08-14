@@ -6,7 +6,7 @@ import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HasEnabled;
+import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.common.client.SharedResources;
@@ -55,7 +55,7 @@ public class UserPreferences extends Composite implements UserPreferencesView {
     
     private class CompetitorDisplayImpl implements SuggestedMultiSelectionCompetitorDataProvider.Display {
         private final SuggestedMultiSelection<SimpleCompetitorWithIdDTO> selectionUi;
-        private final HasEnabled notifyAboutResultsUi;
+        private final HasValue<Boolean> notifyAboutResultsUi;
         
         private CompetitorDisplayImpl(final SuggestedMultiSelectionCompetitorDataProvider dataProvider, FlagImageResolver flagImageResolver) {
             selectionUi = SuggestedMultiSelection.forCompetitors(dataProvider, StringMessages.INSTANCE.favoriteCompetitors(), flagImageResolver);
@@ -71,14 +71,14 @@ public class UserPreferences extends Composite implements UserPreferencesView {
 
         @Override
         public void setNotifyAboutResults(boolean notifyAboutResults) {
-            notifyAboutResultsUi.setEnabled(notifyAboutResults);
+            notifyAboutResultsUi.setValue(notifyAboutResults);
         }
     }
     
     private class BoatClassDisplayImpl implements SuggestedMultiSelectionBoatClassDataProvider.Display {
         private final SuggestedMultiSelection<BoatClassDTO> selectionUi;
-        private final HasEnabled notifyAboutUpcomingRacesUi;
-        private final HasEnabled notifyAboutResultsUi;
+        private final HasValue<Boolean> notifyAboutUpcomingRacesUi;
+        private final HasValue<Boolean> notifyAboutResultsUi;
         
         private BoatClassDisplayImpl(final SuggestedMultiSelectionBoatClassDataProvider dataProvider) {
             selectionUi = SuggestedMultiSelection.forBoatClasses(dataProvider, StringMessages.INSTANCE.favoriteBoatClasses());
@@ -96,12 +96,12 @@ public class UserPreferences extends Composite implements UserPreferencesView {
         
         @Override
         public void setNotifyAboutUpcomingRaces(boolean notifyAboutUpcomingRaces) {
-            notifyAboutUpcomingRacesUi.setEnabled(notifyAboutUpcomingRaces);
+            notifyAboutUpcomingRacesUi.setValue(notifyAboutUpcomingRaces);
         }
         
         @Override
         public void setNotifyAboutResults(boolean notifyAboutResults) {
-            notifyAboutResultsUi.setEnabled(notifyAboutResults);
+            notifyAboutResultsUi.setValue(notifyAboutResults);
         }
     }
 
