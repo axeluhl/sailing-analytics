@@ -15,7 +15,6 @@ import java.util.function.Consumer;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.OptionElement;
 import com.google.gwt.dom.client.SelectElement;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -26,12 +25,8 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.MenuItem;
-import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestBox.DefaultSuggestionDisplay;
-import com.google.gwt.user.client.ui.SuggestBox.SuggestionCallback;
-import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Util;
@@ -959,17 +954,9 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
     private static class ScrollableSuggestionDisplay extends DefaultSuggestionDisplay {
 
         public ScrollableSuggestionDisplay() {
-            PopupPanel popupPanel = getPopupPanel();
-            popupPanel.addStyleName("statisticSuggestBoxPopup");
+            getPopupPanel().addStyleName("statisticSuggestBoxPopup");
         }
         
-        @Override
-        protected void showSuggestions(SuggestBox suggestBox, Collection<? extends Suggestion> suggestions,
-                boolean isDisplayStringHTML, boolean isAutoSelectEnabled, SuggestionCallback callback) {
-            super.showSuggestions(suggestBox, suggestions, isDisplayStringHTML, isAutoSelectEnabled, callback);
-            getPopupPanel().getElement().getStyle().setProperty("maxWidth", suggestBox.getOffsetWidth(), Unit.PX);
-        }
-
         @Override
         protected void moveSelectionUp() {
             super.moveSelectionUp();

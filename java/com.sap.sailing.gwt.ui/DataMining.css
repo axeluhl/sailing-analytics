@@ -267,6 +267,14 @@ input.magnifier {
     max-height: 700px;
     overflow-y: scroll;
 }
+.statisticSuggestBoxPopup .item {
+    padding: 2px;
+    color: #000;
+    cursor: default;
+}
+.statisticSuggestBoxPopup .item-selected {
+    background: #D5E2FF;
+}
 
 .dataMiningListBox {
 	min-width: 120px;
