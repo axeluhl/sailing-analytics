@@ -11,11 +11,13 @@ import com.sap.sse.common.settings.generic.support.SettingsUtil;
 public class MultiRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecycle<MultiRaceLeaderboardSettings> {
 
     protected final List<String> namesOfRaceColumns;
+    private final boolean canBoatInfoBeShown;
     
     public MultiRaceLeaderboardPanelLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages,
             Iterable<DetailType> availableDetailTypes) {
         super(stringMessages, availableDetailTypes);
         this.namesOfRaceColumns = leaderboard != null ? leaderboard.getNamesOfRaceColumns() : new ArrayList<String>();
+        this.canBoatInfoBeShown = leaderboard != null ? !leaderboard.canBoatsOfCompetitorsChangePerRace : false;
     }
     @Override
     public MultiRaceLeaderboardSettings extractUserSettings(MultiRaceLeaderboardSettings currentLeaderboardSettings) {
@@ -55,7 +57,8 @@ public class MultiRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecycl
     
     @Override
     public MultiRaceLeaderboardSettingsDialogComponent getSettingsDialogComponent(MultiRaceLeaderboardSettings settings) {
-        return new MultiRaceLeaderboardSettingsDialogComponent(settings, namesOfRaceColumns, stringMessages, availableDetailTypes, false);
+        return new MultiRaceLeaderboardSettingsDialogComponent(settings, namesOfRaceColumns, stringMessages,
+                availableDetailTypes, canBoatInfoBeShown);
     }
 
     @Override
