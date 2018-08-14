@@ -25,7 +25,8 @@ public class EditableSuggestedMultiSelectionCompetitor
                 return new SuggestedMultiSelectionCompetitorItemDescription(t, flagImageResolver);
             }
 
-        }, new CompetitorDisplayImpl(presenter.getDataProvider(), flagImageResolver).selectionUi);
+        }, new CompetitorDisplayImpl(presenter.getDataProvider(), flagImageResolver).selectionUi,
+                presenter.getDataProvider());
         super.setText("Competitors");
     }
 

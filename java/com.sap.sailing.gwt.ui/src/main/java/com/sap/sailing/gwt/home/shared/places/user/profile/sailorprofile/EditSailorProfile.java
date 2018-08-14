@@ -8,14 +8,12 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
-import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.SailorProfileDetailsView;
 import com.sap.sailing.gwt.home.shared.partials.desktopaccordion.DesktopAccordion;
 import com.sap.sailing.gwt.home.shared.partials.editable.EditableSuggestedMultiSelectionCompetitor;
 import com.sap.sailing.gwt.home.shared.partials.editable.InlineEditLabel;
 import com.sap.sailing.gwt.home.shared.partials.listview.BoatClassListView;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelection.SelectionChangeHandler;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.ParticipatedEventDTO;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.events.SailorProfileEventsTable;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
@@ -63,34 +61,12 @@ public class EditSailorProfile extends Composite implements EditSailorProfileVie
         boatClassesUi.setText("Boatclasses");
         setupAccordions();
         setupTitleChangeListener();
-        setupCompetitorChangeListener();
     }
 
     private void setupTitleChangeListener() {
         // setup title change handler
         titleUi.addTextChangeHandler((text) -> {
             presenter.getDataProvider().updateTitle(text);
-        });
-    }
-
-    private void setupCompetitorChangeListener() {
-        // setup competitor change handler
-        competitorSelectionUi.addSelectionChangeHandler(new SelectionChangeHandler<SimpleCompetitorWithIdDTO>() {
-
-            @Override
-            public void onRemove(SimpleCompetitorWithIdDTO selectedItem) {
-                presenter.getDataProvider().removeCompetitor(selectedItem);
-            }
-
-            @Override
-            public void onClear() {
-                presenter.getDataProvider().clearCompetitors();
-            }
-
-            @Override
-            public void onAdd(SimpleCompetitorWithIdDTO selectedItem) {
-                presenter.getDataProvider().addCompetitor(selectedItem);
-            }
         });
     }
 

@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.shared.partials.multiselection;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.Consumer;
 
@@ -57,7 +56,6 @@ public final class SuggestedMultiSelection<T> extends Composite
     FlowPanel itemContainerUi;
     private final SuggestedMultiSelectionDataProvider<T, ?> dataProvider;
     private final WidgetProvider<T> widgetProvider;
-    private final Collection<SelectionChangeHandler<T>> selectionChangeHandlers = new ArrayList<>();
 
     private SuggestedMultiSelection(SuggestedMultiSelectionDataProvider<T, ?> dataProvider,
             WidgetProvider<T> widgetProvider, String title) {
@@ -65,30 +63,13 @@ public final class SuggestedMultiSelection<T> extends Composite
         this.dataProvider = dataProvider;
         this.widgetProvider = widgetProvider;
         this.suggestionWidgetUi = widgetProvider.getSuggestBoxFilter(selectedItem -> {
-            SuggestedMultiSelection.this.dataProvider.addSelection(selectedItem);
+            dataProvider.addSelection(selectedItem);
             SuggestedMultiSelection.this.addSelectedItem(selectedItem);
         });
         initWidget(uiBinder.createAndBindUi(this));
         headerTitleUi.setInnerText(title);
         UIObject.setVisible(contentSeparatorUi, false);
         this.updateUiState();
-        selectionChangeHandlers.add(new SelectionChangeHandler<T>() {
-
-            @Override
-            public void onAdd(T selectedItem) {
-                dataProvider.addSelection(selectedItem);
-            }
-
-            @Override
-            public void onRemove(T selectedItem) {
-                dataProvider.removeSelection(selectedItem);
-            }
-
-            @Override
-            public void onClear() {
-                dataProvider.clearSelection();
-            }
-        });
     }
 
     /**
@@ -108,14 +89,10 @@ public final class SuggestedMultiSelection<T> extends Composite
         return notification;
     }
 
-    public void addSelectionChangeHandler(SelectionChangeHandler<T> handler) {
-        this.selectionChangeHandlers.add(handler);
-    }
-
     @UiHandler("removeAllButtonUi")
     void onRemoveAllButtonClicked(ClickEvent event) {
         itemContainerUi.clear();
-        selectionChangeHandlers.forEach(h -> h.onClear());
+        dataProvider.clearSelection();
         this.updateUiState();
     }
 
@@ -144,12 +121,9 @@ public final class SuggestedMultiSelection<T> extends Composite
             protected void onRemoveItemRequsted() {
                 this.removeFromParent();
                 updateUiState();
-                selectionChangeHandlers.forEach(h -> h.onRemove(selectedItem));
+                dataProvider.removeSelection(selectedItem);
             }
         });
-        if (!suppressEvents) {
-            selectionChangeHandlers.forEach(h -> h.onAdd(selectedItem));
-        }
         this.updateUiState();
     }
 
@@ -194,18 +168,8 @@ public final class SuggestedMultiSelection<T> extends Composite
         }
     }
 
-    public interface SelectionChangeHandler<S> {
-        void onAdd(S selectedItems);
-
-        void onRemove(S selectedItem);
-
-        void onClear();
-    }
-
     private interface WidgetProvider<T> {
         IsWidget getItemDescriptionWidget(T item);
-
-
         AbstractSuggestBoxFilter<T, T> getSuggestBoxFilter(Consumer<T> selectionCallback);
     }
 

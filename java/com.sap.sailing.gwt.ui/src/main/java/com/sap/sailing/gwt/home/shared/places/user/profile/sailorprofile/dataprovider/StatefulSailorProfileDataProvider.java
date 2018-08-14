@@ -9,6 +9,7 @@ import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfilesDTO;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
+import com.sap.sailing.gwt.home.shared.partials.editable.EditableSuggestedMultiSelection.EditModeChangeHandler;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider.Display;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionDataProvider;
@@ -16,7 +17,7 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSai
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.ParticipatedEventDTO;
 
 public class StatefulSailorProfileDataProvider
-        implements SuggestedMultiSelectionDataProvider<SimpleCompetitorWithIdDTO, Display> {
+        implements SuggestedMultiSelectionDataProvider<SimpleCompetitorWithIdDTO, Display>, EditModeChangeHandler {
 
     private SailorProfileDataProvider sailorProfileDataProvider;
     private final SuggestedMultiSelectionCompetitorDataProvider competitorDataProvider;
@@ -111,23 +112,17 @@ public class StatefulSailorProfileDataProvider
 
     @Override
     public void addSelection(SimpleCompetitorWithIdDTO item) {
-        GWT.log("add2");
-        // TODO Auto-generated method stub
-
+        sailorProfile.getCompetitors().add(item);
     }
 
     @Override
     public void removeSelection(SimpleCompetitorWithIdDTO item) {
-        GWT.log("remove2");
-        // TODO Auto-generated method stub
-
+        sailorProfile.getCompetitors().remove(item);
     }
 
     @Override
     public void clearSelection() {
-        GWT.log("clear2");
-        // TODO Auto-generated method stub
-
+        sailorProfile.getCompetitors().clear();
     }
 
     @Override
@@ -149,19 +144,22 @@ public class StatefulSailorProfileDataProvider
 
     @Override
     public void persist() {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     public void initSelectedItems(Collection<SimpleCompetitorWithIdDTO> selectedItems) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     public String createSuggestionAdditionalDisplayString(SimpleCompetitorWithIdDTO value) {
         return competitorDataProvider.createSuggestionAdditionalDisplayString(value);
+    }
+
+    @Override
+    public void onEditModeChanged(boolean edit) {
+        if (!edit) {
+            sendUpdateToBackend();
+        }
     }
 
 }

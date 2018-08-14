@@ -21,13 +21,16 @@ import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelection;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelection.SelectionChangeHandler;
 
 public class EditableSuggestedMultiSelection<T> extends Composite implements HasText {
 
     private static SuggestedMultiSelectionUiBinder uiBinder = GWT.create(SuggestedMultiSelectionUiBinder.class);
 
     interface SuggestedMultiSelectionUiBinder extends UiBinder<Widget, EditableSuggestedMultiSelection<?>> {
+    }
+
+    public static interface EditModeChangeHandler {
+        void onEditModeChanged(boolean edit);
     }
 
     @UiField
@@ -52,33 +55,19 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
     private final Function<T, IsWidget> itemProducer;
 
     private boolean editMode = false;
+    private EditModeChangeHandler editModeChangeHandler;
 
     public EditableSuggestedMultiSelection(Function<T, IsWidget> itemProducer, SuggestedMultiSelection<T> multis) {
+        this(itemProducer, multis, null);
+    }
+
+    public EditableSuggestedMultiSelection(Function<T, IsWidget> itemProducer, SuggestedMultiSelection<T> multis,
+            EditModeChangeHandler editModeChangeHandler) {
         this.itemProducer = itemProducer;
         multiSelect = multis;
-
+        this.editModeChangeHandler = editModeChangeHandler;
         initWidget(uiBinder.createAndBindUi(this));
 
-        multiSelect.addSelectionChangeHandler(new SelectionChangeHandler<T>() {
-
-            @Override
-            public void onClear() {
-                itemContainerUi.clear();
-            }
-
-            @Override
-            public void onAdd(T selectedItem) {
-                addListItem(selectedItem);
-            }
-
-            @Override
-            public void onRemove(T selectedItem) {
-                IsWidget w = tableElements.remove(selectedItem);
-                if (w != null) {
-                    w.asWidget().removeFromParent();
-                }
-            }
-        });
         multiSelect.getElement().removeFromParent();
     }
 
@@ -86,6 +75,7 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
         this.editMode = state;
         listContainerUi.removeFromParent();
         multiSelect.getElement().removeFromParent();
+        editModeChangeHandler.onEditModeChanged(state);
         if (state) {
             parentPanel.appendChild(multiSelect.getElement());
         } else {
@@ -130,9 +120,5 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
     @Override
     public void setText(String text) {
         headerTitleUi.setInnerText(text);
-    }
-
-    public void addSelectionChangeHandler(SelectionChangeHandler<T> handler) {
-        multiSelect.addSelectionChangeHandler(handler);
     }
 }
