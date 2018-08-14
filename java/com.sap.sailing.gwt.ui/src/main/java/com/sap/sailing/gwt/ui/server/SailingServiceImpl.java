@@ -60,6 +60,8 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.AuthorizationException;
+import org.apache.shiro.subject.Subject;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -6048,27 +6050,43 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void addTagToRaceLog(String leaderboardName, String raceColumnName, String fleetName, String tag,
+    public SuccessInfo addTagToRaceLog(String leaderboardName, String raceColumnName, String fleetName, String tag,
             String comment, String imageURL, TimePoint raceTimepoint) {
-        RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
-        raceLog.add(new RaceLogTagEventImpl(tag, comment, imageURL, raceTimepoint, getService().getServerAuthor(),
-                raceLog.getCurrentPassId()));
+        SuccessInfo successInfo = new SuccessInfo(true, null, null, null);
+        try {            
+            SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
+            RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
+            raceLog.add(new RaceLogTagEventImpl(tag, comment, imageURL, raceTimepoint, getService().getServerAuthor(),
+                    raceLog.getCurrentPassId()));
+        } catch (AuthorizationException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "tagMissingPermissions"), null, null);
+        }
+        return successInfo;
     }
     
     @Override
-    public SuccessInfo removeTagFromRaceLog(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag) {
+    public SuccessInfo removeTagFromRaceLog(String leaderboardName, String raceColumnName, String fleetName,
+            TagDTO tag) {
         SuccessInfo successInfo = new SuccessInfo(true, null, null, null);
         RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
         TagFinder tagFinder = new TagFinder(raceLog, tag.getCreatedAt().minus(1), tag.getCreatedAt().plus(1));
         List<RaceLogTagEvent> foundTagEvents = tagFinder.analyze();
         for (RaceLogTagEvent tagEvent : foundTagEvents) {
-            if (tagEvent.getTag().equals(tag.getTag())
-                    && tagEvent.getComment().equals(tag.getComment())
+            if (tagEvent.getTag().equals(tag.getTag()) && tagEvent.getComment().equals(tag.getComment())
                     && tagEvent.getImageURL().equals(tag.getImageURL())) {
                 try {
-                    raceLog.revokeEvent(tagEvent.getAuthor(), tagEvent, "Revoked");
-                } catch (NotRevokableException e) {
-                    successInfo = new SuccessInfo(false, "Could not remove tag! " + e.getMessage(), null, null);
+                    // check if logged in user is the same user as the creator or logged in user is Administrator
+                    Subject subject = SecurityUtils.getSubject();
+                    subject.checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
+                    if ((subject.getPrincipals() != null && subject.getPrincipals().getPrimaryPrincipal().equals(tag.getUsername())) || subject.hasRole("admin")) {                        
+                        raceLog.revokeEvent(tagEvent.getAuthor(), tagEvent, "Revoked");
+                    } else {
+                        successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "tagMissingPermissions"), null, null);
+                    }
+                } catch (AuthorizationException e) {
+                    successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "tagMissingPermissions"), null, null);
+                } catch (Exception e) {
+                    successInfo = new SuccessInfo(false, e.toString(), null, null);
                 }
             }
         }
