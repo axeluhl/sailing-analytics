@@ -273,6 +273,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     private VideoMetadataDTO checkMetadata(File tmp) throws ParserConfigurationException, SAXException, IOException {
         try (ByteChannel inChannel = Files.newByteChannel(tmp.toPath())) {
             AbstractBoxParser boxParserImpl = new PropertyBoxParserImpl();
+            boxParserImpl.skippingBoxes(new String[] { "mdat" });
             try (IsoFile isof = new IsoFile(inChannel, boxParserImpl)) {
                 try {
                     Date recordStartedTimer = determineRecordingStart(isof);
