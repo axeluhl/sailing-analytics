@@ -58,6 +58,8 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
 
     private SailorProfileEntry entry;
 
+    private boolean suppressEvents = false;
+
     public EditSailorProfile(SharedSailorProfileView.Presenter presenter, FlagImageResolver flagImageResolver,
             SailorProfileDetailsView parent) {
         this.presenter = presenter;
@@ -66,6 +68,7 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
         boatClassesUi.setText("Boatclasses");
         setupAccordions();
         setupTitleChangeListener();
+        setupCompetitorChangeListener();
     }
 
     private void setupTitleChangeListener() {
@@ -77,17 +80,20 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
     }
 
     private void onChange() {
-        this.presenter.getDataProvider().updateOrCreateSailorProfile(entry, new AsyncCallback<SailorProfileEntries>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                GWT.log(caught.getMessage(), caught);
-            }
+        if (!suppressEvents) {
+            this.presenter.getDataProvider().updateOrCreateSailorProfile(entry,
+                    new AsyncCallback<SailorProfileEntries>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            GWT.log(caught.getMessage(), caught);
+                        }
 
-            @Override
-            public void onSuccess(SailorProfileEntries result) {
-                setEntry(result.getEntries().get(0));
-            }
-        });
+                        @Override
+                        public void onSuccess(SailorProfileEntries result) {
+                            setEntry(result.getEntries().get(0));
+                        }
+                    });
+        }
     }
 
     private void setupCompetitorChangeListener() {
@@ -129,11 +135,12 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
     }
 
     public void setEntry(SailorProfileEntry entry) {
+        suppressEvents = true;
         this.entry = entry;
         competitorSelectionUi.setSelectedItems(entry.getCompetitors());
         titleUi.setText(entry.getName());
         boatClassesUi.setItems(entry.getBoatclasses());
-        setupCompetitorChangeListener();
+        suppressEvents = false;
 
         // Get events
         presenter.getDataProvider().getEvents(entry.getKey(), new AsyncCallback<Iterable<ParticipatedEventDTO>>() {
