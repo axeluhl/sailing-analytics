@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.function.Consumer;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -14,6 +15,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
@@ -25,6 +27,13 @@ import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.suggestion.AbstractSuggestOracle;
 
+/**
+ * UI component for multi-selection of entries via suggestion drop-down menu. Selected entries can be removed one by one
+ * or in total. In addition, {@link #addNotificationToggle(Consumer, String) checkboxes} can be added optionally.
+ * 
+ * @param <T>
+ *            actual class of selectable entries
+ */
 public final class SuggestedMultiSelection<T> extends Composite
         implements SuggestedMultiSelectionDataProvider.Display<T> {
 
@@ -37,6 +46,8 @@ public final class SuggestedMultiSelection<T> extends Composite
     SpanElement headerTitleUi;
     @UiField
     FlowPanel notificationToggleContainerUi;
+    @UiField
+    DivElement contentSeparatorUi;
     @UiField(provided = true)
     AbstractFilterWidget<T, T> suggestionWidgetUi;
     @UiField
@@ -58,6 +69,7 @@ public final class SuggestedMultiSelection<T> extends Composite
         });
         initWidget(uiBinder.createAndBindUi(this));
         headerTitleUi.setInnerText(title);
+        UIObject.setVisible(contentSeparatorUi, false);
         this.updateUiState();
         selectionChangeHandlers.add(new SelectionChangeHandler<T>() {
 
@@ -78,10 +90,20 @@ public final class SuggestedMultiSelection<T> extends Composite
         });
     }
 
+    /**
+     * Adds a checkbox with the given label to toggle notifications by notifying the provided callback.
+     * 
+     * @param callback
+     *            {@link Consumer Callback} which get notified on checkbox toggles
+     * @param label
+     *            {@link String Label} for the added checkbox
+     * @return reference on the added checkbox
+     */
     public SuggestedMultiSelectionNotificationToggle addNotificationToggle(Consumer<Boolean> callback, String label) {
         SuggestedMultiSelectionNotificationToggle notification = new SuggestedMultiSelectionNotificationToggle(label);
         notification.toggleButtonUi.addClickHandler(event -> callback.accept(notification.isEnabled()));
         notificationToggleContainerUi.add(notification);
+        UIObject.setVisible(contentSeparatorUi, true);
         return notification;
     }
 
