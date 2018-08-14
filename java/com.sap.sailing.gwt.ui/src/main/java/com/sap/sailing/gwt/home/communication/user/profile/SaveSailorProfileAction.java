@@ -39,11 +39,20 @@ public class SaveSailorProfileAction implements SailingAction<VoidResult> {
 
         List<SailorProfilePreference> sailorProfilePreferences = new ArrayList<>();
         SailorProfilePreferences prefs = ctx.getPreferenceForCurrentUser(SailorProfilePreferences.PREF_NAME);
+        // if user has already stored SailorProfilePreferences, override the changed SailorProfilePreferences, or else
+        // create a new SailorProfilePreferences object with an added SailorProfilePreference object representing the
+        // SailorProfileEntry to store
         if (prefs == null) {
+            // create new SailorProfilePreferences
             prefs = new SailorProfilePreferences(store);
             sailorProfilePreferences.add(new SailorProfilePreference(store, convert(sailorProfileEntry, store)));
             prefs.setSailorProfiles(sailorProfilePreferences);
         } else {
+            // 1) copy existing SailorProfilePreference objects from SailorProfilePreferences into list except the
+            // changed
+            // SailorProfilePreference
+            // 2) add the new version of the SailorProfilePreference to the list
+            // 3) add the list to a new SailorProfilePreferences
             for (SailorProfilePreference p : prefs.getSailorProfiles()) {
                 if (!p.getUuid().equals(sailorProfileEntry.getKey())) {
                     sailorProfilePreferences.add(p);
@@ -57,6 +66,7 @@ public class SaveSailorProfileAction implements SailingAction<VoidResult> {
         return new VoidResult();
     }
 
+    /** convert SailorProfileEntry object to persistable SailorProfile */
     @GwtIncompatible
     private SailorProfile convert(SailorProfileEntry entr, CompetitorAndBoatStore competitorStore) {
         List<Competitor> competitors = new ArrayList<>();

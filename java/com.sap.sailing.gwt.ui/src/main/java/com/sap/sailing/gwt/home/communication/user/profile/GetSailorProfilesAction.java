@@ -43,6 +43,9 @@ public class GetSailorProfilesAction implements SailingAction<SailorProfileEntri
         SailorProfilePreferences preferences = ctx.getPreferenceForCurrentUser(SailorProfilePreferences.PREF_NAME);
         SailorProfileEntries result;
         List<SailorProfileEntry> list = new ArrayList<>();
+
+        // 1) check if uuid is null -> show all sailor profiles, else show sailor profile with corresponding UUID
+        // 2) build SailorProfileEntries based on CompetitorStore and UUID
         StreamSupport.stream(preferences.getSailorProfiles().spliterator(), false)
                 .filter(e -> uuid == null || (uuid != null && uuid.equals(e.getUuid())))
                 .forEach(s -> list.add(convertToDto(s, ctx.getRacingEventService().getCompetitorAndBoatStore())));
@@ -50,20 +53,23 @@ public class GetSailorProfilesAction implements SailingAction<SailorProfileEntri
         return result;
     }
 
+    /** converts SailorProfilePreference to SailorProfileEntry */
     @GwtIncompatible
     private SailorProfileEntry convertToDto(final SailorProfilePreference pref, final CompetitorAndBoatStore store) {
         return new SailorProfileEntry(pref.getUuid(), pref.getName(), convertCompetitors(pref.getCompetitors()),
-                new ArrayList<BadgeDTO>(), convertBoats(pref.getCompetitors(), store));
+                new ArrayList<BadgeDTO>(), getCorrespondingBoats(pref.getCompetitors(), store));
     }
 
+    /** convert Competitors to SimpleCompetitorIdWithDTOs */
     @GwtIncompatible
     private List<SimpleCompetitorWithIdDTO> convertCompetitors(final Iterable<Competitor> comps) {
         return StreamSupport.stream(comps.spliterator(), false).filter(c -> c != null)
                 .map(c -> new SimpleCompetitorWithIdDTO(c)).collect(Collectors.toList());
     }
 
+    /** get the corresponding boat for each competitor in the list of competitors */
     @GwtIncompatible
-    private List<BoatClassDTO> convertBoats(Iterable<Competitor> comps, final CompetitorAndBoatStore store) {
+    private List<BoatClassDTO> getCorrespondingBoats(Iterable<Competitor> comps, final CompetitorAndBoatStore store) {
         return StreamSupport.stream(comps.spliterator(), false).filter(c -> c != null)
                 .map(c -> convertBoatClass(store.getExistingCompetitorWithBoatById(c.getId()).getBoat().getBoatClass()))
                 .collect(Collectors.toList());
