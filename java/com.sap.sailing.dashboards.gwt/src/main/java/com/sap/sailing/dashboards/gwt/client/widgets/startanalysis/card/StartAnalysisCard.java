@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -23,6 +25,8 @@ import com.sap.sailing.dashboards.gwt.client.widgets.startanalysis.StartAnalysis
 import com.sap.sailing.dashboards.gwt.client.widgets.startanalysis.rankingtable.StartAnalysisStartRankTable;
 import com.sap.sailing.dashboards.gwt.shared.StartlineAdvantageType;
 import com.sap.sailing.dashboards.gwt.shared.dto.StartAnalysisDTO;
+import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionModel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
@@ -88,7 +92,9 @@ public class StartAnalysisCard extends Composite implements HasWidgets, StartAna
         this.sailingServiceAsync = sailingServiceAsync;
         this.errorReporter = errorReporter;
         this.raceMapResources = raceMapResources;
-        competitorSelectionModel = new RaceCompetitorSelectionModel(/* hasMultiSelection */true);
+        final Map<CompetitorDTO, BoatDTO> competitorsToBoats = startAnalysisDTO.startAnalysisCompetitorDTOs.stream()
+                .collect(Collectors.toMap(c -> c.competitorDTO, c -> c.boatDTO));
+        competitorSelectionModel = new RaceCompetitorSelectionModel(/* hasMultiSelection */true, competitorsToBoats);
         competitorSelectionModel.setCompetitors(startAnalysisDTO.getCompetitorDTOsFromStartAnaylsisCompetitorDTOs(), raceMap);
         initWidget(uiBinder.createAndBindUi(this));
         startanalysis_card.getElement().getStyle().setLeft(leftCSSProperty, Unit.PCT);
