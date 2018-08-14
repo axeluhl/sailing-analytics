@@ -35,11 +35,11 @@ public class RaceCompetitorSelectionModel extends CompetitorSelectionModel imple
 
     @Override
     public void setBoat(CompetitorDTO competitor, BoatDTO boat) {
-        boatsOfCompetitors.put(competitor, boat);        
+        boatsOfCompetitors.put(competitor, boat);
     }
 
     @Override
     public BoatDTO getBoat(CompetitorDTO competitor) {
-        return boatsOfCompetitors.get(competitor);        
+        return boatsOfCompetitors.get(competitor);
     }
 }
