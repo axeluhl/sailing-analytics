@@ -12,7 +12,7 @@ public abstract class LeaderboardPanelLifecycle<T extends LeaderboardSettings>
 
     protected final Iterable<DetailType> availableDetailTypes;
 
-    public LeaderboardPanelLifecycle(StringMessages stringMessages, Iterable<DetailType> availableDetailTypes) {
+    protected LeaderboardPanelLifecycle(StringMessages stringMessages, Iterable<DetailType> availableDetailTypes) {
         this.stringMessages = stringMessages;
         this.availableDetailTypes = availableDetailTypes;
     }
