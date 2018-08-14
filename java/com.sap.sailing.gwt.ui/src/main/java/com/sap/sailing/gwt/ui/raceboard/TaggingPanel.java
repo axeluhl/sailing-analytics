@@ -17,7 +17,12 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
@@ -27,6 +32,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -56,14 +62,22 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.TagListProvider;
 import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
+import com.sap.sailing.gwt.ui.client.shared.filter.FilterUIFactory;
+import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
+import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSets;
+import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSetsDialog;
+import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSetsJsonDeSerializer;
+import com.sap.sailing.gwt.ui.raceboard.TaggingPanel.TagFilterResources.TagFilterCss;
 import com.sap.sailing.gwt.ui.raceboard.TaggingPanel.TagPanelResources.TagPanelStyle;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentWithoutSettings;
@@ -103,6 +117,46 @@ public class TaggingPanel extends ComponentWithoutSettings
         }
     }
 
+    public interface TagFilterResources extends ClientBundle {
+        public static final TagFilterResources INSTANCE = GWT.create(TagFilterResources.class);
+        
+        @Source("com/sap/sailing/gwt/ui/client/images/SAP_RV_Clear.png")
+        ImageResource clearButton();
+
+        @Source("com/sap/sailing/gwt/ui/client/images/SAP_RV_CompetitorsFilter_INACTIVE.png")
+        ImageResource filterInactiveButton();
+
+        @Source("com/sap/sailing/gwt/ui/client/images/SAP_RV_CompetitorsFilter_ACTIVE.png")
+        ImageResource filterActiveButton();
+
+        @Source("com/sap/sailing/gwt/ui/client/images/SAP_RV_Search.png")
+        ImageResource searchButton();
+
+        @Source("com/sap/sailing/gwt/ui/client/images/SAP_RV_Settings.png")
+        ImageResource settingsButton();
+
+        @Source("tagging-filter.css")
+        TagFilterCss css();
+
+        public interface TagFilterCss extends CssResource {
+            String button();
+            String hiddenButton();
+            String clearButton();
+            String searchButton();
+            String settingsButton();
+            String filterButton();
+            String tagFilterContainer();
+            String searchBox();
+            String searchInput();
+            String filterInactiveButtonBackgroundImage();
+            String filterActiveButtonBackgroundImage();
+            String clearButtonBackgroundImage();
+            String searchButtonBackgroundImage();
+            String settingsButtonBackgroundImage();
+        }
+
+    }
+    
     public interface CellListResources extends CellList.Resources {
         public static final CellListResources INSTANCE = GWT.create(CellListResources.class);
 
@@ -500,6 +554,217 @@ public class TaggingPanel extends ComponentWithoutSettings
         private void setRowData(List<TagButton> buttons) {
             customTagButtonsTable.setRowData(buttons);
             customTagButtonsTable.setVisible(buttons.size() > 0);
+        }
+    }
+    
+    private class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWithUI<TagDTO> {
+        private final static String LOCAL_STORAGE_TAGS_FILTER_SETS_KEY = "sailingAnalytics.raceBoard.tagsFilterSets";
+
+        private final TagFilterCss css = TagFilterResources.INSTANCE.css();
+        private final TextBox searchTextBox;
+        private final Button clearTextBoxButton;
+        private final Button filterSettingsButton;
+        private final TagsFilterSets tagFilterSets;
+        private final FlowPanel searchBoxPanel;
+        private final StringMessages stringMessages;
+        private final TagListProvider tagProvider;
+
+        private FilterSet<TagDTO, FilterWithUI<TagDTO>> lastActiveTagFilterSet;
+
+        public TagFilterPanel(StringMessages stringMessages, TagListProvider tagProvider) {
+            css.ensureInjected();
+            this.stringMessages = stringMessages;
+            this.tagProvider = tagProvider;
+            this.setStyleName(css.tagFilterContainer());
+
+            TagsFilterSets loadedTagsFilterSets = loadTagsFilterSets();
+            if (loadedTagsFilterSets != null) {
+                tagFilterSets = loadedTagsFilterSets;
+                tagProvider.setTagsFilterSet(tagFilterSets.getActiveFilterSetWithGeneralizedType());
+            } else {
+                tagFilterSets = createAndAddDefaultTagsFilter();
+                storeTagsFilterSets(tagFilterSets);
+            }
+
+            Button submitButton = new Button();
+            submitButton.setStyleName(css.button());
+            submitButton.addStyleName(css.searchButton());
+            submitButton.addStyleName(css.searchButtonBackgroundImage());
+
+            searchTextBox = new TextBox();
+            searchTextBox.getElement().setAttribute("placeholder", stringMessages.tagSearchTags());
+            searchTextBox.addKeyUpHandler(this);
+            searchTextBox.setStyleName(css.searchInput());
+
+            clearTextBoxButton = new Button();
+            clearTextBoxButton.setStyleName(css.button());
+            clearTextBoxButton.addStyleName(css.clearButton());
+            clearTextBoxButton.addStyleName(css.clearButtonBackgroundImage());
+            clearTextBoxButton.addStyleName(css.hiddenButton());
+            clearTextBoxButton.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    clearSelection();
+                }
+            });
+
+            filterSettingsButton = new Button("");
+            filterSettingsButton.setStyleName(css.button());
+            filterSettingsButton.addStyleName(css.filterButton());
+            filterSettingsButton.setTitle(stringMessages.tagsFilter());
+            filterSettingsButton.addStyleName(css.filterInactiveButtonBackgroundImage());
+            filterSettingsButton.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    showEditTagsFiltersDialog();
+                }
+            });
+
+            searchBoxPanel = new FlowPanel();
+            searchBoxPanel.setStyleName(css.searchBox());
+            searchBoxPanel.add(submitButton);
+            searchBoxPanel.add(searchTextBox);
+            searchBoxPanel.add(clearTextBoxButton);
+            add(searchBoxPanel);
+            add(filterSettingsButton);
+        }
+
+        private void showEditTagsFiltersDialog() {
+            TagsFilterSetsDialog tagsFilterSetsDialog = new TagsFilterSetsDialog(tagFilterSets, stringMessages,
+                    new DialogCallback<TagsFilterSets>() {
+                        @Override
+                        public void ok(final TagsFilterSets newTagsFilterSets) {
+                            tagFilterSets.getFilterSets().clear();
+                            tagFilterSets.getFilterSets().addAll(newTagsFilterSets.getFilterSets());
+                            tagFilterSets.setActiveFilterSet(newTagsFilterSets.getActiveFilterSet());
+
+                            tagProvider.setTagsFilterSet(newTagsFilterSets.getActiveFilterSetWithGeneralizedType());
+                            tagProvider.updateFilteredTags();
+                            tagProvider.refresh();
+                            updateTagsFilterControlState(newTagsFilterSets);
+                            storeTagsFilterSets(newTagsFilterSets);
+                        }
+
+                        @Override
+                        public void cancel() {
+                        }
+
+                    });
+
+            tagsFilterSetsDialog.show();
+        }
+
+        /**
+         * Updates the tags filter checkbox state by setting its check mark and updating its label according to the current
+         * filter selected
+         */
+        private void updateTagsFilterControlState(TagsFilterSets filterSets) {
+            String tagsFilterTitle = stringMessages.tagsFilter();
+            FilterSet<TagDTO, FilterWithUI<TagDTO>> activeFilterSet = filterSets.getActiveFilterSet();
+            if (activeFilterSet != null) {
+                if (lastActiveTagFilterSet == null) {
+                    filterSettingsButton.removeStyleName(css.filterInactiveButtonBackgroundImage());
+                    filterSettingsButton.addStyleName(css.filterActiveButtonBackgroundImage());
+                }
+                lastActiveTagFilterSet = activeFilterSet;
+            } else {
+                if (lastActiveTagFilterSet != null) {
+                    filterSettingsButton.removeStyleName(css.filterActiveButtonBackgroundImage());
+                    filterSettingsButton.addStyleName(css.filterInactiveButtonBackgroundImage());
+                }
+                lastActiveTagFilterSet = null;
+            }
+            if (lastActiveTagFilterSet != null) {
+                filterSettingsButton.setTitle(tagsFilterTitle + " (" + lastActiveTagFilterSet.getName() + ")");
+            } else {
+                filterSettingsButton.setTitle(tagsFilterTitle);
+            }
+        }
+
+        private TagsFilterSets loadTagsFilterSets() {
+            TagsFilterSets result = null;
+            Storage localStorage = Storage.getLocalStorageIfSupported();
+            if (localStorage != null) {
+                try {
+                    String jsonAsLocalStore = localStorage.getItem(LOCAL_STORAGE_TAGS_FILTER_SETS_KEY);
+                    if (jsonAsLocalStore != null && !jsonAsLocalStore.isEmpty()) {
+                        TagsFilterSetsJsonDeSerializer deserializer = new TagsFilterSetsJsonDeSerializer();
+                        JSONValue value = JSONParser.parseStrict(jsonAsLocalStore);
+                        if (value.isObject() != null) {
+                            result = deserializer.deserialize((JSONObject) value);
+                        }
+                    }
+                } catch (Exception e) {
+                    // exception during loading of tag filters from local storage
+                }
+            }
+            return result;
+        }
+
+        private void storeTagsFilterSets(TagsFilterSets newTagsFilterSets) {
+            Storage localStorage = Storage.getLocalStorageIfSupported();
+            if (localStorage != null) {
+                // delete old value
+                localStorage.removeItem(LOCAL_STORAGE_TAGS_FILTER_SETS_KEY);
+
+                // store the tags filter set
+                TagsFilterSetsJsonDeSerializer serializer = new TagsFilterSetsJsonDeSerializer();
+                JSONObject jsonObject = serializer.serialize(newTagsFilterSets);
+                localStorage.setItem(LOCAL_STORAGE_TAGS_FILTER_SETS_KEY, jsonObject.toString());
+            }
+        }
+
+        private TagsFilterSets createAndAddDefaultTagsFilter() {
+            TagsFilterSets filterSets = new TagsFilterSets();
+
+            //TODO add standard filters here
+
+            return filterSets;
+        }
+
+        private void clearSelection() {
+            searchTextBox.setText("");
+            clearTextBoxButton.addStyleName(css.hiddenButton());
+            onKeyUp(null);
+        }
+
+        @Override
+        public boolean matches(TagDTO object) {
+            return false;
+        }
+
+        @Override
+        public String getName() {
+            return null;
+        }
+
+        @Override
+        public String validate(StringMessages stringMessages) {
+            return null;
+        }
+
+        @Override
+        public String getLocalizedName(StringMessages stringMessages) {
+            return getName();
+        }
+
+        @Override
+        public String getLocalizedDescription(StringMessages stringMessages) {
+            return getName();
+        }
+
+        @Override
+        public FilterWithUI<TagDTO> copy() {
+            return null;
+        }
+
+        @Override
+        public FilterUIFactory<TagDTO> createUIFactory() {
+            return null;
+        }
+
+        @Override
+        public void onKeyUp(KeyUpEvent event) {
         }
     }
 
