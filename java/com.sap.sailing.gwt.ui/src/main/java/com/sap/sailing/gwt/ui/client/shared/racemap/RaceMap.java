@@ -992,13 +992,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
     }
 
-    private void refreshMap(final Date newTime, final long transitionTimeInMillis) {
+    private void refreshMap(final Date newTime, final long transitionTimeInMillis, boolean isRedraw) {
         final Iterable<CompetitorDTO> competitorsToShow = getCompetitorsToShow();
         final com.sap.sse.common.Util.Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap = fixesAndTails
                 .computeFromAndTo(newTime, competitorsToShow, settings.getEffectiveTailLengthInMilliseconds());
         // Request map data update, possibly in two calls; see method details
         callGetRaceMapDataForAllOverlappingAndTipsOfNonOverlappingAndGetBoatPositionsForAllOthers(fromAndToAndOverlap,
-                raceIdentifier, newTime, transitionTimeInMillis, competitorsToShow);
+                raceIdentifier, newTime, transitionTimeInMillis, competitorsToShow, isRedraw);
         // draw the wind into the map, get the combined wind
         List<String> windSourceTypeNames = new ArrayList<String>();
         windSourceTypeNames.add(WindSourceType.EXPEDITION.name());
@@ -1041,11 +1041,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     @Override
     public void timeChanged(final Date newTime, final Date oldTime) {
+        boolean isRedraw = oldTime == null;
         if (newTime != null && isMapInitialized) {
             if (raceIdentifier != null) {
                 if (raceIdentifier != null) {
                     final long transitionTimeInMillis = calculateTimeForPositionTransitionInMillis(newTime, oldTime);
-                    refreshMap(newTime, transitionTimeInMillis);
+                    refreshMap(newTime, transitionTimeInMillis, isRedraw);
                 }
             }
         }
@@ -1079,7 +1080,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      */
     private void callGetRaceMapDataForAllOverlappingAndTipsOfNonOverlappingAndGetBoatPositionsForAllOthers(
             final Triple<Map<CompetitorDTO, Date>, Map<CompetitorDTO, Date>, Map<CompetitorDTO, Boolean>> fromAndToAndOverlap,
-            RegattaAndRaceIdentifier race, final Date newTime, final long transitionTimeInMillis, final Iterable<CompetitorDTO> competitorsToShow) {
+            RegattaAndRaceIdentifier race, final Date newTime, final long transitionTimeInMillis,
+            final Iterable<CompetitorDTO> competitorsToShow, boolean isRedraw) {
         final Map<CompetitorDTO, Date> fromTimesForQuickCall = new HashMap<>();
         final Map<CompetitorDTO, Date> toTimesForQuickCall = new HashMap<>();
         final Map<CompetitorDTO, Date> fromTimesForNonOverlappingTailsCall = new HashMap<>();
@@ -1113,7 +1115,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     (settings.isShowSimulationOverlay() ? simulationOverlay.getLegIdentifier() : null),
                     raceCompetitorSet.getMd5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID(), newTime, settings.isShowEstimatedDuration()),
             GET_RACE_MAP_DATA_CATEGORY,
-            getRaceMapDataCallback(newTime, transitionTimeInMillis, fromAndToAndOverlap.getC(), competitorsToShow, ++boatPositionRequestIDCounter));
+                getRaceMapDataCallback(newTime, transitionTimeInMillis, fromAndToAndOverlap.getC(), competitorsToShow,
+                        ++boatPositionRequestIDCounter, isRedraw));
         // next, if necessary, do the full thing; the two calls have different action classes, so throttling should not drop one for the other
         if (!fromTimesForNonOverlappingTailsCall.keySet().isEmpty()) {
             asyncActionsExecutor.execute(new GetBoatPositionsAction(sailingService, race, fromTimesForNonOverlappingTailsCall, toTimesForNonOverlappingTailsCall,
@@ -1145,7 +1148,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             final Date newTime,
             final long transitionTimeInMillis,
             final Map<CompetitorDTO, Boolean> hasTailOverlapForCompetitor,
-            final Iterable<CompetitorDTO> competitorsToShow, final int requestID) {
+            final Iterable<CompetitorDTO> competitorsToShow, final int requestID, boolean isRedraw) {
         remoteCallsInExecution.add(newTime);
         return new MarkedAsyncCallback<>(new AsyncCallback<RaceMapDataDTO>() {
             @Override
@@ -1177,10 +1180,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatData = raceMapDataDTO.boatPositions;
                         updateBoatPositions(newTime, transitionTimeInMillis, hasTailOverlapForCompetitor,
                                 competitorsToShow, boatData, /* updateTailsOnly */ false);
-                        if (douglasMarkers != null) {
-                            removeAllMarkDouglasPeuckerpoints();
+                        
+                        if (!isRedraw) {
+                            // only remove markers if the time is actually changed
+                            if (douglasMarkers != null) {
+                                removeAllMarkDouglasPeuckerpoints();
+                            }
+                            maneuverMarkersAndLossIndicators.clearAllManeuverMarkers();
                         }
-                        maneuverMarkersAndLossIndicators.clearAllManeuverMarkers();
                         if (requiresCoordinateSystemUpdateWhenCoursePositionAndWindDirectionIsKnown) {
                             updateCoordinateSystemFromSettings();
                         }
@@ -2551,7 +2558,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedFilteredCompetitors());
             } else {
                 // adding a single competitor; may need to re-load data, so refresh:
-                timeChanged(timer.getTime(), null);
+                redraw();
             }
         } else {
             // only change highlighting
@@ -2564,7 +2571,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 // seems like an internal error not to find the lowlighted marker; but maybe the
                 // competitor was added late to the race;
                 // data for newly selected competitor supposedly missing; refresh
-                timeChanged(timer.getTime(), null);
+                redraw();
             }
         }
         // Now update tails for all competitors because selection change may also affect all unselected competitors
@@ -2587,13 +2594,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         if (isShowAnyHelperLines()) {
             // helper lines depend on which competitor is visible, because the *visible* leader is used for
             // deciding which helper lines to show:
-            timeChanged(timer.getTime(), null);
+            redraw();
         } else {
             // try a more incremental update otherwise
             if (settings.isShowOnlySelectedCompetitors()) {
                 // if selection is now empty, show all competitors
                 if (Util.isEmpty(competitorSelection.getSelectedCompetitors())) {
-                    timeChanged(timer.getTime(), null);
+                    redraw();
                 } else {
                     // otherwise remove only deselected competitor's boat images and tail
                     BoatOverlay removedBoatOverlay = boatOverlays.remove(competitor);
@@ -2873,12 +2880,12 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     @Override
     public void competitorsListChanged(Iterable<CompetitorDTO> competitors) {
-        timeChanged(timer.getTime(), null);
+        redraw();
     }
     
     @Override
     public void filteredCompetitorsListChanged(Iterable<CompetitorDTO> filteredCompetitors) {
-        timeChanged(timer.getTime(), null);
+        redraw();
     }
     
     @Override

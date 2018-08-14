@@ -17,7 +17,7 @@ public enum BoatClassMasterdata {
     _49ER ("49er", true, 4.88, 1.93, BoatHullType.MONOHULL, true),
     _49ERFX ("49erFX", true, 4.88, 1.93, BoatHullType.MONOHULL, true, "49FX"),
     _420 ("420", true, 4.20, 1.65, BoatHullType.MONOHULL, true, "420er", "420M", "420W"),
-    _470 ("470", true, 4.70, 1.68, BoatHullType.MONOHULL, true, "470er", "470M", "470W", "470 - M", "470 - W"),
+    _470 ("470", true, 4.70, 1.68, BoatHullType.MONOHULL, true, "470er", "470M", "470W", "470 - M", "470 - W", "470 Men", "470 Women"),
     _5O5 ("5O5", true, 5.03, 1.88, BoatHullType.MONOHULL, true, "505", "5o5", "505er", "5o5er"),
     _5_5MR ("5.5mR", true, 9.50, 1.92, BoatHullType.MONOHULL, true, "5.5 Meter", "5.5 Metre", "5.5", "5.5M", "5.5-metre", "5.5 metre"),
     _6MR ("6mR", true, 11, 2.2, BoatHullType.MONOHULL, true, "6 Meter", "6 Metre", "6", "6M", "6-metre", "6 metre"),
