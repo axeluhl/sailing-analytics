@@ -1,0 +1,55 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'
+    xmlns:um="urn:import:com.sap.sailing.gwt.home.shared.usermanagement.decorator"
+    xmlns:up="urn:import:com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile"
+    xmlns:c="urn:import:com.google.gwt.user.cellview.client">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="local_res"
+        type="com.sap.sailing.gwt.home.desktop.partials.eventsrecent.EventsOverviewRecentResources" />
+    <ui:style>
+        .table {
+            width: 100%;
+            border-radius: 0px;
+            border: none;
+        }
+        .table .empty {
+            margin: 1.033333333333333em;
+            font-style: italic;
+            line-height: 2em;
+        }
+        .table td {
+            vertical-align: middle;
+        }
+
+        .tableTitle{
+            background-color: #008FCC;
+            vertical-align: middle;
+        }
+        .titleUi{
+            padding-top: 1.333em;
+            padding-bottom: 1.3333em;
+            padding-left: 1.333em;
+            color: white;
+            font-weight: bold;
+        }
+
+        .panel{
+            border: 1px solid #dedede;
+            border-radius: .333333333333333em;
+            overflow: hidden;
+        }
+    </ui:style>
+    <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">
+
+        <div class="{res.mainCss.spacermargintopmediumsmall} {style.panel}">
+            <div class="{style.tableTitle} {style.titleUi}">
+                <span ui:field="titleUi" />
+            </div>
+            <c:CellTable ui:field="sailorProfilesTable" addStyleNames="{style.table}">
+                <c:emptyTableWidget>
+                    <g:Label text="{i18n.noDataFound}" addStyleNames="{style.empty}" />
+                </c:emptyTableWidget>
+            </c:CellTable>
+        </div>
+    </g:HTMLPanel>
+</ui:UiBinder>

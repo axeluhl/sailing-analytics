@@ -16,6 +16,7 @@ import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogDependentStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogPassChangeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
@@ -73,5 +74,8 @@ public class TrackedRaceStartTimeUpdateForDependentStartTimeTest extends TrackBa
         assertEquals(r1StartTimeToSet, r1StartTime[0]);
         assertNotNull(r2StartTime[0]);
         assertEquals(r1StartTimeToSet.plus(startTimeDiff), r2StartTime[0]);
+        // bug 4708: test that r2's start time is reverted to null after r1 loses its start time
+        r1RaceLog.add(new RaceLogPassChangeEventImpl(MillisecondsTimePoint.now(), author, /* pass */ 1));
+        assertNull(r2StartTime[0]);
     }
 }

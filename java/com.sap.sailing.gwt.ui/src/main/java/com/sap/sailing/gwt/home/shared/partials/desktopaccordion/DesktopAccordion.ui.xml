@@ -1,0 +1,48 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="local_res"
+        type="com.sap.sailing.gwt.home.desktop.partials.eventsrecent.EventsOverviewRecentResources" />
+    <ui:with field="shr" type="com.sap.sailing.gwt.home.shared.resources.SharedHomeResources" />
+
+    <ui:style>
+        .panel {
+            float: none;
+        }
+    </ui:style>
+    <g:HTMLPanel addStyleNames="{local_res.css.eventsoverviewrecent_year}">
+        <g:HTMLPanel ui:field="headerDivUi"
+            addStyleNames="{local_res.css.eventsoverviewrecent_year_header} {local_res.css.accordion_trigger}">
+            <div class="{res.mediaCss.grid}">
+                <div class="{res.mediaCss.small2} {res.mediaCss.columns}">
+                    <h3 class="{local_res.css.eventsoverviewrecent_year_header_title}">
+                        <span ui:field="titleUi" />
+                    </h3>
+                </div>
+                <div class="{res.mediaCss.small10} {res.mediaCss.columns}">
+                    <table class="{local_res.css.eventsoverviewrecent_year_header_info}">
+                        <tr>
+                            <td>
+                                <div class="{local_res.css.eventsoverviewrecent_year_header_info_item}">
+                                </div>
+                            </td>
+                            <td>
+                                <div class="{local_res.css.eventsoverviewrecent_year_header_info_arrow}">
+                                    <img src="{shr.arrowDownGrey.getSafeUri}"
+                                        class="{local_res.css.eventsoverviewrecent_year_header_info_arrow_image}"></img>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </g:HTMLPanel>
+        <div ui:field="contentDivUi"
+            class="{local_res.css.eventsoverviewrecent_year_content} {local_res.css.accordion_content} {res.mediaCss.column} {res.mediaCss.small12} {style.panel}">
+            <g:FlowPanel ui:field="contentPanelUi"
+                styleName="{res.mediaCss.grid} {res.mediaCss.column} {res.mediaCss.small12}">
+            </g:FlowPanel>
+        </div>
+    </g:HTMLPanel>
+</ui:UiBinder>

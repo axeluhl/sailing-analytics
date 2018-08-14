@@ -30,6 +30,6 @@ public interface SuggestedMultiSelectionDataProvider<T, D extends Display<T>> ex
     }
 
     interface Display<T> {
-        void setSelectedItems(Collection<T> selectedItems);
+        void setSelectedItems(Iterable<T> selectedItemsToSet);
     }
 }

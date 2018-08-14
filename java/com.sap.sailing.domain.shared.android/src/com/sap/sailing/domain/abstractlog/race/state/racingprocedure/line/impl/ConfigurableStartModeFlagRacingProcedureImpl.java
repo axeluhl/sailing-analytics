@@ -28,17 +28,14 @@ public abstract class ConfigurableStartModeFlagRacingProcedureImpl extends BaseR
     public ConfigurableStartModeFlagRacingProcedureImpl(RaceLog raceLog, AbstractLogEventAuthor author,
             ConfigurableStartModeFlagRacingProcedureConfiguration configuration, RaceLogResolver raceLogResolver) {
         super(raceLog, author, configuration, raceLogResolver);
-        
         RacingProcedureTypeAnalyzer procedureAnalyzer = new RacingProcedureTypeAnalyzer(raceLog);
         if (configuration.getStartModeFlags() != null) {
             this.startModeFlagAnalyzer = new StartModeFlagFinder(procedureAnalyzer, raceLog, configuration.getStartModeFlags());
         } else {
             this.startModeFlagAnalyzer = new StartModeFlagFinder(procedureAnalyzer, raceLog, getDefaultStartModeFlags());
         }
-        
         this.cachedStartmodeFlag = getDefaultStartMode();
         this.startmodeFlagHasBeenSet = false;
-        
         update();
     }
 

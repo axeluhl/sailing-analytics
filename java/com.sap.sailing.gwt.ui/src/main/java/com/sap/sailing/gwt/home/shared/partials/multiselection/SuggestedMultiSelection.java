@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.home.shared.partials.multiselection;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.Consumer;
 
@@ -24,20 +25,27 @@ import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.suggestion.AbstractSuggestOracle;
 
-public final class SuggestedMultiSelection<T> extends Composite implements SuggestedMultiSelectionDataProvider.Display<T> {
+public final class SuggestedMultiSelection<T> extends Composite
+        implements SuggestedMultiSelectionDataProvider.Display<T> {
 
     private static SuggestedMultiSelectionUiBinder uiBinder = GWT.create(SuggestedMultiSelectionUiBinder.class);
 
     interface SuggestedMultiSelectionUiBinder extends UiBinder<Widget, SuggestedMultiSelection<?>> {
     }
-    
-    @UiField SpanElement headerTitleUi;
-    @UiField FlowPanel notificationToggleContainerUi;
-    @UiField(provided = true) AbstractFilterWidget<T, T> suggestionWidgetUi;
-    @UiField Button removeAllButtonUi;
-    @UiField FlowPanel itemContainerUi;
+
+    @UiField
+    SpanElement headerTitleUi;
+    @UiField
+    FlowPanel notificationToggleContainerUi;
+    @UiField(provided = true)
+    AbstractFilterWidget<T, T> suggestionWidgetUi;
+    @UiField
+    Button removeAllButtonUi;
+    @UiField
+    FlowPanel itemContainerUi;
     private final SuggestedMultiSelectionDataProvider<T, ?> dataProvider;
     private final WidgetProvider<T> widgetProvider;
+    private final Collection<SelectionChangeHandler<T>> selectionChangeHandlers = new ArrayList<>();
 
     private SuggestedMultiSelection(SuggestedMultiSelectionDataProvider<T, ?> dataProvider,
             WidgetProvider<T> widgetProvider, String title) {
@@ -51,51 +59,81 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
         initWidget(uiBinder.createAndBindUi(this));
         headerTitleUi.setInnerText(title);
         this.updateUiState();
+        selectionChangeHandlers.add(new SelectionChangeHandler<T>() {
+
+            @Override
+            public void onAdd(T selectedItem) {
+                dataProvider.addSelection(selectedItem);
+            }
+
+            @Override
+            public void onRemove(T selectedItem) {
+                dataProvider.removeSelection(selectedItem);
+            }
+
+            @Override
+            public void onClear() {
+                dataProvider.clearSelection();
+            }
+        });
     }
-    
+
     public SuggestedMultiSelectionNotificationToggle addNotificationToggle(Consumer<Boolean> callback, String label) {
         SuggestedMultiSelectionNotificationToggle notification = new SuggestedMultiSelectionNotificationToggle(label);
         notification.toggleButtonUi.addClickHandler(event -> callback.accept(notification.isEnabled()));
         notificationToggleContainerUi.add(notification);
         return notification;
     }
-    
+
+    public void addSelectionChangeHandler(SelectionChangeHandler<T> handler) {
+        this.selectionChangeHandlers.add(handler);
+    }
+
     @UiHandler("removeAllButtonUi")
     void onRemoveAllButtonClicked(ClickEvent event) {
-        dataProvider.clearSelection();
         itemContainerUi.clear();
+        selectionChangeHandlers.forEach(h -> h.onClear());
         this.updateUiState();
     }
-    
+
     @Override
-    public void setSelectedItems(Collection<T> selectedItemsToSet) {
+    public void setSelectedItems(Iterable<T> selectedItemsToSet) {
         itemContainerUi.clear();
         for (final T item : selectedItemsToSet) {
-            this.addSelectedItem(item);
+            this.addSelectedItem(item, true);
         }
     }
-    
+
     private void addSelectedItem(final T selectedItem) {
+        addSelectedItem(selectedItem, false);
+    }
+
+    private void addSelectedItem(final T selectedItem, boolean suppressEvents) {
+
         itemContainerUi.add(new SuggestedMultiSelectionItem() {
+
             @Override
             protected IsWidget getItemDescriptionWidget() {
                 return widgetProvider.getItemDescriptionWidget(selectedItem);
             }
-            
+
             @Override
             protected void onRemoveItemRequsted() {
-                dataProvider.removeSelection(selectedItem);
                 this.removeFromParent();
                 updateUiState();
+                selectionChangeHandlers.forEach(h -> h.onRemove(selectedItem));
             }
         });
+        if (!suppressEvents) {
+            selectionChangeHandlers.forEach(h -> h.onAdd(selectedItem));
+        }
         this.updateUiState();
     }
-    
+
     private void updateUiState() {
         removeAllButtonUi.setEnabled(itemContainerUi.getWidgetCount() > 0);
     }
-    
+
     private static class SuggestedMultiSelectionFilter<T> extends AbstractAsyncSuggestBoxFilter<T, T> {
         private final Consumer<T> selectionCallback;
 
@@ -125,20 +163,29 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
             }, placeholderText);
             this.selectionCallback = selectionCallback;
         }
-        
+
         @Override
         protected final void onSuggestionSelected(T selectedItem) {
             SuggestedMultiSelectionFilter.this.clear();
             selectionCallback.accept(selectedItem);
         }
     }
-    
+
+    public interface SelectionChangeHandler<S> {
+        void onAdd(S selectedItems);
+
+        void onRemove(S selectedItem);
+
+        void onClear();
+    }
+
     private interface WidgetProvider<T> {
         IsWidget getItemDescriptionWidget(T item);
 
+
         AbstractSuggestBoxFilter<T, T> getSuggestBoxFilter(Consumer<T> selectionCallback);
     }
-    
+
     public static SuggestedMultiSelection<SimpleCompetitorWithIdDTO> forCompetitors(
             final SuggestedMultiSelectionDataProvider<SimpleCompetitorWithIdDTO, ?> dataProvider, String headerTitle,
             FlagImageResolver flagImageResolver) {
@@ -151,12 +198,12 @@ public final class SuggestedMultiSelection<T> extends Composite implements Sugge
             @Override
             public AbstractSuggestBoxFilter<SimpleCompetitorWithIdDTO, SimpleCompetitorWithIdDTO> getSuggestBoxFilter(
                     Consumer<SimpleCompetitorWithIdDTO> selectionCallback) {
-                return new SuggestedMultiSelectionFilter<SimpleCompetitorWithIdDTO>(dataProvider,
-                        selectionCallback, StringMessages.INSTANCE.add(StringMessages.INSTANCE.competitor()));
+                return new SuggestedMultiSelectionFilter<SimpleCompetitorWithIdDTO>(dataProvider, selectionCallback,
+                        StringMessages.INSTANCE.add(StringMessages.INSTANCE.competitor()));
             }
         }, headerTitle);
     }
-    
+
     public static SuggestedMultiSelection<BoatClassDTO> forBoatClasses(
             final SuggestedMultiSelectionDataProvider<BoatClassDTO, ?> dataProvider, String headerTitle) {
         return new SuggestedMultiSelection<>(dataProvider, new WidgetProvider<BoatClassDTO>() {
