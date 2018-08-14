@@ -1247,7 +1247,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         return response;
     }
 
-    @GET
+    @POST
     @Path("{leaderboardName}/denoteForTracking")
     public Response denoteForTracking(@PathParam("leaderboardName") String leaderboardName,
             @QueryParam("raceColumnName") String raceColumnName, @QueryParam("fleetName") String fleetName,
