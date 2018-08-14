@@ -22,8 +22,8 @@ import com.sap.sailing.server.impl.preferences.model.SailorProfilePreferences;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
 /**
- * {@link SailingAction} implementation to load favorites for the currently logged in user to bee shown on the
- * preferences page, preparing the appropriate data structure.
+ * {@link SailingAction} implementation to load sailor profiles for the currently logged in user to bee shown on the
+ * sailor profiles overview page, preparing the appropriate data structure.
  */
 public class GetSailorProfilesAction implements SailingAction<SailorProfileEntries> {
 

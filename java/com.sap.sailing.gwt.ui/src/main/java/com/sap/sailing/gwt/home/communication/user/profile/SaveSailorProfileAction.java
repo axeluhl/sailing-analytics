@@ -18,8 +18,7 @@ import com.sap.sse.gwt.dispatch.shared.commands.VoidResult;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
 /**
- * {@link SailingAction} implementation to save favorite boat classes for the currently logged in user as selected on
- * the preferences page.
+ * {@link SailingAction} implementation to save favorite a sailor profiles for the currently logged in user
  */
 public class SaveSailorProfileAction implements SailingAction<VoidResult> {
 
