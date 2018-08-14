@@ -28,6 +28,8 @@ public interface DataMiningService extends RemoteService {
 
     HashSet<FunctionDTO> getStatisticsFor(DataRetrieverChainDefinitionDTO retrieverChainDefinition,
             String localeInfoName);
+    
+    HashSet<AggregationProcessorDefinitionDTO> getAggregatorDefinitions(String localeInfoName);
 
     HashSet<AggregationProcessorDefinitionDTO> getAggregatorDefinitionsFor(FunctionDTO extractionFunction,
             String localeInfoName);

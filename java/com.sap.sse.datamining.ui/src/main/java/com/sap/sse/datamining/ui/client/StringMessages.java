@@ -89,5 +89,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String applyingQuery();
     String searchAvailableStatistics();
     String reloadComponents();
+    String any();
+    String of();
+    String the();
     
 }

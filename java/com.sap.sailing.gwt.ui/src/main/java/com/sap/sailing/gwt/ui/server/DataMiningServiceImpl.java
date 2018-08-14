@@ -112,6 +112,14 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     }
 
     @Override
+    public HashSet<AggregationProcessorDefinitionDTO> getAggregatorDefinitions(String localeInfoName) {
+        SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ));
+        Iterable<AggregationProcessorDefinition<?, ?>> definitions = getDataMiningServer()
+                .getAllAggregationProcessorDefinitions();
+        return aggregatorDefinitionsAsDTOs(definitions, localeInfoName);
+    }
+
+    @Override
     public HashSet<AggregationProcessorDefinitionDTO> getAggregatorDefinitionsFor(FunctionDTO extractionFunction,
             String localeInfoName) {
         SecurityUtils.getSubject().checkPermission(

@@ -68,4 +68,12 @@ public interface DataMiningServer {
     Iterable<PredefinedQueryIdentifier> getPredefinedQueryIdentifiers();
     ModifiableStatisticQueryDefinitionDTO getPredefinedQueryDefinitionDTO(PredefinedQueryIdentifier identifier);
     
+    //-----------------------------------------------------------------------------------------------------------------
+    // Component Accessors as default methods
+    //-----------------------------------------------------------------------------------------------------------------
+    
+    default Iterable<AggregationProcessorDefinition<?, ?>> getAllAggregationProcessorDefinitions() {
+        return getAggregationProcessorProvider().getAll();
+    }
+    
 }
