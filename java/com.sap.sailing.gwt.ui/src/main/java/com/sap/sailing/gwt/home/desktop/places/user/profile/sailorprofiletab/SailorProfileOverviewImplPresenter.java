@@ -42,13 +42,11 @@ public class SailorProfileOverviewImplPresenter implements SailingProfileOvervie
     @Override
     public void setAuthenticationContext(AuthenticationContext authenticationContext) {
         if (authenticationContext.isLoggedIn() && view instanceof SailorProfileOverview) {
-            GWT.log("data requested");
             sharedSailorProfilePresenter.getDataProvider()
                     .loadSailorProfiles(new AsyncCallback<SailorProfileEntries>() {
 
                         @Override
                         public void onSuccess(SailorProfileEntries result) {
-                            GWT.log("on success: " + result);
                             ((SailorProfileOverview) view).setProfileList(result.getEntries());
                         }
 
