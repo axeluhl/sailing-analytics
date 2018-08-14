@@ -10,6 +10,7 @@ import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.dispatch.shared.commands.Result;
 
+/** This objects contains all data related to displaying a SailorProfile in the frontend UI */
 public class SailorProfileDTO implements Result, Serializable {
     private static final long serialVersionUID = -5957161570595861618L;
 
@@ -19,6 +20,10 @@ public class SailorProfileDTO implements Result, Serializable {
     private ArrayList<BadgeDTO> badges = new ArrayList<>();
     private ArrayList<BoatClassDTO> boatclasses = new ArrayList<>();
 
+    /**
+     * if the key is equal to this SAILOR_PROFILE_KEY_NEW object, this instance of SailorProfileDTO is empty and a new
+     * UUID needs to be generated for this instance
+     */
     public static final UUID SAILOR_PROFILE_KEY_NEW = UUID.fromString("00000000-0000-0000-0000-0000000000001");
 
     protected SailorProfileDTO() {

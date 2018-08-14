@@ -7,6 +7,7 @@ import java.util.List;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.dispatch.shared.commands.Result;
 
+/** This domain object contains a list of SailorProfileDTO objects */
 public class SailorProfilesDTO implements Result, Serializable {
     private static final long serialVersionUID = -7062326258445057995L;
     private ArrayList<SailorProfileDTO> entries = new ArrayList<>();
