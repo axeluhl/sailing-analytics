@@ -67,7 +67,6 @@ import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSets;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSetsDialog;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagsFilterSetsJsonDeSerializer;
-import com.sap.sailing.gwt.ui.raceboard.TaggingPanel.TagFilterResources.TagFilterCss;
 import com.sap.sailing.gwt.ui.raceboard.TaggingPanel.TagPanelResources.TagPanelStyle;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
@@ -97,29 +96,6 @@ public class TaggingPanel extends ComponentWithoutSettings
         @Source("com/sap/sailing/gwt/ui/client/images/edit.png")
         ImageResource editIcon();
 
-        @Source("tagging-panel.css")
-        public TagPanelStyle style();
-
-        public interface TagPanelStyle extends CssResource {
-            String tagPanel();
-            String tag();
-            String tagHeading();
-            String tagCreated();
-            String tagComment();
-            String tagImage();
-            String button();
-            String footerButton();
-            String tagButtonTable();
-            String inputPanelTag();
-            String inputPanelComment();
-            String inputPanelImageURL();
-            String footerPanel();
-        }
-    }
-
-    public interface TagFilterResources extends ClientBundle {
-        public static final TagFilterResources INSTANCE = GWT.create(TagFilterResources.class);
-        
         @Source("com/sap/sailing/gwt/ui/client/images/SAP_RV_Clear.png")
         ImageResource clearButton();
 
@@ -135,26 +111,41 @@ public class TaggingPanel extends ComponentWithoutSettings
         @Source("com/sap/sailing/gwt/ui/client/images/SAP_RV_Settings.png")
         ImageResource settingsButton();
 
-        @Source("tagging-filter.css")
-        TagFilterCss css();
+        @Source("tagging-panel.css")
+        public TagPanelStyle style();
 
-        public interface TagFilterCss extends CssResource {
+        public interface TagPanelStyle extends CssResource {
+            // tags
+            String tag();
+            String tagPanel();
+            String tagHeading();
+            String tagCreated();
+            String tagComment();
+            String tagImage();
             String button();
-            String hiddenButton();
-            String clearButton();
-            String searchButton();
-            String settingsButton();
-            String filterButton();
+            String footerButton();
+            String tagButtonTable();
+            String inputPanelTag();
+            String inputPanelComment();
+            String inputPanelImageURL();
+            String footerPanel();
+            
+            // filter tags
+            String tagFilterButton();
+            String tagFilterHiddenButton();
+            String tagFilterClearButton();
+            String tagFilterSearchButton();
+            String tagFilterSettingsButton();
+            String tagFilterFilterButton();
             String tagFilterContainer();
-            String searchBox();
-            String searchInput();
+            String tagFilterSearchBox();
+            String tagFilterSearchInput();
             String filterInactiveButtonBackgroundImage();
             String filterActiveButtonBackgroundImage();
             String clearButtonBackgroundImage();
             String searchButtonBackgroundImage();
             String settingsButtonBackgroundImage();
         }
-
     }
     
     public interface CellListResources extends CellList.Resources {
@@ -560,7 +551,7 @@ public class TaggingPanel extends ComponentWithoutSettings
     private class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWithUI<TagDTO> {
         private final static String LOCAL_STORAGE_TAGS_FILTER_SETS_KEY = "sailingAnalytics.raceBoard.tagsFilterSets";
 
-        private final TagFilterCss css = TagFilterResources.INSTANCE.css();
+        private final TagPanelStyle css = TagPanelResources.INSTANCE.style();
         private final TextBox searchTextBox;
         private final Button clearTextBoxButton;
         private final Button filterSettingsButton;
@@ -587,20 +578,20 @@ public class TaggingPanel extends ComponentWithoutSettings
             }
 
             Button submitButton = new Button();
-            submitButton.setStyleName(css.button());
-            submitButton.addStyleName(css.searchButton());
+            submitButton.setStyleName(css.tagFilterButton());
+            submitButton.addStyleName(css.tagFilterSearchButton());
             submitButton.addStyleName(css.searchButtonBackgroundImage());
 
             searchTextBox = new TextBox();
             searchTextBox.getElement().setAttribute("placeholder", stringMessages.tagSearchTags());
             searchTextBox.addKeyUpHandler(this);
-            searchTextBox.setStyleName(css.searchInput());
+            searchTextBox.setStyleName(css.tagFilterSearchInput());
 
             clearTextBoxButton = new Button();
-            clearTextBoxButton.setStyleName(css.button());
-            clearTextBoxButton.addStyleName(css.clearButton());
+            clearTextBoxButton.setStyleName(css.tagFilterButton());
+            clearTextBoxButton.addStyleName(css.tagFilterClearButton());
             clearTextBoxButton.addStyleName(css.clearButtonBackgroundImage());
-            clearTextBoxButton.addStyleName(css.hiddenButton());
+            clearTextBoxButton.addStyleName(css.tagFilterHiddenButton());
             clearTextBoxButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -609,8 +600,8 @@ public class TaggingPanel extends ComponentWithoutSettings
             });
 
             filterSettingsButton = new Button("");
-            filterSettingsButton.setStyleName(css.button());
-            filterSettingsButton.addStyleName(css.filterButton());
+            filterSettingsButton.setStyleName(css.tagFilterButton());
+            filterSettingsButton.addStyleName(css.tagFilterFilterButton());
             filterSettingsButton.setTitle(stringMessages.tagsFilter());
             filterSettingsButton.addStyleName(css.filterInactiveButtonBackgroundImage());
             filterSettingsButton.addClickHandler(new ClickHandler() {
@@ -621,7 +612,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             });
 
             searchBoxPanel = new FlowPanel();
-            searchBoxPanel.setStyleName(css.searchBox());
+            searchBoxPanel.setStyleName(css.tagFilterSearchBox());
             searchBoxPanel.add(submitButton);
             searchBoxPanel.add(searchTextBox);
             searchBoxPanel.add(clearTextBoxButton);
@@ -724,7 +715,7 @@ public class TaggingPanel extends ComponentWithoutSettings
 
         private void clearSelection() {
             searchTextBox.setText("");
-            clearTextBoxButton.addStyleName(css.hiddenButton());
+            clearTextBoxButton.addStyleName(css.tagFilterHiddenButton());
             onKeyUp(null);
         }
 
