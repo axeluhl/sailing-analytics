@@ -79,6 +79,7 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
     private final Set<AggregatorDefinitionChangedListener> aggregatorDefinitionListeners;
     private boolean isAwaitingReload;
     private int awaitingRetrieverChainStatistics;
+    private int awaitingAggregators;
 
     private final DataMiningSettingsInfoManager settingsManager;
     private final DataMiningSettingsControl settingsControl;
@@ -88,9 +89,10 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
     private final FlowPanel mainPanel;
     private final Label labelBetweenAggregatorAndStatistic;
     
-    private AggregatorWithContext currentAggregator;
-    private final List<AggregatorWithContext> availableAggregators;
-    private final ValueListBox<AggregatorWithContext> aggregatorListBox;
+    private final Map<String, Set<AggregationProcessorDefinitionDTO>> collectedAggregators;
+    private AggregatorGroup currentAggregator;
+    private final List<AggregatorGroup> availableAggregators;
+    private final ValueListBox<AggregatorGroup> aggregatorListBox;
 
     private FunctionDTO identityFunction;
     private final List<IdentityFunctionWithContext> availableIdentityFunctions;
@@ -118,6 +120,7 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         extractionFunctionSuggestBox = new ExtractionFunctionSuggestBox() {
             @Override
             protected void onValueChange() {
+                // TODO Notify retriever chain listeners only when the chain actually changed
                 notifyRetrieverChainListeners();
                 notifyExtractionFunctionListeners();
             }
@@ -142,25 +145,27 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         suggestBoxContainer.addStyleName(StatisticProviderElementStyle);
         suggestBoxContainer.addStyleName(SuggestBoxContainerStyle);
 
+        collectedAggregators = new HashMap<>();
         availableAggregators = new ArrayList<>();
-        aggregatorListBox = new ValueListBox<AggregatorWithContext>(
-                new AbstractRenderer<AggregatorWithContext>() {
+        aggregatorListBox = new ValueListBox<AggregatorGroup>(
+                new AbstractRenderer<AggregatorGroup>() {
                     @Override
-                    public String render(AggregatorWithContext aggregator) {
+                    public String render(AggregatorGroup aggregator) {
                         if (aggregator == null) {
                             return "<" + getDataMiningStringMessages().any() + ">";
                         }
                         return aggregator.getDisplayName();
                     }
                 });
-        aggregatorListBox.addValueChangeHandler(new ValueChangeHandler<AggregatorWithContext>() {
+        aggregatorListBox.addValueChangeHandler(new ValueChangeHandler<AggregatorGroup>() {
             @Override
-            public void onValueChange(ValueChangeEvent<AggregatorWithContext> event) {
+            public void onValueChange(ValueChangeEvent<AggregatorGroup> event) {
                 aggregatorSelectionChanged(event.getValue());
             }
         });
         aggregatorListBox.addStyleName(StatisticProviderElementStyle);
         aggregatorListBox.addStyleName("dataMiningListBox");
+        aggregatorListBox.setEnabled(false);
 
         mainPanel = new FlowPanel();
         mainPanel.addStyleName(StatisticProviderStyle);
@@ -210,31 +215,6 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
                     errorReporter.reportError("Error fetching the retriever chain definitions: " + caught.getMessage());
                 }
             });
-        // FIXME Fetching all aggregators doesn't work, since subtypes of the extracted types aren't supported
-        // Collecting and consolidating all aggregators of the return types of available statistics should fix this 
-        dataMiningService.getAggregatorDefinitions(localeName, new AsyncCallback<HashSet<AggregationProcessorDefinitionDTO>>() {
-            @Override
-            public void onSuccess(HashSet<AggregationProcessorDefinitionDTO> aggregatorDefinitions) {
-                Map<String, Set<AggregationProcessorDefinitionDTO>> aggregatorsByKey = new HashMap<>();
-                for (AggregationProcessorDefinitionDTO aggregator : aggregatorDefinitions) {
-                    Util.addToValueSet(aggregatorsByKey, aggregator.getMessageKey(), aggregator);
-                }
-                
-                availableAggregators.clear();
-                for (Entry<String, Set<AggregationProcessorDefinitionDTO>> aggregatorEntry : aggregatorsByKey.entrySet()) {
-                    availableAggregators.add(new AggregatorWithContext(aggregatorEntry.getKey(), aggregatorEntry.getValue()));
-                }
-                Collections.sort(availableAggregators);
-                aggregatorListBox.setValue(null);
-                aggregatorListBox.setAcceptableValues(availableAggregators);
-                aggregatorListBox.setEnabled(!availableAggregators.isEmpty());
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error fetching the aggregator definitions: " + caught.getMessage());
-            }
-        });
     }
 
     private void updateIdentityFunctions(String localeName, Collection<DataRetrieverChainDefinitionDTO> retrieverChains) {
@@ -268,28 +248,44 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         }
         
         awaitingRetrieverChainStatistics = retrieverChains.size();
+        awaitingAggregators = 0;
         for (DataRetrieverChainDefinitionDTO retrieverChain : retrieverChains) {
             dataMiningService.getStatisticsFor(retrieverChain, localeName,
                 new AsyncCallback<HashSet<FunctionDTO>>() {
                     @Override
                     public void onSuccess(HashSet<FunctionDTO> statistics) {
-                        collectStatistics(retrieverChain, statistics);
+                        collectStatistics(localeName, retrieverChain, statistics);
                     }
 
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError("Error fetching the statistics for the retriever chain '"
                                         + retrieverChain + "': " + caught.getMessage());
-                        collectStatistics(retrieverChain, Collections.emptySet());
+                        collectStatistics(localeName, retrieverChain, Collections.emptySet());
                     }
                 });
         }
     }
 
-    private void collectStatistics(DataRetrieverChainDefinitionDTO retrieverChain,
+    private void collectStatistics(String localeName, DataRetrieverChainDefinitionDTO retrieverChain,
             Iterable<FunctionDTO> extractionFunctions) {
         for (FunctionDTO extractionFunction : extractionFunctions) {
             availableStatistics.add(new StatisticWithContext(retrieverChain, extractionFunction));
+            if (!collectedAggregators.containsKey(extractionFunction.getReturnTypeName())) {
+                awaitingAggregators++;
+                dataMiningService.getAggregatorDefinitionsFor(extractionFunction, localeName, new AsyncCallback<HashSet<AggregationProcessorDefinitionDTO>>() {
+                    @Override
+                    public void onSuccess(HashSet<AggregationProcessorDefinitionDTO> aggregators) {
+                        collectAggregators(extractionFunction, aggregators);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError("Error fetching the aggregators for " + extractionFunction, caught.getMessage());
+                        collectAggregators(null, null);
+                    }
+                });
+            }
         }
 
         awaitingRetrieverChainStatistics--;
@@ -297,35 +293,92 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
             extractionFunctionSuggestBox.setValue(null);
             Collections.sort(availableStatistics);
             extractionFunctionSuggestBox.setSelectableValues(availableStatistics);
+            if (awaitingAggregators <= 0) {
+                collectAggregators(null, null);
+            }
         }
     }
 
-    private void aggregatorSelectionChanged(AggregatorWithContext newAggregator) {
-        // FIXME Doesn't support sub classes of an aggregators extracted type
-        // For example is Double not supported if the extracted type is Number
+    private void collectAggregators(FunctionDTO extractionFunction, Iterable<AggregationProcessorDefinitionDTO> aggregators) {
+        if (extractionFunction != null) {
+            String returnTypeName = extractionFunction.getReturnTypeName();
+            Set<AggregationProcessorDefinitionDTO> aggregatorsForType = collectedAggregators.get(returnTypeName);
+            if (aggregatorsForType == null) {
+                aggregatorsForType = new HashSet<>();
+                collectedAggregators.put(returnTypeName, aggregatorsForType);
+            }
+            Util.addAll(aggregators, aggregatorsForType);
+        }
+        
+        awaitingAggregators--;
+        if (awaitingAggregators <= 0) {
+            Map<String, AggregatorGroup> aggregatorGroups = new HashMap<>();
+            for (String returnTypeName : collectedAggregators.keySet()) {
+                for (AggregationProcessorDefinitionDTO aggregator : collectedAggregators.get(returnTypeName)) {
+                    String aggregatorKey = aggregator.getMessageKey();
+                    AggregatorGroup aggregatorGroup = aggregatorGroups.get(aggregatorKey);
+                    if (aggregatorGroup == null) {
+                        aggregatorGroup = new AggregatorGroup(aggregatorKey);
+                        aggregatorGroups.put(aggregatorKey, aggregatorGroup);
+                    }
+                    
+                    String extractedTypeName = aggregator.getExtractedTypeName();
+                    if (!aggregatorGroup.supportsType(extractedTypeName)) {
+                        aggregatorGroup.setForType(extractedTypeName, aggregator);
+                    }
+                    if (!aggregatorGroup.supportsType(returnTypeName)) {
+                        aggregatorGroup.setForType(returnTypeName, aggregator);
+                    }
+                }
+            }
+            
+            availableAggregators.clear();
+            availableAggregators.addAll(aggregatorGroups.values());
+            Collections.sort(availableAggregators);
+            aggregatorListBox.setValue(null);
+            aggregatorListBox.setAcceptableValues(availableAggregators);
+            aggregatorListBox.setEnabled(!availableAggregators.isEmpty());
+        }
+    }
+
+    private void aggregatorSelectionChanged(AggregatorGroup newAggregator) {
         if (!Objects.equals(currentAggregator, newAggregator)) {
+            boolean currentAggregatorSupportsIdentityFunction = currentAggregator != null
+                    && currentAggregator.supportsType(identityFunction.getReturnTypeName());
+            boolean newAggregatorSupportsIdentityFunction = newAggregator != null
+                    && newAggregator.supportsType(identityFunction.getReturnTypeName());
+            
             List<ExtractionFunctionWithContext> selectableExtractionFunctions = new ArrayList<>();
             String labelBetweenAggregatorAndStatisticText = null;
             if (newAggregator == null) {
                 selectableExtractionFunctions.addAll(availableStatistics);
                 labelBetweenAggregatorAndStatisticText = getDataMiningStringMessages().of();
             } else {
-                if (newAggregator.supportsExtractedType(identityFunction.getReturnTypeName())) {
+                if (newAggregatorSupportsIdentityFunction) {
                     selectableExtractionFunctions.addAll(availableIdentityFunctions);
                     labelBetweenAggregatorAndStatisticText = getDataMiningStringMessages().the();
                 } else {
-                    labelBetweenAggregatorAndStatisticText = getDataMiningStringMessages().of();
-                }
-                for (StatisticWithContext statistic : availableStatistics) {
-                    if (newAggregator.supportsExtractedType(statistic.getExtractionFunction().getReturnTypeName())) {
-                        selectableExtractionFunctions.add(statistic);
+                    for (StatisticWithContext statistic : availableStatistics) {
+                        if (newAggregator.supportsType(statistic.getExtractionFunction().getReturnTypeName())) {
+                            selectableExtractionFunctions.add(statistic);
+                        }
                     }
+                    labelBetweenAggregatorAndStatisticText = getDataMiningStringMessages().of();
                 }
             }
             
             ExtractionFunctionWithContext currentExtractionFunction = extractionFunctionSuggestBox.getExtractionFunction();
-            if (!selectableExtractionFunctions.contains(currentExtractionFunction)) {
-                extractionFunctionSuggestBox.setExtractionFunction(null);
+            if (currentExtractionFunction != null && !selectableExtractionFunctions.contains(currentExtractionFunction)) {
+                ExtractionFunctionWithContext extractionFunctionToSelect = null;
+                if (newAggregatorSupportsIdentityFunction && !currentAggregatorSupportsIdentityFunction) {
+                    for (IdentityFunctionWithContext identityFunction : availableIdentityFunctions) {
+                        if (identityFunction.getRetrieverChain().equals(currentExtractionFunction.getRetrieverChain())) {
+                            extractionFunctionToSelect = identityFunction;
+                            break;
+                        }
+                    }
+                }
+                extractionFunctionSuggestBox.setExtractionFunction(extractionFunctionToSelect);
             }
             Collections.sort(selectableExtractionFunctions);
             extractionFunctionSuggestBox.setSelectableValues(selectableExtractionFunctions);
@@ -438,10 +491,10 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         Collection<String> errorMessages = new ArrayList<>();
 
         AggregationProcessorDefinitionDTO aggregator = queryDefinition.getAggregatorDefinition();
-        AggregatorWithContext aggregatorToSelect = null;
-        for (AggregatorWithContext availableAggregator : availableAggregators) {
+        AggregatorGroup aggregatorToSelect = null;
+        for (AggregatorGroup availableAggregator : availableAggregators) {
             if (availableAggregator.getKey().equals(aggregator.getMessageKey()) &&
-                    availableAggregator.supportsExtractedType(aggregator.getExtractedTypeName())) {
+                    availableAggregator.supportsType(aggregator.getExtractedTypeName())) {
                 aggregatorToSelect = availableAggregator;
                 break;
             }
@@ -551,12 +604,12 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
 
     @Override
     public AggregationProcessorDefinitionDTO getAggregatorDefinition() {
-        AggregatorWithContext aggregator = aggregatorListBox.getValue();
+        AggregatorGroup aggregator = aggregatorListBox.getValue();
         FunctionDTO extractionFunction = getExtractionFunction();
         if (aggregator == null || extractionFunction == null) {
             return null;
         }
-        return aggregator.getAggregatorForExtractedType(extractionFunction.getReturnTypeName());
+        return aggregator.getForType(extractionFunction.getReturnTypeName());
     }
 
     @Override
@@ -705,39 +758,43 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         
     }
     
-    private static class AggregatorWithContext implements Comparable<AggregatorWithContext> {
+    private static class AggregatorGroup implements Comparable<AggregatorGroup> {
         
         private final String key;
-        private final String displayName;
-        private final Map<String, AggregationProcessorDefinitionDTO> aggregatoryByExtractedTypeName;
+        private final Map<String, AggregationProcessorDefinitionDTO> aggregatorsBySupportedTypeName;
         
-        public AggregatorWithContext(String key, Iterable<AggregationProcessorDefinitionDTO> aggregators) {
+        private String displayName;
+        
+        public AggregatorGroup(String key) {
             this.key = key;
-            displayName = Util.first(aggregators).getDisplayName();
-            aggregatoryByExtractedTypeName = new HashMap<>();
-            for (AggregationProcessorDefinitionDTO aggregator : aggregators) {
-                aggregatoryByExtractedTypeName.put(aggregator.getExtractedTypeName(), aggregator);
-            }
+            aggregatorsBySupportedTypeName = new HashMap<>();
         }
         
         public String getKey() {
             return key;
         }
         
+        public boolean supportsType(String typeName) {
+            return aggregatorsBySupportedTypeName.containsKey(typeName);
+        }
+        
+        public AggregationProcessorDefinitionDTO getForType(String typeName) {
+            return aggregatorsBySupportedTypeName.get(typeName);
+        }
+        
+        public void setForType(String typeName, AggregationProcessorDefinitionDTO aggregator) {
+            if (displayName == null) {
+                displayName = aggregator.getDisplayName();
+            }
+            aggregatorsBySupportedTypeName.put(typeName, aggregator);
+        }
+        
         public String getDisplayName() {
             return displayName;
         }
-        
-        public boolean supportsExtractedType(String extractedTypeName) {
-            return aggregatoryByExtractedTypeName.containsKey(extractedTypeName);
-        }
-        
-        public AggregationProcessorDefinitionDTO getAggregatorForExtractedType(String extractedTypeName) {
-            return aggregatoryByExtractedTypeName.get(extractedTypeName);
-        }
 
         @Override
-        public int compareTo(AggregatorWithContext other) {
+        public int compareTo(AggregatorGroup other) {
             if (other == null) {
                 return 1;
             }
@@ -749,7 +806,7 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
             final int prime = 31;
             int result = 1;
             result = prime * result
-                    + ((aggregatoryByExtractedTypeName == null) ? 0 : aggregatoryByExtractedTypeName.hashCode());
+                    + ((aggregatorsBySupportedTypeName == null) ? 0 : aggregatorsBySupportedTypeName.hashCode());
             result = prime * result + ((key == null) ? 0 : key.hashCode());
             return result;
         }
@@ -762,11 +819,11 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
                 return false;
             if (getClass() != obj.getClass())
                 return false;
-            AggregatorWithContext other = (AggregatorWithContext) obj;
-            if (aggregatoryByExtractedTypeName == null) {
-                if (other.aggregatoryByExtractedTypeName != null)
+            AggregatorGroup other = (AggregatorGroup) obj;
+            if (aggregatorsBySupportedTypeName == null) {
+                if (other.aggregatorsBySupportedTypeName != null)
                     return false;
-            } else if (!aggregatoryByExtractedTypeName.equals(other.aggregatoryByExtractedTypeName))
+            } else if (!aggregatorsBySupportedTypeName.equals(other.aggregatorsBySupportedTypeName))
                 return false;
             if (key == null) {
                 if (other.key != null)
