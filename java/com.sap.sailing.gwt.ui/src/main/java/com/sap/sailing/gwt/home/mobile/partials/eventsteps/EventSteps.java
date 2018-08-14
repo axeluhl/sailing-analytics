@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.mobile.partials.eventsteps;
 
+import java.util.function.Function;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -11,6 +13,7 @@ import com.sap.sailing.gwt.home.communication.regatta.RegattaProgressSeriesDTO;
 import com.sap.sailing.gwt.home.communication.regatta.RegattaWithProgressDTO;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 
 public class EventSteps extends Composite implements RefreshableWidget<RegattaWithProgressDTO> {
@@ -22,8 +25,10 @@ public class EventSteps extends Composite implements RefreshableWidget<RegattaWi
     
     @UiField SectionHeaderContent sectionHeaderUi;
     private final MobileSection regattaProgessUi;
+    private final Function<String, PlaceNavigation<?>> racesNavigationFactory;
 
-    public EventSteps(RegattaMetadataDTO regatta) {
+    public EventSteps(RegattaMetadataDTO regatta, Function<String, PlaceNavigation<?>> racesNavigationFactory) {
+        this.racesNavigationFactory = racesNavigationFactory;
         EventStepsResources.INSTANCE.css().ensureInjected();
         initWidget(regattaProgessUi = uiBinder.createAndBindUi(this));
         ImageResource boatClassIcon = BoatClassImageResolver.getBoatClassIconResource(regatta.getBoatClass());
@@ -36,8 +41,10 @@ public class EventSteps extends Composite implements RefreshableWidget<RegattaWi
     @Override
     public void setData(RegattaWithProgressDTO data) {
         regattaProgessUi.clearContent();
+        final boolean showSeriesName = data.getProgress().getSeries().size() > 1;
         for (RegattaProgressSeriesDTO seriesProgress : data.getProgress().getSeries()) {
-            regattaProgessUi.addContent(new EventStepsPhase(seriesProgress));
+            final PlaceNavigation<?> navigation = racesNavigationFactory.apply(seriesProgress.getName());
+            regattaProgessUi.addContent(new EventStepsPhase(seriesProgress, navigation, showSeriesName));
         }
     }
     

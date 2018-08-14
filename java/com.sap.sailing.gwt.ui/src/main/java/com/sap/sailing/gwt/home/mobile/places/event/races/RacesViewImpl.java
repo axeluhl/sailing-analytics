@@ -5,13 +5,16 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.event.GetCompetitionFormatRacesAction;
+import com.sap.sailing.gwt.home.communication.event.RaceCompetitionFormatSeriesDTO;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
@@ -27,6 +30,7 @@ import com.sap.sailing.gwt.home.shared.partials.filter.RacesByCompetitorTextBoxF
 import com.sap.sailing.gwt.home.shared.partials.placeholder.InfoPlaceholder;
 import com.sap.sailing.gwt.home.shared.partials.regattacompetition.RegattaCompetitionPresenter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
 
 public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implements RacesView {
 
@@ -70,6 +74,13 @@ public class RacesViewImpl extends AbstractEventView<RacesView.Presenter> implem
         @Override
         protected String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode) {
             return currentPresenter.getRaceViewerURL(raceMetadata, mode);
+        }
+
+        @Override
+        public void setData(ListResult<RaceCompetitionFormatSeriesDTO> data) {
+            super.setData(data);
+            final Consumer<? super String> scrollCommand = regattaCompetitionUi::scrollToSeries;
+            Scheduler.get().scheduleDeferred(() -> currentPresenter.getPreferredSeriesName().ifPresent(scrollCommand));
         }
     }
     
