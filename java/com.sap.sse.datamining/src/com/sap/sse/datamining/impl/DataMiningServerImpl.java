@@ -38,7 +38,6 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.datamining.impl.components.management.AbstractMemoryMonitorAction;
 import com.sap.sse.datamining.impl.components.management.QueryManagerMemoryMonitor;
-import com.sap.sse.datamining.impl.components.management.ReducedDimensions;
 import com.sap.sse.datamining.impl.components.management.RuntimeMemoryInfoProvider;
 import com.sap.sse.datamining.impl.components.management.StrategyPerQueryTypeManager;
 import com.sap.sse.datamining.shared.DataMiningSession;
@@ -48,7 +47,6 @@ import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
-import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.i18n.impl.CompoundResourceBundleStringMessages;
 import com.sap.sse.util.JoinedClassLoader;
@@ -210,42 +208,6 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
     
     @Override
-    public Function<?> getIdentityFunction() {
-        return functionRegistry.getIdentityFunction();
-    }
-
-    @Override
-    public Iterable<Function<?>> getAllStatistics() {
-        return functionRegistry.getAllStatistics();
-    }
-
-    @Override
-    public Iterable<Function<?>> getFunctionsFor(Class<?> sourceType) {
-        return functionRegistry.getFunctionsFor(sourceType);
-    }
-
-    @Override
-    public Iterable<Function<?>> getStatisticsFor(Class<?> sourceType) {
-        return functionRegistry.getStatisticsFor(sourceType);
-    }
-
-    @Override
-    public Iterable<Function<?>> getDimensionsFor(Class<?> sourceType) {
-        return functionRegistry.getDimensionsFor(sourceType);
-    }
-
-    @Override
-    public Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getDimensionsMappedByLevelFor(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
-        return functionRegistry.getDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
-    }
-    
-    @Override
-    public ReducedDimensions getReducedDimensionsMappedByLevelFor(
-            DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
-        return functionRegistry.getReducedDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
-    }
-
-    @Override
     public Function<?> getFunctionForDTO(FunctionDTO functionDTO) {
         return functionRegistry.getFunctionForDTO(functionDTO, getJoinedClassLoader());
     }
@@ -277,11 +239,6 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     }
     
     @Override
-    public Iterable<DataRetrieverChainDefinition<?, ?>> getDataRetrieverChainDefinitions() {
-        return dataRetrieverChainDefinitionRegistry.getAll();
-    }
-    
-    @Override
     public void registerDataRetrieverChainDefinition(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
         boolean componentsChanged = dataRetrieverChainDefinitionRegistry.register(dataRetrieverChainDefinition);
         if (componentsChanged) {
@@ -296,24 +253,6 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
             updateComponentsChangedTimepoint();
         }
     }
-    
-    @Override
-    public <DataSourceType> Iterable<DataRetrieverChainDefinition<DataSourceType, ?>> getDataRetrieverChainDefinitionsBySourceType(
-            Class<DataSourceType> dataSourceType) {
-        return dataRetrieverChainDefinitionRegistry.getBySourceType(dataSourceType);
-    }
-    
-    @Override
-    public <DataType> Iterable<DataRetrieverChainDefinition<?, DataType>> getDataRetrieverChainDefinitionsByDataType(
-            Class<DataType> retrievedDataType) {
-        return dataRetrieverChainDefinitionRegistry.getByDataType(retrievedDataType);
-    }
-
-    @Override
-    public <DataSourceType, DataType> Iterable<DataRetrieverChainDefinition<DataSourceType, DataType>> getDataRetrieverChainDefinitions(
-            Class<DataSourceType> dataSourceType, Class<DataType> retrievedDataType) {
-        return dataRetrieverChainDefinitionRegistry.get(dataSourceType, retrievedDataType);
-    }
 
     @Override
     public <DataSourceType, DataType> DataRetrieverChainDefinition<DataSourceType, DataType> getDataRetrieverChainDefinitionForDTO(DataRetrieverChainDefinitionDTO retrieverChainDTO) {
@@ -323,18 +262,6 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     @Override
     public AggregationProcessorDefinitionProvider getAggregationProcessorProvider() {
         return aggregationProcessorDefinitionRegistry;
-    }
-
-    @Override
-    public <ExtractedType> Iterable<AggregationProcessorDefinition<? super ExtractedType, ?>> getAggregationProcessorDefinitions(
-            Class<ExtractedType> extractedType) {
-        return aggregationProcessorDefinitionRegistry.getByExtractedType(extractedType);
-    }
-    
-    @Override
-    public <ExtractedType> AggregationProcessorDefinition<? super ExtractedType, ?> getAggregationProcessorDefinition(
-            Class<ExtractedType> extractedType, String aggregationNameMessageKey) {
-        return aggregationProcessorDefinitionRegistry.get(extractedType, aggregationNameMessageKey);
     }
 
     @Override
@@ -366,16 +293,6 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     @Override
     public QueryDefinitionDTOProvider getQueryDefinitionDTOProvider() {
         return queryDefinitionRegistry;
-    }
-    
-    @Override
-    public Iterable<PredefinedQueryIdentifier> getPredefinedQueryIdentifiers() {
-        return queryDefinitionRegistry.getIdentifiers();
-    }
-
-    @Override
-    public ModifiableStatisticQueryDefinitionDTO getPredefinedQueryDefinitionDTO(PredefinedQueryIdentifier identifier) {
-        return queryDefinitionRegistry.get(identifier);
     }
     
     @Override
