@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.home.communication.user.profile;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -10,6 +12,7 @@ import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
@@ -69,10 +72,19 @@ public class GetSailorProfilesAction implements SailingAction<SailorProfilesDTO>
 
     /** get the corresponding boat for each competitor in the list of competitors */
     @GwtIncompatible
-    private List<BoatClassDTO> getCorrespondingBoats(Iterable<Competitor> comps, final CompetitorAndBoatStore store) {
-        return StreamSupport.stream(comps.spliterator(), false).filter(c -> c != null)
-                .map(c -> convertBoatClass(store.getExistingCompetitorWithBoatById(c.getId()).getBoat().getBoatClass()))
-                .collect(Collectors.toList());
+    private Set<BoatClassDTO> getCorrespondingBoats(final Iterable<Competitor> comps,
+            final CompetitorAndBoatStore store) {
+        final Set<BoatClassDTO> boatclasses = new HashSet<>();
+        for (Competitor c : comps) {
+            if (c != null) {
+                CompetitorWithBoat cwd = store.getExistingCompetitorWithBoatById(c.getId());
+                if (cwd != null && cwd.getBoat() != null && cwd.getBoat().getBoatClass() != null) {
+                    BoatClassDTO dto = convertBoatClass(cwd.getBoat().getBoatClass());
+                    boatclasses.add(dto);
+                }
+            }
+        }
+        return boatclasses;
     }
 
     @GwtIncompatible
