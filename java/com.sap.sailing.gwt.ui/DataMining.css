@@ -251,6 +251,10 @@ input.magnifier {
     width: auto;
 }
 
+.unsupportedAggregatorListItem {
+	color: gray;
+}
+
 .statisticSuggestBoxContainer {
 	width: 100%;
 	min-width: 300px;

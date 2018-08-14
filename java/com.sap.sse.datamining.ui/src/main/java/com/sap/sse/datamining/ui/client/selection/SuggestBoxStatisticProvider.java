@@ -12,6 +12,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import com.google.gwt.dom.client.NodeList;
+import com.google.gwt.dom.client.OptionElement;
+import com.google.gwt.dom.client.SelectElement;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -21,6 +24,7 @@ import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -92,7 +96,7 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
     private final Map<String, Set<AggregationProcessorDefinitionDTO>> collectedAggregators;
     private AggregatorGroup currentAggregator;
     private final List<AggregatorGroup> availableAggregators;
-    private final ValueListBox<AggregatorGroup> aggregatorListBox;
+    private final AggregatorListBox aggregatorListBox;
 
     private FunctionDTO identityFunction;
     private final List<IdentityFunctionWithContext> availableIdentityFunctions;
@@ -117,14 +121,8 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
 
         availableIdentityFunctions = new ArrayList<>();
         availableStatistics = new ArrayList<>();
-        extractionFunctionSuggestBox = new ExtractionFunctionSuggestBox() {
-            @Override
-            protected void onValueChange() {
-                // TODO Notify retriever chain listeners only when the chain actually changed
-                notifyRetrieverChainListeners();
-                notifyExtractionFunctionListeners();
-            }
-        };
+        extractionFunctionSuggestBox = new ExtractionFunctionSuggestBox();
+        extractionFunctionSuggestBox.setValueChangeHandler(this::extractionFunctionSelectionChanged);
         extractionFunctionSuggestBox.getValueBox().addFocusHandler(e -> {
             extractionFunctionSuggestBox.getValueBox().selectAll();
             extractionFunctionSuggestBox.showSuggestionList();
@@ -147,16 +145,7 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
 
         collectedAggregators = new HashMap<>();
         availableAggregators = new ArrayList<>();
-        aggregatorListBox = new ValueListBox<AggregatorGroup>(
-                new AbstractRenderer<AggregatorGroup>() {
-                    @Override
-                    public String render(AggregatorGroup aggregator) {
-                        if (aggregator == null) {
-                            return "<" + getDataMiningStringMessages().any() + ">";
-                        }
-                        return aggregator.getDisplayName();
-                    }
-                });
+        aggregatorListBox = new AggregatorListBox("<" + getDataMiningStringMessages().any() + ">");
         aggregatorListBox.addValueChangeHandler(new ValueChangeHandler<AggregatorGroup>() {
             @Override
             public void onValueChange(ValueChangeEvent<AggregatorGroup> event) {
@@ -386,6 +375,22 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
             currentAggregator = newAggregator;
         }
         notifyAggregatorDefinitionListeners();
+    }
+    
+    private void extractionFunctionSelectionChanged(ExtractionFunctionWithContext oldExtractionFunction,
+            ExtractionFunctionWithContext newExtractionFunction) {
+        String returnTypeName = newExtractionFunction == null ? null
+                : newExtractionFunction.getExtractionFunction().getReturnTypeName();
+        aggregatorListBox.updateItemStyles(returnTypeName);
+        
+        DataRetrieverChainDefinitionDTO oldRetrieverChain = oldExtractionFunction == null ? null
+                : oldExtractionFunction.getRetrieverChain();
+        DataRetrieverChainDefinitionDTO newRetrieverChain = newExtractionFunction == null ? null
+                : newExtractionFunction.getRetrieverChain();
+        if (!Objects.equals(oldRetrieverChain, newRetrieverChain)) {
+            notifyRetrieverChainListeners();
+        }
+        notifyExtractionFunctionListeners();
     }
 
     @Override
@@ -834,11 +839,57 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         }
         
     }
+    
+    private static class AggregatorListBox extends ValueListBox<AggregatorGroup> {
+        
+        private static final String UnsupportedItemStyle = "unsupportedAggregatorListItem";
+        
+        private final Map<String, AggregatorGroup> aggregatorsByDisplayName;
+        
+        public AggregatorListBox(String nullDisplayString) {
+            super(new AbstractRenderer<AggregatorGroup>() {
+                @Override
+                public String render(AggregatorGroup aggregator) {
+                    return aggregator == null ? nullDisplayString : aggregator.getDisplayName();
+                }
+            });
+            aggregatorsByDisplayName = new HashMap<>();
+        }
+        
+        public void updateItemStyles(String extractionFunctionReturnTypeName) {
+            ListBox listBox = (ListBox) getWidget();
+            SelectElement selectElement = SelectElement.as(listBox.getElement());
+            NodeList<OptionElement> options = selectElement.getOptions();
+            for (int i = 0; i < options.getLength(); i++) {
+                OptionElement option = options.getItem(i);
+                AggregatorGroup aggregator = aggregatorsByDisplayName.get(option.getText());
+                String className = aggregator == null || extractionFunctionReturnTypeName == null
+                        || aggregator.supportsType(extractionFunctionReturnTypeName) ? "" : UnsupportedItemStyle;
+                option.setClassName(className);
+            }
+        }
+        
+        @Override
+        public void setAcceptableValues(Collection<AggregatorGroup> newValues) {
+            aggregatorsByDisplayName.clear();
+            for (AggregatorGroup aggregator : newValues) {
+                aggregatorsByDisplayName.put(aggregator.displayName, aggregator);
+            }
+            super.setAcceptableValues(newValues);
+        }
+        
+    }
 
-    private abstract class ExtractionFunctionSuggestBox extends CustomSuggestBox<ExtractionFunctionWithContext> {
+    private static class ExtractionFunctionSuggestBox extends CustomSuggestBox<ExtractionFunctionWithContext> {
+        
+        @FunctionalInterface
+        public interface ValueChangeHandler {
+            void valueChanged(ExtractionFunctionWithContext oldValue, ExtractionFunctionWithContext newValue);
+        }
 
         private final AbstractListSuggestOracle<ExtractionFunctionWithContext> suggestOracle;
         private final ScrollableSuggestionDisplay display;
+        private ValueChangeHandler valueChangeHandler;
         
         private ExtractionFunctionWithContext extractionFunction;
 
@@ -874,9 +925,8 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
             addSuggestionSelectionHandler(this::setExtractionFunction);
         }
         
-        @Override
-        public void hideSuggestionList() {
-            display.hideSuggestions();
+        public void setValueChangeHandler(ValueChangeHandler valueChangeHandler) {
+            this.valueChangeHandler = valueChangeHandler;
         }
 
         public void setSelectableValues(Collection<? extends ExtractionFunctionWithContext> selectableValues) {
@@ -885,9 +935,12 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
 
         public void setExtractionFunction(ExtractionFunctionWithContext extractionFunction) {
             if (!Objects.equals(this.extractionFunction, extractionFunction)) {
+                ExtractionFunctionWithContext oldValue = this.extractionFunction;
                 this.extractionFunction = extractionFunction;
                 setValue(extractionFunction == null ? null : extractionFunction.getDisplayString(), false);
-                onValueChange();
+                if (valueChangeHandler != null) {
+                    valueChangeHandler.valueChanged(oldValue, extractionFunction);
+                }
             }
             setFocus(false);
         }
@@ -895,8 +948,11 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         public ExtractionFunctionWithContext getExtractionFunction() {
             return extractionFunction;
         }
-
-        protected abstract void onValueChange();
+        
+        @Override
+        public void hideSuggestionList() {
+            display.hideSuggestions();
+        }
 
     }
 
