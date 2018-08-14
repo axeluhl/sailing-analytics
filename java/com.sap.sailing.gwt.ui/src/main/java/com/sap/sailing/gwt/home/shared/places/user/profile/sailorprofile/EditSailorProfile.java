@@ -10,7 +10,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
-import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfilesDTO;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.SailorProfileDetailsView;
 import com.sap.sailing.gwt.home.shared.partials.desktopaccordion.DesktopAccordion;
 import com.sap.sailing.gwt.home.shared.partials.editable.EditableSuggestedMultiSelectionCompetitor;
@@ -55,13 +54,10 @@ public class EditSailorProfile extends Composite implements EditSailorProfileVie
 
     private final EditSailorProfileView.Presenter presenter;
 
-    private SailorProfileDTO entry;
-
-    private boolean suppressEvents = false;
-
     public EditSailorProfile(EditSailorProfileView.Presenter presenter, FlagImageResolver flagImageResolver,
             SailorProfileDetailsView parent) {
         this.presenter = presenter;
+        presenter.getDataProvider().setView(this);
         competitorSelectionUi = new EditableSuggestedMultiSelectionCompetitor(presenter, flagImageResolver);
         initWidget(uiBinder.createAndBindUi(this));
         boatClassesUi.setText("Boatclasses");
@@ -73,25 +69,8 @@ public class EditSailorProfile extends Composite implements EditSailorProfileVie
     private void setupTitleChangeListener() {
         // setup title change handler
         titleUi.addTextChangeHandler((text) -> {
-            entry.setName(text);
-            onChange();
+            presenter.getDataProvider().updateTitle(text);
         });
-    }
-
-    private void onChange() {
-        if (!suppressEvents) {
-            this.presenter.getDataProvider().updateOrCreateSailorProfile(entry, new AsyncCallback<SailorProfilesDTO>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    GWT.log(caught.getMessage(), caught);
-                }
-
-                @Override
-                public void onSuccess(SailorProfilesDTO result) {
-                    setEntry(result.getEntries().get(0));
-                }
-            });
-        }
     }
 
     private void setupCompetitorChangeListener() {
@@ -100,23 +79,17 @@ public class EditSailorProfile extends Composite implements EditSailorProfileVie
 
             @Override
             public void onRemove(SimpleCompetitorWithIdDTO selectedItem) {
-                entry.getCompetitors().remove(selectedItem);
-                onChange();
+                presenter.getDataProvider().removeCompetitor(selectedItem);
             }
 
             @Override
             public void onClear() {
-                final boolean fireEvent = entry.getCompetitors().size() == 0;
-                entry.getCompetitors().clear();
-                if (fireEvent) {
-                    onChange();
-                }
+                presenter.getDataProvider().clearCompetitors();
             }
 
             @Override
             public void onAdd(SimpleCompetitorWithIdDTO selectedItem) {
-                entry.getCompetitors().add(selectedItem);
-                onChange();
+                presenter.getDataProvider().addCompetitor(selectedItem);
             }
         });
     }
@@ -132,13 +105,11 @@ public class EditSailorProfile extends Composite implements EditSailorProfileVie
         competitorSelectionUi.getElement().getParentElement().removeClassName(res.mediaCss().column());
     }
 
+    @Override
     public void setEntry(SailorProfileDTO entry) {
-        suppressEvents = true;
-        this.entry = entry;
         competitorSelectionUi.setSelectedItems(entry.getCompetitors());
         titleUi.setText(entry.getName());
         boatClassesUi.setItems(entry.getBoatclasses());
-        suppressEvents = false;
 
         // Get events
         presenter.getDataProvider().getEvents(entry.getKey(), new AsyncCallback<Iterable<ParticipatedEventDTO>>() {

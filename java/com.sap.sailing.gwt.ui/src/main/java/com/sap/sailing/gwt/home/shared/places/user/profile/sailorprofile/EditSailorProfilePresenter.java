@@ -1,8 +1,5 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile;
 
-import java.util.UUID;
-
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
@@ -10,12 +7,9 @@ import com.sap.sailing.gwt.home.communication.user.profile.CompetitorSuggestionR
 import com.sap.sailing.gwt.home.communication.user.profile.FavoriteCompetitorsDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.GetCompetitorSuggestionAction;
 import com.sap.sailing.gwt.home.communication.user.profile.SaveFavoriteCompetitorsAction;
-import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.SailorProfileDetailsView;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggestedMultiSelectionCompetitorDataProvider;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.dataprovider.SailorProfileDataProvider;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.dataprovider.SailorProfileDataProviderImpl;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.dataprovider.StatefulSailorProfileDataProvider;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -35,13 +29,13 @@ public class EditSailorProfilePresenter<C extends ClientFactoryWithDispatch & Er
 
     private final C clientFactory;
 
-    private final SailorProfileDataProvider sailorProfileDataProvider;
+    private final StatefulSailorProfileDataProvider sailorProfileDataProvider;
 
     private SharedSailorProfileCompetitorDataProvider adjustedCompetitorDataProvider = null;
 
     public EditSailorProfilePresenter(C clientFactory) {
         this.clientFactory = clientFactory;
-        this.sailorProfileDataProvider = new SailorProfileDataProviderImpl(clientFactory);
+        this.sailorProfileDataProvider = new StatefulSailorProfileDataProvider(clientFactory);
     }
 
     private SharedSailorProfileCompetitorDataProvider createDataProviderIfNecessary() {
@@ -91,7 +85,7 @@ public class EditSailorProfilePresenter<C extends ClientFactoryWithDispatch & Er
     }
 
     @Override
-    public SailorProfileDataProvider getDataProvider() {
+    public StatefulSailorProfileDataProvider getDataProvider() {
         return sailorProfileDataProvider;
     }
 
@@ -104,21 +98,4 @@ public class EditSailorProfilePresenter<C extends ClientFactoryWithDispatch & Er
     public PlaceController getPlaceController() {
         return clientFactory.getPlaceController();
     }
-
-    @Override
-    public void refreshSailorProfile(UUID uuid, SailorProfileDetailsView sailorView) {
-        getDataProvider().findSailorProfileById(uuid, new AsyncCallback<SailorProfileDTO>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-                GWT.log(caught.getMessage(), caught);
-            }
-
-            @Override
-            public void onSuccess(SailorProfileDTO result) {
-                sailorView.setEntry(result);
-            }
-        });
-    }
-
 }
