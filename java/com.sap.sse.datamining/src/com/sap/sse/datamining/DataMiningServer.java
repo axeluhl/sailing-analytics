@@ -36,6 +36,7 @@ public interface DataMiningServer {
     Date getComponentsChangedTimepoint();
 
     FunctionProvider getFunctionProvider();
+    Function<?> getIdentityFunction();
     Iterable<Function<?>> getAllStatistics();
     Iterable<Function<?>> getFunctionsFor(Class<?> sourceType);
     Iterable<Function<?>> getStatisticsFor(Class<?> sourceType);
@@ -66,5 +67,13 @@ public interface DataMiningServer {
     QueryDefinitionDTOProvider getQueryDefinitionDTOProvider();
     Iterable<PredefinedQueryIdentifier> getPredefinedQueryIdentifiers();
     ModifiableStatisticQueryDefinitionDTO getPredefinedQueryDefinitionDTO(PredefinedQueryIdentifier identifier);
+    
+    //-----------------------------------------------------------------------------------------------------------------
+    // Component Accessors as default methods
+    //-----------------------------------------------------------------------------------------------------------------
+    
+    default Iterable<AggregationProcessorDefinition<?, ?>> getAllAggregationProcessorDefinitions() {
+        return getAggregationProcessorProvider().getAll();
+    }
     
 }

@@ -243,6 +243,7 @@ input.magnifier {
 .statisticProviderLabel {
     display: table-cell;
     white-space: nowrap;
+    padding: 0px 3px;
 }
 
 .statisticProviderElement {
@@ -250,10 +251,13 @@ input.magnifier {
     width: auto;
 }
 
+.unsupportedAggregatorListItem {
+	color: gray;
+}
+
 .statisticSuggestBoxContainer {
 	width: 100%;
 	min-width: 300px;
-	padding: 0px 3px;
 }
 
 .statisticSuggestBoxPopup {

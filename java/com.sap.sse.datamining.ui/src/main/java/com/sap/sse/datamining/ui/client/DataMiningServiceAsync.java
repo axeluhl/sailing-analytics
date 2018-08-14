@@ -24,10 +24,15 @@ public interface DataMiningServiceAsync {
 
     public void getComponentsChangedTimepoint(AsyncCallback<Date> asyncCallback);
 
+    void getIdentityFunction(String localeInfoName, AsyncCallback<FunctionDTO> callback);
+    
     void getAllStatistics(String localeInfoName, AsyncCallback<HashSet<FunctionDTO>> callback);
 
     void getStatisticsFor(DataRetrieverChainDefinitionDTO currentRetrieverChainDefinition, String localeName,
             AsyncCallback<HashSet<FunctionDTO>> asyncCallback);
+    
+    void getAggregatorDefinitions(String localeInfoName,
+            AsyncCallback<HashSet<AggregationProcessorDefinitionDTO>> callback);
 
     void getAggregatorDefinitionsFor(FunctionDTO extractionFunction, String localeInfoName,
             AsyncCallback<HashSet<AggregationProcessorDefinitionDTO>> asyncCallback);

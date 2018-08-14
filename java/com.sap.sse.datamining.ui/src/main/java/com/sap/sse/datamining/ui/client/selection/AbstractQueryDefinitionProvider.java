@@ -188,32 +188,10 @@ public abstract class AbstractQueryDefinitionProvider<SettingsType extends Setti
     protected void notifyQueryDefinitionChanged() {
         if (!blockChangeNotification) {
             StatisticQueryDefinitionDTO queryDefinition = getQueryDefinition();
-            if (isQueryDefinitionConsistent(queryDefinition)) {
-                for (QueryDefinitionChangedListener listener : listeners) {
-                    listener.queryDefinitionChanged(queryDefinition);
-                }
+            for (QueryDefinitionChangedListener listener : listeners) {
+                listener.queryDefinitionChanged(queryDefinition);
             }
         }
-    }
-
-    private boolean isQueryDefinitionConsistent(StatisticQueryDefinitionDTO queryDefinition) {
-        if (queryDefinition.getStatisticToCalculate() != null) { // The consistency can't be checked, if no statistic is
-                                                                 // selected
-            String sourceTypeName = queryDefinition.getStatisticToCalculate().getSourceTypeName();
-
-            if (queryDefinition.getDataRetrieverChainDefinition() != null && !sourceTypeName
-                    .equals(queryDefinition.getDataRetrieverChainDefinition().getRetrievedDataTypeName())) {
-                return false;
-            }
-
-            for (FunctionDTO dimensionToGroupBy : queryDefinition.getDimensionsToGroupBy()) {
-                if (!sourceTypeName.equals(dimensionToGroupBy.getSourceTypeName())) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
     }
 
     protected DataMiningServiceAsync getDataMiningService() {

@@ -23,10 +23,13 @@ public interface DataMiningService extends RemoteService {
 
     Date getComponentsChangedTimepoint();
 
+    FunctionDTO getIdentityFunction(String localeInfoName);
     HashSet<FunctionDTO> getAllStatistics(String localeInfoName);
 
     HashSet<FunctionDTO> getStatisticsFor(DataRetrieverChainDefinitionDTO retrieverChainDefinition,
             String localeInfoName);
+    
+    HashSet<AggregationProcessorDefinitionDTO> getAggregatorDefinitions(String localeInfoName);
 
     HashSet<AggregationProcessorDefinitionDTO> getAggregatorDefinitionsFor(FunctionDTO extractionFunction,
             String localeInfoName);

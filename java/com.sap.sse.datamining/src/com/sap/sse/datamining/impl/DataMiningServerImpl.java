@@ -208,6 +208,11 @@ public class DataMiningServerImpl implements ModifiableDataMiningServer {
     public FunctionProvider getFunctionProvider() {
         return functionRegistry;
     }
+    
+    @Override
+    public Function<?> getIdentityFunction() {
+        return functionRegistry.getIdentityFunction();
+    }
 
     @Override
     public Iterable<Function<?>> getAllStatistics() {

@@ -46,7 +46,7 @@ public class TestLeaderboardGroupRetrievalProcessor {
         
         Collection<Processor<HasLeaderboardGroupContext, ?>> resultReceivers = new ArrayList<>();
         resultReceivers.add(receiver);
-        retriever = new LeaderboardGroupRetrievalProcessor(ConcurrencyTestsUtil.getExecutor(), resultReceivers, 0);
+        retriever = new LeaderboardGroupRetrievalProcessor(ConcurrencyTestsUtil.getExecutor(), resultReceivers, 0, "");
     }
 
     private Map<String, LeaderboardGroup> getGroupsInService() {

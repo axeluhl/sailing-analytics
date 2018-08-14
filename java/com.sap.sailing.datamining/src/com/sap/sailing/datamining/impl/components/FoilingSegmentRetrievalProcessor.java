@@ -22,9 +22,11 @@ import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 public class FoilingSegmentRetrievalProcessor extends AbstractRetrievalProcessor<HasRaceOfCompetitorContext, HasFoilingSegmentContext> {
     private final FoilingSegmentsDataMiningSettings settings;
 
-    public FoilingSegmentRetrievalProcessor(ExecutorService executor, Collection<Processor<HasFoilingSegmentContext, ?>> resultReceivers,
-            FoilingSegmentsDataMiningSettings settings, int retrievalLevel) {
-        super(HasRaceOfCompetitorContext.class, HasFoilingSegmentContext.class, executor, resultReceivers, retrievalLevel);
+    public FoilingSegmentRetrievalProcessor(ExecutorService executor,
+            Collection<Processor<HasFoilingSegmentContext, ?>> resultReceivers,
+            FoilingSegmentsDataMiningSettings settings, int retrievalLevel, String retrievedDataTypeMessageKey) {
+        super(HasRaceOfCompetitorContext.class, HasFoilingSegmentContext.class, executor, resultReceivers,
+                retrievalLevel, retrievedDataTypeMessageKey);
         this.settings = settings;
     }
 
