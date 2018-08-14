@@ -396,6 +396,8 @@ public class TaggingPanel extends ComponentWithoutSettings
         private final Button addCustomTagButton;
 
         public EditCustomTagButtonsDialog(Panel customButtonsPanel) {
+            TagPanelStyle style = TagPanelResources.INSTANCE.style();
+            
             setGlassEnabled(true);
             setText(stringMessages.tagEditCustomTagButtons());
 
@@ -450,13 +452,13 @@ public class TaggingPanel extends ComponentWithoutSettings
             customTagButtonsTable.addColumn(tagColumn, stringMessages.tagLabelTag());
             customTagButtonsTable.addColumn(commentColumn, stringMessages.tagLabelComment());
             customTagButtonsTable.addColumn(imageURLColumn, stringMessages.tagLabelImageURL());
-            customTagButtonsTable.addColumn(actionsColumn, "Actions");
-            customTagButtonsTable.setRowData(customTagButtons);
+            customTagButtonsTable.addColumn(actionsColumn, stringMessages.tagLabelAction());
+            setRowData(customTagButtons);
 
             inputPanel = new TagCreationInputPanel(stringMessages);
 
             addCustomTagButton = new Button(stringMessages.tagAddCustomTagButton());
-            addCustomTagButton.setStyleName(TagPanelResources.INSTANCE.style().footerButton());
+            addCustomTagButton.setStyleName(style.footerButton());
             addCustomTagButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -466,7 +468,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                         inputPanel.clearAllValues();
                         customTagButtons.add(tagButton);
                         customButtonsPanel.add(tagButton);
-                        customTagButtonsTable.setRowData(customTagButtons);
+                        setRowData(customTagButtons);
                     } else {
                         Notification.notify(stringMessages.tagNotSpecified(), NotificationType.WARNING);
                     }
@@ -493,6 +495,11 @@ public class TaggingPanel extends ComponentWithoutSettings
 
         private void hideDialog() {
             this.hide();
+        }
+        
+        private void setRowData(List<TagButton> buttons) {
+            customTagButtonsTable.setRowData(buttons);
+            customTagButtonsTable.setVisible(buttons.size() > 0);
         }
     }
 
@@ -765,5 +772,4 @@ public class TaggingPanel extends ComponentWithoutSettings
     public String getDependentCssClassName() {
         return "tags";
     }
-
 }
