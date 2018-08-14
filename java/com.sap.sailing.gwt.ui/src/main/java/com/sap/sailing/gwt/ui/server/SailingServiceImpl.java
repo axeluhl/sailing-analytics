@@ -6053,17 +6053,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public SuccessInfo addTagToRaceLog(String leaderboardName, String raceColumnName, String fleetName, String tag,
             String comment, String imageURL, TimePoint raceTimepoint) {
         SuccessInfo successInfo = new SuccessInfo(true, null, null, null);
-        try {            
-            SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
+        try {
+            SecurityUtils.getSubject().checkPermission(
+                    Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
             RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
             raceLog.add(new RaceLogTagEventImpl(tag, comment, imageURL, raceTimepoint, getService().getServerAuthor(),
                     raceLog.getCurrentPassId()));
         } catch (AuthorizationException e) {
-            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "tagMissingPermissions"), null, null);
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "tagMissingPermissions"),
+                    null, null);
         }
         return successInfo;
     }
-    
+
     @Override
     public SuccessInfo removeTagFromRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             TagDTO tag) {
@@ -6077,14 +6079,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 try {
                     // check if logged in user is the same user as the creator or logged in user is Administrator
                     Subject subject = SecurityUtils.getSubject();
-                    subject.checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
-                    if ((subject.getPrincipals() != null && subject.getPrincipals().getPrimaryPrincipal().equals(tag.getUsername())) || subject.hasRole("admin")) {                        
+                    subject.checkPermission(
+                            Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
+                    if ((subject.getPrincipals() != null
+                            && subject.getPrincipals().getPrimaryPrincipal().equals(tag.getUsername()))
+                            || subject.hasRole("admin")) {
                         raceLog.revokeEvent(tagEvent.getAuthor(), tagEvent, "Revoked");
                     } else {
-                        successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "tagMissingPermissions"), null, null);
+                        successInfo = new SuccessInfo(false,
+                                serverStringMessages.get(getClientLocale(), "tagMissingPermissions"), null, null);
                     }
                 } catch (AuthorizationException e) {
-                    successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "tagMissingPermissions"), null, null);
+                    successInfo = new SuccessInfo(false,
+                            serverStringMessages.get(getClientLocale(), "tagMissingPermissions"), null, null);
                 } catch (Exception e) {
                     successInfo = new SuccessInfo(false, e.toString(), null, null);
                 }

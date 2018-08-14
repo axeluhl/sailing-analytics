@@ -134,7 +134,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             String inputPanelImageURL();
             String footerPanel();
             String tagPreviewPanel();
-            
+
             // filter tags
             String tagFilterButton();
             String tagFilterHiddenButton();
@@ -152,7 +152,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             String settingsButtonBackgroundImage();
         }
     }
-    
+
     public interface CellListResources extends CellList.Resources {
         public static final CellListResources INSTANCE = GWT.create(CellListResources.class);
 
@@ -206,7 +206,8 @@ public class TaggingPanel extends ComponentWithoutSettings
             }
 
             SafeHtml safeTag = SafeHtmlUtils.fromString(tag.getTag());
-            SafeHtml safeCreated = SafeHtmlUtils.fromString(stringMessages.tagCreated(tag.getUsername(), DateTimeFormat.getFormat("E d/M/y, HH:mm").format(tag.getRaceTimepoint().asDate())));
+            SafeHtml safeCreated = SafeHtmlUtils.fromString(stringMessages.tagCreated(tag.getUsername(),
+                    DateTimeFormat.getFormat("E d/M/y, HH:mm").format(tag.getRaceTimepoint().asDate())));
             SafeHtml safeComment = SafeHtmlUtils.fromString(tag.getComment());
             SafeUri trustedImageURL = UriUtils.fromTrustedString(tag.getImageURL());
 
@@ -222,7 +223,8 @@ public class TaggingPanel extends ComponentWithoutSettings
 
             SafeHtml cell;
             if (userService.getCurrentUser() != null
-                    && (tag.getUsername().equals(userService.getCurrentUser().getName()) || userService.getCurrentUser().hasRole("admin"))) {
+                    && (tag.getUsername().equals(userService.getCurrentUser().getName())
+                            || userService.getCurrentUser().hasRole("admin"))) {
                 cell = tagCellTemplate.cellRemovable(tagPanelStyle.tag(), tagPanelStyle.tagHeading(),
                         tagPanelStyle.tagCreated(), safeTag, safeCreated, content);
             } else {
@@ -362,7 +364,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                     }
                 }
             });
-            standardButtonsPanel.add(editCustomTagButtons);         
+            standardButtonsPanel.add(editCustomTagButtons);
         }
 
         private void updateButtons() {
@@ -386,11 +388,11 @@ public class TaggingPanel extends ComponentWithoutSettings
             tagPreviewCellList.setVisibleRange(0, 1);
             previewLabel = new Label(stringMessages.tagPreview());
             listContainingPreviewTag = new ArrayList<TagDTO>();
-            
+
             setStyleName(TagPanelResources.INSTANCE.style().tagPreviewPanel());
             add(previewLabel);
             add(tagPreviewCellList);
-            
+
             inputField.getTagTextBox().addValueChangeHandler(new ValueChangeHandler<String>() {
                 @Override
                 public void onValueChange(ValueChangeEvent<String> event) {
@@ -417,10 +419,12 @@ public class TaggingPanel extends ComponentWithoutSettings
 
         public void renderPreview() {
             listContainingPreviewTag.removeAll(listContainingPreviewTag);
-            previewTag = new TagDTO(inputField.getTagValue(), inputField.getCommentValue(), inputField.getImageURLValue(), "Author", new MillisecondsTimePoint(timer.getTime()), new MillisecondsTimePoint(timer.getTime()));        
+            previewTag = new TagDTO(inputField.getTagValue(), inputField.getCommentValue(),
+                    inputField.getImageURLValue(), "Author", new MillisecondsTimePoint(timer.getTime()),
+                    new MillisecondsTimePoint(timer.getTime()));
             listContainingPreviewTag.add(previewTag);
             tagPreviewCellList.setRowData(listContainingPreviewTag);
-            
+
             setVisible(!inputField.getTagValue().isEmpty());
         }
     }
@@ -456,11 +460,11 @@ public class TaggingPanel extends ComponentWithoutSettings
         public TextBox getTagTextBox() {
             return tagTextBox;
         }
-        
+
         public TextBox getImageURLTextBox() {
             return imageURLTextBox;
         }
-        
+
         public TextArea getCommentTextArea() {
             return commentTextArea;
         }
@@ -505,18 +509,18 @@ public class TaggingPanel extends ComponentWithoutSettings
         private final Button addCustomTagButton;
         private final TagPreviewPanel tagPreviewPanel;
         private final FlowPanel controlButttonPanel;
-        private TagButton selectedTagButton = null; 
+        private TagButton selectedTagButton = null;
 
         public EditCustomTagButtonsDialog(Panel customButtonsPanel) {
-            TagPanelStyle style = TagPanelResources.INSTANCE.style();          
+            TagPanelStyle style = TagPanelResources.INSTANCE.style();
             setGlassEnabled(true);
             setText(stringMessages.tagEditCustomTagButtons());
             setWidth("350px");
 
             mainPanel = new FlowPanel();
             mainPanel.setWidth("100%");
-            
-            //Table with tag buttons
+
+            // Table with tag buttons
             customTagButtonsTable = new CellTable<TagButton>();
             customTagButtonsTable.setStyleName(TagPanelResources.INSTANCE.style().tagButtonTable());
             TextColumn<TagButton> tagColumn = new TextColumn<TagButton>() {
@@ -553,9 +557,9 @@ public class TaggingPanel extends ComponentWithoutSettings
                         inputPanel.setTagValue(button.getTag());
                         inputPanel.setImageURLValue(button.getImageURL());
                         inputPanel.setCommentValue(button.getComment());
-                        
+
                         tagPreviewPanel.renderPreview();
-                        
+
                         saveChangesButton.setVisible(true);
                         cancelChangesButton.setVisible(true);
                         addCustomTagButton.setVisible(false);
@@ -570,13 +574,13 @@ public class TaggingPanel extends ComponentWithoutSettings
             customTagButtonsTable.addColumn(actionsColumn, stringMessages.tagLabelAction());
             setRowData(customTagButtons);
 
-            //input panel
+            // input panel
             inputPanel = new TagCreationInputPanel(stringMessages);
 
-            //contol buttons
+            // contol buttons
             controlButttonPanel = new FlowPanel();
             controlButttonPanel.setStyleName(TagPanelResources.INSTANCE.style().footerPanel());
-            
+
             addCustomTagButton = new Button(stringMessages.tagAddCustomTagButton());
             addCustomTagButton.setStyleName(style.footerButton());
             addCustomTagButton.addClickHandler(new ClickHandler() {
@@ -585,9 +589,9 @@ public class TaggingPanel extends ComponentWithoutSettings
                     if (inputPanel.getTagValue().length() > 0) {
                         TagButton tagButton = new TagButton(inputPanel.getTagValue(), inputPanel.getTagValue(),
                                 inputPanel.getImageURLValue(), inputPanel.getCommentValue());
-                        inputPanel.clearAllValues();       
+                        inputPanel.clearAllValues();
                         tagPreviewPanel.renderPreview();
-                        
+
                         customTagButtons.add(tagButton);
                         customButtonsPanel.add(tagButton);
                         setRowData(customTagButtons);
@@ -596,7 +600,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                     }
                 }
             });
-            
+
             saveChangesButton = new Button(stringMessages.save());
             saveChangesButton.setVisible(false);
             saveChangesButton.setStyleName(style.footerButton());
@@ -611,7 +615,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                         inputPanel.clearAllValues();
                         tagPreviewPanel.renderPreview();
                         customTagButtonsTable.redraw();
-                        
+
                         saveChangesButton.setVisible(false);
                         cancelChangesButton.setVisible(false);
                         addCustomTagButton.setVisible(true);
@@ -622,7 +626,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                     }
                 }
             });
-            
+
             cancelChangesButton = new Button(stringMessages.cancel());
             cancelChangesButton.setVisible(false);
             cancelChangesButton.setStyleName(style.footerButton());
@@ -649,7 +653,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             controlButttonPanel.add(addCustomTagButton);
             controlButttonPanel.add(cancelChangesButton);
             controlButttonPanel.add(saveChangesButton);
-            
+
             tagPreviewPanel = new TagPreviewPanel(inputPanel);
 
             mainPanel.add(customTagButtonsTable);
@@ -664,13 +668,13 @@ public class TaggingPanel extends ComponentWithoutSettings
         private void hideDialog() {
             this.hide();
         }
-        
+
         private void setRowData(List<TagButton> buttons) {
             customTagButtonsTable.setRowData(buttons);
             customTagButtonsTable.setVisible(buttons.size() > 0);
         }
     }
-    
+
     private class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWithUI<TagDTO> {
         private final static String LOCAL_STORAGE_TAGS_FILTER_SETS_KEY = "sailingAnalytics.raceBoard.tagsFilterSets";
 
@@ -700,11 +704,12 @@ public class TaggingPanel extends ComponentWithoutSettings
                 tagFilterSets = createAndAddDefaultTagsFilter();
                 storeTagsFilterSets(tagFilterSets);
             }
-            
+
             filter = new AbstractListFilter<TagDTO>() {
                 @Override
                 public Iterable<String> getStrings(TagDTO tag) {
-                    final List<String> result = new ArrayList<>(Arrays.asList(tag.getTag().toLowerCase(), tag.getComment()));
+                    final List<String> result = new ArrayList<>(
+                            Arrays.asList(tag.getTag().toLowerCase(), tag.getComment()));
                     return result;
                 }
             };
@@ -778,8 +783,8 @@ public class TaggingPanel extends ComponentWithoutSettings
         }
 
         /**
-         * Updates the tags filter checkbox state by setting its check mark and updating its label according to the current
-         * filter selected
+         * Updates the tags filter checkbox state by setting its check mark and updating its label according to the
+         * current filter selected
          */
         private void updateTagsFilterControlState(TagsFilterSets filterSets) {
             String tagsFilterTitle = stringMessages.tagsFilter();
@@ -840,7 +845,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         private TagsFilterSets createAndAddDefaultTagsFilter() {
             TagsFilterSets filterSets = new TagsFilterSets();
 
-            //TODO add standard filters here
+            // TODO add standard filters here
 
             return filterSets;
         }
@@ -853,7 +858,8 @@ public class TaggingPanel extends ComponentWithoutSettings
 
         @Override
         public boolean matches(TagDTO tag) {
-            final Iterable<String> lowercaseKeywords = Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(searchTextBox.getText().toLowerCase());
+            final Iterable<String> lowercaseKeywords = Util
+                    .splitAlongWhitespaceRespectingDoubleQuotedPhrases(searchTextBox.getText().toLowerCase());
             return !Util.isEmpty(filter.applyFilter(lowercaseKeywords, Collections.singleton(tag)));
         }
 
@@ -886,9 +892,10 @@ public class TaggingPanel extends ComponentWithoutSettings
         public FilterUIFactory<TagDTO> createUIFactory() {
             return null;
         }
-        
+
         /**
-         * @param event ignored; may be <code>null</code>
+         * @param event
+         *            ignored; may be <code>null</code>
          */
         @Override
         public void onKeyUp(KeyUpEvent event) {
@@ -900,13 +907,14 @@ public class TaggingPanel extends ComponentWithoutSettings
                 if (newValue.length() >= 2) {
                     clearTextBoxButton.removeStyleName(css.tagFilterHiddenButton());
                     ensureSearchFilterIsSet();
-                    tagProvider.setTagsFilterSet(tagProvider.getTagsFilterSet()); // 
+                    tagProvider.setTagsFilterSet(tagProvider.getTagsFilterSet()); //
                 }
             }
         }
-        
+
         private void ensureSearchFilterIsSet() {
-            if (tagProvider.getTagsFilterSet() == null || !Util.contains(tagProvider.getTagsFilterSet().getFilters(), this)) {
+            if (tagProvider.getTagsFilterSet() == null
+                    || !Util.contains(tagProvider.getTagsFilterSet().getFilters(), this)) {
                 FilterSet<TagDTO, Filter<TagDTO>> newFilterSetWithThis = new FilterSet<>(getName());
                 if (tagProvider.getTagsFilterSet() != null) {
                     for (Filter<TagDTO> oldFilter : tagProvider.getTagsFilterSet().getFilters()) {
@@ -921,7 +929,8 @@ public class TaggingPanel extends ComponentWithoutSettings
         private void removeSearchFilter() {
             if (tagProvider.getTagsFilterSet() != null
                     && Util.contains(tagProvider.getTagsFilterSet().getFilters(), this)) {
-                FilterSet<TagDTO, Filter<TagDTO>> newFilterSetWithThis = new FilterSet<>(tagProvider.getTagsFilterSet().getName());
+                FilterSet<TagDTO, Filter<TagDTO>> newFilterSetWithThis = new FilterSet<>(
+                        tagProvider.getTagsFilterSet().getName());
                 for (Filter<TagDTO> oldFilter : tagProvider.getTagsFilterSet().getFilters()) {
                     if (oldFilter != this) {
                         newFilterSetWithThis.addFilter(oldFilter);
@@ -1039,15 +1048,17 @@ public class TaggingPanel extends ComponentWithoutSettings
                         imageURL, new MillisecondsTimePoint(timer.getTime()), new AsyncCallback<SuccessInfo>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                Notification.notify(stringMessages.tagNotAddedReason(caught.toString()), NotificationType.ERROR);
+                                Notification.notify(stringMessages.tagNotAddedReason(caught.toString()),
+                                        NotificationType.ERROR);
                             }
 
                             @Override
                             public void onSuccess(SuccessInfo result) {
-                                if (result.isSuccessful()) {                                    
+                                if (result.isSuccessful()) {
                                     Notification.notify(stringMessages.tagAddedSuccessfully(), NotificationType.INFO);
                                 } else {
-                                    Notification.notify(stringMessages.tagNotAddedReason(result.getMessage()), NotificationType.ERROR);
+                                    Notification.notify(stringMessages.tagNotAddedReason(result.getMessage()),
+                                            NotificationType.ERROR);
                                 }
                             }
                         });
@@ -1069,19 +1080,21 @@ public class TaggingPanel extends ComponentWithoutSettings
 
                     @Override
                     public void onSuccess(SuccessInfo result) {
-                        if (result.isSuccessful()) {                            
+                        if (result.isSuccessful()) {
                             tagListProvider.getAllTags().remove(tag);
                             updateContent();
                             Notification.notify(stringMessages.tagRemovedSuccessfully(), NotificationType.SUCCESS);
                         } else {
-                            Notification.notify(stringMessages.tagNotRemoved() + " " + result.getMessage(), NotificationType.ERROR);
+                            Notification.notify(stringMessages.tagNotRemoved() + " " + result.getMessage(),
+                                    NotificationType.ERROR);
                         }
                     }
                 });
     }
 
     private boolean isLoggedInAndRaceLogAvailable() {
-        return !(userService.getCurrentUser() == null || leaderboardName == null || raceColumn == null || fleet == null);
+        return !(userService.getCurrentUser() == null || leaderboardName == null || raceColumn == null
+                || fleet == null);
     }
 
     private void updateContent() {
