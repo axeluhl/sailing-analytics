@@ -16,6 +16,12 @@ public class RaceCompetitorSelectionModel extends CompetitorSelectionModel imple
         boatsOfCompetitors = new HashMap<>();
     }
 
+    public RaceCompetitorSelectionModel(boolean hasMultiSelection, Map<CompetitorDTO, BoatDTO> boatsOfCompetitors) {
+        super(hasMultiSelection);
+        this.boatsOfCompetitors = boatsOfCompetitors;
+        addAll(boatsOfCompetitors.keySet());
+    }
+    
     public RaceCompetitorSelectionModel(boolean hasMultiSelection, CompetitorColorProvider competitorColorProvider, Map<CompetitorDTO, BoatDTO> boatsOfCompetitors) {
         super(hasMultiSelection, competitorColorProvider);
         this.boatsOfCompetitors = boatsOfCompetitors;
