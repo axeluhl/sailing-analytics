@@ -5,9 +5,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfilesDTO;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileClientFactory;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfilePresenter;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileView;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileView.Presenter;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfilePresenter;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView.Presenter;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sse.gwt.client.mvp.ClientFactory;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
@@ -16,14 +16,14 @@ public class SailorProfileOverviewImplPresenter implements SailingProfileOvervie
 
     private final SailorProfileView view;
     private final UserProfileView.Presenter userProfilePresenter;
-    private final SharedSailorProfileView.Presenter sharedSailorProfilePresenter;
+    private final EditSailorProfileView.Presenter sharedSailorProfilePresenter;
     private final FlagImageResolver flagImageResolver;
 
     public SailorProfileOverviewImplPresenter(final SailorProfileView view,
             final UserProfileView.Presenter userProfilePresenter, final FlagImageResolver flagImageResolver) {
         this.view = view;
         this.userProfilePresenter = userProfilePresenter;
-        this.sharedSailorProfilePresenter = new SharedSailorProfilePresenter<UserProfileClientFactory>(
+        this.sharedSailorProfilePresenter = new EditSailorProfilePresenter<UserProfileClientFactory>(
                 userProfilePresenter.getClientFactory());
         this.flagImageResolver = flagImageResolver;
         view.setPresenter(this);

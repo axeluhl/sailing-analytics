@@ -22,9 +22,9 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.events.
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 
 /**
- * Implementation of {@link SharedSailorProfileView} where users can view the details of a SailorProfile and edit them.
+ * Implementation of {@link EditSailorProfileView} where users can view the details of a SailorProfile and edit them.
  */
-public class EditSailorProfile extends Composite implements SharedSailorProfileView {
+public class EditSailorProfile extends Composite implements EditSailorProfileView {
 
     private static SharedSailorProfileUiBinder uiBinder = GWT.create(SharedSailorProfileUiBinder.class);
 
@@ -53,13 +53,13 @@ public class EditSailorProfile extends Composite implements SharedSailorProfileV
     @UiField
     DesktopAccordion accordionPolarDiagramUi;
 
-    private final SharedSailorProfileView.Presenter presenter;
+    private final EditSailorProfileView.Presenter presenter;
 
     private SailorProfileDTO entry;
 
     private boolean suppressEvents = false;
 
-    public EditSailorProfile(SharedSailorProfileView.Presenter presenter, FlagImageResolver flagImageResolver,
+    public EditSailorProfile(EditSailorProfileView.Presenter presenter, FlagImageResolver flagImageResolver,
             SailorProfileDetailsView parent) {
         this.presenter = presenter;
         competitorSelectionUi = new EditableSuggestedMultiSelectionCompetitor(presenter, flagImageResolver);

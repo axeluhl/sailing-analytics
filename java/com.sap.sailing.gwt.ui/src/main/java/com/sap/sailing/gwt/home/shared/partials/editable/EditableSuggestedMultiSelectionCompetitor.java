@@ -2,20 +2,20 @@ package com.sap.sailing.gwt.home.shared.partials.editable;
 
 import java.util.function.Function;
 
-import com.google.gwt.user.client.ui.HasEnabled;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelection;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorItemDescription;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileView;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileCompetitorDataProvider;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class EditableSuggestedMultiSelectionCompetitor
         extends EditableSuggestedMultiSelection<SimpleCompetitorWithIdDTO> {
 
-    public EditableSuggestedMultiSelectionCompetitor(final SharedSailorProfileView.Presenter presenter,
+    public EditableSuggestedMultiSelectionCompetitor(final EditSailorProfileView.Presenter presenter,
             final FlagImageResolver flagImageResolver) {
         super(new Function<SimpleCompetitorWithIdDTO, IsWidget>() {
 
@@ -30,14 +30,11 @@ public class EditableSuggestedMultiSelectionCompetitor
 
     private static class CompetitorDisplayImpl implements SuggestedMultiSelectionCompetitorDataProvider.Display {
         private final SuggestedMultiSelection<SimpleCompetitorWithIdDTO> selectionUi;
-        private final HasEnabled notifyAboutResultsUi;
 
-        private CompetitorDisplayImpl(final SuggestedMultiSelectionCompetitorDataProvider dataProvider,
+        private CompetitorDisplayImpl(final SharedSailorProfileCompetitorDataProvider dataProvider,
                 FlagImageResolver flagImageResolver) {
             selectionUi = SuggestedMultiSelection.forCompetitors(dataProvider, StringMessages.INSTANCE.competitors(),
                     flagImageResolver);
-            notifyAboutResultsUi = selectionUi.addNotificationToggle(dataProvider::setNotifyAboutResults,
-                    StringMessages.INSTANCE.notificationAboutNewResults());
             dataProvider.addDisplay(this);
         }
 
@@ -48,7 +45,6 @@ public class EditableSuggestedMultiSelectionCompetitor
 
         @Override
         public void setNotifyAboutResults(boolean notifyAboutResults) {
-            notifyAboutResultsUi.setEnabled(notifyAboutResults);
         }
     }
 

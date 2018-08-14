@@ -3,14 +3,18 @@ package com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile;
 import java.util.Collection;
 
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggestedMultiSelectionCompetitorDataProvider;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider.Display;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionDataProvider;
 
-public class SharedSailorProfileCompetitorDataProvider implements SuggestedMultiSelectionCompetitorDataProvider {
+public class SharedSailorProfileCompetitorDataProvider
+        implements SuggestedMultiSelectionDataProvider<SimpleCompetitorWithIdDTO, Display> {
 
     private SuggestedMultiSelectionCompetitorDataProvider competitorDataProvider;
 
     public SharedSailorProfileCompetitorDataProvider(
-            SuggestedMultiSelectionCompetitorDataProvider competitorDataProvider) {
+            AbstractSuggestedMultiSelectionCompetitorDataProvider competitorDataProvider) {
         this.competitorDataProvider = competitorDataProvider;
     }
 
@@ -44,13 +48,11 @@ public class SharedSailorProfileCompetitorDataProvider implements SuggestedMulti
 
     @Override
     public String createSuggestionKeyString(SimpleCompetitorWithIdDTO value) {
-        // return "";
         return competitorDataProvider.createSuggestionKeyString(value);
     }
 
     @Override
     public String createSuggestionAdditionalDisplayString(SimpleCompetitorWithIdDTO value) {
-        // return "";
         return competitorDataProvider.createSuggestionAdditionalDisplayString(value);
     }
 
@@ -65,17 +67,9 @@ public class SharedSailorProfileCompetitorDataProvider implements SuggestedMulti
     }
 
     @Override
-    public void addDisplay(Display display) {
+    public void addDisplay(
+            com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider.Display display) {
         competitorDataProvider.addDisplay(display);
     }
 
-    @Override
-    public void setNotifyAboutResults(boolean notifyAboutResults) {
-        // competitorDataProvider.setNotifyAboutResults(notifyAboutResults);
-    }
-
-    @Override
-    public void initNotifications(boolean notifyAboutResults) {
-        // competitorDataProvider.initNotifications(notifyAboutResults);
-    }
 }
