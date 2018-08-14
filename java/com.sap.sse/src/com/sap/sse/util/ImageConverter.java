@@ -1,5 +1,7 @@
 package com.sap.sse.util;
 
+import static java.lang.Math.toIntExact;
+
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -7,10 +9,20 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.stream.ImageOutputStream;
+
 
 public class ImageConverter {
 
@@ -121,5 +133,104 @@ public class ImageConverter {
                 notResizeSizeTags.add((String) tagKey);// size tags, that not have the resize checkBox checked
             }
         }
+    }
+    
+    public static InputStream storeImage(BufferedImage resizedBufferedImage, String fileType, IIOMetadata metaData, Logger logger) throws Exception {
+        byte[] bytes = null;
+        // trying to obtain OutputStream of the image with EXIF data
+        try (ImageOutputStream ios = ImageIO.createImageOutputStream(new ByteArrayOutputStream())) {
+            // the following should write the exif data of the image to all copies of the image//it should already work,
+            // but due to a bug the data array stays empty
+            Iterator<ImageWriter> writers = ImageIO.getImageWritersBySuffix(fileType);
+            while (writers.hasNext() && bytes == null) {
+                ImageWriter writer = writers.next();
+                if (writer != null) {
+                    writer.setOutput(ios);
+                    IIOImage iioImage = new IIOImage(resizedBufferedImage, null, metaData);
+                    ImageWriteParam param = writer.getDefaultWriteParam();
+                    IIOMetadata streamMetadata = writer.getDefaultStreamMetadata(param);
+                    writer.write(streamMetadata, iioImage, param);
+                    writer.dispose();
+                    bytes = new byte[toIntExact(ios.length())];
+                    ios.read(bytes);
+                    if (isZeroByteArray(bytes)) {
+                        bytes = null;
+                    }
+                }
+            }
+            if (bytes == null) {
+                throw new Exception(
+                        "Saving file via FileWriter did not work, not able to write file with metadata, retrying with ImageIO.write()");
+            }
+
+        } catch (Exception e) {
+            bytes = null;
+            logger.log(Level.INFO, e.getMessage());
+        }// if obtaining an OutputStream if the image with EXIF data did not work, then write it without
+        InputStream toReturn;
+        if (bytes == null) {
+            toReturn = ImageConverter.biToIs(resizedBufferedImage, fileType);
+        } else {// if it did work, then write the OutputStream to the FileStorageService
+            toReturn =  new ByteArrayInputStream(bytes);
+        }
+        return toReturn;
+    }
+
+    private static boolean isZeroByteArray(byte[] bytes) {
+        boolean toReturn = true;
+        for (int i = 0; i < bytes.length; i++) {
+            if (bytes[i] != 0) {
+                toReturn = false;
+            }
+        }
+        return toReturn;
+    }
+
+    public static class BufferedImageWithMetadataDTO {
+        private BufferedImage image;
+        private IIOMetadata metadata;
+        
+        public BufferedImageWithMetadataDTO(BufferedImage image, IIOMetadata metadata) {
+            this.image = image;
+            this.metadata = metadata;
+        }
+
+        public BufferedImage getImage() {
+            return image;
+        }
+
+        public IIOMetadata getMetadata() {
+            return metadata;
+        } 
+    }
+    
+    public static BufferedImageWithMetadataDTO getImageAndMetadata(String fileType, InputStream is, Logger logger) throws Exception {
+        // trying to receive the EXIF data and loading the image. If this does not work only the image is loaded
+        boolean loaded = false;
+        byte[] bytes = new byte[is.available()];
+        is.read(bytes);
+        IIOMetadata metadata = null;
+        BufferedImage image = null;
+        try {
+            Iterator<ImageReader> readerIterator = ImageIO.getImageReadersBySuffix(fileType);
+            while (readerIterator.hasNext() && !loaded) {
+                ImageReader reader = readerIterator.next();
+                reader.setInput(ImageIO.createImageInputStream(new ByteArrayInputStream(bytes)));
+                metadata = reader.getImageMetadata(0);
+                image = reader.read(0);
+                loaded = metadata != null;
+            }
+            if (!loaded) {
+                throw new Exception(
+                        "Loading file via ImageReader did not work, not able to load metadata, retrying to load with ImageIO.read()");
+            }
+        } catch (Exception e) {
+            logger.log(Level.INFO, e.getMessage());
+        }
+        if (!loaded) {
+                image = ImageConverter.isToBi(new ByteArrayInputStream(bytes));
+        }
+        is.close();
+        return new BufferedImageWithMetadataDTO(image, metadata);
     }
 }
