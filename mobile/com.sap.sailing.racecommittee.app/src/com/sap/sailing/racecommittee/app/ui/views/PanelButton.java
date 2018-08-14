@@ -25,7 +25,7 @@ import android.widget.TextView;
 
 public class PanelButton extends FrameLayout implements DialogInterface.OnClickListener {
 
-    public final static int LEVEL_UNKNOWN = -1;
+    public final static int LEVEL_UNKNOWN = 2;
     public final static int LEVEL_NORMAL = 0;
     public final static int LEVEL_TOGGLED = 1;
     private View mLayer;

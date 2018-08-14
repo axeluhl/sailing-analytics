@@ -27,7 +27,7 @@ public abstract class BasePanelFragment extends RaceFragment {
     /**
      * Marker level is unknown, due to an error
      */
-    protected final static int LEVEL_UNKNOWN = -1;
+    protected final static int LEVEL_UNKNOWN = 2;
 
     /**
      * Marker is in normal state
