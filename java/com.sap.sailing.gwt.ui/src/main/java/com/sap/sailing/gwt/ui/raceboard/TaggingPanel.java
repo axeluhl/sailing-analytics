@@ -331,13 +331,15 @@ public class TaggingPanel extends ComponentWithoutSettings
         private TagDTO previewTag;
         private List<TagDTO> listContainingPreviewTag;
         private final TagCreationInputPanel inputField;
+        private final Label previewLabel;
 
         public TagPreviewPanel(TagCreationInputPanel inputField) {
             this.inputField = inputField;
             tagPreviewCellList = new CellList<TagDTO>(new TagCell(), CellListResources.INSTANCE);
+            previewLabel = new Label(stringMessages.tagPreview());
             
             setStyleName(TagPanelResources.INSTANCE.style().tagPreviewPanel());
-            
+            add(previewLabel);
             add(tagPreviewCellList);
             
             inputField.getTagTextBox().addValueChangeHandler(new ValueChangeHandler<String>() {
@@ -591,11 +593,17 @@ public class TaggingPanel extends ComponentWithoutSettings
 
                 @Override
                 public void onClick(ClickEvent event) {
-                    tagButton.setTag(inputPanel.getTagValue());
-                    tagButton.setComment(inputPanel.getCommentValue());
-                    tagButton.setImageURL(inputPanel.getImageURLValue());
-                    customTagButtonsTable.redraw();
-                    hideDialog();
+                    if(!inputPanel.getTagValue().isEmpty()) {
+                        tagButton.setText(inputPanel.getTagValue());
+                        tagButton.setTag(inputPanel.getTagValue());
+                        tagButton.setComment(inputPanel.getCommentValue());
+                        tagButton.setImageURL(inputPanel.getImageURLValue());
+                        customTagButtonsTable.redraw();
+                        hideDialog();
+                    }
+                    else {
+                        Notification.notify(stringMessages.tagNotSpecified(), NotificationType.WARNING);
+                    }
                 }
             });
 
