@@ -2,6 +2,7 @@ package com.sap.sailing.server.impl.preferences.model;
 
 import java.util.UUID;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.SailorProfile;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
@@ -40,5 +41,13 @@ public class SailorProfilePreference extends AbstractGenericSerializableSettings
 
     public UUID getUuid() {
         return uuid.getValue();
+    }
+
+    public String getName() {
+        return name.getValue();
+    }
+
+    public Iterable<Competitor> getCompetitors() {
+        return competitors.getValues();
     }
 }

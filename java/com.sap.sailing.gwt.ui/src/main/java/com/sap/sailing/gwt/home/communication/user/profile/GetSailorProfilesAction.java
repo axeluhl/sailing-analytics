@@ -1,12 +1,13 @@
 package com.sap.sailing.gwt.home.communication.user.profile;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import com.google.gwt.core.shared.GwtIncompatible;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
@@ -14,6 +15,8 @@ import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.BadgeDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEntries;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEntry;
+import com.sap.sailing.server.impl.preferences.model.SailorProfilePreference;
+import com.sap.sailing.server.impl.preferences.model.SailorProfilePreferences;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
 /**
@@ -32,62 +35,29 @@ public class GetSailorProfilesAction implements SailingAction<SailorProfileEntri
     public GetSailorProfilesAction() {
     }
 
-    private HashMap<UUID, SailorProfileEntry> generateDummyData() {
-
-        List<BadgeDTO> badges = new ArrayList<>();
-        BadgeDTO b1 = new BadgeDTO(UUID.randomUUID(), "Best Sailor Ever");
-        BadgeDTO b2 = new BadgeDTO(UUID.randomUUID(), "100 Miles Sailed");
-        badges.add(b1);
-        badges.add(b2);
-
-        List<BadgeDTO> badges2 = new ArrayList<>();
-        badges2.add(b2);
-
-        List<SimpleCompetitorWithIdDTO> competitors = new ArrayList<>();
-        SimpleCompetitorWithIdDTO c1 = new SimpleCompetitorWithIdDTO("0000", "EZ Competition", "EZC", "DE", "");
-        SimpleCompetitorWithIdDTO c2 = new SimpleCompetitorWithIdDTO("0001", "Hard Competition", "HC", "SE", "");
-        competitors.add(c1);
-        competitors.add(c2);
-
-        List<SimpleCompetitorWithIdDTO> competitors2 = new ArrayList<>();
-        competitors2.add(c1);
-
-        List<BoatClassDTO> boatclasses = new ArrayList<>();
-        BoatClassDTO bc1 = new BoatClassDTO("J/70", null, null);
-        BoatClassDTO bc2 = new BoatClassDTO("12 Meter", null, null);
-        BoatClassDTO bc3 = new BoatClassDTO("5O5", null, null);
-        boatclasses.add(bc1);
-        boatclasses.add(bc2);
-        boatclasses.add(bc3);
-
-        List<BoatClassDTO> boatclasses2 = new ArrayList<>();
-        boatclasses2.add(bc2);
-        boatclasses2.add(bc3);
-
-        UUID uid1 = UUID.fromString("f92aa40e-5870-4f0c-9435-90a9069b0e65");
-        UUID uid2 = UUID.fromString("71dd204f-376b-4129-a8ef-ad190e49ed02");
-        SailorProfileEntry e1 = new SailorProfileEntry(uid1, "My Favorite Guy", competitors, badges, boatclasses);
-        SailorProfileEntry e2 = new SailorProfileEntry(uid2, "This Other Guy", competitors2, badges2, boatclasses2);
-
-        HashMap<UUID, SailorProfileEntry> entries = new HashMap<>();
-        entries.put(uid1, e1);
-        entries.put(uid2, e2);
-        return entries;
-    }
-
     @Override
     @GwtIncompatible
     public SailorProfileEntries execute(SailingDispatchContext ctx) throws DispatchException {
+        SailorProfilePreferences preferences = ctx.getPreferenceForCurrentUser(SailorProfilePreferences.PREF_NAME);
         SailorProfileEntries result;
-        Map<UUID, SailorProfileEntry> entries = generateDummyData();
-        if (uuid == null) {
-            result = new SailorProfileEntries(entries.values());
-        } else {
-            List<SailorProfileEntry> list = new ArrayList<>();
-            list.add(entries.get(uuid));
-            result = new SailorProfileEntries(list);
-        }
+        List<SailorProfileEntry> list = new ArrayList<>();
+        StreamSupport.stream(preferences.getSailorProfiles().spliterator(), false)
+                .filter(e -> uuid == null || (uuid != null && uuid.equals(e.getUuid())))
+                .forEach(s -> list.add(convertToDto(s)));
+        result = new SailorProfileEntries(list);
         return result;
+    }
+
+    @GwtIncompatible
+    private SailorProfileEntry convertToDto(SailorProfilePreference pref) {
+        return new SailorProfileEntry(pref.getUuid(), pref.getName(), convertCompetitors(pref.getCompetitors()),
+                new ArrayList<BadgeDTO>(), new ArrayList<BoatClassDTO>());
+    }
+
+    @GwtIncompatible
+    private List<SimpleCompetitorWithIdDTO> convertCompetitors(Iterable<Competitor> comps) {
+        return StreamSupport.stream(comps.spliterator(), false).filter(c -> c != null)
+                .map(c -> new SimpleCompetitorWithIdDTO(c)).collect(Collectors.toList());
     }
 
 }
