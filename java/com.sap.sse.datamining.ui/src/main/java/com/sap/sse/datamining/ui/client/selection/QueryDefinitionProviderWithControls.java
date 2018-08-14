@@ -56,6 +56,7 @@ import com.sap.sse.datamining.ui.client.StringMessages;
 import com.sap.sse.datamining.ui.client.WithControls;
 import com.sap.sse.datamining.ui.client.developer.PredefinedQueryRunner;
 import com.sap.sse.datamining.ui.client.developer.QueryDefinitionViewer;
+import com.sap.sse.datamining.ui.client.selection.statistic.SuggestBoxStatisticProvider;
 import com.sap.sse.datamining.ui.client.settings.AdvancedDataMiningSettings;
 import com.sap.sse.datamining.ui.client.settings.AdvancedDataMiningSettings.ChangeLossStrategy;
 import com.sap.sse.datamining.ui.client.settings.AdvancedDataMiningSettingsDialogComponent;

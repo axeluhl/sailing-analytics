@@ -1,4 +1,4 @@
-package com.sap.sse.datamining.ui.client.selection;
+package com.sap.sse.datamining.ui.client.selection.statistic;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,22 +12,14 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import com.google.gwt.dom.client.NodeList;
-import com.google.gwt.dom.client.OptionElement;
-import com.google.gwt.dom.client.SelectElement;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.LocaleInfo;
-import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.SuggestBox.DefaultSuggestionDisplay;
-import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.SerializableSettings;
@@ -47,14 +39,13 @@ import com.sap.sse.datamining.ui.client.DataRetrieverChainDefinitionChangedListe
 import com.sap.sse.datamining.ui.client.ExtractionFunctionChangedListener;
 import com.sap.sse.datamining.ui.client.StatisticChangedListener;
 import com.sap.sse.datamining.ui.client.StatisticProvider;
+import com.sap.sse.datamining.ui.client.selection.RetrieverLevelSettingsComponent;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
 import com.sap.sse.gwt.client.shared.components.CompositeTabbedSettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
-import com.sap.sse.gwt.client.suggestion.AbstractListSuggestOracle;
-import com.sap.sse.gwt.client.suggestion.CustomSuggestBox;
 
 /**
  * A {@link StatisticProvider} that contains all statistics registered in the server. Each statistic is paired with the
@@ -640,344 +631,6 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
     @Override
     public String getId() {
         return "GlobalStatisticProvider";
-    }
-
-    private static abstract class ExtractionFunctionWithContext implements Comparable<ExtractionFunctionWithContext> {
-
-        private final DataRetrieverChainDefinitionDTO retrieverChain;
-        private final FunctionDTO extractionFunction;
-        private final Collection<String> matchingStrings;
-
-        protected ExtractionFunctionWithContext(DataRetrieverChainDefinitionDTO retrieverChain,
-                FunctionDTO extractionFunction) {
-            this.retrieverChain = retrieverChain;
-            this.extractionFunction = extractionFunction;
-            matchingStrings = new ArrayList<>(4);
-        }
-
-        public DataRetrieverChainDefinitionDTO getRetrieverChain() {
-            return retrieverChain;
-        }
-
-        public FunctionDTO getExtractionFunction() {
-            return extractionFunction;
-        }
-        
-        public abstract String getDisplayString();
-        
-        public abstract String getAdditionalDisplayString();
-
-        public Iterable<String> getMatchingStrings() {
-            return matchingStrings;
-        }
-        
-        protected void addMatchingString(String matchingString) {
-            matchingStrings.add(matchingString);
-        }
-
-        @Override
-        public int compareTo(ExtractionFunctionWithContext o) {
-            String otherDisplayName = o.getExtractionFunction().getDisplayName();
-            int comparedDisplayName = extractionFunction.getDisplayName().compareToIgnoreCase(otherDisplayName);
-            if (comparedDisplayName != 0) {
-                return comparedDisplayName;
-            }
-            return retrieverChain.compareTo(o.getRetrieverChain());
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((extractionFunction == null) ? 0 : extractionFunction.hashCode());
-            result = prime * result + ((retrieverChain == null) ? 0 : retrieverChain.hashCode());
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
-            ExtractionFunctionWithContext other = (ExtractionFunctionWithContext) obj;
-            if (extractionFunction == null) {
-                if (other.extractionFunction != null)
-                    return false;
-            } else if (!extractionFunction.equals(other.extractionFunction))
-                return false;
-            if (retrieverChain == null) {
-                if (other.retrieverChain != null)
-                    return false;
-            } else if (!retrieverChain.equals(other.retrieverChain))
-                return false;
-            return true;
-        }
-
-    }
-    
-    private static class StatisticWithContext extends ExtractionFunctionWithContext {
-
-        protected StatisticWithContext(DataRetrieverChainDefinitionDTO retrieverChain, FunctionDTO extractionFunction) {
-            super(retrieverChain, extractionFunction);
-            addMatchingString(retrieverChain.getName());
-            addMatchingString(extractionFunction.getDisplayName());
-        }
-
-        @Override
-        public String getDisplayString() {
-            return getExtractionFunction().getDisplayName();
-        }
-
-        @Override
-        public String getAdditionalDisplayString() {
-            return getRetrieverChain().getName();
-        }
-        
-    }
-    
-    private static class IdentityFunctionWithContext extends ExtractionFunctionWithContext {
-
-        protected IdentityFunctionWithContext(DataRetrieverChainDefinitionDTO retrieverChain,
-                FunctionDTO identityFunction) {
-            super(retrieverChain, identityFunction);
-            addMatchingString(retrieverChain.getName());
-        }
-
-        @Override
-        public String getDisplayString() {
-            return getRetrieverChain().getName();
-        }
-
-        @Override
-        public String getAdditionalDisplayString() {
-            return null;
-        }
-        
-    }
-    
-    private static class AggregatorGroup implements Comparable<AggregatorGroup> {
-        
-        private final String key;
-        private final Map<String, AggregationProcessorDefinitionDTO> aggregatorsBySupportedTypeName;
-        
-        private String displayName;
-        
-        public AggregatorGroup(String key) {
-            this.key = key;
-            aggregatorsBySupportedTypeName = new HashMap<>();
-        }
-        
-        public String getKey() {
-            return key;
-        }
-        
-        public boolean supportsType(String typeName) {
-            return aggregatorsBySupportedTypeName.containsKey(typeName);
-        }
-        
-        public AggregationProcessorDefinitionDTO getForType(String typeName) {
-            return aggregatorsBySupportedTypeName.get(typeName);
-        }
-        
-        public void setForType(String typeName, AggregationProcessorDefinitionDTO aggregator) {
-            if (displayName == null) {
-                displayName = aggregator.getDisplayName();
-            }
-            aggregatorsBySupportedTypeName.put(typeName, aggregator);
-        }
-        
-        public String getDisplayName() {
-            return displayName;
-        }
-
-        @Override
-        public int compareTo(AggregatorGroup other) {
-            if (other == null) {
-                return 1;
-            }
-            return displayName.compareToIgnoreCase(other.displayName);
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result
-                    + ((aggregatorsBySupportedTypeName == null) ? 0 : aggregatorsBySupportedTypeName.hashCode());
-            result = prime * result + ((key == null) ? 0 : key.hashCode());
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (obj == null)
-                return false;
-            if (getClass() != obj.getClass())
-                return false;
-            AggregatorGroup other = (AggregatorGroup) obj;
-            if (aggregatorsBySupportedTypeName == null) {
-                if (other.aggregatorsBySupportedTypeName != null)
-                    return false;
-            } else if (!aggregatorsBySupportedTypeName.equals(other.aggregatorsBySupportedTypeName))
-                return false;
-            if (key == null) {
-                if (other.key != null)
-                    return false;
-            } else if (!key.equals(other.key))
-                return false;
-            return true;
-        }
-        
-    }
-    
-    private static class AggregatorListBox extends ValueListBox<AggregatorGroup> {
-        
-        private static final String UnsupportedItemStyle = "unsupportedAggregatorListItem";
-        
-        private final Map<String, AggregatorGroup> aggregatorsByDisplayName;
-        
-        public AggregatorListBox(String nullDisplayString) {
-            super(new AbstractRenderer<AggregatorGroup>() {
-                @Override
-                public String render(AggregatorGroup aggregator) {
-                    return aggregator == null ? nullDisplayString : aggregator.getDisplayName();
-                }
-            });
-            aggregatorsByDisplayName = new HashMap<>();
-        }
-        
-        public void updateItemStyles(String extractionFunctionReturnTypeName) {
-            ListBox listBox = (ListBox) getWidget();
-            SelectElement selectElement = SelectElement.as(listBox.getElement());
-            NodeList<OptionElement> options = selectElement.getOptions();
-            for (int i = 0; i < options.getLength(); i++) {
-                OptionElement option = options.getItem(i);
-                AggregatorGroup aggregator = aggregatorsByDisplayName.get(option.getText());
-                String className = aggregator == null || extractionFunctionReturnTypeName == null
-                        || aggregator.supportsType(extractionFunctionReturnTypeName) ? "" : UnsupportedItemStyle;
-                option.setClassName(className);
-            }
-        }
-        
-        @Override
-        public void setAcceptableValues(Collection<AggregatorGroup> newValues) {
-            aggregatorsByDisplayName.clear();
-            for (AggregatorGroup aggregator : newValues) {
-                aggregatorsByDisplayName.put(aggregator.displayName, aggregator);
-            }
-            super.setAcceptableValues(newValues);
-        }
-        
-    }
-
-    private static class ExtractionFunctionSuggestBox extends CustomSuggestBox<ExtractionFunctionWithContext> {
-        
-        @FunctionalInterface
-        public interface ValueChangeHandler {
-            void valueChanged(ExtractionFunctionWithContext oldValue, ExtractionFunctionWithContext newValue);
-        }
-
-        private final AbstractListSuggestOracle<ExtractionFunctionWithContext> suggestOracle;
-        private final ScrollableSuggestionDisplay display;
-        private ValueChangeHandler valueChangeHandler;
-        
-        private ExtractionFunctionWithContext extractionFunction;
-
-        @SuppressWarnings("unchecked")
-        public ExtractionFunctionSuggestBox() {
-            super(new AbstractListSuggestOracle<ExtractionFunctionWithContext>() {
-                @Override
-                protected Iterable<String> getKeywordStrings(Iterable<String> queryTokens) {
-                    String filterText = Util.first(queryTokens);
-                    if (filterText == null) {
-                        return queryTokens;
-                    }
-                    return Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(filterText);
-                }
-
-                @Override
-                protected Iterable<String> getMatchingStrings(ExtractionFunctionWithContext value) {
-                    return value.getMatchingStrings();
-                }
-
-                @Override
-                protected String createSuggestionKeyString(ExtractionFunctionWithContext value) {
-                    return value.getDisplayString();
-                }
-
-                @Override
-                protected String createSuggestionAdditionalDisplayString(ExtractionFunctionWithContext value) {
-                    return value.getAdditionalDisplayString();
-                }
-            }, new ScrollableSuggestionDisplay());
-            suggestOracle = (AbstractListSuggestOracle<ExtractionFunctionWithContext>) getSuggestOracle();
-            display = (ScrollableSuggestionDisplay) getSuggestionDisplay();
-            addSuggestionSelectionHandler(this::setExtractionFunction);
-        }
-        
-        public void setValueChangeHandler(ValueChangeHandler valueChangeHandler) {
-            this.valueChangeHandler = valueChangeHandler;
-        }
-
-        public void setSelectableValues(Collection<? extends ExtractionFunctionWithContext> selectableValues) {
-            suggestOracle.setSelectableValues(selectableValues);
-        }
-
-        public void setExtractionFunction(ExtractionFunctionWithContext extractionFunction) {
-            if (!Objects.equals(this.extractionFunction, extractionFunction)) {
-                ExtractionFunctionWithContext oldValue = this.extractionFunction;
-                this.extractionFunction = extractionFunction;
-                setValue(extractionFunction == null ? null : extractionFunction.getDisplayString(), false);
-                if (valueChangeHandler != null) {
-                    valueChangeHandler.valueChanged(oldValue, extractionFunction);
-                }
-            }
-            setFocus(false);
-        }
-
-        public ExtractionFunctionWithContext getExtractionFunction() {
-            return extractionFunction;
-        }
-        
-        @Override
-        public void hideSuggestionList() {
-            display.hideSuggestions();
-        }
-
-    }
-
-    private static class ScrollableSuggestionDisplay extends DefaultSuggestionDisplay {
-
-        public ScrollableSuggestionDisplay() {
-            getPopupPanel().addStyleName("statisticSuggestBoxPopup");
-        }
-        
-        @Override
-        protected void moveSelectionUp() {
-            super.moveSelectionUp();
-            scrollSelectedItemIntoView();
-        }
-
-        @Override
-        protected void moveSelectionDown() {
-            super.moveSelectionDown();
-            scrollSelectedItemIntoView();
-        }
-
-        private void scrollSelectedItemIntoView() {
-            getSelectedMenuItem().getElement().scrollIntoView();
-        }
-
-        private native MenuItem getSelectedMenuItem() /*-{
-                        var menu = this.@com.google.gwt.user.client.ui.SuggestBox.DefaultSuggestionDisplay::suggestionMenu;
-                        return menu.@com.google.gwt.user.client.ui.MenuBar::selectedItem;
-        }-*/;
-
     }
 
 }
