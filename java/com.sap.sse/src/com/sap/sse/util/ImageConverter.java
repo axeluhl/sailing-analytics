@@ -27,10 +27,17 @@ import javax.imageio.stream.ImageOutputStream;
 public class ImageConverter {
     private BufferedImage image;
     private IIOMetadata metadata;
+    private final String imageFormat;
+    private static final Logger logger = Logger.getLogger(ImageConverter.class.getName());
 
-    private static int[] calculateActualDimensions(double width, double height, double minWidth, double maxWidth,
-            double minHeight, double maxHeight, boolean upsize) {
-        if (maxWidth > 0 && maxHeight > 0 && maxHeight > minHeight && maxWidth > minWidth) {
+    public ImageConverter(InputStream is, String imageFormat) {
+        this.imageFormat = imageFormat;
+        calculateImageAndMetadata(is);
+    }
+
+    public static int[] calculateDimensions(double width, double height, double minWidth, double maxWidth,
+            double minHeight, double maxHeight) {
+        if (maxWidth >= 0 && maxHeight >= 0 && maxHeight > minHeight && maxWidth > minWidth && width > minWidth && height > minHeight) {
             if (maxWidth <= width || maxHeight <= height) {
                 if (width / maxWidth > height / maxHeight) {
                     maxHeight = height / width * maxWidth;
@@ -43,77 +50,77 @@ public class ImageConverter {
                         return new int[] { (int) maxWidth, (int) maxHeight };
                     }
                 }
-            } else if (upsize) {
-                if (width / maxWidth > height / maxHeight) {
-                    minHeight = height / width * maxWidth;
-                    if (maxHeight >= minHeight) {
-                        return new int[] { (int) maxWidth, (int) minHeight };
-                    }
-
-                } else {
-                    minWidth = width / height * maxHeight;
-                    if (maxWidth >= minWidth) {
-                        return new int[] { (int) minWidth, (int) maxHeight };
-                    }
-                }
+            } else {
+                return new int[] {(int) width, (int) height};
             }
         }
         return null;
     }
 
-    public static BufferedImage resize(BufferedImage img, int demandWidth, int demandHeight) {
-        return resizeScale(img, demandWidth, demandHeight);
+    public BufferedImage resize(int demandWidth, int demandHeight) {
+        return resizeScale(demandWidth, demandHeight);
     }
 
-    public static BufferedImage resize(BufferedImage img, int minWidth, int maxWidth, int minHeight, int maxHeight,
-            String imageFormat, boolean upsize) {
-        int[] dimensions = calculateActualDimensions(img.getWidth(), img.getHeight(), minWidth, maxWidth, minHeight,
-                maxHeight, upsize);
+    public BufferedImage resize(int minWidth, int maxWidth, int minHeight, int maxHeight) {
+        int[] dimensions = calculateDimensions(image.getWidth(), image.getHeight(), minWidth, maxWidth, minHeight,
+                maxHeight);
         if (dimensions != null) {
-            return resize(img, dimensions[0], dimensions[1]);
+            return resize(dimensions[0], dimensions[1]);
         }
         return null;
     }
-    
-    public static InputStream biToIs(BufferedImage img, String fileType) throws IOException {
+
+    public InputStream sourceImageToInputStream() {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ImageIO.write(img, fileType, bos);
+        try {
+            ImageIO.write(image, imageFormat, bos);
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, e.getMessage());
+        }
         byte[] arr = bos.toByteArray();
         return new ByteArrayInputStream(arr);
     }
 
     public static String convertToBase64(InputStream is, String imageFormat) throws IOException {
-        return convertToBase64(biToBy(isToBi(is), imageFormat));
+        return convertToBase64(bufferedImageToByteArray(loadBufferedImageFromInputStream(is), imageFormat));
     }
-    
+
     public static String convertToBase64(BufferedImage img, String imageFormat) throws IOException {
-        return convertToBase64(biToBy(img, imageFormat));
+        return convertToBase64(bufferedImageToByteArray(img, imageFormat));
     }
 
     private static String convertToBase64(byte[] bytes) {
         return Base64.getEncoder().encodeToString(bytes);
     }
 
-    public static BufferedImage isToBi(InputStream is) throws IOException {
-        return ImageIO.read(is);
+    public static BufferedImage loadBufferedImageFromInputStream(InputStream is) {
+        try {
+            return ImageIO.read(is);
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, e.getMessage());
+        }
+        return null;
     }
 
-    private static byte[] biToBy(BufferedImage img, String imageFormat) throws IOException {
+    public static byte[] bufferedImageToByteArray(BufferedImage img, String imageFormat) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(img, imageFormat, baos);
+        try {
+            ImageIO.write(img, imageFormat, baos);
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, e.getMessage());
+        }
         return baos.toByteArray();
     }
 
-    private static BufferedImage resizeScale(BufferedImage img, int demandedWidth, int demandedHeight) {
-        BufferedImage resizedImage = new BufferedImage((int) demandedWidth, (int) demandedHeight, img.getType());
+    private BufferedImage resizeScale(int demandedWidth, int demandedHeight) {
+        BufferedImage resizedImage = new BufferedImage((int) demandedWidth, (int) demandedHeight, image.getType());
         Graphics2D g = resizedImage.createGraphics();
-        g.drawImage(img, 0, 0, (int) demandedWidth, (int) demandedHeight, null);
+        g.drawImage(image, 0, 0, (int) demandedWidth, (int) demandedHeight, null);
         g.dispose();
         return resizedImage;
     }
 
-    public static void splitSizeTags(Map<String, Boolean> sizeTags, List<String> resizeTags,
-            List<String> notResizeSizeTags) {
+    public void splitSizeTags(Map<String, Boolean> sizeTags, List<String> resizeTags, List<String> notResizeSizeTags) {
         for (Object tagKey : sizeTags.keySet()) {
             if (sizeTags.get(tagKey)) {
                 resizeTags.add((String) tagKey);// size tags, that have the resize checkBox checked
@@ -122,19 +129,19 @@ public class ImageConverter {
             }
         }
     }
-    
-    public static InputStream storeImage(BufferedImage resizedBufferedImage, String fileType, IIOMetadata metaData, Logger logger) throws Exception {
+
+    public InputStream resizedImageToInputStream(BufferedImage resizedBufferedImage) throws Exception {
         byte[] bytes = null;
         // trying to obtain OutputStream of the image with EXIF data
         try (ImageOutputStream ios = ImageIO.createImageOutputStream(new ByteArrayOutputStream())) {
             // the following should write the exif data of the image to all copies of the image//it should already work,
             // but due to a bug the data array stays empty
-            Iterator<ImageWriter> writers = ImageIO.getImageWritersBySuffix(fileType);
+            Iterator<ImageWriter> writers = ImageIO.getImageWritersBySuffix(imageFormat);
             while (writers.hasNext() && bytes == null) {
                 ImageWriter writer = writers.next();
                 if (writer != null) {
                     writer.setOutput(ios);
-                    IIOImage iioImage = new IIOImage(resizedBufferedImage, null, metaData);
+                    IIOImage iioImage = new IIOImage(resizedBufferedImage, null, metadata);
                     ImageWriteParam param = writer.getDefaultWriteParam();
                     IIOMetadata streamMetadata = writer.getDefaultStreamMetadata(param);
                     writer.write(streamMetadata, iioImage, param);
@@ -154,17 +161,17 @@ public class ImageConverter {
         } catch (Exception e) {
             bytes = null;
             logger.log(Level.INFO, e.getMessage());
-        }// if obtaining an OutputStream if the image with EXIF data did not work, then write it without
+        } // if obtaining an OutputStream if the image with EXIF data did not work, then write it without
         InputStream toReturn;
         if (bytes == null) {
-            toReturn = ImageConverter.biToIs(resizedBufferedImage, fileType);
+            toReturn = sourceImageToInputStream();
         } else {// if it did work, then write the OutputStream to the FileStorageService
-            toReturn =  new ByteArrayInputStream(bytes);
+            toReturn = new ByteArrayInputStream(bytes);
         }
         return toReturn;
     }
 
-    private static boolean isZeroByteArray(byte[] bytes) {
+    private boolean isZeroByteArray(byte[] bytes) {
         boolean toReturn = true;
         for (int i = 0; i < bytes.length; i++) {
             if (bytes[i] != 0) {
@@ -173,28 +180,30 @@ public class ImageConverter {
         }
         return toReturn;
     }
-    
-    private static byte[] isToBy(InputStream is) throws IOException {
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        int nRead;
-        byte[] data = new byte[1024];
-        while ((nRead = is.read(data, 0, data.length)) != -1) {
-            buffer.write(data, 0, nRead);
+
+    public byte[] inputStreamToByteArray(InputStream is) {
+        byte[] byteArray = null;
+        try {
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            int nRead;
+            byte[] data = new byte[1024];
+            while ((nRead = is.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, nRead);
+            }
+            buffer.flush();
+            byteArray = buffer.toByteArray();
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, e.getMessage());
         }
-     
-        buffer.flush();
-        byte[] byteArray = buffer.toByteArray();
         return byteArray;
     }
-    
-    public void calculateImageAndMetadata(String fileType, InputStream is, Logger logger) throws Exception {
+
+    private void calculateImageAndMetadata(InputStream is) {
         // trying to receive the EXIF data and loading the image. If this does not work only the image is loaded
         boolean loaded = false;
-        byte[] bytes = isToBy(is);
-        metadata = null;
-        image = null;
+        byte[] bytes = inputStreamToByteArray(is);
         try {
-            Iterator<ImageReader> readerIterator = ImageIO.getImageReadersBySuffix(fileType);
+            Iterator<ImageReader> readerIterator = ImageIO.getImageReadersBySuffix(imageFormat);
             while (readerIterator.hasNext() && !loaded) {
                 ImageReader reader = readerIterator.next();
                 reader.setInput(ImageIO.createImageInputStream(new ByteArrayInputStream(bytes)));
@@ -210,11 +219,14 @@ public class ImageConverter {
             logger.log(Level.INFO, e.getMessage());
         }
         if (!loaded) {
-                image = ImageConverter.isToBi(new ByteArrayInputStream(bytes));
+            image = loadBufferedImageFromInputStream(new ByteArrayInputStream(bytes));
         }
-        is.close();
+        try {
+            is.close();
+        } catch (IOException e) {
+            logger.log(Level.WARNING, "Potential ressource leak");
+        }
     }
-    
 
     public BufferedImage getImage() {
         return image;
@@ -222,5 +234,9 @@ public class ImageConverter {
 
     public IIOMetadata getMetadata() {
         return metadata;
-    } 
+    }
+    
+    public String getImageFormat() {
+        return imageFormat;
+    }
 }

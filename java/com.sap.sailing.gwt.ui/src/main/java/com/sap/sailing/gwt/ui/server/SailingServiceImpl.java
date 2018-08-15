@@ -53,7 +53,6 @@ import java.util.regex.Pattern;
 import java.util.stream.StreamSupport;
 import java.util.zip.GZIPInputStream;
 
-import javax.imageio.metadata.IIOMetadata;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -7902,17 +7901,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         // splitting the size-tags in size-tags that need a resize and size-tags that do not need a resize
         List<String> resizeTags = new ArrayList<>();
         List<String> notResizeSizeTags = new ArrayList<>();
-        ImageConverter.splitSizeTags(toResizeImage.getMap(), resizeTags, notResizeSizeTags);
+        //Create ImageConverter for further use
+        ImageConverter converter = new ImageConverter(getService().getFileStorageManagementService().getActiveFileStorageService()
+                .loadFile(new URI(toResizeImage.getSourceRef())), fileType);
+        converter.splitSizeTags(toResizeImage.getMap(), resizeTags, notResizeSizeTags);
         // deleting all size-tags from the tags list, because after resizing there should only be one size tag per image
         toResizeImage.getTags().removeAll(toResizeImage.getMap().keySet());
-        // getting the EXIF data and the image
-        ImageConverter converter = new ImageConverter();
-        converter.calculateImageAndMetadata(fileType,
-                getService().getFileStorageManagementService().getActiveFileStorageService()
-                        .loadFile(new URI(toResizeImage.getSourceRef())),
-                logger);
-        IIOMetadata metadata = converter.getMetadata();
-        BufferedImage img = converter.getImage();
         // iterating over every size-tag that needs a resize
         for (String resizeTag : resizeTags) {
             // creating a new ImageDTO object with all values from the ToResizeImageDTO object
@@ -7920,11 +7914,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             // re-adding the size-tag for this iteration, so every ImageDTO object only has one size-tag
             image.getTags().add(resizeTag);
             // resizing the image
-            BufferedImage resizedBufferedImage = resizeImage(img, resizeTag, fileType);
+            BufferedImage resizedBufferedImage = resizeImage(converter, resizeTag, fileType);
             // adding the new width and h eight to the ImageDTO object
             image.setSizeInPx(resizedBufferedImage.getWidth(), resizedBufferedImage.getHeight());
             // storing the image on FileStorageService
-            InputStream fileStorageStream = ImageConverter.storeImage(resizedBufferedImage, fileType, metadata, logger);
+            InputStream fileStorageStream = converter.resizedBiToIs(resizedBufferedImage);
             URI newUri = getService().getFileStorageManagementService().getActiveFileStorageService().storeFile(fileStorageStream,
                             "." + fileType, new Long(fileStorageStream.available()));
             // saving the new image ref uri to the ImageDTO object
@@ -7956,23 +7950,23 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return resizedImages.toArray(new ImageDTO[resizedImages.size()]);
     }
 
-    private BufferedImage resizeImage(BufferedImage img, String resizeTag, String fileType) {
+    private BufferedImage resizeImage(ImageConverter converter, String resizeTag, String fileType) {
         BufferedImage resizedImage = null;
         switch (resizeTag) {
         case MediaTagConstants.LOGO:
-            resizedImage = ImageConverter.resize(img, MediaConstants.MIN_LOGO_IMAGE_WIDTH,
+            resizedImage = converter.resize(MediaConstants.MIN_LOGO_IMAGE_WIDTH,
                     MediaConstants.MAX_LOGO_IMAGE_WIDTH, MediaConstants.MIN_LOGO_IMAGE_HEIGHT,
-                    MediaConstants.MAX_LOGO_IMAGE_HEIGHT, fileType, false);
+                    MediaConstants.MAX_LOGO_IMAGE_HEIGHT);
             break;
         case MediaTagConstants.STAGE:
-            resizedImage = ImageConverter.resize(img, MediaConstants.MIN_STAGE_IMAGE_WIDTH,
+            resizedImage = converter.resize(MediaConstants.MIN_STAGE_IMAGE_WIDTH,
                     MediaConstants.MAX_STAGE_IMAGE_WIDTH, MediaConstants.MIN_STAGE_IMAGE_HEIGHT,
-                    MediaConstants.MAX_STAGE_IMAGE_HEIGHT, fileType, false);
+                    MediaConstants.MAX_STAGE_IMAGE_HEIGHT);
             break;
         case MediaTagConstants.TEASER:
-            resizedImage = ImageConverter.resize(img, MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH,
+            resizedImage = converter.resize(MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH,
                     MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT,
-                    MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT, fileType, false);
+                    MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT);
             break;
         default:// can not occur, because we only loop over the sizeTags, which are the same as in the switch case
             logger.log(Level.WARNING, "No resizing for avaylable for tag " + resizeTag
