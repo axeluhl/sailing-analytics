@@ -10,17 +10,24 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 
-public class TagListProvider extends ListDataProvider<TagDTO> implements TagProvider {
+/**
+ * @author Julian Rendl(D067890)
+ * Used to store tags and filter sets and to apply these filters on the tags  
+ */
+public class TagListProvider extends ListDataProvider<TagDTO> {
 
     private List<TagDTO> allTags = new ArrayList<TagDTO>();    
     private FilterSet<TagDTO, Filter<TagDTO>> currentFilterSet;     
 
-    @Override
+
     public List<TagDTO> getAllTags() {
         return allTags;
     }
 
-    @Override
+    /**
+     * adds new tags, call {@link #updateFilteredTags() updateFilteredTags} afterwards so list of filtered tags can contain new tags
+     * @param list of tags which shall be added
+     */
     public void addTags(final List<TagDTO> tags) {
         if (tags != null) {
             for (TagDTO tag : tags) {
@@ -29,19 +36,23 @@ public class TagListProvider extends ListDataProvider<TagDTO> implements TagProv
         }
     }
 
-    @Override
+    /**
+     * adds a new tag, call {@link #updateFilteredTags() updateFilteredTags} afterwards so list of filtered tag can contain new tags
+     * @param tag which shall be added
+     */
     public void addTag(final TagDTO tag) {
         if (tag != null) {
             allTags.add(tag);
         }
     }
 
-    @Override
     public List<TagDTO> getFilteredTags() {
         return getList();
     }
 
-    @Override
+    /**
+     * filter all tags by tagsFilterSet
+     */
     public void updateFilteredTags() {
         List<TagDTO> currentFilteredList = new ArrayList<TagDTO>(getAllTags());
 
@@ -66,19 +77,16 @@ public class TagListProvider extends ListDataProvider<TagDTO> implements TagProv
         setList(currentFilteredList);
     }
 
-    @Override
     public FilterSet<TagDTO, Filter<TagDTO>> getTagsFilterSet() {
         return currentFilterSet;
     }
 
-    @Override
     public void setTagsFilterSet(FilterSet<TagDTO, Filter<TagDTO>> tagsFilterSet) {
         this.currentFilterSet = tagsFilterSet;
         this.updateFilteredTags();
         this.refresh();
     }
 
-    @Override
     public int getFilteredTagsListSize() {
         return Util.size(getFilteredTags());
     }
