@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -28,16 +27,9 @@ import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
  * {@link SailingAction} implementation to load sailor profiles for the currently logged in user to bee shown on the
  * sailor profiles overview page, preparing the appropriate data structure.
  */
-public class GetSailorProfilesAction implements SailingAction<SailorProfilesDTO> {
+public class GetAllSailorProfilesAction implements SailingAction<SailorProfilesDTO> {
 
-    private UUID uuid;
-
-    public GetSailorProfilesAction(UUID uuid) {
-        this();
-        this.uuid = uuid;
-    }
-
-    public GetSailorProfilesAction() {
+    public GetAllSailorProfilesAction() {
     }
 
     @Override
@@ -47,10 +39,7 @@ public class GetSailorProfilesAction implements SailingAction<SailorProfilesDTO>
         SailorProfilesDTO result;
         List<SailorProfileDTO> list = new ArrayList<>();
 
-        // 1) check if uuid is null -> show all sailor profiles, else show sailor profile with corresponding UUID
-        // 2) build SailorProfilesDTO based on CompetitorStore and UUID
         StreamSupport.stream(preferences.getSailorProfiles().spliterator(), false)
-                .filter(e -> uuid == null || (uuid != null && uuid.equals(e.getUuid())))
                 .forEach(s -> list.add(convertToDto(s, ctx.getRacingEventService().getCompetitorAndBoatStore())));
         result = new SailorProfilesDTO(list);
         return result;
