@@ -39,9 +39,9 @@
             overflow: hidden;
         }
     </ui:style>
-    <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">
+    <g:HTMLPanel>
 
-        <div class="{res.mainCss.spacermargintopmediumsmall} {style.panel}">
+        <div class="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall} {style.panel}">
             <div class="{style.tableTitle} {style.titleUi}">
                 <span ui:field="titleUi" />
             </div>
