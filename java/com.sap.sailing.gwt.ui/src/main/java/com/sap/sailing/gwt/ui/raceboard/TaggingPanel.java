@@ -524,7 +524,7 @@ public class TaggingPanel extends ComponentWithoutSettings
 
             // Table with tag buttons
             customTagButtonsTable = new CellTable<TagButton>();
-            customTagButtonsTable.setStyleName(TagPanelResources.INSTANCE.style().tagButtonTable());
+            customTagButtonsTable.setStyleName(style.tagButtonTable());
             TextColumn<TagButton> tagColumn = new TextColumn<TagButton>() {
                 @Override
                 public String getValue(TagButton button) {
@@ -687,7 +687,9 @@ public class TaggingPanel extends ComponentWithoutSettings
             mainPanel.add(controlButttonPanel);
             mainPanel.add(tagPreviewPanel);
             mainPanel.add(closeButton);
-
+            mainPanel.ensureDebugId("Test");
+            getElement().getStyle().setBackgroundColor("white");
+            
             setWidget(mainPanel);
         }
 
