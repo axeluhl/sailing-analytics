@@ -25,6 +25,8 @@ import javax.imageio.stream.ImageOutputStream;
 
 
 public class ImageConverter {
+    private BufferedImage image;
+    private IIOMetadata metadata;
 
     private static int[] calculateActualDimensions(double width, double height, double minWidth, double maxWidth,
             double minHeight, double maxHeight, boolean upsize) {
@@ -73,23 +75,18 @@ public class ImageConverter {
         return null;
     }
     
-    public static InputStream biToIs(BufferedImage img, String fileType) {
-        try {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            ImageIO.write(img, fileType, bos);
-            byte[] arr = bos.toByteArray();
-            return new ByteArrayInputStream(arr);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public static InputStream biToIs(BufferedImage img, String fileType) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ImageIO.write(img, fileType, bos);
+        byte[] arr = bos.toByteArray();
+        return new ByteArrayInputStream(arr);
     }
 
-    public static String convertToBase64(InputStream is, String imageFormat) {
+    public static String convertToBase64(InputStream is, String imageFormat) throws IOException {
         return convertToBase64(biToBy(isToBi(is), imageFormat));
     }
     
-    public static String convertToBase64(BufferedImage img, String imageFormat) {
+    public static String convertToBase64(BufferedImage img, String imageFormat) throws IOException {
         return convertToBase64(biToBy(img, imageFormat));
     }
 
@@ -97,22 +94,13 @@ public class ImageConverter {
         return Base64.getEncoder().encodeToString(bytes);
     }
 
-    public static BufferedImage isToBi(InputStream is) {
-        try {
-            return ImageIO.read(is);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public static BufferedImage isToBi(InputStream is) throws IOException {
+        return ImageIO.read(is);
     }
 
-    private static byte[] biToBy(BufferedImage img, String imageFormat) {
+    private static byte[] biToBy(BufferedImage img, String imageFormat) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            ImageIO.write(img, imageFormat, baos);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        ImageIO.write(img, imageFormat, baos);
         return baos.toByteArray();
     }
 
@@ -185,32 +173,26 @@ public class ImageConverter {
         }
         return toReturn;
     }
-
-    public static class BufferedImageWithMetadataDTO {
-        private BufferedImage image;
-        private IIOMetadata metadata;
-        
-        public BufferedImageWithMetadataDTO(BufferedImage image, IIOMetadata metadata) {
-            this.image = image;
-            this.metadata = metadata;
+    
+    private static byte[] isToBy(InputStream is) throws IOException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        int nRead;
+        byte[] data = new byte[1024];
+        while ((nRead = is.read(data, 0, data.length)) != -1) {
+            buffer.write(data, 0, nRead);
         }
-
-        public BufferedImage getImage() {
-            return image;
-        }
-
-        public IIOMetadata getMetadata() {
-            return metadata;
-        } 
+     
+        buffer.flush();
+        byte[] byteArray = buffer.toByteArray();
+        return byteArray;
     }
     
-    public static BufferedImageWithMetadataDTO getImageAndMetadata(String fileType, InputStream is, Logger logger) throws Exception {
+    public void calculateImageAndMetadata(String fileType, InputStream is, Logger logger) throws Exception {
         // trying to receive the EXIF data and loading the image. If this does not work only the image is loaded
         boolean loaded = false;
-        byte[] bytes = new byte[is.available()];
-        is.read(bytes);
-        IIOMetadata metadata = null;
-        BufferedImage image = null;
+        byte[] bytes = isToBy(is);
+        metadata = null;
+        image = null;
         try {
             Iterator<ImageReader> readerIterator = ImageIO.getImageReadersBySuffix(fileType);
             while (readerIterator.hasNext() && !loaded) {
@@ -231,6 +213,14 @@ public class ImageConverter {
                 image = ImageConverter.isToBi(new ByteArrayInputStream(bytes));
         }
         is.close();
-        return new BufferedImageWithMetadataDTO(image, metadata);
     }
+    
+
+    public BufferedImage getImage() {
+        return image;
+    }
+
+    public IIOMetadata getMetadata() {
+        return metadata;
+    } 
 }

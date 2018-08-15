@@ -7906,12 +7906,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         // deleting all size-tags from the tags list, because after resizing there should only be one size tag per image
         toResizeImage.getTags().removeAll(toResizeImage.getMap().keySet());
         // getting the EXIF data and the image
-        ImageConverter.BufferedImageWithMetadataDTO imageAndMetadata = ImageConverter.getImageAndMetadata(fileType,
+        ImageConverter converter = new ImageConverter();
+        converter.calculateImageAndMetadata(fileType,
                 getService().getFileStorageManagementService().getActiveFileStorageService()
                         .loadFile(new URI(toResizeImage.getSourceRef())),
                 logger);
-        IIOMetadata metadata = imageAndMetadata.getMetadata();
-        BufferedImage img = imageAndMetadata.getImage();
+        IIOMetadata metadata = converter.getMetadata();
+        BufferedImage img = converter.getImage();
         // iterating over every size-tag that needs a resize
         for (String resizeTag : resizeTags) {
             // creating a new ImageDTO object with all values from the ToResizeImageDTO object
