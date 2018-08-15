@@ -4,14 +4,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * This class defines if a given value is within boundaries that are flexible by a given halfBoundaryWidth. The halfBoundaryWidth is
+ * This class defines if a given extremal value is within boundaries that are flexible by a given halfBoundaryWidth. The halfBoundaryWidth is
  * defined by a percentage of the difference between max and min of a value range. It needs four types of boundaries: 
  * a) minLeft
  * b) maxLeft
  * c) minRight 
  * d) maxRight 
- * (a)<--value->(b)..........(c)<--value->(d) 
- * If a value is not within the left or the right boundaries the boundaries should be adjusted in a way that the value will fit in the
+ * (a)<--minValue->(b)..........(c)<--maxValue->(d) 
+ * If an extremal value is not within the left or the right boundaries the boundaries should be adjusted in a way that the value will fit in the
  * one or the other. Also there should be the possibility to add listeners that will notify on a boundary change.
  * 
  * A ValueRangeFlexibleBoundaries needs an initialMin, a initialMax and a percentage that indicates the width of the value range
@@ -44,19 +44,18 @@ public class ValueRangeFlexibleBoundaries {
         maxLeft = min + halfBoundaryWidth;
         minRight = max - halfBoundaryWidth;
         maxRight = max + halfBoundaryWidth;
+        notifyListeners();
     }
-    public void checkIfValueIsInRightBoundaryRangeAndUpdateIfNecessary(double value) {
-        if (!isValueInRightRange(value)) {
-            max = value;
+    public void checkIfValueIsInRightBoundaryRangeAndUpdateIfNecessary(double maxValue) {
+        if (!isValueInRightRange(maxValue)) {
+            max = maxValue;
             update();
-            notifyListeners();
         }
     }
-    public void checkIfValueIsInLeftBoundaryRangeAndUpdateIfNecessary(double value) {
-        if (!isValueInLeftRange(value)) {
-            min = value;
+    public void checkIfValueIsInLeftBoundaryRangeAndUpdateIfNecessary(double minValue) {
+        if (!isValueInLeftRange(minValue)) {
+            min = minValue;
             update();
-            notifyListeners();
         }
     }
     private boolean isValueInLeftRange(double value) {
