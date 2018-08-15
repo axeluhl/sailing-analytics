@@ -128,4 +128,8 @@ public class StatefulSailorProfileDataProvider implements
         }
     }
 
+    public void removeSailorProfile(UUID uuid, AsyncCallback<SailorProfileDTO> callback) {
+        sailorProfileDataProvider.removeSailorProfile(uuid, callback);
+    }
+
 }

@@ -50,7 +50,7 @@ public abstract class UpdateSailorProfileAction implements SailingAction<SailorP
         Pair<SailorProfilePreferences, SailorProfilePreference> pair = findAndUpdateCorrectPreference(store, prefs);
         prefs = pair.getA();
         ctx.setPreferenceForCurrentUser(SailorProfilePreferences.PREF_NAME, prefs);
-        return convertToDto(pair.getB(), store);
+        return pair.getB() != null ? convertToDto(pair.getB(), store) : null;
     }
 
     @GwtIncompatible
@@ -71,14 +71,18 @@ public abstract class UpdateSailorProfileAction implements SailingAction<SailorP
                     sailorProfilePreferences.add(p);
                 } else {
                     sp = updatePreference(store, p);
-                    sailorProfilePreferences.add(sp);
+                    if (sp != null) {
+                        sailorProfilePreferences.add(sp);
+                    }
                 }
             }
 
-            // if this is a new SailorProfile (unknown UUID), create a new preference for it
+            // if might be a new SailorProfile (unknown UUID), so create a new preference for it
             if (sp == null) {
                 sp = updatePreference(store, null);
-                sailorProfilePreferences.add(sp);
+                if (sp != null) {
+                    sailorProfilePreferences.add(sp);
+                }
             }
 
             prefs = new SailorProfilePreferences(store);

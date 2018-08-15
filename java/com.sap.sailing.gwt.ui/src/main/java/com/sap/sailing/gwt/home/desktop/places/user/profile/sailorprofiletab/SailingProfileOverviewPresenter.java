@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab;
 
+import java.util.UUID;
+
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sse.gwt.client.mvp.ClientFactory;
@@ -12,4 +14,6 @@ public interface SailingProfileOverviewPresenter extends NotLoggedInPresenter, N
     ClientFactory getClientFactory();
 
     FlagImageResolver getFlagImageResolver();
+
+    void removeSailorProfile(UUID uuid);
 }

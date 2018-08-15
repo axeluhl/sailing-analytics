@@ -1,7 +1,10 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab;
 
+import java.util.UUID;
+
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfilesDTO;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileClientFactory;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView;
@@ -42,20 +45,47 @@ public class SailorProfileOverviewImplPresenter implements SailingProfileOvervie
     @Override
     public void setAuthenticationContext(AuthenticationContext authenticationContext) {
         if (authenticationContext.isLoggedIn() && view instanceof SailorProfileOverview) {
-            sharedSailorProfilePresenter.getDataProvider()
-                    .loadSailorProfiles(new AsyncCallback<SailorProfilesDTO>() {
+            sharedSailorProfilePresenter.getDataProvider().loadSailorProfiles(new AsyncCallback<SailorProfilesDTO>() {
 
-                        @Override
-                        public void onSuccess(SailorProfilesDTO result) {
-                            ((SailorProfileOverview) view).setProfileList(result.getEntries());
-                        }
+                @Override
+                public void onSuccess(SailorProfilesDTO result) {
+                    ((SailorProfileOverview) view).setProfileList(result.getEntries());
+                }
 
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            GWT.log(caught.getMessage(), caught);
-                        }
-                    });
+                @Override
+                public void onFailure(Throwable caught) {
+                    GWT.log(caught.getMessage(), caught);
+                }
+            });
         }
+    }
+
+    @Override
+    public void removeSailorProfile(UUID uuid) {
+        sharedSailorProfilePresenter.getDataProvider().removeSailorProfile(uuid, new AsyncCallback<SailorProfileDTO>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log(caught.getMessage(), caught);
+            }
+
+            @Override
+            public void onSuccess(SailorProfileDTO result) {
+                sharedSailorProfilePresenter.getDataProvider()
+                        .loadSailorProfiles(new AsyncCallback<SailorProfilesDTO>() {
+
+                            @Override
+                            public void onSuccess(SailorProfilesDTO result) {
+                                ((SailorProfileOverview) view).setProfileList(result.getEntries());
+                            }
+
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                GWT.log(caught.getMessage(), caught);
+                            }
+                        });
+            }
+        });
     }
 
     @Override

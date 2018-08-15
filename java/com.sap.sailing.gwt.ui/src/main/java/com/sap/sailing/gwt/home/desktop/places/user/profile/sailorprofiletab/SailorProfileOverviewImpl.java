@@ -67,12 +67,20 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
         sailorProfilesTable.addColumn(competitorColumn, "Competitor");
         sailorProfilesTable.addColumn(boatClassColumn, "Boatclass");
         sailorProfilesTable.addColumn(showColumn, "");
+        sailorProfilesTable.addColumn(removeColumn, "");
 
         showColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
         showColumn.setFieldUpdater(new FieldUpdater<SailorProfileDTO, String>() {
             @Override
             public void update(int index, SailorProfileDTO entry, String value) {
                 presenter.getClientFactory().getPlaceController().goTo(new SailorProfilePlace(entry.getKey()));
+            }
+        });
+        removeColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
+        removeColumn.setFieldUpdater(new FieldUpdater<SailorProfileDTO, String>() {
+            @Override
+            public void update(int index, SailorProfileDTO dto, String value) {
+                presenter.removeSailorProfile(dto.getKey());
             }
         });
     }
@@ -138,6 +146,13 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
         @Override
         public String getValue(SailorProfileDTO entry) {
             return ">";
+        }
+    };
+    private final Column<SailorProfileDTO, String> removeColumn = new Column<SailorProfileDTO, String>(
+            new ButtonCell()) {
+        @Override
+        public String getValue(SailorProfileDTO entry) {
+            return "X";
         }
     };
 

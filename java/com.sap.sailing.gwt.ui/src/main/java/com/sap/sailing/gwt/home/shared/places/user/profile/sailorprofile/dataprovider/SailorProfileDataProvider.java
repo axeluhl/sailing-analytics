@@ -24,4 +24,6 @@ public interface SailorProfileDataProvider {
 
     void createNewSailorProfile(UUID key, String name, AsyncCallback<SailorProfileDTO> callback);
 
+    void removeSailorProfile(UUID uuid, AsyncCallback<SailorProfileDTO> callback);
+
 }

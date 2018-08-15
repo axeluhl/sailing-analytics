@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.CreateSailorProfileAction;
 import com.sap.sailing.gwt.home.communication.user.profile.GetAllSailorProfilesAction;
 import com.sap.sailing.gwt.home.communication.user.profile.GetSailorProfileAction;
+import com.sap.sailing.gwt.home.communication.user.profile.RemoveSailorProfileAction;
 import com.sap.sailing.gwt.home.communication.user.profile.UpdateSailorProfileCompetitorsAction;
 import com.sap.sailing.gwt.home.communication.user.profile.UpdateSailorProfileTitleAction;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.BadgeDTO;
@@ -111,5 +112,10 @@ public class SailorProfileDataProviderImpl implements SailorProfileDataProvider 
     public void updateCompetitors(UUID key, Collection<SimpleCompetitorWithIdDTO> competitors,
             AsyncCallback<SailorProfileDTO> callback) {
         clientFactory.getDispatch().execute(new UpdateSailorProfileCompetitorsAction(key, competitors), callback);
+    }
+
+    @Override
+    public void removeSailorProfile(UUID uuid, AsyncCallback<SailorProfileDTO> callback) {
+        clientFactory.getDispatch().execute(new RemoveSailorProfileAction(uuid), callback);
     }
 }
