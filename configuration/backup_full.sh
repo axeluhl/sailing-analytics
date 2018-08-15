@@ -95,6 +95,7 @@ show collections" | $MONGO_CMD --port $MONGO_PORT | tail -n +4 | grep -v "^syste
 			if [ "$i" != "$MONGODB_COLLECTION_LOCAL" -a \( "$i" != "$MONGODB_COLLECTION_WIND" -o "$PARAM" = "weekly" \) ]; then
 				echo "    Backing up collection $j in MongoDB $i running on port $MONGO_PORT"
 				echo "$MONGOEXPORT_CMD --port $MONGO_PORT -d $i -c $j > $DB_DIR/$j.json"
+				mkdir -p $DB_DIR
 				$MONGOEXPORT_CMD --port $MONGO_PORT -d $i -c $j > $DB_DIR/$j.json
 			fi
 		done
