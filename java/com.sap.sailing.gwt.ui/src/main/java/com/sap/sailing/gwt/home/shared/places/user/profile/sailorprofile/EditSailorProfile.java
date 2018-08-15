@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -29,17 +28,9 @@ public class EditSailorProfile extends Composite implements EditSailorProfileVie
     interface SharedSailorProfileUiBinder extends UiBinder<Widget, EditSailorProfile> {
     }
 
-    interface Style extends CssResource {
-        String edgeToEdge();
-    }
-
     @UiField
     StringMessages i18n;
 
-    @UiField
-    Style style;
-    @UiField
-    SharedResources res;
     @UiField(provided = true)
     EditableSuggestedMultiSelectionCompetitor competitorSelectionUi;
     @UiField
@@ -63,7 +54,6 @@ public class EditSailorProfile extends Composite implements EditSailorProfileVie
         competitorSelectionUi = new EditableSuggestedMultiSelectionCompetitor(presenter, flagImageResolver);
         initWidget(uiBinder.createAndBindUi(this));
         boatClassesUi.setText(i18n.boatClasses());
-        setupAccordions();
         setupTitleChangeListener();
     }
 
@@ -72,14 +62,6 @@ public class EditSailorProfile extends Composite implements EditSailorProfileVie
         titleUi.addTextChangeHandler((text) -> {
             presenter.getDataProvider().updateTitle(text);
         });
-    }
-
-    private void setupAccordions() {
-    }
-
-    public void setEdgeToEdge(boolean edgeToEdge) {
-        competitorSelectionUi.setStyleName(style.edgeToEdge(), edgeToEdge);
-        competitorSelectionUi.getElement().getParentElement().removeClassName(res.mediaCss().column());
     }
 
     @Override

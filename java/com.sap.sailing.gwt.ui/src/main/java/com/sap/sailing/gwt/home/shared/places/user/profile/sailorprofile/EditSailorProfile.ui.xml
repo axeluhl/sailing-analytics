@@ -5,13 +5,7 @@
     xmlns:ms="urn:import:com.sap.sailing.gwt.home.shared.partials.editable">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:style type="com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfile.Style">
-        .edgeToEdge {
-            border-radius: 0;
-            border-left: none;
-            border-right: none;
-        }
-
+    <ui:style>
         .header {
             font-size:
             1.866666666666667em;
@@ -23,20 +17,21 @@
     </ui:style>
     <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">
         <ms:InlineEditLabel ui:field="titleUi" addStyleNames="{style.header}" />
-        <div class="{res.mediaCss.column} {res.mainCss.spacermargintopmediumsmall}">
+        <div class="{res.mediaCss.column}">
             <ms:EditableSuggestedMultiSelectionCompetitor
                 ui:field="competitorSelectionUi"
                 addStyleNames="{res.mediaCss.column} {res.mainCss.spacermargintopmediumsmall} {res.mediaCss.small12} {res.mediaCss.medium6}" />
             <lv:BoatClassListView ui:field="boatClassesUi"
                 addStyleNames="{res.mediaCss.column} {res.mainCss.spacermargintopmediumsmall} {res.mediaCss.small12} {res.mediaCss.medium6}" />
             <div class="{res.mediaCss.column} {res.mainCss.spacermargintopmediumsmall} {res.mediaCss.small12}">
-                <dac:DesktopAccordion ui:field="accordionEventsUi" title="{i18n.events}"/>
+                <dac:DesktopAccordion ui:field="accordionEventsUi" title="{i18n.events}" />
             </div>
             <div class="{res.mediaCss.column} {res.mainCss.spacermargintopmediumsmall} {res.mediaCss.small12}">
-                <dac:DesktopAccordion ui:field="accordionStatisticsUi" title="{i18n.statistics}"/>
+                <dac:DesktopAccordion ui:field="accordionStatisticsUi" title="{i18n.statistics}" />
             </div>
             <div class="{res.mediaCss.column} {res.mainCss.spacermargintopmediumsmall} {res.mediaCss.small12}">
-                <dac:DesktopAccordion ui:field="accordionPolarDiagramUi" title="{i18n.polarSheetChart}" />
+                <dac:DesktopAccordion ui:field="accordionPolarDiagramUi"
+                    title="{i18n.polarSheetChart}" />
             </div>
         </div>
     </g:HTMLPanel>
