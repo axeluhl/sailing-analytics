@@ -8,14 +8,13 @@ import java.util.stream.StreamSupport;
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
-import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.server.impl.preferences.model.SailorProfilePreference;
 import com.sap.sse.common.Util;
 
 /**
- * {@link SailingAction} implementation to load sailor profiles for the currently logged in user to bee shown on the
- * sailor profiles overview page, preparing the appropriate data structure.
+ * {@link UpdateSailorProfileAction} implementation to update the competitors of a sailor profile identified by the UUID
+ * for the currently logged in user.
  */
 public class UpdateSailorProfileCompetitorsAction extends UpdateSailorProfileAction {
 
@@ -42,5 +41,4 @@ public class UpdateSailorProfileCompetitorsAction extends UpdateSailorProfileAct
     protected SailorProfilePreference updatePreference(CompetitorAndBoatStore store, SailorProfilePreference p) {
         return new SailorProfilePreference(store, p, convertCompetitors(this.competitors, store));
     }
-
 }

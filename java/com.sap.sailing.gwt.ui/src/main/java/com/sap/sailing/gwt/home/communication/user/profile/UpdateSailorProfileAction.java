@@ -25,8 +25,9 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
 /**
- * {@link SailingAction} implementation to load sailor profiles for the currently logged in user to bee shown on the
- * sailor profiles overview page, preparing the appropriate data structure.
+ * {@link SailingAction} implementation to update attributes of a sailor profile identified by its UUID for the
+ * currently logged in user. Returns an updated SailorProfileDTO to bee shown on the sailor profile details page,
+ * preparing the appropriate data structure.
  */
 public abstract class UpdateSailorProfileAction implements SailingAction<SailorProfileDTO> {
 

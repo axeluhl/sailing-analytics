@@ -4,12 +4,11 @@ import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
-import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.server.impl.preferences.model.SailorProfilePreference;
 
 /**
- * {@link SailingAction} implementation to load sailor profiles for the currently logged in user to bee shown on the
- * sailor profiles overview page, preparing the appropriate data structure.
+ * {@link UpdateSailorProfileAction} implementation to create a new sailor profile for the currently logged in user with
+ * a UUID and a name.
  */
 public class CreateSailorProfileAction extends UpdateSailorProfileAction {
 
