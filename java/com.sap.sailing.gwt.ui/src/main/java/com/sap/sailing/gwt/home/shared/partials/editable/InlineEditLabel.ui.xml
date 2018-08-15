@@ -1,12 +1,19 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="res"
+        type="com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileResources" />
     <ui:style>
-        .button {
-        font-weight: bold;
+        .edit {
+        height: 45px;
+        width: 45px;
+        background-size: cover;
+        vertical-align: middle;
+        left: -10px;
+        position: relative;
         }
         .label{
         margin-left: 2px;
-        margin-right: 4px;
+        margin-right: 5px;
         margin-top: 4px;
         margin-bottom: 4px;
         }
@@ -15,8 +22,8 @@
         }
     </ui:style>
     <g:HTMLPanel>
-        <g:TextBox ui:field="textBox" styleName="{style.inline}" />
+        <g:TextBox ui:field="textBox" styleName="{style.inline}" height="45" width="45" />
         <g:Label ui:field="label" styleName="{style.label} {style.inline}" />
-        <g:Button styleName="{style.button} {style.inline}" ui:field="button" text="Edit" />
+        <g:Label ui:field="imageUi" styleName="{style.edit} {style.inline}" />
     </g:HTMLPanel>
 </ui:UiBinder> 

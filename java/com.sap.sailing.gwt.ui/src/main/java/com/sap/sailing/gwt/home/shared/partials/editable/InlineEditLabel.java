@@ -9,12 +9,12 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileResources;
 
 public class InlineEditLabel extends Composite implements HasText {
 
@@ -28,7 +28,7 @@ public class InlineEditLabel extends Composite implements HasText {
     }
 
     @UiField
-    Button button;
+    SailorProfileResources res;
 
     @UiField
     TextBox textBox;
@@ -36,12 +36,16 @@ public class InlineEditLabel extends Composite implements HasText {
     @UiField
     Label label;
 
+    @UiField
+    Label imageUi;
+
     private boolean state = false;
 
     private final List<TextChangeHandler> changeHandlers = new ArrayList<>();
 
     public InlineEditLabel() {
         initWidget(uiBinder.createAndBindUi(this));
+        imageUi.getElement().getStyle().setBackgroundImage("url('" + res.editPencil().getSafeUri().asString() + "')");
         textBox.addKeyUpHandler((event) -> {
             if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
                 updateState(false);
@@ -53,7 +57,7 @@ public class InlineEditLabel extends Composite implements HasText {
         updateState(false, true);
     }
 
-    @UiHandler("button")
+    @UiHandler("imageUi")
     void onClick(ClickEvent e) {
         updateState(!state);
     }
@@ -69,14 +73,12 @@ public class InlineEditLabel extends Composite implements HasText {
             textBox.setVisible(true);
             textBox.setText(label.getText());
             textBox.setFocus(true);
-            button.setText("Save");
         } else {
             boolean unchanged = textBox.getText().equals(label.getText());
 
             label.setVisible(true);
             textBox.setVisible(false);
             label.setText(textBox.getText());
-            button.setText("Edit");
 
             if (!suppressEvents && !unchanged) {
                 changeHandlers.forEach(c -> c.onTextChanged(label.getText()));
