@@ -73,6 +73,11 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
         sailorProfilesTable.addColumn(showColumn, "");
         sailorProfilesTable.addColumn(removeColumn, "");
 
+        profileNameColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().textCellWordWrap());
+        badgeColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().textCellWordWrap());
+        competitorColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().textCellWordWrap());
+        boatClassColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().textCellWordWrap());
+
         showColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
         showColumn.setFieldUpdater(new FieldUpdater<SailorProfileDTO, String>() {
             @Override
