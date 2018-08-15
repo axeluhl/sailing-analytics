@@ -1,0 +1,30 @@
+.inlineEditButtonStyle {
+    height: 45px;
+    width: 45px;
+    background-size: cover;
+    vertical-align: middle;
+    background-color: transparent;
+    border: none;
+    display: inline-block
+}
+
+.inlineEditButtonStyle:active {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.inlineEditLabel {
+    margin-left: 2px;
+    margin-right: 4px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.inlineElement {
+    display: inline-block
+}
+
+.editableSuggestionEditButton {
+    position: absolute;
+    right: 2em;
+    top: 0.9em;
+}

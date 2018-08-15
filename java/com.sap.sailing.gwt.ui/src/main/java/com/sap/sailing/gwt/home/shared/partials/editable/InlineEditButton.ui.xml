@@ -1,24 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
-    <ui:with field="res"
-        type="com.sap.sailing.gwt.home.shared.partials.editable.EditableResources" />
-    <ui:style>
-        .edit {
-        height: 45px;
-        width: 45px;
-        background-size: cover;
-        vertical-align: middle;
-        background-color:transparent;
-        border: none;
-        }
-        .edit:active{
-        background-color:rgba(0,0,0,0.1);
-        }
-        .inline{
-        display:inline-block
-        }
-    </ui:style>
+    <ui:with field="res" type="com.sap.sailing.gwt.home.shared.partials.editable.EditableResources" />
     <g:HTMLPanel>
-        <g:Button ui:field="editButton" styleName="{style.edit} {style.inline}" />
+        <g:Button ui:field="editButton" styleName="{res.css.inlineEditButtonStyle}" />
     </g:HTMLPanel>
 </ui:UiBinder> 

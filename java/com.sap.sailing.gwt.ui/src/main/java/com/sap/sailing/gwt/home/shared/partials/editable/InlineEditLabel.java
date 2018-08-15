@@ -43,6 +43,7 @@ public class InlineEditLabel extends Composite implements HasText {
     private final List<TextChangeHandler> changeHandlers = new ArrayList<>();
 
     public InlineEditLabel() {
+        EditableResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         editButtonUi.getElement().getStyle()
                 .setBackgroundImage("url('" + res.editPencil().getSafeUri().asString() + "')");

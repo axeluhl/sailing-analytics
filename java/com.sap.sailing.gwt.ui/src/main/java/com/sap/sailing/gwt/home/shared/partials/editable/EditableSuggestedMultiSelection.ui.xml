@@ -2,18 +2,10 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
     xmlns:sp="urn:import:com.sap.sailing.gwt.home.shared.partials">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res"
         type="com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionResources" />
+    <ui:with field="e_res" type="com.sap.sailing.gwt.home.shared.partials.editable.EditableResources" />
 
-    <ui:style>
-        .toggleEditButton {
-        position: absolute;
-        right: 2em;
-        top: 0.9em;
-        }
-
-    </ui:style>
     <g:HTMLPanel>
         <div ui:field="parentPanel">
             <div ui:field="listContainerUi" class="{local_res.css.suggestions}">
@@ -27,7 +19,7 @@
             </div>
             <sp:multiselection.SuggestedMultiSelection ui:field="multiSelect" />
         </div>
-        <sp:editable.InlineEditButton addStyleNames="{style.toggleEditButton}"
-            ui:field="editButtonUi" />
+        <sp:editable.InlineEditButton
+            addStyleNames="{e_res.css.editableSuggestionEditButton}" ui:field="editButtonUi" />
     </g:HTMLPanel>
 </ui:UiBinder> 
