@@ -3,10 +3,11 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Selenium
 Bundle-SymbolicName: org.mp4parser.isoparser
 Bundle-Version: 1.9.37
-Bundle-ClassPath: lib/isoparser-1.9.37.jar
+Bundle-ClassPath: .,
+ lib/isoparser-1.9.37.jar
 Bundle-Vendor: Sebastian Annies
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Export-Package: com.sap.sailing.media,
+Export-Package: com.sap.sailing.media.mp4,
  org.mp4parser,
  org.mp4parser.boxes,
  org.mp4parser.boxes.iso14496.part12,
