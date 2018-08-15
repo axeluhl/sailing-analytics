@@ -45,8 +45,8 @@ public class SailorProfileTabView extends Composite implements UserProfileTabVie
             view = sailorView;
             currentPresenter.getSharedSailorProfilePresenter().getDataProvider().setView(sailorView.getEditView());
             if (uuid == SailorProfileDTO.SAILOR_PROFILE_KEY_NEW) {
-                SailorProfileDTO newEntry = new SailorProfileDTO(UUID.randomUUID(), "New Sailor Profile");
-                currentPresenter.getSharedSailorProfilePresenter().getDataProvider().createNewEntry(newEntry);
+                currentPresenter.getSharedSailorProfilePresenter().getDataProvider().createNewEntry(UUID.randomUUID(),
+                        "New Sailor Profile");
             } else {
                 currentPresenter.getSharedSailorProfilePresenter().getDataProvider().loadSailorProfile(uuid);
             }

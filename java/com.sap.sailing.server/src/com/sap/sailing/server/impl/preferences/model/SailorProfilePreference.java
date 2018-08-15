@@ -30,6 +30,30 @@ public class SailorProfilePreference extends AbstractGenericSerializableSettings
         competitors.setValues(sailorProfile.getCompetitors());
     }
 
+    /** copy constructor with changed competitors */
+    public SailorProfilePreference(CompetitorAndBoatStore store, SailorProfilePreference other,
+            Iterable<Competitor> newCompetitors) {
+        this(store);
+        uuid.setValue(other.getUuid());
+        name.setValue(other.getName());
+        this.competitors.setValues(newCompetitors);
+    }
+
+    /** copy constructor with changed competitors */
+    public SailorProfilePreference(CompetitorAndBoatStore store, UUID uuid, String name) {
+        this(store);
+        this.uuid.setValue(uuid);
+        this.name.setValue(name);
+    }
+
+    /** copy constructor with new name */
+    public SailorProfilePreference(CompetitorAndBoatStore store, SailorProfilePreference other, String newName) {
+        this(store);
+        uuid.setValue(other.getUuid());
+        name.setValue(newName);
+        this.competitors.setValues(other.getCompetitors());
+    }
+
     @Override
     protected void addChildSettings() {
         // We do not create the Setting instances here, because access to the RacingEventService would not be given.

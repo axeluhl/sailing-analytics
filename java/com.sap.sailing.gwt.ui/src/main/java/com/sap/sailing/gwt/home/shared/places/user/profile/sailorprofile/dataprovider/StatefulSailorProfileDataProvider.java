@@ -22,9 +22,10 @@ public class StatefulSailorProfileDataProvider implements
     private SailorProfileDataProvider sailorProfileDataProvider;
     private final AbstractSuggestedCompetitorMultiSelectionPresenter<Display<SimpleCompetitorWithIdDTO>> competitorDataProvider;
 
-    private SailorProfileDTO sailorProfile;
-
     private EditSailorProfileView sailorView;
+
+    private Collection<SimpleCompetitorWithIdDTO> competitors;
+    private UUID uuid;
 
     public StatefulSailorProfileDataProvider(ClientFactoryWithDispatch clientFactory,
             AbstractSuggestedCompetitorMultiSelectionPresenter<Display<SimpleCompetitorWithIdDTO>> competitorDataProvider) {
@@ -37,59 +38,26 @@ public class StatefulSailorProfileDataProvider implements
     }
 
     public void loadSailorProfile(UUID uuid) {
-        sailorProfileDataProvider.findSailorProfileById(uuid, new AsyncCallback<SailorProfileDTO>() {
-
-            @Override
-            public void onSuccess(SailorProfileDTO result) {
-                sailorProfile = result;
-                sailorView.setEntry(result);
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                GWT.log(caught.getMessage(), caught);
-            }
-        });
+        sailorProfileDataProvider.findSailorProfileById(uuid, refreshCallback);
     }
 
-    private void sendUpdateToBackend() {
-        sailorProfileDataProvider.updateOrCreateSailorProfile(sailorProfile, new AsyncCallback<SailorProfilesDTO>() {
+    private AsyncCallback<SailorProfileDTO> refreshCallback = new AsyncCallback<SailorProfileDTO>() {
 
-            @Override
-            public void onFailure(Throwable caught) {
-                GWT.log(caught.getMessage(), caught);
-            }
+        @Override
+        public void onFailure(Throwable caught) {
+            GWT.log(caught.getMessage(), caught);
+        }
 
-            @Override
-            public void onSuccess(SailorProfilesDTO result) {
-                sailorProfile = result.getEntries().get(0);
-                sailorView.setEntry(sailorProfile);
-            }
-        });
-    }
+        @Override
+        public void onSuccess(SailorProfileDTO result) {
+            competitors = result.getCompetitors();
+            uuid = result.getKey();
+            sailorView.setEntry(result);
+        }
+    };
 
     public void updateTitle(String newTitle) {
-        sailorProfile.setName(newTitle);
-        sendUpdateToBackend();
-    }
-
-    public void removeCompetitor(SimpleCompetitorWithIdDTO selectedItem) {
-        GWT.log("remove");
-        sailorProfile.getCompetitors().remove(selectedItem);
-        sendUpdateToBackend();
-
-    }
-
-    public void clearCompetitors() {
-        GWT.log("clear");
-        sailorProfile.getCompetitors().clear();
-        sendUpdateToBackend();
-    }
-
-    public void addCompetitor(SimpleCompetitorWithIdDTO selectedItem) {
-        GWT.log("add");
-        sailorProfile.getCompetitors().add(selectedItem);
-        sendUpdateToBackend();
+        sailorProfileDataProvider.updateTitle(uuid, newTitle, refreshCallback);
     }
 
     public void getEvents(UUID key, AsyncCallback<Iterable<ParticipatedEventDTO>> asyncCallback) {
@@ -100,9 +68,8 @@ public class StatefulSailorProfileDataProvider implements
         sailorProfileDataProvider.loadSailorProfiles(callback);
     }
 
-    public void createNewEntry(SailorProfileDTO newSailorProfile) {
-        sailorProfile = newSailorProfile;
-        sendUpdateToBackend();
+    public void createNewEntry(UUID uuid, String newTitle) {
+        sailorProfileDataProvider.createNewSailorProfile(uuid, newTitle, refreshCallback);
     }
 
     @Override
@@ -112,17 +79,17 @@ public class StatefulSailorProfileDataProvider implements
 
     @Override
     public void addSelection(SimpleCompetitorWithIdDTO item) {
-        sailorProfile.getCompetitors().add(item);
+        competitors.add(item);
     }
 
     @Override
     public void removeSelection(SimpleCompetitorWithIdDTO item) {
-        sailorProfile.getCompetitors().remove(item);
+        competitors.remove(item);
     }
 
     @Override
     public void clearSelection() {
-        sailorProfile.getCompetitors().clear();
+        competitors.clear();
     }
 
     @Override
@@ -157,7 +124,7 @@ public class StatefulSailorProfileDataProvider implements
     @Override
     public void onEditModeChanged(boolean edit) {
         if (!edit) {
-            sendUpdateToBackend();
+            sailorProfileDataProvider.updateCompetitors(uuid, competitors, refreshCallback);
         }
     }
 

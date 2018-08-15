@@ -8,15 +8,16 @@ import java.util.UUID;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
+import com.sap.sailing.gwt.home.communication.user.profile.CreateSailorProfileAction;
 import com.sap.sailing.gwt.home.communication.user.profile.GetSailorProfilesAction;
-import com.sap.sailing.gwt.home.communication.user.profile.SaveSailorProfileAction;
+import com.sap.sailing.gwt.home.communication.user.profile.UpdateSailorProfileCompetitorsAction;
+import com.sap.sailing.gwt.home.communication.user.profile.UpdateSailorProfileTitleAction;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.BadgeDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfilesDTO;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.ParticipatedEventDTO;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.ParticipatedRegattaDTO;
-import com.sap.sse.gwt.dispatch.shared.commands.VoidResult;
 
 public class SailorProfileDataProviderImpl implements SailorProfileDataProvider {
 
@@ -107,20 +108,20 @@ public class SailorProfileDataProviderImpl implements SailorProfileDataProvider 
     }
 
     @Override
-    public void updateOrCreateSailorProfile(SailorProfileDTO sailorProfile, AsyncCallback<SailorProfilesDTO> callback) {
-        clientFactory.getDispatch().execute(new SaveSailorProfileAction(sailorProfile),
-                new AsyncCallback<VoidResult>() {
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        callback.onFailure(caught);
-                    }
-
-                    @Override
-                    public void onSuccess(VoidResult result) {
-                    }
-                });
-        clientFactory.getDispatch().execute(new GetSailorProfilesAction(sailorProfile.getKey()), callback);
+    public void createNewSailorProfile(UUID key, String name, AsyncCallback<SailorProfileDTO> callback) {
+        clientFactory.getDispatch().execute(new CreateSailorProfileAction(key, name), callback);
     }
 
+    @Override
+    public void updateTitle(UUID key, String updatedTitle, AsyncCallback<SailorProfileDTO> callback) {
+        clientFactory.getDispatch().execute(new UpdateSailorProfileTitleAction(key, updatedTitle),
+                callback);
+    }
+
+    @Override
+    public void updateCompetitors(UUID key, Collection<SimpleCompetitorWithIdDTO> competitors,
+            AsyncCallback<SailorProfileDTO> callback) {
+        clientFactory.getDispatch().execute(new UpdateSailorProfileCompetitorsAction(key, competitors),
+                callback);
+    }
 }
