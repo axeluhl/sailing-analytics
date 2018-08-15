@@ -7,10 +7,10 @@ import java.util.Set;
  * This class defines if a given value is within boundaries that are flexible by a given rangeWidth. The rangeWidth is
  * defined by a percentage of the minimum value, otherwise the adjustment of the boundaries will be biased and the max
  * boundaries are always much bigger then the minimum boundaries. It needs four types of boundaries: 
- * a) minLeftBoundary
- * b) maxLeftBoundary 
- * c) minRightBoundary 
- * d) maxRightBoundary 
+ * a) minLeft
+ * b) maxLeft
+ * c) minRight 
+ * d) maxRight 
  * (a)<--value->(b)..........(c)<--value->(d) 
  * If a value is not within the left or the right boundaries the boundaries should be adjusted in a way that the value will fit in the
  * one or the other. Also there should be the possibility to add listeners that will notify on a boundary change.
@@ -51,7 +51,6 @@ public class ValueRangeBoundaries {
     }
     private void updateRangeWidth(double newMinValue) {
         halfRangeWidth = ((newMinValue * (1 + percentage)) - (newMinValue * (1 - percentage)))/2;
-        updateRight();
     }
     public void checkIfValueIsInRightBoundaryRangeAndUpdateIfNecessary(double value) {
         if (!isValueInRightRange(value)) {
@@ -62,6 +61,7 @@ public class ValueRangeBoundaries {
     public void checkIfValueIsInLeftBoundaryRangeAndUpdateIfNecessary(double value) {
         if (!isValueInLeftRange(value)) {
             updateRangeWidth(value);
+            updateRight();
             updateLeft(value);
             notifyListeners();
         }

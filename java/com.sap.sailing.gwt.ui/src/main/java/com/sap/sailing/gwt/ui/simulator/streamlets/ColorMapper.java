@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * This class maps a given range of values to a full color spectrum. The color spectrum could also be a gray scale.
+ * This class maps a given range of values to a full color spectrum. The color spectrum could also be a grey scale.
  * Therefore it needs the max and the min value to be mapped. It uses a {@link ValueRangeBoundaries} to get those.
  * The ColorMapper has listeners that will be notified if the colormapping has been changed.
  * 
@@ -24,7 +24,6 @@ public class ColorMapper implements ValueRangeBoundariesChangedListener {
         minValue = this.valueRange.getMinLeft();
         maxValue = this.valueRange.getMaxRight();
         this.isGrey = isGrey;
-        valueRange.addListener(this);
         colorMapperChangedListeners = new HashSet<>();
     }
 
