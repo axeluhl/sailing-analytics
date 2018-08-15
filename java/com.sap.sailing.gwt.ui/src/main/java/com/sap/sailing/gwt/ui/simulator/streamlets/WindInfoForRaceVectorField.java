@@ -48,7 +48,6 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
     private double averageLatitudeCosine;
     private double knotsInDegreePerFrame;
     private final CoordinateSystem coordinateSystem;
-    private boolean colored = false;
     
     private final Comparator<WindDTO> windByRequestTimePointComparator = new Comparator<WindDTO>() {
         @Override
@@ -215,35 +214,4 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
     public double getParticleFactor() {
         return 0.5;
     }
-
-    public void setColors(boolean isColored) {
-        this.colored = isColored;
-    }
-
-    public boolean getColors() {
-        return this.colored;
-    }
-
-    /**
-     * {@link #MAX_WIND_SPEED_IN_KNOTS maximum wind speed} is fully opaque; zero speed is fully transparent
-     */
-    @Override
-    public String getColor(double speed) {
-        if (this.colored) {
-            double h;
-            if (speed <= 4.0) {
-                h = 240.0;
-            } else if (speed <= 12.0) {
-                h = 120.0 + (12.0 - speed) / (12.0 - 4.0) * (240.0 - 120.0);
-            } else if (speed <= 20.0) {
-                h = 0.0 + (20.0 - speed) / (20.0 - 12.0) * (120.0 - 0.0);
-            } else {
-                h = 0.0;
-            }
-            return "hsl(" + Math.round(h) + ", 100%, 50%)";
-        } else {
-            return "rgba(255,255,255," + Math.min(1.0, 0.5 + 0.6 * speed / MAX_WIND_SPEED_IN_KNOTS) + ")";
-        }
-    }
-
 }

@@ -63,6 +63,7 @@ public class Swarm implements TimeListener {
 
     private HandlerRegistration handlerRegistration;
     
+    private boolean colored = false;
     private final ValueRangeBoundaries valueRange;
     private final ColorMapper colorMapper;
 
@@ -80,7 +81,6 @@ public class Swarm implements TimeListener {
         valueRange = new ValueRangeBoundaries(0.0, 120.0, /*percentage*/ 0.1);
         colorMapper = new ColorMapper(valueRange, !colored);
     }
-
     public void start(final int animationIntervalMillis) {
         fullcanvas.setCanvasSettings();
         // if map is not yet loaded, wait for it
@@ -96,7 +96,6 @@ public class Swarm implements TimeListener {
             });
         }
     }
-
     private void startWithMap(int animationIntervalMillis) {
         projection = new Mercator(fullcanvas, map);
         projection.calibrate();
@@ -105,11 +104,9 @@ public class Swarm implements TimeListener {
         swarmContinue = true;
         startLoop(animationIntervalMillis);
     }
-
     public void stop() {
         swarmContinue = false;
     }
-
     private Particle createParticle() {
         Particle particle = null;
         boolean done = false;
@@ -140,7 +137,6 @@ public class Swarm implements TimeListener {
         }
         return particle;
     }
-    
     private LatLng getRandomPosition() {
         final LatLng result;
         double rndY = Math.random();
@@ -157,7 +153,6 @@ public class Swarm implements TimeListener {
         }
         return newParticles;
     }
-
     public void onBoundsChanged(boolean zoomChanged, int swarmPause) {
         this.zoomChanged |= zoomChanged;
         if (this.zoomChanged) {
@@ -165,7 +160,6 @@ public class Swarm implements TimeListener {
         }
         this.swarmPause = swarmPause;
     }
-
     private void updateBounds() {
         LatLngBounds fieldBounds = this.field.getFieldCorners();
         final LatLngBounds mapBounds = map.getBounds();
@@ -179,11 +173,9 @@ public class Swarm implements TimeListener {
         cosineOfAverageLatitude = Math.cos((visibleBoundsOfField.getSouthWest().getLatitude()/180.*Math.PI+
                 visibleBoundsOfField.getNorthEast().getLatitude()/180.*Math.PI)/2);
     };
-
     //native void log(String message) /*-{
     //    console.log( message );
     //}-*/;
-    
     private void startLoop(final int animationIntervalMillis) {
         // Create animation-loop based on timer timeout
         loopTimer = new com.google.gwt.user.client.Timer() {
@@ -221,7 +213,6 @@ public class Swarm implements TimeListener {
         };
         loopTimer.schedule(animationIntervalMillis);
     }
-
     private void drawSwarm() {
         Context2d ctxt = canvas.getContext2d();
         ctxt.setGlobalAlpha(0.08);
@@ -245,8 +236,6 @@ public class Swarm implements TimeListener {
             ctxt.stroke();
         }
     }
-
-    private boolean colored = false;
     public void setColors(boolean isColored) {
         this.colored = isColored;
         colorMapper.setGrey(!isColored);
@@ -301,7 +290,6 @@ public class Swarm implements TimeListener {
         drawSwarm();
         return true;
     }
-
     public ValueRangeBoundaries getValueRange() {
         return valueRange;
     }
