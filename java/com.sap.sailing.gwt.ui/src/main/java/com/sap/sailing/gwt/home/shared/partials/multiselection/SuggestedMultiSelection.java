@@ -22,7 +22,7 @@ import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.shared.partials.filter.AbstractAsyncSuggestBoxFilter;
 import com.sap.sailing.gwt.home.shared.partials.filter.AbstractFilterWidget;
 import com.sap.sailing.gwt.home.shared.partials.filter.AbstractSuggestBoxFilter;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionDataProvider.SuggestionItemsCallback;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionPresenter.SuggestionItemsCallback;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.suggestion.AbstractSuggestOracle;
@@ -35,7 +35,7 @@ import com.sap.sse.gwt.client.suggestion.AbstractSuggestOracle;
  *            actual class of selectable entries
  */
 public final class SuggestedMultiSelection<T> extends Composite
-        implements SuggestedMultiSelectionDataProvider.Display<T> {
+        implements SuggestedMultiSelectionPresenter.Display<T> {
 
     private static SuggestedMultiSelectionUiBinder uiBinder = GWT.create(SuggestedMultiSelectionUiBinder.class);
 
@@ -54,16 +54,16 @@ public final class SuggestedMultiSelection<T> extends Composite
     Button removeAllButtonUi;
     @UiField
     FlowPanel itemContainerUi;
-    private final SuggestedMultiSelectionDataProvider<T, ?> dataProvider;
+    private final SuggestedMultiSelectionPresenter<T, ?> presenter;
     private final WidgetProvider<T> widgetProvider;
 
-    private SuggestedMultiSelection(SuggestedMultiSelectionDataProvider<T, ?> dataProvider,
+    private SuggestedMultiSelection(SuggestedMultiSelectionPresenter<T, ?> presenter,
             WidgetProvider<T> widgetProvider, String title) {
         SuggestedMultiSelectionResources.INSTANCE.css().ensureInjected();
-        this.dataProvider = dataProvider;
+        this.presenter = presenter;
         this.widgetProvider = widgetProvider;
         this.suggestionWidgetUi = widgetProvider.getSuggestBoxFilter(selectedItem -> {
-            dataProvider.addSelection(selectedItem);
+            presenter.addSelection(selectedItem);
             SuggestedMultiSelection.this.addSelectedItem(selectedItem);
         });
         initWidget(uiBinder.createAndBindUi(this));
@@ -91,25 +91,18 @@ public final class SuggestedMultiSelection<T> extends Composite
 
     @UiHandler("removeAllButtonUi")
     void onRemoveAllButtonClicked(ClickEvent event) {
+        presenter.clearSelection();
         itemContainerUi.clear();
-        dataProvider.clearSelection();
         this.updateUiState();
     }
 
     @Override
     public void setSelectedItems(Iterable<T> selectedItemsToSet) {
         itemContainerUi.clear();
-        for (final T item : selectedItemsToSet) {
-            this.addSelectedItem(item, true);
-        }
+        selectedItemsToSet.forEach(this::addSelectedItem);
     }
 
     private void addSelectedItem(final T selectedItem) {
-        addSelectedItem(selectedItem, false);
-    }
-
-    private void addSelectedItem(final T selectedItem, boolean suppressEvents) {
-
         itemContainerUi.add(new SuggestedMultiSelectionItem() {
 
             @Override
@@ -119,9 +112,9 @@ public final class SuggestedMultiSelection<T> extends Composite
 
             @Override
             protected void onRemoveItemRequsted() {
+                presenter.removeSelection(selectedItem);
                 this.removeFromParent();
                 updateUiState();
-                dataProvider.removeSelection(selectedItem);
             }
         });
         this.updateUiState();
@@ -134,13 +127,13 @@ public final class SuggestedMultiSelection<T> extends Composite
     private static class SuggestedMultiSelectionFilter<T> extends AbstractAsyncSuggestBoxFilter<T, T> {
         private final Consumer<T> selectionCallback;
 
-        private SuggestedMultiSelectionFilter(final SuggestedMultiSelectionDataProvider<T, ?> dataProvider,
+        private SuggestedMultiSelectionFilter(final SuggestedMultiSelectionPresenter<T, ?> presenter,
                 Consumer<T> selectionCallback, String placeholderText) {
             super(new AbstractSuggestOracle<T>() {
                 @Override
                 protected void getSuggestions(final Request request, final Callback callback,
                         final Iterable<String> queryTokens) {
-                    dataProvider.getSuggestionItems(queryTokens, request.getLimit(), new SuggestionItemsCallback<T>() {
+                    presenter.getSuggestionItems(queryTokens, request.getLimit(), new SuggestionItemsCallback<T>() {
                         @Override
                         public void setSuggestionItems(Collection<T> suggestionItems) {
                             setSuggestions(request, callback, suggestionItems, queryTokens);
@@ -150,12 +143,12 @@ public final class SuggestedMultiSelection<T> extends Composite
 
                 @Override
                 protected String createSuggestionKeyString(T value) {
-                    return dataProvider.createSuggestionKeyString(value);
+                    return presenter.createSuggestionKeyString(value);
                 }
 
                 @Override
                 protected String createSuggestionAdditionalDisplayString(T value) {
-                    return dataProvider.createSuggestionAdditionalDisplayString(value);
+                    return presenter.createSuggestionAdditionalDisplayString(value);
                 }
             }, placeholderText);
             this.selectionCallback = selectionCallback;
@@ -174,9 +167,9 @@ public final class SuggestedMultiSelection<T> extends Composite
     }
 
     public static SuggestedMultiSelection<SimpleCompetitorWithIdDTO> forCompetitors(
-            final SuggestedMultiSelectionDataProvider<SimpleCompetitorWithIdDTO, ?> dataProvider, String headerTitle,
+            final SuggestedMultiSelectionPresenter<SimpleCompetitorWithIdDTO, ?> presenter, String headerTitle,
             FlagImageResolver flagImageResolver) {
-        return new SuggestedMultiSelection<>(dataProvider, new WidgetProvider<SimpleCompetitorWithIdDTO>() {
+        return new SuggestedMultiSelection<>(presenter, new WidgetProvider<SimpleCompetitorWithIdDTO>() {
             @Override
             public IsWidget getItemDescriptionWidget(SimpleCompetitorWithIdDTO item) {
                 return new SuggestedMultiSelectionCompetitorItemDescription(item, flagImageResolver);
@@ -185,15 +178,15 @@ public final class SuggestedMultiSelection<T> extends Composite
             @Override
             public AbstractSuggestBoxFilter<SimpleCompetitorWithIdDTO, SimpleCompetitorWithIdDTO> getSuggestBoxFilter(
                     Consumer<SimpleCompetitorWithIdDTO> selectionCallback) {
-                return new SuggestedMultiSelectionFilter<SimpleCompetitorWithIdDTO>(dataProvider, selectionCallback,
+                return new SuggestedMultiSelectionFilter<SimpleCompetitorWithIdDTO>(presenter, selectionCallback,
                         StringMessages.INSTANCE.add(StringMessages.INSTANCE.competitor()));
             }
         }, headerTitle);
     }
 
     public static SuggestedMultiSelection<BoatClassDTO> forBoatClasses(
-            final SuggestedMultiSelectionDataProvider<BoatClassDTO, ?> dataProvider, String headerTitle) {
-        return new SuggestedMultiSelection<>(dataProvider, new WidgetProvider<BoatClassDTO>() {
+            final SuggestedMultiSelectionPresenter<BoatClassDTO, ?> presenter, String headerTitle) {
+        return new SuggestedMultiSelection<>(presenter, new WidgetProvider<BoatClassDTO>() {
             @Override
             public IsWidget getItemDescriptionWidget(BoatClassDTO item) {
                 return new SuggestedMultiSelectionBoatClassItemDescription(item);
@@ -202,7 +195,7 @@ public final class SuggestedMultiSelection<T> extends Composite
             @Override
             public AbstractSuggestBoxFilter<BoatClassDTO, BoatClassDTO> getSuggestBoxFilter(
                     Consumer<BoatClassDTO> selectionCallback) {
-                return new SuggestedMultiSelectionFilter<BoatClassDTO>(dataProvider, selectionCallback,
+                return new SuggestedMultiSelectionFilter<BoatClassDTO>(presenter, selectionCallback,
                         StringMessages.INSTANCE.add(StringMessages.INSTANCE.boatClass()));
             }
         }, headerTitle);

@@ -1,17 +1,14 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile;
 
+import java.util.Collection;
+
 import com.google.gwt.place.shared.PlaceController;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
-import com.sap.sailing.gwt.home.communication.user.profile.CompetitorSuggestionResult;
-import com.sap.sailing.gwt.home.communication.user.profile.FavoriteCompetitorsDTO;
-import com.sap.sailing.gwt.home.communication.user.profile.GetCompetitorSuggestionAction;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggestedMultiSelectionCompetitorDataProvider;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggestedCompetitorMultiSelectionPresenter;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionPresenter;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.dataprovider.StatefulSailorProfileDataProvider;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
-import com.sap.sse.gwt.client.Notification;
-import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.mvp.ClientFactory;
 
 /**
@@ -32,31 +29,18 @@ public class EditSailorProfilePresenter<C extends ClientFactoryWithDispatch & Er
     public EditSailorProfilePresenter(C clientFactory) {
         this.clientFactory = clientFactory;
         this.sailorProfileDataProvider = new StatefulSailorProfileDataProvider(clientFactory,
-                new SuggestedMultiSelectionCompetitorDataProviderImpl());
+                new SuggestedMultiSelectionCompetitorDataProviderImpl(clientFactory));
     }
 
-    private class SuggestedMultiSelectionCompetitorDataProviderImpl
-            extends AbstractSuggestedMultiSelectionCompetitorDataProvider {
+    private class SuggestedMultiSelectionCompetitorDataProviderImpl extends
+            AbstractSuggestedCompetitorMultiSelectionPresenter<SuggestedMultiSelectionPresenter.Display<SimpleCompetitorWithIdDTO>> {
 
-        @Override
-        protected void getSuggestions(Iterable<String> queryTokens, int limit,
-                final SuggestionItemsCallback<SimpleCompetitorWithIdDTO> callback) {
-            clientFactory.getDispatch().execute(new GetCompetitorSuggestionAction(queryTokens, limit),
-                    new AsyncCallback<CompetitorSuggestionResult>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            Notification.notify("Error while loading competitor suggestion", NotificationType.ERROR);
-                        }
-
-                        @Override
-                        public void onSuccess(CompetitorSuggestionResult result) {
-                            callback.setSuggestionItems(result.getValues());
-                        }
-                    });
+        private SuggestedMultiSelectionCompetitorDataProviderImpl(ClientFactoryWithDispatch clientFactory) {
+            super(clientFactory);
         }
 
         @Override
-        protected void persist(FavoriteCompetitorsDTO favorites) {
+        protected void persist(Collection<SimpleCompetitorWithIdDTO> selectedItem) {
             /** persistence is done in {@link StatefulSailorProfileDataProvider} */
         }
     }

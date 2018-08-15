@@ -12,8 +12,6 @@ import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelection;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionBoatClassDataProvider;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -53,11 +51,12 @@ public class UserPreferences extends Composite implements UserPreferencesView {
         favoriteCompetitorsSelctionUi.getElement().getParentElement().removeClassName(res.mediaCss().column());
     }
     
-    private class CompetitorDisplayImpl implements SuggestedMultiSelectionCompetitorDataProvider.Display {
+    private class CompetitorDisplayImpl implements CompetitorSelectionPresenter.Display {
         private final SuggestedMultiSelection<SimpleCompetitorWithIdDTO> selectionUi;
         private final HasValue<Boolean> notifyAboutResultsUi;
         
-        private CompetitorDisplayImpl(final SuggestedMultiSelectionCompetitorDataProvider dataProvider, FlagImageResolver flagImageResolver) {
+        private CompetitorDisplayImpl(final CompetitorSelectionPresenter dataProvider,
+                FlagImageResolver flagImageResolver) {
             selectionUi = SuggestedMultiSelection.forCompetitors(dataProvider, StringMessages.INSTANCE.favoriteCompetitors(), flagImageResolver);
             notifyAboutResultsUi = selectionUi.addNotificationToggle(dataProvider::setNotifyAboutResults,
                     StringMessages.INSTANCE.notificationAboutNewResults());
@@ -75,12 +74,12 @@ public class UserPreferences extends Composite implements UserPreferencesView {
         }
     }
     
-    private class BoatClassDisplayImpl implements SuggestedMultiSelectionBoatClassDataProvider.Display {
+    private class BoatClassDisplayImpl implements BoatClassSelectionPresenter.Display {
         private final SuggestedMultiSelection<BoatClassDTO> selectionUi;
         private final HasValue<Boolean> notifyAboutUpcomingRacesUi;
         private final HasValue<Boolean> notifyAboutResultsUi;
         
-        private BoatClassDisplayImpl(final SuggestedMultiSelectionBoatClassDataProvider dataProvider) {
+        private BoatClassDisplayImpl(final BoatClassSelectionPresenter dataProvider) {
             selectionUi = SuggestedMultiSelection.forBoatClasses(dataProvider, StringMessages.INSTANCE.favoriteBoatClasses());
             notifyAboutUpcomingRacesUi = selectionUi.addNotificationToggle(dataProvider::setNotifyAboutUpcomingRaces,
                     StringMessages.INSTANCE.notificationAboutUpcomingRaces());

@@ -10,24 +10,24 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileD
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfilesDTO;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
 import com.sap.sailing.gwt.home.shared.partials.editable.EditableSuggestedMultiSelection.EditModeChangeHandler;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider.Display;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionDataProvider;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggestedCompetitorMultiSelectionPresenter;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionPresenter;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.ParticipatedEventDTO;
 
-public class StatefulSailorProfileDataProvider
-        implements SuggestedMultiSelectionDataProvider<SimpleCompetitorWithIdDTO, Display>, EditModeChangeHandler {
+public class StatefulSailorProfileDataProvider implements
+        SuggestedMultiSelectionPresenter<SimpleCompetitorWithIdDTO, SuggestedMultiSelectionPresenter.Display<SimpleCompetitorWithIdDTO>>,
+        EditModeChangeHandler {
 
     private SailorProfileDataProvider sailorProfileDataProvider;
-    private final SuggestedMultiSelectionCompetitorDataProvider competitorDataProvider;
+    private final AbstractSuggestedCompetitorMultiSelectionPresenter<Display<SimpleCompetitorWithIdDTO>> competitorDataProvider;
 
     private SailorProfileDTO sailorProfile;
 
     private EditSailorProfileView sailorView;
 
     public StatefulSailorProfileDataProvider(ClientFactoryWithDispatch clientFactory,
-            SuggestedMultiSelectionCompetitorDataProvider competitorDataProvider) {
+            AbstractSuggestedCompetitorMultiSelectionPresenter<Display<SimpleCompetitorWithIdDTO>> competitorDataProvider) {
         sailorProfileDataProvider = new SailorProfileDataProviderImpl(clientFactory);
         this.competitorDataProvider = competitorDataProvider;
     }
@@ -137,8 +137,7 @@ public class StatefulSailorProfileDataProvider
     }
 
     @Override
-    public void addDisplay(
-            com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider.Display display) {
+    public void addDisplay(SuggestedMultiSelectionPresenter.Display<SimpleCompetitorWithIdDTO> display) {
         competitorDataProvider.addDisplay(display);
     }
 
