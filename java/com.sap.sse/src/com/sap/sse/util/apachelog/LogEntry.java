@@ -36,7 +36,7 @@ public class LogEntry {
     
     public LogEntry(String logEntry) {
         final Iterator<String> i = Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(logEntry).iterator();
-        hostname = i.next();
+        hostname = i.next().trim();
         requestorIpString = i.next();
         remoteLogname = i.next();
         remoteUser = i.next();
