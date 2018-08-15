@@ -64,7 +64,7 @@ public class Swarm implements TimeListener {
     private HandlerRegistration handlerRegistration;
     
     private boolean colored = false;
-    private final ValueRangeBoundaries valueRange;
+    private final ValueRangeFlexibleBoundaries valueRange;
     private final ColorMapper colorMapper;
 
     public Swarm(FullCanvasOverlay fullcanvas, MapWidget map, com.sap.sse.gwt.client.player.Timer timer,
@@ -78,7 +78,7 @@ public class Swarm implements TimeListener {
         timePoint = timer.getTime();
         cosineOfAverageLatitude = 1.0; // default to equator
         diffPx = new Vector(0, 0);
-        valueRange = new ValueRangeBoundaries(0.0, 120.0, /*percentage*/ 0.1);
+        valueRange = new ValueRangeFlexibleBoundaries(0.0, 120.0, /*percentage*/ 0.15);
         colorMapper = new ColorMapper(valueRange, !colored);
     }
     public void start(final int animationIntervalMillis) {
@@ -290,7 +290,7 @@ public class Swarm implements TimeListener {
         drawSwarm();
         return true;
     }
-    public ValueRangeBoundaries getValueRange() {
+    public ValueRangeFlexibleBoundaries getValueRange() {
         return valueRange;
     }
     public ColorMapper getColorMapper() {

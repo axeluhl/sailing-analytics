@@ -1,5 +1,5 @@
 package com.sap.sailing.gwt.ui.simulator.streamlets;
 
-public interface ValueRangeBoundariesChangedListener {
+public interface ValueRangeFlexibleBoundariesChangedListener {
     void onValueRangeBoundariesChanged();
 }
