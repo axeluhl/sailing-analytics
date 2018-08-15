@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.communication.user.profile;
+package com.sap.sailing.gwt.home.communication.user.profile.sailorprofile;
 
 import java.util.UUID;
 
@@ -19,7 +19,7 @@ public class UpdateSailorProfileTitleAction extends UpdateSailorProfileAction {
         this.title = title;
     }
 
-    public UpdateSailorProfileTitleAction() {
+    protected UpdateSailorProfileTitleAction() {
     }
 
     @GwtIncompatible

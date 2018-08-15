@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.communication.user.profile;
+package com.sap.sailing.gwt.home.communication.user.profile.sailorprofile;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -25,12 +25,12 @@ public class UpdateSailorProfileCompetitorsAction extends UpdateSailorProfileAct
         Util.addAll(competitors, this.competitors);
     }
 
-    public UpdateSailorProfileCompetitorsAction() {
+    protected UpdateSailorProfileCompetitorsAction() {
     }
 
     /** convert SimpleCompetitorIdWithDTOs to Competitors */
     @GwtIncompatible
-    private Iterable<Competitor> convertCompetitors(final Iterable<SimpleCompetitorWithIdDTO> comps,
+    private Iterable<Competitor> convertCompetitorDTOs(final Iterable<SimpleCompetitorWithIdDTO> comps,
             CompetitorAndBoatStore store) {
         return StreamSupport.stream(comps.spliterator(), false)
                 .map(c -> store.getExistingCompetitorByIdAsString(c.getIdAsString())).collect(Collectors.toList());
@@ -39,6 +39,6 @@ public class UpdateSailorProfileCompetitorsAction extends UpdateSailorProfileAct
     @GwtIncompatible
     @Override
     protected SailorProfilePreference updatePreference(CompetitorAndBoatStore store, SailorProfilePreference p) {
-        return new SailorProfilePreference(store, p, convertCompetitors(this.competitors, store));
+        return new SailorProfilePreference(store, p, convertCompetitorDTOs(this.competitors, store));
     }
 }

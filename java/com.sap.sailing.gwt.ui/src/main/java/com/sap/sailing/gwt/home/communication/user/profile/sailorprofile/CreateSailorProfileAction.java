@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.communication.user.profile;
+package com.sap.sailing.gwt.home.communication.user.profile.sailorprofile;
 
 import java.util.UUID;
 
@@ -19,7 +19,7 @@ public class CreateSailorProfileAction extends UpdateSailorProfileAction {
         this.name = name;
     }
 
-    public CreateSailorProfileAction() {
+    protected CreateSailorProfileAction() {
     }
 
     @GwtIncompatible

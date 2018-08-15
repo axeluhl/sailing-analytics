@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.communication.user.profile;
+package com.sap.sailing.gwt.home.communication.user.profile.sailorprofile;
 
 import java.util.UUID;
 
@@ -17,7 +17,6 @@ public class RemoveSailorProfileAction extends UpdateSailorProfileAction {
     }
 
     protected RemoveSailorProfileAction() {
-
     }
 
     @GwtIncompatible
