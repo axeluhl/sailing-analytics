@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sse.common.Util;
@@ -17,8 +19,14 @@ import com.sap.sse.common.filter.FilterSet;
 public class TagListProvider extends ListDataProvider<TagDTO> {
 
     private List<TagDTO> allTags = new ArrayList<TagDTO>();    
-    private FilterSet<TagDTO, Filter<TagDTO>> currentFilterSet;     
+    private FilterSet<TagDTO, Filter<TagDTO>> currentFilterSet; 
+    private Label filterInformationLabel;
 
+    
+    
+    public TagListProvider(Label filterInformationLabel) {
+        this.filterInformationLabel = filterInformationLabel;
+    }
 
     public List<TagDTO> getAllTags() {
         return allTags;
@@ -82,9 +90,19 @@ public class TagListProvider extends ListDataProvider<TagDTO> {
     }
 
     public void setTagsFilterSet(FilterSet<TagDTO, Filter<TagDTO>> tagsFilterSet) {
-        this.currentFilterSet = tagsFilterSet;
-        this.updateFilteredTags();
-        this.refresh();
+        if(filterInformationLabel != null) {
+            if(tagsFilterSet != null) {
+                filterInformationLabel.setText(tagsFilterSet.getName());
+                filterInformationLabel.setVisible(true);
+            }
+            else {
+                filterInformationLabel.setVisible(false);
+            } 
+        }    
+        
+        updateFilteredTags();  
+        currentFilterSet = tagsFilterSet;
+        refresh();
     }
 
     public int getFilteredTagsListSize() {

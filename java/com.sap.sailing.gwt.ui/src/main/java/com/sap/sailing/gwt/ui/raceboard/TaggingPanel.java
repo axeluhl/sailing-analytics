@@ -968,6 +968,7 @@ public class TaggingPanel extends ComponentWithoutSettings
     private final HeaderPanel panel;
     private final TagCreationPanel tagCreationPanel;
     private final Panel filterbarPanel;
+    private final Label currentFilterLabel;
     private final ScrollPanel contentPanel;
     private final CellList<TagDTO> tagCellList;
     private final SingleSelectionModel<TagDTO> tagSelectionModel;
@@ -993,7 +994,9 @@ public class TaggingPanel extends ComponentWithoutSettings
         TagPanelResources.INSTANCE.style().ensureInjected();
         CellListResources.INSTANCE.cellListStyle().ensureInjected();
 
-        tagListProvider = new TagListProvider();
+        //TODO Add this label to ui
+        currentFilterLabel = new Label();
+        tagListProvider = new TagListProvider(currentFilterLabel);
         customTagButtons = new ArrayList<TagButton>();
 
         panel = new HeaderPanel();
@@ -1044,7 +1047,8 @@ public class TaggingPanel extends ComponentWithoutSettings
                 timer.setTime(tagSelectionModel.getSelectedObject().getRaceTimepoint().asMillis());
             }
         });
-
+        
+        contentPanel.add(currentFilterLabel);
         contentPanel.add(tagCellList);
         contentPanel.getElement().getStyle().setHeight(100, Unit.PCT);
         contentPanel.getElement().getStyle().setPaddingTop(10, Unit.PX);
