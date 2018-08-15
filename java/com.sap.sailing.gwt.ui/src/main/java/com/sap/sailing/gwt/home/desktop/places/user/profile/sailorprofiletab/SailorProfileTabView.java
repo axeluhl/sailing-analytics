@@ -11,6 +11,7 @@ import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.SailorProfileDetails;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 
 public class SailorProfileTabView extends Composite implements UserProfileTabView<SailorProfilePlace> {
@@ -46,7 +47,7 @@ public class SailorProfileTabView extends Composite implements UserProfileTabVie
             currentPresenter.getSharedSailorProfilePresenter().getDataProvider().setView(sailorView.getEditView());
             if (uuid == SailorProfileDTO.SAILOR_PROFILE_KEY_NEW) {
                 currentPresenter.getSharedSailorProfilePresenter().getDataProvider().createNewEntry(UUID.randomUUID(),
-                        "New Sailor Profile");
+                        StringMessages.INSTANCE.newSailorProfileName());
             } else {
                 currentPresenter.getSharedSailorProfilePresenter().getDataProvider().loadSailorProfile(uuid);
             }

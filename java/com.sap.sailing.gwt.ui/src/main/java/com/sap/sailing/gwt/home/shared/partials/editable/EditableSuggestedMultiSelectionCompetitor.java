@@ -16,7 +16,7 @@ public class EditableSuggestedMultiSelectionCompetitor
         super(competitor -> new SuggestedMultiSelectionCompetitorItemDescription(competitor, flagImageResolver),
                 new CompetitorDisplayImpl(presenter.getDataProvider(), flagImageResolver).selectionUi,
                 presenter.getDataProvider());
-        super.setText("Competitors");
+        super.setText(i18n.competitors());
     }
 
     private static class CompetitorDisplayImpl

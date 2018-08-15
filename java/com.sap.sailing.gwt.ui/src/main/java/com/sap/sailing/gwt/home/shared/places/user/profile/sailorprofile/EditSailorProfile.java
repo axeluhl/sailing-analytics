@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.home.shared.partials.listview.BoatClassListView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.ParticipatedEventDTO;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.events.SailorProfileEventsTable;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 /**
  * Implementation of {@link EditSailorProfileView} where users can view the details of a SailorProfile and edit them.
@@ -31,6 +32,9 @@ public class EditSailorProfile extends Composite implements EditSailorProfileVie
     interface Style extends CssResource {
         String edgeToEdge();
     }
+
+    @UiField
+    StringMessages i18n;
 
     @UiField
     Style style;
@@ -58,7 +62,7 @@ public class EditSailorProfile extends Composite implements EditSailorProfileVie
         presenter.getDataProvider().setView(this);
         competitorSelectionUi = new EditableSuggestedMultiSelectionCompetitor(presenter, flagImageResolver);
         initWidget(uiBinder.createAndBindUi(this));
-        boatClassesUi.setText("Boatclasses");
+        boatClassesUi.setText(i18n.boatClasses());
         setupAccordions();
         setupTitleChangeListener();
     }
@@ -71,9 +75,6 @@ public class EditSailorProfile extends Composite implements EditSailorProfileVie
     }
 
     private void setupAccordions() {
-        accordionEventsUi.setTitle("Events");
-        accordionStatisticsUi.setTitle("Statistics");
-        accordionPolarDiagramUi.setTitle("Polar Diagram");
     }
 
     public void setEdgeToEdge(boolean edgeToEdge) {

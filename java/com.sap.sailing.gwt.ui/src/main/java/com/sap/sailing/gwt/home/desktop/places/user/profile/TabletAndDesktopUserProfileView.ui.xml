@@ -15,7 +15,7 @@
       <c:tabcontent title="{i18n.favoritesAndNotifications}">
         <s:preferencestab.UserProfilePreferencesTabView ui:field="preferencesTabUi" />
       </c:tabcontent>
-      <c:tabcontent title="{i18n.sailorProfile">
+      <c:tabcontent title="{i18n.sailorProfiles}">
         <s:sailorprofiletab.SailorProfileTabView ui:field="sailorProfileTabUi" />
       </c:tabcontent>
       <c:tabcontent title="{i18n.settings}">

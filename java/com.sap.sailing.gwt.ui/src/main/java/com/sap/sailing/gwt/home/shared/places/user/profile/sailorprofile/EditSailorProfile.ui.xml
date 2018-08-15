@@ -26,17 +26,17 @@
         <div class="{res.mediaCss.column} {res.mainCss.spacermargintopmediumsmall}">
             <ms:EditableSuggestedMultiSelectionCompetitor
                 ui:field="competitorSelectionUi"
-                addStyleNames="{res.mediaCss.column} {res.mainCss.spacermargintopmediumsmall} {res.mediaCss.small6}" />
+                addStyleNames="{res.mediaCss.column} {res.mainCss.spacermargintopmediumsmall} {res.mediaCss.small12} {res.mediaCss.medium6}" />
             <lv:BoatClassListView ui:field="boatClassesUi"
-                addStyleNames="{res.mediaCss.column} {res.mainCss.spacermargintopmediumsmall} {res.mediaCss.small6}" />
+                addStyleNames="{res.mediaCss.column} {res.mainCss.spacermargintopmediumsmall} {res.mediaCss.small12} {res.mediaCss.medium6}" />
             <div class="{res.mediaCss.column} {res.mainCss.spacermargintopmediumsmall} {res.mediaCss.small12}">
-                <dac:DesktopAccordion ui:field="accordionEventsUi" />
+                <dac:DesktopAccordion ui:field="accordionEventsUi" title="{i18n.events}"/>
             </div>
             <div class="{res.mediaCss.column} {res.mainCss.spacermargintopmediumsmall} {res.mediaCss.small12}">
-                <dac:DesktopAccordion ui:field="accordionStatisticsUi" />
+                <dac:DesktopAccordion ui:field="accordionStatisticsUi" title="{i18n.statistics}"/>
             </div>
             <div class="{res.mediaCss.column} {res.mainCss.spacermargintopmediumsmall} {res.mediaCss.small12}">
-                <dac:DesktopAccordion ui:field="accordionPolarDiagramUi" />
+                <dac:DesktopAccordion ui:field="accordionPolarDiagramUi" title="{i18n.polarSheetChart}" />
             </div>
         </div>
     </g:HTMLPanel>

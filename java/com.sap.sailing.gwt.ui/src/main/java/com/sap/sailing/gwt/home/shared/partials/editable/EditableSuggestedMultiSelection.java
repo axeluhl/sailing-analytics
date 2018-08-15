@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelection;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class EditableSuggestedMultiSelection<T> extends Composite implements HasText {
 
@@ -32,6 +33,9 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
     public static interface EditModeChangeHandler {
         void onEditModeChanged(boolean edit);
     }
+
+    @UiField
+    StringMessages i18n;
 
     @UiField
     DivElement parentPanel;
@@ -78,8 +82,10 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
         editModeChangeHandler.onEditModeChanged(state);
         if (state) {
             parentPanel.appendChild(multiSelect.getElement());
+            toggleEditButtonUi.setText(i18n.save());
         } else {
             parentPanel.appendChild(listContainerUi);
+            toggleEditButtonUi.setText(i18n.edit());
         }
     }
 

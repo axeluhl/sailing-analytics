@@ -2096,4 +2096,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String swissTimingUpdateURL();
     String swissTimingUpdateUsername();
     String swissTimingUpdatePassword();
+
+    String boatClasses();
+    String sailorProfiles();
+    String profileName();
+    String addSailorProfileMessage();
+    String badges();
+    String newSailorProfileName();
 }
