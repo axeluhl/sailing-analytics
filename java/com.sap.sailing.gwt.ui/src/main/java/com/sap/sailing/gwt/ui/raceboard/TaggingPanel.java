@@ -548,9 +548,21 @@ public class TaggingPanel extends ComponentWithoutSettings
                 @Override
                 public void update(int index, TagButton button, String value) {
                     if (LeaderboardConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
+                        final int heightOfTagButtonPanel = customButtonsPanel.getOffsetHeight();
+                        
                         customTagButtons.remove(button);
                         customButtonsPanel.remove(button);
                         customTagButtonsTable.setRowData(customTagButtons);
+                        
+                        final int deltaHeight = customButtonsPanel.getOffsetHeight() - heightOfTagButtonPanel;
+                        /* 
+                         * If the height of the customButtonsPanel has changed ( delta not equals to 0 ), 
+                         * the footerWidget of the TaggingPanel has a different height, 
+                         * which in this case might cause the contentWidget to be to small.                     
+                        */
+                        if(deltaHeight != 0) { 
+                            panel.setContentWidget(contentPanel);
+                        }
                     } else if (LeaderboardConfigImagesBarCell.ACTION_EDIT.equals(value)) {
                         selectedTagButton = button;
 
@@ -587,6 +599,8 @@ public class TaggingPanel extends ComponentWithoutSettings
                 @Override
                 public void onClick(ClickEvent event) {
                     if (inputPanel.getTagValue().length() > 0) {
+                        final int heightOfTagButtonPanel = customButtonsPanel.getOffsetHeight();
+                        
                         TagButton tagButton = new TagButton(inputPanel.getTagValue(), inputPanel.getTagValue(),
                                 inputPanel.getImageURLValue(), inputPanel.getCommentValue());
                         inputPanel.clearAllValues();
@@ -595,6 +609,16 @@ public class TaggingPanel extends ComponentWithoutSettings
                         customTagButtons.add(tagButton);
                         customButtonsPanel.add(tagButton);
                         setRowData(customTagButtons);
+                        
+                        final int deltaHeight = customButtonsPanel.getOffsetHeight() - heightOfTagButtonPanel;
+                        /* 
+                         * If the height of the customButtonsPanel has changed ( delta not equals to 0 ), 
+                         * the footerWidget of the TaggingPanel has a different height, 
+                         * which might cause the contentWidget to overlap the footerWidget.                     
+                        */
+                        if(deltaHeight != 0) { 
+                            panel.setContentWidget(contentPanel);
+                        }
                     } else {
                         Notification.notify(stringMessages.tagNotSpecified(), NotificationType.WARNING);
                     }
@@ -944,7 +968,7 @@ public class TaggingPanel extends ComponentWithoutSettings
     private final HeaderPanel panel;
     private final TagCreationPanel tagCreationPanel;
     private final Panel filterbarPanel;
-    private final Panel contentPanel;
+    private final ScrollPanel contentPanel;
     private final CellList<TagDTO> tagCellList;
     private final SingleSelectionModel<TagDTO> tagSelectionModel;
 
