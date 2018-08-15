@@ -194,9 +194,11 @@ public class TaggingPanel extends ComponentWithoutSettings
         private final TagCellTemplate tagCellTemplate = GWT.create(TagCellTemplate.class);
         private final TagPanelResources tagPanelRes = GWT.create(TagPanelResources.class);
         private final TagPanelStyle tagPanelStyle = tagPanelRes.style();
+        private final boolean isPreviewCell;
 
-        public TagCell() {
+        public TagCell(boolean isPreviewCell) {
             super("click");
+            this.isPreviewCell = isPreviewCell;
         }
 
         @Override
@@ -222,7 +224,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             }
 
             SafeHtml cell;
-            if (userService.getCurrentUser() != null
+            if (isPreviewCell && userService.getCurrentUser() != null
                     && (tag.getUsername().equals(userService.getCurrentUser().getName())
                             || userService.getCurrentUser().hasRole("admin"))) {
                 cell = tagCellTemplate.cellRemovable(tagPanelStyle.tag(), tagPanelStyle.tagHeading(),
@@ -384,7 +386,7 @@ public class TaggingPanel extends ComponentWithoutSettings
 
         public TagPreviewPanel(TagCreationInputPanel inputField) {
             this.inputField = inputField;
-            tagPreviewCellList = new CellList<TagDTO>(new TagCell(), CellListResources.INSTANCE);
+            tagPreviewCellList = new CellList<TagDTO>(new TagCell(false), CellListResources.INSTANCE);
             tagPreviewCellList.setVisibleRange(0, 1);
             previewLabel = new Label(stringMessages.tagPreview());
             listContainingPreviewTag = new ArrayList<TagDTO>();
@@ -1001,7 +1003,7 @@ public class TaggingPanel extends ComponentWithoutSettings
 
         panel = new HeaderPanel();
         filterbarPanel = new TagFilterPanel(stringMessages, tagListProvider);
-        tagCellList = new CellList<TagDTO>(new TagCell(), CellListResources.INSTANCE);
+        tagCellList = new CellList<TagDTO>(new TagCell(true), CellListResources.INSTANCE);
         tagSelectionModel = new SingleSelectionModel<TagDTO>();
 
         contentPanel = new ScrollPanel();
@@ -1048,7 +1050,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             }
         });
         
-        contentPanel.add(currentFilterLabel);
+        //contentPanel.add(currentFilterLabel);
         contentPanel.add(tagCellList);
         contentPanel.getElement().getStyle().setHeight(100, Unit.PCT);
         contentPanel.getElement().getStyle().setPaddingTop(10, Unit.PX);
