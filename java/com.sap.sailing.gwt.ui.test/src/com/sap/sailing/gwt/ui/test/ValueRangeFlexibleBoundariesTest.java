@@ -9,7 +9,7 @@ public class ValueRangeFlexibleBoundariesTest {
     Double minLeft = -6.0;
     Double maxRight = 6.0;
     @Test
-    public void testCheckIfValueIsInRightBoundaryRangeAndUpdateIfNecessary() {
+    public void testCheckIfValueIsInLeftBoundaryRangeAndUpdateIfNecessary() {
         //update left border to 0.0, that means boundaries now should be [-0.5,0.5] and [4.5,5.5]
         valueRange.checkIfValueIsInLeftBoundaryRangeAndUpdateIfNecessary(0.0);
         Double newMinLeft = -0.5;
@@ -18,7 +18,7 @@ public class ValueRangeFlexibleBoundariesTest {
         assertEquals(newMaxRight, (Double) valueRange.getMaxRight());
     }
     @Test
-    public void testCheckIfValueIsInLeftBoundaryRangeAndUpdateIfNecessary() {
+    public void testCheckIfValueIsInRightBoundaryRangeAndUpdateIfNecessary() {
         //update right border to 20, that means the boundaries now should be [-7.5,-2.5] and [17.5,22.5]
         valueRange.checkIfValueIsInRightBoundaryRangeAndUpdateIfNecessary(20.0);
         Double newMaxRight = 22.5;
