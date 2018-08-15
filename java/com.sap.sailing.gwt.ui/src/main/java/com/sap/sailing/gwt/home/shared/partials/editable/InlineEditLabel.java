@@ -14,7 +14,6 @@ import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileResources;
 
 public class InlineEditLabel extends Composite implements HasText {
 
@@ -28,16 +27,16 @@ public class InlineEditLabel extends Composite implements HasText {
     }
 
     @UiField
-    SailorProfileResources res;
+    EditableResources res;
 
     @UiField
-    TextBox textBox;
+    TextBox textBoxUi;
 
     @UiField
-    Label label;
+    Label labelUi;
 
     @UiField
-    Label imageUi;
+    InlineEditButton editButtonUi;
 
     private boolean state = false;
 
@@ -45,19 +44,22 @@ public class InlineEditLabel extends Composite implements HasText {
 
     public InlineEditLabel() {
         initWidget(uiBinder.createAndBindUi(this));
-        imageUi.getElement().getStyle().setBackgroundImage("url('" + res.editPencil().getSafeUri().asString() + "')");
-        textBox.addKeyUpHandler((event) -> {
+        editButtonUi.getElement().getStyle()
+                .setBackgroundImage("url('" + res.editPencil().getSafeUri().asString() + "')");
+        textBoxUi.addKeyUpHandler((event) -> {
             if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
                 updateState(false);
+                editButtonUi.updateState(false);
             }
         });
-        label.addClickHandler((event) -> {
+        labelUi.addClickHandler((event) -> {
             updateState(true);
+            editButtonUi.updateState(true);
         });
         updateState(false, true);
     }
 
-    @UiHandler("imageUi")
+    @UiHandler("editButtonUi")
     void onClick(ClickEvent e) {
         updateState(!state);
     }
@@ -68,20 +70,20 @@ public class InlineEditLabel extends Composite implements HasText {
 
     private void updateState(boolean newState, boolean suppressEvents) {
         if (newState) {
-            textBox.setWidth((label.getOffsetWidth() + 7) + "px");
-            label.setVisible(false);
-            textBox.setVisible(true);
-            textBox.setText(label.getText());
-            textBox.setFocus(true);
+            textBoxUi.setWidth((labelUi.getOffsetWidth() + 7) + "px");
+            labelUi.setVisible(false);
+            textBoxUi.setVisible(true);
+            textBoxUi.setText(labelUi.getText());
+            textBoxUi.setFocus(true);
         } else {
-            boolean unchanged = textBox.getText().equals(label.getText());
+            boolean unchanged = textBoxUi.getText().equals(labelUi.getText());
 
-            label.setVisible(true);
-            textBox.setVisible(false);
-            label.setText(textBox.getText());
+            labelUi.setVisible(true);
+            textBoxUi.setVisible(false);
+            labelUi.setText(textBoxUi.getText());
 
             if (!suppressEvents && !unchanged) {
-                changeHandlers.forEach(c -> c.onTextChanged(label.getText()));
+                changeHandlers.forEach(c -> c.onTextChanged(labelUi.getText()));
             }
         }
         this.state = newState;
@@ -89,12 +91,12 @@ public class InlineEditLabel extends Composite implements HasText {
 
     @Override
     public void setText(String text) {
-        label.setText(text);
+        labelUi.setText(text);
     }
 
     @Override
     public String getText() {
-        return label.getText();
+        return labelUi.getText();
     }
 
     public void addTextChangeHandler(TextChangeHandler handler) {

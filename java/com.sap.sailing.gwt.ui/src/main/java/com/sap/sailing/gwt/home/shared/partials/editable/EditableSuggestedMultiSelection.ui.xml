@@ -27,8 +27,7 @@
             </div>
             <sp:multiselection.SuggestedMultiSelection ui:field="multiSelect" />
         </div>
-        <g:Button addStyleNames="{res.mainCss.button} {style.toggleEditButton}" ui:field="toggleEditButtonUi">
-            <ui:text from="{i18n.edit}" />
-        </g:Button>
+        <sp:editable.InlineEditButton addStyleNames="{style.toggleEditButton}"
+            ui:field="editButtonUi" />
     </g:HTMLPanel>
 </ui:UiBinder> 

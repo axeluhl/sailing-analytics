@@ -14,7 +14,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasText;
@@ -52,9 +51,6 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
     @UiField
     DivElement listContainerUi;
 
-    @UiField
-    Button toggleEditButtonUi;
-
     private final Map<T, IsWidget> tableElements = new HashMap<>();
     private final Function<T, IsWidget> itemProducer;
 
@@ -82,14 +78,12 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
         editModeChangeHandler.onEditModeChanged(state);
         if (state) {
             parentPanel.appendChild(multiSelect.getElement());
-            toggleEditButtonUi.setText(i18n.save());
         } else {
             parentPanel.appendChild(listContainerUi);
-            toggleEditButtonUi.setText(i18n.edit());
         }
     }
 
-    @UiHandler("toggleEditButtonUi")
+    @UiHandler("editButtonUi")
     void onEditButtonClicked(ClickEvent event) {
         setEditMode(!editMode);
     }
