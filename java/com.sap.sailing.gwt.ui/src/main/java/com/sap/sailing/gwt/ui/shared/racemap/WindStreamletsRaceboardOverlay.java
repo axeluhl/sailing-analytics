@@ -53,7 +53,6 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
     private static final long RESOLUTION_IN_MILLIS = 5000;
     private static final int WIND_FETCH_INTERVAL_IN_MILLIS = 10000;
     private static final int CHECK_WIND_SOURCE_INTERVAL_IN_MILLIS = 60000;
-    
     private boolean visible = false;
     private final Timer timer;
     private Swarm swarm;
@@ -66,10 +65,9 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
     private final Scheduler scheduler;
     private Canvas streamletLegend;
     private boolean firstColoring = true;
-    
+    private boolean colored;
     private long latitudeCount;
     private double latitudeSum;
-    
     private final NumberFormat numberFormatOneDecimal = NumberFormatterFactory.getDecimalFormat(1);
 
     public WindStreamletsRaceboardOverlay(MapWidget map, int zIndex, final Timer timer,
@@ -337,7 +335,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
             }
         }
     }
-private boolean colored;
+
     public void setColors(boolean isColored) {
         this.colored = isColored;
         if ((isColored) && (firstColoring)) {
