@@ -26,12 +26,10 @@ public class ColorMapper implements ValueRangeFlexibleBoundariesChangedListener 
         this.isGrey = isGrey;
         colorMapperChangedListeners = new HashSet<>();
     }
-
     public void setGrey(boolean isGrey) {
         this.isGrey = isGrey;
         notifyListeners();
     }
-
     public String getColor(double value) {
         if (isGrey) {
             return "rgba(255,255,255," + Math.min(1.0, (value - minValue) / (maxValue - minValue)) + ")";
@@ -40,12 +38,10 @@ public class ColorMapper implements ValueRangeFlexibleBoundariesChangedListener 
             return "hsl(" + Math.round(h) + ", 100%, 50%)";
         }
     }
-
     private void updateMinMax() {
         minValue = valueRange.getMinLeft();
         maxValue = valueRange.getMaxRight();
     }
-
     @Override
     public void onValueRangeBoundariesChanged() {
         updateMinMax();
