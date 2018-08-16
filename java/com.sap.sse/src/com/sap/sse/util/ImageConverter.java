@@ -84,7 +84,7 @@ public class ImageConverter {
         }
     }
 
-    public InputStream sourceImageToInputStream() {//public for testing
+    public InputStream imageToInputStream(BufferedImage image) {//public for testing
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
             ImageIO.write(image, imageFormat, bos);
@@ -172,7 +172,7 @@ public class ImageConverter {
         } // if obtaining an OutputStream if the image with EXIF data did not work, then write it without
         InputStream toReturn;
         if (bytes == null) {
-            toReturn = sourceImageToInputStream();
+            toReturn = imageToInputStream(resizedBufferedImage);
         } else {// if it did work, then write the OutputStream to the FileStorageService
             toReturn = new ByteArrayInputStream(bytes);
         }
