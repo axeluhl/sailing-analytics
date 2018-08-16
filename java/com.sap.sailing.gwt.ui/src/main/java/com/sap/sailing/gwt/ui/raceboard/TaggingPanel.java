@@ -334,6 +334,7 @@ public class TaggingPanel extends ComponentWithoutSettings
 
             createTagFromTextBoxes = new Button(stringMessages.tagAddTag());
             createTagFromTextBoxes.setStyleName(TagPanelResources.INSTANCE.style().footerButton());
+            createTagFromTextBoxes.addStyleName("gwt-Button");
             createTagFromTextBoxes.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -348,6 +349,7 @@ public class TaggingPanel extends ComponentWithoutSettings
 
             editCustomTagButtons = new Button(stringMessages.tagEditCustomTagButtons());
             editCustomTagButtons.setStyleName(TagPanelResources.INSTANCE.style().footerButton());
+            editCustomTagButtons.addStyleName("gwt-Button");
             editCustomTagButtons.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -597,6 +599,7 @@ public class TaggingPanel extends ComponentWithoutSettings
 
             addCustomTagButton = new Button(stringMessages.tagAddCustomTagButton());
             addCustomTagButton.setStyleName(style.footerButton());
+            addCustomTagButton.addStyleName("gwt-Button");
             addCustomTagButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -630,6 +633,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             saveChangesButton = new Button(stringMessages.save());
             saveChangesButton.setVisible(false);
             saveChangesButton.setStyleName(style.footerButton());
+            saveChangesButton.addStyleName("gwt-Button");
             saveChangesButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -656,6 +660,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             cancelChangesButton = new Button(stringMessages.cancel());
             cancelChangesButton.setVisible(false);
             cancelChangesButton.setStyleName(style.footerButton());
+            cancelChangesButton.addStyleName("gwt-Button");
             cancelChangesButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -670,6 +675,7 @@ public class TaggingPanel extends ComponentWithoutSettings
 
             closeButton = new Button(stringMessages.close());
             closeButton.setStyleName(TagPanelResources.INSTANCE.style().footerButton());
+            closeButton.addStyleName("gwt-Button");
             closeButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -743,6 +749,7 @@ public class TaggingPanel extends ComponentWithoutSettings
 
             Button submitButton = new Button();
             submitButton.setStyleName(css.tagFilterButton());
+            submitButton.addStyleName("gwt-Button");
             submitButton.addStyleName(css.tagFilterSearchButton());
             submitButton.addStyleName(css.searchButtonBackgroundImage());
 
@@ -756,6 +763,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             clearTextBoxButton.addStyleName(css.tagFilterClearButton());
             clearTextBoxButton.addStyleName(css.clearButtonBackgroundImage());
             clearTextBoxButton.addStyleName(css.tagFilterHiddenButton());
+            clearTextBoxButton.addStyleName("gwt-Button");
             clearTextBoxButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -766,8 +774,9 @@ public class TaggingPanel extends ComponentWithoutSettings
             filterSettingsButton = new Button("");
             filterSettingsButton.setStyleName(css.tagFilterButton());
             filterSettingsButton.addStyleName(css.tagFilterFilterButton());
-            filterSettingsButton.setTitle(stringMessages.tagsFilter());
             filterSettingsButton.addStyleName(css.filterInactiveButtonBackgroundImage());
+            filterSettingsButton.addStyleName("gwt-Button");
+            filterSettingsButton.setTitle(stringMessages.tagsFilter());
             filterSettingsButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
