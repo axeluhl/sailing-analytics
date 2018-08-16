@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
+import java.util.HashMap;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,8 +28,8 @@ public class ImageConverterTest {
 
     @Before
     public void setUp() {
-        jpgConverter = new ImageConverter(new ByteArrayInputStream(onePixelJpgExample),"jpg");
-        pngConverter = new ImageConverter(new ByteArrayInputStream(onePixelPngExample),"png");
+        jpgConverter = new ImageConverter(new ByteArrayInputStream(onePixelJpgExample),"jpg", new HashMap<String, Boolean>());
+        pngConverter = new ImageConverter(new ByteArrayInputStream(onePixelPngExample),"png", new HashMap<String, Boolean>());
         assertNotNull(jpgConverter.getImage());
         assertNotNull(pngConverter.getImage());
     }
