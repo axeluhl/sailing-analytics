@@ -2135,7 +2135,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 ReadonlyRaceState raceState = ReadonlyRaceStateImpl.getOrCreate(getService(), raceLog);
                 Iterable<RaceLogTagEvent> foundTagEvents = raceState.getTagEvents();
                 for (RaceLogTagEvent tagEvent : foundTagEvents) {
-                    if (latestReceivedTagTime == null
+                    if ((latestReceivedTagTime == null && tagEvent.getRevokedAt() == null)
                             || (latestReceivedTagTime != null && tagEvent.getRevokedAt() == null
                                     && tagEvent.getCreatedAt().after(latestReceivedTagTime))
                             || (latestReceivedTagTime != null && tagEvent.getRevokedAt() != null
