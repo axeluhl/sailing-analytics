@@ -282,32 +282,38 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
     protected FocusWidget getInitialFocusWidget() {
         return nameEntryField;
     }
-    
-    //used for ImageListComposite and VideoListComposite to inform user that upload is not possible without needing to try it first
-    private void testFileStorageService(FileStorageManagementGwtServiceAsync sailingService) {//double callback to test if a fileStorageService is enabled and enable upload if it is
+
+    // used for ImageListComposite and VideoListComposite to inform user that upload is not possible without needing to
+    // try it first
+    private void testFileStorageService(FileStorageManagementGwtServiceAsync sailingService) {
+        // double callback to test if a fileStorageService is enabled and enable upload if it is
         storageServiceAvailable.setValue(false);
         sailingService.getActiveFileStorageServiceName(new AsyncCallback<String>() {
             @Override
             public void onSuccess(String result) {
-                sailingService.testFileStorageServiceProperties(result, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<FileStorageServicePropertyErrorsDTO>() {
+                if (result != null) {
+                    sailingService.testFileStorageServiceProperties(result,
+                            LocaleInfo.getCurrentLocale().getLocaleName(),
+                            new AsyncCallback<FileStorageServicePropertyErrorsDTO>() {
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
-                    }
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
+                                }
 
-                    @Override
-                    public void onSuccess(FileStorageServicePropertyErrorsDTO result) {
-                        if(result == null) {
-                            storageServiceAvailable.setValue(true);
-                        }else {
-                            Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
-                        }
-                        
-                    }
-                });
+                                @Override
+                                public void onSuccess(FileStorageServicePropertyErrorsDTO result) {
+                                    if (result == null) {
+                                        storageServiceAvailable.setValue(true);
+                                    } else {
+                                        Notification.notify(stringMessages.setUpStorageService(),
+                                                NotificationType.ERROR);
+                                    }
+                                }
+                            });
+                }
             }
-            
+
             @Override
             public void onFailure(Throwable caught) {
                 Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
