@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.swisstimingadapter;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 
@@ -53,11 +54,11 @@ public interface SwissTimingFactory {
     
     SwissTimingRaceTracker createRaceTracker(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, WindStore windStore,
             DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, SwissTimingTrackingConnectivityParameters connectivityParams)
-            throws InterruptedException, UnknownHostException, IOException, ParseException;
+            throws InterruptedException, UnknownHostException, IOException, ParseException, URISyntaxException;
 
     RaceTracker createRaceTracker(Regatta regatta, WindStore windStore, DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry,
             RaceLogResolver raceLogResolver, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, SwissTimingTrackingConnectivityParameters connectivityParams)
-            throws UnknownHostException, InterruptedException, IOException, ParseException;
+            throws UnknownHostException, InterruptedException, IOException, ParseException, URISyntaxException;
 
     Race createRace(String raceId, String raceName, String description, BoatClass boatClass);
 
