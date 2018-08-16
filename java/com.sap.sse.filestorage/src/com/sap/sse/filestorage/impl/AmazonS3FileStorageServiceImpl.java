@@ -54,7 +54,7 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
 
     private AmazonS3Client createS3Client() throws InvalidPropertiesException {
         AWSCredentials creds;
-        
+
         // first try to use properties
         if (accessId.getValue() != null && accessKey.getValue() != null) {
             creds = new BasicAWSCredentials(accessId.getValue(), accessKey.getValue());
@@ -124,7 +124,7 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
         AmazonS3Client s3 = createS3Client();
 
         
-        if(bucketName.getValue().equals("")) {
+        if (bucketName.getValue().equals("")) {
             throw new InvalidPropertiesException("empty bucketname is not allowed");
         }
         // test if credentials are valid

@@ -1,0 +1,9 @@
+diff a/java/com.sap.sailing.gwt.ui/src/main/java/com/sap/sailing/gwt/ui/client/StringMessages_de.properties b/java/com.sap.sailing.gwt.ui/src/main/java/com/sap/sailing/gwt/ui/client/StringMessages_de.properties	(rejected hunks)
+@@ -2088,6 +2088,5 @@
+ manage2SailPort=Port
+ swissTimingUpdateURL=Update URL (z.B. für Startzeit-Übertragung)
+ swissTimingUpdateUsername=Benutzername zum Versenden der Updates
+-swissTimingUpdatePassword=Passwort zum Versenden der Updates
+\ No newline at end of file
+ swissTimingUpdatePassword=Passwort zum Versenden der UpdatesswissTimingUpdatePassword=Passwort zum Versenden der UpdatesswissTimingUpdatePassword=Passwort zum Versenden der Updates
+ allowResizing=Skalierung erlauben

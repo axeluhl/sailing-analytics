@@ -7893,21 +7893,24 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public ImageDTO[] resizeImage(ToResizeImageDTO toResizeImage) throws Exception {
         // In following size tag will describe the tags, that have a defined size in MediaConstants, which is LOGO,
         // TEASER and STAGE at the moment
-        //create ArrayList that will contain all images that are to return
+        // create ArrayList that will contain all images that are to return
         List<ImageDTO> resizedImages = new ArrayList<ImageDTO>();
         // calculating the fileType of the image by its uri
-        String fileType = toResizeImage.getSourceRef().substring(toResizeImage.getSourceRef().lastIndexOf(".")+1);
+        String fileType = toResizeImage.getSourceRef().substring(toResizeImage.getSourceRef().lastIndexOf(".") + 1);
         // deleting all size-tags from the tags list, because after resizing there should only be one size tag per image
         toResizeImage.getTags().removeAll(toResizeImage.getMap().keySet());
-        //Create ImageConverter for further use
-        ImageConverter converter = new ImageConverter(HttpUrlConnectionHelper.redirectConnection(new URL(toResizeImage.getSourceRef())).getInputStream(), fileType, toResizeImage.getMap());
+        // Create ImageConverter for further use
+        ImageConverter converter = new ImageConverter(
+                HttpUrlConnectionHelper.redirectConnection(new URL(toResizeImage.getSourceRef())).getInputStream(),
+                fileType, toResizeImage.getMap());
         addImagesThatNeedResizing(converter, resizedImages, toResizeImage);
         addImagesThatDoNotNeedResizing(converter, resizedImages, toResizeImage);
         return resizedImages.toArray(new ImageDTO[resizedImages.size()]);
     }
 
-    private void addImagesThatDoNotNeedResizing(ImageConverter converter, List<ImageDTO> resizedImages, ToResizeImageDTO toResizeImage) {
-     // if there is no size tag that does not need a resize we can delete the original source
+    private void addImagesThatDoNotNeedResizing(ImageConverter converter, List<ImageDTO> resizedImages,
+            ToResizeImageDTO toResizeImage) {
+        // if there is no size tag that does not need a resize we can delete the original source
         if (converter.getNotResizeSizeTags().isEmpty()) {
             try {
                 getService().getFileStorageManagementService().getActiveFileStorageService()
@@ -7930,7 +7933,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
     }
 
-    private void addImagesThatNeedResizing(ImageConverter converter, List<ImageDTO> resizedImages, ToResizeImageDTO toResizeImage) throws Exception{
+    private void addImagesThatNeedResizing(ImageConverter converter, List<ImageDTO> resizedImages,
+            ToResizeImageDTO toResizeImage) throws Exception {
         // iterating over every size-tag that needs a resize
         for (String resizeTag : converter.getResizeTags()) {
             // creating a new ImageDTO object with all values from the ToResizeImageDTO object
@@ -7943,8 +7947,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             image.setSizeInPx(resizedBufferedImage.getWidth(), resizedBufferedImage.getHeight());
             // storing the image on FileStorageService
             InputStream fileStorageStream = converter.resizedImageToInputStream(resizedBufferedImage);
-            URI newUri = getService().getFileStorageManagementService().getActiveFileStorageService().storeFile(fileStorageStream,
-                            "." + converter.getImageFormat(), new Long(fileStorageStream.available()));
+            URI newUri = getService().getFileStorageManagementService().getActiveFileStorageService().storeFile(
+                    fileStorageStream, "." + converter.getImageFormat(), new Long(fileStorageStream.available()));
             // saving the new image ref uri to the ImageDTO object
             image.setSourceRef(newUri.toString());
             // adding the resized ImageDTO object to arraylist
@@ -7956,14 +7960,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         BufferedImage resizedImage = null;
         switch (resizeTag) {
         case MediaTagConstants.LOGO:
-            resizedImage = converter.resize(MediaConstants.MIN_LOGO_IMAGE_WIDTH,
-                    MediaConstants.MAX_LOGO_IMAGE_WIDTH, MediaConstants.MIN_LOGO_IMAGE_HEIGHT,
-                    MediaConstants.MAX_LOGO_IMAGE_HEIGHT);
+            resizedImage = converter.resize(MediaConstants.MIN_LOGO_IMAGE_WIDTH, MediaConstants.MAX_LOGO_IMAGE_WIDTH,
+                    MediaConstants.MIN_LOGO_IMAGE_HEIGHT, MediaConstants.MAX_LOGO_IMAGE_HEIGHT);
             break;
         case MediaTagConstants.STAGE:
-            resizedImage = converter.resize(MediaConstants.MIN_STAGE_IMAGE_WIDTH,
-                    MediaConstants.MAX_STAGE_IMAGE_WIDTH, MediaConstants.MIN_STAGE_IMAGE_HEIGHT,
-                    MediaConstants.MAX_STAGE_IMAGE_HEIGHT);
+            resizedImage = converter.resize(MediaConstants.MIN_STAGE_IMAGE_WIDTH, MediaConstants.MAX_STAGE_IMAGE_WIDTH,
+                    MediaConstants.MIN_STAGE_IMAGE_HEIGHT, MediaConstants.MAX_STAGE_IMAGE_HEIGHT);
             break;
         case MediaTagConstants.TEASER:
             resizedImage = converter.resize(MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH,

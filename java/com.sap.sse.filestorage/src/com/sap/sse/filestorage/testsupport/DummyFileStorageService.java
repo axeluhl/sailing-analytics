@@ -41,4 +41,5 @@ public class DummyFileStorageService extends BaseFileStorageServiceImpl implemen
     @Override
     public void testProperties() throws InvalidPropertiesException {
     }
+
 }

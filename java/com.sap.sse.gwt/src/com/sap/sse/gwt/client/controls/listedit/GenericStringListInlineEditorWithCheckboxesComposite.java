@@ -23,9 +23,10 @@ public abstract class GenericStringListInlineEditorWithCheckboxesComposite<Value
         private List<CheckBox> checkBoxes;
         private ClickHandler checkBoxClickHandler;
         private String checkBoxText;
-        
+
         public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, List<String> suggestValues,
-                String placeholderTextForAddTextbox, int textBoxSize, List<CheckBox> checkBoxes, String checkBoxText, ClickHandler clickHandler) {
+                String placeholderTextForAddTextbox, int textBoxSize, List<CheckBox> checkBoxes, String checkBoxText,
+                ClickHandler clickHandler) {
             super(stringMessages, removeImage, suggestValues, placeholderTextForAddTextbox, textBoxSize);
             this.checkBoxes = checkBoxes;
             this.checkBoxClickHandler = clickHandler;
@@ -37,24 +38,24 @@ public abstract class GenericStringListInlineEditorWithCheckboxesComposite<Value
             super.addRow(newValue);
             CheckBox checkBox = new CheckBox(checkBoxText);
             checkBoxes.add(checkBox);
-            expandedValuesGrid.setWidget(expandedValuesGrid.getRowCount()-1, 2, checkBox);
+            expandedValuesGrid.setWidget(expandedValuesGrid.getRowCount() - 1, 2, checkBox);
             checkBox.setVisible(false);
             checkBox.getElement().getStyle().setBackgroundColor("red");
             checkBox.addClickHandler(checkBoxClickHandler);
         }
-        
+
         @Override
         public Widget initWidget() {
             expandedValuesGrid = new Grid(0, 3);
             expandedValuesGrid.ensureDebugId("ExpandedValuesGrid");
-            
+
             VerticalPanel panel = new VerticalPanel();
             panel.add(createAddWidget());
             panel.add(expandedValuesGrid);
             return panel;
-            
+
         }
-        
+
         @Override
         public void onRowRemoved(int rowIndex) {
             checkBoxes.remove(rowIndex);

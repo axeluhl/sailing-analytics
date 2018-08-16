@@ -252,7 +252,7 @@ public class VideosListComposite extends Composite {
     }
 
     private void openCreateVideoDialog(String initialTag) {
-        if(!storageServiceAvailable.getValue()) {
+        if (!storageServiceAvailable.getValue()) {
             Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
             return;
         }
@@ -271,7 +271,7 @@ public class VideosListComposite extends Composite {
     }
 
     private void openEditVideoDialog(final VideoDTO selectedVideo) {
-        if(!storageServiceAvailable.getValue()) {
+        if (!storageServiceAvailable.getValue()) {
             Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
             return;
         }

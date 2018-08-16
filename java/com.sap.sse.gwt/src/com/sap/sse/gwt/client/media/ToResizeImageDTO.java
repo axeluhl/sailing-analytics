@@ -6,7 +6,7 @@ import java.util.Map;
 public class ToResizeImageDTO extends ImageDTO {
 
     Map<String, Boolean> toResizeMap;
-    
+
     /** for GWT */
     protected ToResizeImageDTO() {
     }
@@ -15,12 +15,12 @@ public class ToResizeImageDTO extends ImageDTO {
         super(imageRef, createdAtDate);
         this.toResizeMap = toResizeMap;
     }
-    
+
     public boolean resizeForTag(String tag) {
         return toResizeMap.get(tag);
     }
-    
-    public Map<String, Boolean> getMap(){
+
+    public Map<String, Boolean> getMap() {
         return toResizeMap;
     }
 }

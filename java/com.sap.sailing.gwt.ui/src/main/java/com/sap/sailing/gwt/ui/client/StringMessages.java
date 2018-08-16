@@ -2095,11 +2095,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String manage2SailEventURLBox();
     String manage2SailEventIdBoxTooltip();
     String manage2SailPort();
-    String allowResizing();
     String windFinderSpotCollectionsList();
     String swissTimingUpdateURL();
     String swissTimingUpdateUsername();
     String swissTimingUpdatePassword();
+    String allowResizing();
     String resizeSuccessfull();
     String resizeUnsuccessfull();
     String setUpStorageService();

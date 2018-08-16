@@ -58,12 +58,11 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
     protected static class ImageParameterValidator implements Validator<ImageDTO> {
         private StringMessages stringMessages;
         private List<CheckBox> doResize;
-        
         public ImageParameterValidator(StringMessages stringMessages, ArrayList<CheckBox> doResize) {
             this.stringMessages = stringMessages;
             this.doResize = doResize;
         }
-        
+
         @Override
         public String getErrorMessage(ImageDTO imageToValidate) {
             String errorMessage = null;
@@ -252,7 +251,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
             }
         });
     }
-    
+
     @Override
     protected ImageDTO getResult() {
         List<String> tags = new ArrayList<String>();

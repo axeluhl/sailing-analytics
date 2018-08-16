@@ -158,12 +158,12 @@ public class ImagesListComposite extends Composite {
             public SafeHtml getValue(ImageDTO image) {
                 String linkName = "";
                 String link = image.getSourceRef();
-                if (link.endsWith("/")) {
+                if(link.endsWith("/")) {
                     link = link.substring(0, link.length() - 1);
                 }
                 int index = link.lastIndexOf("/");
-                if (index > 0) {
-                    linkName = link.substring(index + 1, link.length());
+                if(index > 0) {
+                    linkName =  link.substring(index+1, link.length());
                 }
                 return ANCHORTEMPLATE.cell(UriUtils.fromString(image.getSourceRef()), linkName);
             }

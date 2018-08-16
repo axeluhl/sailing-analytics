@@ -82,7 +82,7 @@ public class LocalFileStorageServiceImpl extends BaseFileStorageServiceImpl impl
 
         return getUri(fileName);
     }
-    
+
     private static String getKey(String fileEnding) {
         String key = UUID.randomUUID().toString();
         key += fileEnding;
