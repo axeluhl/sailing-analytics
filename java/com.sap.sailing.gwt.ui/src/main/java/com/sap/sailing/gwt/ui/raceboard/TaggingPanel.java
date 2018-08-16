@@ -280,6 +280,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             this.imageURL = imageURL;
             this.comment = comment;
             setStyleName(TagPanelResources.INSTANCE.style().footerButton());
+            addStyleName("gwt-Button");
             addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
@@ -1042,7 +1043,6 @@ public class TaggingPanel extends ComponentWithoutSettings
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
                 // set time slider to corresponding position
-                GWT.log(event.getSource().toString());
                 timer.setTime(tagSelectionModel.getSelectedObject().getRaceTimepoint().asMillis());
             }
         });
