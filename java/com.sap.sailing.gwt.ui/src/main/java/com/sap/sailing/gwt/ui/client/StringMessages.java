@@ -2128,4 +2128,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String tagPreview();
     String tagVisibleForPublicCheckBox();
     String tagVisibility();
+    String tagConfirmDeletionHeading();
+    String tagConfirmDeletion(String tag);
+    String tagButtonConfirmDeletionHeading();
+    String tagButtonConfirmDeletion(String tagButton);
+    String confirm();
+    String cancel();
 }
