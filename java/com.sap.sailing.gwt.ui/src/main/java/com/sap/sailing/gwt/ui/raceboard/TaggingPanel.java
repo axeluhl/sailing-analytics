@@ -101,9 +101,6 @@ public class TaggingPanel extends ComponentWithoutSettings
         @Source("com/sap/sailing/gwt/ui/client/images/edit.png")
         ImageResource editIcon();
 
-        @Source("com/sap/sailing/gwt/ui/client/images/unlock.png")
-        ImageResource publicIcon();
-
         @Source("com/sap/sailing/gwt/ui/client/images/lock.png")
         ImageResource privateIcon();
 
@@ -211,12 +208,20 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     public interface TagCellTemplate extends SafeHtmlTemplates {
-        @Template("<div class='{0}'><div class='{1}'><img src='{6}'>{3}</div><div class='{2}'>{4}</div>{5}</div>")
+        @Template("<div class='{0}'><div class='{1}'>{3}</div><div class='{2}'>{4}</div>{5}</div>")
         SafeHtml cell(String styleTag, String styleTagHeading, String styleTagCreated, SafeHtml tag, SafeHtml createdAt,
-                SafeHtml content, SafeUri safeUri);
+                SafeHtml content);
+
+        @Template("<div class='{0}'><div class='{1}'>{3}<button>X</button></div><div class='{2}'>{4}</div>{5}</div>")
+        SafeHtml cellRemovable(String styleTag, String styleTagHeading, String styleTagCreated, SafeHtml tag,
+                SafeHtml createdAt, SafeHtml content);
+
+        @Template("<div class='{0}'><div class='{1}'><img src='{6}'>{3}</div><div class='{2}'>{4}</div>{5}</div>")
+        SafeHtml privateCell(String styleTag, String styleTagHeading, String styleTagCreated, SafeHtml tag,
+                SafeHtml createdAt, SafeHtml content, SafeUri safeUri);
 
         @Template("<div class='{0}'><div class='{1}'><img src='{6}'>{3}<button>X</button></div><div class='{2}'>{4}</div>{5}</div>")
-        SafeHtml cellRemovable(String styleTag, String styleTagHeading, String styleTagCreated, SafeHtml tag,
+        SafeHtml privateCellRemovable(String styleTag, String styleTagHeading, String styleTagCreated, SafeHtml tag,
                 SafeHtml createdAt, SafeHtml content, SafeUri safeUri);
 
         @Template("<div class='{0}'><img src='{2}'/></div><div class='{1}'>{3}</div>")
@@ -253,9 +258,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             SafeHtml safeComment = SafeHtmlUtils.fromString(tag.getComment());
             SafeUri trustedImageURL = UriUtils.fromTrustedString(tag.getImageURL());
 
-            SafeUri safeIsVisibelForPublicImageUri = tag.isVisibleForPublic()
-                    ? TagPanelResources.INSTANCE.publicIcon().getSafeUri()
-                    : TagPanelResources.INSTANCE.privateIcon().getSafeUri();
+            SafeUri safeIsPrivateImageUri = TagPanelResources.INSTANCE.privateIcon().getSafeUri();
 
             SafeHtml content = SafeHtmlUtils.EMPTY_SAFE_HTML;
 
@@ -272,11 +275,22 @@ public class TaggingPanel extends ComponentWithoutSettings
             if (!isPreviewCell && userService.getCurrentUser() != null
                     && (tag.getUsername().equals(userService.getCurrentUser().getName())
                             || userService.getCurrentUser().hasRole("admin"))) {
-                cell = tagCellTemplate.cellRemovable(tagPanelStyle.tag(), tagPanelStyle.tagHeading(),
-                        tagPanelStyle.tagCreated(), safeTag, safeCreated, content, safeIsVisibelForPublicImageUri);
+                if (tag.isVisibleForPublic()) {
+                    cell = tagCellTemplate.cellRemovable(tagPanelStyle.tag(), tagPanelStyle.tagHeading(),
+                            tagPanelStyle.tagCreated(), safeTag, safeCreated, content);
+                } else {
+                    cell = tagCellTemplate.privateCellRemovable(tagPanelStyle.tag(), tagPanelStyle.tagHeading(),
+                            tagPanelStyle.tagCreated(), safeTag, safeCreated, content, safeIsPrivateImageUri);
+                }
+
             } else {
-                cell = tagCellTemplate.cell(tagPanelStyle.tag(), tagPanelStyle.tagHeading(), tagPanelStyle.tagCreated(),
-                        safeTag, safeCreated, content, safeIsVisibelForPublicImageUri);
+                if (tag.isVisibleForPublic()) {
+                    cell = tagCellTemplate.cell(tagPanelStyle.tag(), tagPanelStyle.tagHeading(),
+                            tagPanelStyle.tagCreated(), safeTag, safeCreated, content);
+                } else {
+                    cell = tagCellTemplate.privateCell(tagPanelStyle.tag(), tagPanelStyle.tagHeading(),
+                            tagPanelStyle.tagCreated(), safeTag, safeCreated, content, safeIsPrivateImageUri);
+                }
             }
             htmlBuilder.append(cell);
         }
