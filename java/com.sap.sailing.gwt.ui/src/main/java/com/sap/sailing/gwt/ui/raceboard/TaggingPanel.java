@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -246,7 +247,12 @@ public class TaggingPanel extends ComponentWithoutSettings
                 }
                 Element button = parent.getElementsByTagName("button").getItem(0);
                 if (button != null && button.isOrHasChild(Element.as(eventTarget))) {
-                    removeTagFromRaceLog(tag);
+                    new ConfirmationDialog(stringMessages.tagConfirmDeletionHeading(),
+                            stringMessages.tagConfirmDeletion(tag.getTag()), (confirmed) -> {
+                                if (confirmed) {
+                                    removeTagFromRaceLog(tag);
+                                }
+                            });
                 }
             }
         }
@@ -545,19 +551,23 @@ public class TaggingPanel extends ComponentWithoutSettings
                     if (LeaderboardConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
                         final int heightOfTagButtonPanel = customButtonsPanel.getOffsetHeight();
 
-                        customTagButtons.remove(button);
-                        customButtonsPanel.remove(button);
-                        customTagButtonsTable.setRowData(customTagButtons);
+                        new ConfirmationDialog(stringMessages.tagButtonConfirmDeletionHeading(), stringMessages.tagButtonConfirmDeletion(button.getTag()), (confirmed) -> {
+                            if (confirmed) {
+                                customTagButtons.remove(button);
+                                customButtonsPanel.remove(button);
+                                setRowData(customTagButtons);
 
-                        final int deltaHeight = customButtonsPanel.getOffsetHeight() - heightOfTagButtonPanel;
-                        /*
-                         * If the height of the customButtonsPanel has changed ( delta not equals to 0 ), the
-                         * footerWidget of the TaggingPanel has a different height, which in this case might cause the
-                         * contentWidget to be to small.
-                         */
-                        if (deltaHeight != 0) {
-                            panel.setContentWidget(contentPanel);
-                        }
+                                final int deltaHeight = customButtonsPanel.getOffsetHeight() - heightOfTagButtonPanel;
+                                /*
+                                 * If the height of the customButtonsPanel has changed ( delta not equals to 0 ), the
+                                 * footerWidget of the TaggingPanel has a different height, which in this case might cause the
+                                 * contentWidget to be to small.
+                                 */
+                                if (deltaHeight != 0) {
+                                    panel.setContentWidget(contentPanel);
+                                }
+                            }
+                        });
                     } else if (LeaderboardConfigImagesBarCell.ACTION_EDIT.equals(value)) {
                         selectedTagButton = button;
 
@@ -693,6 +703,51 @@ public class TaggingPanel extends ComponentWithoutSettings
         private void setRowData(List<TagButton> buttons) {
             customTagButtonsTable.setRowData(buttons);
             customTagButtonsTable.setVisible(buttons.size() > 0);
+        }
+    }
+
+    private class ConfirmationDialog extends DialogBox {
+
+        private final FlowPanel panel;
+        private final TagPanelStyle style = TagPanelResources.INSTANCE.style();
+
+        public ConfirmationDialog(String title, String text, Consumer<Boolean> consumer) {
+            panel = new FlowPanel();
+            setGlassEnabled(true);
+
+            Label label = new Label(text);
+            label.getElement().getStyle().setMarginBottom(10, Unit.PX);
+
+            Button confirm = new Button(stringMessages.confirm());
+            confirm.setStyleName(style.footerButton());
+            confirm.addStyleName("gwt-Button");
+            confirm.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    consumer.accept(true);
+                    hide();
+                }
+            });
+
+            Button cancel = new Button(stringMessages.cancel());
+            cancel.setStyleName(style.footerButton());
+            cancel.addStyleName("gwt-Button");
+            cancel.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    consumer.accept(false);
+                    hide();
+                }
+            });
+
+            panel.add(label);
+            panel.add(cancel);
+            panel.add(confirm);
+
+            setText(title);
+            getElement().getStyle().setBackgroundColor("white");
+            setWidget(panel);
+            center();
         }
     }
 
