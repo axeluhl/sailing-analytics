@@ -41,10 +41,4 @@ public class DummyFileStorageService extends BaseFileStorageServiceImpl implemen
     @Override
     public void testProperties() throws InvalidPropertiesException {
     }
-
-    @Override
-    public InputStream loadFile(URI uri) throws OperationFailedException, InvalidPropertiesException, IOException {
-        return null;
-    }
-
 }

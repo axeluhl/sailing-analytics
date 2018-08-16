@@ -1,6 +1,5 @@
 package com.sap.sse.filestorage.impl;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -144,12 +143,5 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
             throw new InvalidPropertiesException("invalid bucket", new Pair<FileStorageServiceProperty, String>(
                     bucketName, "bucket does not exist"));
         }
-    }
-
-    @Override
-    public InputStream loadFile(URI uri) throws OperationFailedException, InvalidPropertiesException, IOException {
-        String key = uri.getPath().substring(uri.getPath().lastIndexOf("/")+1);
-        AmazonS3Client s3Client = createS3Client();
-        return s3Client.getObject(bucketName.getValue(), key).getObjectContent();
     }
 }

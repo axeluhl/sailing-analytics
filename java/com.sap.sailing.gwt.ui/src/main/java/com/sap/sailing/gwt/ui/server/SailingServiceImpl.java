@@ -7900,8 +7900,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         // deleting all size-tags from the tags list, because after resizing there should only be one size tag per image
         toResizeImage.getTags().removeAll(toResizeImage.getMap().keySet());
         //Create ImageConverter for further use
-        ImageConverter converter = new ImageConverter(getService().getFileStorageManagementService().getActiveFileStorageService()
-                .loadFile(new URI(toResizeImage.getSourceRef())), fileType, toResizeImage.getMap());
+        ImageConverter converter = new ImageConverter(HttpUrlConnectionHelper.redirectConnection(new URL(toResizeImage.getSourceRef())).getInputStream(), fileType, toResizeImage.getMap());
         addImagesThatNeedResizing(converter, resizedImages, toResizeImage);
         addImagesThatDoNotNeedResizing(converter, resizedImages, toResizeImage);
         return resizedImages.toArray(new ImageDTO[resizedImages.size()]);
@@ -7916,9 +7915,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             } catch (NoCorrespondingServiceRegisteredException | OperationFailedException | InvalidPropertiesException
                     | IOException | URISyntaxException e) {
                 logger.log(Level.WARNING,
-                        "Deleting original image after resize did not ork because of: " + e.getMessage());
+                        "Deleting original image after resize did not work because of: " + e.getMessage());
                 // file deleting did not work -> no important error, because the "only" result of this is one more
-                // stored image
+                // stored image and only if the source image was is on the file storage
             }
         } else {
             // otherwise we have to create an ImageDTO object for every non-resize-size-tag
