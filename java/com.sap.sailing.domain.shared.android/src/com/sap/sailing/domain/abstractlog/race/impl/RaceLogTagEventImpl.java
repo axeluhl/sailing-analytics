@@ -15,8 +15,9 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
     private TimePoint revokedAt;
     private final boolean visibleForPublic;
 
-    public RaceLogTagEventImpl(String pTag, String pComment, String pImageURL, boolean pVisibleForPublic, TimePoint createdAt,
-            TimePoint logicalTimePoint, AbstractLogEventAuthor author, Serializable pId, int pPassId) {
+    public RaceLogTagEventImpl(String pTag, String pComment, String pImageURL, boolean pVisibleForPublic,
+            TimePoint createdAt, TimePoint logicalTimePoint, AbstractLogEventAuthor author, Serializable pId,
+            int pPassId) {
         super(createdAt, logicalTimePoint, author, pId, pPassId);
         tag = pTag;
         comment = pComment;
@@ -26,13 +27,13 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
         this.revokedAt = null;
     }
 
-    public RaceLogTagEventImpl(String tag, String comment, String imageURL, boolean visibleForPublic, TimePoint createdAt,
-            TimePoint logicalTimePoint, AbstractLogEventAuthor author, int passId) {
+    public RaceLogTagEventImpl(String tag, String comment, String imageURL, boolean visibleForPublic,
+            TimePoint createdAt, TimePoint logicalTimePoint, AbstractLogEventAuthor author, int passId) {
         this(tag, comment, imageURL, visibleForPublic, createdAt, logicalTimePoint, author, randId(), passId);
     }
 
-    public RaceLogTagEventImpl(String tag, String comment, String imageURL, boolean visibleForPublic, TimePoint logicalTimePoint,
-            AbstractLogEventAuthor author, int passId) {
+    public RaceLogTagEventImpl(String tag, String comment, String imageURL, boolean visibleForPublic,
+            TimePoint logicalTimePoint, AbstractLogEventAuthor author, int passId) {
         this(tag, comment, imageURL, visibleForPublic, now(), logicalTimePoint, author, randId(), passId);
     }
 

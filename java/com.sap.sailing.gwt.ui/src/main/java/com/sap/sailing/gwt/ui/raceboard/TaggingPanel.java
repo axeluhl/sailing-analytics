@@ -253,7 +253,8 @@ public class TaggingPanel extends ComponentWithoutSettings
             SafeHtml safeComment = SafeHtmlUtils.fromString(tag.getComment());
             SafeUri trustedImageURL = UriUtils.fromTrustedString(tag.getImageURL());
 
-            SafeUri safeIsVisibelForPublicImageUri = tag.isVisibleForPublic() ? TagPanelResources.INSTANCE.publicIcon().getSafeUri()
+            SafeUri safeIsVisibelForPublicImageUri = tag.isVisibleForPublic()
+                    ? TagPanelResources.INSTANCE.publicIcon().getSafeUri()
                     : TagPanelResources.INSTANCE.privateIcon().getSafeUri();
 
             SafeHtml content = SafeHtmlUtils.EMPTY_SAFE_HTML;
@@ -346,7 +347,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         public String getComment() {
             return comment;
         }
-        
+
         public boolean isVisibleForPublic() {
             return visibleForPublic;
         }
@@ -388,8 +389,8 @@ public class TaggingPanel extends ComponentWithoutSettings
                 @Override
                 public void onClick(ClickEvent event) {
                     if (isLoggedInAndRaceLogAvailable()) {
-                        addTagToRaceLog(inputPanel.getTag(), inputPanel.getComment(),
-                                inputPanel.getImageURL(), inputPanel.isVisibleForPublic());
+                        addTagToRaceLog(inputPanel.getTag(), inputPanel.getComment(), inputPanel.getImageURL(),
+                                inputPanel.isVisibleForPublic());
                         inputPanel.clearAllValues();
                     }
                 }
@@ -469,7 +470,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             inputField.getVisibleForPublicCheckBox().addValueChangeHandler(new ValueChangeHandler<Boolean>() {
                 @Override
                 public void onValueChange(ValueChangeEvent<Boolean> event) {
-                    renderPreview();                   
+                    renderPreview();
                 }
             });
             renderPreview();
@@ -477,8 +478,8 @@ public class TaggingPanel extends ComponentWithoutSettings
 
         public void renderPreview() {
             listContainingPreviewTag.removeAll(listContainingPreviewTag);
-            previewTag = new TagDTO(inputField.getTag(), inputField.getComment(),
-                    inputField.getImageURL(), "Author", inputField.isVisibleForPublic(), new MillisecondsTimePoint(timer.getTime()),
+            previewTag = new TagDTO(inputField.getTag(), inputField.getComment(), inputField.getImageURL(), "Author",
+                    inputField.isVisibleForPublic(), new MillisecondsTimePoint(timer.getTime()),
                     new MillisecondsTimePoint(timer.getTime()));
             listContainingPreviewTag.add(previewTag);
             tagPreviewCellList.setRowData(listContainingPreviewTag);
@@ -515,7 +516,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             commentTextArea.setTitle(stringMessages.tagLabelComment());
             commentTextArea.getElement().setPropertyString("placeholder", stringMessages.tagLabelComment());
             add(commentTextArea);
-            
+
             visibleForPublicCheckBox = new CheckBox(stringMessages.tagVisibleForPublicCheckBox());
             visibleForPublicCheckBox.setStyleName(style.inputPanelIsVisibleForPublic());
             add(visibleForPublicCheckBox);
@@ -532,7 +533,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         public TextArea getCommentTextArea() {
             return commentTextArea;
         }
-        
+
         public CheckBox getVisibleForPublicCheckBox() {
             return visibleForPublicCheckBox;
         }
@@ -548,9 +549,9 @@ public class TaggingPanel extends ComponentWithoutSettings
         public String getImageURL() {
             return imageURLTextBox.getValue();
         }
-        
+
         public boolean isVisibleForPublic() {
-            return visibleForPublicCheckBox.getValue();        
+            return visibleForPublicCheckBox.getValue();
         }
 
         public void setTag(String tag) {
@@ -1146,7 +1147,8 @@ public class TaggingPanel extends ComponentWithoutSettings
         if (isLoggedInAndRaceLogAvailable()) {
             if (tag.length() > 0) {
                 sailingService.addTagToRaceLog(leaderboardName, raceColumn.getName(), fleet.getName(), tag, comment,
-                        imageURL, isPublic, new MillisecondsTimePoint(timer.getTime()), new AsyncCallback<SuccessInfo>() {
+                        imageURL, isPublic, new MillisecondsTimePoint(timer.getTime()),
+                        new AsyncCallback<SuccessInfo>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 Notification.notify(stringMessages.tagNotAddedReason(caught.toString()),
