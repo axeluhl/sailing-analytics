@@ -66,7 +66,7 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
     }
 
     @Override
-    public boolean isPublic() {
+    public boolean isVisibleForPublic() {
         return visibleForPublic;
     }
 }

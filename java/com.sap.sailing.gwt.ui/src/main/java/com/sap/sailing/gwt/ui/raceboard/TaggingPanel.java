@@ -41,6 +41,7 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HeaderPanel;
@@ -99,10 +100,10 @@ public class TaggingPanel extends ComponentWithoutSettings
         // TODO image is stored in wrong folder
         @Source("com/sap/sailing/gwt/ui/client/images/edit.png")
         ImageResource editIcon();
-        
+
         @Source("com/sap/sailing/gwt/ui/client/images/unlock.png")
         ImageResource publicIcon();
-        
+
         @Source("com/sap/sailing/gwt/ui/client/images/lock.png")
         ImageResource privateIcon();
 
@@ -127,35 +128,63 @@ public class TaggingPanel extends ComponentWithoutSettings
         public interface TagPanelStyle extends CssResource {
             // tags
             String tag();
+
             String tagPanel();
+
             String tagHeading();
+
             String tagCreated();
+
             String tagComment();
+
             String tagImage();
+
             String button();
+
             String footerButton();
+
             String tagButtonTable();
+
             String inputPanelTag();
+
             String inputPanelComment();
+
             String inputPanelImageURL();
+
             String footerPanel();
+
             String tagPreviewPanel();
 
             // filter tags
             String tagFilterButton();
+
             String tagFilterHiddenButton();
+
             String tagFilterClearButton();
+
             String tagFilterSearchButton();
+
             String tagFilterSettingsButton();
+
             String tagFilterFilterButton();
+
             String tagFilterContainer();
+
             String tagFilterSearchBox();
+
             String tagFilterSearchInput();
+
             String filterInactiveButtonBackgroundImage();
+
             String filterActiveButtonBackgroundImage();
+
             String clearButtonBackgroundImage();
+
             String searchButtonBackgroundImage();
+
             String settingsButtonBackgroundImage();
+
+            String inputPanelIsVisibleForPublic();
         }
     }
 
@@ -168,10 +197,15 @@ public class TaggingPanel extends ComponentWithoutSettings
 
         public interface CellListStyle extends CellList.Style {
             String cellListEventItem();
+
             String cellListWidget();
+
             String cellListEvenItem();
+
             String cellListOddItem();
+
             String cellListSelectedItem();
+
             String cellListKeyboardSelectedItem();
         }
     }
@@ -184,7 +218,6 @@ public class TaggingPanel extends ComponentWithoutSettings
         @Template("<div class='{0}'><div class='{1}'><img src='{6}'>{3}<button>X</button></div><div class='{2}'>{4}</div>{5}</div>")
         SafeHtml cellRemovable(String styleTag, String styleTagHeading, String styleTagCreated, SafeHtml tag,
                 SafeHtml createdAt, SafeHtml content, SafeUri safeUri);
-        
 
         @Template("<div class='{0}'><img src='{2}'/></div><div class='{1}'>{3}</div>")
         SafeHtml contentWithCommentWithImage(String styleTagImage, String styleTagComment, SafeUri imageURL,
@@ -219,11 +252,12 @@ public class TaggingPanel extends ComponentWithoutSettings
                     DateTimeFormat.getFormat("E d/M/y, HH:mm").format(tag.getRaceTimepoint().asDate())));
             SafeHtml safeComment = SafeHtmlUtils.fromString(tag.getComment());
             SafeUri trustedImageURL = UriUtils.fromTrustedString(tag.getImageURL());
-            
-            SafeUri safeIsPublicImageUri = tag.isPublic() ? TagPanelResources.INSTANCE.publicIcon().getSafeUri() : TagPanelResources.INSTANCE.privateIcon().getSafeUri();
+
+            SafeUri safeIsVisibelForPublicImageUri = tag.isVisibleForPublic() ? TagPanelResources.INSTANCE.publicIcon().getSafeUri()
+                    : TagPanelResources.INSTANCE.privateIcon().getSafeUri();
 
             SafeHtml content = SafeHtmlUtils.EMPTY_SAFE_HTML;
-            
+
             if (tag.getComment().length() > 0 && tag.getImageURL().length() <= 0) {
                 content = tagCellTemplate.contentWithCommentWithoutImage(tagPanelStyle.tagComment(), safeComment);
             } else if (tag.getComment().length() <= 0 && tag.getImageURL().length() > 0) {
@@ -238,10 +272,10 @@ public class TaggingPanel extends ComponentWithoutSettings
                     && (tag.getUsername().equals(userService.getCurrentUser().getName())
                             || userService.getCurrentUser().hasRole("admin"))) {
                 cell = tagCellTemplate.cellRemovable(tagPanelStyle.tag(), tagPanelStyle.tagHeading(),
-                        tagPanelStyle.tagCreated(), safeTag, safeCreated, content, safeIsPublicImageUri);
+                        tagPanelStyle.tagCreated(), safeTag, safeCreated, content, safeIsVisibelForPublicImageUri);
             } else {
                 cell = tagCellTemplate.cell(tagPanelStyle.tag(), tagPanelStyle.tagHeading(), tagPanelStyle.tagCreated(),
-                        safeTag, safeCreated, content, safeIsPublicImageUri);
+                        safeTag, safeCreated, content, safeIsVisibelForPublicImageUri);
             }
             htmlBuilder.append(cell);
         }
@@ -284,17 +318,19 @@ public class TaggingPanel extends ComponentWithoutSettings
 
     private class TagButton extends Button {
         private String tag, imageURL, comment;
+        private boolean visibleForPublic;
 
-        public TagButton(String buttonName, String tag, String imageURL, String comment) {
+        public TagButton(String buttonName, String tag, String imageURL, String comment, boolean visibleForPublic) {
             super(buttonName);
             this.tag = tag;
             this.imageURL = imageURL;
             this.comment = comment;
+            this.visibleForPublic = visibleForPublic;
             setStyleName(TagPanelResources.INSTANCE.style().footerButton());
             addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    addTagToRaceLog(getTag(), getComment(), getImageURL());
+                    addTagToRaceLog(getTag(), getComment(), getImageURL(), isVisibleForPublic());
                 }
             });
         }
@@ -309,6 +345,10 @@ public class TaggingPanel extends ComponentWithoutSettings
 
         public String getComment() {
             return comment;
+        }
+        
+        public boolean isVisibleForPublic() {
+            return visibleForPublic;
         }
 
         public void setTag(String tag) {
@@ -348,8 +388,8 @@ public class TaggingPanel extends ComponentWithoutSettings
                 @Override
                 public void onClick(ClickEvent event) {
                     if (isLoggedInAndRaceLogAvailable()) {
-                        addTagToRaceLog(inputPanel.getTagValue(), inputPanel.getCommentValue(),
-                                inputPanel.getImageURLValue());
+                        addTagToRaceLog(inputPanel.getTag(), inputPanel.getComment(),
+                                inputPanel.getImageURL(), inputPanel.isVisibleForPublic());
                         inputPanel.clearAllValues();
                     }
                 }
@@ -426,47 +466,59 @@ public class TaggingPanel extends ComponentWithoutSettings
                 }
 
             });
+            inputField.getVisibleForPublicCheckBox().addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+                @Override
+                public void onValueChange(ValueChangeEvent<Boolean> event) {
+                    renderPreview();                   
+                }
+            });
             renderPreview();
         }
 
         public void renderPreview() {
             listContainingPreviewTag.removeAll(listContainingPreviewTag);
-            previewTag = new TagDTO(inputField.getTagValue(), inputField.getCommentValue(),
-                    inputField.getImageURLValue(),  "Author", new MillisecondsTimePoint(timer.getTime()),
-                    new MillisecondsTimePoint(timer.getTime()), true);
+            previewTag = new TagDTO(inputField.getTag(), inputField.getComment(),
+                    inputField.getImageURL(), "Author", new MillisecondsTimePoint(timer.getTime()),
+                    new MillisecondsTimePoint(timer.getTime()), inputField.isVisibleForPublic());
             listContainingPreviewTag.add(previewTag);
             tagPreviewCellList.setRowData(listContainingPreviewTag);
 
-            setVisible(!inputField.getTagValue().isEmpty());
+            setVisible(!inputField.getTag().isEmpty());
         }
     }
 
     public class TagCreationInputPanel extends FlowPanel {
-        private TextBox tagTextBox, imageURLTextBox;
-        private TextArea commentTextArea;
+        private final TextBox tagTextBox, imageURLTextBox;
+        private final TextArea commentTextArea;
+        private final CheckBox visibleForPublicCheckBox;
+        private final TagPanelStyle style;
 
         public TagCreationInputPanel(StringMessages stringMessages) {
+            style = TagPanelResources.INSTANCE.style();
             setWidth("100%");
 
             tagTextBox = new TextBox();
-            tagTextBox.setStyleName(TagPanelResources.INSTANCE.style().inputPanelTag());
+            tagTextBox.setStyleName(style.inputPanelTag());
             tagTextBox.setTitle(stringMessages.tagLabelTag());
             tagTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelTag());
             add(tagTextBox);
 
             imageURLTextBox = new TextBox();
-            imageURLTextBox.setStyleName(TagPanelResources.INSTANCE.style().inputPanelImageURL());
+            imageURLTextBox.setStyleName(style.inputPanelImageURL());
             imageURLTextBox.setTitle(stringMessages.tagLabelImageURL());
             imageURLTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelImageURL());
             add(imageURLTextBox);
 
             commentTextArea = new TextArea();
-            commentTextArea.setStyleName(TagPanelResources.INSTANCE.style().inputPanelComment());
+            commentTextArea.setStyleName(style.inputPanelComment());
             commentTextArea.setVisibleLines(4);
             commentTextArea.setTitle(stringMessages.tagLabelComment());
             commentTextArea.getElement().setPropertyString("placeholder", stringMessages.tagLabelComment());
             add(commentTextArea);
-
+            
+            visibleForPublicCheckBox = new CheckBox(stringMessages.tagVisibleForPublicCheckBox());
+            visibleForPublicCheckBox.setStyleName(style.inputPanelIsVisibleForPublic());
+            add(visibleForPublicCheckBox);
         }
 
         public TextBox getTagTextBox() {
@@ -480,28 +532,36 @@ public class TaggingPanel extends ComponentWithoutSettings
         public TextArea getCommentTextArea() {
             return commentTextArea;
         }
+        
+        public CheckBox getVisibleForPublicCheckBox() {
+            return visibleForPublicCheckBox;
+        }
 
-        public String getTagValue() {
+        public String getTag() {
             return tagTextBox.getValue();
         }
 
-        public String getCommentValue() {
+        public String getComment() {
             return commentTextArea.getValue();
         }
 
-        public String getImageURLValue() {
+        public String getImageURL() {
             return imageURLTextBox.getValue();
         }
+        
+        public boolean isVisibleForPublic() {
+            return visibleForPublicCheckBox.getValue();        
+        }
 
-        public void setTagValue(String tag) {
+        public void setTag(String tag) {
             tagTextBox.setValue(tag);
         }
 
-        public void setCommentValue(String comment) {
+        public void setComment(String comment) {
             commentTextArea.setValue(comment);
         }
 
-        public void setImageURLValue(String imageURL) {
+        public void setImageURL(String imageURL) {
             imageURLTextBox.setValue(imageURL);
         }
 
@@ -561,26 +621,26 @@ public class TaggingPanel extends ComponentWithoutSettings
                 public void update(int index, TagButton button, String value) {
                     if (LeaderboardConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
                         final int heightOfTagButtonPanel = customButtonsPanel.getOffsetHeight();
-                        
+
                         customTagButtons.remove(button);
                         customButtonsPanel.remove(button);
                         customTagButtonsTable.setRowData(customTagButtons);
-                        
+
                         final int deltaHeight = customButtonsPanel.getOffsetHeight() - heightOfTagButtonPanel;
-                        /* 
-                         * If the height of the customButtonsPanel has changed ( delta not equals to 0 ), 
-                         * the footerWidget of the TaggingPanel has a different height, 
-                         * which in this case might cause the contentWidget to be to small.                     
-                        */
-                        if(deltaHeight != 0) { 
+                        /*
+                         * If the height of the customButtonsPanel has changed ( delta not equals to 0 ), the
+                         * footerWidget of the TaggingPanel has a different height, which in this case might cause the
+                         * contentWidget to be to small.
+                         */
+                        if (deltaHeight != 0) {
                             panel.setContentWidget(contentPanel);
                         }
                     } else if (LeaderboardConfigImagesBarCell.ACTION_EDIT.equals(value)) {
                         selectedTagButton = button;
 
-                        inputPanel.setTagValue(button.getTag());
-                        inputPanel.setImageURLValue(button.getImageURL());
-                        inputPanel.setCommentValue(button.getComment());
+                        inputPanel.setTag(button.getTag());
+                        inputPanel.setImageURL(button.getImageURL());
+                        inputPanel.setComment(button.getComment());
 
                         tagPreviewPanel.renderPreview();
 
@@ -610,25 +670,25 @@ public class TaggingPanel extends ComponentWithoutSettings
             addCustomTagButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    if (inputPanel.getTagValue().length() > 0) {
+                    if (inputPanel.getTag().length() > 0) {
                         final int heightOfTagButtonPanel = customButtonsPanel.getOffsetHeight();
-                        
-                        TagButton tagButton = new TagButton(inputPanel.getTagValue(), inputPanel.getTagValue(),
-                                inputPanel.getImageURLValue(), inputPanel.getCommentValue());
+
+                        TagButton tagButton = new TagButton(inputPanel.getTag(), inputPanel.getTag(),
+                                inputPanel.getImageURL(), inputPanel.getComment(), inputPanel.isVisibleForPublic());
                         inputPanel.clearAllValues();
                         tagPreviewPanel.renderPreview();
 
                         customTagButtons.add(tagButton);
                         customButtonsPanel.add(tagButton);
                         setRowData(customTagButtons);
-                        
+
                         final int deltaHeight = customButtonsPanel.getOffsetHeight() - heightOfTagButtonPanel;
-                        /* 
-                         * If the height of the customButtonsPanel has changed ( delta not equals to 0 ), 
-                         * the footerWidget of the TaggingPanel has a different height, 
-                         * which might cause the contentWidget to overlap the footerWidget.                     
-                        */
-                        if(deltaHeight != 0) { 
+                        /*
+                         * If the height of the customButtonsPanel has changed ( delta not equals to 0 ), the
+                         * footerWidget of the TaggingPanel has a different height, which might cause the contentWidget
+                         * to overlap the footerWidget.
+                         */
+                        if (deltaHeight != 0) {
                             panel.setContentWidget(contentPanel);
                         }
                     } else {
@@ -643,11 +703,11 @@ public class TaggingPanel extends ComponentWithoutSettings
             saveChangesButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    if (inputPanel.getTagValue().length() > 0) {
-                        selectedTagButton.setText(inputPanel.getTagValue());
-                        selectedTagButton.setTag(inputPanel.getTagValue());
-                        selectedTagButton.setComment(inputPanel.getCommentValue());
-                        selectedTagButton.setImageURL(inputPanel.getImageURLValue());
+                    if (inputPanel.getTag().length() > 0) {
+                        selectedTagButton.setText(inputPanel.getTag());
+                        selectedTagButton.setTag(inputPanel.getTag());
+                        selectedTagButton.setComment(inputPanel.getComment());
+                        selectedTagButton.setImageURL(inputPanel.getImageURL());
                         inputPanel.clearAllValues();
                         tagPreviewPanel.renderPreview();
                         customTagButtonsTable.redraw();
@@ -699,7 +759,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             mainPanel.add(closeButton);
             mainPanel.ensureDebugId("Test");
             getElement().getStyle().setBackgroundColor("white");
-            
+
             setWidget(mainPanel);
         }
 
@@ -1008,7 +1068,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         TagPanelResources.INSTANCE.style().ensureInjected();
         CellListResources.INSTANCE.cellListStyle().ensureInjected();
 
-        //TODO Add this label to ui
+        // TODO Add this label to ui
         currentFilterLabel = new Label();
         tagListProvider = new TagListProvider(currentFilterLabel);
         customTagButtons = new ArrayList<TagButton>();
@@ -1061,8 +1121,8 @@ public class TaggingPanel extends ComponentWithoutSettings
                 timer.setTime(tagSelectionModel.getSelectedObject().getRaceTimepoint().asMillis());
             }
         });
-        
-        //contentPanel.add(currentFilterLabel);
+
+        // contentPanel.add(currentFilterLabel);
         contentPanel.add(tagCellList);
         contentPanel.getElement().getStyle().setHeight(100, Unit.PCT);
         contentPanel.getElement().getStyle().setPaddingTop(10, Unit.PX);
@@ -1083,11 +1143,11 @@ public class TaggingPanel extends ComponentWithoutSettings
         }
     }
 
-    private void addTagToRaceLog(String tag, String comment, String imageURL) {
+    private void addTagToRaceLog(String tag, String comment, String imageURL, boolean isPublic) {
         if (isLoggedInAndRaceLogAvailable()) {
             if (tag.length() > 0) {
                 sailingService.addTagToRaceLog(leaderboardName, raceColumn.getName(), fleet.getName(), tag, comment,
-                        imageURL, true, new MillisecondsTimePoint(timer.getTime()), new AsyncCallback<SuccessInfo>() {
+                        imageURL, isPublic, new MillisecondsTimePoint(timer.getTime()), new AsyncCallback<SuccessInfo>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 Notification.notify(stringMessages.tagNotAddedReason(caught.toString()),

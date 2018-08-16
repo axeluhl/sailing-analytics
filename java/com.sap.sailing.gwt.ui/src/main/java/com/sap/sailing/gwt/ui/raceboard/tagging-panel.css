@@ -113,9 +113,18 @@ b {
 	border: 1px solid #cecece;
 	margin-top: -1px;
 	resize: none;
-    margin-bottom: 5px;
-    border-radius: 0px 0px 4px 4px; 
+    border-radius: 0px 0px 0px 4px; 
     width: 100%;
+}
+
+.inputPanelIsVisibleForPublic {
+	float: right;
+	padding: 2px;
+    border: 1px solid #cecece;
+    resize: none;
+    border-radius: 0px 0px 4px 4px;
+    margin-bottom: 5px;
+    margin-top: -3px;
 }
 
 /**************************** Tag filtering ****************************/

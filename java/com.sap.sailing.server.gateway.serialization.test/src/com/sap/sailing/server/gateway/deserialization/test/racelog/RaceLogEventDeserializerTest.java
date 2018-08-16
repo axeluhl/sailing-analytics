@@ -156,6 +156,6 @@ public class RaceLogEventDeserializerTest {
         assertEquals(originalEvent.getComment(), newEvent.getComment());
         assertEquals(originalEvent.getImageURL(), newEvent.getImageURL());
         assertEquals(originalEvent.getUsername(), newEvent.getUsername());
-        assertEquals(originalEvent.isPublic(), newEvent.isPublic());
+        assertEquals(originalEvent.isVisibleForPublic(), newEvent.isVisibleForPublic());
     }   
 }

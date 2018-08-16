@@ -2137,7 +2137,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 List<RaceLogTagEvent> foundTagEvents = tagFinder.analyze();
                 for (RaceLogTagEvent tagEvent : foundTagEvents) {
                     tags.add(new TagDTO(tagEvent.getTag(), tagEvent.getComment(), tagEvent.getImageURL(),
-                            tagEvent.getUsername(), tagEvent.getLogicalTimePoint(), tagEvent.getCreatedAt(), tagEvent.isPublic()));
+                            tagEvent.getUsername(), tagEvent.getLogicalTimePoint(), tagEvent.getCreatedAt(), tagEvent.isVisibleForPublic()));
                 }
             }
         }   
@@ -7866,7 +7866,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     public void visit(RaceLogTagEvent event) {
                         // TODO check if if condition is correct D067890
                         if (hasStartTime && isLatestPass(event)) {
-                            raceLog.add(new RaceLogTagEventImpl(event.getTag(), event.getComment(), event.getImageURL(), event.isPublic(), event.getCreatedAt(), event.getLogicalTimePoint(),
+                            raceLog.add(new RaceLogTagEventImpl(event.getTag(), event.getComment(), event.getImageURL(), event.isVisibleForPublic(), event.getCreatedAt(), event.getLogicalTimePoint(),
                                     event.getAuthor(), raceLog.getCurrentPassId()));
                         }
                     }

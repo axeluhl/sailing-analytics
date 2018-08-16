@@ -31,7 +31,7 @@ public class RaceLogTagEventSerializer extends BaseRaceLogEventSerializer{
         result.put(FIELD_TAG, tagEvent.getTag());
         result.put(FIELD_COMMENT, tagEvent.getComment());
         result.put(FIELD_URL, tagEvent.getImageURL());
-        result.put(FIELD_IS_PUBLIC, tagEvent.isPublic());
+        result.put(FIELD_IS_PUBLIC, tagEvent.isVisibleForPublic());
         return result;
     }
 }

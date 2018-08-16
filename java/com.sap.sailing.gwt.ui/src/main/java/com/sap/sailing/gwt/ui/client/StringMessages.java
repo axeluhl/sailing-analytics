@@ -5,6 +5,7 @@ import java.util.UUID;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.LocalizableResource.DefaultLocale;
 import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.sap.sailing.domain.common.i18n.CommonStringMessages;
 import com.sap.sse.gwt.client.DefaultRule_0_1_n;
 import com.sap.sse.gwt.client.DefaultRule_1_0n;
@@ -2124,4 +2125,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String tagEditCustomTagButton();
     String tagSaveCustomTagButton();
     String tagPreview();
+    String tagVisibleForPublicCheckBox();
 }
