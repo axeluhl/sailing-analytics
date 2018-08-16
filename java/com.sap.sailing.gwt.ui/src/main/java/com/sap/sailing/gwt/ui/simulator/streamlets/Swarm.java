@@ -280,11 +280,12 @@ public class Swarm implements TimeListener {
                 particle.stepsToLive--;
                 if ((particle.stepsToLive > 0) && (this.field.inBounds(particle.currentPosition))) {
                     particle.v = field.getVector(particle.currentPosition, timePoint);
-                    if (particle.v.length() > maxSpeed) {
-                        maxSpeed = particle.v.length();
+                    final double length = particle.v.length();
+                    if (length > maxSpeed) {
+                        maxSpeed = length;
                     }
-                    if (particle.v.length() < minSpeed) {
-                        minSpeed = particle.v.length();
+                    if (length < minSpeed) {
+                        minSpeed = length;
                     }
                 } else {
                     particle.v = null;
@@ -294,8 +295,10 @@ public class Swarm implements TimeListener {
                 particles[idx] = this.createParticle();
             }
         }
-        valueRange.setMinMax(minSpeed, maxSpeed);
-        drawSwarm();
+        if (minSpeed <= maxSpeed) {
+            valueRange.setMinMax(minSpeed, maxSpeed);
+            drawSwarm();
+        }
         return true;
     }
     
