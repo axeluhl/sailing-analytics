@@ -230,7 +230,7 @@ public class RaceTimesInfoProvider {
         raceTimesInfos.clear();
     }
 
-    public TimePoint getLatestReceivedTag(RegattaAndRaceIdentifier raceIdentifier) {
+    public TimePoint getLatestReceivedTagTime(RegattaAndRaceIdentifier raceIdentifier) {
         return latestReceivedTagTimes.get(raceIdentifier);
     }
     

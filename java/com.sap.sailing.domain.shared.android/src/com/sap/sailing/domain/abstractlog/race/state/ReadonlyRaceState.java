@@ -4,6 +4,7 @@ import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventComparator;
@@ -146,5 +147,7 @@ public interface ReadonlyRaceState extends RaceStateEventProcessor {
      * If wind has been entered, returns the most recent one. Otherwise <code>null</code>.
      */
     Wind getWindFix();
+    
+    Iterable<RaceLogTagEvent> getTagEvents();
 
 }

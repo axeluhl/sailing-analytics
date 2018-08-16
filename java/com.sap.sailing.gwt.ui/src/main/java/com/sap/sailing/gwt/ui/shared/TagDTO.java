@@ -4,24 +4,33 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.common.TimePoint;
 
 public class TagDTO implements IsSerializable {
-    
+
     private String tag;
     private String comment;
     private String imageURL;
     private String username;
     private TimePoint raceTimepoint;
     private TimePoint createdAt;
-    
+    private TimePoint revokedAt;
+
     // for GWT
-    public TagDTO() {}
+    public TagDTO() {
+    }
+
+    public TagDTO(String tag, String comment, String imageURL, String username, TimePoint raceTimepoint,
+            TimePoint createdAt) {
+        this(tag, comment, imageURL, username, raceTimepoint, createdAt, null);
+    }
     
-    public TagDTO(String tag, String comment, String imageURL, String username, TimePoint raceTimepoint, TimePoint createdAt) {
+    public TagDTO(String tag, String comment, String imageURL, String username, TimePoint raceTimepoint,
+            TimePoint createdAt, TimePoint revokedAt) {
         this.tag = tag;
         this.comment = comment;
         this.imageURL = imageURL;
         this.username = username;
         this.raceTimepoint = raceTimepoint;
         this.createdAt = createdAt;
+        this.revokedAt = revokedAt;
     }
 
     public String getTag() {
@@ -43,9 +52,13 @@ public class TagDTO implements IsSerializable {
     public TimePoint getRaceTimepoint() {
         return raceTimepoint;
     }
-    
+
     public TimePoint getCreatedAt() {
         return createdAt;
+    }
+
+    public TimePoint getRevokedAt() {
+        return revokedAt;
     }
 
     @Override
@@ -85,15 +98,10 @@ public class TagDTO implements IsSerializable {
         }
         return true;
     }
-    
+
     @Override
     public String toString() {
-        return "TagDTO [tag=" + tag
-                + ", comment=" + comment
-                + ", imageURL=" + imageURL
-                + ", username=" + username
-                + ", raceTimepoint=" + raceTimepoint
-                + ", createdAt=" + createdAt
-                + "]";
+        return "TagDTO [tag=" + tag + ", comment=" + comment + ", imageURL=" + imageURL + ", username=" + username
+                + ", raceTimepoint=" + raceTimepoint + ", createdAt=" + createdAt + ", revokedAt=" + revokedAt + "]";
     }
 }

@@ -99,7 +99,6 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCours
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.MarkPassingDataFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinderResult;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TagFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesEventFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TrackingTimesFinder;
 import com.sap.sailing.domain.abstractlog.race.impl.BaseRaceLogEventVisitor;
@@ -2133,11 +2132,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
             Iterable<RaceLog> raceLogs = trackedRace.getAttachedRaceLogs();
             for (RaceLog raceLog : raceLogs) {
-                TagFinder tagFinder = new TagFinder(raceLog, latestReceivedTagTime);
-                List<RaceLogTagEvent> foundTagEvents = tagFinder.analyze();
+                ReadonlyRaceState raceState = ReadonlyRaceStateImpl.getOrCreate(getService(), raceLog);
+                Iterable<RaceLogTagEvent> foundTagEvents = raceState.getTagEvents();
                 for (RaceLogTagEvent tagEvent : foundTagEvents) {
-                    tags.add(new TagDTO(tagEvent.getTag(), tagEvent.getComment(), tagEvent.getImageURL(),
-                            tagEvent.getUsername(), tagEvent.getLogicalTimePoint(), tagEvent.getCreatedAt()));
+                    if (latestReceivedTagTime == null
+                            || (latestReceivedTagTime != null && tagEvent.getRevokedAt() == null
+                                    && tagEvent.getCreatedAt().after(latestReceivedTagTime))
+                            || (latestReceivedTagTime != null && tagEvent.getRevokedAt() != null
+                                    && tagEvent.getRevokedAt().after(latestReceivedTagTime))) {
+                        tags.add(new TagDTO(tagEvent.getTag(), tagEvent.getComment(), tagEvent.getImageURL(),
+                                tagEvent.getUsername(), tagEvent.getLogicalTimePoint(), tagEvent.getCreatedAt(),
+                                tagEvent.getRevokedAt()));
+                    }
                 }
             }
         }   
@@ -6071,8 +6077,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             TagDTO tag) {
         SuccessInfo successInfo = new SuccessInfo(true, null, null, null);
         RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
-        TagFinder tagFinder = new TagFinder(raceLog, tag.getCreatedAt().minus(1), tag.getCreatedAt().plus(1));
-        List<RaceLogTagEvent> foundTagEvents = tagFinder.analyze();
+        ReadonlyRaceState raceState = ReadonlyRaceStateImpl.getOrCreate(getService(), raceLog);
+        Iterable<RaceLogTagEvent> foundTagEvents = raceState.getTagEvents();
         for (RaceLogTagEvent tagEvent : foundTagEvents) {
             if (tagEvent.getTag().equals(tag.getTag()) && tagEvent.getComment().equals(tag.getComment())
                     && tagEvent.getImageURL().equals(tag.getImageURL())) {
