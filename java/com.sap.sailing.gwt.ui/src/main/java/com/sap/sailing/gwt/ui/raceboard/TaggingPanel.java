@@ -10,7 +10,6 @@ import java.util.Map;
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.ValueUpdater;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
@@ -354,16 +353,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                 @Override
                 public void onClick(ClickEvent event) {
                     if (isLoggedInAndRaceLogAvailable()) {
-                        EditCustomTagButtonsDialog editCustomTagButtonsDialog = new EditCustomTagButtonsDialog(
-                                customButtonsPanel);
-
-                        // scheduler is used because otherwise DialogBox would not be centered properly
-                        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-                            public void execute() {
-                                editCustomTagButtonsDialog.show();
-                                editCustomTagButtonsDialog.center();
-                            }
-                        });
+                        new EditCustomTagButtonsDialog(customButtonsPanel);
                         updateButtons();
                     }
                 }
@@ -553,18 +543,18 @@ public class TaggingPanel extends ComponentWithoutSettings
                 public void update(int index, TagButton button, String value) {
                     if (LeaderboardConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
                         final int heightOfTagButtonPanel = customButtonsPanel.getOffsetHeight();
-                        
+
                         customTagButtons.remove(button);
                         customButtonsPanel.remove(button);
                         customTagButtonsTable.setRowData(customTagButtons);
-                        
+
                         final int deltaHeight = customButtonsPanel.getOffsetHeight() - heightOfTagButtonPanel;
-                        /* 
-                         * If the height of the customButtonsPanel has changed ( delta not equals to 0 ), 
-                         * the footerWidget of the TaggingPanel has a different height, 
-                         * which in this case might cause the contentWidget to be to small.                     
-                        */
-                        if(deltaHeight != 0) { 
+                        /*
+                         * If the height of the customButtonsPanel has changed ( delta not equals to 0 ), the
+                         * footerWidget of the TaggingPanel has a different height, which in this case might cause the
+                         * contentWidget to be to small.
+                         */
+                        if (deltaHeight != 0) {
                             panel.setContentWidget(contentPanel);
                         }
                     } else if (LeaderboardConfigImagesBarCell.ACTION_EDIT.equals(value)) {
@@ -605,7 +595,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                 public void onClick(ClickEvent event) {
                     if (inputPanel.getTagValue().length() > 0) {
                         final int heightOfTagButtonPanel = customButtonsPanel.getOffsetHeight();
-                        
+
                         TagButton tagButton = new TagButton(inputPanel.getTagValue(), inputPanel.getTagValue(),
                                 inputPanel.getImageURLValue(), inputPanel.getCommentValue());
                         inputPanel.clearAllValues();
@@ -614,14 +604,14 @@ public class TaggingPanel extends ComponentWithoutSettings
                         customTagButtons.add(tagButton);
                         customButtonsPanel.add(tagButton);
                         setRowData(customTagButtons);
-                        
+
                         final int deltaHeight = customButtonsPanel.getOffsetHeight() - heightOfTagButtonPanel;
-                        /* 
-                         * If the height of the customButtonsPanel has changed ( delta not equals to 0 ), 
-                         * the footerWidget of the TaggingPanel has a different height, 
-                         * which might cause the contentWidget to overlap the footerWidget.                     
-                        */
-                        if(deltaHeight != 0) { 
+                        /*
+                         * If the height of the customButtonsPanel has changed ( delta not equals to 0 ), the
+                         * footerWidget of the TaggingPanel has a different height, which might cause the contentWidget
+                         * to overlap the footerWidget.
+                         */
+                        if (deltaHeight != 0) {
                             panel.setContentWidget(contentPanel);
                         }
                     } else {
@@ -679,7 +669,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             closeButton.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
-                    hideDialog();
+                    hide();
                 }
             });
             controlButttonPanel.add(addCustomTagButton);
@@ -694,12 +684,9 @@ public class TaggingPanel extends ComponentWithoutSettings
             mainPanel.add(tagPreviewPanel);
             mainPanel.add(closeButton);
             getElement().getStyle().setBackgroundColor("white");
-            
-            setWidget(mainPanel);
-        }
 
-        private void hideDialog() {
-            this.hide();
+            setWidget(mainPanel);
+            center();
         }
 
         private void setRowData(List<TagButton> buttons) {
@@ -1006,7 +993,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         TagPanelResources.INSTANCE.style().ensureInjected();
         CellListResources.INSTANCE.cellListStyle().ensureInjected();
 
-        //TODO Add this label to ui
+        // TODO Add this label to ui
         currentFilterLabel = new Label();
         tagListProvider = new TagListProvider(currentFilterLabel);
         customTagButtons = new ArrayList<TagButton>();
@@ -1059,8 +1046,8 @@ public class TaggingPanel extends ComponentWithoutSettings
                 timer.setTime(tagSelectionModel.getSelectedObject().getRaceTimepoint().asMillis());
             }
         });
-        
-        //contentPanel.add(currentFilterLabel);
+
+        // contentPanel.add(currentFilterLabel);
         contentPanel.add(tagCellList);
         contentPanel.getElement().getStyle().setHeight(100, Unit.PCT);
         contentPanel.getElement().getStyle().setPaddingTop(10, Unit.PX);
