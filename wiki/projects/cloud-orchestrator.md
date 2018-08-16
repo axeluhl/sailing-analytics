@@ -1,6 +1,6 @@
 # Cloud Orchestration - Project Plan
 
-[TOC]
+[[_TOC_]]
 
 The cloud landscape used to run the SAP Sailing Analytics as well as its development infrastructure has grown increasingly comprehensive and elaborate over the last few years. It has largely been configured through manual efforts on behalf of event and infrastructure operators and administrators.
 
