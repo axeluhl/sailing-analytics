@@ -18,10 +18,10 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
@@ -478,8 +478,8 @@ public class TaggingPanel extends ComponentWithoutSettings
         public void renderPreview() {
             listContainingPreviewTag.removeAll(listContainingPreviewTag);
             previewTag = new TagDTO(inputField.getTag(), inputField.getComment(),
-                    inputField.getImageURL(), "Author", new MillisecondsTimePoint(timer.getTime()),
-                    new MillisecondsTimePoint(timer.getTime()), inputField.isVisibleForPublic());
+                    inputField.getImageURL(), "Author", inputField.isVisibleForPublic(), new MillisecondsTimePoint(timer.getTime()),
+                    new MillisecondsTimePoint(timer.getTime()));
             listContainingPreviewTag.add(previewTag);
             tagPreviewCellList.setRowData(listContainingPreviewTag);
 
@@ -1210,15 +1210,25 @@ public class TaggingPanel extends ComponentWithoutSettings
     public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo,
             long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest, long clientTimeWhenResponseWasReceived) {
         raceTimesInfo.forEach((raceIdentifier, raceInfo) -> {
-            boolean addedTag = false;
+            boolean modifiedTags = false;
             boolean updatedLatestTag = false;
             if (raceIdentifier.equals(raceInfo.getRaceIdentifier())) {
                 List<TagDTO> currentTags = tagListProvider.getAllTags();
-                TimePoint latestReceivedTagTime = raceTimesInfoProvider.getLatestReceivedTag(raceIdentifier);
+                TimePoint latestReceivedTagTime = raceTimesInfoProvider.getLatestReceivedTagTime(raceIdentifier);
                 for (TagDTO tag : raceInfo.getTags()) {
-                    if (!currentTags.contains(tag)) {
+                    if (tag.getRevokedAt() != null) {
+                        // tag got revoked
+                        currentTags.remove(tag);
+                        modifiedTags = true;
+                        if (latestReceivedTagTime == null || (latestReceivedTagTime != null
+                                && latestReceivedTagTime.before(tag.getRevokedAt()))) {
+                            latestReceivedTagTime = tag.getRevokedAt();
+                            updatedLatestTag = true;
+                        }
+                    } else if (!currentTags.contains(tag)) {
+                        // tag did not get revoked
                         currentTags.add(tag);
-                        addedTag = true;
+                        modifiedTags = true;
                         if (latestReceivedTagTime == null || (latestReceivedTagTime != null
                                 && latestReceivedTagTime.before(tag.getCreatedAt()))) {
                             latestReceivedTagTime = tag.getCreatedAt();
@@ -1229,7 +1239,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                 if (updatedLatestTag) {
                     raceTimesInfoProvider.setLatestReceivedTagTime(raceIdentifier, latestReceivedTagTime);
                 }
-                if (addedTag) {
+                if (modifiedTags) {
                     updateContent();
                 }
             }

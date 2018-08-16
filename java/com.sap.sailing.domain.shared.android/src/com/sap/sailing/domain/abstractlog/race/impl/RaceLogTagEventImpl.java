@@ -11,8 +11,8 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
 
     private static final long serialVersionUID = 7213518902555323432L;
 
-    private final String tag, comment, imageURL, username;
-
+    private String tag, comment, imageURL, username;
+    private TimePoint revokedAt;
     private final boolean visibleForPublic;
 
     public RaceLogTagEventImpl(String pTag, String pComment, String pImageURL, boolean pVisibleForPublic, TimePoint createdAt,
@@ -23,16 +23,17 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
         imageURL = pImageURL;
         username = author.getName();
         visibleForPublic = pVisibleForPublic;
+        this.revokedAt = null;
     }
 
-    public RaceLogTagEventImpl(String pTag, String pComment, String pImageURL, boolean visibleForPublic, TimePoint createdAt,
-            TimePoint logicalTimePoint, AbstractLogEventAuthor author, int pPassId) {
-        this(pTag, pComment, pImageURL, visibleForPublic, createdAt, logicalTimePoint, author, randId(), pPassId);
+    public RaceLogTagEventImpl(String tag, String comment, String imageURL, boolean visibleForPublic, TimePoint createdAt,
+            TimePoint logicalTimePoint, AbstractLogEventAuthor author, int passId) {
+        this(tag, comment, imageURL, visibleForPublic, createdAt, logicalTimePoint, author, randId(), passId);
     }
 
-    public RaceLogTagEventImpl(String pTag, String pComment, String pImageURL, boolean visibleForPublic, 
-            TimePoint logicalTimePoint, AbstractLogEventAuthor author, int pPassId) {
-        this(pTag, pComment, pImageURL, visibleForPublic, now(), logicalTimePoint, author, randId(), pPassId);
+    public RaceLogTagEventImpl(String tag, String comment, String imageURL, boolean visibleForPublic, TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, int passId) {
+        this(tag, comment, imageURL, visibleForPublic, now(), logicalTimePoint, author, randId(), passId);
     }
 
     @Override
@@ -49,17 +50,32 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
     public String getImageURL() {
         return imageURL;
     }
-    
+
     @Override
     public String getUsername() {
         return username;
     }
-    
+
+    /**
+     * Only sets revokedAt if tag is not revoked already and given timepoint is not null.
+     */
+    @Override
+    public void markAsRevoked(TimePoint revokedAt) {
+        if (this.revokedAt == null && revokedAt != null) {
+            this.revokedAt = revokedAt;
+        }
+    }
+
+    @Override
+    public TimePoint getRevokedAt() {
+        return revokedAt;
+    }
+
     @Override
     public void accept(RaceLogEventVisitor visitor) {
         visitor.visit(this);
     }
-    
+
     @Override
     public String getShortInfo() {
         return "tag=" + tag + ", comment=" + comment;
@@ -68,5 +84,42 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
     @Override
     public boolean isVisibleForPublic() {
         return visibleForPublic;
+    }
+
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        RaceLogTagEventImpl other = (RaceLogTagEventImpl) obj;
+        if (comment == null) {
+            if (other.comment != null)
+                return false;
+        } else if (!comment.equals(other.comment))
+            return false;
+        if (imageURL == null) {
+            if (other.imageURL != null)
+                return false;
+        } else if (!imageURL.equals(other.imageURL))
+            return false;
+        if (tag == null) {
+            if (other.tag != null)
+                return false;
+        } else if (!tag.equals(other.tag))
+            return false;
+        if (username == null) {
+            if (other.username != null)
+                return false;
+        } else if (!username.equals(other.username))
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "RaceLogTagEvent [tag=" + tag + ", comment=" + comment + ", imageURL=" + imageURL + ", username="
+                + username + ", visibleForPublic=" + visibleForPublic + ", revokedAt=" + revokedAt + "]";
     }
 }
