@@ -7918,7 +7918,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             // adding the new width and h eight to the ImageDTO object
             image.setSizeInPx(resizedBufferedImage.getWidth(), resizedBufferedImage.getHeight());
             // storing the image on FileStorageService
-            InputStream fileStorageStream = converter.resizedBiToIs(resizedBufferedImage);
+            InputStream fileStorageStream = converter.resizedImageToInputStream(resizedBufferedImage);
             URI newUri = getService().getFileStorageManagementService().getActiveFileStorageService().storeFile(fileStorageStream,
                             "." + fileType, new Long(fileStorageStream.available()));
             // saving the new image ref uri to the ImageDTO object
