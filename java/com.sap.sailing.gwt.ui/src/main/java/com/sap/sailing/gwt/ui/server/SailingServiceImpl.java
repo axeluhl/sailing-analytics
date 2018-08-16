@@ -6081,7 +6081,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Iterable<RaceLogTagEvent> foundTagEvents = raceState.getTagEvents();
         for (RaceLogTagEvent tagEvent : foundTagEvents) {
             if (tagEvent.getTag().equals(tag.getTag()) && tagEvent.getComment().equals(tag.getComment())
-                    && tagEvent.getImageURL().equals(tag.getImageURL())) {
+                    && tagEvent.getImageURL().equals(tag.getImageURL())
+                    && tagEvent.getUsername().equals(tag.getUsername())
+                    && tagEvent.getLogicalTimePoint().equals(tag.getRaceTimepoint())) {
                 try {
                     // check if logged in user is the same user as the creator or logged in user is Administrator
                     Subject subject = SecurityUtils.getSubject();

@@ -24,10 +24,7 @@ public class TagFinder extends RaceLogAnalyzer<List<RaceLogTagEvent>> {
         for (RaceLogEvent raceLogEvent : raceLogEvents) {
             if (raceLogEvent instanceof RaceLogTagEvent) {
                 // tag event is not revoked (at least until this point of time at scanning race log)
-                RaceLogTagEvent tagEvent = (RaceLogTagEvent) raceLogEvent;
-                if (!result.contains(tagEvent)) {
-                    result.add(tagEvent);
-                }
+                result.add((RaceLogTagEvent) raceLogEvent);
             } else if (raceLogEvent instanceof RaceLogRevokeEvent) {
                 // tag event got revoked => update it in result list or add it to result as revoked tag event
                 RaceLogRevokeEvent revokeEvent = (RaceLogRevokeEvent) raceLogEvent;
@@ -35,11 +32,8 @@ public class TagFinder extends RaceLogAnalyzer<List<RaceLogTagEvent>> {
                 if (revokedEvent != null && revokedEvent instanceof RaceLogTagEvent) {
                     RaceLogTagEvent revokedTagEvent = (RaceLogTagEvent) revokedEvent;
                     int index = result.indexOf(revokedTagEvent);
-                    if (index > 0) {
+                    if (index >= 0) {
                         result.get(index).markAsRevoked(revokeEvent.getCreatedAt());
-                    } else {
-                        revokedTagEvent.markAsRevoked(revokeEvent.getCreatedAt());
-                        result.add(revokedTagEvent);
                     }
                 }
             }
