@@ -51,14 +51,14 @@ public class ImageConverterTest {
 
     @Test
     public void testConversions() {
-        byte[] byteArray1 = ImageConverter.bufferedImageToByteArray(jpgConverter.getImage(),
-                jpgConverter.getImageFormat());
-        byte[] byteArray2 = jpgConverter
-                .inputStreamToByteArray(jpgConverter.imageToInputStream(jpgConverter.getImage()));
+        byte[] byteArray1;
+        byte[] byteArray2;
+        byteArray1 = ImageConverter.bufferedImageToByteArray(jpgConverter.getImage(), jpgConverter.getImageFormat());
+        byteArray2 = jpgConverter.inputStreamToByteArray(jpgConverter.imageToInputStream(jpgConverter.getImage()));
         assertArrayEquals(byteArray1, byteArray2);
         assertArrayEquals(byteArray1, onePixelJpgExample);
         byteArray1 = ImageConverter.bufferedImageToByteArray(pngConverter.getImage(), pngConverter.getImageFormat());
-        byteArray2 = pngConverter.inputStreamToByteArray(pngConverter.imageToInputStream(jpgConverter.getImage()));
+        byteArray2 = pngConverter.inputStreamToByteArray(pngConverter.imageToInputStream(pngConverter.getImage()));
         assertArrayEquals(byteArray1, byteArray2);
         assertArrayEquals(byteArray1, onePixelPngExample);
     }
