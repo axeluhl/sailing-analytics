@@ -16,8 +16,10 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableResources;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab.RegattaLeaderboardPlace;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorItemDescription;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.ParticipatedEventDTO;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.ParticipatedRegattaDTO;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 
 public class SailorProfileEventsTable extends Composite {
@@ -36,7 +38,10 @@ public class SailorProfileEventsTable extends Composite {
     @UiField
     SpanElement titleUi;
 
-    public SailorProfileEventsTable() {
+    private FlagImageResolver flagImageResolver;
+
+    public SailorProfileEventsTable(FlagImageResolver flagImageResolver) {
+        this.flagImageResolver = flagImageResolver;
     }
 
     public void setController(PlaceController placeController) {
@@ -86,6 +91,9 @@ public class SailorProfileEventsTable extends Composite {
             new AbstractCell<ParticipatedRegattaDTO>() {
                 @Override
                 public void render(Context context, ParticipatedRegattaDTO value, SafeHtmlBuilder sb) {
+                    sb.appendHtmlConstant(new SuggestedMultiSelectionCompetitorItemDescription(value.getCompetitorDto(),
+                            flagImageResolver).getElement().getInnerHTML());
+                    // sb.appendHtmlConstant("<div>" + value.getCompetitorDto().getName() + "</div>");
                     //
                     // for (BoatClassDTO boatclass : value.getBoatclasses()) {
                     // sb.appendHtmlConstant(

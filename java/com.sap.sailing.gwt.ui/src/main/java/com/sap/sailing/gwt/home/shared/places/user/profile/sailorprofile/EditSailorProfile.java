@@ -47,9 +47,12 @@ public class EditSailorProfile extends Composite implements EditSailorProfileVie
 
     private final EditSailorProfileView.Presenter presenter;
 
+    private FlagImageResolver flagImageResolver;
+
     public EditSailorProfile(EditSailorProfileView.Presenter presenter, FlagImageResolver flagImageResolver,
             SailorProfileDetailsView parent) {
         this.presenter = presenter;
+        this.flagImageResolver = flagImageResolver;
         presenter.getDataProvider().setView(this);
         competitorSelectionUi = new EditableSuggestedMultiSelectionCompetitor(presenter, flagImageResolver);
         initWidget(uiBinder.createAndBindUi(this));
@@ -80,7 +83,7 @@ public class EditSailorProfile extends Composite implements EditSailorProfileVie
             @Override
             public void onSuccess(Iterable<ParticipatedEventDTO> result) {
                 for (ParticipatedEventDTO dto : result) {
-                    SailorProfileEventsTable table = new SailorProfileEventsTable();
+                    SailorProfileEventsTable table = new SailorProfileEventsTable(flagImageResolver);
                     table.setController(presenter.getPlaceController());
                     table.setEvent(dto);
                     table.addStyleName(SharedResources.INSTANCE.mediaCss().column());
