@@ -14,24 +14,24 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
     private String tag, comment, imageURL, username;
     private TimePoint revokedAt;
 
-    public RaceLogTagEventImpl(String pTag, String pComment, String pImageURL, TimePoint createdAt,
-            TimePoint logicalTimePoint, AbstractLogEventAuthor author, Serializable pId, int pPassId) {
-        super(createdAt, logicalTimePoint, author, pId, pPassId);
-        tag = pTag;
-        comment = pComment;
-        imageURL = pImageURL;
-        username = author.getName();
-        revokedAt = null;
+    public RaceLogTagEventImpl(String tag, String comment, String imageURL, TimePoint createdAt,
+            TimePoint logicalTimePoint, AbstractLogEventAuthor author, Serializable id, int passId) {
+        super(createdAt, logicalTimePoint, author, id, passId);
+        this.tag = tag;
+        this.comment = comment;
+        this.imageURL = imageURL;
+        this.username = author.getName();
+        this.revokedAt = null;
     }
 
-    public RaceLogTagEventImpl(String pTag, String pComment, String pImageURL, TimePoint createdAt,
-            TimePoint logicalTimePoint, AbstractLogEventAuthor author, int pPassId) {
-        this(pTag, pComment, pImageURL, createdAt, logicalTimePoint, author, randId(), pPassId);
+    public RaceLogTagEventImpl(String tag, String comment, String imageURL, TimePoint createdAt,
+            TimePoint logicalTimePoint, AbstractLogEventAuthor author, int passId) {
+        this(tag, comment, imageURL, createdAt, logicalTimePoint, author, randId(), passId);
     }
 
-    public RaceLogTagEventImpl(String pTag, String pComment, String pImageURL, TimePoint logicalTimePoint,
-            AbstractLogEventAuthor author, int pPassId) {
-        this(pTag, pComment, pImageURL, now(), logicalTimePoint, author, randId(), pPassId);
+    public RaceLogTagEventImpl(String tag, String comment, String imageURL, TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, int passId) {
+        this(tag, comment, imageURL, now(), logicalTimePoint, author, randId(), passId);
     }
 
     @Override
