@@ -43,6 +43,11 @@ public class ManeuverForClassificationJsonDeserializer implements JsonDeserializ
         boolean clean = (boolean) object.get(ManeuverForClassificationJsonSerializer.CLEAN);
         ManeuverCategory maneuverCategory = ManeuverCategory
                 .valueOf((String) object.get(ManeuverForClassificationJsonSerializer.MANEUVER_CATEGORY));
+        double twaBeforeInDegrees = (double) object.get(ManeuverForClassificationJsonSerializer.TWA_BEFORE_IN_DEGREES);
+        double twaAfterInDegrees = (double) object.get(ManeuverForClassificationJsonSerializer.TWA_AFTER_IN_DEGREES);
+        double twsInKnots = (double) object.get(ManeuverForClassificationJsonSerializer.TWS_IN_KNOTS);
+        double speedBeforeInKnots = (double) object.get(ManeuverForClassificationJsonSerializer.SPEED_BEFORE_IN_KNOTS);
+        double speedAfterInKnots = (double) object.get(ManeuverForClassificationJsonSerializer.SPEED_AFTER_IN_KNOTS);
 
         return new ManeuverForClassificationImpl(maneuverType, absoluteTotalCourseChangeInDegrees, speedInSpeedOutRatio,
                 oversteeringInDegrees, speedLossRatio, speedGainRatio, lowestSpeedVsExitingSpeedRatio,
@@ -50,7 +55,8 @@ public class ManeuverForClassificationJsonDeserializer implements JsonDeserializ
                 deviationFromOptimalJibeAngleInDegrees,
                 highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees,
                 mainCurveDurationInSeconds, maneuverDurationInSeconds, recoveryPhaseDurationInSeconds,
-                timeLossInSeconds, clean, maneuverCategory);
+                timeLossInSeconds, clean, maneuverCategory, twaBeforeInDegrees, twaAfterInDegrees, twsInKnots,
+                speedBeforeInKnots, speedAfterInKnots);
     }
 
 }

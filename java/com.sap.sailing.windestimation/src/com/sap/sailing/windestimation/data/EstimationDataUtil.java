@@ -113,7 +113,9 @@ public class EstimationDataUtil {
                 if (currentManeuver != null) {
                     ManeuverForClassification maneuverForClassification = getManeuverForClassification(currentManeuver,
                             previousManeuver, nextManeuver);
-                    maneuversForClassification.add(maneuverForClassification);
+                    if (maneuverForClassification != null) {
+                        maneuversForClassification.add(maneuverForClassification);
+                    }
                 }
                 previousManeuver = currentManeuver;
                 currentManeuver = nextManeuver;
@@ -121,7 +123,9 @@ public class EstimationDataUtil {
             if (currentManeuver != null) {
                 ManeuverForClassification maneuverForClassification = getManeuverForClassification(currentManeuver,
                         previousManeuver, null);
-                maneuversForClassification.add(maneuverForClassification);
+                if (maneuverForClassification != null) {
+                    maneuversForClassification.add(maneuverForClassification);
+                }
             }
             CompetitorTrackWithEstimationData<ManeuverForClassification> competitorTrack = new CompetitorTrackWithEstimationData<>(
                     otherCompetitorTrack.getCompetitorName(), otherCompetitorTrack.getBoatClass(),
@@ -137,6 +141,9 @@ public class EstimationDataUtil {
     public static ManeuverForClassification getManeuverForClassification(
             CompleteManeuverCurveWithEstimationData maneuver, CompleteManeuverCurveWithEstimationData previousManeuver,
             CompleteManeuverCurveWithEstimationData nextManeuver) {
+        if (maneuver.getWind() == null) {
+            return null;
+        }
         ManeuverTypeForClassification maneuverType = getManeuverTypeForClassification(maneuver);
         double absoluteTotalCourseChangeInDegrees = Math
                 .abs(maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees());
@@ -228,6 +235,16 @@ public class EstimationDataUtil {
                                 maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getKnots(),
                                 maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getKnots());
         ManeuverCategory maneuverCategory = getManeuverCategory(maneuver);
+        double twaBeforeInDegrees = maneuver.getWind().getFrom()
+                .getDifferenceTo(maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getBearing())
+                .getDegrees();
+        double twaAfterInDegrees = maneuver.getWind().getFrom()
+                .getDifferenceTo(maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getBearing())
+                .getDegrees();
+        double twsInKnots = maneuver.getWind().getKnots();
+        double speedBeforeInKnots = maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore()
+                .getKnots();
+        double speedAfterInKnots = maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getKnots();
         ManeuverForClassification maneuverForClassification = new ManeuverForClassificationImpl(maneuverType,
                 absoluteTotalCourseChangeInDegrees, speedInSpeedOutRatio, oversteeringInDegrees, speedLossRatio,
                 speedGainRatio, lowestSpeedVsExitingSpeedRatio,
@@ -235,7 +252,8 @@ public class EstimationDataUtil {
                 deviationFromOptimalJibeAngleInDegrees,
                 highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees,
                 mainCurveDurationInSeconds, maneuverDurationInSeconds, recoveryPhaseDurationInSeconds,
-                timeLossInSeconds, clean, maneuverCategory);
+                timeLossInSeconds, clean, maneuverCategory, twaBeforeInDegrees, twaAfterInDegrees, twsInKnots,
+                speedBeforeInKnots, speedAfterInKnots);
         return maneuverForClassification;
     }
 

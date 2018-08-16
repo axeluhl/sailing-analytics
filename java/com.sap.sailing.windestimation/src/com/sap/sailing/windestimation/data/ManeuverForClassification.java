@@ -5,7 +5,7 @@ public interface ManeuverForClassification {
     ManeuverTypeForClassification getManeuverType();
 
     double getAbsoluteTotalCourseChangeInDegrees();
-    
+
     double getSpeedInSpeedOutRatio();
 
     double getOversteeringInDegrees();
@@ -13,7 +13,7 @@ public interface ManeuverForClassification {
     double getSpeedLossRatio();
 
     double getSpeedGainRatioWithinMainCurve();
-    
+
     double getLowestSpeedVsExitingSpeedRatio();
 
     double getMaximalTurningRateInDegreesPerSecond();
@@ -35,5 +35,15 @@ public interface ManeuverForClassification {
     boolean isClean();
 
     ManeuverCategory getManeuverCategory();
+
+    double getTwaBeforeInDegrees();
+
+    double getTwaAfterInDegrees();
+
+    double getTwsInKnots();
+
+    double getSpeedBeforeInKnots();
+
+    double getSpeedAfterInKnots();
 
 }

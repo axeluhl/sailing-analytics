@@ -19,6 +19,11 @@ public class ManeuverForClassificationImpl implements ManeuverForClassification 
     private boolean clean;
     private ManeuverCategory maneuverCategory;
     private double lowestSpeedVsExitingSpeedRatio;
+    private double twaBeforeInDegrees;
+    private double twaAfterInDegrees;
+    private double twsInKnots;
+    private double speedBeforeInKnots;
+    private double speedAfterInKnots;
 
     public ManeuverForClassificationImpl(ManeuverTypeForClassification maneuverType,
             double absoluteTotalCourseChangeInDegrees, double speedInSpeedOutRatio, double oversteeringInDegrees,
@@ -27,7 +32,8 @@ public class ManeuverForClassificationImpl implements ManeuverForClassification 
             Double deviationFromOptimalJibeAngleInDegrees,
             Double highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees,
             double mainCurveDurationInSeconds, double maneuverDurationInSeconds, double recoveryPhaseDurationInSeconds,
-            double timeLossInSeconds, boolean clean, ManeuverCategory maneuverCategory) {
+            double timeLossInSeconds, boolean clean, ManeuverCategory maneuverCategory, double twaBeforeInDegrees,
+            double twaAfterInDegrees, double twsInKnots, double speedBeforeInKnots, double speedAfterInKnots) {
         this.maneuverType = maneuverType;
         this.absoluteTotalCourseChangeInDegrees = absoluteTotalCourseChangeInDegrees;
         this.speedInSpeedOutRatio = speedInSpeedOutRatio;
@@ -45,6 +51,11 @@ public class ManeuverForClassificationImpl implements ManeuverForClassification 
         this.timeLossInSeconds = timeLossInSeconds;
         this.clean = clean;
         this.maneuverCategory = maneuverCategory;
+        this.twaBeforeInDegrees = twaBeforeInDegrees;
+        this.twaAfterInDegrees = twaAfterInDegrees;
+        this.twsInKnots = twsInKnots;
+        this.speedBeforeInKnots = speedBeforeInKnots;
+        this.speedAfterInKnots = speedAfterInKnots;
     }
 
     @Override
@@ -130,6 +141,31 @@ public class ManeuverForClassificationImpl implements ManeuverForClassification 
     @Override
     public ManeuverCategory getManeuverCategory() {
         return maneuverCategory;
+    }
+
+    @Override
+    public double getTwaBeforeInDegrees() {
+        return twaBeforeInDegrees;
+    }
+
+    @Override
+    public double getTwaAfterInDegrees() {
+        return twaAfterInDegrees;
+    }
+
+    @Override
+    public double getTwsInKnots() {
+        return twsInKnots;
+    }
+
+    @Override
+    public double getSpeedBeforeInKnots() {
+        return speedBeforeInKnots;
+    }
+    
+    @Override
+    public double getSpeedAfterInKnots() {
+        return speedAfterInKnots;
     }
 
 }
