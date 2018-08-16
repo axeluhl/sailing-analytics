@@ -757,7 +757,6 @@ public class TaggingPanel extends ComponentWithoutSettings
             mainPanel.add(controlButttonPanel);
             mainPanel.add(tagPreviewPanel);
             mainPanel.add(closeButton);
-            mainPanel.ensureDebugId("Test");
             getElement().getStyle().setBackgroundColor("white");
 
             setWidget(mainPanel);

@@ -114,6 +114,16 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
                 return false;
         } else if (!username.equals(other.username))
             return false;
+        if (getLogicalTimePoint() == null) {
+            if (other.getLogicalTimePoint() != null)
+                return false;
+        } else if (!getLogicalTimePoint().equals(other.getLogicalTimePoint()))
+            return false;
+        if (getCreatedAt() == null) {
+            if (other.getCreatedAt() != null)
+                return false;
+        } else if (!getCreatedAt().equals(other.getCreatedAt()))
+            return false;
         return true;
     }
 
