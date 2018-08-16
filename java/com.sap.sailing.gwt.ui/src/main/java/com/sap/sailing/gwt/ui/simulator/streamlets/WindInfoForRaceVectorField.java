@@ -102,9 +102,6 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
         double knotSpeedSumScaledByConfidence = 0;
         final BearingWithConfidenceCluster<Position> bearingCluster = new BearingWithConfidenceCluster<>(weigher);
         for (final Entry<WindSource, WindTrackInfoDTO> windSourceAndWindTrack : windInfoForRace.windTrackInfoByWindSource.entrySet()) {
-            /*if ((windSourceAndWindTrack.getKey().name().equals("RACECOMMITTEE"))||(windSourceAndWindTrack.getKey().name().equals("COURSE_BASED"))) {
-                continue;
-            }*/
            if (!Util.contains(windInfoForRace.windSourcesToExclude, windSourceAndWindTrack.getKey())) {
                 WindDTO timewiseClosestFixForWindSource = getTimewiseClosestFix(windSourceAndWindTrack.getValue(), at);
                 if (timewiseClosestFixForWindSource != null) {
