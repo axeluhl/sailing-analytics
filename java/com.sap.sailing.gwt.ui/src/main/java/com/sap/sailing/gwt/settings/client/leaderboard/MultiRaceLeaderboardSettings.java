@@ -28,7 +28,7 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
 
     
     public MultiRaceLeaderboardSettings() {
-        super();
+        super(false);
     }
 
     public MultiRaceLeaderboardSettings(Collection<DetailType> maneuverDetailsToShow,
@@ -48,6 +48,7 @@ public class MultiRaceLeaderboardSettings extends LeaderboardSettings {
     }
 
     public MultiRaceLeaderboardSettings(Iterable<String> namesOfRaceColumnsToShow) {
+        super(false);
        this.namesOfRaceColumnsToShow.setValues(namesOfRaceColumnsToShow);
     }
     

@@ -91,7 +91,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
                 getService().getSensorFixStore(), exportWind, deviceConfigurations);
         final StreamingOutput streamingOutput;
         if (compress) {
-            streamingOutput= new CompressingStreamingOutput(masterData, competitorIds, startTime);
+            streamingOutput = new CompressingStreamingOutput(masterData, competitorIds, startTime);
         } else {
             streamingOutput = new NonCompressingStreamingOutput(masterData, competitorIds, startTime);
         }
