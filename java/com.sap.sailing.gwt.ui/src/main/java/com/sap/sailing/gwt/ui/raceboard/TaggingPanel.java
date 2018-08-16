@@ -106,6 +106,9 @@ public class TaggingPanel extends ComponentWithoutSettings
         @Source("com/sap/sailing/gwt/ui/client/images/lock.png")
         ImageResource privateIcon();
 
+        @Source("com/sap/sailing/gwt/ui/client/images/unlock.png")
+        ImageResource publicIcon();
+
         @Source("com/sap/sailing/gwt/ui/client/images/SAP_RV_Clear.png")
         ImageResource clearButton();
 
@@ -127,62 +130,35 @@ public class TaggingPanel extends ComponentWithoutSettings
         public interface TagPanelStyle extends CssResource {
             // tags
             String tag();
-
             String tagPanel();
-
             String tagHeading();
-
             String tagCreated();
-
             String tagComment();
-
             String tagImage();
-
             String button();
-
             String footerButton();
-
             String tagButtonTable();
-
             String inputPanelTag();
-
             String inputPanelComment();
-
             String inputPanelImageURL();
-
             String footerPanel();
-
             String tagPreviewPanel();
 
             // filter tags
             String tagFilterButton();
-
             String tagFilterHiddenButton();
-
             String tagFilterClearButton();
-
             String tagFilterSearchButton();
-
             String tagFilterSettingsButton();
-
             String tagFilterFilterButton();
-
             String tagFilterContainer();
-
             String tagFilterSearchBox();
-
             String tagFilterSearchInput();
-
             String filterInactiveButtonBackgroundImage();
-
             String filterActiveButtonBackgroundImage();
-
             String clearButtonBackgroundImage();
-
             String searchButtonBackgroundImage();
-
             String settingsButtonBackgroundImage();
-
             String inputPanelIsVisibleForPublic();
         }
     }
@@ -196,15 +172,10 @@ public class TaggingPanel extends ComponentWithoutSettings
 
         public interface CellListStyle extends CellList.Style {
             String cellListEventItem();
-
             String cellListWidget();
-
             String cellListEvenItem();
-
             String cellListOddItem();
-
             String cellListSelectedItem();
-
             String cellListKeyboardSelectedItem();
         }
     }
@@ -535,6 +506,7 @@ public class TaggingPanel extends ComponentWithoutSettings
 
             visibleForPublicCheckBox = new CheckBox(stringMessages.tagVisibleForPublicCheckBox());
             visibleForPublicCheckBox.setStyleName(style.inputPanelIsVisibleForPublic());
+            visibleForPublicCheckBox.setValue(true);
             add(visibleForPublicCheckBox);
         }
 
@@ -635,7 +607,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                 @Override
                 public ImageResource getValue(TagButton tagButton) {
                     if (tagButton.isVisibleForPublic()) {
-                        return null;
+                        return TagPanelResources.INSTANCE.publicIcon();
                     } else {
                         return TagPanelResources.INSTANCE.privateIcon();
                     }
@@ -1280,6 +1252,10 @@ public class TaggingPanel extends ComponentWithoutSettings
 
     @Override
     public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
+        tagListProvider.getAllTags().clear();
+        raceTimesInfoProvider.getRaceIdentifiers().forEach((raceIdentifier) -> {
+            raceTimesInfoProvider.setLatestReceivedTagTime(raceIdentifier, null);
+        });
         updateContent();
     }
 
