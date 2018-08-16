@@ -9,6 +9,7 @@ import java.util.Map;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.cell.client.ImageResourceCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.shared.GWT;
@@ -38,6 +39,7 @@ import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -602,7 +604,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             TagPanelStyle style = TagPanelResources.INSTANCE.style();
             setGlassEnabled(true);
             setText(stringMessages.tagEditCustomTagButtons());
-            setWidth("350px");
+            setWidth("450px");
 
             mainPanel = new FlowPanel();
             mainPanel.setWidth("100%");
@@ -626,6 +628,17 @@ public class TaggingPanel extends ComponentWithoutSettings
                 @Override
                 public String getValue(TagButton button) {
                     return button.getComment();
+                }
+            };
+            Column<TagButton, ImageResource> isPrivateColumn = new Column<TagButton, ImageResource>(
+                    new ImageResourceCell()) {
+                @Override
+                public ImageResource getValue(TagButton tagButton) {
+                    if (tagButton.isVisibleForPublic()) {
+                        return null;
+                    } else {
+                        return TagPanelResources.INSTANCE.privateIcon();
+                    }
                 }
             };
 
@@ -671,6 +684,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             customTagButtonsTable.addColumn(tagColumn, stringMessages.tagLabelTag());
             customTagButtonsTable.addColumn(imageURLColumn, stringMessages.tagLabelImageURL());
             customTagButtonsTable.addColumn(commentColumn, stringMessages.tagLabelComment());
+            customTagButtonsTable.addColumn(isPrivateColumn, stringMessages.tagVisibility());
             customTagButtonsTable.addColumn(actionsColumn, stringMessages.tagLabelAction());
             setRowData(customTagButtons);
 
