@@ -661,6 +661,7 @@ public class TaggingPanel extends ComponentWithoutSettings
 
                         saveChangesButton.setVisible(true);
                         cancelChangesButton.setVisible(true);
+                        closeButton.setVisible(false);
                         addCustomTagButton.setVisible(false);
                         customTagButtonsTable.setVisible(false);
                     }
@@ -729,6 +730,7 @@ public class TaggingPanel extends ComponentWithoutSettings
 
                         saveChangesButton.setVisible(false);
                         cancelChangesButton.setVisible(false);
+                        closeButton.setVisible(true);
                         addCustomTagButton.setVisible(true);
                         selectedTagButton = null;
                         setRowData(customTagButtons);
@@ -748,6 +750,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                     tagPreviewPanel.renderPreview();
                     saveChangesButton.setVisible(false);
                     cancelChangesButton.setVisible(false);
+                    closeButton.setVisible(true);
                     addCustomTagButton.setVisible(true);
                     setRowData(customTagButtons);
                 }
@@ -761,6 +764,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                     hideDialog();
                 }
             });
+            controlButttonPanel.add(closeButton);
             controlButttonPanel.add(addCustomTagButton);
             controlButttonPanel.add(cancelChangesButton);
             controlButttonPanel.add(saveChangesButton);
@@ -771,7 +775,6 @@ public class TaggingPanel extends ComponentWithoutSettings
             mainPanel.add(inputPanel);
             mainPanel.add(controlButttonPanel);
             mainPanel.add(tagPreviewPanel);
-            mainPanel.add(closeButton);
             getElement().getStyle().setBackgroundColor("white");
 
             setWidget(mainPanel);
