@@ -1592,7 +1592,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             resultEvent = loadRaceLogUseCompetitorsFromRaceLogEvent(createdAt, author, logicalTimePoint, id, passId,
                     competitors, dbObject);
         } else if (eventClass.equals(RaceLogTagEvent.class.getSimpleName())) {
-            resultEvent = loadRaceLogTagEvent(createdAt, author, logicalTimePoint, id, passId, competitors, dbObject);
+            resultEvent = loadRaceLogTagEvent(createdAt, author, logicalTimePoint, id, passId, dbObject);
         }else {
             throw new IllegalStateException(String.format("Unknown RaceLogEvent type %s", eventClass));
         }
@@ -1770,12 +1770,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     private RaceLogEvent loadRaceLogTagEvent(TimePoint createdAt, AbstractLogEventAuthor author,
-            TimePoint logicalTimePoint, Serializable id, Integer passId, List<Competitor> competitors,
+            TimePoint logicalTimePoint, Serializable id, Integer passId,
             DBObject dbObject) {
         String tag = (String) dbObject.get(FieldNames.RACE_LOG_TAG.name());
         String comment = (String) dbObject.get(FieldNames.RACE_LOG_COMMENT.name());
         String imageURL = (String) dbObject.get(FieldNames.RACE_LOG_IMAGE_URL.name());
-        return new RaceLogTagEventImpl(tag, comment, imageURL, createdAt, logicalTimePoint, author, id, passId);
+        boolean isPublic = (boolean) dbObject.get(FieldNames.RACE_LOG_IS_PUBLIC.name());
+        return new RaceLogTagEventImpl(tag, comment, imageURL, isPublic, createdAt, logicalTimePoint, author, id, passId);
     }
 
     private RaceLogEvent loadRaceLogGateLineOpeningTimeEvent(TimePoint createdAt, AbstractLogEventAuthor author,

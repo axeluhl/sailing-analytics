@@ -540,7 +540,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName, List<Util.Pair<ControlPointDTO, PassingInstruction>> course) throws NotFoundException;
     
     SuccessInfo addTagToRaceLog(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment,
-            String imageURL, TimePoint raceTimepoint);
+            String imageURL, boolean isPublic, TimePoint raceTimepoint);
 
     SuccessInfo removeTagFromRaceLog(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag);
 

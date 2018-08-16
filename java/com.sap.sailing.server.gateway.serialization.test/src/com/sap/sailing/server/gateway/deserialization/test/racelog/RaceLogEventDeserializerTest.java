@@ -132,7 +132,7 @@ public class RaceLogEventDeserializerTest {
     
     @Test
     public void testSerializationAndDeserializationForRaceLogTagEvent() throws Exception{
-        RaceLogTagEventImpl originalEvent = new RaceLogTagEventImpl("tag", "comment", "url", timePoint, timePoint2, author, UUID.randomUUID(), 3);
+        RaceLogTagEventImpl originalEvent = new RaceLogTagEventImpl("tag", "comment", "url", false, timePoint, timePoint2, author, UUID.randomUUID(), 3);
         RaceLogEventSerializer serializer = (RaceLogEventSerializer) RaceLogEventSerializer.create(CompetitorJsonSerializer.create());
         JSONObject object = serializer.serialize(originalEvent); 
         
@@ -156,5 +156,6 @@ public class RaceLogEventDeserializerTest {
         assertEquals(originalEvent.getComment(), newEvent.getComment());
         assertEquals(originalEvent.getImageURL(), newEvent.getImageURL());
         assertEquals(originalEvent.getUsername(), newEvent.getUsername());
+        assertEquals(originalEvent.isPublic(), newEvent.isPublic());
     }   
 }

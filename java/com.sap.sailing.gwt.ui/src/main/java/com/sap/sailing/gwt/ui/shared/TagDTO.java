@@ -9,19 +9,21 @@ public class TagDTO implements IsSerializable {
     private String comment;
     private String imageURL;
     private String username;
+    private boolean isPublic;
     private TimePoint raceTimepoint;
     private TimePoint createdAt;
     
     // for GWT
     public TagDTO() {}
     
-    public TagDTO(String tag, String comment, String imageURL, String username, TimePoint raceTimepoint, TimePoint createdAt) {
+    public TagDTO(String tag, String comment, String imageURL, String username, TimePoint raceTimepoint, TimePoint createdAt, boolean isPublic) {
         this.tag = tag;
         this.comment = comment;
         this.imageURL = imageURL;
         this.username = username;
         this.raceTimepoint = raceTimepoint;
         this.createdAt = createdAt;
+        this.isPublic = isPublic;
     }
 
     public String getTag() {
@@ -38,6 +40,10 @@ public class TagDTO implements IsSerializable {
 
     public String getUsername() {
         return username;
+    }
+    
+    public boolean isPublic() {
+        return isPublic;
     }
 
     public TimePoint getRaceTimepoint() {
@@ -83,6 +89,9 @@ public class TagDTO implements IsSerializable {
         } else if (!username.equals(other.username)) {
             return false;
         }
+        if (isPublic() != other.isPublic()) {
+            return false;
+        }
         return true;
     }
     
@@ -94,6 +103,6 @@ public class TagDTO implements IsSerializable {
                 + ", username=" + username
                 + ", raceTimepoint=" + raceTimepoint
                 + ", createdAt=" + createdAt
-                + "]";
+                + ", isPublic_]" + isPublic;
     }
 }

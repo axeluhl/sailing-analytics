@@ -11,4 +11,6 @@ public interface RaceLogTagEvent extends RaceLogEvent, Revokable {
     String getComment();
     
     String getImageURL(); 
+    
+    boolean isPublic();
 }

@@ -11,25 +11,28 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
 
     private static final long serialVersionUID = 7213518902555323432L;
 
-    private String tag, comment, imageURL, username;
+    private final String tag, comment, imageURL, username;
 
-    public RaceLogTagEventImpl(String pTag, String pComment, String pImageURL, TimePoint createdAt,
+    private final boolean visibleForPublic;
+
+    public RaceLogTagEventImpl(String pTag, String pComment, String pImageURL, boolean pVisibleForPublic, TimePoint createdAt,
             TimePoint logicalTimePoint, AbstractLogEventAuthor author, Serializable pId, int pPassId) {
         super(createdAt, logicalTimePoint, author, pId, pPassId);
         tag = pTag;
         comment = pComment;
         imageURL = pImageURL;
         username = author.getName();
+        visibleForPublic = pVisibleForPublic;
     }
 
-    public RaceLogTagEventImpl(String pTag, String pComment, String pImageURL, TimePoint createdAt,
+    public RaceLogTagEventImpl(String pTag, String pComment, String pImageURL, boolean visibleForPublic, TimePoint createdAt,
             TimePoint logicalTimePoint, AbstractLogEventAuthor author, int pPassId) {
-        this(pTag, pComment, pImageURL, createdAt, logicalTimePoint, author, randId(), pPassId);
+        this(pTag, pComment, pImageURL, visibleForPublic, createdAt, logicalTimePoint, author, randId(), pPassId);
     }
 
-    public RaceLogTagEventImpl(String pTag, String pComment, String pImageURL,
+    public RaceLogTagEventImpl(String pTag, String pComment, String pImageURL, boolean visibleForPublic, 
             TimePoint logicalTimePoint, AbstractLogEventAuthor author, int pPassId) {
-        this(pTag, pComment, pImageURL, now(), logicalTimePoint, author, randId(), pPassId);
+        this(pTag, pComment, pImageURL, visibleForPublic, now(), logicalTimePoint, author, randId(), pPassId);
     }
 
     @Override
@@ -60,5 +63,10 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
     @Override
     public String getShortInfo() {
         return "tag=" + tag + ", comment=" + comment;
+    }
+
+    @Override
+    public boolean isPublic() {
+        return visibleForPublic;
     }
 }

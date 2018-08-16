@@ -256,7 +256,7 @@ public class RaceLogEventSerializerTest {
     @Test
     public void testTagSerializer() { 
         // we use the real event type here because we do not want to re-implement the dispatching.
-        RaceLogEvent event = new RaceLogTagEventImpl("", "", "", MillisecondsTimePoint.now(), author, 0);
+        RaceLogEvent event = new RaceLogTagEventImpl("", "", "", true, MillisecondsTimePoint.now(), author, 0);
         serializer.serialize(event);
         verify(tagEventSerializer).serialize(event);
     }

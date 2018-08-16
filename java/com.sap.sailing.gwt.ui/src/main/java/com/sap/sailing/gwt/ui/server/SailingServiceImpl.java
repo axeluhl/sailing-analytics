@@ -2137,7 +2137,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 List<RaceLogTagEvent> foundTagEvents = tagFinder.analyze();
                 for (RaceLogTagEvent tagEvent : foundTagEvents) {
                     tags.add(new TagDTO(tagEvent.getTag(), tagEvent.getComment(), tagEvent.getImageURL(),
-                            tagEvent.getUsername(), tagEvent.getLogicalTimePoint(), tagEvent.getCreatedAt()));
+                            tagEvent.getUsername(), tagEvent.getLogicalTimePoint(), tagEvent.getCreatedAt(), tagEvent.isPublic()));
                 }
             }
         }   
@@ -6051,13 +6051,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public SuccessInfo addTagToRaceLog(String leaderboardName, String raceColumnName, String fleetName, String tag,
-            String comment, String imageURL, TimePoint raceTimepoint) {
+            String comment, String imageURL, boolean isPublic, TimePoint raceTimepoint) {
         SuccessInfo successInfo = new SuccessInfo(true, null, null, null);
         try {
             SecurityUtils.getSubject().checkPermission(
                     Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
             RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
-            raceLog.add(new RaceLogTagEventImpl(tag, comment, imageURL, raceTimepoint, getService().getServerAuthor(),
+            raceLog.add(new RaceLogTagEventImpl(tag, comment, imageURL, isPublic, raceTimepoint, getService().getServerAuthor(),
                     raceLog.getCurrentPassId()));
         } catch (AuthorizationException e) {
             successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "tagMissingPermissions"),
@@ -7866,7 +7866,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     public void visit(RaceLogTagEvent event) {
                         // TODO check if if condition is correct D067890
                         if (hasStartTime && isLatestPass(event)) {
-                            raceLog.add(new RaceLogTagEventImpl(event.getTag(), event.getComment(), event.getImageURL(), event.getCreatedAt(), event.getLogicalTimePoint(),
+                            raceLog.add(new RaceLogTagEventImpl(event.getTag(), event.getComment(), event.getImageURL(), event.isPublic(), event.getCreatedAt(), event.getLogicalTimePoint(),
                                     event.getAuthor(), raceLog.getCurrentPassId()));
                         }
                     }

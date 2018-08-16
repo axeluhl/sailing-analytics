@@ -28,7 +28,8 @@ public class RaceLogTagEventDeserializer extends BaseRaceLogEventDeserializer{
         String tag = object.get(RaceLogTagEventSerializer.FIELD_TAG).toString();
         String comment = object.get(RaceLogTagEventSerializer.FIELD_COMMENT).toString();
         String imageURL = object.get(RaceLogTagEventSerializer.FIELD_URL).toString();
-        return new RaceLogTagEventImpl(tag, comment, imageURL, createdAt, timePoint, author, id, passId);
+        boolean isPublic = (boolean) object.get(RaceLogTagEventSerializer.FIELD_IS_PUBLIC);
+        return new RaceLogTagEventImpl(tag, comment, imageURL, isPublic, createdAt, timePoint, author, id, passId);
     }
 
 }

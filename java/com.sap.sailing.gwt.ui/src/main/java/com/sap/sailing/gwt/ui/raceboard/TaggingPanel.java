@@ -99,6 +99,12 @@ public class TaggingPanel extends ComponentWithoutSettings
         // TODO image is stored in wrong folder
         @Source("com/sap/sailing/gwt/ui/client/images/edit.png")
         ImageResource editIcon();
+        
+        @Source("com/sap/sailing/gwt/ui/client/images/unlock.png")
+        ImageResource publicIcon();
+        
+        @Source("com/sap/sailing/gwt/ui/client/images/lock.png")
+        ImageResource privateIcon();
 
         @Source("com/sap/sailing/gwt/ui/client/images/SAP_RV_Clear.png")
         ImageResource clearButton();
@@ -171,13 +177,14 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     public interface TagCellTemplate extends SafeHtmlTemplates {
-        @Template("<div class='{0}'><div class='{1}'>{3}</div><div class='{2}'>{4}</div>{5}</div>")
+        @Template("<div class='{0}'><div class='{1}'><img src='{6}'>{3}</div><div class='{2}'>{4}</div>{5}</div>")
         SafeHtml cell(String styleTag, String styleTagHeading, String styleTagCreated, SafeHtml tag, SafeHtml createdAt,
-                SafeHtml content);
+                SafeHtml content, SafeUri safeUri);
 
-        @Template("<div class='{0}'><div class='{1}'>{3}<button>X</button></div><div class='{2}'>{4}</div>{5}</div>")
+        @Template("<div class='{0}'><div class='{1}'><img src='{6}'>{3}<button>X</button></div><div class='{2}'>{4}</div>{5}</div>")
         SafeHtml cellRemovable(String styleTag, String styleTagHeading, String styleTagCreated, SafeHtml tag,
-                SafeHtml createdAt, SafeHtml content);
+                SafeHtml createdAt, SafeHtml content, SafeUri safeUri);
+        
 
         @Template("<div class='{0}'><img src='{2}'/></div><div class='{1}'>{3}</div>")
         SafeHtml contentWithCommentWithImage(String styleTagImage, String styleTagComment, SafeUri imageURL,
@@ -212,8 +219,11 @@ public class TaggingPanel extends ComponentWithoutSettings
                     DateTimeFormat.getFormat("E d/M/y, HH:mm").format(tag.getRaceTimepoint().asDate())));
             SafeHtml safeComment = SafeHtmlUtils.fromString(tag.getComment());
             SafeUri trustedImageURL = UriUtils.fromTrustedString(tag.getImageURL());
+            
+            SafeUri safeIsPublicImageUri = tag.isPublic() ? TagPanelResources.INSTANCE.publicIcon().getSafeUri() : TagPanelResources.INSTANCE.privateIcon().getSafeUri();
 
             SafeHtml content = SafeHtmlUtils.EMPTY_SAFE_HTML;
+            
             if (tag.getComment().length() > 0 && tag.getImageURL().length() <= 0) {
                 content = tagCellTemplate.contentWithCommentWithoutImage(tagPanelStyle.tagComment(), safeComment);
             } else if (tag.getComment().length() <= 0 && tag.getImageURL().length() > 0) {
@@ -224,14 +234,14 @@ public class TaggingPanel extends ComponentWithoutSettings
             }
 
             SafeHtml cell;
-            if (isPreviewCell && userService.getCurrentUser() != null
+            if (!isPreviewCell && userService.getCurrentUser() != null
                     && (tag.getUsername().equals(userService.getCurrentUser().getName())
                             || userService.getCurrentUser().hasRole("admin"))) {
                 cell = tagCellTemplate.cellRemovable(tagPanelStyle.tag(), tagPanelStyle.tagHeading(),
-                        tagPanelStyle.tagCreated(), safeTag, safeCreated, content);
+                        tagPanelStyle.tagCreated(), safeTag, safeCreated, content, safeIsPublicImageUri);
             } else {
                 cell = tagCellTemplate.cell(tagPanelStyle.tag(), tagPanelStyle.tagHeading(), tagPanelStyle.tagCreated(),
-                        safeTag, safeCreated, content);
+                        safeTag, safeCreated, content, safeIsPublicImageUri);
             }
             htmlBuilder.append(cell);
         }
@@ -386,7 +396,7 @@ public class TaggingPanel extends ComponentWithoutSettings
 
         public TagPreviewPanel(TagCreationInputPanel inputField) {
             this.inputField = inputField;
-            tagPreviewCellList = new CellList<TagDTO>(new TagCell(false), CellListResources.INSTANCE);
+            tagPreviewCellList = new CellList<TagDTO>(new TagCell(true), CellListResources.INSTANCE);
             tagPreviewCellList.setVisibleRange(0, 1);
             previewLabel = new Label(stringMessages.tagPreview());
             listContainingPreviewTag = new ArrayList<TagDTO>();
@@ -422,8 +432,8 @@ public class TaggingPanel extends ComponentWithoutSettings
         public void renderPreview() {
             listContainingPreviewTag.removeAll(listContainingPreviewTag);
             previewTag = new TagDTO(inputField.getTagValue(), inputField.getCommentValue(),
-                    inputField.getImageURLValue(), "Author", new MillisecondsTimePoint(timer.getTime()),
-                    new MillisecondsTimePoint(timer.getTime()));
+                    inputField.getImageURLValue(),  "Author", new MillisecondsTimePoint(timer.getTime()),
+                    new MillisecondsTimePoint(timer.getTime()), true);
             listContainingPreviewTag.add(previewTag);
             tagPreviewCellList.setRowData(listContainingPreviewTag);
 
@@ -1005,7 +1015,7 @@ public class TaggingPanel extends ComponentWithoutSettings
 
         panel = new HeaderPanel();
         filterbarPanel = new TagFilterPanel(stringMessages, tagListProvider);
-        tagCellList = new CellList<TagDTO>(new TagCell(true), CellListResources.INSTANCE);
+        tagCellList = new CellList<TagDTO>(new TagCell(false), CellListResources.INSTANCE);
         tagSelectionModel = new SingleSelectionModel<TagDTO>();
 
         contentPanel = new ScrollPanel();
@@ -1077,7 +1087,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         if (isLoggedInAndRaceLogAvailable()) {
             if (tag.length() > 0) {
                 sailingService.addTagToRaceLog(leaderboardName, raceColumn.getName(), fleet.getName(), tag, comment,
-                        imageURL, new MillisecondsTimePoint(timer.getTime()), new AsyncCallback<SuccessInfo>() {
+                        imageURL, true, new MillisecondsTimePoint(timer.getTime()), new AsyncCallback<SuccessInfo>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 Notification.notify(stringMessages.tagNotAddedReason(caught.toString()),
