@@ -58,6 +58,18 @@ Currently, several sub-domain names exist (e.g., wiki, bugzilla and hudson) that
 
 Those hold the nodes responding to requests. In a replication cluster we usually want to have one for the "-master" URL that event administrators use
 
+### Volumes
+
+There are a number of disk volumes that are critical to monitor and, where necessary, scale. This includes:
+
+- Backup server (*/home/backup*)
+- Database server (*/var/lib/mongodb* and sub-mounts, */var/lib/mysql*)
+- Central Webserver (*/var/log/old*, */var/log/old/cache*, */var/www/static*, */var/www/home* hosting the git repository)
+
+Through the AWS API the read/write throughputs can be observed, and peaks as well as bottlenecks may be identified. At least as importantly, the file system fill state has to be observed which is not possible through the AWS API and needs to happen through the respective instances' operating systems.
+
+It shall be possible to define alerts based on file systems whose free space drops below a given threshold. Re-sizing volumes automatically may be an interesting option in the future.
+
 ### Alerts
 
 Alerts can be defined for different metrics and with different notification targets. SMS text messages and e-mail notifications are available.
@@ -95,6 +107,8 @@ Application nodes have to provide a REST API with reliable health information.
 A replica is not healthy while its initial load is about to start, or is still on-going or its replication queue is yet to drain after the initial load has finished. A replica will take harm from requests received while the initial load is received or being processed. Requests may be permitted after the initial load has finished processing and while the replication queue is being drained, although the replica will not yet have reached the state that the master is in.
 
 A master is not healthy until it has finished loading all data from the MongoDB during the activation of the *RacingEventService*. It will take harm from requests received during this loading phase. After loading the "master data," a master server will try to restore all race trackers, starting to track the races for which a so-called "restore record" exists. During this phase the master is not fully ready yet but will not take harm from requests after loading all master data has completed. For example, in an emergency situation where otherwise the replication cluster would be unavailable it may be useful to already direct requests at such a master to at least display a landing page or a meaningful error page.
+
+The Java instances have a few and shall have more interesting observable parameters. Some values can be observed through the AWS API, such as general network and CPU loads. So far, the number of leaderboards and the restore process can be observed using JMX managed beans, as can be seen in the JConsole. Other interesting parameters to observe by the orchestrator would be the memory usage and garbage collection (GC) stats, as well as information about the thread pools, their usage and their contention. It would be great if the orchestrator could find out about bottlenecks and how they may be avoided, e.g., hitting bandwidth limitations or not having enough CPUs available to serialize data fast enough for the bandwidth available and the demand observed.
 
 ### Multi-Instances
 
@@ -173,6 +187,8 @@ The backup script on *dbserver.internal.sapsailing.com:/opt/backup.sh* does *not
 ## Orchestration Use Cases
 
 ### Create a New Event on a Dedicated Replication Cluster
+
+
 
 ### Create a New "Club Set-Up" in a Multi-Instance
 
