@@ -188,7 +188,23 @@ The backup script on *dbserver.internal.sapsailing.com:/opt/backup.sh* does *not
 
 ### Create a New Event on a Dedicated Replication Cluster
 
+A user wants to create a new event. But instead of creating it on an existing server instance, such as the archive server or a club server, he/she would like to create a new dedicated server instance such that the server is a master which later may receive its own replicas and thus form the core of a new replication cluster. The user defines the technical event name, such as *TW2018* for the "Travemünder Woche 2018," which is then used as the server name, MongoDB database name, and replication channel name.
 
+The steps are:
+
+- Launch a new instance from a prepared AMI (either the AMI is regularly updated with the latest packages and kernel patches, or a "yum update" needs to be run and then the instance rebooted)
+- The latest (or a specified) release is installed to */home/sailing/servers/server*
+- The */home/sailing/servers/server/env.sh* file is adjusted to reflect the server name, MongoDB settings, as well as the ports to be used (for a dedicated server probably the defaults at 8888 for the HTTP server, 14888 for the OSGi console telnet port, and 2010 for the Expedition UDP connector)
+- The Java process is launched
+- An event is created; it doesn't necessarily have to have the correct name and attributes yet; it's only important to obtain its UUID.
+- With the new security implementation, the event will be owned by the user requesting the dedicated replication cluster, and a new group named after the unique server name is created of which the user is made a part.
+- The user obtains a qualified *admin:&lt;servername&gt;* role that grants him/her administrative permissions for all objects owned by the group pertinent to the new replication cluster.
+- An Apache *httpd* macro call for the event with its UUID is inserted into a *.conf* file in the instance's */etc/httpd/conf.d* directory
+- The Apache *httpd* server is launched
+- Two target groups *S-ded-&lt;servername&gt;* and *S-ded-&lt;servername&gt;-master* are created, and the new instance is added to both of them
+- Two new ALB rules for *&lt;servername&gt;.sapsailing.com* and *&lt;servername&gt;-master.sapsailing.com* are created, forwarding their requests to the respective target group from the previous step
+
+asdf
 
 ### Create a New "Club Set-Up" in a Multi-Instance
 
