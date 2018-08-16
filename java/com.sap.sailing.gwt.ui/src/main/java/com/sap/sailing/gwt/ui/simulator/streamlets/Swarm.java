@@ -285,8 +285,7 @@ public class Swarm implements TimeListener {
                 particles[idx] = this.createParticle();
             }
         }
-        valueRange.checkIfValueIsInLeftBoundaryRangeAndUpdateIfNecessary(minSpeed);
-        valueRange.checkIfValueIsInRightBoundaryRangeAndUpdateIfNecessary(maxSpeed);
+        valueRange.setMinMax(minSpeed, maxSpeed);
         drawSwarm();
         return true;
     }

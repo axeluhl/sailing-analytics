@@ -89,9 +89,11 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
         getCanvas().getElement().setId("swarm-display");
         createStreamletLegend(map);
     }
+    
     public double getAverageLatitudeDeg() {
         return latitudeCount > 0 ? latitudeSum/latitudeCount : 0;
     }
+    
     private void updateAverageLatitudeDeg(WindInfoForRaceDTO windInfoForRace) {
         for (Entry<WindSource, WindTrackInfoDTO> windSourceAndTrack : windInfoForRace.windTrackInfoByWindSource.entrySet()) {
             for (WindDTO wind : windSourceAndTrack.getValue().windFixes) {
@@ -105,22 +107,10 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
             windField.setAverageLatitudeDeg(latitudeSum/latitudeCount);
         }
     }
+    
     private void createStreamletLegend(MapWidget map) {
         streamletLegend = Canvas.createIfSupported();
         streamletLegend.addStyleName("MapStreamletLegend");
-        //streamletLegend.setTitle(stringMessages.simulationLegendTooltip());
-        /*streamletLegend.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                int clickPixelY = event.getRelativeY(streamletLegend.getElement());
-                int legendRow = clickPixelY / ((int) rectHeight);
-                int pathRow = legendRow - (racePath!=null ? 1 : 0);
-                //Window.alert("clickPixelY: " + clickPixelY + "\nlegendRow: " + legendRow);
-                visiblePaths[pathRow] = !visiblePaths[pathRow];
-                clearCanvas();
-                drawPaths();
-            }
-        });*/
         map.setControls(ControlPosition.LEFT_BOTTOM, streamletLegend);
         int canvasWidth = 500;
         int canvasHeight = 60;
@@ -128,7 +118,8 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
         streamletLegend.setWidth(String.valueOf(canvasWidth));
         streamletLegend.setHeight(String.valueOf(canvasHeight));
         streamletLegend.setCoordinateSpaceWidth(canvasWidth);
-        streamletLegend.setCoordinateSpaceHeight(canvasHeight);    }
+        streamletLegend.setCoordinateSpaceHeight(canvasHeight);
+    }
 
     public void drawLegend() {
         if (streamletLegend.isVisible()) {
@@ -189,6 +180,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
             }
         }
     }
+    
     public void startStreamlets() {
         scheduleWindDataRefresh();
         if (swarm == null) {
@@ -200,6 +192,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
         this.swarm.start(animationIntervalMillis);
         this.swarm.getColorMapper().addListener(this);
     }
+    
     private void scheduleWindDataRefresh() {
         scheduler.scheduleFixedPeriod(new RepeatingCommand() {
             @Override
@@ -218,12 +211,14 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
         // Now run things once, first updating the wind sources, then grabbing the wind from those sources:
         updateWindSourcesToObserve(new Runnable() { @Override public void run() { updateWindField(); } });
     }
+    
     private void stopStreamlets() {
         if (this.swarm != null) {
             this.swarm.stop();
             this.swarm.getColorMapper().removeListener(this);
         }
     }
+    
     /**
      * Check which wind sources are available for the race identified by {@link #raceIdentifier}. For any wind source
      * not yet observed (contained in the keys of {@link #windInfoForRace}'s
@@ -234,8 +229,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
         sailingService.getWindSourcesInfo(raceIdentifier, new MarkedAsyncCallback<>(new AsyncCallback<WindInfoForRaceDTO>() {
             @Override
             public void onFailure(Throwable caught) {
-                        Notification.notify(stringMessages.errorFetchingWindStreamletData(caught.getMessage()),
-                                NotificationType.WARNING);
+                Notification.notify(stringMessages.errorFetchingWindStreamletData(caught.getMessage()), NotificationType.WARNING);
             }
             @Override
             public void onSuccess(WindInfoForRaceDTO result) {
@@ -253,6 +247,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
             }
         }));
     }
+    
     private void updateWindField() {
         Date timeOfLastFixOfSource = null;
         Set<String> windSourceTypeNames = new HashSet<>();
@@ -301,10 +296,12 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
                     }
                 }));
     }
+    
     @Override
     public boolean isVisible() {
         return this.visible;
     }
+    
     @Override
     public void setVisible(boolean isVisible) {
         if (getCanvas() != null) {
@@ -323,6 +320,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
             }
         }
     }
+    
     public void setColors(boolean isColored) {
         this.colored = isColored;
         if ((isColored) && (firstColoring)) {
@@ -330,21 +328,26 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
         }
         this.streamletLegend.setVisible(isColored);
         if (swarm != null) {
-        swarm.setColors(isColored);}
+            swarm.setColors(isColored);
+        }
     }
+    
     @Override
     public void removeFromMap() {
         this.setVisible(false);
     }
+    
     @Override
     protected void drawCenterChanged() {
     }
+    
     public void onBoundsChanged(boolean zoomChanged) {
         if (swarm != null) {
             int swarmPause = (zoomChanged ? 5 : 1);
             swarm.onBoundsChanged(zoomChanged, swarmPause);
         }
     }
+    
     @Override
     public void onColorMappingChanged() {
         drawLegend();
