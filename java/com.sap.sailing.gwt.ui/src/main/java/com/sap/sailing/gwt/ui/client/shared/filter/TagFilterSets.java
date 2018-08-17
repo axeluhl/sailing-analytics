@@ -12,12 +12,12 @@ import com.sap.sse.common.filter.FilterSet;
  *
  */
 
-public class TagsFilterSets {
+public class TagFilterSets {
     private List<FilterSet<TagDTO, FilterWithUI<TagDTO>>> filterSets;
     
     private FilterSet<TagDTO, FilterWithUI<TagDTO>> activeFilterSet;
 
-    public TagsFilterSets() {
+    public TagFilterSets() {
         filterSets = new ArrayList<FilterSet<TagDTO, FilterWithUI<TagDTO>>>();
         activeFilterSet = null;
     }

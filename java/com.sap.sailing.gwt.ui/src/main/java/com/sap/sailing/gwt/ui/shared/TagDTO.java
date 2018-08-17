@@ -5,18 +5,12 @@ import com.sap.sse.common.TimePoint;
 
 public class TagDTO implements IsSerializable {
 
-    private String tag;
-    private String comment;
-    private String imageURL;
-    private String username;
+    private String tag, comment, imageURL, username;
     private boolean visibleForPublic;
-    private TimePoint raceTimepoint;
-    private TimePoint createdAt;
-    private TimePoint revokedAt;
+    private TimePoint raceTimepoint, createdAt, revokedAt;
 
     // for GWT
-    public TagDTO() {
-    }
+    public TagDTO() {}
 
     public TagDTO(String tag, String comment, String imageURL, String username, boolean visibleForPublic, TimePoint raceTimepoint, TimePoint createdAt) {
         this(tag, comment, imageURL, username, visibleForPublic, raceTimepoint, createdAt, null);
@@ -115,7 +109,7 @@ public class TagDTO implements IsSerializable {
                 + ", username=" + username
                 + ", raceTimepoint=" + raceTimepoint
                 + ", createdAt=" + createdAt
-                + ", isPublic" + visibleForPublic
+                + ", isPublic=" + visibleForPublic
                 + ", revokedAt=" + revokedAt + "]";
     }
 }

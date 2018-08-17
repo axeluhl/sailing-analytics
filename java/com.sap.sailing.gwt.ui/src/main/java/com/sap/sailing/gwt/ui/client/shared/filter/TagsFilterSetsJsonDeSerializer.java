@@ -11,7 +11,7 @@ import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.common.filter.ValueFilter;
 
-public class TagsFilterSetsJsonDeSerializer implements GwtJsonDeSerializer<TagsFilterSets> {
+public class TagsFilterSetsJsonDeSerializer implements GwtJsonDeSerializer<TagFilterSets> {
     public static final String FIELD_ACTIVE_FILTERSET = "activeFilterSet";
     public static final String FIELD_FILTERSETS = "filterSets";
     public static final String FIELD_FILTERSET_NAME = "name";
@@ -19,7 +19,7 @@ public class TagsFilterSetsJsonDeSerializer implements GwtJsonDeSerializer<TagsF
     public static final String FIELD_FILTERS = "filters";
 
     @Override
-    public JSONObject serialize(TagsFilterSets filterSets) {
+    public JSONObject serialize(TagFilterSets filterSets) {
         JSONObject result = new JSONObject();
         result.put(FIELD_ACTIVE_FILTERSET, filterSets.getActiveFilterSet() != null ? new JSONString(filterSets.getActiveFilterSet().getName()) : JSONNull.getInstance());
         JSONArray filterSetArray = new JSONArray();
@@ -49,10 +49,10 @@ public class TagsFilterSetsJsonDeSerializer implements GwtJsonDeSerializer<TagsF
     }
     
     @Override
-    public TagsFilterSets deserialize(JSONObject rootObject) {
-        TagsFilterSets result = null;
+    public TagFilterSets deserialize(JSONObject rootObject) {
+        TagFilterSets result = null;
         if (rootObject != null) {
-            result = new TagsFilterSets();
+            result = new TagFilterSets();
             JSONValue activeFilterSetValue = rootObject.get(FIELD_ACTIVE_FILTERSET);
             String activeFilterSetName;
             if (activeFilterSetValue.isNull() != null) {

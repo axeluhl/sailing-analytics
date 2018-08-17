@@ -5,7 +5,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sse.common.Util;
@@ -13,19 +13,14 @@ import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 
 /**
- * @author Julian Rendl(D067890)
- * Used to store tags and filter sets and to apply these filters on the tags  
+ * @author Julian Rendl(D067890) Used to store tags and filter sets and to apply these filters on the tags
  */
 public class TagListProvider extends ListDataProvider<TagDTO> {
 
-    private List<TagDTO> allTags = new ArrayList<TagDTO>();    
-    private FilterSet<TagDTO, Filter<TagDTO>> currentFilterSet; 
-    private Label filterInformationLabel;
+    private List<TagDTO> allTags = new ArrayList<TagDTO>();
+    private FilterSet<TagDTO, Filter<TagDTO>> currentFilterSet;
 
-    
-    
-    public TagListProvider(Label filterInformationLabel) {
-        this.filterInformationLabel = filterInformationLabel;
+    public TagListProvider() {
     }
 
     public List<TagDTO> getAllTags() {
@@ -33,8 +28,11 @@ public class TagListProvider extends ListDataProvider<TagDTO> {
     }
 
     /**
-     * adds new tags, call {@link #updateFilteredTags() updateFilteredTags} afterwards so list of filtered tags can contain new tags
-     * @param list of tags which shall be added
+     * adds new tags, call {@link #updateFilteredTags() updateFilteredTags} afterwards so list of filtered tags can
+     * contain new tags
+     * 
+     * @param list
+     *            of tags which shall be added
      */
     public void addTags(final List<TagDTO> tags) {
         if (tags != null) {
@@ -45,8 +43,11 @@ public class TagListProvider extends ListDataProvider<TagDTO> {
     }
 
     /**
-     * adds a new tag, call {@link #updateFilteredTags() updateFilteredTags} afterwards so list of filtered tag can contain new tags
-     * @param tag which shall be added
+     * adds a new tag, call {@link #updateFilteredTags() updateFilteredTags} afterwards so list of filtered tag can
+     * contain new tags
+     * 
+     * @param tag
+     *            which shall be added
      */
     public void addTag(final TagDTO tag) {
         if (tag != null) {
@@ -63,7 +64,6 @@ public class TagListProvider extends ListDataProvider<TagDTO> {
      */
     public void updateFilteredTags() {
         List<TagDTO> currentFilteredList = new ArrayList<TagDTO>(getAllTags());
-
         if (currentFilterSet != null) {
             for (Filter<TagDTO> filter : currentFilterSet.getFilters()) {
                 for (Iterator<TagDTO> i = currentFilteredList.iterator(); i.hasNext();) {
@@ -74,6 +74,7 @@ public class TagListProvider extends ListDataProvider<TagDTO> {
                 }
             }
         }
+        
         currentFilteredList.sort(new Comparator<TagDTO>() {
             @Override
             public int compare(TagDTO tag1, TagDTO tag2) {
@@ -85,23 +86,13 @@ public class TagListProvider extends ListDataProvider<TagDTO> {
         setList(currentFilteredList);
     }
 
-    public FilterSet<TagDTO, Filter<TagDTO>> getTagsFilterSet() {
+    public FilterSet<TagDTO, Filter<TagDTO>> getTagFilterSet() {
         return currentFilterSet;
     }
 
     public void setTagsFilterSet(FilterSet<TagDTO, Filter<TagDTO>> tagsFilterSet) {
-        if(filterInformationLabel != null) {
-            if(tagsFilterSet != null) {
-                filterInformationLabel.setText(tagsFilterSet.getName());
-                filterInformationLabel.setVisible(true);
-            }
-            else {
-                filterInformationLabel.setVisible(false);
-            } 
-        }    
-        
-        updateFilteredTags();  
         currentFilterSet = tagsFilterSet;
+        updateFilteredTags();
         refresh();
     }
 

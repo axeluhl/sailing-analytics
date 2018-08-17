@@ -22,8 +22,8 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
  * @author Julian Rendl (D067890)
  *
  */
-public class TagsFilterSetsDialog extends DataEntryDialog<TagsFilterSets> {
-    private final TagsFilterSets tagsFilterSets;
+public class TagFilterSetsDialog extends DataEntryDialog<TagFilterSets> {
+    private final TagFilterSets tagsFilterSets;
     private final StringMessages stringMessages;
 
     private final Button addFilterSetButton;
@@ -39,18 +39,18 @@ public class TagsFilterSetsDialog extends DataEntryDialog<TagsFilterSets> {
     private final String ACTIVE_FILTERSET_RADIOBUTTON_GROUPNAME = "ActiveFilterSetRB"; 
     private final String filterNothingFiltersetName;
     
-    protected static class TagsFilterSetsValidator implements Validator<TagsFilterSets> {
+    protected static class TagsFilterSetsValidator implements Validator<TagFilterSets> {
         public TagsFilterSetsValidator() {
             super();
         }
 
         @Override
-        public String getErrorMessage(TagsFilterSets tagsFilterSets) {
+        public String getErrorMessage(TagFilterSets tagsFilterSets) {
             return null;
         }
     }
 
-    public TagsFilterSetsDialog(TagsFilterSets tagsFilterSets, StringMessages stringMessages, DialogCallback<TagsFilterSets> callback) {
+    public TagFilterSetsDialog(TagFilterSets tagsFilterSets, StringMessages stringMessages, DialogCallback<TagFilterSets> callback) {
         super(stringMessages.tagsFilter(), null, stringMessages.ok(), stringMessages.cancel(), new TagsFilterSetsValidator(), callback);
         this.tagsFilterSets = tagsFilterSets;
         this.stringMessages = stringMessages; 
@@ -214,8 +214,8 @@ public class TagsFilterSetsDialog extends DataEntryDialog<TagsFilterSets> {
     }
 
     @Override
-    protected TagsFilterSets getResult() {
-        TagsFilterSets result = new TagsFilterSets();
+    protected TagFilterSets getResult() {
+        TagFilterSets result = new TagFilterSets();
         int filterSetCount = activeFilterSetRadioButtons.size();        
         for (int i = 0; i < filterSetCount; i++) {
             FilterSet<TagDTO, FilterWithUI<TagDTO>> filterSet = filterSets.get(i);

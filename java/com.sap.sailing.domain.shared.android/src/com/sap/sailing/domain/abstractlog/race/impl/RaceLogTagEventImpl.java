@@ -11,20 +11,20 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
 
     private static final long serialVersionUID = 7213518902555323432L;
 
-    private String tag, comment, imageURL, username;
-    private TimePoint revokedAt;
+    private final String tag, comment, imageURL, username;
     private final boolean visibleForPublic;
+    private TimePoint revokedAt;
 
-    public RaceLogTagEventImpl(String pTag, String pComment, String pImageURL, boolean pVisibleForPublic,
-            TimePoint createdAt, TimePoint logicalTimePoint, AbstractLogEventAuthor author, Serializable pId,
-            int pPassId) {
-        super(createdAt, logicalTimePoint, author, pId, pPassId);
-        tag = pTag;
-        comment = pComment;
-        imageURL = pImageURL;
+    public RaceLogTagEventImpl(String tag, String comment, String imageURL, boolean visibleForPublic,
+            TimePoint createdAt, TimePoint logicalTimePoint, AbstractLogEventAuthor author, Serializable id,
+            int passId) {
+        super(createdAt, logicalTimePoint, author, id, passId);
+        this.tag = tag;
+        this.comment = comment;
+        this.imageURL = imageURL;
+        this.visibleForPublic = visibleForPublic;
         username = author.getName();
-        visibleForPublic = pVisibleForPublic;
-        this.revokedAt = null;
+        revokedAt = null;
     }
 
     public RaceLogTagEventImpl(String tag, String comment, String imageURL, boolean visibleForPublic,
@@ -58,7 +58,7 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
     }
 
     /**
-     * Only sets revokedAt if tag is not revoked already and given timepoint is not null.
+     * Only sets revokedAt if tag is not already revoked and given timepoint is not null.
      */
     @Override
     public void markAsRevoked(TimePoint revokedAt) {
