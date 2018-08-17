@@ -30,21 +30,19 @@ public class ColorMapperTest {
         valueSet = new HashSet<>();
         updateValueSet(valueSet);
         colorSet = new HashSet<>();
-        updateColorSet(colorSet);
-    }
-
-    public void updateColorSet(Set<String> colorSet) {
-        colorSet.clear();
-        for (int i : valueSet) {
-            double h = (1 - (i - valueRange.getMinLeft()) / (valueRange.getMaxRight() - valueRange.getMinLeft())) * 240;
-            colorSet.add("hsl(" + Math.round(h) + ", 100%, 50%)");
-        }
+        fillColorSet();
     }
 
     public void updateValueSet(Set<Integer> valueSet) {
         valueSet.clear();
         for (int i = (int) Math.round(valueRange.getMinLeft()); i <= (int) Math.round(valueRange.getMaxRight()); i++) {
             valueSet.add(i);
+        }
+    }
+
+    public void fillColorSet() {
+        for (int i = 0; i <= 240; i++) {
+            colorSet.add("hsl(" + i + ", 100%, 50%)");
         }
     }
 
@@ -75,7 +73,6 @@ public class ColorMapperTest {
         // verify Listener
         verify(listener, times(1)).onColorMappingChanged();
         updateValueSet(valueSet);
-        updateColorSet(colorSet);
         // check if new values are within the colorSet
         for (int i : valueSet) {
             assertTrue(colorSet.contains(colorMapper.getColor(i)));
