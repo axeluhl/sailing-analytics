@@ -68,7 +68,7 @@ public class ColorMapperTest {
     }
 
     @Test
-    public void changeValueRangeAndTestGetColor() {
+    public void changeValueRangeAndTestGetColorColored() {
         valueRange.setMinMax(12.0, 26.0);
         // verify Listener
         verify(listener, times(1)).onColorMappingChanged();
