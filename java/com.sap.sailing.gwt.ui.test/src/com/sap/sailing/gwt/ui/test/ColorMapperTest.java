@@ -45,7 +45,7 @@ public class ColorMapperTest {
             colorSet.add("hsl(" + i + ", 100%, 50%)");
         }
     }
-
+    
     @Test
     public void testExceptionForValueOutOfBoundaries() {
         try {
