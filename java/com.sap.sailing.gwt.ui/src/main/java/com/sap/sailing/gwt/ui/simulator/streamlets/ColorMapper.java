@@ -39,7 +39,7 @@ public class ColorMapper implements ValueRangeFlexibleBoundariesChangedListener 
      */
     public String getColor(double value) {
         if (value < minValue || value > maxValue) {
-            throw new IllegalArgumentException("The value "+value+" is out of the value range "+valueRange);
+            throw new IllegalArgumentException("The value "+value+" is out of the value range: "+valueRange.getMinLeft()+" - "+valueRange.getMaxRight());
         }
         final String result;
         if (isGrey) {
