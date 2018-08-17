@@ -78,7 +78,7 @@ public class Swarm implements TimeListener {
         timePoint = timer.getTime();
         cosineOfAverageLatitude = 1.0; // default to equator
         diffPx = new Vector(0, 0);
-        valueRange = new ValueRangeFlexibleBoundaries(0.0, 120.0, /*percentage*/ 0.15);
+        valueRange = new ValueRangeFlexibleBoundaries(/*wind speed in knots*/ 0.0,/*wind speed in knots*/ 60.0, /*percentage*/ 0.15);
         colorMapper = new ColorMapper(valueRange, !colored);
     }
     
@@ -257,8 +257,8 @@ public class Swarm implements TimeListener {
      * {@link VectorField#getMotionScale(int)} at the map's current zoom level. 
      */
     private boolean execute(Vector diffPx) {
-        double minSpeed = 120.0;
-        double maxSpeed = 0.0;
+        double minSpeedInKnots = 120.0;
+        double maxSpeedInKnots = 0.0;
         double speed = field.getMotionScale(map.getZoom());
         for (int idx = 0; idx < particles.length; idx++) {
             Particle particle = particles[idx];
@@ -281,11 +281,11 @@ public class Swarm implements TimeListener {
                 if ((particle.stepsToLive > 0) && (this.field.inBounds(particle.currentPosition))) {
                     particle.v = field.getVector(particle.currentPosition, timePoint);
                     final double length = particle.v.length();
-                    if (length > maxSpeed) {
-                        maxSpeed = length;
+                    if (length > maxSpeedInKnots) {
+                        maxSpeedInKnots = length;
                     }
-                    if (length < minSpeed) {
-                        minSpeed = length;
+                    if (length < minSpeedInKnots) {
+                        minSpeedInKnots = length;
                     }
                 } else {
                     particle.v = null;
@@ -295,8 +295,8 @@ public class Swarm implements TimeListener {
                 particles[idx] = this.createParticle();
             }
         }
-        if (minSpeed <= maxSpeed) {
-            valueRange.setMinMax(minSpeed, maxSpeed);
+        if (minSpeedInKnots <= maxSpeedInKnots) {
+            valueRange.setMinMax(minSpeedInKnots, maxSpeedInKnots);
             drawSwarm();
         }
         return true;
