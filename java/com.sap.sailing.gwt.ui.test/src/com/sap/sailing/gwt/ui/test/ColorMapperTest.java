@@ -1,4 +1,5 @@
 package com.sap.sailing.gwt.ui.test;
+
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
@@ -39,6 +40,7 @@ public class ColorMapperTest {
             colorSet.add("hsl(" + Math.round(h) + ", 100%, 50%)");
         }
     }
+
     public void updateValueSet(Set<Integer> valueSet) {
         valueSet.clear();
         for (int i = (int) Math.round(valueRange.getMinLeft()); i <= (int) Math.round(valueRange.getMaxRight()); i++) {
@@ -66,14 +68,15 @@ public class ColorMapperTest {
             assertTrue(colorSet.contains(colorMapper.getColor(i)));
         }
     }
+
     @Test
     public void changeValueRangeAndTestGetColor() {
         valueRange.setMinMax(12.0, 26.0);
-        //verify Listener
+        // verify Listener
         verify(listener, times(1)).onColorMappingChanged();
         updateValueSet(valueSet);
         updateColorSet(colorSet);
-        //check if new values are within the colorSet
+        // check if new values are within the colorSet
         for (int i : valueSet) {
             assertTrue(colorSet.contains(colorMapper.getColor(i)));
         }
