@@ -99,14 +99,19 @@ public class GetEventsForSailorProfileAction implements SailingAction<SailorProf
                             continue;
                         }
 
-                        // skip, if regatta is not part of this event (e.g. shared leaderboard group)
+                        // skip, if the regatta is not part of this event (e.g. shared leaderboard group)
                         if (!HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
-                            continue;
+
+                            // skip, if overall leaderboard is not part of this event, don't skip if this is a regatta
+                            // during an event which is not part of an overall leaderboard
+                            if (leaderboardGroup.hasOverallLeaderboard()
+                                    && !HomeServiceUtil.isPartOfEvent(event, leaderboardGroup.getOverallLeaderboard()))
+                                continue;
                         }
 
                         participatedRegattas.add(
                                 new ParticipatedRegattaDTO(regattaName, rank, new SimpleCompetitorWithIdDTO(competitor),
-                                        clubName, null, event.getId().toString(), points));
+                                        clubName, "" + regatta.getId(), "" + event.getId(), points));
                     }
                 }
             }
