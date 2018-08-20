@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedEv
 import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedRegattaDTO;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab.RegattaLeaderboardPlace;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sse.common.Util;
 
@@ -57,12 +58,12 @@ public class SailorProfileEventsTable extends Composite {
     }
 
     private void setupTable() {
-        sailorProfilesTable.addColumn(regattaNameColumn, "Regatta Name");
-        sailorProfilesTable.addColumn(regattaRank, "Regatta Rank");
-        sailorProfilesTable.addColumn(competitorColumn, "Competitor");
-        sailorProfilesTable.addColumn(clubNameColumn, "Club Name");
-        sailorProfilesTable.addColumn(sumPointsColumn, "Sub Points");
-        sailorProfilesTable.addColumn(showColumn, "");
+        sailorProfilesTable.addColumn(regattaNameColumn, StringMessages.INSTANCE.regattaName());
+        sailorProfilesTable.addColumn(regattaRank, StringMessages.INSTANCE.regattaRank());
+        sailorProfilesTable.addColumn(competitorColumn, StringMessages.INSTANCE.competitor());
+        sailorProfilesTable.addColumn(clubNameColumn, StringMessages.INSTANCE.name());
+        sailorProfilesTable.addColumn(sumPointsColumn, "\u2211");
+        sailorProfilesTable.addColumn(showColumn);
 
         showColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
         showColumn.setFieldUpdater(new FieldUpdater<ParticipatedRegattaDTO, String>() {
