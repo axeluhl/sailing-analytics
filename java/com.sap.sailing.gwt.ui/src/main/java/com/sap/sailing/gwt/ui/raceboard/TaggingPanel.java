@@ -422,6 +422,9 @@ public class TaggingPanel extends ComponentWithoutSettings
 
         // default value for "Visible for public" checkbox
         private static final boolean DEFAULT_VISIBLE_FOR_PUBLIC = true;
+        
+        //default textbox or textarea lengths
+
 
         private final TextBox tagTextBox, imageURLTextBox;
         private final TextArea commentTextArea;
@@ -433,18 +436,21 @@ public class TaggingPanel extends ComponentWithoutSettings
             tagTextBox = new TextBox();
             tagTextBox.setStyleName(style.inputPanelTag());
             tagTextBox.setTitle(stringMessages.tagLabelTag());
+            tagTextBox.getElement().setAttribute("maxlength", Integer.toString(TagDTO.MAX_TAG_LENGTH));
             tagTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelTag());
             add(tagTextBox);
 
             imageURLTextBox = new TextBox();
             imageURLTextBox.setStyleName(style.inputPanelImageURL());
             imageURLTextBox.setTitle(stringMessages.tagLabelImageURL());
+            imageURLTextBox.getElement().setAttribute("maxlength", Integer.toString(TagDTO.MAX_IMAGE_URL_LENGTH));
             imageURLTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelImageURL());
             add(imageURLTextBox);
 
             commentTextArea = new TextArea();
             commentTextArea.setStyleName(style.inputPanelComment());
             commentTextArea.setVisibleLines(4);
+            commentTextArea.getElement().setAttribute("maxlength", Integer.toString(TagDTO.MAX_COMMENT_LENGTH));
             commentTextArea.setTitle(stringMessages.tagLabelComment());
             commentTextArea.getElement().setPropertyString("placeholder", stringMessages.tagLabelComment());
             add(commentTextArea);

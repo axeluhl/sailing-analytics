@@ -6465,6 +6465,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
             String comment, String imageURL, boolean isPublic, TimePoint raceTimepoint) {
         SuccessInfo successInfo = new SuccessInfo(true, null, null, null);
         try {
+            if(tag.length() > TagDTO.MAX_TAG_LENGTH) {
+                throw new Exception("tagTagIsToLong");
+            }
+            if(comment.length() > TagDTO.MAX_COMMENT_LENGTH) {
+                throw new Exception("tagCommentIsToLong");
+            }
+            if(imageURL.length() > TagDTO.MAX_IMAGE_URL_LENGTH) {
+                throw new Exception("tagImageURLIsToLong");
+            }
             SecurityUtils.getSubject().checkPermission(
                     Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
             RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
@@ -6473,6 +6482,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
         } catch (AuthorizationException e) {
             successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "tagMissingPermissions"),
                     null, null);
+        } catch (Exception e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), e.getMessage()),
+                    null, null);           
         }
         return successInfo;
     }
