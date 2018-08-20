@@ -132,6 +132,20 @@ public abstract class BaseProportionalPlotOptions<T extends BaseProportionalPlot
     }
 
     /**
+     * Convenience method for setting the 'depth option of the plot.  Equivalent to:
+     * <pre><code>
+     *     piePlotOptions.setOption("depth", 25);
+     * </code></pre>
+     * The thickness of a 3D pie. Defaults to 0.
+     * Note: This option requires highcharts-3d.js
+     * @param depth The thickness of a 3D pie.
+     * @return  A reference to this {@link BaseProportionalPlotOptions} instance for convenient method chaining.
+     */
+    public T setDepth(Number depth) {
+        return this.setOption("depth", depth);
+    }
+
+    /**
      * Convenience method for setting the "ignoreHiddenPoint" option for the pie plot options.  Equivalent to:
      * <pre><code>
      *     piePlotOptions.setOptions("ignoreHiddenPoint", false);

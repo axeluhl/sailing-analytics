@@ -1,44 +1,67 @@
 package com.sap.sailing.domain.common.sensordata;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
- * Metadata that defines the column structure of {@link com.sap.sailing.domain.common.tracking.DoubleVectorFix}es when imported.
+ * Metadata that defines the column structure of Bravo fixes when imported as
+ * {@link com.sap.sailing.domain.common.tracking.DoubleVectorFix}.
+ * <p>
+ * 
+ * The current implementation only stores a subset of the information available during the import.
  */
-public enum BravoSensorDataMetadata {
-    INSTANCE;
+public enum BravoSensorDataMetadata implements ColumnMetadata {
+    RIDE_HEIGHT_PORT_HULL("RideHeightPortHull"), //
+    RIDE_HEIGHT_STBD_HULL("RideHeightStbdHull"), //
+    HEEL("Heel"), //
+    PITCH("ImuSensor_Pitch");
 
-    private final String RIDE_HEIGHT = "RideHeight";
-    private final int HEADER_COLUMN_OFFSET = 3;
-
-    private final List<String> columns = Collections.unmodifiableList(Arrays.asList(RIDE_HEIGHT, "RideHeightPortHull",
-            "RideHeightStbdHull", "Heel", "Trim", "ImuSensor_GyroX", "ImuSensor_GyroY", "ImuSensor_GyroZ",
-            "ImuSensor_Pitch", "ImuSensor_Roll", "ImuSensor_Yaw", "ImuSensor_LinearAccX", "ImuSensor_LinearAccY",
-            "ImuSensor_LinearAccZ", "Hb_Z", "Dn_Z", "Db_Z", "LKF_ride_hgh", "LKF_ride_hgh_Position",
-            "LKF_ride_hgh_Velocity", "LKF_ride_hgh_Acceleration", "LKF_ride_hgh_PositionError",
-            "LKF_ride_hgh_VelocityError", "LKF_ride_hgh_AccelerationError", "Gps_Gga_PosFixTime", "Gps_Gga_Lat",
-            "Gps_Gga_Lon", "Gps_Gga_QI", "Gps_Gga_HDOP", "Gps_Gga_AntHeight", "Gps_Vtg_TMG", "Gps_Vtg_SOGKnots",
-            "Gps_Rmc_MagVar", "Gps_EastVelocity", "Gps_NorthVelocity", "Gps_UpVelocity", "BravoNet_Node0x0A0_Ch0",
-            "BravoNet_Node0x0A0_Voltage", "BravoNet_Node0x0A0_Temperature", "BravoNet_Node0x0A0_Current"));
+    private String columnName;
     
-    public final int rideHeightColumn = getColumnIndex(RIDE_HEIGHT);
-    public final int columnCount = columns.size();
-
-    public List<String> getColumns() {
-        return columns;
-    }
-
-    public boolean hasColumn(String columnName) {
-        return columns.contains(columnName);
-    }
-
-    public int getColumnIndex(String columnName) {
-        return columns.indexOf(columnName);
+    private BravoSensorDataMetadata(String columnName) {
+        this.columnName = columnName;
     }
     
-    public int getHeaderColumnOffset() {
-        return HEADER_COLUMN_OFFSET;
+    public String getColumnName() {
+        return columnName;
+    }
+
+    public int getColumnIndex() {
+        return this.ordinal();
+    }
+
+    public static final int HEADER_COLUMN_OFFSET = 3;
+
+    public static BravoSensorDataMetadata byColumnName(String valueName) {
+        BravoSensorDataMetadata[] values = BravoSensorDataMetadata.values();
+        for (BravoSensorDataMetadata item : values) {
+            if (Objects.equals(item.getColumnName(), valueName)) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    public static int getTrackColumnCount() {
+        return BravoSensorDataMetadata.values().length;
+    }
+
+    public static List<String> getTrackColumnNames() {
+        ArrayList<String> colNames = new ArrayList<>(getTrackColumnCount());
+        for (BravoSensorDataMetadata item : BravoSensorDataMetadata.values()) {
+            colNames.add(item.getColumnName());
+        }
+        return colNames;
+    }
+
+    public static Map<String, Integer> getColumnNamesToIndexInDoubleFix() {
+        final Map<String, Integer> columnNamesToIndexInDoubleFix = new HashMap<>();
+        for (final BravoSensorDataMetadata column : BravoSensorDataMetadata.values()) {
+            columnNamesToIndexInDoubleFix.put(column.getColumnName(), column.getColumnIndex());
+        }
+        return columnNamesToIndexInDoubleFix;
     }
 }

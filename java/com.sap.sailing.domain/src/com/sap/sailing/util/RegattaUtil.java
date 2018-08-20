@@ -2,8 +2,8 @@ package com.sap.sailing.util;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Regatta;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sse.common.Distance;
 
 public class RegattaUtil {
 

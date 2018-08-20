@@ -18,3 +18,4 @@ Require-Bundle: com.sap.sse.security,
  com.sap.sse.shared.android
 Export-Package: com.sap.sse.security.userstore.mongodb,
  com.sap.sse.security.userstore.mongodb.impl;x-friends:="com.sap.sse.security.test"
+Automatic-Module-Name: com.sap.sse.security.userstore.mongodb

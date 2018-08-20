@@ -19,12 +19,12 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import com.sap.sailing.declination.Declination;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.quadtree.QuadTree;
+import com.sap.sse.common.Bearing;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
@@ -37,6 +37,12 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  */
 public class DeclinationStore {
     private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+    
+    private final DeclinationImporter importer;
+    
+    public DeclinationStore(DeclinationImporter importer) {
+        this.importer = importer;
+    }
     
     /**
      * Returns <code>null</code> if no stored declinations exist for the <code>year</code> requested.
@@ -122,7 +128,7 @@ public class DeclinationStore {
         return result;
     }
     
-    private void fetchAndAppendDeclination(TimePoint timePoint, Position position, NOAAImporter importer,
+    private void fetchAndAppendDeclination(TimePoint timePoint, Position position, DeclinationImporter importer,
             Writer out) throws IOException {
         Declination declination = null;
         // re-try three times
@@ -153,7 +159,6 @@ public class DeclinationStore {
                 usage();
             } else {
                 double grid = Double.valueOf(args[2]);
-                NOAAImporter importer = new NOAAImporter();
                 for (int year = fromYear; year <= toYear; year++) {
                     QuadTree<Declination> storedDeclinations = getStoredDeclinations(year);
                     if (storedDeclinations == null) {
@@ -182,7 +187,7 @@ public class DeclinationStore {
         }
     }
 
-    private void fetchAndAppendDeclinationForLatitude(double grid, NOAAImporter importer, int year,
+    private void fetchAndAppendDeclinationForLatitude(double grid, DeclinationImporter importer, int year,
             QuadTree<Declination> storedDeclinations, Writer out, int month, TimePoint timePoint, double lat)
             throws IOException {
         System.out.println("Date: " + year + "/" + (month + 1) + ", Latitude: " + lat);
@@ -194,7 +199,7 @@ public class DeclinationStore {
         }
     }
 
-    private void fetchAndAppendDeclination(NOAAImporter importer, QuadTree<Declination> storedDeclinations, Writer out,
+    private void fetchAndAppendDeclination(DeclinationImporter importer, QuadTree<Declination> storedDeclinations, Writer out,
             TimePoint timePoint, double lat, double lng) throws IOException {
         Position point = new DegreePosition(lat, lng);
         final Declination existingDeclinationRecord;
@@ -213,16 +218,19 @@ public class DeclinationStore {
      * Launches the importer, writing to resources/declination-year.txt (where "year" represents the year for which the
      * values are stored in the file) the declinations downloaded online for the years <code>args[0]</code> to
      * <code>args[1]</code> (inclusive) for all positions with a grid of <code>args[2]</code> degrees each, starting at
-     * 0&deg;0.0'N and 0&deg;0.0'E.
+     * 0&deg;0.0'N and 0&deg;0.0'E. <code>args[3]</code> can optionally be used to select a non-default declination
+     * importer. By default, the {@link NOAAImporter} will be used. Using "c" here will use the {@link ColoradoImporter}
+     * instead.
+     * 
      * @throws ParseException 
      * @throws ClassNotFoundException 
      */
     public static void main(String[] args) throws IOException, ClassNotFoundException, ParseException {
-        DeclinationStore store = new DeclinationStore();
+        DeclinationStore store = new DeclinationStore(args.length > 3 && args[3].equals("c") ? new ColoradoImporter() : new NOAAImporter());
         store.run(args);
     }
     
     private void usage() {
-        System.out.println("java " + NOAAImporter.class.getName() + " <fromYear> <toYear> <gridSizeInDegrees>");
+        System.out.println("java " + getClass().getName() + " <fromYear> <toYear> <gridSizeInDegrees>");
     }
 }

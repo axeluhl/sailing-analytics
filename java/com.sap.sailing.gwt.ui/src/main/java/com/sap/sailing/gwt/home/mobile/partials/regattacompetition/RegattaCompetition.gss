@@ -50,6 +50,7 @@
   text-align: center;
 }
 .regattacompetition_phase_fleetfullwidth .regattacompetition_phase_fleet_race_title {
+  text-overflow: ellipsis;
   position: absolute;
   top: 50%;
   left: 1.133333333333333em;
@@ -138,7 +139,7 @@
   display: inline-block;
   width: 1.666666666666667em;
   height: 1.1em;
-  background: url("images/home/launch-loupe.svg") no-repeat center center;
+  background: resourceUrl("launchLoupe") no-repeat center center;
   position: absolute;
   right: 0;
   top: 0.133333333333333em;
@@ -148,7 +149,7 @@
 }
 .regattacompetition_phase_fleet_race_arrow {
   display: none;
-  background: url("images/home/launch-loupe.svg") no-repeat center center;
+  background: resourceUrl("launchLoupe") no-repeat center center;
   position: absolute;
   top: 50%;
   right: 1em;
@@ -158,10 +159,10 @@
           transform: translateY(-50%);
 }
 .regattacompetition_phase_fleet_raceplanned .regattacompetition_phase_fleet_race_title:after {
-  background: url("images/home/launch-play.svg") no-repeat center center;
+  background: resourceUrl("launchPlay") no-repeat center center;
 }
 .regattacompetition_phase_fleet_raceplanned .regattacompetition_phase_fleet_race_arrow {
-  background: url("images/home/launch-play.svg") no-repeat center center;
+  background: resourceUrl("launchPlay") no-repeat center center;
 }
 .regattacompetition_phase_fleet_raceuntracked .regattacompetition_phase_fleet_race_arrow {
   display: none;
@@ -177,4 +178,20 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.regattacompetition_phase_fleet_race_title_big {
+  width: 27%;
+}
+
+@media (min-width: 375px) {
+  .regattacompetition_phase_fleet_race_title_big {
+    width: 33%;
+  }
+}
+
+@media (min-width: 700px) {
+  .regattacompetition_phase_fleet_race_title_big {
+    width: 40%;
+  }
 }

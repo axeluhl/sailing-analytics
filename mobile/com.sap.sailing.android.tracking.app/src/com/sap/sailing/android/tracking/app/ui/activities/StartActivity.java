@@ -2,27 +2,31 @@ package com.sap.sailing.android.tracking.app.ui.activities;
 
 import java.util.List;
 
-import android.content.Intent;
-import android.graphics.drawable.ColorDrawable;
-import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-
 import com.sap.sailing.android.shared.data.BaseCheckinData;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.AbstractStartActivity;
 import com.sap.sailing.android.shared.util.EulaHelper;
+import com.sap.sailing.android.shared.util.NotificationHelper;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.fragments.HomeFragment;
 import com.sap.sailing.android.tracking.app.utils.AboutHelper;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.CheckinManager;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
+import com.sap.sailing.android.tracking.app.valueobjects.BoatCheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.CheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.CompetitorCheckinData;
 import com.sap.sailing.android.tracking.app.valueobjects.MarkCheckinData;
 import com.sap.sailing.android.ui.fragments.AbstractHomeFragment;
+
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 public class StartActivity extends AbstractStartActivity<CheckinData> {
 
@@ -48,6 +52,11 @@ public class StartActivity extends AbstractStartActivity<CheckinData> {
         if (!EulaHelper.with(this).isEulaAccepted()) {
             EulaHelper.with(this).showEulaDialog(R.style.AppTheme_AlertDialog);
         }
+
+        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
+        int smallIcon = R.drawable.ic_directions_boat;
+        CharSequence title = getText(R.string.app_name);
+        NotificationHelper.prepareNotificationWith(title, largeIcon, smallIcon);
     }
 
     @Override
@@ -63,8 +72,7 @@ public class StartActivity extends AbstractStartActivity<CheckinData> {
 
     @Override
     public AbstractHomeFragment getHomeFragment() {
-        HomeFragment homeFragment = (HomeFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
-        return homeFragment;
+        return (HomeFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
     }
 
     private void startRegatta(String checkinDigest) {
@@ -120,7 +128,7 @@ public class StartActivity extends AbstractStartActivity<CheckinData> {
                 try {
                     DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, checkinData.getCheckinUrl().checkinDigest);
                     DatabaseHelper.getInstance()
-                        .storeCompetitorCheckinRow(this, checkinData.getEvent(), competitorCheckinData.getCompetitor(), checkinData.getLeaderboard(), checkinData.getCheckinUrl());
+                        .storeCompetitorCheckinRow(this, competitorCheckinData);
                 } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
                     ExLog.e(this, TAG, "Batch insert failed: " + e.getMessage());
                     displayDatabaseError();
@@ -130,7 +138,16 @@ public class StartActivity extends AbstractStartActivity<CheckinData> {
                 try {
                     DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, checkinData.getCheckinUrl().checkinDigest);
                     DatabaseHelper.getInstance()
-                        .storeMarkCheckinRow(this, checkinData.getEvent(), markCheckinData.getMark(), checkinData.getLeaderboard(), checkinData.getCheckinUrl());
+                        .storeMarkCheckinRow(this, markCheckinData);
+                } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
+                    ExLog.e(this, TAG, "Batch insert failed: " + e.getMessage());
+                    displayDatabaseError();
+                }
+            } else if (checkinData instanceof BoatCheckinData) {
+                BoatCheckinData boatCheckinData = (BoatCheckinData) checkinData;
+                try {
+                    DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, checkinData.getCheckinUrl().checkinDigest);
+                    DatabaseHelper.getInstance().storeBoatCheckinRow(this, boatCheckinData);
                 } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
                     ExLog.e(this, TAG, "Batch insert failed: " + e.getMessage());
                     displayDatabaseError();

@@ -10,6 +10,7 @@ import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
 public class RaceLogTrackingEventManagementImagesBarCell extends ImagesBarCell {
     public static final String ACTION_DENOTE_FOR_RACELOG_TRACKING = "ACTION_DENOTE_FOR_RACELOG_TRACKING";
     public final static String ACTION_COMPETITOR_REGISTRATIONS = "ACTION_COMPETITOR_REGISTRATIONS";
+    public final static String ACTION_BOAT_REGISTRATIONS = "ACTION_BOAT_REGISTRATIONS";
     public final static String ACTION_MAP_DEVICES = "ACTION_MAP_DEVICES";
     public final static String ACTION_INVITE_BUOY_TENDERS = "ACTION_INVITE_BUOY_TENDERS";
     public static final String ACTION_SHOW_REGATTA_LOG = "ACTION_SHOW_REGATTA_LOG";
@@ -34,6 +35,8 @@ public class RaceLogTrackingEventManagementImagesBarCell extends ImagesBarCell {
                 makeImagePrototype(resources.denoteForRaceLogTracking())));
         result.add(new ImageSpec(ACTION_COMPETITOR_REGISTRATIONS, stringMessages.competitorRegistrations(),
                 makeImagePrototype(resources.competitorRegistrations())));
+        result.add(new ImageSpec(ACTION_BOAT_REGISTRATIONS, stringMessages.boatRegistrations(),
+                makeImagePrototype(resources.boatRegistrations())));
         result.add(new ImageSpec(ACTION_MAP_DEVICES, stringMessages.mapDevices(),
                 makeImagePrototype(resources.mapDevices())));
         result.add(new ImageSpec(ACTION_INVITE_BUOY_TENDERS, stringMessages.inviteBuoyTenders(),

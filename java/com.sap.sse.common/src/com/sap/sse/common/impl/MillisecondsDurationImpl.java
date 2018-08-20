@@ -4,9 +4,7 @@ import com.sap.sse.common.Duration;
 
 public class MillisecondsDurationImpl implements Duration {
     private static final long serialVersionUID = -4257982564719184723L;
-    private long millis;
-    
-    MillisecondsDurationImpl() {} // for serialization only
+    private final long millis;
     
     public MillisecondsDurationImpl(long millis) {
         super();

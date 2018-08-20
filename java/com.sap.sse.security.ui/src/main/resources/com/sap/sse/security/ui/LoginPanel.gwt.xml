@@ -9,6 +9,7 @@
   <inherits name='com.sap.sse.gwt.Settings'/>
   <inherits name="com.sap.sse.gwt.Settings" />
   <inherits name="com.sap.sse.Security" />
+  <inherits name="com.sap.sse.security.ui.SecurityLocalesAllPermutations" />
   <inherits name="com.sap.sse.security.SSESecuritySerializers" />
   
   <set-property name="gwt.logging.enabled" value="TRUE"/> 
@@ -20,6 +21,5 @@
   <set-property name="gwt.logging.systemHandler" value="ENABLED" />
 
   <!-- Specify the paths for translatable code                    -->
-  <extend-property name="locale" values="de"/>
   <source path='loginpanel'/>
 </module>

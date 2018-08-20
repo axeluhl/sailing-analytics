@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,6 +36,8 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
      * implicitly replicate their effects while being executed.
      */
     static final ThreadLocal<Serializable> idOfOperationBeingExecuted = new ThreadLocal<Serializable>();
+    
+    static final AtomicInteger operationCounter = new AtomicInteger(0);
     
     /**
      * Produces an object input stream that can choose to resolve objects against a cache so that duplicate instances
@@ -157,6 +160,8 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
             operationToNotify = owr;
         }
         for (OperationExecutionListener<S> listener : getOperationExecutionListeners()) {
+            final int operationCount = operationCounter.incrementAndGet();
+            logger.fine(()->""+operationCount+": Replicating "+operation);
             try {
                 listener.executed(operationToNotify);
             } catch (Exception e) {
@@ -226,6 +231,10 @@ public interface ReplicableWithObjectInputStream<S, O extends OperationWithResul
 
     void addOperationSentToMasterForReplication(OperationWithResultWithIdWrapper<S, ?> operationWithResultWithIdWrapper);
 
+    /**
+     * @return the descriptor of the master from which this replica is replicating this {@link Replicable}, or
+     *         {@code null} if this {@link Replicable} is currently running as a master.
+     */
     ReplicationMasterDescriptor getMasterDescriptor();
 
     /**

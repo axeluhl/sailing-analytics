@@ -60,6 +60,7 @@ public class RegattaDetailsComposite extends Composite {
     private final Label defaultCourseArea;
     private final Label useStartTimeInference;
     private final Label controlTrackingFromStartAndFinishTimes;
+    private final Label canBoatsOfCompetitorsChangePerRace;
     private final Label configuration;
     private final Label buoyZoneRadiusInHullLengths;
     
@@ -80,7 +81,7 @@ public class RegattaDetailsComposite extends Composite {
         VerticalPanel vPanel = new VerticalPanel();
         mainPanel.add(vPanel);
 
-        int rows = 12;
+        int rows = 13;
         Grid grid = new Grid(rows, 2);
         vPanel.add(grid);
         
@@ -93,6 +94,7 @@ public class RegattaDetailsComposite extends Composite {
         defaultCourseArea = createLabelAndValueWidget(grid, currentRow++, stringMessages.courseArea(), "CourseAreaLabel");
         useStartTimeInference = createLabelAndValueWidget(grid, currentRow++, stringMessages.useStartTimeInference(), "UseStartTimeInferenceLabel");
         controlTrackingFromStartAndFinishTimes = createLabelAndValueWidget(grid, currentRow++, stringMessages.controlTrackingFromStartAndFinishTimes(), "UseStartTimeInferenceLabel");
+        canBoatsOfCompetitorsChangePerRace = createLabelAndValueWidget(grid, currentRow++, stringMessages.canBoatsOfCompetitorsChangePerRace(), "CanBoatsOfCompetitorsChangePerRaceLabel");
         buoyZoneRadiusInHullLengths = createLabelAndValueWidget(grid, currentRow++, stringMessages.buoyZoneRadiusInHullLengths(), "BuoyZoneRadiusInHullLengthsLabel");
         configuration = createLabelAndValueWidget(grid, currentRow++, stringMessages.racingProcedureConfiguration(), "RacingProcedureLabel");
         scoringSystem = createLabelAndValueWidget(grid, currentRow++, stringMessages.scoringSystem(), "ScoringSystemLabel");
@@ -238,19 +240,21 @@ public class RegattaDetailsComposite extends Composite {
                     editRacesOfRegattaSeries(regatta, series);
                 } else if (SeriesConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
                     RegattaIdentifier identifier = new RegattaName(regatta.getName());
-                    sailingService.removeSeries(identifier, series.getName(), new MarkedAsyncCallback<Void>(
-                            new AsyncCallback<Void>() {
-                                @Override
-                                public void onFailure(Throwable cause) {
-                                    errorReporter.reportError("Error trying to remove series " + series.getName()
-                                            + ": " + cause.getMessage());
-                                }
-        
-                                @Override
-                                public void onSuccess(Void result) {
-                                    regattaRefresher.fillRegattas();
-                                }
-                    }));
+                    if (Window.confirm(stringMessages.reallyRemoveSeries(series.getName()))) {
+                        sailingService.removeSeries(identifier, series.getName(),
+                                new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
+                                    @Override
+                                    public void onFailure(Throwable cause) {
+                                        errorReporter.reportError("Error trying to remove series " + series.getName()
+                                                + ": " + cause.getMessage());
+                                    }
+
+                                    @Override
+                                    public void onSuccess(Void result) {
+                                        regattaRefresher.fillRegattas();
+                                    }
+                                }));
+                    }
                 }
 
             }
@@ -312,7 +316,6 @@ public class RegattaDetailsComposite extends Composite {
         List<RaceColumnDTO> existingRaceColumns = series.getRaceColumns();
         final List<Pair<String, Integer>> raceColumnNamesToAddWithInsertIndex = new ArrayList<>();
         final List<String> raceColumnsToRemove = new ArrayList<>();
-        
         // TODO see bug 1447: the resulting order currently doesn't necessarily match the order of races in this dialog!
         int insertIndex = 0;
         for (RaceColumnDTO newRaceColumn : newRaceColumns) {
@@ -355,7 +358,6 @@ public class RegattaDetailsComposite extends Composite {
                                         public void onFailure(Throwable caught) {
                                             errorReporter.reportError("Error trying to add race columns " + raceColumnNamesToAddWithInsertIndex
                                                     + " to series " + series.getName() + ": " + caught.getMessage());
-
                                         }
 
                                         @Override
@@ -400,6 +402,7 @@ public class RegattaDetailsComposite extends Composite {
             defaultCourseArea.setText(regatta.defaultCourseAreaUuid == null ? "" : regatta.defaultCourseAreaName);
             useStartTimeInference.setText(regatta.useStartTimeInference ? stringMessages.yes() : stringMessages.no());
             controlTrackingFromStartAndFinishTimes.setText(regatta.controlTrackingFromStartAndFinishTimes ? stringMessages.yes() : stringMessages.no());
+            canBoatsOfCompetitorsChangePerRace.setText(regatta.canBoatsOfCompetitorsChangePerRace ? stringMessages.yes() : stringMessages.no());
             buoyZoneRadiusInHullLengths.setText(String.valueOf(regatta.buoyZoneRadiusInHullLengths)); 
 
             if (regatta.configuration != null) {

@@ -7,12 +7,18 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.Set;
 import java.util.TreeMap;
 
+import com.sap.sse.common.settings.Settings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.generic.HasValueSetting;
 import com.sap.sse.common.settings.generic.Setting;
 import com.sap.sse.common.settings.generic.SettingsListSetting;
+import com.sap.sse.common.settings.generic.SettingsMap;
 import com.sap.sse.common.settings.generic.ValueCollectionSetting;
 import com.sap.sse.common.settings.generic.ValueConverter;
 import com.sap.sse.common.settings.generic.ValueSetting;
@@ -24,8 +30,32 @@ import com.sap.sse.common.settings.generic.ValueSetting;
  *
  */
 public class SettingsToStringMapSerializer {
+    
+    private static final Logger LOG = Logger.getLogger(SettingsToStringMapSerializer.class.getName());
+    
+    private static final String ADDED_SUFFIX = GenericSerializableSettings.PATH_SEPARATOR + GenericSerializableSettings.ADDED_TOKEN;
+    private static final String REMOVED_SUFFIX = GenericSerializableSettings.PATH_SEPARATOR + GenericSerializableSettings.REMOVED_TOKEN;
+    
+    public final Map<String, Iterable<String>> serialize(SettingsMap settingsMap) {
+        final Map<String, Iterable<String>> result = new HashMap<>();
+        serialize("", settingsMap, result);
+        return result;
+    }
+    
+    private void serialize(String prefix, SettingsMap settingsMap, Map<String, Iterable<String>> serialized) {
+        for (Map.Entry<String, Settings> entry : settingsMap.getSettingsPerComponentId().entrySet()) {
+            String key = entry.getKey();
+            String childPrefix = key == null ? prefix : prefix + key + GenericSerializableSettings.PATH_SEPARATOR;
+            Settings settings = entry.getValue();
+            if(settings instanceof SettingsMap) {
+                serialize(childPrefix, (SettingsMap) settings, serialized);
+            } else if (settings instanceof GenericSerializableSettings) {
+                serialize(childPrefix, (GenericSerializableSettings) settings, serialized);
+            }
+        }
+    }
 
-    public Map<String, Iterable<String>> serialize(GenericSerializableSettings settings) {
+    public final Map<String, Iterable<String>> serialize(GenericSerializableSettings settings) {
         final Map<String, Iterable<String>> result = new HashMap<>();
         serialize("", settings, result);
         return result;
@@ -45,7 +75,7 @@ public class SettingsToStringMapSerializer {
         if (setting instanceof ValueSetting) {
             serialized.put(key, serializeValueSetting(key, (ValueSetting<?>) setting));
         } else if (setting instanceof ValueCollectionSetting) {
-            serialized.put(key, serializeValueListSetting(key, (ValueCollectionSetting<?>) setting));
+            serializeValueListSetting(key, serialized, (ValueCollectionSetting<?>) setting);
         } else {
             String prefix = key + GenericSerializableSettings.PATH_SEPARATOR;
             if (setting instanceof GenericSerializableSettings) {
@@ -72,16 +102,41 @@ public class SettingsToStringMapSerializer {
         return Collections.singleton(valueSetting.getValueConverter().toStringValue(valueSetting.getValue()));
     }
 
-    private <T> Iterable<String> serializeValueListSetting(String key, ValueCollectionSetting<T> valueSetting) {
+    private <T> Iterable<String> serializeValueListSetting(String key, Map<String, Iterable<String>> serialized, ValueCollectionSetting<T> valueSetting) {
         List<String> result = new ArrayList<>();
         ValueConverter<T> valueConverter = valueSetting.getValueConverter();
-        for (T value : valueSetting.getValues()) {
+        serialized.put(key + ADDED_SUFFIX, serializeMultipleValuesForSetting(valueConverter, valueSetting.getAddedValues()));
+        serialized.put(key + REMOVED_SUFFIX, serializeMultipleValuesForSetting(valueConverter, valueSetting.getRemovedValues()));
+        return result;
+    }
+    
+    private <T> Iterable<String> serializeMultipleValuesForSetting(ValueConverter<T> valueConverter, Iterable<T> values) {
+        List<String> result = new ArrayList<>();
+        for (T value : values) {
             result.add(valueConverter.toStringValue(value));
         }
         return result;
     }
+    
+    public final <T extends SettingsMap> T deserializeSettingsMap(T settingsMap, Map<String, Iterable<String>> values) {
+        final Map<String, Map<String, Iterable<String>>> mappedInnerValues = mapNested(values);
+        final Set<Entry<String, Settings>> childSettings = settingsMap.getSettingsPerComponentId().entrySet();
+        for (Map.Entry<String, Settings> entry : childSettings) {
+            final String key = entry.getKey();
+            final Settings settings = entry.getValue();
+            final Map<String, Iterable<String>> innerValues = key == null ? values : mappedInnerValues.get(key.toString());
+            if(innerValues != null) {
+                if(settings instanceof SettingsMap) {
+                    deserializeSettingsMap((SettingsMap) settings, innerValues);
+                } else if(settings instanceof GenericSerializableSettings) {
+                    deserialize((GenericSerializableSettings)settings, innerValues);
+                }
+            }
+        }
+        return settingsMap;
+    }
 
-    public <T extends GenericSerializableSettings> T deserialize(T settings, Map<String, Iterable<String>> values) {
+    public final <T extends GenericSerializableSettings> T deserialize(T settings, Map<String, Iterable<String>> values) {
         Map<String, Map<String, Iterable<String>>> mappedInnerValues = mapNested(values);
         for (Map.Entry<String, Setting> entry : settings.getChildSettings().entrySet()) {
             final String key = entry.getKey();
@@ -95,14 +150,16 @@ public class SettingsToStringMapSerializer {
             Map<String, Map<String, Iterable<String>>> mappedInnerValues) {
         if (setting instanceof HasValueSetting) {
             final Iterable<String> settingValues = values.get(key);
-            if (settingValues != null) {
-                if (setting instanceof ValueSetting) {
+            if (setting instanceof ValueSetting) {
+                if (settingValues != null) {
                     deserializeValueSetting((ValueSetting<?>) setting, settingValues);
-                } else if (setting instanceof ValueCollectionSetting) {
-                    deserializeValueListSetting((ValueCollectionSetting<?>) setting, settingValues);
-                } else {
-                    throw new IllegalStateException("Unknown HasValueSetting type");
                 }
+            } else if (setting instanceof ValueCollectionSetting) {
+                final Iterable<String> addedValues = values.get(key + ADDED_SUFFIX);
+                final Iterable<String> removedValues = values.get(key + REMOVED_SUFFIX);
+                deserializeValueListSetting((ValueCollectionSetting<?>) setting, settingValues, addedValues, removedValues);
+            } else {
+                throw new IllegalStateException("Unknown HasValueSetting type");
             }
         } else {
             final Map<String, Iterable<String>> innerValues = mappedInnerValues.get(key);
@@ -124,16 +181,42 @@ public class SettingsToStringMapSerializer {
             // Additional values are currently silently skipped.
             // This should only happen if somebody manipulates the data or a List setting is changed to a single setting
             // value.
-            valueSetting.setValue(valueSetting.getValueConverter().fromStringValue(iterator.next()));
+            final ValueConverter<T> valueConverter = valueSetting.getValueConverter();
+            final String stringValue = iterator.next();
+            try {
+                valueSetting.setValue(valueConverter.fromStringValue(stringValue));
+            } catch(Exception e) {
+                LOG.log(Level.WARNING, "Error while converting String value \"" + stringValue + "\" using converter \""
+                        + valueConverter.getClass().getSimpleName() + "\"", e);
+            }
         }
     }
 
-    private <T> void deserializeValueListSetting(ValueCollectionSetting<T> valueSetting, Iterable<String> values) {
-        List<T> deserializedValues = new ArrayList<>();
-        for (String stringValue : values) {
-            deserializedValues.add(valueSetting.getValueConverter().fromStringValue(stringValue));
+    private <T> void deserializeValueListSetting(ValueCollectionSetting<T> valueSetting, Iterable<String> values, Iterable<String> addedValues, Iterable<String> removedValues) {
+        final ValueConverter<T> valueConverter = valueSetting.getValueConverter();
+        if(values != null) {
+            // fallback logic to correctly deserialize values serialized before diffing was introduced
+            valueSetting.setValues(deserializeMultipleValuesForSetting(valueConverter, values));
+        } else {
+            final Iterable<T> addedSettingValues = deserializeMultipleValuesForSetting(valueConverter, addedValues);
+            final Iterable<T> removedSettingValues = deserializeMultipleValuesForSetting(valueConverter, removedValues);
+            valueSetting.setDiff(removedSettingValues, addedSettingValues);
         }
-        valueSetting.setValues(deserializedValues);
+    }
+    
+    private <T> Iterable<T> deserializeMultipleValuesForSetting(ValueConverter<T> valueConverter, Iterable<String> values) {
+        List<T> deserializedValues = new ArrayList<>();
+        if(values != null) {
+            for (String stringValue : values) {
+                try {
+                    deserializedValues.add(valueConverter.fromStringValue(stringValue));
+                } catch(Exception e) {
+                    LOG.log(Level.WARNING, "Error while converting String value \"" + stringValue + "\" using converter \""
+                            + valueConverter.getClass().getSimpleName() + "\"", e);
+                }
+            }
+        }
+        return deserializedValues;
     }
 
     private <T extends GenericSerializableSettings> void deserializeSettingsListSetting(SettingsListSetting<T> valueSetting,

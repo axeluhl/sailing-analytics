@@ -129,7 +129,7 @@ class MediaLibrary {
     void deleteMediaTrack(MediaTrack mediaTrackToBeDeleted) {
         LockUtil.lockForWrite(lock);
         try {
-            MediaTrack deletedMediaTrack = getMediaTrackForClone(mediaTrackToBeDeleted);
+            MediaTrack deletedMediaTrack = resolveClone(mediaTrackToBeDeleted);
             mediaTracksByDbId.remove(deletedMediaTrack);
             updateMapByRace_Remove(deletedMediaTrack);
         } finally {
@@ -140,7 +140,7 @@ class MediaLibrary {
     void titleChanged(MediaTrack changedMediaTrack) {
         LockUtil.lockForWrite(lock);
         try {
-            MediaTrack mediaTrack = getMediaTrackForClone(changedMediaTrack);
+            MediaTrack mediaTrack = resolveClone(changedMediaTrack);
             if (mediaTrack != null) {
                 mediaTrack.title = changedMediaTrack.title;
             }
@@ -152,7 +152,7 @@ class MediaLibrary {
     void urlChanged(MediaTrack changedMediaTrack) {
         LockUtil.lockForWrite(lock);
         try {
-            MediaTrack mediaTrack = getMediaTrackForClone(changedMediaTrack);
+            MediaTrack mediaTrack = resolveClone(changedMediaTrack);
             if (mediaTrack != null) {
                 mediaTrack.url = changedMediaTrack.url;
             }
@@ -164,7 +164,7 @@ class MediaLibrary {
     void mimeTypeChanged(MediaTrack changedMediaTrack) {
         LockUtil.lockForWrite(lock);
         try {
-            MediaTrack mediaTrack = getMediaTrackForClone(changedMediaTrack);
+            MediaTrack mediaTrack = resolveClone(changedMediaTrack);
             if (mediaTrack != null) {
                 mediaTrack.mimeType = changedMediaTrack.mimeType;
             }
@@ -176,7 +176,7 @@ class MediaLibrary {
     void startTimeChanged(MediaTrack changedMediaTrack) {
         LockUtil.lockForWrite(lock);
         try {
-            MediaTrack mediaTrack = getMediaTrackForClone(changedMediaTrack);
+            MediaTrack mediaTrack = resolveClone(changedMediaTrack);
             if (mediaTrack != null) {
                 mediaTrack.startTime = changedMediaTrack.startTime;
             }
@@ -188,7 +188,7 @@ class MediaLibrary {
     void durationChanged(MediaTrack changedMediaTrack) {
         LockUtil.lockForWrite(lock);
         try {
-            MediaTrack mediaTrack = getMediaTrackForClone(changedMediaTrack);
+            MediaTrack mediaTrack = resolveClone(changedMediaTrack);
             if (mediaTrack != null) {
                 mediaTrack.duration = changedMediaTrack.duration;
             }
@@ -200,7 +200,7 @@ class MediaLibrary {
     void assignedRacesChanged(MediaTrack changedMediaTrack) {
         LockUtil.lockForWrite(lock);
         try {
-            MediaTrack mediaTrack = getMediaTrackForClone(changedMediaTrack);
+            MediaTrack mediaTrack = resolveClone(changedMediaTrack);
             if (mediaTrack != null) {
                 updateMapByRace_Remove(mediaTrack); //Cannot use updateCache_Update method, because race is changed
                 mediaTrack.assignedRaces.clear();
@@ -214,11 +214,19 @@ class MediaLibrary {
         }
     }
 
-    private MediaTrack getMediaTrackForClone(MediaTrack mediaTrackClone) {
+    /**
+     * A {@link MediaTrack} is used on the server and in the GWT client and travels through
+     * GWT RPC calls. When received as a parameter it is never identical to any server-side
+     * {@link MediaTrack} object. This method resolves a clone such as those received as a
+     * GWT RPC method call parameter to a {@link MediaTrack} object known by the server,
+     * based on its {@link Object#hashCode()} and {@link Object#equals(Object)} method that
+     * is based on the {@link MediaTrack#dbId} field.<p>
+     * 
+     * It is also permissible to pass a server-side object to this method in which case it may
+     * be returned unchanged.
+     */
+    private MediaTrack resolveClone(MediaTrack mediaTrackClone) {
         MediaTrack mediaTrack = mediaTracksByDbId.get(mediaTrackClone);
-        if (mediaTrack == mediaTrackClone) {
-            throw new IllegalArgumentException("Media track and clone must not be identical.");
-        }
         return mediaTrack;
     }
 
@@ -292,7 +300,7 @@ class MediaLibrary {
     }
 
     public MediaTrack lookupMediaTrack(MediaTrack mediaTrack) {
-        return getMediaTrackForClone(mediaTrack);
+        return resolveClone(mediaTrack);
     }
 
 }

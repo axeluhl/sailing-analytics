@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import com.sap.sailing.domain.common.BearingChangeAnalyzer;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 public class BearingChangeAnalyzerTest {
     private final BearingChangeAnalyzer bearingChangeAnalyzer = BearingChangeAnalyzer.INSTANCE;

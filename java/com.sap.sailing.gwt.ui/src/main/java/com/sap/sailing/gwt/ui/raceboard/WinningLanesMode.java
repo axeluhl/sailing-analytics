@@ -6,13 +6,17 @@ import java.util.List;
 
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsFactory;
+import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 import com.sap.sailing.gwt.ui.shared.MarkPassingTimesDTO;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorageAndAdditionalSettingsLayers.OnSettingsReloadedCallback;
 
 /**
  * Puts the race viewer in a mode where the user can see what may be called the "Winning Lanes." For this,
@@ -37,50 +41,48 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
     }
 
     private void adjustLeaderboardSettings() {
-        final LeaderboardSettings existingSettings = getLeaderboardPanel().getSettings();
-        final List<DetailType> raceDetailsToShow = new ArrayList<>(existingSettings.getRaceDetailsToShow());
+        final SingleRaceLeaderboardPanel leaderboardPanel = getLeaderboardPanel();
+        final List<DetailType> raceDetailsToShow = new ArrayList<>();
         raceDetailsToShow.add(DetailType.RACE_AVERAGE_ABSOLUTE_CROSS_TRACK_ERROR_IN_METERS);
         raceDetailsToShow.add(DetailType.RACE_AVERAGE_SIGNED_CROSS_TRACK_ERROR_IN_METERS);
         raceDetailsToShow.add(DetailType.RACE_DISTANCE_TRAVELED);
         raceDetailsToShow.add(DetailType.RACE_TIME_TRAVELED);
-        raceDetailsToShow.remove(DetailType.DISPLAY_LEGS);
-        final LeaderboardSettings newSettings = new LeaderboardSettings(
-                Util.cloneListOrNull(existingSettings.getManeuverDetailsToShow()),
-                Util.cloneListOrNull(existingSettings.getLegDetailsToShow()),
-                raceDetailsToShow,
-                Util.cloneListOrNull(existingSettings.getOverallDetailsToShow()),
-                Util.cloneListOrNull(existingSettings.getNamesOfRaceColumnsToShow()),
-                Util.cloneListOrNull(existingSettings.getNamesOfRacesToShow()),
-                existingSettings.getNumberOfLastRacesToShow(), /* auto-expand pre-selected race */ true,
-                existingSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
-                existingSettings.getNameOfRaceToSort(), existingSettings.isSortAscending(),
-                existingSettings.isUpdateUponPlayStateChange(),
-                existingSettings.getActiveRaceColumnSelectionStrategy(),
-                existingSettings.isShowAddedScores(),
-                existingSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
-                existingSettings.isShowCompetitorSailIdColumn(),
-                existingSettings.isShowCompetitorFullNameColumn());
-        getLeaderboardPanel().updateSettings(newSettings);
+        final SingleRaceLeaderboardSettings additiveSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsWithCustomRaceDetails(raceDetailsToShow);
+        ((RaceBoardComponentContext) leaderboardPanel.getComponentContext()).addModesPatching(leaderboardPanel, additiveSettings, new OnSettingsReloadedCallback<SingleRaceLeaderboardSettings>() {
+            @Override
+            public void onSettingsReloaded(SingleRaceLeaderboardSettings patchedSettings) {
+                leaderboardPanel.updateSettings(patchedSettings);
+            }
+        });
     }
 
     private void adjustMapSettings() {
-        final RaceMapSettings existingMapSettings = getRaceBoardPanel().getMap().getSettings();
-        final RaceMapSettings newMapSettings = new RaceMapSettings(existingMapSettings.getZoomSettings(),
-                existingMapSettings.getHelpLinesSettings(),
-                existingMapSettings.getTransparentHoverlines(),
-                existingMapSettings.getHoverlineStrokeWeight(),
+        RaceMap raceMap = getRaceBoardPanel().getMap();
+        final RaceMapSettings defaultSettings = raceMap.getLifecycle().createDefaultSettings();
+        final RaceMapSettings additiveSettings = new RaceMapSettings(defaultSettings.getZoomSettings(),
+                defaultSettings.getHelpLinesSettings(),
+                defaultSettings.getTransparentHoverlines(),
+                defaultSettings.getHoverlineStrokeWeight(),
                 tailLength.asMillis(),
                 /* existingMapSettings.isWindUp() */ true,
-                existingMapSettings.getBuoyZoneRadius(),
+                defaultSettings.getBuoyZoneRadius(),
                 /* existingMapSettings.isShowOnlySelectedCompetitors() */ true, // show the top n competitors and their tails quickly
-                existingMapSettings.isShowSelectedCompetitorsInfo(),
-                existingMapSettings.isShowWindStreamletColors(),
-                existingMapSettings.isShowWindStreamletOverlay(),
-                existingMapSettings.isShowSimulationOverlay(),
-                existingMapSettings.isShowMapControls(),
-                existingMapSettings.getManeuverTypesToShow(),
-                existingMapSettings.isShowDouglasPeuckerPoints());
-        getRaceBoardPanel().getMap().updateSettings(newMapSettings);
+                defaultSettings.isShowSelectedCompetitorsInfo(),
+                defaultSettings.isShowWindStreamletColors(),
+                defaultSettings.isShowWindStreamletOverlay(),
+                defaultSettings.isShowSimulationOverlay(),
+                defaultSettings.isShowMapControls(),
+                defaultSettings.getManeuverTypesToShow(),
+                defaultSettings.isShowDouglasPeuckerPoints(),
+                defaultSettings.isShowEstimatedDuration(),
+                defaultSettings.getStartCountDownFontSizeScaling(),
+                defaultSettings.isShowManeuverLossVisualization());
+        ((RaceBoardComponentContext) raceMap.getComponentContext()).addModesPatching(raceMap, additiveSettings, new OnSettingsReloadedCallback<RaceMapSettings>() {
+            @Override
+            public void onSettingsReloaded(RaceMapSettings patchedSettings) {
+                raceMap.updateSettings(patchedSettings);
+            }
+        });
     }
 
     /**
@@ -122,17 +124,16 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
             stopReceivingLeaderboard();
             adjustLeaderboardSettings();
         }
-        if (adjustedLeaderboardSettings && tailLength != null) {
-            adjustMapSettings();
-        }
         if (getLeaderboardForSpecificTimePoint() == null && tailLength != null && getLeaderboard() != null && getRaceColumn() != null) {
             loadLeaderboardForSpecificTimePoint(getLeaderboard().name, getRaceColumn().getName(), getTimer().getTime());
         }
         if (!adjustedCompetitorSelection && getLeaderboardForSpecificTimePoint() != null && getCompetitorsInRace() != null) {
             stopReceivingCompetitorsInRace();
             adjustedCompetitorSelection = true;
+            updateCompetitorSelection();
         }
-        updateCompetitorSelection();
+        if (adjustedLeaderboardSettings && tailLength != null && adjustedCompetitorSelection) {
+            adjustMapSettings();
+        }
     }
-
 }

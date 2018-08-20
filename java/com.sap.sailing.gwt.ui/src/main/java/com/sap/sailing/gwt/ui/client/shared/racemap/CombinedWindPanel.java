@@ -53,7 +53,8 @@ public class CombinedWindPanel extends FlowPanel {
                         oldRaceMapSettings.isShowSelectedCompetitorsInfo(), oldRaceMapSettings.isShowWindStreamletColors(),
                         newShowStreamletsOverlaySetting, oldRaceMapSettings.isShowSimulationOverlay(),
                         oldRaceMapSettings.isShowMapControls(), oldRaceMapSettings.getManeuverTypesToShow(),
-                        oldRaceMapSettings.isShowDouglasPeuckerPoints());
+                        oldRaceMapSettings.isShowDouglasPeuckerPoints(), oldRaceMapSettings.isShowEstimatedDuration(),
+                        oldRaceMapSettings.getStartCountDownFontSizeScaling(), oldRaceMapSettings.isShowManeuverLossVisualization());
                 map.updateSettings(newRaceMapSettings);
             }
         });

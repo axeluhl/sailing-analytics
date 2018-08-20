@@ -2,16 +2,14 @@ package com.sap.sailing.datamining.impl.components;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import com.sap.sailing.datamining.data.HasMarkPassingContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.datamining.impl.data.MarkPassingWithContext;
-import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.datamining.impl.data.TrackedLegOfCompetitorWithSpecificTimePointWithContext;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.tracking.Maneuver;
-import com.sap.sailing.domain.tracking.MarkPassingManeuver;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
@@ -29,10 +27,14 @@ public class MarkPassingRetrievalProcessor extends AbstractRetrievalProcessor<Ha
         TimePoint finishTime = element.getTrackedLegOfCompetitor().getFinishTime();
         if (finishTime != null) {
             try {
-                List<Maneuver> maneuvers = element.getTrackedLegOfCompetitor().getManeuvers(finishTime, false);
+                Iterable<Maneuver> maneuvers = element.getTrackedLegOfCompetitor().getManeuvers(finishTime, false);
                 for (Maneuver maneuver : maneuvers) {
-                    if (maneuver.getType() == ManeuverType.MARK_PASSING) {
-                        maneuversWithContext.add(new MarkPassingWithContext(element, (MarkPassingManeuver) maneuver));
+                    if (isAborted()) {
+                        break;
+                    }
+                    if (maneuver.isMarkPassing()) {
+                        maneuversWithContext.add(new MarkPassingWithContext(new TrackedLegOfCompetitorWithSpecificTimePointWithContext(
+                                element.getTrackedLegContext(), element.getTrackedLegOfCompetitor(), maneuver.getTimePoint()), maneuver));
                     }
                 }
             } catch (NoWindException e) {

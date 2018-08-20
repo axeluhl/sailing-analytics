@@ -13,7 +13,7 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
 import com.sap.sailing.domain.racelogtracking.impl.DeviceMappingWithRegattaLogEventImpl;
@@ -48,8 +48,8 @@ public class RegattaLogDeviceMappingFinder<ItemT extends WithID>
     }
 
     protected DeviceMappingWithRegattaLogEvent<ItemT> createMapping(DeviceIdentifier device, ItemT item,
-            TimePoint from, TimePoint to, Serializable originalEventId, RegattaLogDeviceMappingEvent<ItemT> event) {
-        return new DeviceMappingWithRegattaLogEventImpl<ItemT>(item, device, new TimeRangeImpl(from, to),
+            TimePoint from, TimePoint toInclusive, Serializable originalEventId, RegattaLogDeviceMappingEvent<ItemT> event) {
+        return new DeviceMappingWithRegattaLogEventImpl<ItemT>(item, device, new TimeRangeImpl(from, toInclusive, /* inclusive */ true),
                 Collections.singletonList(originalEventId), event);
     }
 
@@ -95,16 +95,16 @@ public class RegattaLogDeviceMappingFinder<ItemT extends WithID>
         List<DeviceMappingWithRegattaLogEvent<ItemT>> result = new ArrayList<>();
         for (final RegattaLogDeviceMappingEvent<ItemT> event : events) {
             TimePoint from = event.getFrom();
-            TimePoint to = event.getTo();
-            TimePoint closingTimePoint = closingEvents.containsKey(event.getId()) ? closingEvents.get(event.getId())
-                    .getClosingTimePoint() : null;
+            TimePoint toInclusive = event.getToInclusive();
+            TimePoint closingTimePointInclusive = closingEvents.containsKey(event.getId()) ? closingEvents.get(event.getId())
+                    .getClosingTimePointInclusive() : null;
             if (from == null) {
                 logger.severe("No start time set for DeviceMappingEvent with ID: " + event.getId());
             }
-            if (to == null) {
-                to = closingTimePoint;
+            if (toInclusive == null) {
+                toInclusive = closingTimePointInclusive;
             }
-            result.add(createMapping(event.getDevice(), item, from, to, event.getId(), event));
+            result.add(createMapping(event.getDevice(), item, from, toInclusive, event.getId(), event));
         }
         return result;
     }

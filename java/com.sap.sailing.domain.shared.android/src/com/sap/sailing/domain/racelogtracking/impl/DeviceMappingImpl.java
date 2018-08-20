@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
@@ -66,7 +66,8 @@ public class DeviceMappingImpl<ItemType extends WithID> implements DeviceMapping
     }
     
     public static <T extends WithID> DeviceMapping<T> convertToDeviceMapping(RegattaLogDeviceMappingEvent<T> event) {
-        return new DeviceMappingImpl<T>(event.getMappedTo(), event.getDevice(), new TimeRangeImpl(event.getFrom(), event.getTo()),
+        return new DeviceMappingImpl<T>(event.getMappedTo(), event.getDevice(),
+                new TimeRangeImpl(event.getFrom(), event.getToInclusive(), /* inclusive */ true),
                 event.getId(), event.getClass());
     }
     

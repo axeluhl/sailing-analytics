@@ -113,7 +113,7 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
             toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
             int sidePadding = (int) getResources().getDimension(R.dimen.toolbar_left_padding);
             toolbar.setPadding(sidePadding, 0, 0, 0);
-            getSupportActionBar().setTitle(leaderboard.name);
+            getSupportActionBar().setTitle(leaderboard.displayName);
             getSupportActionBar().setSubtitle(event.name);
             ColorDrawable backgroundDrawable = new ColorDrawable(getResources().getColor(R.color.toolbar_background));
             getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
@@ -424,8 +424,7 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
                 if (checkinData instanceof CompetitorCheckinData) {
                     CompetitorCheckinData competitorCheckinData = (CompetitorCheckinData) checkinData;
                     DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, checkinDigest);
-                    DatabaseHelper.getInstance().storeCompetitorCheckinRow(this, competitorCheckinData.getEvent(), competitorCheckinData.getCompetitor(),
-                        competitorCheckinData.getLeaderboard(), competitorCheckinData.getCheckinUrl());
+                    DatabaseHelper.getInstance().storeCompetitorCheckinRow(this, competitorCheckinData);
                     competitor = DatabaseHelper.getInstance().getCompetitor(this, checkinDigest);
                     event = DatabaseHelper.getInstance().getEventInfo(this, checkinDigest);
                     leaderboard = DatabaseHelper.getInstance().getLeaderboard(this, checkinDigest);

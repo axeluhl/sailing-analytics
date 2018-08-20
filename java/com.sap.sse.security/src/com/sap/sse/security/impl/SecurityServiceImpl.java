@@ -31,6 +31,7 @@ import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.LockedAccountException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.cache.CacheManager;
 import org.apache.shiro.config.Ini;
 import org.apache.shiro.config.Ini.Section;
@@ -190,11 +191,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      * is empty.
      */
     private void initEmptyStore() {
-        if (Util.isEmpty(store.getUsers())) {
+        if (!store.hasUsers()) {
             try {
                 logger.info("No users found, creating default user \"admin\" with password \"admin\"");
                 createSimpleUser("admin", "nobody@sapsailing.com", "admin", 
-                        /* fullName */ null, /* company */ null, /* validationBaseURL */ null);
+                        /* fullName */ null, /* company */ null, Locale.ENGLISH, /* validationBaseURL */ null);
                 addRoleForUser("admin", DefaultRoles.ADMIN.getRolename());
             } catch (UserManagementException | MailException e) {
                 logger.log(Level.SEVERE, "Exception while creating default admin user", e);
@@ -323,10 +324,16 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public User getUserByEmail(String email) {
         return store.getUserByEmail(email);
     }
-
+    
     @Override
     public User createSimpleUser(final String username, final String email, String password, String fullName,
             String company, final String validationBaseURL) throws UserManagementException, MailException {
+        return createSimpleUser(username, email, password, fullName, company, /* locale */ null, validationBaseURL);
+    }
+
+    @Override
+    public User createSimpleUser(final String username, final String email, String password, String fullName,
+            String company, Locale locale, final String validationBaseURL) throws UserManagementException, MailException {
         if (store.getUserByName(username) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
@@ -342,6 +349,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         final User result = store.createUser(username, email, upa);
         result.setFullName(fullName);
         result.setCompany(company);
+        result.setLocale(locale);
         final String emailValidationSecret = result.startEmailValidation();
         // don't replicate exception handling; replicate only the effect on the user store
         apply(s->s.internalStoreUser(result));
@@ -885,29 +893,29 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public ReplicatingCacheManager getCacheManager() {
         return cacheManager;
     }
+    
+    private void ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(String username) {
+        final Subject subject = SecurityUtils.getSubject();
+        if (!subject.hasRole(DefaultRoles.ADMIN.getRolename()) && (subject.getPrincipal() == null
+                || !username.equals(subject.getPrincipal().toString()))) {
+            final String currentUserName = subject.getPrincipal() == null ? "<anonymous>"
+                    : subject.getPrincipal().toString();
+            throw new AuthorizationException(
+                    "User " + currentUserName + " does not have the permission required to access data of user " + username);
+        }
+    }
 
     @Override
-    public Void setPreference(final String username, final String key, final String value) {
-        final Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
-            apply(s->s.internalSetPreference(username, key, value));
-        } else {
-            throw new SecurityException("User " + subject.getPrincipal().toString()
-                    + " does not have permission to set preference for user " + username);
-        }
-        return null;
+    public void setPreference(final String username, final String key, final String value) {
+        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
+        apply(s->s.internalSetPreference(username, key, value));
     }
 
     @Override
     public void setPreferenceObject(final String username, final String key, final Object value) {
-        final Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
-            final String preferenceObjectAsString = internalSetPreferenceObject(username, key, value);
-            apply(s->s.internalSetPreference(username, key, preferenceObjectAsString));
-        } else {
-            throw new SecurityException("User " + subject.getPrincipal().toString()
-                    + " does not have permission to set preference object for user " + username);
-        }
+        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
+        final String preferenceObjectAsString = internalSetPreferenceObject(username, key, value);
+        apply(s->s.internalSetPreference(username, key, preferenceObjectAsString));
     }
 
     @Override
@@ -923,13 +931,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public void unsetPreference(String username, String key) {
-        Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
-            apply(s->s.internalUnsetPreference(username, key));
-        } else {
-            throw new SecurityException("User " + subject.getPrincipal().toString()
-                    + " does not have permission to unset preference for user " + username);
-        }
+        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
+        apply(s->s.internalUnsetPreference(username, key));
     }
 
     @Override
@@ -966,13 +969,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public String getPreference(String username, String key) {
-        Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.name()) || username.equals(subject.getPrincipal().toString())) {
-            return store.getPreference(username, key);
-        } else {
-            throw new org.apache.shiro.authz.AuthorizationException("User " + subject.getPrincipal().toString()
-                    + " does not have permission to read preferences of user " + username);
-        }
+        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
+        return store.getPreference(username, key);
+    }
+    
+    @Override
+    public Map<String, String> getAllPreferences(String username) {
+        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
+        return store.getAllPreferences(username);
     }
     
     @Override

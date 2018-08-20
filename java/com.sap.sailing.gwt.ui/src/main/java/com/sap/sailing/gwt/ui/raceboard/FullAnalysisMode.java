@@ -4,10 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
-import com.sap.sse.common.Util;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsFactory;
+import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
+import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorageAndAdditionalSettingsLayers.OnSettingsReloadedCallback;
 
 /**
  * This mode best applies to non-live "replay" races. It sets the time to the "end of race" time point and makes sure
@@ -26,6 +29,14 @@ public class FullAnalysisMode extends AbstractRaceBoardMode {
      */
     @Override
     protected void trigger() {
+        if (!timerAdjusted && getRaceTimesInfoForRace() != null && getRaceTimesInfoForRace().endOfRace != null) {
+            timerAdjusted = true;
+            stopReceivingRaceTimesInfos();
+            if (getTimer().getPlayMode() == PlayModes.Live) {
+                getTimer().setPlayMode(PlayModes.Replay);
+            }
+            setTimerOrUseCustomStart(new MillisecondsTimePoint(getRaceTimesInfoForRace().endOfRace));
+        }
         if (!leaderboardSettingsAdjusted && getLeaderboard() != null) {
             leaderboardSettingsAdjusted = true;
             // it's important to first unregister the listener before updateSettings is called because
@@ -33,37 +44,22 @@ public class FullAnalysisMode extends AbstractRaceBoardMode {
             stopReceivingLeaderboard();
             adjustLeaderboardSettings();
         }
-        if (!timerAdjusted && getRaceTimesInfoForRace() != null && getRaceTimesInfoForRace().endOfRace != null) {
-            timerAdjusted = true;
-            stopReceivingRaceTimesInfos();
-            if (getTimer().getPlayMode() == PlayModes.Live) {
-                getTimer().setPlayMode(PlayModes.Replay);
-            }
-            getTimer().setTime(getRaceTimesInfoForRace().endOfRace.getTime());
-        }
     }
 
     private void adjustLeaderboardSettings() {
-        final LeaderboardSettings existingSettings = getLeaderboardPanel().getSettings();
-        final List<DetailType> raceDetailsToShow = new ArrayList<>(existingSettings.getRaceDetailsToShow());
+        final SingleRaceLeaderboardPanel leaderboardPanel = getLeaderboardPanel();
+        final List<DetailType> raceDetailsToShow = new ArrayList<>();
+        raceDetailsToShow.add(DetailType.RACE_DISPLAY_LEGS);
         raceDetailsToShow.add(DetailType.RACE_AVERAGE_SPEED_OVER_GROUND_IN_KNOTS);
         raceDetailsToShow.add(DetailType.RACE_DISTANCE_TRAVELED);
         raceDetailsToShow.add(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS);
-        final LeaderboardSettings newSettings = new LeaderboardSettings(
-                Util.cloneListOrNull(existingSettings.getManeuverDetailsToShow()),
-                Util.cloneListOrNull(existingSettings.getLegDetailsToShow()),
-                raceDetailsToShow, Util.cloneListOrNull(existingSettings.getOverallDetailsToShow()),
-                Util.cloneListOrNull(existingSettings.getNamesOfRaceColumnsToShow()),
-                Util.cloneListOrNull(existingSettings.getNamesOfRacesToShow()),
-                existingSettings.getNumberOfLastRacesToShow(), /* auto-expand pre-selected race */ true,
-                existingSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
-                existingSettings.getNameOfRaceToSort(), existingSettings.isSortAscending(),
-                existingSettings.isUpdateUponPlayStateChange(),
-                existingSettings.getActiveRaceColumnSelectionStrategy(),
-                existingSettings.isShowAddedScores(),
-                existingSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
-                existingSettings.isShowCompetitorSailIdColumn(),
-                existingSettings.isShowCompetitorFullNameColumn());
-        getLeaderboardPanel().updateSettings(newSettings);
+        final SingleRaceLeaderboardSettings additiveSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsWithCustomRaceDetails(raceDetailsToShow);
+        ((RaceBoardComponentContext) leaderboardPanel.getComponentContext()).addModesPatching(leaderboardPanel, additiveSettings, new OnSettingsReloadedCallback<SingleRaceLeaderboardSettings>() {
+            @Override
+            public void onSettingsReloaded(SingleRaceLeaderboardSettings patchedSettings) {
+                leaderboardPanel.updateSettings(patchedSettings);
+            }
+            
+        });
     }
 }

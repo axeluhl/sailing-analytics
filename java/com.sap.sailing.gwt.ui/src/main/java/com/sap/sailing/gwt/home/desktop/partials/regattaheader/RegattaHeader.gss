@@ -13,17 +13,20 @@
   border-bottom: 1px solid #ddd;
 }
 .regattaheaderpadding {
+  padding-left: 4em;
   padding-right: 9.666667em;
 }
 .regattaheader_logo {
-  float: left;
+  position: absolute;
   width: 3.333333333333333em;
   height: 3.333333333333333em;
+  margin: 0.666666666666667em 0.666666666666667em 1em;
   text-align: center;
   line-height: 3.333333333333333em;
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
+  left: 1em;
 }
 .regattaheader_logo img {
   display: inline-block;
@@ -47,6 +50,7 @@
 }
 .regattaheader_content_details {
   overflow: hidden;
+  min-height: 1.133333333333333em;
 }
 .regattaheader_content_details_item {
   float: left;
@@ -96,7 +100,7 @@
   text-align: right;
   padding: 0.666666666666667em;
   padding-right: 5.333333333333333em;
-  background-image: url("images/home/arrow-down-grey.png");
+  background-image: resourceUrl("arrowDownGrey");
   background-size: 1.333333333333333em 1.333333333333333em;
   background-position: center;
   background-repeat: no-repeat;
@@ -165,4 +169,42 @@ img.regattaheader_update_title_icon {
 }
 .regattaheader_update_timestamp {
   font-size: 12px;
+}
+.iconHeaderGPS, .iconHeaderWind, .iconHeaderVideo, .iconHeaderAudio {
+  pointer-events: none;
+}
+.iconHeaderGPS, .iconGPS {
+  background-image: resourceUrl('gpsFixes');
+}
+.iconHeaderWind, .iconWind {
+  background-image: resourceUrl('wind');
+}
+.iconHeaderVideo, .iconVideo {
+  background-image: resourceUrl('video');
+}
+.iconHeaderAudio, .iconAudio {
+  background-image: resourceUrl('audio');
+}
+
+.iconGPS, .iconWind, .iconVideo, .iconAudio {
+    line-height: 1.5em;
+    position: relative;
+    height:1.666666666666667rem;
+    display: inline-block;
+    padding-left: 2.333333333333333em;
+    background-size: 1.666666666666667rem 1.666666666666667rem;
+    background-position: left bottom;
+    background-repeat: no-repeat;
+}
+.iconWind {
+    margin-left: 0.666666666666667em;
+    border-left: 1px solid #ccc;
+}
+.iconVideo {
+    padding-top: 0.277777777777778em;
+}
+.iconAudio {
+    margin-left: 0.666666666666667em;
+    border-left: 1px solid #ccc;
+    padding-top: 0.277777777777778em;
 }

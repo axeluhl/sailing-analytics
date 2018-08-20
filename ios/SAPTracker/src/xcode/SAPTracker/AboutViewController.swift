@@ -28,36 +28,42 @@ class AboutViewController: UIViewController {
     
     // MARK: - Setup
     
-    private func setup() {
+    fileprivate func setup() {
+        setupButtons()
         setupLocalization()
         setupNavigationBar()
         setupVersion()
     }
     
-    private func setupLocalization() {
+    fileprivate func setupButtons() {
+        makeBlue(button: licenseInformationButton)
+        makeBlue(button: termsButton)
+    }
+    
+    fileprivate func setupLocalization() {
         navigationItem.title = Translation.AboutView.Title.String
         partnershipTextView.text = Translation.AboutView.PartnershipTextView.Text.String
-        licenseInformationButton.setTitle(Translation.LicenseView.Title.String, forState: .Normal)
-        termsButton.setTitle(Translation.AboutView.TermsButton.Title.String, forState: .Normal)
+        licenseInformationButton.setTitle(Translation.LicenseView.Title.String, for: .normal)
+        termsButton.setTitle(Translation.AboutView.TermsButton.Title.String, for: .normal)
         versionTitleLabel.text = Translation.AboutView.VersionTitleLabel.Text.String
     }
     
-    private func setupNavigationBar() {
+    fileprivate func setupNavigationBar() {
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: UIImageView(image: UIImage(named: "sap_logo")))
     }
     
-    private func setupVersion() {
-        versionLabel.text = NSBundle.mainBundle().infoDictionary?["CFBundleVersion"] as? String ?? "-"
+    fileprivate func setupVersion() {
+        versionLabel.text = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "-"
     }
     
     // MARK: - Actions
     
-    @IBAction func doneButtonTapped(sender: AnyObject) {
-        presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func doneButtonTapped(_ sender: Any) {
+        presentingViewController!.dismiss(animated: true, completion: nil)
     }
     
-    @IBAction func termsButtonTapped(sender: AnyObject) {
-        UIApplication.sharedApplication().openURL(URLs.Terms)
+    @IBAction func termsButtonTapped(_ sender: Any) {
+        UIApplication.shared.openURL(URLs.Terms)
     }
     
 }

@@ -1,6 +1,6 @@
 package com.sap.sailing.domain.common.impl;
 
-import com.sap.sailing.domain.common.Bearing;
+import com.sap.sse.common.Bearing;
 
 public class MeterPerSecondSpeedWithDegreeBearingImpl extends AbstractSpeedWithAbstractBearingImpl {
     private static final long serialVersionUID = -524654796500981303L;

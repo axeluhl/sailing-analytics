@@ -114,7 +114,7 @@ public class TestFunctionManagerAsFunctionProvider {
                 break;
             }
         }
-        final Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> reducedDimensionsMappedByLevel = server.getReducedDimensionsMappedByLevelFor(retrieverChain);
+        final Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> reducedDimensionsMappedByLevel = server.getReducedDimensionsMappedByLevelFor(retrieverChain).getReducedDimensions();
         assertThat(reducedDimensionsMappedByLevel, is(expectedDimensions));
     }
     

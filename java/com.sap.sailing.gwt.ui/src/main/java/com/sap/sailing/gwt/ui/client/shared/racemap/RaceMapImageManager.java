@@ -12,6 +12,7 @@ import com.google.gwt.maps.client.overlays.Marker;
 import com.google.gwt.maps.client.overlays.MarkerImage;
 import com.google.gwt.maps.client.overlays.MarkerOptions;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.resources.client.TextResource;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sse.common.Util;
 
@@ -24,19 +25,19 @@ public class RaceMapImageManager {
     /**
      * An arrow showing the combined wind depending on the wind direction 
      */
-    protected ImageTransformer combinedWindIconTransformer;
+    private final ImageTransformer combinedWindIconTransformer;
 
     /**
      * An arrow showing the true north direction
      */
-    protected ImageTransformer trueNorthIndicatorIconTransformer;
+    private final ImageTransformer trueNorthIndicatorIconTransformer;
 
     /**
      * An arrow showing the wind provided by a wind sensor on a boat 
      */
-    protected ImageTransformer windSensorIconTransformer;
+    private final ImageTransformer windSensorIconTransformer;
 
-    protected Map<Util.Pair<ManeuverType, ManeuverColor>, Marker> maneuverIconsForTypeAndDirectionIndicatingColor;
+    private final Map<Util.Pair<ManeuverType, ManeuverColor>, Marker> maneuverIconsForTypeAndDirectionIndicatingColor;
 
     private final RaceMapResources resources;
     
@@ -60,11 +61,11 @@ public class RaceMapImageManager {
             }
             Marker icon;
             for (ManeuverType maneuver : maneuvers) {
-                icon = createMarker(resources.maneuverMarkerRed());
-                maneuverIconsForTypeAndDirectionIndicatingColor
+                icon = createMarker(getResources().maneuverMarkerRed());
+                getManeuverIconsForTypeAndDirectionIndicatingColor()
                         .put(new Util.Pair<ManeuverType, ManeuverColor>(maneuver, ManeuverColor.RED), icon);
-                icon = createMarker(resources.maneuverMarkerGreen());
-                maneuverIconsForTypeAndDirectionIndicatingColor
+                icon = createMarker(getResources().maneuverMarkerGreen());
+                getManeuverIconsForTypeAndDirectionIndicatingColor()
                         .put(new Util.Pair<ManeuverType, ManeuverColor>(maneuver, ManeuverColor.GREEN), icon);
             }
         }
@@ -80,15 +81,27 @@ public class RaceMapImageManager {
         return marker;
     }
     
-    public ImageTransformer getTrueNorthIndicatorIconTransformer() {
+    ImageTransformer getTrueNorthIndicatorIconTransformer() {
         return trueNorthIndicatorIconTransformer;
     }
     
-    public ImageTransformer getCombinedWindIconTransformer() {
+    ImageTransformer getCombinedWindIconTransformer() {
         return combinedWindIconTransformer;
     }
 
-    public ImageTransformer getWindSensorIconTransformer() {
+    ImageTransformer getWindSensorIconTransformer() {
         return windSensorIconTransformer;
+    }
+    
+    TextResource getWindFinderLogo() {
+        return getResources().getWindFinderLogo();
+    }
+
+    Map<Util.Pair<ManeuverType, ManeuverColor>, Marker> getManeuverIconsForTypeAndDirectionIndicatingColor() {
+        return maneuverIconsForTypeAndDirectionIndicatingColor;
+    }
+
+    private RaceMapResources getResources() {
+        return resources;
     }
 }

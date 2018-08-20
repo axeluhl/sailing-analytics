@@ -23,12 +23,13 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceConfigurationDTO.RegattaConfigurationDTO.RacingProcedureConfigurationDTO;
+import com.sap.sse.common.Duration;
+import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurationDTO.RegattaConfigurationDTO> {
 
     private final AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
-
     private final StringMessages stringMessages;
     private final DeviceConfigurationDTO.RegattaConfigurationDTO originalConfiguration;
 
@@ -36,6 +37,7 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
 
     private ListBox racingProcedureListBox;
     private ListBox designerModeEntryListBox;
+    private IntegerBox protestTimeInMinutesTextBox;
 
     private DisclosurePanel rrs26DisclosurePanel;
     private CheckBox rrs26EnabledBox;
@@ -118,9 +120,10 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
     }
 
     private void setupGeneral() {
-        Grid grid = new Grid(2, 2);
+        Grid grid = new Grid(3, 2);
         setupCourseDesignerListBox(grid, 0);
         setupRacingProcedureListBox(grid, 1);
+        setupProtestTimeTextBox(grid, 2);
         contentPanel.add(grid);
     }
 
@@ -153,6 +156,14 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
         });
         grid.setWidget(gridRow, 0, new Label(stringMessages.courseDesignerMode()));
         grid.setWidget(gridRow, 1, designerModeEntryListBox);
+    }
+
+    private void setupProtestTimeTextBox(Grid grid, int gridRow) {
+        final Integer protestTimeDurationInMinutes = originalConfiguration.defaultProtestTimeDuration == null ? null :
+            (int) originalConfiguration.defaultProtestTimeDuration.asMinutes();
+        protestTimeInMinutesTextBox = createIntegerBox(protestTimeDurationInMinutes, 3);
+        grid.setWidget(gridRow, 0, new Label(stringMessages.protestTime()));
+        grid.setWidget(gridRow, 1, protestTimeInMinutesTextBox);
     }
 
     private ListBox setupClassFlagListBox(RacingProcedureConfigurationDTO config) {
@@ -345,6 +356,7 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
         if (originalConfiguration.gateStartConfiguration != null) {
             gateStartGolfDownBox.setValue(originalConfiguration.gateStartConfiguration.hasAdditionalGolfDownTime);
         }
+        
         grid.setWidget(0, 0, new Label(stringMessages.classFlag() + ":"));
         grid.setWidget(0, 1, gateStartClassFlagListBox);
         grid.setWidget(0, 2, createHelpImage(stringMessages.classFlagHelpText("Gate Start")));
@@ -500,6 +512,8 @@ public class RegattaConfigurationDialog extends DataEntryDialog<DeviceConfigurat
             CourseDesignerMode mode = CourseDesignerMode.valueOf(designerModeEntryListBox.getValue(index));
             result.defaultCourseDesignerMode = mode == CourseDesignerMode.UNKNOWN ? null : mode;
         }
+        result.defaultProtestTimeDuration = protestTimeInMinutesTextBox.getValue() == null ? null :
+            Duration.ONE_MINUTE.times(protestTimeInMinutesTextBox.getValue());
         if (rrs26EnabledBox.getValue()) {
             result.rrs26Configuration = new DeviceConfigurationDTO.RegattaConfigurationDTO.RRS26ConfigurationDTO();
             getRacingProcedureConfigurationResults(result.rrs26Configuration, rrs26ClassFlagListBox, rrs26RecallBox, rrs26ResultEntryBox);

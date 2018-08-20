@@ -1,0 +1,54 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+	<title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/regattas/{regattaname}/competitors/createandadd</h2>
+
+<b>Description:</b>
+<p>Creates a new competitor and registers it with the regatta. Competitor creation can be controlled by a number of
+parameter; defaults will be obtained from the authenticated user invoking the service.<br/>
+All slashes contained within the {regattaname} parameter must be replaced by "__" (double underscore).</p>
+<br/>
+<table>
+	<tr>
+		<td>Webservice Type:</td>
+		<td>POST</td>
+	</tr>
+	<tr>
+		<td>Output format:</td>
+		<td>The competitor as a JSON document</td>
+	</tr>
+	<tr>
+		<td>Mandatory parameters:</td>
+		<td>boatclass the name of the competitor's boat class</td>
+	</tr>
+	<tr>
+		<td>Optional parameters:</td>
+		<td>
+			<div>sailid the sail number to use</div>
+			<div>nationalityIOC three-letter IOC country code</div>
+			<div>timeontimefactor a double value telling the ToT / TMF / time-on-time factor for handicap racing</div>
+			<div>timeondistanceallowancepernauticalmileasmillis distance-based allowance in milliseconds for handicap racing (ToD)</div>
+			<div>searchtag a search tag for the competitor</div>
+		</td>
+	</tr>
+	<tr>
+		<td>Request method:</td>
+		<td>POST</td>
+	</tr>
+	<tr>
+		<td>Example:</td>
+		<td>curl -X POST -H "Authorization: Bearer KMTuXevrA0CYyM6O1W2E0QB9gVeP8tIpgjafJOvj/6A=" "http://127.0.0.1:8888/sailingserver/api/v1/regattas/Smartphone%20Tracking%20Test%2022.06/competitors/createandadd?boatclass=49er&sailid=GER+123&nationalityIOC=GER"</td>
+	</tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

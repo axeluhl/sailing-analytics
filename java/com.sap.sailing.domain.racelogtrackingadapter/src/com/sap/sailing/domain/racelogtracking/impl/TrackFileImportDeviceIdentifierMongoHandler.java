@@ -4,9 +4,9 @@ import java.util.UUID;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.persistence.racelog.tracking.DeviceIdentifierMongoHandler;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
 import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
 import com.sap.sse.common.TimePoint;
@@ -24,7 +24,7 @@ public class TrackFileImportDeviceIdentifierMongoHandler implements DeviceIdenti
         String trackName = (String) dbObject.get(Fields.TRACK_NAME.name());
         TimePoint uploaded = TrackFileImportDeviceIdentifierJsonHandler.
                 loadTimePoint(dbObject.get(Fields.UPLOADED_MILLIS.name()));
-        return new TrackFileImportDeviceIdentifierImpl(uuid, fileName, trackName, uploaded);
+        return new TrackFileImportDeviceIdentifierImpl(uuid, stringRepresentation, fileName, trackName, uploaded);
     }
 
     @Override

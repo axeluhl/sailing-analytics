@@ -10,11 +10,13 @@ import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.HasCell;
 import com.google.gwt.cell.client.ImageCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
+import com.google.gwt.cell.client.SafeImageCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -51,28 +53,28 @@ public class SortableExpandableColumnHeader extends Header<SafeHtml> {
     
     private static CellTemplates template = GWT.create(CellTemplates.class);
     
-    public SortableExpandableColumnHeader(String title, String iconURL, LeaderboardPanel leaderboardPanel,
+    public SortableExpandableColumnHeader(String title, SafeUri iconURL, LeaderboardPanel<?> leaderboardPanel,
     ExpandableSortableColumn<?> column, StringMessages stringConstants) {
         this(title, null, null, iconURL, leaderboardPanel, column, stringConstants);
     }
 
-    public SortableExpandableColumnHeader(String title, String tooltip, String iconURL,
-    LeaderboardPanel leaderboardPanel, ExpandableSortableColumn<?> column, StringMessages stringConstants) {
+    public SortableExpandableColumnHeader(String title, String tooltip, SafeUri iconURL,
+    LeaderboardPanel<?> leaderboardPanel, ExpandableSortableColumn<?> column, StringMessages stringConstants) {
         this(title, tooltip, null, iconURL, leaderboardPanel, column, stringConstants);
     }
 
-    public SortableExpandableColumnHeader(String title, String tooltip, String iconURL,
-    LeaderboardPanel leaderboardPanel, ExpandableSortableColumn<?> column, StringMessages stringConstants, String unit) {
+    public SortableExpandableColumnHeader(String title, String tooltip, SafeUri iconURL,
+    LeaderboardPanel<?> leaderboardPanel, ExpandableSortableColumn<?> column, StringMessages stringConstants, String unit) {
         this(title, tooltip, unit, iconURL, leaderboardPanel, column, stringConstants);
     }
 
     public SortableExpandableColumnHeader(String title, String tooltip, String unit,
-            String iconURL, LeaderboardPanel leaderboardPanel, ExpandableSortableColumn<?> column, StringMessages stringConstants) {
+            SafeUri iconURL, LeaderboardPanel<?> leaderboardPanel, ExpandableSortableColumn<?> column, StringMessages stringConstants) {
         super(constructCell(title, tooltip, unit, iconURL, column.isExpansionEnabled(), leaderboardPanel, column, stringConstants));
     }
 
     private static <T> Cell<SafeHtml> constructCell(final String title, final String tooltip, final String unit,
-            final String iconURL, boolean isExpansionEnabled, final LeaderboardPanel leaderboardPanel, final ExpandableSortableColumn<?> column, final StringMessages stringConstants) {
+            final SafeUri iconURL, boolean isExpansionEnabled, final LeaderboardPanel<?> leaderboardPanel, final ExpandableSortableColumn<?> column, final StringMessages stringConstants) {
         final List<HasCell<SafeHtml, ?>> cells = new ArrayList<HasCell<SafeHtml, ?>>(3);
         // if it's a medal race, add the cell rendering the medal image
         // add the cell rendering the expand/collapse button:
@@ -95,19 +97,19 @@ public class SortableExpandableColumnHeader extends Header<SafeHtml> {
             });
         }
         if (iconURL != null) {
-            cells.add(new HasCell<SafeHtml, String>() {
+            cells.add(new HasCell<SafeHtml, SafeUri>() {
                 @Override
-                public Cell<String> getCell() {
-                    return new ImageCell();
+                public Cell<SafeUri> getCell() {
+                    return new SafeImageCell();
                 }
 
                 @Override
-                public FieldUpdater<SafeHtml, String> getFieldUpdater() {
+                public FieldUpdater<SafeHtml, SafeUri> getFieldUpdater() {
                     return null; // no updates possible in a header cell
                 }
 
                 @Override
-                public String getValue(SafeHtml object) {
+                public SafeUri getValue(SafeHtml object) {
                     return iconURL;
                 }
             });

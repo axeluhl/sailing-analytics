@@ -11,11 +11,16 @@ import UIKit
 class GPSFixController: NSObject {
     
     struct NotificationType {
-        static let ModeChanged = "RegattaController.ModeChanged"
+        static let ModeChanged = "GPSFixController.ModeChanged"
+        static let SentGPSFixes = "GPSFixController.SentGPSFixes"
     }
     
     struct UserInfo {
         static let Mode = "Mode"
+        static let Sent = "Sent"
+        struct SentKey {
+            static let Count = "Count"
+        }
     }
     
     struct GPSFixSending {
@@ -39,126 +44,144 @@ class GPSFixController: NSObject {
         }
     }
     
-    let regatta: Regatta
+    weak var checkIn: CheckIn!
+    weak var coreDataManager: CoreDataManager!
     
-    init(regatta: Regatta) {
-        self.regatta = regatta
+    init(checkIn: CheckIn, coreDataManager: CoreDataManager) {
+        self.checkIn = checkIn
+        self.coreDataManager = coreDataManager
     }
     
     // MARK: - Send All
     
-    func sendAll(completion: (withSuccess: Bool) -> Void) {
-        sendAll({
-            completion(withSuccess: true)
+    func sendAll(completion: @escaping (_ withSuccess: Bool) -> Void) {
+        sendAll(success: {
+            completion(true)
         }) { (error, gpsFixesLeft) in
-            completion(withSuccess: false)
+            completion(false)
         }
     }
     
-    private func sendAll(success: () -> Void, failure: (error: RequestManager.Error, gpsFixesLeft: Set<GPSFix>) -> Void) {
-        sendAll(regatta.gpsFixes as? Set<GPSFix> ?? [], success: success, failure: failure)
+    fileprivate func sendAll(success: @escaping () -> Void, failure: @escaping (_ error: Error, _ gpsFixesLeft: Set<GPSFix>) -> Void) {
+        sendAll(gpsFixesLeft: checkIn.gpsFixes as? Set<GPSFix> ?? [], success: success, failure: failure)
     }
     
-    private func sendAll(gpsFixesLeft: Set<GPSFix>,
-                         success: () -> Void,
-                         failure: (error: RequestManager.Error, gpsFixesLeft: Set<GPSFix>) -> Void)
+    fileprivate func sendAll(
+        gpsFixesLeft: Set<GPSFix>,
+        success: @escaping () -> Void,
+        failure: @escaping (_ error: Error, _ gpsFixesLeft: Set<GPSFix>) -> Void)
     {
         guard gpsFixesLeft.count > 0 else { success(); return }
-        sendSlice(gpsFixesLeft, success: { (gpsFixesLeft) in
-            self.sendAll(gpsFixesLeft, success: success, failure: failure)
+        sendSlice(gpsFixes: gpsFixesLeft, success: { (gpsFixesLeft) in
+            self.sendAll(gpsFixesLeft: gpsFixesLeft, success: success, failure: failure)
         }) { (error, gpsFixesLeft) in
-            failure(error: error, gpsFixesLeft: gpsFixesLeft)
+            failure(error, gpsFixesLeft)
         }
     }
     
     // MARK: - Send Slice
     
-    func sendSlice(completion: (withSuccess: Bool) -> Void) {
-        sendSlice({ (gpsFixesLeft) in
-            completion(withSuccess: true)
+    func sendSlice(completion: @escaping (_ withSuccess: Bool) -> Void) {
+        sendSlice(success: { (gpsFixesLeft) in
+            completion(true)
         }) { (error, gpsFixesLeft) in
-            completion(withSuccess: false)
+            completion(false)
         }
     }
     
-    private func sendSlice(success: (gpsFixesLeft: Set<GPSFix>) -> Void, failure: (error: RequestManager.Error, gpsFixesLeft: Set<GPSFix>?) -> Void) {
-        sendSlice(regatta.gpsFixes as? Set<GPSFix> ?? [], success: success, failure: failure)
+    fileprivate func sendSlice(
+        success: @escaping (_ gpsFixesLeft: Set<GPSFix>) -> Void,
+        failure: @escaping (_ error: Error, _ gpsFixesLeft: Set<GPSFix>?) -> Void)
+    {
+        sendSlice(gpsFixes: checkIn.gpsFixes as? Set<GPSFix> ?? [], success: success, failure: failure)
     }
     
-    private func sendSlice(gpsFixes: Set<GPSFix>,
-                           success: (gpsFixesLeft: Set<GPSFix>) -> Void,
-                           failure: (error: RequestManager.Error, gpsFixesLeft: Set<GPSFix>) -> Void)
+    fileprivate func sendSlice(
+        gpsFixes: Set<GPSFix>,
+        success: @escaping (_ gpsFixesLeft: Set<GPSFix>) -> Void,
+        failure: @escaping (_ error: Error, _ gpsFixesLeft: Set<GPSFix>) -> Void)
     {
-        guard gpsFixes.count > 0 else { success(gpsFixesLeft: []); return }
-        let slicedGPSFixes = sliceGPSFixes(gpsFixes)
-        let gpsFixesLeft = gpsFixes.subtract(slicedGPSFixes)
-        sendSlice(slicedGPSFixes,
-                  gpsFixesLeft: gpsFixesLeft,
-                  success: success,
-                  failure: failure
+        guard gpsFixes.count > 0 else { success([]); return }
+        let slicedGPSFixes = sliceGPSFixes(gpsFixes: gpsFixes)
+        let gpsFixesLeft = gpsFixes.subtracting(slicedGPSFixes)
+        sendSlice(
+            gpsFixes: slicedGPSFixes,
+            gpsFixesLeft: gpsFixesLeft,
+            success: success,
+            failure: failure
         )
     }
     
-    private func sendSlice(gpsFixes: Array<GPSFix>,
-                           gpsFixesLeft: Set<GPSFix>,
-                           success: (gpsFixesLeft: Set<GPSFix>) -> Void,
-                           failure: (error: RequestManager.Error, gpsFixesLeft: Set<GPSFix>) -> Void)
+    fileprivate func sendSlice(
+        gpsFixes: Array<GPSFix>,
+        gpsFixesLeft: Set<GPSFix>,
+        success: @escaping (_ gpsFixesLeft: Set<GPSFix>) -> Void,
+        failure: @escaping (_ error: Error, _ gpsFixesLeft: Set<GPSFix>) -> Void)
     {
-        log("\(gpsFixes.count) GPS fixes will be sent and \(gpsFixesLeft.count) will be left")
-        requestManager.postGPSFixes(gpsFixes,
-                                    success: { () in self.sendSliceSuccess(gpsFixes, gpsFixesLeft: gpsFixesLeft, success: success) },
-                                    failure: { (error) in self.sendSliceFailure(error, gpsFixesLeft: gpsFixesLeft, failure: failure) }
-        )
+        log(info: "\(gpsFixes.count) GPS fixes will be sent and \(gpsFixesLeft.count) will be left")
+        checkInRequestManager.postGPSFixes(gpsFixes: gpsFixes, success: { () in
+            self.sendSliceSuccess(gpsFixes: gpsFixes, gpsFixesLeft: gpsFixesLeft, success: success)
+        }) { (error) in
+            self.sendSliceFailure(error: error, gpsFixesLeft: gpsFixesLeft, failure: failure)
+        }
     }
     
-    private func sendSliceSuccess(gpsFixes: Array<GPSFix>,
-                                  gpsFixesLeft: Set<GPSFix>,
-                                  success: (gpsFixesLeft: Set<GPSFix>) -> Void)
+    fileprivate func sendSliceSuccess(
+        gpsFixes: Array<GPSFix>,
+        gpsFixesLeft: Set<GPSFix>,
+        success: @escaping (_ gpsFixesLeft: Set<GPSFix>) -> Void)
     {
-        dispatch_async(dispatch_get_main_queue(), {
-            self.log("Sending \(gpsFixes.count) GPS fixes was successful")
-            self.postModeChangedNotification(BatteryManager.sharedManager.batterySaving ? .BatterySaving : .Online)
-            CoreDataManager.sharedManager.deleteObjects(gpsFixes)
-            CoreDataManager.sharedManager.saveContext()
-            self.log("\(gpsFixes.count) GPS fixes deleted")
-            success(gpsFixesLeft: gpsFixesLeft)
+        DispatchQueue.main.async(execute: {
+            self.log(info: "Sending \(gpsFixes.count) GPS fixes was successful")
+            self.postModeChangedNotification(mode: BatteryManager.sharedManager.batterySaving ? .BatterySaving : .Online)
+            self.postSentGPSFixes(count: gpsFixes.count)
+            self.coreDataManager.deleteObjects(objects: gpsFixes)
+            self.coreDataManager.saveContext()
+            self.log(info: "\(gpsFixes.count) GPS fixes deleted")
+            success(gpsFixesLeft)
         })
     }
     
-    private func sendSliceFailure(error: RequestManager.Error,
-                                  gpsFixesLeft: Set<GPSFix>,
-                                  failure: (error: RequestManager.Error, gpsFixesLeft: Set<GPSFix>) -> Void)
+    fileprivate func sendSliceFailure(
+        error: Error,
+        gpsFixesLeft: Set<GPSFix>,
+        failure: @escaping (_ error: Error, _ gpsFixesLeft: Set<GPSFix>) -> Void)
     {
-        dispatch_async(dispatch_get_main_queue(), {
-            self.log("Sending GPS fixes failed. \(error.title): \(error.message)")
-            self.postModeChangedNotification(AFNetworkReachabilityManager.sharedManager().reachable ? .Error : .Offline)
-            failure(error: error, gpsFixesLeft: gpsFixesLeft)
+        DispatchQueue.main.async(execute: {
+            self.log(info: "Sending GPS fixes failed: \(error.localizedDescription)")
+            self.postModeChangedNotification(mode: AFNetworkReachabilityManager.shared().isReachable ? .Error : .Offline)
+            failure(error, gpsFixesLeft)
         })
     }
     
     // MARK: - Notifications
     
-    private func postModeChangedNotification(mode: Mode) {
+    fileprivate func postModeChangedNotification(mode: Mode) {
         let userInfo = [UserInfo.Mode: mode.rawValue]
-        let notification = NSNotification(name: NotificationType.ModeChanged, object: self, userInfo: userInfo)
-        NSNotificationQueue.defaultQueue().enqueueNotification(notification, postingStyle: NSPostingStyle.PostASAP)
+        let notification = Notification(name: Notification.Name(rawValue: NotificationType.ModeChanged), object: self, userInfo: userInfo)
+        NotificationQueue.default.enqueue(notification, postingStyle: .asap)
     }
-    
+
+    fileprivate func postSentGPSFixes(count: Int) {
+        let userInfo = [UserInfo.Sent: [UserInfo.SentKey.Count: count]]
+        let notification = Notification(name: Notification.Name(rawValue: NotificationType.SentGPSFixes), object: self, userInfo: userInfo)
+        NotificationQueue.default.enqueue(notification, postingStyle: .asap)
+    }
+
     // MARK: - Properties
     
-    private lazy var requestManager: RequestManager = {
-        let requestManager = RequestManager(baseURLString: self.regatta.serverURL)
-        return requestManager
+    fileprivate lazy var checkInRequestManager: CheckInRequestManager = {
+        return CheckInRequestManager(baseURLString: self.checkIn.serverURL)
     }()
     
     // MARK: - Helper
     
-    private func log(info: String) {
-        logInfo("\(self.description)", info: info)
+    fileprivate func log(info: String) {
+        logInfo(name: "\(self.description)", info: info)
     }
     
-    private func sliceGPSFixes(gpsFixes: Set<GPSFix>) -> Array<GPSFix> {
-        return Array(gpsFixes.sort { (gpsFix1, gpsFix2) -> Bool in gpsFix1.timestamp < gpsFix2.timestamp }.prefix(GPSFixSending.SliceSize))
+    fileprivate func sliceGPSFixes(gpsFixes: Set<GPSFix>) -> Array<GPSFix> {
+        return Array(gpsFixes.sorted { (gpsFix1, gpsFix2) -> Bool in gpsFix1.timestamp < gpsFix2.timestamp }.prefix(GPSFixSending.SliceSize))
     }
     
 }

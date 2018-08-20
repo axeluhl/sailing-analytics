@@ -87,6 +87,16 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
         return getFirstFunction().getParameters();
     }
     
+    @Override
+    public boolean needsLocalizationParameters() {
+        for (final Function<?> function : getFunctions()) {
+            if (function.needsLocalizationParameters()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * @return the return type of the last function.
      */
@@ -159,7 +169,7 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
         Object result = functionsIterator.next().tryToInvoke(instance, parameterProvider);
         while (functionsIterator.hasNext()) {
             Function<?> function = functionsIterator.next();
-            result = function.tryToInvoke(result);
+            result = function.tryToInvoke(result, parameterProvider);
             if (result == null) {
                 return null;
             }
@@ -218,7 +228,7 @@ public class ConcatenatingCompoundFunction<ReturnType> extends AbstractFunction<
     
     @Override
     public String toString() {
-        return getSimpleName();
+        return getDeclaringType().getSimpleName() + "." + getSimpleName() + " : " + getReturnType().getSimpleName();
     }
 
     @Override

@@ -35,12 +35,12 @@ NEWGROUPS_FOR_CONTINUE=${NEWGROUPS}.continue
 
 # If we continue, don't download again
 if [ "$continue" != "1" ]; then
-  wget $WGET_QUIET -O - ${OLDSERVER}/sailingserver/api/v1/leaderboardgroups | sed -e 's/,/\n/g' -e 's/\[/\n/' -e 's/\]/\n/' -e 's/\"//g' | grep -v "^$" | sort >$OLDGROUPS
-  wget $WGET_QUIET -O - ${NEWSERVER}/sailingserver/api/v1/leaderboardgroups | sed -e 's/,/\n/g' -e 's/\[/\n/' -e 's/\]/\n/' -e 's/\"//g' | grep -v "^$" | sort >$NEWGROUPS
+  wget $WGET_QUIET -O - ${OLDSERVER}/sailingserver/api/v1/leaderboardgroups | sed -e 's/\",\"/\n/g' -e 's/\[/\n/' -e 's/\]/\n/' -e 's/\"//g' | grep -v "^$" | sort >$OLDGROUPS
+  wget $WGET_QUIET -O - ${NEWSERVER}/sailingserver/api/v1/leaderboardgroups | sed -e 's/\",\"/\n/g' -e 's/\[/\n/' -e 's/\]/\n/' -e 's/\"//g' | grep -v "^$" | sort >$NEWGROUPS
 fi
 
 download_and_fix_boatclasses () {
-    wget $WGET_QUIET -O - "$1/sailingserver/api/v1/leaderboardgroups/`echo $OLD_LB | sed -e 's/ /%20/g'`" | sed -e 's/\b470W\b/470/g' -e 's/\b470M\b/470/g' -e 's/\<505\>/5O5/g' -e 's/Laser Int\./Laser/g' -e 's/J-24/J\/24/g' -e 's/\([^ ]\)Radial/\1Laser Radial/g' -e 's/J80/J\/80/g' -e 's/12mR/12 Meter/g' -e 's/Extreme40/Extreme 40/g' -e 's/Drachen/Dragon Int\./g' -e 's/TORNADO/Tornado Catamaran/g' -e 's/Melges24/Melges 24/g' -e 's/RAD W/RADW/g' -e 's/B25/Platu 25/g' -e 's/Europe\([^ ]\)/Europe Int\.\1/g' -e 's/Silbernes Band/SILBERNESBAND/g' -e 's/Laser RAD/Laser Radial/g' -e 's/\<Folke\>/Folkboat/g' -e 's/\<HB\>/H-Boat/g' -e 's/\<F 18\>/Formula 18/g' -e 's/\<J 24\>/J\/24/g' -e 's/2\.4mR/2\.4 Meter/g' -e 's/\<OK\([^ ]\)/OK Dinghy\1/g' -e 's/SWAN\([^ ]\)/Swan 45\1/g' | python -m json.tool | sed -e 's/\("timepoint" *: *\)"[^"]*"/\1""/g' >"$2" 2>$WGET_ERR
+    wget $WGET_QUIET -O - "$1/sailingserver/api/v1/leaderboardgroups/`echo $OLD_LB | sed -e 's/ /%20/g'`" | python -m json.tool | grep -v "\"id\": \"[^\"]*\"" | grep -v "\"timepoint\": \"[^\"]*\"" >"$2" 2>$WGET_ERR
 }
 
 diff leaderboardgroups.old.sed leaderboardgroups.new.sed

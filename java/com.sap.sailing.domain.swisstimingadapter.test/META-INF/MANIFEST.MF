@@ -16,10 +16,11 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.persistence,
  com.sap.sailing.domain.tractracadapter,
  com.sap.sailing.domain.swisstimingadapter.persistence;bundle-version="1.0.0",
- org.junit4;bundle-version="4.8.2",
+ org.junit;bundle-version="4.8.2",
  org.hamcrest.core;bundle-version="1.1.0",
  com.sap.sse,
  com.sap.sse.common
 Bundle-ClassPath: resources/,
  .
 Import-Package: com.sap.sailing.server
+Automatic-Module-Name: com.sap.sailing.domain.swisstimingadapter.test

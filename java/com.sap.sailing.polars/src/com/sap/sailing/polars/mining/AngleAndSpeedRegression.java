@@ -8,25 +8,25 @@ import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
 
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.base.impl.SpeedWithBearingWithConfidenceImpl;
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.confidence.BearingWithConfidence;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.polars.impl.CubicEquation;
 import com.sap.sailing.polars.regression.IncrementalLeastSquares;
 import com.sap.sailing.polars.regression.impl.IncrementalAnyOrderLeastSquaresImpl;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 /**
- * This container has two regressions. One for boatSpeed over windSpeed and one for beatAngle over windSpeed
+ * This container has two regressions. One for boatSpeed over windSpeed and one for TWA (true wind angle) over windSpeed
  * estimations.<p>
  * 
  * It can return speed and angle for a given windSpeed and should only be used for restricted sets of input data. There
@@ -39,10 +39,27 @@ import com.sap.sse.common.Util.Pair;
 public class AngleAndSpeedRegression implements Serializable {
 
     private static final long serialVersionUID = 6343595388753945979L;
-    private final IncrementalLeastSquares speedRegression = new IncrementalAnyOrderLeastSquaresImpl(3, false);
-    private final IncrementalLeastSquares angleRegression = new IncrementalAnyOrderLeastSquaresImpl(3);
+    private final IncrementalLeastSquares speedRegression;
+    private final IncrementalLeastSquares angleRegression;
 
-    private double maxWindSpeedInKnots = -1;
+    private double maxWindSpeedInKnots;
+
+    public AngleAndSpeedRegression() {
+        speedRegression = new IncrementalAnyOrderLeastSquaresImpl(3, false);
+        angleRegression = new IncrementalAnyOrderLeastSquaresImpl(3);
+        maxWindSpeedInKnots = -1;
+    }
+
+    /**
+     * Constructor with parameters used by {@link AngleAndSpeedRegressionDeserializer} to deserialize regression data
+     * from remote server
+     */
+    public AngleAndSpeedRegression(double maxWindSpeedInKnots, IncrementalLeastSquares speedRegression,
+            IncrementalLeastSquares angleRegression) {
+        this.speedRegression = speedRegression;
+        this.angleRegression = angleRegression;
+        this.maxWindSpeedInKnots = maxWindSpeedInKnots;
+    }
 
     public void addData(WindWithConfidence<Pair<Position, TimePoint>> windSpeed,
             BearingWithConfidence<Void> angleToTheWind, SpeedWithBearingWithConfidence<TimePoint> boatSpeed) {
@@ -90,8 +107,7 @@ public class AngleAndSpeedRegression implements Serializable {
                 boolean angleFound;
                 try {
                     angle = angleRegression.getOrCreatePolynomialFunction().value(windSpeedCandidateInKnots);
-                    if ((tack == Tack.PORT && legType == LegType.UPWIND)
-                            || (tack == Tack.STARBOARD && legType == LegType.DOWNWIND)) {
+                    if (tack == Tack.PORT) {
                         angle = -angle;
                     }
                     angleFound = true;
@@ -116,4 +132,16 @@ public class AngleAndSpeedRegression implements Serializable {
         return angleRegression.getOrCreatePolynomialFunction();
     }
 
+    public IncrementalAnyOrderLeastSquaresImpl getSpeedRegression() {
+        return (IncrementalAnyOrderLeastSquaresImpl) speedRegression;
+    }
+
+    public IncrementalAnyOrderLeastSquaresImpl getAngleRegression() {
+        return (IncrementalAnyOrderLeastSquaresImpl) angleRegression;
+    }
+
+    public double getMaxWindSpeedInKnots() {
+        return maxWindSpeedInKnots;
+    }
+    
 }

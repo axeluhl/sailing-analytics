@@ -36,7 +36,7 @@ public class ExpeditionMessageParser implements UDPMessageParser<ExpeditionMessa
                 Map<Integer, Double> values = new HashMap<Integer, Double>();
                 String[] variablesAndValuesInterleaved = variableValuePairs.split(",");
                 long now = System.currentTimeMillis();
-                Long diff = receiver.getTimeStampOfLastMessageReceived().get(boatID);
+                Long diff = receiver.getLastKnownMessageDelayInMillis(boatID);
                 TimePoint defaultForMessageTimePoint;
                 if (diff != null) {
                     // compute a reasonable default for a time stamp in case message doesn't provide one
@@ -60,7 +60,7 @@ public class ExpeditionMessageParser implements UDPMessageParser<ExpeditionMessa
                 }
                 if (result.hasValue(ExpeditionMessage.ID_GPS_TIME)) {
                     // an original GPS time stamp; then remember the difference between now and the time stamp
-                    receiver.getTimeStampOfLastMessageReceived().put(boatID, now - result.getTimePoint().asMillis());
+                    receiver.updateLastKnownMessageDelay(boatID, now - result.getTimePoint().asMillis());
                 }
                 return result;
             } else {

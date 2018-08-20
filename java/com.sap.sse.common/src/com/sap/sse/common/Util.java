@@ -28,9 +28,9 @@ public class Util {
     
         private transient int hashCode;
     
-        @SuppressWarnings("unused")
         // required for some serialization frameworks such as GWT RPC
-        private Pair() {
+        @Deprecated
+        protected Pair() {
         }
 
         public Pair(A a, B b) {
@@ -146,6 +146,19 @@ public class Util {
         }
     }
     
+    /**
+     * To be replaced with java.util.function.Supplier when we can consistently use Java 8.
+     */
+    public interface Provider<T> {
+        T get();
+    }
+    
+    /**
+     * To be replaced with java.util.function.Function when we can consistently use Java 8.
+     */
+    public interface Function<I, O> {
+        O get(I in);
+    }
 
     /**
      * Adds all elements from <code>what</code> to <code>addTo</code> and returns <code>addTo</code> for chained use.
@@ -159,6 +172,28 @@ public class Util {
             }
         }
         return addTo;
+    }
+    
+    /**
+     * Retains all elements from <code>what</code> in <code>retainIn</code> and removes all others from
+     * {@code retainIn}.
+     * 
+     * @return <code>retainIn</code> for chained use.
+     * @throws NullPointerException in case {@code what} or {@code retainIn} are {@code null}
+     */
+    public static <T> Collection<T> retainAll(Iterable<? extends T> what, Collection<T> retainIn) {
+        if (what == null || retainIn == null) {
+            throw new NullPointerException();
+        } else {
+            if (what instanceof Collection) {
+                retainIn.retainAll((Collection<?>) what);
+            } else {
+                final Set<T> set = new HashSet<>(); // for quick contains
+                addAll(what, set);
+                retainIn.retainAll(set);
+            }
+            return retainIn;
+        }
     }
     
     /**
@@ -297,6 +332,24 @@ public class Util {
         }
         return list;
     }
+    
+    public static <T> Set<T> createSet(Iterable<T> iterable) {
+        Set<T> set = new HashSet<>();
+        Iterator<T> iterator = iterable.iterator();
+        while (iterator.hasNext()) {
+            set.add(iterator.next());
+        }
+        return set;
+    }
+    
+    public static interface Mapper<S, T> { T map(S s); }
+    public static <S, T> Iterable<T> map(Iterable<S> iterable, Mapper<S, T> mapper) {
+        List<T> result = new ArrayList<>();
+        for (final S s : iterable) {
+            result.add(mapper.map(s));
+        }
+        return result;
+    }
 
     /**
      * A null-safe check whether <code>t</code> is contained in <code>ts</code>. For <code>ts==null</code> the method
@@ -316,6 +369,26 @@ public class Util {
             }
             return false;
         }
+    }
+
+    /**
+     * Checks whether for all elements from {@code what} the method {@link #contains(Iterable, Object)}
+     * returns {@code true}. In case {@code what} is empty or {@code null}, {@code true} is returned if and only
+     * if {@code ts} is not {@code null}.
+     */
+    public static <T> boolean containsAll(Iterable<T> ts, Iterable<T> what) {
+        if (ts == null) {
+            return false;
+        }
+        if (what == null) {
+            return true;
+        }
+        for (final T w : what) {
+            if (!contains(ts, w)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static <T> boolean isEmpty(Iterable<T> ts) {
@@ -338,6 +411,12 @@ public class Util {
             }
         }
         return result;
+    }
+    
+    public static boolean equalsWithNull(String s1, String s2, boolean ignoreCase) {
+        final String s1LC = ignoreCase?s1==null?null:s1.toLowerCase():s1;
+        final String s2LC = ignoreCase?s2==null?null:s2.toLowerCase():s2;
+        return equalsWithNull(s1LC, s2LC);
     }
 
     /**
@@ -378,9 +457,27 @@ public class Util {
      * made. This is the caller's obligation.
      */
     public static <K, V> void addToValueSet(Map<K, Set<V>> map, K key, V value) {
+        addToValueSet(map, key, value, new ValueSetConstructor<V>() {
+            @Override
+            public Set<V> createSet() {
+                return new HashSet<V>();
+            }
+        });
+    }
+
+    public static interface ValueSetConstructor<T> {
+        Set<T> createSet();
+    }
+    
+    /**
+     * Ensures that a {@link Set Set&lt;V&gt;} is contained in {@code map} for {@code key} and
+     * then adds {@code value} to that set. No synchronization / concurrency control effort is
+     * made. This is the caller's obligation.
+     */
+    public static <K, V> void addToValueSet(Map<K, Set<V>> map, K key, V value, ValueSetConstructor<V> setConstructor) {
         Set<V> set = map.get(key);
         if (set == null) {
-            set = new HashSet<V>();
+            set = setConstructor.createSet();
             map.put(key, set);
         }
         set.add(value);
@@ -418,6 +515,15 @@ public class Util {
         return joinStrings(separator, Arrays.asList(strings));
     }
 
+    public static String join(String separator, Object... objects) {
+        final String[] strings = new String[objects.length];
+        int i=0;
+        for (Object o : objects) {
+            strings[i++] = o.toString();
+        }
+        return joinStrings(separator, Arrays.asList(strings));
+    }
+
     public static String joinStrings(String separator, Iterable<String> strings) {
         StringBuilder result = new StringBuilder();
         boolean first = true;
@@ -442,6 +548,99 @@ public class Util {
             strings[i] = nameds[i].getName();
         }
         return join(separator, strings);
+    }
+    
+    /**
+     * Splits {@code s} along whitespace (blank, tab, line feed, carriage return, form feed) characters that are not
+     * within a <em>phrase</em>. <em>Phrases</em> are enclosed by double quotes ({@code "}). To make a double quote or any other
+     * character part of a {@link String} in the result, a backslash ({@code \}) must precede the double quote as an escape character. With this,
+     * a {@code \} character or a whitespace character can become part of the split result by escaping it with a {@code \} character. If {@code s}'s last character
+     * happens to be the (unescaped) escape character it stands for itself.
+     * 
+     * A double quote {@code "} in the middle of an unquoted phrase marks the beginning of a new quoted phrase. When occurring unescaped in
+     * a quoted phrase, it marks the end of that quoted phrase, and a new unquoted phrase starts.
+     * <p>
+     * 
+     * The following example expressions all evaluate to {@code true}:
+     * 
+     * <pre>
+     * {@link #splitAlongWhitespaceRespectingDoubleQuotedPhrases(String) splitAlongWhitespaceRespectingDoubleQuotedPhrases("a b c")}.equals(Arrays.asList("a", "b", "c"))
+     * {@link #splitAlongWhitespaceRespectingDoubleQuotedPhrases(String) splitAlongWhitespaceRespectingDoubleQuotedPhrases("a \"b c\"")}.equals(Arrays.asList("a", "b c"))
+     * {@link #splitAlongWhitespaceRespectingDoubleQuotedPhrases(String) splitAlongWhitespaceRespectingDoubleQuotedPhrases("a \"b \\\" c\"")}.equals(Arrays.asList("a", "b \" c"))
+     * {@link #splitAlongWhitespaceRespectingDoubleQuotedPhrases(String) splitAlongWhitespaceRespectingDoubleQuotedPhrases("a \"bc\"de")}.equals(Arrays.asList("a", "bc", "de"))
+     * {@link #splitAlongWhitespaceRespectingDoubleQuotedPhrases(String) splitAlongWhitespaceRespectingDoubleQuotedPhrases("a\"bc\" de")}.equals(Arrays.asList("a", "bc", "de"))
+     * {@link #splitAlongWhitespaceRespectingDoubleQuotedPhrases(String) splitAlongWhitespaceRespectingDoubleQuotedPhrases("\\ ")}.equals(Arrays.asList(" "))
+     * {@link #splitAlongWhitespaceRespectingDoubleQuotedPhrases(String) splitAlongWhitespaceRespectingDoubleQuotedPhrases("  \\ \\\\ ")}.equals(Arrays.asList(" \\"))
+     * {@link #isEmpty(Iterable) isEmpty(splitAlongWhitespaceRespectingDoubleQuotedPhrases(" \n\t  "))
+     * </pre>
+     * 
+     * @return if {@code s==null}, then {@code null}, else a non-{@code null} but possibly empty sequence of {@link String} whose iteration order corresponds with
+     *         the occurrence of the split results, left to right, in {@code s}
+     */
+    public static Iterable<String> splitAlongWhitespaceRespectingDoubleQuotedPhrases(String s) {
+        final char ESCAPE_CHARACTER = '\\';
+        final List<String> result;
+        if (s == null) {
+            result = null;
+        } else {
+            result = new ArrayList<>();
+            boolean escaped = false;
+            StringBuilder phrase = null;
+            boolean inQuotedPhrase = false;
+            for (final char c : s.toCharArray()) {
+                if (escaped) {
+                    if (phrase == null) {
+                        phrase = new StringBuilder();
+                    }
+                    phrase.append(c);
+                    escaped = false;
+                } else if (c == ESCAPE_CHARACTER) {
+                    escaped = true; // don't append but mark for next character to be appended
+                } else if (c == '"') {
+                    if (inQuotedPhrase) {
+                        result.add(phrase.toString());
+                        inQuotedPhrase = false;
+                        phrase = null;
+                    } else {
+                        inQuotedPhrase = true;
+                        if (phrase != null) { // starts a quoted phrase in the middle of a running phrase
+                            result.add(phrase.toString());
+                        }
+                        phrase = new StringBuilder();
+                    }
+                } else {
+                    if (inQuotedPhrase) {
+                        phrase.append(c);
+                    } else {
+                        if (new String(new char[] {c}).matches("\\s")) { // whitespace
+                            if (phrase != null) {
+                                // phrase is terminated by this whitespace
+                                result.add(phrase.toString());
+                                phrase = null;
+                            } // else skip whitespace outside of phrases
+                        } else {
+                            if (phrase == null) {
+                                phrase = new StringBuilder();
+                            }
+                            phrase.append(c);
+                        }
+                    }
+                }
+            }
+            if (escaped) {
+                // escape character as last character stands for itself
+                if (phrase == null) {
+                    phrase = new StringBuilder();
+                }
+                phrase.append(ESCAPE_CHARACTER);
+            }
+            if (phrase != null) {
+                // a phrase is also terminated by the end of the string, also (lenient mode) if
+                // within an (unterminated) quoted phrase
+                result.add(phrase.toString());
+            }
+        }
+        return result;
     }
     
     /**
@@ -558,5 +757,105 @@ public class Util {
             }
         });
         return sortedCollection;
+    }
+    
+    /**
+     * Groups the given values by a key. The key is being extracted from the values by using the given {@link Function}. Inner
+     * Collections of the resulting Map are created using the given {@link Provider} instance.
+     * <br>
+     * Can be replaced with Java 8 Stream API in the future.
+     * 
+     * @param values the values to group
+     * @param mappingFunction function that extracts the group key from a value
+     * @param newCollectionProvider factory to create new instances of the inner collections
+     * @return a map containing all given values in inner collections grouped by a specific criteria
+     */
+    public static <K, V> Map<K, Iterable<V>> group(Iterable<V> values, Function<V, K> mappingFunction,
+            Provider<? extends Collection<V>> newCollectionProvider) {
+        final Map<K, Iterable<V>> result = new HashMap<>();
+        for (V value : values) {
+            final K key = mappingFunction.get(value);
+            Collection<V> groupValues = (Collection<V>) result.get(key);
+            if (groupValues == null) {
+                groupValues = newCollectionProvider.get();
+                result.put(key, groupValues);
+            }
+            groupValues.add(value);
+        }
+        return result;
+    }
+    
+    @SafeVarargs
+    public static <T extends Comparable<T>> T min(T... elements) {
+        return Collections.min(Arrays.asList(elements));
+    }
+
+    @SafeVarargs
+    public static <T extends Comparable<T>> T max(T... elements) {
+        return Collections.max(Arrays.asList(elements));
+    }
+
+    /**
+     * Checks if the given map is null, and if, returns an empty map.
+     */
+    public static <K, V> Map<K, V> nullToEmptyMap(Map<K, V> map) {
+        if (map == null) {
+            return Collections.emptyMap();
+        }
+        return map;
+    }
+
+    public static String toStringOrNull(Object toStringOrNull) {
+        if (toStringOrNull == null) {
+            return null;
+        }
+        return toStringOrNull.toString();
+    }
+    
+    /**
+     * Pads a numerical value with '0' characters up to a number of digits left and right of the decimal point. If the
+     * number of digits right of the decimal point is zero, no decimal point will be rendered in the result. The sum of
+     * digits requested must be greater than zero. Digits will appear left of the decimal point if required to represent
+     * the integer part of the {@code value}'s magnitude.
+     * 
+     * @param digitsLeftOfDecimal
+     *            a non-negative number; if zero,
+     * @param digitsRightOfDecimal
+     *            a non-negative number; if zero, no decimal point will appear at all
+     * @param round
+     *            whether or not the value shall be rounded to the number of decimals requested. If {@code false}, the
+     *            value will be displayed in a truncated form
+     */
+    public static String padPositiveValue(double value, int digitsLeftOfDecimal, int digitsRightOfDecimal, boolean round) {
+        assert value >= 0;
+        assert digitsLeftOfDecimal >= 0;
+        assert digitsRightOfDecimal >= 0;
+        final StringBuilder sb = new StringBuilder();
+        final double scalePow = Math.pow(10.0, digitsRightOfDecimal);
+        final double scaledValue = round?Math.round(value * scalePow):(value*scalePow);
+        double remainder = scaledValue;
+        if (digitsLeftOfDecimal==0 && scaledValue>=scalePow) {
+            sb.append(Math.round(remainder/scalePow));
+            remainder = remainder%scalePow;
+        }
+        for (int i=digitsLeftOfDecimal+digitsRightOfDecimal; i>0; i--) {
+            if (i==digitsRightOfDecimal) {
+                sb.append('.');
+            }
+            final double pow = Math.pow(10.0, i-1);
+            sb.append((int) (remainder/pow));
+            remainder = remainder % pow;
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Retains a copy of only the elements in {@link Iterable toFilter} that are contained in the specified
+     * {@link Iterable toRetain}. In other words, removes all elements of toFilter that are not contained in toRetain.
+     */
+    public static <T> Iterable<T> retainCopy(Iterable<T> toFilter, Iterable<T> toRetain) {
+        final List<T> returnValue = Util.asList(toFilter);
+        returnValue.retainAll(Util.asList(toRetain));
+        return returnValue;
     }
 }

@@ -9,7 +9,7 @@
     <!-- Website header-->
       <div class="{res.mediaCss.grid}">
         <div class="{local_res.css.siteheader_logo} {res.mediaCss.small2} {res.mediaCss.medium2} {res.mediaCss.large3} {res.mediaCss.columns}">
-          <a href="http://sapsponsorships.com">
+          <a href="https://www.sap.com/sponsorships">
             <img src="images/home/logo-small@2x.png" alt="{i18n.headerLogo}" class="{local_res.css.siteheader_logo_image}"></img>
             <p class="{local_res.css.siteheader_logo_title}">
               <ui:text from='{i18n.headerLogo}' />

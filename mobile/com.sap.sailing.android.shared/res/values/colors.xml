@@ -63,4 +63,9 @@
 
     <color name="normal_button">#f3f3f3</color>
     <color name="normal_button_pressed">#bfbfbf</color>
+
+    <color name="signal_great">#8ab54e</color>
+    <color name="signal_good">@color/sap_yellow</color>
+    <color name="signal_poor">@color/sap_red</color>
+    <color name="signal_none">#455B27</color>
 </resources>

@@ -8,10 +8,6 @@
   	<inherits name="com.sap.sse.security.ui.LoginPanel" />
   	<inherits name="com.sap.sailing.domain.SailingDomain" />
 	<inherits name="com.sap.sse.gwt.AdminConsole" />
-  	<!-- Fancy DateTimePicker (without the rest of Bootstrap!) -->
-	<!-- GWT-Bootstrap License: Apache License, Version 2.0 -->
-	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
-	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
   	
 	<!-- Highcharts API -->
 	<inherits name="com.sap.sse.gwt.Highcharts_Autoinject" />
@@ -23,7 +19,8 @@
 				
 	<entry-point class="com.sap.sailing.gwt.ui.client.media.popup.VideoPopupWindow" />
 
-        <inherits name='com.sap.sailing.gwt.common.SailingLocales' />
+    <!-- module containing locale configuration -->
+    <inherits name='com.sap.sailing.gwt.common.SailingLocalesAllPermutations' />
 	
 	<source path='client' />
 	<source path='actions'/>

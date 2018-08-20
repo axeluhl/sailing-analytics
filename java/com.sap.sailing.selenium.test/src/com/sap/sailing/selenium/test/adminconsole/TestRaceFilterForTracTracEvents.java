@@ -23,7 +23,6 @@ public class TestRaceFilterForTracTracEvents extends AbstractSeleniumTest {
      * <p>Test with no filter at all, which means we expect all TracTrac races are displayed for a given event.</p>
      */
     @Test
-    @SuppressWarnings("boxing")
     public void testNoFilter() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
@@ -35,7 +34,6 @@ public class TestRaceFilterForTracTracEvents extends AbstractSeleniumTest {
      * <p>Test with partial filter, which should show multiple races but not all.</p>
      */
     @Test
-    @SuppressWarnings("boxing")
     public void testPartialFilter() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
@@ -48,7 +46,6 @@ public class TestRaceFilterForTracTracEvents extends AbstractSeleniumTest {
      * <p>Test with exact filter which should match only 1 races.</p>
      */
     @Test
-    @SuppressWarnings("boxing")
     public void testExactFilter() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();
@@ -61,7 +58,6 @@ public class TestRaceFilterForTracTracEvents extends AbstractSeleniumTest {
      * <p>Test with filter which does not match anything.</p>
      */
     @Test
-    @SuppressWarnings("boxing")
     public void testNoneMatchingFilter() {
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         TracTracEventManagementPanelPO tracTracEvents = adminConsole.goToTracTracEvents();

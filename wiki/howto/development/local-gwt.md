@@ -37,3 +37,26 @@ There's a randomly occuring error, since the update to GWT 2.7, where an entry p
 Your source appears not to live underneath a subpackage called 'client'; no problem, but you'll need to use the &lt;source&gt; directive in your module to make it accessible
 </pre>
 The problem can be "solved" by retrying until it works.
+
+## i18n / permutations
+
+
+GWT generates one permutation per configured locale, in short:
+
+ * locale configuration is kept in the module descriptors
+ * localized text is stored in utf-8 property files
+ 
+The [online GWT i18n guide](http://www.gwtproject.org/doc/latest/DevGuideI18n.html) provides further/ detail information of how i18n is solved in GWT
+ 
+The build script uses the "-b" option to generate just one permutation. 
+This switch simply replaces all references to "AllPermutations" to "SinglePermutation" gwt module descriptors. 
+The "AllPermutations" gwt modules contain all locales that should be generated, while the "SinglePermutation" modules restrict the compilation to the default locale (en) and to the gecko browser.
+ 
+See:
+
+  * SailingLocalesAllPermutations.gwt.xml
+  * SailingLocalesSinglePermutation.gwt.xml
+  * com.sap.sailing.gwt.ui.client.StringMessages
+  * com.sap.sailing.gwt.ui/src/main/java/com/sap/sailing/gwt/ui/client/StringMessages.properties
+ 
+ 

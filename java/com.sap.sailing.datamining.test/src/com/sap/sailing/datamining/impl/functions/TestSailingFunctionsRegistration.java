@@ -18,10 +18,9 @@ import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.datamining.test.util.OpenFunctionManager;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Nationality;
-import com.sap.sailing.domain.base.Team;
 import com.sap.sailing.domain.common.Moving;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sse.common.Named;
+import com.sap.sse.common.Speed;
 import com.sap.sse.datamining.factories.FunctionFactory;
 import com.sap.sse.datamining.functions.Function;
 
@@ -61,13 +60,11 @@ public class TestSailingFunctionsRegistration {
         
         Method getCompetitorMethod = HasTrackedLegOfCompetitorContext.class.getMethod("getCompetitor", new Class<?>[0]);
         Function<?> getCompetitor = functionFactory.createMethodWrappingFunction(getCompetitorMethod);
-        Method getTeamMethod = Competitor.class.getMethod("getTeam", new Class<?>[0]);
-        Function<?> getTeam = functionFactory.createMethodWrappingFunction(getTeamMethod);
-        Method getNationalityMethod = Team.class.getMethod("getNationality", new Class<?>[0]);
+        Method getNationalityMethod = Competitor.class.getMethod("getNationality", new Class<?>[0]);
         Function<?> getNationality = functionFactory.createMethodWrappingFunction(getNationalityMethod);
         Method getAcronymMethod = Nationality.class.getMethod("getThreeLetterIOCAcronym", new Class<?>[0]);
         Function<?> getAcronym = functionFactory.createMethodWrappingFunction(getAcronymMethod);
-        expectedDimensions.add(functionFactory.createCompoundFunction(Arrays.asList(getCompetitor, getTeam, getNationality, getAcronym)));
+        expectedDimensions.add(functionFactory.createCompoundFunction(Arrays.asList(getCompetitor, getNationality, getAcronym)));
         
         return expectedDimensions;
     }

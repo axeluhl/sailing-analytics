@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.common.sensordata.BravoSensorDataMetadata;
 import com.sap.sailing.domain.common.tracking.impl.BravoFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
@@ -30,8 +31,8 @@ public class BravoFixTrackSerializationTest {
     
     @Before
     public void setUp() {
-        Competitor competitor = TrackBasedTest.createCompetitor("SAP Extreme Sailing Team");
-        track = new BravoFixTrackImpl<Competitor>(competitor, BravoFixTrack.TRACK_NAME);
+        CompetitorWithBoat competitor = TrackBasedTest.createCompetitorWithBoat("SAP Extreme Sailing Team");
+        track = new BravoFixTrackImpl<Competitor>(competitor, BravoFixTrack.TRACK_NAME, false);
     }
     
     @Test
@@ -116,8 +117,10 @@ public class BravoFixTrackSerializationTest {
         }
         
         private void addOrReplaceBravoFixToTrack(boolean replace) {
-            double[] fixData = new double[BravoSensorDataMetadata.INSTANCE.columnCount];
-            fixData[BravoSensorDataMetadata.INSTANCE.rideHeightColumn] = rideHeight;
+            Double[] fixData = new Double[BravoSensorDataMetadata.getTrackColumnCount()];
+            // fill the port/starboard columns as well because their minimum defines the true ride height
+            fixData[BravoSensorDataMetadata.RIDE_HEIGHT_PORT_HULL.getColumnIndex()] = rideHeight;
+            fixData[BravoSensorDataMetadata.RIDE_HEIGHT_STBD_HULL.getColumnIndex()] = rideHeight;
             track.add(new BravoFixImpl(new DoubleVectorFixImpl(timePoint, fixData)), replace);
         }
     }

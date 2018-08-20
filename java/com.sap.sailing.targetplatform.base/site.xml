@@ -9,9 +9,6 @@
    <feature url="features/target-jms/com.sap.sailing.target.jms_1.0.0.jar" id="com.sap.sailing.target.jms" version="1.0.0">
       <category name="RaceAnalysisTarget"/>
    </feature>
-   <feature url="features/target-jsp/com.sap.sailing.target.jsp_1.0.0.jar" id="com.sap.sailing.target.jsp" version="1.0.0">
-      <category name="RaceAnalysisTarget"/>
-   </feature>
    <feature url="features/target-jackson/com.sap.sailing.target.jackson_1.0.0.jar" id="com.sap.sailing.target.jackson" version="1.0.0">
       <category name="RaceAnalysisTarget"/>
    </feature>

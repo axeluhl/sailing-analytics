@@ -5,7 +5,6 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.sap.sailing.domain.swisstimingadapter.RaceType;
@@ -53,14 +52,4 @@ public class DomainFactoryTest {
         assertThat(raceType, is(notNullValue()));
         assertThat(raceType.getRaceCode(), is(OlympicRaceCode.UNKNOWN));
     }
-    
-    @Ignore
-    @Test
-    public void testCompetitorLookup() throws Exception {
-        before();
-        
-//        swissTimingDomainFactory.getOrCreateCompetitor(boatID, threeLetterIOCCode, name, boatClass);
-
-    }
-
 }

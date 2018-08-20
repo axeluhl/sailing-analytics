@@ -19,7 +19,7 @@ Require-Bundle: com.sap.sailing.server,
  com.sap.sailing.expeditionconnector,
  com.sap.sailing.domain.swisstimingadapter,
  org.json.simple;bundle-version="1.1.0",
- org.junit4;bundle-version="4.8.2",
+ org.junit;bundle-version="4.8.2",
  org.hamcrest;bundle-version="1.1.0",
  com.sap.sailing.polars,
  com.sap.sse.common,
@@ -31,3 +31,4 @@ Require-Bundle: com.sap.sailing.server,
  com.sap.sailing.server.gateway,
  javax.ws.rs,
  com.sap.sailing.server.testsupport
+Automatic-Module-Name: com.sap.sailing.server.replication.test

@@ -1,7 +1,6 @@
 package com.sap.sailing.simulator.util;
 
 public interface SailingSimulatorConstants {
-
     public static final char ModeFreestyle = 'f'; // mode: 'f'reestyle definition of race course
     public static final char ModeMeasured = 'm';  // mode: 'm'easured race course & tracks
     public static final char ModeEvent = 'e';     // mode: 'e'vent entry overlay with regatta areas
@@ -13,5 +12,4 @@ public interface SailingSimulatorConstants {
     public static final char EventKielerWoche = 'k';        // event: 'k'ieler woche
     public static final char EventTravemuenderWoche = 't';  // event: 't'ravemünder woche
     public static final char EventX40Cardiff = 'c';  // event: 'c'ardiff extreme sailing series
-    
 }

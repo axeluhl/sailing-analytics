@@ -1,10 +1,8 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.dom.client.Style.Unit;
@@ -17,273 +15,269 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.LeaderboardType;
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
+import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardContextDefinition;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveLifecycle;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPerspectiveOwnSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.MetaLeaderboardPerspectiveLifecycle;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiCompetitorLeaderboardChartLifecycle;
+import com.sap.sailing.gwt.settings.client.leaderboard.MultiCompetitorLeaderboardChartSettings;
+import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocationFactory;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
+import com.sap.sailing.gwt.ui.client.SailingServiceHelper;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings.RaceColumnSelectionStrategies;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
-import com.sap.sse.common.Util;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
-import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
-import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.gwt.client.shared.settings.OnSettingsLoadedCallback;
+import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
+import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorage;
+import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
-
-public class LeaderboardEntryPoint extends AbstractSailingEntryPoint {
+public class LeaderboardEntryPoint extends AbstractSailingEntryPoint implements ProvidesLeaderboardRouting {
     public static final long DEFAULT_REFRESH_INTERVAL_MILLIS = 3000l;
 
     private static final Logger logger = Logger.getLogger(LeaderboardEntryPoint.class.getName());
 
+    private StringMessages stringmessages = StringMessages.INSTANCE;
+    private UUID eventId;
     private String leaderboardName;
     private String leaderboardGroupName;
-    private LeaderboardType leaderboardType;
-    private EventDTO event;
-    
+    private AbstractLeaderboardDTO leaderboardDTO;
+    private LeaderboardContextDefinition leaderboardContextDefinition;
+
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
-        final boolean showRaceDetails = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_SHOW_RACE_DETAILS, false /* default*/);
-        final boolean embedded = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_EMBEDDED, false /* default*/); 
-        final boolean hideToolbar = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_HIDE_TOOLBAR, false /* default*/); 
-        final String eventIdAsString = GwtHttpRequestUtils.getStringParameter(LeaderboardUrlSettings.PARAM_EVENT_ID, null /* default*/);
-        final UUID eventId = eventIdAsString == null ? null : UUID.fromString(eventIdAsString);
 
-        leaderboardName = Window.Location.getParameter("name");
-        leaderboardGroupName = Window.Location.getParameter(LeaderboardUrlSettings.PARAM_LEADERBOARD_GROUP_NAME);
+        leaderboardContextDefinition = new SettingsToUrlSerializer()
+                .deserializeFromCurrentLocation(new LeaderboardContextDefinition());
+
+        eventId = leaderboardContextDefinition.getEventId();
+
+        leaderboardName = leaderboardContextDefinition.getLeaderboardName();
+        leaderboardGroupName = leaderboardContextDefinition.getLeaderboardGroupName();
 
         if (leaderboardName != null) {
-            final Runnable checkLeaderboardNameAndCreateUI = new Runnable() {
-                @Override
-                public void run() {
-                    sailingService.checkLeaderboardName(leaderboardName,
-                            new MarkedAsyncCallback<Util.Pair<String, LeaderboardType>>(
-                                    new AsyncCallback<Util.Pair<String, LeaderboardType>>() {
-                                        @Override
-                                        public void onSuccess(Util.Pair<String, LeaderboardType> leaderboardNameAndType) {
-                                            if (leaderboardNameAndType != null
-                                                    && leaderboardName.equals(leaderboardNameAndType.getA())) {
-                                                Window.setTitle(leaderboardName);
-                                                leaderboardType = leaderboardNameAndType.getB();
-                                                createUI(showRaceDetails, embedded, hideToolbar, event);
-                                            } else {
-                                                RootPanel.get().add(new Label(getStringMessages().noSuchLeaderboard()));
-                                            }
-                                        }
-
-                                        @Override
-                                        public void onFailure(Throwable t) {
-                                            reportError("Error trying to obtain list of leaderboard names: "
-                                                    + t.getMessage());
-                                        }
-                                    }));
-                }
-            };
             if (eventId == null) {
-                checkLeaderboardNameAndCreateUI.run(); // use null-initialized event field
+                checkLeaderboardNameAndCreateUI(); // use null-initialized event field
             } else {
-                sailingService.getEventById(eventId, /* withStatisticalData */false, new MarkedAsyncCallback<EventDTO>(
-                        new AsyncCallback<EventDTO>() {
+                // TODO it seems we do not really need the EventDTO. What's the intention of loading it? Should we visualize some information in the header?
+                getSailingService().getEventById(eventId, /* withStatisticalData */false,
+                        new MarkedAsyncCallback<EventDTO>(new AsyncCallback<EventDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                reportError("Error trying to obtain event "+eventId+": " + caught.getMessage());
+                                reportError("Error trying to obtain event " + eventId + ": " + caught.getMessage());
                             }
 
                             @Override
                             public void onSuccess(EventDTO result) {
-                                event = result;
-                                checkLeaderboardNameAndCreateUI.run();
+                                if(result != null) {
+                                    leaderboardDTO = result.getLeaderboardByName(leaderboardName);
+                                }
+                                checkLeaderboardNameAndCreateUI();
                             }
                         }));
             }
         } else {
             RootPanel.get().add(new Label(getStringMessages().noSuchLeaderboard()));
         }
-        final String zoomTo = Window.Location.getParameter(LeaderboardUrlSettings.PARAM_ZOOM_TO);
+    }
+    
+    private void checkLeaderboardNameAndCreateUI() {
+        if(leaderboardDTO == null) {
+            getSailingService().getLeaderboard(leaderboardName, 
+                       new MarkedAsyncCallback<StrippedLeaderboardDTO>(new AsyncCallback<StrippedLeaderboardDTO>() {
+                            @Override
+                            public void onSuccess(StrippedLeaderboardDTO leaderboardDTO) {
+                                if (leaderboardDTO != null) {
+                                    LeaderboardEntryPoint.this.leaderboardDTO = leaderboardDTO;
+                                    Window.setTitle(leaderboardName);
+                                    loadSettingsAndCreateUI();
+                                } else {
+                                    RootPanel.get().add(new Label(getStringMessages().noSuchLeaderboard()));
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Throwable t) {
+                                reportError("Error trying to obtain list of leaderboard names: " + t.getMessage());
+                            }
+                        }));
+        } else {
+            loadSettingsAndCreateUI();
+        }
+    }
+
+    private void loadSettingsAndCreateUI() {
+        long delayBetweenAutoAdvancesInMilliseconds = DEFAULT_REFRESH_INTERVAL_MILLIS;
+        final Timer timer = new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds);
+        
+        // make a single live request as the default but don't continue to play by default
+
+        final StoredSettingsLocation storageDefinition = StoredSettingsLocationFactory
+                .createStoredSettingsLocatorForLeaderboard(leaderboardContextDefinition);
+        getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName,
+                null, new AsyncCallback<Iterable<DetailType>>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        logger.log(Level.SEVERE, "Could not load detailtypes", caught);
+                    }
+
+                    @Override
+                    public void onSuccess(Iterable<DetailType> result) {
+                        final Function<String, SailingServiceAsync> sailingServiceFactory = leaderboardName -> SailingServiceHelper
+                                .createSailingServiceInstance(new ProvidesLeaderboardRouting() {
+                                    @Override
+                                    public String getLeaderboardName() {
+                                        return leaderboardName;
+                                    }
+                                });
+                        if (leaderboardDTO.type.isMetaLeaderboard()) {
+                            // overall
+                            MetaLeaderboardPerspectiveLifecycle rootComponentLifeCycle = new MetaLeaderboardPerspectiveLifecycle(
+                                    stringmessages, leaderboardDTO, result);
+                            ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> context = new ComponentContextWithSettingsStorage<>(
+                                    rootComponentLifeCycle, getUserService(), storageDefinition);
+                            context.getInitialSettings(
+                                    new OnSettingsLoadedCallback<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>>() {
+                                        @Override
+                                        public void onSuccess(
+                                                PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> defaultSettings) {
+                                            configureWithSettings(defaultSettings, timer);
+                                            final MetaLeaderboardViewer leaderboardViewer = new MetaLeaderboardViewer(
+                                                    null, context, rootComponentLifeCycle, defaultSettings,
+                                                    sailingServiceFactory, new AsyncActionsExecutor(), timer, null,
+                                                    leaderboardGroupName, leaderboardName, LeaderboardEntryPoint.this,
+                                                    getStringMessages(), getActualChartDetailType(defaultSettings),
+                                                    result);
+                                            createUi(leaderboardViewer, defaultSettings, timer,
+                                                    leaderboardContextDefinition);
+                                        }
+
+                                        @Override
+                                        public void onError(Throwable caught,
+                                                PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> fallbackDefaultSettings) {
+                                            logger.log(Level.WARNING,
+                                                    "Could not load initialsettings, useing default settings as fallback",
+                                                    caught);
+                                            onSuccess(fallbackDefaultSettings);
+                                        }
+                                    });
+                        } else {
+                            LeaderboardPerspectiveLifecycle rootComponentLifeCycle = new LeaderboardPerspectiveLifecycle(
+                                    StringMessages.INSTANCE, leaderboardDTO, result);
+                            ComponentContext<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>> context = new ComponentContextWithSettingsStorage<>(
+                                    rootComponentLifeCycle, getUserService(), storageDefinition);
+                            context.getInitialSettings(
+                                    new OnSettingsLoadedCallback<PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings>>() {
+                                        @Override
+                                        public void onSuccess(
+                                                PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> defaultSettings) {
+                                            getSailingService().getAvailableDetailTypesForLeaderboard(leaderboardName,
+                                                    null, new AsyncCallback<Iterable<DetailType>>() {
+
+                                                        @Override
+                                                        public void onFailure(Throwable caught) {
+                                                            logger.log(Level.SEVERE,
+                                                                    "Could not load available detail types",
+                                                                    caught);
+                                                        }
+
+                                                        @Override
+                                                        public void onSuccess(Iterable<DetailType> result) {
+                                                            configureWithSettings(defaultSettings, timer);
+                                                            final MultiRaceLeaderboardViewer leaderboardViewer = new MultiRaceLeaderboardViewer(
+                                                                    null, context, rootComponentLifeCycle,
+                                                                    defaultSettings, sailingServiceFactory,
+                                                                    new AsyncActionsExecutor(), timer,
+                                                                    leaderboardGroupName, leaderboardName,
+                                                                    LeaderboardEntryPoint.this, getStringMessages(),
+                                                                    getActualChartDetailType(defaultSettings), result);
+                                                            createUi(leaderboardViewer, defaultSettings, timer,
+                                                                    leaderboardContextDefinition);
+                                                        }
+                                                    });
+                                        }
+
+                                        @Override
+                                        public void onError(Throwable caught,
+                                                PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> fallbackDefaultSettings) {
+                                            logger.log(Level.WARNING,
+                                                    "Could not load initialsettings, useing default settings as fallback",
+                                                    caught);
+                                            onSuccess(fallbackDefaultSettings);
+                                        }
+                                    });
+                        }
+                    }
+                });
+        
+    }
+    
+    private DetailType getActualChartDetailType(
+            PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings) {
+        MultiCompetitorLeaderboardChartSettings chartSettings = settings
+                .findSettingsByComponentId(MultiCompetitorLeaderboardChartLifecycle.ID);
+        DetailType chartDetailType = chartSettings == null ? null : chartSettings.getDetailType();
+        
+        if (chartDetailType == DetailType.REGATTA_NET_POINTS_SUM) {
+            return chartDetailType;
+        }
+        return MultiCompetitorLeaderboardChartSettings.getDefaultDetailType(leaderboardDTO.type.isMetaLeaderboard());
+    }
+    
+    private void createUi(Widget leaderboardViewer,
+            PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings, Timer timer,
+            LeaderboardContextDefinition leaderboardContextSettings) {
+        LeaderboardPerspectiveOwnSettings ownSettings = settings.getPerspectiveOwnSettings();
+        
+        DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
+        RootLayoutPanel.get().add(mainPanel);
+        if (!ownSettings.isEmbedded()) {
+            // Hack to shorten the leaderboardName in case of overall leaderboards
+            String leaderboardDisplayName = leaderboardContextSettings.getDisplayName();
+            if (leaderboardDisplayName == null || leaderboardDisplayName.isEmpty()) {
+                leaderboardDisplayName = leaderboardName;
+            }
+            SAPSailingHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(leaderboardDisplayName);
+            new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
+            mainPanel.addNorth(header, 75);
+        }
+
+        mainPanel.add(new ScrollPanel(leaderboardViewer));
+    }
+
+    protected void configureWithSettings(PerspectiveCompositeSettings<LeaderboardPerspectiveOwnSettings> settings,
+            Timer timer) {
+        LeaderboardPerspectiveOwnSettings perspectiveOwnSettings = settings.getPerspectiveOwnSettings();
+        final String zoomTo = perspectiveOwnSettings.getZoomTo();
         if (zoomTo != null) {
-            RootPanel.getBodyElement().setAttribute(
-                    "style",
+            RootPanel.getBodyElement().setAttribute("style",
                     "zoom: " + zoomTo + ";-moz-transform: scale(" + zoomTo
                             + ");-moz-transform-origin: 0 0;-o-transform: scale(" + zoomTo
                             + ");-o-transform-origin: 0 0;-webkit-transform: scale(" + zoomTo
                             + ");-webkit-transform-origin: 0 0;");
         }
-    }
-    
-    private void createUI(boolean showRaceDetails, boolean embedded, boolean hideToolbar, EventDTO event) {
-        DockLayoutPanel mainPanel = new DockLayoutPanel(Unit.PX);
-        RootLayoutPanel.get().add(mainPanel);
-        if (!embedded) {
-            // Hack to shorten the leaderboardName in case of overall leaderboards
-            String leaderboardDisplayName = Window.Location.getParameter("displayName");
-            if (leaderboardDisplayName == null || leaderboardDisplayName.isEmpty()) {
-                leaderboardDisplayName = leaderboardName;
-            }
-            SAPSailingHeaderWithAuthentication header  = new SAPSailingHeaderWithAuthentication(leaderboardDisplayName);
-            new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
-            mainPanel.addNorth(header, 75);
-        }
-        ScrollPanel contentScrollPanel = new ScrollPanel();
-        long delayBetweenAutoAdvancesInMilliseconds = DEFAULT_REFRESH_INTERVAL_MILLIS;
-        final RegattaAndRaceIdentifier preselectedRace = getPreselectedRace(Window.Location.getParameterMap());
-        // make a single live request as the default but don't continue to play by default
-        Timer timer = new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds);
-        final LeaderboardSettings leaderboardSettings = createLeaderboardSettingsFromURLParameters(Window.Location.getParameterMap());
-        if (leaderboardSettings.getDelayBetweenAutoAdvancesInMilliseconds() != null) {
-            timer.setPlayMode(PlayModes.Live); // the leaderboard, viewed via the entry point, goes "live" and "playing" if an auto-refresh
-        } // interval has been specified
-        boolean autoExpandLastRaceColumn = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_AUTO_EXPAND_LAST_RACE_COLUMN, false);
-        boolean showCharts = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_SHOW_CHARTS, false);
-        boolean showOverallLeaderboard = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_SHOW_OVERALL_LEADERBOARD, false);
-        boolean showSeriesLeaderboards = GwtHttpRequestUtils.getBooleanParameter(LeaderboardUrlSettings.PARAM_SHOW_SERIES_LEADERBOARDS, false);
-        String chartDetailParam = GwtHttpRequestUtils.getStringParameter(LeaderboardUrlSettings.PARAM_CHART_DETAIL, null);
-        final DetailType chartDetailType;
-        if (chartDetailParam != null && (DetailType.REGATTA_RANK.name().equals(chartDetailParam) || DetailType.OVERALL_RANK.name().equals(chartDetailParam) || 
-                DetailType.REGATTA_NET_POINTS_SUM.name().equals(chartDetailParam))) {
-            chartDetailType = DetailType.valueOf(chartDetailParam);
-        } else {
-            chartDetailType = leaderboardType.isMetaLeaderboard() ?  DetailType.OVERALL_RANK : DetailType.REGATTA_RANK;
-        }
         
-        final Widget leaderboardViewer;
-        if (leaderboardType.isMetaLeaderboard()) {
-            leaderboardViewer = new MetaLeaderboardViewer(sailingService, new AsyncActionsExecutor(),
-                    timer, leaderboardSettings, null, preselectedRace, leaderboardGroupName, leaderboardName, this, getStringMessages(),
-                    userAgent, showRaceDetails, hideToolbar, autoExpandLastRaceColumn, showCharts, chartDetailType, showSeriesLeaderboards);
-        } else {
-            leaderboardViewer = new LeaderboardViewer(sailingService, new AsyncActionsExecutor(),
-                    timer, leaderboardSettings, preselectedRace, leaderboardGroupName, leaderboardName, this, getStringMessages(),
-                    userAgent, showRaceDetails, hideToolbar, autoExpandLastRaceColumn, showCharts, chartDetailType, showOverallLeaderboard);
+        if (perspectiveOwnSettings.isLifePlay()) {
+            timer.setPlayMode(PlayModes.Live); // the leaderboard, viewed via the entry point, goes "live" and "playing"
+                                               // if an auto-refresh
         }
-        contentScrollPanel.setWidget(leaderboardViewer);
-        mainPanel.add(contentScrollPanel);
-    }
-   
-    private RegattaAndRaceIdentifier getPreselectedRace(Map<String, List<String>> parameterMap) {
-        RegattaAndRaceIdentifier result;
-        if (parameterMap.containsKey(LeaderboardUrlSettings.PARAM_RACE_NAME) && parameterMap.get(LeaderboardUrlSettings.PARAM_RACE_NAME).size() == 1 &&
-                parameterMap.containsKey(LeaderboardUrlSettings.PARAM_REGATTA_NAME) && parameterMap.get(LeaderboardUrlSettings.PARAM_REGATTA_NAME).size() == 1) {
-            result = new RegattaNameAndRaceName(parameterMap.get(LeaderboardUrlSettings.PARAM_REGATTA_NAME).get(0), parameterMap.get(LeaderboardUrlSettings.PARAM_RACE_NAME).get(0));
-        } else {
-            result = null;
-        }
-        return result;
-    }
-
-    /**
-     * Constructs {@link LeaderboardSettings} from the URL parameters found
-     */
-    private LeaderboardSettings createLeaderboardSettingsFromURLParameters(Map<String, List<String>> parameterMap) {
-        LeaderboardSettings result;
-        Long refreshIntervalMillis = parameterMap.containsKey(LeaderboardUrlSettings.PARAM_REFRESH_INTERVAL_MILLIS) ? Long
-                .valueOf(parameterMap.get(LeaderboardUrlSettings.PARAM_REFRESH_INTERVAL_MILLIS).get(0)) : null;
-        RaceColumnSelectionStrategies raceColumnSelectionStrategy;
-        final Integer numberOfLastRacesToShow;
-        if (parameterMap.containsKey(LeaderboardUrlSettings.PARAM_NAME_LAST_N)) {
-            raceColumnSelectionStrategy = RaceColumnSelectionStrategies.LAST_N;
-            numberOfLastRacesToShow = Integer.valueOf(parameterMap.get(LeaderboardUrlSettings.PARAM_NAME_LAST_N).get(0));
-        } else if (isSmallWidth()) {
-            raceColumnSelectionStrategy = RaceColumnSelectionStrategies.LAST_N;
-            int width = Window.getClientWidth();
-            numberOfLastRacesToShow = (width-275)/40;
-        } else {
-            raceColumnSelectionStrategy = RaceColumnSelectionStrategies.EXPLICIT;
-            numberOfLastRacesToShow = null;
-        }
-        if (parameterMap.containsKey(LeaderboardUrlSettings.PARAM_RACE_NAME) || parameterMap.containsKey(LeaderboardUrlSettings.PARAM_RACE_DETAIL) ||
-                parameterMap.containsKey(LeaderboardUrlSettings.PARAM_LEG_DETAIL) || parameterMap.containsKey(LeaderboardUrlSettings.PARAM_MANEUVER_DETAIL) ||
-                parameterMap.containsKey(LeaderboardUrlSettings.PARAM_OVERALL_DETAIL) || parameterMap.containsKey(LeaderboardUrlSettings.PARAM_SHOW_ADDED_SCORES) ||
-                parameterMap.containsKey(LeaderboardUrlSettings.PARAM_SHOW_OVERALL_COLUMN_WITH_NUMBER_OF_RACES_COMPLETED) 
-                || parameterMap.containsKey(LeaderboardUrlSettings.PARAM_SHOW_COMPETITOR_NAME_COLUMNS)) {
-            List<DetailType> maneuverDetails = getDetailTypeListFromParamValue(parameterMap.get(LeaderboardUrlSettings.PARAM_MANEUVER_DETAIL));
-            List<DetailType> raceDetails = getDetailTypeListFromParamValue(parameterMap.get(LeaderboardUrlSettings.PARAM_RACE_DETAIL));
-            List<DetailType> overallDetails = getDetailTypeListFromParamValue(parameterMap.get(LeaderboardUrlSettings.PARAM_OVERALL_DETAIL));
-            if (overallDetails.isEmpty()) {
-                overallDetails = Collections.singletonList(DetailType.REGATTA_RANK);
-            }
-            List<DetailType> legDetails = getDetailTypeListFromParamValue(parameterMap.get(LeaderboardUrlSettings.PARAM_LEG_DETAIL));
-            List<String> namesOfRacesToShow = getStringListFromParamValue(parameterMap.get(LeaderboardUrlSettings.PARAM_RACE_NAME));
-            boolean showAddedScores = parameterMap.containsKey(LeaderboardUrlSettings.PARAM_SHOW_ADDED_SCORES) ? 
-                    Boolean.valueOf(parameterMap.get(LeaderboardUrlSettings.PARAM_SHOW_ADDED_SCORES).get(0)) : false;
-            boolean showOverallColumnWithNumberOfRacesSailedPerCompetitor = parameterMap.containsKey(LeaderboardUrlSettings.PARAM_SHOW_OVERALL_COLUMN_WITH_NUMBER_OF_RACES_COMPLETED) ?
-                    Boolean.valueOf(parameterMap.get(LeaderboardUrlSettings.PARAM_SHOW_OVERALL_COLUMN_WITH_NUMBER_OF_RACES_COMPLETED).get(0)) : false;
-            boolean autoExpandPreSelectedRace = parameterMap.containsKey(LeaderboardUrlSettings.PARAM_AUTO_EXPAND_PRESELECTED_RACE) ?
-                    Boolean.valueOf(parameterMap.get(LeaderboardUrlSettings.PARAM_AUTO_EXPAND_PRESELECTED_RACE).get(0)) :
-                        (namesOfRacesToShow != null && namesOfRacesToShow.size() == 1);
-           boolean showCompetitorSailIdColumn = true;
-           boolean showCompetitorFullNameColumn = true;
-           if (parameterMap.containsKey(LeaderboardUrlSettings.PARAM_SHOW_COMPETITOR_NAME_COLUMNS)) {
-                String value = parameterMap.get(LeaderboardUrlSettings.PARAM_SHOW_COMPETITOR_NAME_COLUMNS).get(0);
-                if (value.equals(LeaderboardUrlSettings.COMPETITOR_NAME_COLUMN_FULL_NAME)) {
-                    showCompetitorSailIdColumn = false;
-                } else if (value.equals(LeaderboardUrlSettings.COMPETITOR_NAME_COLUMN_SAIL_ID)) {
-                    showCompetitorFullNameColumn = false;
-                } else if (value.trim().equals("")) {
-                    showCompetitorFullNameColumn = false;
-                    showCompetitorSailIdColumn = false;
-                }
-            }
-            result = new LeaderboardSettings(maneuverDetails, legDetails, raceDetails, overallDetails,
-                    /* namesOfRaceColumnsToShow */ null,
-                    namesOfRacesToShow, numberOfLastRacesToShow,
-                    autoExpandPreSelectedRace, refreshIntervalMillis, /* sort by column */ (namesOfRacesToShow != null && !namesOfRacesToShow.isEmpty()) ?
-                                    namesOfRacesToShow.get(0) : null,
-                            /* ascending */ true, /* updateUponPlayStateChange */ raceDetails.isEmpty() && legDetails.isEmpty(),
-                                    raceColumnSelectionStrategy, showAddedScores, showOverallColumnWithNumberOfRacesSailedPerCompetitor,
-                                    showCompetitorSailIdColumn, showCompetitorFullNameColumn);
-
-        } else {
-            final List<DetailType> overallDetails = Collections.singletonList(DetailType.REGATTA_RANK);
-            result = LeaderboardSettingsFactory.getInstance().createNewDefaultSettings(null, null,
-                    /* overallDetails */ overallDetails, null,
-                    /* autoExpandFirstRace */false, refreshIntervalMillis, numberOfLastRacesToShow,
-                    raceColumnSelectionStrategy, /* showCompetitorSailIdColumns */ true, /*showCompetitorFullNameColumn*/ true);
-        }
-        return result;
-    }
-
-    private List<DetailType> getDetailTypeListFromParamValue(List<String> list) {
-        List<DetailType> result = new ArrayList<DetailType>();
-        if (list != null) {
-            for (String entry : list) {
-                try {
-                    result.add(DetailType.valueOf(entry));
-                } catch (IllegalArgumentException e) {
-                    logger.info("Can't find detail type "+entry+". Ignoring.");
-                }
-            }
-        }
-        return result;
-    }
-
-    private List<String> getStringListFromParamValue(List<String> list) {
-        List<String> result = new ArrayList<String>();
-        if (list != null) {
-            result.addAll(list);
-        }
-        return result;
     }
     
-    /**
-     * Assembles a dialog that other parts of the application can use to let the user parameterize a leaderboard and
-     * obtain the according URL for it. This keeps the "secrets" of which URL parameters have which meaning encapsulated
-     * within this class.<p>
-     * 
-     * The implementation by and large uses the {@link LeaderboardSettingsDialogComponent}'s widget and adds to it a checkbox
-     * for driving the {@link #LeaderboardUrlSettings.PARAM_EMBEDDED} field.
-     * 
-     * @see LeaderboardEntryPoint#getUrl(String, LeaderboardSettings, boolean)
-     */
-    public static DataEntryDialog<LeaderboardUrlSettings> getUrlConfigurationDialog(final AbstractLeaderboardDTO leaderboard,
-            final StringMessages stringMessages) {
-        return new LeaderboardUrlConfigurationDialog(stringMessages, leaderboard);
+    @Override
+    public String getLeaderboardName() {
+        return leaderboardName;
     }
-
 }

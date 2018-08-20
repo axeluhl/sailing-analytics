@@ -28,3 +28,4 @@ Require-Bundle: com.sap.sse.datamining.shared;bundle-version="1.0.0",
  com.sap.sse.datamining.annotations;bundle-version="1.0.0"
 Bundle-Activator: com.sap.sse.datamining.impl.DataMiningFrameworkActivator
 Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: com.sap.sse.datamining

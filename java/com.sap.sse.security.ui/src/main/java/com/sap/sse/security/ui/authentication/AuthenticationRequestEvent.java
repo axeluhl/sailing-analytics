@@ -9,10 +9,19 @@ import com.google.gwt.event.shared.GwtEvent;
 public class AuthenticationRequestEvent extends GwtEvent<AuthenticationRequestEvent.Handler> {
     public static final Type<Handler> TYPE = new Type<AuthenticationRequestEvent.Handler>();
 
+    private final AuthenticationPlaces requestedPlace;
+
+    public AuthenticationRequestEvent(AuthenticationPlaces requestedPlace) {
+        this.requestedPlace = requestedPlace;
+    }
+
     public interface Handler extends EventHandler {
         void onUserManagementRequestEvent(AuthenticationRequestEvent event);
     }
-    
+
+    public AuthenticationPlaces getRequestedPlace() {
+        return requestedPlace;
+    }
 
     @Override
     public Type<Handler> getAssociatedType() {

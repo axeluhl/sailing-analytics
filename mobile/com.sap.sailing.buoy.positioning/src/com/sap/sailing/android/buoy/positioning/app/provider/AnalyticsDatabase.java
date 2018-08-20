@@ -5,12 +5,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
-import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.CheckinUriColumns;
+import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.CheckinUri;
 import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.Leaderboard;
-import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.LeaderboardColumns;
 import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.Mark;
-import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.MarkColums;
-import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.MarkPingColumns;
+import com.sap.sailing.android.buoy.positioning.app.provider.AnalyticsContract.MarkPing;
 import com.sap.sailing.android.shared.logging.ExLog;
 
 public class AnalyticsDatabase extends SQLiteOpenHelper {
@@ -19,8 +17,7 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "sap_sailing_analytics_buoy.db";
 
-    private static final int VER_2015_RELEASE_1 = 1;
-    private static final int CUR_DATABASE_VERSION = VER_2015_RELEASE_1;
+    private static final int DATABASE_VERSION = 2;
 
     private final Context mContext;
 
@@ -40,51 +37,38 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
     }
 
     public AnalyticsDatabase(Context context) {
-        super(context, DATABASE_NAME, null, CUR_DATABASE_VERSION);
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
         mContext = context;
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE " + Tables.LEADERBOARDS + " (" + BaseColumns._ID
-                + " INTEGER PRIMARY KEY AUTOINCREMENT, " + LeaderboardColumns.LEADERBOARD_CHECKIN_DIGEST + " TEXT, "
-                + LeaderboardColumns.LEADERBOARD_SERVER_URL + " TEXT, " + LeaderboardColumns.LEADERBOARD_NAME
-                + " TEXT );");
+                + " INTEGER PRIMARY KEY AUTOINCREMENT, " + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " TEXT, "
+                + Leaderboard.LEADERBOARD_SERVER_URL + " TEXT, " + Leaderboard.LEADERBOARD_NAME
+                + " TEXT, " + Leaderboard.LEADERBOARD_DISPLAY_NAME + " TEXT );");
 
         db.execSQL("CREATE TABLE " + Tables.CHECKIN_URIS + " (" + BaseColumns._ID
-                + " INTEGER PRIMARY KEY AUTOINCREMENT, " + CheckinUriColumns.CHECKIN_URI_CHECKIN_DIGEST + " TEXT, "
-                + CheckinUriColumns.CHECKIN_URI_VALUE + " TEXT );");
+                + " INTEGER PRIMARY KEY AUTOINCREMENT, " + CheckinUri.CHECKIN_URI_CHECKIN_DIGEST + " TEXT, "
+                + CheckinUri.CHECKIN_URI_VALUE + " TEXT );");
 
         db.execSQL("CREATE TABLE " + Tables.MARKS + " (" + BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + MarkColums.MARK_CHECKIN_DIGEST + " TEXT," + MarkColums.MARK_ID + " INTEGER," + MarkColums.MARK_NAME
-                + " TEXT," + MarkColums.MARK_TYPE + " TEXT," + MarkColums.MARK_CLASS_NAME + " TEXT );");
+                + Mark.MARK_CHECKIN_DIGEST + " TEXT," + Mark.MARK_ID + " INTEGER," + Mark.MARK_NAME
+                + " TEXT," + Mark.MARK_TYPE + " TEXT," + Mark.MARK_CLASS_NAME + " TEXT );");
 
         db.execSQL("CREATE TABLE " + Tables.MARK_PINGS + " (" + BaseColumns._ID
-                + " INTEGER PRIMARY KEY AUTOINCREMENT, " + MarkPingColumns.MARK_ID + " INTEGER,"
-                + MarkPingColumns.MARK_PING_TIMESTAMP + " TEXT," + MarkPingColumns.MARK_PING_LATITUDE + " TEXT,"
-                + MarkPingColumns.MARK_PING_LONGITUDE + " TEXT," + MarkPingColumns.MARK_PING_ACCURACY + " REAL );");
+                + " INTEGER PRIMARY KEY AUTOINCREMENT, " + MarkPing.MARK_ID + " INTEGER,"
+                + MarkPing.MARK_PING_TIMESTAMP + " TEXT," + MarkPing.MARK_PING_LATITUDE + " TEXT,"
+                + MarkPing.MARK_PING_LONGITUDE + " TEXT," + MarkPing.MARK_PING_ACCURACY + " REAL );");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        ExLog.i(mContext, TAG, "onUpgrade() from " + oldVersion + " to " + newVersion);
+        ExLog.i(mContext, TAG, "onUpgrade() called with: db = [" + db + "], oldVersion = [" + oldVersion + "], newVersion = [" + newVersion + "]");
 
-        int version = oldVersion;
-
-        if (version != CUR_DATABASE_VERSION) {
-            ExLog.i(mContext, TAG, "Upgrade unsuccessful - destroying old data during upgrade");
-
-            db.execSQL("DROP TABLE IF EXISTS " + Tables.LEADERBOARDS);
-            db.execSQL("DROP TABLE IF EXISTS " + Tables.CHECKIN_URIS);
-            db.execSQL("DROP TABLE IF EXISTS " + Tables.MARKS);
-            db.execSQL("DROP TABLE IF EXISTS " + Tables.MARK_PINGS);
-
-            onCreate(db);
-            version = CUR_DATABASE_VERSION;
+        if (oldVersion < 2) {
+            db.execSQL("ALTER TABLE " + Tables.LEADERBOARDS + " ADD COLUMN " + Leaderboard.LEADERBOARD_DISPLAY_NAME + " TEXT");
+            db.execSQL("UPDATE " + Tables.LEADERBOARDS + " SET " + Leaderboard.LEADERBOARD_DISPLAY_NAME + " = " + Leaderboard.LEADERBOARD_NAME);
         }
-    }
-
-    public static void deleteDatabase(Context context) {
-        context.deleteDatabase(DATABASE_NAME);
     }
 }

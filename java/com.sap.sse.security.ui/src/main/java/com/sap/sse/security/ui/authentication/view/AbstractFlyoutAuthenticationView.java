@@ -33,9 +33,6 @@ public abstract class AbstractFlyoutAuthenticationView implements FlyoutAuthenti
     @UiField protected DivElement flyoverContentUi;
     @UiField SimplePanel contentContainerUi;
     
-    @UiField(provided = true)
-    final CommonSharedResources res;
-
     private Presenter presenter;
 
     /**
@@ -44,7 +41,6 @@ public abstract class AbstractFlyoutAuthenticationView implements FlyoutAuthenti
      * @param res the {@link CommonSharedResources} to use
      */
     public AbstractFlyoutAuthenticationView(CommonSharedResources res) {
-        this.res = res;
         LOCAL_CSS.ensureInjected();
         popupPanel.ensureDebugId("authenticationView");
         popupPanel.addStyleName(LOCAL_CSS.flyover());

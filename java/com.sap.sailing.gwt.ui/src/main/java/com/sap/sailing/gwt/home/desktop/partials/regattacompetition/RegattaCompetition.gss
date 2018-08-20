@@ -144,7 +144,7 @@
   display: inline-block;
   width: 1em;
   height: 0.866666666666667em;
-  background: url("images/home/launch-loupe.svg") no-repeat center center;
+  background: resourceUrl("launchLoupe") no-repeat center center;
   font-size: 1.466666666666667em;
   position: absolute;
   right: 0;
@@ -175,7 +175,7 @@
   background-color: #8a8a8a;
 }
 .fleet_races_raceplanned .fleet_races_race_name:after {
-  background: url("images/home/launch-play.svg") no-repeat center center;
+  background: resourceUrl("launchPlay") no-repeat center center;
 }
 .fleet_races_raceuntracked .fleet_races_race_name:after {
   display: none;

@@ -9,6 +9,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -21,7 +22,7 @@ import android.os.Bundle;
 
 public class MessagePersistenceManager {
 
-    private final static String TAG = MessagePersistenceManager.class.getName();
+    private final static String TAG = MessagePersistenceManager.class.getSimpleName();
 
     private final static String delayedMessagesFileName = "delayedMessages.txt";
 
@@ -136,30 +137,32 @@ public class MessagePersistenceManager {
 
     private Intent restorePersistedIntent(String persistedMessage) throws UnsupportedEncodingException {
         String[] lineParts = persistedMessage.split(";");
-        String url = lineParts[2];
-        String callbackPayload = lineParts[0];
-        String payload = URLDecoder.decode(lineParts[1], MessageSendingService.charsetName);
-        String callbackClassString = lineParts[3];
-
-        Class<? extends ServerReplyCallback> callbackClass = null;
-        if (!"null".equals(callbackClassString)) {
-            try {
-                @SuppressWarnings("unchecked")
-                Class<? extends ServerReplyCallback> tmp =
-                        (Class<? extends ServerReplyCallback>) Class.forName(callbackClassString);
-                callbackClass = tmp;
-            } catch (ClassNotFoundException e) {
-                ExLog.e(context, TAG, "Could not find class for callback name: " + callbackClassString);
+        final Intent messageIntent; 
+        if (lineParts == null || lineParts.length < 4) {
+            messageIntent = null;
+        } else {
+            String url = lineParts[2];
+            String callbackPayload = lineParts[0];
+            String payload = URLDecoder.decode(lineParts[1], MessageSendingService.charsetName);
+            String callbackClassString = lineParts[3];
+            Class<? extends ServerReplyCallback> callbackClass = null;
+            if (!"null".equals(callbackClassString)) {
+                try {
+                    @SuppressWarnings("unchecked")
+                    Class<? extends ServerReplyCallback> tmp =
+                            (Class<? extends ServerReplyCallback>) Class.forName(callbackClassString);
+                    callbackClass = tmp;
+                } catch (ClassNotFoundException e) {
+                    ExLog.e(context, TAG, "Could not find class for callback name: " + callbackClassString);
+                }
             }
-        }
-
-        // We are passing no message id, because we know it used to suppress message sending and
-        // we want this message to be sent.
-        Intent messageIntent = MessageSendingService.createMessageIntent(context, url, callbackPayload,
-                null, payload, /* isResend */ true, callbackClass);
-
-        if (messageRestorer != null) {
-            messageRestorer.restoreMessage(context, messageIntent);
+            // We are passing no message id, because we know it used to suppress message sending and
+            // we want this message to be sent.
+            messageIntent = MessageSendingService.createMessageIntent(context, url, callbackPayload,
+                    null, payload, /* isResend */ true, callbackClass);
+            if (messageRestorer != null) {
+                messageRestorer.restoreMessage(context, messageIntent);
+            }
         }
         return messageIntent;
     }
@@ -239,11 +242,20 @@ public class MessagePersistenceManager {
     public Intent restoreFirstDelayedIntentNotUnderwayAndMarkAsUnderway() throws UnsupportedEncodingException {
         Intent result = null;
         synchronized (persistedMessages) {
-            for (final String nextMessage : persistedMessages) {
+            for (final Iterator<String> nextMessageIter=persistedMessages.iterator(); nextMessageIter.hasNext(); ) {
+                final String nextMessage = nextMessageIter.next();
                 if (!messagesCurrentlyBeingResent.contains(nextMessage)) {
                     result = restorePersistedIntent(nextMessage);
-                    messagesCurrentlyBeingResent.add(nextMessage);
-                    break;
+                    if (result == null) {
+                        ExLog.w(context, TAG, "In method restoreFirstDelayedIntentNotUnderwayAndMarkAsUnderway: message "+
+                                    nextMessage+" was not restored into a valid Intent; dropping.");
+                        // couldn't be parsed into an intent; remove:
+                        nextMessageIter.remove();
+                        writePersistedMessagesToFile();
+                    } else {
+                        messagesCurrentlyBeingResent.add(nextMessage);
+                        break;
+                    }
                 }
             }
         }

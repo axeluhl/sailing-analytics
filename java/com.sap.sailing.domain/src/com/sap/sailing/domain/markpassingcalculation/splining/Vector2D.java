@@ -3,8 +3,8 @@ package com.sap.sailing.domain.markpassingcalculation.splining;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sse.common.Bearing;
 
 /**
  * A vector in the 2 dimensional plane that supports numerous vector operations.

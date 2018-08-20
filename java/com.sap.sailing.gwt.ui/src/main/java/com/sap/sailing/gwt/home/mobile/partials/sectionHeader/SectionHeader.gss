@@ -34,6 +34,7 @@
   margin: -1em 1em -1em 0;
   background-size: contain;
   background-position: center;
+  background-repeat: no-repeat;
 }
 .sectionheader_item_image_seperator {
   position: absolute;
@@ -62,6 +63,9 @@
   font-size: 0.866666666666667em;
   color: #0a0a0a;
 }
+.sectionheader_item, .sectionheader_item_title, .sectionheader_item_subtitle {
+  max-width: 100%;
+}
 .sectionheader_item_infotext {
   display: inline-block;
   vertical-align: middle;
@@ -69,13 +73,22 @@
   font-weight: 700;
   color: #008fcc;
 }
-img.sectionheader_item_arrow {
+.sectionheader_item_arrow {
   display: inline-block;
   vertical-align: middle;
   margin-left: 1em;
   height: 0.8em;
+  width: 0.8em;
+  background-size: 125%;
+  background-position: center;
+  background-image: resourceUrl('arrowDownGrey');
+  background-repeat: no-repeat;
+  -webkit-transform: rotate(270deg);
+     -moz-transform: rotate(270deg);
+      -ms-transform: rotate(270deg);
+          transform: rotate(270deg);
 }
-img.sectionheader_item_arrow.accordion {
+.sectionheader_item_arrow.accordion {
   -webkit-transform: rotate(180deg);
      -moz-transform: rotate(180deg);
       -ms-transform: rotate(180deg);
@@ -84,7 +97,7 @@ img.sectionheader_item_arrow.accordion {
     -moz-transition: -moz-transform 0.4s;
          transition: transform 0.4s;
 }
-img.sectionheader_item_arrow.accordion.collapsed {
+.sectionheader_item_arrow.accordion.collapsed {
   -webkit-transform: rotate(0deg);
      -moz-transform: rotate(0deg);
       -ms-transform: rotate(0deg);
@@ -108,12 +121,11 @@ img.sectionheader_item_arrow.accordion.collapsed {
   border: none;
   border-radius: 0;
   padding: 0.666666666666667em 2em 0.666666666666667em 1em;
-  background: url("images/mobile/filter.svg") 100% no-repeat transparent;
+  background: resourceUrl("filter") 100% no-repeat transparent;
   background-size: 1.333333333333333em;
 }
-.sectionheader_item_adjust_title {
-  margin-left: 4em;
-  margin-right: 2.5em;
+.sectionheader_item_adjust_title_left {
+  padding-left: 4em;
   position: absolute;
   top: 50%;
   -webkit-transform: translateY(-50%);
@@ -121,6 +133,9 @@ img.sectionheader_item_arrow.accordion.collapsed {
       -ms-transform: translateY(-50%);
           transform: translateY(-50%);
 }
-.sectionheader_item_adjust_title > h2 {
+.sectionheader_item_adjust_title_left > h2 {
 	display: inline;
+}
+.sectionheader_item_adjust_title_right {
+  padding-right: 2.5em;
 }

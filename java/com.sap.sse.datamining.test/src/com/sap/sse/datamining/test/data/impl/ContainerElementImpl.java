@@ -13,4 +13,9 @@ public class ContainerElementImpl implements ContainerElement {
         return name;
     }
 
+    @Override
+    public String getStringFromInt(int i) {
+        return ""+i;
+    }
+
 }

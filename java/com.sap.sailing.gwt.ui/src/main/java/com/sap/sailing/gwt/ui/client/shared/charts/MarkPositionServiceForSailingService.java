@@ -21,11 +21,6 @@ public class MarkPositionServiceForSailingService implements MarkPositionService
     }
 
     @Override
-    public void getMarkTracks(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, AsyncCallback<MarkTracksDTO> callback) {
-        sailingService.getMarkTracks(raceIdentifier.getLeaderboardName(), raceIdentifier.getRaceColumnName(), raceIdentifier.getFleetName(), callback);
-    }
-    
-    @Override
     public void getMarkTrack(LeaderboardNameRaceColumnNameAndFleetName raceIdentifier, String markIdAsString,
             AsyncCallback<MarkTrackDTO> callback) {
         sailingService.getMarkTrack(raceIdentifier.getLeaderboardName(), raceIdentifier.getRaceColumnName(), raceIdentifier.getFleetName(), markIdAsString, callback);

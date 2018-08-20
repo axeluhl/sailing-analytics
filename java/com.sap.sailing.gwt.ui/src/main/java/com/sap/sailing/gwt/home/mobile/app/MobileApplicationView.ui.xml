@@ -9,11 +9,16 @@
 	.mainContent {
 		height: 100%;
 	}
+    .subHeaderPanel>* {
+        padding: 0.5em 1em;
+        border-bottom: 1px solid #ccc;
+    }
 	</ui:style>
 
 	<g:HTMLPanel addStyleNames="{style.mainContent}">
 		<div class="{res.mainCss.wrapper}">
 			<s:header.Header ui:field="headerPanel" />
+			<g:SimplePanel ui:field="subHeaderPanel" addStyleNames="{style.subHeaderPanel}" />
 			<g:SimplePanel ui:field="mainContentPanel" />
 		</div>
 		<s:footer.Footer ui:field="footerPanel" />

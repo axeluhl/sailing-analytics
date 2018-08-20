@@ -1,0 +1,54 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+	<title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/regattas/{name}/addracecolumns</h2>
+
+<b>Description:</b>
+<p>Adds race columns to a series in a regatta. The number of races, the series to append to and the
+race column name prefix can be specified using optional parameters. By default, a single race column is
+added to the last series in the regatta, using "R" as the column name prefix, finding the first free
+number starting with the number of races already in the series.<br/>
+All slashes contained within the {name} parameter must be replaced by "__" (double underscore).</p>
+<br/>
+<table>
+	<tr>
+		<td>Webservice Type:</td>
+		<td>REST</td>
+	</tr>
+	<tr>
+		<td>Output format:</td>
+		<td>Json</td>
+	</tr>
+	<tr>
+		<td>Mandatory parameters:</td>
+		<td>None</td>
+	</tr>
+	<tr>
+		<td>Optional parameters:</td>
+		<td>
+			<div>numberofraces an integer specifying the number of races to add (default=1)</div>
+			<div>prefix the race column name prefix (default="R")</div>
+			<div>toseries name of the series to which to append; default is the last series in the regatta</div>
+		</td>
+	</tr>
+	<tr>
+		<td>Request method:</td>
+		<td>POST</td>
+	</tr>
+	<tr>
+		<td>Example:</td>
+		<td>curl -X POST -H "Authorization: Bearer w9YSIfr/Zf6a127SZDddkhdAtQuuv0Jm1PSXlo1Yvd0=" "http://dev.sapsailing.com/sailingserver/api/v1/regattas/BSW%202015%20-%20Rudern/addracecolumns"</td>
+	</tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

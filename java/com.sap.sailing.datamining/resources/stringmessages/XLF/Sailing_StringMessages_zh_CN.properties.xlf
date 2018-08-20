@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-	<file datatype="javapropertyresourcebundle" date="2016-11-23T14:54:06Z" original="/usr/sap/ljs/app/Converter_2566045106627533633/java/com.sap.sailing.datamining/resources/stringmessages/Sailing_StringMessages.properties" source-language="en" target-language="zh-CN">
+	<file datatype="javapropertyresourcebundle" date="2017-01-12T14:33:45Z" original="/usr/sap/ljs/app/Converter_2566045106627533633/java/com.sap.sailing.datamining/resources/stringmessages/Sailing_StringMessages.properties" source-language="en" target-language="zh-CN">
 		<header>
 			<skl>
 				<internal-file crc="f38aaa3e2ebfcee22c5187ca5b77bc00" form="base64">H4sIAAAAAAAAAIVWS28jKRC+8yu4jJQcRopn9qkVKznJ2vHKeci2Ntoj7i53o7TBApys59dvVdEP7Ew8F7rq4wOKetHLHUCpljQKHldgl1A4W4Zr2DgPaU6OroJcMyBuTYjaFrDy+hUaXN0BskPEg96CokHMoVoddqDwK0kQS22a2a2ij3zYb9fgxb+gvaKB2Aljfjv9oKNxVjcmHlQmi3HhnT1sVfsVC6h0jFq1X3Hj9j7A2INWSZQki2un402jQ1AkSRbFpAGIikex0AUoGnCH7Q6iic6rQeQNeK1Ygd4qGjLmEu9R1CtdZUtkAiWieEVdgl877UvygbHVrdtqYxcQvYFX8Dc1aiqjBbboHJnmAznv/I5VENOn5cT8d46GjM9Iwf3utX95Qucg89wCosmWl0xdQNg38UcGy0RLSx43mQd/dFPpNnKgk6EW9kg5b2Xi5P6ferff5Z6WjOSUfJYcTF7MHXN0eyLkF+EkRluLIXemu4DO7ZzcWz6Y92xsuYwebBXrmb0Gvceai4pg2eHSWNnNiOtNvFI3utmSNFJzU9VRauNJ/dKqaw/wDQj5qqZgYwMZ9JO6d3hFHXPwZzXxEOoM+UXh8c5WGfSrusPt5RvaRupvaqobnvi941YtMLpCxPlk40j9Y1yDZsjQY1/U3d57U6AbsI4brPJXWBbUfjpNsiovrrANhfiHHMk3jH28PKbP7BP4Avc+XYcu+3RKpWQ6t4CzlBeO18E1+wgLbV9Up0jSUsCoRb6LFvdNCtUm9j1zHJdRI6NvmdFJRiS2IhZSF36usQ2TSjmWdjomnLbptO3QqxPariBDx3Fi0F+Ur4p02o8RSZBIvfZx0yViUAmh/O2xnrXSxUvOYL2f/dtgiLJZ1vvZJ8D+HQ83xhfNEa2dkO0MWz3F2g2Pfu5CQC7bzZDEpprA4TlydNnUWE35oadToRNDXnyiY+dcU5eDfa40++3EWBPq3DqGZcKz62Cs80uQ+t7ya4hvALaPwNiW7QHfu5K8GLVhkZ//bE+8FLOAz2vxgu/tLMhW7K0Ymg737syg7BVKbX2ItH85JfOZXfdPQefXu1PSE07RVjSkVDz6T2jzru9njI43EXtcIrA8zN8aDwW96dimbQWq12UCqIBuocKeM5hEXhpMIk0868POGaziThDdy4WBVq3MUWfru+Qg+cPCYktP6yqZP5TVqjY+Ht6v4Lh+PVlAfeEN029I2XH5qm3UFbh9+MuWj5u5saA6nsyTN6dK5HLuGuqXVN10yp1uNlibNXCe0WuVCp0tiDXIGgm0jOQN136Dz9n3bfjwuJXZAvrDxlnnKEWQZIzC1aLiHkrd8M8US9xOxf+VN8i0cAoAAA==</internal-file>
@@ -83,8 +83,8 @@
 				<source>Team</source>
 				<target state="signed-off">团队</target>
 			</trans-unit>
-			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="CompetitorSearchTag" resname="CompetitorSearchTag">
-				<source>Competitor Search Tag</source>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="SearchTag" resname="SearchTag">
+				<source>Search Tag</source>
 				<target>参赛队搜索标记</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="LeaderboardSailingDomainRetrieverChain" resname="LeaderboardSailingDomainRetrieverChain">

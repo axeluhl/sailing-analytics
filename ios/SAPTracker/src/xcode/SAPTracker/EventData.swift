@@ -10,7 +10,7 @@ import UIKit
 
 class EventData: BaseData {
 
-    private struct Keys {
+    fileprivate struct Keys {
         static let EndDate = "endDate"
         static let ID = "id"
         static let ImageURLs = "imageURLs"

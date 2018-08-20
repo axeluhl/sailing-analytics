@@ -107,4 +107,12 @@ public final class RegattaRaceStatesSettings extends AbstractGenericSerializable
         visibleRegattas.setDefaultValues(regattaIds);
     }
 
+    public RegattaRaceStatesSettings createInstanceWithSettings(Iterable<UUID> visibleCourseAreas,
+            Iterable<String> visibleRegattas, boolean showOnlyRacesOfSameDay, boolean showOnlyCurrentlyRunningRaces) {
+        RegattaRaceStatesSettings newSettings = new RegattaRaceStatesSettings(null, visibleCourseAreas, null,
+                visibleRegattas, showOnlyRacesOfSameDay, showOnlyCurrentlyRunningRaces);
+        newSettings.visibleCourseAreas.setDefaultValues(this.visibleCourseAreas.getDefaultValues());
+        newSettings.visibleRegattas.setDefaultValues(this.visibleRegattas.getDefaultValues());
+        return newSettings;
+    }
 }

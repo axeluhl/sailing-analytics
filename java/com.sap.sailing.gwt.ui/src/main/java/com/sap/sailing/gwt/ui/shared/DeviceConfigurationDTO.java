@@ -6,6 +6,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.Flags;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sse.common.Duration;
 
 public class DeviceConfigurationDTO implements IsSerializable {
     
@@ -40,6 +41,7 @@ public class DeviceConfigurationDTO implements IsSerializable {
         }
         public RacingProcedureType defaultRacingProcedureType;
         public CourseDesignerMode defaultCourseDesignerMode;
+        public Duration defaultProtestTimeDuration;
         
         public RRS26ConfigurationDTO rrs26Configuration;
         public SWCStartConfigurationDTO swcStartConfiguration;

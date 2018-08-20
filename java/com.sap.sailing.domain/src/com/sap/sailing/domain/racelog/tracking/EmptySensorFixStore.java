@@ -1,10 +1,11 @@
 package com.sap.sailing.domain.racelog.tracking;
 
 import java.util.Map;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
@@ -42,6 +43,13 @@ public enum EmptySensorFixStore implements SensorFixStore {
     }
 
     @Override
+    public <FixT extends Timed> void loadFixes(Consumer<FixT> consumer, DeviceIdentifier deviceIdentifier,
+            TimePoint start, TimePoint end, boolean inclusive, BooleanSupplier isPreemptiveStopped,
+            Consumer<Double> progressReporter)
+            throws NoCorrespondingServiceRegisteredException, TransformationException {
+    }
+
+    @Override
     public <FixT extends Timed> void storeFix(DeviceIdentifier device, FixT fix) {
     }
 
@@ -52,5 +60,17 @@ public enum EmptySensorFixStore implements SensorFixStore {
     @Override
     public <FixT extends Timed> Map<DeviceIdentifier, FixT> getLastFix(Iterable<DeviceIdentifier> forDevices) {
         return null;
+    }
+
+    @Override
+    public <FixT extends Timed> boolean loadOldestFix(Consumer<FixT> consumer, DeviceIdentifier device,
+            TimeRange timeRangetoLoad) throws NoCorrespondingServiceRegisteredException, TransformationException {
+        return false;
+    }
+
+    @Override
+    public <FixT extends Timed> boolean loadYoungestFix(Consumer<FixT> consumer, DeviceIdentifier device,
+            TimeRange timeRangetoLoad) throws NoCorrespondingServiceRegisteredException, TransformationException {
+        return false;
     }
 }

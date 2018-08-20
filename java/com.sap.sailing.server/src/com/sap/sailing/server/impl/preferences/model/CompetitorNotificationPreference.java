@@ -1,7 +1,7 @@
 package com.sap.sailing.server.impl.preferences.model;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.BooleanSetting;
 
@@ -11,12 +11,12 @@ public class CompetitorNotificationPreference extends AbstractGenericSerializabl
     private transient CompetitorSetting competitor;
     private transient BooleanSetting notifyAboutResults;
 
-    public CompetitorNotificationPreference(CompetitorStore competitorStore) {
+    public CompetitorNotificationPreference(CompetitorAndBoatStore competitorStore) {
         competitor = new CompetitorSetting("competitor", this, competitorStore);
         notifyAboutResults = new BooleanSetting("notifyAboutResults", this, false);
     }
 
-    public CompetitorNotificationPreference(CompetitorStore competitorStore, Competitor competitor,
+    public CompetitorNotificationPreference(CompetitorAndBoatStore competitorStore, Competitor competitor,
             boolean notifyAboutResults) {
         this(competitorStore);
         this.competitor.setValue(competitor);

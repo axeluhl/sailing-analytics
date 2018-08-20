@@ -9,6 +9,7 @@ import com.sap.sailing.domain.base.configuration.procedures.RRS26Configuration;
 import com.sap.sailing.domain.base.configuration.procedures.SWCStartConfiguration;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sse.common.Duration;
 
 public class RegattaConfigurationImpl implements RegattaConfiguration {
 
@@ -16,6 +17,7 @@ public class RegattaConfigurationImpl implements RegattaConfiguration {
 
     private RacingProcedureType defaultRacingProcedureType;
     private CourseDesignerMode defaultCourseDesignerMode;
+    private Duration defaultProtestTimeDuration;
     
     private RRS26Configuration rrs26Configuration;
     private SWCStartConfiguration swcStartConfiguration;
@@ -40,6 +42,15 @@ public class RegattaConfigurationImpl implements RegattaConfiguration {
 
     public void setDefaultCourseDesignerMode(CourseDesignerMode mode) {
         defaultCourseDesignerMode = mode;
+    }
+
+    @Override
+    public Duration getDefaultProtestTimeDuration() {
+        return defaultProtestTimeDuration;
+    }
+
+    public void setDefaultProtestTimeDuration(Duration defaultProtestTimeDuration) {
+        this.defaultProtestTimeDuration = defaultProtestTimeDuration;
     }
 
     @Override
@@ -101,6 +112,7 @@ public class RegattaConfigurationImpl implements RegattaConfiguration {
         RegattaConfigurationImpl copy = new RegattaConfigurationImpl();
         copy.setDefaultRacingProcedureType(defaultRacingProcedureType);
         copy.setDefaultCourseDesignerMode(defaultCourseDesignerMode);
+        copy.setDefaultProtestTimeDuration(defaultProtestTimeDuration);
         copy.setRRS26Configuration(rrs26Configuration);
         copy.setSWCStartConfiguration(swcStartConfiguration);
         copy.setGateStartConfiguration(gateStartConfiguration);
@@ -119,6 +131,9 @@ public class RegattaConfigurationImpl implements RegattaConfiguration {
         }
         if (update.getDefaultRacingProcedureType() != null) {
             target.setDefaultRacingProcedureType(update.getDefaultRacingProcedureType());
+        }
+        if (update.getDefaultProtestTimeDuration() != null) {
+            target.setDefaultProtestTimeDuration(update.getDefaultProtestTimeDuration());
         }
         if (update.getRRS26Configuration() != null) {
             target.setRRS26Configuration(

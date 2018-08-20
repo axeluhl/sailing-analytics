@@ -6,7 +6,7 @@
 We distinguish two cases: adding a 3rd-party bundle to the target platform and adding a new development bundle as a Java project.
 
 ## Adding a Bundle to the Target Platform
-Add a New Library which can not be found in any SAP Repository
+* Add a New Library which can not be found in any SAP Repository
 * Check if the library is already OSGi-enabled (normally this means there is a MANIFEST.MF file in the META-INF folder of the JAR file containing valid OSGi metadata.
 * In case the library is not OSGi-enabled someone has to create such a OSGi-enabled version (ask the technical lead of the project)
 * Add the library to an appropriate target folder under plugins/ in the project com.sap.sailing.targetplatform.base (e.g. target-base)
@@ -98,38 +98,55 @@ TODO
 ## Adding a Column to the Leaderboard
 It is a typical request to have a new column with a new key figure added to the leaderboard structure. A number of things need to be considered to implement this.
 
-## Extending LeaderboardDTO Contents
+### Extending LeaderboardDTO Contents
 The content to be displayed by the LeaderboardPanel user interface component is transmitted from the server to the client using a LeaderboardDTO object. The class describes overall measures and data for the entire leaderboard, has overviews for each race as well as all detail figures for all legs. For example, the LeaderboardDTO object contains LeaderboardRowDTO objects, one for each competitor. Each such row object, in turn, contains LeaderboardEntryDTOs, one for each race column in the leaderboard. Those contain aggregates for the respective race/competitor as well as a list of LegEntryDTOs describing key figures for the competitors performance in each leg of the race.
 
 Depending on the level (overall, race, leg) at which to add a column, a corresponding field may need to be added to one of LeaderboardDTO, LeaderboardRowDTO, LeaderboardEntryDTO or LegEntryDTO. It may, however, at times also be possible to derive a new value from other values already fully contained in the LeaderboardDTO object. In such a case, no change is required to the LeaderboardDTO type hierarchy.
 
-## Filling LeaderboardDTO Extensions
+### Filling LeaderboardDTO Extensions
 The LeaderboardDTO objects are constructed in SailingServiceImpl.computeLeaderboardByName and its outbound call hierarchy. Looking at the existing code, it should become clear how to extend this. Usually, if really new measures are to be introduced, a corresponding extension to TrackedRace and its key implementation class TrackedRaceImpl becomes necessary where the new measures are computed, based on the raw tracking data and the various domain APIs available there.
 
 When a new measure is introduced such that computeLeaderboardByName needs to access data which may change over time, it is important to make sure that the leaderboard caches in LiveLeaderboardUpdater and LeaderboardDTOCache are invalidated accordingly if the data used by the computations introduced changes. For example, if the new figure depends on the structure of the leaderboard, the cache needs to be invalidated when the leaderboard's column layout changes. Fortunately, in this case, such an observer pattern already exists for the leaderboard caches and can be used to understand how such a pattern needs to be implemented.
 
-## Adding the Column Type
+### Adding the Column Type
 The LeaderboardPanel and its dependent components are the user interface components used to display the leaderboard. The underlying GWT component used to render the leaderboard is a CellTable with Column implementations for the various different column types. In a little "micro-framework" we support expandable columns (those with a "+" button in the header allowing the user to expand more details for that column), columns with CSS styles that travel with the column as the column moves to the right or the left in the table, as well as sortable columns. A special column base class exists to represent Double values. This column type displays a colored bar, symbolizing the relative value's magnitude, compared to the other values in the column.
 
 A column class is implemented as a subclass of SortableColumn. If the column is to display a numeric value where comparing between values makes sense, consider using a FormattedDoubleLegDetailColumn which displays a bar in the value's background, indicating the value's magnitude. To make this column type widely applicable, its constructor accepts a LegDetailField value which is responsible for computing or extracting the value to be displayed from a LeaderboardRowDTO object.
 
 A column which may itself have details should be implemented as a subclass of ExpandableSortableColumn, implementing the getDetailColumnMap method to specify the detail columns, as explained later in Adding to Parent Column's Detail Column Map.
 
-## Extending DetailType
+### Extending DetailType
 The enumeration type DetailType has a literal for each column type available. The literal describes the column's precision as a number of decimals (not used for non-numeric column types) and the default sorting order.
 
 To make the new DetailType literal displayable, DetailTypeFormatter.format needs to be extended by a corresponding case clause so that it supports the new literal.
 
-## Adding to List of Available Columns
+### Adding to List of Available Columns
 Mostly for the presentation in the leaderboard settings panel, the lists of available column types are maintained in class-level methods on LeaderboardPanel (getAvailableRaceDetailColumnTypes and getAvailableOverallDetailColumnTypes) ManeuverCountRaceColumn (getAvailableManeuverDetailColumnTypes) and LegColumn (getAvailableLegDetailColumnTypes). When adding a detail column to a parent column, the corresponding getAvailable...ColumnTypes method needs to be extended by returning the respective DetailsType literal so the column is offered in the settings panel.
 
-## Adding to Parent Column's Detail Column Map
+### Adding to Parent Column's Detail Column Map
 If the column added is supposed to be a detail of a parent column, the new column type needs to be returned by the parent column's getDetailColumnMap method. Check the LegColumn.getDetailColumnMap for details.
 
 **Discussion**
 The current approach to extending the leaderboard panel by another column is unnecessarily laborious and contains a number of redundancies. In particular, adding the column to both, the detail column map and the list of "available columns" only used by the settings seems highly redundant. When constructing a FormattedDoubleLegDetailColumn, the DetailType literal is used three times: once for the key of the detail column map, then for the precision and default sorting order. This should be simplified.
 
 Generally, there are too many special cases necessitating specific handling. Instead, it would be much better to have a homogeneous hierarchy of column types which automatically leads to the necessary results in getDetailColumnMap and the settings dialogs.
+
+## Adding new available information to the competitor chart
+
+The user can choose the information to be displayed in the competitor chart by choosing from the available information. 
+This information is a subset of the information available as defined in the DetailType enumeration.
+
+For a given information to be available for the Competitor-Chart, it must:
+
+* be defined as a enum element in DetailType
+* be added to the list of available items in the constructor of MultiCompetitorRaceChartSettingsComponent
+
+Further,
+
+* the DetailTypeFormatter is used to properly render the information label
+* the SailingService.getCompetitorRaceDataEntry(...) Method is used to load the specified information
+
+
 
 ## Adding a ScoreCorrectionProvider
 External regatta management systems can usually provide the official scores through some electronic interface. These interfaces come with a pull or push transport protocol which may range from direct TCP, HTTP to an FTP file transfer, and a content format which can be anything from a simple CSV format to a complex XML document structure. Using such interfaces results in the capability of importing the official scores as score corrections into our leader boards, thus aligning the tracking results and the official results.
@@ -235,3 +252,13 @@ Now connect an Eclipse debugger to that VM's port 8000. This may require an SSH 
 $ stop debugging
 $ exit
 </pre>
+
+## Upgrade TracTrac TracAPI Release
+
+The TracAPI is a Java API provided by TracTrac that allows applications to interact with TracTrac's tracking services. It comes as a binary JAR file, a JAR file containing the source code of the API interfaces, as well as a JAR file containing the Javadocs. The SAP Sailing Analytics wrap all of this in an OSGi bundle called ``com.tractrac.clientmodule``. We keep this bundle's version in sync with the TracAPI version. The version is encoded in the ``META-INF/MANIFEST.MF`` file as well as the Maven ``pom.xml`` file and needs to be adjusted during an upgrade.
+
+When TracTrac publishes a TracAPI upgrade, they usually notify us by e-mail and provide download locations for the new release pointing to TracTrac's Maven site, such as http://tracdev.dk/maven-sites-clients/releases/TracAPI-3.6.3.tar.gz. You will need credentials for that site.
+
+After downloading, extract the ``lib/TracAPI.jar`` and ``src/TracAPI-src.jar`` from the ``TracAPI-x.y.z.tar.gz`` to ``java/com.tractrac.clientmodule/lib``. Unpack the ``TracAPI-x.y.z-javadoc.tar.gz`` into ``java/com.tractrac.clientmodule/javadoc`` and adjust the versions in ``META-INF/MANIFEST.MF`` and ``pom.xml`` accordingly. Unpack the ``Readme.txt`` file from ``TracAPI-x.y.z.tar.gz`` to ``java/com.tractrac.clientmodule``. Optionally, unpack the sample sources from the ``src/com`` folder contained in ``TracAPI-x.y.z.tar.gz`` into ``java/com.tractrac.clientmodule/src``.
+
+For non-trivial upgrades use of a git branch and dedicated build job is recommended. Otherwise, committing and pushing to master with the ``SAPSailingAnalytics-master`` build job picking up and testing the changes should suffice.

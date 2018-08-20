@@ -16,3 +16,4 @@ Bundle-ClassPath: .
 Web-ContextPath: /sailingserver/test-support
 Import-Package: org.osgi.framework,
  org.osgi.util.tracker;version="1.5.1"
+Automatic-Module-Name: com.sap.sailing.server.gateway.test.support

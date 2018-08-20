@@ -6,3 +6,4 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: com.sap.sse.datamining.annotations
+Automatic-Module-Name: com.sap.sse.datamining.annotations

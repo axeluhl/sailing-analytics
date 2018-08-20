@@ -36,6 +36,6 @@ public class TracTracRaceRecordDTO extends AbstractRaceRecordDTO {
 
     @Override
     public String toString() {
-        return "Race "+getName()+" ("+trackingStartTime+" "+raceStatus+")";
+        return "Regatta "+regattaName+", race "+getName()+" ("+trackingStartTime+" "+raceStatus+")";
     }
 }

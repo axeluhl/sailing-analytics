@@ -1,0 +1,7 @@
+.dateTimeInput {
+    font-family: 'Open Sans', 'Arial Unicode MS', Arial, sans-serif;
+    font-size: small;
+    border: 1px solid #ccc;
+    border-top: 1px solid #999;
+    padding: 2.75px 3px;
+}

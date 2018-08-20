@@ -29,7 +29,7 @@ import com.sap.sailing.domain.igtimiadapter.datatypes.Fix;
 import com.sap.sailing.domain.igtimiadapter.shared.IgtimiWindReceiver;
 import com.sap.sailing.expeditionconnector.ExpeditionListener;
 import com.sap.sailing.expeditionconnector.ExpeditionMessage;
-import com.sap.sailing.expeditionconnector.ExpeditionWindTrackerFactory;
+import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
 import com.sap.sailing.expeditionconnector.UDPExpeditionReceiver;
 import com.sap.sailing.server.gateway.SailingServerHttpServlet;
 import com.sap.sse.common.Util;
@@ -148,8 +148,8 @@ public abstract class WindStatusServlet extends SailingServerHttpServlet impleme
     private boolean registerExpeditionListener() {
         boolean result = false;
         try {
-            ServiceTracker<ExpeditionWindTrackerFactory, ExpeditionWindTrackerFactory> expeditionServiceTracker = new ServiceTracker<ExpeditionWindTrackerFactory, ExpeditionWindTrackerFactory>(
-                    getContext(), ExpeditionWindTrackerFactory.class.getName(), null);
+            ServiceTracker<ExpeditionTrackerFactory, ExpeditionTrackerFactory> expeditionServiceTracker = new ServiceTracker<ExpeditionTrackerFactory, ExpeditionTrackerFactory>(
+                    getContext(), ExpeditionTrackerFactory.class.getName(), null);
             expeditionServiceTracker.open();
             UDPExpeditionReceiver receiver = expeditionServiceTracker.getService().getOrCreateWindReceiverOnDefaultPort();
             receiver.addListener(new ExpeditionListener() {

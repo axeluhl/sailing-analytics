@@ -16,7 +16,10 @@ import com.sap.sse.common.filter.Filter;
  * 
  */
 public abstract class CustomizableFilterablePanel<T> extends AbstractFilterablePanel<T> {
-
+    /**
+     * Does not add the default filter text box yet; use {@link #addDefaultTextBox()} to do so; you may
+     * add other widgets before the default text filter box.
+     */
     public CustomizableFilterablePanel(Iterable<T> all, AbstractCellTable<T> display, ListDataProvider<T> filtered) {
         super(all, display, filtered, /* show default filter text box */ false);
     }

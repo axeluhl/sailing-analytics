@@ -10,7 +10,6 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
-import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 import com.sap.sse.common.settings.serializer.AbstractSettingsToJsonSerializer;
 
 /**
@@ -20,21 +19,21 @@ import com.sap.sse.common.settings.serializer.AbstractSettingsToJsonSerializer;
  */
 public class SettingsToJsonSerializerGWT extends AbstractSettingsToJsonSerializer<JSONObject, JSONArray> {
     
-    public String serializeToString(GenericSerializableSettings settings) {
-        return serialize(settings).toString();
+    @Override
+    public String jsonObjectToString(JSONObject jsonObject) {
+        return jsonObject.toString();
     }
-
-    public <T extends GenericSerializableSettings> T deserialize(T settings, String jsonString) {
-        if (jsonString != null && !jsonString.isEmpty()) {
-            JSONValue jsonValue = JSONParser.parseStrict(jsonString);
-            if (jsonValue != null) {
-                JSONObject jsonObject = jsonValue.isObject();
-                if (jsonObject != null) {
-                    deserialize(settings, (JSONObject) jsonObject);
-                }
+    
+    @Override
+    public JSONObject parseStringToJsonObject(String jsonString) {
+        JSONValue jsonValue = JSONParser.parseStrict(jsonString);
+        if (jsonValue != null) {
+            JSONObject jsonObject = jsonValue.isObject();
+            if (jsonObject != null) {
+                return jsonObject;
             }
         }
-        return settings;
+        return null;
     }
     
     @Override
@@ -115,5 +114,10 @@ public class SettingsToJsonSerializerGWT extends AbstractSettingsToJsonSerialize
             result.add(fromJsonValue(jsonArray.get(i)));
         }
         return result;
+    }
+
+    @Override
+    public boolean isArray(Object jsonValue) {
+        return jsonValue instanceof JSONArray;
     }
 }

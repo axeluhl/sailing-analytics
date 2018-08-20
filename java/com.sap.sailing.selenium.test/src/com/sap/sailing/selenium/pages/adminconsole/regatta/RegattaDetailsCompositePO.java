@@ -1,15 +1,16 @@
 package com.sap.sailing.selenium.pages.adminconsole.regatta;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
-
 import com.sap.sailing.selenium.pages.PageArea;
-
 import com.sap.sailing.selenium.pages.adminconsole.ActionsHelper;
-
 import com.sap.sailing.selenium.pages.gwt.CellTablePO;
 import com.sap.sailing.selenium.pages.gwt.DataEntryPO;
 import com.sap.sailing.selenium.pages.gwt.GenericCellTablePO;
@@ -56,8 +57,7 @@ public class RegattaDetailsCompositePO extends PageArea {
         if (entry != null) {
             WebElement action = ActionsHelper.findEditAction(entry.getWebElement());
             action.click();
-            WebElement dialog = findElementBySeleniumId(this.driver, "SeriesEditDialog");
-            return new SeriesEditDialogPO(this.driver, dialog);
+            return waitForPO(SeriesEditDialogPO::new, "SeriesEditDialog", 5);
         }
         return null;
     }
@@ -67,8 +67,8 @@ public class RegattaDetailsCompositePO extends PageArea {
         if (entry != null) {
             WebElement removeAction = ActionsHelper.findRemoveAction(entry.getWebElement());
             removeAction.click();
-            // ActionsHelper.acceptAlert(this.driver);
-            // waitForAjaxRequests();
+             ActionsHelper.acceptAlert(this.driver);
+             waitForAjaxRequests();
         }
     }
     
@@ -85,5 +85,18 @@ public class RegattaDetailsCompositePO extends PageArea {
     
     private CellTablePO<DataEntryPO> getSeriesTable() {
         return new GenericCellTablePO<>(this.driver, this.seriesTable, DataEntryPO.class);
+    }
+    
+    public List<String> getRaceNames(String seriesName) {
+        final DataEntryPO seriesEntry = findSeries(seriesName);
+        final String racesColumnContent = seriesEntry.getColumnContent("Races");
+        if (racesColumnContent != null && ! racesColumnContent.isEmpty()) {
+            return Arrays.asList(racesColumnContent.split(", "));
+        }
+        return Collections.emptyList();
+    }
+    
+    public void waitForRacesOfSeries(final String series, final List<String> races) {
+        waitUntil(() -> getRaceNames(series).equals(races));
     }
 }

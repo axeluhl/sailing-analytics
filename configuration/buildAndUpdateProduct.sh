@@ -76,7 +76,7 @@ GWT_WORKERS=2
 MAVEN_SETTINGS="$PROJECT_HOME/configuration/maven-settings.xml"
 MAVEN_SETTINGS_PROXY="$PROJECT_HOME/configuration/maven-settings-proxy.xml"
 
-p2PluginRepository=$PROJECT_HOME/java/com.sap.$PROJECT_TYPE.feature.p2build/bin/products/raceanalysis.product.id/linux/gtk/$ARCH
+p2PluginRepository=$PROJECT_HOME/java/com.sap.$PROJECT_TYPE.feature.p2build/target/products/raceanalysis.product.id/linux/gtk/$ARCH
 
 HAS_OVERWRITTEN_TARGET=0
 TARGET_SERVER_NAME=$active_branch
@@ -272,7 +272,7 @@ if [[ "$@" == "release" ]]; then
     cp -v $p2PluginRepository/configuration/config.ini configuration/
 
     cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
-    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-selector.xml configuration/jetty/etc
+    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-http.xml configuration/jetty/etc
     cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deployer.xml configuration/jetty/etc
     cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
     cp -v $PROJECT_HOME/java/target/configuration/monitoring.properties configuration/
@@ -547,7 +547,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
             echo "INFO: Activating proxy profile"
             extra="$extra -P no-debug.with-proxy"
             MAVEN_SETTINGS=$MAVEN_SETTINGS_PROXY
-	    ANDROID_OPTIONS="--proxy-host proxy --proxy-port 8080"
+	    ANDROID_OPTIONS="--proxy_host=proxy --proxy_port=8080"
         else
             extra="$extra -P no-debug.without-proxy"
 	    ANDROID_OPTIONS=""
@@ -557,22 +557,23 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	if [ $gwtcompile -eq 1 ] && [[ "$clean" == "clean" ]]; then
 	    echo "INFO: Compiling GWT (rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.*)"
 	    rm -rf com.sap.$PROJECT_TYPE.gwt.ui/com.sap.$PROJECT_TYPE.*
-        GWT_XML_FILES=`find com.sap.$PROJECT_TYPE.gwt.ui/src/main/resources -name '*.gwt.xml'`
+        GWT_XML_FILES=`find . -name '*.gwt.xml'`
         if [ $onegwtpermutationonly -eq 1 ]; then
             echo "INFO: Patching .gwt.xml files such that only one GWT permutation needs to be compiled"
             for i in $GWT_XML_FILES; do
                 echo "INFO: Patching $i files such that only one GWT permutation needs to be compiled"
                 cp $i $i.bak
-                cat $i | sed -e 's/^[	 ]*<extend-property  *name="locale"  *values="de" *\/>/<!-- <extend-property name="locale" values="de"\/> --> <set-property name="user.agent" value="gecko1_8" \/>/' >$i.sed
-                mv $i.sed $i
+                cat $i | sed -e 's/AllPermutations/SinglePermutation/' >$i.sed
+                mv $i.sed $i                
             done
         else
             echo "INFO: Patching .gwt.xml files such that all GWT permutations are compiled"
             for i in $GWT_XML_FILES; do
                 echo "INFO: Patching $i files such that all GWT permutations are compiled"
                 cp $i $i.bak
-                cat $i | sed -e 's/<!-- <extend-property  *name="locale"  *values="de" *\/> --> <set-property name="user.agent" value="gecko1_8" \/>/<extend-property name="locale" values="de"\/>/' >$i.sed
+                cat $i | sed -e 's/SinglePermutation/AllPermutations/' >$i.sed
                 mv $i.sed $i
+                
             done
         fi
 
@@ -628,11 +629,14 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo "ANDROID_HOME=$ANDROID_HOME"
         PATH=$PATH:$ANDROID_HOME/tools
         PATH=$PATH:$ANDROID_HOME/platform-tools
-        ANDROID="$ANDROID_HOME/tools/android"
-        if [ \! -x "$ANDROID" ]; then
-            ANDROID="$ANDROID_HOME/tools/android.bat"
+        SDK_MANAGER="$ANDROID_HOME/tools/bin/sdkmanager"
+        if [ \! -x "$SDK_MANAGER" ]; then
+            SDK_MANAGER="$ANDROID_HOME/tools/bin/sdkmanager.bat"
         fi
         
+	# Uncomment the following line for testing an artifact stages in the SAP-central Nexus system:
+        # mobile_extra="-P -with-not-android-relevant -P with-mobile -P use-staged-third-party-artifacts -Dmaven.repo.local=${TMP}/temp_maven_repo"
+	# Use the following line for regular builds with no staged Nexus artifacts:
         mobile_extra="-P -with-not-android-relevant -P with-mobile"
         
         if [ $testing -eq 0 ]; then
@@ -661,18 +665,16 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         TEST_API=18
         ANDROID_ABI=armeabi-v7a
         AVD_NAME="androidTest-${NOW}"
-        echo "Updating Android SDK (tools)..." | tee -a $START_DIR/build.log
-        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter tools --no-ui --force --all > /dev/null
-        echo "Updating Android SDK (platform-tools)..." | tee -a $START_DIR/build.log
-        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter platform-tools --no-ui --force --all > /dev/null
+        echo "Updating Android SDK..." | tee -a $START_DIR/build.log
+        "$SDK_MANAGER" --update $ANDROID_OPTIONS
         echo "Updating Android SDK (build-tools-${BUILD_TOOLS})..." | tee -a $START_DIR/build.log
-        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter build-tools-${BUILD_TOOLS} --no-ui --force --all > /dev/null
+        "$SDK_MANAGER" $ANDROID_OPTIONS "build-tools;${BUILD_TOOLS}"
         echo "Updating Android SDK (android-${TARGET_API})..." | tee -a $START_DIR/build.log
-        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter android-${TARGET_API} --no-ui --force --all > /dev/null
+        "$SDK_MANAGER" $ANDROID_OPTIONS "platforms;android-${TARGET_API}"
         echo "Updating Android SDK (extra-android-m2repository)..." | tee -a $START_DIR/build.log
-        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter extra-android-m2repository --no-ui --force --all > /dev/null
+        "$SDK_MANAGER" $ANDROID_OPTIONS "extras;android;m2repository"
         echo "Updating Android SDK (extra-google-m2repository)..." | tee -a $START_DIR/build.log
-        echo yes | "$ANDROID" update sdk $ANDROID_OPTIONS --filter extra-google-m2repository --no-ui --force --all > /dev/null
+        "$SDK_MANAGER" $ANDROID_OPTIONS "extras;google;m2repository"
 
         echo "Using following command for apps build: mvn $mobile_extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
         echo "Maven version used: `mvn --version`"
@@ -822,7 +824,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     # overwrite configurations that should never be customized and belong to the build
     cp -v $p2PluginRepository/configuration/config.ini configuration/
     cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml configuration/jetty/etc
-    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-selector.xml configuration/jetty/etc
+    cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-http.xml configuration/jetty/etc
     cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deployer.xml configuration/jetty/etc
     cp -v $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties configuration/jetty/etc
 
@@ -858,7 +860,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     sed -i "/expedition.udp.port/d" "$ACDIR/configuration/config.ini"
     sed -i "/replication.exchangeName/d" "$ACDIR/configuration/config.ini"
     sed -i "/replication.exchangeHost/d" "$ACDIR/configuration/config.ini"
-    sed -i "s/^.*jetty.port.*$/<Set name=\"port\"><Property name=\"jetty.port\" default=\"$SERVER_PORT\"\/><\/Set>/g" "$ACDIR/configuration/jetty/etc/jetty-selector.xml"
+    sed -i "s/^.*jetty.port.*$/<Set name=\"port\"><Property name=\"jetty.port\" default=\"$SERVER_PORT\"\/><\/Set>/g" "$ACDIR/configuration/jetty/etc/jetty-http.xml"
 
     echo "I have read the following configuration from $ACDIR/env.sh:"
     echo "SERVER_NAME: $SERVER_NAME"
@@ -906,7 +908,7 @@ if [[ "$@" == "remote-deploy" ]]; then
 
         $SCP_CMD $p2PluginRepository/configuration/config.ini $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/
         $SCP_CMD $PROJECT_HOME/java/target/configuration/jetty/etc/jetty.xml $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/etc
-        $SCP_CMD $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-selector.xml $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/etc
+        $SCP_CMD $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-http.xml $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/etc
         $SCP_CMD $PROJECT_HOME/java/target/configuration/jetty/etc/jetty-deployer.xml $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/etc
         $SCP_CMD $PROJECT_HOME/java/target/configuration/jetty/etc/realm.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/jetty/etc
         $SCP_CMD $PROJECT_HOME/java/target/configuration/monitoring.properties $REMOTE_SERVER_LOGIN:$REMOTE_SERVER/configuration/

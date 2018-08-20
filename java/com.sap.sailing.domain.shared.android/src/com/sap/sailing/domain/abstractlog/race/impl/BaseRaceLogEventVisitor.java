@@ -1,6 +1,5 @@
 package com.sap.sailing.domain.abstractlog.race.impl;
 
-import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEndOfTrackingEvent;
@@ -48,11 +47,6 @@ public abstract class BaseRaceLogEventVisitor implements RaceLogEventVisitor {
 
     @Override
     public void visit(RaceLogStartTimeEvent event) {
-
-    }
-
-    @Override
-    public void visit(RaceLogCourseAreaChangedEvent event) {
 
     }
 
@@ -115,7 +109,7 @@ public abstract class BaseRaceLogEventVisitor implements RaceLogEventVisitor {
     public void visit(RaceLogRegisterCompetitorEvent event) {
 
     }
-    
+
     @Override
     public void visit(RaceLogAdditionalScoringInformationEvent event) {
         
@@ -150,4 +144,5 @@ public abstract class BaseRaceLogEventVisitor implements RaceLogEventVisitor {
     public void visit(RaceLogUseCompetitorsFromRaceLogEvent event) {
         
     }
+    
 }

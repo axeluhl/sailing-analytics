@@ -2,6 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Test
 Bundle-SymbolicName: com.sap.sailing.server.test
+Automatic-Module-Name: com.sap.sailing.server.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -15,11 +16,11 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.mongodb,
  com.tractrac.clientmodule;bundle-version="2.0.0",
  org.hamcrest;bundle-version="1.1.0",
- org.junit4;bundle-version="4.8.2",
+ org.junit;bundle-version="4.8.2",
  com.sap.sailing.domain.test,
  org.mockito.mockito-core;bundle-version="1.10.14",
  com.sap.sse.common,
- org.eclipse.jetty.server;bundle-version="9.2.2",
+ org.eclipse.jetty.server;bundle-version="9.4.8",
  com.sap.sailing.domain.shared.android,
  com.sap.sailing.domain.racelogtrackingadapter.testsupport,
  com.sap.sailing.server.testsupport

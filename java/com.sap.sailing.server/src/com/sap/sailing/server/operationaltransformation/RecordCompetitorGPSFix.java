@@ -31,9 +31,14 @@ public class RecordCompetitorGPSFix extends AbstractRaceOperation<Void> {
 
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
-        DynamicTrackedRace trackedRace = (DynamicTrackedRace) toState.getTrackedRace(getRaceIdentifier());
-        Competitor competitor = trackedRace.getRace().getCompetitorById(competitorID);
-        trackedRace.recordFix(competitor, gpsFix, /* onlyWhenInTrackingTimeInterval */ false); // record the fix in any case
+        // it's fair to not wait for the tracked race to arrive here because we're receiving a replication operation
+        // and the synchronous race-creating operation must have been processed synchronously before this operation
+        // could even have been received
+        DynamicTrackedRace trackedRace = (DynamicTrackedRace) toState.getExistingTrackedRace(getRaceIdentifier());
+	if (trackedRace != null) {
+	    Competitor competitor = trackedRace.getRace().getCompetitorById(competitorID);
+	    trackedRace.recordFix(competitor, gpsFix, /* onlyWhenInTrackingTimeInterval */ false); // record the fix in any case
+	}
         return null;
     }
 

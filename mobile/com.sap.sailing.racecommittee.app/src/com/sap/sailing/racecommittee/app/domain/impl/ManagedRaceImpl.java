@@ -1,13 +1,14 @@
 package com.sap.sailing.racecommittee.app.domain.impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.FinishingTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.StartTimeFinder;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
@@ -19,7 +20,6 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.data.AndroidRaceLogResolver;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.domain.ManagedRaceIdentifier;
-import com.sap.sailing.racecommittee.app.domain.MapMarker;
 import com.sap.sailing.racecommittee.app.utils.ManagedRaceCalculator;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -29,8 +29,7 @@ public class ManagedRaceImpl implements ManagedRace {
     private static final long serialVersionUID = -4936566684992524001L;
     private final ManagedRaceIdentifier identifier;
     private RaceState state;
-    private Collection<Competitor> competitors;
-    private List<MapMarker> mapMarkers;
+    private Map<Competitor, Boat> competitorsAndBoats;
     private CourseBase courseOnServer;
     private ManagedRaceCalculator calculator;
     private double factor;
@@ -54,7 +53,7 @@ public class ManagedRaceImpl implements ManagedRace {
      */
     private ManagedRaceImpl(ManagedRaceIdentifier identifier, double factor, Double explicitFactor, int zeroBasedIndexInFleet) {
         this.identifier = identifier;
-        this.competitors = new ArrayList<>();
+        this.competitorsAndBoats = new HashMap<>();
         this.courseOnServer = null;
         this.factor = factor;
         this.explicitFactor = explicitFactor;
@@ -128,22 +127,18 @@ public class ManagedRaceImpl implements ManagedRace {
 
     @Override
     public Collection<Competitor> getCompetitors() {
-        return competitors;
+        return competitorsAndBoats.keySet();
     }
 
     @Override
-    public void setCompetitors(Collection<Competitor> competitors) {
-        this.competitors = competitors;
+    public Map<Competitor, Boat> getCompetitorsAndBoats() {
+        return competitorsAndBoats;
     }
 
     @Override
-    public List<MapMarker> getMapMarkers() {
-        return mapMarkers;
-    }
-
-    @Override
-    public void setMapMarkers(List<MapMarker> markers) {
-        this.mapMarkers = markers;
+    public void setCompetitors(Map<Competitor, Boat> competitorsAndBoats) {
+        this.competitorsAndBoats.clear();
+        this.competitorsAndBoats.putAll(competitorsAndBoats);
     }
 
     @Override

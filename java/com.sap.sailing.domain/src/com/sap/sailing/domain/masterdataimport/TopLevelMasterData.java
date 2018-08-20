@@ -23,6 +23,7 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -33,7 +34,6 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Timed;
@@ -78,8 +78,7 @@ public class TopLevelMasterData implements Serializable {
 
     private Map<DeviceIdentifier, Set<Timed>> getAllRelevantRaceLogTrackingFixes(SensorFixStore sensorFixStore) {
         Map<DeviceIdentifier, Set<Timed>> relevantFixes = new HashMap<>();
-        
-        //Add fixes for regatta log mappings
+        // Add fixes for regatta log mappings
         for (Regatta regatta : getAllRegattas()) {
             RegattaLog regattaLog = regatta.getRegattaLog();
             try {
@@ -91,7 +90,7 @@ public class TopLevelMasterData implements Serializable {
                 regattaLog.unlockAfterRead();
             }
         }
-        //Add fixes for race log mapping
+        // Add fixes for race log mapping
         for (LeaderboardGroup group : leaderboardGroups) {
             for (Leaderboard leaderboard : group.getLeaderboards()) {
                 for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
@@ -134,7 +133,7 @@ public class TopLevelMasterData implements Serializable {
             relevantFixes.put(device, new HashSet<>());
         }
         Set<Timed> fixes = relevantFixes.get(device);
-        sensorFixStore.loadFixes(fixes::add, mappingEvent.getDevice(), mappingEvent.getFrom(), mappingEvent.getTo(),
+        sensorFixStore.loadFixes(fixes::add, mappingEvent.getDevice(), mappingEvent.getFrom(), mappingEvent.getToInclusive(),
                 true);
     }
 
@@ -286,7 +285,6 @@ public class TopLevelMasterData implements Serializable {
             for (RegattaAndRaceIdentifier raceIdentifier : mediaTrack.assignedRaces) {
                 if (raceIdentitifiersForMediaExport.contains(raceIdentifier)) {
                     filteredMediaTracks.add(mediaTrack);
-                    continue;
                 }
             }
         }

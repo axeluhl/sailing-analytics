@@ -1,29 +1,29 @@
 .usermanagement_icon {
-	width: 3rem;
+    width: 3rem;
     height: 3rem;
     vertical-align: middle;
     background-repeat: no-repeat;
     background-position: center center;
     background-size: contain;
-    background-image: url('images/home/loggedout.svg');
+    background-image: resourceUrl('loggedout');
     cursor: pointer;
     position: absolute;
     right: 10px;
     top: 6px;
 }
 .usermanagement_icon.usermanagement_open {
-	background-image: url('images/home/loggedout-open.svg');
+    background-image: resourceUrl('loggedoutOpen');
 }
 .usermanagement_icon.usermanagement_loggedin {
-	background-image: url('images/home/loggedin.svg');
+    background-image: resourceUrl('loggedin');
 }
 .usermanagement_icon.usermanagement_loggedin.usermanagement_open {
-	background-image: url('images/home/loggedin-open.svg');
+    background-image: resourceUrl('loggedinOpen');
 }
 .usermanagement_view {
-	top: 68px !important;
+    top: 60px !important;
     left: inherit !important;
-    right: 5px !important;
+    right: 0;
     z-index: 10;
     line-height: 1.333;
 }
@@ -31,12 +31,18 @@
     font-size: 15px;
 }
 .usermanagement_view.usermanagement_mobile {
-	top: 60px !important;
+    top: 60px !important;
     left: 0 !important;
 }
+.usermanagement_view_content_wrapper {
+    padding: 0 0.75rem 0 1rem !important;
+}
+.usermanagement_view_content:before {
+    right: 1em !important;
+}
 .usermanagement_mobile .usermanagement_view_content_wrapper {
-	padding: 0;
+    padding: 0 !important;
 }
 .usermanagement_mobile .usermanagement_view_content {
-	width: 100%;
+    width: 100%;
 }

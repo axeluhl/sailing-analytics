@@ -17,9 +17,6 @@ import java.util.Map;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static org.mockito.Mockito.mock;
-
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.swisstimingadapter.DomainFactory;
 import com.sap.sailing.domain.swisstimingreplayadapter.SwissTimingReplayRace;
 import com.sap.sailing.domain.swisstimingreplayadapter.impl.SwissTimingRaceConfig;
@@ -33,13 +30,13 @@ public class SwissTimingRaceConfigurationTest {
     @Test
     public void testLoadConfigurations() throws IOException, ParseException, org.json.simple.parser.ParseException {
         InputStream inputStream = getClass().getResourceAsStream(JSON_URL);
-        List<SwissTimingReplayRace> races = new SwissTimingReplayServiceImpl(DomainFactory.INSTANCE, mock(RaceLogResolver.class)).parseJSONObject(inputStream , JSON_URL);
+        List<SwissTimingReplayRace> races = new SwissTimingReplayServiceImpl(DomainFactory.INSTANCE).parseJSONObject(inputStream , JSON_URL);
         Map<String, SwissTimingRaceConfig> configsById = new HashMap<String, SwissTimingRaceConfig>();
         for (SwissTimingReplayRace race : races) {
             URL configFileURL = new URL(MessageFormat.format(SwissTimingReplayServiceImpl.RACE_CONFIG_URL_TEMPLATE, race.getRaceId()));
             URLConnection connection = configFileURL.openConnection();
             InputStream configDataStream = connection.getInputStream();
-            SwissTimingRaceConfig raceConfig = new SwissTimingReplayServiceImpl(DomainFactory.INSTANCE, mock(RaceLogResolver.class)).loadRaceConfig(configDataStream);
+            SwissTimingRaceConfig raceConfig = new SwissTimingReplayServiceImpl(DomainFactory.INSTANCE).loadRaceConfig(configDataStream);
             configsById.put(race.getRaceId(), raceConfig);
         }
     }
@@ -49,7 +46,7 @@ public class SwissTimingRaceConfigurationTest {
         URL configFileURL = new URL(MessageFormat.format(SwissTimingReplayServiceImpl.RACE_CONFIG_URL_TEMPLATE, "446483"));
         URLConnection connection = configFileURL.openConnection();
         InputStream configDataStream = connection.getInputStream();
-        SwissTimingRaceConfig config_446483 = new SwissTimingReplayServiceImpl(DomainFactory.INSTANCE, mock(RaceLogResolver.class)).loadRaceConfig(configDataStream);
+        SwissTimingRaceConfig config_446483 = new SwissTimingReplayServiceImpl(DomainFactory.INSTANCE).loadRaceConfig(configDataStream);
         assertNotNull(config_446483);
         assertEquals("GB", config_446483.country_code);
         assertNull(config_446483.event_name);
@@ -66,16 +63,18 @@ public class SwissTimingRaceConfigurationTest {
         URL configFileURL = new URL(MessageFormat.format(SwissTimingReplayServiceImpl.RACE_CONFIG_URL_TEMPLATE, "6260"));
         URLConnection connection = configFileURL.openConnection();
         InputStream configDataStream = connection.getInputStream();
-        SwissTimingRaceConfig config_446483 = new SwissTimingReplayServiceImpl(DomainFactory.INSTANCE, mock(RaceLogResolver.class)).loadRaceConfig(configDataStream);
+        SwissTimingRaceConfig config_446483 = new SwissTimingReplayServiceImpl(DomainFactory.INSTANCE).loadRaceConfig(configDataStream);
         assertNotNull(config_446483);
         assertEquals("GB", config_446483.country_code);
-        assertEquals("London 2012 Olympic Games", config_446483.event_name);
+        // TODO There used to be an attribute event_name in the "config" sub-element; around 2017-07-25 these things seem to have vanished;
+        // Asked Radek Masnica <masnica.r@st-software.com> and Christian Sgodzay <Sgodzay.C@st-sportservice.com> about the changes.
+        // Hopefully this can be re-enabled soon...
+        // assertEquals("London 2012 Olympic Games", config_446483.event_name);
+        // assertEquals("1343914800000", config_446483.race_start_ts);
         assertEquals("60", config_446483.gmt_offset);
         assertEquals("50,603424", config_446483.latitude);
         assertEquals("Nothe", config_446483.location);
         assertEquals("-2,442963", config_446483.longitude);
-        assertEquals("1343914800000", config_446483.race_start_ts);
-
     }
 
 }

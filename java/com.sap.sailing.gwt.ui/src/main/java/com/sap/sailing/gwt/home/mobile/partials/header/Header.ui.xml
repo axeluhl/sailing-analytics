@@ -18,7 +18,7 @@
     <div class="{res.mediaCss.grid}">
       <header class="{local_res.css.header} {res.mediaCss.small12} {res.mediaCss.columns}">
         <div class="{local_res.css.header_logo}">
-          <a href="http://sapsponsorships.com" title="SAP sponsorships">
+          <a href="https://www.sap.com/sponsorships" title="SAP sponsorships">
             <img src="images/mobile/logo-small@2x.png" alt="{i18n.headerLogo}" class="{local_res.css.header_logo_image}"></img>
           </a>
         </div>
@@ -30,7 +30,7 @@
           </nav>
         </div>
         <div ui:field="searchUi" class="{local_res.css.header_search}">
-          <img src="images/mobile/search-icon.svg"  class="{local_res.css.header_search_icon}"></img>
+          <img src="{local_res.search.getSafeUri}" class="{local_res.css.header_search_icon}"></img>
         </div>
 <!--         <div class="{local_res.css.header_searchbox}"> -->
 <!--           <form action="search-results.html" name="sitesearch" autocomplete="off" class="{local_res.css.header_searchbox_form}"> -->

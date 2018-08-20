@@ -1378,7 +1378,7 @@ public enum IFNationCode {
      * Singapore
      * 
      */
-    SIN,
+    SGP,
 
     /**
      * St Kitts
@@ -1552,7 +1552,7 @@ public enum IFNationCode {
      * Trinidad And Tobago
      * 
      */
-    TRI,
+    TTO,
 
     /**
      * Tunisia

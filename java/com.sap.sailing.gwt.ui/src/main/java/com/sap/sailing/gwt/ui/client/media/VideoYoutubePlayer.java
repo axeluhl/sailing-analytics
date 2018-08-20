@@ -43,8 +43,7 @@ public class VideoYoutubePlayer extends AbstractMediaPlayer implements VideoSync
 
     private final List<DeferredAction> deferredActions = new ArrayList<DeferredAction>();
 
-    public VideoYoutubePlayer(final MediaTrack videoTrack, TimePoint raceStartTime, final boolean showControls,
-            Timer raceTimer) {
+    public VideoYoutubePlayer(final MediaTrack videoTrack, TimePoint raceStartTime, Timer raceTimer) {
         super(videoTrack);
         this.raceTimer = raceTimer;
         this.raceStartTime = raceStartTime;
@@ -64,7 +63,7 @@ public class VideoYoutubePlayer extends AbstractMediaPlayer implements VideoSync
                 // The videoContainer must be attached to the DOM before the Youtube player can be created.
                 // If not, Youtube API won't find the container which is referenced by its id attribute.
                 if (event.isAttached()) {
-                    videoControl = new YoutubeVideoControl(videoTrack.url, videoContainerId, showControls);
+                    videoControl = new YoutubeVideoControl(videoTrack.url, videoContainerId);
                     for (DeferredAction deferredAction : deferredActions) {
                         deferredAction.execute();
                     }

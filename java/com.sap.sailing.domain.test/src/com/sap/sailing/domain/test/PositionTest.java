@@ -6,18 +6,21 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Mile;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
-import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixImpl;
-import com.sap.sailing.domain.common.tracking.impl.CompactGPSFixMovingImpl;
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixImpl;
+import com.sap.sailing.domain.common.tracking.impl.VeryCompactGPSFixMovingImpl;
+import com.sap.sailing.domain.common.tracking.impl.CompactionNotPossibleException;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class PositionTest {
@@ -32,20 +35,40 @@ public class PositionTest {
     @Test
     public void testEqualityBetweenCompactAndVerbosePosition() {
         Position p1 = new DegreePosition(49.2, 008.3);
-        CompactGPSFixImpl compactFix = new CompactGPSFixImpl(p1, MillisecondsTimePoint.now());
+        VeryCompactGPSFixImpl compactFix = new VeryCompactGPSFixImpl(p1, MillisecondsTimePoint.now());
         assertNotSame(p1, compactFix.getPosition());
-        assertEquals(p1, compactFix.getPosition());
+        PositionAssert.assertPositionEquals(p1, compactFix.getPosition(), 0.000001);
     }
     
     @Test
-    public void testEqualityBetweenCompactAndVerboseSpeedWithBearing() {
+    public void testCompactFixRange() {
+        final TimePoint now = MillisecondsTimePoint.now();
+        assertCompactFixHasEqualLatLng(now, 0., 0.);
+        assertCompactFixHasEqualLatLng(now, 90., 0.);
+        assertCompactFixHasEqualLatLng(now, -90., 0.);
+        assertCompactFixHasEqualLatLng(now, 0., 180.);
+        assertCompactFixHasEqualLatLng(now, 0., -180.);
+        assertCompactFixHasEqualLatLng(now, 45., 45.);
+        assertCompactFixHasEqualLatLng(now, 0., -45.);
+        assertCompactFixHasEqualLatLng(now, -45., 45.);
+        assertCompactFixHasEqualLatLng(now, 0., 45.);
+    }
+    
+    private void assertCompactFixHasEqualLatLng(final TimePoint now, final double latDeg, final double lngDeg) {
+        GPSFix fix = new VeryCompactGPSFixImpl(new DegreePosition(latDeg, lngDeg), now);
+        assertEquals(latDeg, fix.getPosition().getLatDeg(), 0.0000001);
+        assertEquals(lngDeg, fix.getPosition().getLngDeg(), 0.0000001);
+    }
+    
+    @Test
+    public void testEqualityBetweenCompactAndVerboseSpeedWithBearing() throws CompactionNotPossibleException {
         Position p1 = new DegreePosition(49.2, 008.3);
         SpeedWithBearing swb = new KnotSpeedWithBearingImpl(12, new DegreeBearingImpl(123));
-        CompactGPSFixMovingImpl compactFix = new CompactGPSFixMovingImpl(p1, MillisecondsTimePoint.now(), swb);
+        VeryCompactGPSFixMovingImpl compactFix = new VeryCompactGPSFixMovingImpl(p1, MillisecondsTimePoint.now(), swb);
         assertNotSame(p1, compactFix.getPosition());
-        assertEquals(p1, compactFix.getPosition());
+        PositionAssert.assertPositionEquals(p1, compactFix.getPosition(), 0.000001);
         assertNotSame(swb, compactFix.getSpeed());
-        assertEquals(swb, compactFix.getSpeed());
+        PositionAssert.assertSpeedEquals(swb, compactFix.getSpeed(), /* bearing deg delta */ 0.1, /* knot speed delta */ 0.1);
     }
     
     @Test
@@ -336,5 +359,65 @@ public class PositionTest {
         Position rotatedBy90DegreesCounterClockWise = p1.getLocalCoordinates(new DegreePosition(0, 0), new DegreeBearingImpl(45));
         assertEquals(-Math.sqrt(1./2.), rotatedBy90DegreesCounterClockWise.getLatDeg(), 0.001);
         assertEquals(Math.sqrt(1./2.), rotatedBy90DegreesCounterClockWise.getLngDeg(), 0.001);
+    }
+
+    @Test
+    public void testStringRepresentation1() {
+        Position p = new DegreePosition(0, 0);
+        assertEquals("N00°00.000' E000°00.000'", p.getAsDegreesAndDecimalMinutesWithCardinalPoints());
+    }
+
+    @Test
+    public void testStringRepresentation2() {
+        Position p = new DegreePosition(1, 1);
+        assertEquals("N01°00.000' E001°00.000'", p.getAsDegreesAndDecimalMinutesWithCardinalPoints());
+    }
+
+    @Test
+    public void testStringRepresentation3() {
+        Position p = new DegreePosition(-1, -1);
+        assertEquals("S01°00.000' W001°00.000'", p.getAsDegreesAndDecimalMinutesWithCardinalPoints());
+    }
+
+    @Test
+    public void testStringRepresentation4() {
+        Position p = new DegreePosition(-11, -11);
+        assertEquals("S11°00.000' W011°00.000'", p.getAsDegreesAndDecimalMinutesWithCardinalPoints());
+    }
+
+    @Test
+    public void testStringRepresentation5() {
+        Position p = new DegreePosition(-11, -111);
+        assertEquals("S11°00.000' W111°00.000'", p.getAsDegreesAndDecimalMinutesWithCardinalPoints());
+    }
+
+    @Test
+    public void testStringRepresentation6() {
+        Position p = new DegreePosition(-11.0 - 1.05 / 60.0, -111.0 - 1.05 / 60.0);
+        assertEquals("S11°01.050' W111°01.050'", p.getAsDegreesAndDecimalMinutesWithCardinalPoints());
+    }
+
+    @Test
+    public void testStringRepresentation7() {
+        Position p = new DegreePosition(1.5, 1.5);
+        assertEquals("N01°30.000' E001°30.000'", p.getAsDegreesAndDecimalMinutesWithCardinalPoints());
+    }
+    
+    @Test
+    public void testStringRepresentation8() {
+        Position p = new DegreePosition(59.999999999/60.0, 59.999999999/60.0);
+        assertEquals("N01°00.000' E001°00.000'", p.getAsDegreesAndDecimalMinutesWithCardinalPoints());
+    }
+
+    @Test
+    public void testStringRepresentation9() {
+        Position p = new DegreePosition(54.569283, 10.005400);
+        assertEquals("N54°34.157' E010°00.324'", p.getAsDegreesAndDecimalMinutesWithCardinalPoints());
+    }
+
+    @Test
+    public void testStringRepresentation10() {
+        Position p = new DegreePosition(53.569127762780646, 10.004243641469529);
+        assertEquals("N53°34.148' E010°00.255'", p.getAsDegreesAndDecimalMinutesWithCardinalPoints());
     }
 }

@@ -8,23 +8,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import android.annotation.TargetApi;
-import android.app.AlarmManager;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.Service;
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.BitmapFactory;
-import android.os.Binder;
-import android.os.Build;
-import android.os.IBinder;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
-import android.util.Pair;
-
 import com.sap.sailing.android.shared.logging.ExLog;
+import com.sap.sailing.android.shared.util.NotificationHelper;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogChangedVisitor;
@@ -47,6 +32,20 @@ import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerialize
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+import android.annotation.TargetApi;
+import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.PendingIntent;
+import android.app.Service;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Binder;
+import android.os.Build;
+import android.os.IBinder;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.util.Pair;
+
 public class RaceStateService extends Service {
 
     private final static String TAG = RaceStateService.class.getName();
@@ -59,8 +58,6 @@ public class RaceStateService extends Service {
             return RaceStateService.this;
         }
     }
-
-    private final static int NOTIFICATION_ID = 42;
 
     private final IBinder mBinder = new RaceStateServiceBinder();
 
@@ -75,9 +72,6 @@ public class RaceStateService extends Service {
 
     private Map<String, List<Pair<PendingIntent, RaceStateEvents>>> managedIntents;
 
-    private NotificationManager notificationManager;
-    private NotificationCompat.Builder notificationBuilder;
-
     @Override
     public void onCreate() {
         this.alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
@@ -87,26 +81,22 @@ public class RaceStateService extends Service {
         this.registeredStateEventSchedulers = new HashMap<>();
         this.managedIntents = new HashMap<>();
 
-        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        setupNotificationBuilder();
-
         super.onCreate();
+
+        Notification notification = setupNotification(null);
+        startForeground(NotificationHelper.getNotificationId(), notification);
         ExLog.i(this, TAG, "Started.");
     }
 
-    private void setupNotificationBuilder() {
+    private Notification setupNotification(String customContent) {
         Intent launcherIntent = new Intent(this, LoginActivity.class);
         launcherIntent.setAction(Intent.ACTION_MAIN);
         launcherIntent.addCategory(Intent.CATEGORY_LAUNCHER);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, launcherIntent, 0);
-        notificationBuilder = new NotificationCompat.Builder(this)
-            .setSmallIcon(R.drawable.ic_boat_white_24dp)
-            .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
-            .setContentTitle(getText(R.string.service_info))
-            .setContentText(getString(R.string.service_text_no_races))
-            .setContentIntent(contentIntent)
-            .setColor(getResources().getColor(R.color.constant_sap_blue_1))
-            .setOngoing(true);
+        CharSequence title = getText(R.string.service_info);
+        String content = customContent != null ? customContent : getString(R.string.service_text_no_races);
+        int color = getResources().getColor(R.color.constant_sap_blue_1);
+        return NotificationHelper.getNotification(this, title, content, contentIntent, color);
     }
 
     @Override
@@ -130,7 +120,7 @@ public class RaceStateService extends Service {
     @Override
     public void onDestroy() {
         unregisterAllRaces();
-
+        stopForeground(false);
         super.onDestroy();
     }
 
@@ -282,10 +272,9 @@ public class RaceStateService extends Service {
 
     private void updateNotification() {
         int numRaces = managedIntents.keySet().size();
-        notificationManager.notify(NOTIFICATION_ID, notificationBuilder
-                .setContentText(getString(R.string.service_text_num_races, numRaces))
-                .build());
-        startForeground(NOTIFICATION_ID, notificationBuilder.build());
+        String content = getString(R.string.service_text_num_races, numRaces);
+        Notification notification = setupNotification(content);
+        startForeground(NotificationHelper.getNotificationId(), notification);
     }
 
     public void registerRace(ManagedRace race) {

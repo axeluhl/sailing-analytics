@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -17,10 +18,12 @@ import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpSession;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.subject.Subject;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -122,15 +125,19 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         logger.info("Logging out user: " + SecurityUtils.getSubject());
         getSecurityService().logout();
         getHttpSession().invalidate();
+        final Cookie cookie = new Cookie(UserManagementConstants.LOCALE_COOKIE_NAME, "");
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        getThreadLocalResponse().addCookie(cookie);
         logger.info("Invalidated HTTP session");
         return new SuccessInfo(true, "Logged out.", /* redirectURL */ null, null);
     }
 
     @Override
-    public UserDTO createSimpleUser(String name, String email, String password, String fullName, String company, String validationBaseURL) throws UserManagementException, MailException {
+    public UserDTO createSimpleUser(String name, String email, String password, String fullName, String company, String localeName, String validationBaseURL) throws UserManagementException, MailException {
         User u = null;
         try {
-            u = getSecurityService().createSimpleUser(name, email, password, fullName, company, validationBaseURL);
+            u = getSecurityService().createSimpleUser(name, email, password, fullName, company, getLocaleFromLocaleName(localeName), validationBaseURL);
         } catch (UserManagementException e) {
             logger.log(Level.SEVERE, "Error creating user "+name, e);
             throw new UserManagementException(e.getMessage());
@@ -165,27 +172,36 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
         }
     }
-    
-    @Override
-    public void updateUserProperties(final String username, String fullName, String company, String localeName) throws UserManagementException {
+
+    private void ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(String username) throws UserManagementException {
         final Subject subject = SecurityUtils.getSubject();
         // the signed-in subject has role ADMIN or is changing own user
-        if (subject.hasRole(DefaultRoles.ADMIN.getRolename()) || username.equals(subject.getPrincipal().toString())) {
-            getSecurityService().updateUserProperties(username, fullName, company,
-                    localeName == null || localeName.isEmpty() ? null : Locale.forLanguageTag(localeName));
-        } else {
+        if (!subject.hasRole(DefaultRoles.ADMIN.getRolename()) && (subject.getPrincipal() == null
+                || !username.equals(subject.getPrincipal().toString()))) {
             throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
         }
     }
     
     @Override
-    public void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL) throws UserManagementException, MailException {
-        final Subject subject = SecurityUtils.getSubject();
-        if (subject.hasRole(DefaultRoles.ADMIN.getRolename()) || username.equals(subject.getPrincipal().toString())) {
-            getSecurityService().updateSimpleUserEmail(username, newEmail, validationBaseURL);
-        } else {
-            throw new UserManagementException(UserManagementException.INVALID_CREDENTIALS);
+    public void updateUserProperties(final String username, String fullName, String company, String localeName) throws UserManagementException {
+        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
+        getSecurityService().updateUserProperties(username, fullName, company,
+                getLocaleFromLocaleName(localeName));
+    }
+
+    private Locale getLocaleFromLocaleName(String localeName) {
+        try {
+            return localeName == null || localeName.isEmpty() ? null : Locale.forLanguageTag(localeName);
+        } catch (Exception e) {
+            logger.log(Level.WARNING, e, () -> "Error while parsing locale with name '" + localeName + "'");
+            return null;
         }
+    }
+    
+    @Override
+    public void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL) throws UserManagementException, MailException {
+        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
+        getSecurityService().updateSimpleUserEmail(username, newEmail, validationBaseURL);
     }
     
     @Override
@@ -424,18 +440,66 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public void setPreference(String username, String key, String value) {
-        getSecurityService().setPreference(username, key, value);
+    public void setPreference(String username, String key, String value) throws UserManagementException {
+        try {
+            getSecurityService().setPreference(username, key, value);
+        } catch (AuthorizationException e) {
+            throw new UserManagementException(UserManagementException.USER_DOESNT_HAVE_PERMISSION);
+        }
+    }
+    
+    @Override
+    public void setPreferences(String username, Map<String, String> keyValuePairs) throws UserManagementException {
+        try {
+            for (Entry<String, String> entry : keyValuePairs.entrySet()) {
+                getSecurityService().setPreference(username, entry.getKey(), entry.getValue());
+            }
+        } catch (AuthorizationException e) {
+            throw new UserManagementException(UserManagementException.USER_DOESNT_HAVE_PERMISSION);
+        }
     }
 
     @Override
-    public void unsetPreference(String username, String key) {
-        getSecurityService().unsetPreference(username, key);
+    public void unsetPreference(String username, String key) throws UserManagementException {
+        try {
+            getSecurityService().unsetPreference(username, key);
+        } catch (AuthorizationException e) {
+            throw new UserManagementException(UserManagementException.USER_DOESNT_HAVE_PERMISSION);
+        }
     }
 
     @Override
-    public String getPreference(String username, String key) {
-        return getSecurityService().getPreference(username, key);
+    public String getPreference(String username, String key) throws UserManagementException {
+        try {
+            return getSecurityService().getPreference(username, key);
+        } catch (AuthorizationException e) {
+            throw new UserManagementException(UserManagementException.USER_DOESNT_HAVE_PERMISSION);
+        }
+    }
+    
+    @Override
+    public Map<String, String> getPreferences(String username, List<String> keys) throws UserManagementException {
+        Map<String, String> requestedPreferences = new HashMap<>();
+        for (String key : keys) {
+            requestedPreferences.put(key, getPreference(username, key));
+        }
+        return requestedPreferences;
+    }
+    
+    @Override
+    public Map<String, String> getAllPreferences(String username) throws UserManagementException {
+        try {
+            final Map<String, String> allPreferences = getSecurityService().getAllPreferences(username);
+            final Map<String, String> result = new HashMap<>();
+            for (Map.Entry<String, String> entry : allPreferences.entrySet()) {
+                if(!entry.getKey().startsWith("_")) {
+                    result.put(entry.getKey(), entry.getValue());
+                }
+            }
+            return result;
+        } catch (AuthorizationException e) {
+            throw new UserManagementException(UserManagementException.USER_DOESNT_HAVE_PERMISSION);
+        }
     }
 
     @Override
@@ -447,4 +511,5 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public String getOrCreateAccessToken(String username) {
         return getSecurityService().getOrCreateAccessToken(username);
     }
+
 }

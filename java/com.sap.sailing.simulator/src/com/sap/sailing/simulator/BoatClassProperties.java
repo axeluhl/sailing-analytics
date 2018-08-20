@@ -1,6 +1,6 @@
 package com.sap.sailing.simulator;
 
-import com.sap.sailing.domain.common.Distance;
+import com.sap.sse.common.Distance;
 
 public interface BoatClassProperties {
 

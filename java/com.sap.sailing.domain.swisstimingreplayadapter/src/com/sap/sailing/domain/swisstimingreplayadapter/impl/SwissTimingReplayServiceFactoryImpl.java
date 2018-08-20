@@ -19,7 +19,7 @@ public class SwissTimingReplayServiceFactoryImpl implements SwissTimingReplaySer
     public SwissTimingReplayService createSwissTimingReplayService(DomainFactory domainFactory, RaceLogResolver raceLogResolver) {
         SwissTimingReplayService result = servicesForDomainFactories.get(domainFactory);
         if (result == null) {
-            result = new SwissTimingReplayServiceImpl(domainFactory, raceLogResolver);
+            result = new SwissTimingReplayServiceImpl(domainFactory);
             servicesForDomainFactories.put(domainFactory, result);
         }
         return result;

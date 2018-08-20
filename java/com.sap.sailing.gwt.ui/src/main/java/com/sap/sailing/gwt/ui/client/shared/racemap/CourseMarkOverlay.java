@@ -9,8 +9,6 @@ import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.Point;
 import com.google.gwt.maps.client.base.Size;
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.MeterDistance;
@@ -19,6 +17,8 @@ import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.racemap.CanvasOverlayV3;
 import com.sap.sailing.gwt.ui.shared.racemap.MarkVectorGraphics;
 import com.sap.sailing.gwt.ui.shared.racemap.MarkVectorGraphicsFactory;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util;
 
 /**
@@ -115,7 +115,7 @@ public class CourseMarkOverlay extends CanvasOverlayV3 {
             }
             final Bearing rotation = markVectorGraphics.getRotationInDegrees(coursePositionsDTO);
             if (rotation != null) {
-                setCanvasRotation(rotation.getDegrees());
+                setCanvasRotation(coordinateSystem.mapDegreeBearing(rotation.getDegrees()));
             }
             Point buoyPositionInPx = mapProjection.fromLatLngToDivPixel(coordinateSystem.toLatLng(position));
             if (showBuoyZone && isMarkWithBuoyZone(mark) && buoyZoneRadiusInPixel > MIN_BUOYZONE_RADIUS_IN_PX) {

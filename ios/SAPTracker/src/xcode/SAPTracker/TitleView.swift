@@ -10,49 +10,49 @@ import UIKit
 
 class TitleView: UIView {
     
-    private struct View {
+    fileprivate struct View {
         static let TitleLabel = "titleLabel"
         static let SubtitleLabel = "subtitleLabel"
     }
     
-    private var titleLabel: UILabel
-    private var subtitleLabel: UILabel
+    fileprivate var titleLabel: UILabel
+    fileprivate var subtitleLabel: UILabel
     
     // MARK: - Life cycle
     
     override init(frame: CGRect) {
-        titleLabel = UILabel(frame: CGRectZero)
+        titleLabel = UILabel(frame: CGRect.zero)
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.backgroundColor = .clearColor()
-        titleLabel.textAlignment = .Center
+        titleLabel.backgroundColor = .clear
+        titleLabel.textAlignment = .center
         titleLabel.textColor = Colors.NavigationBarTitleColor
-        titleLabel.font = Fonts.OpenSansBold13
-        subtitleLabel = UILabel(frame: CGRectZero)
+        titleLabel.font = UIFont.boldSystemFont(ofSize: 13)
+        subtitleLabel = UILabel(frame: CGRect.zero)
         subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
-        subtitleLabel.backgroundColor = .clearColor()
-        subtitleLabel.textAlignment = .Center
+        subtitleLabel.backgroundColor = .clear
+        subtitleLabel.textAlignment = .center
         subtitleLabel.textColor = Colors.NavigationBarTitleColor
-        subtitleLabel.font = Fonts.OpenSans10
+        subtitleLabel.font = UIFont.systemFont(ofSize: 10)
         super.init(frame: frame)
         translatesAutoresizingMaskIntoConstraints = true
         addSubviews()
     }
     
     convenience init() {
-        self.init(frame: CGRectZero)
+        self.init(frame: CGRect.zero)
     }
     
     convenience init(title: String, subtitle: String) {
-        self.init(frame: CGRectZero)
-        setTitle(title)
-        setSubtitle(subtitle)
+        self.init(frame: CGRect.zero)
+        setTitle(title: title)
+        setSubtitle(subtitle: subtitle)
     }
     
     required init(coder aDecoder: NSCoder) {
         fatalError("TitleView does not support NSCoding")
     }
     
-    private func addSubviews() {
+    fileprivate func addSubviews() {
         addSubview(titleLabel)
         addSubview(subtitleLabel)
     }
@@ -78,25 +78,31 @@ class TitleView: UIView {
     override func updateConstraints() {
         removeConstraints(self.constraints)
         let views = [View.TitleLabel: titleLabel, View.SubtitleLabel: subtitleLabel]
-        addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|[\(View.TitleLabel)]|",
+        addConstraints(NSLayoutConstraint.constraints(
+            withVisualFormat: "H:|[\(View.TitleLabel)]|",
             options: [],
             metrics: nil,
-            views: views))
-        addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|[\(View.SubtitleLabel)]|",
+            views: views
+        ))
+        addConstraints(NSLayoutConstraint.constraints(
+            withVisualFormat: "H:|[\(View.SubtitleLabel)]|",
             options: [],
             metrics: nil,
-            views: views))
-        addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|[\(View.TitleLabel)][\(View.SubtitleLabel)]|",
+            views: views
+        ))
+        addConstraints(NSLayoutConstraint.constraints(
+            withVisualFormat: "V:|[\(View.TitleLabel)][\(View.SubtitleLabel)]|",
             options: [],
             metrics: nil,
-            views: views))
+            views: views
+        ))
         super.updateConstraints()
     }
     
-    override func sizeThatFits(size: CGSize) -> CGSize {
-        let width = max(CGRectGetWidth(titleLabel.bounds), CGRectGetWidth(subtitleLabel.bounds))
-        let height = CGRectGetHeight(titleLabel.bounds) + CGRectGetHeight(subtitleLabel.bounds)
-        return CGSizeMake(width, height)
+    override func sizeThatFits(_ size: CGSize) -> CGSize {
+        let width = max(titleLabel.bounds.width, subtitleLabel.bounds.width)
+        let height = titleLabel.bounds.height + subtitleLabel.bounds.height
+        return CGSize(width: width, height: height)
     }
     
 }

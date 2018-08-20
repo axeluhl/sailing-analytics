@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDeviceMappingFinder;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.WithID;

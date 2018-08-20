@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Selenium
+Bundle-SymbolicName: org.mp4parser.isoparser
+Bundle-Version: 1.9.31
+Bundle-ClassPath: lib/isoparser-1.9.31.jar
+Bundle-Vendor: Sebastian Annies
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Export-Package: com.sap.sailing.media,
+ org.mp4parser,
+ org.mp4parser.boxes,
+ org.mp4parser.boxes.iso14496.part12,
+ org.mp4parser.tools
+Import-Package: org.slf4j;version="1.6.4"
+Automatic-Module-Name: org.mp4parser.isoparser
+

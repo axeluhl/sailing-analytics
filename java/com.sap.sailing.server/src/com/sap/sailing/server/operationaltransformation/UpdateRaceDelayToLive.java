@@ -1,5 +1,7 @@
 package com.sap.sailing.server.operationaltransformation;
 
+import java.util.logging.Logger;
+
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.server.RacingEventService;
@@ -7,6 +9,7 @@ import com.sap.sailing.server.RacingEventServiceOperation;
 
 public class UpdateRaceDelayToLive extends AbstractRaceOperation<Void> {
     private static final long serialVersionUID = -4759501337499106614L;
+    private static final Logger logger = Logger.getLogger(UpdateRaceDelayToLive.class.getName());
     private final long delayToLiveInMillis;
     
     public UpdateRaceDelayToLive(RegattaAndRaceIdentifier raceIdentifier, long delayToLiveInMillis) {
@@ -16,8 +19,15 @@ public class UpdateRaceDelayToLive extends AbstractRaceOperation<Void> {
 
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
-        DynamicTrackedRace trackedRace = (DynamicTrackedRace) toState.getTrackedRace(getRaceIdentifier());
-        trackedRace.setAndFixDelayToLiveInMillis(delayToLiveInMillis);
+        // it's fair to not wait for the tracked race to arrive here because we're receiving a replication operation
+        // and the synchronous race-creating operation must have been processed synchronously before this operation
+        // could even have been received
+        DynamicTrackedRace trackedRace = (DynamicTrackedRace) toState.getExistingTrackedRace(getRaceIdentifier());
+        if (trackedRace != null) {
+            trackedRace.setAndFixDelayToLiveInMillis(delayToLiveInMillis);
+        } else {
+            logger.warning("Tracked race for "+getRaceIdentifier()+" has disappeared");
+        }
         return null;
     }
 

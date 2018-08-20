@@ -11,18 +11,22 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.maps.client.events.idle.IdleMapEvent;
 import com.google.gwt.maps.client.events.idle.IdleMapHandler;
 import com.sap.sailing.domain.common.DetailType;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsFactory;
+import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
 import com.sap.sailing.gwt.ui.client.shared.charts.ChartSettings;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChart;
 import com.sap.sailing.gwt.ui.client.shared.charts.MultiCompetitorRaceChartSettings;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMap;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardSettings;
+import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 import com.sap.sse.common.Duration;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
+import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorageAndAdditionalSettingsLayers.OnSettingsReloadedCallback;
 
 /**
  * The start analysis mode makes the competitor chart visible and sets it to speed over ground; the
@@ -58,49 +62,54 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
     }
 
     private void adjustMapSettings() {
-        final RaceMapSettings existingMapSettings = getRaceBoardPanel().getMap().getSettings();
-        final RaceMapSettings newMapSettings = new RaceMapSettings(
+        RaceMap raceMap = getRaceBoardPanel().getMap();
+        final RaceMapSettings defaultSettings = raceMap.getLifecycle().createDefaultSettings();
+        final RaceMapSettings additiveSettings = new RaceMapSettings(
                 new RaceMapZoomSettings(Collections.singleton(ZoomTypes.BOATS), /* zoomToSelected */ false),
-                existingMapSettings.getHelpLinesSettings(),
-                existingMapSettings.getTransparentHoverlines(),
-                existingMapSettings.getHoverlineStrokeWeight(),
-                existingMapSettings.getTailLengthInMilliseconds(),
+                defaultSettings.getHelpLinesSettings(),
+                defaultSettings.getTransparentHoverlines(),
+                defaultSettings.getHoverlineStrokeWeight(),
+                defaultSettings.getTailLengthInMilliseconds(),
                 /* existingMapSettings.isWindUp() */ true,
-                existingMapSettings.getBuoyZoneRadius(),
-                existingMapSettings.isShowOnlySelectedCompetitors(),
-                existingMapSettings.isShowSelectedCompetitorsInfo(),
-                existingMapSettings.isShowWindStreamletColors(),
-                existingMapSettings.isShowWindStreamletOverlay(),
-                existingMapSettings.isShowSimulationOverlay(),
-                existingMapSettings.isShowMapControls(),
-                existingMapSettings.getManeuverTypesToShow(),
-                existingMapSettings.isShowDouglasPeuckerPoints());
-        // try to update the settings once; the problem is the "wind up" display; it changes pan/zoom
-        // which is a major source of instability for the map. Going twice in the map idle event handler
-        // to ensure the settings are really applied.
-        final Object[] registration = new Object[1];
-        registration[0] = getRaceBoardPanel().getMap().getMap().addIdleHandler(new IdleMapHandler() {
+                defaultSettings.getBuoyZoneRadius(),
+                defaultSettings.isShowOnlySelectedCompetitors(),
+                defaultSettings.isShowSelectedCompetitorsInfo(),
+                defaultSettings.isShowWindStreamletColors(),
+                defaultSettings.isShowWindStreamletOverlay(),
+                defaultSettings.isShowSimulationOverlay(),
+                defaultSettings.isShowMapControls(),
+                defaultSettings.getManeuverTypesToShow(),
+                defaultSettings.isShowDouglasPeuckerPoints(),
+                defaultSettings.isShowEstimatedDuration(),
+                defaultSettings.getStartCountDownFontSizeScaling(),
+                defaultSettings.isShowManeuverLossVisualization());
+        ((RaceBoardComponentContext) raceMap.getComponentContext()).addModesPatching(raceMap, additiveSettings, new OnSettingsReloadedCallback<RaceMapSettings>() {
             @Override
-            public void onEvent(IdleMapEvent event) {
-                Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+            public void onSettingsReloaded(RaceMapSettings patchedSettings) {
+             // try to update the settings once; the problem is the "wind up" display; it changes pan/zoom
+                // which is a major source of instability for the map. Going twice in the map idle event handler
+                // to ensure the settings are really applied.
+                final Object[] registration = new Object[1];
+                registration[0] = getRaceBoardPanel().getMap().getMap().addIdleHandler(new IdleMapHandler() {
                     @Override
-                    public void execute() {
-                        getRaceBoardPanel().getMap().updateSettings(newMapSettings);
+                    public void onEvent(IdleMapEvent event) {
+                        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+                            @Override
+                            public void execute() {
+                                getRaceBoardPanel().getMap().updateSettings(patchedSettings);
+                            }
+                        });
+                        ((HandlerRegistration) registration[0]).removeHandler();
                     }
                 });
-                ((HandlerRegistration) registration[0]).removeHandler();
+                raceMap.updateSettings(patchedSettings);
             }
+            
         });
-        getRaceBoardPanel().getMap().updateSettings(newMapSettings);
     }
 
     @Override
     protected void trigger() {
-        if (!leaderboardSettingsAdjusted && getLeaderboard() != null) {
-            leaderboardSettingsAdjusted = true;
-            stopReceivingLeaderboard();
-            adjustLeaderboardSettings();
-        }
         if (!timerAdjusted && getRaceTimesInfoForRace() != null && getRaceTimesInfoForRace().startOfRace != null) {
             timerAdjusted = true;
             // we've done our adjustments; remove listener and let go
@@ -128,10 +137,17 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
                         if (simulationOverlayFound) {
                             if (isCompetitorChartEnabled()) {
                                 getRaceBoardPanel().setCompetitorChartVisible(true);
-                                final MultiCompetitorRaceChartSettings newCompetitorChartSettings = new MultiCompetitorRaceChartSettings(
+                                final MultiCompetitorRaceChartSettings additiveSettings = new MultiCompetitorRaceChartSettings(
                                         new ChartSettings(/* stepSizeInMillis */ 1000), DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
                                         /* no second series */ null);
-                                competitorChart.updateSettings(newCompetitorChartSettings);
+                                ((RaceBoardComponentContext) competitorChart.getComponentContext()).addModesPatching(competitorChart, additiveSettings, new OnSettingsReloadedCallback<MultiCompetitorRaceChartSettings>() {
+
+                                    @Override
+                                    public void onSettingsReloaded(MultiCompetitorRaceChartSettings patchedSettings) {
+                                        competitorChart.updateSettings(patchedSettings);
+                                    }
+                                    
+                                });
                                 getRaceTimePanel().getTimeRangeProvider().setTimeZoom(
                                         new MillisecondsTimePoint(getRaceTimesInfoForRace().startOfRace).minus(DURATION_BEFORE_START_TO_INCLUDE_IN_CHART_TIME_RANGE).asDate(),
                                         new MillisecondsTimePoint(getRaceTimesInfoForRace().startOfRace).plus(DURATION_AFTER_START_TO_INCLUDE_IN_CHART_TIME_RANGE).asDate());
@@ -142,6 +158,11 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
                     }
                 }, /* delay in milliseconds */ 500);
             }
+        }
+        if (!leaderboardSettingsAdjusted && getLeaderboard() != null) {
+            leaderboardSettingsAdjusted = true;
+            stopReceivingLeaderboard();
+            adjustLeaderboardSettings();
         }
         if (getLeaderboardForSpecificTimePoint() == null &&
                 getRaceColumn() != null && getLeaderboard() != null
@@ -156,35 +177,25 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
     }
 
     private void adjustLeaderboardSettings() {
-        final LeaderboardSettings existingSettings = getLeaderboardPanel().getSettings();
-        final List<DetailType> raceDetailsToShow = new ArrayList<>(existingSettings.getRaceDetailsToShow());
+        final SingleRaceLeaderboardPanel leaderboardPanel = getLeaderboardPanel();
+        final List<DetailType> raceDetailsToShow = new ArrayList<>();
         raceDetailsToShow.add(DetailType.RACE_SPEED_OVER_GROUND_FIVE_SECONDS_BEFORE_START);
         raceDetailsToShow.add(DetailType.RACE_DISTANCE_TO_START_FIVE_SECONDS_BEFORE_RACE_START);
         raceDetailsToShow.add(DetailType.DISTANCE_TO_START_AT_RACE_START);
-        raceDetailsToShow.add(DetailType.DISTANCE_TO_START_LINE);
         raceDetailsToShow.add(DetailType.DISTANCE_TO_STARBOARD_END_OF_STARTLINE_WHEN_PASSING_START_IN_METERS);
         raceDetailsToShow.add(DetailType.SPEED_OVER_GROUND_AT_RACE_START);
         raceDetailsToShow.add(DetailType.SPEED_OVER_GROUND_WHEN_PASSING_START);
         raceDetailsToShow.add(DetailType.START_TACK);
         raceDetailsToShow.add(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS);
-        raceDetailsToShow.remove(DetailType.DISPLAY_LEGS);
-        final LeaderboardSettings newSettings = new LeaderboardSettings(
-                Util.cloneListOrNull(existingSettings.getManeuverDetailsToShow()),
-                Util.cloneListOrNull(existingSettings.getLegDetailsToShow()),
-                Util.cloneListOrNull(raceDetailsToShow),
-                Util.cloneListOrNull(existingSettings.getOverallDetailsToShow()),
-                Util.cloneListOrNull(existingSettings.getNamesOfRaceColumnsToShow()),
-                Util.cloneListOrNull(existingSettings.getNamesOfRacesToShow()),
-                existingSettings.getNumberOfLastRacesToShow(), /* auto-expand pre-selected race */ true,
-                existingSettings.getDelayBetweenAutoAdvancesInMilliseconds(),
-                existingSettings.getNameOfRaceToSort(), existingSettings.isSortAscending(),
-                existingSettings.isUpdateUponPlayStateChange(),
-                existingSettings.getActiveRaceColumnSelectionStrategy(),
-                existingSettings.isShowAddedScores(),
-                existingSettings.isShowOverallColumnWithNumberOfRacesCompletedPerCompetitor(),
-                existingSettings.isShowCompetitorSailIdColumn(),
-                existingSettings.isShowCompetitorFullNameColumn());
-        getLeaderboardPanel().updateSettings(newSettings);
+        final SingleRaceLeaderboardSettings additiveSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsWithCustomRaceDetails(raceDetailsToShow);
+        ((RaceBoardComponentContext) leaderboardPanel.getComponentContext()).addModesPatching(leaderboardPanel, additiveSettings, new OnSettingsReloadedCallback<SingleRaceLeaderboardSettings>() {
+
+            @Override
+            public void onSettingsReloaded(SingleRaceLeaderboardSettings patchedSettings) {
+                leaderboardPanel.updateSettings(patchedSettings);
+            }
+            
+        });
     }
     
     private boolean isCompetitorChartEnabled() {

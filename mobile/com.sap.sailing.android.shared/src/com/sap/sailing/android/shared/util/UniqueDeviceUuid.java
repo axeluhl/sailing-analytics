@@ -14,7 +14,7 @@ public class UniqueDeviceUuid {
 
     private static String mDeviceId;
 
-    @SuppressLint("CommitPrefEdits")
+    @SuppressLint("ApplySharedPref")
     public synchronized static String getUniqueId(Context context) {
         if (mDeviceId == null) {
             SharedPreferences preferences = context.getSharedPreferences(FILENAME, Context.MODE_PRIVATE);

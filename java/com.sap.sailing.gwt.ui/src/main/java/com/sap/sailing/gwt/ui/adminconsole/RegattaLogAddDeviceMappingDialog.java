@@ -15,16 +15,16 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sailing.domain.common.racelog.tracking.QRCodeURLCreationException;
 import com.sap.sailing.gwt.ui.adminconsole.ItemToMapToDeviceSelectionPanel.SelectionChangedHandler;
-import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
+import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
 import com.sap.sailing.gwt.ui.client.GwtUrlHelper;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.DeviceIdentifierDTO;
 import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
@@ -32,14 +32,16 @@ import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.GenericListBox;
 import com.sap.sse.gwt.client.controls.GenericListBox.ValueBuilder;
+import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
+import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithBootstrap<DeviceMappingDTO> {
+public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTimeBox<DeviceMappingDTO> {
     private final String leaderboardName;
     private final GenericListBox<EventDTO> events; 
 
-    protected final BetterDateTimeBox from;
-    protected final BetterDateTimeBox to;
+    protected final DateAndTimeInput from;
+    protected final DateAndTimeInput to;
     protected final ListBox deviceType;
     protected final TextBox deviceId;
     protected final DeviceMappingQRCodeWidget qrWidget;
@@ -83,9 +85,9 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithBootstr
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
 
-        from = createDateTimeBox(new Date());
+        from = createDateTimeBox(new Date(), Accuracy.SECONDS);
         from.setValue(null);
-        to = createDateTimeBox(new Date());
+        to = createDateTimeBox(new Date(), Accuracy.SECONDS);
         to.setValue(null);
 
         deviceType = createListBox(false);
@@ -116,7 +118,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithBootstr
                     public void onSelectionChange(MarkDTO mark) {
                         selectedItem = mark;
                         qrWidget.setMappedItem(DeviceMappingConstants.URL_MARK_ID_AS_STRING, mark.getIdAsString());
-                        validate();
+                        validateAndUpdate();
                     }
 
                     @Override
@@ -124,7 +126,15 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithBootstr
                         selectedItem = competitor;
                         qrWidget.setMappedItem(DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING,
                                 competitor.getIdAsString());
-                        validate();
+                        validateAndUpdate();
+                    }
+                    
+                    @Override
+                    public void onSelectionChange(BoatDTO boat) {
+                        selectedItem = boat;
+                        qrWidget.setMappedItem(DeviceMappingConstants.URL_BOAT_ID_AS_STRING,
+                                boat.getIdAsString());
+                        validateAndUpdate();
                     }
                 }, mapping != null ? mapping.mappedTo : null);
         if (mapping != null) {
@@ -135,7 +145,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithBootstr
         qrWidget = setupQRCodeWidget();
         qrWidget.generateQRCode();
         this.leaderboardName = leaderboardName;
-        loadCompetitorsAndMarks();
+        loadCompetitorsBoatsAndMarks();
         events = new GenericListBox<EventDTO>(new ValueBuilder<EventDTO>() {
             @Override
             public String getValue(EventDTO item) {
@@ -216,8 +226,9 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithBootstr
         return new DeviceMappingDTO(deviceIdentifier, from.getValue(), to.getValue(), selectedItem, null);
     }
 
-    private void loadCompetitorsAndMarks() {
+    private void loadCompetitorsBoatsAndMarks() {
         sailingService.getCompetitorRegistrationsForLeaderboard(leaderboardName, itemSelectionPanel.getSetCompetitorsCallback());
+        sailingService.getBoatRegistrationsForLeaderboard(leaderboardName, itemSelectionPanel.getSetBoatsCallback());
         sailingService.getMarksInRegattaLog(leaderboardName, itemSelectionPanel.getSetMarksCallback());
     }
 }

@@ -5,19 +5,19 @@ import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.HeadingElement;
-import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.event.LabelType;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.home.shared.partials.bubble.Bubble;
+import com.sap.sailing.gwt.home.shared.partials.bubble.Bubble.Direction;
+import com.sap.sailing.gwt.home.shared.partials.bubble.BubbleContentBoatClass;
 import com.sap.sailing.gwt.home.shared.partials.filter.AbstractSelectionFilter;
 import com.sap.sailing.gwt.home.shared.utils.CollapseAnimation;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
@@ -41,7 +41,7 @@ public class SectionHeaderContent extends Composite {
     @UiField DivElement subtitleUi;
     @UiField DivElement headerRightUi;
     @UiField DivElement infoTextUi;
-    @UiField ImageElement actionArrowUi;
+    @UiField DivElement actionArrowUi;
     @UiField SimplePanel filterSelectContainerUi;
 
     public SectionHeaderContent() {
@@ -72,7 +72,8 @@ public class SectionHeaderContent extends Composite {
     public void setImageUrl(String imageUrl) {
         imageUi.getStyle().clearDisplay();
         imageUi.getStyle().setBackgroundImage("url(" + imageUrl + ")");
-        titleAndLabelContainerUi.addClassName(SectionHeaderResources.INSTANCE.css().sectionheader_item_adjust_title());
+        titleAndLabelContainerUi
+                .addClassName(SectionHeaderResources.INSTANCE.css().sectionheader_item_adjust_title_left());
     }
     
     public void setInfoText(String infoText) {
@@ -92,25 +93,32 @@ public class SectionHeaderContent extends Composite {
                 animation.animate(collapsed);
             }
         });
-        actionArrowUi.setSrc("images/mobile/arrow-down-grey.png");
         actionArrowUi.addClassName(SectionHeaderResources.INSTANCE.css().accordion());
+        titleAndLabelContainerUi
+                .addClassName(SectionHeaderResources.INSTANCE.css().sectionheader_item_adjust_title_right());
         actionArrowUi.getStyle().clearDisplay();
         headerRightUi.getStyle().clearDisplay();
     }
     
     public void setClickAction(final PlaceNavigation<?> placeNavigation) {
         placeNavigation.configureAnchorElement(headerMainUi);
+        this.adjustedActionStyles();
+        titleAndLabelContainerUi
+                .addClassName(SectionHeaderResources.INSTANCE.css().sectionheader_item_adjust_title_right());
         headerRightUi.getStyle().clearDisplay();
         actionArrowUi.getStyle().clearDisplay();
     }
     
     public void setClickAction(final String url) {
         headerMainUi.setHref(url);
-        DOM.setEventListener(headerMainUi, new EventListener() {
-            @Override
-            public void onBrowserEvent(Event event) {
-            }
+        DOM.setEventListener(headerMainUi, event -> {
         });
+        this.adjustedActionStyles();
+    }
+
+    private void adjustedActionStyles() {
+        titleAndLabelContainerUi
+                .addClassName(SectionHeaderResources.INSTANCE.css().sectionheader_item_adjust_title_right());
         headerRightUi.getStyle().clearDisplay();
         actionArrowUi.getStyle().clearDisplay();
     }
@@ -135,4 +143,11 @@ public class SectionHeaderContent extends Composite {
         selectionFilter.getElement().setAttribute("dir", "rtl");
     }
     
+    public void initBoatClassPopup(String boatClassName) {
+        BubbleContentBoatClass content = new BubbleContentBoatClass(boatClassName);
+        Bubble.DefaultPresenter presenter = new Bubble.DefaultPresenter(content, getElement(), imageUi,
+                Direction.RIGHT);
+        presenter.registerTarget(imageUi);
+    }
+
 }

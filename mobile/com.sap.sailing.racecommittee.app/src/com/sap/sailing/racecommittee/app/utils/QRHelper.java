@@ -43,6 +43,7 @@ public class QRHelper {
 
             String identifier = connectionConfiguration.getDeviceIdentifier();
             URL apkUrl = UrlHelper.tryConvertToURL(connectionConfiguration.getApkUrl());
+            String accessToken = connectionConfiguration.getAccessToken();
 
             if (apkUrl != null) {
                 String serverUrl = UrlHelper.getServerUrl(apkUrl);
@@ -51,6 +52,7 @@ public class QRHelper {
                 SharedPreferences.Editor editor = preferences.edit();
                 editor.putString(mContext.getString(R.string.preference_identifier_key), identifier);
                 editor.putString(mContext.getString(R.string.preference_server_url_key), serverUrl);
+                editor.putString(mContext.getString(R.string.preference_access_token_key), accessToken);
                 editor.commit();
 
                 new AutoUpdater(mContext).checkForUpdate(false);

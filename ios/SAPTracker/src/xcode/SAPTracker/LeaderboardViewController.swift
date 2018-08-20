@@ -10,7 +10,7 @@ import Foundation
 
 class LeaderboardViewController: UIViewController {
     
-    var regatta: Regatta!
+    weak var checkIn: CheckIn!
     
     @IBOutlet weak var webView: UIWebView!
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
@@ -22,24 +22,29 @@ class LeaderboardViewController: UIViewController {
     
     // MARK: - Setup
     
-    private func setup() {
+    fileprivate func setup() {
         setupLocalization()
+        setupNavigationBar()
         setupWebView()
     }
     
-    private func setupLocalization() {
+    fileprivate func setupLocalization() {
         navigationItem.title = Translation.LeaderboardView.Title.String
     }
     
-    private func setupWebView() {
-        guard let url = regatta.leaderboardURL() else { return }
-        webView.loadRequest(NSURLRequest(URL: url))
+    fileprivate func setupNavigationBar() {
+        navigationItem.leftBarButtonItem = UIBarButtonItem(customView: UIImageView(image: UIImage(named: "sap_logo")))
+    }
+    
+    fileprivate func setupWebView() {
+        guard let url = checkIn.leaderboardURL() else { return }
+        webView.loadRequest(URLRequest(url: url))
     }
     
     // MARK: - Actions
     
-    @IBAction func doneButtonTapped(sender: AnyObject) {
-        presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func doneButtonTapped(_ sender: Any) {
+        presentingViewController!.dismiss(animated: true, completion: nil)
     }
     
 }
@@ -48,18 +53,18 @@ class LeaderboardViewController: UIViewController {
 
 extension LeaderboardViewController: UIWebViewDelegate {
 
-    func webViewDidFinishLoad(webView: UIWebView) {
+    func webViewDidFinishLoad(_ webView: UIWebView) {
         activityIndicator.stopAnimating()
     }
     
-    func webView(webView: UIWebView, didFailLoadWithError error: NSError?) {
+    func webView(_ webView: UIWebView, didFailLoadWithError error: Error) {
         activityIndicator.stopAnimating()
-        let alertController = UIAlertController(title: error?.localizedDescription, message: nil, preferredStyle: .Alert)
-        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default) { (action) in
-            self.presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
+        let alertController = UIAlertController(title: error.localizedDescription, message: nil, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { [weak self] action in
+            self?.presentingViewController!.dismiss(animated: true, completion: nil)
         }
         alertController.addAction(okAction)
-        presentViewController(alertController, animated: true, completion: nil)
+        present(alertController, animated: true, completion: nil)
     }
 
 }

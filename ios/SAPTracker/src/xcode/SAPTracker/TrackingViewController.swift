@@ -10,8 +10,8 @@ import Foundation
 
 class TrackingViewController : UIViewController {
     
-    var regatta: Regatta!
-    var regattaController: RegattaController!
+    weak var checkIn: CheckIn!
+    weak var sessionController: SessionController!
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var tableViewHeight: NSLayoutConstraint!
@@ -29,45 +29,54 @@ class TrackingViewController : UIViewController {
     
     // MARK: - Setup
     
-    private func setup() {
+    fileprivate func setup() {
         setupButtons()
         setupLocalization()
         setupNavigationBar()
     }
     
-    private func setupButtons() {
-        stopTrackingButton.setBackgroundImage(Images.RedHighlighted, forState: .Highlighted)
+    fileprivate func setupButtons() {
+        makeRed(button: stopTrackingButton)
     }
     
-    private func setupLocalization() {
-        stopTrackingButton.setTitle(Translation.TrackingView.StopTrackingButton.Title.String, forState: .Normal)
+    fileprivate func setupLocalization() {
+        stopTrackingButton.setTitle(Translation.TrackingView.StopTrackingButton.Title.String, for: .normal)
     }
     
-    private func setupNavigationBar() {
+    fileprivate func setupNavigationBar() {
         navigationItem.leftBarButtonItem = UIBarButtonItem(customView: UIImageView(image: UIImage(named: "sap_logo")))
-        navigationItem.titleView = TitleView(title: regatta.event.name, subtitle: regatta.leaderboard.name)
+        navigationItem.titleView = TitleView(title: checkIn.event.name, subtitle: checkIn.leaderboard.name)
         navigationController?.navigationBar.setNeedsLayout()
     }
     
     // MARK: - Actions
     
-    @IBAction func stopTrackingButtonTapped(sender: AnyObject) {
-        let alertController = UIAlertController(title: Translation.TrackingView.StopTrackingAlert.Title.String,
-                                                message: Translation.TrackingView.StopTrackingAlert.Message.String,
-                                                preferredStyle: .Alert
+    @IBAction func stopTrackingButtonTapped(_ sender: Any) {
+        let alertController = UIAlertController(
+            title: Translation.TrackingView.StopTrackingAlert.Title.String,
+            message: Translation.TrackingView.StopTrackingAlert.Message.String,
+            preferredStyle: .alert
         )
-        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default) { action in
-            LocationManager.sharedManager.stopTracking()
-            SVProgressHUD.show()
-            self.regattaController.gpsFixController.sendAll({ (withSuccess) in
-                SVProgressHUD.popActivity()
-                self.dismissViewControllerAnimated(true, completion: nil)
-            })
+        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { [weak self] (action) in
+            self?.stopTracking()
         }
-        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Cancel, handler: nil)
+        let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel)
         alertController.addAction(okAction)
         alertController.addAction(cancelAction)
-        presentViewController(alertController, animated: true, completion: nil)
+        present(alertController, animated: true, completion: nil)
+    }
+    
+    fileprivate func stopTracking() {
+        LocationManager.sharedManager.stopTracking()
+        SVProgressHUD.show()
+        self.sessionController.gpsFixController.sendAll(completion: { (withSuccess) in
+            SVProgressHUD.popActivity()
+            self.dismiss(animated: true, completion: nil)
+        })
+    }
+    
+    @IBAction func optionButtonTapped(_ sender: Any) {
+        presentSettingsViewController()
     }
     
 }
@@ -90,14 +99,14 @@ extension TrackingViewController: UITableViewDataSource {
         CellIdentifier.GPSAccuracyCell
     ]
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return TrackingViewController.Rows.count
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier(TrackingViewController.Rows[indexPath.row]) ?? UITableViewCell()
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: TrackingViewController.Rows[indexPath.row]) ?? UITableViewCell()
         if let gpsFixesCell = cell as? TrackingViewGPSFixesCell {
-            gpsFixesCell.regatta = regatta
+            gpsFixesCell.checkIn = checkIn
         }
         return cell
     }
@@ -108,15 +117,15 @@ extension TrackingViewController: UITableViewDataSource {
 
 extension TrackingViewController: UITableViewDelegate {
     
-    func tableView(tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
         return 52
     }
     
-    func tableView(tableView: UITableView, estimatedHeightForFooterInSection section: Int) -> CGFloat {
+    func tableView(_ tableView: UITableView, estimatedHeightForFooterInSection section: Int) -> CGFloat {
         return 0
     }
     
-    func tableView(tableView: UITableView, willDisplayCell cell: UITableViewCell, forRowAtIndexPath indexPath: NSIndexPath) {
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         cell.removeSeparatorInset()
     }
     

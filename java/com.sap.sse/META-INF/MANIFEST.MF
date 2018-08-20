@@ -10,16 +10,23 @@ Export-Package: com.sap.sse,
  com.sap.sse.i18n,
  com.sap.sse.i18n.impl,
  com.sap.sse.osgi,
+ com.sap.sse.pairinglist,
+ com.sap.sse.pairinglist.impl,
  com.sap.sse.qrcode,
  com.sap.sse.util,
+ com.sap.sse.util.graph,
  com.sap.sse.util.impl,
- com.sap.sse.util.kmeans
+ com.sap.sse.util.kmeans,
+ com.sap.sse.util.topologicalordering
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.sap.sse.common,
  com.sap.sse.shared.android,
  org.apache.servicemix.bundles.zxing;bundle-version="3.1.0",
- org.json.simple;bundle-version="1.1.0"
+ org.json.simple;bundle-version="1.1.0",
+ org.apache.httpcomponents.httpclient,
+ org.apache.httpcomponents.httpcore;bundle-version="4.2.5"
 Import-Package: javax.servlet;version="3.1.0",
  javax.servlet.http;version="3.1.0",
  org.osgi.framework;version="1.8.0",
  org.osgi.util.tracker;version="1.5.1"
+Automatic-Module-Name: com.sap.sse

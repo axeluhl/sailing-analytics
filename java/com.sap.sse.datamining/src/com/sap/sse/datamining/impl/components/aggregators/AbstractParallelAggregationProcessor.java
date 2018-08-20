@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutorService;
 
 import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
+import com.sap.sse.datamining.components.ProcessorInstruction;
 import com.sap.sse.datamining.impl.components.AbstractParallelProcessor;
 import com.sap.sse.datamining.impl.components.AbstractProcessorInstruction;
 import com.sap.sse.datamining.impl.components.ProcessorInstructionPriority;
@@ -26,21 +27,41 @@ public abstract class AbstractParallelAggregationProcessor<InputType, Aggregated
     }
 
     @Override
-    protected AbstractProcessorInstruction<AggregatedType> createInstruction(final InputType element) {
-        return new AbstractProcessorInstruction<AggregatedType>(this, ProcessorInstructionPriority.Aggregation) {
-            @Override
-            public AggregatedType computeResult() {
-                synchronized (monitor) {
-                    handleElement(element);
+    protected ProcessorInstruction<AggregatedType> createInstruction(final InputType element) {
+        if (needsSynchronization()) {
+            return new AbstractProcessorInstruction<AggregatedType>(this, ProcessorInstructionPriority.Aggregation) {
+                @Override
+                public AggregatedType computeResult() {
+                    synchronized (monitor) {
+                        handleElement(element);
+                    }
+                    return AbstractParallelAggregationProcessor.super.createInvalidResult();
                 }
-                return AbstractParallelAggregationProcessor.super.createInvalidResult();
-            }
-        };
+            };
+        } else {
+            return new AbstractProcessorInstruction<AggregatedType>(this, ProcessorInstructionPriority.Aggregation) {
+                @Override
+                protected AggregatedType computeResult() throws Exception {
+                    handleElement(element);
+                    return AbstractParallelAggregationProcessor.super.createInvalidResult();
+                }
+                
+            };
+        }
     }
 
+    /**
+     * Defines if {@link #handleElement(Object) handleElement} needs to be called in a synchronized block.
+     * Default is <code>true</code>.</br>
+     * Override if the concrete aggregator implementation will handle the synchronization on its own. 
+     * @return
+     */
+    protected boolean needsSynchronization() {
+        return true;
+    }
 
     /**
-     * Method to handle the element. This method is only called in a way, that is thread safe, so
+     * Method to handle the element. This method is only called in a way that is thread safe so
      * that multiple threads can't corrupt the data.
      */
     protected abstract void handleElement(InputType element);

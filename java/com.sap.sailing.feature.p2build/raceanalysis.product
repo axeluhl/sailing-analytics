@@ -29,25 +29,31 @@
    <features>
       <feature id="com.sap.sailing.feature" version="1.0.0.qualifier"/>
       <feature id="com.sap.sailing.feature.runtime" version="1.0.0.qualifier"/>
+      <feature id="com.sap.sse.feature" version="1.0.0.qualifier"/>
+      <feature id="com.sap.sse.feature.runtime" version="1.0.0.qualifier"/>
    </features>
 
    <configurations>
-      <plugin id="com.sap.sailing.autoload" autoStart="true" startLevel="6" />
       <plugin id="com.sap.sailing.barbados.resultimport" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.dashboards.gwt" autoStart="true" startLevel="5" />
       <plugin id="com.sap.sailing.datamining" autoStart="true" startLevel="4" />
+      <plugin id="com.sap.sailing.domain.bravoadapter" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.domain.deckmanadapter" autoStart="true" startLevel="4" />
+      <plugin id="com.sap.sailing.domain.expeditionadapter" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.domain.igtimiadapter" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.domain.racelogtrackingadapter" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.domain.swisstimingadapter" autoStart="false" startLevel="4" />
-      <plugin id="com.sap.sailing.domain.swisstimingreplayadapter" autoStart="false" startLevel="4" />
+      <plugin id="com.sap.sailing.domain.swisstimingadapter.persistence" autoStart="true" startLevel="3" />
+      <plugin id="com.sap.sailing.domain.swisstimingreplayadapter" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.domain.tractracadapter" autoStart="false" startLevel="4" />
+      <plugin id="com.sap.sailing.domain.tractracadapter.persistence" autoStart="true" startLevel="3" />
+      <plugin id="com.sap.sailing.domain.windfinderadapter" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.ess40.resultimport" autoStart="true" startLevel="3" />
+      <plugin id="com.sap.sailing.expeditionconnector.persistence" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.freg.resultimport" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.gwt.ui" autoStart="true" startLevel="5" />
       <plugin id="com.sap.sailing.kiworesultimport" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.manage2sail.resultimport" autoStart="true" startLevel="3" />
-      <plugin id="com.sap.sailing.yachtscoring.resultimport" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.monitoring" autoStart="true" startLevel="6" />
       <plugin id="com.sap.sailing.news" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sailing.polars" autoStart="true" startLevel="4" />
@@ -60,6 +66,7 @@
       <plugin id="com.sap.sailing.www" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.xmlexport" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sailing.xrr.resultimport" autoStart="true" startLevel="3" />
+      <plugin id="com.sap.sailing.yachtscoring.resultimport" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sse.filestorage" autoStart="true" startLevel="3" />
       <plugin id="com.sap.sse.mail" autoStart="true" startLevel="4" />
       <plugin id="com.sap.sse.replication" autoStart="true" startLevel="5" />
@@ -69,12 +76,10 @@
       <plugin id="org.apache.felix.shell.remote" autoStart="true" startLevel="0" />
       <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.equinox.simpleconfigurator" autoStart="true" startLevel="2" />
-      <plugin id="org.eclipse.jetty.continuation" autoStart="true" startLevel="4" />
       <plugin id="org.eclipse.jetty.deploy" autoStart="true" startLevel="4" />
       <plugin id="org.eclipse.jetty.http" autoStart="true" startLevel="4" />
       <plugin id="org.eclipse.jetty.io" autoStart="true" startLevel="4" />
       <plugin id="org.eclipse.jetty.jmx" autoStart="true" startLevel="4" />
-      <plugin id="org.eclipse.jetty.nested" autoStart="true" startLevel="4" />
       <plugin id="org.eclipse.jetty.osgi.boot" autoStart="true" startLevel="3" />
       <plugin id="org.eclipse.jetty.security" autoStart="true" startLevel="4" />
       <plugin id="org.eclipse.jetty.server" autoStart="true" startLevel="4" />
@@ -82,9 +87,15 @@
       <plugin id="org.eclipse.jetty.util" autoStart="true" startLevel="4" />
       <plugin id="org.eclipse.jetty.webapp" autoStart="true" startLevel="4" />
       <plugin id="org.eclipse.jetty.xml" autoStart="true" startLevel="4" />
-      <plugin id="org.mortbay.jetty.util" autoStart="true" startLevel="4" />
       <property name="eclipse.ignoreApp" value="true" />
       <property name="osgi.noShutdown" value="true" />
    </configurations>
+
+   <preferencesInfo>
+      <targetfile overwrite="false"/>
+   </preferencesInfo>
+
+   <cssInfo>
+   </cssInfo>
 
 </product>

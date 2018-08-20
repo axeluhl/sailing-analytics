@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay.NavigationItem;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class SeriesMiniOverallLeaderboardActivity extends AbstractActivity implements SeriesMiniOverallLeaderboardView.Presenter {
@@ -24,11 +25,13 @@ public class SeriesMiniOverallLeaderboardActivity extends AbstractActivity imple
     private final SeriesMiniOverallLeaderboardPlace place;
     private EventSeriesViewDTO series;
     private final NavigationPathDisplay navigationPathDisplay;
+    private final FlagImageResolver flagImageResolver;
 
-    public SeriesMiniOverallLeaderboardActivity(SeriesMiniOverallLeaderboardPlace place, NavigationPathDisplay navigationPathDisplay, MobileApplicationClientFactory clientFactory) {
+    public SeriesMiniOverallLeaderboardActivity(SeriesMiniOverallLeaderboardPlace place, NavigationPathDisplay navigationPathDisplay, MobileApplicationClientFactory clientFactory, FlagImageResolver flagImageResolver) {
         this.navigationPathDisplay = navigationPathDisplay;
         this.clientFactory = clientFactory;
         this.place = place;
+        this.flagImageResolver = flagImageResolver;
     }
 
     @Override
@@ -47,8 +50,8 @@ public class SeriesMiniOverallLeaderboardActivity extends AbstractActivity imple
     }
 
     private void initUi(AcceptsOneWidget panel, EventBus eventBus, EventSeriesViewDTO series) {
-        final SeriesMiniOverallLeaderboardView view = new SeriesMiniOverallLeaderboardViewImpl(this);
-        view.setQuickFinderValues(series.getDisplayName(), series.getEvents());
+        final SeriesMiniOverallLeaderboardView view = new SeriesMiniOverallLeaderboardViewImpl(this, flagImageResolver);
+        view.setQuickFinderValues(series.getDisplayName(), series.getEventsDescending());
         panel.setWidget(view.asWidget());
         
         initNavigationPath();

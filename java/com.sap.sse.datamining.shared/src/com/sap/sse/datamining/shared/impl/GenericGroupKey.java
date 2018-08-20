@@ -1,10 +1,8 @@
 package com.sap.sse.datamining.shared.impl;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
-import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.datamining.shared.GroupKey;
 
 
@@ -31,6 +29,11 @@ public class GenericGroupKey<T> extends AbstractGroupKey {
     public boolean hasSubKeys() {
         return false;
     }
+    
+    @Override
+    public int size() {
+        return 1;
+    }
 
     @Override
     public List<? extends GroupKey> getKeys() {
@@ -49,10 +52,6 @@ public class GenericGroupKey<T> extends AbstractGroupKey {
             Object keyValue = ((GenericGroupKey<?>) key).value;
             if (value instanceof Enum && keyValue instanceof Enum) {
                 result = ((Enum<?>) value).ordinal() - ((Enum<?>) keyValue).ordinal(); 
-            }
-            if (value instanceof String && keyValue instanceof String) {
-                Comparator<String> comparator = new NaturalComparator();
-                result = comparator.compare((String) value, (String) keyValue);
             }
         }
         return result;

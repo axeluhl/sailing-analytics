@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: gwt-dev
 Bundle-SymbolicName: com.google.gwt.dev
-Bundle-Version: 2.8.0
+Bundle-Version: 2.8.2
 Bundle-Vendor: GOOGLE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: lib/gwt-dev.jar,
@@ -12,3 +12,4 @@ Export-Package: com.google.gwt.core.ext,
  com.google.gwt.core.ext.linker,
  com.google.gwt.core.ext.linker.impl,
  com.google.gwt.dev.cfg
+Automatic-Module-Name: com.google.gwt.dev

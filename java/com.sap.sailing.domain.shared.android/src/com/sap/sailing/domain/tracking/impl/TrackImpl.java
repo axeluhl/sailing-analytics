@@ -6,10 +6,15 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.NavigableSet;
 
+import com.sap.sailing.domain.tracking.FixAcceptancePredicate;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Timed;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Function;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.scalablevalue.ScalableValue;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.util.impl.ArrayListNavigableSet;
@@ -145,14 +150,25 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
 
     @Override
     public FixType getLastFixAtOrBefore(TimePoint timePoint) {
+        return getLastFixAtOrBefore(timePoint, /* fixAcceptancePredicate == null means accept all */ null);
+    }
+    
+    private FixType getLastFixAtOrBefore(TimePoint timePoint, FixAcceptancePredicate<FixType> fixAcceptancePredicate) {
         lockForRead();
         try {
-            return (FixType) getInternalFixes().floor(getDummyFix(timePoint));
+            final NavigableSet<FixType> headSet = getInternalFixes().headSet(getDummyFix(timePoint), /* inclusive */ true);
+            for (final Iterator<FixType> i=headSet.descendingIterator(); i.hasNext(); ) {
+                final FixType next = i.next();
+                if (fixAcceptancePredicate == null || fixAcceptancePredicate.isAcceptFix(next)) {
+                    return next;
+                }
+            }
+            return null;
         } finally {
             unlockAfterRead();
         }
     }
-    
+
     @Override
     public FixType getLastFixBefore(TimePoint timePoint) {
         lockForRead();
@@ -185,9 +201,20 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
 
     @Override
     public FixType getFirstFixAtOrAfter(TimePoint timePoint) {
+        return getFirstFixAtOrAfter(timePoint, /* fixAcceptancePredicate==null means accept all fixes */ null);
+    }
+
+    private FixType getFirstFixAtOrAfter(TimePoint timePoint, FixAcceptancePredicate<FixType> fixAcceptancePredicate) {
         lockForRead();
         try {
-            return (FixType) getInternalFixes().ceiling(getDummyFix(timePoint));
+            final NavigableSet<FixType> tailSet = getInternalFixes().tailSet(getDummyFix(timePoint), /* inclusive */ true);
+            for (final Iterator<FixType> i=tailSet.iterator(); i.hasNext(); ) {
+                final FixType next = i.next();
+                if (fixAcceptancePredicate == null || fixAcceptancePredicate.isAcceptFix(next)) {
+                    return next;
+                }
+            }
+            return null;
         } finally {
             unlockAfterRead();
         }
@@ -251,6 +278,60 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
         }
     }
     
+    /**
+     * @param fixAcceptancePredicate
+     *            if not {@code null}, adjacent fixes will be skipped as long as this predicate does not
+     *            {@link FixAcceptancePredicate#isAcceptFix(Object) accept} the fix. This can, e.g., be used to skip
+     *            fixes that don't have values in a dimension required. If {@code null}, the next fixes left and right
+     *            (including the exact {@code timePoint} if a fix exists there) will be used without further check.
+     */
+    private Pair<FixType, FixType> getSurroundingFixes(TimePoint timePoint, FixAcceptancePredicate<FixType> fixAcceptancePredicate) {
+        FixType left = getLastFixAtOrBefore(timePoint, fixAcceptancePredicate);
+        FixType right = getFirstFixAtOrAfter(timePoint, fixAcceptancePredicate);
+        com.sap.sse.common.Util.Pair<FixType, FixType> result = new com.sap.sse.common.Util.Pair<>(left, right);
+        return result;
+    }
+
+    private <V, T> T timeBasedAverage(TimePoint timePoint, ScalableValue<V, T> value1, TimePoint timePoint1, ScalableValue<V, T> value2, TimePoint timePoint2) {
+        final T acc;
+        if (timePoint1.equals(timePoint2)) {
+            acc = value1.add(value2).divide(2);
+        } else {
+            long timeDiff1 = Math.abs(timePoint1.asMillis() - timePoint.asMillis());
+            long timeDiff2 = Math.abs(timePoint2.asMillis() - timePoint.asMillis());
+            acc = value1.multiply(timeDiff2).add(value2.multiply(timeDiff1)).divide(timeDiff1 + timeDiff2);
+        }
+        return acc;
+    }
+
+    @Override
+    public <InternalType, ValueType> ValueType getInterpolatedValue(TimePoint timePoint,
+            Function<FixType, ScalableValue<InternalType, ValueType>> converter) {
+        return getInterpolatedValue(timePoint, converter, /* fixAcceptancePredicate==null means accept all */ null);
+    }
+
+    protected <InternalType, ValueType> ValueType getInterpolatedValue(TimePoint timePoint,
+            Function<FixType, ScalableValue<InternalType, ValueType>> converter, FixAcceptancePredicate<FixType> fixAcceptancePredicate) {
+        final ValueType result;
+        Pair<FixType, FixType> fixPair = getSurroundingFixes(timePoint, fixAcceptancePredicate);
+        if (fixPair.getA() == null) {
+            if (fixPair.getB() == null) {
+                result = null;
+            } else {
+                result = converter.get(fixPair.getB()).divide(1);
+            }
+        } else {
+            if (fixPair.getB() == null || fixPair.getA() == fixPair.getB()) {
+                result = converter.get(fixPair.getA()).divide(1);
+            } else {
+                result = timeBasedAverage(timePoint,
+                        converter.get(fixPair.getA()), fixPair.getA().getTimePoint(),
+                        converter.get(fixPair.getB()), fixPair.getB().getTimePoint());
+            }
+        }
+        return result;
+    }
+
     @Override
     public Iterator<FixType> getFixesIterator(TimePoint startingAt, boolean inclusive) {
         assertReadLock();
@@ -377,5 +458,75 @@ public class TrackImpl<FixType extends Timed> implements Track<FixType> {
         } finally {
             unlockAfterRead();
         }
+    }
+    
+    @Override
+    public <T> T getValueSum(TimePoint from, TimePoint to, T nullElement, Adder<T> adder, TimeRangeCache<T> cache, TimeRangeValueCalculator<T> valueCalculator) {
+        return getValueSumRecursively(from, to, /* recursionLevel */ 0, nullElement, adder, cache, valueCalculator);
+    }
+    
+    private <T> T getValueSumRecursively(TimePoint from, TimePoint to, int recursionDepth, T nullElement,
+            Adder<T> adder, TimeRangeCache<T> cache, TimeRangeValueCalculator<T> valueCalculator) {
+        T result;
+        if (!from.before(to)) {
+            result = nullElement;
+        } else {
+            boolean perfectCacheHit = false;
+            lockForRead();
+            try {
+                Util.Pair<TimePoint, Util.Pair<TimePoint, T>> bestCacheEntry = cache.getEarliestFromAndResultAtOrAfterFrom(from, to);
+                if (bestCacheEntry != null) {
+                    perfectCacheHit = true; // potentially a cache hit; but if it doesn't span the full interval, it's not perfect; see below
+                    // compute the missing stretches between best cache entry's "from" and our "from" and the cache
+                    // entry's "to" and our "to"
+                    T valueFromFromToBeginningOfCacheEntry = nullElement;
+                    T valueFromEndOfCacheEntryToTo = nullElement;
+                    if (!bestCacheEntry.getB().getA().equals(from)) {
+                        assert bestCacheEntry.getB().getA().after(from);
+                        perfectCacheHit = false;
+                        valueFromFromToBeginningOfCacheEntry = getValueSumRecursively(from, bestCacheEntry
+                                .getB().getA(), recursionDepth + 1, nullElement, adder, cache, valueCalculator);
+                    }
+                    if (!bestCacheEntry.getA().equals(to)) {
+                        assert bestCacheEntry.getA().before(to);
+                        perfectCacheHit = false;
+                        valueFromEndOfCacheEntryToTo = getValueSumRecursively(bestCacheEntry.getA(), to,
+                                recursionDepth + 1, nullElement, adder, cache, valueCalculator);
+                    }
+                    if (valueFromEndOfCacheEntryToTo == null || bestCacheEntry.getB().getB() == null) {
+                        result = null;
+                    } else {
+                        result = adder.add(adder.add(valueFromFromToBeginningOfCacheEntry, bestCacheEntry.getB().getB()), 
+                                valueFromEndOfCacheEntryToTo);
+                    }
+                } else {
+                    if (from.compareTo(to) < 0) {
+                        result = valueCalculator.calculate(from, to);
+                    } else {
+                        result = nullElement;
+                    }
+                }
+                // run the cache update while still holding the read lock; this avoids bug4629 where a cache invalidation
+                // caused by fix insertions can come after the result calculation and before the cache update
+                if (!perfectCacheHit && recursionDepth == 0) {
+                    cache.cache(from, to, result);
+                }
+            } finally {
+                unlockAfterRead();
+            }
+        }
+        return result;
+    }
+
+
+    
+    @Override
+    public int size() {
+        return fixes.size();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return fixes.isEmpty();
     }
 }

@@ -10,52 +10,70 @@ import Foundation
 
 class TimerViewController: UIViewController {
 
-    private let startDate = NSDate()
+    fileprivate let startDate = Date()
     
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var timeLabel: UILabel!
+    
+    weak var timer: Timer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
     }
     
-    // MARK: - Setup
-    
-    private func setup() {
-        setupLocalization()
-        setupTimer()
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        validateTimer()
     }
     
-    private func setupLocalization() {
-        titleLabel.text = Translation.TimerView.TitleLabel.Text.String
-    }
-    
-    private func setupTimer() {
-        let timer = NSTimer(timeInterval: 0.1,
-                            target: self,
-                            selector: #selector(tick),
-                            userInfo: nil,
-                            repeats: true
-        )
-        NSRunLoop.currentRunLoop().addTimer(timer, forMode:NSRunLoopCommonModes)    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        invalidateTimer()
     }
     
     // MARK: - Timer
     
-    @objc private func tick(timer: NSTimer) {
-        let currentDate = NSDate()
-        let timeInterval = currentDate.timeIntervalSinceDate(startDate)
-        let timerDate = NSDate(timeIntervalSince1970: timeInterval)
-        timeLabel.text = dateFormatter.stringFromDate(timerDate)
+    fileprivate func validateTimer() {
+        timer = Timer.scheduledTimer(
+            timeInterval: 0.1,
+            target: self,
+            selector: #selector(tickTimer),
+            userInfo: nil,
+            repeats: true
+        )
+        tickTimer()
+    }
+
+    fileprivate func invalidateTimer() {
+        timer?.invalidate()
+    }
+    
+    // MARK: - Setup
+    
+    fileprivate func setup() {
+        setupLocalization()
+    }
+    
+    fileprivate func setupLocalization() {
+        titleLabel.text = Translation.TimerView.TitleLabel.Text.String
+    }
+    
+    // MARK: - Timer
+    
+    @objc fileprivate func tickTimer() {
+        let currentDate = Date()
+        let timeInterval = currentDate.timeIntervalSince(startDate)
+        let timerDate = Date(timeIntervalSince1970: timeInterval)
+        timeLabel.text = dateFormatter.string(from: timerDate)
     }
     
     // MARK: - Properties
     
-    private lazy var dateFormatter: NSDateFormatter = {
-        let dateFormatter = NSDateFormatter()
+    fileprivate lazy var dateFormatter: DateFormatter = {
+        let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "HH:mm:ss"
-        dateFormatter.timeZone = NSTimeZone(forSecondsFromGMT: 0)
+        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
         return dateFormatter
     }()
     

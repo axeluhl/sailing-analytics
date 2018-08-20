@@ -1,0 +1,3 @@
+.sliceButtonBackgroundImage {
+    background-image: resourceUrl('sliceButton');
+}

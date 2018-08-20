@@ -47,7 +47,7 @@ public class SailingServiceImplMock extends SailingServiceImpl {
 
     public SailingServiceImplMock() {
         super();
-        service = new RacingEventServiceImpl(true, new MockSmartphoneImeiServiceFinderFactory());
+        service = new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true, new MockSmartphoneImeiServiceFinderFactory(), /* restoreTrackedRaces */ false);
         try {
             replicationService = new ReplicationServiceImpl("test exchange", "localhost", 0,
                     new ReplicationInstancesManager(), new AbstractReplicablesProvider() {
@@ -75,7 +75,7 @@ public class SailingServiceImplMock extends SailingServiceImpl {
                     public RaceHandle addSwissTimingRace(TrackerManager trackerManager,
                             RegattaIdentifier regattaToAddTo, String raceID, String raceName, String raceDescription,
                             BoatClass boatClass, String hostname, int port, StartList startList, RaceLogStore logStore,
-                            RegattaLogStore regattaLogStore, long timeoutInMilliseconds, boolean useInternalMarkPassingAlgorithm) throws InterruptedException,
+                            RegattaLogStore regattaLogStore, long timeoutInMilliseconds, boolean useInternalMarkPassingAlgorithm, boolean trackWind, boolean correctWindDirectionByMagneticDeclination, String updateURL, String updateUsername, String updatePassword) throws InterruptedException,
                             UnknownHostException, IOException, ParseException, Exception {
                         // TODO Auto-generated method stub
                         return null;

@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.state.RaceStateChangedListener;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
@@ -42,7 +43,14 @@ public class RaceSummaryFragment extends BaseFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View layout = inflater.inflate(R.layout.race_summary, container, false);
+        final AppUtils appUtils = AppUtils.with(inflater.getContext());
+        final int resId;
+        if (appUtils.isPhone() && getResources().getConfiguration().fontScale > 1 && !appUtils.isHDPI()) {
+            resId = R.layout.race_summary_large_font;
+        } else {
+            resId = R.layout.race_summary_normal;
+        }
+        View layout = inflater.inflate(resId, container, false);
 
         mRaceStateListener = new RaceStateListener();
         mDateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);

@@ -14,15 +14,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Logger;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.PathType;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.NauticalMileDistance;
@@ -79,9 +75,13 @@ import com.sap.sailing.simulator.windfield.WindControlParameters;
 import com.sap.sailing.simulator.windfield.WindFieldGenerator;
 import com.sap.sailing.simulator.windfield.WindFieldGeneratorFactory;
 import com.sap.sailing.simulator.windfield.impl.WindFieldGeneratorMeasured;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.ThreadPoolUtil;
 
@@ -935,7 +935,9 @@ public class SimulatorServiceImpl extends RemoteServiceServlet implements Simula
 
         if (mode == SailingSimulatorConstants.ModeMeasured) {
             // Adding the polyline
-            pathDTOs[0] = this.getPolylinePathDTO(pathsAndNames.get("6#GPS Poly"), pathsAndNames.get("7#GPS Track"));
+            // TODO bug4427: Eclipse Oxygen warnings have pointed at the strange get(String) invocations below; it turns out the whole mode=m set-up in the standalone simulator seems broken; Christopher to clarify
+//            pathDTOs[0] = this.getPolylinePathDTO(pathsAndNames.get("6#GPS Poly"), pathsAndNames.get("7#GPS Track"));
+            pathDTOs[0] = this.getPolylinePathDTO(pathsAndNames.get(null), pathsAndNames.get(null)); // TODO bug4427: the above expressions evaluate to null anyway, provoking an NPE; however, mode=m fails much earlier because the SimulatorMap.regattaAreaCanvasOverlay field is null, causing an NPE even earlier
         }
 
         for (Entry<PathType, Path> entry : pathsAndNames.entrySet()) {

@@ -88,8 +88,9 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
         if (isForTracking()) {
             startTrackerIfNotAlreadyStarted();
         } else {
-            stopTrackerIfStillRunning(false);
+            stopTrackerIfStillRunning(/* preemptive */ false, /* willBeRemoved */ false);
         }
+        this.notifyAll();
     }
     
     private void addRaceLog(RaceLog raceLog) {
@@ -116,11 +117,12 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
         knownRaceLogs.remove(raceLog);
     }
     
-    public void stop(boolean preemptive) {
-        stopTrackerIfStillRunning(preemptive);
+    public void stop(boolean preemptive, boolean willBeRemoved) {
+        stopTrackerIfStillRunning(preemptive, willBeRemoved);
         trackedRace.removeListener(raceChangeListener);
         synchronized (knownRaceLogs) {
-            for (RaceLog raceLog : knownRaceLogs) {
+            final Set<RaceLog> tempSet = new HashSet<>(knownRaceLogs);
+            for (RaceLog raceLog : tempSet) {
                 removeRaceLogUnlocked(raceLog);
             }
         }
@@ -133,10 +135,10 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
         }
     }
 
-    private synchronized void stopTrackerIfStillRunning(boolean preemptive) {
+    private synchronized void stopTrackerIfStillRunning(boolean preemptive, boolean willBeRemoved) {
         if (tracker != null) {
             logger.fine("Stopping fix tracker for TrackedRace: " + trackedRace.getRaceIdentifier());
-            tracker.stop(preemptive);
+            tracker.stop(preemptive, willBeRemoved);
             tracker = null;
         }
     }
@@ -151,5 +153,12 @@ public class RaceLogFixTrackerManager implements TrackingDataLoader {
             }
         }
         return false;
+    }
+    
+    public synchronized FixLoaderAndTracker waitForTracker() throws InterruptedException {
+        while (tracker == null) {
+            this.wait();
+        }
+        return tracker;
     }
 }

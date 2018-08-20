@@ -28,6 +28,7 @@ import com.google.gwt.user.client.ui.HTMLTable.ColumnFormatter;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -79,13 +80,14 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     private TextBox jsonURLTextBox;
     private TextBox tracTracUpdateURITextBox;
     private TextBox tractracUsernameTextBox;
-    private TextBox tractracPasswordTextBox;
+    private PasswordTextBox tractracPasswordTextBox;
     private Label loadingMessageLabel;
 
     private LabeledAbstractFilterablePanel<TracTracRaceRecordDTO> racesFilterablePanel;
     private FlushableCellTable<TracTracRaceRecordDTO> racesTable;
     
-    public TracTracEventManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
+    public TracTracEventManagementPanel(final SailingServiceAsync sailingService,
+            ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringMessages) {
         super(sailingService, regattaRefresher, errorReporter, true, stringMessages);
         this.errorReporter = errorReporter;
@@ -198,7 +200,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         grid.setWidget(6, 1, tractracUsernameTextBox);
         
         // TracTrac Password
-        tractracPasswordTextBox = new TextBox();
+        tractracPasswordTextBox = new PasswordTextBox();
         tractracPasswordTextBox.ensureDebugId("TracTracPasswordTextBox");
         tractracPasswordTextBox.setVisibleLength(40);
         
@@ -221,10 +223,8 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
             }
         });
         grid.setWidget(9, 1, listRacesButton);
-        
         loadingMessageLabel = new Label();
         grid.setWidget(9, 2, loadingMessageLabel);
-
         return connectionsPanel;
     }
 
@@ -455,12 +455,10 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
     
     private String getBoatClassNamesAsString(TracTracRaceRecordDTO object) {
         StringBuilder boatClassNames = new StringBuilder();
-        
         for (String boatClassName : object.boatClassNames) {
             boatClassNames.append(boatClassName);
             boatClassNames.append(", ");
         }
-        
         return boatClassNames.substring(0, boatClassNames.length() - 2);
     }
     

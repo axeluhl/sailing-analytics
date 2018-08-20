@@ -5,6 +5,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.http.client.UrlBuilder;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.Window;
 
 /**
@@ -29,7 +30,7 @@ public class UrlBuilderUtil {
     public static UrlBuilder createUrlBuilderFromCurrentLocationWithCleanParameters() {
         final UrlBuilder urlBuilder = Window.Location.createUrlBuilder();
         for (String parameterName : Window.Location.getParameterMap().keySet()) {
-            if (!"gwt.codesvr".equals(parameterName) && !"locale".equals(parameterName)) {
+            if (!"gwt.codesvr".equals(parameterName) && !LocaleInfo.getLocaleQueryParam().equals(parameterName)) {
                 urlBuilder.removeParameter(parameterName);
             }
         }

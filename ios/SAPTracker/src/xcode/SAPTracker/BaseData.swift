@@ -21,7 +21,11 @@ class BaseData: NSObject {
         self.dictionary = dictionary ?? [String: AnyObject]()
         super.init()
     }
-    
+
+    func dictionaryValue(forKey key: String) -> [String: AnyObject] {
+        return dictionary[key] as? [String: AnyObject] ?? [String: AnyObject]()
+    }
+
     func doubleValue(forKey key: String) -> Double {
         return dictionary[key] as? Double ?? 0.0
     }

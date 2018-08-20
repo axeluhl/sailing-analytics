@@ -7,9 +7,9 @@
             margin-bottom: 2em;
         }
         .temp {
-			font-weight: bold; 
-			font-style: italic;
-		} 
+            font-weight: bold; 
+            font-style: italic;
+        } 
     </ui:style>
     <g:HTMLPanel>
         <div class="{res.mediaCss.grid}">

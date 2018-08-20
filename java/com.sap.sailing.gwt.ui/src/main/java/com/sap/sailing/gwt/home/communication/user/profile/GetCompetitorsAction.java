@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
@@ -37,7 +37,7 @@ public class GetCompetitorsAction implements SailingAction<SortedSetResult<Simpl
     @Override
     @GwtIncompatible
     public SortedSetResult<SimpleCompetitorWithIdDTO> execute(SailingDispatchContext ctx) throws DispatchException {
-        CompetitorStore competitorStore = ctx.getRacingEventService().getCompetitorStore();
+        CompetitorAndBoatStore competitorStore = ctx.getRacingEventService().getCompetitorAndBoatStore();
         SortedSetResult<SimpleCompetitorWithIdDTO> result = new SortedSetResult<>();
         for (String id : ids) {
             Competitor competitor = competitorStore.getExistingCompetitorByIdAsString(id);

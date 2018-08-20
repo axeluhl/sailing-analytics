@@ -10,10 +10,8 @@ import java.util.Map;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.Cell.Context;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
-import com.google.gwt.user.cellview.client.Header;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.SortingOrder;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
@@ -52,7 +50,7 @@ public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableCol
     private final LinkedList<Boolean> queuedToggleRequests;
     
     private boolean suppressSortingOnce;
-    private final LeaderboardPanel leaderboardPanel;
+    private final LeaderboardPanel<?> leaderboardPanel;
     private final Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> detailColumnsMap;
     private final List<DetailType> detailSelection;
     
@@ -71,7 +69,7 @@ public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableCol
      */
     private boolean expanded;
 
-    public ExpandableSortableColumn(LeaderboardPanel leaderboardPanel, boolean enableExpansion, Cell<C> cell,
+    public ExpandableSortableColumn(LeaderboardPanel<?> leaderboardPanel, boolean enableExpansion, Cell<C> cell,
             SortingOrder preferredSortingOrder, StringMessages stringConstants, String detailHeaderStyle, String detailColumnStyle,
             List<DetailType> detailSelection, DisplayedLeaderboardRowsProvider displayedLeaderboardRowsProvider) {
         super(cell, preferredSortingOrder, displayedLeaderboardRowsProvider);
@@ -87,12 +85,12 @@ public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableCol
      * override this method.
      */
     protected Map<DetailType, AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?>> getDetailColumnMap(
-            LeaderboardPanel leaderboardPanel, StringMessages stringConstants, String detailHeaderStyle,
+            LeaderboardPanel<?> leaderboardPanel, StringMessages stringConstants, String detailHeaderStyle,
             String detailColumnStyle) {
         return Collections.emptyMap();
     }
 
-    protected LeaderboardPanel getLeaderboardPanel() {
+    protected LeaderboardPanel<?> getLeaderboardPanel() {
         return leaderboardPanel;
     }
     
@@ -191,7 +189,7 @@ public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableCol
             } else {
                 final CellTable<LeaderboardRowDTO> table = getLeaderboardPanel().getLeaderboardTable();
                 if (table == null) {
-                    GWT.log("WARNING: leaderborad table is null");
+                    GWT.log("WARNING: leaderboard table is null");
                 } else {
                     getLeaderboardPanel().addBusyTask();
                     setTogglingInProcess(true);
@@ -239,10 +237,10 @@ public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableCol
     }
     /**
      * Finishes the current toggling by removing the
-     * {@link LeaderboardPanel#removeBusyTask() busy task} from the {@link #getLeaderboardPanel() leaderboard panel} and setting the
+     * {@link ClassicLeaderboardPanel#removeBusyTask() busy task} from the {@link #getLeaderboardPanel() leaderboard panel} and setting the
      * {@link #setTogglingInProcess(boolean) togglingInProcess flag} to <code>false</code>.
      * Afterwards, {@link #queuedToggleRequests queued toggling requests} are executed, if any.
-     * Make sure that this method is called only once, and only after {@link LeaderboardPanel#addBusyTask()} has been called.
+     * Make sure that this method is called only once, and only after {@link ClassicLeaderboardPanel#addBusyTask()} has been called.
      */
     private void finishCurrentToggling() {
         getLeaderboardPanel().removeBusyTask();
@@ -298,6 +296,6 @@ public abstract class ExpandableSortableColumn<C> extends LeaderboardSortableCol
     }
     
     @Override
-    public abstract Header<SafeHtml> getHeader();
+    public abstract SortableExpandableColumnHeader getHeader();
 
 }

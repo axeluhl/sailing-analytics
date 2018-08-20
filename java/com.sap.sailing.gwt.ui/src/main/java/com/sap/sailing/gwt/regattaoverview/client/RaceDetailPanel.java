@@ -284,7 +284,7 @@ public class RaceDetailPanel extends SimplePanel {
         }
 
         return bothNullOrEquals(left.courseAreaIdAsString, right.courseAreaIdAsString)
-                && bothNullOrEquals(left.regattaName, right.regattaName)
+                && bothNullOrEquals(left.leaderboardName, right.leaderboardName)
                 && bothNullOrEquals(left.raceInfo.seriesName, right.raceInfo.seriesName)
                 && bothNullOrEquals(left.raceInfo.fleetName, right.raceInfo.fleetName)
                 && bothNullOrEquals(left.raceInfo.raceName, right.raceInfo.raceName);

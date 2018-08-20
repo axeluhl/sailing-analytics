@@ -5,9 +5,9 @@ import java.util.Comparator;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 
-public class TrackingQualityMinMaxRenderer extends MinMaxRenderer {
+public class TrackingQualityMinMaxRenderer extends MinMaxRenderer<LeaderboardRowDTO> {
 
-    public TrackingQualityMinMaxRenderer(HasStringAndDoubleValue valueProvider, Comparator<LeaderboardRowDTO> comparator) {
+    public TrackingQualityMinMaxRenderer(HasStringAndDoubleValue<LeaderboardRowDTO> valueProvider, Comparator<LeaderboardRowDTO> comparator) {
         super(valueProvider, comparator);
     }
     

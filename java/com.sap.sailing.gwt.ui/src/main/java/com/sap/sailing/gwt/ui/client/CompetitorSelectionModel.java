@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.client;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,18 +10,18 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 
 public class CompetitorSelectionModel implements CompetitorSelectionProvider {
-    private final Set<CompetitorDTO> allCompetitors;
+    protected final Set<CompetitorDTO> allCompetitors;
     
     /**
-     * Keys are {@link CompetitorDTO#getIdAsString()} of their values
+     * Keys are {@link CompetitorWithBoatDTO#getIdAsString()} of their values
      */
     private final LinkedHashMap<String, CompetitorDTO> selectedCompetitors;
     
@@ -32,7 +31,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     
     private FilterSet<CompetitorDTO, Filter<CompetitorDTO>> competitorsFilterSet; 
 
-    private final CompetitorColorProvider competitorColorProvider; 
+    protected final CompetitorColorProvider competitorColorProvider; 
 
     public CompetitorSelectionModel(boolean hasMultiSelection) {
         this(hasMultiSelection, new CompetitorColorProviderImpl(), null);
@@ -47,7 +46,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
         this.hasMultiSelection = hasMultiSelection;
         this.competitorColorProvider = competitorColorProvider;
         this.competitorsFilterSet = competitorsFilterSet;
-        this.allCompetitors = new LinkedHashSet<CompetitorDTO>();
+        this.allCompetitors = new LinkedHashSet<>();
         this.selectedCompetitors = new LinkedHashMap<>();
         this.listeners = new HashSet<CompetitorSelectionChangeListener>();
     }
@@ -56,7 +55,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
      * Adds a competitor to the {@link #getAllCompetitors() set of all competitors}. If the competitor was not yet
      * contained, it will be deselected.
      */
-    public void add(CompetitorDTO competitor) {
+    public void add(CompetitorWithBoatDTO competitor) {
         add(competitor, true);
     }
     
@@ -127,7 +126,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     @Override
     public Iterable<CompetitorDTO> getSelectedFilteredCompetitors() {
         Set<CompetitorDTO> result = new HashSet<>(selectedCompetitors.values());
-        result.retainAll(getFilteredCompetitors());
+        Util.retainAll(getFilteredCompetitors(), result);
         return result;
     }
 
@@ -137,8 +136,8 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     }
     
     @Override
-    public Collection<CompetitorDTO> getFilteredCompetitors() {
-        Set<CompetitorDTO> currentFilteredList = new LinkedHashSet<CompetitorDTO>(allCompetitors);
+    public Iterable<CompetitorDTO> getFilteredCompetitors() {
+        Set<CompetitorDTO> currentFilteredList = new LinkedHashSet<>(allCompetitors);
         if (competitorsFilterSet != null) {
             for (Filter<CompetitorDTO> filter : competitorsFilterSet.getFilters()) {
                 for (Iterator<CompetitorDTO> i=currentFilteredList.iterator(); i.hasNext(); ) {
@@ -207,7 +206,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
 
     @Override
     public void setSelection(Iterable<CompetitorDTO> newSelection, CompetitorSelectionChangeListener... listenersNotToNotify) {
-        Set<CompetitorDTO> competitorsToRemoveFromSelection = new HashSet<CompetitorDTO>(selectedCompetitors.values());
+        Set<CompetitorDTO> competitorsToRemoveFromSelection = new HashSet<>(selectedCompetitors.values());
         for (CompetitorDTO newSelectedCompetitor : newSelection) {
             setSelected(newSelectedCompetitor, true, listenersNotToNotify);
             competitorsToRemoveFromSelection.remove(newSelectedCompetitor);
@@ -220,7 +219,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     @Override
     public void setCompetitors(Iterable<CompetitorDTO> newCompetitors, CompetitorSelectionChangeListener... listenersNotToNotify) {
         boolean changed = false;
-        Map<String, CompetitorDTO> oldCompetitorsToRemove = new HashMap<String, CompetitorDTO>();
+        Map<String, CompetitorDTO> oldCompetitorsToRemove = new HashMap<>();
         for (final CompetitorDTO c : allCompetitors) {
             oldCompetitorsToRemove.put(c.getIdAsString(), c);
         }
@@ -261,11 +260,6 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     }
 
     @Override
-    public Color getColor(CompetitorDTO competitor, RegattaAndRaceIdentifier raceIdentfier) {
-        return allCompetitors.contains(competitor) ? competitorColorProvider.getColor(competitor, raceIdentfier) : Color.WHITE /* safe default */;
-    }
-
-    @Override
     public FilterSet<CompetitorDTO, Filter<CompetitorDTO>> getCompetitorsFilterSet() {
         return competitorsFilterSet;
     }
@@ -273,7 +267,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     @Override 
     public FilterSet<CompetitorDTO, Filter<CompetitorDTO>> getOrCreateCompetitorsFilterSet(String nameToAssignToNewFilterSet) {
         if (competitorsFilterSet == null) {
-            competitorsFilterSet = new FilterSet<CompetitorDTO, Filter<CompetitorDTO>>(nameToAssignToNewFilterSet);
+            competitorsFilterSet = new FilterSet<>(nameToAssignToNewFilterSet);
         }
         return getCompetitorsFilterSet();
     }
@@ -295,7 +289,7 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
     @Override
     public boolean hasActiveFilters() {
         return (competitorsFilterSet != null && !competitorsFilterSet.getFilters().isEmpty() 
-                && getFilteredCompetitors().size() != allCompetitors.size());
+                && Util.size(getFilteredCompetitors()) != allCompetitors.size());
     }
 
     @Override
@@ -314,6 +308,6 @@ public class CompetitorSelectionModel implements CompetitorSelectionProvider {
 
     @Override
     public int getFilteredCompetitorsListSize() {
-        return getFilteredCompetitors().size();
+        return Util.size(getFilteredCompetitors());
     }
 }

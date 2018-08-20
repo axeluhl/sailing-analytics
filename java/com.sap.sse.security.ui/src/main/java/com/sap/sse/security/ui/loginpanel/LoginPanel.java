@@ -5,13 +5,15 @@ import java.util.HashMap;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ImageResourceRenderer;
 import com.google.gwt.user.client.ui.Label;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
@@ -55,11 +57,11 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
                         userService.login(userData.getUsername(), userData.getPassword(), new MarkedAsyncCallback<SuccessInfo>(new AsyncCallback<SuccessInfo>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                Window.alert(stringMessages.invalidCredentials());
+                                Notification.notify(stringMessages.invalidCredentials(), NotificationType.ERROR);
                             }
                             @Override public void onSuccess(SuccessInfo result) {
                                 if (!result.isSuccessful()) {
-                                    Window.alert(stringMessages.invalidCredentials());
+                                    Notification.notify(stringMessages.invalidCredentials(), NotificationType.ERROR);
                                 }
                             }
                         }));
@@ -77,19 +79,19 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
                     @Override
                     public void ok(final UserData userData) {
                         userManagementService.createSimpleUser(userData.getUsername(), userData.getEmail(), userData.getPassword(),
-                                /* fullName */ null, /* company */ null,
+                                /* fullName */ null, /* company */ null, LocaleInfo.getCurrentLocale().getLocaleName(),
                                 EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()),
                                 new MarkedAsyncCallback<UserDTO>(new AsyncCallback<UserDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                Window.alert(stringMessages.errorCreatingUser(userData.getUsername(), caught.getMessage()));
+                                Notification.notify(stringMessages.errorCreatingUser(userData.getUsername(), caught.getMessage()), NotificationType.ERROR);
                             }
                             @Override public void onSuccess(UserDTO result) {
                                 userService.login(userData.getUsername(), userData.getPassword(), new MarkedAsyncCallback<SuccessInfo>(new AsyncCallback<SuccessInfo>() {
                                     @Override
                                     public void onFailure(Throwable caught) {
                                         // pretty strange; we just successfully created the user with these credentials...
-                                        Window.alert(stringMessages.invalidCredentials());
+                                        Notification.notify(stringMessages.invalidCredentials(), NotificationType.ERROR);
                                     }
                                     @Override public void onSuccess(SuccessInfo result) {}
                                 }));
@@ -163,7 +165,7 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
     }
 
     @Override
-    public void onUserStatusChange(UserDTO user) {
+    public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
         updateStatus();
     }
 }

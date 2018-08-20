@@ -1,0 +1,15 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+             xmlns:f="urn:import:com.sap.sailing.gwt.home.shared.partials.filter">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">
+        <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopsmall} {res.mainCss.spacermarginbottomsmall}">
+            <ui:text from="{i18n.userProfileSettingsTabDescription}" />
+        </div>
+        <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermarginbottomsmall}">
+            <f:UserSettingsByKeyTextBoxFilter ui:field="userSettingsFilterUi"/>
+        </div>
+        <g:FlowPanel ui:field="settingsContainerUi" addStyleNames="{res.mediaCss.column} {res.mediaCss.small12}" />
+    </g:HTMLPanel>
+</ui:UiBinder> 

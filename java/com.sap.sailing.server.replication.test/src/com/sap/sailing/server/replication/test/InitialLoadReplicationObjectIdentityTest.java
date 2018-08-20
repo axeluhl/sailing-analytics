@@ -1,7 +1,6 @@
 package com.sap.sailing.server.replication.test;
 
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
@@ -11,9 +10,11 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -25,8 +26,10 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogWindFixEventImpl;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -43,7 +46,6 @@ import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
@@ -57,6 +59,7 @@ import com.sap.sailing.domain.persistence.PersistenceFactory;
 import com.sap.sailing.domain.persistence.media.MediaDBFactory;
 import com.sap.sailing.domain.racelog.tracking.EmptySensorFixStore;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
+import com.sap.sailing.domain.test.PositionAssert;
 import com.sap.sailing.domain.test.TrackBasedTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -70,6 +73,7 @@ import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboar
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MimeType;
@@ -88,9 +92,9 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
     public void setUp() throws Exception {
         persistenceSetUp(/* dropDB */ true);
         this.master = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(testSetUp.mongoDBService, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
-                .getMongoObjectFactory(testSetUp.mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(testSetUp.mongoDBService), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE);
+                .getMongoObjectFactory(testSetUp.mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(testSetUp.mongoDBService), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE, /* restoreTrackedRaces */ false);
         this.replica = new RacingEventServiceImpl(PersistenceFactory.INSTANCE.getDomainObjectFactory(testSetUp.mongoDBService, DomainFactory.INSTANCE), PersistenceFactory.INSTANCE
-                .getMongoObjectFactory(testSetUp.mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(testSetUp.mongoDBService), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE);
+                .getMongoObjectFactory(testSetUp.mongoDBService), MediaDBFactory.INSTANCE.getMediaDB(testSetUp.mongoDBService), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE, /* restoreTrackedRaces */ false);
     }
     
     private void performReplicationSetup() throws Exception {
@@ -122,7 +126,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         final String boatClassName = "49er";
         final Iterable<Series> series = Collections.emptyList();
         Regatta masterRegatta = master.createRegatta(RegattaImpl.getDefaultName(baseEventName, boatClassName), boatClassName, 
-                /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(), series,
+                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(), series,
                 /* persistent */ true, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true,
                 /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric.CONSTRUCTOR);
         assertNotNull(master.getRegatta(masterRegatta.getRegattaIdentifier()));
@@ -131,7 +135,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         
         /* RaceDefinition and DynamicTrackedRace */
         RaceDefinition masterRace = new RaceDefinitionImpl("Test Race", new CourseImpl("Test Course", Collections.<Waypoint>emptyList()),
-                masterRegatta.getBoatClass(), Collections.<Competitor>emptyList());
+                masterRegatta.getBoatClass(), Collections.<Competitor,Boat>emptyMap());
         masterRegatta.addRace(masterRace);
         DynamicTrackedRace masterTrackedRace = master.createTrackedRace(new RegattaNameAndRaceName(masterRegatta.getName(), masterRace.getName()),
                 master.getWindStore(), /* delayToLiveInMillis */ 3000,
@@ -158,7 +162,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         WindTrack masterRCWindFixes = masterTrackedRace.getOrCreateWindTrack(new WindSourceImpl(WindSourceType.RACECOMMITTEE));
         masterRCWindFixes.lockForRead();
         try {
-            assertEquals(masterWindFix, masterRCWindFixes.getRawFixes().iterator().next());
+            PositionAssert.assertWindEquals(masterWindFix, masterRCWindFixes.getRawFixes().iterator().next(), /* pos deg delta */ 0.0000001, /* bearing deg delta */ 0.01, /* knot speed delta */ 0.01);
         } finally {
             masterRCWindFixes.unlockAfterRead();
         }
@@ -233,7 +237,7 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         try {
             Iterator<Wind> replicaRCWindFixesIter = replicaRCWindFixes.getRawFixes().iterator();
             replicaRCWindFixesIter.next();
-            assertEquals(replicaWindFix, replicaRCWindFixesIter.next());
+            PositionAssert.assertWindEquals(replicaWindFix, replicaRCWindFixesIter.next(), /* pos deg delta */ 0.0000001, /* bearing deg delta */ 0.01, /* knot speed delta */ 0.02);
         } finally {
             replicaRCWindFixes.unlockAfterRead();
         }
@@ -252,10 +256,10 @@ public class InitialLoadReplicationObjectIdentityTest extends AbstractServerRepl
         Regatta regatta = master.apply(addEventOperation);
         final String raceName1 = "Test Race 1";
         final String raceName2 = "Test Race 2";
-        Competitor competitor = TrackBasedTest.createCompetitor("The Same Competitor");
+        CompetitorWithBoat competitor = TrackBasedTest.createCompetitorWithBoat("The Same Competitor");
         final CourseImpl masterCourse = new CourseImpl("Test Course", new ArrayList<Waypoint>());
-        final ArrayList<Competitor> competitors = new ArrayList<Competitor>();
-        competitors.add(competitor);
+        final Map<Competitor,Boat> competitors = new HashMap<>();
+        competitors.put(competitor, competitor.getBoat());
         RaceDefinition race1 = new RaceDefinitionImpl(raceName1, masterCourse, boatClass, competitors);
         AddRaceDefinition addRaceOperation1 = new AddRaceDefinition(new RegattaName(regatta.getName()), race1);
         master.apply(addRaceOperation1);

@@ -11,8 +11,6 @@ public class ManeuverTypeFormatter {
             return stringMessages.headUp();
         case JIBE:
             return stringMessages.jibe();
-        case MARK_PASSING:
-            return stringMessages.markPassing();
         case PENALTY_CIRCLE:
             return stringMessages.penaltyCircle();
         case TACK:

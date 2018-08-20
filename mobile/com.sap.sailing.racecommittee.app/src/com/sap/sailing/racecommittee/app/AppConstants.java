@@ -13,10 +13,10 @@ public class AppConstants {
     public final static String FLAG_KEY = PACKAGE_NAME + ".raceFlag";
     public final static String EXTRA_FORCE_REFRESH = PACKAGE_NAME + ".forceRefresh";
 
-    public final static String AUTHOR_TYPE_OFFICER_START = "Race Officer on Start Vessel";
-    public final static String AUTHOR_TYPE_OFFICER_FINISH = "Race Officer on Finish Vessel";
+    public final static String AUTHOR_TYPE_OFFICER_VESSEL = "Race Officer on Vessel";
     public final static String AUTHOR_TYPE_SHORE_CONTROL = "Shore Control";
     public final static String AUTHOR_TYPE_VIEWER = "Viewer";
+    public final static String AUTHOR_TYPE_SUPERUSER = "Super User";
 
     public final static String DARK_THEME = "dark";
     public final static String LIGHT_THEME = "light";
@@ -41,8 +41,15 @@ public class AppConstants {
 
     // Inner process events
     public final static String INTENT_ACTION_TOGGLE = PACKAGE_NAME + ".action.toggle";
+    public final static String INTENT_ACTION_ON_LIFECYCLE = PACKAGE_NAME + ".action.on";
+    public final static String INTENT_ACTION_EXTRA = PACKAGE_NAME + ".action.extra";
+    public final static String INTENT_ACTION_EXTRA_FORCED = INTENT_ACTION_EXTRA + ".forced";
 
-    public final static String INTENT_ACTION_EXTRA = PACKAGE_NAME + ".extra";
+    // Lifecycle events as extra
+    public final static String INTENT_ACTION_EXTRA_LIFECYCLE = INTENT_ACTION_EXTRA + ".lifecycle";
+    public final static String INTENT_ACTION_EXTRA_START = "start";
+    public final static String INTENT_ACTION_EXTRA_STOP = "stop";
+
     public final static String INTENT_ACTION_TOGGLE_PROCEDURE = "procedure";
     public final static String INTENT_ACTION_TOGGLE_PROCEDURE_MORE_MODE = "more_mode";
     public final static String INTENT_ACTION_TOGGLE_PROCEDURE_MORE_PATHFINDER = "more_pathfinder";
@@ -56,6 +63,7 @@ public class AppConstants {
     public final static String INTENT_ACTION_TOGGLE_RECALL = "recall";
     public final static String INTENT_ACTION_TOGGLE_BLUE_FIRST = "more";
     public final static String INTENT_ACTION_TOGGLE_BLUE_LAST = "blue_last";
+    public final static String INTENT_ACTION_TOGGLE_COMPETITOR = "competitor";
 
     public final static String INTENT_ACTION_TOGGLE_REPLAY = "replay";
     public final static String INTENT_ACTION_TOGGLE_PHOTOS = "photos";

@@ -9,11 +9,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.AbstractBearing;
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.simulator.PolarDiagram;
 import com.sap.sailing.simulator.impl.PolarDiagram49;
@@ -22,6 +18,10 @@ import com.sap.sailing.simulator.impl.PolarDiagram49ORC;
 import com.sap.sailing.simulator.impl.PolarDiagram49STG;
 import com.sap.sailing.simulator.impl.PolarDiagram505STG;
 import com.sap.sailing.simulator.impl.PolarDiagramCSV;
+import com.sap.sse.common.AbstractBearing;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Speed;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 public class PolarDiagramCSVTest {
     private static double DELTA_PERCENTAGE = 0.54;

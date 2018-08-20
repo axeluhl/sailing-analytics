@@ -27,4 +27,8 @@ public enum RaceLogTrackingState {
     public boolean isForTracking() {
         return this != NOT_A_RACELOG_TRACKED_RACE;
     }
+    
+    public boolean isTracking() {
+        return this == TRACKING;
+    }
 }

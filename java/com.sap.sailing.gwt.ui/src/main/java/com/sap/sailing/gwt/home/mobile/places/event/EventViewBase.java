@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.user.client.ui.IsWidget;
+import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.gwt.home.communication.SailingDispatchSystem;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
@@ -31,6 +32,8 @@ public interface EventViewBase extends IsWidget {
     
     void setSailorInfos(String description, String buttonLabel, String url);
     
+    void setWindfinderNavigations(Iterable<SpotDTO> spotData);
+
     void setSeriesNavigation(String buttonLabel, PlaceNavigation<?> placeNavigation);
 
     public interface Presenter extends RegattaLeaderboardNavigationProvider, SeriesLeaderboardNavigationProvider,
@@ -46,8 +49,6 @@ public interface EventViewBase extends IsWidget {
         PlaceNavigation<?> getEventNavigation();
         
         PlaceNavigation<?> getMediaPageNavigation();
-        
-        String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata);
         
         String getRaceViewerURL(SimpleRaceMetadataDTO raceMetadata, String mode);
 

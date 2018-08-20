@@ -18,6 +18,7 @@ public interface ClusterBoundary<ElementType extends Serializable> extends Seria
     public boolean contains(ElementType value);
 
     public ComparisonStrategy getStrategy();
+    public ElementType getBoundaryValue();
 
     public Class<ElementType> getClusterElementsType();
 

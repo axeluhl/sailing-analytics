@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
-import com.sap.sailing.domain.common.Speed;
+import com.sap.sse.common.Speed;
 
 public class SpeedFragment extends BaseFragment {
 

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/button_bar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:layout_marginBottom="8dp"
+    android:layout_marginLeft="8dp"
+    android:layout_marginRight="8dp"
+    android:orientation="horizontal">
+
+    <Spinner
+        android:id="@+id/spinner_penalty"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="1"
+        android:background="@drawable/spinner_background_light"
+        android:spinnerMode="dropdown" />
+
+    <ImageButton
+        android:id="@+id/button_apply"
+        style="?attr/button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:clipToPadding="false"
+        android:src="?attr/check_24dp_invert"
+        android:stateListAnimator="@animator/button_elevation" />
+
+    <Button
+        android:id="@+id/button_publish"
+        style="?attr/button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:gravity="center"
+        tools:text="@string/confirm" />
+</LinearLayout>

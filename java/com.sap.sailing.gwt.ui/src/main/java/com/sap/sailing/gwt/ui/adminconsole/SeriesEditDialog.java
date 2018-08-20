@@ -13,7 +13,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.resources.client.ImageResource;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -31,6 +30,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sse.gwt.client.IconResources;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.controls.listedit.GenericStringListInlineEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
@@ -223,7 +224,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         raceNamesEditor.addValueChangeHandler(new ValueChangeHandler<Iterable<String>>() {
             @Override
             public void onValueChange(ValueChangeEvent<Iterable<String>> event) {
-                validate();
+                validateAndUpdate();
             }
         });
         
@@ -416,9 +417,9 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
                         for (String raceToAdd : raceNamesToAdd) {
                             addValue(raceToAdd);
                         }
-                        validate();
+                        validateAndUpdate();
                     } else {
-                        Window.alert(getStringMessages().pleaseSelectASeriesFirst());
+                        Notification.notify(getStringMessages().pleaseSelectASeriesFirst(), NotificationType.ERROR);
                     }
                 }
             });

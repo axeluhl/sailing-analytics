@@ -14,14 +14,14 @@ import java.util.logging.Logger;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.maps.client.MapWidget;
-import com.sap.sailing.domain.common.AbstractBearing;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldDTO;
 import com.sap.sailing.gwt.ui.shared.WindFieldGenParamsDTO;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.util.ToolTip;
+import com.sap.sse.common.AbstractBearing;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.gwt.client.player.Timer;
 
 /**

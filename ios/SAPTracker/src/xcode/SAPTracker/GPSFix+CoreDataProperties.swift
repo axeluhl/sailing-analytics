@@ -19,6 +19,6 @@ extension GPSFix {
     @NSManaged var longitude: Double
     @NSManaged var speed: Double
     @NSManaged var timestamp: Double
-    @NSManaged var regatta: Regatta
+    @NSManaged var checkIn: CheckIn
 
 }

@@ -1,10 +1,12 @@
 package com.sap.sailing.racecommittee.app.ui.views;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -19,6 +21,8 @@ import android.widget.TextView;
 
 import com.sap.sailing.racecommittee.app.R;
 
+import java.util.Locale;
+
 public class CompassView extends RelativeLayout {
 
     private CompassDirectionListener changeListener;
@@ -29,19 +33,18 @@ public class CompassView extends RelativeLayout {
     private float currentDegrees;
     private Float deferredToDegrees;
 
-    public CompassView(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-        inflate();
+    public CompassView(Context context) {
+        this(context, null);
     }
 
     public CompassView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        inflate();
+        this(context, attrs, 0);
     }
 
-    public CompassView(Context context) {
-        super(context);
-        inflate();
+    public CompassView(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
+
+        LayoutInflater.from(getContext()).inflate(R.layout.compass_view, this);
     }
 
     private float getNeedlePivotX() {
@@ -52,9 +55,26 @@ public class CompassView extends RelativeLayout {
         return needleView.getMeasuredHeight() / 2;
     }
 
-    private void inflate() {
-        LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        inflater.inflate(R.layout.compass_view, this);
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+
+        int size;
+        if (widthMode == MeasureSpec.EXACTLY && widthSize > 0) {
+            size = widthSize;
+        } else if (heightMode == MeasureSpec.EXACTLY && heightSize > 0) {
+            size = heightSize;
+        } else {
+            size = widthSize < heightSize ? widthSize : heightSize;
+        }
+
+        degreeView.setTextSize(TypedValue.COMPLEX_UNIT_PX, size / 10);
+
+        int finalMeasureSpec = MeasureSpec.makeMeasureSpec(size, MeasureSpec.EXACTLY);
+        super.onMeasure(finalMeasureSpec, finalMeasureSpec);
     }
 
     @Override
@@ -70,7 +90,7 @@ public class CompassView extends RelativeLayout {
             public void onImeBack(BackAwareEditText editText) {
                 float degree = currentDegrees > 0 ? currentDegrees : currentDegrees + 360;
                 degreeView.clearFocus();
-                degreeView.setText(String.format("%.0f°", degree));
+                degreeView.setText(String.format(Locale.getDefault(), "%.0f°", degree));
                 degreeValue.setText(degreeView.getText());
             }
         });
@@ -117,6 +137,7 @@ public class CompassView extends RelativeLayout {
         dialog.show();
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         float rotateX = (-1) * (event.getY() - needleView.getY() - getNeedlePivotY());
@@ -166,7 +187,7 @@ public class CompassView extends RelativeLayout {
             if (degree >= 359.5f) {
                 degree = 0;
             }
-            degreeView.setText(String.format("%.0f°", degree));
+            degreeView.setText(String.format(Locale.getDefault(), "%.0f°", degree));
             degreeValue.setText(degreeView.getText());
         }
     }

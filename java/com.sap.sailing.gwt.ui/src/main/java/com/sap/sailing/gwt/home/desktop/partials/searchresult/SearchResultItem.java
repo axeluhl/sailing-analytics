@@ -30,10 +30,6 @@ public class SearchResultItem extends AbstractSearchResultItem {
         this.navigator = navigator;
         this.item = item;
         init(uiBinder.createAndBindUi(this), item);
-        SearchResultEventInfoDTO event = item.getEvents().iterator().next();
-        String eventId = String.valueOf(event.getId()), leaderboardName = item.getLeaderboardName(), baseUrl = item.getBaseUrl();
-        PlaceNavigation<?> regattaNavigation = navigator.getRegattaNavigation(eventId, leaderboardName, baseUrl, item.isOnRemoteServer());
-        regattaNavigation.configureAnchorElement(resultTitleUi);
     }
 
     @Override
@@ -42,9 +38,15 @@ public class SearchResultItem extends AbstractSearchResultItem {
     }
     
     @Override
+    protected void configureRegattaNavigation(String eventId, String leaderboardName, String baseUrl, boolean isOnRemoteServer) {
+        navigator.getRegattaNavigation(eventId, leaderboardName, baseUrl, item.isOnRemoteServer()).configureAnchorElement(resultTitleUi);
+    }
+    
+    @Override
     protected void addEventInfo(SearchResultEventInfoDTO event) {
-        eventInfoContainerUi.appendChild(new SearchResultItemEventInfo(
-                navigator, event, item.getBaseUrl(), item.isOnRemoteServer()).getElement());
+        String eventId = String.valueOf(event.getId());
+        PlaceNavigation<?> eventNavigation = navigator.getEventNavigation(eventId, item.getBaseUrl(), item.isOnRemoteServer());
+        eventInfoContainerUi.appendChild(new SearchResultItemEventInfo(event, eventNavigation).getElement());
     }
 
 }

@@ -8,13 +8,16 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.windfinder.SpotDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.desktop.partials.eventheader.EventHeader;
 import com.sap.sailing.gwt.home.desktop.partials.sailorinfo.SailorInfo;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
+import com.sap.sailing.gwt.home.shared.partials.windfinder.WindfinderControl;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
 
 public class TabletAndDesktopMultiRegattaEventView extends Composite implements EventMultiregattaView {
     
@@ -45,6 +48,10 @@ public class TabletAndDesktopMultiRegattaEventView extends Composite implements 
         String sailorsInfoURL = currentPresenter.getEventDTO().getSailorsInfoWebsiteURL();
         if(sailorsInfoURL != null && ! sailorsInfoURL.isEmpty()) {
             tabPanelUi.addTabExtension(new SailorInfo(sailorsInfoURL));
+        }
+        final Iterable<SpotDTO> spots = currentPresenter.getEventDTO().getAllWindFinderSpotIdsUsedByEvent();
+        if (spots != null && !Util.isEmpty(spots)) {
+            tabPanelUi.addTabExtension(new WindfinderControl(spots, SpotDTO::getCurrentlyMostAppropriateUrl));
         }
     }
 

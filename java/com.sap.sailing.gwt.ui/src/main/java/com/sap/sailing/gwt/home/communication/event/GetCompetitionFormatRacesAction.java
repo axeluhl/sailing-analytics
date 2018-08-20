@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.communication.event;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
+import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.server.EventActionUtil;
@@ -26,7 +27,7 @@ import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
  * </p>
  */
 public class GetCompetitionFormatRacesAction implements
-        SailingAction<ResultWithTTL<ListResult<RaceCompetitionFormatSeriesDTO>>>, IsClientCacheable {
+        SailingAction<ResultWithTTL<ListResult<RaceCompetitionFormatSeriesDTO>>>, IsClientCacheable, ProvidesLeaderboardRouting {
     
     private UUID eventId;
     private String regattaId;
@@ -57,5 +58,10 @@ public class GetCompetitionFormatRacesAction implements
     @Override
     public void cacheInstanceKey(StringBuilder key) {
         key.append(eventId).append("_").append(regattaId);
+    }
+
+    @Override
+    public String getLeaderboardName() {
+        return regattaId;
     }
 }

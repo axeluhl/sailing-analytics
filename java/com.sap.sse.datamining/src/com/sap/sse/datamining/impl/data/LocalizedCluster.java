@@ -19,7 +19,7 @@ public class LocalizedCluster<ElementType extends Serializable> implements Clust
 
     @Override
     public String asLocalizedString(Locale locale, ResourceBundleStringMessages stringMessages) {
-        return stringMessages.get(locale, messageKey) + " " + cluster.asLocalizedString(locale, stringMessages);
+        return cluster.asLocalizedString(locale, stringMessages) + " " + stringMessages.get(locale, messageKey);
     }
 
     @Override
@@ -30,6 +30,10 @@ public class LocalizedCluster<ElementType extends Serializable> implements Clust
     @Override
     public Class<ElementType> getClusterElementsType() {
         return cluster.getClusterElementsType();
+    }
+    
+    public Cluster<ElementType> getInnerCluster() {
+        return cluster;
     }
 
 }

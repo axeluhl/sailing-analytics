@@ -46,6 +46,7 @@ import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard
 import com.sap.sailing.server.operationaltransformation.RenameLeaderboard;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, RaceLogEvent, RaceLogEventVisitor> {
@@ -180,7 +181,7 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
             assertEquals(courseDesignChangedEvent.getPassId(), replicatedEvent.getPassId());
             assertEquals(courseDesignChangedEvent.getCreatedAt(), replicatedEvent.getCreatedAt());
             assertEquals(courseDesignChangedEvent.getLogicalTimePoint(), replicatedEvent.getLogicalTimePoint());
-            assertEquals(Util.size(courseDesignChangedEvent.getInvolvedBoats()), Util.size(replicatedEvent.getInvolvedBoats()));
+            assertEquals(Util.size(courseDesignChangedEvent.getInvolvedCompetitors()), Util.size(replicatedEvent.getInvolvedCompetitors()));
             compareCourseBase(courseDesignChangedEvent.getCourseDesign(), replicatedEvent.getCourseDesign());
         } finally {
             replicaLog.unlockAfterRead();
@@ -269,10 +270,10 @@ public class RaceLogReplicationTest extends AbstractLogReplicationTest<RaceLog, 
     protected CourseBase createCourseData() {
         CourseBase course = new CourseDataImpl("Test Course");
         course.addWaypoint(0, new WaypointImpl(new ControlPointWithTwoMarksImpl(UUID.randomUUID(), 
-                new MarkImpl(UUID.randomUUID(), "Black", MarkType.BUOY, "black", "round", "circle"),
-                new MarkImpl(UUID.randomUUID(), "Green", MarkType.BUOY, "green", "round", "circle"),
+                new MarkImpl(UUID.randomUUID(), "Black", MarkType.BUOY, AbstractColor.getCssColor("black"), "round", "circle"),
+                new MarkImpl(UUID.randomUUID(), "Green", MarkType.BUOY, AbstractColor.getCssColor("green"), "round", "circle"),
                 "Upper gate")));
-        course.addWaypoint(1, new WaypointImpl(new MarkImpl(UUID.randomUUID(), "White", MarkType.BUOY, "white", "conical", "bold"), PassingInstruction.Port));
+        course.addWaypoint(1, new WaypointImpl(new MarkImpl(UUID.randomUUID(), "White", MarkType.BUOY, AbstractColor.getCssColor("white"), "conical", "bold"), PassingInstruction.Port));
         
         return course;
     }

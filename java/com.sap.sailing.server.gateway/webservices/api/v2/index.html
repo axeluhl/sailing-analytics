@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+	<title>SAP Sailing Analytics Webservices API Version 2.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 2.0 - Overview</h1>
+
+<p>
+A number of web services are available to query the state of a SAP Sailing Analytics server instance.
+Note that different server instances exist, and not all servers hold the same data. Usually, events get
+their own URL which is then made sure to point to a server instance holding the data for that event.
+We use an Apache reverse proxy to map URLs (and in particular the sub-domain) to a particular server instance.
+So, <a href="http://www.sapsailing.com">www.sapsailing.com</a> may end up on a different server instance than
+<a href="http://tw2013.sapsailing.com">tw2013.sapsailing.com</a>
+or <a href="http://ess40-2013.sapsailing.com">ess40-2013.sapsailing.com</a>. Usually, we hand out a per-event
+or per-series URL, such as the ones above (except www.sapsailing.com which is the general landing page),
+and you would only fetch the content for the event you're interested in, even if the server instance has more.
+In all subsequent explanations, you may replace the "www.sapsailing.com" hostname by an according per-event host
+name to make sure you get to the event you're interested in.
+</p>
+<div style="height: 1em;"></div>
+<table>
+<thead>
+	<tr>
+		<td>Webservice URL</td>
+		<td>Description</td>
+	</tr>
+</thead>
+<tbody>
+	<tr>
+		<td><a href="leaderboardGetDoc.html">/api/v2/leaderboards/{name}</a></td>
+		<td>Gets the details of a leaderboard</td>
+	</tr>
+</tbody>
+</table>
+<div style="height: 1em;"></div>
+<a href="../../index.html">Back to Web Services Home</a> 
+</body>
+</html>

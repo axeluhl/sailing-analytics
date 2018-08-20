@@ -3,20 +3,20 @@ package com.sap.sailing.datamining;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import com.sap.sailing.datamining.data.ClusterFormatter;
-import com.sap.sailing.datamining.impl.data.LinearDoubleClusterGroup;
-import com.sap.sailing.datamining.impl.data.PercentageClusterFormatter;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
+import com.sap.sse.common.Speed;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.data.ClusterBoundary;
+import com.sap.sse.datamining.data.ClusterFormatter;
 import com.sap.sse.datamining.data.ClusterGroup;
 import com.sap.sse.datamining.impl.data.ClusterWithLowerAndUpperBoundaries;
 import com.sap.sse.datamining.impl.data.ClusterWithSingleBoundary;
 import com.sap.sse.datamining.impl.data.ComparableClusterBoundary;
 import com.sap.sse.datamining.impl.data.ComparisonStrategy;
 import com.sap.sse.datamining.impl.data.FixClusterGroup;
+import com.sap.sse.datamining.impl.data.LinearDoubleClusterGroup;
 import com.sap.sse.datamining.impl.data.LocalizedCluster;
+import com.sap.sse.datamining.impl.data.PercentageClusterFormatter;
 
 public class SailingClusterGroups {
     

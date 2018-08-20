@@ -1,9 +1,5 @@
 package com.sap.sailing.gwt.home.communication.fakeseries;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
@@ -14,6 +10,7 @@ import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO.EventSeriesState;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
+import com.sap.sailing.server.util.EventUtil;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
@@ -62,7 +59,7 @@ public class GetEventSeriesViewAction implements SailingAction<EventSeriesViewDT
         boolean oneEventStarted = false;
         boolean oneEventLive = false;
         boolean allFinished = true;
-        if (HomeServiceUtil.isFakeSeries(o)) {
+        if (EventUtil.isFakeSeries(o)) {
             LeaderboardGroup overallLeaderboardGroup = o.getLeaderboardGroups().iterator().next();
             dto.setDisplayName(overallLeaderboardGroup.getDisplayName() != null ? overallLeaderboardGroup.getDisplayName() : overallLeaderboardGroup.getName());
 
@@ -70,20 +67,8 @@ public class GetEventSeriesViewAction implements SailingAction<EventSeriesViewDT
                 dto.setLeaderboardId(overallLeaderboardGroup.getOverallLeaderboard().getName());
             }
 
-            List<Event> fakeSeriesEvents = new ArrayList<Event>();
-            for (Event event : ctx.getRacingEventService().getAllEvents()) {
-                for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
-                    if (overallLeaderboardGroup.equals(leaderboardGroup)) {
-                        fakeSeriesEvents.add(event);
-                    }
-                }
-            }
-            Collections.sort(fakeSeriesEvents, new Comparator<Event>() {
-                public int compare(Event e1, Event e2) {
-                    return e1.getStartDate().compareTo(e2.getEndDate());
-                }
-            });
-            for(Event eventInSeries: fakeSeriesEvents) {
+            for (Event eventInSeries : HomeServiceUtil.getEventsForSeriesOrdered(overallLeaderboardGroup,
+                    ctx.getRacingEventService())) {
                 EventMetadataDTO eventOfSeries = HomeServiceUtil.convertToMetadataDTO(eventInSeries, ctx.getRacingEventService());
                 dto.addEvent(eventOfSeries);
                 

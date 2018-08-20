@@ -10,8 +10,8 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogCloseOpenEndedDeviceMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEvent;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
 import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
@@ -51,8 +51,8 @@ public abstract class BaseRegattaLogDeviceMappingFinder<ItemT extends WithID>
         for (final RegattaLogDeviceMappingEvent<ItemT> event : events.get(item)) {
             final TimePoint from = event.getFrom();
             final RegattaLogCloseOpenEndedDeviceMappingEvent closingEvent = closingEvents.get(event.getId());
-            final TimePoint to = closingEvent != null ? closingEvent.getClosingTimePoint() : event.getTo();
-            final TimeRange mappingTimeRange = new TimeRangeImpl(from, to);
+            final TimePoint toInclusive = closingEvent != null ? closingEvent.getClosingTimePointInclusive() : event.getToInclusive();
+            final TimeRange mappingTimeRange = new TimeRangeImpl(from, toInclusive, /* inclusive */ true);
             if (mappingTimeRange.includes(fixTimePoint)) {
                 if (closingEvent != null) {
                     log.revokeEvent(closingEvent.getAuthor(), closingEvent,
@@ -65,15 +65,40 @@ public abstract class BaseRegattaLogDeviceMappingFinder<ItemT extends WithID>
                 if (!endOfFirstHalf.before(from)) {
                     log.add(createDeviceMappingEvent(item, event.getAuthor(), from, endOfFirstHalf, event.getDevice()));
                 }
-                if (to == null || !to.before(startOfSecondHalf)) {
-                    log.add(createDeviceMappingEvent(item, event.getAuthor(), startOfSecondHalf, to,
+                if (toInclusive == null || !toInclusive.before(startOfSecondHalf)) {
+                    log.add(createDeviceMappingEvent(item, event.getAuthor(), startOfSecondHalf, toInclusive,
                             event.getDevice()));
                 }
             }
         }
     }
 
+    /**
+     * Checks if the regatta log has one or more device mappings for {@code item} that cover the time point
+     * {@code fixTimePoint}.
+     */
+    public boolean hasMappingFor(ItemT item, TimePoint fixTimePoint) {
+        boolean result = false;
+        Map<ItemT, List<RegattaLogDeviceMappingEvent<ItemT>>> events = new HashMap<ItemT, List<RegattaLogDeviceMappingEvent<ItemT>>>();
+        Map<Serializable, RegattaLogCloseOpenEndedDeviceMappingEvent> closingEvents = new HashMap<Serializable, RegattaLogCloseOpenEndedDeviceMappingEvent>();
+        findUnrevokedMappingAndClosingEvents(events, closingEvents);
+        final List<RegattaLogDeviceMappingEvent<ItemT>> mappingsList = events.get(item);
+        if (mappingsList != null) {
+            for (final RegattaLogDeviceMappingEvent<ItemT> event : mappingsList) {
+                final TimePoint from = event.getFrom();
+                final RegattaLogCloseOpenEndedDeviceMappingEvent closingEvent = closingEvents.get(event.getId());
+                final TimePoint toInclusive = closingEvent != null ? closingEvent.getClosingTimePointInclusive() : event.getToInclusive();
+                final TimeRange mappingTimeRange = new TimeRangeImpl(from, toInclusive, /* inclusive */ true);
+                if (mappingTimeRange.includes(fixTimePoint)) {
+                    result = true;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
     protected abstract RegattaLogDeviceMappingEvent<ItemT> createDeviceMappingEvent(ItemT item,
-            AbstractLogEventAuthor author, TimePoint plus, TimePoint to, DeviceIdentifier deviceId);
+            AbstractLogEventAuthor author, TimePoint plus, TimePoint toInclusive, DeviceIdentifier deviceId);
 
 }

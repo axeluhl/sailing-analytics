@@ -1,37 +1,11 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
   xmlns:g="urn:import:com.google.gwt.user.client.ui"
+  xmlns:l="urn:import:com.sap.sse.gwt.client.controls.languageselect"
   xmlns:s="urn:import:com.sap.sailing.gwt.home.client.shared">
   <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
   <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
   <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.footer.FooterResources" />
   <ui:with field="releaseNotesNavigation" type="com.sap.sailing.gwt.home.shared.app.PlaceNavigation" />
-  <ui:style gss="true">
-    .languageSelect::-ms-expand {
-      display: none;
-    }
-    .languageSelect {
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      -ms-appearance: none;
-      appearance: none;
-      
-      margin-top: 25px;
-      color: #efaa00;
-      line-height: 1.5em;
-      height: 1.5em;
-      display: inline-block;
-      border: transparent;
-      cursor: pointer;
-      padding-right: 1.2em;
-      background: #333;
-      cursor: pointer;
-      
-      background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZlcnNpb249JzEuMScgaGVpZ2h0PScxOHB4JyB3aWR0aD0nMTZweCc+PHRleHQgeD0nMCcgeT0nMTUnIGZpbGw9JyNlZmFhMDAnIGZvbnQtc2l6ZT0nMTYnPiYjOTY2MDs8L3RleHQ+PC9zdmc+");
-      background-position: right center;
-      background-repeat: no-repeat;
-      
-    }
-  </ui:style>
   <g:HTMLPanel tag="footer" addStyleNames="{local_res.css.sitefooter}">
     <!-- Website footer-->
       <div class="{res.mediaCss.grid}">
@@ -56,16 +30,13 @@
             		class="{local_res.css.sitefooter_links_link} {res.mediaCss.showonsmall} {res.mediaCss.hideonmedium} {res.mediaCss.hideonlarge}">
               Mobile
             </a>
-            <a href="{releaseNotesNavigation.getTargetUrl}" class="{local_res.css.sitefooter_links_link}">
+            <a href="{releaseNotesNavigation.getSafeTargetUrl}" class="{local_res.css.sitefooter_links_link}">
               <ui:text from='{i18n.whatsNew}' />
             </a>
           </div>
         </div>
-        <div ui:field="languageSelectionDiv" class="{res.mediaCss.small12} {res.mediaCss.medium3} {res.mediaCss.columns} {local_res.css.sitefooter_language}">
-          <span><ui:text from='{i18n.footerLanguage}' />:</span>
-            <g:Anchor ui:field="changeLanguageLink" styleName="{local_res.css.sitefooter_language_link}" />
-            <g:ValueListBox addStyleNames="{style.languageSelect}" ui:field="changeLanguageList" />
-        </div>
+        <l:LanguageSelector labelText="{i18n.footerLanguage}" addStyleNames="{res.mediaCss.small12}
+                {res.mediaCss.medium3} {res.mediaCss.columns} {local_res.css.sitefooter_language}" />
       </div>
   </g:HTMLPanel>
 </ui:UiBinder>

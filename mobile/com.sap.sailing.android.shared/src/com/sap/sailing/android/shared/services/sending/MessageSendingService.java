@@ -13,6 +13,7 @@ import com.sap.sailing.android.shared.R;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessagePersistenceManager.MessageRestorer;
 import com.sap.sailing.android.shared.services.sending.MessageSenderTask.MessageSendingListener;
+import com.sap.sailing.android.shared.util.NotificationHelper;
 import com.sap.sailing.android.shared.util.PrefUtils;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 
@@ -68,7 +69,7 @@ public class MessageSendingService extends Service implements MessageSendingList
 
     public static final String charsetName = "UTF-8";
 
-    protected final static String TAG = MessageSendingService.class.getName();
+    protected final static String TAG = MessageSendingService.class.getSimpleName();
 
     private ConnectivityManager connectivityManager;
     private Handler handler;
@@ -227,7 +228,15 @@ public class MessageSendingService extends Service implements MessageSendingList
         if (persistenceManager.areIntentsDelayed()) {
             handleDelayedMessages();
         }
+        startForeground(NotificationHelper.getNotificationId(), NotificationHelper.getNotification(this));
         ExLog.i(this, TAG, "Sending Service on Create.");
+    }
+
+    @Override
+    public void onDestroy() {
+        stopForeground(true);
+        ExLog.i(this, TAG, "Message Sending Service is being destroyed.");
+        super.onDestroy();
     }
 
     @Override

@@ -1,10 +1,10 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 
 /**
- * Holds the same data as a {@link QuickRanksDTO} object, only that the {@link CompetitorDTO} is replaced by the
+ * Holds the same data as a {@link QuickRanksDTO} object, only that the {@link CompetitorWithBoatDTO} is replaced by the
  * string representation of the competitor's ID.
  * 
  * @author Axel Uhl (d043530)
@@ -28,7 +28,7 @@ public class CompactQuickRankDTO implements IsSerializable {
         return competitorIdAsString;
     }
 
-    public int getRank() {
+    public int getOneBasedRank() {
         return rank;
     }
 

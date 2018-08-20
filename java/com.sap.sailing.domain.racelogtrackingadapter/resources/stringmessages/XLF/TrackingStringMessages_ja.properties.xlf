@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-	<file datatype="javapropertyresourcebundle" date="2016-11-23T14:56:08Z" original="/usr/sap/ljs/app/Converter_2566045106627533633/java/com.sap.sailing.domain.racelogtrackingadapter/resources/stringmessages/TrackingStringMessages.properties" source-language="en" target-language="ja">
+	<file datatype="javapropertyresourcebundle" date="2017-03-03T15:30:38Z" original="/usr/sap/ljs/app/Converter_7335190261158680380/java/com.sap.sailing.domain.racelogtrackingadapter/resources/stringmessages/TrackingStringMessages.properties" source-language="en" target-language="ja">
 		<header>
 			<skl>
-				<internal-file crc="cdbdcb19e10086d34f715e2a7da26eef" form="base64">H4sIAAAAAAAAAF2RTU/DMAyG7/0VvnGZEGekHgYSUiVgY+3gnLXeajWNo9jbqBD/naQtbOLm+PXH+zgaTN2ROxTuRGqU2D1xyKs5C5c07DlkUhv3tnnkBlfhnYR0G2zFGzyQKIal5C+mQ5BjQBj4CK05IWiL8HX3DUvvgZyosRabW6hadJDmjQV7tpbPaeM0HjhAbanuRtWS6+AoSY5jA0hvgvqWXZzOEOb1YCQ7o625x4rzjymKBRmtyq1gkLzU2AfxmcxkxjWBqbmWllNqkm2c6SL7Ce0wwlYtyXO0khf7Ec9EzICmSb40atAbssATUYMnqhHOpO34TvjGpvLhcoYFCPXeDjPrDuMREpIkN/fZ7shDha7BkKcQdIwz432pHLCYxlT4qclSw+5GLzdPCwfUBXiLRvB36X1qL1jyuftyDu9n/D/p+hzJwDqSxm/2/tX0mJfLNZSROOE/JHuTnEnMFa6kQ6v/S2HOZz95rIJYdwIAAA==</internal-file>
+				<internal-file crc="064477f4b22ea4cc8cbdaab36795b9a4" form="base64">H4sIAAAAAAAAAF1RQU7DQAy85xW+cakQ50o5FCSkSEBLk8J5m7iN1c16tXZbIsTf2U1SWnHzzjjjmYkGUx/I7Qt3IjVK7J455NWEwhWGHYdMauPe10/c4DJ8kJBugq14jXsSxbCQ/NUcEOQYEHo+QmtOCNoifD/8wMJ7ICdqrMXmHqoWHSS9YWHH1vI5XRzlgQPUlurDwFpyBzhKoqNsAOlMUN+yi+oMYToPRrIz2po7rDj/HKe4kNGy3AgGyUuN30F8JjOZcU1gam6pxQiNtI2aLmY/oe2HsFVL8hKt5MVuiGdizICmSb40ctAZssBjogZPVCOcSdvhneIbm9b7aw0zEOq87aesW4wlpEiS3Myz7ZH7Cl2DIU8j6DBnxvtSOWAxylT4pRdLDbs7vfaejvaoM/AWjeDl8DxJFCz5pHCtxPupgj/qtpJkYhXTxl/t/ZvpMC8XKyhj6lTBY7I40plErHAl7Vv9vwoTnv0Cs+RzW3sCAAA=</internal-file>
 			</skl>
 			<phase-group>
-				<phase company-name="SAP AG" date="2016-11-04T21:01:36Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
+				<phase company-name="SAP AG" date="2016-12-16T08:45:26Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
 			</phase-group>
 			<tool tool-company="SAP AG" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter" tool-name="TEW: Javascript .properties Flexible File Converter" tool-version="1.1.0"/>
 		</header>
@@ -17,7 +17,7 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="scanQRCodeOrVisitUrlToRegisterAs" resname="scanQRCodeOrVisitUrlToRegisterAs">
 				<source>Make sure you have the <ph id="1">{0}</ph> App installed. Then scan the following QRCode or click the link using your smartphone to register as</source>
-				<target state="translated"><ph id="1">{0}</ph> アプリがインストールされていることを確認してください。その上で、以下の QR コードをスキャンするか、スマートフォンを使用してリンクをクリックして登録します:</target>
+				<target state="signed-off"><ph id="1">{0}</ph> アプリがインストールされていることを確認してください。その上で、以下の QR コードをスキャンするか、スマートフォンを使用してリンクをクリックして登録します:</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="welcomeTo" resname="welcomeTo">
 				<source>Welcome to</source>
@@ -40,8 +40,8 @@
 				<target state="signed-off">設標船</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="appStoreInstallText" resname="appStoreInstallText">
-				<source>If don't have the App yet, please install:</source>
-				<target state="signed-off">まだアプリがない場合は、インストールしてください:</target>
+				<source>If you don't have the App yet, please install:</source>
+				<target state="translated">まだアプリがない場合は、インストールしてください:</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="appIos" resname="appIos">
 				<source>Install iOS App</source>

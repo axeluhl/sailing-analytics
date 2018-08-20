@@ -7,7 +7,5 @@ public interface ValueCollection extends Value {
 
     <T> void setValues(Iterable<T> values, ValueConverter<T> converter);
 
-    <T> void addValue(T value, ValueConverter<T> converter);
-
     void clear();
 }

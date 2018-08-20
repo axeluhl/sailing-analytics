@@ -10,7 +10,7 @@ import UIKit
 
 class TeamData: BaseData {
 
-    private enum Keys {
+    fileprivate enum Keys {
         static let ImageURL = "imageUri"
     }
     

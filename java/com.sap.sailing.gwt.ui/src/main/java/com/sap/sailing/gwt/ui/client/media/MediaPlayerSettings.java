@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.client.media;
 
-import com.sap.sailing.gwt.common.client.formfactor.DeviceDetector;
 import com.sap.sse.common.settings.AbstractSettings;
+import com.sap.sse.gwt.client.formfactor.DeviceDetector;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 
 public class MediaPlayerSettings extends AbstractSettings {

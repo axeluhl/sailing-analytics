@@ -7,6 +7,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.start.EventStageDTO;
 import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
@@ -19,7 +20,8 @@ public class Stage extends Composite {
 
     private static StageUiBinder uiBinder = GWT.create(StageUiBinder.class);
     
-    @UiField WidgetCarousel widgetCarousel;
+    @UiField
+    SimplePanel widgetCarouselContainerUi;
     
     private StageTeaser stageTeaser;
     private List<StageTeaser> stageTeaserComposites;
@@ -33,6 +35,8 @@ public class Stage extends Composite {
     }
 
     public void setFeaturedEvents(List<EventStageDTO> list) {
+        final WidgetCarousel widgetCarousel = new WidgetCarousel();
+        widgetCarousel.setShowDots(false);
         for (EventStageDTO event : list) {
             switch (event.getStageType()) {
             case POPULAR:
@@ -48,5 +52,6 @@ public class Stage extends Composite {
             widgetCarousel.addWidget(stageTeaser);
             stageTeaserComposites.add(stageTeaser);
         }
+        this.widgetCarouselContainerUi.setWidget(widgetCarousel);
     }
 }

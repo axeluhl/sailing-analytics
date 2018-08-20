@@ -1,0 +1,59 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+    xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    xmlns:login="urn:import:com.sap.sailing.gwt.home.mobile.places.morelogininformation"
+    xmlns:a="urn:import:com.sap.sailing.gwt.home.mobile.partials.accordion">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="i18nsec" type="com.sap.sse.security.ui.client.i18n.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="local_res" type="com.sap.sailing.gwt.home.shared.places.morelogininformation.MoreLoginInformationResources" />
+    <ui:style>
+    .title {
+        font-size: 1.5em;
+    }
+    .register {
+        border-radius: .384615384615385em;
+        width: 100%;
+        text-align: center;
+    }
+    .buttonContainer {
+        margin-top: 1em;
+    }
+    </ui:style>
+    <a:Accordion>
+        <a:header>
+            <g:HTMLPanel>
+                <h1 class="{style.title}">
+                    <ui:text from="{i18n.moreLoginInformationHeadline}" />
+                </h1>
+                <p>
+                    <ui:text from="{i18n.moreLoginInformationIntroduction}" />
+                </p>
+            </g:HTMLPanel>
+        </a:header>
+        <a:item>
+            <login:MoreLoginInformationContentMobile
+                title="{i18n.moreLoginInformationSectionUserSettingsHeading}" image="{local_res.settings}"
+                content="{i18n.moreLoginInformationSectionUserSettingsDescription}" />
+        </a:item>
+        <a:item>
+            <login:MoreLoginInformationContentMobile
+                title="{i18n.strategySimulator}" image="{local_res.simulator}"
+                content="{i18n.moreLoginInformationSectionStrategySimulatorDescription}" />
+        </a:item>
+        <a:item>
+            <login:MoreLoginInformationContentMobile
+                title="{i18n.moreLoginInformationSectionUserNotificationsHeading}"
+                image="{local_res.notifications}"
+                content="{i18n.moreLoginInformationSectionUserNotificationsDescription}" />
+        </a:item>
+        <a:footer>
+            <g:HTMLPanel addStyleNames="{style.buttonContainer}">
+                <a ui:field="registerControl" class="{style.register} {res.mainCss.button} {res.mainCss.buttonstrong} 
+                        {res.mainCss.buttonarrowrightwhite}">
+                    <ui:text from="{i18n.moreLoginInformationRegisterControlText}"/>
+                </a>
+            </g:HTMLPanel>
+        </a:footer>
+    </a:Accordion>
+</ui:UiBinder>

@@ -8,21 +8,24 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.communication.event.GetLiveRacesForEventAction;
 import com.sap.sailing.gwt.home.communication.event.GetRegattaListViewAction;
 import com.sap.sailing.gwt.home.communication.event.statistics.GetEventStatisticsAction;
 import com.sap.sailing.gwt.home.communication.regatta.RegattaWithProgressDTO;
+import com.sap.sailing.gwt.home.desktop.partials.eventdescription.EventDescription;
 import com.sap.sailing.gwt.home.desktop.partials.eventstage.EventOverviewStage;
 import com.sap.sailing.gwt.home.desktop.partials.liveraces.LiveRacesList;
 import com.sap.sailing.gwt.home.desktop.partials.multiregattalist.MultiRegattaList;
 import com.sap.sailing.gwt.home.desktop.partials.raceoffice.RaceOfficeSection;
 import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.DropdownFilter;
 import com.sap.sailing.gwt.home.desktop.partials.regattanavigation.DropdownFilter.DropdownFilterList;
-import com.sap.sailing.gwt.home.desktop.partials.statistics.StatisticsBox;
+import com.sap.sailing.gwt.home.desktop.partials.statistics.DesktopStatisticsBoxView;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.EventMultiregattaView;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.EventMultiregattaView.Presenter;
 import com.sap.sailing.gwt.home.desktop.places.event.multiregatta.MultiregattaTabView;
+import com.sap.sailing.gwt.home.shared.partials.statistics.EventStatisticsBox;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
@@ -40,10 +43,11 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
     
     @UiField(provided = true) EventOverviewStage stageUi;
+    @UiField SimplePanel descriptionUi;
     @UiField(provided = true) LiveRacesList liveRacesListUi;
     @UiField(provided = true) DropdownFilter<String> boatCategoryFilterUi;
     @UiField(provided = true) MultiRegattaList regattaListUi;
-    @UiField StatisticsBox statisticsBoxUi;
+    @UiField(provided = true) EventStatisticsBox statisticsBoxUi;
     @UiField RaceOfficeSection raceOfficeSectionUi;
     private Presenter currentPresenter;
 
@@ -69,7 +73,17 @@ public class MultiregattaOverviewTabView extends Composite implements Multiregat
         MultiregattaOverviewRegattasTabViewRegattaFilterList regattaFilterList = new MultiregattaOverviewRegattasTabViewRegattaFilterList();
         boatCategoryFilterUi = new DropdownFilter<String>(StringMessages.INSTANCE.all(), regattaFilterList);
         regattaListUi = new MultiRegattaList(currentPresenter, false);
+        statisticsBoxUi = new EventStatisticsBox(true, new DesktopStatisticsBoxView());
+        
         initWidget(ourUiBinder.createAndBindUi(this));
+
+        final String description = currentPresenter.getEventDTO().getDescription();
+        if (description != null) {
+            descriptionUi.add(new EventDescription(description));
+        } else {
+            descriptionUi.removeFromParent();
+        }
+        
         raceOfficeSectionUi.addLink(StringMessages.INSTANCE.racesOverview(), currentPresenter.getRegattaOverviewLink());
         
         RefreshManager refreshManager = new RefreshManagerWithErrorAndBusy(this, contentArea, currentPresenter.getDispatch(), currentPresenter.getErrorAndBusyClientFactory());

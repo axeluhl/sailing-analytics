@@ -139,8 +139,6 @@ public class MediaMasterDataExportTest {
             Fleet defaultFleet = raceColumn.getFleets().iterator().next();
             raceColumn.setRaceIdentifier(defaultFleet, regattaAndRaceIdentifier);
         }
-        
-
         List<? extends Leaderboard> leaderboards = Arrays.asList(regattaLeaderboard, flexibleLeaderboard);
         LeaderboardGroup leaderboardGroup = new LeaderboardGroupImpl("name", "description", "displayName", displayGroupsInReverseOrder , leaderboards);
         Set<LeaderboardGroup> groupsToExport = Collections.singleton(leaderboardGroup);

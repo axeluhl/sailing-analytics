@@ -1,6 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="shr" type="com.sap.sailing.gwt.home.shared.resources.SharedHomeResources" />
 	<ui:style gss="true" type="com.sap.sailing.gwt.home.shared.partials.fullscreen.FullscreenContainer.Style">
 		.popup {
 			position: fixed !important;
@@ -48,6 +49,20 @@
 			width: auto;
 			cursor: pointer;
 			padding: 10px;
+			vertical-align: top;
+		}
+		a.toolbarAction, button.toolbarAction {
+			border-radius: initial;
+			font-size: 1.25em;
+		}
+		a.toolbarAction {
+			color: #fff;
+			text-decoration: none;
+			outline: none;
+			padding-top: 0.666666666666667em
+		}
+		button.toolbarAction {
+			background-color: transparent;
 		}
 		.toolbarBusyIndicator {
 			display: inline-block;
@@ -79,7 +94,7 @@
 	        </a>
 			<div class="{style.toolbar}">
 				<g:FlowPanel styleName="{style.toolbarContent}" ui:field="toolbarUi"/>
-				<g:Image title="{i18n.closeFullscreenView}" url="images/home/close.svg" styleName="{style.toolbarAction}" ui:field="closeActionUi"/>
+				<g:Image title="{i18n.closeFullscreenView}" url="{shr.close.getSafeUri.asString}" styleName="{style.toolbarAction}" ui:field="closeActionUi"/>
 			</div>
 			<g:SimplePanel styleName="{style.headerContent}" ui:field="headerContentUi"/>
 		</g:HTMLPanel>

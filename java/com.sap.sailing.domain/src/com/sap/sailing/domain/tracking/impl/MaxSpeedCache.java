@@ -7,11 +7,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
 
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.GPSTrackListener;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
@@ -154,7 +154,7 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
                     if (!invalidationInterval.includes(maxFixTimePoint)) {
                         final TimePoint cacheEntryTo = toAndResult.getA();
                         final TimeRange croppedCacheEntryTimeRangeContainingMaxFix;
-                        if (invalidationInterval.startsAfter(maxFixTimePoint)) {
+                        if (invalidationInterval.startsAtOrAfter(maxFixTimePoint)) {
                             croppedCacheEntryTimeRangeContainingMaxFix = new TimeRangeImpl(cacheEntryFrom, invalidationInterval.from());
                         } else { // invalidation interval must end before the maxFixTimePoint
                             assert invalidationInterval.endsBefore(maxFixTimePoint);
@@ -294,7 +294,9 @@ public class MaxSpeedCache<ItemType, FixType extends GPSFix> implements GPSTrack
                     } else {
                         speedAtFixTime = track.getEstimatedSpeed(fix.getTimePoint());
                     }
-                    if (speedAtFixTime != null && speedAtFixTime.compareTo(max) > 0) {
+                    // accept max speeds only if they don't exceed our validity threshold
+                    if (speedAtFixTime != null && speedAtFixTime.compareTo(GPSFixTrack.DEFAULT_MAX_SPEED_FOR_SMOOTHING) < 0
+                            && speedAtFixTime.compareTo(max) > 0) {
                         max = speedAtFixTime;
                         maxSpeedFix = fix;
                     }

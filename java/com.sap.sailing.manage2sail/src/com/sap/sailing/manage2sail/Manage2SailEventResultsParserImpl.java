@@ -31,7 +31,6 @@ public class Manage2SailEventResultsParserImpl implements Manage2SailEventResult
 
     /**
      * @param is closed before the method returns, also in case of exception
-     * @throws IOException 
      */
     public EventResultDescriptor getEventResult(InputStream is) throws IOException {
         EventResultDescriptor result = null;
@@ -65,9 +64,8 @@ public class Manage2SailEventResultsParserImpl implements Manage2SailEventResult
                 regattaResult.setHtmlUrl(parseURL(jsonRegatta, "HtmlUrl"));
                 regattaResult.setPublishedAt(parseDate(jsonRegatta, "Published"));
                 regattaResult.setIsFinal((Boolean) jsonRegatta.get("Final"));
-                
                 JSONArray jsonRaces = (JSONArray) jsonRegatta.get("Races");
-                if(jsonRaces != null) {
+                if (jsonRaces != null) {
                     for (Object raceObject: jsonRaces) {
                         RaceResultDescriptor raceResult = new RaceResultDescriptor(); 
                         JSONObject jsonRace = (JSONObject) raceObject;

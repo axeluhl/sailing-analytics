@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -21,7 +23,9 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
+import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
 /**
  * Shows the currently tracked events/races in a table. Updated if subscribed as an {@link RegattasDisplayer}, e.g., with
@@ -36,9 +40,11 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
     private ExportPopup exportPopup;
     private boolean actionButtonsEnabled;
 
-    public TrackedRacesListComposite(final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
+    public TrackedRacesListComposite(Component<?> parent, ComponentContext<?> context,
+            final SailingServiceAsync sailingService,
+            final ErrorReporter errorReporter,
             final RegattaRefresher regattaRefresher, final StringMessages stringMessages, boolean hasMultiSelection, boolean actionButtonsEnabled) {
-        super(sailingService, errorReporter, regattaRefresher, stringMessages, hasMultiSelection);
+        super(parent, context, sailingService, errorReporter, regattaRefresher, stringMessages, hasMultiSelection);
         this.raceIsTrackedRaceChangeListener = new HashSet<TrackedRaceChangedListener>();
         this.actionButtonsEnabled = actionButtonsEnabled;
         createUI();
@@ -47,7 +53,6 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
     private void showSetDelayToLiveDialog() {
         TrackedRacesSettings settings = new TrackedRacesSettings();
         settings.setDelayToLiveInSeconds(DEFAULT_LIVE_DELAY_IN_MILLISECONDS);
-        
         SettingsDialog<TrackedRacesSettings> settingsDialog = new SettingsDialog<TrackedRacesSettings>(this, stringMessages);
         settingsDialog.show();
     }
@@ -67,7 +72,7 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Exception trying to stop tracking races " + races + ": " + caught.getMessage());
+                        errorReporter.reportError(stringMessages.errorStoppingRaceTracking(Util.toStringOrNull(Util.createList(races)), caught.getMessage()));
                     }
         
                     @Override
@@ -89,8 +94,7 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
                 new AsyncCallback<Void>() {
                     @Override
                     public void onFailure(Throwable caught) {
-                        errorReporter.reportError("Exception trying to remove races " + regattaNamesAndRaceNames +
-                                ": " + caught.getMessage());
+                        errorReporter.reportError(stringMessages.errorRemovingRace(Util.toStringOrNull(regattaNamesAndRaceNames), caught.getMessage()));
                     }
 
                     @Override
@@ -106,17 +110,6 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
     @Override
     protected void addControlButtons(HorizontalPanel trackedRacesButtonPanel) {
         if(actionButtonsEnabled) {
-            btnRemoveRace = new Button(stringMessages.remove());
-            btnRemoveRace.ensureDebugId("RemoveRaceButton");
-            btnRemoveRace.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    removeAndUntrackRaces(refreshableSelectionModel.getSelectedSet());
-                }
-            });
-            btnRemoveRace.setEnabled(false);
-            trackedRacesButtonPanel.add(btnRemoveRace);
-            
             btnUntrack = new Button(stringMessages.stopTracking());
             btnUntrack.ensureDebugId("StopTrackingButton");
             btnUntrack.addClickHandler(new ClickHandler() {
@@ -149,6 +142,28 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
             });
             btnExport.setEnabled(false);
             trackedRacesButtonPanel.add(btnExport);
+            
+            btnRemoveRace = new Button(stringMessages.remove());
+            btnRemoveRace.ensureDebugId("RemoveRaceButton");
+            btnRemoveRace.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    if(askUserForConfirmation()){
+                        removeAndUntrackRaces(refreshableSelectionModel.getSelectedSet());
+                    }
+                }
+
+                private boolean askUserForConfirmation() {
+                    if(refreshableSelectionModel.itemIsSelectedButNotVisible(raceTable.getVisibleItems())){
+                        final String trackedRaceNames =  refreshableSelectionModel.getSelectedSet().stream().map(e -> e.getRegattaName()+" - "+e.getName()).collect(Collectors.joining("\n"));
+                        return Window.confirm(stringMessages.doYouReallyWantToRemoveNonVisibleTrackedRaces(trackedRaceNames));
+                    }
+                    return true;
+                }
+                    
+            });
+            btnRemoveRace.setEnabled(false);
+            trackedRacesButtonPanel.add(btnRemoveRace);
         }
     }
 
@@ -157,10 +172,13 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
         if (actionButtonsEnabled) {
             if (selectedRaces.isEmpty()) {
                 btnRemoveRace.setEnabled(false);
+                btnRemoveRace.setText(stringMessages.remove());
                 btnUntrack.setEnabled(false);
                 btnExport.setEnabled(false);
             } else {
                 btnRemoveRace.setEnabled(true);
+                final int numberOfItemsSelected = refreshableSelectionModel.getSelectedSet().size();
+                btnRemoveRace.setText(numberOfItemsSelected <= 1 ? stringMessages.remove() : stringMessages.removeNumber(numberOfItemsSelected));
                 btnUntrack.setEnabled(true);
                 btnExport.setEnabled(true);
             }
@@ -193,8 +211,12 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
 
     @Override
     public TrackedRacesSettings getSettings() {
-        // TODO Auto-generated method stub
-        return null;
+        return settings;
+    }
+
+    @Override
+    public String getId() {
+        return "TrackedRacesListComposite";
     }
 
     

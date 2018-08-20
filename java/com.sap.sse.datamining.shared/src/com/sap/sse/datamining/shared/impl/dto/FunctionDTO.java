@@ -7,20 +7,30 @@ import java.util.List;
 public class FunctionDTO implements Serializable, Comparable<FunctionDTO> {
     private static final long serialVersionUID = 4587389541910498505L;
 
-    private boolean isDimension;
-    private String functionName;
-    private String sourceTypeName;
-    private String returnTypeName;
-    private List<String> parameterTypeNames;
-
+    private final boolean isDimension;
+    private final String functionName;
+    private final String sourceTypeName;
+    private final String returnTypeName;
+    private final List<String> parameterTypeNames;
+    private final int ordinal;
     private String displayName;
-    private int ordinal;
-
     /**
-     * Constructor for the GWT-Serialization. Don't use this!
+     * If the {@link #displayName} is not set and this provider is valid, the {@F
      */
-    @Deprecated
-    FunctionDTO() {
+    private transient DisplayNameProvider displayNameProvider;
+
+    public static interface DisplayNameProvider {
+        String getDisplayName();
+    }
+    
+    /**
+     * Makes the construction of the {@link #displayName} lazy, using the {@code displayNameProvider}.
+     */
+    public FunctionDTO(boolean isDimension, String functionName, String sourceTypeName, String returnTypeName,
+            List<String> parameterTypeNames, DisplayNameProvider displayNameProvider, int ordinal) {
+        this(isDimension, functionName, sourceTypeName, returnTypeName, parameterTypeNames,
+                /* displayName is constructed lazily using the displayNameProvider */ (String) null, ordinal);
+        this.displayNameProvider = displayNameProvider;
     }
     
     public FunctionDTO(boolean isDimension, String functionName, String sourceTypeName, String returnTypeName,
@@ -52,6 +62,9 @@ public class FunctionDTO implements Serializable, Comparable<FunctionDTO> {
     }
 
     public String getDisplayName() {
+        if (displayName == null && displayNameProvider != null) {
+            displayName = displayNameProvider.getDisplayName();
+        }
         return displayName;
     }
     

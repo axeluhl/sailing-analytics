@@ -12,11 +12,6 @@
 	<inherits name='com.google.gwt.ajaxloader.AjaxLoader' />
 	<inherits name='com.google.gwt.maps.Maps' />
 
-	<!-- Bootstrap API -->
-	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
-	<inherits
-		name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
-
 	<!-- Other module inherits -->
 	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
 	<inherits name="com.sap.sse.SSECommon" />
@@ -27,7 +22,8 @@
 	<!-- Specify the app entry point class. -->
 	<entry-point class='com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint' />
 
-        <inherits name='com.sap.sailing.gwt.common.SailingLocales' />
+    <!-- module containing locale configuration -->
+    <inherits name='com.sap.sailing.gwt.common.SailingLocalesAllPermutations' />
 
 	<inherits name='com.sap.sailing.gwt.ui.SourceLeaderboard' />
 	<inherits name='com.sap.sailing.gwt.ui.SourceCommon' />
@@ -35,6 +31,7 @@
 	<inherits name='com.sap.sailing.gwt.ui.SourceShared' />
 	<inherits name="com.sap.sailing.gwt.ui.SourceLeaderboard" />
 	<inherits name="com.sap.sailing.gwt.ui.SourceAdminConsole" />
+    <inherits name='com.sap.sailing.gwt.settings.Settings'/>
 	
 	<inherits name='com.sap.sse.gwt.CommonControlCSS_Autoinject'/>	
 	<inherits name='com.sap.sailing.gwt.common.AuthenticationCommon'/>

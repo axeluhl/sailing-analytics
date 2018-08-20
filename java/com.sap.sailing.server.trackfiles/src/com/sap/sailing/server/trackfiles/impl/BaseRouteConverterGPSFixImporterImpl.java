@@ -6,6 +6,13 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import com.sap.sailing.domain.common.tracking.GPSFix;
+import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
+import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
+import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
+import com.sap.sailing.server.trackfiles.common.BaseGPSFixImporterImpl;
 
 import slash.common.type.CompactCalendar;
 import slash.navigation.base.BaseNavigationPosition;
@@ -13,12 +20,6 @@ import slash.navigation.base.BaseRoute;
 import slash.navigation.base.NavigationFormat;
 import slash.navigation.base.NavigationFormatParser;
 import slash.navigation.base.ParserResult;
-
-import com.sap.sailing.domain.common.tracking.GPSFix;
-import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifier;
-import com.sap.sailing.domain.trackfiles.TrackFileImportDeviceIdentifierImpl;
-import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
-import com.sap.sailing.server.trackfiles.common.BaseGPSFixImporterImpl;
 
 public abstract class BaseRouteConverterGPSFixImporterImpl extends BaseGPSFixImporterImpl {    
     public BaseRouteConverterGPSFixImporterImpl(List<Class<? extends NavigationFormat<?>>> supportedFormats) {
@@ -54,7 +55,8 @@ public abstract class BaseRouteConverterGPSFixImporterImpl extends BaseGPSFixImp
     
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public void importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing, String sourceName)
+    public boolean importFixes(InputStream inputStream, Callback callback, boolean inferSpeedAndBearing,
+            String sourceName)
             throws IOException, FormatNotSupportedException {
         NavigationFormatParser parser = new NavigationFormatParser();
         List<BaseRoute> routes;
@@ -79,7 +81,7 @@ public abstract class BaseRouteConverterGPSFixImporterImpl extends BaseGPSFixImp
         } catch (Exception e) {
             throw new IOException(e);
         }
-        
+        final AtomicBoolean importedFixes = new AtomicBoolean(false);
         for (BaseRoute route : routes) {
             List<? extends BaseNavigationPosition> positions = (List<? extends BaseNavigationPosition>) route.getPositions();
             String routeName = route.getName();
@@ -87,10 +89,12 @@ public abstract class BaseRouteConverterGPSFixImporterImpl extends BaseGPSFixImp
             for (BaseNavigationPosition p : positions) {
                 try {
                     addFixAndInfer(callback, inferSpeedAndBearing, convertToGPSFix(p), device);
+                    importedFixes.set(true);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         }
+        return importedFixes.get();
     }
 }

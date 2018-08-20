@@ -5,4 +5,5 @@ public class MarkInfo {
     public String markId;
     public String markName;
     public String checkinDigest;
+
 }

@@ -2,7 +2,8 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Dev
 Bundle-SymbolicName: com.google.gwt.servlet
-Bundle-Version: 2.8.0
+Automatic-Module-Name: com.google.gwt.servlet
+Bundle-Version: 2.8.2
 Bundle-Vendor: GOOGLE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: lib/gwt-servlet.jar,
@@ -139,7 +140,6 @@ Export-Package: com.google.gwt.activity.shared,
  com.google.gwt.user.server.rpc.core.java.util,
  com.google.gwt.user.server.rpc.impl,
  com.google.gwt.useragent.client,
- com.google.gwt.util.regexfilter,
  com.google.gwt.util.tools.shared,
  com.google.gwt.validation.client,
  com.google.gwt.validation.client.constraints,

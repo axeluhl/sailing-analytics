@@ -11,5 +11,5 @@ public interface Competitor {
     
     String getName();
     
-    String getID();
+    String getIdAsString();
 }

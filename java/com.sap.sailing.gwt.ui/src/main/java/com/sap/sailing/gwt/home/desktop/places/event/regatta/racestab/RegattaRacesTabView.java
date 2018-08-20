@@ -44,6 +44,7 @@ import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Pr
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaTabView;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterPresenter;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueChangeHandler;
+import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueProvider;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterWidget;
 import com.sap.sailing.gwt.home.shared.partials.filter.RacesByCompetitorTextBoxFilter;
 import com.sap.sailing.gwt.home.shared.partials.placeholder.InfoPlaceholder;
@@ -52,6 +53,7 @@ import com.sap.sailing.gwt.home.shared.refresh.ActionProvider.AbstractActionProv
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
@@ -93,6 +95,12 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     private RegattaRacesTabViewFilterPresenter filterPresenter;
     private Navigation currentlySelectedTab = Navigation.SORT_LIST_FORMAT;
     private RefreshManager refreshManager;
+
+    private final FlagImageResolver flagImageResolver;
+    
+    public RegattaRacesTabView(FlagImageResolver flagImageResolver) {
+        this.flagImageResolver = flagImageResolver;
+    }
     
     @Override
     public void setPresenter(Presenter currentPresenter) {
@@ -130,8 +138,10 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             }
         }, new GetRegattaWithProgressAction(eventId, regattaId));
         addRacesAction(liveRacesListUi.getRefreshable(), new GetLiveRacesForRegattaAction(eventId, regattaId), Navigation.SORT_LIST_FORMAT);
+        filterPresenter.addProvider(Navigation.SORT_LIST_FORMAT, liveRacesListUi.getRaceList());
         filterPresenter.addHandler(Navigation.SORT_LIST_FORMAT, liveRacesListUi.getRaceList());
         addRacesAction(raceListContainerUi, new GetFinishedRacesAction(eventId, regattaId), Navigation.SORT_LIST_FORMAT);
+        filterPresenter.addProvider(Navigation.SORT_LIST_FORMAT, finishedRacesList);
         filterPresenter.addHandler(Navigation.SORT_LIST_FORMAT, finishedRacesList);
         
         listNavigationPanelUi.addAction(Navigation.SORT_LIST_FORMAT, true);
@@ -139,6 +149,7 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         RegattaCompetitionPresenter competitionPresenter = new DesktopRegattaCompetitionPresenter();
         addRacesAction(competitionPresenter, new GetCompetitionFormatRacesAction(eventId, regattaId),
                 Navigation.COMPETITION_FORMAT);
+        filterPresenter.addProvider(Navigation.COMPETITION_FORMAT, competitionPresenter);
         filterPresenter.addHandler(Navigation.COMPETITION_FORMAT, competitionPresenter);
     }
     
@@ -195,10 +206,14 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
         private final SortableRaceListColumn<RaceListRaceDTO, ?> windSourcesCountColumn = RaceListColumnFactory.getWindSourcesCountColumn();
         private final SortableRaceListColumn<RaceListRaceDTO, ?> videoCountColumn = RaceListColumnFactory.getVideoCountColumn();
         private final SortableRaceListColumn<RaceListRaceDTO, ?> audioCountColumn = RaceListColumnFactory.getAudioCountColumn();
-        private final SortableRaceListColumn<RaceListRaceDTO, ?> winnerColumn = RaceListColumnFactory.getWinnerColumn();
+        private final SortableRaceListColumn<RaceListRaceDTO, ?> winnerColumn = RaceListColumnFactory.getWinnerColumn(flagImageResolver);
+        private boolean hasWind;
+        private boolean hasVideos;
+        private boolean hasAudios;
+
 
         public RaceListFinishedRaces(EventView.Presenter presenter) {
-            super(presenter, new RaceListColumnSet(1, 1));
+            super(presenter, new RaceListColumnSet(1, 1), true);
         }
         
         @Override
@@ -212,12 +227,15 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             // TODO: this.startTimeColumn.setShowTimeOnly(!RaceListDataUtil.hasDifferentStartDates(data));
             this.startTimeColumn.setShowTimeOnly(false);
             this.durationColumn.setShowDetails(RaceListDataUtil.hasDurations(data));
-            boolean hasWind = RaceListDataUtil.hasWind(data);
+            this.hasWind = RaceListDataUtil.hasWind(data);
+            this.hasVideos = RaceListDataUtil.hasVideos(data);
+            this.hasAudios = RaceListDataUtil.hasAudios(data);
+
             this.windSpeedColumn.setShowDetails(hasWind);
             this.windDirectionColumn.setShowDetails(hasWind);
             this.windSourcesCountColumn.setShowDetails(RaceListDataUtil.hasWindSources(data));
-            this.videoCountColumn.setShowDetails(RaceListDataUtil.hasVideos(data));
-            this.audioCountColumn.setShowDetails(RaceListDataUtil.hasAudios(data));
+            this.videoCountColumn.setShowDetails(hasVideos);
+            this.audioCountColumn.setShowDetails(hasAudios);
             this.winnerColumn.setShowDetails(RaceListDataUtil.hasWinner(data));
             super.setTableData(data);
         }
@@ -245,6 +263,21 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
             columnSet.addColumn(audioCountColumn);
             columnSet.addColumn(fleetNameColumn);
         }
+
+        @Override
+        public boolean hasWind() {
+            return hasWind;
+        }
+
+        @Override
+        public boolean hasVideos() {
+            return hasVideos;
+        }
+
+        @Override
+        public boolean hasAudios() {
+            return hasAudios;
+        }
         
     }
     
@@ -260,19 +293,32 @@ public class RegattaRacesTabView extends Composite implements RegattaTabView<Reg
     }
 
     private class RegattaRacesTabViewFilterPresenter extends FilterPresenter<SimpleRaceMetadataDTO, SimpleCompetitorDTO> {
-        private final Map<Navigation, List<FilterValueChangeHandler<SimpleRaceMetadataDTO, SimpleCompetitorDTO>>> handlersByTab = new HashMap<>();
+
+        private final Map<Navigation, List<FilterValueProvider<SimpleCompetitorDTO>>> providersByTab = new HashMap<>();
+        private final Map<Navigation, List<FilterValueChangeHandler<SimpleRaceMetadataDTO>>> handlersByTab = new HashMap<>();
         
         private RegattaRacesTabViewFilterPresenter(FilterWidget<SimpleRaceMetadataDTO, SimpleCompetitorDTO> filterWidget) {
             super(filterWidget);
         }
         
         @Override
-        protected List<FilterValueChangeHandler<SimpleRaceMetadataDTO, SimpleCompetitorDTO>> getCurrentValueChangeHandlers() {
+        protected List<FilterValueProvider<SimpleCompetitorDTO>> getCurrentValueProviders() {
+            return providersByTab.get(currentlySelectedTab);
+        }
+        
+        @Override
+        protected List<FilterValueChangeHandler<SimpleRaceMetadataDTO>> getCurrentValueChangeHandlers() {
             return handlersByTab.get(currentlySelectedTab);
         }
         
-        private void addHandler(Navigation assosiatedTab, FilterValueChangeHandler<SimpleRaceMetadataDTO, SimpleCompetitorDTO> handler) {
-            List<FilterValueChangeHandler<SimpleRaceMetadataDTO, SimpleCompetitorDTO>> list = handlersByTab.get(assosiatedTab);
+        private void addProvider(Navigation assosiatedTab, FilterValueProvider<SimpleCompetitorDTO> provider) {
+            List<FilterValueProvider<SimpleCompetitorDTO>> list = providersByTab.get(assosiatedTab);
+            if (list == null) this.providersByTab.put(assosiatedTab, list = new ArrayList<>());
+            list.add(provider);
+        }
+
+        private void addHandler(Navigation assosiatedTab, FilterValueChangeHandler<SimpleRaceMetadataDTO> handler) {
+            List<FilterValueChangeHandler<SimpleRaceMetadataDTO>> list = handlersByTab.get(assosiatedTab);
             if (list == null) this.handlersByTab.put(assosiatedTab, list = new ArrayList<>());
             list.add(handler);
             super.addHandler(handler);

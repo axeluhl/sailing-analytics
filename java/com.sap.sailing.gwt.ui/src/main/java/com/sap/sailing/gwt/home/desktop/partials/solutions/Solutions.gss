@@ -94,7 +94,7 @@
   background-repeat: no-repeat;
   background-position: right center;
   background-size: 40%;
-  background-image: url("images/home/solutions-sap-in-sailing.jpg");
+  background-image: resourceUrl("sapInSailing");
 }
 .solutions_contentsapinsailing_body .gridalternator {
   padding: 4em 0 4.333333333333333em;
@@ -118,7 +118,7 @@
   background-repeat: no-repeat;
   background-position: left center;
   background-size: 100%;
-  background-image: url("images/home/solutions-sap.png");
+  background-image: resourceUrl("sap");
   padding: 4em 0 4.333333333333333em;
 }
 @media (min-width: 45em) {
@@ -139,7 +139,7 @@
   padding: 4em 50% 4.333333333333333em 0;
   max-width: 88em;
   background-repeat: no-repeat;
-  background-image: url("images/home/solutions-sap-sailing-race-manager.png");
+  background-image: resourceUrl("sapSailingRaceManager");
   background-size: 40%;
   background-position: center right;
 }
@@ -162,7 +162,7 @@
   background-repeat: no-repeat;
   background-position: left center;
   background-size: 40%;
-  background-image: url("images/home/solutions-sap-sailing-insight.png");
+  background-image: resourceUrl("sapSailingInsight");
   padding: 4em 0 4.333333333333333em;
 }
 @media (min-width: 45em) {
@@ -183,7 +183,7 @@
   padding: 4em 50% 4.333333333333333em 0;
   max-width: 88em;
   background-repeat: no-repeat;
-  background-image: url("images/home/solutions-sap-sailing-buoy-pinger.png");
+  background-image: resourceUrl("sapSailingBuoyPinger");
   background-size: 40%;
   background-position: center right;
 }
@@ -202,7 +202,7 @@
 }
 .solutions_contentpost .gridalternator {
   background-repeat: no-repeat;
-  background-image: url("images/home/solutions-post.png");
+  background-image: resourceUrl("post");
   background-position: left center;
   background-size: 100%;
   padding: 1.666666666666667em 0;
@@ -225,7 +225,7 @@
   padding: 4em 50% 4.333333333333333em 0;
   max-width: 88em;
   background-repeat: no-repeat;
-  background-image: url("images/home/solutions-training.png");
+  background-image: resourceUrl("training");
   background-size: 45%;
   background-position: center right;
 }
@@ -250,7 +250,7 @@
   height: 100%;
   max-width: 80em;
   background-repeat: no-repeat;
-  background-image: url("images/home/solutions-training.png");
+  background-image: resourceUrl("training");
   background-size: 100% auto;
   background-position: center 13.333333333333334em;
 }
@@ -262,7 +262,7 @@
 }
 .solutions_contentsimulator .gridalternator {
   background-repeat: no-repeat;
-  background-image: url("images/home/solutions-simulator.png");
+  background-image: resourceUrl("simulator");
   background-position: left center;
   background-size: 100%;
   padding: 3.333333333333333em 0 3.333333333333333em;

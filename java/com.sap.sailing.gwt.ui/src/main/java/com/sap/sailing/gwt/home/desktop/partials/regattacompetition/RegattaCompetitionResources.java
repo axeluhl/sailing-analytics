@@ -1,10 +1,10 @@
 package com.sap.sailing.gwt.home.desktop.partials.regattacompetition;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 
-public interface RegattaCompetitionResources extends ClientBundle {
+public interface RegattaCompetitionResources extends SharedHomeResources {
     public static final RegattaCompetitionResources INSTANCE = GWT.create(RegattaCompetitionResources.class);
 
     @Source("RegattaCompetition.gss")

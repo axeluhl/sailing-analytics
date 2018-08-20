@@ -18,17 +18,20 @@ import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay.NavigationItem;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 
 public class SeriesActivity extends AbstractActivity implements SeriesView.Presenter {
     private final MobileApplicationClientFactory clientFactory;
     private final AbstractSeriesPlace place;
     private EventSeriesViewDTO series;
     private final NavigationPathDisplay navigationPathDisplay;
+    private final FlagImageResolver flagImageResolver;
     
-    public SeriesActivity(AbstractSeriesPlace place, NavigationPathDisplay navigationPathDisplay, MobileApplicationClientFactory clientFactory) {
+    public SeriesActivity(AbstractSeriesPlace place, NavigationPathDisplay navigationPathDisplay, MobileApplicationClientFactory clientFactory, FlagImageResolver flagImageResolver) {
         this.navigationPathDisplay = navigationPathDisplay;
         this.clientFactory = clientFactory;
         this.place = place;
+        this.flagImageResolver = flagImageResolver;
     }
 
     @Override
@@ -46,8 +49,8 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     }
     
     private void initUi(final AcceptsOneWidget panel, EventBus eventBus, EventSeriesViewDTO series) {
-        final SeriesView view = new SeriesViewImpl(this);
-        view.setQuickFinderValues(series.getDisplayName(), series.getEvents());
+        final SeriesView view = new SeriesViewImpl(this, flagImageResolver);
+        view.setQuickFinderValues(series.getDisplayName(), series.getEventsDescending());
         panel.setWidget(view.asWidget());
         
         initNavigationPath();

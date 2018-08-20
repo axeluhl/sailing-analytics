@@ -12,9 +12,9 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.DockPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -30,7 +30,6 @@ import com.sap.sse.security.shared.PermissionsForRoleProvider;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
-import com.sap.sse.security.ui.loginpanel.LoginPanel;
 import com.sap.sse.security.ui.loginpanel.LoginPanelCss;
 import com.sap.sse.security.ui.shared.UserDTO;
 
@@ -68,7 +67,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
  * @author Axel Uhl (D043530)
  *
  */
-public class AdminConsolePanel extends DockLayoutPanel implements HandleTabSelectable{
+public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectable {
     private final UserService userService;
     
     /**
@@ -153,14 +152,7 @@ public class AdminConsolePanel extends DockLayoutPanel implements HandleTabSelec
 
     public AdminConsolePanel(UserService userService, PermissionsForRoleProvider permissionsForRoleProvider,
             ServerInfoRetriever buildVersionRetriever, String releaseNotesAnchorLabel,
-            String releaseNotesURL, ErrorReporter errorReporter, LoginPanelCss loginPanelCss) {
-        this(userService, permissionsForRoleProvider, buildVersionRetriever, releaseNotesAnchorLabel, releaseNotesURL, errorReporter, loginPanelCss, true);
-    }
-    
-    public AdminConsolePanel(UserService userService, PermissionsForRoleProvider permissionsForRoleProvider,
-            ServerInfoRetriever buildVersionRetriever, String releaseNotesAnchorLabel,
-            String releaseNotesURL, ErrorReporter errorReporter, LoginPanelCss loginPanelCss, boolean withLogin) {
-        super(Unit.EM);
+            String releaseNotesURL, ErrorReporter errorReporter, LoginPanelCss loginPanelCss, StringMessages stringMessages) {
         this.permissionsForRoleProvider = permissionsForRoleProvider;
         this.permissionsAnyOfWhichIsRequiredToSeeWidget = new HashMap<>();
         this.userService = userService;
@@ -168,7 +160,7 @@ public class AdminConsolePanel extends DockLayoutPanel implements HandleTabSelec
         this.panelsByWidget = new HashMap<>();
         getUserService().addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
-            public void onUserStatusChange(UserDTO user) {
+            public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
                 updateTabDisplayForCurrentUser(user);
             }
         });
@@ -210,20 +202,18 @@ public class AdminConsolePanel extends DockLayoutPanel implements HandleTabSelec
             }
         };
         final DockPanel informationPanel = new DockPanel();
-        informationPanel.setSize("100%", "95%");
+        informationPanel.setWidth("100%");
         informationPanel.setSpacing(10);
-        if(withLogin) {
-            informationPanel.add(new LoginPanel(loginPanelCss, getUserService()), DockPanel.WEST);
-        }
         informationPanel.add(errorReporter.getPersistentInformationWidget(), DockPanel.CENTER);
-        SystemInformationPanel sysinfoPanel = new SystemInformationPanel(buildVersionRetriever, errorReporter);
+        SystemInformationPanel sysinfoPanel = new SystemInformationPanel(buildVersionRetriever, errorReporter, stringMessages);
         sysinfoPanel.ensureDebugId("SystemInformation");
         final Anchor releaseNotesLink = new Anchor(new SafeHtmlBuilder().appendEscaped(releaseNotesAnchorLabel).toSafeHtml(), releaseNotesURL);
         sysinfoPanel.add(releaseNotesLink);
         informationPanel.add(sysinfoPanel, DockPanel.EAST);
         informationPanel.setCellHorizontalAlignment(sysinfoPanel, HasHorizontalAlignment.ALIGN_RIGHT);
-        this.addSouth(informationPanel, 2.5);
-        this.add(topLevelTabPanel);
+        this.setFooterWidget(informationPanel);
+        topLevelTabPanel.setSize("100%", "100%");
+        this.setContentWidget(topLevelTabPanel);
     }
 
     /**

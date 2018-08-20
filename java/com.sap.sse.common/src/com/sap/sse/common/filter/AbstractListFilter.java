@@ -31,18 +31,20 @@ public abstract class AbstractListFilter<T> {
     public abstract Iterable<String> getStrings(T t);
     
     /**
-     * Constructs a list based on the contents of {@link #all} and the current search phrase {@link #text}. 
+     * Constructs a list based on the contents of {@code all} using the {@link #matcher} which matches
+     * the {@code keywords} against what {@link #getStrings(Object)} returns for the respective
+     * object from {@code all}.
      */
     public Iterable<T> applyFilter(Iterable<String> keywords, Iterable<T> all) {
-        List<T> sortedList = new ArrayList<T>();
+        List<T> result = new ArrayList<T>();
         if (all != null) {
             for (T t : all) {
                 if (matcher.matches(keywords, t)) {
-                    sortedList.add(t);
+                    result.add(t);
                 }
             }
         }
-        return sortedList;
+        return result;
     }
 }
 

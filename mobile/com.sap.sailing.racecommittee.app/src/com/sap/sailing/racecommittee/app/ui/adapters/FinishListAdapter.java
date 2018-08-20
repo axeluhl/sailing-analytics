@@ -1,9 +1,8 @@
 package com.sap.sailing.racecommittee.app.ui.adapters;
 
-import java.util.List;
-
 import com.h6ah4i.android.widget.advrecyclerview.draggable.ItemDraggableRange;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
+import com.h6ah4i.android.widget.advrecyclerview.expandable.GroupPositionItemDraggableRange;
 import com.h6ah4i.android.widget.advrecyclerview.swipeable.RecyclerViewSwipeManager;
 import com.h6ah4i.android.widget.advrecyclerview.utils.AbstractDraggableSwipeableItemViewHolder;
 import com.sap.sailing.android.shared.util.BitmapHelper;
@@ -15,22 +14,26 @@ import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapter.ViewHolder> {
 
-    private Context mContext;
-    private List<CompetitorResultWithIdImpl> mCompetitor;
+    private final Context mContext;
+    private final CompetitorResultsList<CompetitorResultWithIdImpl> mCompetitor;
+    private final boolean mCanBoatsOfCompetitorsChangePerRace;
     private FinishEvents mListener;
 
-    public FinishListAdapter(Context context, List<CompetitorResultWithIdImpl> competitor) {
+    public FinishListAdapter(Context context, CompetitorResultsList<CompetitorResultWithIdImpl> competitor, boolean canBoatsOfCompetitorsChangePerRace) {
         setHasStableIds(true);
         mContext = context;
         mCompetitor = competitor;
+        mCanBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRace;
     }
 
     public void setListener(FinishEvents listener) {
@@ -46,16 +49,21 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         CompetitorResultWithIdImpl item = mCompetitor.get(position);
-
-        if (item.getMaxPointsReason().equals(MaxPointsReason.NONE)) {
-            holder.position.setText(String.valueOf(position + 1));
+        if (item.getOneBasedRank() != 0) {
+            holder.position.setText(String.valueOf(item.getOneBasedRank()));
         } else {
-            holder.position.setText(item.getMaxPointsReason().name());
+            holder.position.setText(null);
+        }
+        holder.vesselId.setVisibility(View.GONE);
+        if (mCanBoatsOfCompetitorsChangePerRace && item.getBoat() != null) {
+            holder.vesselId.setVisibility(View.VISIBLE);
+            holder.vesselId.setText(item.getBoat().getSailID());
+            if (item.getBoat().getColor() != null) {
+                ViewHelper.setColors(holder.vesselId, item.getBoat().getColor().getAsHtml());
+            }
         }
         holder.competitor.setText(item.getCompetitorDisplayName());
-
         int dragState = holder.getDragStateFlags();
-
         if ((dragState & RecyclerViewDragDropManager.STATE_FLAG_IS_UPDATED) != 0) {
             int bgColor;
             if ((dragState & RecyclerViewDragDropManager.STATE_FLAG_IS_ACTIVE) != 0) {
@@ -65,6 +73,29 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
             }
             holder.container.setBackgroundColor(bgColor);
         }
+        Drawable warning;
+        switch (item.getMergeState()) {
+            case ERROR:
+                warning = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_red);
+                break;
+
+            case WARNING:
+                warning = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_yellow);
+                break;
+
+            default:
+                warning = null;
+                break;
+        }
+        holder.warning.setImageDrawable(warning);
+        holder.penalty.setText(item.getMaxPointsReason().name());
+        holder.penalty.setVisibility(item.getMaxPointsReason().equals(MaxPointsReason.NONE) ? View.GONE : View.VISIBLE);
+        int bgId = R.attr.sap_gray_black_30;
+        if (mCompetitor.get(position).getOneBasedRank() == 0) {
+            bgId = R.attr.sap_gray_black_20;
+        }
+        holder.container.setBackgroundColor(ThemeHelper.getColor(mContext, bgId));
+        holder.dragHandle.setVisibility(item.getOneBasedRank() != 0 ? View.VISIBLE : View.INVISIBLE);
     }
 
     @Override
@@ -85,32 +116,26 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         // x, y --- relative from the itemView's top-left
         View containerView = holder.container;
         View dragHandleView = holder.dragHandle;
-
         int offsetX = containerView.getLeft() + (int) (ViewCompat.getTranslationX(containerView) + 0.5f);
         int offsetY = containerView.getTop() + (int) (ViewCompat.getTranslationY(containerView) + 0.5f);
-
-        return hitTest(dragHandleView, x - offsetX, y - offsetY);
+        return dragHandleView.getVisibility() == View.VISIBLE && hitTest(dragHandleView, x - offsetX, y - offsetY);
     }
 
     @Override
     public ItemDraggableRange onGetItemDraggableRange(ViewHolder viewHolder, int position) {
-        return null;
+        final int start = 0;
+        final int end = mCompetitor.getFirstRankZeroPosition() - 1;
+        return new GroupPositionItemDraggableRange(start, end);
     }
 
     @Override
     public void onMoveItem(int fromPosition, int toPosition) {
-        if (fromPosition == toPosition) {
-            return;
+        // Note: fromPosition may be greater than toPosition if item is moved towards the top of the list
+        if (fromPosition != toPosition) {
+            if (mListener != null) {
+                mListener.onItemMove(fromPosition, toPosition);
+            }
         }
-
-        CompetitorResultWithIdImpl item = mCompetitor.get(fromPosition);
-        mCompetitor.remove(item);
-        mCompetitor.add(toPosition, item);
-        if (mListener != null) {
-            mListener.afterMoved();
-        }
-
-        notifyItemMoved(fromPosition, toPosition);
     }
 
     @Override
@@ -129,15 +154,21 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
             case RecyclerViewSwipeManager.DRAWABLE_SWIPE_NEUTRAL_BACKGROUND:
                 bgRes = R.attr.swipe_idle;
                 break;
+
             case RecyclerViewSwipeManager.DRAWABLE_SWIPE_LEFT_BACKGROUND:
                 bgRes = R.attr.swipe_left;
                 break;
+
             case RecyclerViewSwipeManager.DRAWABLE_SWIPE_RIGHT_BACKGROUND:
                 bgRes = R.attr.swipe_right;
                 break;
         }
 
-        viewHolder.container.setBackgroundColor(ThemeHelper.getColor(mContext, R.attr.sap_gray_black_30));
+        int bgId = R.attr.sap_gray_black_30;
+        if (mCompetitor.get(position).getOneBasedRank() == 0) {
+            bgId = R.attr.sap_gray_black_20;
+        }
+        viewHolder.container.setBackgroundColor(ThemeHelper.getColor(mContext, bgId));
         Drawable background = BitmapHelper.getAttrDrawable(mContext, bgRes);
         BitmapHelper.setBackground(viewHolder.itemView, background);
     }
@@ -159,9 +190,7 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         switch (reaction) {
             case RecyclerViewSwipeManager.AFTER_SWIPE_REACTION_REMOVE_ITEM:
                 if (mListener != null) {
-                    mListener.onItemRemoved(mCompetitor.get(position));
-                    mCompetitor.remove(position);
-                    notifyItemRemoved(position);
+                    mListener.onItemRemove(position);
                 }
                 break;
 
@@ -170,23 +199,29 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         }
     }
 
-    public interface FinishEvents {
-        void afterMoved();
+    public int getFirstRankZeroPosition() {
+        return mCompetitor.getFirstRankZeroPosition();
+    }
 
-        void onItemRemoved(CompetitorResultWithIdImpl item);
+    public interface FinishEvents {
+        void onItemMove(int fromPosition, int toPosition);
+
+        void onItemRemove(int position);
 
         void onLongClick(CompetitorResultWithIdImpl item);
 
-        void onEditItem(CompetitorResultWithIdImpl item, int position);
+        void onItemEdit(CompetitorResultWithIdImpl item);
     }
 
     public class ViewHolder extends AbstractDraggableSwipeableItemViewHolder implements View.OnLongClickListener {
-        public View container;
-        public View dragHandle;
-        public View editItem;
-        public TextView position;
-        public TextView vesselId;
-        public TextView competitor;
+        View container;
+        View dragHandle;
+        View editItem;
+        TextView position;
+        TextView vesselId;
+        TextView competitor;
+        ImageView warning;
+        TextView penalty;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -199,13 +234,16 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
                     @Override
                     public void onClick(View v) {
                         if (mListener != null) {
-                            mListener.onEditItem(mCompetitor.get(getAdapterPosition()), getAdapterPosition() + 1);
+                            final CompetitorResultWithIdImpl competitorResultItem = mCompetitor.get(getAdapterPosition());
+                            mListener.onItemEdit(competitorResultItem);
                         }
                     }
                 });
             }
             vesselId = ViewHelper.get(itemView, R.id.vessel_id);
             competitor = ViewHelper.get(itemView, R.id.competitor);
+            warning = ViewHelper.get(itemView, R.id.warning_sign);
+            penalty = ViewHelper.get(itemView, R.id.item_penalty);
             position = ViewHelper.get(itemView, R.id.position);
             if (position != null) {
                 position.setOnLongClickListener(this);

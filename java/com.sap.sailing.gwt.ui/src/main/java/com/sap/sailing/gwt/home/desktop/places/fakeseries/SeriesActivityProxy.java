@@ -1,8 +1,12 @@
 package com.sap.sailing.gwt.home.desktop.places.fakeseries;
 
 import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
+import com.google.gwt.activity.shared.Activity;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.client.place.event.legacy.SeriesClientFactory;
 import com.sap.sailing.gwt.home.communication.fakeseries.EventSeriesViewDTO;
 import com.sap.sailing.gwt.home.communication.fakeseries.GetEventSeriesViewAction;
@@ -17,7 +21,10 @@ import com.sap.sailing.gwt.home.shared.app.ProvidesNavigationPath;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sse.gwt.client.mvp.AbstractActivityProxy;
+import com.sap.sse.gwt.resources.CommonControlsCSS;
+import com.sap.sse.gwt.resources.Highcharts;
 
 public class SeriesActivityProxy extends AbstractActivityProxy implements ProvidesNavigationPath, WithHeader {
 
@@ -60,8 +67,25 @@ public class SeriesActivityProxy extends AbstractActivityProxy implements Provid
                     place = getRealPlace(series);
                 }
                 place = verifyAndAdjustPlace();
-                super.onSuccess(new SeriesActivity((AbstractSeriesTabPlace) place, series, clientFactory,
-                        homePlacesNavigator, navigationPathDisplay));
+
+                CommonControlsCSS.ensureInjected();
+                Highcharts.ensureInjected();
+                withFlagImageResolver(flagImageResolver -> new SeriesActivity((AbstractSeriesTabPlace) place, series, clientFactory,
+                        homePlacesNavigator, navigationPathDisplay, flagImageResolver));
+            }
+            private void withFlagImageResolver(final Function<FlagImageResolver, Activity> activityFactory) {
+                final Consumer<Activity> onSuccess = super::onSuccess;
+                final Consumer<Throwable> onFailure = super::onFailure;
+                FlagImageResolver.get(new AsyncCallback<FlagImageResolver>() {
+                    @Override
+                    public void onSuccess(FlagImageResolver result) {
+                        onSuccess.accept(activityFactory.apply(result));
+                    }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        onFailure.accept(caught);
+                    }
+                });
             }
         });
     }

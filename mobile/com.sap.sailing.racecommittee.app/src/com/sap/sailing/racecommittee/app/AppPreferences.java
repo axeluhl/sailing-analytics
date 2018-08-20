@@ -5,16 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.preference.PreferenceManager;
-import android.provider.Settings.Secure;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.text.TextUtils;
-
 import com.google.android.gms.maps.model.LatLng;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
@@ -28,6 +18,16 @@ import com.sap.sailing.racecommittee.app.domain.coursedesign.CourseLayouts;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.NumberOfRounds;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.TrapezoidCourseLayouts;
 import com.sap.sailing.racecommittee.app.domain.coursedesign.WindWardLeeWardCourseLayouts;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.preference.PreferenceManager;
+import android.provider.Settings.Secure;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 /**
  * Wrapper for {@link SharedPreferences} for all hidden and non-hidden preferences and state variables.
@@ -497,13 +497,32 @@ public class AppPreferences {
             .getInteger(R.integer.preference_dependent_races_offset_default));
     }
 
-    public int getProtestTimeDuration() {
+    public int getProtestTimeDurationInMinutes() {
         return helper.getInt(context.getString(R.string.preference_protest_time_duration_key), context.getResources()
             .getInteger(R.integer.preference_protest_time_duration_default));
     }
 
-    public void setProtestTimeDuration(int value) {
-        helper.getEditor().putInt(context.getString(R.string.preference_protest_time_duration_key), value).commit();
+    public int getProtestTimeDurationInMinutesCustom() {
+        return helper.getInt(context.getString(R.string.preference_protest_time_duration_custom_key), -1);
+    }
+
+    public boolean isDefaultProtestTimeCustomEditable() {
+        return helper.getBoolean(context.getString(R.string.preference_protest_time_duration_custom_editable_key),
+                context.getResources().getBoolean(R.bool.preference_protest_time_duration_custom_editable_default));
+    }
+
+    public void setDefaultProtestTimeDurationInMinutes(int protestTimeInMinutes) {
+        helper.getEditor().putInt(context.getString(R.string.preference_protest_time_duration_key), protestTimeInMinutes).commit();
+    }
+
+    public void setDefaultProtestTimeDurationInMinutesCustom(int protestTimeInMinutest) {
+        helper.getEditor().putInt(context.getString(R.string.preference_protest_time_duration_custom_key), protestTimeInMinutest).commit();
+    }
+
+    public void setDefaultProtestTimeDurationInMinutesCustomEditable(boolean editable) {
+        helper.getEditor()
+            .putBoolean(context.getString(R.string.preference_protest_time_duration_custom_editable_key), editable)
+            .commit();
     }
 
     public String getTheme() {

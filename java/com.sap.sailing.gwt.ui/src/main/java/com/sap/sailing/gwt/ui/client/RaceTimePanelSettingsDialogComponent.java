@@ -1,10 +1,11 @@
 package com.sap.sailing.gwt.ui.client;
 
+import com.sap.sse.security.ui.client.UserService;
 
 public class RaceTimePanelSettingsDialogComponent extends TimePanelSettingsDialogComponent<RaceTimePanelSettings> {
     
-    public RaceTimePanelSettingsDialogComponent(RaceTimePanelSettings settings, StringMessages stringMessages) {
-        super(settings, stringMessages);
+    public RaceTimePanelSettingsDialogComponent(RaceTimePanelSettings settings, StringMessages stringMessages, UserService userService) {
+        super(settings, stringMessages, userService);
     }
 
     @Override

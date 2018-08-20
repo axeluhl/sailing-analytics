@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.mobile.places.event.overview.regatta;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -19,6 +20,8 @@ import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase;
 import com.sap.sailing.gwt.home.mobile.places.event.overview.AbstractEventOverview;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class RegattaOverviewImpl extends AbstractEventOverview {
@@ -28,15 +31,19 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
     private EventSteps eventStepsUi;
     private RegattaLiveRaces liveRacesUi;
 
-    public RegattaOverviewImpl(EventViewBase.Presenter presenter) {
+    private final FlagImageResolver flagImageResolver;
+
+    public RegattaOverviewImpl(EventViewBase.Presenter presenter, FlagImageResolver flagImageResolver) {
         super(presenter, presenter.isMultiRegattaEvent(), presenter.isMultiRegattaEvent());
+        this.flagImageResolver = flagImageResolver;
         FlowPanel container = new FlowPanel();
-        if(presenter.getRegatta() != null) {
+        if (presenter.getRegatta() != null) {
             this.setupProgress(container);
             this.setupLiveRaces(container);
         }
         if (!isMultiRegattaEvent()) {
             this.setupOverviewStage(container);
+            this.setupEventDescription(container);
         }
         this.setupMiniLeaderboard(container);
         initRacesNavigation(container);
@@ -49,7 +56,9 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
     }
     
     private void setupProgress(Panel container) {
-        eventStepsUi = new EventSteps();
+        final Function<String, PlaceNavigation<?>> racesNavigationFactory = prefSeriesName -> currentPresenter
+                .getRegattaRacesNavigation(getRegattaId(), prefSeriesName);
+        eventStepsUi = new EventSteps(currentPresenter.getRegatta(), racesNavigationFactory);
         refreshManager.add(eventStepsUi, new GetRegattaWithProgressAction(getEventId(), getRegattaId()));
         container.add(eventStepsUi);
     }
@@ -61,9 +70,9 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
     }
     
     private void setupMiniLeaderboard(Panel container) {
-        MinileaderboardBox miniLeaderboard = new MinileaderboardBox(false);
+        MinileaderboardBox miniLeaderboard = new MinileaderboardBox(false, flagImageResolver);
         miniLeaderboard.setAction(MSG.showAll(), currentPresenter.getRegattaMiniLeaderboardNavigation(getRegattaId()));
-        if(currentPresenter.getRegatta() != null) {
+        if (currentPresenter.getRegatta() != null) {
             refreshManager.add(miniLeaderboard, new GetMiniLeaderbordAction(getEventId(), getRegattaId(), 3));
         } else {
             // This forces the "There are no results available yet" message to show

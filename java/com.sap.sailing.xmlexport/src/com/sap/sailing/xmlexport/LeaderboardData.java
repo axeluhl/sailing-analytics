@@ -19,20 +19,19 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.jdom.Element;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Leg;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
@@ -53,7 +52,10 @@ import com.sap.sailing.domain.tracking.WindPositionMode;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -227,7 +229,7 @@ public class LeaderboardData extends ExportAction {
         if (competitorsForColumn == null) {
             competitorsForColumn = new ArrayList<>();
         }
-        List<Competitor> competitors = leaderboard.getCompetitorsFromBestToWorst(column, timepointToBeUsed);
+        Iterable<Competitor> competitors = leaderboard.getCompetitorsFromBestToWorst(column, timepointToBeUsed);
         for (Competitor competitorInLeaderboard : competitors) {
             // we must keep track of competitors that we are associated to fleets
             // in order to not export the score correction twice. This is needed
@@ -237,7 +239,8 @@ public class LeaderboardData extends ExportAction {
                 MaxPointsReason mpr = leaderboard.getScoreCorrection().getMaxPointsReason(competitorInLeaderboard, column, timepointToBeUsed);
                 if (mpr != null && !mpr.equals(MaxPointsReason.NONE)) {
                     // add this competitor to the list to have him evaluated
-                    Element competitorElement = createCompetitorXML(competitorInLeaderboard, leaderboard, /*shortVersion*/ true, null);
+                    Boat boatOfCompetitor = null; // TODO: Where can we get the boat here?
+                    Element competitorElement = createCompetitorXML(competitorInLeaderboard, boatOfCompetitor, leaderboard, /*shortVersion*/ true, null);
                     Element competitorRaceDataElement = new Element("competitor_race_data");
                     MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitorInLeaderboard, column, timepointToBeUsed);
                     addNamedElementWithValue(competitorRaceDataElement, "max_points_reason", maxPointsReason.toString()); 
@@ -398,7 +401,8 @@ public class LeaderboardData extends ExportAction {
                 if (fleetCompetitorIsSailingIn != null && fleetCompetitorIsSailingIn.equals(fleet) && !competitorsForColumn.contains(competitorInLeaderboard)) {
                     if (mpr != null && !mpr.equals(MaxPointsReason.NONE)) {
                         // add this competitor to the list to have him evaluated
-                        Element competitorElement = createCompetitorXML(competitorInLeaderboard, leaderboard, /*shortVersion*/ true, null);
+                        Boat boatOfCompetitor = leaderboard.getBoatOfCompetitor(competitorInLeaderboard, column, fleetCompetitorIsSailingIn);
+                        Element competitorElement = createCompetitorXML(competitorInLeaderboard, boatOfCompetitor, leaderboard, /*shortVersion*/ true, null);
                         Element competitorRaceDataElement = new Element("competitor_race_data");
                         MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitorInLeaderboard, column, race.getEndOfRace());
                         addNamedElementWithValue(competitorRaceDataElement, "max_points_reason", maxPointsReason.toString()); 
@@ -419,7 +423,8 @@ public class LeaderboardData extends ExportAction {
         
         int raceRank = 0;
         for (Competitor competitor : allCompetitors) {
-            Element competitorElement = createCompetitorXML(competitor, leaderboard, /*shortVersion*/ true, null);
+            Boat boatOfCompetitor = null; // TODO: Where can we get the boat here?
+            Element competitorElement = createCompetitorXML(competitor, boatOfCompetitor, leaderboard, /*shortVersion*/ true, null);
             Element competitorRaceDataElement = new Element("competitor_race_data");
             MaxPointsReason maxPointsReason = leaderboard.getMaxPointsReason(competitor, column, race.getEndOfRace());
             if (maxPointsReason != null && !maxPointsReason.equals(MaxPointsReason.NONE)) {
@@ -438,8 +443,8 @@ public class LeaderboardData extends ExportAction {
                 continue;
             }
 
-            List<Maneuver> maneuvers = getManeuvers(race, competitor, /*waitForLatest*/ false);
-            addNamedElementWithValue(competitorRaceDataElement, "number_of_maneuvers", maneuvers != null ? maneuvers.size() : 0);
+            Iterable<Maneuver> maneuvers = getManeuvers(race, competitor, /*waitForLatest*/ false);
+            addNamedElementWithValue(competitorRaceDataElement, "number_of_maneuvers", maneuvers != null ? Util.size(maneuvers) : 0);
             addNamedElementWithValue(competitorRaceDataElement, "number_of_tacks", getNumberOfTacks(maneuvers));
             addNamedElementWithValue(competitorRaceDataElement, "number_of_jibes", getNumberOfJibes(maneuvers));
             addNamedElementWithValue(competitorRaceDataElement, "number_of_penalty_circles", getNumberOfPenaltyCircles(maneuvers));
@@ -591,7 +596,7 @@ public class LeaderboardData extends ExportAction {
             }
             addNamedElementWithValue(competitorRaceDataElement, "distance_traveled_in_meters", distanceTraveledInThisRace == null ? 0.0 : distanceTraveledInThisRace.getMeters());
             addNamedElementWithValue(competitorRaceDataElement, "distance_traveled_including_non_finished_legs_in_meters", getDistanceTraveled(race, competitor, race.getEndOfRace(), /*alsoReturnDistanceIfCompetitorHasNotFinishedRace*/ true).getMeters());
-            Speed averageSpeedOverGround = getAverageSpeedOverGround(race, competitor, race.getEndOfRace(), true);
+            Speed averageSpeedOverGround = race.getAverageSpeedOverGround(competitor, race.getEndOfRace());
             addNamedElementWithValue(competitorRaceDataElement, "average_speed_over_ground_in_knots", averageSpeedOverGround == null ? 0.0 : averageSpeedOverGround.getKnots());
             addNamedElementWithValue(competitorRaceDataElement, "final_race_rank", ++raceRank);
             TrackedLegOfCompetitor trackedLegOfCompetitor = race.getTrackedLeg(competitor, race.getRace().getCourse().getFirstLeg());
@@ -619,19 +624,21 @@ public class LeaderboardData extends ExportAction {
      * Creates xml elements related to a competitor.
      * @param shortVersion when set to <code>true</code> then only the name and UUID is returned
      */
-    private Element createCompetitorXML(Competitor competitor, Leaderboard leaderboard, boolean shortVersion, Util.Pair<Double, Vector<String>> competitorConfidenceAndErrorMessages) throws NoWindException, IOException, ServletException {
+    private Element createCompetitorXML(Competitor competitor, Boat boatOfCompetitor, Leaderboard leaderboard, 
+            boolean shortVersion, Util.Pair<Double, Vector<String>> competitorConfidenceAndErrorMessages) throws NoWindException, IOException, ServletException {
         TimePoint timeSpent = MillisecondsTimePoint.now();
         Element competitorElement = new Element("competitor");
         addNamedElementWithValue(competitorElement, "uuid", competitor.getId().toString());
         addNamedElementWithValue(competitorElement, "name", competitor.getName());
+        addNamedElementWithValue(competitorElement, "short_name", competitor.getShortName());
         
         if (shortVersion)
             return competitorElement;
         
-        if (competitor.getBoat() != null) {
-            addNamedElementWithValue(competitorElement, "sail_id", cleanSailId(competitor.getBoat().getSailID(), competitor));
-            addNamedElementWithValue(competitorElement, "boat_class", competitor.getBoat().getBoatClass().getName());
-            addNamedElementWithValue(competitorElement, "boat_name", competitor.getBoat().getName());
+        if (boatOfCompetitor != null) {
+            addNamedElementWithValue(competitorElement, "sail_id", cleanSailId(boatOfCompetitor.getSailID(), competitor));
+            addNamedElementWithValue(competitorElement, "boat_class", boatOfCompetitor.getBoatClass().getName());
+            addNamedElementWithValue(competitorElement, "boat_name", boatOfCompetitor.getName());
         } else {
             addNamedElementWithValue(competitorElement, "sail_id", "");
             addNamedElementWithValue(competitorElement, "boat_class", "");
@@ -730,7 +737,8 @@ public class LeaderboardData extends ExportAction {
         addNamedElementWithValue(legElement, "great_circle_distance_at_end_of_race_in_meters", trackedLeg.getGreatCircleDistance(trackedLeg.getTrackedRace().getEndOfRace()).getMeters());
         
         for (Competitor competitor : trackedLeg.getTrackedRace().getCompetitorsFromBestToWorst(/*timePoint*/ trackedLeg.getTrackedRace().getEndOfRace())) {
-            Element competitorElement = createCompetitorXML(competitor, leaderboard, /*shortVersion*/ true, null);
+            Boat boatOfCompetitor = null; // TODO: Where can we get the boat here?
+            Element competitorElement = createCompetitorXML(competitor, boatOfCompetitor, leaderboard, /*shortVersion*/ true, null);
             Element competitorLegDataElement = new Element("competitor_leg_data");
             TrackedLegOfCompetitor competitorLeg = trackedLeg.getTrackedLeg(competitor);
             
@@ -778,8 +786,8 @@ public class LeaderboardData extends ExportAction {
                 addNamedElementWithValue(competitorLegDataElement, "rank_gain_for_this_leg_between_start_and_finish", 0);
             }
             
-            List<Maneuver> maneuvers = competitorLeg.getManeuvers(legFinishTime, /*waitForLatest*/false);
-            addNamedElementWithValue(competitorLegDataElement, "maneuver_count", maneuvers.size());
+            Iterable<Maneuver> maneuvers = competitorLeg.getManeuvers(legFinishTime, /*waitForLatest*/false);
+            addNamedElementWithValue(competitorLegDataElement, "maneuver_count", Util.size(maneuvers));
             Element maneuversElement = new Element("maneuvers");
             int maneuverCounter = 0;
             for (Maneuver man : maneuvers) {
@@ -788,8 +796,8 @@ public class LeaderboardData extends ExportAction {
                 addNamedElementWithValue(maneuverInformation, "type", man.getType().toString());
                 addNamedElementWithValue(maneuverInformation, "position", maneuverCounter);
                 addNamedElementWithValue(maneuverInformation, "direction_change_in_degrees", man.getDirectionChangeInDegrees());
-                Distance maneuverLoss = man.getManeuverLoss();
-                addNamedElementWithValue(maneuverInformation, "loss_in_meters", maneuverLoss != null ? maneuverLoss.getMeters() : 0.0);
+                addNamedElementWithValue(maneuverInformation, "loss_in_meters",
+                        man.getManeuverLoss() != null ? man.getManeuverLoss().getProjectedDistanceLost().getMeters() : 0.0);
                 addNamedElementWithValue(maneuverInformation, "speed_before_in_knots", man.getSpeedWithBearingBefore().getKnots());
                 addNamedElementWithValue(maneuverInformation, "speed_after_in_knots", man.getSpeedWithBearingAfter().getKnots());
                 maneuversElement.addContent(maneuverInformation);
@@ -946,13 +954,13 @@ public class LeaderboardData extends ExportAction {
         return new Util.Pair<Double, Vector<String>>(simpleConfidence, messages);
     }
     
-    private Util.Pair<Double, Vector<String>> checkData(Competitor competitor) throws Exception {
+    private Util.Pair<Double, Vector<String>> checkData(Competitor competitor, Boat boatOfCompetitor) throws Exception {
         double simpleConfidence = 1.0; Vector<String> messages = new Vector<String>();
         if (competitor.getName() == null || competitor.getName().equals("")) {
             messages.add("Competitor " + competitor.getId() + " has no name!");
             simpleConfidence -= 1;
         }
-        if (competitor.getBoat() == null || competitor.getBoat().getSailID() == null || competitor.getBoat().getSailID().equals("")) {
+        if (boatOfCompetitor == null || boatOfCompetitor.getSailID() == null || boatOfCompetitor.getSailID().equals("")) {
             messages.add("Competitor " + competitor.getId() + " has no sail id that can be used!");
             simpleConfidence -= 1;
         }
@@ -1029,8 +1037,12 @@ public class LeaderboardData extends ExportAction {
         final List<Element> racesElements = new ArrayList<Element>();
         final List<Element> competitorElements = new ArrayList<Element>();
         for (Competitor competitor : leaderboard.getAllCompetitors()) {
-            Util.Pair<Double, Vector<String>> competitorConfidenceAndErrorMessages = checkData(competitor);
-            competitorElements.add(createCompetitorXML(competitor, leaderboard, /*shortVersion*/ false, competitorConfidenceAndErrorMessages));
+            Boat boatOfCompetitor = null;
+            if (competitor.hasBoat()) {
+                boatOfCompetitor = ((CompetitorWithBoat) competitor).getBoat();
+            }
+            Util.Pair<Double, Vector<String>> competitorConfidenceAndErrorMessages = checkData(competitor, boatOfCompetitor);
+            competitorElements.add(createCompetitorXML(competitor, boatOfCompetitor, leaderboard, /*shortVersion*/ false, competitorConfidenceAndErrorMessages));
         }
         List<Element> windData = new ArrayList<Element>();
         TrackedRace raceBefore = null; int sameDayGroupIndex = 0; int raceCounter = 0;

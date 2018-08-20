@@ -83,9 +83,11 @@ INSTALL_FROM_RELEASE=
 USE_ENVIRONMENT=
 
 INSTANCE_ID="$SERVER_NAME:$SERVER_PORT"
-ADDITIONAL_JAVA_ARGS="-Dpersistentcompetitors.clear=false -XX:ThreadPriorityPolicy=2 -XX:+UseG1GC -verbose:gc -XX:MaxGCPauseMillis=500 -XX:+PrintAdaptiveSizePolicy -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -Xloggc:logs/gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M -Djava.awt.headless=true"
+ADDITIONAL_JAVA_ARGS="-Dpersistentcompetitors.clear=false -XX:ThreadPriorityPolicy=2 -XX:+UseG1GC -verbose:gc -XX:MaxGCPauseMillis=500 -XX:+PrintAdaptiveSizePolicy -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -Xloggc:logs/gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M -XX:MaxGCPauseMillis=500 -XX:+PrintAdaptiveSizePolicy"
 
-JAVA_HOME=/opt/jdk1.8.0_20
+# Uncomment for use with SAP JVM only:
+#ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -XX:+GCHistory -XX:GCHistoryFilename=logs/sapjvm_gc@PID.prf"
+
 if [[ ! -d $JAVA_HOME ]] && [[ -f "/usr/libexec/java_home" ]]; then
     JAVA_HOME=`/usr/libexec/java_home`
 fi

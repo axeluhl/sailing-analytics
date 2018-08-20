@@ -7,6 +7,7 @@ import com.sap.sailing.gwt.home.mobile.places.user.profile.AbstractUserProfileAc
 import com.sap.sailing.gwt.home.shared.places.user.profile.preferences.UserPreferencesPresenter;
 import com.sap.sailing.gwt.home.shared.places.user.profile.preferences.UserPreferencesView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.preferences.UserPreferencesView.Presenter;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.home.shared.places.user.profile.preferences.UserProfilePreferencesPlace;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 
@@ -16,10 +17,10 @@ public class UserProfilePreferencesActivity extends AbstractUserProfileActivity 
     private final UserProfilePreferencesView currentView;
     
     public UserProfilePreferencesActivity(UserProfilePreferencesPlace place,
-            MobileApplicationClientFactory clientFactory) {
+            MobileApplicationClientFactory clientFactory, FlagImageResolver flagImageResolver) {
         super(clientFactory);
         this.userPreferencesPresenter = new UserPreferencesPresenter<MobileApplicationClientFactory>(clientFactory);
-        this.currentView = new UserProfilePreferencesViewImpl(this);
+        this.currentView = new UserProfilePreferencesViewImpl(this, flagImageResolver);
     }
 
     @Override

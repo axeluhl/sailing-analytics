@@ -1,0 +1,86 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
+<META HTTP-EQUIV="Content-Language" CONTENT="en-GB"> 
+<META NAME="OWNER" CONTENT="WMO-OMM">
+<meta http-equiv="Page-Enter" content="blendtrans(duration=1)"> 
+<meta http-equiv="expires" content="Mon, 1 Aug 2016 24:00:00 GMT">
+<META name="ROBOTS" content="INDEX, FOLLOW">
+<meta name="Publisher" content="WMO">
+<meta name="distribution" content="global"> 
+<META NAME="RATING" CONTENT="GENERAL">
+<meta name="google-translate-customization" content="4674b2aee967599d-c92c77533b8fc0ad-gd1e0dcabc4d7b3c8-b"></meta>
+<META NAME='revisit-after' CONTENT="7 days">
+<meta name="Copyright" content="(C) WMO.INT">
+<meta name="security" content="Public" />
+<meta http-equiv="imagetoolbar" content="no">
+<meta name="Page-topic" content="Scientific community" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="author" content="WMO.INT Webteam">
+<meta name="description" content="World Meteorological Organization PROGRAMMES site | English version | WMO.int"> 
+<meta name="abstract" content="World Meteorological Organization PROGRAMMES site | Working together in weather, climate, and water" /> 
+<meta name="Audience" content="All" />
+<meta name="no-email-collection" value="http://www.unspam.com/noemailcollection" />
+<meta name="Page-type" content="United Nations specialized agency" />
+<meta name="mssmarttagspreventparsing" content="true" />
+<title>404 Not Found on WMO.INT</title>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-5372772-3', 'auto');
+  ga('send', 'pageview');
+
+</script>
+<style type="text/css">
+body,td,th {
+	font-family: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", "DejaVu Sans", Verdana, sans-serif;
+	font-style: normal;
+	font-weight: bold;
+	font-size: 16px;
+	color: #0B0A70;
+}
+body {
+	margin-left: 5px;
+	margin-top: 5px;
+	margin-right: 5px;
+	margin-bottom: 5px;
+}
+a:link {
+	text-decoration: none;
+}
+a:visited {
+	text-decoration: none;
+}
+a:hover {
+	text-decoration: underline;
+}
+a:active {
+	text-decoration: none;
+}
+</style>
+</head>
+
+<body text="#0B0A70" link="#D48605" vlink="#D48605" alink="#D48605" leftmargin="5" topmargin="5" marginwidth="5" marginheight="5"><div align=center>
+<img src="/HttpErrorCodes/wmo_extranet_header_en_nolink.jpg"><br />
+<h2 align="center">WMO website </h2>
+<strong><em><br>
+Originating from:
+<script type="text/javascript">
+document.write(document.referrer);
+ </script>
+</em></strong><em></em>
+<div><br>
+  Sorry, the information you are looking for has maybe already been migrated to <a href="http://public.wmo.int" target="_blank"><em>public.wmo.int</em></a>. <strong>Please visit our new website - <a href="http://public.wmo.int" target="_blank"><em>public.wmo.int</em></a> - and update your bookmark</strong>.</div>
+<div><br>
+  If   you are looking for content that was available on this site and do not   find it with the <a href="http://public.wmo.int/en/search" target="_blank">Search tool on the new site</a>, <strong>please   inform us at <a href="mailto:publicwebsite@wmo.int" target="_blank"><em>publicwebsite@wmo.int</em></a>.</strong> <br>
+  You can also check the <a href="http://www.wmo.int/GoogleSearchWMO_en.html" target="_blank">current Extranet search engine</a>.</div>
+<p>&nbsp;</p>
+<p><a href="javascript:setLanguage('ar');"><span dir="rtl">&#1593;&#1585;&#1576;&#1610;</span></a> | <a href="javascript:setLanguage('zh');">&#20013;&#25991;</a> | <a href="javascript:setLanguage('fr');">Fr</a> | <a href="javascript:setLanguage('ru');">Ru</a> | <a href="javascript:setLanguage('es');">Es</a>  | <a href="javascript:setLanguage('en');">En</a> &nbsp; </p>
+<p>&nbsp;</p>
+</div>
+</body>
+</html>

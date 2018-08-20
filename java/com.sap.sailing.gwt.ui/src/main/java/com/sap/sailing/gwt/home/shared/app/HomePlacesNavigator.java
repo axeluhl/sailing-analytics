@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.imprint.ImprintPlace;
+import com.sap.sailing.gwt.home.shared.places.morelogininformation.MoreLoginInformationPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
@@ -21,6 +22,7 @@ import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPl
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.preferences.UserProfilePreferencesPlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserProfileSettingsPlace;
 
 public class HomePlacesNavigator extends AbstractPlaceNavigator {
 
@@ -34,6 +36,11 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
 
     public PlaceNavigation<EventsPlace> getEventsNavigation() {
         return createGlobalPlaceNavigation(new EventsPlace());
+    }
+    
+
+    public PlaceNavigation<MoreLoginInformationPlace> getMoreLoginInfo() {
+        return createGlobalPlaceNavigation(new MoreLoginInformationPlace());
     }
 
     public PlaceNavigation<SolutionsPlace> getSolutionsNavigation(SolutionsNavigationTabs navigationTab) {
@@ -85,7 +92,7 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
     }
 
     public PlaceNavigation<ConfirmationPlace> getMailVerifiedConfirmationNavigation() {
-        return createLocalPlaceNavigation(new ConfirmationPlace(Action.MAIL_VERIFIED));
+        return createLocalPlaceNavigation(new ConfirmationPlace(Action.MAIL_VERIFIED, null, null));
     }
 
     public PlaceNavigation<ConfirmationPlace> getPasswordResettedConfirmationNavigation(String username) {
@@ -102,5 +109,9 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
 
     public PlaceNavigation<? extends AbstractUserProfilePlace> getUserPreferencesNavigation() {
         return createLocalPlaceNavigation(new UserProfilePreferencesPlace());
+    }
+    
+    public PlaceNavigation<? extends AbstractUserProfilePlace> getUserSettingsNavigation() {
+        return createLocalPlaceNavigation(new UserProfileSettingsPlace());
     }
 }

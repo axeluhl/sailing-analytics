@@ -14,13 +14,19 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
+import org.apache.shiro.subject.Subject;
+
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.anniversary.DetailedRaceInfo;
+import com.sap.sailing.domain.anniversary.SimpleRaceInfo;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
@@ -40,8 +46,11 @@ import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
+import com.sap.sailing.domain.base.impl.DynamicCompetitorWithBoat;
+import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DataImportSubProgress;
+import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RaceFetcher;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -49,6 +58,8 @@ import com.sap.sailing.domain.common.RegattaFetcher;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
+import com.sap.sailing.domain.common.WindFinderReviewedSpotsCollectionIdProvider;
+import com.sap.sailing.domain.common.dto.AnniversaryType;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.leaderboard.EventResolver;
@@ -58,31 +69,41 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.leaderboard.LeaderboardRegistry;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboardWithEliminations;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
+import com.sap.sailing.domain.racelog.tracking.SensorFixStoreSupplier;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
 import com.sap.sailing.domain.regattalike.LeaderboardThatHasRegattaLike;
+import com.sap.sailing.domain.statistics.Statistics;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
+import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tracking.WindStore;
+import com.sap.sailing.domain.tracking.WindTracker;
+import com.sap.sailing.server.anniversary.AnniversaryRaceDeterminator;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sailing.server.simulation.SimulationService;
+import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.common.search.Searchable;
 import com.sap.sse.filestorage.FileStorageManagementService;
+import com.sap.sse.pairinglist.PairingList;
+import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
@@ -115,7 +136,8 @@ import com.sap.sse.shared.media.VideoDescriptor;
  */
 public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetcher, RegattaRegistry, RaceFetcher,
         LeaderboardRegistry, EventResolver, LeaderboardGroupResolver, TrackerManager, Searchable<LeaderboardSearchResult, KeywordQuery>,
-        ReplicableWithObjectInputStream<RacingEventService, RacingEventServiceOperation<?>>, RaceLogResolver {
+        ReplicableWithObjectInputStream<RacingEventService, RacingEventServiceOperation<?>>, RaceLogResolver,
+        SensorFixStoreSupplier, WindFinderReviewedSpotsCollectionIdProvider {
     @Override
     Regatta getRegatta(RegattaName regattaName);
 
@@ -124,6 +146,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     DynamicTrackedRace getTrackedRace(Regatta regatta, RaceDefinition race);
 
+    /**
+     * When the regatta, tracked regatta and race definition are found, this method waits for the
+     * tracked race to appear.
+     */
     DynamicTrackedRace getTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
 
     /**
@@ -156,29 +182,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * {@link #addTracTracRace(URL, URI, URI, WindStore, long)} with an equal combination of URLs/URIs, the {@link TracTracRaceTracker}
      * already tracking the race was re-used. The trackers will be stopped by this call regardless of how many calls
      * were made that ensured they were tracking.
+     * @param willBeRemoved TODO
      */
-    void stopTracking(Regatta regatta) throws MalformedURLException, IOException, InterruptedException;
-
-    /**
-     * Removes <code>race</code> and any corresponding {@link #getTrackedRace(Regatta, RaceDefinition) tracked race}
-     * from this service. If it was the last {@link RaceDefinition} in its {@link Regatta} and the regatta
-     * {@link Regatta#isPersistent() is not stored persistently}, the <code>regatta</code> is removed as well and will no
-     * longer be returned by {@link #getAllRegattas()}. The wind tracking is stopped for <code>race</code>.
-     * <p>
-     * 
-     * Any {@link RaceTracker} for which <code>race</race> is the last race tracked that is still reachable
-     * from {@link #getAllRegattas()} will be {@link RaceTracker#stop(boolean) stopped}.
-     * 
-     * The <code>race</code> will be also removed from all leaderboards containing a column that has <code>race</code>'s
-     * {@link #getTrackedRace(Regatta, RaceDefinition) corresponding} {@link TrackedRace} as its
-     * {@link RaceColumn#getTrackedRace(Fleet)}.
-     * 
-     * @param regatta
-     *            the regatta from which to remove the race
-     * @param race
-     *            the race to remove
-     */
-    void removeRace(Regatta regatta, RaceDefinition race) throws MalformedURLException, IOException,InterruptedException;
+    void stopTracking(Regatta regatta, boolean willBeRemoved) throws MalformedURLException, IOException, InterruptedException;
 
     /**
      * @param port
@@ -191,6 +197,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void startTrackingWind(Regatta regatta, RaceDefinition race, boolean correctByDeclination);
 
+    /**
+     * If a {@link WindTracker} exists for {@code race}, it is stopped and the {@link RaceTrackingConnectivityParameters}
+     * through which the {@code race} was created are updated to not track wind when restoring that race upon a server
+     * restart.
+     */
     void stopTrackingWind(Regatta regatta, RaceDefinition race) throws SocketException, IOException;
 
     /**
@@ -212,6 +223,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     FlexibleLeaderboard addFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName, int[] discardThresholds, ScoringScheme scoringScheme, Serializable courseAreaId);
 
     RegattaLeaderboard addRegattaLeaderboard(RegattaIdentifier regattaIdentifier, String leaderboardDisplayName, int[] discardThresholds);
+
+    RegattaLeaderboardWithEliminations addRegattaLeaderboardWithEliminations(String leaderboardName, String leaderboardDisplayName, RegattaLeaderboard fullRegattaLeaderboard);
 
     void removeLeaderboard(String leaderboardName);
 
@@ -258,6 +271,10 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     void removeSeries(Series series) throws MalformedURLException, IOException, InterruptedException;
 
+    /**
+     * Returns {@code null} if the regatta or the race definition or the tracked regatta or the tracked race are not
+     * found.
+     */
     DynamicTrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier raceIdentifier);
 
     /**
@@ -268,24 +285,24 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     /**
      * Creates a new group with the name <code>groupName</code>, the description <code>desciption</code> and the
      * leaderboards with the names in <code>leaderboardNames</code> and saves it in the database.
-     * @param id TODO
      * @param groupName
      *            The name of the new group
      * @param description
      *            The description of the new group
-     * @param displayName TODO
-     * @param displayGroupsInReverseOrder TODO
      * @param leaderboardNames
      *            The names of the leaderboards, which should be contained by the new group.<br />
      *            If there isn't a leaderboard with one of these names an {@link IllegalArgumentException} is thrown.
      * @return The new leaderboard group
      */
-    LeaderboardGroup addLeaderboardGroup(UUID id, String groupName, String description,
-            String displayName, boolean displayGroupsInReverseOrder, List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
+    LeaderboardGroup addLeaderboardGroup(UUID leaderboardGroupId, String groupName, String description,
+            String displayName, boolean displayGroupsInReverseOrder, List<String> leaderboardNames,
+            int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType);
 
     /**
      * Removes the group with the name <code>groupName</code> from the service and the database.
-     * @param groupName The name of the group which shall be removed.
+     * 
+     * @param groupName
+     *            The name of the group which shall be removed.
      */
     void removeLeaderboardGroup(String groupName);
 
@@ -310,13 +327,21 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Regatta getOrCreateDefaultRegatta(String name, String boatClassName, Serializable id);
 
     /**
-     * @param series the series must not have any {@link RaceColumn}s yet
-     * @param controlTrackingFromStartAndFinishTimes TODO
+     * Creates a regatta and replicates this to all replicas currently attached.
+     * 
+     * @param series
+     *            the series must not have any {@link RaceColumn}s yet
+     * @param controlTrackingFromStartAndFinishTimes
+     *            cannot be {@code true} if {@link useStartTimeInference} is also {@code true}
      */
-    Regatta createRegatta(String regattaName, String boatClassName, TimePoint startDate, TimePoint endDate, Serializable id, Iterable<? extends Series> series,
+    Regatta createRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace, TimePoint startDate, TimePoint endDate, Serializable id, Iterable<? extends Series> series,
             boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths,
             boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor);
     
+    /**
+     * @param controlTrackingFromStartAndFinishTimes
+     *            cannot be {@code true} if {@link useStartTimeInference} is also {@code true}
+     */
     Regatta updateRegatta(RegattaIdentifier regattaIdentifier, TimePoint startDate, TimePoint endDate,
             Serializable newDefaultCourseAreaId, RegattaConfiguration regattaConfiguration,
             Iterable<? extends Series> series, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
@@ -363,6 +388,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     /**
      * Updates a sailing event with the name <code>eventName</code>, the venue<code>venue</code> and the regattas with
      * the names in <code>regattaNames</code> and updates it in the database.
+     * 
      * @param eventName
      *            The name of the event to update
      * @param startDate
@@ -373,12 +399,15 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            The name of the venue of the event
      * @param isPublic
      *            Indicates whether the event is public accessible via the publication URL or not
-     * @param baseURL TODO
+     * @param windFinderReviewedSpotCollectionIds
+     *            IDs of WindFinder spot collections, reviewed by www.windfinder.com, to use by the WindFinder wind
+     *            tracker and to expose on the event's UI
      * @return The new event
      */
     void updateEvent(UUID id, String eventName, String eventDescription, TimePoint startDate, TimePoint endDate,
             String venueName, boolean isPublic, Iterable<UUID> leaderboardGroupIds, URL officialWebsiteURL, URL baseURL, 
-            Map<Locale, URL> sailorsInfoWebsiteURLs, Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos);
+            Map<Locale, URL> sailorsInfoWebsiteURLs, Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos,
+            Iterable<String> windFinderReviewedSpotCollectionIds);
 
     /**
      * Renames a sailing event. If a sailing event by the name <code>oldName</code> does not exist in {@link #getEvents()},
@@ -440,11 +469,11 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * In contrast to mediaTracksAdded, this method takes mediaTracks with a given dbId.
      * Checks if the track already exists in the library and the database and adds/stores it
      * accordingly. If a track already exists and override, its properties are checked for changes 
-     * @param mediaTrack
      * @param override If true, track properties (title, url, start time, duration, not mime type!) will be 
      * overwritten with the values from the track to be imported.
+     * @param mediaTrack
      */
-    void mediaTracksImported(Iterable<MediaTrack> mediaTracksToImport, boolean override);
+    void mediaTracksImported(Iterable<MediaTrack> mediaTracksToImport, MasterDataImportObjectCreationCount creatingCount, boolean override) throws Exception;
     
     Iterable<MediaTrack> getMediaTracksForRace(RegattaAndRaceIdentifier regattaAndRaceIdentifier);
     
@@ -456,6 +485,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     RaceLog getRaceLog(String leaderboardName, String raceColumnName, String fleetName);
 
+    Map<Competitor, Boat> getCompetitorToBoatMappingsForRace(String leaderboardName, String raceColumnName, String fleetName);
+    
     /**
      * @param controlTrackingFromStartAndFinishTimes TODO
      * @param rankingMetricConstructor TODO
@@ -463,9 +494,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *         the call
      */
     Util.Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String fullRegattaName, String boatClassName, 
-            TimePoint startDate, TimePoint endDate, Serializable id, 
+            boolean canBoatsOfCompetitorsChangePerRace, TimePoint startDate, TimePoint endDate, Serializable id, 
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
-            Serializable defaultCourseAreaId, double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
+            Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor);
 
     /**
@@ -524,12 +555,47 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     TimePoint setStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName, String authorName,
             int authorPriority, int passId, TimePoint logicalTimePoint, TimePoint startTime, RacingProcedureType racingProcedure);
+    
+    /**
+     * Forces a new end time identified by the passed parameters.
+     * @param leaderboardName name of the RaceLog's leaderboard.
+     * @param raceColumnName name of the RaceLog's column
+     * @param fleetName name of the RaceLog's fleet
+     * @param authorName name of the {@link AbstractLogEventAuthor} the {@link RaceLogStartTimeEvent} will be created with
+     * @param authorPriority priority of the author.
+     * @param passId Pass identifier of the new start time event.
+     * @param logicalTimePoint logical {@link TimePoint} of the new event.
+     * @return
+     */
+    TimePoint setEndTime(String leaderboardName, String raceColumnName, String fleetName, String authorName,
+            int authorPriority, int passId, TimePoint logicalTimePoint);
+
+    /**
+     * Forces a new finishing time identified by the passed parameters.
+     * @param leaderboardName name of the RaceLog's leaderboard.
+     * @param raceColumnName name of the RaceLog's column
+     * @param fleetName name of the RaceLog's fleet
+     * @param authorName name of the {@link AbstractLogEventAuthor} the {@link RaceLogStartTimeEvent} will be created with
+     * @param authorPriority priority of the author.
+     * @param passId Pass identifier of the new start time event.
+     * @param logicalTimePoint logical {@link TimePoint} of the new event.
+     * @return
+     */
+    TimePoint setFinishingTime(String leaderboardName, String raceColumnName, String fleetName, String authorName,
+            Integer authorPriority, int passId, MillisecondsTimePoint millisecondsTimePoint);
 
     /**
      * Gets the start time, pass identifier and racing procedure for the queried race. Start time might be <code>null</code>.
      */
     Util.Triple<TimePoint, Integer, RacingProcedureType> getStartTimeAndProcedure(String leaderboardName, String raceColumnName, String fleetName);
 
+    /**
+     * Gets the finishing and finish times as well as the pass identifier for the queried race. The first TimePoint is the
+     * finishing time, the second on is the finish time. Finishing and/or finish times might be <code>null</code>.
+     */
+    com.sap.sse.common.Util.Triple<TimePoint, TimePoint, Integer> getFinishingAndFinishTime(
+            String leaderboardName, String raceColumnName, String fleetName);
+    
     MongoObjectFactory getMongoObjectFactory();
     
     DomainObjectFactory getDomainObjectFactory();
@@ -540,13 +606,16 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
 
     SimulationService getSimulationService();
     
-    SensorFixStore getSensorFixStore();
-    
     RaceTracker getRaceTrackerById(Object id);
     
+    /**
+     * Tries to obtain a priority-0 author from a currently logged-in {@link Subject}. If no user
+     * is currently logged on or subject's {@link Subject#getPrincipal() principal} is not set,
+     * a default server author object with priority 0 is returned as default.
+     */
     AbstractLogEventAuthor getServerAuthor();
     
-    CompetitorStore getCompetitorStore();
+    CompetitorAndBoatStore getCompetitorAndBoatStore();
     
     TypeBasedServiceFinderFactory getTypeBasedServiceFinderFactory();
 
@@ -632,4 +701,153 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * yet, the given callback will be informed asynchronously on registration of the RaceTracker in question.
      */
     void getRaceTrackerByRegattaAndRaceIdentifier(RegattaAndRaceIdentifier raceIdentifier, Consumer<RaceTracker> callback);
+
+    /**
+     * When restoring tracked races was requested upon creation of this service and after the corresponding restore records
+     * were read from the persistent store, this method returns the number of races to be restored. Otherwise, it returns 0.
+     * 
+     * @see #getNumberOfTrackedRacesRestored()
+     */
+    int getNumberOfTrackedRacesToRestore();
+
+    /**
+     * When restoring tracked races was requested upon creation of this service, this method tells the number of races
+     * whose loading process has already been triggered. Otherwise, it returns 0.
+     * 
+     * @see #getNumberOfTrackedRacesToRestore()
+     */
+    int getNumberOfTrackedRacesRestored();
+
+    /**
+     * Provides {@link Statistics statistic information} for every year which is covered by the local
+     * server.
+     * 
+     * @return a map of {@link Statistics statistic objects} keyed be the year they are representing
+     */
+    Map<Integer, Statistics> getLocalStatisticsByYear();
+
+    /**
+     * Provides {@link Statistics statistic information} for every year which is covered by the local and
+     * all remote servers.
+     * 
+     * @return a map of {@link Statistics statistic objects} keyed be the year they are representing
+     */
+    Map<Integer, Statistics> getOverallStatisticsByYear();
+
+    /**
+     * Obtains information about all {@link TrackedRace}s connected to {@link Event}s managed locally on this server
+     * instance or reachable through a remote server reference, having a non-{@code null}
+     * {@link TrackedRace#getStartOfRace() start time}. Being "connected" here means that the race is linked to a
+     * {@link Leaderboard} that is part of a {@link LeaderboardGroup} which is in turn
+     * {@link Event#getLeaderboardGroups() linked} to the {@link Event}.
+     * 
+     * @return a new map whose keys identify the race and whose values have a short info about the race that will allow,
+     *         e.g., to sort by start time and therefore identify "anniversary" races in a central instance. All
+     *         {@link SimpleRaceInfo#getRemoteUrl()} values will be {@code null} for races managed locally on this server;
+     *         for races obtained through remote server references, the remote URL will be that of the remote server
+     *         reference. Callers may modify the map as each call to this method will produce a new copy.
+     */
+    Map<RegattaAndRaceIdentifier, SimpleRaceInfo> getRemoteRaceList();
+
+    /**
+     * Obtains information about all {@link TrackedRace}s connected to {@link Event}s managed locally on this server
+     * instance, having a non-{@code null} {@link TrackedRace#getStartOfRace() start time}. Being "connected" here means
+     * that the race is linked to a {@link Leaderboard} that is part of a {@link LeaderboardGroup} which is in turn
+     * {@link Event#getLeaderboardGroups() linked} to the {@link Event}.
+     * 
+     * @return a new map whose keys identify the race and whose values have a short info about the race that will allow,
+     *         e.g., to sort by start time and therefore identify "anniversary" races in a central instance. All
+     *         {@link SimpleRaceInfo#getRemoteUrl()} values will be {@code null}, meaning that the tracked races live
+     *         locally on this server. Callers may modify the map as each call to this method will produce a new copy.
+     */
+    Map<RegattaAndRaceIdentifier, SimpleRaceInfo> getLocalRaceList();
+
+    /**
+     * Provides a {@link DetailedRaceInfo} for the given {@link RegattaAndRaceIdentifier}. The algorithm first tries to
+     * resolve this via {@link getFullDetailsForRaceLocal(RegattaAndRaceIdentifier)}, if no local result can be
+     * determined, the identifier is resolved against the cached remote race list in the
+     * {@link com.sap.sailing.server.impl.RemoteSailingServerSet}. If a match is found, the remoteUrl stored in the
+     * match is used to make a remote REST call to retrieve the required information from the remote server. This method
+     * is intended to be used to resolve detailed information for determined anniversary races.
+     * 
+     * @return a DetailedRaceInfo object or null if the race could not be resolved
+     */
+    DetailedRaceInfo getFullDetailsForRaceCascading(RegattaAndRaceIdentifier regattaNameAndRaceName);
+
+    /**
+     * Provides a {@link DetailedRaceInfo} for the given {@link RegattaAndRaceIdentifier}. This method only tries to
+     * resolve the race against locally tracked races reachable from an event that have a startOfRace that is not
+     * {@code null}.
+     * 
+     * @return a DetailedRaceInfo object or null if the race could not be resolved
+     */
+    DetailedRaceInfo getFullDetailsForRaceLocal(RegattaAndRaceIdentifier raceIdentifier);
+
+    /**
+     * Provides number and {@link AnniversaryType type} information for the next anniversary race.
+     * 
+     * @return a {@link Pair} containing the next anniversary number and {@link AnniversaryType type}, or
+     *         <code>null</code> if next anniversary can't be determined
+     */
+    Pair<Integer, AnniversaryType> getNextAnniversary();
+
+    /**
+     * @return the amount of races that are tracked have a startTime and are either remotely or locally resolvable, or <code>null</code> if next anniversary can't be determined
+     */
+    int getCurrentRaceCount();
+
+    /**
+     * Provides a {@link Map} of all known anniversaries, keyed by the number of the anniversary race.
+     * 
+     * @return the {@link Map} of known anniversaries (key = anniversary number / value = {@link Pair} containing
+     *         {@link DetailedRaceInfo race} and {@link AnniversaryType type} information)
+     */
+    Map<Integer, Pair<DetailedRaceInfo, AnniversaryType>> getKnownAnniversaries();
+
+    /**
+     * Provides the number, {@link DetailedRaceInfo race} and {@link AnniversaryType type} information for the latest
+     * anniversary race.
+     * 
+     * @return {@link Triple} containing the last anniversary number, {@link DetailedRaceInfo race} and
+     *         {@link AnniversaryType type}, or <code>null</code> if there's no anniversary so far
+     */
+    Triple<Integer, DetailedRaceInfo, AnniversaryType> getLastAnniversary();
+    
+    /**
+     * Returns the {@link AnniversaryRaceDeterminator} used by this service. This is needed for replication for
+     * anniversary races only.
+     */
+    AnniversaryRaceDeterminator getAnniversaryRaceDeterminator();
+    
+    /**
+     * Returns a calculated {@link PairingListTemplate}, specified by flights, groups and competitors.
+     *
+     * @param leaderboardName the name of the leaderboard
+     * @param competitorsCount count of competitor
+     * @param flightMultiplier specifies how often the flights will be cloned
+     * @return calculated {@link PairingListTemplate}
+     */
+    PairingListTemplate createPairingListTemplate(final int flightsCount, final int groupsCount,
+            final int competitorsCount, final int flightMultiplier);
+    
+    /**
+     * Matches the competitors of a leaderboard to the {@link PairingList}
+     * 
+     * @param pairingListTemplate
+     *            the returned {@link PairingList} is based upon it
+     * @param leaderboardName
+     *            name of the leaderboard
+     * @return {@link PairingList} that contains competitor objects matched to {@link RaceColumn}s and {@link Fleet}s
+     * @throws PairingListCreationException
+     *             for example if the number of boats available for the leaderboard is too small to create the pairing
+     *             list
+     */
+    PairingList<RaceColumn, Fleet, Competitor,Boat> getPairingListFromTemplate(PairingListTemplate pairingListTemplate, 
+            final String leaderboardName, final Iterable<RaceColumn> selectedFlights) throws PairingListCreationException;
+
+    /**
+     * From a {@link CompetitorDescriptor} looks up or creates a {@link CompetitorWithBoat} object which is then guaranteed
+     * to be in the {@link CompetitorStore}.
+     */
+    DynamicCompetitorWithBoat convertCompetitorDescriptorToCompetitorWithBoat(CompetitorDescriptor competitorDescriptor, String searchTag);
 }

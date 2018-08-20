@@ -19,11 +19,12 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
     public final static String ACTION_EDIT = "ACTION_EDIT";
     public final static String ACTION_REFRESH_RACELOG = "ACTION_REFRESH_RACE_LOG";
     public final static String ACTION_SET_STARTTIME = "ACTION_SET_STARTTIME";
+    public final static String ACTION_SET_FINISHING_AND_FINISH_TIME = "ACTION_SET_FINISHING_AND_FINISH_TIME";
     public final static String ACTION_SHOW_RACELOG = "ACTION_SHOW_RACELOG";
     public final static String ACTION_SET_TRACKING_TIMES = "ACTION_SET_TRACKING_TIMES";
     public final static String ACTION_STOP_TRACKING = "ACTION_STOP_TRACKING";
     public final static String ACTION_START_TRACKING = "ACTION_START_TRACKING";
-
+    public final static String ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS = "ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS";
     
     private final StringMessages stringMessages;
     private SmartphoneTrackingEventManagementPanel smartphoneTrackingEventManagementPanel;
@@ -50,6 +51,7 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
         result.add(new ImageSpec(ACTION_EDIT, stringMessages.actionEdit(), makeImagePrototype(resources.editIcon())));
         result.add(new ImageSpec(ACTION_REFRESH_RACELOG, stringMessages.refreshRaceLog(), makeImagePrototype(resources.reloadIcon())));
         result.add(new ImageSpec(ACTION_SET_STARTTIME, stringMessages.setStartTime(), makeImagePrototype(resources.clockIcon())));
+        result.add(new ImageSpec(ACTION_SET_FINISHING_AND_FINISH_TIME, stringMessages.setFinishingAndFinishTime(), makeImagePrototype(resources.blueSmall())));
         result.add(new ImageSpec(ACTION_SHOW_RACELOG, stringMessages.raceLog(), makeImagePrototype(resources.flagIcon())));
         result.add(new ImageSpec(ACTION_SET_TRACKING_TIMES, stringMessages.setTrackingTimes(), makeImagePrototype(resources.setTrackingTimes())));
         
@@ -60,6 +62,10 @@ public class RaceLogTrackingEventManagementRaceImagesBarCell extends ImagesBarCe
             if (startEndTrackingTime.getB() == null || startEndTrackingTime.getB().getTimePoint() == null) {
                 result.add(new ImageSpec(ACTION_STOP_TRACKING, stringMessages.stopTracking(), makeImagePrototype(resources.stopRaceLogTracking())));
             }
+        }
+        
+        if (smartphoneTrackingEventManagementPanel.getSelectedLeaderboard().canBoatsOfCompetitorsChangePerRace) {
+            result.add(new ImageSpec(ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS, stringMessages.actionShowCompetitorToBoatAssignments(), makeImagePrototype(resources.sailboatIcon())));
         }
         
         return result;

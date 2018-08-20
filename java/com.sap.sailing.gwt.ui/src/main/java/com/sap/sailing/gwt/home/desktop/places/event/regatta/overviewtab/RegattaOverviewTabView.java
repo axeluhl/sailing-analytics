@@ -7,27 +7,32 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.communication.event.GetLiveRacesForRegattaAction;
 import com.sap.sailing.gwt.home.communication.event.GetRegattaStatisticsAction;
 import com.sap.sailing.gwt.home.communication.event.GetRegattaWithProgressAction;
 import com.sap.sailing.gwt.home.communication.event.minileaderboard.GetMiniLeaderbordAction;
 import com.sap.sailing.gwt.home.communication.event.statistics.GetEventStatisticsAction;
-import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata;
 import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata.RegattaState;
 import com.sap.sailing.gwt.home.communication.regatta.RegattaWithProgressDTO;
+import com.sap.sailing.gwt.home.desktop.partials.eventdescription.EventDescription;
 import com.sap.sailing.gwt.home.desktop.partials.eventstage.EventOverviewStage;
 import com.sap.sailing.gwt.home.desktop.partials.liveraces.LiveRacesList;
 import com.sap.sailing.gwt.home.desktop.partials.multiregattalist.MultiRegattaListItem;
+import com.sap.sailing.gwt.home.desktop.partials.raceoffice.RaceOfficeSection;
 import com.sap.sailing.gwt.home.desktop.partials.standings.StandingsList;
-import com.sap.sailing.gwt.home.desktop.partials.statistics.StatisticsBox;
+import com.sap.sailing.gwt.home.desktop.partials.statistics.DesktopStatisticsBoxView;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.EventRegattaView.Presenter;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.RegattaTabView;
+import com.sap.sailing.gwt.home.shared.partials.statistics.EventStatisticsBox;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 
 /**
  * Created by pgtaboada on 25.11.14.
@@ -39,14 +44,18 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
 
     private static MyBinder ourUiBinder = GWT.create(MyBinder.class);
     private Presenter currentPresenter;
-    
+
     @UiField SimplePanel regattaInfoContainerUi;
     @UiField(provided = true) LiveRacesList liveRacesListUi;
     @UiField(provided = true) EventOverviewStage stageUi;
+    @UiField SimplePanel descriptionUi;
     @UiField(provided = true) StandingsList standingsUi;
-    @UiField(provided = true) StatisticsBox statisticsBoxUi;
+    @UiField(provided = true) EventStatisticsBox statisticsBoxUi;
+    @UiField RaceOfficeSection raceOfficeSectionUi;
+    private final FlagImageResolver flagImageResolver;
 
-    public RegattaOverviewTabView() {
+    public RegattaOverviewTabView(FlagImageResolver flagImageResolver) {
+        this.flagImageResolver = flagImageResolver;
     }
 
     @Override
@@ -63,11 +72,23 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
     public void start(RegattaOverviewPlace myPlace, AcceptsOneWidget contentArea) {
         liveRacesListUi = new LiveRacesList(currentPresenter, false);
         stageUi = new EventOverviewStage(currentPresenter);
-        statisticsBoxUi = new StatisticsBox(false);
+        statisticsBoxUi = new EventStatisticsBox(false, new DesktopStatisticsBoxView());
         final HasRegattaMetadata regattaMetadata = currentPresenter.getRegattaMetadata();
-        standingsUi = new StandingsList(regattaMetadata != null && regattaMetadata.getState() == RegattaState.FINISHED, currentPresenter.getRegattaLeaderboardNavigation(currentPresenter.getRegattaId()));
-
+        standingsUi = new StandingsList(regattaMetadata != null && regattaMetadata.getState() == RegattaState.FINISHED,
+                currentPresenter.getRegattaLeaderboardNavigation(currentPresenter.getRegattaId()),
+                flagImageResolver);
         initWidget(ourUiBinder.createAndBindUi(this));
+
+        if (!currentPresenter.showRegattaMetadata()) {
+            final String description = currentPresenter.getEventDTO().getDescription();
+            if (description != null) {
+                descriptionUi.add(new EventDescription(description));
+            } else {
+                descriptionUi.removeFromParent();
+            }
+        }
+        
+        raceOfficeSectionUi.addLink(StringMessages.INSTANCE.racesOverview(), currentPresenter.getRegattaOverviewLink());
         
         RefreshManager refreshManager = new RefreshManagerWithErrorAndBusy(this, contentArea, currentPresenter.getDispatch(), currentPresenter.getErrorAndBusyClientFactory());
         if (currentPresenter.getRegattaMetadata() != null) {

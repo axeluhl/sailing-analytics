@@ -12,8 +12,10 @@ import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanel;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabPanelPlaceSelectionEvent;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.preferencestab.UserProfilePreferencesTabView;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.userprofile.desktop.userheader.UserHeader;
@@ -35,8 +37,14 @@ public class TabletAndDesktopUserProfileView extends Composite implements UserPr
     
     @UiField(provided = true)
     UserHeader headerUi;
+    
+    @UiField(provided = true)
+    UserProfilePreferencesTabView preferencesTabUi;
 
-    public TabletAndDesktopUserProfileView() {
+    private final FlagImageResolver flagImageResolver;
+
+    public TabletAndDesktopUserProfileView(FlagImageResolver flagImageResolver) {
+        this.flagImageResolver = flagImageResolver;
     }
 
     @Override
@@ -45,6 +53,8 @@ public class TabletAndDesktopUserProfileView extends Composite implements UserPr
         tabPanelUi = new TabPanel<>(currentPresenter, historyMapper);
         
         headerUi = new UserHeader(SharedResources.INSTANCE);
+        
+        preferencesTabUi = new UserProfilePreferencesTabView(flagImageResolver);
         
         initWidget(uiBinder.createAndBindUi(this));
     }

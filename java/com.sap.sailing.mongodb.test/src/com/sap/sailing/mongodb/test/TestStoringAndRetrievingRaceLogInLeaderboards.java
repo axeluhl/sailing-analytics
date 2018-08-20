@@ -21,9 +21,9 @@ import com.mongodb.MongoException;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogDependentStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
@@ -41,7 +41,6 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
-import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseAreaChangeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogDependentStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEventComparator;
@@ -117,7 +116,7 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
     }
 
     private RaceLog retrieveRaceLog() {
-        Leaderboard loadedLeaderboard = domainObjectFactory.loadLeaderboard(leaderboardName, /* regattaRegistry */ null);
+        Leaderboard loadedLeaderboard = domainObjectFactory.loadLeaderboard(leaderboardName, /* regattaRegistry */ null, /* leaderboardRegistry */ null);
         Fleet loadedDefaultFleet = loadedLeaderboard.getFleet(null);
         return loadedLeaderboard.getRaceColumnByName(raceColumnName).getRaceLog(loadedDefaultFleet);
     }
@@ -306,12 +305,12 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
     
     @Test
     public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogFinishPositioningConfirmedEvent() {   
-        Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", 
-                Color.RED, "someone@nowhere.de", null, null, null,
+        Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", "SAP",
+                Color.RED, "someone@nowhere.de", null, null,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         CompetitorResults storedPositioningList = new CompetitorResultsImpl();
         storedPositioningList.add(new CompetitorResultImpl(storedCompetitor.getId(), storedCompetitor.getName(), /* rank */
-                1, MaxPointsReason.NONE, /* score */ null, /* finishingTimePoint */null, /* comment */null));
+                1, MaxPointsReason.NONE, /* score */ null, /* finishingTimePoint */null, /* comment */null, MergeState.OK));
         RaceLogFinishPositioningConfirmedEvent event = new RaceLogFinishPositioningConfirmedEventImpl(now, author, 0, storedPositioningList);
         addAndStoreRaceLogEvent(leaderboard, raceColumnName, event);
         RaceLog loadedRaceLog = retrieveRaceLog();
@@ -330,14 +329,14 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
     
     @Test
     public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogFinishPositioningConfirmedEventWithContents() {   
-        Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", 
-                Color.RED, "someone@nowhere.de", null, null, null,
+        Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", "SAP",
+                Color.RED, "someone@nowhere.de", null, null,
                 /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         CompetitorResults storedPositioningList = new CompetitorResultsImpl();
         final TimePoint finishingTimePoint = MillisecondsTimePoint.now();
         final String comment = "This is a comment";
         storedPositioningList.add(new CompetitorResultImpl(storedCompetitor.getId(), storedCompetitor.getName(), /* rank */
-                1, MaxPointsReason.NONE, /* score */ 12.3,  finishingTimePoint, comment));
+                1, MaxPointsReason.NONE, /* score */ 12.3,  finishingTimePoint, comment, MergeState.OK));
         RaceLogFinishPositioningConfirmedEvent event = new RaceLogFinishPositioningConfirmedEventImpl(now, author, 0, storedPositioningList);
         addAndStoreRaceLogEvent(leaderboard, raceColumnName, event);
         RaceLog loadedRaceLog = retrieveRaceLog();
@@ -369,7 +368,7 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
             RaceLogFinishPositioningConfirmedEvent loadedConfirmedEvent = (RaceLogFinishPositioningConfirmedEvent) loadedEvent;
             assertEquals(now, loadedConfirmedEvent.getLogicalTimePoint());
             assertEquals(0, loadedConfirmedEvent.getPassId());
-            assertEquals(0, loadedConfirmedEvent.getInvolvedBoats().size());
+            assertEquals(0, loadedConfirmedEvent.getInvolvedCompetitors().size());
             assertNull(event.getPositionedCompetitorsIDsNamesMaxPointsReasons()); 
             assertNull(loadedConfirmedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons());
             assertEquals(1, Util.size(loadedRaceLog.getFixes()));
@@ -401,11 +400,11 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
     
     @Test
     public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogFinishPositioningListChangeEvent() {
-        Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", Color.RED,
-                "someone@nowhere.de", null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", "SAP", Color.RED,
+                "someone@nowhere.de", null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         CompetitorResults storedPositioningList = new CompetitorResultsImpl();
         storedPositioningList.add(new CompetitorResultImpl(storedCompetitor.getId(), storedCompetitor.getName(), /* rank */
-                1, MaxPointsReason.NONE, /* score */ null, /* finishingTimePoint */null, /* comment */null));
+                1, MaxPointsReason.NONE, /* score */ null, /* finishingTimePoint */null, /* comment */null, MergeState.OK));
         RaceLogFinishPositioningListChangedEvent event = new RaceLogFinishPositioningListChangedEventImpl(now, author, 0, storedPositioningList);
         
         addAndStoreRaceLogEvent(leaderboard, raceColumnName, event);
@@ -419,31 +418,10 @@ public class TestStoringAndRetrievingRaceLogInLeaderboards extends RaceLogMongoD
             assertEquals(event.getLogicalTimePoint(), loadedPositioningEvent.getLogicalTimePoint());
             assertEquals(event.getPassId(), loadedPositioningEvent.getPassId());
             assertEquals(event.getId(), loadedPositioningEvent.getId());
-            assertEquals(event.getInvolvedBoats().size(), loadedPositioningEvent.getInvolvedBoats().size());
+            assertEquals(event.getInvolvedCompetitors().size(), loadedPositioningEvent.getInvolvedCompetitors().size());
             final CompetitorResults expectedCompetiorResults = event.getPositionedCompetitorsIDsNamesMaxPointsReasons();
             final CompetitorResults loadedCompetitorResults = loadedPositioningEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons();
             assertCompetitorResultsEqual(expectedCompetiorResults, loadedCompetitorResults);
-            assertEquals(1, Util.size(loadedRaceLog.getFixes()));
-        } finally {
-            loadedRaceLog.unlockAfterRead();
-        }
-    }
-
-    @Test
-    public void testStoreAndRetrieveSimpleLeaderboardWithRaceLogCourseAreaChangeEvent() {
-        final UUID uuid = UUID.randomUUID();
-        RaceLogCourseAreaChangedEvent event = new RaceLogCourseAreaChangeEventImpl(now, author, 0, uuid);
-        addAndStoreRaceLogEvent(leaderboard, raceColumnName, event);
-        RaceLog loadedRaceLog = retrieveRaceLog();
-        loadedRaceLog.lockForRead();
-        try {
-            RaceLogEvent loadedEvent = loadedRaceLog.getFirstRawFix();
-            RaceLogCourseAreaChangedEvent courseAreaEvent = (RaceLogCourseAreaChangedEvent) loadedEvent;
-            assertEquals(event.getCreatedAt(), courseAreaEvent.getCreatedAt());
-            assertEquals(event.getLogicalTimePoint(), courseAreaEvent.getLogicalTimePoint());
-            assertEquals(event.getPassId(), courseAreaEvent.getPassId());
-            assertEquals(event.getId(), courseAreaEvent.getId());
-            assertEquals(event.getCourseAreaId(), courseAreaEvent.getCourseAreaId());
             assertEquals(1, Util.size(loadedRaceLog.getFixes()));
         } finally {
             loadedRaceLog.unlockAfterRead();

@@ -29,6 +29,8 @@ import com.sap.sse.gwt.client.mvp.ErrorView;
 import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
 import com.sap.sse.security.ui.authentication.WithAuthenticationManager;
+import com.sap.sse.security.ui.authentication.WithUserService;
+import com.sap.sse.security.ui.authentication.login.LoginHintContent;
 import com.sap.sse.security.ui.client.SecureClientFactoryImpl;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -40,7 +42,7 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
 public class MobileApplicationClientFactory extends
         SecureClientFactoryImpl<ApplicationTopLevelView<ResettableNavigationPathDisplay>> implements
         ErrorAndBusyClientFactory, SearchResultClientFactory, ConfirmationClientFactory, PasswordResetClientFactory,
-        WithAuthenticationManager {
+        WithAuthenticationManager, WithUserService {
     private final MobilePlacesNavigator navigator;
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
     private final AuthenticationManager authenticationManager;
@@ -61,13 +63,27 @@ public class MobileApplicationClientFactory extends
         this(new MobileApplicationView(navigator, eventBus), eventBus, placeController, navigator);
     }
 
-    public MobileApplicationClientFactory(MobileApplicationView root, EventBus eventBus,
+    public MobileApplicationClientFactory(final MobileApplicationView root, EventBus eventBus,
             PlaceController placeController, final MobilePlacesNavigator navigator) {
         super(root, eventBus, placeController);
         this.navigator = navigator;
         this.authenticationManager = new AuthenticationManagerImpl(this, eventBus, getNavigator()
                 .getMailVerifiedConfirmationNavigation().getFullQualifiedUrl(), getNavigator()
                 .getPasswordResetNavigation().getFullQualifiedUrl());
+        
+        authenticationManager.checkNewUserPopup(() -> root.setSubHeaderContent(null), dismissCallback -> {
+            final LoginHintContent content = new LoginHintContent(() -> {
+                root.setSubHeaderContent(null);
+                dismissCallback.run();
+            }, () -> {
+                root.setSubHeaderContent(null);
+                dismissCallback.run();
+                navigator.goToPlace(navigator.getMoreLoginInfo());
+            },() -> {
+                navigator.goToPlace(navigator.getSignInNavigation());
+            });
+            root.setSubHeaderContent(content);
+        });
     }
 
     public MobilePlacesNavigator getNavigator() {

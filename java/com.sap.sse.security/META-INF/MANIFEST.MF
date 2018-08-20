@@ -6,8 +6,7 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.sap.sse.security.impl.Activator
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.sap.sse.util,
- javax.mail;version="1.4.0",
+Import-Package: javax.mail;version="1.4.0",
  javax.mail.internet;version="1.4.0",
  javax.ws.rs;version="1.1.1",
  javax.ws.rs.core;version="1.1.1",
@@ -18,16 +17,15 @@ Import-Package: com.sap.sse.util,
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Require-Bundle: javax.servlet;bundle-version="3.1.0",
- slf4j.api;bundle-version="1.6.4",
  org.json.simple,
  com.sun.jersey,
- org.apache.commons.logging;bundle-version="1.1.1",
  org.apache.commons.beanutils;bundle-version="1.8.0",
  org.apache.shiro.core;bundle-version="1.2.2",
  org.apache.shiro.ehcache;bundle-version="1.2.3",
  org.apache.shiro.web;bundle-version="1.2.2",
  org.apache.servicemix.bundles.ehcache;bundle-version="2.6.9",
  org.apache.servicemix.bundles.scribe;bundle-version="1.3.3",
+ com.sap.sse,
  com.sap.sse.common,
  com.sap.sse.replication,
  com.sap.sse.operationaltransformation,
@@ -38,3 +36,4 @@ Require-Bundle: javax.servlet;bundle-version="3.1.0",
 Web-ContextPath: /security
 Export-Package: com.sap.sse.security,
  com.sap.sse.security.jaxrs
+Automatic-Module-Name: com.sap.sse.security

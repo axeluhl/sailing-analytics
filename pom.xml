@@ -101,7 +101,7 @@
   --> 
           <repository>
               <id>sailing-server-maven</id>
-              <url>http://maven.sapsailing.com/maven</url>
+              <url>https://maven.sapsailing.com/maven</url>
           </repository>
   
           <repository>

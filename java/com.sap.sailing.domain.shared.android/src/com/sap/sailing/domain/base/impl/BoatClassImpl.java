@@ -4,8 +4,10 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
 import com.sap.sailing.domain.common.BoatHullType;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sse.common.Distance;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.NamedImpl;
 
 public class BoatClassImpl extends NamedImpl implements BoatClass {
@@ -48,7 +50,9 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
 
     public BoatClassImpl(String name, boolean typicallyStartsUpwind) {
         this(name, typicallyStartsUpwind, /* displayName */ null,
-                /* hull length */ new MeterDistance(5), /* hullBeam */ null, /* hullType */ null);
+                // use the typical dinghy parameters as default
+                /* hull length */ new MeterDistance(5), /* hullBeam */ new MeterDistance(1.8),
+                /* hullType */ BoatHullType.MONOHULL);
     }
     
     public BoatClassImpl(String name, BoatClassMasterdata masterData) {
@@ -67,6 +71,11 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
         approximateManeuverDurationInMilliseconds = APPROXIMATE_AVERAGE_MANEUVER_DURATION.asMillis();
     }    
 
+    @Override
+    public Duration getApproximateManeuverDuration() {
+        return new MillisecondsDurationImpl(getApproximateManeuverDurationInMilliseconds());
+    }
+    
     @Override
     public long getApproximateManeuverDurationInMilliseconds() {
         return approximateManeuverDurationInMilliseconds;
@@ -140,5 +149,4 @@ public class BoatClassImpl extends NamedImpl implements BoatClass {
     public BoatHullType getHullType() {
         return hullType;
     }
-
 }

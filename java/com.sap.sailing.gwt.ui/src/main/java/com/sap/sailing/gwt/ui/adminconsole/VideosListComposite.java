@@ -12,6 +12,8 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -58,7 +60,7 @@ public class VideosListComposite extends Composite {
 
     interface AnchorTemplates extends SafeHtmlTemplates {
         @SafeHtmlTemplates.Template("<a target=\"_blank\" href=\"{0}\">{1}</a>")
-        SafeHtml cell(String url, String displayName);
+        SafeHtml cell(SafeUri url, String displayName);
     }
 
     private static AnchorTemplates ANCHORTEMPLATE = GWT.create(AnchorTemplates.class);
@@ -138,7 +140,7 @@ public class VideosListComposite extends Composite {
                 if(linkName.length() >= 25) {
                     linkName = linkName.substring(0, 22) + "...";     
                 }
-                return ANCHORTEMPLATE.cell(video.getSourceRef(), linkName);
+                return ANCHORTEMPLATE.cell(UriUtils.fromString(video.getSourceRef()), linkName);
             }
         };
 

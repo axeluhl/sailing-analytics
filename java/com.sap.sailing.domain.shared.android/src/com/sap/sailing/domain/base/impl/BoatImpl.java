@@ -2,37 +2,47 @@ package com.sap.sailing.domain.base.impl;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatChangeListener;
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.impl.NamedImpl;
+import com.sap.sse.common.impl.RenamableImpl;
 
-public class BoatImpl extends NamedImpl implements DynamicBoat {
+public class BoatImpl extends RenamableImpl implements DynamicBoat {
     private static final long serialVersionUID = 3489730487528955788L;
     private final BoatClass boatClass;
+    private final Serializable id;
     private String sailID;
-    private final Color color;
+    private Color color;
     private transient Set<BoatChangeListener> listeners;
 
-    public BoatImpl(String name, BoatClass boatClass, String sailID) {
-        this(name, boatClass, sailID, null);
+    public BoatImpl(Serializable id, String name, BoatClass boatClass, String sailId) {
+        this(id, name, boatClass, sailId, null);
     }
 
-    public BoatImpl(String name, BoatClass boatClass, String sailID, Color color) {
+    public BoatImpl(Serializable id, String name, BoatClass boatClass, String sailID, Color color) {
         super(name);
+        this.id = id;
         this.boatClass = boatClass;
         this.sailID = sailID;
         this.color = color;
         this.listeners = new HashSet<BoatChangeListener>();
     }
-    
+
     private void readObject(ObjectInputStream ois) throws IOException, ClassNotFoundException {
         ois.defaultReadObject();
         listeners = new HashSet<BoatChangeListener>();
+    }
+
+    @Override
+    public Serializable getId() {
+        return id;
     }
 
     @Override
@@ -49,7 +59,18 @@ public class BoatImpl extends NamedImpl implements DynamicBoat {
     public Color getColor() {
         return color;
     }
-    
+
+    @Override
+    public void setName(String newName) {
+        final String oldName = getName();
+        if (!Util.equalsWithNull(oldName, newName)) {
+            super.setName(newName);
+            for (BoatChangeListener listener : getListeners()) {
+                listener.nameChanged(oldName, newName);
+            }
+        }
+    }
+
     @Override
     public void setSailId(String newSailId) {
         final String oldSailId = this.sailID;
@@ -62,6 +83,22 @@ public class BoatImpl extends NamedImpl implements DynamicBoat {
     }
 
     @Override
+    public void setColor(Color newColor) {
+        final Color oldColor = this.color;
+        if (!Util.equalsWithNull(oldColor, newColor)) {
+            this.color = newColor;
+            for (BoatChangeListener listener : getListeners()) {
+                listener.colorChanged(oldColor, newColor);
+            }
+        }
+    }
+
+    @Override
+    public Boat resolve(SharedDomainFactory domainFactory) {
+        return domainFactory.getOrCreateBoat(getId(), getName(), getBoatClass(), getSailID(), getColor());
+    }
+
+    @Override
     public void addBoatChangeListener(BoatChangeListener listener) {
         synchronized (listeners) {
             listeners.add(listener);
@@ -69,7 +106,7 @@ public class BoatImpl extends NamedImpl implements DynamicBoat {
     }
 
     @Override
-    public void removeCompetitorChangeListener(BoatChangeListener listener) {
+    public void removeBoatChangeListener(BoatChangeListener listener) {
         synchronized (listeners) {
             listeners.remove(listener);
         }
@@ -79,5 +116,10 @@ public class BoatImpl extends NamedImpl implements DynamicBoat {
         synchronized (listeners) {
             return new HashSet<BoatChangeListener>(listeners);
         }
+    }
+
+    @Override
+    public String toString() {
+        return getName()==null?getSailID():getName();
     }
 }

@@ -1,26 +1,24 @@
 package com.sap.sailing.gwt.home.communication.event;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.gwt.common.client.EventWindFinderUtil;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
-import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO.EventType;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.server.EventActionUtil;
 import com.sap.sailing.gwt.home.server.EventActionUtil.LeaderboardCallback;
 import com.sap.sailing.gwt.home.server.LeaderboardContext;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
+import com.sap.sailing.server.util.EventUtil;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 import com.sap.sse.shared.media.ImageDescriptor;
@@ -65,13 +63,26 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
         dto.setOfficialWebsiteURL(event.getOfficialWebsiteURL() == null ? null : event.getOfficialWebsiteURL().toString());
         URL sailorsInfoWebsiteURL = event.getSailorsInfoWebsiteURLOrFallback(context.getClientLocale());
         dto.setSailorsInfoWebsiteURL(sailorsInfoWebsiteURL == null ? null : sailorsInfoWebsiteURL.toString());
-
+        if (context.getWindFinderTrackerFactory() != null) {
+            dto.setAllWindFinderSpotsUsedByEvent(new EventWindFinderUtil().getWindFinderSpotsToConsider(event,
+                    context.getWindFinderTrackerFactory(), /* useCachedSpotsForTrackedRaces */ true));
+        }
         dto.setHasMedia(HomeServiceUtil.hasMedia(event));
         dto.setState(HomeServiceUtil.calculateEventState(event));
         // bug2982: always show leaderboard and competitor analytics 
         dto.setHasAnalytics(true);
+        
+        String description = event.getDescription();
+        if (description == null || description.trim().isEmpty() || event.getName().equalsIgnoreCase(description)) {
+            // If a description isn't useful, it should not be shown in the UI
+            description = null;
+        }
+        dto.setDescription(description);
 
-        final boolean isFakeSeries = HomeServiceUtil.isFakeSeries(event);
+        final EventType eventType = EventUtil.getEventType(event);
+        dto.setType(eventType);
+        
+        final boolean isFakeSeries = eventType == EventType.SERIES;
         
         EventActionUtil.forLeaderboardsOfEvent(context, event, new LeaderboardCallback() {
             @Override
@@ -89,34 +100,18 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
         });
         
         if (isFakeSeries) {
-            dto.setType(EventType.SERIES_EVENT);
-            
             LeaderboardGroup overallLeaderboardGroup = event.getLeaderboardGroups().iterator().next();
             dto.setSeriesName(HomeServiceUtil.getLeaderboardDisplayName(overallLeaderboardGroup));
-            List<Event> fakeSeriesEvents = new ArrayList<Event>();
             
-            for (Event eventOfSeries : context.getRacingEventService().getAllEvents()) {
-                for (LeaderboardGroup leaderboardGroup : eventOfSeries.getLeaderboardGroups()) {
-                    if (overallLeaderboardGroup.equals(leaderboardGroup)) {
-                        fakeSeriesEvents.add(eventOfSeries);
-                    }
-                }
-            }
-            Collections.sort(fakeSeriesEvents, new Comparator<Event>() {
-                public int compare(Event e1, Event e2) {
-                    return e1.getStartDate().compareTo(e2.getEndDate());
-                }
-            });
-            for(Event eventInSeries: fakeSeriesEvents) {
+            for (Event eventInSeries : HomeServiceUtil.getEventsForSeriesInDescendingOrder(overallLeaderboardGroup,
+                    context.getRacingEventService())) {
                 String displayName = HomeServiceUtil.getLocation(eventInSeries, context.getRacingEventService());
                 if(displayName == null) {
                     displayName = eventInSeries.getName();
                 }
                 EventState eventState = HomeServiceUtil.calculateEventState(eventInSeries);
-                dto.getEventsOfSeries().add(new EventReferenceWithStateDTO(eventInSeries.getId(), displayName, eventState));
+                dto.addEventToSeries(new EventReferenceWithStateDTO(eventInSeries.getId(), displayName, eventState));
             }
-        } else {
-            dto.setType(dto.getRegattas().size() == 1 ? EventType.SINGLE_REGATTA: EventType.MULTI_REGATTA);
         }
         return dto;
     }

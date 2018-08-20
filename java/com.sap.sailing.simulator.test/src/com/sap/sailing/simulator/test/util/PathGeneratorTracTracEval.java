@@ -5,10 +5,10 @@ import java.util.List;
 
 import junit.framework.Assert;
 
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.simulator.Path;
 import com.sap.sailing.simulator.impl.PathGeneratorTracTrac;
+import com.sap.sse.common.Distance;
 
 public class PathGeneratorTracTracEval {
 

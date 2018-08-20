@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.common.client.suggestion;
 import java.util.Arrays;
 
 import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sse.gwt.client.suggestion.AbstractListSuggestOracle;
 
 public class BoatClassMasterdataSuggestOracle extends AbstractListSuggestOracle<BoatClassMasterdata> {
     

@@ -68,7 +68,7 @@ public class Header extends Composite {
         signInNavigationItem = addNavigation(com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE.signIn(), new Runnable() {
             @Override
             public void run() {
-                placeNavigator.getSignInNavigation().goToPlace();
+                        placeNavigator.getSignInNavigation().goToPlace();
             }
         });
         userDetailsNavigationItem = addNavigation(placeNavigator.getUserProfileNavigation(), com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE.userDetails());

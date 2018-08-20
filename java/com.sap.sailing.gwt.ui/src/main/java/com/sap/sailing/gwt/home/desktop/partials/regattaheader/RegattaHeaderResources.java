@@ -1,10 +1,10 @@
 package com.sap.sailing.gwt.home.desktop.partials.regattaheader;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.sap.sailing.gwt.home.desktop.resources.SharedDesktopResources;
 
-public interface RegattaHeaderResources extends ClientBundle {
+public interface RegattaHeaderResources extends SharedDesktopResources {
     public static final RegattaHeaderResources INSTANCE = GWT.create(RegattaHeaderResources.class);
 
     @Source("RegattaHeader.gss")
@@ -29,5 +29,15 @@ public interface RegattaHeaderResources extends ClientBundle {
         String regattaheader_update_title();
         String regattaheader_update_title_icon();
         String regattaheader_update_timestamp();
+        
+        String iconHeaderGPS();
+        String iconHeaderWind();
+        String iconHeaderVideo();
+        String iconHeaderAudio();
+        
+        String iconGPS();
+        String iconWind();
+        String iconVideo();
+        String iconAudio(); 
     }
 }

@@ -38,20 +38,20 @@ public class DoubleVectorFixMongoHandlerImpl implements FixMongoHandler<DoubleVe
         return new DoubleVectorFixImpl(timePoint, fromDBObject((DBObject) dbObject.get(FieldNames.FIX.name())));
     }
     
-    private DBObject toDBObject(double[] data) {
+    private DBObject toDBObject(Double[] data) {
         BasicDBList result = new BasicDBList();
-        for (double value : data) {
+        for (Double value : data) {
             result.add(value);
         }
         return result;
     }
     
-    private double[] fromDBObject(DBObject dbObject) {
+    private Double[] fromDBObject(DBObject dbObject) {
         @SuppressWarnings("unchecked")
-        List<Double> dbValues = (List<Double>) dbObject;
-        double[] result = new double[dbValues.size()];
-        for(int i = 0 ; i < dbValues.size() ; i++) {
-            result[i] = dbValues.get(i);
+        List<Number> dbValues = (List<Number>) dbObject;
+        Double[] result = new Double[dbValues.size()];
+        for (int i = 0 ; i < dbValues.size() ; i++) {
+            result[i] = dbValues.get(i) == null ? null : dbValues.get(i).doubleValue();
         }
         return result;
     }

@@ -49,4 +49,9 @@ public class RaceLogDenoteForTrackingEventImpl extends RaceLogEventImpl implemen
     public Serializable getRaceId() {
         return raceId;
     }
+
+    @Override
+    public String getShortInfo() {
+        return getRaceName();
+    }
 }

@@ -229,7 +229,7 @@ public class CountryCodeFactoryImpl implements CountryCodeFactory {
         add(new CountryCodeImpl("SERBIA (Republic of Serbia)", "RS", "SRB", "rs", null, "SRB", "688", "381"));
         add(new CountryCodeImpl("SEYCHELLES", "SC", "SYC", "sc", "SY", "SEY", "690", "248"));
         add(new CountryCodeImpl("SIERRA LEONE", "SL", "SLE", "sl", "WAL", "SLE", "694", "232"));
-        add(new CountryCodeImpl("SINGAPORE", "SG", "SGP", "sg", "SGP", "SIN", "702", "65"));
+        add(new CountryCodeImpl("SINGAPORE", "SG", "SGP", "sg", "SGP", "SGP", "702", "65"));
         add(new CountryCodeImpl("SINT MAARTEN", "SX", "SXM", "sx", null, null, "534", "599"));
         add(new CountryCodeImpl("SLOVAKIA (Slovak Republic)", "SK", "SVK", "sk", "SK", "SVK", "703", "421"));
         add(new CountryCodeImpl("SLOVENIA", "SI", "SVN", "si", "SLO", "SLO", "705", "386"));
@@ -256,7 +256,7 @@ public class CountryCodeFactoryImpl implements CountryCodeFactory {
         add(new CountryCodeImpl("TOGO", "TG", "TGO", "tg", "TG", "TOG", "768", "228"));
         add(new CountryCodeImpl("TOKELAU", "TK", "TKL", "tk", null, null, "772", "690"));
         add(new CountryCodeImpl("TONGA", "TO", "TON", "to", null, "TGA", "776", "676"));
-        add(new CountryCodeImpl("TRINIDAD AND TOBAGO", "TT", "TTO", "tt", "TT", "TRI", "780", "1-868"));
+        add(new CountryCodeImpl("TRINIDAD AND TOBAGO", "TT", "TTO", "tt", "TT", "TTO", "780", "1-868"));
         add(new CountryCodeImpl("TUNISIA", "TN", "TUN", "tn", "TN", "TUN", "788", "216"));
         add(new CountryCodeImpl("TURKEY", "TR", "TUR", "tr", "TR", "TUR", "792", "90"));
         add(new CountryCodeImpl("TURKMENISTAN", "TM", "TKM", "tm", "TM", "TKM", "795", "993"));

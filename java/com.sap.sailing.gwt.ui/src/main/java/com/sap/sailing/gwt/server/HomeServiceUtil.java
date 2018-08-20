@@ -4,12 +4,14 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,9 +22,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.EventBase;
-import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
-import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RemoteSailingServerReference;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
@@ -30,6 +30,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.gwt.home.communication.event.EventLinkDTO;
 import com.sap.sailing.gwt.home.communication.event.EventMetadataDTO;
 import com.sap.sailing.gwt.home.communication.event.EventReferenceDTO;
 import com.sap.sailing.gwt.home.communication.event.EventState;
@@ -39,6 +40,7 @@ import com.sap.sailing.gwt.home.communication.start.EventStageDTO;
 import com.sap.sailing.gwt.home.communication.start.StageEventType;
 import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.util.EventUtil;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -69,18 +71,6 @@ public final class HomeServiceUtil {
         return url == null ? null : url.getURL().toString();
     }
     
-    public static boolean isFakeSeries(EventBase event) {
-        Iterator<? extends LeaderboardGroupBase> lgIter = event.getLeaderboardGroups().iterator();
-        if(!lgIter.hasNext()) {
-            return false;
-        }
-        LeaderboardGroupBase lg = lgIter.next();
-        if(lgIter.hasNext()) {
-            return false;
-        }
-        return lg.hasOverallLeaderboard();
-    }
-    
     public static boolean isSingleRegatta(Event event) {
         boolean first = true;
         for(LeaderboardGroup lg : event.getLeaderboardGroups()) {
@@ -95,11 +85,16 @@ public final class HomeServiceUtil {
     }
     
     public static EventState calculateEventState(EventBase event) {
-        TimePoint now = MillisecondsTimePoint.now();
-        if (now.before(event.getStartDate())) {
+        final TimePoint startDate = event.getStartDate();
+        if (startDate == null) {
+            return EventState.PLANNED;
+        }
+        final TimePoint now = MillisecondsTimePoint.now();
+        if (now.before(startDate)) {
             return event.isPublic() ? EventState.UPCOMING : EventState.PLANNED;
         }
-        if (now.after(event.getEndDate())) {
+        final TimePoint endDate = event.getEndDate();
+        if (endDate != null && now.after(endDate)) {
             return EventState.FINISHED;
         }
         return EventState.RUNNING;
@@ -176,51 +171,6 @@ public final class HomeServiceUtil {
 
     public static int calculateCompetitorsCount(Leaderboard sl) {
         return Util.size(sl.getCompetitors());
-    }
-    
-    public static int calculateRaceCount(Leaderboard sl) {
-        int nonCarryForwardRacesCount = 0;
-        for (RaceColumn column : sl.getRaceColumns()) {
-            if (!column.isCarryForward()) {
-                nonCarryForwardRacesCount += Util.size(column.getFleets());
-            }
-        }
-        return nonCarryForwardRacesCount;
-    }
-    
-    public static int calculateRaceColumnCount(Leaderboard sl) {
-        int nonCarryForwardRacesCount = 0;
-        for (RaceColumn rc : sl.getRaceColumns()) {
-            nonCarryForwardRacesCount += rc.isCarryForward() ? 0 : 1;
-        }
-        return nonCarryForwardRacesCount;
-    }
-    
-    public static int calculateTrackedRaceCount(Leaderboard sl) {
-        int count=0;
-        for (RaceColumn column : sl.getRaceColumns()) {
-            for (Fleet fleet : column.getFleets()) {
-                TrackedRace trackedRace = column.getTrackedRace(fleet);
-                if(trackedRace != null && trackedRace.hasGPSData() && trackedRace.hasWindData()) {
-                    count++;
-                }
-            }
-        }
-        return count;
-    }
-    
-    public static int calculateTrackedRaceColumnCount(Leaderboard sl) {
-        int count=0;
-        for (RaceColumn column : sl.getRaceColumns()) {
-            for (Fleet fleet : column.getFleets()) {
-                TrackedRace trackedRace = column.getTrackedRace(fleet);
-                if(trackedRace != null && trackedRace.hasGPSData() && trackedRace.hasWindData()) {
-                    count++;
-                    break;
-                }
-            }
-        }
-        return count;
     }
     
     public static String getBoatClassName(Leaderboard leaderboard) {
@@ -371,10 +321,11 @@ public final class HomeServiceUtil {
         return dto;
     }
     
-    public static EventListEventDTO convertToEventListDTO(EventBase event, URL baseURL, boolean onRemoteServer, RacingEventService service) {
+    public static EventListEventDTO convertToEventListDTO(EventBase event, URL baseURL, boolean onRemoteServer,
+            RacingEventService service) {
         EventListEventDTO dto = new EventListEventDTO();
         mapToMetadataDTO(event, dto, service);
-        dto.setBaseURL(baseURL.toString());
+        dto.setBaseURL(String.valueOf(baseURL));
         dto.setOnRemoteServer(onRemoteServer);
         return dto;
     }
@@ -385,21 +336,34 @@ public final class HomeServiceUtil {
         return dto;
     }
     
+    public static EventLinkDTO convertToEventLinkDTO(EventBase event, URL baseURL, boolean onRemoteServer,
+            RacingEventService service) {
+        EventLinkDTO dto = new EventLinkDTO();
+        mapToReferenceDTO(event, dto, service);
+        dto.setBaseURL(String.valueOf(baseURL));
+        dto.setOnRemoteServer(onRemoteServer);
+        return dto;
+    }
+    
     public static void mapToMetadataDTO(EventBase event, EventMetadataDTO dto, RacingEventService service) {
-        dto.setId((UUID) event.getId());
-        dto.setDisplayName(getEventDisplayName(event, service));
-        dto.setStartDate(event.getStartDate().asDate());
-        dto.setEndDate(event.getEndDate().asDate());
+        mapToReferenceDTO(event, dto, service);
+        dto.setStartDate(event.getStartDate() == null ? null : event.getStartDate().asDate());
+        dto.setEndDate(event.getEndDate() == null ? null : event.getEndDate().asDate());
         dto.setState(HomeServiceUtil.calculateEventState(event));
         dto.setVenue(event.getVenue().getName());
-        if(HomeServiceUtil.isFakeSeries(event)) {
+        if (EventUtil.isFakeSeries(event)) {
             dto.setLocation(getLocation(event, service));
         }
         dto.setThumbnailImageURL(HomeServiceUtil.findEventThumbnailImageUrlAsString(event));
     }
     
+    private static void mapToReferenceDTO(EventBase event, EventReferenceDTO dto, RacingEventService service) {
+        dto.setId((UUID) event.getId());
+        dto.setDisplayName(getEventDisplayName(event, service));
+    }
+
     public static String getEventDisplayName(EventBase event, RacingEventService service) {
-        if(isFakeSeries(event)) {
+        if (EventUtil.isFakeSeries(event)) {
             String seriesName = getSeriesName(event);
             if(seriesName != null) {
                 String location = getLocation(event, service);
@@ -534,7 +498,7 @@ public final class HomeServiceUtil {
     }
 
     public static boolean hasRegattaData(EventBase event) {
-        final boolean fakeSeries = HomeServiceUtil.isFakeSeries(event);
+        final boolean fakeSeries = EventUtil.isFakeSeries(event);
         for (LeaderboardGroupBase leaderboardGroupBase : event.getLeaderboardGroups()) {
             if(leaderboardGroupBase instanceof LeaderboardGroup) {
                 // for events that are locally available, we can see if there are any leaderboards
@@ -550,5 +514,88 @@ public final class HomeServiceUtil {
             }
         }
         return false;
+    }
+    
+    /**
+     * Provides the list of {@link Event}s for a series based on the given overall {@link LeaderboardGroup} in a
+     * descending order sorted by the {@link Event#getStartDate() event's start date}.
+     * 
+     * @param overallLeaderboardGroup the series overall {@link LeaderboardGroup}
+     * @param service {@link RacingEventService}
+     * @return the {@link Event}s for the series in descending od
+     */
+    public static List<Event> getEventsForSeriesInDescendingOrder(LeaderboardGroup overallLeaderboardGroup,
+            RacingEventService service) {
+        List<Event> eventsForSeriesOrdered = getEventsForSeriesOrdered(overallLeaderboardGroup, service);
+        Collections.reverse(eventsForSeriesOrdered);
+        return eventsForSeriesOrdered;
+    }
+    
+    /**
+     * Provides the list of {@link Event}s for a series based on the given overall {@link LeaderboardGroup} in an
+     * order that matches the order of {@link Leaderboard Leaderboards} in the {@link LeaderboardGroup}.
+     * 
+     * @param overallLeaderboardGroup the series overall {@link LeaderboardGroup}
+     * @param service {@link RacingEventService}
+     * @return the {@link Event}s for the series
+     */
+    public static List<Event> getEventsForSeriesOrdered(LeaderboardGroup overallLeaderboardGroup,
+            RacingEventService service) {
+        final Iterable<Event> eventsInSeries = getEventsInSeries(overallLeaderboardGroup, service);
+        final Iterable<Leaderboard> orderedLeaderboards = getLeaderboardsForSeriesInOrder(overallLeaderboardGroup);
+        final List<Event> orderedEventsInSeries = new ArrayList<>();
+        for (Leaderboard leaderboard : orderedLeaderboards) {
+            final Event associatedEvent = getAssociatedEventForLeaderboardInSeries(leaderboard, eventsInSeries);
+            if (associatedEvent != null) {
+                orderedEventsInSeries.add(associatedEvent);
+            }
+        }
+        return orderedEventsInSeries;
+    }
+
+    /**
+     * The {@link Leaderboard Leaderboards} referenced in the given {@link LeaderboardGroup} have a defined order. If
+     * the displayGroupsInReverseOrder flag is set for the {@link LeaderboardGroup}, the order needs to change in the
+     * UI. This methods sorts the {@link Leaderboard Leaderboards} using this flag.
+     */
+    public static Iterable<Leaderboard> getLeaderboardsForSeriesInOrder(LeaderboardGroup overallLeaderboardGroup) {
+        if (overallLeaderboardGroup.isDisplayGroupsInReverseOrder()) {
+            List<Leaderboard> leaderboardsInSeries = new ArrayList<>();
+            Util.addAll(overallLeaderboardGroup.getLeaderboards(), leaderboardsInSeries);
+            Collections.reverse(leaderboardsInSeries);
+            return leaderboardsInSeries;
+        }
+        return overallLeaderboardGroup.getLeaderboards();
+    }
+
+    private static Event getAssociatedEventForLeaderboardInSeries(Leaderboard leaderboard,
+            Iterable<Event> eventsInSeries) {
+        final CourseArea defaultCourseArea = leaderboard.getDefaultCourseArea();
+        if (defaultCourseArea != null) {
+            for (Event event : eventsInSeries) {
+                if (Util.contains(event.getVenue().getCourseAreas(), defaultCourseArea)) {
+                    return event;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * The given {@link LeaderboardGroup} needs to be one that is used to define a {@link Event} series (e.g. ESS or
+     * Bundesliga). In this case, multiple {@link Event Events} reference the same {@link LeaderboardGroup}. This method
+     * calculates all Events that are associated to the given {@link LeaderboardGroup}.
+     */
+    private static Iterable<Event> getEventsInSeries(LeaderboardGroup overallLeaderboardGroup,
+            RacingEventService service) {
+        Set<Event> eventsInSeries = new HashSet<>();
+        for (Event event : service.getAllEvents()) {
+            for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
+                if (overallLeaderboardGroup.equals(leaderboardGroup)) {
+                    eventsInSeries.add(event);
+                }
+            }
+        }
+        return eventsInSeries;
     }
 }

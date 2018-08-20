@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,16 +24,20 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.LastPublishedCourseDesignFinder;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogUseCompetitorsFromRaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsAnalyzer;
+import com.sap.sailing.domain.abstractlog.race.tracking.analyzing.impl.RegisteredCompetitorsAndBoatsAnalyzer;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogRegisterCompetitorEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsFromRaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.tracking.analyzing.impl.RegattaLogDefinedMarkAnalyzer;
 import com.sap.sailing.domain.abstractlog.shared.events.RegisterCompetitorEvent;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
+import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
@@ -43,6 +49,7 @@ import com.sap.sailing.domain.regattalike.RegattaLikeIdentifier;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implements RaceColumn {
@@ -55,15 +62,15 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     private TrackedRaces trackedRaces;
     private Map<Fleet, RaceIdentifier> raceIdentifiers;
 
-    private Map<Fleet, RaceLog> raceLogs;
-
+    private ConcurrentMap<Fleet, RaceLog> raceLogs;
+    
     private transient RaceLogStore raceLogStore;
     private RegattaLikeIdentifier regattaLikeParent;
 
     public AbstractRaceColumn() {
         this.trackedRaces = new TrackedRaces();
         this.raceIdentifiers = new HashMap<Fleet, RaceIdentifier>();
-        this.raceLogs = new HashMap<Fleet, RaceLog>();
+        this.raceLogs = new ConcurrentHashMap<Fleet, RaceLog>();
     }
 
     @Override
@@ -77,9 +84,7 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
 
     @Override
     public RaceLog getRaceLog(Fleet fleet) {
-        synchronized (raceLogs) {
-            return raceLogs.get(fleet);
-        }
+        return raceLogs.get(fleet);
     }
 
     @Override
@@ -192,25 +197,23 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
 
     @Override
     public void reloadRaceLog(Fleet fleet) {
-        synchronized (raceLogs) {
-            RaceLogIdentifier identifier = getRaceLogIdentifier(fleet);
-            RaceLog newOrLoadedRaceLog = raceLogStore.getRaceLog(identifier, /* ignoreCache */true);
-            RaceLog raceLogAvailable = raceLogs.get(fleet);
-            if (raceLogAvailable == null) {
-                RaceColumnRaceLogReplicator listener = new RaceColumnRaceLogReplicator(this, identifier);
-                // FIXME Wouldn't this skip any listener notifications that a merge below would trigger if the race log already existed?
-                // FIXME For example, how about the race log-provided score corrections that need application to the leaderboard and replication?
-                newOrLoadedRaceLog.addListener(listener);
-                raceLogs.put(fleet, newOrLoadedRaceLog);
-                final TrackedRace trackedRace = getTrackedRace(fleet);
-                if (trackedRace != null) {
-                    // need to attach race log
-                    trackedRace.attachRaceLog(newOrLoadedRaceLog);
-                }
-            } else {
-                // now add all race log events from newOrLoadedRaceLog that are not already in raceLogAvailable
-                raceLogAvailable.merge(newOrLoadedRaceLog);
+        RaceLogIdentifier identifier = getRaceLogIdentifier(fleet);
+        RaceLog newOrLoadedRaceLog = raceLogStore.getRaceLog(identifier, /* ignoreCache */true);
+        RaceLog raceLogAvailable = raceLogs.get(fleet);
+        if (raceLogAvailable == null) {
+            RaceColumnRaceLogReplicator listener = new RaceColumnRaceLogReplicator(this, identifier);
+            // FIXME Wouldn't this skip any listener notifications that a merge below would trigger if the race log already existed?
+            // FIXME For example, how about the race log-provided score corrections that need application to the leaderboard and replication?
+            newOrLoadedRaceLog.addListener(listener);
+            raceLogs.put(fleet, newOrLoadedRaceLog);
+            final TrackedRace trackedRace = getTrackedRace(fleet);
+            if (trackedRace != null) {
+                // need to attach race log
+                trackedRace.attachRaceLog(newOrLoadedRaceLog);
             }
+        } else {
+            // now add all race log events from newOrLoadedRaceLog that are not already in raceLogAvailable
+            raceLogAvailable.merge(newOrLoadedRaceLog);
         }
     }
 
@@ -249,51 +252,125 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
 
     @Override
     public Iterable<Competitor> getAllCompetitors() {
-        Set<Competitor> result = new HashSet<>();
-        for (Fleet fleet : getFleets()) {
-            Util.addAll(getAllCompetitors(fleet), result);
-        }
-        return result;
+        return getAllCompetitorsWithRaceDefinitionsConsidered().getB();
     }
 
     @Override
-    public Iterable<Competitor> getAllCompetitors(final Fleet fleet) {
-        final Iterable<Competitor> result;
+    public Pair<Iterable<RaceDefinition>, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered() {
+        Set<Competitor> competitors = new HashSet<>();
+        Set<RaceDefinition> raceDefinitionsConsidered = new HashSet<>();
+        for (Fleet fleet : getFleets()) {
+            final Pair<RaceDefinition, Iterable<Competitor>> allCompetitorsWithRaceDefinitionsConsidered = getAllCompetitorsWithRaceDefinitionsConsidered(fleet);
+            Util.addAll(allCompetitorsWithRaceDefinitionsConsidered.getB(), competitors);
+            if (allCompetitorsWithRaceDefinitionsConsidered.getA() != null) {
+                raceDefinitionsConsidered.add(allCompetitorsWithRaceDefinitionsConsidered.getA());
+            }
+        }
+        return new Pair<>(raceDefinitionsConsidered, competitors);
+    }
+
+    /**
+     * Same as {@link #getAllCompetitors(Fleet)}, but also returns the {@link RaceDefinition} as the first
+     * component of a pair if it contributed its {@link RaceDefinition#getCompetitors()}. If the resulting
+     * iterable of competitors did not consider a {@link RaceDefinition}'s competitor set, {@code null}
+     * is returned as the first component of the pair.
+     */
+    private Pair<RaceDefinition, Iterable<Competitor>> getAllCompetitorsWithRaceDefinitionsConsidered(final Fleet fleet) {
+        final Iterable<Competitor> competitors;
+        final RaceDefinition raceDefinition;
         TrackedRace trackedRace = getTrackedRace(fleet);
         if (trackedRace != null) {
-            result = trackedRace.getRace().getCompetitors();
+            raceDefinition = trackedRace.getRace();
+            competitors = raceDefinition.getCompetitors();
         } else {
+            raceDefinition = null;
             // if no tracked race is found, use competitors from race/regatta log depending on whether
             // the mapping event is present or not; this assumes that if a tracked
             // race exists, its competitors set takes precedence over what's in the race log. Usually,
             // the tracked race will have the same competitors as those in the race log, or more because
             // those from the regatta log are added to the tracked race as well.
             Set<Competitor> viaRaceLog = new RegisteredCompetitorsAnalyzer(getRaceLog(fleet), getRegattaLog()).analyze();
-            result = viaRaceLog;
+            competitors = viaRaceLog;
+        }
+        return new Pair<>(raceDefinition, competitors);
+    }
+    
+    @Override
+    public Iterable<Competitor> getAllCompetitors(final Fleet fleet) {
+        return getAllCompetitorsWithRaceDefinitionsConsidered(fleet).getB();
+    }
+
+    
+    @Override
+    public Map<Competitor, Boat> getAllCompetitorsAndTheirBoats() {
+        Map<Competitor, Boat> result = new HashMap<>();
+        for (Fleet fleet : getFleets()) {
+            result.putAll(getAllCompetitorsAndTheirBoats(fleet));
         }
         return result;
-    }
-    
+    }        
+
     @Override
-    public void registerCompetitor(Competitor competitor, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException {
-        registerCompetitors(Collections.singleton(competitor), fleet);
+    public Map<Competitor, Boat> getAllCompetitorsAndTheirBoats(Fleet fleet) {
+        final Map<Competitor, Boat> competitors;
+        TrackedRace trackedRace = getTrackedRace(fleet);
+        if (trackedRace != null) {
+            competitors = trackedRace.getRace().getCompetitorsAndTheirBoats();
+        } else {
+            // if no tracked race is found, use competitors from race/regatta log depending on whether
+            // the mapping event is present or not; this assumes that if a tracked
+            // race exists, its competitors set takes precedence over what's in the race log. Usually,
+            // the tracked race will have the same competitors as those in the race log, or more because
+            // those from the regatta log are added to the tracked race as well.
+            competitors = new RegisteredCompetitorsAndBoatsAnalyzer(getRaceLog(fleet), getRegattaLog()).analyze();
+        }
+        return competitors;
     }
-    
+
     @Override
-    public void registerCompetitors(Iterable<Competitor> competitors, Fleet fleet)
+    public void registerCompetitor(CompetitorWithBoat competitorWithBoat, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException {
+        Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
+        competitorsAndBoats.put(competitorWithBoat, competitorWithBoat.getBoat());
+        registerCompetitorsInternal(competitorsAndBoats, fleet);
+    }
+
+    @Override
+    public void registerCompetitors(Iterable<CompetitorWithBoat> competitorWithBoats, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException {
+        Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
+        for (CompetitorWithBoat competitorWithBoat: competitorWithBoats) {
+            competitorsAndBoats.put(competitorWithBoat, competitorWithBoat.getBoat());
+        }
+        registerCompetitorsInternal(competitorsAndBoats, fleet);
+    }
+
+    @Override
+    public void registerCompetitor(Competitor competitor, Boat boat, Fleet fleet) throws CompetitorRegistrationOnRaceLogDisabledException {
+        Map<Competitor, Boat> competitorsAndBoats = new HashMap<>();
+        competitorsAndBoats.put(competitor, boat);
+        registerCompetitorsInternal(competitorsAndBoats, fleet);
+    }
+
+    @Override
+    public void registerCompetitors(Map<Competitor, Boat> competitorsAndBoats, Fleet fleet)
+            throws CompetitorRegistrationOnRaceLogDisabledException {
+        registerCompetitorsInternal(competitorsAndBoats, fleet);
+    }
+
+    private void registerCompetitorsInternal(Map<Competitor, Boat> competitorsAndBoats, Fleet fleet)
             throws CompetitorRegistrationOnRaceLogDisabledException {
         if (!isCompetitorRegistrationInRacelogEnabled(fleet)) {
-            throw new CompetitorRegistrationOnRaceLogDisabledException("Competitor registration not allowed  for fleet "+fleet+" in column "+this);
+            throw new CompetitorRegistrationOnRaceLogDisabledException("Competitor registration not allowed for fleet "+fleet+" in column "+this);
         }
         TimePoint now = MillisecondsTimePoint.now();
         RaceLog raceLog = getRaceLog(fleet);
         int passId = raceLog.getCurrentPassId();
-        for (Competitor competitor : competitors) {
+        for (Entry<Competitor, Boat> competitorAndBoat : competitorsAndBoats.entrySet()) {
             raceLog.add(new RaceLogRegisterCompetitorEventImpl(now, now, raceLogEventAuthorForRaceColumn, 
-                    UUID.randomUUID(), passId, competitor));
+                    UUID.randomUUID(), passId, competitorAndBoat.getKey(), competitorAndBoat.getValue()));
         }
     }
     
+
     @Override
     public void deregisterCompetitor(Competitor competitor, Fleet fleet)
             throws CompetitorRegistrationOnRaceLogDisabledException {
@@ -301,12 +378,12 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
     }
     
     @Override
-    public void deregisterCompetitors(Iterable<Competitor> competitors, Fleet fleet)
+    public void deregisterCompetitors(Iterable<? extends Competitor> competitors, Fleet fleet)
             throws CompetitorRegistrationOnRaceLogDisabledException {
         if (!isCompetitorRegistrationInRacelogEnabled(fleet)) {
             throw new CompetitorRegistrationOnRaceLogDisabledException("Competitor registration not allowed for fleet "+fleet+" in column "+this);
         }
-        HashSet<Competitor> competitorSet = new HashSet<Competitor>();
+        Set<Competitor> competitorSet = new HashSet<Competitor>();
         Util.addAll(competitors, competitorSet);
         RaceLog raceLog = getRaceLog(fleet);
         for (RaceLogEvent event : raceLog.getUnrevokedEventsDescending()) {
@@ -406,4 +483,5 @@ public abstract class AbstractRaceColumn extends SimpleAbstractRaceColumn implem
             }
         }
     }
+
 }

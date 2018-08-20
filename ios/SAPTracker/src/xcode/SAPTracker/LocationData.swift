@@ -13,7 +13,7 @@ class LocationData: NSObject {
 
     struct LocationValidation {
         static let requiredAccuracy: CLLocationAccuracy = 10
-        static let maxElapsedTime: NSTimeInterval = 10
+        static let maxElapsedTime: TimeInterval = 10
     }
     
     var location: CLLocation
@@ -26,7 +26,7 @@ class LocationData: NSObject {
     var isValid: Bool {
         get {
             guard location.horizontalAccuracy >= 0 && location.horizontalAccuracy <= LocationValidation.requiredAccuracy else { return false }
-            guard location.timestamp.timeIntervalSinceDate(NSDate()) <= LocationValidation.maxElapsedTime else { return false }
+            guard location.timestamp.timeIntervalSince(Date()) <= LocationValidation.maxElapsedTime else { return false }
             return true;
         }
     }

@@ -20,9 +20,7 @@
 				</div>
 			</div>
 			<div class="{res.mediaCss.grid}">
-				<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
-					<sse:carousel.ImageCarousel ui:field="imageCarousel" />
-				</div>
+				<g:SimplePanel ui:field="imageCarouselHolderUi" addStyleNames="{res.mediaCss.small12} {res.mediaCss.columns}" />
 			</div>
 		</div>
 		<div class="{res.mainCss.mainsection} {local_res.css.media} {local_res.css.mediavideos}">

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sse.common.Distance;
 
 
 public enum BoatClassMasterdata {
@@ -16,19 +17,24 @@ public enum BoatClassMasterdata {
     _49ER ("49er", true, 4.88, 1.93, BoatHullType.MONOHULL, true),
     _49ERFX ("49erFX", true, 4.88, 1.93, BoatHullType.MONOHULL, true, "49FX"),
     _420 ("420", true, 4.20, 1.65, BoatHullType.MONOHULL, true, "420er", "420M", "420W"),
-    _470 ("470", true, 4.70, 1.68, BoatHullType.MONOHULL, true, "470er", "470M", "470W"),
+    _470 ("470", true, 4.70, 1.68, BoatHullType.MONOHULL, true, "470er", "470M", "470W", "470 - M", "470 - W", "470 Men", "470 Women"),
     _5O5 ("5O5", true, 5.03, 1.88, BoatHullType.MONOHULL, true, "505", "5o5", "505er", "5o5er"),
     _5_5MR ("5.5mR", true, 9.50, 1.92, BoatHullType.MONOHULL, true, "5.5 Meter", "5.5 Metre", "5.5", "5.5M", "5.5-metre", "5.5 metre"),
+    _6MR ("6mR", true, 11, 2.2, BoatHullType.MONOHULL, true, "6 Meter", "6 Metre", "6", "6M", "6-metre", "6 metre"),
+    _8MR ("8mR", true, 9.62, 2.45, BoatHullType.MONOHULL, true, "8 Meter", "8 Metre", "8M", "8-metre"),
     A_CAT ("A-Catamaran", true, 5.49, 2.30, BoatHullType.CATAMARAN, false, "A-Cat", "ACat", "A-Class Catamaran"),
     ALBIN_EXPRESS ("Albin Express", true, 7.77, 2.50, BoatHullType.MONOHULL, false),
     ALBIN_BALLAD ("Albin Ballad", true, 9.12, 2.95, BoatHullType.MONOHULL, false),
     B_ONE ("B/ONE", true, 7.80, 2.49, BoatHullType.MONOHULL, true, "B-ONE"),
+    CADET ("Cadet", true, 3.20, 1.38, BoatHullType.MONOHULL, true),
     CANOE_IC ("International Canoe", true, 5.20, 1.01, BoatHullType.MONOHULL, true, "Canoe IC", "Canoe-IC", "IC", "Kanu IC", "International Canoe", "International 10 Sq.m. Sailing Canoe"),
     CANOE_TAIFUN ("Canoe Taifun", true, 5.20, 1.32, BoatHullType.MONOHULL, false, "Taifun", "Taifun Kanu", "Kanu Taifun"),
     CONTENDER ("Contender", true, 4.88, 1.42, BoatHullType.MONOHULL, false),
     CC_30 ("C&C 30", true, 9.12, 3.25, BoatHullType.MONOHULL, true),
+    CLUB_SWAN_50 ("Club Swan 50", true, 16.74, 4.20, BoatHullType.MONOHULL, true, "ClubSwan50"),
     D_ONE ("D-One", true, 4.23, 2.31, BoatHullType.MONOHULL, true, "Devoti D-One", "DOne", "D_One"),
     DRAGON_INT ("Dragon Int.", true, 8.89, 1.96, BoatHullType.MONOHULL, true, "Drachen", "Dragon"),
+    DELPHIA_24 ("Delphia 24", true, 7.70, 2.50, BoatHullType.MONOHULL, true, "Delphia 24 One Design", "Delphia 24 OD"),
     DYAS("Dyas", true, 7.15, 1.95, BoatHullType.MONOHULL, true),
     EXTREME_40 ("Extreme 40", false, 12.2, 6.60, BoatHullType.CATAMARAN, true, "Extreme-40", "Extreme40", "ESS40", "ess"),
     D_35 ("D35", false, 10.81, 6.89, BoatHullType.CATAMARAN, false),
@@ -39,6 +45,7 @@ public enum BoatClassMasterdata {
     FARR_280 ("Farr 280", true, 8.72, 2.87, BoatHullType.MONOHULL, true, "F280", "F-280", "Farr-280"),
     FINN ("Finn", true, 4.50, 1.51, BoatHullType.MONOHULL, false),
     FLYING_DUTCHMAN ("Flying Dutchman", true, 6.10, 1.80, BoatHullType.MONOHULL, true, "FD"),
+    FLYING_JUNIOR ("Flying Junior", true, 4.03, 1.50, BoatHullType.MONOHULL, true, "FJ"),
     FLYING_PHANTOM ("Flying Phantom", true, 5.52, 3.00, BoatHullType.CATAMARAN, true),
     FOLKBOAT ("Folkboat", true, 7.68, 2.20, BoatHullType.MONOHULL, false, "Folke", "Folkeboot"),
     FUN ("FUN", true, 7.20, 2.45, BoatHullType.MONOHULL, true, "FUN O.D.", "FUN OD", "Open FUN"),
@@ -47,6 +54,7 @@ public enum BoatClassMasterdata {
     GP_26 ("GP 26", true, 7.90, 2.55, BoatHullType.MONOHULL, true, "GP26", "GP-26"),
     HOBIE_16 ("Hobie 16", true, 5.05, 2.41, BoatHullType.CATAMARAN, false, "H16"),
     H_BOAT ("H-Boat", true, 8.28, 2.18, BoatHullType.MONOHULL, true, "HB"),
+    HANSA_303 ("Hansa 303", false, 3.03, 1.35, BoatHullType.MONOHULL, false, "Hansa-303", "Hansa303"),
     HOBIE_TIGER ("Hobie Tiger", true, 5.51, 2.60, BoatHullType.CATAMARAN, true),
     HOBIE_WILD_CAT ("Hobie Wild Cat", true, 5.49, 2.59, BoatHullType.CATAMARAN, true, "Hobie Wild Cat F18"),
     INTERNATIONAL_14("International 14", true, 4.27, 1.83, BoatHullType.MONOHULL, true, "I14", "Int.14", "Int14"),
@@ -58,19 +66,22 @@ public enum BoatClassMasterdata {
     J105 ("J/105", true, 10.52, 3.35, BoatHullType.MONOHULL, true, "J105", "J-105"),
     J111 ("J/111", true, 11.1, 3.29, BoatHullType.MONOHULL, true, "J111", "J-111"),
     KIELZUGVOGEL ("Kielzugvogel", true, 5.80, 1.88, BoatHullType.MONOHULL, false, "KZV"), 
-    KITE ("Kite", true, 3.35, 1.52, BoatHullType.MONOHULL, false), 
+    FORMULA_KITE ("Kite", true, 3.35, 1.52, BoatHullType.MONOHULL, false, "Formula Kite"), 
     LASER_2 ("Laser 2", true, 4.39, 1.42, BoatHullType.MONOHULL, false, "Laser II", "Laser2", "Laser-2", "Laser-II"),
     LASER_4_7 ("Laser 4.7", true, 4.20, 1.39, BoatHullType.MONOHULL, false, "L4.7"),
     LASER_RADIAL ("Laser Radial", true, 4.19, 1.41, BoatHullType.MONOHULL, false, "LAR", "Laser RAD", "RAD", "Radial"),
     LASER_INT ("Laser Int.", true, 4.19, 1.39, BoatHullType.MONOHULL, false, "Laser", "LSR"),
     LASER_SB3 ("Laser SB3", true, 6.15, 2.15, BoatHullType.MONOHULL, false, "LSB3", "SB20"),
     LAGO_26 ("Lago 26", true, 7.95, 2.50, BoatHullType.MONOHULL, true, "Lago26"),
+    LONGTZE ("Longtze", true, 6.85, 2.57, BoatHullType.MONOHULL, true, "Swiss Longtze Class"),
     M32 ("M32", false, 9.70, 5.50, BoatHullType.CATAMARAN, true, "M/32", "M32 Catamaran", "M/32 Catamaran"),
     MELGES_20 ("Melges 20", true, 6.10, 2.13, BoatHullType.MONOHULL, true, "Melges-20", "M20"),
     MELGES_24 ("Melges 24", true, 7.32, 2.50, BoatHullType.MONOHULL, true, "Melges-24", "M24"),
     MINI_TRANSAT ("Mini Transat 6.50", true, 6.50, 3.00, BoatHullType.MONOHULL, true, "Mini Transat"),
     MUSTO_SKIFF ("Musto Skiff", true, 4.55, 1.35, BoatHullType.MONOHULL, true, "Musto Performance Skiff", "MPS", "Musto"),
+    NACRA_15 ("Nacra 15", true, 4.70, 2.35, BoatHullType.CATAMARAN, true, "N15", "Nacra-15"),
     NACRA_17 ("Nacra 17", true, 5.25, 2.59, BoatHullType.CATAMARAN, true, "N17", "Nacra-17"),
+    NACRA_17_FOIL ("Nacra 17 Foiling", true, 5.25, 2.59, BoatHullType.CATAMARAN, true, "N17F", "Nacra-17-Foiling"),
     O_JOLLE ("O-Jolle", true, 5.00, 1.66, BoatHullType.MONOHULL, false, "O Jolle", "OJolle", "Olympiajolle"),
     OK ("OK Dinghy", true, 5.25, 2.59, BoatHullType.MONOHULL, false, "OK-Dinghy", "OK-Jolle", "OK"),
     OPEN_BIC("O'pen BIC", true, 2.75, 1.14, BoatHullType.MONOHULL, false, "OpenBIC"),
@@ -85,8 +96,10 @@ public enum BoatClassMasterdata {
     RS500 ("RS 500", true, 4.34, 1.58, BoatHullType.MONOHULL, true, "RS500", "RS_500"),
     RS800 ("RS 800", true, 4.80, 1.88, BoatHullType.MONOHULL, true, "RS800", "RS_800"),
     RS_AERO ("RS Aero", true, 4.00, 1.40, BoatHullType.MONOHULL, false, "RSAERO", "RS_Aero"),
-    RS_X ("RS:X", true, 2.86, 0.93, BoatHullType.SURFERBOARD, false, "RS-X", "RSX", "RS:X"),
+    RS_X ("RS:X", true, 2.86, 0.93, BoatHullType.SURFERBOARD, false, "RS-X", "RSX", "RS:X", "RS:X Men", "RS:X Woman", "RS:X Women"),
     RS_FEVA ("RS Feva", true, 3.64, 1.42, BoatHullType.MONOHULL, true, "RSFeva"),
+    RS_TERA ("RS Tera", true, 2.87, 1.23, BoatHullType.MONOHULL, true, "RSTera"),
+    SKUD_18 ("SKUD 18", true, 5.8, 2.29, BoatHullType.MONOHULL, true),
     SONAR ("Sonar", true, 7.01, 2.39, BoatHullType.MONOHULL, true),
     SOLING ("Soling", true, 8.15, 1.91, BoatHullType.MONOHULL, true),
     SPLASH_BLUE ("Splash Blue", true, 3.50, 1.50, BoatHullType.MONOHULL, false, "Splash_Blue"),
@@ -97,10 +110,20 @@ public enum BoatClassMasterdata {
     SUNBEAM_22 ("Sunbeam 22", true, 6.70, 2.15, BoatHullType.MONOHULL, true, "Sunbeam 22.1"),
     SWAN_45 ("Swan 45", true, 13.83, 3.91, BoatHullType.MONOHULL, true, "Swan", "Swan-45"),
     TARTAN_10 ("Tartan 10", true, 10.10, 2.82, BoatHullType.MONOHULL, true),
+    TECHNO_293 ("Techno 293", true, 2.93, 0.79, BoatHullType.SURFERBOARD, false, "Techno-293", "Bic Techno 293", "Bic Techno-293", "Bic-Techno-293"),
+    TECHNO_293_PLUS ("Techno 293 Plus", true, 2.93, 0.79, BoatHullType.SURFERBOARD, false, "Techno-293-Plus", "Techno 293+", "Bic Techno-293-Plus", "Bic Techno 293+", "Bic Techno 293 Plus"),
+    TEENY ("Teeny", true, 3.15, 1.37, BoatHullType.MONOHULL, true),
     TORNADO ("Tornado Catamaran", true, 6.10, 3.02, BoatHullType.CATAMARAN, true, "Tornado", "Tornado Cat"),
+    TOM_28_MAX ("Tom 28 MAX", true, 8.48, 2.48, BoatHullType.MONOHULL, true, "Tom 28"),
     TRIAS ("Trias", true, 9.20, 2.12, BoatHullType.MONOHULL, true),
+    TP52 ("TP52", true, 15.85, 4.35, BoatHullType.MONOHULL, true, "TP 52", "Transpac 52", "Transpac52"),
+    VARIANTA ("Varianta", true, 6.40, 2.10, BoatHullType.MONOHULL, true),
+    VAURIEN ("Vaurien", true, 4.08, 1.47, BoatHullType.MONOHULL, true),
+    VENT_D_OUEST ("Vent d'Ouest", true, 5.85, 1.75, BoatHullType.MONOHULL, true, "VENTDOUEST", "VENTD'OUEST"),
     VIPER_640 ("Viper 640", true, 6.43, 2.49, BoatHullType.MONOHULL, true),
+    VO60 ("VO60", true, 19.5, 5.25, BoatHullType.MONOHULL, true, "Volvo Ocean 60", "VolvoOcean60", "W60", "Whitbread60", "Whitbread 60"),
     VX_ONE ("VX ONE", true, 5.79, 2.19, BoatHullType.MONOHULL, true, "VX-ONE"),
+    WETA ("Weta", true, 4.4, 3.5, BoatHullType.TRIMARAN, true, "Weta Trimaran"),
     X_99 ("X-99", true, 9.96, 2.95, BoatHullType.MONOHULL, true, "X99"),
     
     // multi-class "boat classes"; to be replaced at some later point in time by something like a RegattaClass
@@ -109,7 +132,10 @@ public enum BoatClassMasterdata {
     ORC_INTERNATIONAL ("ORC International", true, 13.83, 3.91, BoatHullType.MONOHULL, true, "ORC Int."),
     
     // Performance Handicap Racing Fleet (PHRF) is a handicap system used for racing in North America
-    PHRF ("PHRF", true, 13.83, 3.91, BoatHullType.MONOHULL, true);
+    PHRF ("PHRF", true, 13.83, 3.91, BoatHullType.MONOHULL, true),
+
+    // a 'boat class' to track runners at runnng events 
+    RUNNING ("Runner", true, 1.0, 1.0, BoatHullType.NO_HULL, false, "Running");
 
     private final String displayName;
     private final String[] alternativeNames;

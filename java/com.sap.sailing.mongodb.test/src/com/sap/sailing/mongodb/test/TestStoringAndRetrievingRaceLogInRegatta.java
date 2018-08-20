@@ -14,9 +14,9 @@ import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResults;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogCourseAreaChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogFinishPositioningConfirmedEvent;
@@ -32,7 +32,6 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultsImpl;
-import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseAreaChangeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningConfirmedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFinishPositioningListChangedEventImpl;
@@ -207,10 +206,10 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
     
     @Test
     public void testStoreAndRetrieveRegattaWithRaceLogFinishPositioningListChangeEvent() {
-        Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", Color.RED, 
-                "someone@nowhere.de", null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", "SAP", Color.RED, 
+                "someone@nowhere.de", null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         CompetitorResults storedPositioningList = new CompetitorResultsImpl();
-        storedPositioningList.add(new CompetitorResultImpl(storedCompetitor.getId(), storedCompetitor.getName(), /* rank */ 1, MaxPointsReason.NONE, /* score */ null, /* finishingTime */ null, /* comment */ null));
+        storedPositioningList.add(new CompetitorResultImpl(storedCompetitor.getId(), storedCompetitor.getName(), /* rank */ 1, MaxPointsReason.NONE, /* score */ null, /* finishingTime */ null, /* comment */ null, MergeState.OK));
         RaceLogFinishPositioningListChangedEvent event = new RaceLogFinishPositioningListChangedEventImpl(now, author, 0, storedPositioningList);
         addAndStoreRaceLogEvent(regatta, raceColumnName, event);
         RaceLog loadedRaceLog = retrieveRaceLog();
@@ -221,7 +220,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
             assertEquals(event.getLogicalTimePoint(), loadedPositioningEvent.getLogicalTimePoint());
             assertEquals(event.getPassId(), loadedPositioningEvent.getPassId());
             assertEquals(event.getId(), loadedPositioningEvent.getId());
-            assertEquals(event.getInvolvedBoats().size(), loadedPositioningEvent.getInvolvedBoats().size());
+            assertEquals(event.getInvolvedCompetitors().size(), loadedPositioningEvent.getInvolvedCompetitors().size());
             assertCompetitorResultsEqual(event.getPositionedCompetitorsIDsNamesMaxPointsReasons(), loadedPositioningEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons());
             assertEquals(1, Util.size(loadedRaceLog.getFixes()));
         } finally {
@@ -231,10 +230,10 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
     
     @Test
     public void testStoreAndRetrieveRegattaWithRaceLogFinishPositioningConfirmedEvent() {   
-        Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", Color.RED, 
-                "someone@nowhere.de", null, null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
+        Competitor storedCompetitor = DomainFactory.INSTANCE.getOrCreateCompetitor(UUID.randomUUID(), "SAP Extreme Sailing Team", "SAP", Color.RED, 
+                "someone@nowhere.de", null, null, /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null);
         CompetitorResults storedPositioningList = new CompetitorResultsImpl();
-        storedPositioningList.add(new CompetitorResultImpl(storedCompetitor.getId(), storedCompetitor.getName(), /* rank */ 1, MaxPointsReason.NONE, /* score */ null, /* finishingTime */ null, /* comment */ null));
+        storedPositioningList.add(new CompetitorResultImpl(storedCompetitor.getId(), storedCompetitor.getName(), /* rank */ 1, MaxPointsReason.NONE, /* score */ null, /* finishingTime */ null, /* comment */ null, MergeState.OK));
         RaceLogFinishPositioningConfirmedEvent event = new RaceLogFinishPositioningConfirmedEventImpl(now, author, 0, storedPositioningList);
         addAndStoreRaceLogEvent(regatta, raceColumnName, event);
         RaceLog loadedRaceLog = retrieveRaceLog();
@@ -245,7 +244,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
             assertEquals(event.getLogicalTimePoint(), loadedConfirmedEvent.getLogicalTimePoint());
             assertEquals(event.getPassId(), loadedConfirmedEvent.getPassId());
             assertEquals(event.getId(), loadedConfirmedEvent.getId());
-            assertEquals(event.getInvolvedBoats().size(), loadedConfirmedEvent.getInvolvedBoats().size());
+            assertEquals(event.getInvolvedCompetitors().size(), loadedConfirmedEvent.getInvolvedCompetitors().size());
             assertCompetitorResultsEqual(event.getPositionedCompetitorsIDsNamesMaxPointsReasons(), loadedConfirmedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons());
             assertEquals(1, Util.size(loadedRaceLog.getFixes()));
         } finally {
@@ -267,7 +266,7 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
             RaceLogFinishPositioningConfirmedEvent loadedConfirmedEvent = (RaceLogFinishPositioningConfirmedEvent) loadedEvent;
             assertEquals(now, loadedConfirmedEvent.getLogicalTimePoint());
             assertEquals(0, loadedConfirmedEvent.getPassId());
-            assertEquals(0, loadedConfirmedEvent.getInvolvedBoats().size());
+            assertEquals(0, loadedConfirmedEvent.getInvolvedCompetitors().size());
             assertNull(event.getPositionedCompetitorsIDsNamesMaxPointsReasons()); 
             assertNull(loadedConfirmedEvent.getPositionedCompetitorsIDsNamesMaxPointsReasons());
             assertEquals(1, Util.size(loadedRaceLog.getFixes()));
@@ -296,29 +295,6 @@ public class TestStoringAndRetrievingRaceLogInRegatta extends AbstractTestStorin
         
         MongoObjectFactoryImpl factoryImpl = (MongoObjectFactoryImpl) mongoObjectFactory;
         factoryImpl.getRaceLogCollection().insert(raceLogResult);
-    }
-    
-    @Test
-    public void testStoreAndRetrieveRegattaWithRaceLogCourseAreaChangeEvent() {
-        final UUID uuid = UUID.randomUUID();
-        RaceLogCourseAreaChangedEvent event = new RaceLogCourseAreaChangeEventImpl(now, author, 0, uuid);
-
-        addAndStoreRaceLogEvent(regatta, raceColumnName, event);
-
-        RaceLog loadedRaceLog = retrieveRaceLog();
-
-        loadedRaceLog.lockForRead();
-        try {
-            RaceLogEvent loadedEvent = loadedRaceLog.getFirstRawFix();
-            RaceLogCourseAreaChangedEvent courseAreaEvent = (RaceLogCourseAreaChangedEvent) loadedEvent;
-            assertEquals(event.getLogicalTimePoint(), courseAreaEvent.getLogicalTimePoint());
-            assertEquals(event.getPassId(), courseAreaEvent.getPassId());
-            assertEquals(event.getId(), courseAreaEvent.getId());
-            assertEquals(event.getCourseAreaId(), courseAreaEvent.getCourseAreaId());
-            assertEquals(1, Util.size(loadedRaceLog.getFixes()));
-        } finally {
-            loadedRaceLog.unlockAfterRead();
-        }
     }
 
     @Test

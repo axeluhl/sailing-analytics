@@ -9,12 +9,12 @@ import com.google.gwt.canvas.dom.client.TextMetrics;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.TimeZone;
 import com.google.gwt.maps.client.MapWidget;
-import com.sap.sailing.domain.common.AbstractBearing;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
 import com.sap.sailing.simulator.util.SailingSimulatorConstants;
+import com.sap.sse.common.AbstractBearing;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
 /**
  * Class to draw the legend for the different paths on the map.
@@ -64,8 +64,7 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
         if (mapProjection != null && pathOverlays != null && pathOverlays.size() > 0) {
             boolean containsPolyline = false;
             for (PathCanvasOverlay overlay : this.pathOverlays) {
-                //TODO: Make course name a constant
-                if (overlay.getName().equals("What-If Course")) {
+                if (overlay.getName().equals(PathPolyline.END_USER_NAME)) {
                     containsPolyline = true;
                     break;
                 }
@@ -74,7 +73,7 @@ public class PathLegendCanvasOverlay extends FullCanvasOverlay {
                 List<PathCanvasOverlay> result = new ArrayList<PathCanvasOverlay>();
                 int indexOfPolyline = 0;
                 for (int index = 0; index < this.pathOverlays.size(); index++) {
-                    if (this.pathOverlays.get(index).getName().equals("What-If Course")) {
+                    if (this.pathOverlays.get(index).getName().equals(PathPolyline.END_USER_NAME)) {
                         indexOfPolyline = index;
                     } else {
                         result.add(this.pathOverlays.get(index));

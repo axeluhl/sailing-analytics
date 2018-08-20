@@ -2,24 +2,26 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.List;
 
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.common.client.suggestion.BoatClassMasterdataSuggestOracle;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
+import com.sap.sse.common.Distance;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
 
 public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWithSeriesAndFleetsDialog<RegattaDTO> {
     protected TextBox nameEntryField;
     protected SuggestBox boatClassEntryField;
+    protected CheckBox canBoatsOfCompetitorsChangePerRaceCheckBox;
 
     public RegattaWithSeriesAndFleetsDialog(RegattaDTO regatta, Iterable<SeriesDTO> series, List<EventDTO> existingEvents, EventDTO defaultEvent,
             String title, String okButton, StringMessages stringMessages,
@@ -35,6 +37,9 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
         if (regatta.boatClass != null) {
             boatClassEntryField.setText(regatta.boatClass.getName());
         }
+        canBoatsOfCompetitorsChangePerRaceCheckBox = createCheckbox("");
+        canBoatsOfCompetitorsChangePerRaceCheckBox.ensureDebugId("CanBoatsOfCompetitorsChangePerRaceCheckBox");
+        canBoatsOfCompetitorsChangePerRaceCheckBox.setValue(regatta.canBoatsOfCompetitorsChangePerRace);
     }
 
     @Override
@@ -48,7 +53,8 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
     protected RegattaDTO getResult() {
         RegattaDTO result = getRegattaDTO();
         result.setName(nameEntryField.getText().trim()); // trim to particularly avoid trailing blanks
-        result.boatClass = new BoatClassDTO(boatClassEntryField.getText(), Distance.NULL);
+        result.boatClass = new BoatClassDTO(boatClassEntryField.getText(), Distance.NULL, Distance.NULL);
+        result.canBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRaceCheckBox.getValue();
         return result;
     }
     
@@ -56,9 +62,12 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
     protected void setupAdditionalWidgetsOnPanel(VerticalPanel panel, Grid formGrid) {
         formGrid.insertRow(0);
         formGrid.insertRow(0);
+        formGrid.insertRow(0);
         formGrid.setWidget(0, 0, new Label(stringMessages.name() + ":"));
         formGrid.setWidget(0, 1, nameEntryField);
         formGrid.setWidget(1, 0, new Label(stringMessages.boatClass() + ":"));
         formGrid.setWidget(1, 1, boatClassEntryField);
+        formGrid.setWidget(2, 0, new Label(stringMessages.canBoatsOfCompetitorsChangePerRace() + ":"));
+        formGrid.setWidget(2, 1, canBoatsOfCompetitorsChangePerRaceCheckBox);
     }
 }

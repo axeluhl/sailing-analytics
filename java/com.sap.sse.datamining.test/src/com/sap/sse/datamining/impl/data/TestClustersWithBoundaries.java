@@ -28,8 +28,8 @@ public class TestClustersWithBoundaries {
         Cluster<Integer> cluster = new ClusterWithLowerAndUpperBoundaries<>(lowerBound, upperBound);
         Cluster<Integer> localizedCluster = new LocalizedCluster<Integer>("TestCluster", cluster);
         
-        assertThat(localizedCluster.asLocalizedString(Locale.ENGLISH, stringMessages), is("Test Cluster English [0 - 10["));
-        assertThat(localizedCluster.asLocalizedString(Locale.GERMAN, stringMessages), is("Test Cluster Deutsch [0 - 10["));
+        assertThat(localizedCluster.asLocalizedString(Locale.ENGLISH, stringMessages), is("[0 - 10[ Test Cluster English"));
+        assertThat(localizedCluster.asLocalizedString(Locale.GERMAN, stringMessages), is("[0 - 10[ Test Cluster Deutsch"));
     }
 
 

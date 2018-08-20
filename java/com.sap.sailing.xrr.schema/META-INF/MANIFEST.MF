@@ -15,3 +15,4 @@ Import-Package: com.sap.sailing.server,
 Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.common,
  com.sap.sse.common
+Automatic-Module-Name: com.sap.sailing.xrr.schema

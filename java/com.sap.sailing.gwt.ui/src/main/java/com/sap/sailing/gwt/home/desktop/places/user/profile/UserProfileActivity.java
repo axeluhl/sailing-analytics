@@ -16,7 +16,9 @@ import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
+import com.sap.sse.security.ui.authentication.AuthenticationPlaces;
 import com.sap.sse.security.ui.authentication.AuthenticationRequestEvent;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -30,13 +32,14 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
 
     private final StringMessages i18n_sec = StringMessages.INSTANCE;
     
-    private UserProfileView<AbstractUserProfilePlace, UserProfileView.Presenter> currentView = new TabletAndDesktopUserProfileView();
+    private UserProfileView<AbstractUserProfilePlace, UserProfileView.Presenter> currentView;
 
     public UserProfileActivity(AbstractUserProfilePlace place, UserProfileClientFactory clientFactory,
-            DesktopPlacesNavigator homePlacesNavigator, NavigationPathDisplay navigationPathDisplay) {
+            DesktopPlacesNavigator homePlacesNavigator, NavigationPathDisplay navigationPathDisplay, FlagImageResolver flagImageResolver) {
         this.currentPlace = place;
         this.clientFactory = clientFactory;
         this.homePlacesNavigator = homePlacesNavigator;
+        currentView = new TabletAndDesktopUserProfileView(flagImageResolver);
 
         initNavigationPath(navigationPathDisplay);
     }
@@ -91,7 +94,7 @@ public class UserProfileActivity extends AbstractActivity implements UserProfile
     
     @Override
     public void doTriggerLoginForm() {
-        clientFactory.getEventBus().fireEvent(new AuthenticationRequestEvent());
+        clientFactory.getEventBus().fireEvent(new AuthenticationRequestEvent(AuthenticationPlaces.SIGN_IN));
     }
     
     @Override

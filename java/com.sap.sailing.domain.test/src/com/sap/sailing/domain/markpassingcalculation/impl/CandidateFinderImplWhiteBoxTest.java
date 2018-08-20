@@ -7,8 +7,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.StreamSupport;
 
 import org.junit.Before;
@@ -18,12 +18,13 @@ import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogImpl;
 import com.sap.sailing.domain.abstractlog.race.state.impl.RaceStateImpl;
 import com.sap.sailing.domain.abstractlog.race.state.racingprocedure.impl.ReadonlyRacingProcedureFactory;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.impl.EmptyRegattaConfiguration;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
@@ -38,6 +39,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class CandidateFinderImplWhiteBoxTest {
@@ -54,15 +56,16 @@ public class CandidateFinderImplWhiteBoxTest {
     }
     
     private CandidateFinderWithPublicGetProbabilityOfStartBasedOnOtherCompetitorsStartLineDistances finder;
-    private Competitor competitor;
+    private CompetitorWithBoat competitor;
     private DynamicTrackedRace trackedRace;
     private TimePoint now;
     
     @Before
     public void setUp() {
         now = MillisecondsTimePoint.now();
-        competitor = TrackBasedTest.createCompetitor("Competitor");
-        trackedRace = TrackBasedTest.createTestTrackedRace("Test Regatta", "Test Race", "505", Collections.singleton(competitor), now, /* useMarkPassingCalculator */ true);
+        competitor = TrackBasedTest.createCompetitorWithBoat("Competitor");
+        Map<Competitor, Boat> competitorAndBoats = TrackBasedTest.createCompetitorAndBoatsMap(competitor);
+        trackedRace = TrackBasedTest.createTestTrackedRace("Test Regatta", "Test Race", "505", competitorAndBoats, now, /* useMarkPassingCalculator */ true);
         finder = new CandidateFinderWithPublicGetProbabilityOfStartBasedOnOtherCompetitorsStartLineDistances(trackedRace);
     }
     

@@ -18,19 +18,23 @@ import org.junit.Rule;
 import org.junit.rules.TestWatchman;
 import org.junit.runner.RunWith;
 import org.junit.runners.model.FrameworkMethod;
+import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.html5.WebStorage;
 import org.openqa.selenium.remote.Augmenter;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-import com.sap.sse.common.Duration;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sailing.selenium.core.Managed;
 import com.sap.sailing.selenium.core.SeleniumRunner;
 import com.sap.sailing.selenium.core.TestEnvironment;
 import com.sap.sailing.selenium.core.WindowManager;
+import com.sap.sailing.selenium.pages.PageObject;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
  * <p>Abstract base class for unit tests with Selenium. This class is already annotated as required to get executed
@@ -82,13 +86,37 @@ public abstract class AbstractSeleniumTest {
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
+        
+        // To be able to access LocalStorage we need to load a page having the target origin
+        getWebDriver().get(contextRoot);
+        
+        // clear local storage
+        final WebStorage webStorage = (WebStorage)getWebDriver();
+        webStorage.getLocalStorage().clear();
+        
+        // extending the timeout of notifications to 100s to prevent timing failures
+        webStorage.getLocalStorage().setItem("sse.notification.customTimeOutInSeconds",
+                Integer.toString(PageObject.DEFAULT_WAIT_TIMEOUT_SECONDS));
+        
+        try {
+            // In IE 11 we sometimes see the problem that IE somehow automatically changes the zoom level to 75%.
+            // Selenium tests with InternetExplorerDriver fail if the zoom level is not set to 100% due to the fact that coordinates determined aren't correct.
+            // With this we enforce a zoom level of 100% before running a test.
+            // To make this work correctly you also need to set InternetExplorerDriver.IGNORE_ZOOM_SETTING to true (this should be pre-configured in local-test-environment.xml when activating IE driver)
+            getWebDriver().findElement(By.tagName("html")).sendKeys(Keys.chord(Keys.CONTROL, "0"));
+        } catch (Exception e) {
+        }
     }
     
     protected void setUpAuthenticatedSession() {
+        // To be able to set a cookie we need to load a page having the target origin
+        getWebDriver().get(getContextRoot());
+        
         logger.info("Authenticating session...");
         Cookie sessionCookie = authenticate(getContextRoot());
         getWebDriver().get(getContextRoot() + "index.html"); // initialize web driver so setting a cookie for the local domain is possible
-        getWebDriver().manage().addCookie(sessionCookie);
+        final Cookie cookieWithoutDomain = new Cookie(sessionCookie.getName(), sessionCookie.getValue(), null, sessionCookie.getPath(), sessionCookie.getExpiry(), sessionCookie.isSecure(), sessionCookie.isHttpOnly());
+        getWebDriver().manage().addCookie(cookieWithoutDomain);
         logger.info("...obtained session cookie "+sessionCookie);
     }
 

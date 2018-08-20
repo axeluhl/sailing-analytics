@@ -4,7 +4,7 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages"/>
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res" type="com.sap.sailing.gwt.home.desktop.partials.old.EventRegattaLeaderboardResources" />
-	<g:HTMLPanel styleName=" {local_res.css.marginFix}">
+	<g:HTMLPanel styleName="{res.mainCss.spacermargintopsmall}">
 		<div class="{res.mediaCss.grid}">
 			<div class="{res.mediaCss.small6} {res.mediaCss.column} {local_res.css.regattaleaderboard_meta_scoring}">
 				<div ui:field="lastScoringCommentDiv" class="{local_res.css.regattaleaderboard_meta_scoring_comment}"></div>
@@ -17,22 +17,19 @@
 					<div ui:field="lastScoringUpdateTextDiv" class="{local_res.css.regattaleaderboard_meta_update_text}"></div>
 					<div ui:field="lastScoringUpdateTimeDiv" class="{local_res.css.regattaleaderboard_meta_update_timestamp}"></div>
 				</div>
-				<g:Anchor ui:field="autoRefreshAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.regattaleaderboard_meta_reload}"></g:Anchor>
-				<g:Anchor ui:field="settingsAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.regattaleaderboard_meta_settings_button}"></g:Anchor>
-				<g:Anchor ui:field="fullscreenAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.regattaleaderboard_meta_fullscreen_button}"></g:Anchor>
+				<g:Anchor ui:field="autoRefreshAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.regattaleaderboard_meta_reload}" />
+				<g:Anchor ui:field="settingsAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.regattaleaderboard_meta_settings_button}" />
+				<g:Anchor ui:field="showLiveRacesAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.regattaleaderboard_meta_liveraces_button}" />
+				<g:Anchor ui:field="fullscreenAnchor" href="javascript:;" styleName="{res.mainCss.button} {local_res.css.regattaleaderboard_meta_fullscreen_button}" />
 			</div>
 		</div>
 		  
 		<div class="{res.mediaCss.grid}">
 			<div class="{res.mediaCss.small12} {res.mediaCss.columns}">
 				<div class="{local_res.css.letItScroll}">
-					<table class="{local_res.css.regattaleaderboard_table}">
-						<tr>
-							<td>
-								<g:HTMLPanel ui:field="oldLeaderboardPanel"></g:HTMLPanel>
-							</td>
-						</tr>
-					</table>
+					<div class="{local_res.css.regattaleaderboard_table}">
+						<g:HTMLPanel ui:field="oldLeaderboardPanel"></g:HTMLPanel>
+					</div>
 				</div>
 			</div>
 		</div>

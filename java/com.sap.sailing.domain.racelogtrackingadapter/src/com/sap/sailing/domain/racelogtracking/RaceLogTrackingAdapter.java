@@ -40,7 +40,7 @@ public interface RaceLogTrackingAdapter {
      * <li>Is a {@link RaceLogStartTrackingEvent} present in the racelog? If not, add one</li>
      * </ul>
      */
-    RaceHandle startTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet)
+    RaceHandle startTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet, boolean trackWind, boolean correctWindDirectionByMagneticDeclination)
             throws NotDenotedForRaceLogTrackingException, Exception;
 
     RaceLogTrackingState getRaceLogTrackingState(RacingEventService service, RaceColumn raceColumn, Fleet fleet);
@@ -53,12 +53,15 @@ public interface RaceLogTrackingAdapter {
     /**
      * Denotes the {@link RaceLog} for racelog-tracking, by inserting a {@link RaceLogDenoteForTrackingEvent}.
      * 
+     * @return {@code true} if the race was not yet denoted for race log tracking and now has successfully been denoted
+     *         so
+     * 
      * @throws NotDenotableForRaceLogTrackingException
      *             Fails, if no {@link RaceLog}, or a non-empty {@link RaceLog}, or one with attached
      *             {@link TrackedRace} is found already in place. Also fails, if the {@code leaderboard} is not a
      *             {@link RegattaLeaderboard}.
      */
-    void denoteRaceForRaceLogTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn,
+    boolean denoteRaceForRaceLogTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn,
             Fleet fleet, String raceName) throws NotDenotableForRaceLogTrackingException;
 
     /**
@@ -71,8 +74,12 @@ public interface RaceLogTrackingAdapter {
      * Denotes the entire {@link Leaderboard} for racelog-tracking, by calling the
      * {@link #denoteRaceForRaceLogTracking(RacingEventService, Leaderboard, RaceColumn, Fleet, String)} method for each
      * {@link RaceLog}.
+     * 
+     * @param prefix Use this parameter to set the racename in the denoteEvent. The prefix will be used for all races. 
+     * Additional to the prefix there will be a serial number that gives every race a individual name. You can pass null 
+     * to get the default denote name. The default looks like: regatta name + racecolumn name + race name.
      */
-    void denoteAllRacesForRaceLogTracking(RacingEventService service, Leaderboard leaderboard)
+    void denoteAllRacesForRaceLogTracking(RacingEventService service, Leaderboard leaderboard, String prefix)
             throws NotDenotableForRaceLogTrackingException;
 
     /**

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: gwt-user
 Bundle-SymbolicName: com.google.gwt.user
-Bundle-Version: 2.8.0
+Bundle-Version: 2.8.2
 Bundle-Vendor: GOOGLE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: lib/gwt-user.jar,
@@ -145,7 +145,6 @@ Export-Package: com.google.gwt.activity.shared,
  com.google.gwt.user.tools.util,
  com.google.gwt.useragent.client,
  com.google.gwt.useragent.rebind,
- com.google.gwt.util.regexfilter,
  com.google.gwt.validation.client,
  com.google.gwt.validation.client.constraints,
  com.google.gwt.validation.client.impl,
@@ -187,5 +186,6 @@ Export-Package: com.google.gwt.activity.shared,
  javaemul.internal.annotations,
  jsinterop.annotations
 Require-Bundle: javax.servlet;bundle-version="3.1.0",
- org.junit4;bundle-version="4.8.2";resolution:=optional,
- com.google.gwt.dev;bundle-version="2.8.0"
+ org.junit;bundle-version="4.8.2";resolution:=optional,
+ com.google.gwt.dev;bundle-version="2.8.2"
+Automatic-Module-Name: com.google.gwt.user

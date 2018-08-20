@@ -1,5 +1,7 @@
 package com.sap.sailing.android.shared.ui.activities;
 
+import com.sap.sailing.android.shared.logging.ExLog;
+
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.support.v4.app.Fragment;
@@ -7,11 +9,9 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AlertDialog;
 
-import com.sap.sailing.android.shared.logging.ExLog;
-
 public abstract class AbstractBaseActivity extends SendingServiceAwareActivity {
 
-    private static final String TAG = AbstractBaseActivity.class.getName();
+    private static final String TAG = AbstractBaseActivity.class.getSimpleName();
 
     /**
      * An object used to synchronize access to the {@link #progressDialog} field to avoid concurrency

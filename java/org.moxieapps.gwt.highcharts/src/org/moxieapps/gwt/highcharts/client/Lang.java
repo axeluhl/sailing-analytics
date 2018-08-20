@@ -151,6 +151,19 @@ public class Lang extends Configurable<Lang> {
     }
 
     /**
+     * Convenience method for setting the 'noData' option of the chart. Equivalent to:
+     * <pre><code>
+     *     lsng.setOption("noData", "no data to display");
+     * </code></pre>
+     * The text to display when the chart has no data.  Defaults to "No data to display"
+     * @param noData A String representing the message to be shown when a chart has no data
+     * @return A reference to this {@link Lang} instance for convenient method chaining.
+     */
+    public Lang setNoData(String noData) {
+        return this.setOption("noData", noData);
+    }
+
+    /**
      * Convenience method for setting the 'shortMonths' lang option.  Equivalent to:
      * <pre><code>
      *     lang.setOption("shortMonths", shortMonths);

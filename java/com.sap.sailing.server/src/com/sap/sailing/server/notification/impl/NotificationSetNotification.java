@@ -10,17 +10,12 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.activation.DataHandler;
-import javax.activation.DataSource;
-import javax.mail.BodyPart;
-import javax.mail.Multipart;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMultipart;
-import javax.mail.util.ByteArrayDataSource;
-
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 import com.sap.sse.mail.MailService;
+import com.sap.sse.mail.SerializableDefaultMimeBodyPartSupplier;
+import com.sap.sse.mail.SerializableFileMimeBodyPartSupplier;
+import com.sap.sse.mail.SerializableMultipartSupplier;
 import com.sap.sse.mail.queue.MailNotification;
 import com.sap.sse.security.PreferenceObjectBasedNotificationSet;
 import com.sap.sse.security.User;
@@ -67,7 +62,7 @@ public abstract class NotificationSetNotification<T> implements MailNotification
     private final PreferenceObjectBasedNotificationSet<?, T> associatedNotificationSet;
     private static final ResourceBundleStringMessagesImpl messages = new ResourceBundleStringMessagesImpl(
             SailingNotificationServiceImpl.STRING_MESSAGES_BASE_NAME,
-            NotificationSetNotification.class.getClassLoader());
+            NotificationSetNotification.class.getClassLoader(), StandardCharsets.UTF_8.name());
 
     public NotificationSetNotification(T objectToNotifyAbout, PreferenceObjectBasedNotificationSet<?, T> associatedNotificationSet) {
         this.objectToNotifyAbout = objectToNotifyAbout;
@@ -81,22 +76,14 @@ public abstract class NotificationSetNotification<T> implements MailNotification
         // send batches with the actual mail addresses as bcc?
         associatedNotificationSet.forUsersWithVerifiedEmailMappedTo(objectToNotifyAbout, (user) -> {
             Locale locale = user.getLocaleOrDefault();
-            Multipart multipart = new MimeMultipart("related");
-            BodyPart bodyPart = new MimeBodyPart();
-            BodyPart messageImagePart = new MimeBodyPart();
+            final NotificationMailTemplate mailTemplate = getMailTemplate(objectToNotifyAbout, locale);
             try {
-                // TODO: add cid:saplogo
-                NotificationMailTemplate mailTemplate = getMailTemplate(objectToNotifyAbout, locale);
-                bodyPart.setContent(getMailContent(mailTemplate, user, locale), "text/html");
-                multipart.addBodyPart(bodyPart);
-
-                DataSource imageDs = new ByteArrayDataSource(LOGO_BYTES, "image/png");
-                messageImagePart.setDataHandler(new DataHandler(imageDs));
-                messageImagePart.setHeader("Content-ID", "saplogo");
-                messageImagePart.setHeader("Content-Disposition", "inline;filename=\"saplogo.png\"");
-                multipart.addBodyPart(messageImagePart);
-
-                mailService.sendMail(user.getEmail(), mailTemplate.getSubject(), multipart);
+                final SerializableMultipartSupplier multipartSupplier = new SerializableMultipartSupplier("related");
+                multipartSupplier.addBodyPart(new SerializableDefaultMimeBodyPartSupplier(
+                        getMailContent(mailTemplate, user, locale), "text/html"));
+                multipartSupplier.addBodyPart(new SerializableFileMimeBodyPartSupplier(LOGO_BYTES, "image/png",
+                        "saplogo", "saplogo.png"));
+                mailService.sendMail(user.getEmail(), mailTemplate.getSubject(), multipartSupplier);
             } catch (Exception e) {
                 logger.log(Level.SEVERE,
                         "Could not send mail notification for \"" + objectToNotifyAbout + "\" to user \"" + user + "\"", e);

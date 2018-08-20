@@ -28,7 +28,8 @@
             android:singleLine="false"
             android:textColor="@color/fiori_text_color"
             android:textSize="18sp"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            tools:text="Event" />
 
         <TextView
             android:id="@+id/regattaName"
@@ -38,23 +39,33 @@
             android:maxLines="2"
             android:singleLine="false"
             android:textColor="@color/fiori_text_color"
-            android:textSize="18sp"/>
+            android:textSize="18sp"
+            tools:text="Regatta" />
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/regatta_detail"
+    <FrameLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
         android:layout_marginEnd="@dimen/fragment_side_margin"
         android:layout_marginRight="@dimen/fragment_side_margin"
-        android:layout_weight="0.3"
-        android:ellipsize="middle"
-        android:gravity="end"
-        android:maxLines="2"
-        android:singleLine="false"
-        android:textColor="@color/fiori_text_color"
-        android:textSize="18sp"/>
+        android:layout_gravity="center_vertical"
+        android:layout_weight="0.3">
+
+        <TextView
+            android:id="@+id/regatta_detail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:ellipsize="middle"
+            android:gravity="end"
+            android:maxLines="2"
+            android:padding="5dp"
+            android:singleLine="false"
+            android:textColor="@color/fiori_text_color"
+            android:textSize="18sp"
+            tools:text="Detail" />
+    </FrameLayout>
+
 
 </LinearLayout>

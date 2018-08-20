@@ -1,10 +1,11 @@
 package com.sap.sailing.selenium.core;
 
 import java.util.Set;
+import java.util.function.BiConsumer;
 
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriver.TargetLocator;
 
 /**
  * <p></p>
@@ -25,20 +26,8 @@ public class WindowManager {
      */
     public WindowManager(WebDriver driver) {
         this.driver = driver;
-    }
-    
-    /**
-     * <p></p>
-     * 
-     * @param url
-     */
-    public void switchTo(String url) {
-        WebDriverWindow window = findWindow(url);
         
-        if(window == null)
-            throw new RuntimeException("Window not found");
-        
-        window.switchToWindow();
+        setWindowMaximized();
     }
     
     /**
@@ -47,60 +36,24 @@ public class WindowManager {
      * @return
      *   
      */
-    public WebDriverWindow getCurrentWindow() {
+    private WebDriverWindow getCurrentWindow() {
         return new WebDriverWindow(this.driver, this.driver.getWindowHandle());
     }
     
     /**
      * <p></p>
      * 
-     * <p>Note: If no window is found with the specified URL, </p>
-     * 
-     * @param url
-     *   
-     * @return
-     *   
-     */
-    public WebDriverWindow findWindow(String url) {
-        if(url == null)
-            throw new IllegalArgumentException();
-        
-        TargetLocator locator = this.driver.switchTo();
-        
-        for(String handle : this.driver.getWindowHandles()) {
-            locator.window(handle);
-            
-            if(url.equals(this.driver.getCurrentUrl()))
-                return new WebDriverWindow(this.driver, handle);
-        }
-        
-        return null;
-    }
-    
-    /**
-     * <p></p>
-     * 
      * @return
      */
-    public WebDriverWindow openNewWindow() {
+    private WebDriverWindow openNewWindow() {
         return openNewWindow(false);
     }
     
-    public WebDriverWindow openNewWindow(boolean focus) {
+    private WebDriverWindow openNewWindow(boolean focus) {
         return openNewWindow("", focus);
     }
     
-    /**
-     * <p></p>
-     * 
-     * @param url
-     * @return
-     */
-    public WebDriverWindow openNewWindow(String url) {
-        return openNewWindow(url, false);
-    }
-    
-    public WebDriverWindow openNewWindow(String url, boolean focus) {
+    private WebDriverWindow openNewWindow(String url, boolean focus) {
         WebDriverWindow window = new WebDriverWindow(this.driver, createWindow(url));
         
         if(focus) {
@@ -133,5 +86,38 @@ public class WindowManager {
             return handle;
 
         return null;
+    }
+    
+    public void withExtraWindow(BiConsumer<WebDriverWindow, WebDriverWindow> defaultAndExtraWindow) {
+        final WebDriverWindow defaultWindow = getCurrentWindow();
+        final WebDriverWindow extraWindow = openNewWindow();
+        extraWindow.switchToWindow();
+        setWindowMaximized();
+        defaultWindow.switchToWindow();
+        try {
+            defaultAndExtraWindow.accept(defaultWindow, extraWindow);
+        } finally {
+            try {
+                extraWindow.close();
+            } catch (Exception e) {
+                // This call may fail depending on the WebDriver being used
+            }
+            defaultWindow.switchToWindow();
+        }
+    }
+    
+    private void setWindowMaximized() {
+        try {
+            driver.manage().window().maximize();
+        } catch (Exception e) {
+            // Depending on the combination of OS and WebDriver implementation this may fail
+            // e.g. chrome with xvfb can't do this successfully.
+            try {
+                // Trying to set a proper screen size as fallback that should usable with all modern screens
+                driver.manage().window().setSize(new Dimension(1440, 900));
+            } catch (Exception exc) {
+                // In this case we just can't change the window
+            }
+        }
     }
 }

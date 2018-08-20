@@ -1,8 +1,8 @@
 package com.sap.sailing.polars.mining;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
@@ -13,14 +13,14 @@ import org.apache.commons.math.analysis.polynomials.PolynomialFunction;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Speed;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarsChangedListener;
 import com.sap.sailing.polars.regression.IncrementalLeastSquares;
 import com.sap.sailing.polars.regression.impl.IncrementalAnyOrderLeastSquaresImpl;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Speed;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.data.Cluster;
@@ -55,8 +55,6 @@ public class SpeedRegressionPerAngleClusterProcessor implements
      */
     private transient ConcurrentMap<BoatClass, Set<PolarsChangedListener>> listeners;
 
-    private final Set<BoatClass> availableBoatClasses = new HashSet<BoatClass>();
-
     public SpeedRegressionPerAngleClusterProcessor(ClusterGroup<Bearing> angleClusterGroup) {
         this.angleClusterGroup = angleClusterGroup;
     }
@@ -87,7 +85,6 @@ public class SpeedRegressionPerAngleClusterProcessor implements
         }
         GPSFixMovingWithPolarContext fix = element.getDataEntry();
         regression.addData(fix.getWind().getObject().getKnots(), fix.getBoatSpeed().getObject().getKnots());
-        availableBoatClasses.add(boatClass);
         Set<PolarsChangedListener> listenersForBoatClass = listeners.get(fix.getBoatClass());
         if (listenersForBoatClass != null) {
             for (PolarsChangedListener listener : listenersForBoatClass) {
@@ -187,7 +184,7 @@ public class SpeedRegressionPerAngleClusterProcessor implements
     }
 
     Set<BoatClass> getAvailableBoatClasses() {
-        return availableBoatClasses;
+        return Collections.unmodifiableSet(fixCountPerBoatClass.keySet());
     }
 
     @Override
@@ -233,4 +230,17 @@ public class SpeedRegressionPerAngleClusterProcessor implements
         return angleClusterGroup;
     }
 
+    public Map<GroupKey, IncrementalAnyOrderLeastSquaresImpl> getRegressionsImpl() {
+        synchronized (regressions) {
+            Map<GroupKey, IncrementalAnyOrderLeastSquaresImpl> map = new HashMap<>();
+            regressions.keySet().stream().forEach(key -> map.put(key, (IncrementalAnyOrderLeastSquaresImpl) regressions.get(key)));
+            return Collections.unmodifiableMap(map);
+        }
+    }
+
+    public Map<BoatClass, Long> getFixCountPerBoatClass() {
+        synchronized (fixCountPerBoatClass) {
+            return Collections.unmodifiableMap(fixCountPerBoatClass);
+        }
+    }
 }

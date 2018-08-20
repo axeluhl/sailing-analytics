@@ -11,31 +11,35 @@
 	<inherits name='com.google.gwt.ajaxloader.AjaxLoader' />
   	<inherits name='com.google.gwt.maps.Maps' />
 	
-  	<!--  Bootstrap API -->
-	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
-	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
 	<inherits name='com.sap.sailing.gwt.common.AuthenticationCommon'/>
+  	
+  	<!-- module containing datamining features -->
+    <inherits name="com.sap.sse.datamining.SSEDataMining"/>
   	
 	<!-- Other module inherits -->
 	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
 	<inherits name="com.sap.sse.SSECommon" />
+	<!-- 
 	<inherits name="com.sap.sse.datamining.DataMiningDomain" />
 	<inherits name="com.sap.sse.datamining.DataMiningAnnotations" />
+	 -->
 	<inherits name="com.sap.sailing.domain.SailingDomain" />
 	<inherits name="com.sap.sse.gwt.AdminConsole" />
 	<inherits name="com.sap.sse.security.ui.LoginPanel" />
 	<inherits name="com.sap.sailing.datamining.DataMiningSailingDomain" />
 	<inherits name="com.sap.sailing.polars.datamining.DataMiningPolars" />
+    <inherits name="com.sap.sailing.ExpeditionConnectorCommon" />
 	
-        <inherits name='com.sap.sailing.gwt.common.SailingLocales' />
+    <!-- module containing locale configuration -->
+    <inherits name='com.sap.sailing.gwt.common.SailingLocalesAllPermutations' />
 
 	<!-- Disable logging -->
 	<set-property name="gwt.logging.enabled" value="FALSE"/>
 
 	<source path="datamining" />
 	<source path="polarmining" />
-		
-	<inherits name='com.sap.sailing.gwt.ui.SourceCommon'/>
+	
+    <inherits name='com.sap.sailing.gwt.ui.SourceCommon'/>
 	<inherits name='com.sap.sailing.gwt.ui.SourceClient'/>
 	<inherits name='com.sap.sailing.gwt.ui.SourceShared'/>
 	<inherits name="com.sap.sailing.gwt.ui.SourceLeaderboard"/>
@@ -44,5 +48,6 @@
 	
 	<inherits name='com.sap.sse.gwt.CommonControlCSS_Autoinject'/>	
 	<entry-point class="com.sap.sailing.gwt.ui.datamining.DataMiningEntryPoint" />
+	
 	
 </module>

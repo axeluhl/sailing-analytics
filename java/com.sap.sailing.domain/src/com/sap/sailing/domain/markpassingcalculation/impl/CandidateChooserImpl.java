@@ -13,27 +13,33 @@ import java.util.NavigableSet;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.logging.Level;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
 import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
+import com.sap.sailing.domain.markpassingcalculation.MarkPassingCalculator;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 
 /**
  * The standard implementation of {@link CandidateChooser}. A graph is created, with each {@link Candidate} as a
@@ -63,7 +69,7 @@ public class CandidateChooserImpl implements CandidateChooser {
     /**
      * Distance ratios of actual distance traveled and leg length above this threshold will receive
      * penalties on their probability. Ratios below 1.0 receive the ratio as the penalty.
-     * See {@link #getDistanceEstimationBasedProbability(Competitor, Candidate, Candidate)}.
+     * See {@link #getDistanceEstimationBasedProbability(Competitor, Candidate, Candidate, Distance)}.
      */
     private static final double MAX_REASONABLE_RATIO_BETWEEN_DISTANCE_TRAVELED_AND_LEG_LENGTH = 2.0;
 
@@ -72,24 +78,52 @@ public class CandidateChooserImpl implements CandidateChooser {
      * as identified by {@link TrackedRace#getStartOfRace()} is therefore {@link #EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME}
      * after {@link #raceStartTime}.
      */
-    private static final Duration EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME = new MillisecondsDurationImpl(5000);
+    private static final Duration EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME = Duration.ONE_SECOND.times(30);
     
     /**
      * The duration after which a start mark passing's probability is considered only 50%. A perfect start mark
      * passing happening exactly at the race start time has time-wise probability of 1.0. Another delay of this much
      * lets the probability drop to 1/3, and so on.
      */
-    private static final Duration DELAY_AFTER_WHICH_PROBABILITY_OF_START_HALVES = Duration.ONE_MINUTE;
+    private static final Duration DELAY_AFTER_WHICH_PROBABILITY_OF_START_HALVES = Duration.ONE_MINUTE.times(5);
     
+    /**
+     * In order to save the expensive distance calculation we may try to rank down an edge based on an
+     * outrageously low speed the competitor would have been sailing at, based on the known distance between
+     * the waypoints and the time taken between the waypoints as provided by the candidates. Anything above
+     * this constant is assumed to be reasonable and gets a probability of 1 (no "penalty"). As the speed
+     * drops below this value, the ratio of the actual speed estimate and this constant defined the probability
+     * which then is less than 1 and therefore constitutes a penalty. Should the result be below the
+     * {@link Edge#getPenaltyForSkipping() skip limit} then it is not necessary to calculate the distance
+     * actually sailed, saving a lot of computational effort.<p>
+     * 
+     * With the current selection of 1kt and a skip probability of 0.1 any speed estimated below 0.1kt will
+     * lead to the edge being discarded.
+     */
+    private static final Speed MINIMUM_REASONABLE_SPEED = new KnotSpeedImpl(3);
+
+    private static final Speed MAXIMUM_REASONABLE_SPEED = GPSFixTrack.DEFAULT_MAX_SPEED_FOR_SMOOTHING;
+
     private static final double MINIMUM_PROBABILITY = Edge.getPenaltyForSkipping();
 
     private static final Logger logger = Logger.getLogger(CandidateChooserImpl.class.getName());
 
     private Map<Competitor, Map<Waypoint, MarkPassing>> currentMarkPasses = new HashMap<>();
+    
+    /**
+     * Methods operating on this collection and the collections embedded in it must be {@code synchronized} in order to
+     * avoid overlapping operations. This will generally not limit concurrency further than usual, except for the
+     * start-up phase where a background thread may be spawned by the constructor in case the
+     * {@link MarkPassingCalculator#MarkPassingCalculator(DynamicTrackedRace, boolean, boolean)} constructor is
+     * invoked with the {@code waitForInitialMarkPassingCalculation} parameter set to {@code false}. In this
+     * case, mark passing calculation will be launched in the background and will not be waited for. This then
+     * needs to be synchronized with the dynamic (re-)calculations triggered by fixes and other data popping in.
+     */
     private Map<Competitor, Map<Candidate, Set<Edge>>> allEdges = new HashMap<>();
+    
     private Map<Competitor, Set<Candidate>> candidates = new HashMap<>();
     private Map<Competitor, NavigableSet<Candidate>> fixedPassings = new HashMap<>();
-    private Map<Competitor, Integer> suppressedPassings = new HashMap<>();
+    private ConcurrentHashMap<Competitor, Integer> suppressedPassings = new ConcurrentHashMap<>();
     
     /**
      * Set to {@link #EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME} milliseconds before the actual race start,
@@ -107,7 +141,17 @@ public class CandidateChooserImpl implements CandidateChooser {
     private final CandidateWithSettableWaypointIndex end;
     private final DynamicTrackedRace race;
     
+    /**
+     * Most data structures in this candidate chooser are keyed by {@link Competitor} objects. When a method iterates
+     * over or manipulates such a per-competitor structure it must obtain the corresponding lock from here and
+     * acquire the read/write lock respectively. See {@link #getCompetitorLock}. The map is initialized in the
+     * constructor and populated for all the race's competitors already. From there on it is used in read-only
+     * mode, so no synchronization is necessary.
+     */
+    private final HashMap<Competitor, NamedReentrantReadWriteLock> perCompetitorLocks;
+
     public CandidateChooserImpl(DynamicTrackedRace race) {
+        this.perCompetitorLocks = new HashMap<>();
         this.race = race;
         waypointPositionAndDistanceCache = new WaypointPositionAndDistanceCache(race, Duration.ONE_MINUTE);
         final TimePoint startOfRaceWithoutInference = race.getStartOfRace(/* inferred */ false);
@@ -119,6 +163,7 @@ public class CandidateChooserImpl implements CandidateChooser {
         candidates = new HashMap<>();
         List<Candidate> startAndEnd = Arrays.asList(start, end);
         for (Competitor c : race.getRace().getCompetitors()) {
+            perCompetitorLocks.put(c, createCompetitorLock(c));
             candidates.put(c, Collections.synchronizedSet(new TreeSet<Candidate>()));
             final HashMap<Waypoint, MarkPassing> currentMarkPassesForCompetitor = new HashMap<Waypoint, MarkPassing>();
             currentMarkPasses.put(c, currentMarkPassesForCompetitor);
@@ -154,13 +199,25 @@ public class CandidateChooserImpl implements CandidateChooser {
             addCandidates(c, startAndEnd);
         }
     }
+    
+    private NamedReentrantReadWriteLock createCompetitorLock(Competitor c) {
+        return new NamedReentrantReadWriteLock("Competitor lock for "+c+" in candidate chooser "+this, /* fair */ false);
+    }
 
     @Override
     public void calculateMarkPassDeltas(Competitor c, Iterable<Candidate> newCans, Iterable<Candidate> oldCans) {
-       final TimePoint startOfRace = race.getStartOfRace(/* inference */ false);
+        final TimePoint startOfRace = race.getStartOfRace(/* inference */ false);
         if (startOfRace != null) {
-            if (raceStartTime == null || !startOfRace.minus(EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME).equals(raceStartTime)) {
-                raceStartTime = startOfRace.minus(EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME);
+            final boolean startTimeUpdated;
+            synchronized (this) { // protect raceStartTime check and update
+                if (raceStartTime == null || !startOfRace.minus(EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME).equals(raceStartTime)) {
+                    raceStartTime = startOfRace.minus(EARLY_STARTS_CONSIDERED_THIS_MUCH_BEFORE_STARTTIME);
+                    startTimeUpdated = true;
+                } else {
+                    startTimeUpdated = false;
+                }
+            }
+            if (startTimeUpdated) {
                 List<Candidate> startList = new ArrayList<>();
                 startList.add(start);
                 for (Competitor com : candidates.keySet()) {
@@ -193,33 +250,43 @@ public class CandidateChooserImpl implements CandidateChooser {
 
     @Override
     public void setFixedPassing(Competitor c, Integer zeroBasedIndexOfWaypoint, TimePoint t) {
-        Candidate fixedCan = new CandidateImpl(zeroBasedIndexOfWaypoint + 1, t, 1, Util.get(race.getRace().getCourse().getWaypoints(), zeroBasedIndexOfWaypoint));
-        NavigableSet<Candidate> fixed = fixedPassings.get(c);
-        if (fixed != null) { // can only set the mark passing if the competitor is still part of this race
-            if (!fixed.add(fixedCan)) {
-                Candidate old = fixed.ceiling(fixedCan);
-                fixed.remove(old);
-                removeCandidates(c, Arrays.asList(old));
-                fixed.add(fixedCan);
+        LockUtil.lockForWrite(perCompetitorLocks.get(c));
+        try {
+            Candidate fixedCan = new CandidateImpl(zeroBasedIndexOfWaypoint + 1, t, 1, Util.get(race.getRace().getCourse().getWaypoints(), zeroBasedIndexOfWaypoint));
+            NavigableSet<Candidate> fixed = fixedPassings.get(c);
+            if (fixed != null) { // can only set the mark passing if the competitor is still part of this race
+                if (!fixed.add(fixedCan)) {
+                    Candidate old = fixed.ceiling(fixedCan);
+                    fixed.remove(old);
+                    removeCandidates(c, Arrays.asList(old));
+                    fixed.add(fixedCan);
+                }
+                addCandidates(c, Arrays.asList(fixedCan));
+                findShortestPath(c);
             }
-            addCandidates(c, Arrays.asList(fixedCan));
-            findShortestPath(c);
+        } finally {
+            LockUtil.unlockAfterWrite(perCompetitorLocks.get(c));
         }
     }
 
     @Override
     public void removeFixedPassing(Competitor c, Integer zeroBasedIndexOfWaypoint) {
-        Candidate toRemove = null;
-        for (Candidate can : fixedPassings.get(c)) {
-            if (can.getOneBasedIndexOfWaypoint() - 1 == zeroBasedIndexOfWaypoint) {
-                toRemove = can;
-                break;
+        LockUtil.lockForWrite(perCompetitorLocks.get(c));
+        try {
+            Candidate toRemove = null;
+            for (Candidate can : fixedPassings.get(c)) {
+                if (can.getOneBasedIndexOfWaypoint() - 1 == zeroBasedIndexOfWaypoint) {
+                    toRemove = can;
+                    break;
+                }
             }
-        }
-        if (toRemove != null) {
-            fixedPassings.get(c).remove(toRemove);
-            removeCandidates(c, Arrays.asList(toRemove));
-            findShortestPath(c);
+            if (toRemove != null) {
+                fixedPassings.get(c).remove(toRemove);
+                removeCandidates(c, Arrays.asList(toRemove));
+                findShortestPath(c);
+            }
+        } finally {
+            LockUtil.unlockAfterWrite(perCompetitorLocks.get(c));
         }
     }
 
@@ -236,6 +303,7 @@ public class CandidateChooserImpl implements CandidateChooser {
     }
 
     private void createNewEdges(Competitor c, Iterable<Candidate> newCandidates) {
+        assert perCompetitorLocks.get(c).isWriteLocked();
         final Boolean isGateStart = race.isGateStart();
         Map<Candidate, Set<Edge>> edges = allEdges.get(c);
         for (Candidate newCan : newCandidates) {
@@ -254,8 +322,11 @@ public class CandidateChooserImpl implements CandidateChooser {
                         continue; // don't create edge from/to same waypoint
                     }
     
+                    final Supplier<Double> estimatedDistanceProbabilitySupplier;
                     final double estimatedDistanceProbability;
                     final double startTimingProbability;
+                    // when null, don't create an edge; when a valid distance, use this as the totalGreatCircleDistance value
+                    final Distance ignoreEdgeDueToProbabilityLowerThanMinimumForSkipping;
                     if (early == start) {
                         // An edge starting at the start proxy node. If the late candidate is for a start mark passing,
                         // determine a probability not based on distance traveled but based on the
@@ -265,10 +336,12 @@ public class CandidateChooserImpl implements CandidateChooser {
                         // the race's start time.
                         if (isGateStart == Boolean.TRUE || start.getTimePoint() == null) { // TODO for gate start read gate timing and scale probability accordingly
                             startTimingProbability = 1; // no start time point known; all candidate time points equally likely
-                            estimatedDistanceProbability = 1; // can't tell distance sailed either because we don't know the start time
+                            estimatedDistanceProbability = 1.0;
+                            ignoreEdgeDueToProbabilityLowerThanMinimumForSkipping = Distance.NULL;
+                            estimatedDistanceProbabilitySupplier = null; // can't tell distance sailed either because we don't know the start time
                         } else {
                             // no gate start and we know the race start time
-                            if (late.getWaypoint() == race.getRace().getCourse().getFirstWaypoint()) {
+                            if (late.getWaypoint() != null && late.getWaypoint() == race.getRace().getCourse().getFirstWaypoint()) {
                                 // no skips; going from the start proxy node to a candidate for the start mark passing;
                                 // calculate the probability for the start being the start given its timing and multiply
                                 // with the estimation for the distance-based probability:
@@ -279,20 +352,34 @@ public class CandidateChooserImpl implements CandidateChooser {
                                 startTimingProbability = DELAY_AFTER_WHICH_PROBABILITY_OF_START_HALVES.divide(
                                         DELAY_AFTER_WHICH_PROBABILITY_OF_START_HALVES.plus(
                                                 timeGapBetweenStartOfRaceAndCandidateTimePoint));
-                                estimatedDistanceProbability = 1;
+                                estimatedDistanceProbability = 1.0;
+                                ignoreEdgeDueToProbabilityLowerThanMinimumForSkipping = Distance.NULL;
+                                estimatedDistanceProbabilitySupplier = null;
                             } else {
                                 startTimingProbability = 1; // can't really tell how well the start time was matched when
-                                                              // we don't have a start candidate
-                                estimatedDistanceProbability = late == end ? 1 : getDistanceEstimationBasedProbability(c, early, late);
+                                                            // we don't have a start candidate
+                                if (late == end) {
+                                    estimatedDistanceProbability = 1.0;
+                                    ignoreEdgeDueToProbabilityLowerThanMinimumForSkipping = Distance.NULL;
+                                    estimatedDistanceProbabilitySupplier = null;
+                                } else {
+                                    estimatedDistanceProbability = 0.0;
+                                    ignoreEdgeDueToProbabilityLowerThanMinimumForSkipping = getIgnoreDueToTimingInducedEstimatedSpeeds(c, early, late);
+                                    estimatedDistanceProbabilitySupplier = ()->getDistanceEstimationBasedProbability(c, early, late, ignoreEdgeDueToProbabilityLowerThanMinimumForSkipping);
+                                }
                             }
                         }
                     } else {
                         startTimingProbability = 1; // no penalty for any start time difference because this edge doesn't cover a start
                         if (late == end) {
                             // final edge; we don't know anything about distances for the end proxy node
-                            estimatedDistanceProbability = 1;
+                            estimatedDistanceProbability = 1.0;
+                            ignoreEdgeDueToProbabilityLowerThanMinimumForSkipping = Distance.NULL;
+                            estimatedDistanceProbabilitySupplier = null;
                         } else {
-                            estimatedDistanceProbability = getDistanceEstimationBasedProbability(c, early, late);
+                            estimatedDistanceProbability = 0.0;
+                            ignoreEdgeDueToProbabilityLowerThanMinimumForSkipping = getIgnoreDueToTimingInducedEstimatedSpeeds(c, early, late);
+                            estimatedDistanceProbabilitySupplier = ()->getDistanceEstimationBasedProbability(c, early, late, ignoreEdgeDueToProbabilityLowerThanMinimumForSkipping);
                         }
                     }
                     // If one of the candidates is fixed, the edge is always created unless they travel backwards in time.
@@ -301,8 +388,16 @@ public class CandidateChooserImpl implements CandidateChooser {
                     final NavigableSet<Candidate> fixed = fixedPassings.get(c);
                     // TODO this comparison does not exactly implement the condition "if distance is more likely than skipping"
                     if (travelingForwardInTimeOrUnknown(early, late) &&
-                            (fixed.contains(early) || fixed.contains(late) || estimatedDistanceProbability > MINIMUM_PROBABILITY)) {
-                        addEdge(edges, new Edge(early, late, startTimingProbability * estimatedDistanceProbability, race.getRace().getCourse().getNumberOfWaypoints()));
+                            (fixed.contains(early) || fixed.contains(late) || ignoreEdgeDueToProbabilityLowerThanMinimumForSkipping != null)) {
+                        final Edge edge;
+                        if (estimatedDistanceProbabilitySupplier != null) {
+                            edge = new Edge(early, late,
+                                        ()->startTimingProbability * estimatedDistanceProbabilitySupplier.get(), race.getRace().getCourse().getNumberOfWaypoints());
+                        } else {
+                            edge = new Edge(early, late,
+                                    startTimingProbability * estimatedDistanceProbability, race.getRace().getCourse().getNumberOfWaypoints());
+                        }
+                        addEdge(edges, edge);
                     }
                 }
             }
@@ -314,7 +409,7 @@ public class CandidateChooserImpl implements CandidateChooser {
     }
 
     private void addEdge(Map<Candidate, Set<Edge>> edges, Edge e) {
-        logger.finest("Adding "+ e.toString());
+        logger.finest(()->"Adding "+ e.toString());
         Set<Edge> edgeSet = edges.get(e.getStart());
         if (edgeSet == null) {
             edgeSet = new HashSet<>();
@@ -333,127 +428,182 @@ public class CandidateChooserImpl implements CandidateChooser {
      * optimization problem separately for each segment and concatenates the solutions.
      */
     private void findShortestPath(Competitor c) {
-        Map<Candidate, Set<Edge>> allCompetitorEdges = allEdges.get(c);
-        SortedSet<Candidate> mostLikelyCandidates = new TreeSet<>();
-        NavigableSet<Candidate> fixedPasses = fixedPassings.get(c);
-        Candidate startOfFixedInterval = fixedPasses.first();
-        Candidate endOfFixedInterval = fixedPasses.higher(startOfFixedInterval);
-        Integer zeroBasedIndexOfWaypoint = suppressedPassings.get(c);
-        Integer oneBasedIndexOfSuppressedWaypoint = zeroBasedIndexOfWaypoint != null ? zeroBasedIndexOfWaypoint + 1 : end
-                .getOneBasedIndexOfWaypoint();
-        while (endOfFixedInterval != null) {
-            if (oneBasedIndexOfSuppressedWaypoint <= endOfFixedInterval.getOneBasedIndexOfWaypoint()) {
-                endOfFixedInterval = end;
-            }
-            NavigableSet<Util.Pair<Edge, Double>> currentEdgesMoreLikelyFirst = new TreeSet<>(new Comparator<Util.Pair<Edge, Double>>() {
-                @Override
-                public int compare(Util.Pair<Edge, Double> o1, Util.Pair<Edge, Double> o2) {
-                    int result = o2.getB().compareTo(o1.getB());
-                    return result != 0 ? result : o1.getA().compareTo(o2.getA());
+        LockUtil.lockForWrite(perCompetitorLocks.get(c));
+        try {
+            Map<Candidate, Set<Edge>> allCompetitorEdges = allEdges.get(c);
+            SortedSet<Candidate> mostLikelyCandidates = new TreeSet<>();
+            NavigableSet<Candidate> fixedPasses = fixedPassings.get(c);
+            Candidate startOfFixedInterval = fixedPasses.first();
+            Candidate endOfFixedInterval = fixedPasses.higher(startOfFixedInterval);
+            Integer zeroBasedIndexOfWaypoint = suppressedPassings.get(c);
+            Integer oneBasedIndexOfSuppressedWaypoint = zeroBasedIndexOfWaypoint != null ? zeroBasedIndexOfWaypoint + 1 : end
+                    .getOneBasedIndexOfWaypoint();
+            while (endOfFixedInterval != null) {
+                if (oneBasedIndexOfSuppressedWaypoint <= endOfFixedInterval.getOneBasedIndexOfWaypoint()) {
+                    endOfFixedInterval = end;
                 }
-            });
-            Map<Candidate, Util.Pair<Candidate, Double>> candidateWithParentAndHighestTotalProbability = new HashMap<>();
-            int indexOfEndOfFixedInterval = endOfFixedInterval.getOneBasedIndexOfWaypoint();
-
-            boolean endFound = false;
-            currentEdgesMoreLikelyFirst.add(new Util.Pair<Edge, Double>(new Edge(new CandidateImpl(-1, null, /* estimated distance probability */ 1, null), startOfFixedInterval,
-                    1, race.getRace().getCourse().getNumberOfWaypoints()), 1.0));
-            while (!endFound) {
-                Util.Pair<Edge, Double> mostLikelyEdgeWithProbability = currentEdgesMoreLikelyFirst.pollFirst();
-                if (mostLikelyEdgeWithProbability == null) {
-                    endFound = true;
-                } else {
-                    Edge currentMostLikelyEdge = mostLikelyEdgeWithProbability.getA();
-                    Double currentHighestProbability = mostLikelyEdgeWithProbability.getB();
-                    // If the shortest path to this candidate is already known the new edge is not added.
-                    if (!candidateWithParentAndHighestTotalProbability.containsKey(currentMostLikelyEdge.getEnd())) {
-                        // The most likely edge taking us to currentMostLikelyEdge.getEnd() is found. Remember it.
-                        candidateWithParentAndHighestTotalProbability.put(currentMostLikelyEdge.getEnd(), new Util.Pair<Candidate, Double>(
-                                currentMostLikelyEdge.getStart(), currentHighestProbability));
-                        if (logger.isLoggable(Level.FINEST)) {
-                            logger.finest("Added "+ currentMostLikelyEdge + " as most likely edge for " + c);
-                        }
-                        endFound = currentMostLikelyEdge.getEnd() == endOfFixedInterval;
-                        if (!endFound) {
-                            // the end of the segment was not yet found; add edges leading away from
-                            // currentMostLikelyEdge.getEnd(), multiplying up their probabilities with the probability
-                            // of reaching currentMostLikelyEdge.getEnd()
-                            Set<Edge> edgesForNewCandidate = allCompetitorEdges.get(currentMostLikelyEdge.getEnd());
-                            if (edgesForNewCandidate != null) {
-                                for (Edge e : edgesForNewCandidate) {
-                                    int oneBasedIndexOfEndOfEdge = e.getEnd().getOneBasedIndexOfWaypoint();
-                                    // only add edge if it stays within the current segment, not exceeding
-                                    // the next fixed mark passing
-                                    if (oneBasedIndexOfEndOfEdge <= indexOfEndOfFixedInterval
-                                            && (oneBasedIndexOfEndOfEdge < oneBasedIndexOfSuppressedWaypoint || e.getEnd() == end)) {
-                                        currentEdgesMoreLikelyFirst.add(new Util.Pair<Edge, Double>(e, currentHighestProbability * e.getProbability()));
+                NavigableSet<Util.Pair<Edge, Double>> currentEdgesMoreLikelyFirst = new TreeSet<>(new Comparator<Util.Pair<Edge, Double>>() {
+                    @Override
+                    public int compare(Util.Pair<Edge, Double> o1, Util.Pair<Edge, Double> o2) {
+                        int result = o2.getB().compareTo(o1.getB());
+                        return result != 0 ? result : o1.getA().compareTo(o2.getA());
+                    }
+                });
+                Map<Candidate, Util.Pair<Candidate, Double>> candidateWithParentAndHighestTotalProbability = new HashMap<>();
+                int indexOfEndOfFixedInterval = endOfFixedInterval.getOneBasedIndexOfWaypoint();
+    
+                boolean endFound = false;
+                currentEdgesMoreLikelyFirst.add(new Util.Pair<Edge, Double>(new Edge(
+                        new CandidateImpl(-1, null, /* estimated distance probability */ 1, null), startOfFixedInterval,
+                        ()->1.0, race.getRace().getCourse().getNumberOfWaypoints()), 1.0));
+                while (!endFound) {
+                    Util.Pair<Edge, Double> mostLikelyEdgeWithProbability = currentEdgesMoreLikelyFirst.pollFirst();
+                    if (mostLikelyEdgeWithProbability == null) {
+                        endFound = true;
+                    } else {
+                        Edge currentMostLikelyEdge = mostLikelyEdgeWithProbability.getA();
+                        Double currentHighestProbability = mostLikelyEdgeWithProbability.getB();
+                        // If the shortest path to this candidate is already known the new edge is not added.
+                        if (!candidateWithParentAndHighestTotalProbability.containsKey(currentMostLikelyEdge.getEnd())) {
+                            // The most likely edge taking us to currentMostLikelyEdge.getEnd() is found. Remember it.
+                            candidateWithParentAndHighestTotalProbability.put(currentMostLikelyEdge.getEnd(), new Util.Pair<Candidate, Double>(
+                                    currentMostLikelyEdge.getStart(), currentHighestProbability));
+                            logger.finest(()->"Added "+ currentMostLikelyEdge + " as most likely edge for " + c);
+                            endFound = currentMostLikelyEdge.getEnd() == endOfFixedInterval;
+                            if (!endFound) {
+                                // the end of the segment was not yet found; add edges leading away from
+                                // currentMostLikelyEdge.getEnd(), multiplying up their probabilities with the probability
+                                // of reaching currentMostLikelyEdge.getEnd()
+                                Set<Edge> edgesForNewCandidate = allCompetitorEdges.get(currentMostLikelyEdge.getEnd());
+                                if (edgesForNewCandidate != null) {
+                                    for (Edge e : edgesForNewCandidate) {
+                                        int oneBasedIndexOfEndOfEdge = e.getEnd().getOneBasedIndexOfWaypoint();
+                                        // only add edge if it stays within the current segment, not exceeding
+                                        // the next fixed mark passing
+                                        if (oneBasedIndexOfEndOfEdge <= indexOfEndOfFixedInterval
+                                                && (oneBasedIndexOfEndOfEdge < oneBasedIndexOfSuppressedWaypoint || e.getEnd() == end)) {
+                                            currentEdgesMoreLikelyFirst.add(new Util.Pair<Edge, Double>(e, currentHighestProbability * e.getProbability()));
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
+                final Pair<Candidate, Double> bestCandidateAndProbabilityForEndOfFixedInterval = candidateWithParentAndHighestTotalProbability.get(endOfFixedInterval);
+                Candidate marker = bestCandidateAndProbabilityForEndOfFixedInterval == null ? null : bestCandidateAndProbabilityForEndOfFixedInterval.getA();
+                while (marker != null && marker.getOneBasedIndexOfWaypoint() > 0) {
+                    mostLikelyCandidates.add(marker);
+                    marker = candidateWithParentAndHighestTotalProbability.get(marker).getA();
+                }
+                startOfFixedInterval = endOfFixedInterval;
+                endOfFixedInterval = fixedPasses.higher(endOfFixedInterval);
             }
-            final Pair<Candidate, Double> bestCandidateAndProbabilityForEndOfFixedInterval = candidateWithParentAndHighestTotalProbability.get(endOfFixedInterval);
-            Candidate marker = bestCandidateAndProbabilityForEndOfFixedInterval == null ? null : bestCandidateAndProbabilityForEndOfFixedInterval.getA();
-            while (marker != null && marker.getOneBasedIndexOfWaypoint() > 0) {
-                mostLikelyCandidates.add(marker);
-                marker = candidateWithParentAndHighestTotalProbability.get(marker).getA();
+            boolean changed = false;
+            Map<Waypoint, MarkPassing> currentPasses = currentMarkPasses.get(c);
+            if (currentPasses.size() != mostLikelyCandidates.size()) {
+                changed = true;
+            } else {
+                for (Candidate can : mostLikelyCandidates) {
+                    MarkPassing currentPassing = currentPasses.get(can.getWaypoint());
+                    if (currentPassing == null || currentPassing.getTimePoint().compareTo(can.getTimePoint()) != 0) {
+                        changed = true;
+                        break;
+                    }
+                }
             }
-            startOfFixedInterval = endOfFixedInterval;
-            endOfFixedInterval = fixedPasses.higher(endOfFixedInterval);
+            if (changed) {
+                currentPasses.clear();
+                List<MarkPassing> newMarkPassings = new ArrayList<>();
+                for (Candidate can : mostLikelyCandidates) {
+                    if (can != start && can != end) {
+                        MarkPassingImpl newMarkPassing = new MarkPassingImpl(can.getTimePoint(), can.getWaypoint(), c);
+                        currentPasses.put(newMarkPassing.getWaypoint(), newMarkPassing);
+                        newMarkPassings.add(newMarkPassing);
+                    }
+                }
+                logger.fine(()->"Updating MarkPasses for " + c + " in case "+race.getRace().getName());
+                race.updateMarkPassings(c, newMarkPassings);
+            }
+        } finally {
+            LockUtil.unlockAfterWrite(perCompetitorLocks.get(c));
         }
-        boolean changed = false;
-        Map<Waypoint, MarkPassing> currentPasses = currentMarkPasses.get(c);
-        if (currentPasses.size() != mostLikelyCandidates.size()) {
-            changed = true;
+    }
+
+    /**
+     * The timing of the candidates is put in relation to the distance between the waypoints they connect. This implies
+     * a rough speed estimate. If this is completely "out of whack" (way too low or way too high), we can assume that if
+     * ultimately carrying out the potentially expensive (for long-distance races) calculation of the distance sailed,
+     * we would only find that the distance-based probability would be below the {@link #MINIMUM_PROBABILITY} threshold
+     * such that that edge would be ignored.
+     * 
+     * @return {@code null} if the edge between {@code c1} and {@code c2} shall be ignored; the
+     *         {@link #getMinimumTotalGreatCircleDistanceBetweenWaypoints(Waypoint, Waypoint, TimePoint) straight-line
+     *         distance between the corresponding waypoints} otherwise. This distance can be used for a subsequent call
+     *         to {@link #getDistanceEstimationBasedProbability(Competitor, Candidate, Candidate, Distance)} so it doesn't have
+     *         to be re-calculated there.
+     */
+    private Distance getIgnoreDueToTimingInducedEstimatedSpeeds(Competitor c, Candidate c1, Candidate c2) {
+        final boolean ignore;
+        assert c1.getOneBasedIndexOfWaypoint() < c2.getOneBasedIndexOfWaypoint();
+        assert c2 != end;
+        final TimePoint middleOfc1Andc2 = new MillisecondsTimePoint(c1.getTimePoint().plus(c2.getTimePoint().asMillis()).asMillis() / 2);
+        Waypoint first = getFirstWaypoint(c1);
+        final Waypoint second = c2.getWaypoint();
+        final Distance totalGreatCircleDistance = getMinimumTotalGreatCircleDistanceBetweenWaypoints(first, second, middleOfc1Andc2);
+        if (totalGreatCircleDistance == null) {
+            ignore = true; // no distance known; cannot tell, so ignore the edge
         } else {
-            for (Candidate can : mostLikelyCandidates) {
-                MarkPassing currentPassing = currentPasses.get(can.getWaypoint());
-                if (currentPassing == null || currentPassing.getTimePoint().compareTo(can.getTimePoint()) != 0) {
-                    changed = true;
-                    break;
-                }
-            }
+            // Computing the distance traveled can be quite expensive, especially for candidates very far apart.
+            // As a quick approximation let's look at how long the time between the candidates was and relate that to the minimum distance
+            // between the waypoints. This leads to a speed estimation; if we take the minimum distance times two, we
+            // get an upper bound for a reasonable distance sailed between the waypoints and therefore an estimation
+            // for the maximum speed at which the competitor would have had to sail:
+            Speed estimatedMaxSpeed = totalGreatCircleDistance.scale(2).inTime(c1.getTimePoint().until(c2.getTimePoint()));
+            final double estimatedMinSpeedBasedProbability = Math.max(0, estimatedMaxSpeed.divide(MINIMUM_REASONABLE_SPEED));
+            final double estimatedMaxSpeedBasedProbability = Math.max(0, MAXIMUM_REASONABLE_SPEED.divide(estimatedMaxSpeed));
+            final double estimatedSpeedBasedProbabilityMinimum = Math.min(estimatedMaxSpeedBasedProbability, estimatedMinSpeedBasedProbability);
+            ignore = estimatedSpeedBasedProbabilityMinimum < MINIMUM_PROBABILITY;
         }
-        if (changed) {
-            currentPasses.clear();
-            List<MarkPassing> newMarkPassings = new ArrayList<>();
-            for (Candidate can : mostLikelyCandidates) {
-                if (can != start && can != end) {
-                    MarkPassingImpl newMarkPassing = new MarkPassingImpl(can.getTimePoint(), can.getWaypoint(), c);
-                    currentPasses.put(newMarkPassing.getWaypoint(), newMarkPassing);
-                    newMarkPassings.add(newMarkPassing);
-                }
-            }
-            if (logger.isLoggable(Level.FINE)) {
-                logger.fine("Updating MarkPasses for " + c + " in case "+race.getRace().getName());
-            }
-            race.updateMarkPassings(c, newMarkPassings);
+        return ignore ? null : totalGreatCircleDistance;
+    }
+
+    /**
+     * If the candidate has no waypoint associated, return the course's first waypoint; otherwise, return the candidates
+     * {@link Candidate#getWaypoint() waypoint}.
+     */
+    private Waypoint getFirstWaypoint(Candidate candidate) {
+        Waypoint first;
+        if (candidate.getOneBasedIndexOfWaypoint() == 0) {
+            first = race.getRace().getCourse().getFirstWaypoint();
+        } else {
+            first = candidate.getWaypoint();
         }
+        return first;
     }
 
     /**
      * The distance between waypoints is used to estimate the distance that should be covered between these two
      * candidates. This estimation is then compared to the distance actually sailed. A distance smaller than the
      * estimation is (aside from a small tolerance) impossible, a distance larger get increasingly unlikely.
+     * 
+     * @param totalGreatCircleDistance
+     *            the result of a previous
+     *            {@link #getMinimumTotalGreatCircleDistanceBetweenWaypoints(Waypoint, Waypoint, TimePoint)} call for
+     *            the two waypoints of {@code c1} and {@code c2}
      */
-    private double getDistanceEstimationBasedProbability(Competitor c, Candidate c1, Candidate c2) {
+    private double getDistanceEstimationBasedProbability(Competitor c, Candidate c1, Candidate c2, Distance totalGreatCircleDistance) {
         final double result;
         assert c1.getOneBasedIndexOfWaypoint() < c2.getOneBasedIndexOfWaypoint();
         assert c2 != end;
-        Waypoint first;
-        final TimePoint middleOfc1Andc2 = new MillisecondsTimePoint(c1.getTimePoint().plus(c2.getTimePoint().asMillis()).asMillis() / 2);
-        if (c1.getOneBasedIndexOfWaypoint() == 0) {
-            first = race.getRace().getCourse().getFirstWaypoint();
-        } else {
-            first = c1.getWaypoint();
-        }
-        final Waypoint second = c2.getWaypoint();
-        final Distance totalGreatCircleDistance = getMinimumTotalGreatCircleDistanceBetweenWaypoints(first, second, middleOfc1Andc2);
         if (totalGreatCircleDistance == null) {
-            result = 0; // no distance known; cannot tell; low probability
+            result = 0.0; // no distance known; cannot tell
         } else {
+            // Computing the distance traveled can be quite expensive, especially for candidates very far apart.
+            // Let's first look at how long the time between the candidates was and relate that to the minimum distance
+            // between the waypoints. This leads to a speed estimation; if we take the minimum distance times two, we
+            // get an upper bound for a reasonable distance sailed between the waypoints and therefore an estimation
+            // for the maximum speed at which the competitor would have had to sail:
             final Distance actualDistanceTraveled = race.getTrack(c).getDistanceTraveled(c1.getTimePoint(), c2.getTimePoint());
             final double probabilityForMaxReasonableRatioBetweenDistanceTraveledAndLegLength =
                     c2.getWaypoint() == race.getRace().getCourse().getLastWaypoint() ? PENALTY_FOR_LATEST_FINISH_PASSING : 1.0;
@@ -534,28 +684,36 @@ public class CandidateChooserImpl implements CandidateChooser {
     }
 
     private void addCandidates(Competitor c, Iterable<Candidate> newCandidates) {
-        for (Candidate can : newCandidates) {
-            candidates.get(c).add(can);
+        LockUtil.lockForWrite(perCompetitorLocks.get(c));
+        try {
+            for (Candidate can : newCandidates) {
+                candidates.get(c).add(can);
+            }
+            createNewEdges(c, newCandidates);
+        } finally {
+            LockUtil.unlockAfterWrite(perCompetitorLocks.get(c));
         }
-        createNewEdges(c, newCandidates);
     }
 
-    private void removeCandidates(Competitor c, Iterable<Candidate> wrongCandidates) {
-        for (Candidate can : wrongCandidates) {
-            if (logger.isLoggable(Level.FINEST)) {
-                logger.finest("Removing all edges containing " + can + "of "+ c);
-            }
-            candidates.get(c).remove(can);
-            Map<Candidate, Set<Edge>> edges = allEdges.get(c);
-            edges.remove(can);
-            for (Set<Edge> set : edges.values()) {
-                for (Iterator<Edge> i = set.iterator(); i.hasNext();) {
-                    final Edge e = i.next();
-                    if (e.getStart() == can || e.getEnd() == can) {
-                        i.remove();
+    private synchronized void removeCandidates(Competitor c, Iterable<Candidate> wrongCandidates) {
+        LockUtil.lockForWrite(perCompetitorLocks.get(c));
+        try {
+            for (Candidate can : wrongCandidates) {
+                logger.finest(()->"Removing all edges containing " + can + "of "+ c);
+                candidates.get(c).remove(can);
+                Map<Candidate, Set<Edge>> edges = allEdges.get(c);
+                edges.remove(can);
+                for (Set<Edge> set : edges.values()) {
+                    for (Iterator<Edge> i = set.iterator(); i.hasNext();) {
+                        final Edge e = i.next();
+                        if (e.getStart() == can || e.getEnd() == can) {
+                            i.remove();
+                        }
                     }
                 }
             }
+        } finally {
+            LockUtil.unlockAfterWrite(perCompetitorLocks.get(c));
         }
     }
 

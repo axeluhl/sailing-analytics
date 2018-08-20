@@ -1,0 +1,4 @@
+#!/bin/sh
+# Counts the lines per committer currently in the tree, for all files with type
+# .java, .MF, .properties, .swift and .xml
+git ls-tree -r --name-only HEAD -- | grep "\(\.java$\)\|\(\.MF$\)\|\(\.properties$\)\|\(\.swift$\)\|\(\.xml$\)" | sed -e 's/^/"/' -e 's/$/"/' | xargs -n1 git blame HEAD | recode ISO-8859-1..UTF-8 | sed -e 's/^.* (\(.*\) [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] [0-9][0-9]:[0-9][0-9]:[0-9][0-9] [+-][0-9][0-9][0-9][0-9]  *[0-9][0-9]*).*$/\1/' | sed -e 's/ *$//' | sort | uniq -c | sort -rn | awk 'BEGIN {s=0;} /.*/ {s=s+$1; print $0;} END { print "\n Sum: " s; }'

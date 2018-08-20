@@ -23,7 +23,6 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sailing.domain.common.confidence.impl.PositionAndTimePointWeigher;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.tracking.GPSFix;
@@ -41,6 +40,7 @@ import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.AbstractTimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.SerializableComparator;
 import com.sap.sse.concurrent.LockUtil;
@@ -689,7 +689,7 @@ public class TrackBasedEstimationWindTrackImpl extends VirtualWindTrackImpl {
         @Override
         public void statusChanged(TrackedRaceStatus newStatus, TrackedRaceStatus oldStatus) {
             if (oldStatus.getStatus() == TrackedRaceStatusEnum.LOADING) {
-                if (newStatus.getStatus() != TrackedRaceStatusEnum.LOADING) {
+                if (newStatus.getStatus() != TrackedRaceStatusEnum.LOADING && newStatus.getStatus() != TrackedRaceStatusEnum.REMOVED) {
                     suspended = false;
                 }
             } else if (newStatus.getStatus() == TrackedRaceStatusEnum.LOADING) {

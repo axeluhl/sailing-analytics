@@ -9,4 +9,6 @@ package com.sap.sailing.server;
  */
 public interface RacingEventServiceMXBean {
     public int getNumberOfLeaderboards();
+    public int getNumberOfTrackedRacesToRestore();
+    public int getNumberOfTrackedRacesRestored();
 }

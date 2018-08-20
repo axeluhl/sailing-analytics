@@ -2,15 +2,15 @@ package com.sap.sailing.android.shared.application;
 
 import java.lang.ref.WeakReference;
 
-import android.app.Application;
-import android.content.Context;
-import android.content.Intent;
-
 import com.sap.sailing.android.shared.R;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.logging.LifecycleLogger;
 import com.sap.sailing.android.shared.logging.LoggingExceptionHandler;
 import com.sap.sailing.android.shared.util.PrefUtils;
+
+import android.app.Application;
+import android.content.Context;
+import android.content.Intent;
 
 /**
  * <p>Registers an additional exception handler for uncaught exception to have some crash logging.</p>
@@ -19,7 +19,7 @@ import com.sap.sailing.android.shared.util.PrefUtils;
  */
 public class LoggableApplication extends Application {
 
-    private final static String TAG = LoggableApplication.class.getName();
+    private final static String TAG = LoggableApplication.class.getSimpleName();
     
     private static StringContext stringContext;
     

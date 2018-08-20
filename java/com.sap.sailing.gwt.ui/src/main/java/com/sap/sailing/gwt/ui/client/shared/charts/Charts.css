@@ -1,40 +1,45 @@
 .busyIndicatorStyle {
-	display: table-cell;
-	vertical-align: middle;
-	text-align: center;
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
 }
 
 .busyIndicatorImageStyle {
-	
-}
-
-.settingsButtonStyle {
-	position: absolute;
-	right: 0px;
-	bottom: 10px;
-	z-index: 1;
-	margin-top: 14px;
-	margin-right: 4px;
-	border: none;
-}
-
-.settingsButtonStyle:focus {
-	outline: 0 !important;
-}
-
-.settingsButtonStyle:hover {
-	border: 1px solid #ececec;
+    
 }
 
 .chartStyle {
-	position: absolute;
-	left: 0px;
-	top: 0px;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+}
+
+.toolbar {
+    position: absolute;
+    right: 4px;
+    bottom: 10px;
+    
+    text-align: right;
+    z-index: 1;
+}
+.toolbar>button {
+    margin-top: 8px;
+    width: 2em;
+    height: 2em;
+    background-color: transparent;
+    background-size: contain;
+    border: none;
+    display: block;
+}
+
+.toolbar>button:focus {
+    outline: 0 !important;
+}
+
+.toolbar>button:hover {
+    border: 1px solid #ececec;
 }
 
 @sprite .settingsButtonBackgroundImage {
-	gwt-image: "settingsButton";
-	width: 2em;
-	height: 2em;
-	background-size: contain;
+    gwt-image: "settingsButton";
 }

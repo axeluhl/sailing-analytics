@@ -10,6 +10,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
+import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
@@ -31,11 +32,9 @@ public class EventCreateDialog extends EventDialog {
         venueEntryField.setVisibleLength(35);
         venueEntryField.ensureDebugId("VenueTextBox");
         final Date now = new Date();
-        startDateBox = createDateTimeBox(now);
-        startDateBox.setFormat("dd/mm/yyyy hh:ii");
+        startDateBox = createDateTimeBox(now, Accuracy.MINUTES);
         startDateBox.ensureDebugId("StartDateTimeBox");
-        endDateBox = createDateTimeBox(now);
-        endDateBox.setFormat("dd/mm/yyyy hh:ii"); 
+        endDateBox = createDateTimeBox(now, Accuracy.MINUTES);
         endDateBox.ensureDebugId("EndDateTimeBox");
         isPublicCheckBox = createCheckbox("");
         isPublicCheckBox.setValue(false);

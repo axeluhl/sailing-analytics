@@ -1,6 +1,6 @@
 package com.sap.sailing.android.tracking.app.valueobjects;
 
-import com.sap.sailing.domain.racelogtracking.DeviceIdentifier;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 
 public abstract class UrlData {
     public String uriStr;

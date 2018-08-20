@@ -34,8 +34,13 @@ public class RecordCompetitorSensorFixTrack extends AbstractRaceOperation<Void> 
 
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
-        DynamicTrackedRace trackedRace = (DynamicTrackedRace) toState.getTrackedRace(getRaceIdentifier());
-        trackedRace.addSensorTrack(track.getTrackedItem(), track.getTrackName(), track);
+        // it's fair to not wait for the tracked race to arrive here because we're receiving a replication operation
+        // and the synchronous race-creating operation must have been processed synchronously before this operation
+        // could even have been received
+        DynamicTrackedRace trackedRace = (DynamicTrackedRace) toState.getExistingTrackedRace(getRaceIdentifier());
+	if (trackedRace != null) {
+            trackedRace.addSensorTrack(track.getTrackedItem(), track.getTrackName(), track);
+	}
         return null;
     }
 

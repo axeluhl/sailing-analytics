@@ -139,7 +139,7 @@ body {
 	width: 2.666666666666667em;
 	height: 2.666666666666667em;
  	background-color: #9f9f9f;
-  	background-image: url("images/home/reload.png");
+  	background-image: resourceUrl("reload");
 	background-size: 40%;
 	background-repeat: no-repeat;
 	background-position: center center;
@@ -156,7 +156,7 @@ body {
   height: 2.666666666666667em;
  
   background-color: #9f9f9f;
-  background-image: url("images/home/settings.png");
+  background-image: resourceUrl("settings");
   background-size: 40%;
   background-repeat: no-repeat;
   background-position: center center;

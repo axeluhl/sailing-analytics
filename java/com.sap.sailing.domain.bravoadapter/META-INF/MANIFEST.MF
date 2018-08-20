@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Bravoadapter
+Bundle-SymbolicName: com.sap.sailing.domain.bravoadapter
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: org.osgi.framework;version="1.8.0"
+Require-Bundle: com.sap.sailing.domain,
+ com.sap.sailing.server.trackfiles,
+ com.sap.sailing.domain.common,
+ com.sap.sse.common,
+ com.sap.sailing.server.gateway
+Bundle-Activator: com.sap.sailing.domain.bravoadapter.impl.Activator
+Automatic-Module-Name: com.sap.sailing.domain.bravoadapter

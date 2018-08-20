@@ -3,6 +3,7 @@
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderResources" />
+    <ui:with field="shr" type="com.sap.sailing.gwt.home.shared.resources.SharedHomeResources" />
 	<g:HTMLPanel>
 		<a style="display:block;" ui:field="headerMainUi">
 			<div class="{local_res.css.sectionheader_item}" ui:field="headerLeftUi">
@@ -17,8 +18,7 @@
 			</div>
 			<div class="{local_res.css.sectionheader_item} {local_res.css.sectionheader_itemright}" style="display:none;" ui:field="headerRightUi">
 				<div class="{local_res.css.sectionheader_item_infotext}" style="display:none;" ui:field="infoTextUi"></div>
-				<img src="images/mobile/arrow-grey-right.png" alt="" class="{local_res.css.sectionheader_item_arrow}"
-					style="display:none;" ui:field="actionArrowUi"></img>
+				<div class="{local_res.css.sectionheader_item_arrow}" style="display:none;" ui:field="actionArrowUi"></div>
 				<g:SimplePanel ui:field="filterSelectContainerUi"></g:SimplePanel>
 			</div>
 		</a>

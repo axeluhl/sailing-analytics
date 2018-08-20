@@ -31,8 +31,7 @@ public class GetCompetitorSuggestionAction implements SailingAction<CompetitorSu
     private final AbstractListFilter<Competitor> competitorFilter = new AbstractListFilter<Competitor>() {
         @Override
         public Iterable<String> getStrings(Competitor competitor) {
-            if (competitor.getBoat() == null) return Arrays.asList(competitor.getName());
-            return Arrays.asList(competitor.getBoat().getSailID(), competitor.getName());
+            return Arrays.asList(competitor.getName());
         }
     };
     
@@ -64,7 +63,7 @@ public class GetCompetitorSuggestionAction implements SailingAction<CompetitorSu
     
     @GwtIncompatible
     private Iterable<Competitor> getFilteredCompetitors(SailingDispatchContext ctx) {
-        Iterable<? extends Competitor> allCompetitors = ctx.getRacingEventService().getCompetitorStore().getCompetitors();
+        Iterable<? extends Competitor> allCompetitors = ctx.getRacingEventService().getCompetitorAndBoatStore().getAllCompetitors();
         return competitorFilter.applyFilter(queryTokens, Util.addAll(allCompetitors, new ArrayList<Competitor>())); 
     }
     

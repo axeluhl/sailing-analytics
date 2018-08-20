@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Datamining_provider
+Bundle-SymbolicName: com.sap.sailing.datamining.provider
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: com.sap.sse.datamining,
+ com.sap.sailing.server,
+ com.sap.sse.common
+Import-Package: org.osgi.framework;version="1.8.0",
+ org.osgi.util.tracker
+Export-Package: com.sap.sailing.datamining.provider
+Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: com.sap.sailing.datamining.provider

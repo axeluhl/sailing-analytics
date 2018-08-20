@@ -57,7 +57,7 @@ public class SeriesWithFleetsDefaultCreateDialog extends SeriesWithFleetsCreateD
         fleetListComposite.addValueChangeHandler(new ValueChangeHandler<Iterable<FleetDTO>>() {
             @Override
             public void onValueChange(ValueChangeEvent<Iterable<FleetDTO>> event) {
-                validate();
+                validateAndUpdate();
             }
         });
     }

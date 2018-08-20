@@ -31,6 +31,7 @@ import com.sap.sailing.domain.regattalog.impl.EmptyRegattaLogStore;
 import com.sap.sailing.domain.test.AbstractTracTracLiveTest;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
@@ -89,13 +90,14 @@ public class TrackRaceReplicationTest extends AbstractServerReplicationTest {
                 .createTrackingConnectivityParameters(paramURL, liveURI, storedURI, courseDesignUpdateURI,
                         startOfTracking, endOfTracking, /* delayToLiveInMillis */
                         0l, /* offsetToStartTimeOfSimulatedRace */null, /*ignoreTracTracMarkPassings*/ false, EmptyRaceLogStore.INSTANCE,
-                        EmptyRegattaLogStore.INSTANCE, tracTracUsername, tracTracPassword, "", "");
+                        EmptyRegattaLogStore.INSTANCE, tracTracUsername, tracTracPassword, "", "", /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ false,
+                        /* preferReplayIfAvailable */ false, /* timeoutInMillis */ (int) RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS);
     }
 
     private void startTracking() throws Exception, InterruptedException {
         startTrackingOnMaster();
         waitForTrackRaceReplicationTrigger();
-        raceIdentifier = racesHandle.getRaceTracker().getRaceIdentifiers().iterator().next();
+        raceIdentifier = racesHandle.getRaceTracker().getRaceIdentifier();
         masterTrackedRace = master.getTrackedRace(raceIdentifier);
     }
 

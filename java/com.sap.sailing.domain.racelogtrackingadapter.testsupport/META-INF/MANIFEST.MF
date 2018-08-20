@@ -15,7 +15,8 @@ Require-Bundle: com.sap.sailing.domain.shared.android,
  org.json.simple;bundle-version="1.1.0",
  org.mockito.mockito-core;bundle-version="1.9.5",
  org.hamcrest;bundle-version="1.1.0",
- org.junit4;bundle-version="4.8.2",
+ org.junit;bundle-version="4.8.2",
  com.sap.sse.common,
  com.sap.sailing.server.gateway.serialization.shared.android
 Export-Package: com.sap.sailing.domain.racelog.tracking.test.mock
+Automatic-Module-Name: com.sap.sailing.domain.racelogtrackingadapter.testsupport

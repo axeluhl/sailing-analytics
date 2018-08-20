@@ -35,7 +35,6 @@ import com.sap.sse.security.ui.authentication.AuthenticationClientFactoryImpl;
 import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.AuthenticationManagerImpl;
 import com.sap.sse.security.ui.authentication.AuthenticationPlaceManagementController;
-import com.sap.sse.security.ui.authentication.WrappedPlaceManagementController;
 import com.sap.sse.security.ui.authentication.info.LoggedInUserInfoPlace;
 import com.sap.sse.security.ui.authentication.view.FlyoutAuthenticationPresenter;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -43,7 +42,7 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class TabletAndDesktopApplicationClientFactory extends AbstractApplicationClientFactory<DesktopApplicationTopLevelView> implements DesktopClientFactory {
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
-    private final WrappedPlaceManagementController userManagementWizardController;
+    private final AuthenticationPlaceManagementController userManagementWizardController;
     private final AuthenticationManager authenticationManager;
     
     public TabletAndDesktopApplicationClientFactory(boolean isStandaloneServer) {
@@ -78,6 +77,8 @@ public class TabletAndDesktopApplicationClientFactory extends AbstractApplicatio
 
         new FlyoutAuthenticationPresenter(userManagementDisplay, getTopLevelView().getAuthenticationMenuView(),
                 userManagementWizardController, eventBus, authenticationManager.getAuthenticationContext());
+
+        new DesktopLoginHintPopup(authenticationManager, placesNavigator);
     }
     
     @Override

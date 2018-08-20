@@ -21,21 +21,17 @@ public class SensorFixTrackImpl<ItemType extends WithID & Serializable, FixT ext
 
     private static final long serialVersionUID = 6383421895429843002L;
     
-    private final Iterable<String> valueNames;
     private final String trackName;
     private final TrackListenerCollection<ItemType, FixT, SensorFixTrackListener<ItemType, FixT>> listeners;
 
     /**
      * @param trackedItem the item this track is mapped to
      * @param trackName the name of the track by which it can be obtained from the {@link TrackedRace}.
-     * @param valueNames the name of the values that can be obtained by fixes contained in the track
      * @param nameForReadWriteLock the name to use for the lock object that is used internally
      */
-    public SensorFixTrackImpl(ItemType trackedItem, String trackName, Iterable<String> valueNames,
-            String nameForReadWriteLock) {
+    public SensorFixTrackImpl(ItemType trackedItem, String trackName, String nameForReadWriteLock) {
         super(trackedItem, nameForReadWriteLock);
         this.trackName = trackName;
-        this.valueNames = valueNames;
         this.listeners = new TrackListenerCollection<>();
     }
     
@@ -55,11 +51,6 @@ public class SensorFixTrackImpl<ItemType extends WithID & Serializable, FixT ext
     
     protected void notifyListeners(Consumer<SensorFixTrackListener<ItemType, FixT>> notification) {
         listeners.getListeners().forEach(notification);
-    }
-
-    @Override
-    public Iterable<String> getValueNames() {
-        return valueNames;
     }
 
     @Override

@@ -4,8 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.UUID;
 
-import junit.framework.Assert;
-
 import org.json.simple.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +41,10 @@ import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerialize
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogCourseDesignChangedEventSerializer;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.AbstractColor;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+
+import junit.framework.Assert;
 
 public class RaceLogCourseDesignChangedEventSerializerTest {
 
@@ -77,8 +78,8 @@ public class RaceLogCourseDesignChangedEventSerializerTest {
         assertEquals(event.getPassId(), deserializedEvent.getPassId());
         assertEquals(event.getLogicalTimePoint(), deserializedEvent.getLogicalTimePoint());
         assertEquals(event.getCourseDesignerMode(), deserializedEvent.getCourseDesignerMode());
-        assertEquals(0, Util.size(event.getInvolvedBoats()));
-        assertEquals(0, Util.size(deserializedEvent.getInvolvedBoats()));
+        assertEquals(0, Util.size(event.getInvolvedCompetitors()));
+        assertEquals(0, Util.size(deserializedEvent.getInvolvedCompetitors()));
 
         compareCourseData(event.getCourseDesign(), deserializedEvent.getCourseDesign());
     }
@@ -87,9 +88,9 @@ public class RaceLogCourseDesignChangedEventSerializerTest {
         CourseBase course = new CourseDataImpl("Test Course");
 
         course.addWaypoint(0, new WaypointImpl(new ControlPointWithTwoMarksImpl(UUID.randomUUID(), new MarkImpl(UUID.randomUUID(), "Black",
-                MarkType.BUOY, "black", "round", "circle"), new MarkImpl(UUID.randomUUID(), "Green", MarkType.BUOY,
-                "green", "round", "circle"), "Upper gate")));
-        course.addWaypoint(1, new WaypointImpl(new MarkImpl(UUID.randomUUID(), "White", MarkType.BUOY, "white",
+                MarkType.BUOY, AbstractColor.getCssColor("black"), "round", "circle"), new MarkImpl(UUID.randomUUID(), "Green", MarkType.BUOY,
+                        AbstractColor.getCssColor("green"), "round", "circle"), "Upper gate")));
+        course.addWaypoint(1, new WaypointImpl(new MarkImpl(UUID.randomUUID(), "White", MarkType.BUOY, AbstractColor.getCssColor("white"),
                 "conical", "bold"), PassingInstruction.Port));
 
         return course;

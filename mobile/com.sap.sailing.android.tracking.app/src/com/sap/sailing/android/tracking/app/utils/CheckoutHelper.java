@@ -6,8 +6,7 @@ import java.net.URL;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.net.Uri;
-
+import com.sap.sailing.android.shared.data.CheckinUrlInfo;
 import com.sap.sailing.android.shared.data.http.HttpJsonPostRequest;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.activities.AbstractBaseActivity;
@@ -15,6 +14,8 @@ import com.sap.sailing.android.shared.util.NetworkHelper;
 import com.sap.sailing.android.shared.util.UniqueDeviceUuid;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
+
+import android.net.Uri;
 
 public class CheckoutHelper {
     private static String TAG = CheckoutHelper.class.getName();
@@ -49,8 +50,7 @@ public class CheckoutHelper {
         }
     }
 
-    public void checkoutMark(AbstractBaseActivity activity, String leaderboardName, String eventServer, String markId,
-        NetworkHelper.NetworkHelperSuccessListener successListener, NetworkHelper.NetworkHelperFailureListener failureListener) {
+    public void checkoutMark(AbstractBaseActivity activity, String leaderboardName, String eventServer, String id, int type, NetworkHelper.NetworkHelperSuccessListener successListener, NetworkHelper.NetworkHelperFailureListener failureListener) {
         AppPreferences prefs = new AppPreferences(activity);
         final String checkoutURLStr = eventServer
             + prefs.getServerCheckoutPath().replace("{leaderboard-name}", Uri.encode(leaderboardName));
@@ -59,7 +59,11 @@ public class CheckoutHelper {
 
         JSONObject checkoutData = new JSONObject();
         try {
-            checkoutData.put(DeviceMappingConstants.JSON_MARK_ID_AS_STRING, markId);
+            if (CheckinUrlInfo.TYPE_MARK == type) {
+                checkoutData.put(DeviceMappingConstants.JSON_MARK_ID_AS_STRING, id);
+            } else {
+                checkoutData.put(DeviceMappingConstants.JSON_BOAT_ID_AS_STRING, id);
+            }
             checkoutData.put(DeviceMappingConstants.JSON_DEVICE_UUID, UniqueDeviceUuid.getUniqueId(activity));
             checkoutData.put(DeviceMappingConstants.JSON_TO_MILLIS, System.currentTimeMillis());
         } catch (JSONException e) {

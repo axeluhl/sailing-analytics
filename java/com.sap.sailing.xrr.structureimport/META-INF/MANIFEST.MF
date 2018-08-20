@@ -9,16 +9,18 @@ Export-Package: .,
  com.sap.sailing.xrr.structureimport.buildstructure;uses:="com.sap.sailing.xrr.resultimport.schema",
  com.sapsailing.xrr.structureimport.eventimport
 Bundle-ActivationPolicy: lazy
-Require-Bundle: com.google.gwt.user;bundle-version="2.8.0";resolution:=optional,
- com.google.gwt.servlet;bundle-version="2.8.0",
+Require-Bundle: com.google.gwt.user;bundle-version="2.8.2";resolution:=optional,
+ com.google.gwt.servlet;bundle-version="2.8.2",
  com.sap.sailing.domain.common;bundle-version="1.0.0",
  com.sap.sailing.domain,
  com.sap.sailing.xrr.schema;bundle-version="1.0.0",
  com.sap.sailing.xrr.resultimport;bundle-version="1.0.0",
  com.sap.sse.common;bundle-version="1.0.0",
- com.sap.sailing.resultimport;bundle-version="1.0.0"
+ com.sap.sailing.resultimport;bundle-version="1.0.0",
+ com.sap.sse
 Import-Package: com.sap.sailing.server.operationaltransformation,
  com.sap.sailing.xrr.schema,
  org.json.simple,
  org.json.simple.parser,
  org.osgi.framework;version="1.7.0"
+Automatic-Module-Name: com.sap.sailing.xrr.structureimport

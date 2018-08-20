@@ -9,24 +9,31 @@
 import UIKit
 import AVFoundation
 
+protocol ScanViewControllerDelegate: class {
+    
+    func scanViewController(_ controller: ScanViewController, didCheckIn checkIn: CheckIn)
+    
+}
+
 class ScanViewController: UIViewController {
     
-    weak var homeViewController: HomeViewController?
+    weak var coreDataManager: CoreDataManager!
+    weak var delegate: ScanViewControllerDelegate?
     
     @IBOutlet weak var previewView: UIView!
     @IBOutlet weak var targetImageView: UIImageView!
     
-    private var scanSession: AVCaptureSession?
-    private var scanOutput: AVCaptureMetadataOutput?
-    private var scanPreviewLayer: AVCaptureVideoPreviewLayer?
-    private var scanError: NSError?
+    fileprivate var scanSession: AVCaptureSession?
+    fileprivate var scanOutput: AVCaptureMetadataOutput?
+    fileprivate var scanPreviewLayer: AVCaptureVideoPreviewLayer?
+    fileprivate var scanError: NSError?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         startScanning()
     }
@@ -38,34 +45,37 @@ class ScanViewController: UIViewController {
     
     // MARK: - Layout
     
-    private func layout() {
+    fileprivate func layout() {
         layoutPreviewLayer()
     }
     
-    private func layoutPreviewLayer() {
+    fileprivate func layoutPreviewLayer() {
         guard let previewLayer = scanPreviewLayer else { return }
         previewLayer.frame = previewView.bounds
-        previewLayer.position = CGPointMake(CGRectGetMidX(previewView.bounds), CGRectGetMidY(previewView.bounds))
+        previewLayer.position = CGPoint(
+            x: previewView.bounds.midX,
+            y: previewView.bounds.midY
+        )
     }
     
     // MARK: - Setup
     
-    private func setup() {
+    fileprivate func setup() {
         setupLocalization()
         setupScanning()
     }
     
-    private func setupLocalization() {
+    fileprivate func setupLocalization() {
         navigationItem.title = Translation.ScanView.Title.String
     }
     
-    private func setupScanning() {
+    fileprivate func setupScanning() {
         do {
             let session = AVCaptureSession()
             let output = AVCaptureMetadataOutput()
-            let device = AVCaptureDevice.defaultDeviceWithMediaType(AVMediaTypeVideo)
+            let device = AVCaptureDevice.defaultDevice(withMediaType: AVMediaTypeVideo)
             let input = try AVCaptureDeviceInput(device: device);
-            output.setMetadataObjectsDelegate(self, queue: dispatch_get_main_queue())
+            output.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
             session.canSetSessionPreset(AVCaptureSessionPresetHigh)
             if session.canAddInput(input) {
                 session.addInput(input)
@@ -74,15 +84,19 @@ class ScanViewController: UIViewController {
                 session.addOutput(output)
             }
             output.metadataObjectTypes = [AVMetadataObjectTypeQRCode]
-            let previewLayer = AVCaptureVideoPreviewLayer(session: session)
-            previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill
-            previewLayer.connection.videoOrientation = videoOrientation(forInterfaceOrientation: UIApplication.sharedApplication().statusBarOrientation)
-            previewLayer.frame = previewView.bounds
-            previewLayer.position = CGPointMake(CGRectGetMidX(previewView.bounds), CGRectGetMidY(previewView.bounds))
-            previewView.layer.addSublayer(previewLayer)
+            if let previewLayer = AVCaptureVideoPreviewLayer(session: session) {
+                previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill
+                previewLayer.connection.videoOrientation = videoOrientation(forInterfaceOrientation: UIApplication.shared.statusBarOrientation)
+                previewLayer.frame = previewView.bounds
+                previewLayer.position = CGPoint(
+                    x: previewView.bounds.midX,
+                    y: previewView.bounds.midY
+                )
+                previewView.layer.addSublayer(previewLayer)
+                scanPreviewLayer = previewLayer
+            }
             scanSession = session
             scanOutput = output
-            scanPreviewLayer = previewLayer
         } catch let error as NSError {
             scanError = error
         }
@@ -90,71 +104,59 @@ class ScanViewController: UIViewController {
     
     // MARK: - Scanning
     
-    private func startScanning() {
-        targetImageView.image = UIImage(named: "scan_white")
-        if let error = scanError {
-            let alertController = UIAlertController(title: error.localizedDescription,
-                                                    message: error.localizedFailureReason,
-                                                    preferredStyle: .Alert
+    fileprivate func startScanning() {
+        guard scanError == nil else {
+            let error = scanError!
+            let alertController = UIAlertController(
+                title: error.localizedDescription,
+                message: error.localizedFailureReason,
+                preferredStyle: .alert
             )
-            let settingsAction = UIAlertAction(title: Translation.Common.Settings.String, style: .Default) { (action) in
-                UIApplication.sharedApplication().openURL(NSURL(string: UIApplicationOpenSettingsURLString) ?? NSURL())
-                self.navigationController?.popViewControllerAnimated(true)
+            let settingsAction = UIAlertAction(title: Translation.Common.Settings.String, style: .default) { [weak self] action in
+                if let settingsURL = URL(string: UIApplicationOpenSettingsURLString) {
+                    UIApplication.shared.openURL(settingsURL)
+                }
+                _ = self?.navigationController?.popViewController(animated: true)
             }
-            let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .Cancel) { (action) in
-                self.navigationController?.popViewControllerAnimated(true)
+            let cancelAction = UIAlertAction(title: Translation.Common.Cancel.String, style: .cancel) { [weak self] action in
+                _ = self?.navigationController?.popViewController(animated: true)
             }
             alertController.addAction(settingsAction)
             alertController.addAction(cancelAction)
-            presentViewController(alertController, animated: true, completion: nil)
-        } else {
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), {
-                self.scanSession?.startRunning()
-            })
+            present(alertController, animated: true, completion: nil)
+            return
         }
+        targetImageView.image = UIImage(named: "scan_white")
+        scanSession?.startRunning()
     }
     
-    private func stopScanning() {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), {
-            self.scanSession?.stopRunning()
-        })
+    func stopScanning() {
         targetImageView.image = UIImage(named: "scan_green")
+        scanSession?.stopRunning()
     }
     
     // MARK: - UIViewControllerDelegate
     
-    override func willRotateToInterfaceOrientation(toInterfaceOrientation: UIInterfaceOrientation, duration: NSTimeInterval) {
+    override func willRotate(to toInterfaceOrientation: UIInterfaceOrientation, duration: TimeInterval) {
         scanPreviewLayer?.connection.videoOrientation = videoOrientation(forInterfaceOrientation: toInterfaceOrientation)
     }
     
     // MARK: - Properties
     
-    private lazy var checkInController: CheckInController = {
-        let checkInController = CheckInController()
-        checkInController.delegate = self
-        return checkInController
+    fileprivate lazy var regattaCheckInController: RegattaCheckInController = {
+        return RegattaCheckInController(coreDataManager: self.coreDataManager)
     }()
     
     // MARK: - Helper
     
-    private func videoOrientation(forInterfaceOrientation orientation: UIInterfaceOrientation) -> AVCaptureVideoOrientation {
+    fileprivate func videoOrientation(forInterfaceOrientation orientation: UIInterfaceOrientation) -> AVCaptureVideoOrientation {
         switch orientation {
-        case .LandscapeLeft: return .LandscapeLeft
-        case .LandscapeRight: return .LandscapeRight
-        case .Portrait: return .Portrait
-        case .PortraitUpsideDown: return .PortraitUpsideDown
-        case .Unknown: return .Portrait
+        case .landscapeLeft: return .landscapeLeft
+        case .landscapeRight: return .landscapeRight
+        case .portrait: return .portrait
+        case .portraitUpsideDown: return .portraitUpsideDown
+        case .unknown: return .portrait
         }
-    }
-    
-}
-
-// MARK: - CheckInControllerDelegate
-
-extension ScanViewController: CheckInControllerDelegate {
-    
-    func showCheckInAlert(sender: CheckInController, alertController: UIAlertController) {
-        presentViewController(alertController, animated: true, completion: nil)
     }
     
 }
@@ -163,50 +165,58 @@ extension ScanViewController: CheckInControllerDelegate {
 
 extension ScanViewController: AVCaptureMetadataOutputObjectsDelegate {
     
-    func captureOutput(captureOutput: AVCaptureOutput!,
-                       didOutputMetadataObjects metadataObjects: [AnyObject]!,
-                                                fromConnection connection: AVCaptureConnection!)
+    func captureOutput(
+        _ captureOutput: AVCaptureOutput!,
+        didOutputMetadataObjects metadataObjects: [Any]!,
+        from connection: AVCaptureConnection!)
     {
         if metadataObjects.count > 0 {
+            performSelector(onMainThread: #selector(stopScanning), with: nil, waitUntilDone: false)
             let metadataObject = metadataObjects[0] as! AVMetadataMachineReadableCodeObject
-            if let regattaData = RegattaData(urlString: metadataObject.stringValue) {
-                stopScanning()
-                dispatch_async(dispatch_get_main_queue(), {
-                    self.captureOutputSuccess(regattaData)
+            if let checkInData = CheckInData(urlString: metadataObject.stringValue) {
+                DispatchQueue.main.async(execute: {
+                    self.captureOutputSuccess(checkInData: checkInData)
                 })
             } else {
-                dispatch_async(dispatch_get_main_queue(), {
+                DispatchQueue.main.async(execute: {
                     self.captureOutputFailure()
                 })
             }
         }
     }
     
-    private func captureOutputSuccess(regattaData: RegattaData) {
-        checkInController.checkIn(regattaData, completion: { (withSuccess) in
-            if withSuccess {
-                self.homeViewController?.selectedRegatta = CoreDataManager.sharedManager.fetchRegatta(regattaData)
-                self.navigationController?.popViewControllerAnimated(true)
-            } else {
-                self.startScanning()
-            }
-        })
+    fileprivate func captureOutputSuccess(checkInData: CheckInData) {
+        checkIn(withCheckInData: checkInData)
     }
     
-    private func captureOutputFailure() {
-        showIncorrectCodeAlert()
-    }
-    
-    // MARK: - Alerts
-    
-    private func showIncorrectCodeAlert() {
-        let alertController = UIAlertController(title: Translation.Common.Error.String,
-                                                message: Translation.ScanView.IncorrectCodeAlert.Message.String,
-                                                preferredStyle: .Alert
-        )
-        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .Default, handler: nil)
+    fileprivate func captureOutputFailure() {
+        let title = Translation.Common.Error.String
+        let message = Translation.ScanView.IncorrectCodeAlert.Message.String
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: Translation.Common.OK.String, style: .default) { [weak self] action in
+            self?.startScanning()
+        }
         alertController.addAction(okAction)
-        presentViewController(alertController, animated: true, completion: nil)
+        present(alertController, animated: true, completion: nil)
+    }
+    
+    // MARK: - CheckIn
+    
+    fileprivate func checkIn(withCheckInData checkInData: CheckInData) {
+        regattaCheckInController.checkInWithViewController(self, checkInData: checkInData, success: { [weak self] (checkIn) in
+            self?.checkInSuccess(checkIn: checkIn)
+        }) { [weak self] (error) in
+            self?.checkInFailure(error: error)
+        }
+    }
+    
+    fileprivate func checkInSuccess(checkIn: CheckIn) {
+        _ = navigationController?.popViewController(animated: true)
+        delegate?.scanViewController(self, didCheckIn: checkIn)
+    }
+    
+    fileprivate func checkInFailure(error: Error) {
+        startScanning()
     }
     
 }

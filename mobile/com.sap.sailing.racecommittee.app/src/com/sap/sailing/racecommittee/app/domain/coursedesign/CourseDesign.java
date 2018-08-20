@@ -2,8 +2,8 @@ package com.sap.sailing.racecommittee.app.domain.coursedesign;
 
 import java.util.Set;
 
-import com.sap.sailing.domain.common.Bearing;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sse.common.Bearing;
 
 public interface CourseDesign {
     Position getStartBoatPosition();

@@ -20,7 +20,7 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
@@ -85,12 +85,12 @@ public class SearchServiceTest {
     private Venue flensburg;
     private Event pfingstbusch;
     private Regatta pfingstbusch29er;
-    private Competitor hassoPlattner;
-    private Competitor alexanderRies;
-    private Competitor antonKoch;
-    private Competitor tobiasSchadewaldt;
-    private Competitor philippBuhl;
-    private Competitor dennisGehrlein;
+    private CompetitorWithBoat hassoPlattner;
+    private CompetitorWithBoat alexanderRies;
+    private CompetitorWithBoat antonKoch;
+    private CompetitorWithBoat tobiasSchadewaldt;
+    private CompetitorWithBoat philippBuhl;
+    private CompetitorWithBoat dennisGehrlein;
     private Regatta pfingstbusch470;
     private Regatta aalRegatta;
     private DynamicTrackedRace pfingstbusch29erTrackedR1;
@@ -139,7 +139,7 @@ public class SearchServiceTest {
                 /* medal */false, /* fleetsCanRunInParallel */ true, /* startsWithZero */false, /* firstColumnIsNonDiscardableCarryForward */false,
                 /* discardingThresholds */null, /* hasSplitFleetContiguousScoring */false, /* maximumNumberOfDiscards */ null));
         pfingstbusch29er = server.apply(new AddSpecificRegatta(RegattaImpl.getDefaultName("Pfingstbusch", "29er"), "29er", 
-                /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(),
+                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(),
                 new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
                 true, new LowPoint(), kielAlpha.getId(), /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false, RankingMetrics.ONE_DESIGN));
         server.apply(new AddColumnToSeries(pfingstbusch29er.getRegattaIdentifier(), "Default", "R1"));
@@ -148,7 +148,8 @@ public class SearchServiceTest {
         RegattaLeaderboard pfingstbusch29erLeaderboard = server.apply(new CreateRegattaLeaderboard(pfingstbusch29er.getRegattaIdentifier(),
                 /* leaderboardDisplayName */ null, /* discardThresholds */ new int[0]));
         pfingstbusch470 = server.apply(new AddSpecificRegatta(RegattaImpl.getDefaultName("Pfingstbusch", "470"), "470", 
-                /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(), new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
+                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null,
+                UUID.randomUUID(), new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
                 true, new LowPoint(), kielBravo.getId(), /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false, RankingMetrics.ONE_DESIGN));
         server.apply(new AddColumnToSeries(pfingstbusch470.getRegattaIdentifier(), "Default", "R1"));
         server.apply(new AddColumnToSeries(pfingstbusch470.getRegattaIdentifier(), "Default", "R2"));
@@ -170,7 +171,7 @@ public class SearchServiceTest {
         final CourseAreaImpl flensburgStandard = new CourseAreaImpl("Standard", UUID.randomUUID());
         flensburg.addCourseArea(flensburgStandard);
         aalRegatta = server.apply(new AddSpecificRegatta(RegattaImpl.getDefaultName("Aalregatta", "ORC"), "ORC", 
-                /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(),
+                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(),
                 new RegattaCreationParametersDTO(seriesCreationParams), /* persistent */
                 true, new LowPoint(), flensburgStandard.getId(), /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false, RankingMetrics.ONE_DESIGN));
         server.apply(new AddColumnToSeries(aalRegatta.getRegattaIdentifier(), "Default", "R1"));
@@ -181,18 +182,18 @@ public class SearchServiceTest {
                 /* displayGroupsInReverseOrder */ false, Collections.singletonList(RegattaImpl.getDefaultName("Aalregatta", "ORC")),
                 new int[0], /* overallLeaderboardScoringSchemeType */ null));
         server.apply(new AddLeaderboardGroupToEvent(aalEvent.getId(), aalLeaderboardGroup.getId()));
-        hassoPlattner = AbstractTracTracLiveTest.createCompetitor("Hasso Plattner");
-        alexanderRies = AbstractTracTracLiveTest.createCompetitor("Alexander Ries");
-        antonKoch = AbstractTracTracLiveTest.createCompetitor("Anton Koch");
-        tobiasSchadewaldt = AbstractTracTracLiveTest.createCompetitor("Tobias Schadewaldt");
-        philippBuhl = AbstractTracTracLiveTest.createCompetitor("Philipp Buhl");
-        dennisGehrlein = AbstractTracTracLiveTest.createCompetitor("Dennis Gehrlein");
+        hassoPlattner = AbstractTracTracLiveTest.createCompetitorWithBoat("Hasso Plattner");
+        alexanderRies = AbstractTracTracLiveTest.createCompetitorWithBoat("Alexander Ries");
+        antonKoch = AbstractTracTracLiveTest.createCompetitorWithBoat("Anton Koch");
+        tobiasSchadewaldt = AbstractTracTracLiveTest.createCompetitorWithBoat("Tobias Schadewaldt");
+        philippBuhl = AbstractTracTracLiveTest.createCompetitorWithBoat("Philipp Buhl");
+        dennisGehrlein = AbstractTracTracLiveTest.createCompetitorWithBoat("Dennis Gehrlein");
         final RaceDefinitionImpl pfingstbusch29erR1 = new RaceDefinitionImpl("R1", new CourseImpl("up/down", Collections.<Waypoint>emptyList()), pfingstbusch29er.getBoatClass(),
-                Arrays.asList(new Competitor[] { alexanderRies, tobiasSchadewaldt }));
+                AbstractTracTracLiveTest.createCompetitorAndBoatsMap(alexanderRies, tobiasSchadewaldt));
         final RaceDefinitionImpl pfingstbusch29erR2 = new RaceDefinitionImpl("R2", new CourseImpl("up/down", Collections.<Waypoint>emptyList()), pfingstbusch29er.getBoatClass(),
-                Arrays.asList(new Competitor[] { alexanderRies, tobiasSchadewaldt }));
+                AbstractTracTracLiveTest.createCompetitorAndBoatsMap(alexanderRies, tobiasSchadewaldt));
         final RaceDefinitionImpl pfingstbusch29erR3 = new RaceDefinitionImpl("R3", new CourseImpl("up/down", Collections.<Waypoint>emptyList()), pfingstbusch29er.getBoatClass(),
-                Arrays.asList(new Competitor[] { alexanderRies, tobiasSchadewaldt }));
+                AbstractTracTracLiveTest.createCompetitorAndBoatsMap(alexanderRies, tobiasSchadewaldt));
         server.apply(new AddRaceDefinition(pfingstbusch29er.getRegattaIdentifier(), pfingstbusch29erR1));
         server.apply(new AddRaceDefinition(pfingstbusch29er.getRegattaIdentifier(), pfingstbusch29erR2));
         server.apply(new AddRaceDefinition(pfingstbusch29er.getRegattaIdentifier(), pfingstbusch29erR3));
@@ -206,9 +207,9 @@ public class SearchServiceTest {
         pfingstbusch29erLeaderboard.getRaceColumnByName("R3").setTrackedRace(pfingstbusch29erLeaderboard.getRaceColumnByName("R3").getFleetByName("Default"), pfingstbusch29erTrackedR3);
 
         final RaceDefinitionImpl pfingstbush470R1 = new RaceDefinitionImpl("R1", new CourseImpl("up/down", Collections.<Waypoint>emptyList()), pfingstbusch470.getBoatClass(),
-                Arrays.asList(new Competitor[] { philippBuhl, antonKoch }));
+                AbstractTracTracLiveTest.createCompetitorAndBoatsMap(philippBuhl, antonKoch));
         final RaceDefinitionImpl pfingstbush470R2 = new RaceDefinitionImpl("R2", new CourseImpl("up/down", Collections.<Waypoint>emptyList()), pfingstbusch470.getBoatClass(),
-                Arrays.asList(new Competitor[] { philippBuhl, antonKoch }));
+                AbstractTracTracLiveTest.createCompetitorAndBoatsMap(philippBuhl, antonKoch));
         server.apply(new AddRaceDefinition(pfingstbusch470.getRegattaIdentifier(), pfingstbush470R1));
         server.apply(new AddRaceDefinition(pfingstbusch470.getRegattaIdentifier(), pfingstbush470R2));
         // track only R1 and R2
@@ -221,9 +222,9 @@ public class SearchServiceTest {
         pfingstbusch470Leaderboard.getRaceColumnByName("R2").setTrackedRace(pfingstbusch470Leaderboard.getRaceColumnByName("R2").getFleetByName("Default"), pfingstbusch470TrackedR2);
 
         final RaceDefinitionImpl aalOrcR1 = new RaceDefinitionImpl("R1", new CourseImpl("up/down", Collections.<Waypoint>emptyList()), aalRegatta.getBoatClass(),
-                Arrays.asList(new Competitor[] { hassoPlattner, dennisGehrlein, philippBuhl }));
+                AbstractTracTracLiveTest.createCompetitorAndBoatsMap(hassoPlattner, dennisGehrlein, philippBuhl));
         final RaceDefinitionImpl aalOrcR2 = new RaceDefinitionImpl("R2", new CourseImpl("up/down", Collections.<Waypoint>emptyList()), aalRegatta.getBoatClass(),
-                Arrays.asList(new Competitor[] { hassoPlattner, dennisGehrlein, philippBuhl }));
+                AbstractTracTracLiveTest.createCompetitorAndBoatsMap(hassoPlattner, dennisGehrlein, philippBuhl));
         server.apply(new AddRaceDefinition(aalRegatta.getRegattaIdentifier(), aalOrcR1));
         server.apply(new AddRaceDefinition(aalRegatta.getRegattaIdentifier(), aalOrcR2));
         // track only R1 and R2

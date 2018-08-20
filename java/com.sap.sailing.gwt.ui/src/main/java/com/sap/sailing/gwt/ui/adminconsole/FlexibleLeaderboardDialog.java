@@ -16,7 +16,7 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 
-public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialog {
+public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialog<LeaderboardDescriptor> {
     protected ListBox scoringSchemeListBox;
     protected ListBox sailingEventsListBox;
     protected Collection<EventDTO> existingEvents;

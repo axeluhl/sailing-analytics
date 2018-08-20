@@ -72,7 +72,7 @@ public class RegattaByKeywordSearchService {
                 leaderboardStrings.add(leaderboard.getDisplayName());
                 for (Competitor competitor : leaderboard.getCompetitors()) {
                     leaderboardStrings.add(competitor.getName());
-                    leaderboardStrings.add(competitor.getBoat().getSailID());
+                    leaderboardStrings.add(competitor.getShortName());
                     String competitorDisplayName = leaderboard.getDisplayName(competitor);
                     if (competitorDisplayName != null) {
                         leaderboardStrings.add(competitorDisplayName);
@@ -126,12 +126,12 @@ public class RegattaByKeywordSearchService {
      * 
      * @param leaderboard the leaderboard to get the matching events for
      * @param leaderboardGroup the LeaderboardGroup hosting the leaderboard
-     * @param events all events hosting the LeaderboardGroup
+     * @param events all events hosting the LeaderboardGroup; may be {@code null}; if {@code null}, result will be {@code null}
      * @return the best matching events for the given Leaderboard/LeaderboardGroup
      */
     private Set<Event> filterEventsForLeaderboard(Leaderboard leaderboard, LeaderboardGroup leaderboardGroup, Set<Event> events) {
         final Set<Event> result;
-        if (leaderboardGroup.hasOverallLeaderboard()) {
+        if (events != null && leaderboardGroup.hasOverallLeaderboard()) {
             CourseArea defaultCourseArea = leaderboard.getDefaultCourseArea();
             Set<Event> preResult = null;
             if (defaultCourseArea != null) {

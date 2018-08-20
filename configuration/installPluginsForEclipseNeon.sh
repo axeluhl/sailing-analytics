@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# You need an installation of the Neon release of "Eclipse IDE for Eclipse Committers" matching you OS and JDK (32 vs 64 Bit):
-# http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/neonr
+# You need an installation of the Neon SR2 release of "Eclipse IDE for Eclipse Committers" matching you OS and JDK (32 vs 64 Bit):
+# http://www.eclipse.org/downloads/packages/eclipse-ide-eclipse-committers/neon2
 
 if [[ $1 == "" ]]; then
     echo "You need to specify the Eclipse installation directory"
@@ -33,9 +33,8 @@ installPlugins https://dl-ssl.google.com/android/eclipse com.android.ide.eclipse
 echo "Installing GWT SDM debug bridge..."
 installPlugins http://p2.sapsailing.com/p2/sdbg com.github.sdbg.feature.feature.group
 
-# EasyShell is currently not Neon compatible, but 2.0 is coming: https://github.com/anb0s/EasyShell/issues/29
-# echo "Installing EasyShell..."
-# installPlugins http://anb0s.github.io/EasyShell com.tetrade.eclipse.plugins.easyshell.feature.feature.group
+echo "Installing EasyShell..."
+installPlugins http://anb0s.github.io/EasyShell de.anbos.eclipse.easyshell.feature.feature.group
 
 echo "Installing BIRT charts (requirement for MAT)..."
 installPlugins http://download.eclipse.org/birt/update-site/4.6 org.eclipse.birt.chart.feature.group
@@ -51,5 +50,8 @@ updatePlugins http://download.eclipse.org/egit/updates org.eclipse.jgit.feature.
 
 echo "Installing latest version of Mylyn ..."
 updatePlugins http://download.eclipse.org/mylyn/releases/latest org.eclipse.mylyn_feature.feature.group,org.eclipse.mylyn.bugzilla_feature.feature.group,org.eclipse.mylyn.builds.feature.group,org.eclipse.mylyn.commons.feature.group,org.eclipse.mylyn.commons.identity.feature.group,org.eclipse.mylyn.commons.notifications.feature.group,org.eclipse.mylyn.commons.repositories.feature.group,org.eclipse.mylyn.commons.repositories.http.feature.group,org.eclipse.mylyn.context_feature.feature.group,org.eclipse.mylyn.discovery.feature.group,org.eclipse.mylyn.gerrit.feature.feature.group,org.eclipse.mylyn.git.feature.group,org.eclipse.mylyn.hudson.feature.group,org.eclipse.mylyn.java_feature.feature.group,org.eclipse.mylyn.monitor.feature.group,org.eclipse.mylyn.reviews.feature.feature.group,org.eclipse.mylyn.team_feature.feature.group,org.eclipse.mylyn.versions.feature.group,org.eclipse.mylyn.wikitext_feature.feature.group
+
+echo "Installing SAP JVM Tools (profiler) ..."
+installPlugins https://tools.hana.ondemand.com/neon com.sap.jvm.profiling.feature.group
 
 echo "Installation completed!"

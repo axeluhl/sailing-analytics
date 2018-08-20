@@ -56,14 +56,15 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.impl.DelegatingRegattaLeaderboardWithCompetitorElimination;
 import com.sap.sailing.domain.leaderboard.impl.FlexibleLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.leaderboard.impl.HighPointExtremeSailingSeriesOverall;
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets10LastBreaksTie;
 import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets10Or8AndLastBreaksTie;
+import com.sap.sailing.domain.leaderboard.impl.HighPointFirstGets12Or8AndLastBreaksTie2017;
 import com.sap.sailing.domain.leaderboard.impl.LeaderboardGroupImpl;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
-import com.sap.sailing.domain.leaderboard.impl.RegattaLeaderboardImpl;
 import com.sap.sailing.domain.leaderboard.impl.ThresholdBasedResultDiscardingRuleImpl;
 import com.sap.sailing.domain.leaderboard.meta.LeaderboardGroupMetaLeaderboard;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
@@ -82,9 +83,9 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.impl.ArrayListNavigableSet;
 
 public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRankingTestBase {
-    protected Leaderboard createLeaderboard(Regatta regatta, int[] discardingThresholds) {
-        ThresholdBasedResultDiscardingRuleImpl discardingRules = new ThresholdBasedResultDiscardingRuleImpl(discardingThresholds);
-        return new RegattaLeaderboardImpl(regatta, discardingRules);
+    protected DelegatingRegattaLeaderboardWithCompetitorElimination createDelegatingRegattaLeaderboardWithCompetitorElimination(
+            Regatta regatta, String leaderboardName, int[] discardingThresholds) {
+        return new DelegatingRegattaLeaderboardWithCompetitorElimination(()->createLeaderboard(regatta, discardingThresholds), leaderboardName);
     }
 
     @Test
@@ -102,6 +103,32 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         f1Column.setTrackedRace(f1Column.getFleets().iterator().next(), f1);
         List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
         assertEquals(competitors, rankedCompetitors);
+    }
+
+    @Test
+    public void testAutomaticRdgAdjustment() throws NoWindException {
+        List<Competitor> competitors = createCompetitors(10);
+        Regatta regatta = createRegatta(/* qualifying */0, new String[] { "Default" }, /* final */4,
+                new String[] { "Default" },
+                /* medal */false, /* medal */ 0, "testOneStartedRaceWithDifferentScores",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true), DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT_WITH_AUTOMATIC_RDG));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
+        TrackedRace f1 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors);
+        RaceColumn f1Column = series.get(1).getRaceColumnByName("F1");
+        RaceColumn f2Column = series.get(1).getRaceColumnByName("F2");
+        RaceColumn f3Column = series.get(1).getRaceColumnByName("F3");
+        RaceColumn f4Column = series.get(1).getRaceColumnByName("F4");
+        f1Column.setTrackedRace(f1Column.getFleets().iterator().next(), f1);
+        leaderboard.getScoreCorrection().setMaxPointsReason(competitors.get(3), f1Column, MaxPointsReason.RDG);
+        leaderboard.getScoreCorrection().correctScore(competitors.get(3), f2Column, 7);
+        assertEquals(7, leaderboard.getTotalPoints(competitors.get(3), f1Column, later), 0.0000001);
+        leaderboard.getScoreCorrection().correctScore(competitors.get(3), f3Column, 5);
+        assertEquals(6, leaderboard.getTotalPoints(competitors.get(3), f1Column, later), 0.0000001);
+        leaderboard.getScoreCorrection().setMaxPointsReason(competitors.get(3), f4Column, MaxPointsReason.RDG);
+        assertEquals(6, leaderboard.getTotalPoints(competitors.get(3), f1Column, later), 0.0000001);
+        assertEquals(6, leaderboard.getTotalPoints(competitors.get(3), f4Column, later), 0.0000001);
     }
 
     /**
@@ -304,6 +331,356 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         // therefore the new net points for #9 are
         // { 9: 5+42=47 }
         assertEquals(47.0, leaderboard.getNetPoints(competitors.get(9), later), 0.00000001);
+    }
+
+    /**
+     * Match races want to prefer a competitor over another with equal score sum based on the direct
+     * comparison. When the two competitors matched each other, the result(s) of these matches are to
+     * be considered in isolation to break a tie. If this score sum is still equal, the last of these
+     * matches shall take precedence, if any.<p>
+     * 
+     * If more than two competitors have equal score sum the comparator needs to ensure that all those
+     * competitors can be put in a consistent order. This may not always be possible. Consider three
+     * competitors A, B, and C such that A won against B, B won against C and C won against A, but all
+     * three having equal total scores. In this case, no consistent ordering of these three competitors
+     * is possible, and all three need to be ranked equal.
+     */
+    @Test
+    public void testMatchRaceTieBreak() {
+        List<Competitor> competitors = createCompetitors(6);
+        Regatta regatta = createRegatta(/* qualifying */ 2, new String[] { "M1", "M2", "M3" }, /* final */0,
+                new String[] { "Default" },
+                /* medal */false, /* medal */ 0, "testMatchRaceTieBreak",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.HIGH_POINT_FIRST_GETS_ONE));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        Series qualificationSeries;
+        Iterator<? extends Series> seriesIter = regatta.getSeries().iterator();
+        qualificationSeries = seriesIter.next();
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
+        TrackedRace q1M1 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(0, 2));
+        TrackedRace q1M2 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(2, 4));
+        TrackedRace q1M3 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(4, 6));
+        RaceColumn q1Column = qualificationSeries.getRaceColumnByName("Q1");
+        q1Column.setTrackedRace(q1Column.getFleetByName("M1"), q1M1);
+        q1Column.setTrackedRace(q1Column.getFleetByName("M2"), q1M2);
+        q1Column.setTrackedRace(q1Column.getFleetByName("M3"), q1M3);
+        
+        TrackedRace q2M1 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(0), competitors.get(2)));
+        TrackedRace q2M2 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(3), competitors.get(1)));
+        TrackedRace q2M3 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(5), competitors.get(4)));
+        RaceColumn q2Column = qualificationSeries.getRaceColumnByName("Q2");
+        q2Column.setTrackedRace(q2Column.getFleetByName("M1"), q2M1);
+        q2Column.setTrackedRace(q2Column.getFleetByName("M2"), q2M2);
+        q2Column.setTrackedRace(q2Column.getFleetByName("M3"), q2M3);
+        
+        // point sums for competitors 0..5: 2, 0, 1, 1, 1, 1
+        // So it's clear-cut for (0) and (1); all others (2..5) need to be tie-broken based
+        // on their direct comparison.
+        // (2):  < (3); ? (4); ? (5)
+        // (3):         ? (4); ? (5)
+        // (4):                > (5)   because (4) won over (5) in Q1, but (5) won over (4) in Q2 which came last
+        // With this, multiple orders are possible:
+        //   (2), (3), (5), (4)
+        //   (2), (5), (3), (4)
+        //   (5), (2), (3), (4)
+        //   (5), (4), (2), (3)
+        //   ...
+        // So we have two separate "ordered chains," one being (2)<(3) and the other being (5)<(4). In this
+        // case (2) and (5) shall be compared equal, and (3) and (4) shall be compared equal, leaving resolution
+        // to a lesser criterion, such as the fallback name-based ordering.
+
+        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertEquals(competitors.get(0), rankedCompetitors.get(0)); // 2 points; winner
+        assertEquals(competitors.get(1), rankedCompetitors.get(rankedCompetitors.size()-1)); // 0 points; loser
+        assertTrue(rankedCompetitors.indexOf(competitors.get(2)) < rankedCompetitors.indexOf(competitors.get(3)));
+        assertTrue(rankedCompetitors.indexOf(competitors.get(5)) < rankedCompetitors.indexOf(competitors.get(4)));
+    }
+
+    @Test
+    public void testMatchRaceTieBreakWithMultipleDirectComparisonScoreDifference() {
+        List<Competitor> competitors = createCompetitors(6);
+        Regatta regatta = createRegatta(/* qualifying */ 4, new String[] { "M1", "M2", "M3" }, /* final */0,
+                new String[] { "Default" },
+                /* medal */false, /* medal */ 0, "testMatchRaceTieBreak",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.HIGH_POINT_FIRST_GETS_ONE));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        Series qualificationSeries;
+        Iterator<? extends Series> seriesIter = regatta.getSeries().iterator();
+        qualificationSeries = seriesIter.next();
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
+        TrackedRace q1M1 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(0, 2));
+        TrackedRace q1M2 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(2, 4));
+        TrackedRace q1M3 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(4, 6));
+        RaceColumn q1Column = qualificationSeries.getRaceColumnByName("Q1");
+        q1Column.setTrackedRace(q1Column.getFleetByName("M1"), q1M1);
+        q1Column.setTrackedRace(q1Column.getFleetByName("M2"), q1M2);
+        q1Column.setTrackedRace(q1Column.getFleetByName("M3"), q1M3);
+        
+        TrackedRace q2M1 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(1), competitors.get(0)));
+        TrackedRace q2M2 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(2), competitors.get(3)));
+        TrackedRace q2M3 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(4), competitors.get(5)));
+        RaceColumn q2Column = qualificationSeries.getRaceColumnByName("Q2");
+        q2Column.setTrackedRace(q2Column.getFleetByName("M1"), q2M1);
+        q2Column.setTrackedRace(q2Column.getFleetByName("M2"), q2M2);
+        q2Column.setTrackedRace(q2Column.getFleetByName("M3"), q2M3);
+        
+        TrackedRace q3M1 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(0, 2));
+        TrackedRace q3M2 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(2, 4));
+        TrackedRace q3M3 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(4, 6));
+        RaceColumn q3Column = qualificationSeries.getRaceColumnByName("Q3");
+        q3Column.setTrackedRace(q2Column.getFleetByName("M1"), q3M1);
+        q3Column.setTrackedRace(q2Column.getFleetByName("M2"), q3M2);
+        q3Column.setTrackedRace(q2Column.getFleetByName("M3"), q3M3);
+
+        TrackedRace q4M1 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(1), competitors.get(2)));
+        TrackedRace q4M2 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(3), competitors.get(0)));
+        TrackedRace q4M3 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(4), competitors.get(5)));
+        RaceColumn q4Column = qualificationSeries.getRaceColumnByName("Q4");
+        q4Column.setTrackedRace(q2Column.getFleetByName("M1"), q4M1);
+        q4Column.setTrackedRace(q2Column.getFleetByName("M2"), q4M2);
+        q4Column.setTrackedRace(q2Column.getFleetByName("M3"), q4M3);
+        // point sums for competitors 0..5: 2, 2, 3, 1, 4, 0
+        // The only tie to break is between (0) and (1) with the following direct comparisons:
+        // Q1: (0)->(1); Q2: (1)->(0); Q3: (0)->(1)
+        // This gives 2 points for (0) and 1 point for (1), so (0) shall be ranked better (lesser) than (1)
+
+        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertEquals(Arrays.asList(competitors.get(4), competitors.get(2), competitors.get(0), competitors.get(1), competitors.get(3), competitors.get(5)),
+                rankedCompetitors);
+    }
+    
+    @Test
+    public void testMatchRaceTieBreakWithMultipleDirectComparisonLastRace() {
+        List<Competitor> competitors = createCompetitors(6);
+        Regatta regatta = createRegatta(/* qualifying */ 4, new String[] { "M1", "M2", "M3" }, /* final */0,
+                new String[] { "Default" },
+                /* medal */false, /* medal */ 0, "testMatchRaceTieBreak",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.HIGH_POINT_FIRST_GETS_ONE));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        Series qualificationSeries;
+        Iterator<? extends Series> seriesIter = regatta.getSeries().iterator();
+        qualificationSeries = seriesIter.next();
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
+        TrackedRace q1M1 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(0, 2));
+        TrackedRace q1M2 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(2, 4));
+        TrackedRace q1M3 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(4, 6));
+        RaceColumn q1Column = qualificationSeries.getRaceColumnByName("Q1");
+        q1Column.setTrackedRace(q1Column.getFleetByName("M1"), q1M1);
+        q1Column.setTrackedRace(q1Column.getFleetByName("M2"), q1M2);
+        q1Column.setTrackedRace(q1Column.getFleetByName("M3"), q1M3);
+        
+        TrackedRace q2M1 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(1), competitors.get(0)));
+        TrackedRace q2M2 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(2), competitors.get(3)));
+        TrackedRace q2M3 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(4), competitors.get(5)));
+        RaceColumn q2Column = qualificationSeries.getRaceColumnByName("Q2");
+        q2Column.setTrackedRace(q2Column.getFleetByName("M1"), q2M1);
+        q2Column.setTrackedRace(q2Column.getFleetByName("M2"), q2M2);
+        q2Column.setTrackedRace(q2Column.getFleetByName("M3"), q2M3);
+        
+        TrackedRace q3M1 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(0, 2));
+        TrackedRace q3M2 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(2, 4));
+        TrackedRace q3M3 = new MockedTrackedRaceWithStartTimeAndRanks(now, competitors.subList(4, 6));
+        RaceColumn q3Column = qualificationSeries.getRaceColumnByName("Q3");
+        q3Column.setTrackedRace(q2Column.getFleetByName("M1"), q3M1);
+        q3Column.setTrackedRace(q2Column.getFleetByName("M2"), q3M2);
+        q3Column.setTrackedRace(q2Column.getFleetByName("M3"), q3M3);
+
+        TrackedRace q4M1 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(1), competitors.get(0)));
+        TrackedRace q4M2 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(2), competitors.get(3)));
+        TrackedRace q4M3 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(4), competitors.get(5)));
+        RaceColumn q4Column = qualificationSeries.getRaceColumnByName("Q4");
+        q4Column.setTrackedRace(q2Column.getFleetByName("M1"), q4M1);
+        q4Column.setTrackedRace(q2Column.getFleetByName("M2"), q4M2);
+        q4Column.setTrackedRace(q2Column.getFleetByName("M3"), q4M3);
+        // point sums for competitors 0..5: 2, 2, 4, 0, 4, 0
+        // The ties between (2) and (4) with both 4 points cannot be decided because they never met;
+        // the same holds for (3) and (5) with both 0 points.
+        // The tie between (0) and (1) shall be broken based on their last match because their
+        // direct comparison scores are equal, too (both 2). In the last match (1) won over (0).
+        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertEquals(Arrays.asList(competitors.get(1), competitors.get(0)), rankedCompetitors.subList(2, 4));
+    }
+
+    /**
+     * Match races want to prefer a competitor over another with equal score sum based on the direct
+     * comparison. When the two competitors matched each other, the result(s) of these matches are to
+     * be considered in isolation to break a tie. If this score sum is still equal, the last of these
+     * matches shall take precedence, if any.<p>
+     * 
+     * If more than two competitors have equal score sum the comparator needs to ensure that all those
+     * competitors can be put in a consistent order. This may not always be possible. Consider three
+     * competitors A, B, and C such that A won against B, B won against C and C won against A, but all
+     * three having equal total scores. In this case, no consistent ordering of these three competitors
+     * is possible, and all three need to be ranked equal.
+     */
+    @Test
+    public void testMatchRaceTieBreakWithCycle() {
+        List<Competitor> competitors = createCompetitors(6);
+        Regatta regatta = createRegatta(/* qualifying */ 2, new String[] { "M1", "M2", "M3" }, /* final */0,
+                new String[] { "Default" },
+                /* medal */false, /* medal */ 0, "testMatchRaceTieBreak",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.HIGH_POINT_FIRST_GETS_ONE));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        Series qualificationSeries;
+        Iterator<? extends Series> seriesIter = regatta.getSeries().iterator();
+        qualificationSeries = seriesIter.next();
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
+        TrackedRace q1M1 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(0), competitors.get(1)));
+        TrackedRace q1M2 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(2), competitors.get(3)));
+        TrackedRace q1M3 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(4), competitors.get(5)));
+        RaceColumn q1Column = qualificationSeries.getRaceColumnByName("Q1");
+        q1Column.setTrackedRace(q1Column.getFleetByName("M1"), q1M1);
+        q1Column.setTrackedRace(q1Column.getFleetByName("M2"), q1M2);
+        q1Column.setTrackedRace(q1Column.getFleetByName("M3"), q1M3);
+        
+        TrackedRace q2M1 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(1), competitors.get(2)));
+        TrackedRace q2M2 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(3), competitors.get(4)));
+        TrackedRace q2M3 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(5), competitors.get(0)));
+        RaceColumn q2Column = qualificationSeries.getRaceColumnByName("Q2");
+        q2Column.setTrackedRace(q2Column.getFleetByName("M1"), q2M1);
+        q2Column.setTrackedRace(q2Column.getFleetByName("M2"), q2M2);
+        q2Column.setTrackedRace(q2Column.getFleetByName("M3"), q2M3);
+        
+        // point sums for competitors 0..5: 1, 1, 1, 1, 1, 1
+        // cyclic direct comparison; expect competitors to be ordered by their names
+        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertEquals(competitors, rankedCompetitors);
+    }
+
+    /**
+     * Match races want to prefer a competitor over another with equal score sum based on the direct
+     * comparison. When the two competitors matched each other, the result(s) of these matches are to
+     * be considered in isolation to break a tie. If this score sum is still equal, the last of these
+     * matches shall take precedence, if any.<p>
+     * 
+     * If more than two competitors have equal score sum the comparator needs to ensure that all those
+     * competitors can be put in a consistent order. This may not always be possible. Consider three
+     * competitors A, B, and C such that A won against B, B won against C and C won against A, but all
+     * three having equal total scores. In this case, no consistent ordering of these three competitors
+     * is possible, and all three need to be ranked equal.
+     */
+    @Test
+    public void testMatchRaceTieBreakWithTwoRelatedCycles() {
+        List<Competitor> competitors = createCompetitors(6);
+        Regatta regatta = createRegatta(/* qualifying */ 3, new String[] { "M1", "M2", "M3" }, /* final */0,
+                new String[] { "Default" },
+                /* medal */false, /* medal */ 0, "testMatchRaceTieBreak",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.HIGH_POINT_FIRST_GETS_ONE));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        Series qualificationSeries;
+        Iterator<? extends Series> seriesIter = regatta.getSeries().iterator();
+        qualificationSeries = seriesIter.next();
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
+        TrackedRace q1M1 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(0), competitors.get(1)));
+        TrackedRace q1M2 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(4), competitors.get(2)));
+        TrackedRace q1M3 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(3), competitors.get(5)));
+        RaceColumn q1Column = qualificationSeries.getRaceColumnByName("Q1");
+        q1Column.setTrackedRace(q1Column.getFleetByName("M1"), q1M1);
+        q1Column.setTrackedRace(q1Column.getFleetByName("M2"), q1M2);
+        q1Column.setTrackedRace(q1Column.getFleetByName("M3"), q1M3);
+        
+        TrackedRace q2M1 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(1), competitors.get(2)));
+        TrackedRace q2M2 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(3), competitors.get(0)));
+        TrackedRace q2M3 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(5), competitors.get(4)));
+        RaceColumn q2Column = qualificationSeries.getRaceColumnByName("Q2");
+        q2Column.setTrackedRace(q2Column.getFleetByName("M1"), q2M1);
+        q2Column.setTrackedRace(q2Column.getFleetByName("M2"), q2M2);
+        q2Column.setTrackedRace(q2Column.getFleetByName("M3"), q2M3);
+
+        TrackedRace q3M1 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(2), competitors.get(0)));
+        TrackedRace q3M2 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(5), competitors.get(1)));
+        TrackedRace q3M3 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(4), competitors.get(3)));
+        RaceColumn q3Column = qualificationSeries.getRaceColumnByName("Q3");
+        q3Column.setTrackedRace(q1Column.getFleetByName("M1"), q3M1);
+        q3Column.setTrackedRace(q1Column.getFleetByName("M2"), q3M2);
+        q3Column.setTrackedRace(q1Column.getFleetByName("M3"), q3M3);
+
+        // point sums for competitors 0..5: 1, 1, 1, 2, 2, 2
+        // 
+        // For 0..2 we have a cycle: (0)<(1)<(2)<(0), so they shall be treated equal, sorted by name
+        // Further, we have: (5)<(4)<(3)<(5), so this is another cycle over the remaining three competitors
+        // and               (3)          <   (0)
+        // and               (5)          <   (1)  connect the chains
+        // which could be resolved by comparing all elements of {(3), (4), (5)} lesser than all elements of {(0), (1), (2)};
+        // had the links between the chains been inconsistent then all elements of both chains would have to compare equal,
+        // resorting to name comparison
+        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertEquals(Arrays.asList(competitors.get(3), competitors.get(4), competitors.get(5)),
+                Arrays.asList(rankedCompetitors.get(0), rankedCompetitors.get(1), rankedCompetitors.get(2)));
+        assertEquals(Arrays.asList(competitors.get(0), competitors.get(1), competitors.get(2)),
+                Arrays.asList(rankedCompetitors.get(3), rankedCompetitors.get(4), rankedCompetitors.get(5)));
+    }
+
+    /**
+     * Match races want to prefer a competitor over another with equal score sum based on the direct
+     * comparison. When the two competitors matched each other, the result(s) of these matches are to
+     * be considered in isolation to break a tie. If this score sum is still equal, the last of these
+     * matches shall take precedence, if any.<p>
+     * 
+     * If more than two competitors have equal score sum the comparator needs to ensure that all those
+     * competitors can be put in a consistent order. This may not always be possible. Consider three
+     * competitors A, B, and C such that A won against B, B won against C and C won against A, but all
+     * three having equal total scores. In this case, no consistent ordering of these three competitors
+     * is possible, and all three need to be ranked equal.
+     */
+    @Test
+    public void testMatchRaceTieBreakWithPartialCycle() {
+        List<Competitor> competitors = createCompetitors(6);
+        Regatta regatta = createRegatta(/* qualifying */ 3, new String[] { "M1", "M2", "M3" }, /* final */0,
+                new String[] { "Default" },
+                /* medal */false, /* medal */ 0, "testMatchRaceTieBreak",
+                DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true),
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.HIGH_POINT_FIRST_GETS_ONE));
+        Leaderboard leaderboard = createLeaderboard(regatta, /* discarding thresholds */ new int[0]);
+        Series qualificationSeries;
+        Iterator<? extends Series> seriesIter = regatta.getSeries().iterator();
+        qualificationSeries = seriesIter.next();
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
+        TrackedRace q1M1 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(0), competitors.get(1)));
+        TrackedRace q1M2 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(4), competitors.get(2)));
+        TrackedRace q1M3 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(3), competitors.get(5)));
+        RaceColumn q1Column = qualificationSeries.getRaceColumnByName("Q1");
+        q1Column.setTrackedRace(q1Column.getFleetByName("M1"), q1M1);
+        q1Column.setTrackedRace(q1Column.getFleetByName("M2"), q1M2);
+        q1Column.setTrackedRace(q1Column.getFleetByName("M3"), q1M3);
+        
+        TrackedRace q2M1 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(1), competitors.get(2)));
+        TrackedRace q2M2 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(3), competitors.get(0)));
+        TrackedRace q2M3 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(4), competitors.get(5)));
+        RaceColumn q2Column = qualificationSeries.getRaceColumnByName("Q2");
+        q2Column.setTrackedRace(q2Column.getFleetByName("M1"), q2M1);
+        q2Column.setTrackedRace(q2Column.getFleetByName("M2"), q2M2);
+        q2Column.setTrackedRace(q2Column.getFleetByName("M3"), q2M3);
+
+        TrackedRace q3M1 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(2), competitors.get(0)));
+        TrackedRace q3M2 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(5), competitors.get(1)));
+        TrackedRace q3M3 = new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors.get(4), competitors.get(3)));
+        RaceColumn q3Column = qualificationSeries.getRaceColumnByName("Q3");
+        q3Column.setTrackedRace(q1Column.getFleetByName("M1"), q3M1);
+        q3Column.setTrackedRace(q1Column.getFleetByName("M2"), q3M2);
+        q3Column.setTrackedRace(q1Column.getFleetByName("M3"), q3M3);
+
+        // point sums for competitors 0..5: 1, 1, 1, 2, 3, 1
+        // 
+        // For 0..2 we have a cycle: (0)<(1)<(2)<(0), so they shall be treated equal, sorted by name
+        // (5) has equal points with (0), (1), and (2) but we have (5)<(1) (based on q3M2), so the
+        // "single-element chain" (5) is connected to the cycle and is "less" than the cycle.
+        // Further, we have: (4)<(3)<(all others) based on points (high point!)
+        // So the expected order is: (4), (3), (5), (0), (1), (2) (where the last three elements' order is resolved by their name)
+        List<Competitor> rankedCompetitors = leaderboard.getCompetitorsFromBestToWorst(later);
+        assertEquals(Arrays.asList(competitors.get(4), competitors.get(3), competitors.get(5), competitors.get(0), competitors.get(1), competitors.get(2)),
+                rankedCompetitors);
     }
 
     /**
@@ -1336,7 +1713,8 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
     public void testAdditionalScoreInformationLeadsToChangedScoreForOneColumn() throws NoWindException {
         TrackedRegattaRegistry trackedRegattaRegistry = mock(TrackedRegattaRegistry.class);
         Regatta dummyRegatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, "Dummy",
-                new BoatClassImpl("Extreme40", false), /*startDate*/ null, /*endDate*/ null, trackedRegattaRegistry,
+                new BoatClassImpl("Extreme40", false), 
+                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null, trackedRegattaRegistry,
                 new HighPointFirstGets10Or8AndLastBreaksTie(), "578876345345",
                 new CourseAreaImpl("Humba", UUID.randomUUID()));
         trackedRegattaRegistry.getOrCreateTrackedRegatta(dummyRegatta);
@@ -1454,6 +1832,44 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         assertEquals(new Double(1), leaderboardHighPointESSOverall.getNetPoints(competitors[14], later));
         assertEquals(new Double(1), leaderboardHighPointESSOverall.getNetPoints(competitors[15], later));
     }
+    
+    @Test
+    public void testESS2017WithCompetitorsBeingDSQScoringTwoLessThanLastCompetingCompetitor() throws NoWindException {
+        Competitor[] competitors = createCompetitors(8).toArray(new Competitor[0]);
+        TimePoint now = MillisecondsTimePoint.now();
+        TimePoint later = new MillisecondsTimePoint(now.asMillis()+1000);
+        FlexibleLeaderboard leaderboardHighPoint12LastBreaksTie2017 = new FlexibleLeaderboardImpl("Test ESS Highpoint", 
+        		new ThresholdBasedResultDiscardingRuleImpl(/* discarding thresholds */ new int[0]),
+                new HighPointFirstGets12Or8AndLastBreaksTie2017(), null);
+        RaceColumn raceColumn = leaderboardHighPoint12LastBreaksTie2017
+                .addRace(new MockedTrackedRaceWithStartTimeAndRanks(now, Arrays.asList(competitors)), "R1", /* medalRace */
+                        false);
+        // test basic scores with best getting 12 and worst getting 5 in a 12 point scheme
+        assertTrue(leaderboardHighPoint12LastBreaksTie2017.getScoringScheme().getScoreComparator(/* nullScoresAreBetter */ false).compare(
+                leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[0], later), 
+                leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[3], later)) < 0); // c0 better than c3
+        assertEquals(8, leaderboardHighPoint12LastBreaksTie2017.getCompetitorsFromBestToWorst(later).size());
+        assertEquals(new Double(12), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[0], later));
+        assertEquals(new Double(5), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[7], later));
+        // now let's assume that the first competitor is DSQ so it gets 4 points
+        leaderboardHighPoint12LastBreaksTie2017.getScoreCorrection().setMaxPointsReason(competitors[0], raceColumn, MaxPointsReason.DSQ);
+        assertEquals(8, leaderboardHighPoint12LastBreaksTie2017.getCompetitorsFromBestToWorst(later).size());
+        assertEquals(new Double(12), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[1], later));
+        assertEquals(new Double(4), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[0], later));
+        assertEquals(new Double(6), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[7], later));
+        leaderboardHighPoint12LastBreaksTie2017.getScoreCorrection().setMaxPointsReason(competitors[0], raceColumn, MaxPointsReason.NONE);
+        assertEquals(new Double(12), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[0], later));
+        assertEquals(new Double(5), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[7], later));
+        leaderboardHighPoint12LastBreaksTie2017.getScoreCorrection().setMaxPointsReason(competitors[0], raceColumn, MaxPointsReason.DNS);
+        assertEquals(new Double(12), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[1], later));
+        assertEquals(new Double(5), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[0], later));
+        assertEquals(new Double(6), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[7], later));
+        // two competitors not started leading to tie
+        leaderboardHighPoint12LastBreaksTie2017.getScoreCorrection().setMaxPointsReason(competitors[1], raceColumn, MaxPointsReason.DNS);
+        assertEquals(new Double(12), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[2], later));
+        assertEquals(new Double(6), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[1], later));
+        assertEquals(new Double(6), leaderboardHighPoint12LastBreaksTie2017.getNetPoints(competitors[0], later));
+    }
 
     @Test
     public void testOverallLeaderboardWithESSHighPointScoring() throws NoWindException {
@@ -1538,6 +1954,7 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         assertEquals(c[0], rankedCompetitors.get(0));
         assertEquals(c[2], rankedCompetitors.get(1));
     }
+
     @Test 
     public void testHighPointScoringEightWithInterpolationWhenFleetNotComplete() throws NoWindException {
         int competitorsCount = 21;
@@ -1778,7 +2195,7 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
         assertEquals(1. + .9, leaderboard1.getNetPoints(c1[0], afterEndOfR1), 0.00000001);
         assertEquals(1, leaderboard1.getTotalRankOfCompetitor(c1[0], afterEndOfR1));
         // now assert that the competitor c1[0] is best in r2 because of the score correction, although c1[0] doesn't have a fleet
-        assertEquals(0, leaderboard1.getCompetitorsFromBestToWorst(r2, afterEndOfR1).indexOf(c1[0]));
+        assertEquals(0, Util.indexOf(leaderboard1.getCompetitorsFromBestToWorst(r2, afterEndOfR1), c1[0]));
     }
 
     @Test
@@ -1908,7 +2325,8 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
             series.add(finalSeries);
         }
         final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("Extreme40", /* typicallyStartsUpwind */ false);
-        Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass, /*startDate*/ null, /*endDate*/ null,
+        Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass, 
+                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null,
                 series, /* persistent */false, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.HIGH_POINT_FIRST_GETS_TEN), "123", /* course area */null, OneDesignRankingMetric::new);
         List<Competitor> competitors = createCompetitors(12);
         final int firstYellowCompetitorIndex = 3;
@@ -2026,7 +2444,8 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
             series.add(medalSeries);
         }
         final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true);
-        Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass, /*startDate*/ null, /*endDate*/ null,
+        Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass, 
+                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null,
                 series, /* persistent */false, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", /* course area */null, OneDesignRankingMetric::new);
         List<Competitor> competitors = createCompetitors(12);
         final int firstYellowCompetitorIndex = 3;
@@ -2138,7 +2557,8 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
             series.add(finalSeries);
         }
         final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true);
-        Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass, /*startDate*/ null, /*endDate*/ null,
+        Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass,
+                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null,
                 series, /* persistent */false, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", /* course area */null, OneDesignRankingMetric::new);
         List<Competitor> competitors = createCompetitors(12);
         final int firstYellowCompetitorIndex = 3;
@@ -2226,7 +2646,8 @@ public class LeaderboardScoringAndRankingTest extends LeaderboardScoringAndRanki
             series.add(finalSeries);
         }
         final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true);
-        Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass, /*startDate*/ null, /*endDate*/ null,
+        Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass, 
+                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null,
                 series, /* persistent */false, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", /* course area */null, OneDesignRankingMetric::new);
         final int TOTAL_NUMBER_OF_COMPETITORS = 100;
         List<Competitor> competitors = createCompetitors(TOTAL_NUMBER_OF_COMPETITORS);

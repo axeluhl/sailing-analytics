@@ -4,17 +4,19 @@
 
 ## Quick Start: How to run tests locally in Eclipse
 
-There are two ways to run the Selenium tests locally on your computer. Either, you compile the GWT UI using our build script and run the tests based on the compiled UI, or you run the tests using the GWT hosted mode.
+There are two ways to run the Selenium tests locally on your computer. Either, you compile the GWT UI using our build script and run the tests based on the compiled UI, or you run the tests using the GWT super dev mode.
 
 ### Firefox Prerequisites
 
-You have to ensure that your Firefox browser has a profile called "Selenium" and that in this profile the latest version of the GWT plugin is installed. To ensure this, launch the server by choosing the "Sailing Server (Proxy)" or "Sailing Server (No Proxy)" launch config. Then, run the "SailingGWT" launch to start the GWT UI in hosted / development mode. Afterwards you can launch Firefox from the command line with the -p option. On Windows machines, you can do this by pressing the Windows key, then typing "firefox.exe -p". In the profile manager create a profile called Selenium and start Firefow with that profile. Hit the entry page of the AdminConsole by entering `http://127.0.0.1:8888/gwt/AdminConsole.html?gwt.codesvr=127.0.0.1:9997` into the address bar. This will ask you to install the GWT plugin into your Selenium profile. When done, exit the browser. You may use the profile manager again to set your default profile to your original profile.
+Running Selenium tests with FireFox requires to use GeckoDriver. You need to download a current version of GeckoDriver from [the download page](https://github.com/mozilla/geckodriver/releases) and unzip it on your system. At the time this was written, the current version was 0.21.0 and it worked best with FireFox versions 57-61 but other versions of both, GeckoDriver and FireFox should also work. In the file "/com.sap.sailing.selenium.test/local-test-environment.xml" you need to adjust the property "webdriver.gecko.driver" to point to the unzipped GeckoDriver executable. If you have a version of FixeFox globally installed on your system, GeckoDriver will use this one. If you do not have an installed version of FireFox or need to use a different version, you can set the property "webdriver.firefox.bin" in "/com.sap.sailing.selenium.test/local-test-environment.xml" to point to the specific firefox executable. When using a portable version, it is not the "FirefoxPortable.exe" but "App/Firefox/firefox.exe".
 
-### Running the tests with GWT hosted mode
+In older versions of Selenium, you needed to configure a special user profile in FireFox. With GeckoDriver, this isn't needed anymore.
 
-Launch the server by choosing the "Sailing Server (Proxy, winddbTest)" or "Sailing Server (No Proxy, winddbTest)" launch config. Then, run the "SailingGWT" launch to start the GWT UI in hosted / development mode.
+### Running the tests with GWT super dev mode
 
-When the GWT development mode has finished its initialization as indicated by the "Development Mode" view showing the entry point URLs, launch the "com.sap.sailing.senelium.test (Proxy, GWT Codesvr)" or "com.sap.sailing.senelium.test (No Proxy, GWT Codesvr)" launch. This will then pop up Firefox windows using the "Selenium" profile and run the tests.
+Launch the server by choosing the "Sailing Server (Proxy, winddbTest)" or "Sailing Server (No Proxy, winddbTest)" launch config. Then, run the "GWT Sailing SDM" launch to start the GWT UI in super dev mode (SDM).
+
+When the GWT SDM has finished its initialization as indicated by the "Development Mode" view showing the entry point URLs, launch the "com.sap.sailing.senelium.test (Proxy)" or "com.sap.sailing.senelium.test (No Proxy)" launch. This will then pop up Firefox and run the tests.
 
 ### Running the tests after a successful local GWT compile
 
@@ -109,9 +111,11 @@ For a more practical example of how to write page objects and test you should ta
 
 While our build environment is stable regarding to the used browser version, this may not be the case in your development environment, where you have the newest browser version installed probably. The short release cycles of the browsers often bring changes in the implementation, which are incompatible with Selenium. Therefore you have to update the used Selenium version by performing the following steps to be able to run the tests local.
 
-* Download the latest _Client & WebDriver Bindings_ for Java from the official [Selenium](http://docs.seleniumhq.org/download/) website
-* Delete the _selenium-java-<version>.jar_ in the root directory of the project _org.openqa.selenium.osgi_ as well as all libraries in the _lib_ directory and copy the new versions from the downloaded file in  the appropriate folders
+* Download the latest _Client_ for Java from the official [Selenium](http://docs.seleniumhq.org/download/) website
+* Delete the _client-combined-<version>.jar_ (plus the _client-combined-<version>-sources.jar_) in the root directory of the project _org.openqa.selenium.osgi_ as well as all libraries in the _lib_ directory and copy the new versions from the downloaded file in  the appropriate folders
 * Open the _MANIFEST.MF_ with the Plug-in Manifest Editor and switch to the _Runtime_ tab
     * Remove all the old libraries from the _Classpath_ section and add all new versions
     * Add all new packages that start with _org.openqa.selenium_ to the _Exported Packages_ section in the case there were packages added
 * Updated the version number in the _MANIFEST.MF_ and in the _pom.xml_
+* update build.properties to reflect the changed *.jar files
+* Update the version number in _MANIFEST.MF_ files referencing the _org.openqa.selenium_ bundle (e.g in _com.sap.sailing.selenium.test_)

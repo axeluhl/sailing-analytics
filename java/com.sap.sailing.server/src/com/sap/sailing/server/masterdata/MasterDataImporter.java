@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.CompetitorStore;
+import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.MasterDataImportInformation;
@@ -65,7 +65,7 @@ public class MasterDataImporter {
     }
 
     private void setAllowCompetitorsDataToBeReset(List<Serializable> competitorIds) {
-        CompetitorStore store = baseDomainFactory.getCompetitorStore();
+        CompetitorAndBoatStore store = baseDomainFactory.getCompetitorAndBoatStore();
         for (Serializable id : competitorIds) {
             Competitor competitor = baseDomainFactory.getExistingCompetitorById(id);
             if (competitor != null) {

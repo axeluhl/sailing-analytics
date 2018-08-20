@@ -4,8 +4,6 @@ import java.util.UUID;
 
 public class PingDeviceIdentifierImpl implements PingDeviceIdentifier {
     private static final long serialVersionUID = -4049961972156611640L;
-
-    
     private final UUID id;
     
     public PingDeviceIdentifierImpl() {

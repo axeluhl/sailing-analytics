@@ -3,6 +3,7 @@ package com.sap.sailing.server.gateway.impl;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -49,24 +50,30 @@ public class FileUploadServlet extends AbstractFileUploadServlet {
         for (FileItem fileItem : fileItems) {
             final JSONObject result = new JSONObject();
             final String fileExtension;
+            final String fileName = Paths.get(fileItem.getName()).getFileName().toString();
             final String fileType = fileItem.getContentType();
             if (fileType.equals("image/jpeg")) {
                 fileExtension = ".jpg";
             } else if (fileType.equals("image/png")) {
                 fileExtension = ".png";
             } else {
-                fileExtension = "";
+                int lastDot = fileName.lastIndexOf(".");
+                if (lastDot > 0) {
+                    fileExtension = fileName.substring(lastDot);
+                } else {
+                    fileExtension = "";
+                }
             }
             try {
                 if (fileItem.getSize() > 1024 * 1024 * MAX_SIZE_IN_MB) {
                     final String errorMessage = "Image is larger than " + MAX_SIZE_IN_MB + "MB";
-                    logger.warning("Ignoring file storage request because file "+fileItem.getName()+" is larger than "+MAX_SIZE_IN_MB+"MB");
+                    logger.warning("Ignoring file storage request because file "+fileName+" is larger than "+MAX_SIZE_IN_MB+"MB");
                     result.put("status", Status.INTERNAL_SERVER_ERROR.name());
                     result.put("message", errorMessage);
                 } else {
                     final URI fileUri = getService().getFileStorageManagementService().getActiveFileStorageService()
                             .storeFile(fileItem.getInputStream(), fileExtension, fileItem.getSize());
-                    result.put(JSON_FILE_NAME, fileItem.getName());
+                    result.put(JSON_FILE_NAME, fileName);
                     result.put(JSON_FILE_URI, fileUri.toString());
                 }
             } catch (IOException | OperationFailedException | InvalidPropertiesException | NoCorrespondingServiceRegisteredException e) {

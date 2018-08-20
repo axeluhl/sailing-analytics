@@ -2,7 +2,7 @@
 <resources>
 
     <!-- Base application theme -->
-    <style name="AppTheme.Light" parent="AppTheme.Light.Base"/>
+    <style name="AppTheme.Light" parent="AppTheme.Light.Base" />
 
     <style name="AppTheme.Light.Base" parent="AppTheme.Light.Custom">
         <item name="windowActionModeOverlay">true</item>
@@ -79,7 +79,9 @@
         <item name="button_next">@drawable/button_next_light</item>
         <item name="button_prev">@drawable/button_prev_light</item>
         <item name="check_18dp">@drawable/ic_check_black_18dp</item>
+        <item name="check_24dp_invert">@drawable/ic_check_white_24dp</item>
         <item name="chevron_left_24dp">@drawable/ic_chevron_left_black_24dp</item>
+        <item name="clear_24dp">@drawable/ic_clear_black_24dp</item>
         <item name="create">@drawable/ic_create_light</item>
         <item name="compass_back">@drawable/compass_back_light</item>
         <item name="compass_needle">@drawable/compass_needle_light</item>
@@ -88,8 +90,12 @@
         <item name="course_updown_48dp">@drawable/course_updown_48dp_light</item>
         <item name="course_updown_64dp">@drawable/course_updown_64dp_light</item>
         <item name="dns">@drawable/ic_dns_black</item>
+        <item name="flag_18dp">@drawable/ic_flag_black_18dp</item>
+        <item name="flag_24dp">@drawable/ic_flag_black_24dp</item>
         <item name="hearing">@drawable/ic_hearing_black</item>
         <item name="link_24dp">@drawable/ic_link_black_24dp</item>
+        <item name="list_both_24dp">@drawable/ic_list_both_black_24dp</item>
+        <item name="list_single_24dp">@drawable/ic_list_single_black_24dp</item>
         <item name="lock_outline">@drawable/ic_lock_outline_black</item>
         <item name="keyboard_control_36dp">@drawable/ic_keyboard_control_black_36dp</item>
         <item name="marker">@drawable/marker_light</item>
@@ -97,7 +103,9 @@
         <item name="mic_48dp">@drawable/ic_mic_black_48dp</item>
         <item name="photo_camera">@drawable/ic_photo_camera_black</item>
         <item name="play_arrow_36dp">@drawable/ic_play_arrow_black_36dp</item>
+        <item name="search_24dp">@drawable/ic_search_black_24dp</item>
         <item name="search_24dp_invert">@drawable/ic_search_white_24dp</item>
+        <item name="sortby_24dp">@drawable/ic_sortby_black_24dp</item>
         <item name="spinner_background">@drawable/spinner_background_light</item>
         <item name="swipe_idle">@drawable/swipe_idle_light</item>
         <item name="swipe_left">@drawable/swipe_left_light</item>
@@ -117,6 +125,7 @@
     <style name="AppTheme.Light.Custom" parent="Theme.AppCompat.NoActionBar">
         <item name="chevron_left">@drawable/ic_chevron_left_black_24dp</item>
         <item name="chevron_right">@drawable/ic_chevron_right_black_24dp</item>
+        <item name="competitor_list">@drawable/ic_list_single_black_48dp</item>
 
         <item name="flag_blue_first">@drawable/flag_blue_first_32dp_light</item>
         <item name="flag_blue_last">@drawable/flag_blue_last_32dp_light</item>
@@ -127,6 +136,8 @@
         <item name="flags_course">@drawable/flags_course_64dp_light</item>
         <item name="flags_postpone">@drawable/flags_postpone_64dp_light</item>
         <item name="flags_recall">@drawable/flags_recall_64dp_light</item>
+
+        <item name="list_24dp">?attr/list_single_24dp</item>
     </style>
 
     <style name="AppTheme.Light.PopupMenuStyle" parent="@style/Widget.AppCompat.Light.PopupMenu">

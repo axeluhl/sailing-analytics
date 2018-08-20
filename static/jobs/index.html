@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+<link rel="shortcut icon" type="image/x-icon"
+ href="https://www.sapsailing.com/gwt/images/sap.ico">
+<link
+ href="https://www.sapsailing.com/gwt/images/sap-sailing-app-icon.png"
+ rel="apple-touch-icon">
+
+<title>SAP Sailing - Jobs</title>
+
+<link rel="stylesheet" type="text/css"
+ href="https://www.sapsailing.com/sailing-normalize-3.0.2.cache.css">
+<link rel="stylesheet" type="text/css"
+ href="https://www.sapsailing.com/sailing-fontface-1.0.cache.css">
+ 
+<script type="text/javascript">
+function handleSearch() {
+    var searchUrl = "https://www.sapsailing.com/gwt/Home.html#SearchResultPlace:";
+    var searchBox = document.getElementById("searchBox");
+    if (searchBox && searchBox.value) {
+        searchUrl += searchBox.value;
+    }
+    window.location.href = searchUrl;
+    return false;
+}
+</script>
+
+<style>
+.E6EY1K-c-g {
+    font-size: 15px;
+    font-size: 1rem;
+    background: #333;
+    border-bottom: 5px solid #f0ab00;
+    min-height: 4.333333333333333em;
+    line-height: 4em;
+    width: 100%;
+    overflow: hidden
+}
+
+.E6EY1K-c-a {
+    margin: .8em 0;
+    float: left
+}
+
+.E6EY1K-c-b {
+    display: none;
+    height: 4.333333333333333em;
+    line-height: 4.333333333333333em;
+    color: #f6f9fc
+}
+
+@media ( min-width :50em) {
+    .E6EY1K-c-b {
+        display: inline
+    }
+}
+
+.E6EY1K-c-i {
+    float: right;
+    text-align: right;
+    width: 100%;
+    height: 4.333333333333333em
+}
+
+.E6EY1K-c-j {
+    display: inline-block;
+    height: 4.642857142857143em;
+    line-height: 4.642857142857143em;
+    font-size: .933333333333333em;
+    font-weight: 600;
+    color: #f6f9fc;
+    text-transform: uppercase;
+    padding: 0 2.5em
+}
+
+.E6EY1K-c-j:hover, .E6EY1K-c-j:focus {
+    text-decoration: none;
+    background-color: #2d2d2d
+}
+
+.E6EY1K-c-j:hover, .E6EY1K-c-j:focus {
+    color: #f0ab00
+}
+
+.E6EY1K-c-l {
+    display: inline-block;
+    height: 4.333333333333333em;
+    font-weight: 600;
+    color: #f6f9fc;
+    text-transform: uppercase;
+    text-align: right
+}
+
+.E6EY1K-c-e {
+    -webkit-box-shadow: -10px 0 10px rgba(51, 51, 51, 0.9);
+    box-shadow: -10px 0 10px rgba(51, 51, 51, 0.9)
+}
+
+.E6EY1K-c-c {
+    font-size: 15px;
+    font-size: 1rem;
+    display: inline-block;
+    width: 100%;
+    margin-top: .2em;
+    position: relative
+}
+
+.E6EY1K-c-e {
+    width: 100%;
+    padding: .785714285714286em 2.857142857142857em .785714285714286em
+        1.071428571428571em;
+    background: #222;
+    border: 1px solid #666;
+    font-size: .933333333333333em;
+    color: #fff;
+    outline: none
+}
+
+.E6EY1K-c-d {
+    position: absolute;
+    right: 1.5em;
+    top: 50%;
+    margin-top: -0.666666666666667em
+}
+
+.E6EY1K-c-d:hover, .E6EY1K-c-d:focus {
+    background-color: transparent
+}
+
+.E6EY1K-c-e {
+    -webkit-transition: height .1s ease;
+    -moz-transition: height .1s ease;
+    -o-transition: height .1s ease;
+    -ms-transition: height .1s ease;
+    transition: height .1s ease
+}
+
+.E6EY1K-d-d {
+    color: #f0ab00;
+    display: inline-block;
+    cursor: pointer;
+    margin-left: .666666666666667em
+}
+
+.E6EY1K-b-b {
+    float: left;
+    padding: 0 1rem;
+    position: relative;
+    width: 100%
+}
+
+.E6EY1K-b-b img {
+    max-width: 100%;
+    height: auto;
+    ms-interpolation-mode: bicubic
+}
+
+.E6EY1K-b-ib {
+    width: 8.3333333333333%
+}
+
+.E6EY1K-b-mb {
+    width: 16.6666666666667%
+}
+
+.E6EY1K-b-tb {
+    width: 75%
+}
+
+@media ( min-width :25em) {
+    .E6EY1K-b-K {
+        width: 25%
+    }
+    .E6EY1K-b-O {
+        width: 58.3333333333333%
+    }
+}
+
+@media ( min-width :50em) {
+    .E6EY1K-b-k {
+        width: 25%
+    }
+    .E6EY1K-b-n {
+        width: 50%
+    }
+}
+
+*, *:before, *:after {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box
+}
+
+html, body {
+    height: 100%;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 93.75%;
+    line-height: 1.333;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -ms-content-zooming: none
+}
+
+a {
+    text-decoration: none;
+    color: #008fcc
+}
+
+a:hover, a:focus {
+    text-decoration: underline
+}
+
+a img {
+    vertical-align: bottom
+}
+
+h2 {
+    font-size: 2.4em;
+    font-weight: bold;
+    color: #008fcc;
+    margin-top: .7em;
+    margin-bottom: .7em
+}
+
+.E6EY1K-a-g {
+    display: block;
+    width: 100%;
+    max-width: 80rem;
+    list-style: none;
+    margin: 0 auto;
+    zoom: 1
+}
+
+.E6EY1K-a-g:before, .E6EY1K-a-g:after {
+    content: "";
+    display: table
+}
+
+.E6EY1K-a-g:after {
+    clear: both
+}
+
+.E6EY1K-a-g * {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box
+}
+
+.E6EY1K-a-g .E6EY1K-a-g {
+    width: auto;
+    max-width: none;
+    margin-left: -1rem;
+    margin-right: -1rem
+}
+
+.E6EY1K-a-a {
+    font-size: 15px;
+    font-size: 1rem;
+    display: inline-block;
+    font-weight: 600;
+    color: #fff;
+    border: none;
+    padding: .666666666666667em 1.133333333333333em;
+    background-color: #f0ab00;
+    -webkit-transition: background-color .2s;
+    -moz-transition: background-color .2s;
+    -o-transition: background-color .2s;
+    -ms-transition: background-color .2s;
+    transition: background-color .2s;
+    text-decoration: none
+}
+
+.E6EY1K-a-a:hover, .E6EY1K-a-a:focus {
+    background-color: #d89a00;
+    outline: none;
+    text-decoration: none
+}
+
+.E6EY1K-a-e {
+    background-repeat: no-repeat;
+    background-position: left top;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    background-size: cover;
+    height: 0;
+    border: 0;
+    overflow: hidden;
+    background-color: transparent;
+    width: 1.333333333333333em;
+    padding: 1.4em 0 0;
+    background-image:
+        url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAVCAYAAABG1c6oAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2hpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYxIDY0LjE0MDk0OSwgMjAxMC8xMi8wNy0xMDo1NzowMSAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDowMzgwMTE3NDA3MjA2ODExODhDNkY0MENFRkI5ODA4MiIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDo5MUFEMjM1NkJDQzExMUUzQjg3OTk5M0I5MTJGQ0VFNSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo5MUFEMjM1NUJDQzExMUUzQjg3OTk5M0I5MTJGQ0VFNSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1LjEgTWFjaW50b3NoIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6RkREN0JFQTYyNjIxNjgxMTg3MUZENzgzOTY3OTA2QzciIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6MDM4MDExNzQwNzIwNjgxMTg4QzZGNDBDRUZCOTgwODIiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz4wYIhVAAABZklEQVR42qyUwUdEURTGe28S8VbDEPGIiHaJFhlepFXUv9AiQ6tGtJ7N/AFRRCRatCxaJWpTilYRbzUMj9EjRSQmpb7LF8edd++drg4/9zhz53POPeed4L37OfCfFhbEquAYPINv0AXnYKUfwUBkOAyaYMNy/wysgo5LcIhZJIxn4BQ8gJjxKn97AlMm0UGem0JsH9TBm3a3BrZBBRyCeVOGEc5HEDGrZUvJ62CL/iy4LWpKQjFlDceb74IX+kumLo/TfwX3DsEPcE1/wiRYEpf7sd97kUkwo19hR102zbNlElQlfIlHt9kiGKN/YhLMwZ4QXDOIzYADUXZqG2xV7o1o0CU4YpNURgucQ2kpZzE3fXoxBzb5wy7oEZXLQTVnjl9Jpv1Rzd5OQSMmwQUYKcpQt5hPocTajI2CK9GYnkwDj31oFQ09dmiHT9PW4mVF6LmYM000Z8mpr6AUveOZupriZT8CDADoqmLlEaD/6QAAAABJRU5ErkJggg==");
+}
+
+.E6EY1K-a-g:before, .E6EY1K-a-g:after {
+    content: "";
+    display: none !important;
+}
+
+.button-job {
+    font-size: 24px !important;
+    font-size: 1rem;
+    display: inline-block;
+    font-weight: 600;
+    color: #fff;
+    border: none;
+    padding: .666666666666667em 1.133333333333333em;
+    background-color: #f0ab00;
+    -webkit-transition: background-color .2s;
+    -moz-transition: background-color .2s;
+    -o-transition: background-color .2s;
+    -ms-transition: background-color .2s;
+    transition: background-color .2s;
+    text-decoration: none;
+}
+</style>
+</head>
+<body style="margin: 0 !important;">
+ <div>
+  <header class="E6EY1K-c-g">
+   <div class="E6EY1K-a-g">
+    <div class="E6EY1K-b-mb E6EY1K-b-k E6EY1K-b-b">
+     <a href="https://sapsponsorships.com"> <img
+      src="data:image/png;base64,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"
+      width="161" height="80" class="E6EY1K-c-a"
+      alt="SAP Sailing Analytics" style="width: 80px; height: 40px;">
+     </a>
+     <p class="E6EY1K-c-b">Sailing Analytics</p>
+    </div>
+    <div class="E6EY1K-b-tb E6EY1K-b-O E6EY1K-b-n E6EY1K-b-b">
+     <nav class="E6EY1K-c-i">
+      <a class="E6EY1K-c-j"
+       href="https://www.sapsailing.com/gwt/Home.html#StartPlace:null">Home</a>
+      <a class="E6EY1K-c-j"
+       href="https://www.sapsailing.com/gwt/Home.html#EventsPlace:null">Events</a>
+      <!--<a class="E6EY1K-c-j" href="https://www.sapsailing.com/gwt/Home.html#SolutionsPlace:navigationTab=SailingAnalytics">Solutions</a>-->
+      <a class="E6EY1K-c-j E6EY1K-c-k"
+       href="https://jobs.sapsailing.com/index.html">Jobs</a> <a
+       class="E6EY1K-c-j"
+       href="https://www.sap.com/about/legal/impressum.html">Imprint</a>
+     </nav>
+    </div>
+    <form class="E6EY1K-c-l E6EY1K-b-ib E6EY1K-b-K E6EY1K-b-b"
+     method="POST" onSubmit="return handleSearch();">
+     <div class="E6EY1K-c-c">
+      <button type="submit" class="E6EY1K-a-a E6EY1K-a-e E6EY1K-c-d">Search</button>
+      <input id="searchBox" type="text" class="E6EY1K-c-e"
+       placeholder="Search SAPSailing.com ">
+     </div>
+    </form>
+   </div>
+  </header>
+ </div>
+
+ <table style="margin-top: 45px; margin-bottom: 45px;">
+  <tr>
+   <td align="left" valign="middle"><div
+     style="margin-left: 20px; padding: 25px; width: 500px;">
+     <h2>About Us</h2>
+     <p>SAP is at the center of today’s technology revolution,
+      developing innovations that not only help our customers run at
+      their best, but also improve the lives of people everywhere.</p>
+     <p>As the market leader in enterprise application software, we
+      help organizations of all sizes and industries combat the damaging
+      effects of complexity, generate new opportunities for innovation
+      and growth, and stay ahead of the competition.</p>
+     <p>By delivering real time analytics around race rankings,
+      speeds, maneuvers, bearings etc., SAP is helping to simplify and
+      demystify the complex sport of sailing.</p>
+     <p>SAP Sailing Analytics provide insights and transparency to
+      the world of sailing by utilizing Cloud and In-Memory Technology,
+      processing GPS and wind measurement data in real time and
+      visualizing contents in various frontends accessible from
+      anywhere.</p>
+     <h2>Jobs</h2>
+     <a class="button-job"
+      href="https://jobs.sap.com/job/WalldorfSt_-Leon-Rot-Intern-Working-Student-%28fm%29-SAP-Sailing-Program-Job-BW/346487201/?locale=en_US"
+      target="_blank">&raquo;&nbsp;Student Backend Development</a>
+    </div></td>
+   <td align="center" valign="top"><div style="margin-top: 55px;">
+     <img src="RaceViewer2.jpg" height="85%" width="85%" />
+    </div></td>
+  </tr>
+  <tr>
+   <td style="padding-top: 20px;" align="center"></td>
+   <td style="padding-top: 20px;" align="center"></td>
+ </table>
+</body>
+</html>

@@ -2,6 +2,7 @@ package com.sap.sailing.domain.base.racegroup.impl;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.base.racegroup.RaceCell;
+import com.sap.sailing.domain.common.TargetTimeInfo;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.NamedImpl;
 
@@ -21,6 +22,8 @@ public class RaceCellImpl extends NamedImpl implements RaceCell {
     private final Double explicitFactor;
     
     private final int zeroBasedIndexInFleet;
+    
+    private final TargetTimeInfo targetTime;
 
     /**
      * @param zeroBasedIndexInFleet
@@ -34,12 +37,13 @@ public class RaceCellImpl extends NamedImpl implements RaceCell {
      *            except in case the first race column is a "virtual" one that holds a non-discardable carry-forward
      *            result. In this case, the second Race Column, which is the first "non-virtual" one, receives index 0.
      */
-    public RaceCellImpl(String raceColumnName, RaceLog raceLog, double factor, Double explicitFactor, int zeroBasedIndexInFleet) {
+    public RaceCellImpl(String raceColumnName, RaceLog raceLog, double factor, Double explicitFactor, int zeroBasedIndexInFleet, TargetTimeInfo targetTime) {
         super(raceColumnName);
         this.raceLog = raceLog;
         this.factor = factor;
         this.explicitFactor = explicitFactor;
         this.zeroBasedIndexInFleet = zeroBasedIndexInFleet;
+        this.targetTime = targetTime;
     }
 
     @Override
@@ -71,8 +75,13 @@ public class RaceCellImpl extends NamedImpl implements RaceCell {
     }
 
     @Override
+    public TargetTimeInfo getTargetTime() {
+        return targetTime;
+    }
+
+    @Override
     public String toString() {
         return "RaceCellImpl [factor=" + factor + ", explicitFactor=" + explicitFactor + ", zeroBasedIndexInFleet="
-                + zeroBasedIndexInFleet + ", getName()=" + getName() + "]";
+                + zeroBasedIndexInFleet + ", name=" + getName() + ", targetTime: " + getTargetTime() + "]";
     }
 }

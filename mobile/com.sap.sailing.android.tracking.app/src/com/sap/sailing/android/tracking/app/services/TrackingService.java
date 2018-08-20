@@ -1,5 +1,7 @@
 package com.sap.sailing.android.tracking.app.services;
 
+import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,63 +12,70 @@ import java.util.UUID;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject; 
+import org.json.JSONObject;
+
+import android.app.Notification;
+import android.app.PendingIntent;
+import android.app.Service;
+import android.content.Context;
+import android.content.Intent;
+import android.hardware.GeomagneticField;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Binder;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
+import android.widget.Toast;
 
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService;
+import com.sap.sailing.android.shared.ui.customviews.GPSQuality;
+import com.sap.sailing.android.shared.util.NotificationHelper;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.ui.activities.TrackingActivity;
 import com.sap.sailing.android.tracking.app.utils.AppPreferences;
 import com.sap.sailing.android.tracking.app.utils.DatabaseHelper;
 import com.sap.sailing.android.tracking.app.valueobjects.EventInfo;
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Speed;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterPerSecondSpeedImpl;
 import com.sap.sailing.domain.common.tracking.impl.FlatSmartphoneUuidAndGPSFixMovingJsonSerializer;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 
-import android.annotation.TargetApi;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.Service;
-import android.content.Intent;
-import android.content.Context;
-import android.graphics.BitmapFactory;
-import android.hardware.GeomagneticField;
-import android.location.Location;
-import android.location.LocationManager;
-import android.os.Binder;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.IBinder;
-import android.support.v4.app.NotificationCompat;
-import android.widget.Toast;
+public class TrackingService extends Service implements LocationListener {
 
-public class TrackingService extends Service implements  android.location.LocationListener {
+    private static final String TAG = TrackingService.class.getName();
+    private static final String THREAD_NAME = "Location WatchDog";
 
-    private NotificationManager notificationManager;
+    private static final int NO_LOCATION = 0;
+    private static final long NO_LOCATION_CHECK = Duration.ONE_SECOND.times(5).asMillis();
+
+    private static final int POOR_DISTANCE = 48;
+    private static final int GREAT_DISTANCE = 10;
+    private static final int NO_DISTANCE = 0;
+
     private AppPreferences prefs;
 
     private GPSQualityListener gpsQualityListener;
     private final IBinder trackingBinder = new TrackingBinder();
 
-    private static final String TAG = TrackingService.class.getName();
-
-    // Unique Identification Number for the Notification.
-    // We use it on Notification start, and to cancel it.
-    private int NOTIFICATION_ID = R.string.tracker_started;
-
     public final static int UPDATE_INTERVAL_IN_MILLIS_DEFAULT = 1000;
     public final static String GPS_DISABLED_MESSAGE = "gpsDisabled";
     private float minLocationUpdateDistanceInMeters = 0f;
-    private boolean initialLocation;
 
     private String checkinDigest;
     private EventInfo event;
 
-    protected LocationManager locationManager;
+    private LocationManager locationManager;
+    private LocationWatchDog locationWatchDog;
 
     /**
      * Must be synchronized upon while modifying the {@link #timerForDelayingSendingMessages} field
@@ -79,7 +88,7 @@ public class TrackingService extends Service implements  android.location.Locati
      * {@link #locationsQueuedBasedOnSendingInterval} after the send interval, and the next message sending intent
      * arriving can be forwarded to the sending service immediately, with the timer being started immediately afterwards
      * to delay the sending of messages arriving later until the resend interval has expired. If not {@code null},
-     * messages that arrive in {@link #enqueueForSending(String, JSONObject)} will be appended to
+     * messages that arrive in {@link #enqueueForSending(String, Location)} will be appended to
      * {@link #locationsQueuedBasedOnSendingInterval}.
      * <p>
      *
@@ -111,12 +120,7 @@ public class TrackingService extends Service implements  android.location.Locati
         locationsQueuedBasedOnSendingInterval = new LinkedHashMap<>();
         prefs = new AppPreferences(this);
 
-        initialLocation = true;
-        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        
-        
     }
 
     @Override
@@ -159,6 +163,18 @@ public class TrackingService extends Service implements  android.location.Locati
 
         prefs.setTrackerIsTracking(true);
         prefs.setTrackerIsTrackingCheckinDigest(checkinDigest);
+
+        if (locationWatchDog == null) {
+            // create new Location WatchDog
+            HandlerThread thread = new HandlerThread(THREAD_NAME, THREAD_PRIORITY_BACKGROUND);
+            thread.start();
+            locationWatchDog = new LocationWatchDog(thread.getLooper());
+
+            // start WatchDog
+            Message msg = locationWatchDog.obtainMessage(NO_LOCATION);
+            msg.obj = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            locationWatchDog.sendMessageDelayed(msg, NO_LOCATION_CHECK);
+        }
     }
 
     private void stopTracking() {
@@ -166,6 +182,12 @@ public class TrackingService extends Service implements  android.location.Locati
 
         prefs.setTrackerIsTracking(false);
         prefs.setTrackerIsTrackingCheckinDigest(null);
+
+        if (locationWatchDog != null) {
+            // stop the Location WatchDog
+            locationWatchDog.getLooper().quit();
+            locationWatchDog = null;
+        }
 
         stopSelf();
         ExLog.i(this, TAG, "Stopped Tracking");
@@ -190,13 +212,15 @@ public class TrackingService extends Service implements  android.location.Locati
             bearingImpl.add(new DegreeBearingImpl(- geomagneticField.getDeclination()));
         }
 
-        GPSQuality quality = GPSQuality.noSignal;
         if (gpsQualityListener != null) {
-            if (gpsAccuracy > 48) {
+            GPSQuality quality = GPSQuality.noSignal;
+            if (gpsAccuracy <= NO_DISTANCE) {
+                quality = GPSQuality.noSignal;
+            } else if (gpsAccuracy > POOR_DISTANCE) {
                 quality = GPSQuality.poor;
-            } else if (gpsAccuracy > 10) {
+            } else if (gpsAccuracy > GREAT_DISTANCE) {
                 quality = GPSQuality.good;
-            } else if (gpsAccuracy <= 10) {
+            } else if (gpsAccuracy <= GREAT_DISTANCE) {
                 quality = GPSQuality.great;
             }
 
@@ -204,7 +228,6 @@ public class TrackingService extends Service implements  android.location.Locati
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     private JSONObject createJsonLocationFix(Location location) throws JSONException {
         JSONObject fixJson = new JSONObject();
         fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.BEARING_DEG, location.getBearing());
@@ -214,7 +237,7 @@ public class TrackingService extends Service implements  android.location.Locati
         fixJson.put(FlatSmartphoneUuidAndGPSFixMovingJsonSerializer.LAT_DEG, location.getLatitude());
         return fixJson;
     }
-    
+
     private JSONArray createJsonLocationFixes(Iterable<Location> locations) throws JSONException {
         final JSONArray fixesAsJson = new JSONArray();
         for (final Location location : locations) {
@@ -302,16 +325,7 @@ public class TrackingService extends Service implements  android.location.Locati
             }
         };
     }
-
-    private void storeInitialTrackingTimestamp() {
-        if (prefs.getTrackingTimerStarted() == 0) {
-            prefs.setTrackingTimerStarted(System.currentTimeMillis());
-        }
-        initialLocation = false;
-    }
-
     
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP_MR1)
     @Override
     public IBinder onBind(Intent intent) {
         return trackingBinder;
@@ -320,7 +334,7 @@ public class TrackingService extends Service implements  android.location.Locati
     @Override
     public void onDestroy() {
         stopTracking();
-        notificationManager.cancel(NOTIFICATION_ID);
+        stopForeground(false);
         Toast.makeText(this, R.string.tracker_stopped, Toast.LENGTH_SHORT).show();
     }
 
@@ -329,13 +343,19 @@ public class TrackingService extends Service implements  android.location.Locati
      */ 
     @Override
     public void onLocationChanged(Location location) {
-        if (initialLocation) {
-            storeInitialTrackingTimestamp();
-        }
-        reportGPSQualityBearingAndSpeed(location.getAccuracy(), location.getBearing(), location.getSpeed(),
-                location.getLatitude(), location.getLongitude(), location.getAltitude());
+        reportGPSQualityBearingAndSpeed(location.getAccuracy(), location.getBearing(), location.getSpeed(), location.getLatitude(), location.getLongitude(), location.getAltitude());
         final String postUrlStr = event.server + prefs.getServerGpsFixesPostPath();
         enqueueForSending(postUrlStr, location);
+
+        if (locationWatchDog != null) {
+            // clear message queue
+            locationWatchDog.removeMessages(NO_LOCATION);
+
+            // add new message with last location
+            Message msg = locationWatchDog.obtainMessage(NO_LOCATION);
+            msg.obj = location;
+            locationWatchDog.sendMessageDelayed(msg, NO_LOCATION_CHECK);
+        }
     }
 
     @Override
@@ -357,17 +377,17 @@ public class TrackingService extends Service implements  android.location.Locati
     }
 
      private void showNotification() {
-     Intent intent = new Intent(this, TrackingActivity.class);
-     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-     | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-     PendingIntent pi = PendingIntent.getActivity(this, 0, intent, 0);
-     Notification notification = new NotificationCompat.Builder(this)
-     .setContentTitle(getText(R.string.app_name))
-     .setContentText(getString(R.string.tracking_notification_text, event.name)).setContentIntent(pi)
-         .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
-         .setSmallIcon(R.drawable.ic_directions_boat)
-         .setOngoing(true).build();
-         notificationManager.notify(NOTIFICATION_ID, notification);
+         Intent intent = new Intent(this, TrackingActivity.class);
+         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+         Notification notification = NotificationHelper.getNotification(
+             this,
+             getText(R.string.app_name),
+             getString(R.string.tracking_notification_text, event.name),
+             pendingIntent
+         );
+         startForeground(NotificationHelper.getNotificationId(), notification);
      }
 
     public void registerGPSQualityListener(GPSQualityListener listener) {
@@ -384,23 +404,32 @@ public class TrackingService extends Service implements  android.location.Locati
         }
     }
 
-    public enum GPSQuality {
-        noSignal(0), poor(2), good(3), great(4);
-
-        private final int gpsQuality;
-
-        GPSQuality(int quality) {
-            this.gpsQuality = quality;
-        }
-
-        public int toInt() {
-            return this.gpsQuality;
-        }
-    }
-
     public interface GPSQualityListener {
-        void gpsQualityAndAccuracyUpdated(GPSQuality quality, float gpsAccurracy, Bearing gpsBearing,
-            Speed gpsSpeed);
+        void gpsQualityAndAccuracyUpdated(GPSQuality quality, float accuracy, Bearing bearing, Speed speed);
     }
 
+    private class LocationWatchDog extends Handler {
+
+        LocationWatchDog(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case NO_LOCATION:
+                    ExLog.i(getApplicationContext(), TAG, "No Location");
+                    Location location = (Location) msg.obj;
+                    if (location == null) {
+                        location = new Location(LocationManager.GPS_PROVIDER);
+                    }
+                    reportGPSQualityBearingAndSpeed(NO_DISTANCE, location.getBearing(), location.getSpeed(),
+                        location.getLatitude(), location.getLongitude(), location.getAltitude());
+                    break;
+
+                default:
+                    super.handleMessage(msg);
+            }
+        }
+    }
 }

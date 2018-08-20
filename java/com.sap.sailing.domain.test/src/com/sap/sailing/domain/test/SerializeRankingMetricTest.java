@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -33,10 +34,10 @@ public class SerializeRankingMetricTest extends AbstractSerializationTest {
         final BoatClass _49er = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
         final TrackedRace trackedRace = new DynamicTrackedRaceImpl(new DynamicTrackedRegattaImpl(
                 new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, "Regatta", /* boatClass */ _49er,
-                        /* startDate */ null, /* endDate */ null, /* trackedRegattaRegistry */ null,
-                        new LowPoint(), UUID.randomUUID(), /* courseArea */ null)),
+                        /* canBoatsOfCompetitorsChangePerRace */ true, /* startDate */ null, /* endDate */ null,
+                        /* trackedRegattaRegistry */ null, new LowPoint(), UUID.randomUUID(), /* courseArea */ null)),
                 new RaceDefinitionImpl("Race", new CourseImpl("Course", Collections.<Waypoint>emptyList()) , 
-                        /* boatClass */ _49er, Collections.<Competitor>emptySet()),
+                        /* boatClass */ _49er, Collections.<Competitor,Boat>emptyMap()),
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 0l, 0l, 0l,
                 false, TimeOnTimeAndDistanceRankingMetric::new, null);
         RankingMetric clone = cloneBySerialization(trackedRace.getRankingMetric(), DomainFactory.INSTANCE);

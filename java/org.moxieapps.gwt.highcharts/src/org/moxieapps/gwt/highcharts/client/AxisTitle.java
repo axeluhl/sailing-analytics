@@ -154,4 +154,16 @@ public class AxisTitle extends Configurable<AxisTitle> {
         return this.setOption("text", text);
     }
 
+    /**
+     * Convenience method for setting the 'y' option of the title.  Equivalent to:
+     * <pre><code>
+     *     axisTitle.setOption("y", 25);
+     * </code></pre>
+     * @param y The number of pixels that the y-axis will be offset
+     * @return A reference to this {@link AxisTitle} instance for convenient method chaining.
+     */
+    public AxisTitle setY(Number y) {
+        return this.setOption("y", y);
+    }
+
 }

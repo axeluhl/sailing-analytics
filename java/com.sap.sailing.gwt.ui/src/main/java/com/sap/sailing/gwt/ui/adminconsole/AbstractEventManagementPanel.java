@@ -22,13 +22,16 @@ import com.sap.sailing.gwt.ui.shared.RaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 
 public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel {
     protected final TrackedRacesListComposite trackedRacesListComposite;
     private final List<RegattaDTO> availableRegattas;
     private final ListBox availableRegattasListBox;
     
-    public AbstractEventManagementPanel(SailingServiceAsync sailingService, RegattaRefresher regattaRefresher,
+    public AbstractEventManagementPanel(SailingServiceAsync sailingService,
+            RegattaRefresher regattaRefresher,
             ErrorReporter errorReporter, boolean actionButtonsEnabled, StringMessages stringMessages) {
         super(sailingService, regattaRefresher, errorReporter, stringMessages);
         this.availableRegattas = new ArrayList<RegattaDTO>();
@@ -37,7 +40,8 @@ public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel 
         this.availableRegattasListBox.ensureDebugId("AvailableRegattasListBox");
         
         // TrackedEventsComposite should exist in every *ManagementPanel. 
-        trackedRacesListComposite = new TrackedRacesListComposite(sailingService, errorReporter, regattaRefresher,
+        trackedRacesListComposite = new TrackedRacesListComposite(null, null, sailingService, errorReporter,
+                regattaRefresher,
                 stringMessages, /* multiselection */ true, actionButtonsEnabled);
         trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");
     }
@@ -119,7 +123,7 @@ public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel 
                     builder.append(")");
                     builder.append("\n");
                 }
-                Window.alert(builder.toString());
+                Notification.notify(builder.toString(), NotificationType.ERROR);
                 result = false;
             } else {
                 result = true;

@@ -8,5 +8,6 @@
     <string name="preference_server_competitor_path" translatable="false">/sailingserver/api/v1/competitors/{competitor_id}</string>
     <string name="preference_server_team_info_path" translatable="false">/sailingserver/api/v1/competitors/{competitor_id}/team</string>
     <string name="preference_server_team_image_upload_path" translatable="false">/sailingserver/api/v1/competitors/{competitor_id}/team/image</string>
-    <string name="preferece_server_mark_path" translatable="false">/sailingserver/api/v1/leaderboards/{leaderboardName}/marks/{markId}</string>
+    <string name="preference_server_mark_path" translatable="false">/sailingserver/api/v1/leaderboards/{leaderboardName}/marks/{mark_id}</string>
+    <string name="preference_server_boat_path" translatable="false">/sailingserver/api/v1/boats/{boat_id}</string>
 </resources>

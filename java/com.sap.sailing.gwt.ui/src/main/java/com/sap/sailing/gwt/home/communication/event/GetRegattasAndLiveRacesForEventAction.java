@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.communication.event;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -14,11 +15,9 @@ import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.server.EventActionUtil;
 import com.sap.sailing.gwt.home.server.EventActionUtil.LeaderboardCallback;
-import com.sap.sailing.gwt.home.server.EventActionUtil.RaceCallback;
 import com.sap.sailing.gwt.home.server.LeaderboardContext;
 import com.sap.sailing.gwt.home.server.RaceContext;
-import com.sap.sailing.gwt.server.HomeServiceUtil;
-import com.sap.sse.common.Duration;
+import com.sap.sailing.gwt.home.server.RaceRefreshCalculator;
 import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 
@@ -53,39 +52,27 @@ public class GetRegattasAndLiveRacesForEventAction implements SailingAction<Resu
     @Override
     @GwtIncompatible
     public ResultWithTTL<RegattasAndLiveRacesDTO> execute(SailingDispatchContext context) {
-        Event event = context.getRacingEventService().getEvent(eventId);
-        final Map<String, RegattaMetadataDTO> regattas = mapRegattas(context, event);
+        final Map<String, RegattaMetadataDTO> regattas = mapRegattas(context);
         final TreeMap<RegattaMetadataDTO, TreeSet<LiveRaceDTO>> regattasWithRaces = new TreeMap<>();
-        EventState eventState = HomeServiceUtil.calculateEventState(event);
-        
-        final Duration ttl;
-        if (eventState == EventState.RUNNING || eventState == EventState.UPCOMING) {
-            EventActionUtil.forRacesOfEvent(context, eventId, new RaceCallback() {
-                @Override
-                public void doForRace(RaceContext context) {
-                    LiveRaceDTO liveRace = context.getLiveRaceOrNull();
-                    if(liveRace != null) {
-                        ensureRegatta(context, regattas, regattasWithRaces).add(liveRace);
-                    }
-                }
-            });
-            ttl = Duration.ONE_MINUTE.times(2);
-        } else {
-            ttl = EventActionUtil.calculateTtlForNonLiveEvent(event, eventState);
-        }
         final TreeSet<RegattaMetadataDTO> regattasWithoutRaces = new TreeSet<>();
-        for (RegattaMetadataDTO regatta : regattas.values()) {
-            if (!regattasWithRaces.containsKey(regatta)) {
-                regattasWithoutRaces.add(regatta);
-            }
-        }
-        return new ResultWithTTL<RegattasAndLiveRacesDTO>(ttl, new RegattasAndLiveRacesDTO(regattasWithRaces, regattasWithoutRaces));
+        final RaceRefreshCalculator refreshCalculator = new RaceRefreshCalculator();
+
+        EventActionUtil.forRacesOfEvent(context, eventId, raceContent -> {
+            Optional<LiveRaceDTO> liveRace = Optional.ofNullable(raceContent.getLiveRaceOrNull());
+            liveRace.ifPresent(r -> ensureRegatta(raceContent, regattas, regattasWithRaces).add(r));
+            refreshCalculator.doForRace(raceContent);
+        });
+        regattas.values().stream().filter(regatta -> !regattasWithRaces.containsKey(regatta))
+                .forEach(regattasWithoutRaces::add);
+        RegattasAndLiveRacesDTO dto = new RegattasAndLiveRacesDTO(regattasWithRaces, regattasWithoutRaces);
+        ResultWithTTL<RegattasAndLiveRacesDTO> result = new ResultWithTTL<>(refreshCalculator.getTTL(), dto);
+        return EventActionUtil.withLiveRaceOrDefaultSchedule(context, eventId, event -> result, dto);
     }
 
     @GwtIncompatible
-    private Map<String, RegattaMetadataDTO> mapRegattas(SailingDispatchContext context, Event event) {
+    private Map<String, RegattaMetadataDTO> mapRegattas(SailingDispatchContext context) {
         final Map<String, RegattaMetadataDTO> result = new HashMap<>();
-        EventActionUtil.forLeaderboardsOfEvent(context, event, new LeaderboardCallback() {
+        EventActionUtil.forLeaderboardsOfEvent(context, eventId, new LeaderboardCallback() {
             @Override
             public void doForLeaderboard(LeaderboardContext context) {
                 result.put(context.getLeaderboardName(), context.asRegattaMetadataDTO());
@@ -95,7 +82,8 @@ public class GetRegattasAndLiveRacesForEventAction implements SailingAction<Resu
     }
 
     @GwtIncompatible
-    protected Set<LiveRaceDTO> ensureRegatta(RaceContext context, Map<String, RegattaMetadataDTO> regattas, Map<RegattaMetadataDTO, TreeSet<LiveRaceDTO>> regattasWithRaces) {
+    protected Set<LiveRaceDTO> ensureRegatta(RaceContext context, Map<String, RegattaMetadataDTO> regattas,
+            Map<RegattaMetadataDTO, TreeSet<LiveRaceDTO>> regattasWithRaces) {
         String regattaName = context.getRegattaName();
         RegattaMetadataDTO regatta = regattas.get(regattaName);
         TreeSet<LiveRaceDTO> races = regattasWithRaces.get(regatta);

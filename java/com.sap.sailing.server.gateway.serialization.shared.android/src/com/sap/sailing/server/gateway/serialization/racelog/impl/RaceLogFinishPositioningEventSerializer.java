@@ -17,6 +17,7 @@ public abstract class RaceLogFinishPositioningEventSerializer extends BaseRaceLo
     public static final String FIELD_SCORE_CORRECTIONS_MAX_POINTS_REASON = "maxPointsReason";
     public static final String FIELD_SCORE = "score";
     public static final String FIELD_COMMENT = "comment";
+    public static final String FIELD_MERGE_STATE = "mergeState";
     public static final String FIELD_RANK = "rank";
     public static final String FIELD_FINISHING_TIME_POINT_AS_MILLIS = "finishingTimePointAsMillis";
     
@@ -45,6 +46,7 @@ public abstract class RaceLogFinishPositioningEventSerializer extends BaseRaceLo
                 jsonPositionedCompetitor.put(FIELD_SCORE_CORRECTIONS_MAX_POINTS_REASON, positionedCompetitor.getMaxPointsReason().name());
                 jsonPositionedCompetitor.put(FIELD_SCORE, positionedCompetitor.getScore());
                 jsonPositionedCompetitor.put(FIELD_COMMENT, positionedCompetitor.getComment());
+                jsonPositionedCompetitor.put(FIELD_MERGE_STATE, positionedCompetitor.getMergeState().name());
                 jsonPositionedCompetitor.put(FIELD_RANK, positionedCompetitor.getOneBasedRank()); // writes it as an int, but deserializer will fetch it as a Long
                 jsonPositionedCompetitor.put(FIELD_FINISHING_TIME_POINT_AS_MILLIS, positionedCompetitor.getFinishingTime() == null ? null : positionedCompetitor.getFinishingTime().asMillis());
                 jsonPositionedCompetitors.add(jsonPositionedCompetitor);

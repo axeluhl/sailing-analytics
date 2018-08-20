@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.ArrayList;
+import java.util.ArrayList; 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -147,6 +147,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         
         ListHandler<RegattaDTO> columnSortHandler = new ListHandler<RegattaDTO>(regattaListDataProvider.getList());
         table.addColumnSortHandler(columnSortHandler);
+        columnSortHandler.setComparator(regattaSelectionCheckboxColumn, regattaSelectionCheckboxColumn.getComparator());
 
         TextColumn<RegattaDTO> regattaNameColumn = new TextColumn<RegattaDTO>() {
             @Override
@@ -161,6 +162,16 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                 return new NaturalComparator().compare(r1.getName(), r2.getName());
             }
         });
+
+        TextColumn<RegattaDTO> regattaCanBoatsOfCompetitorsChangePerRaceColumn = new TextColumn<RegattaDTO>() {
+            @Override
+            public String getValue(RegattaDTO regatta) {
+                return regatta.canBoatsOfCompetitorsChangePerRace ? stringMessages.yes() : stringMessages.no();
+            }
+        };
+        regattaCanBoatsOfCompetitorsChangePerRaceColumn.setSortable(true);
+        columnSortHandler.setComparator(regattaCanBoatsOfCompetitorsChangePerRaceColumn,
+                (r1, r2)->Boolean.valueOf(r1.canBoatsOfCompetitorsChangePerRace).compareTo(Boolean.valueOf(r2.canBoatsOfCompetitorsChangePerRace)));
 
         TextColumn<RegattaDTO> startEndDateColumn = new TextColumn<RegattaDTO>() {
             @Override
@@ -222,6 +233,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                 if (RegattaConfigImagesBarCell.ACTION_EDIT.equals(value)) {
                     editRegatta(regatta);
                 } else if (RegattaConfigImagesBarCell.ACTION_REMOVE.equals(value)) {
+                    
                     if (Window.confirm(stringMessages.doYouReallyWantToRemoveRegatta(regatta.getName()))) {
                         removeRegatta(regatta);
                     }
@@ -231,6 +243,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
 
         table.addColumn(regattaSelectionCheckboxColumn, regattaSelectionCheckboxColumn.getHeader());
         table.addColumn(regattaNameColumn, stringMessages.regattaName());
+        table.addColumn(regattaCanBoatsOfCompetitorsChangePerRaceColumn, stringMessages.canBoatsChange());
         table.addColumn(startEndDateColumn, stringMessages.from() + "/" + stringMessages.to());
         table.addColumn(regattaBoatClassColumn, stringMessages.boatClass());
         table.addColumn(rankingMetricColumn, stringMessages.rankingMetric());
@@ -357,5 +370,9 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
 
     public RefreshableMultiSelectionModel<RegattaDTO> getRefreshableMultiSelectionModel() {
         return refreshableRegattaMultiSelectionModel;
+    }
+
+    public CellTable<RegattaDTO> getRegattaTable() {
+        return regattaTable;
     }
 }

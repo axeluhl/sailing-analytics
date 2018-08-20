@@ -170,7 +170,7 @@ public interface RaceState extends ReadonlyRaceState {
     /**
      * Sets a new confirmed finishing list.
      */
-    void setFinishPositioningConfirmed(TimePoint now);
+    void setFinishPositioningConfirmed(TimePoint now, CompetitorResults positionedCompetitors);
 
     /**
      * Sets a new active course design.

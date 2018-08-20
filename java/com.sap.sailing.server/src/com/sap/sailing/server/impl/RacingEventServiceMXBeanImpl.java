@@ -19,4 +19,14 @@ public class RacingEventServiceMXBeanImpl implements RacingEventServiceMXBean {
     public int getNumberOfLeaderboards() {
         return getRacingEventService().getLeaderboards().size();
     }
+
+    @Override
+    public int getNumberOfTrackedRacesToRestore() {
+        return getRacingEventService().getNumberOfTrackedRacesToRestore();
+    }
+
+    @Override
+    public int getNumberOfTrackedRacesRestored() {
+        return getRacingEventService().getNumberOfTrackedRacesRestored();
+    }
 }

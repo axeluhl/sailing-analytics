@@ -1,12 +1,13 @@
 package com.sap.sailing.racecommittee.app.data.handlers;
 
-import java.util.Collection;
+import java.util.Map;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.racecommittee.app.data.OnlineDataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 
-public class CompetitorsDataHandler extends DataHandler<Collection<Competitor>> {
+public class CompetitorsDataHandler extends DataHandler<Map<Competitor, Boat>> {
     
     private ManagedRace race;
 
@@ -21,12 +22,12 @@ public class CompetitorsDataHandler extends DataHandler<Collection<Competitor>> 
     }
     
     @Override
-    public Collection<Competitor> getCachedResults() {
-        return race.getCompetitors();
+    public Map<Competitor, Boat> getCachedResults() {
+        return race.getCompetitorsAndBoats();
     }
 
     @Override
-    public void onResult(Collection<Competitor> data, boolean isCached) {
+    public void onResult(Map<Competitor, Boat> data, boolean isCached) {
         race.setCompetitors(data);
     }
 

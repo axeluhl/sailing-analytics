@@ -19,10 +19,7 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.impl.BoatClassImpl;
-import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
@@ -86,15 +83,14 @@ public abstract class AbstractJsonExportTest {
      
     protected List<Competitor> createCompetitors(int numberOfCompetitorsToCreate) {
         List<Competitor> result = new ArrayList<Competitor>();
-        BoatClass boatClass = new BoatClassImpl("505", /* typicallyStartsUpwind */ true);
         for (int i = 1; i <= numberOfCompetitorsToCreate; i++) {
             String competitorName = "C" + i;
-            Competitor competitor = new CompetitorImpl(UUID.randomUUID(), competitorName, Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
+            Competitor competitor = new CompetitorImpl(UUID.randomUUID(), competitorName, "KYC", Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
                                     new PersonImpl(competitorName, new NationalityImpl("GER"),
                                             /* dateOfBirth */ null, "This is famous "+competitorName)),
                                             new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
-                                            /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
-                                    boatClass, null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null); 
+                                            /* dateOfBirth */null, "This is Rigo, the coach")),
+                                    /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null); 
             result.add(competitor);
         }
         return result;

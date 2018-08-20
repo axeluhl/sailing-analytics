@@ -67,4 +67,10 @@ public class MongoRaceLogStoreImpl implements RaceLogStore {
         raceLogCache.put(identifier, raceLog);
     }
 
+    @Override
+    public void clear() {
+        mongoObjectFactory.removeAllRaceLogs();
+        raceLogCache.clear();
+    }
+
 }

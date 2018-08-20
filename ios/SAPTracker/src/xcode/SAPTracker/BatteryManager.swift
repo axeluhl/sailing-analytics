@@ -15,11 +15,11 @@ class BatteryManager: NSObject {
     }
     
     struct SendingInterval {
-        static let Normal: NSTimeInterval = 3
-        static let BatterySaving: NSTimeInterval = 30
+        static let Normal: TimeInterval = 3
+        static let BatterySaving: TimeInterval = 30
     }
     
-    private let device: UIDevice!
+    fileprivate let device: UIDevice!
     
     class var sharedManager: BatteryManager {
         struct Singleton {
@@ -29,31 +29,31 @@ class BatteryManager: NSObject {
     }
     
     override init() {
-        device = UIDevice.currentDevice()
+        device = UIDevice.current
         super.init()
         setup()
     }
     
     // MARK: - Setup
     
-    private func setup() {
+    fileprivate func setup() {
         setupDevice()
     }
     
-    private func setupDevice() {
-        device.batteryMonitoringEnabled = true
+    fileprivate func setupDevice() {
+        device.isBatteryMonitoringEnabled = true
     }
     
     // MARK: - Properties
     
     var batterySaving: Bool { get { return Preferences.batterySaving || forceBatterySaving() } }
         
-    var sendingPeriod: NSTimeInterval { get { return batterySaving ? SendingInterval.BatterySaving : SendingInterval.Normal } }
+    var sendingPeriod: TimeInterval { get { return batterySaving ? SendingInterval.BatterySaving : SendingInterval.Normal } }
     
     // MARK: - Helper
     
-    private func forceBatterySaving() -> Bool {
-        return device.batteryLevel < BatteryLevel.Min && (device.batteryState == .Unplugged || device.batteryState == .Unknown)
+    fileprivate func forceBatterySaving() -> Bool {
+        return device.batteryLevel < BatteryLevel.Min && (device.batteryState == .unplugged || device.batteryState == .unknown)
     }
     
  }

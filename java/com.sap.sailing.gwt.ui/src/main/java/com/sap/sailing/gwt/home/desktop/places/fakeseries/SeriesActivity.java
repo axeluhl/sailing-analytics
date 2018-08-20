@@ -8,7 +8,6 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.client.place.event.legacy.SeriesClientFactory;
@@ -24,14 +23,15 @@ import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
+import com.sap.sailing.gwt.ui.leaderboard.LeaderboardEntryPoint;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
 import com.sap.sse.gwt.client.player.Timer.PlayStates;
-import com.sap.sse.gwt.client.useragent.UserAgentDetails;
+import com.sap.sse.security.ui.client.UserService;
 
 public class SeriesActivity extends AbstractActivity implements SeriesView.Presenter {
 
@@ -45,13 +45,12 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     
     private SeriesView<AbstractSeriesTabPlace, SeriesView.Presenter> currentView = new TabletAndDesktopSeriesView();
     
-    private final UserAgentDetails userAgent = new UserAgentDetails(Window.Navigator.getUserAgent());
     private final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
     private final long delayBetweenAutoAdvancesInMilliseconds = LeaderboardEntryPoint.DEFAULT_REFRESH_INTERVAL_MILLIS;
     private final EventSeriesViewDTO series;
 
     public SeriesActivity(AbstractSeriesTabPlace place, EventSeriesViewDTO series, SeriesClientFactory clientFactory,
-            DesktopPlacesNavigator homePlacesNavigator, NavigationPathDisplay navigationPathDisplay) {
+            DesktopPlacesNavigator homePlacesNavigator, NavigationPathDisplay navigationPathDisplay, FlagImageResolver flagImageResolver) {
         this.currentPlace = place;
         this.series = series;
         this.ctx = new SeriesContext(place.getCtx());
@@ -60,11 +59,10 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
 
         if (this.ctx.getAnalyticsManager() == null) {
             ctx.withAnalyticsManager(new EventSeriesAnalyticsDataManager( //
-                    clientFactory.getSailingService(), //
+                    clientFactory, //
                     asyncActionsExecutor, //
                     new Timer(PlayModes.Live, PlayStates.Paused, delayBetweenAutoAdvancesInMilliseconds), //
-                    clientFactory.getErrorReporter(), //
-                    userAgent));
+                    clientFactory.getErrorReporter(), flagImageResolver));
 
         }
         
@@ -139,5 +137,10 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     @Override
     public ErrorAndBusyClientFactory getErrorAndBusyClientFactory() {
         return clientFactory;
+    }
+    
+    @Override
+    public UserService getUserService() {
+        return clientFactory.getUserService();
     }
 }

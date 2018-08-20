@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 import com.sap.sailing.gwt.home.shared.utils.EventDatesFormatterUtil;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.LinkUtil;
 
 public class EventTeaser extends Composite {
@@ -85,6 +86,9 @@ public class EventTeaser extends Composite {
     
     public void setSeriesInformation(PlaceNavigation<?> seriesNavigation, EventListEventSeriesDTO eventSeries) {
         eventImage.appendChild(new EventTeaserSeriesInfoCorner(seriesNavigation, eventSeries).getElement());
+        eventName.setInnerSafeHtml(LongNamesUtil.breakLongName(eventSeries.getDisplayName()));
+        venue.setInnerText(StringMessages.INSTANCE.lastEvent(event.getLocationOrVenue()));
+        eventImage.setTitle(StringMessages.INSTANCE.teaserOverallLinkToolTip());
     }
     
     public void hideImage(boolean hide) {

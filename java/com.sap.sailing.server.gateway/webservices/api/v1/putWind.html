@@ -1,0 +1,42 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/wind/putWind</h2>
+
+<b>Description:</b>
+<p>Gets the details of a competitor</p>
+<br/>
+<table>
+    <tr>
+        <td>Webservice Type:</td>
+        <td>REST</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>Json</td>
+    </tr>
+    <tr>
+        <td>Mandatory parameters:</td>
+        <td>windData, regattaName, raceName, windSourceType, windSourceId</td>
+    </tr>
+    <tr>
+        <td>Examples:</td>
+        <td>
+            Request: <br> {"windData":[{"position":{"latitude_deg":1,"longitude_deg":1},"timepoint":1234,"direction":120,"speedinknots":60}],"regattaNamesAndRaceNames":[{"regattaName":"ESS 2016 Cardiff","raceName":"Race 1"}],"windSourceType":"WEB","windSourceId":"tracker02"} 
+            <br>
+            Answer: <br> [{"regattaNameAndRaceName":{"regattaName":"ESS 2016 Cardiff","raceName":"Race 1"},"answer":[true]}]
+        </td>
+    </tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

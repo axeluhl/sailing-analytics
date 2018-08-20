@@ -1,0 +1,45 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:style>
+        .label {
+            margin-right: .25em;
+        }
+        .label:after {
+            content: ":";
+        }
+        .languageSwichLink, .languageSelection {
+            color: #efaa00;
+            cursor: pointer;
+            font-family: 'Open Sans', Arial, Verdana, sans-serif !important;
+        }
+        .languageSelection:-ms-expand {
+            display: none;
+        }
+        .languageSelection {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            -ms-appearance: none;
+            appearance: none;
+            line-height: 1.5em;
+            height: 1.5em;
+            display: inline-block;
+            border: transparent;
+            padding-right: 1.2em;
+            background-color: #333;
+            background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZlcnNpb249JzEuMScgaGVpZ2h0PScxOHB4JyB3aWR0aD0nMTZweCc+PHRleHQgeD0nMCcgeT0nMTUnIGZpbGw9JyNlZmFhMDAnIGZvbnQtc2l6ZT0nMTYnPiYjOTY2MDs8L3RleHQ+PC9zdmc+");
+            background-position: right center;
+            background-repeat: no-repeat;
+            /* Fix for old firefox versions to make the native arrow disappear: */
+            text-overflow: "";
+            text-indent: 0.01px;
+        }
+        .languageSelection::-ms-expand {
+            display: none;
+        }
+    </ui:style>
+    <g:FlowPanel tag="span">
+        <g:InlineLabel ui:field="labelUi" addStyleNames="{style.label}"/>
+        <g:Anchor ui:field="languageSwitchLinkUi" styleName="{style.languageSwichLink}"/>
+        <g:ValueListBox ui:field="languageSelectionUi" addStyleNames="{style.languageSelection}"/>
+    </g:FlowPanel>
+</ui:UiBinder> 

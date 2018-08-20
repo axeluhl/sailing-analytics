@@ -15,8 +15,11 @@ import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
+import com.sap.sailing.domain.tracking.impl.TimeRangeCache;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Function;
+import com.sap.sse.common.scalablevalue.ScalableValue;
 
 /**
  * Wrapper for a {@link RaceLog} which will ignore all calls trying to add an {@link RaceLogEvent}. All other
@@ -249,5 +252,23 @@ public class NoAddingRaceLogWrapper implements RaceLog {
     @Override
     public void revokeEvent(AbstractLogEventAuthor author, RaceLogEvent toRevoke) throws NotRevokableException {
         innerRaceLog.revokeEvent(author, toRevoke);
+    }
+
+    @Override
+    public <InternalType, ValueType> ValueType getInterpolatedValue(TimePoint timePoint,
+            Function<RaceLogEvent, ScalableValue<InternalType, ValueType>> converter) {
+        return innerRaceLog.getInterpolatedValue(timePoint, converter);
+    }
+    
+    @Override
+    public int size() {
+        return innerRaceLog.size();
+    }
+
+    @Override
+    public <T> T getValueSum(TimePoint from, TimePoint to, T nullElement,
+            com.sap.sailing.domain.tracking.Track.Adder<T> adder, TimeRangeCache<T> cache,
+            com.sap.sailing.domain.tracking.Track.TimeRangeValueCalculator<T> valueCalculator) {
+        return innerRaceLog.getValueSum(from, to, nullElement, adder, cache, valueCalculator);
     }
 }

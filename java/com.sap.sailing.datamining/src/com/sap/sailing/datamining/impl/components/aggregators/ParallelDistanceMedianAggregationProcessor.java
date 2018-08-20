@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.impl.MeterDistance;
+import com.sap.sse.common.Distance;
 import com.sap.sse.datamining.components.AggregationProcessorDefinition;
 import com.sap.sse.datamining.components.Processor;
 import com.sap.sse.datamining.impl.components.GroupedDataEntry;
@@ -50,6 +50,9 @@ public class ParallelDistanceMedianAggregationProcessor
     protected Map<GroupKey, Distance> aggregateResult() {
         Map<GroupKey, Distance> result = new HashMap<>();
         for (Entry<GroupKey, List<Distance>> groupedValuesEntry : groupedValues.entrySet()) {
+            if (isAborted()) {
+                break;
+            }
             result.put(groupedValuesEntry.getKey(), getMedianOf(groupedValuesEntry.getValue()));
         }
         return result;

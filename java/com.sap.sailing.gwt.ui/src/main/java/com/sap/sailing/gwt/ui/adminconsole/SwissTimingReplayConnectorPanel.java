@@ -63,7 +63,8 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
     private final Grid grid;
     private final List<SwissTimingReplayRaceDTO> availableSwissTimingRaces;
 
-    public SwissTimingReplayConnectorPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
+    public SwissTimingReplayConnectorPanel(final SailingServiceAsync sailingService,
+            ErrorReporter errorReporter,
             RegattaRefresher regattaRefresher, StringMessages stringMessages) {
         super(sailingService, regattaRefresher, errorReporter, true, stringMessages);
         this.errorReporter = errorReporter;
@@ -196,7 +197,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
             @Override
             public List<String> getSearchableStrings(SwissTimingReplayRaceDTO t) {
                 List<String> strings = new ArrayList<String>();
-                strings.addAll(Arrays.asList(t.boat_class, t.flight_number, t.getName(), t.race_id, t.rsc));
+                strings.addAll(Arrays.asList(t.boat_class, t.flight_number, t.getName(), t.rsc));
                 return strings;
             }
         };

@@ -5,15 +5,14 @@ import java.util.LinkedHashMap;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Leg;
-import com.sap.sailing.domain.common.Bearing;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.TargetTimeInfo.LegTargetTimeInfo;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.domain.tracking.impl.TrackedLegImpl;
-import com.sap.sse.common.Duration;
+import com.sap.sse.common.Bearing;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
@@ -27,7 +26,7 @@ public interface TrackedLeg extends Serializable {
     TrackedRace getTrackedRace();
 
     /**
-     * Determines whether the current {@link #getLeg() leg} is +/- {@link #UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees
+     * Determines whether the current {@link #getLeg() leg} is +/- {@link LegType#UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees
      * collinear with the current wind's bearing.
      */
     boolean isUpOrDownwindLeg(TimePoint at) throws NoWindException;
@@ -101,7 +100,7 @@ public interface TrackedLeg extends Serializable {
     Distance getGreatCircleDistance(TimePoint timePoint, MarkPositionAtTimePointCache markPositionCache);
 
     /**
-     * If the current {@link #getLeg() leg} is +/- {@link TrackedLegImpl#UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees
+     * If the current {@link #getLeg() leg} is +/- {@link LegType#UPWIND_DOWNWIND_TOLERANCE_IN_DEG} degrees
      * collinear with the wind's bearing, <code>pos1</code> is projected onto the line crossing <code>pos2</code> in the
      * wind's bearing, and the distance from the projection to <code>pos2</code> is returned. Otherwise, it is assumed
      * that the leg is neither an upwind nor a downwind leg, and hence the along-track distance to <code>mark</code> is
@@ -164,7 +163,7 @@ public interface TrackedLeg extends Serializable {
      * is not available
      * @throws NoWindException no wind available. unable to determine legtypes for given timepoint
      */
-    Duration getEstimatedTimeToComplete(PolarDataService polarDataService, TimePoint timepoint, MarkPositionAtTimePointCache markPositionCache)
+    LegTargetTimeInfo getEstimatedTimeAndDistanceToComplete(PolarDataService polarDataService, TimePoint timepoint, MarkPositionAtTimePointCache markPositionCache)
             throws NotEnoughDataHasBeenAddedException, NoWindException;
 
     /**

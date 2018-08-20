@@ -4,9 +4,12 @@ import java.util.Date;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
 import com.google.gwt.maps.client.base.LatLngBounds;
+import com.google.gwt.maps.client.events.bounds.BoundsChangeMapEvent;
+import com.google.gwt.maps.client.events.bounds.BoundsChangeMapHandler;
 import com.google.gwt.user.client.Timer;
 import com.sap.sailing.gwt.ui.client.shared.racemap.BoundsUtil;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
@@ -58,6 +61,8 @@ public class Swarm implements TimeListener {
     private Date timePoint;
     private double cosineOfAverageLatitude;
 
+    private HandlerRegistration handlerRegistration;
+
     public Swarm(FullCanvasOverlay fullcanvas, MapWidget map, com.sap.sse.gwt.client.player.Timer timer,
             VectorField vectorField, StreamletParameters streamletPars) {
         this.field = vectorField;
@@ -71,12 +76,27 @@ public class Swarm implements TimeListener {
         diffPx = new Vector(0, 0);
     }
 
-    public void start(int animationIntervalMillis) {
+    public void start(final int animationIntervalMillis) {
         fullcanvas.setCanvasSettings();
+        // if map is not yet loaded, wait for it
+        if (map.getBounds() != null) {
+            startWithMap(animationIntervalMillis);
+        } else {
+            handlerRegistration = map.addBoundsChangeHandler(new BoundsChangeMapHandler() {
+                @Override
+                public void onEvent(BoundsChangeMapEvent event) {
+                    Swarm.this.handlerRegistration.removeHandler();
+                    startWithMap(animationIntervalMillis);
+                }
+            });
+        }
+    }
+
+    private void startWithMap(int animationIntervalMillis) {
         projection = new Mercator(fullcanvas, map);
         projection.calibrate();
         updateBounds();
-        particles = this.createParticles();
+        particles = createParticles();
         swarmContinue = true;
         startLoop(animationIntervalMillis);
     }

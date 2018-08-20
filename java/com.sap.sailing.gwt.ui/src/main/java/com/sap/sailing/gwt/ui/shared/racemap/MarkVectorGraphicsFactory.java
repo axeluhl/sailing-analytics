@@ -7,20 +7,24 @@ public class MarkVectorGraphicsFactory {
     public MarkVectorGraphics getMarkVectorGraphics(MarkDTO markDTO) {
         final MarkType markType = markDTO.type;
         final MarkVectorGraphics result;
-        switch (markType) {
-        case BUOY:
+        if (markType == null) {
             result = createBuoyMarkVectorGraphics(markDTO);
-            break;
-        case STARTBOAT:
-        case FINISHBOAT:
-            result = new BoatMarkVectorGraphics(markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern, markDTO.getIdAsString());
-            break;
-        case LANDMARK:
-            result = new LandMarkVectorGraphics(markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
-            break;
-        default:
-            result = createBuoyMarkVectorGraphics(markDTO);
-            break;
+        } else {
+            switch (markType) {
+            case BUOY:
+                result = createBuoyMarkVectorGraphics(markDTO);
+                break;
+            case STARTBOAT:
+            case FINISHBOAT:
+                result = new BoatMarkVectorGraphics(markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern, markDTO.getIdAsString());
+                break;
+            case LANDMARK:
+                result = new LandMarkVectorGraphics(markDTO.type, markDTO.color, markDTO.shape, markDTO.pattern);
+                break;
+            default:
+                result = createBuoyMarkVectorGraphics(markDTO);
+                break;
+            }
         }
         return result;
     }

@@ -1,26 +1,31 @@
 package com.sap.sailing.datamining.impl.data;
 
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
+import com.sap.sailing.datamining.data.HasLeaderboardGroupContext;
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.polars.PolarDataService;
 
 public class LeaderboardWithContext implements HasLeaderboardContext {
     private final Leaderboard leaderboard;
-    private final PolarDataService polarDataService;
+    private final HasLeaderboardGroupContext leaderboardGroupContext;
 
-    public LeaderboardWithContext(Leaderboard leaderboard, PolarDataService polarDataService) {
+    public LeaderboardWithContext(Leaderboard leaderboard, HasLeaderboardGroupContext leaderboardGroupContext) {
         this.leaderboard = leaderboard;
-        this.polarDataService = polarDataService;
+        this.leaderboardGroupContext = leaderboardGroupContext;
     }
 
+    public HasLeaderboardGroupContext getLeaderboardGroupContext() {
+        return leaderboardGroupContext;
+    }
+    
     @Override
     public Leaderboard getLeaderboard() {
         return leaderboard;
     }
-
+    
     @Override
-    public PolarDataService getPolarDataService() {
-        return polarDataService;
+    public BoatClass getBoatClass() {
+        return getLeaderboard().getBoatClass();
     }
 
     @Override

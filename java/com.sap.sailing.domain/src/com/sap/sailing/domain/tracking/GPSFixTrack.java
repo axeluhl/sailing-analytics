@@ -3,15 +3,16 @@ package com.sap.sailing.domain.tracking;
 import java.util.Iterator;
 
 import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.Position;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.confidence.Weigher;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
+import com.sap.sse.common.Distance;
+import com.sap.sse.common.Duration;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TimeRange;
 import com.sap.sse.common.Timed;
@@ -45,6 +46,12 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends MappedTra
      * {@link #getEstimatedPosition(TimePoint, boolean) estimated positions} at <code>from</code> and <code>to</code>.
      */
     Distance getDistanceTraveled(TimePoint from, TimePoint to);
+
+    /**
+     * Gets the longest duration between two smoothened GPS-fixes contained within the provided period within the track.
+     * Returns {@code Duration.NULL} if there are less than 2 fixes contained within the track.
+     */
+    Duration getLongestIntervalBetweenTwoFixes(TimePoint from, TimePoint to);
 
     /**
      * Computes the distance traveled on the raw, unsmoothened track between the
@@ -166,5 +173,22 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends MappedTra
      * have everything re-calculated when needed.
      */
     void resumeValidityCaching();
+    
+    /**
+     * Gets a list of speed with bearing steps considering the provided time range. The bearings are retrieved by means
+     * of {@link GPSFixTrack#getEstimatedSpeed(TimePoint)}. The steps are sampled at time points of non-raw GPS fixes.
+     * When there is no non-raw fix contained at {@code fromTimePoint}, the time point of the first step will be the
+     * time point of the first non-raw fix before {@code fromTimePoint}. Analogously, when there is no non-raw fix
+     * contained at {@code toTimePoint}, the last step's time point will be the first non-raw fix after
+     * {@code toTimePoint}. The idea of this concept is to produce at least two steps as part of the result, in order to
+     * provide the caller at least a {@code |totalCourseChangeAngleInDegrees > 0|} between the given time range.
+     * 
+     * @param fromTimePoint
+     *            The from time point (inclusive) for resulting bearing steps
+     * @param toTimePoint
+     *            The to time point (inclusive) for resulting bearing steps
+     * @return The list of bearings between the provided time range
+     */
+    SpeedWithBearingStepsIterable getSpeedWithBearingSteps(TimePoint fromTimePoint, TimePoint toTimePoint);
 
 }

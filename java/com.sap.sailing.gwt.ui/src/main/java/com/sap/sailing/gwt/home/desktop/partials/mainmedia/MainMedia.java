@@ -9,11 +9,12 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.media.SailingImageDTO;
 import com.sap.sailing.gwt.home.communication.media.SailingVideoDTO;
+import com.sap.sailing.gwt.home.desktop.app.DesktopPlacesNavigator;
 import com.sap.sailing.gwt.home.desktop.partials.media.SailingFullscreenViewer;
-import com.sap.sailing.gwt.home.shared.app.PlaceNavigator;
 import com.sap.sse.gwt.client.controls.carousel.ImageCarousel;
 
 public class MainMedia extends Composite {
@@ -21,20 +22,24 @@ public class MainMedia extends Composite {
     private static final int MAX_VIDEO_COUNT = 3;
 
     @UiField HTMLPanel videosPanel;
-    @UiField ImageCarousel<SailingImageDTO> imageCarousel;
+    @UiField SimplePanel imageCarouselHolderUi;
 
     interface MainMediaUiBinder extends UiBinder<Widget, MainMedia> {
     }
 
     private static MainMediaUiBinder uiBinder = GWT.create(MainMediaUiBinder.class);
 
-    public MainMedia(PlaceNavigator navigator) {
+    private final DesktopPlacesNavigator navigator;
+
+    public MainMedia(DesktopPlacesNavigator navigator) {
+        this.navigator = navigator;
         MainMediaResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        imageCarousel.registerFullscreenViewer(new SailingFullscreenViewer());
     }
 
     public void setData(Collection<SailingVideoDTO> videos, ArrayList<SailingImageDTO> photos) {
+        final ImageCarousel<SailingImageDTO> imageCarousel = new ImageCarousel<>();
+        imageCarousel.registerFullscreenViewer(new SailingFullscreenViewer(navigator));
         Iterator<SailingVideoDTO> videoIterator = videos.iterator();
         int videoCount = 0;
         while(videoCount < MAX_VIDEO_COUNT && videoIterator.hasNext()) {
@@ -47,5 +52,6 @@ public class MainMedia extends Composite {
             imageCarousel.addImage(image);
         }
         imageCarousel.setInfiniteScrolling(true);
+        imageCarouselHolderUi.setWidget(imageCarousel);
     }
 }

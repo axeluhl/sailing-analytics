@@ -23,19 +23,6 @@
 	      <div class="{res.mediaCss.small8} {res.mediaCss.columns}">
 	        <h5><span ui:field="searchResultAmountUi"></span></h5>
 	      </div>
-	      <!-- sorting is not supported yet 
-	      <div class="{res.mediaCss.small4} {res.mediaCss.columns}">
-	        <div class="{local_res.css.searchresult_content_amount_relevance}">
-	          <div class="{local_res.css.searchresult_content_amount_relevance_label}">Sort by:</div>
-	          <div class="{local_res.css.dropdown}">
-	            <div class="{local_res.css.dropdown_head}">
-	              <div class="{local_res.css.dropdown_head_title}">Relevance<a class="{res.mainCss.button} {res.mainCss.buttonarrowdown} {local_res.css.dropdown_head_titlebutton}">&nbsp;</a></div>
-	            </div>
-	            <div class="{local_res.css.dropdown_content}"><a href="#" class="{local_res.css.dropdown_content_link}"><strong class="{local_res.css.dropdown_content_link_title}">Neueste</strong></a><a href="#" class="{local_res.css.dropdown_content_link}"><strong class="{local_res.css.dropdown_content_link_title}">Älteste</strong></a></div>
-	          </div>
-	        </div>
-	      </div>
-	      -->
 	    </div>
 	    <div class="{res.mediaCss.grid}">
 	      <div class="{res.mediaCss.small12} {res.mediaCss.columns}">

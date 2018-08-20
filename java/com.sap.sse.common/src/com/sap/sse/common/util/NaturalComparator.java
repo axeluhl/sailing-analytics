@@ -17,6 +17,9 @@ public class NaturalComparator implements Comparator<String> {
         this.caseSensitive = caseSensitive;
     }
     
+    /**
+     * Creates a case-sensitive natural comparator.
+     */
     public NaturalComparator() {
         caseSensitive = true;
     }

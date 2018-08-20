@@ -12,7 +12,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
  * register it self as a display on the {@link ListDataProvider} and reacts on the changes of {@link ListDataProvider}.
  * When the {@link ListDataProvider} is changed this {@link RefreshableSingleSelectionModel selectionmodel} will refresh
  * the selection according to the {@link ListDataProvider} changes. To make this class work correct it is very important
- * to set the {@link ListDataProvider}, otherwise it won´t work.
+ * to set the {@link ListDataProvider}, otherwise it won't work.
  * <p>
  * For more details on the update process read the {@link RefreshableSelectionModel} Javadoc and see the methods
  * {@link RefreshableSingleSelectionModel#refreshSelectionModel(Iterable)} and
@@ -72,14 +72,27 @@ public class RefreshableSingleSelectionModel<T> extends SingleSelectionModel<T> 
             super.setSelected(item, selected);
         }
     }
+    
+    /**
+     * Checks if the currently selected object is also visible.
+     * 
+     * @param visibleItemList
+     *            can be obtained by calling {@link com.google.gwt.user.cellview.client.CellTable#getVisibleItems()}
+     *            method.
+     * @return <code>true</code> if the list of visible items does not contain the selected item.
+     */
+    public boolean itemIsSelectedButNotVisible(List<T> visibleItemList) {
+       return !visibleItemList.contains(getSelectedObject());
+    }
 
     /**
-     * Refreshes the {@link RefreshableSingleSelectionModel} with the <code>newObjects</code>. If the current selected
-     * object {@link EntityIdentityComparator#representSameEntity(Object, Object) represent the same entity} as an
-     * object from <code>newObjects</code> it will be reselected. All others are de-selected. That means a selected
-     * object is not contained in <code>newObjects</code> the object wouldn't be selected anymore. If this selection
-     * model has no {@link EntityIdentityComparator} set, this method will use the {@link #equals(Object)} method to
-     * compare. If an object is reselected it will be replaced with the new version of it.
+     * Refreshes the {@link RefreshableSingleSelectionModel} with the <code>newObjects</code>. If the currently selected
+     * object {@link EntityIdentityComparator#representSameEntity(Object, Object) represents the same entity} as an
+     * object from <code>newObjects</code> it will be reselected. All others are de-selected. That means if a selected
+     * object is not contained (based on {@link EntityIdentityComparator#representSameEntity(Object, Object)}) in
+     * <code>newObjects</code> the object wouldn't be selected anymore. If this selection model has no
+     * {@link EntityIdentityComparator} set, this method will use the {@link #equals(Object)} method to compare. If an
+     * object is reselected it will be replaced with the new version of it.
      * <p>
      *
      * When the selection is refreshed this method triggers a

@@ -22,18 +22,28 @@ public class TestCompoundFunction {
 
     private Function<?> getContainerElementFunction;
     private Function<?> getNameFunction;
+    private Function<?> getStringFromIntFunction;
     
     private Function<String> compoundFunction;
+    private Function<String> compoundFunctionWithSecondTakingSingleIntParameter;
     
     @Before
     public void initializeCompoundFunction() throws ClassCastException, NoSuchMethodException, SecurityException {
+        {
         List<Function<?>> functions = new ArrayList<>();
         getContainerElementFunction = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(MarkedContainer.class.getMethod("getContainerElement", new Class<?>[0]));
         functions.add(getContainerElementFunction);
         getNameFunction = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(ContainerElement.class.getMethod("getName", new Class<?>[0]));
         functions.add(getNameFunction);
-        
         compoundFunction = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(functions);
+        }
+        {
+        List<Function<?>> functions = new ArrayList<>();
+        functions.add(getContainerElementFunction);
+        getStringFromIntFunction = FunctionTestsUtil.getFunctionFactory().createMethodWrappingFunction(ContainerElement.class.getMethod("getStringFromInt", new Class<?>[] { int.class }));
+        functions.add(getStringFromIntFunction);
+        compoundFunctionWithSecondTakingSingleIntParameter = FunctionTestsUtil.getFunctionFactory().createCompoundFunction(functions);
+        }
     }
 
     @Test(expected=IllegalArgumentException.class)
@@ -62,6 +72,15 @@ public class TestCompoundFunction {
         
         String result = compoundFunction.tryToInvoke(container);
         assertThat(result, is(containerElementName));
+    }
+
+    @Test
+    public void testInvocationWithParametersForSecondFunction() {
+        String one = "1";
+        ContainerElement element = new ContainerElementImpl(one);
+        MarkedContainer container = new MarkedContainerImpl(element);
+        String result = compoundFunctionWithSecondTakingSingleIntParameter.tryToInvoke(container, ()->new Object[] { 1 });
+        assertThat(result, is(one));
     }
 
 }

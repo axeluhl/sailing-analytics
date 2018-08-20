@@ -141,7 +141,7 @@ public class StarbordSideOfStartLineRecognitionTest {
         MockedTrackedRaceImpl trackedRace = createTrackedRaceWithMarkPositions(startPortPosition, startStarboardPosition, windwardPosition);
         Position p = trackedRace.getOrCreateTrack(trackedRace.getStartLine(now).getStarboardMarkWhileApproachingLine()).
                 getEstimatedPosition(now, /* extrapolate */ false);
-        assertEquals(startStarboardPosition, p);
+        PositionAssert.assertPositionEquals(startStarboardPosition, p, 0.0000001);
     }
 
     @Test

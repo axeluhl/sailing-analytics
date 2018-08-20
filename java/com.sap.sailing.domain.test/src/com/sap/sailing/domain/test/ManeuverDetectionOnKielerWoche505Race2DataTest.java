@@ -27,7 +27,6 @@ import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.WindSourceType;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.WindImpl;
@@ -38,6 +37,7 @@ import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.tractrac.model.lib.api.event.CreateModelException;
 import com.tractrac.subscription.lib.api.SubscriberInitializationException;
@@ -87,7 +87,7 @@ public class ManeuverDetectionOnKielerWoche505Race2DataTest extends OnlineTracTr
     public void testManeuversForHasso() throws NoWindException {
         Competitor hasso = getCompetitorByName("Dr.Plattner");
         NavigableSet<MarkPassing> hassosMarkPassings = getTrackedRace().getMarkPassings(hasso);
-        List<Maneuver> maneuvers = getTrackedRace().getManeuvers(hasso, hassosMarkPassings.first().getTimePoint(),
+        Iterable<Maneuver> maneuvers = getTrackedRace().getManeuvers(hasso, hassosMarkPassings.first().getTimePoint(),
                 hassosMarkPassings.last().getTimePoint(), /* waitForLatest */ true);
         Calendar c = new GregorianCalendar(TimeZone.getTimeZone("Europe/Berlin"));
         c.clear();
@@ -102,10 +102,10 @@ public class ManeuverDetectionOnKielerWoche505Race2DataTest extends OnlineTracTr
         c.set(2011, 6-1, 23, 16, 20, 1);
         assertManeuver(maneuvers, ManeuverType.JIBE, Tack.STARBOARD, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);
         c.set(2011, 6-1, 23, 16, 22, 25);
-        assertManeuver(maneuvers, ManeuverType.JIBE, Tack.PORT, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 3000);
+        assertManeuver(maneuvers, ManeuverType.JIBE, Tack.PORT, new MillisecondsTimePoint(c.getTime()), /* tolerance in milliseconds */ 5000);
     }
 
-    private void assertManeuver(List<Maneuver> maneuvers, ManeuverType type, Tack newTack,
+    private void assertManeuver(Iterable<Maneuver> maneuvers, ManeuverType type, Tack newTack,
             MillisecondsTimePoint timePoint, int toleranceInMilliseconds) {
         for (Maneuver maneuver : maneuvers) {
             if (maneuver.getType() == type && (newTack == null || newTack == maneuver.getNewTack()) &&

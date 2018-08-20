@@ -4,7 +4,7 @@
 <module>
 
 	<!-- Inherit the core Web Toolkit stuff.                        -->
-	<inherits name='com.google.gwt.user.User'/> 
+	<inherits name='com.google.gwt.user.User'/>
 	
 	<inherits name='com.google.gwt.debug.Debug'/>
 
@@ -19,6 +19,8 @@
 	<inherits name="com.google.gwt.logging.Logging"/>
   
 	<!-- Other module inherits                                      -->
+	<inherits name='com.sap.sailing.gwt.settings.Settings'/>
+	<inherits name="com.sap.sse.security.ui.Settings" />
 	<inherits name="com.sap.sse.gwt.EmulatedJRE" />
 	<inherits name="com.sap.sse.gwt.SSESharedGWT" />
 	<inherits name="com.sap.sse.SSECommon" />
@@ -30,11 +32,6 @@
         
     <inherits name="com.sap.sse.gwt.dispatch.Dispatch" />
     
-	<!-- Fancy DateTimePicker (without the rest of Bootstrap!) -->
-	<!-- GWT-Bootstrap License: Apache License, Version 2.0 -->
-	<inherits name="com.github.gwtbootstrap.BootstrapNoResources" />
-	<inherits name='com.github.gwtbootstrap.datetimepicker.DatetimepickerNoResources' />
-	
 	<super-source path="jre" />
 
 	<set-property name="gwt.logging.enabled" value="TRUE"/> 
@@ -43,9 +40,6 @@
 	<set-property name="gwt.logging.consoleHandler" value="ENABLED" />
 	<set-property name="gwt.logging.developmentModeHandler" value="DISABLED" />
 	<set-property name="gwt.logging.systemHandler" value="ENABLED" />
-
-        <extend-property name="locale" values="de"/>
-	<extend-property name="locale" values="ru"/>
 	
 	<!-- Turning CSS obfuscation off -->
 	<!-- <set-configuration-property name="CssResource.style" value="pretty"/> -->

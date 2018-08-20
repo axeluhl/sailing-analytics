@@ -18,4 +18,6 @@ public interface RaceMapStyle extends CssResource {
     public String raceMapIndicatorPanelCanvas();
     public String combinedWindPanel();
     public String trueNorthIndicatorPanel();
+    public String estimatedDuration();
+    public String estimatedDurationWithHeader();
 }

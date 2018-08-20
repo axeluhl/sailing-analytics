@@ -18,19 +18,22 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.Distance;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.gwt.ui.client.ManeuverTypeFormatter;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapHelpLinesSettings.HelpLineTypes;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapZoomSettings.ZoomTypes;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.controls.IntegerBox;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 
+/**
+ * The view responsible for manipulating an instance of RaceMapSettings, is handled by the RaceMapLifecycle
+ */
 public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<RaceMapSettings> {
     private static final Distance MAX_BUOY_ZONE_RADIUS = new MeterDistance(100);
     private static final int MAX_STROKE_WEIGHT = 33;
@@ -50,6 +53,8 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private DoubleBox buoyZoneRadiusInMetersBox;
     private CheckBox transparentHoverlines;
     private IntegerBox hoverlineStrokeWeight;
+    private DoubleBox startCountDownFontSizeScalingBox;
+    private CheckBox maneuverLossVisualizationCheckBox;
     
     private boolean isSimulationEnabled;
     
@@ -57,6 +62,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private final RaceMapSettings initialSettings;
 
     private ArrayList<CheckBox> disableOnlySelectedWhenAreFalse;
+    private CheckBox showEstimatedDuration;
     
     public RaceMapSettingsDialogComponent(RaceMapSettings settings, StringMessages stringMessages, boolean isSimulationEnabled) {
         this.isSimulationEnabled = isSimulationEnabled;
@@ -67,22 +73,24 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     @Override
     public Widget getAdditionalWidget(DataEntryDialog<?> dialog) {
         VerticalPanel vp = new VerticalPanel();
-
         Label generalLabel = dialog.createHeadlineLabel(stringMessages.general());
         vp.add(generalLabel);
        
         windUpCheckbox = dialog.createCheckbox(stringMessages.windUp());
         windUpCheckbox.setValue(initialSettings.isWindUp());
+        windUpCheckbox.getElement().setAttribute("selenium_checkbox", String.valueOf(initialSettings.isWindUp()));
+        windUpCheckbox.ensureDebugId("windUpCheckBox");
         vp.add(windUpCheckbox);
 
         showWindStreamletOverlayCheckbox = dialog.createCheckbox(stringMessages.showWindStreamletOverlay());
+        showWindStreamletOverlayCheckbox.ensureDebugId("showWindStreamletOverlayCheckBox");
         showWindStreamletOverlayCheckbox.setValue(initialSettings.isShowWindStreamletOverlay());
         vp.add(showWindStreamletOverlayCheckbox);
         
         showWindStreamletColorsCheckbox = dialog.createCheckbox(stringMessages.showWindStreamletColors());
         showWindStreamletColorsCheckbox.setEnabled(initialSettings.isShowWindStreamletOverlay());
         showWindStreamletColorsCheckbox.setValue(initialSettings.isShowWindStreamletColors());
-        showWindStreamletColorsCheckbox.addStyleName("RaceMapSettingsDialogCheckboxIntended");
+        showWindStreamletColorsCheckbox.addStyleName("RaceMapSettingsDialogCheckBoxIntended");
         vp.add(showWindStreamletColorsCheckbox);
 
         showWindStreamletOverlayCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
@@ -93,7 +101,13 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         });
         
         if (isSimulationEnabled) {
+            showEstimatedDuration = dialog.createCheckbox(stringMessages.showEstimatedDuration());
+            showEstimatedDuration.ensureDebugId("showEstimatedDurationCheckBox");
+            showEstimatedDuration.setValue(initialSettings.isShowEstimatedDuration());
+            vp.add(showEstimatedDuration);
+        
             showSimulationOverlayCheckbox = dialog.createCheckbox(stringMessages.showSimulationOverlay());
+            showSimulationOverlayCheckbox.ensureDebugId("showSimulationOverlayCheckBox");
             showSimulationOverlayCheckbox.setValue(initialSettings.isShowSimulationOverlay());
             vp.add(showSimulationOverlayCheckbox);
         }
@@ -102,6 +116,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         vp.add(competitorsLabel);
 
         showOnlySelectedCompetitorsCheckBox = dialog.createCheckbox(stringMessages.showOnlySelectedCompetitors());
+        showOnlySelectedCompetitorsCheckBox.ensureDebugId("showOnlySelectedCompetitorsCheckBox");
         showOnlySelectedCompetitorsCheckBox.setValue(initialSettings.isShowOnlySelectedCompetitors());
         vp.add(showOnlySelectedCompetitorsCheckBox);
 
@@ -219,7 +234,12 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         vp.add(createHelpLineCheckBox(dialog, HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE));
         vp.add(createHelpLineCheckBox(dialog, HelpLineTypes.COURSEGEOMETRY));
         
+        maneuverLossVisualizationCheckBox = dialog.createCheckbox(stringMessages.maneuverLoss());
+        maneuverLossVisualizationCheckBox.setValue(initialSettings.isShowManeuverLossVisualization());
+        vp.add(maneuverLossVisualizationCheckBox);
+        
         transparentHoverlines = dialog.createCheckbox(stringMessages.transparentBufferLineOnHover());
+        transparentHoverlines.ensureDebugId("transparentHoverlinesCheckBox");
         transparentHoverlines.setValue(initialSettings.getTransparentHoverlines());
         vp.add(transparentHoverlines);
         
@@ -230,6 +250,12 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         hoverlineStrokeWeightPanel.add(hoverlineStrokeWeight);
         vp.add(hoverlineStrokeWeightPanel);
         
+        HorizontalPanel startCountDownFontSizeScalingPanel = new HorizontalPanel();
+        Label startCountDownFontSizeScalingLabel = new Label(stringMessages.startCountDownFontSizeScaling() + ":");
+        startCountDownFontSizeScalingPanel.add(startCountDownFontSizeScalingLabel);
+        startCountDownFontSizeScalingBox = dialog.createDoubleBox(initialSettings.getStartCountDownFontSizeScaling(), 3);
+        startCountDownFontSizeScalingPanel.add(startCountDownFontSizeScalingBox);
+        vp.add(startCountDownFontSizeScalingPanel);
         return vp;
     }
     
@@ -268,22 +294,22 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         RaceMapHelpLinesSettings helpLinesSettings = getHelpLinesSettings();
         RaceMapZoomSettings zoomSettings = getZoomSettings();
 
+        boolean estimatedDuration = isSimulationEnabled ? showEstimatedDuration.getValue() : false;
         boolean showSimulationOverlay = isSimulationEnabled ? showSimulationOverlayCheckbox.getValue() : false;
         long tailLengthInMilliseconds = initialSettings.getTailLengthInMilliseconds(); 
         if (helpLinesSettings.isVisible(HelpLineTypes.BOATTAILS)) {
             tailLengthInMilliseconds = tailLengthBox.getValue() == null ? -1 : tailLengthBox.getValue() * 1000l;
         }
-        
         Distance buoyZoneRadius = initialSettings.getBuoyZoneRadius();
         if (helpLinesSettings.isVisible(HelpLineTypes.BUOYZONE) && buoyZoneRadiusInMetersBox.getValue() != null) {
             buoyZoneRadius = new MeterDistance(buoyZoneRadiusInMetersBox.getValue());
         }
-        
         return new RaceMapSettings(zoomSettings, helpLinesSettings,
                 transparentHoverlines.getValue(), hoverlineStrokeWeight.getValue(), tailLengthInMilliseconds, windUpCheckbox.getValue(),
                 buoyZoneRadius, showOnlySelectedCompetitorsCheckBox.getValue(), showSelectedCompetitorsInfoCheckBox.getValue(),
                 showWindStreamletColorsCheckbox.getValue(), showWindStreamletOverlayCheckbox.getValue(), showSimulationOverlay,
-                initialSettings.isShowMapControls(), maneuverTypesToShow, showDouglasPeuckerPointsCheckBox.getValue());
+                initialSettings.isShowMapControls(), maneuverTypesToShow, showDouglasPeuckerPointsCheckBox.getValue(),estimatedDuration,
+                startCountDownFontSizeScalingBox.getValue(), maneuverLossVisualizationCheckBox.getValue());
     }
     
     private RaceMapZoomSettings getZoomSettings() {

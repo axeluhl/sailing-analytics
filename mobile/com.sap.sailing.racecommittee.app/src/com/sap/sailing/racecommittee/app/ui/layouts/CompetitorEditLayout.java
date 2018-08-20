@@ -7,33 +7,34 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.text.TextUtils;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.EditText;
-import android.widget.NumberPicker;
-import android.widget.ScrollView;
-import android.widget.Spinner;
-
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.ViewHelper;
 import com.sap.sailing.domain.abstractlog.race.CompetitorResult;
+import com.sap.sailing.domain.abstractlog.race.CompetitorResult.MergeState;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.domain.impl.CompetitorResultWithIdImpl;
 import com.sap.sailing.racecommittee.app.ui.adapters.StringArraySpinnerAdapter;
-import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
-import com.sap.sailing.racecommittee.app.utils.TimeUtils;
+import com.sap.sailing.racecommittee.app.ui.fragments.dialogs.FullTimePickerDialog;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
+import android.annotation.SuppressLint;
+import android.app.DatePickerDialog;
+import android.content.Context;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.DatePicker;
+import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.ScrollView;
+import android.widget.Spinner;
+import android.widget.TextView;
+
 @SuppressLint("ViewConstructor")
-public class CompetitorEditLayout extends ScrollView {
+public class CompetitorEditLayout extends ScrollView implements DatePickerDialog.OnDateSetListener, FullTimePickerDialog.OnTimeSetListener {
 
     private CompetitorResultWithIdImpl mCompetitor;
     private GregorianCalendar mCalendar;
@@ -41,20 +42,25 @@ public class CompetitorEditLayout extends ScrollView {
     private Spinner mPosition;
     private Spinner mPenalty;
     private EditText mScore;
-    private Spinner mDate;
-    private NumberPicker mHours;
-    private NumberPicker mMinutes;
-    private NumberPicker mSeconds;
     private EditText mComment;
+    private TextView mFinishDate;
+    private TextView mFinishTime;
+    private FrameLayout mDelete;
 
-    public CompetitorEditLayout(Context context, TimePoint startTime, CompetitorResultWithIdImpl competitor, int currentPos, int maxPos) {
-        super(context);
-        init(startTime, competitor, currentPos, maxPos);
+    private boolean mRestricted;
+
+    public CompetitorEditLayout(Context context, CompetitorResultWithIdImpl competitor, int maxPos, boolean hasWarning) {
+        this(context, null, competitor, maxPos, true, hasWarning);
     }
 
-    private void init(TimePoint startTime, CompetitorResultWithIdImpl competitor, int currentPos, int maxPos) {
+    public CompetitorEditLayout(final Context context, final TimePoint startTime, CompetitorResultWithIdImpl competitor, int maxPos,
+        boolean restrictedView, boolean hasWarning) {
+        super(context);
+
+        mRestricted = restrictedView;
+        mCompetitor = competitor;
         int layoutId;
-        if (AppUtils.with(getContext()).isPhone() && AppUtils.with(getContext()).isHDPI()) {
+        if (AppUtils.with(getContext()).isPhone()) {
             layoutId = R.layout.race_tracking_list_competitor_edit_small;
         } else {
             layoutId = R.layout.race_tracking_list_competitor_edit_normal;
@@ -64,39 +70,92 @@ public class CompetitorEditLayout extends ScrollView {
         setFillViewport(true);
         setPadding(0, getResources().getDimensionPixelSize(R.dimen.dialog_top_padding), 0, 0);
 
-        mCompetitor = competitor;
+        View position = ViewHelper.get(layout, R.id.competitor_position_layout);
+        if (position != null) {
+            position.setVisibility(restrictedView ? GONE : VISIBLE);
+        }
+        View warning = ViewHelper.get(layout, R.id.competitor_warning_message);
+        if (warning != null) {
+            warning.setVisibility(hasWarning ? VISIBLE : GONE);
+        }
 
         mCalendar = (GregorianCalendar) GregorianCalendar.getInstance();
         if (mCompetitor.getFinishingTime() != null) {
             mCalendar.setTimeInMillis(mCompetitor.getFinishingTime().asMillis());
         }
+        final int initialYear = mCalendar.get(Calendar.YEAR);
+        final int initialMonth = mCalendar.get(Calendar.MONTH);
+        final int initialDay = mCalendar.get(Calendar.DAY_OF_MONTH);
+        final int initialHour = mCalendar.get(Calendar.HOUR_OF_DAY);
+        final int initialMinutes = mCalendar.get(Calendar.MINUTE);
+        final int initialSecond = mCalendar.get(Calendar.SECOND);
 
-        mHours = ViewHelper.get(layout, R.id.competitor_finish_time_hours);
-        if (mHours != null) {
-            formatPicker(mHours, 0, 23);
-            mHours.setValue(mCalendar.get(Calendar.HOUR_OF_DAY));
+        View timeLayout = ViewHelper.get(layout, R.id.competitor_finish_time_layout);
+        if (timeLayout != null) {
+            timeLayout.setVisibility(mRestricted ? GONE : VISIBLE);
+        }
+        mFinishDate = ViewHelper.get(layout, R.id.competitor_finish_date);
+        if (mFinishDate != null) {
+            mFinishDate.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int year = initialYear;
+                    int month = initialMonth;
+                    int day = initialDay;
+                    if (mCalendar != null) {
+                        year = mCalendar.get(Calendar.YEAR);
+                        month = mCalendar.get(Calendar.MONTH);
+                        day = mCalendar.get(Calendar.DAY_OF_MONTH);
+                    }
+                    DatePickerDialog dialog = new DatePickerDialog(context, R.style.AppTheme_PickerDialog, CompetitorEditLayout.this, year, month, day);
+                    dialog.getDatePicker().setMinDate(startTime.asMillis());
+                    dialog.show();
+                }
+            });
+        }
+        mFinishTime = ViewHelper.get(layout, R.id.competitor_finish_time);
+        if (mFinishTime != null) {
+            mFinishTime.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int hour = initialHour;
+                    int minutes = initialMinutes;
+                    int second = initialSecond;
+                    if (mCalendar != null) {
+                        hour = mCalendar.get(Calendar.HOUR_OF_DAY);
+                        minutes = mCalendar.get(Calendar.MINUTE);
+                        second = mCalendar.get(Calendar.SECOND);
+                    }
+                    FullTimePickerDialog dialog = new FullTimePickerDialog(context, R.style.AppTheme_PickerDialog, CompetitorEditLayout.this, hour, minutes, second, true);
+                    dialog.show();
+                }
+            });
         }
 
-        mMinutes = ViewHelper.get(layout, R.id.competitor_finish_time_minutes);
-        if (mMinutes != null) {
-            formatPicker(mMinutes, 0, 59);
-            mMinutes.setValue(mCalendar.get(Calendar.MINUTE));
+        if (mCompetitor.getFinishingTime() == null) {
+            mCalendar = null;
         }
 
-        mSeconds = ViewHelper.get(layout, R.id.competitor_finish_time_seconds);
-        if (mSeconds != null) {
-            formatPicker(mSeconds, 0, 59);
-            mSeconds.setValue(mCalendar.get(Calendar.SECOND));
+        mDelete = ViewHelper.get(layout, R.id.competitor_finish_date_delete);
+        if (mDelete != null) {
+            mDelete.setEnabled(false);
+            mDelete.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mCalendar = null;
+                    showFinishTime();
+                }
+            });
         }
+        showFinishTime();
 
         mPosition = ViewHelper.get(layout, R.id.competitor_position);
         if (mPosition != null) {
             StringArraySpinnerAdapter positionAdapter = new StringArraySpinnerAdapter(getPositionList(maxPos));
             mPosition.setAdapter(positionAdapter);
             mPosition.setOnItemSelectedListener(new StringArraySpinnerAdapter.SpinnerSelectedListener(positionAdapter));
-            mPosition.setSelection(currentPos);
+            mPosition.setSelection(competitor.getOneBasedRank());
         }
-
         mPenalty = ViewHelper.get(layout, R.id.competitor_penalty);
         if (mPenalty != null) {
             StringArraySpinnerAdapter penaltyAdapter = new StringArraySpinnerAdapter(getAllMaxPointsReasons());
@@ -104,50 +163,15 @@ public class CompetitorEditLayout extends ScrollView {
             mPenalty.setOnItemSelectedListener(new StringArraySpinnerAdapter.SpinnerSelectedListener(penaltyAdapter));
             mPenalty.setSelection(penaltyAdapter.getPosition(mCompetitor.getMaxPointsReason().toString()));
         }
-
-        mDate = ViewHelper.get(layout, R.id.competitor_finish_date);
-        if (mDate != null) {
-            String[] dates = getDates(startTime);
-            StringArraySpinnerAdapter dateAdapter = new StringArraySpinnerAdapter(dates);
-            mDate.setAdapter(dateAdapter);
-            mDate.setOnItemSelectedListener(new StringArraySpinnerAdapter.SpinnerSelectedListener(dateAdapter));
-            mDate.setSelection(findDate(dates, competitor.getFinishingTime()));
-            if (dates.length == 1) {
-                mDate.setVisibility(GONE);
-            }
-        }
-
         mScore = ViewHelper.get(layout, R.id.competitor_score);
         if (mScore != null && mCompetitor.getScore() != null) {
-            mScore.setText(String.format(Locale.US, "%f", mCompetitor.getScore()));
+            mScore.setText(String.format(Locale.getDefault(), "%f", mCompetitor.getScore()));
         }
-
         mComment = ViewHelper.get(layout, R.id.competitor_comment);
         if (mComment != null) {
             mComment.setText(mCompetitor.getComment());
         }
-
         addView(layout);
-    }
-
-    private String[] getDates(@NonNull TimePoint startTime) {
-        TimePoint now = MillisecondsTimePoint.now();
-        ArrayList<String> dates = TimeUtils.getDates(getContext(), startTime, now);
-        return dates.toArray(new String[dates.size()]);
-    }
-
-    private int findDate(@NonNull String[] dates, @Nullable TimePoint finishingTime) {
-        int pos = 0;
-        if (finishingTime != null) {
-            SimpleDateFormat simpleFormat = new SimpleDateFormat(getContext().getString(R.string.date_short), Locale.US);
-            String finishDate = simpleFormat.format(finishingTime.asDate());
-            for (int i = 0; i < dates.length; i++) {
-                if (finishDate.equals(dates[i])) {
-                    pos = i;
-                }
-            }
-        }
-        return pos;
     }
 
     private String[] getAllMaxPointsReasons() {
@@ -161,62 +185,89 @@ public class CompetitorEditLayout extends ScrollView {
     private String[] getPositionList(int maxPos) {
         List<String> result = new ArrayList<>();
         for (int i = 0; i <= maxPos; i++) {
-            result.add(String.format(Locale.US, "%d", i));
+            addPositionToPositionList(result, i);
         }
         return result.toArray(new String[result.size()]);
     }
 
+    private void addPositionToPositionList(List<String> result, int i) {
+        result.add(String.format(Locale.getDefault(), "%d", i));
+    }
+
     public CompetitorResultWithIdImpl getValue() {
         int oneBaseRank = 0;
-        if (mPosition != null) {
-            oneBaseRank = mPosition.getSelectedItemPosition();
-        }
         MaxPointsReason maxPointsReason = MaxPointsReason.NONE;
         if (mPenalty != null) {
             maxPointsReason = MaxPointsReason.valueOf((String) mPenalty.getSelectedItem());
+        }
+        if (mPosition != null) {
+            oneBaseRank = mPosition.getSelectedItemPosition();
         }
         Double score = null;
         if (mScore != null && !TextUtils.isEmpty(mScore.getText())) {
             score = Double.valueOf(mScore.getText().toString());
         }
-        if (mDate != null) {
-            String[] date = ((String) mDate.getSelectedItem()).split("-");
-            mCalendar.set(Calendar.YEAR, Integer.parseInt(date[0]));
-            mCalendar.set(Calendar.MONTH, Integer.parseInt(date[1]) - 1);
-            mCalendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(date[2]));
+        TimePoint finishingTime = null;
+        if (!mRestricted) {
+            if (mCalendar != null) {
+                finishingTime = new MillisecondsTimePoint(mCalendar.getTime());
+            } else {
+                finishingTime = null;
+            }
         }
-        if (mHours != null) {
-            mCalendar.set(Calendar.HOUR_OF_DAY, mHours.getValue());
-        }
-        if (mMinutes != null) {
-            mCalendar.set(Calendar.MINUTE, mMinutes.getValue());
-        }
-        if (mSeconds != null) {
-            mCalendar.set(Calendar.SECOND, mSeconds.getValue());
-        }
-        TimePoint finishingTime = new MillisecondsTimePoint(mCalendar.getTime());
         String comment = null;
         if (mComment != null) {
             comment = mComment.getText().toString();
         }
         CompetitorResult result = new CompetitorResultImpl(mCompetitor.getCompetitorId(), mCompetitor
-            .getCompetitorDisplayName(), oneBaseRank, maxPointsReason, score, finishingTime, comment);
-        return new CompetitorResultWithIdImpl(mCompetitor.getId(), result);
+            .getCompetitorDisplayName(), oneBaseRank, maxPointsReason, score, finishingTime, comment, MergeState.OK);
+        return new CompetitorResultWithIdImpl(mCompetitor.getId(), mCompetitor.getBoat(), result);
     }
 
-    private void formatPicker(@Nullable NumberPicker picker, int minValue, int maxValue) {
-        if (picker != null) {
-            picker.setMinValue(minValue);
-            picker.setMaxValue(maxValue);
-            picker.setFormatter(new NumberPicker.Formatter() {
-                @Override
-                public String format(int value) {
-                    return String.format(Locale.US, "%02d", value);
-                }
-            });
-            ThemeHelper
-                .setPickerColor(getContext(), picker, getContext().getResources().getColor(R.color.dialog_color_text), getContext().getResources()
-                    .getColor(R.color.dialog_color_button));
+    @Override
+    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+        if (mCalendar == null) {
+            mCalendar = (GregorianCalendar) Calendar.getInstance();
+        }
+        mCalendar.set(Calendar.YEAR, year);
+        mCalendar.set(Calendar.MONTH, monthOfYear);
+        mCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+        showFinishTime();
+    }
+
+    @Override
+    public void onTimeSet(FullTimePickerDialog dialog, int hourOfDay, int minute, int second) {
+        if (mCalendar == null) {
+            mCalendar = (GregorianCalendar) Calendar.getInstance();
+        }
+        mCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+        mCalendar.set(Calendar.MINUTE, minute);
+        mCalendar.set(Calendar.SECOND, second);
+        showFinishTime();
+    }
+
+    private void showFinishTime() {
+        SimpleDateFormat date = new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault());
+        SimpleDateFormat time = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
+
+        if (mFinishDate != null) {
+            if (mCalendar != null) {
+                mFinishDate.setText(date.format(mCalendar.getTime()));
+            } else {
+                mFinishDate.setText(null);
+            }
+        }
+        if (mFinishTime != null) {
+            if (mCalendar != null) {
+                mFinishTime.setText(time.format(mCalendar.getTime()));
+            } else {
+                mFinishTime.setText(null);
+            }
+        }
+        mDelete.setEnabled(mCalendar != null);
+        for (int i = 0; i < mDelete.getChildCount(); i++) {
+            mDelete.getChildAt(i).setEnabled(mDelete.isEnabled());
         }
     }
+
 }

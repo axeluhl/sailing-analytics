@@ -7,9 +7,9 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.polars.datamining.data.impl.SpeedClusterGroup;
+import com.sap.sse.common.Speed;
 import com.sap.sse.datamining.data.Cluster;
 
 public class SpeedClusterGroupTest {

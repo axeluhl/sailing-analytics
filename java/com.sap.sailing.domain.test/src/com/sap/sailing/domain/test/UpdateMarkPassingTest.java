@@ -11,7 +11,7 @@ import java.util.HashSet;
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
-import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Series;
@@ -40,11 +40,11 @@ public class UpdateMarkPassingTest {
         when(race.getName()).thenReturn("Test Race");
         Course c = new CourseImpl("Test Course", Collections.singleton(waypoint));
         when(race.getCourse()).thenReturn(c);
-        Competitor competitor = TrackBasedTest.createCompetitor("Test Competitor");
+        CompetitorWithBoat competitor = TrackBasedTest.createCompetitorWithBoat("Test Competitor");
         when(race.getBoatClass()).thenReturn(new BoatClassImpl("49er", /* typicallyStartsUpwind */ true));
         when(race.getCompetitors()).thenReturn(Collections.singleton(competitor));
         DynamicTrackedRaceImpl trackedRace = new DynamicTrackedRaceImpl(
-        /* trackedRegatta */new DynamicTrackedRegattaImpl(new RegattaImpl("test", null, null, null, new HashSet<Series>(), false, null,
+        /* trackedRegatta */new DynamicTrackedRegattaImpl(new RegattaImpl("test", null, true, null, null, new HashSet<Series>(), false, null,
                                 "test", null, OneDesignRankingMetric::new)),
                 race, Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, 
         /* delayToLiveInMillis */1000, /* millisecondsOverWhichToAverageWind */30000,

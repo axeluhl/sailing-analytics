@@ -1,0 +1,17 @@
+[{
+	"c": "Germany",
+	"lon": 10.15,
+	"n": "Kiel-Holtenau Airport",
+	"kw": "kiel-holtenau",
+	"lat": 54.38,
+	"has": "1111000",
+	"id": "de15"
+},{
+	"c": "Germany",
+	"lon": 10.28,
+	"n": "Kiel/Leuchtturm",
+	"kw": "kiel_leuchtturm",
+	"lat": 54.47,
+	"has": "1111010",
+	"id": "10044N"
+}]

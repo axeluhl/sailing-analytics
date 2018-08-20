@@ -50,9 +50,9 @@ public class SimulatorEntryPoint extends AbstractSailingEntryPoint {
     @Override
     protected void doOnModuleLoad() {
         Highcharts.ensureInjectedWithExport();
-    	super.doOnModuleLoad();
+        super.doOnModuleLoad();
         EntryPointHelper.registerASyncService((ServiceDefTarget) simulatorService, RemoteServiceMappingConstants.simulatorServiceRemotePath);
-    	checkUrlParameters();
+        checkUrlParameters();
         createSimulatorPanel();
     }
 
@@ -195,7 +195,7 @@ public class SimulatorEntryPoint extends AbstractSailingEntryPoint {
             @Override
             public Widget get() {
                 SimulatorMainPanel simulatorPanel = new SimulatorMainPanel(simulatorService, getStringMessages(), SimulatorEntryPoint.this, xRes, yRes, border, streamletPars,
-                        autoUpdate, mode, event, showGrid, showLines, seedLines, showArrows, showLineGuides, showStreamlets, showMapControls);
+                        autoUpdate, mode, event, showGrid, showLines, seedLines, showArrows, showLineGuides, showStreamlets, showMapControls, getUserService());
                 return simulatorPanel;
             }
         });

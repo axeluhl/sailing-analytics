@@ -31,19 +31,14 @@
     <color name="switch_track">#898989</color>
     <color name="switch_thumb">@color/constant_sap_yellow_1</color>
 
+    <color name="popup_background">#fafafa</color>
+    <color name="popup_pressed">#ebebeb</color>
+
     <!-- buoy colors -->
     <!-- color layer -->
     <color name="buoy_color">#f8ac00</color> <!-- default -->
-    <color name="buoy_color_black">#2c2c2c</color>
-    <color name="buoy_color_green">#89b54e</color>
-    <color name="buoy_color_grey">#dfdfdf</color>
-    <color name="buoy_color_red">#b3492a</color>
-    <color name="buoy_color_orange">#de892d</color>
-    <color name="buoy_color_white">#ffffff</color>
-    <color name="buoy_color_yellow">#f1d400</color>
 
     <!-- outline layer -->
     <color name="buoy_outline">#ffffff</color> <!-- default -->
-    <color name="buoy_outline_white">#797979</color>
 
 </resources>

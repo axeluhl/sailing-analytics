@@ -5,6 +5,7 @@ import java.io.Serializable;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.impl.MarkImpl;
 import com.sap.sailing.domain.common.MarkType;
+import com.sap.sse.common.Color;
 
 public class MarkInfo extends MarkImpl {
     private static final long serialVersionUID = 6139266956501048794L;
@@ -28,7 +29,7 @@ public class MarkInfo extends MarkImpl {
         this.checkinDigest = checkinDigest;
     }
 
-    public MarkInfo(Serializable id, String name, MarkType type, String color, String shape, String pattern, String classname, String checkinDigest) {
+    public MarkInfo(Serializable id, String name, MarkType type, Color color, String shape, String pattern, String classname, String checkinDigest) {
         super(id, name, type, color, shape, pattern);
         this.className = classname;
         this.checkinDigest = checkinDigest;

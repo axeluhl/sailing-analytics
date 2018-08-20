@@ -9,6 +9,7 @@ import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogSuppressedMarkPassingsEventImpl;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.impl.DynamicCompetitor;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogSuppressedMarkPassingsEventSerializer;
@@ -16,14 +17,15 @@ import com.sap.sse.common.TimePoint;
 
 public class RaceLogSuppressedMarkPassingsEventDeserializer extends BaseRaceLogEventDeserializer implements JsonDeserializer<RaceLogEvent> {
 
-    public RaceLogSuppressedMarkPassingsEventDeserializer(JsonDeserializer<Competitor> competitorDeserializer) {
+    public RaceLogSuppressedMarkPassingsEventDeserializer(JsonDeserializer<DynamicCompetitor> competitorDeserializer) {
         super(competitorDeserializer);
     }
 
     @Override
     protected RaceLogEvent deserialize(JSONObject object, Serializable id, TimePoint createdAt, AbstractLogEventAuthor author,
             TimePoint timePoint, int passId, List<Competitor> competitors) throws JsonDeserializationException {
-        Integer indexOfFirstWaypoint = (Integer) object.get(RaceLogSuppressedMarkPassingsEventSerializer.FIELD_INDEX_OF_FIRST_SUPPRESSED_WAYPOINTS);
+        final Number indexOfFirstWaypointAsNumber = (Number) object.get(RaceLogSuppressedMarkPassingsEventSerializer.FIELD_INDEX_OF_FIRST_SUPPRESSED_WAYPOINTS);
+		Integer indexOfFirstWaypoint = indexOfFirstWaypointAsNumber==null?null:indexOfFirstWaypointAsNumber.intValue();
         return new RaceLogSuppressedMarkPassingsEventImpl(createdAt, timePoint, author, id, competitors, passId, indexOfFirstWaypoint);
     }
 }

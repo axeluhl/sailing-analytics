@@ -17,17 +17,18 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.ScoringSchemeType;
-import com.sap.sailing.gwt.ui.client.DataEntryDialogWithBootstrap;
+import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.leaderboard.RankingMetricTypeFormatter;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
-import com.sap.sailing.gwt.ui.shared.BetterDateTimeBox;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
+import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
 
 /**
@@ -39,13 +40,13 @@ import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
  *
  * @param <T>
  */
-public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEntryDialogWithBootstrap<T> {
+public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEntryDialogWithDateTimeBox<T> {
 
     protected StringMessages stringMessages;
     private final RegattaDTO regatta;
 
-    protected final BetterDateTimeBox startDateBox;
-    protected final BetterDateTimeBox endDateBox;
+    protected final DateAndTimeInput startDateBox;
+    protected final DateAndTimeInput endDateBox;
     protected final ListBox scoringSchemeListBox;
     protected final ListBox courseAreaListBox;
     protected final ListBox sailingEventsListBox;
@@ -72,11 +73,9 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
             final NodeList<OptionElement> options = selectElement.getOptions();
             options.getItem(options.getLength()-1).setTitle(RankingMetricTypeFormatter.getDescription(rankingMetricType, stringMessages));
         }
-        startDateBox = createDateTimeBox(regatta.startDate);
-        startDateBox.setFormat("dd/mm/yyyy hh:ii"); 
+        startDateBox = createDateTimeBox(regatta.startDate, Accuracy.MINUTES);
         startDateBox.ensureDebugId("StartDateTimeBox");
-        endDateBox = createDateTimeBox(regatta.endDate);
-        endDateBox.setFormat("dd/mm/yyyy hh:ii"); 
+        endDateBox = createDateTimeBox(regatta.endDate, Accuracy.MINUTES);
         endDateBox.ensureDebugId("EndDateTimeBox");
         scoringSchemeListBox = createListBox(false);
         scoringSchemeListBox.ensureDebugId("ScoringSchemeListBox");

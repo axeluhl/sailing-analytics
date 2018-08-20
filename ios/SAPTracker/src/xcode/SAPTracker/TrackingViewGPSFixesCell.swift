@@ -10,7 +10,7 @@ import UIKit
 
 class TrackingViewGPSFixesCell: UITableViewCell {
 
-    var regatta: Regatta?
+    weak var checkIn: CheckIn?
     
     @IBOutlet weak var gpsFixesTitleLabel: UILabel!
     @IBOutlet weak var gpsFixesLabel: UILabel!
@@ -27,35 +27,36 @@ class TrackingViewGPSFixesCell: UITableViewCell {
     
     // MARK: - Setup
     
-    private func setup() {
+    fileprivate func setup() {
         setupLocalization()
         setupGPSFixesLabel()
     }
     
-    private func setupLocalization() {
+    fileprivate func setupLocalization() {
         gpsFixesTitleLabel.text = Translation.TrackingView.TableView.GPSFixesCell.GPSFixesTitleLabel.Text.String
     }
     
-    private func setupGPSFixesLabel() {
-        gpsFixesLabel.text = String(format: "%d", regatta?.gpsFixes?.count ?? 0)
+    fileprivate func setupGPSFixesLabel() {
+        gpsFixesLabel.text = String(format: "%d", checkIn?.gpsFixes?.count ?? 0)
     }
     
     // MARK: - Notifications
     
-    private func subscribeForNotifications() {
-        NSNotificationCenter.defaultCenter().addObserver(self,
-                                                         selector:#selector(locationManagerUpdated(_:)),
-                                                         name:LocationManager.NotificationType.Updated,
-                                                         object: nil
+    fileprivate func subscribeForNotifications() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(locationManagerUpdated(_:)),
+            name: NSNotification.Name(rawValue: LocationManager.NotificationType.Updated),
+            object: nil
         )
     }
     
-    private func unsubscribeFromNotifications() {
-        NSNotificationCenter.defaultCenter().removeObserver(self)
+    fileprivate func unsubscribeFromNotifications() {
+        NotificationCenter.default.removeObserver(self)
     }
     
-    @objc private func locationManagerUpdated(notification: NSNotification) {
-        dispatch_async(dispatch_get_main_queue(), {
+    @objc fileprivate func locationManagerUpdated(_ notification: Notification) {
+        DispatchQueue.main.async(execute: {
             self.setupGPSFixesLabel()
         })
     }

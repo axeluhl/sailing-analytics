@@ -155,7 +155,6 @@ public class UserStoreImpl implements UserStore {
 
     @Override
     public void clear() {
-        preferences.clear();
         clearAllPreferenceObjects();
         emailForUsername.clear();
         settings.clear();
@@ -173,7 +172,7 @@ public class UserStoreImpl implements UserStore {
     private void clearAllPreferenceObjects() {
         final Set<String> usersToProcess = new HashSet<>(preferences.keySet());
         for (String username : usersToProcess) {
-            removeAllPreferenceObjectsForUser(username);
+            removeAllPreferencesForUser(username);
         }
     }
 
@@ -317,6 +316,11 @@ public class UserStoreImpl implements UserStore {
     @Override
     public Iterable<User> getUsers() {
         return new ArrayList<User>(users.values());
+    }
+
+    @Override
+    public boolean hasUsers() {
+        return !users.isEmpty();
     }
 
     @Override
@@ -486,7 +490,11 @@ public class UserStoreImpl implements UserStore {
                 }
             }
         }
-        userMap.put(key, value);
+        if(value == null) {
+            userMap.remove(key);
+        } else {
+            userMap.put(key, value);
+        }
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storePreferences(username, userMap);
         }

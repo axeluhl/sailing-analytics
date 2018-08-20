@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
-	<file datatype="javapropertyresourcebundle" date="2016-11-23T14:55:41Z" original="/usr/sap/ljs/app/Converter_2566045106627533633/java/com.sap.sse.security.ui/src/main/java/com/sap/sse/security/ui/client/i18n/StringMessages.properties" source-language="en" target-language="ja">
+	<file datatype="javapropertyresourcebundle" date="2017-03-03T15:30:11Z" original="/usr/sap/ljs/app/Converter_5099745395718684415/java/com.sap.sse.security.ui/src/main/java/com/sap/sse/security/ui/client/i18n/StringMessages.properties" source-language="en" target-language="ja">
 		<header>
 			<skl>
-				<internal-file crc="d38efe4badae12b0c22cb2104d135a30" form="base64">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</internal-file>
+				<internal-file crc="1a97a5a016bf3357b3f0613d523b2ebc" form="base64">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</internal-file>
 			</skl>
 			<phase-group>
-				<phase company-name="SAP AG" date="2016-11-04T21:01:36Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
+				<phase company-name="SAP AG" date="2016-12-09T08:12:06Z" phase-name="file-creation" process-name="file-creation" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter"/>
 			</phase-group>
 			<tool tool-company="SAP AG" tool-id="urn:x-sap:sls-mlt:java:properties-flexible-converter" tool-name="TEW: Javascript .properties Flexible File Converter" tool-version="1.1.0"/>
 		</header>
@@ -25,7 +25,7 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="passwordRepeat" resname="passwordRepeat">
 				<source>Repeat password</source>
-				<target state="signed-off">パスワード繰返</target>
+				<target state="translated">パスワード再入力</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="loggedIn" resname="loggedIn">
 				<source>Logged in as user <ph id="1">{0}</ph>!</source>
@@ -65,7 +65,7 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="welcome" resname="welcome">
 				<source>Welcome, <ph id="1">{0}</ph>!</source>
-				<target state="translated"><ph id="1">{0}</ph> さん、ようこそ</target>
+				<target state="signed-off"><ph id="1">{0}</ph> さん、ようこそ</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="tryingToVerifyUser" resname="tryingToVerifyUser">
 				<source>Trying to verify user...</source>
@@ -77,7 +77,7 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="signedInAs" resname="signedInAs">
 				<source>Signed in as <ph id="1">{0}</ph></source>
-				<target state="translated"><ph id="1">{0}</ph> としてサインイン</target>
+				<target state="signed-off"><ph id="1">{0}</ph> としてサインイン</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="signedInAsTitle" resname="signedInAsTitle">
 				<source>Signed in as:</source>
@@ -161,7 +161,7 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="account" resname="account">
 				<source><ph id="1">{0}</ph>-Account</source>
-				<target state="translated"><ph id="1">{0}</ph> アカウント</target>
+				<target state="signed-off"><ph id="1">{0}</ph> アカウント</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="save" resname="save">
 				<source>Save</source>
@@ -349,7 +349,7 @@
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="settingsForComponent" resname="settingsForComponent">
 				<source>Settings for <ph id="1">{0}</ph></source>
-				<target state="translated"><ph id="1">{0}</ph> の設定</target>
+				<target state="signed-off"><ph id="1">{0}</ph> の設定</target>
 			</trans-unit>
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="pleaseSelect" resname="pleaseSelect">
 				<source>Please select</source>
@@ -398,6 +398,10 @@
 			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="preferredLanguage" resname="preferredLanguage">
 				<source>Preferred language</source>
 				<target state="signed-off">優先言語</target>
+			</trans-unit>
+			<trans-unit datatype="x-urn:x-sap:sls-mlt:java:flexible-converter:messageformat" id="cannotResetInvalidURL" resname="cannotResetInvalidURL">
+				<source>Invalid reset URL...</source>
+				<target state="signed-off">無効なリセット URL...</target>
 			</trans-unit>
 		</body>
 	</file>

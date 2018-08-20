@@ -64,7 +64,19 @@ public abstract class AbstractTimePoint implements TimePoint {
 
     @Override
     public TimePoint plus(long milliseconds) {
-        return new MillisecondsTimePoint(asMillis()+milliseconds);
+        final TimePoint result;
+        if (milliseconds > 0) {
+            if (EndOfTime.asMillis()-milliseconds >= asMillis()) {
+                result = new MillisecondsTimePoint(asMillis()+milliseconds);
+            } else {
+                result = EndOfTime;
+            }
+        } else if (asMillis() < milliseconds) {
+            result = BeginningOfTime;
+        } else {
+            result = new MillisecondsTimePoint(asMillis()+milliseconds);
+        }
+        return result;
     }
     
     @Override
@@ -100,7 +112,15 @@ public abstract class AbstractTimePoint implements TimePoint {
 
     @Override
     public String toString() {
-        return asDate().toString();
+        long millis = asMillis() % 1000l;
+        final String fullSeconds = asDate().toString();
+        final String result;
+        if (millis == 0) {
+            result = fullSeconds;
+        } else {
+            result = fullSeconds + " (+"+millis+"ms)";
+        }
+        return result;
     }
 
     /**

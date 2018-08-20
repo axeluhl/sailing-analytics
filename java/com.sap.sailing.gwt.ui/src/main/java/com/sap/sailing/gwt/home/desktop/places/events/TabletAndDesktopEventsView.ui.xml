@@ -5,9 +5,6 @@
 	<ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
 	<ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:style>
-		.events-overview-navigation {
-		    font-size: 1rem;
-		}
 		.breadcrumb {
 		  font-size: 1rem;
 		  /* @alternate */ font-size: 0.866666666666667em;

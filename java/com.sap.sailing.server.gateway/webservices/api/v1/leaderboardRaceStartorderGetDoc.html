@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+	<link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+	<title>SAP Sailing Analytics Webservices API Version 1.0</title>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/leaderboards/{name}/startorder?race_column={name}&amp;fleet={name}</h2>
+
+<b>Description:</b>
+<p>Gets the order in which competitors have started or are expected to start for a race. The output
+   is a JSON array that contains the race competitors in the order in which they have passed
+   the start waypoint or are expected to do so. Those competitors for which a start mark
+   passing is already known are sorted by those start mark passings. All other
+   boats are ordered by their geometric distance from the start line or the windward distance from the start mark
+   if the start for some reason is defined by a single mark.
+</p>
+<br/>
+<table>
+	<tr>
+		<td>Webservice Type:</td>
+		<td>REST</td>
+	</tr>
+	<tr>
+		<td>Output format:</td>
+		<td>Json</td>
+	</tr>
+	<tr>
+		<td>Mandatory parameters:</td>
+        <td>race_column
+            <br/>fleet</td>
+	</tr>
+	<tr>
+		<td>Optional parameters:</td>
+		<td>None</td>
+	</tr>
+	<tr>
+		<td>Request method:</td>
+		<td>GET</td>
+	</tr>
+	<tr>
+		<td>Example:</td>
+		<td><a href="https://dev.sapsailing.com/sailingserver/api/v1/leaderboards/ESS%202016%20Cardiff/startorder?race_column=R1&fleet=Default">https://dev.sapsailing.com/sailingserver/api/v1/leaderboards/ESS%202016%20Cardiff/startorder?race_column=R1&fleet=Default</a></td>
+	</tr>
+</table>
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>

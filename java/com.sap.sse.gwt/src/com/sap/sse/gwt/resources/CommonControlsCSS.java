@@ -10,7 +10,7 @@ import com.google.gwt.dom.client.StyleInjector;
  *
  */
 public class CommonControlsCSS {
-    public static LegacyResources LEGACY = GWT.create(LegacyResources.class);
+    public static HighChartsRessource LEGACY = GWT.create(HighChartsRessource.class);
     public static void ensureInjected() {
         StyleInjector.injectAtStart(LEGACY.commonControls().getText(), true);
     }

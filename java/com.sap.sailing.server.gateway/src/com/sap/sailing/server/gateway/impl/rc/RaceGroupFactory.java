@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.CourseArea;
@@ -25,14 +26,22 @@ import com.sap.sailing.domain.base.racegroup.impl.RaceGroupImpl;
 import com.sap.sailing.domain.base.racegroup.impl.RaceRowImpl;
 import com.sap.sailing.domain.base.racegroup.impl.SeriesWithRowsImpl;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
+import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.TargetTimeInfo;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.leaderboard.ScoringScheme;
+import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
  * Used to convert {@link Leaderboard}s to {@link RaceGroup}s.
  */
 public class RaceGroupFactory {
+    private static final Logger logger = Logger.getLogger(RaceGroupFactory.class.getName());
 
     /**
      * Convert given {@link RegattaLeaderboard} to a {@link RaceGroup}.
@@ -44,8 +53,8 @@ public class RaceGroupFactory {
         CourseArea courseArea = leaderboard.getDefaultCourseArea();
         Regatta regatta = ((RegattaLeaderboard) leaderboard).getRegatta();
         Iterable<SeriesWithRows> series = getSeries(leaderboard);
-        return new RaceGroupImpl(name, leaderboard.getDisplayName(), regatta.getBoatClass(), courseArea,
-                series, regatta.getRegattaConfiguration());
+        return new RaceGroupImpl(name, leaderboard.getDisplayName(), regatta.getBoatClass(), regatta.canBoatsOfCompetitorsChangePerRace(), 
+                courseArea, series, regatta.getRegattaConfiguration());
     }
 
     /**
@@ -59,15 +68,16 @@ public class RaceGroupFactory {
         BoatClass boatClass = null;
         RegattaConfiguration configuration = null;
         Iterable<SeriesWithRows> series = getSeries(leaderboard);
-        return new RaceGroupImpl(name, leaderboard.getDisplayName(), boatClass, courseArea, series, configuration);
+        return new RaceGroupImpl(name, leaderboard.getDisplayName(), boatClass, false, courseArea, series, configuration);
     }
 
     private Iterable<SeriesWithRows> getSeries(Leaderboard leaderboard) {
         Map<Series, List<RaceColumn>> seriesToRaceColumns = getSeriesToRaceColumns(leaderboard);
         Collection<SeriesWithRows> seriesWithRows = new ArrayList<>();
         for (Series series : getSeriesIterable(leaderboard, seriesToRaceColumns)) {
-            seriesWithRows.add(new SeriesWithRowsImpl(series.getName(), series.isMedal(), series.isFleetsCanRunInParallel(), getRows(series,
-                    seriesToRaceColumns.get(series))));
+            seriesWithRows
+                    .add(new SeriesWithRowsImpl(series.getName(), series.isMedal(), series.isFleetsCanRunInParallel(),
+                            getRows(series, seriesToRaceColumns.get(series), leaderboard.getScoringScheme())));
         }
         return seriesWithRows;
     }
@@ -81,14 +91,16 @@ public class RaceGroupFactory {
     }
 
     /**
-     * @param raceColumns must be provided in the same order in which they appear in the series / leaderboard
+     * @param raceColumns
+     *            must be provided in the same order in which they appear in the series / leaderboard
      */
-    private Collection<RaceRow> getRows(Series series, List<RaceColumn> raceColumns) {
+    private Collection<RaceRow> getRows(Series series, List<RaceColumn> raceColumns, ScoringScheme scoringScheme) {
         Collection<RaceRow> rows = new ArrayList<>();
         for (Fleet fleet : series.getFleets()) {
             // We are taking the fleet name because there might be several "default fleet"
             // objects when TrackedRaces are linked onto this Leaderboard
-                rows.add(new RaceRowImpl(fleet, getCells(fleet.getName(), raceColumns, isFirstRaceColumnVirtual(series))));
+            rows.add(new RaceRowImpl(fleet,
+                    getCells(fleet.getName(), raceColumns, isFirstRaceColumnVirtual(series), scoringScheme)));
         }
         return rows;
     }
@@ -98,20 +110,33 @@ public class RaceGroupFactory {
     }
 
     /**
-     * Delivers the race cell in the order of the {@link RaceColumn}s provided in {@code raceColumns}.
+     * Delivers the race cell in the order of the {@link RaceColumn}s provided in {@code raceColumns}. The
+     * {@link RaceCell#getTargetTime() target times} are based on an
+     * {@link TrackedRace#getEstimatedTimeToComplete(TimePoint) estimation} for the current point in time, when the
+     * request is being made, using this time point to determine the wind speed and direction for each leg.
      */
-    private List<RaceCell> getCells(String fleetName, List<RaceColumn> raceColumns, boolean isFirstRaceColumnVirtual) {
+    private List<RaceCell> getCells(String fleetName, List<RaceColumn> raceColumns, boolean isFirstRaceColumnVirtual, ScoringScheme scoringScheme) {
         boolean skippedFirst = false;
         List<RaceCell> cells = new ArrayList<>();
         if (raceColumns != null) {
             int zeroBasedIndexOfRaceInFleet = 0;
+            final TimePoint now = MillisecondsTimePoint.now();
             for (final RaceColumn raceColumn : raceColumns) {
                 if (isFirstRaceColumnVirtual && !skippedFirst) {
                     skippedFirst = true;
                 } else {
-                    Fleet fleet = raceColumn.getFleetByName(fleetName);
+                    final Fleet fleet = raceColumn.getFleetByName(fleetName);
+                    final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
+                    TargetTimeInfo targetTime;
+                    try {
+                        targetTime = trackedRace == null ? null : trackedRace.getEstimatedTimeToComplete(now);
+                    } catch (NotEnoughDataHasBeenAddedException | NoWindException e) {
+                        logger.fine(()->"Unable to determine target time for "+trackedRace);
+                        targetTime = null;
+                    }
                     cells.add(new RaceCellImpl(raceColumn.getName(), raceColumn.getRaceLog(fleet),
-                            raceColumn.getFactor(), raceColumn.getExplicitFactor(), zeroBasedIndexOfRaceInFleet++));
+                            scoringScheme.getScoreFactor(raceColumn), raceColumn.getExplicitFactor(),
+                            zeroBasedIndexOfRaceInFleet++, targetTime));
                 }
             }
         }

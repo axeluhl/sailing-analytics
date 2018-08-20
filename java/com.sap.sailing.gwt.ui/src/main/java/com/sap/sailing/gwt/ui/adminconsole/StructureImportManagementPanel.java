@@ -15,7 +15,6 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
@@ -48,6 +47,8 @@ import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -299,7 +300,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
                 @Override
                 public void onFailure(Throwable caught) {
                     busyIndicator.setBusy(false);
-                    errorReporter.reportError("Error trying to load regattas");
+                    errorReporter.reportError(stringMessages.errorLoadingRegattas(jsonURL, caught.getMessage()));
                 }
 
                 @Override
@@ -342,7 +343,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
      */
     private RegattaDTO createRegattaDefaults(RegattaDTO regatta) {
         RegattaDTO result = new RegattaDTO("Default", ScoringSchemeType.LOW_POINT);
-        result.boatClass = new BoatClassDTO(BoatClassDTO.DEFAULT_NAME, /* hull length */ new MeterDistance(5));
+        result.boatClass = new BoatClassDTO(BoatClassDTO.DEFAULT_NAME, /* hull length */ new MeterDistance(5), /* hull beam */ new MeterDistance(1.8));
         result.series = regatta.series;
         result.rankingMetricType = RankingMetrics.ONE_DESIGN;
         return result;
@@ -475,7 +476,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
             @Override
             public void onSuccess(Void result) {
                 regattaRefresher.fillRegattas();
-                Window.alert(stringMessages.successfullyCreatedRegattas());
+                Notification.notify(stringMessages.successfullyCreatedRegattas(), NotificationType.SUCCESS);
             }
         });
     }

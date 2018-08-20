@@ -17,7 +17,6 @@ import java.util.logging.Logger;
 
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
-import javax.mail.Multipart;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
@@ -28,6 +27,7 @@ import javax.mail.internet.MimeUtility;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mail.MailServiceResolver;
+import com.sap.sse.mail.SerializableMultipartSupplier;
 import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
@@ -68,7 +68,7 @@ public class MailServiceImpl implements ReplicableMailService {
     protected static interface ContentSetter {
         void setContent(MimeMessage msg) throws MessagingException;
     }
-
+    
     private boolean canSendMail() {
         return mailProperties != null && mailProperties.containsKey("mail.transport.protocol");
     }
@@ -88,16 +88,12 @@ public class MailServiceImpl implements ReplicableMailService {
                         msg.setSubject(subject);
                     }
                     msg.addRecipient(RecipientType.TO, new InternetAddress(toAddress.trim()));
-                    
                     // this fixes the DCH MIME type error 
                     // see http://tanyamadurapperuma.blogspot.de/2014/01/struggling-with-nosuchproviderexception.html
                     Thread.currentThread().setContextClassLoader(javax.mail.Session.class.getClassLoader());
-
                     contentSetter.setContent(msg);
-                    
                     // for testing with gmail
                     //Transport ts = session.getTransport("smtps");
-
                     Transport ts = session.getTransport();
                     ts.connect();
                     ts.sendMessage(msg, msg.getRecipients(RecipientType.TO));
@@ -134,19 +130,19 @@ public class MailServiceImpl implements ReplicableMailService {
     }
 
     @Override
-    public Void internalSendMail(String toAddress, String subject, Multipart multipartContent) throws MailException {
+    public Void internalSendMail(String toAddress, String subject, SerializableMultipartSupplier multipartSupplier) throws MailException {
         internalSendMail(toAddress, subject, new ContentSetter() {
             @Override
             public void setContent(MimeMessage msg) throws MessagingException {
-                msg.setContent(multipartContent);
+                msg.setContent(multipartSupplier.get());
             }
         });
         return null;
     }
 
     @Override
-    public void sendMail(String toAddress, String subject, Multipart multipartContent) throws MailException {
-        apply(s -> s.internalSendMail(toAddress, subject, multipartContent));
+    public void sendMail(String toAddress, String subject, SerializableMultipartSupplier multipartSupplier) throws MailException {
+        apply(s -> s.internalSendMail(toAddress, subject, multipartSupplier));
     }
 
     @Override

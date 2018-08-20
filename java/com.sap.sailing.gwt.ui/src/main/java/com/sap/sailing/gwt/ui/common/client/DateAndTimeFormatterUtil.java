@@ -17,6 +17,8 @@ public class DateAndTimeFormatterUtil {
             DateTimeFormat.getFormat(PredefinedFormat.TIME_LONG));
     public static DateTimeFormatRenderer shortTimeFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat(PredefinedFormat.TIME_SHORT));
+    public static DateTimeFormatRenderer mediumTimeFormatter = new DateTimeFormatRenderer(
+            DateTimeFormat.getFormat(PredefinedFormat.TIME_MEDIUM));
 
     public static DateTimeFormatRenderer weekdayMonthAbbrDayDateFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat("EEE, " + LocaleInfo.getCurrentLocale().getDateTimeFormatInfo().formatMonthAbbrevDay()));
@@ -24,6 +26,10 @@ public class DateAndTimeFormatterUtil {
             DateTimeFormat.getFormat(DateTimeFormat.PredefinedFormat.DATE_LONG));
     public static DateTimeFormatRenderer longTimeFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat("HH:mm:ss zzz"), timeZoneWithoutOffset);
+    public static DateTimeFormatRenderer minutesTimeFormatter = new DateTimeFormatRenderer(
+            DateTimeFormat.getFormat("m"), timeZoneWithoutOffset);
+    public static DateTimeFormatRenderer hoursAndMinutesTimeFormatter = new DateTimeFormatRenderer(
+            DateTimeFormat.getFormat("HH:mm"), timeZoneWithoutOffset);
 
     private static DateTimeFormatRenderer secondsTimeFormatter = new DateTimeFormatRenderer(
             DateTimeFormat.getFormat("m:ss"), timeZoneWithoutOffset);
@@ -71,6 +77,10 @@ public class DateAndTimeFormatterUtil {
         return result;
     }
     
+    public static String formatLongDateAndTimeGMT(Date date) {
+        return longDateFormatter.render(date) + ", " + longTimeFormatter.render(date);
+    }
+
     public static String getClientTimeZoneAsGMTString() {
         Date now = new Date();
         @SuppressWarnings("deprecation")

@@ -3,18 +3,17 @@ package com.sap.sailing.domain.tracking;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Map;
-import java.util.Set;
 
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 
 /**
- * Centerpiece of a tracking adapter. A tracker is responsible for receiving tracking data for one or more
- * {@link RaceDefinition races} that are {@link Regatta#getAllRaces() part of} a common {@link #getRegatta() Event}. Some
+ * Centerpiece of a tracking adapter. A tracker is responsible for receiving tracking data for one
+ * {@link RaceDefinition race} that is {@link Regatta#getAllRaces() part of} a common {@link #getRegatta() Event}. Some
  * tracker architectures may not be able to deliver all data for the {@link RaceDefinition} when created or started.
- * Therefore, {@link #getRaces()} may return <code>null</code> if the race information hasn't been received by the
- * tracker yet. Through the {@link RaceHandle} returned by {@link #getRacesHandle()} it is also possible to perform a
+ * Therefore, {@link #getRace()} may return <code>null</code> if the race information hasn't been received by the
+ * tracker yet. Through the {@link RaceHandle} returned by {@link #getRaceHandle()} it is also possible to perform a
  * {@link RaceHandle#getRace() blocking get} for the race tracked by this tracker.
  * <p>
  * 
@@ -44,7 +43,7 @@ public interface RaceTracker {
     static long TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS = 60000;
 
     /**
-     * Stops tracking the races.
+     * Stops tracking the race.
      * 
      * @param preemptive
      *            if <code>false</code>, the tracker will continue to process data already received but will stop
@@ -53,20 +52,30 @@ public interface RaceTracker {
      */
     void stop(boolean preemptive) throws MalformedURLException, IOException, InterruptedException;
 
+
+    /**
+     * Like {@link #stop(boolean)}, only that with this method the caller can assert by setting {@code willBeRemoved} to
+     * {@code true} that the race will be removed and no longer be accessible to clients after stopping this tracker.
+     * This helps save computational efforts because calculations that would otherwise be triggered when loading a race
+     * completes no longer need to be triggered.
+     */
+    void stop(boolean preemptive, boolean willBeRemoved) throws MalformedURLException, IOException, InterruptedException;
+
     com.sap.sailing.domain.base.Regatta getRegatta();
 
     /**
-     * Returns the races being tracked by this tracker. Non-blocking call that returns <code>null</code> or an empty set
-     * if the {@link RaceDefinition} for a TracTrac Event hasn't been created yet, e.g., because the course definition
-     * hasn't been received yet or the listener for receiving course information hasn't been registered (yet). Also
-     * returns races that have been removed from containing structures which may lead this tracker to no longer update
-     * their {@link TrackedRace} with new data.
+     * Returns the race being tracked by this tracker, in a "volatile" way, meaning that if another thread belonging to
+     * this tracker has established the {@link RaceDefinition} for this tracker, other threads will immediately see this
+     * object. Non-blocking call that returns <code>null</code> if the {@link RaceDefinition} hasn't been created yet,
+     * e.g., because the course definition hasn't been received yet or the listener for receiving course information
+     * hasn't been registered (yet). Also returns a race that may have been removed from containing structures which may
+     * lead this tracker to no longer update their {@link TrackedRace} with new data.
      */
-    Set<RaceDefinition> getRaces();
+    RaceDefinition getRace();
     
-    Set<RegattaAndRaceIdentifier> getRaceIdentifiers();
+    RegattaAndRaceIdentifier getRaceIdentifier();
 
-    RaceHandle getRacesHandle();
+    RaceHandle getRaceHandle();
 
     DynamicTrackedRegatta getTrackedRegatta();
     
@@ -80,28 +89,68 @@ public interface RaceTracker {
     /**
      * Listener interface for race tracker related events
      */
+    @FunctionalInterface
     interface Listener {
         /**
          * Tracker has stopped event, see {@link RaceTracker#stop(boolean)} method
          * 
          * @param preemptive
+         *            whether to stop ongoing loading jobs
+         * @param willBeRemoved
+         *            if {@code true}, the race is about to be removed; hence, no need in resuming any caches or other
+         *            (re-)calculation jobs
          */
-        void onTrackerWillStop(boolean preemptive);
+        void onTrackerWillStop(boolean preemptive, boolean willBeRemoved);
+    }
+    
+    @FunctionalInterface
+    interface RaceCreationListener {
+        /**
+         * Tracker has received its {@link RaceDefinition}, so that now {@link RaceTracker#getRace} no longer returns
+         * {@code null} but a valid {@link RaceDefinition}
+         * 
+         * @param tracker
+         *            this tracker is passed to the listener which can then obtain the {@link RaceTracker#getRace()
+         *            race} and the {@link RaceTracker#getConnectivityParams() connectivity parameters}, etc. If the
+         *            {@link RaceTracker} already has created its race, this method is called immediately upon
+         *            {@link RaceTracker#add(Listener) adding} this listener so that the listener will always receive
+         *            the call for a valid race if the race is created at any point in time, regardless the point in
+         *            time of the listener registration. This helps avoid race conditions.
+         */
+        void onRaceCreated(RaceTracker tracker);
     }
 
     /**
      * Register a new RaceTracker.Listener for this race tracker.
      * 
-     * @param newListener
      * @return true if listener has been added
      */
     boolean add(RaceTracker.Listener newListener);
 
     /**
-     * Remove listener from racetracker
+     * Remove listener from race tracker
      * 
-     * @param newListener
+     * @param listener
      * @return the listener registration for listener removal
      */
-    void remove(RaceTracker.Listener newListener);
+    void remove(RaceTracker.Listener listener);
+    
+    /**
+     * Adds a listener that will be {@link RaceCreationListener#onRaceCreated(RaceTracker) notified} when the
+     * {@link #getRace()} method starts returning a valid, non-{@code null} race. The listener will be notified
+     * immediately if {@link #getRace()} already yields a valid {@link RaceDefinition} when calling this method so
+     * that the listener will be notified at least once. The listener will automatically be removed after it has been
+     * notified. 
+     */
+    void add(RaceTracker.RaceCreationListener listener);
+    
+    void remove(RaceTracker.RaceCreationListener listener);
+
+    /**
+     * The connectivity parameters used to create this tracker. Can be used, e.g., to add or remove those parameters to
+     * the set of trackers to restore after a server restart. May return {@code null}, e.g., in case the tracker was
+     * created by a test case that did not use a {@link RaceTrackingConnectivityParameters} object to describe what to
+     * track.
+     */
+    RaceTrackingConnectivityParameters getConnectivityParams();
 }

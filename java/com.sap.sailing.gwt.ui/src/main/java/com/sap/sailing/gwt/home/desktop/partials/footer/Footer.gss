@@ -48,9 +48,3 @@
     text-align: right;
   }
 }
-.sitefooter_language_link {
-  color: #efaa00;
-  display: inline-block;
-  cursor: pointer;
-  margin-left: 0.666666666666667em;
-}

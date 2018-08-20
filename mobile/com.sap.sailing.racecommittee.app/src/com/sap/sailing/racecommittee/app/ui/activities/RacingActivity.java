@@ -23,6 +23,7 @@ import com.sap.sailing.domain.base.racegroup.RaceGroup;
 import com.sap.sailing.domain.base.racegroup.RaceGroupSeriesFleet;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
+import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.racecommittee.app.AppConstants;
 import com.sap.sailing.racecommittee.app.AppPreferences;
 import com.sap.sailing.racecommittee.app.R;
@@ -439,6 +440,12 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
             public void onClick(DialogInterface dialog, int which) {
                 ExLog.i(RacingActivity.this, LogEvent.RACE_RESET_YES, mSelectedRace.getId());
                 ExLog.w(RacingActivity.this, TAG, String.format("Race %s is selected for reset.", mSelectedRace.getId()));
+                Fragment fragment = getFragmentManager().findFragmentById(R.id.race_content);
+                if (fragment != null) {
+                    FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                    transaction.remove(fragment);
+                    transaction.commit();
+                }
                 mSelectedRace.getState().setAdvancePass(MillisecondsTimePoint.now());
             }
         });
@@ -579,11 +586,16 @@ public class RacingActivity extends SessionActivity implements RaceListCallbacks
                                 if (mSelectedRace.getStatus() != RaceLogRaceStatus.FINISHING) {
                                     content = RaceFlagViewerFragment.newInstance();
                                 } else {
-                                    if (preferences.getRacingProcedureIsResultEntryEnabled(mSelectedRace.getState().
-                                        getRacingProcedure().getType())) {
-                                        content = TrackingListFragment.newInstance(args, 1);
+                                    boolean forced = intent.getBooleanExtra(AppConstants.INTENT_ACTION_EXTRA_FORCED, false);
+                                    if (forced) {
+                                       content = RaceFinishingFragment.newInstance();
                                     } else {
-                                        content = RaceFinishingFragment.newInstance();
+                                        RacingProcedureType procedureType = mSelectedRace.getState().getRacingProcedure().getType();
+                                        if (preferences.getRacingProcedureIsResultEntryEnabled(procedureType)) {
+                                            content = TrackingListFragment.newInstance(args, 1);
+                                        } else {
+                                            content = RaceFinishingFragment.newInstance();
+                                        }
                                     }
                                 }
                                 content.setArguments(args);

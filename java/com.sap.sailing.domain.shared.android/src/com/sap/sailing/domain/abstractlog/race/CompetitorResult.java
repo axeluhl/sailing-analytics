@@ -14,6 +14,30 @@ import com.sap.sse.common.TimePoint;
  *
  */
 public interface CompetitorResult extends Serializable {
+    public static enum MergeState {
+        /**
+         * No merge was necessary at competitor level.
+         */
+        OK,
+        
+        /**
+         * A field-wise merge was necessary because an update was received that affected this competitor result
+         * while locally this competitor result was in a "dirty" (modified) state. The merge was carried out
+         * automatically because the fields changed in the dirty state did not overlap with the fields changed
+         * in the version of the object received.
+         */
+        WARNING,
+        
+        /**
+         * A field-wise merge was necessary because an update was received that affected this competitor result while
+         * locally this competitor result was in a "dirty" (modified) state. The fields changed in the dirty state
+         * overlap with the fields changed in the version of the object received. Field values from the local dirty state
+         * have been preferred or have been appended in case of {@link String}-typed fields and need manual
+         * intervention.
+         */
+        ERROR
+    };
+    
     Serializable getCompetitorId();
     
     String getCompetitorDisplayName();
@@ -27,4 +51,9 @@ public interface CompetitorResult extends Serializable {
     TimePoint getFinishingTime();
 
     String getComment();
+    
+    /**
+     * Always returns a valid, non-{@code null} result. See {@link MergeState} for details.
+     */
+    MergeState getMergeState();
 }

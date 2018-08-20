@@ -3,9 +3,15 @@ package com.sap.sse.security.ui.authentication;
 import static com.sap.sse.security.shared.UserManagementException.CANNOT_RESET_PASSWORD_WITHOUT_VALIDATED_EMAIL;
 import static com.sap.sse.security.shared.UserManagementException.USER_ALREADY_EXISTS;
 
+import java.util.function.Consumer;
+
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.web.bindery.event.shared.EventBus;
+import com.sap.sse.common.Util;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContextImpl;
@@ -39,8 +45,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     /**
      * Creates an {@link AuthenticationManagerImpl} instance based on the {@link UserService} and
      * {@link UserManagementServiceAsync} instances provided by the given {@link WithSecurity} instance.
-     * 
-     * @param userService
+     *      * @param userService
      *            the {@link UserService} instance to use
      * @param eventBus
      *            the {@link EventBus} instance
@@ -82,7 +87,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
         this.passwordResetUrl = passwordResetUrl;
         userService.addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
-            public void onUserStatusChange(UserDTO user) {
+            public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
                 eventBus.fireEvent(new AuthenticationContextEvent(new AuthenticationContextImpl(user)));
             }
         });
@@ -92,12 +97,25 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
                     logout();
             }
         });
+        userService.addUserStatusEventHandler(new UserStatusEventHandler() {
+            @SuppressWarnings("unused")
+            @Override
+            public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
+                final String localeParam = Window.Location.getParameter(LocaleInfo.getLocaleQueryParam());
+                // If a user is already authenticated while opening the page, we only trigger a reload if no locale is given by the URL
+                if (ExperimentalFeatures.REFRESH_ON_LOCALE_CHANGE_IN_USER_PROFILE && preAuthenticated
+                        && (localeParam == null || localeParam.isEmpty())) {
+                    redirectWithLocaleForAuthenticatedUser();
+                }
+            }
+        }, true);
     }
 
     @Override
     public void createAccount(final String name, String email, String password, String fullName, 
             String company, SuccessCallback<UserDTO> callback) {
-        userManagementService.createSimpleUser(name, email, password, fullName, company, emailConfirmationUrl,
+        userManagementService.createSimpleUser(name, email, password, fullName, company,
+                LocaleInfo.getCurrentLocale().getLocaleName(), emailConfirmationUrl,
                 new AsyncCallbackImpl<UserDTO>(callback) {
                     @Override
                     public void onFailure(Throwable caught) {
@@ -137,6 +155,10 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
             public void onSuccess(SuccessInfo result) {
                 if (result.isSuccessful()) {
                     callback.onSuccess(result);
+                    if (ExperimentalFeatures.REFRESH_ON_LOCALE_CHANGE_IN_USER_PROFILE) {
+                        // when a user logs in we explicitly switch to the user's locale event if a locale is given by the URL
+                        redirectIfLocaleIsSetAndLocaleIsNotGivenInTheURL(result.getUserDTO().getLocale());
+                    }
                 } else {
                     if (SuccessInfo.FAILED_TO_LOGIN.equals(result.getMessage())) {
                         view.setErrorMessage(StringMessages.INSTANCE.failedToSignIn());
@@ -156,17 +178,92 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     @Override
     public void logout() {
         userService.logout();
-        eventBus.fireEvent(new AuthenticationRequestEvent());
+        eventBus.fireEvent(new AuthenticationRequestEvent(AuthenticationPlaces.SIGN_IN));
     }
     
-    @Override
-    public void refreshUserInfo() {
+    /**
+     * Refresh information of current user.
+     */
+    private void refreshUserInfo() {
         userService.updateUser(true);
     }
     
     @Override
+    public void updateUserProperties(String fullName, String company, String localeName, final AsyncCallback<Void> callback) {
+        final UserDTO currentUser = getAuthenticationContext().getCurrentUser();
+        final String username = currentUser.getName();
+        final String locale = currentUser.getLocale();
+        userManagementService.updateUserProperties(username, fullName, company, localeName, new AsyncCallback<Void>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                callback.onFailure(caught);
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+                refreshUserInfo();
+                callback.onSuccess(result);
+                
+                if(!Util.equalsWithNull(locale, localeName)) {
+                    redirectIfLocaleIsSetAndLocaleIsNotGivenInTheURL(localeName);
+                }
+            }
+        });
+    }
+    
+    /**
+     * Switches to the locale to the current user's locale when a user logs in.
+     */
+    private void redirectWithLocaleForAuthenticatedUser() {
+        final AuthenticationContext authenticationContext = getAuthenticationContext();
+        if(authenticationContext.isLoggedIn()) {
+            redirectIfLocaleIsSetAndLocaleIsNotGivenInTheURL(authenticationContext.getCurrentUser().getLocale());
+        }
+    }
+    
+    private void redirectIfLocaleIsSetAndLocaleIsNotGivenInTheURL(String locale) {
+        if(shouldChangeLocale(locale)) {
+            Window.Location.reload();
+        }
+    }
+    
+    private boolean shouldChangeLocale(String locale) {
+        if(locale == null || locale.isEmpty()) {
+            // If the user currently has no locale preference, we do not refresh
+            return false;
+        }
+        final String localeParam = Window.Location.getParameter(LocaleInfo.getLocaleQueryParam());
+        if (localeParam != null && !localeParam.isEmpty()) {
+            // If the locale is specified in the URL, we do not refresh
+            return false;
+        }
+        final String currentLocale = LocaleInfo.getCurrentLocale().getLocaleName();
+        // If the current locale is equal to the preferred language, a refresh isn't necessary
+        return !currentLocale.equals(locale);
+    }
+
+    @Override
     public AuthenticationContext getAuthenticationContext() {
         return new AuthenticationContextImpl(userService.getCurrentUser());
+    }
+    
+    @Override
+    public void checkNewUserPopup(final Runnable hideUserHintCallback, Consumer<Runnable> showUserHintCallback) {
+        userService.addUserStatusEventHandler(new UserStatusEventHandler() {
+            @Override
+            public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
+                if (user != null) {
+                    // No further user changes need to be handled
+                    userService.removeUserStatusEventHandler(this);
+                    hideUserHintCallback.run();
+                } else {
+                    if (!userService.wasUserRecentlyLoggedInOrDismissedTheHint()) {
+                        showUserHintCallback.accept(userService::setUserLoginHintToStorage);
+                    }
+                }
+            }
+        }, true);
     }
     
     private abstract class AsyncCallbackImpl<T> implements AsyncCallback<T> {
@@ -186,7 +283,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     private class ErrorMessageViewImpl implements ErrorMessageView {
         @Override
         public void setErrorMessage(String errorMessage) {
-            Window.alert(errorMessage);
+            Notification.notify(errorMessage, NotificationType.ERROR);
         }
     }
 }

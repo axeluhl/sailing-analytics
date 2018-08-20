@@ -8,20 +8,40 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.NamedWithID;
 import com.sap.sse.datamining.annotations.Connector;
+import com.sap.sse.datamining.annotations.Dimension;
 
 public interface Competitor extends NamedWithID, IsManagedByCache<SharedDomainFactory> {
-    @Connector(messageKey="Team", ordinal=9)
     Team getTeam();
-
-    @Connector(messageKey="Boat", ordinal=10)
-    Boat getBoat();
     
+    /**
+     * Short for {@link #getTeam()}.{@link Team#getNationality() getNationality()}.
+     */
+    @Connector(messageKey="Nationality", ordinal=9)
+    Nationality getNationality();
+
     Color getColor();
     
     String getEmail();
-    
+
     boolean hasEmail();
 
+    String getShortName();
+
+    /**
+     * Returns a derived short information about a competitor depending on the information available
+     * If we have a short name set on the competitor this name will be returned.
+     * If no short name exist but a boat the either the sailId or the boat name will returned.
+     * If all these attributes have no value null is returned.   
+     */
+    String getShortInfo();
+
+    /**
+     * A helper to know if the competitor has a boat attached.
+     * See {@link CompetitorWithBoat}
+     */
+    boolean hasBoat();
+
+    @Dimension(messageKey="SearchTag", ordinal=11)
     String getSearchTag();
     
     /**

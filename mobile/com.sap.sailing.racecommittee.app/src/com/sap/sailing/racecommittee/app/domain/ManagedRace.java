@@ -1,10 +1,11 @@
 package com.sap.sailing.racecommittee.app.domain;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Map;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.state.RaceState;
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseBase;
 import com.sap.sailing.domain.base.racegroup.FilterableRace;
@@ -59,34 +60,20 @@ public interface ManagedRace extends FilterableRace, ManagedRaceIdentifier, Name
      */
     Collection<Competitor> getCompetitors();
 
-    /**
-     * returns the list of markers to display on the racemap
-     *
-     * @return list of Markers
-     */
-    List<MapMarker> getMapMarkers();
-
+    Map<Competitor, Boat> getCompetitorsAndBoats();
+    
     CourseBase getCourseOnServer();
 
     void setCourseOnServer(CourseBase course);
 
     /**
-     * sets the list of competitors for a race. As the competitors are retrieved later from the backend, the list of
+     * sets the list of competitors and boats for a race. As the competitors are retrieved later from the backend, the list of
      * competitors has to be settable.
      *
      * @param competitors
      *            the retrieved list of competitors for this race
      */
-    void setCompetitors(Collection<Competitor> competitors);
-
-    /**
-     * sets the list of mapItems ( buoys, other boats ) for a race. As the mapItems are retrieved later from the backend, the list of
-     * mapItems has to be settable.
-     *
-     * @param markers
-     *            the retrieved list of mapItems for this race
-     */
-    void setMapMarkers(List<MapMarker> markers);
+    void setCompetitors(Map<Competitor, Boat> competitorsAndBoats);
 
     /**
      * Returns true if {@link RaceState} has been calculated and set

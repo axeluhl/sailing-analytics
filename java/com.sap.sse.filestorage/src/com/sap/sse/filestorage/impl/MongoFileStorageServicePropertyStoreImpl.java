@@ -2,6 +2,7 @@ package com.sap.sse.filestorage.impl;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
@@ -12,6 +13,7 @@ import com.sap.sse.filestorage.FileStorageServicePropertyStore;
 import com.sap.sse.mongodb.MongoDBService;
 
 public class MongoFileStorageServicePropertyStoreImpl implements FileStorageServicePropertyStore {
+	private static final Logger logger = Logger.getLogger(MongoFileStorageServicePropertyStoreImpl.class.getName());
     public static final String PROPERTIES_COLLECTION_NAME = "FileStorageServiceProperties";
     public static final String ACTIVE_SERVICE_COLLECTION_NAME = "ActiveFileStorageService";
     private final DBCollection propertiesCollection;
@@ -23,10 +25,16 @@ public class MongoFileStorageServicePropertyStoreImpl implements FileStorageServ
 
     public MongoFileStorageServicePropertyStoreImpl(MongoDBService dbService) {
         propertiesCollection = dbService.getDB().getCollection(PROPERTIES_COLLECTION_NAME);
-        DBObject index = new BasicDBObjectBuilder().add(FieldNames.SERVICE_NAME.name(), true)
-                .add(FieldNames.PROPERTY_NAME.name(), true).get();
-        propertiesCollection.createIndex(index, "unique service name/property name combination", true);
-
+        DBObject index = new BasicDBObjectBuilder().add(FieldNames.SERVICE_NAME.name(), 1)
+                .add(FieldNames.PROPERTY_NAME.name(), 1).get();
+        try {
+        	propertiesCollection.createIndex(index, "unique service name/property name combination", true);
+        } catch (Exception e)  {
+        	logger.info("Problem creating index, probably due to index format change; dropping indexes and creating again...");
+        	// could be that the index was created with different properties; need to remove and create again:
+        	propertiesCollection.dropIndexes();
+        	propertiesCollection.createIndex(index, "unique service name/property name combination", true);
+        }
         activeServiceCollection = dbService.getDB().getCollection(ACTIVE_SERVICE_COLLECTION_NAME);
     }
 

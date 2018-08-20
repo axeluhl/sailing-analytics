@@ -20,9 +20,16 @@ public class UpdateEndOfTracking extends AbstractRaceOperation<Void> {
 
     @Override
     public Void internalApplyTo(RacingEventService toState) throws Exception {
-        DynamicTrackedRace trackedRace = (DynamicTrackedRace) toState.getTrackedRace(getRaceIdentifier());
-        logger.fine("applying endOfTracking="+endOfTracking+" for "+trackedRace.getRace().getName());
-        trackedRace.setEndOfTrackingReceived(endOfTracking);
+        // it's fair to not wait for the tracked race to arrive here because we're receiving a replication operation
+        // and the synchronous race-creating operation must have been processed synchronously before this operation
+        // could even have been received
+        DynamicTrackedRace trackedRace = (DynamicTrackedRace) toState.getExistingTrackedRace(getRaceIdentifier());
+        if (trackedRace != null) {
+            logger.fine("applying endOfTracking="+endOfTracking+" for "+trackedRace.getRace().getName());
+            trackedRace.setEndOfTrackingReceived(endOfTracking);
+        } else {
+            logger.warning("Tracked race for "+getRaceIdentifier()+" has disappeared");
+        }
         return null;
     }
 

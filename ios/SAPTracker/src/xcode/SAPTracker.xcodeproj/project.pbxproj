@@ -7,8 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		64FDEBDC20D12DCF0086C2F4 /* AFAutoPurgingImageCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 64FDEBDA20D12DCE0086C2F4 /* AFAutoPurgingImageCache.m */; };
+		64FDEBDD20D12DCF0086C2F4 /* AFImageDownloader.m in Sources */ = {isa = PBXBuildFile; fileRef = 64FDEBDB20D12DCE0086C2F4 /* AFImageDownloader.m */; };
 		7F0658FD19F7D6700077FF95 /* ScanViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F0658FC19F7D6700077FF95 /* ScanViewController.swift */; };
-		7F0658FF19F7EE910077FF95 /* RegattaData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F0658FE19F7EE910077FF95 /* RegattaData.swift */; };
+		7F0658FF19F7EE910077FF95 /* CheckInData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F0658FE19F7EE910077FF95 /* CheckInData.swift */; };
 		7F14A10A1A13B9A6001C1ECB /* _abkhazia.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F14A0041A13B9A6001C1ECB /* _abkhazia.png */; };
 		7F14A10B1A13B9A6001C1ECB /* _basque-country.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F14A0051A13B9A6001C1ECB /* _basque-country.png */; };
 		7F14A10C1A13B9A6001C1ECB /* _british-antarctic-territory.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F14A0061A13B9A6001C1ECB /* _british-antarctic-territory.png */; };
@@ -280,19 +282,14 @@
 		7F44095B19F65B5B0021BF22 /* CoreData.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */; };
 		7F4D2F541A1C8EE50038E7D1 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */; };
 		7F83F15619F154F000C53328 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F15519F154F000C53328 /* AppDelegate.swift */; };
-		7F83F15819F154F000C53328 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F15719F154F000C53328 /* HomeViewController.swift */; };
 		7F83F16C19F154F000C53328 /* SAPTrackerAPITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F83F16B19F154F000C53328 /* SAPTrackerAPITests.swift */; };
 		7F83F17619F1574700C53328 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F83F17519F1574700C53328 /* CoreLocation.framework */; };
-		7F87CAA11A2CCE8B0076C617 /* OpenSans-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CA9D1A2CCE8B0076C617 /* OpenSans-Bold.ttf */; };
-		7F87CAA21A2CCE8B0076C617 /* OpenSans-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CA9E1A2CCE8B0076C617 /* OpenSans-Light.ttf */; };
-		7F87CAA31A2CCE8B0076C617 /* OpenSans-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CA9F1A2CCE8B0076C617 /* OpenSans-Regular.ttf */; };
-		7F87CAA41A2CCE8B0076C617 /* OpenSans-Semibold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */; };
 		7F8B8D3F1A37356C00C34B88 /* TrackingPageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8B8D3E1A37356C00C34B88 /* TrackingPageViewController.swift */; };
 		7F8B8D411A373B0200C34B88 /* SpeedViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8B8D401A373B0200C34B88 /* SpeedViewController.swift */; };
 		7F8B8D431A373D4400C34B88 /* CourseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8B8D421A373D4400C34B88 /* CourseViewController.swift */; };
 		7F8CC2081A10D47A00C56D7F /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */; };
 		7F950A911A35E967003C8C5C /* LeaderboardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F950A901A35E967003C8C5C /* LeaderboardViewController.swift */; };
-		7F99DE3C1A126554009B3619 /* RegattaViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F99DE3B1A126554009B3619 /* RegattaViewController.swift */; };
+		7F99DE3C1A126554009B3619 /* RegattaCompetitorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F99DE3B1A126554009B3619 /* RegattaCompetitorViewController.swift */; };
 		7FA2220B1A25E55400FD364B /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F83F17519F1574700C53328 /* CoreLocation.framework */; };
 		7FA6551A19F6661900A1B92D /* CoreDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FA6551919F6661900A1B92D /* CoreDataManager.swift */; };
 		7FAFA7951A126B5700D230F1 /* AboutViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FAFA7941A126B5700D230F1 /* AboutViewController.swift */; };
@@ -305,45 +302,94 @@
 		9E95C3D61C723AB30016632B /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E95C3D51C723AB30016632B /* Constants.swift */; };
 		9ECBDDAE1C9C4F0300F76AEB /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9ECBDDAD1C9C4F0300F76AEB /* LaunchScreen.storyboard */; };
 		C8150BA51DCC6FDB0087C9C2 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = C8150BA71DCC6FDB0087C9C2 /* InfoPlist.strings */; };
+		C8289F3A1F386D8300A76953 /* SignUpRequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8289F391F386D8300A76953 /* SignUpRequestManager.swift */; };
+		C843D47F1EBC54A300250F01 /* CompetitorCheckIn+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D4791EBC54A300250F01 /* CompetitorCheckIn+CoreDataProperties.swift */; };
+		C843D4801EBC54A300250F01 /* CompetitorCheckIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D47A1EBC54A300250F01 /* CompetitorCheckIn.swift */; };
+		C843D4811EBC54A300250F01 /* MarkCheckIn+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D47B1EBC54A300250F01 /* MarkCheckIn+CoreDataProperties.swift */; };
+		C843D4821EBC54A300250F01 /* MarkCheckIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D47C1EBC54A300250F01 /* MarkCheckIn.swift */; };
+		C843D4831EBC54A300250F01 /* CheckIn+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D47D1EBC54A300250F01 /* CheckIn+CoreDataProperties.swift */; };
+		C843D4841EBC54A300250F01 /* CheckIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D47E1EBC54A300250F01 /* CheckIn.swift */; };
+		C843D4861EBC927800250F01 /* RegattaMarkViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D4851EBC927800250F01 /* RegattaMarkViewController.swift */; };
+		C843D4881EBCADDC00250F01 /* CompetitorSessionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D4871EBCADDC00250F01 /* CompetitorSessionController.swift */; };
+		C843D48A1EBCADF500250F01 /* MarkSessionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D4891EBCADF500250F01 /* MarkSessionController.swift */; };
+		C843D48C1EBCB36900250F01 /* SessionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D48B1EBCB36900250F01 /* SessionViewController.swift */; };
+		C843D48F1EC099EB00250F01 /* CoreData2-3.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = C843D48E1EC099EB00250F01 /* CoreData2-3.xcmappingmodel */; };
+		C843D4911EC0A93600250F01 /* CoreData1-3.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = C843D4901EC0A93600250F01 /* CoreData1-3.xcmappingmodel */; };
+		C843D532201F3050003725F0 /* NewCheckInViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C843D531201F3050003725F0 /* NewCheckInViewController.swift */; };
 		C84936181D40D295000F30E8 /* GPSFixController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C84936171D40D295000F30E8 /* GPSFixController.swift */; };
-		C84936291D47645F000F30E8 /* HomeViewRegattaCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C84936281D47645F000F30E8 /* HomeViewRegattaCell.swift */; };
+		C84936291D47645F000F30E8 /* CheckInTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C84936281D47645F000F30E8 /* CheckInTableViewCell.swift */; };
 		C852914F1D48FB91009E9A9D /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C85291511D48FB91009E9A9D /* Localizable.strings */; };
-		C852BAA21CF5E1EA0093B0C5 /* RequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C852BAA11CF5E1EA0093B0C5 /* RequestManager.swift */; };
+		C852BAA21CF5E1EA0093B0C5 /* CheckInRequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C852BAA11CF5E1EA0093B0C5 /* CheckInRequestManager.swift */; };
 		C852BAAB1CF736680093B0C5 /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = C852BAAA1CF736680093B0C5 /* Preferences.swift */; };
+		C85DB8251F30B680009559CE /* SignUp.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C85DB8241F30B680009559CE /* SignUp.storyboard */; };
+		C85DB8281F31AAE0009559CE /* SignUpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C85DB8271F31AAE0009559CE /* SignUpViewController.swift */; };
+		C85DB82A1F31AAFD009559CE /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C85DB8291F31AAFD009559CE /* LoginViewController.swift */; };
+		C85DB82C1F31AB1A009559CE /* ForgotPasswordViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C85DB82B1F31AB1A009559CE /* ForgotPasswordViewController.swift */; };
+		C85DB82E1F31D804009559CE /* SignUpController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C85DB82D1F31D804009559CE /* SignUpController.swift */; };
 		C8603D511C52892A002B2F28 /* Acknowledgements.markdown in Resources */ = {isa = PBXBuildFile; fileRef = C8603D491C528832002B2F28 /* Acknowledgements.markdown */; };
-		C8739E041D2AA2A500A89F3C /* Regatta+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFA1D2AA2A500A89F3C /* Regatta+CoreDataProperties.swift */; };
-		C8739E051D2AA2A500A89F3C /* Regatta.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFB1D2AA2A500A89F3C /* Regatta.swift */; };
+		C867BD091F4B0274007E78E0 /* TrainingCompetitorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C867BD081F4B0274007E78E0 /* TrainingCompetitorViewController.swift */; };
+		C867BD0B1F4B0290007E78E0 /* CreateTrainingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C867BD0A1F4B0290007E78E0 /* CreateTrainingViewController.swift */; };
 		C8739E061D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFC1D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift */; };
 		C8739E071D2AA2A500A89F3C /* GPSFix.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFD1D2AA2A500A89F3C /* GPSFix.swift */; };
 		C8739E081D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFE1D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift */; };
 		C8739E091D2AA2A500A89F3C /* Leaderboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739DFF1D2AA2A500A89F3C /* Leaderboard.swift */; };
-		C8739E0A1D2AA2A500A89F3C /* Competitor+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E001D2AA2A500A89F3C /* Competitor+CoreDataProperties.swift */; };
-		C8739E0B1D2AA2A500A89F3C /* Competitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E011D2AA2A500A89F3C /* Competitor.swift */; };
 		C8739E0C1D2AA2A500A89F3C /* Event+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E021D2AA2A500A89F3C /* Event+CoreDataProperties.swift */; };
 		C8739E0D1D2AA2A500A89F3C /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E031D2AA2A500A89F3C /* Event.swift */; };
-		C8739E0F1D2BEE7900A89F3C /* RegattaController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E0E1D2BEE7900A89F3C /* RegattaController.swift */; };
+		C8739E0F1D2BEE7900A89F3C /* SessionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E0E1D2BEE7900A89F3C /* SessionController.swift */; };
 		C8739E121D2BF14F00A89F3C /* EventData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E111D2BF14F00A89F3C /* EventData.swift */; };
 		C8739E141D2BF16300A89F3C /* LeaderboardData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E131D2BF16300A89F3C /* LeaderboardData.swift */; };
 		C8739E161D2BF17900A89F3C /* CompetitorData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E151D2BF17900A89F3C /* CompetitorData.swift */; };
 		C8739E181D2BF2DC00A89F3C /* BaseData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E171D2BF2DC00A89F3C /* BaseData.swift */; };
 		C8739E1C1D2D5F1700A89F3C /* LocationData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8739E1B1D2D5F1700A89F3C /* LocationData.swift */; };
+		C87A74E11F4EE570003DE396 /* TrainingRequestManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C87A74E01F4EE570003DE396 /* TrainingRequestManager.swift */; };
+		C87A74E31F4F0E34003DE396 /* TrainingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C87A74E21F4F0E34003DE396 /* TrainingController.swift */; };
+		C87A74E81F504EBB003DE396 /* CreateEventData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C87A74E71F504EBB003DE396 /* CreateEventData.swift */; };
+		C87A74EA1F5053AE003DE396 /* RegattaCompetitorCreateAndAddData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C87A74E91F5053AE003DE396 /* RegattaCompetitorCreateAndAddData.swift */; };
+		C87A74EC1F5068D0003DE396 /* CreateTrainingData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C87A74EB1F5068D0003DE396 /* CreateTrainingData.swift */; };
+		C880646E2087DA1F005FBE57 /* BoatClassData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C880646D2087DA1F005FBE57 /* BoatClassData.swift */; };
+		C88F6D2B1FEAC4E800A616BE /* LeaderboardAutoCourseData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88F6D2A1FEAC4E800A616BE /* LeaderboardAutoCourseData.swift */; };
+		C88F6D2D1FEACC5700A616BE /* LeaderboardGroupData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88F6D2C1FEACC5700A616BE /* LeaderboardGroupData.swift */; };
+		C88F6D2F1FEACD7400A616BE /* RegattaRaceCourseData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88F6D2E1FEACD7400A616BE /* RegattaRaceCourseData.swift */; };
+		C88F6D311FFBC35F00A616BE /* ErrorHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88F6D301FFBC35F00A616BE /* ErrorHelper.swift */; };
+		C891886E2057DB4A00E37CC3 /* BoatData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C891886D2057DB4A00E37CC3 /* BoatData.swift */; };
+		C89188712057E7D700E37CC3 /* BoatCheckIn.swift in Sources */ = {isa = PBXBuildFile; fileRef = C891886F2057E7D700E37CC3 /* BoatCheckIn.swift */; };
+		C89188722057E7D700E37CC3 /* BoatCheckIn+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89188702057E7D700E37CC3 /* BoatCheckIn+CoreDataProperties.swift */; };
+		C89188742057F32300E37CC3 /* RegattaBoatViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89188732057F32300E37CC3 /* RegattaBoatViewController.swift */; };
+		C89188762057F36300E37CC3 /* BoatSessionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89188752057F36300E37CC3 /* BoatSessionViewController.swift */; };
+		C89188782057F44200E37CC3 /* BoatViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89188772057F44200E37CC3 /* BoatViewController.swift */; };
+		C891887A2057F55100E37CC3 /* BoatSessionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89188792057F55100E37CC3 /* BoatSessionController.swift */; };
+		C891887C20580A4100E37CC3 /* TrainingBoatViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C891887B20580A4100E37CC3 /* TrainingBoatViewController.swift */; };
 		C89C5FC51D06A289002AAAD2 /* GradientView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FC41D06A289002AAAD2 /* GradientView.swift */; };
 		C89C5FCA1D06CECD002AAAD2 /* TrackingViewStatusCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FC91D06CECD002AAAD2 /* TrackingViewStatusCell.swift */; };
 		C89C5FCC1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FCB1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift */; };
 		C89C5FCE1D06CF26002AAAD2 /* TrackingViewGPSFixesCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FCD1D06CF26002AAAD2 /* TrackingViewGPSFixesCell.swift */; };
 		C89C5FD01D06CF46002AAAD2 /* TrackingViewModeCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C89C5FCF1D06CF46002AAAD2 /* TrackingViewModeCell.swift */; };
 		C8A4400B1C18153600DF70A0 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = C8A4400A1C18153600DF70A0 /* Settings.bundle */; };
+		C8B3B9BC1F39E64400B3B6BA /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8B3B9BB1F39E64400B3B6BA /* Keychain.swift */; };
+		C8B3B9C01F3C3B4400B3B6BA /* SignUp.strings in Resources */ = {isa = PBXBuildFile; fileRef = C8B3B9BF1F3C3B4400B3B6BA /* SignUp.strings */; };
+		C8B3B9C21F3C6B3900B3B6BA /* SignUpTranslation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8B3B9C11F3C6B3900B3B6BA /* SignUpTranslation.swift */; };
 		C8BBAC791C52649E004CA551 /* LicenseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BBAC781C52649E004CA551 /* LicenseViewController.swift */; };
 		C8BFCCC41D51C53500FC1A27 /* TeamData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BFCCC31D51C53500FC1A27 /* TeamData.swift */; };
 		C8BFCCCC1D523C5D00FC1A27 /* TitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8BFCCCB1D523C5D00FC1A27 /* TitleView.swift */; };
+		C8CF22A31F6194C600A01E0A /* RegattaCheckInController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22A21F6194C600A01E0A /* RegattaCheckInController.swift */; };
+		C8CF22A51F61965C00A01E0A /* TrainingCheckInController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22A41F61965C00A01E0A /* TrainingCheckInController.swift */; };
+		C8CF22A91F62780C00A01E0A /* CheckInDataCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22A81F62780C00A01E0A /* CheckInDataCollector.swift */; };
+		C8CF22AD1F668BAB00A01E0A /* TrainingMarkViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22AC1F668BAB00A01E0A /* TrainingMarkViewController.swift */; };
+		C8CF22B41F67C4D800A01E0A /* RegattaRaceColumnAddData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22B31F67C4D800A01E0A /* RegattaRaceColumnAddData.swift */; };
+		C8CF22B81F68133000A01E0A /* TrainingRaceData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22B71F68133000A01E0A /* TrainingRaceData.swift */; };
+		C8CF22BE1F69187800A01E0A /* CompetitorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22BD1F69187800A01E0A /* CompetitorViewController.swift */; };
+		C8CF22C01F6926E500A01E0A /* CompetitorSessionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22BF1F6926E500A01E0A /* CompetitorSessionViewController.swift */; };
+		C8CF22C21F692B5300A01E0A /* MarkSessionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22C11F692B5300A01E0A /* MarkSessionViewController.swift */; };
+		C8CF22C41F692B7700A01E0A /* MarkViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22C31F692B7700A01E0A /* MarkViewController.swift */; };
+		C8CF22C61F694EB900A01E0A /* TrainingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8CF22C51F694EB900A01E0A /* TrainingViewController.swift */; };
 		C8D5E81D1D479FA800DA0D61 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C8D5E81C1D479FA800DA0D61 /* Main.storyboard */; };
+		C8E0BD0A1F39A08B002FCCA5 /* FormularViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8E0BD091F39A08B002FCCA5 /* FormularViewController.swift */; };
+		C8E0BD0D1F39ADAD002FCCA5 /* KeychainPasswordItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8E0BD0C1F39ADAD002FCCA5 /* KeychainPasswordItem.swift */; };
+		C8E0D3131F59475B001EEF5C /* CheckInTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8E0D3121F59475B001EEF5C /* CheckInTableViewController.swift */; };
 		C8F1B1E11D488B6D004C3379 /* Translation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8F1B1E01D488B6D004C3379 /* Translation.swift */; };
-		C8F71EDA1D8691F700826DE4 /* AFHTTPRequestOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = C8F71EA61D8691F700826DE4 /* AFHTTPRequestOperation.m */; };
-		C8F71EDB1D8691F700826DE4 /* AFHTTPRequestOperationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C8F71EA81D8691F700826DE4 /* AFHTTPRequestOperationManager.m */; };
 		C8F71EDC1D8691F700826DE4 /* AFHTTPSessionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C8F71EAA1D8691F700826DE4 /* AFHTTPSessionManager.m */; };
 		C8F71EDD1D8691F700826DE4 /* AFNetworkReachabilityManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C8F71EAD1D8691F700826DE4 /* AFNetworkReachabilityManager.m */; };
 		C8F71EDE1D8691F700826DE4 /* AFSecurityPolicy.m in Sources */ = {isa = PBXBuildFile; fileRef = C8F71EAF1D8691F700826DE4 /* AFSecurityPolicy.m */; };
-		C8F71EDF1D8691F700826DE4 /* AFURLConnectionOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = C8F71EB11D8691F700826DE4 /* AFURLConnectionOperation.m */; };
 		C8F71EE01D8691F700826DE4 /* AFURLRequestSerialization.m in Sources */ = {isa = PBXBuildFile; fileRef = C8F71EB31D8691F700826DE4 /* AFURLRequestSerialization.m */; };
 		C8F71EE11D8691F700826DE4 /* AFURLResponseSerialization.m in Sources */ = {isa = PBXBuildFile; fileRef = C8F71EB51D8691F700826DE4 /* AFURLResponseSerialization.m */; };
 		C8F71EE21D8691F700826DE4 /* AFURLSessionManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C8F71EB71D8691F700826DE4 /* AFURLSessionManager.m */; };
@@ -355,13 +401,13 @@
 		C8F71EE81D8691F700826DE4 /* TSMarkdownParser.m in Sources */ = {isa = PBXBuildFile; fileRef = C8F71EC61D8691F700826DE4 /* TSMarkdownParser.m */; };
 		C8F71EE91D8691F700826DE4 /* AFNetworkActivityIndicatorManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C8F71EC91D8691F700826DE4 /* AFNetworkActivityIndicatorManager.m */; };
 		C8F71EEA1D8691F700826DE4 /* UIActivityIndicatorView+AFNetworking.m in Sources */ = {isa = PBXBuildFile; fileRef = C8F71ECB1D8691F700826DE4 /* UIActivityIndicatorView+AFNetworking.m */; };
-		C8F71EEB1D8691F700826DE4 /* UIAlertView+AFNetworking.m in Sources */ = {isa = PBXBuildFile; fileRef = C8F71ECD1D8691F700826DE4 /* UIAlertView+AFNetworking.m */; };
 		C8F71EEC1D8691F700826DE4 /* UIButton+AFNetworking.m in Sources */ = {isa = PBXBuildFile; fileRef = C8F71ECF1D8691F700826DE4 /* UIButton+AFNetworking.m */; };
 		C8F71EED1D8691F700826DE4 /* UIImageView+AFNetworking.m in Sources */ = {isa = PBXBuildFile; fileRef = C8F71ED21D8691F700826DE4 /* UIImageView+AFNetworking.m */; };
 		C8F71EEE1D8691F700826DE4 /* UIProgressView+AFNetworking.m in Sources */ = {isa = PBXBuildFile; fileRef = C8F71ED51D8691F700826DE4 /* UIProgressView+AFNetworking.m */; };
 		C8F71EEF1D8691F700826DE4 /* UIRefreshControl+AFNetworking.m in Sources */ = {isa = PBXBuildFile; fileRef = C8F71ED71D8691F700826DE4 /* UIRefreshControl+AFNetworking.m */; };
 		C8F71EF01D8691F700826DE4 /* UIWebView+AFNetworking.m in Sources */ = {isa = PBXBuildFile; fileRef = C8F71ED91D8691F700826DE4 /* UIWebView+AFNetworking.m */; };
 		C8F71EF31D86A15F00826DE4 /* SMTWiFiStatus.m in Sources */ = {isa = PBXBuildFile; fileRef = C8F71EF21D86A15F00826DE4 /* SMTWiFiStatus.m */; };
+		C8FF5B7C1EB8CF2C00CF9764 /* MarkData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8FF5B7B1EB8CF2C00CF9764 /* MarkData.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -375,9 +421,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		64FDEBD220D12C390086C2F4 /* AFImageDownloader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFImageDownloader.h; sourceTree = "<group>"; };
+		64FDEBD320D12C390086C2F4 /* AFAutoPurgingImageCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFAutoPurgingImageCache.h; sourceTree = "<group>"; };
+		64FDEBDA20D12DCE0086C2F4 /* AFAutoPurgingImageCache.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AFAutoPurgingImageCache.m; sourceTree = "<group>"; };
+		64FDEBDB20D12DCE0086C2F4 /* AFImageDownloader.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AFImageDownloader.m; sourceTree = "<group>"; };
 		7F03FD3F19FA4D7400FA1327 /* bridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bridge.h; sourceTree = "<group>"; };
 		7F0658FC19F7D6700077FF95 /* ScanViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = ScanViewController.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
-		7F0658FE19F7EE910077FF95 /* RegattaData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = RegattaData.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
+		7F0658FE19F7EE910077FF95 /* CheckInData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = CheckInData.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		7F14A0041A13B9A6001C1ECB /* _abkhazia.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = _abkhazia.png; sourceTree = "<group>"; };
 		7F14A0051A13B9A6001C1ECB /* _basque-country.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "_basque-country.png"; sourceTree = "<group>"; };
 		7F14A0061A13B9A6001C1ECB /* _british-antarctic-territory.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "_british-antarctic-territory.png"; sourceTree = "<group>"; };
@@ -651,21 +701,16 @@
 		7F83F15019F154F000C53328 /* SAPTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SAPTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7F83F15419F154F000C53328 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7F83F15519F154F000C53328 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		7F83F15719F154F000C53328 /* HomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
 		7F83F16519F154F000C53328 /* SAPTrackerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SAPTrackerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		7F83F16A19F154F000C53328 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7F83F16B19F154F000C53328 /* SAPTrackerAPITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SAPTrackerAPITests.swift; sourceTree = "<group>"; };
 		7F83F17519F1574700C53328 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
-		7F87CA9D1A2CCE8B0076C617 /* OpenSans-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenSans-Bold.ttf"; sourceTree = "<group>"; };
-		7F87CA9E1A2CCE8B0076C617 /* OpenSans-Light.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenSans-Light.ttf"; sourceTree = "<group>"; };
-		7F87CA9F1A2CCE8B0076C617 /* OpenSans-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenSans-Regular.ttf"; sourceTree = "<group>"; };
-		7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "OpenSans-Semibold.ttf"; sourceTree = "<group>"; };
 		7F8B8D3E1A37356C00C34B88 /* TrackingPageViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingPageViewController.swift; sourceTree = "<group>"; };
 		7F8B8D401A373B0200C34B88 /* SpeedViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpeedViewController.swift; sourceTree = "<group>"; };
 		7F8B8D421A373D4400C34B88 /* CourseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CourseViewController.swift; sourceTree = "<group>"; };
 		7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
 		7F950A901A35E967003C8C5C /* LeaderboardViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LeaderboardViewController.swift; sourceTree = "<group>"; };
-		7F99DE3B1A126554009B3619 /* RegattaViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaViewController.swift; sourceTree = "<group>"; };
+		7F99DE3B1A126554009B3619 /* RegattaCompetitorViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaCompetitorViewController.swift; sourceTree = "<group>"; };
 		7FA6551919F6661900A1B92D /* CoreDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = CoreDataManager.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		7FAFA7941A126B5700D230F1 /* AboutViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AboutViewController.swift; sourceTree = "<group>"; };
 		7FC5232C19F6AEE800BBFDCC /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
@@ -677,45 +722,95 @@
 		9ECBDDAD1C9C4F0300F76AEB /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		C8150BA61DCC6FDB0087C9C2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C8150BA81DCC6FDD0087C9C2 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		C8289F391F386D8300A76953 /* SignUpRequestManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignUpRequestManager.swift; sourceTree = "<group>"; };
+		C843D4791EBC54A300250F01 /* CompetitorCheckIn+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CompetitorCheckIn+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		C843D47A1EBC54A300250F01 /* CompetitorCheckIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompetitorCheckIn.swift; sourceTree = "<group>"; };
+		C843D47B1EBC54A300250F01 /* MarkCheckIn+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "MarkCheckIn+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		C843D47C1EBC54A300250F01 /* MarkCheckIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MarkCheckIn.swift; sourceTree = "<group>"; };
+		C843D47D1EBC54A300250F01 /* CheckIn+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CheckIn+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		C843D47E1EBC54A300250F01 /* CheckIn.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckIn.swift; sourceTree = "<group>"; };
+		C843D4851EBC927800250F01 /* RegattaMarkViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaMarkViewController.swift; sourceTree = "<group>"; };
+		C843D4871EBCADDC00250F01 /* CompetitorSessionController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompetitorSessionController.swift; sourceTree = "<group>"; };
+		C843D4891EBCADF500250F01 /* MarkSessionController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MarkSessionController.swift; sourceTree = "<group>"; };
+		C843D48B1EBCB36900250F01 /* SessionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SessionViewController.swift; sourceTree = "<group>"; };
+		C843D48E1EC099EB00250F01 /* CoreData2-3.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = "CoreData2-3.xcmappingmodel"; sourceTree = "<group>"; };
+		C843D4901EC0A93600250F01 /* CoreData1-3.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = "CoreData1-3.xcmappingmodel"; sourceTree = "<group>"; };
+		C843D522201F1F17003725F0 /* CoreData 4.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "CoreData 4.xcdatamodel"; sourceTree = "<group>"; };
+		C843D531201F3050003725F0 /* NewCheckInViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewCheckInViewController.swift; sourceTree = "<group>"; };
 		C84936171D40D295000F30E8 /* GPSFixController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSFixController.swift; sourceTree = "<group>"; };
-		C84936281D47645F000F30E8 /* HomeViewRegattaCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeViewRegattaCell.swift; sourceTree = "<group>"; };
+		C84936281D47645F000F30E8 /* CheckInTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckInTableViewCell.swift; sourceTree = "<group>"; };
 		C85291501D48FB91009E9A9D /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
-		C852BAA11CF5E1EA0093B0C5 /* RequestManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestManager.swift; sourceTree = "<group>"; };
+		C852BAA11CF5E1EA0093B0C5 /* CheckInRequestManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckInRequestManager.swift; sourceTree = "<group>"; };
 		C852BAAA1CF736680093B0C5 /* Preferences.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
+		C85DB8241F30B680009559CE /* SignUp.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = SignUp.storyboard; sourceTree = "<group>"; };
+		C85DB8271F31AAE0009559CE /* SignUpViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignUpViewController.swift; sourceTree = "<group>"; };
+		C85DB8291F31AAFD009559CE /* LoginViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
+		C85DB82B1F31AB1A009559CE /* ForgotPasswordViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ForgotPasswordViewController.swift; sourceTree = "<group>"; };
+		C85DB82D1F31D804009559CE /* SignUpController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignUpController.swift; sourceTree = "<group>"; };
 		C85FAA501D4F84460087C2A2 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
 		C8603D491C528832002B2F28 /* Acknowledgements.markdown */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = Acknowledgements.markdown; sourceTree = "<group>"; };
+		C867BD081F4B0274007E78E0 /* TrainingCompetitorViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrainingCompetitorViewController.swift; sourceTree = "<group>"; };
+		C867BD0A1F4B0290007E78E0 /* CreateTrainingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CreateTrainingViewController.swift; sourceTree = "<group>"; };
 		C8739D9A1D25317100A89F3C /* CoreData 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "CoreData 2.xcdatamodel"; sourceTree = "<group>"; };
-		C8739DFA1D2AA2A500A89F3C /* Regatta+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Regatta+CoreDataProperties.swift"; sourceTree = "<group>"; };
-		C8739DFB1D2AA2A500A89F3C /* Regatta.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Regatta.swift; sourceTree = "<group>"; };
 		C8739DFC1D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "GPSFix+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		C8739DFD1D2AA2A500A89F3C /* GPSFix.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GPSFix.swift; sourceTree = "<group>"; };
 		C8739DFE1D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Leaderboard+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		C8739DFF1D2AA2A500A89F3C /* Leaderboard.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Leaderboard.swift; sourceTree = "<group>"; };
-		C8739E001D2AA2A500A89F3C /* Competitor+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Competitor+CoreDataProperties.swift"; sourceTree = "<group>"; };
-		C8739E011D2AA2A500A89F3C /* Competitor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Competitor.swift; sourceTree = "<group>"; };
 		C8739E021D2AA2A500A89F3C /* Event+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Event+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		C8739E031D2AA2A500A89F3C /* Event.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
-		C8739E0E1D2BEE7900A89F3C /* RegattaController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaController.swift; sourceTree = "<group>"; };
+		C8739E0E1D2BEE7900A89F3C /* SessionController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SessionController.swift; sourceTree = "<group>"; };
 		C8739E111D2BF14F00A89F3C /* EventData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventData.swift; sourceTree = "<group>"; };
 		C8739E131D2BF16300A89F3C /* LeaderboardData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LeaderboardData.swift; sourceTree = "<group>"; };
 		C8739E151D2BF17900A89F3C /* CompetitorData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompetitorData.swift; sourceTree = "<group>"; };
 		C8739E171D2BF2DC00A89F3C /* BaseData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseData.swift; sourceTree = "<group>"; };
 		C8739E1B1D2D5F1700A89F3C /* LocationData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationData.swift; sourceTree = "<group>"; };
+		C87A74E01F4EE570003DE396 /* TrainingRequestManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrainingRequestManager.swift; sourceTree = "<group>"; };
+		C87A74E21F4F0E34003DE396 /* TrainingController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrainingController.swift; sourceTree = "<group>"; };
+		C87A74E71F504EBB003DE396 /* CreateEventData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CreateEventData.swift; sourceTree = "<group>"; };
+		C87A74E91F5053AE003DE396 /* RegattaCompetitorCreateAndAddData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaCompetitorCreateAndAddData.swift; sourceTree = "<group>"; };
+		C87A74EB1F5068D0003DE396 /* CreateTrainingData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CreateTrainingData.swift; sourceTree = "<group>"; };
+		C880646D2087DA1F005FBE57 /* BoatClassData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoatClassData.swift; sourceTree = "<group>"; };
+		C88F6D2A1FEAC4E800A616BE /* LeaderboardAutoCourseData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardAutoCourseData.swift; sourceTree = "<group>"; };
+		C88F6D2C1FEACC5700A616BE /* LeaderboardGroupData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardGroupData.swift; sourceTree = "<group>"; };
+		C88F6D2E1FEACD7400A616BE /* RegattaRaceCourseData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegattaRaceCourseData.swift; sourceTree = "<group>"; };
+		C88F6D301FFBC35F00A616BE /* ErrorHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorHelper.swift; sourceTree = "<group>"; };
+		C891886D2057DB4A00E37CC3 /* BoatData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BoatData.swift; sourceTree = "<group>"; };
+		C891886F2057E7D700E37CC3 /* BoatCheckIn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoatCheckIn.swift; sourceTree = "<group>"; };
+		C89188702057E7D700E37CC3 /* BoatCheckIn+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BoatCheckIn+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		C89188732057F32300E37CC3 /* RegattaBoatViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegattaBoatViewController.swift; sourceTree = "<group>"; };
+		C89188752057F36300E37CC3 /* BoatSessionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoatSessionViewController.swift; sourceTree = "<group>"; };
+		C89188772057F44200E37CC3 /* BoatViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoatViewController.swift; sourceTree = "<group>"; };
+		C89188792057F55100E37CC3 /* BoatSessionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoatSessionController.swift; sourceTree = "<group>"; };
+		C891887B20580A4100E37CC3 /* TrainingBoatViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingBoatViewController.swift; sourceTree = "<group>"; };
 		C89C5FC41D06A289002AAAD2 /* GradientView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GradientView.swift; sourceTree = "<group>"; };
 		C89C5FC91D06CECD002AAAD2 /* TrackingViewStatusCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingViewStatusCell.swift; sourceTree = "<group>"; };
 		C89C5FCB1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingViewGPSAccuracyCell.swift; sourceTree = "<group>"; };
 		C89C5FCD1D06CF26002AAAD2 /* TrackingViewGPSFixesCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingViewGPSFixesCell.swift; sourceTree = "<group>"; };
 		C89C5FCF1D06CF46002AAAD2 /* TrackingViewModeCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrackingViewModeCell.swift; sourceTree = "<group>"; };
 		C8A4400A1C18153600DF70A0 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
+		C8B3B9BB1F39E64400B3B6BA /* Keychain.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
+		C8B3B9BF1F3C3B4400B3B6BA /* SignUp.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = SignUp.strings; sourceTree = "<group>"; };
+		C8B3B9C11F3C6B3900B3B6BA /* SignUpTranslation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignUpTranslation.swift; sourceTree = "<group>"; };
 		C8BBAC781C52649E004CA551 /* LicenseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LicenseViewController.swift; sourceTree = "<group>"; };
 		C8BFCCC31D51C53500FC1A27 /* TeamData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TeamData.swift; sourceTree = "<group>"; };
 		C8BFCCCB1D523C5D00FC1A27 /* TitleView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TitleView.swift; sourceTree = "<group>"; };
+		C8CF22A21F6194C600A01E0A /* RegattaCheckInController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaCheckInController.swift; sourceTree = "<group>"; };
+		C8CF22A41F61965C00A01E0A /* TrainingCheckInController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrainingCheckInController.swift; sourceTree = "<group>"; };
+		C8CF22A81F62780C00A01E0A /* CheckInDataCollector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckInDataCollector.swift; sourceTree = "<group>"; };
+		C8CF22AC1F668BAB00A01E0A /* TrainingMarkViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrainingMarkViewController.swift; sourceTree = "<group>"; };
+		C8CF22B31F67C4D800A01E0A /* RegattaRaceColumnAddData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegattaRaceColumnAddData.swift; sourceTree = "<group>"; };
+		C8CF22B71F68133000A01E0A /* TrainingRaceData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrainingRaceData.swift; sourceTree = "<group>"; };
+		C8CF22BD1F69187800A01E0A /* CompetitorViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompetitorViewController.swift; sourceTree = "<group>"; };
+		C8CF22BF1F6926E500A01E0A /* CompetitorSessionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompetitorSessionViewController.swift; sourceTree = "<group>"; };
+		C8CF22C11F692B5300A01E0A /* MarkSessionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MarkSessionViewController.swift; sourceTree = "<group>"; };
+		C8CF22C31F692B7700A01E0A /* MarkViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MarkViewController.swift; sourceTree = "<group>"; };
+		C8CF22C51F694EB900A01E0A /* TrainingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TrainingViewController.swift; sourceTree = "<group>"; };
 		C8D5E81C1D479FA800DA0D61 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
+		C8D938B11EB9AFDB00B1B4BC /* CoreData 3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "CoreData 3.xcdatamodel"; sourceTree = "<group>"; };
+		C8E0BD091F39A08B002FCCA5 /* FormularViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FormularViewController.swift; sourceTree = "<group>"; };
+		C8E0BD0C1F39ADAD002FCCA5 /* KeychainPasswordItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KeychainPasswordItem.swift; sourceTree = "<group>"; };
+		C8E0D3121F59475B001EEF5C /* CheckInTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckInTableViewController.swift; sourceTree = "<group>"; };
 		C8F1B1E01D488B6D004C3379 /* Translation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Translation.swift; sourceTree = "<group>"; };
-		C8F71EA51D8691F700826DE4 /* AFHTTPRequestOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFHTTPRequestOperation.h; sourceTree = "<group>"; };
-		C8F71EA61D8691F700826DE4 /* AFHTTPRequestOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFHTTPRequestOperation.m; sourceTree = "<group>"; };
-		C8F71EA71D8691F700826DE4 /* AFHTTPRequestOperationManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFHTTPRequestOperationManager.h; sourceTree = "<group>"; };
-		C8F71EA81D8691F700826DE4 /* AFHTTPRequestOperationManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFHTTPRequestOperationManager.m; sourceTree = "<group>"; };
 		C8F71EA91D8691F700826DE4 /* AFHTTPSessionManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFHTTPSessionManager.h; sourceTree = "<group>"; };
 		C8F71EAA1D8691F700826DE4 /* AFHTTPSessionManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFHTTPSessionManager.m; sourceTree = "<group>"; };
 		C8F71EAB1D8691F700826DE4 /* AFNetworking.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFNetworking.h; sourceTree = "<group>"; };
@@ -723,8 +818,6 @@
 		C8F71EAD1D8691F700826DE4 /* AFNetworkReachabilityManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFNetworkReachabilityManager.m; sourceTree = "<group>"; };
 		C8F71EAE1D8691F700826DE4 /* AFSecurityPolicy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFSecurityPolicy.h; sourceTree = "<group>"; };
 		C8F71EAF1D8691F700826DE4 /* AFSecurityPolicy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFSecurityPolicy.m; sourceTree = "<group>"; };
-		C8F71EB01D8691F700826DE4 /* AFURLConnectionOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFURLConnectionOperation.h; sourceTree = "<group>"; };
-		C8F71EB11D8691F700826DE4 /* AFURLConnectionOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFURLConnectionOperation.m; sourceTree = "<group>"; };
 		C8F71EB21D8691F700826DE4 /* AFURLRequestSerialization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFURLRequestSerialization.h; sourceTree = "<group>"; };
 		C8F71EB31D8691F700826DE4 /* AFURLRequestSerialization.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFURLRequestSerialization.m; sourceTree = "<group>"; };
 		C8F71EB41D8691F700826DE4 /* AFURLResponseSerialization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AFURLResponseSerialization.h; sourceTree = "<group>"; };
@@ -748,8 +841,6 @@
 		C8F71EC91D8691F700826DE4 /* AFNetworkActivityIndicatorManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AFNetworkActivityIndicatorManager.m; sourceTree = "<group>"; };
 		C8F71ECA1D8691F700826DE4 /* UIActivityIndicatorView+AFNetworking.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIActivityIndicatorView+AFNetworking.h"; sourceTree = "<group>"; };
 		C8F71ECB1D8691F700826DE4 /* UIActivityIndicatorView+AFNetworking.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIActivityIndicatorView+AFNetworking.m"; sourceTree = "<group>"; };
-		C8F71ECC1D8691F700826DE4 /* UIAlertView+AFNetworking.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIAlertView+AFNetworking.h"; sourceTree = "<group>"; };
-		C8F71ECD1D8691F700826DE4 /* UIAlertView+AFNetworking.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIAlertView+AFNetworking.m"; sourceTree = "<group>"; };
 		C8F71ECE1D8691F700826DE4 /* UIButton+AFNetworking.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIButton+AFNetworking.h"; sourceTree = "<group>"; };
 		C8F71ECF1D8691F700826DE4 /* UIButton+AFNetworking.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIButton+AFNetworking.m"; sourceTree = "<group>"; };
 		C8F71ED01D8691F700826DE4 /* UIImage+AFNetworking.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+AFNetworking.h"; sourceTree = "<group>"; };
@@ -764,6 +855,7 @@
 		C8F71ED91D8691F700826DE4 /* UIWebView+AFNetworking.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIWebView+AFNetworking.m"; sourceTree = "<group>"; };
 		C8F71EF11D86A15F00826DE4 /* SMTWiFiStatus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SMTWiFiStatus.h; path = Libraries/SMTWiFiStatus/SMTWiFiStatus.h; sourceTree = "<group>"; };
 		C8F71EF21D86A15F00826DE4 /* SMTWiFiStatus.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SMTWiFiStatus.m; path = Libraries/SMTWiFiStatus/SMTWiFiStatus.m; sourceTree = "<group>"; };
+		C8FF5B7B1EB8CF2C00CF9764 /* MarkData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MarkData.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -800,18 +892,23 @@
 		7F06590019F7FE750077FF95 /* CoreData */ = {
 			isa = PBXGroup;
 			children = (
+				C891886F2057E7D700E37CC3 /* BoatCheckIn.swift */,
+				C89188702057E7D700E37CC3 /* BoatCheckIn+CoreDataProperties.swift */,
+				C843D47E1EBC54A300250F01 /* CheckIn.swift */,
+				C843D47D1EBC54A300250F01 /* CheckIn+CoreDataProperties.swift */,
+				C843D47A1EBC54A300250F01 /* CompetitorCheckIn.swift */,
+				C843D4791EBC54A300250F01 /* CompetitorCheckIn+CoreDataProperties.swift */,
 				7FA6551919F6661900A1B92D /* CoreDataManager.swift */,
-				7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */,
-				C8739DFA1D2AA2A500A89F3C /* Regatta+CoreDataProperties.swift */,
-				C8739DFB1D2AA2A500A89F3C /* Regatta.swift */,
-				C8739DFC1D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift */,
-				C8739DFD1D2AA2A500A89F3C /* GPSFix.swift */,
-				C8739DFE1D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift */,
-				C8739DFF1D2AA2A500A89F3C /* Leaderboard.swift */,
-				C8739E001D2AA2A500A89F3C /* Competitor+CoreDataProperties.swift */,
-				C8739E011D2AA2A500A89F3C /* Competitor.swift */,
-				C8739E021D2AA2A500A89F3C /* Event+CoreDataProperties.swift */,
 				C8739E031D2AA2A500A89F3C /* Event.swift */,
+				C8739E021D2AA2A500A89F3C /* Event+CoreDataProperties.swift */,
+				C8739DFD1D2AA2A500A89F3C /* GPSFix.swift */,
+				C8739DFC1D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift */,
+				C8739DFF1D2AA2A500A89F3C /* Leaderboard.swift */,
+				C8739DFE1D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift */,
+				C843D47C1EBC54A300250F01 /* MarkCheckIn.swift */,
+				C843D47B1EBC54A300250F01 /* MarkCheckIn+CoreDataProperties.swift */,
+				7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */,
+				C843D48D1EC0999D00250F01 /* Migration */,
 			);
 			name = CoreData;
 			sourceTree = "<group>";
@@ -819,13 +916,12 @@
 		7F06590119F7FE920077FF95 /* ViewController */ = {
 			isa = PBXGroup;
 			children = (
+				7FAFA7941A126B5700D230F1 /* AboutViewController.swift */,
 				C8BBAC781C52649E004CA551 /* LicenseViewController.swift */,
 				7F8CC2071A10D47A00C56D7F /* SettingsViewController.swift */,
-				7FAFA7941A126B5700D230F1 /* AboutViewController.swift */,
-				7F83F15719F154F000C53328 /* HomeViewController.swift */,
-				C84936281D47645F000F30E8 /* HomeViewRegattaCell.swift */,
-				7F0658FC19F7D6700077FF95 /* ScanViewController.swift */,
-				C89C60101D0FF036002AAAD2 /* Regatta */,
+				C8CF22B01F669CA700A01E0A /* CheckIn */,
+				C89C60101D0FF036002AAAD2 /* Session */,
+				C85DB8261F31AAAA009559CE /* SignUp */,
 			);
 			name = ViewController;
 			sourceTree = "<group>";
@@ -833,10 +929,12 @@
 		7F06590219F7FEA40077FF95 /* DataController */ = {
 			isa = PBXGroup;
 			children = (
-				7F23F0871A1A3DEF00F03F1C /* CheckInController.swift */,
-				C84936171D40D295000F30E8 /* GPSFixController.swift */,
-				C8739E0E1D2BEE7900A89F3C /* RegattaController.swift */,
+				C87A74E51F504CA7003DE396 /* CheckIn */,
 				C8739E101D2BF13200A89F3C /* Data */,
+				C8CF22A71F619B5F00A01E0A /* GPSFix */,
+				C8CF22A61F619B4800A01E0A /* Session */,
+				C87A74E61F504CB4003DE396 /* SignUp */,
+				C87A74E41F504C97003DE396 /* Training */,
 			);
 			name = DataController;
 			sourceTree = "<group>";
@@ -1114,10 +1212,10 @@
 		7F83F14719F154F000C53328 = {
 			isa = PBXGroup;
 			children = (
+				7AC6457280AEA3EC18F5E846 /* Frameworks */,
+				7F83F15119F154F000C53328 /* Products */,
 				7F83F15219F154F000C53328 /* SAPTracker */,
 				7F83F16819F154F000C53328 /* SAPTrackerTests */,
-				7F83F15119F154F000C53328 /* Products */,
-				7AC6457280AEA3EC18F5E846 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1133,9 +1231,9 @@
 		7F83F15219F154F000C53328 /* SAPTracker */ = {
 			isa = PBXGroup;
 			children = (
-				C8F71EA31D8691F700826DE4 /* Libraries */,
 				7F83F15519F154F000C53328 /* AppDelegate.swift */,
 				C8739DC71D2A653F00A89F3C /* Classes */,
+				C8F71EA31D8691F700826DE4 /* Libraries */,
 				C89C60131D0FF61E002AAAD2 /* Resources */,
 				7F83F15319F154F000C53328 /* Supporting Files */,
 			);
@@ -1145,18 +1243,22 @@
 		7F83F15319F154F000C53328 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				C85291511D48FB91009E9A9D /* Localizable.strings */,
-				C8D5E81C1D479FA800DA0D61 /* Main.storyboard */,
-				9ECBDDAD1C9C4F0300F76AEB /* LaunchScreen.storyboard */,
-				7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */,
-				7FD9D3021A1236080058FEAD /* Extensions.swift */,
-				9E95C3D51C723AB30016632B /* Constants.swift */,
+				C8A4400A1C18153600DF70A0 /* Settings.bundle */,
+				7F03FD3F19FA4D7400FA1327 /* bridge.h */,
 				C8603D491C528832002B2F28 /* Acknowledgements.markdown */,
 				7F83F15419F154F000C53328 /* Info.plist */,
-				7F03FD3F19FA4D7400FA1327 /* bridge.h */,
-				C8A4400A1C18153600DF70A0 /* Settings.bundle */,
+				9ECBDDAD1C9C4F0300F76AEB /* LaunchScreen.storyboard */,
+				C8D5E81C1D479FA800DA0D61 /* Main.storyboard */,
+				C85DB8241F30B680009559CE /* SignUp.storyboard */,
+				C8B3B9BF1F3C3B4400B3B6BA /* SignUp.strings */,
+				9E95C3D51C723AB30016632B /* Constants.swift */,
+				7FD9D3021A1236080058FEAD /* Extensions.swift */,
+				C8B3B9C11F3C6B3900B3B6BA /* SignUpTranslation.swift */,
 				C8F1B1E01D488B6D004C3379 /* Translation.swift */,
+				7F4D2F531A1C8EE50038E7D1 /* Images.xcassets */,
 				C8150BA71DCC6FDB0087C9C2 /* InfoPlist.strings */,
+				C85291511D48FB91009E9A9D /* Localizable.strings */,
+				C88F6D301FFBC35F00A616BE /* ErrorHelper.swift */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -1189,20 +1291,42 @@
 			name = JSON;
 			sourceTree = "<group>";
 		};
+		C843D48D1EC0999D00250F01 /* Migration */ = {
+			isa = PBXGroup;
+			children = (
+				C843D4901EC0A93600250F01 /* CoreData1-3.xcmappingmodel */,
+				C843D48E1EC099EB00250F01 /* CoreData2-3.xcmappingmodel */,
+			);
+			name = Migration;
+			sourceTree = "<group>";
+		};
 		C852BAA91CF736440093B0C5 /* Preferences */ = {
 			isa = PBXGroup;
 			children = (
+				C8B3B9BB1F39E64400B3B6BA /* Keychain.swift */,
+				C8E0BD0C1F39ADAD002FCCA5 /* KeychainPasswordItem.swift */,
 				C852BAAA1CF736680093B0C5 /* Preferences.swift */,
 			);
 			name = Preferences;
 			sourceTree = "<group>";
 		};
+		C85DB8261F31AAAA009559CE /* SignUp */ = {
+			isa = PBXGroup;
+			children = (
+				C85DB82B1F31AB1A009559CE /* ForgotPasswordViewController.swift */,
+				C8E0BD091F39A08B002FCCA5 /* FormularViewController.swift */,
+				C85DB8291F31AAFD009559CE /* LoginViewController.swift */,
+				C85DB8271F31AAE0009559CE /* SignUpViewController.swift */,
+			);
+			name = SignUp;
+			sourceTree = "<group>";
+		};
 		C8739D8B1D23C01500A89F3C /* Managers */ = {
 			isa = PBXGroup;
 			children = (
-				7F2C605919F160E400C32D93 /* LocationManager.swift */,
 				7F1B66F81A0CDCF600904A41 /* BatteryManager.swift */,
-				C852BAA11CF5E1EA0093B0C5 /* RequestManager.swift */,
+				7F2C605919F160E400C32D93 /* LocationManager.swift */,
+				C8CF22AE1F669C1A00A01E0A /* Request */,
 			);
 			name = Managers;
 			sourceTree = "<group>";
@@ -1223,15 +1347,53 @@
 		C8739E101D2BF13200A89F3C /* Data */ = {
 			isa = PBXGroup;
 			children = (
-				7F0658FE19F7EE910077FF95 /* RegattaData.swift */,
-				C8739E111D2BF14F00A89F3C /* EventData.swift */,
-				C8739E131D2BF16300A89F3C /* LeaderboardData.swift */,
-				C8739E151D2BF17900A89F3C /* CompetitorData.swift */,
 				C8739E171D2BF2DC00A89F3C /* BaseData.swift */,
+				C880646D2087DA1F005FBE57 /* BoatClassData.swift */,
+				C891886D2057DB4A00E37CC3 /* BoatData.swift */,
+				7F0658FE19F7EE910077FF95 /* CheckInData.swift */,
+				C8739E151D2BF17900A89F3C /* CompetitorData.swift */,
+				C87A74E71F504EBB003DE396 /* CreateEventData.swift */,
+				C87A74EB1F5068D0003DE396 /* CreateTrainingData.swift */,
+				C8739E111D2BF14F00A89F3C /* EventData.swift */,
+				C88F6D2A1FEAC4E800A616BE /* LeaderboardAutoCourseData.swift */,
+				C8739E131D2BF16300A89F3C /* LeaderboardData.swift */,
+				C88F6D2C1FEACC5700A616BE /* LeaderboardGroupData.swift */,
 				C8739E1B1D2D5F1700A89F3C /* LocationData.swift */,
+				C8FF5B7B1EB8CF2C00CF9764 /* MarkData.swift */,
+				C87A74E91F5053AE003DE396 /* RegattaCompetitorCreateAndAddData.swift */,
+				C8CF22B31F67C4D800A01E0A /* RegattaRaceColumnAddData.swift */,
+				C88F6D2E1FEACD7400A616BE /* RegattaRaceCourseData.swift */,
 				C8BFCCC31D51C53500FC1A27 /* TeamData.swift */,
+				C8CF22B71F68133000A01E0A /* TrainingRaceData.swift */,
 			);
 			name = Data;
+			sourceTree = "<group>";
+		};
+		C87A74E41F504C97003DE396 /* Training */ = {
+			isa = PBXGroup;
+			children = (
+				C87A74E21F4F0E34003DE396 /* TrainingController.swift */,
+			);
+			name = Training;
+			sourceTree = "<group>";
+		};
+		C87A74E51F504CA7003DE396 /* CheckIn */ = {
+			isa = PBXGroup;
+			children = (
+				7F23F0871A1A3DEF00F03F1C /* CheckInController.swift */,
+				C8CF22A81F62780C00A01E0A /* CheckInDataCollector.swift */,
+				C8CF22A21F6194C600A01E0A /* RegattaCheckInController.swift */,
+				C8CF22A41F61965C00A01E0A /* TrainingCheckInController.swift */,
+			);
+			name = CheckIn;
+			sourceTree = "<group>";
+		};
+		C87A74E61F504CB4003DE396 /* SignUp */ = {
+			isa = PBXGroup;
+			children = (
+				C85DB82D1F31D804009559CE /* SignUpController.swift */,
+			);
+			name = SignUp;
 			sourceTree = "<group>";
 		};
 		C89C5FC31D06A269002AAAD2 /* Views */ = {
@@ -1247,10 +1409,10 @@
 		C89C5FC61D06CE62002AAAD2 /* Tracking */ = {
 			isa = PBXGroup;
 			children = (
+				7F8B8D3E1A37356C00C34B88 /* TrackingPageViewController.swift */,
+				7F1875B21A10F1B800C25BE0 /* TrackingViewController.swift */,
 				C89C5FC81D06CEA0002AAAD2 /* Cells */,
 				C89C5FC71D06CE87002AAAD2 /* Pages */,
-				7F1875B21A10F1B800C25BE0 /* TrackingViewController.swift */,
-				7F8B8D3E1A37356C00C34B88 /* TrackingPageViewController.swift */,
 			);
 			name = Tracking;
 			sourceTree = "<group>";
@@ -1258,9 +1420,9 @@
 		C89C5FC71D06CE87002AAAD2 /* Pages */ = {
 			isa = PBXGroup;
 			children = (
-				7F193A8E1A39ACF500D71773 /* TimerViewController.swift */,
-				7F8B8D401A373B0200C34B88 /* SpeedViewController.swift */,
 				7F8B8D421A373D4400C34B88 /* CourseViewController.swift */,
+				7F8B8D401A373B0200C34B88 /* SpeedViewController.swift */,
+				7F193A8E1A39ACF500D71773 /* TimerViewController.swift */,
 			);
 			name = Pages;
 			sourceTree = "<group>";
@@ -1268,42 +1430,38 @@
 		C89C5FC81D06CEA0002AAAD2 /* Cells */ = {
 			isa = PBXGroup;
 			children = (
-				C89C5FC91D06CECD002AAAD2 /* TrackingViewStatusCell.swift */,
 				C89C5FCB1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift */,
 				C89C5FCD1D06CF26002AAAD2 /* TrackingViewGPSFixesCell.swift */,
 				C89C5FCF1D06CF46002AAAD2 /* TrackingViewModeCell.swift */,
+				C89C5FC91D06CECD002AAAD2 /* TrackingViewStatusCell.swift */,
 			);
 			name = Cells;
 			sourceTree = "<group>";
 		};
-		C89C60101D0FF036002AAAD2 /* Regatta */ = {
+		C89C60101D0FF036002AAAD2 /* Session */ = {
 			isa = PBXGroup;
 			children = (
-				7F99DE3B1A126554009B3619 /* RegattaViewController.swift */,
+				C8CF22BF1F6926E500A01E0A /* CompetitorSessionViewController.swift */,
+				C8CF22BD1F69187800A01E0A /* CompetitorViewController.swift */,
 				7F950A901A35E967003C8C5C /* LeaderboardViewController.swift */,
+				C8CF22C11F692B5300A01E0A /* MarkSessionViewController.swift */,
+				C8CF22C31F692B7700A01E0A /* MarkViewController.swift */,
+				C843D48B1EBCB36900250F01 /* SessionViewController.swift */,
+				C8CF22B11F669DA700A01E0A /* Regatta */,
 				C89C5FC61D06CE62002AAAD2 /* Tracking */,
+				C8CF22B21F669DB100A01E0A /* Training */,
+				C89188752057F36300E37CC3 /* BoatSessionViewController.swift */,
+				C89188772057F44200E37CC3 /* BoatViewController.swift */,
 			);
-			name = Regatta;
+			name = Session;
 			sourceTree = "<group>";
 		};
 		C89C60131D0FF61E002AAAD2 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
 				7F14A0031A13B9A6001C1ECB /* Flags */,
-				C89C60141D0FF63C002AAAD2 /* Fonts */,
 			);
 			name = Resources;
-			sourceTree = "<group>";
-		};
-		C89C60141D0FF63C002AAAD2 /* Fonts */ = {
-			isa = PBXGroup;
-			children = (
-				7F87CA9D1A2CCE8B0076C617 /* OpenSans-Bold.ttf */,
-				7F87CA9E1A2CCE8B0076C617 /* OpenSans-Light.ttf */,
-				7F87CA9F1A2CCE8B0076C617 /* OpenSans-Regular.ttf */,
-				7F87CAA01A2CCE8B0076C617 /* OpenSans-Semibold.ttf */,
-			);
-			name = Fonts;
 			sourceTree = "<group>";
 		};
 		C8BFCC1B1D50F17800FC1A27 /* SMTWiFiStatus */ = {
@@ -1314,6 +1472,76 @@
 			);
 			name = SMTWiFiStatus;
 			path = ..;
+			sourceTree = "<group>";
+		};
+		C8CF22A61F619B4800A01E0A /* Session */ = {
+			isa = PBXGroup;
+			children = (
+				C843D4871EBCADDC00250F01 /* CompetitorSessionController.swift */,
+				C843D4891EBCADF500250F01 /* MarkSessionController.swift */,
+				C8739E0E1D2BEE7900A89F3C /* SessionController.swift */,
+				C89188792057F55100E37CC3 /* BoatSessionController.swift */,
+			);
+			name = Session;
+			sourceTree = "<group>";
+		};
+		C8CF22A71F619B5F00A01E0A /* GPSFix */ = {
+			isa = PBXGroup;
+			children = (
+				C84936171D40D295000F30E8 /* GPSFixController.swift */,
+			);
+			name = GPSFix;
+			sourceTree = "<group>";
+		};
+		C8CF22AE1F669C1A00A01E0A /* Request */ = {
+			isa = PBXGroup;
+			children = (
+				C852BAA11CF5E1EA0093B0C5 /* CheckInRequestManager.swift */,
+				C8289F391F386D8300A76953 /* SignUpRequestManager.swift */,
+				C87A74E01F4EE570003DE396 /* TrainingRequestManager.swift */,
+			);
+			name = Request;
+			sourceTree = "<group>";
+		};
+		C8CF22AF1F669C8F00A01E0A /* New */ = {
+			isa = PBXGroup;
+			children = (
+				C843D531201F3050003725F0 /* NewCheckInViewController.swift */,
+				C867BD0A1F4B0290007E78E0 /* CreateTrainingViewController.swift */,
+				7F0658FC19F7D6700077FF95 /* ScanViewController.swift */,
+			);
+			name = New;
+			sourceTree = "<group>";
+		};
+		C8CF22B01F669CA700A01E0A /* CheckIn */ = {
+			isa = PBXGroup;
+			children = (
+				C84936281D47645F000F30E8 /* CheckInTableViewCell.swift */,
+				C8E0D3121F59475B001EEF5C /* CheckInTableViewController.swift */,
+				C8CF22AF1F669C8F00A01E0A /* New */,
+			);
+			name = CheckIn;
+			sourceTree = "<group>";
+		};
+		C8CF22B11F669DA700A01E0A /* Regatta */ = {
+			isa = PBXGroup;
+			children = (
+				7F99DE3B1A126554009B3619 /* RegattaCompetitorViewController.swift */,
+				C843D4851EBC927800250F01 /* RegattaMarkViewController.swift */,
+				C89188732057F32300E37CC3 /* RegattaBoatViewController.swift */,
+			);
+			name = Regatta;
+			sourceTree = "<group>";
+		};
+		C8CF22B21F669DB100A01E0A /* Training */ = {
+			isa = PBXGroup;
+			children = (
+				C867BD081F4B0274007E78E0 /* TrainingCompetitorViewController.swift */,
+				C8CF22AC1F668BAB00A01E0A /* TrainingMarkViewController.swift */,
+				C8CF22C51F694EB900A01E0A /* TrainingViewController.swift */,
+				C891887B20580A4100E37CC3 /* TrainingBoatViewController.swift */,
+			);
+			name = Training;
 			sourceTree = "<group>";
 		};
 		C8F71EA31D8691F700826DE4 /* Libraries */ = {
@@ -1331,10 +1559,6 @@
 		C8F71EA41D8691F700826DE4 /* AFNetworking */ = {
 			isa = PBXGroup;
 			children = (
-				C8F71EA51D8691F700826DE4 /* AFHTTPRequestOperation.h */,
-				C8F71EA61D8691F700826DE4 /* AFHTTPRequestOperation.m */,
-				C8F71EA71D8691F700826DE4 /* AFHTTPRequestOperationManager.h */,
-				C8F71EA81D8691F700826DE4 /* AFHTTPRequestOperationManager.m */,
 				C8F71EA91D8691F700826DE4 /* AFHTTPSessionManager.h */,
 				C8F71EAA1D8691F700826DE4 /* AFHTTPSessionManager.m */,
 				C8F71EAB1D8691F700826DE4 /* AFNetworking.h */,
@@ -1342,8 +1566,6 @@
 				C8F71EAD1D8691F700826DE4 /* AFNetworkReachabilityManager.m */,
 				C8F71EAE1D8691F700826DE4 /* AFSecurityPolicy.h */,
 				C8F71EAF1D8691F700826DE4 /* AFSecurityPolicy.m */,
-				C8F71EB01D8691F700826DE4 /* AFURLConnectionOperation.h */,
-				C8F71EB11D8691F700826DE4 /* AFURLConnectionOperation.m */,
 				C8F71EB21D8691F700826DE4 /* AFURLRequestSerialization.h */,
 				C8F71EB31D8691F700826DE4 /* AFURLRequestSerialization.m */,
 				C8F71EB41D8691F700826DE4 /* AFURLResponseSerialization.h */,
@@ -1384,12 +1606,14 @@
 		C8F71EC71D8691F700826DE4 /* UIKit+AFNetworking */ = {
 			isa = PBXGroup;
 			children = (
+				64FDEBDA20D12DCE0086C2F4 /* AFAutoPurgingImageCache.m */,
+				64FDEBD320D12C390086C2F4 /* AFAutoPurgingImageCache.h */,
+				64FDEBDB20D12DCE0086C2F4 /* AFImageDownloader.m */,
+				64FDEBD220D12C390086C2F4 /* AFImageDownloader.h */,
 				C8F71EC81D8691F700826DE4 /* AFNetworkActivityIndicatorManager.h */,
 				C8F71EC91D8691F700826DE4 /* AFNetworkActivityIndicatorManager.m */,
 				C8F71ECA1D8691F700826DE4 /* UIActivityIndicatorView+AFNetworking.h */,
 				C8F71ECB1D8691F700826DE4 /* UIActivityIndicatorView+AFNetworking.m */,
-				C8F71ECC1D8691F700826DE4 /* UIAlertView+AFNetworking.h */,
-				C8F71ECD1D8691F700826DE4 /* UIAlertView+AFNetworking.m */,
 				C8F71ECE1D8691F700826DE4 /* UIButton+AFNetworking.h */,
 				C8F71ECF1D8691F700826DE4 /* UIButton+AFNetworking.m */,
 				C8F71ED01D8691F700826DE4 /* UIImage+AFNetworking.h */,
@@ -1451,15 +1675,18 @@
 		7F83F14819F154F000C53328 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0720;
+				LastUpgradeCheck = 0820;
 				ORGANIZATIONNAME = com.sap.sailing;
 				TargetAttributes = {
 					7F83F14F19F154F000C53328 = {
 						CreatedOnToolsVersion = 6.0.1;
-						DevelopmentTeam = RRE8EFVCE3;
+						LastSwiftMigration = 0820;
+						ProvisioningStyle = Manual;
 					};
 					7F83F16419F154F000C53328 = {
 						CreatedOnToolsVersion = 6.0.1;
+						LastSwiftMigration = 0820;
+						ProvisioningStyle = Manual;
 						TestTargetID = 7F83F14F19F154F000C53328;
 					};
 				};
@@ -1503,6 +1730,7 @@
 				7F14A12D1A13B9A6001C1ECB /* AZ.png in Resources */,
 				7F14A1D21A13B9A6001C1ECB /* PT.png in Resources */,
 				7F14A1241A13B9A6001C1ECB /* AN.png in Resources */,
+				C85DB8251F30B680009559CE /* SignUp.storyboard in Resources */,
 				7F14A2071A13B9A6001C1ECB /* VN.png in Resources */,
 				7F14A1791A13B9A6001C1ECB /* Hello.txt in Resources */,
 				7F14A1E81A13B9A6001C1ECB /* SS.png in Resources */,
@@ -1548,6 +1776,7 @@
 				7F14A1681A13B9A6001C1ECB /* GA.png in Resources */,
 				7F14A10C1A13B9A6001C1ECB /* _british-antarctic-territory.png in Resources */,
 				7F14A1771A13B9A6001C1ECB /* GW.png in Resources */,
+				C8B3B9C01F3C3B4400B3B6BA /* SignUp.strings in Resources */,
 				7F14A1811A13B9A6001C1ECB /* IE.png in Resources */,
 				7F14A14D1A13B9A6001C1ECB /* CR.png in Resources */,
 				7F14A1991A13B9A6001C1ECB /* LB.png in Resources */,
@@ -1668,7 +1897,6 @@
 				7F14A1C71A13B9A6001C1ECB /* OM.png in Resources */,
 				7F14A1F21A13B9A6001C1ECB /* TJ.png in Resources */,
 				7F14A12C1A13B9A6001C1ECB /* AX.png in Resources */,
-				7F87CAA11A2CCE8B0076C617 /* OpenSans-Bold.ttf in Resources */,
 				7F14A1951A13B9A6001C1ECB /* KW.png in Resources */,
 				7F14A1C21A13B9A6001C1ECB /* NO.png in Resources */,
 				7F14A16E1A13B9A6001C1ECB /* GI.png in Resources */,
@@ -1733,13 +1961,10 @@
 				7F14A10F1A13B9A6001C1ECB /* _gosquared.png in Resources */,
 				7F14A1171A13B9A6001C1ECB /* _scotland.png in Resources */,
 				7F14A1FB1A13B9A6001C1ECB /* TW.png in Resources */,
-				7F87CAA41A2CCE8B0076C617 /* OpenSans-Semibold.ttf in Resources */,
 				7F14A1451A13B9A6001C1ECB /* CG.png in Resources */,
 				7F14A1F11A13B9A6001C1ECB /* TH.png in Resources */,
 				7F14A1AC1A13B9A6001C1ECB /* ML.png in Resources */,
-				7F87CAA31A2CCE8B0076C617 /* OpenSans-Regular.ttf in Resources */,
 				7F14A1AE1A13B9A6001C1ECB /* MN.png in Resources */,
-				7F87CAA21A2CCE8B0076C617 /* OpenSans-Light.ttf in Resources */,
 				7F14A1D41A13B9A6001C1ECB /* PY.png in Resources */,
 				7F14A1E11A13B9A6001C1ECB /* SI.png in Resources */,
 				7F14A1921A13B9A6001C1ECB /* KN.png in Resources */,
@@ -1799,78 +2024,126 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C8F71EDA1D8691F700826DE4 /* AFHTTPRequestOperation.m in Sources */,
+				64FDEBDC20D12DCF0086C2F4 /* AFAutoPurgingImageCache.m in Sources */,
+				64FDEBDD20D12DCF0086C2F4 /* AFImageDownloader.m in Sources */,
+				C867BD091F4B0274007E78E0 /* TrainingCompetitorViewController.swift in Sources */,
+				C85DB82A1F31AAFD009559CE /* LoginViewController.swift in Sources */,
 				7F1875B31A10F1B800C25BE0 /* TrackingViewController.swift in Sources */,
 				C8739E081D2AA2A500A89F3C /* Leaderboard+CoreDataProperties.swift in Sources */,
 				C8739E121D2BF14F00A89F3C /* EventData.swift in Sources */,
-				C8F71EDF1D8691F700826DE4 /* AFURLConnectionOperation.m in Sources */,
+				C843D4881EBCADDC00250F01 /* CompetitorSessionController.swift in Sources */,
+				C880646E2087DA1F005FBE57 /* BoatClassData.swift in Sources */,
+				C891887A2057F55100E37CC3 /* BoatSessionController.swift in Sources */,
 				C8F71EE31D8691F700826DE4 /* SVIndefiniteAnimatedView.m in Sources */,
-				C8739E0F1D2BEE7900A89F3C /* RegattaController.swift in Sources */,
+				C8739E0F1D2BEE7900A89F3C /* SessionController.swift in Sources */,
 				C8739E1C1D2D5F1700A89F3C /* LocationData.swift in Sources */,
-				7F83F15819F154F000C53328 /* HomeViewController.swift in Sources */,
+				C85DB82C1F31AB1A009559CE /* ForgotPasswordViewController.swift in Sources */,
 				7F8B8D431A373D4400C34B88 /* CourseViewController.swift in Sources */,
 				7FAFA7951A126B5700D230F1 /* AboutViewController.swift in Sources */,
 				C8739E161D2BF17900A89F3C /* CompetitorData.swift in Sources */,
-				C8739E0A1D2AA2A500A89F3C /* Competitor+CoreDataProperties.swift in Sources */,
+				C8289F3A1F386D8300A76953 /* SignUpRequestManager.swift in Sources */,
 				C8739E0C1D2AA2A500A89F3C /* Event+CoreDataProperties.swift in Sources */,
 				C8739E071D2AA2A500A89F3C /* GPSFix.swift in Sources */,
+				C8E0BD0D1F39ADAD002FCCA5 /* KeychainPasswordItem.swift in Sources */,
+				C891887C20580A4100E37CC3 /* TrainingBoatViewController.swift in Sources */,
+				C87A74E11F4EE570003DE396 /* TrainingRequestManager.swift in Sources */,
+				C89188762057F36300E37CC3 /* BoatSessionViewController.swift in Sources */,
+				C843D4811EBC54A300250F01 /* MarkCheckIn+CoreDataProperties.swift in Sources */,
+				C843D532201F3050003725F0 /* NewCheckInViewController.swift in Sources */,
 				C8F71EEE1D8691F700826DE4 /* UIProgressView+AFNetworking.m in Sources */,
+				C8CF22A91F62780C00A01E0A /* CheckInDataCollector.swift in Sources */,
+				C85DB82E1F31D804009559CE /* SignUpController.swift in Sources */,
+				C8CF22AD1F668BAB00A01E0A /* TrainingMarkViewController.swift in Sources */,
 				7F44095B19F65B5B0021BF22 /* CoreData.xcdatamodeld in Sources */,
 				C89C5FD01D06CF46002AAAD2 /* TrackingViewModeCell.swift in Sources */,
+				C8FF5B7C1EB8CF2C00CF9764 /* MarkData.swift in Sources */,
+				C88F6D311FFBC35F00A616BE /* ErrorHelper.swift in Sources */,
 				C8F71EEA1D8691F700826DE4 /* UIActivityIndicatorView+AFNetworking.m in Sources */,
 				7F1B66F91A0CDCF600904A41 /* BatteryManager.swift in Sources */,
 				7FA6551A19F6661900A1B92D /* CoreDataManager.swift in Sources */,
 				C8F71EE71D8691F700826DE4 /* SVRadialGradientLayer.m in Sources */,
-				C852BAA21CF5E1EA0093B0C5 /* RequestManager.swift in Sources */,
+				C852BAA21CF5E1EA0093B0C5 /* CheckInRequestManager.swift in Sources */,
 				C8F71EE01D8691F700826DE4 /* AFURLRequestSerialization.m in Sources */,
 				C8BBAC791C52649E004CA551 /* LicenseViewController.swift in Sources */,
 				C8BFCCC41D51C53500FC1A27 /* TeamData.swift in Sources */,
+				C843D4911EC0A93600250F01 /* CoreData1-3.xcmappingmodel in Sources */,
+				C89188742057F32300E37CC3 /* RegattaBoatViewController.swift in Sources */,
+				C88F6D2B1FEAC4E800A616BE /* LeaderboardAutoCourseData.swift in Sources */,
 				7F23F0881A1A3DEF00F03F1C /* CheckInController.swift in Sources */,
+				C843D47F1EBC54A300250F01 /* CompetitorCheckIn+CoreDataProperties.swift in Sources */,
 				C8F71EDC1D8691F700826DE4 /* AFHTTPSessionManager.m in Sources */,
 				C8F71EE91D8691F700826DE4 /* AFNetworkActivityIndicatorManager.m in Sources */,
-				C84936291D47645F000F30E8 /* HomeViewRegattaCell.swift in Sources */,
+				C84936291D47645F000F30E8 /* CheckInTableViewCell.swift in Sources */,
+				C891886E2057DB4A00E37CC3 /* BoatData.swift in Sources */,
 				7F2C605A19F160E400C32D93 /* LocationManager.swift in Sources */,
 				C89C5FCC1D06CF0C002AAAD2 /* TrackingViewGPSAccuracyCell.swift in Sources */,
-				C8739E041D2AA2A500A89F3C /* Regatta+CoreDataProperties.swift in Sources */,
 				C89C5FCA1D06CECD002AAAD2 /* TrackingViewStatusCell.swift in Sources */,
-				C8739E051D2AA2A500A89F3C /* Regatta.swift in Sources */,
+				C843D4861EBC927800250F01 /* RegattaMarkViewController.swift in Sources */,
 				C8F71EDE1D8691F700826DE4 /* AFSecurityPolicy.m in Sources */,
-				C8F71EDB1D8691F700826DE4 /* AFHTTPRequestOperationManager.m in Sources */,
 				7F8B8D3F1A37356C00C34B88 /* TrackingPageViewController.swift in Sources */,
+				C89188712057E7D700E37CC3 /* BoatCheckIn.swift in Sources */,
+				C843D48F1EC099EB00250F01 /* CoreData2-3.xcmappingmodel in Sources */,
+				C8CF22B81F68133000A01E0A /* TrainingRaceData.swift in Sources */,
 				C84936181D40D295000F30E8 /* GPSFixController.swift in Sources */,
-				7F99DE3C1A126554009B3619 /* RegattaViewController.swift in Sources */,
+				7F99DE3C1A126554009B3619 /* RegattaCompetitorViewController.swift in Sources */,
+				C89188722057E7D700E37CC3 /* BoatCheckIn+CoreDataProperties.swift in Sources */,
+				C843D4841EBC54A300250F01 /* CheckIn.swift in Sources */,
 				C8BFCCCC1D523C5D00FC1A27 /* TitleView.swift in Sources */,
+				C8CF22C01F6926E500A01E0A /* CompetitorSessionViewController.swift in Sources */,
 				C8F71EF31D86A15F00826DE4 /* SMTWiFiStatus.m in Sources */,
 				7F8CC2081A10D47A00C56D7F /* SettingsViewController.swift in Sources */,
 				C8739E0D1D2AA2A500A89F3C /* Event.swift in Sources */,
+				C87A74EC1F5068D0003DE396 /* CreateTrainingData.swift in Sources */,
+				C8CF22A31F6194C600A01E0A /* RegattaCheckInController.swift in Sources */,
 				7F8B8D411A373B0200C34B88 /* SpeedViewController.swift in Sources */,
 				9E95C3D61C723AB30016632B /* Constants.swift in Sources */,
+				C8CF22A51F61965C00A01E0A /* TrainingCheckInController.swift in Sources */,
+				C89188782057F44200E37CC3 /* BoatViewController.swift in Sources */,
 				C8F71EF01D8691F700826DE4 /* UIWebView+AFNetworking.m in Sources */,
+				C87A74E81F504EBB003DE396 /* CreateEventData.swift in Sources */,
 				7FD9D3031A1236080058FEAD /* Extensions.swift in Sources */,
 				C8739E091D2AA2A500A89F3C /* Leaderboard.swift in Sources */,
+				C8B3B9BC1F39E64400B3B6BA /* Keychain.swift in Sources */,
 				C8739E141D2BF16300A89F3C /* LeaderboardData.swift in Sources */,
 				C89C5FC51D06A289002AAAD2 /* GradientView.swift in Sources */,
 				C8F71EEF1D8691F700826DE4 /* UIRefreshControl+AFNetworking.m in Sources */,
 				C8F71EE21D8691F700826DE4 /* AFURLSessionManager.m in Sources */,
+				C843D4821EBC54A300250F01 /* MarkCheckIn.swift in Sources */,
 				C8F71EDD1D8691F700826DE4 /* AFNetworkReachabilityManager.m in Sources */,
+				C843D4801EBC54A300250F01 /* CompetitorCheckIn.swift in Sources */,
+				C8CF22C41F692B7700A01E0A /* MarkViewController.swift in Sources */,
 				C852BAAB1CF736680093B0C5 /* Preferences.swift in Sources */,
+				C843D48A1EBCADF500250F01 /* MarkSessionController.swift in Sources */,
+				C8CF22C21F692B5300A01E0A /* MarkSessionViewController.swift in Sources */,
 				7F0658FD19F7D6700077FF95 /* ScanViewController.swift in Sources */,
+				C843D4831EBC54A300250F01 /* CheckIn+CoreDataProperties.swift in Sources */,
 				C8F71EEC1D8691F700826DE4 /* UIButton+AFNetworking.m in Sources */,
+				C867BD0B1F4B0290007E78E0 /* CreateTrainingViewController.swift in Sources */,
+				C87A74E31F4F0E34003DE396 /* TrainingController.swift in Sources */,
+				C8CF22C61F694EB900A01E0A /* TrainingViewController.swift in Sources */,
 				C8F1B1E11D488B6D004C3379 /* Translation.swift in Sources */,
 				C8F71EE81D8691F700826DE4 /* TSMarkdownParser.m in Sources */,
 				C8739E061D2AA2A500A89F3C /* GPSFix+CoreDataProperties.swift in Sources */,
 				7F193A8F1A39ACF500D71773 /* TimerViewController.swift in Sources */,
+				C88F6D2F1FEACD7400A616BE /* RegattaRaceCourseData.swift in Sources */,
 				C8739E181D2BF2DC00A89F3C /* BaseData.swift in Sources */,
+				C8CF22B41F67C4D800A01E0A /* RegattaRaceColumnAddData.swift in Sources */,
 				7F83F15619F154F000C53328 /* AppDelegate.swift in Sources */,
+				C8B3B9C21F3C6B3900B3B6BA /* SignUpTranslation.swift in Sources */,
 				7F950A911A35E967003C8C5C /* LeaderboardViewController.swift in Sources */,
 				C8F71EED1D8691F700826DE4 /* UIImageView+AFNetworking.m in Sources */,
-				C8F71EEB1D8691F700826DE4 /* UIAlertView+AFNetworking.m in Sources */,
+				C88F6D2D1FEACC5700A616BE /* LeaderboardGroupData.swift in Sources */,
+				C87A74EA1F5053AE003DE396 /* RegattaCompetitorCreateAndAddData.swift in Sources */,
+				C8E0D3131F59475B001EEF5C /* CheckInTableViewController.swift in Sources */,
+				C843D48C1EBCB36900250F01 /* SessionViewController.swift in Sources */,
+				C85DB8281F31AAE0009559CE /* SignUpViewController.swift in Sources */,
 				C89C5FCE1D06CF26002AAAD2 /* TrackingViewGPSFixesCell.swift in Sources */,
-				C8739E0B1D2AA2A500A89F3C /* Competitor.swift in Sources */,
 				C8F71EE11D8691F700826DE4 /* AFURLResponseSerialization.m in Sources */,
 				C8F71EE61D8691F700826DE4 /* SVProgressHUD.m in Sources */,
-				7F0658FF19F7EE910077FF95 /* RegattaData.swift in Sources */,
+				7F0658FF19F7EE910077FF95 /* CheckInData.swift in Sources */,
 				7F193A911A39E54600D71773 /* GPSAccuracyView.swift in Sources */,
+				C8E0BD0A1F39A08B002FCCA5 /* FormularViewController.swift in Sources */,
+				C8CF22BE1F69187800A01E0A /* CompetitorViewController.swift in Sources */,
 				C8F71EE41D8691F700826DE4 /* SVProgressAnimatedView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1919,6 +2192,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -1928,8 +2202,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -1939,6 +2215,7 @@
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -1963,6 +2240,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -1972,8 +2250,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
@@ -1982,6 +2262,7 @@
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -1992,6 +2273,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				ONLY_ACTIVE_ARCH = NO;
 				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -1999,15 +2281,22 @@
 		7F83F17019F154F000C53328 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = SAPTracker/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "-D DEBUG";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.sap.sailing.ios.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = SAPTracker/bridge.h;
+				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -2015,15 +2304,22 @@
 		7F83F17119F154F000C53328 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = SAPTracker/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_SWIFT_FLAGS = "";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.sap.sailing.ios.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = SAPTracker/bridge.h;
+				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -2032,6 +2328,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -2040,7 +2338,10 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.sap.sailing.ios.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "Q3U792Z354/“SAP Sailing Boat Tracker”";
+				PROVISIONING_PROFILE_SPECIFIER = "Q3U792Z354/“SAP Sailing Boat Tracker”";
 				SWIFT_OBJC_BRIDGING_HEADER = SAPTracker/bridge.h;
+				SWIFT_VERSION = 3.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SAPTracker.app/SAPTracker";
 			};
 			name = Debug;
@@ -2049,11 +2350,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				INFOPLIST_FILE = SAPTrackerTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.sap.sailing.ios.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "Q3U792Z354/“SAP Sailing Boat Tracker”";
+				PROVISIONING_PROFILE_SPECIFIER = "Q3U792Z354/“SAP Sailing Boat Tracker”";
 				SWIFT_OBJC_BRIDGING_HEADER = SAPTracker/bridge.h;
+				SWIFT_VERSION = 3.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SAPTracker.app/SAPTracker";
 			};
 			name = Release;
@@ -2094,10 +2399,12 @@
 		7F44095919F65B5B0021BF22 /* CoreData.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				C843D522201F1F17003725F0 /* CoreData 4.xcdatamodel */,
+				C8D938B11EB9AFDB00B1B4BC /* CoreData 3.xcdatamodel */,
 				C8739D9A1D25317100A89F3C /* CoreData 2.xcdatamodel */,
 				7F44095A19F65B5B0021BF22 /* CoreData.xcdatamodel */,
 			);
-			currentVersion = C8739D9A1D25317100A89F3C /* CoreData 2.xcdatamodel */;
+			currentVersion = C843D522201F1F17003725F0 /* CoreData 4.xcdatamodel */;
 			path = CoreData.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

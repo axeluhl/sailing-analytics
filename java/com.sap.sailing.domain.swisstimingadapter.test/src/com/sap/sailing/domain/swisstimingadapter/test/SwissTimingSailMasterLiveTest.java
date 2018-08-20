@@ -18,18 +18,19 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.sap.sailing.domain.common.Distance;
-import com.sap.sailing.domain.common.Speed;
 import com.sap.sailing.domain.swisstimingadapter.Competitor;
 import com.sap.sailing.domain.swisstimingadapter.Course;
 import com.sap.sailing.domain.swisstimingadapter.Fix;
 import com.sap.sailing.domain.swisstimingadapter.Mark;
 import com.sap.sailing.domain.swisstimingadapter.Race;
 import com.sap.sailing.domain.swisstimingadapter.RaceStatus;
+import com.sap.sailing.domain.swisstimingadapter.RacingStatus;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterConnector;
 import com.sap.sailing.domain.swisstimingadapter.SailMasterListener;
 import com.sap.sailing.domain.swisstimingadapter.StartList;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
+import com.sap.sse.common.Distance;
+import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 
@@ -164,9 +165,9 @@ public class SwissTimingSailMasterLiveTest implements SailMasterListener {
     }
 
     @Override
-    public void receivedRacePositionData(String raceID, RaceStatus status, TimePoint timePoint, TimePoint startTime,
-            Long millisecondsSinceRaceStart, Integer nextMarkIndexForLeader, Distance distanceToNextMarkForLeader,
-            Collection<Fix> fixes) {
+    public void receivedRacePositionData(String raceID, RaceStatus raceStatus, RacingStatus racingStatus, TimePoint timePoint,
+            TimePoint startTime, Long millisecondsSinceRaceStart, Integer nextMarkIndexForLeader,
+            Distance distanceToNextMarkForLeader, Collection<Fix> fixes) {
         System.out.print(".");
         rpdCounter++;
     }

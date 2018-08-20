@@ -2,12 +2,13 @@ package com.sap.sailing.domain.tractracadapter;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.UUID;
 
 import com.sap.sailing.domain.common.MarkType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.tractracadapter.impl.RaceCourseReceiver;
+import com.sap.sse.common.Color;
 import com.sap.sse.common.Named;
-import com.sap.sse.common.Util;
 import com.tractrac.model.lib.api.event.IRaceCompetitor;
 
 /**
@@ -28,12 +29,18 @@ import com.tractrac.model.lib.api.event.IRaceCompetitor;
 public interface MetadataParser {
     public interface ControlPointMetaData extends Named {
         MarkType getType();
-        String getColor();
+        Color getColor();
         String getShape();
         String getPattern();
         Serializable getId();
     }
-    
+
+    public interface BoatMetaData extends Named {
+        String getId();
+        String getColor();
+        UUID getUuid();
+    }
+
     Map<Integer, PassingInstruction> parsePassingInstructionData(String routeMetadataString, Iterable<? extends TracTracControlPoint> controlPoints);
 
     /**
@@ -58,7 +65,7 @@ public interface MetadataParser {
     /**
      * Parses the boat name, boad id and the boat color for a competitor (entry) of a race.
      * @param competitor
-     * @return a Triple containing the boat name, boat id and boat color or null if no metadata is availalble
+     * @return the boat metadata or null if no metadata is availalble
      */
-    Util.Triple<String, String, String> parseCompetitorBoat(IRaceCompetitor competitor);
+    BoatMetaData parseCompetitorBoat(IRaceCompetitor competitor);
 }

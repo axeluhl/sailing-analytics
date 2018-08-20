@@ -24,6 +24,7 @@ public class MultiRegattaActivity extends AbstractEventActivity<AbstractEventPla
     protected EventViewBase initView() {
         final AbstractEventOverview view = new MultiRegattaViewImpl(this);
         initSailorInfo(view);
+        initWindfinderNavigations(view);
         initQuickfinder(view, true);
         initMedia(view);
         return view;

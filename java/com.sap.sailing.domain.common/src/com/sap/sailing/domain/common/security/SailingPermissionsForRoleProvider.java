@@ -23,6 +23,7 @@ public class SailingPermissionsForRoleProvider implements PermissionsForRoleProv
                     
                     // AdminConsole:
                     Permission.MANAGE_ALL_COMPETITORS,
+                    Permission.MANAGE_ALL_BOATS,
                     Permission.MANAGE_COURSE_LAYOUT,
                     Permission.MANAGE_DEVICE_CONFIGURATION,
                     Permission.MANAGE_EVENTS,

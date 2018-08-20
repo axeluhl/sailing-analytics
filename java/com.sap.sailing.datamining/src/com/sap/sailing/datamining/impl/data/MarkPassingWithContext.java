@@ -5,24 +5,22 @@ import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.common.NauticalSide;
-import com.sap.sailing.domain.common.SpeedWithBearing;
-import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
-import com.sap.sailing.domain.tracking.MarkPassingManeuver;
+import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Util;
 
 public class MarkPassingWithContext implements HasMarkPassingContext {
-
+    private static final long serialVersionUID = -337042113749307686L;
     private final HasTrackedLegOfCompetitorContext trackedLegOfCompetitor;
-    private final MarkPassingManeuver maneuver;
+    private final Maneuver maneuver;
     
     private Double absoluteRank;
     private boolean rankHasBeenInitialized;
 
-    public MarkPassingWithContext(HasTrackedLegOfCompetitorContext trackedLegOfCompetitor, MarkPassingManeuver maneuver) {
+    public MarkPassingWithContext(HasTrackedLegOfCompetitorContext trackedLegOfCompetitor, Maneuver markPassingManeuver) {
         this.trackedLegOfCompetitor = trackedLegOfCompetitor;
-        this.maneuver = maneuver;
+        this.maneuver = markPassingManeuver;
     }
 
     @Override
@@ -31,38 +29,18 @@ public class MarkPassingWithContext implements HasMarkPassingContext {
     }
 
     @Override
-    public MarkPassingManeuver getManeuver() {
+    public Maneuver getManeuver() {
         return maneuver;
-    }
-
-    @Override
-    public Tack getTack() {
-        return getManeuver().getNewTack();
     }
     
     @Override
     public Waypoint getWaypoint() {
-        return getManeuver().getWaypointPassed();
+        return getManeuver().getMarkPassing().getWaypoint();
     }
     
     @Override
     public NauticalSide getPassingSide() {
-        return getManeuver().getSide();
-    }
-
-    @Override
-    public SpeedWithBearing getSpeedBefore() {
-        return getManeuver().getSpeedWithBearingBefore();
-    }
-
-    @Override
-    public SpeedWithBearing getSpeedAfter() {
-        return getManeuver().getSpeedWithBearingAfter();
-    }
-
-    @Override
-    public Double getDirectionChangeInDegrees() {
-        return getManeuver().getDirectionChangeInDegrees();
+        return getManeuver().getToSide();
     }
 
     @Override
@@ -75,7 +53,7 @@ public class MarkPassingWithContext implements HasMarkPassingContext {
     @Override
     public Double getAbsoluteRank() {
         if (!rankHasBeenInitialized) {
-            TrackedRace trackedRace = getTrackedLegOfCompetitorContext().getTrackedLegContext().getTrackedRaceContext().getTrackedRace();
+            TrackedRace trackedRace = getTrackedLegOfCompetitorContext().getTrackedRace();
             Competitor competitor = getTrackedLegOfCompetitorContext().getCompetitor();
             int rank = trackedRace.getRank(competitor, getManeuver().getTimePoint());
             absoluteRank = rank == 0 ? null : Double.valueOf(rank);
@@ -83,5 +61,4 @@ public class MarkPassingWithContext implements HasMarkPassingContext {
         }
         return absoluteRank;
     }
-
 }

@@ -36,6 +36,7 @@ public class Quickfinder extends Widget implements HasSelectionHandlers<String> 
     private final Map<String, PlaceNavigation<?>> navigations = new HashMap<>();
     
     public Quickfinder() {
+        QuickfinderResources.INSTANCE.css().ensureInjected();
         setElement(uiBinder.createAndBindUi(this));
         Event.sinkEvents(selectUi, Event.ONCHANGE);
         Event.setEventListener(selectUi, new EventListener() {

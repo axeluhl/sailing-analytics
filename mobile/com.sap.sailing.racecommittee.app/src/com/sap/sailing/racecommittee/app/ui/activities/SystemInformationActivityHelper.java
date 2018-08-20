@@ -133,6 +133,7 @@ public class SystemInformationActivityHelper {
         notices.addNotice(licenseHelper.getDialogNotice(activity));
         LicensesDialog.Builder builder = new LicensesDialog.Builder(activity);
         builder.setTitle(activity.getString(R.string.license_information));
+        builder.setThemeResourceId(R.style.AppTheme_AlertDialog);
         builder.setNotices(notices);
         builder.build().show();
     }

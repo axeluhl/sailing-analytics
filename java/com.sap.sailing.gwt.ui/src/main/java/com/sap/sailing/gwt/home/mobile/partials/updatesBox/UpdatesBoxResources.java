@@ -1,10 +1,10 @@
 package com.sap.sailing.gwt.home.mobile.partials.updatesBox;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
+import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 
-public interface UpdatesBoxResources extends ClientBundle {
+public interface UpdatesBoxResources extends SharedHomeResources {
     public static final UpdatesBoxResources INSTANCE = GWT.create(UpdatesBoxResources.class);
 
     @Source("UpdatesBox.gss")

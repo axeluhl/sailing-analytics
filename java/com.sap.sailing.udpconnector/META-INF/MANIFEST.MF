@@ -7,3 +7,4 @@ Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: com.sap.sailing.udpconnector
+Automatic-Module-Name: com.sap.sailing.udpconnector

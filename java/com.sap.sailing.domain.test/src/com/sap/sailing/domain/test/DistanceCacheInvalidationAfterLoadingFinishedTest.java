@@ -3,15 +3,16 @@ package com.sap.sailing.domain.test;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
@@ -19,8 +20,10 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
@@ -32,13 +35,14 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
  *
  */
 public class DistanceCacheInvalidationAfterLoadingFinishedTest extends TrackBasedTest {
-    private Competitor competitor;
+    private CompetitorWithBoat competitor;
     private DynamicTrackedRace trackedRace;
     
     @Before
     public void setUp() {
-        competitor = createCompetitor("Test Competitor");
-        trackedRace = createTestTrackedRace("Test Regatta", "Test Race", "505", Collections.singleton(competitor), MillisecondsTimePoint.now(), /* useMarkPassingCalculator */ false);
+        competitor = createCompetitorWithBoat("Test Competitor");
+        Map<Competitor, Boat> competitorsAndBoats = TrackBasedTest.createCompetitorAndBoatsMap(competitor);
+        trackedRace = createTestTrackedRace("Test Regatta", "Test Race", "505", competitorsAndBoats, MillisecondsTimePoint.now(), /* useMarkPassingCalculator */ false);
     }
     
     @Test
@@ -57,6 +61,6 @@ public class DistanceCacheInvalidationAfterLoadingFinishedTest extends TrackBase
         final Distance distance = speed.travel(Duration.ONE_SECOND);
         trackedRace.recordFix(competitor, new GPSFixMovingImpl(startPos.translateGreatCircle(bearing, distance), now.plus(Duration.ONE_SECOND), speed));
         trackedRace.onStatusChanged(tdl, new TrackedRaceStatusImpl(TrackedRaceStatusEnum.TRACKING, /* progress */ 1.0));
-        assertEquals(distance.getMeters(), trackedRace.getDistanceTraveled(competitor, now.plus(Duration.ONE_SECOND.times(2))).getMeters(), 0.000001); // ask 1s after the second fix
+        assertEquals(distance.getMeters(), trackedRace.getDistanceTraveled(competitor, now.plus(Duration.ONE_SECOND.times(2))).getMeters(), 0.01); // ask 1s after the second fix
     }
 }

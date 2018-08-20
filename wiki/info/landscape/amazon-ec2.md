@@ -12,6 +12,7 @@
 
 #### Starting an instance
 
+
 - Which instance type to choose:
   - Archive: m2.2xlarge
   - Live: c1.xlarge
@@ -19,34 +20,34 @@
 You may need to select "All generations" instead of "Current generation" to see these instance configurations. Of course, you may choose variations of those as you feel is appropriate for your use case.
 
 - Using a release, set the following in the instance's user data, replacing `myspecificevent` by a unique name of the event or series you'll be running on that instance, such as `kielerwoche2014` or similar.
-<pre>
-INSTALL_FROM_RELEASE=`name-of-release`
-USE_ENVIRONMENT=live-server
-MONGODB_NAME=myspecificevent
-REPLICATION_CHANNEL=myspecificevent
-SERVER_NAME=MYSPECIFICEVENT
-BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
-SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
-</pre>
+  <pre>
+  INSTALL_FROM_RELEASE=`name-of-release`
+  USE_ENVIRONMENT=live-server
+  MONGODB_NAME=myspecificevent
+  REPLICATION_CHANNEL=myspecificevent
+  SERVER_NAME=MYSPECIFICEVENT
+  BUILD_COMPLETE_NOTIFY=simon.marcel.pamies@sap.com
+  SERVER_STARTUP_NOTIFY=simon.marcel.pamies@sap.com
+  </pre>
 
 Note that when you select to install an environment using the `USE_ENVIRONMENT` variable, any other variable that you specify in the user data, such as the `MONGODB_NAME` or `REPLICATION_CHANNEL` properties in the example above, these additional user data properties will override whatever comes from the environment specified by the `USE_ENVIRONMENT` parameter.
 
 - To build from git, install and start, set the following in the instance's user data, adjusting the branch name (`BUILD_FROM`), the `myspecificevent` naming and memory settings according to your needs:
-<pre>
-BUILD_BEFORE_START=True
-BUILD_FROM=master
-RUN_TESTS=False
-COMPILE_GWT=True
-BUILD_COMPLETE_NOTIFY=you@email.com
-SERVER_STARTUP_NOTIFY=
-SERVER_NAME=MYSPECIFICEVENT
-MEMORY=2048m
-REPLICATION_HOST=rabbit.internal.sapsailing.com
-REPLICATION_CHANNEL=myspecificevent
-MONGODB_HOST=dbserver.internal.sapsailing.com
-MONGODB_PORT=10202
-MONGODB_NAME=myspecificevent
-</pre>
+  <pre>
+  BUILD_BEFORE_START=True
+  BUILD_FROM=master
+  RUN_TESTS=False
+  COMPILE_GWT=True
+  BUILD_COMPLETE_NOTIFY=you@email.com
+  SERVER_STARTUP_NOTIFY=
+  SERVER_NAME=MYSPECIFICEVENT
+  MEMORY=2048m
+  REPLICATION_HOST=rabbit.internal.sapsailing.com
+  REPLICATION_CHANNEL=myspecificevent
+  MONGODB_HOST=dbserver.internal.sapsailing.com
+  MONGODB_PORT=10202
+  MONGODB_NAME=myspecificevent
+  </pre>
 
 #### Setting up a new image (AMI) from scratch (more or less)
 
@@ -76,12 +77,174 @@ INSTALL_FROM_RELEASE=(name-of-release)
 USE_ENVIRONMENT=live-replica-server
 REPLICATE_MASTER_SERVLET_HOST=(IP of your master server)
 REPLICATE_MASTER_EXCHANGE_NAME=myspecificevent
-REPLICATE_ON_START=com.sap.sailing.server.impl.RacingEventServiceImpl,com.sap.sse.security.impl.SecurityServiceImpl,com.sap.sse.filestorage.impl.FileStorageManagementServiceImpl,com.sap.sse.mail.impl.MailServiceImpl,com.sap.sailing.polars.impl.PolarDataServiceImpl,com.sap.sailing.domain.racelogtracking.impl.fixtracker.RegattaLogFixTrackerRegattaListener
 SERVER_NAME=MYSPECIFICEVENT
 MONGODB_NAME=myspecificevent-replica
 EVENT_ID=&lt;some-uuid-of-an-event-you-want-to-feature&gt;
 SERVER_STARTUP_NOTIFY=you@email.com
 </pre>
+
+
+
+#### Setting up a Multi Instance
+To set up a multi instance for a server with name "SSV", subdomain "ssv.sapsailing.com" and description "Schwartauer Segler-Verein, [www.ssv-net.de](http://www.ssv-net.de), Alexander Probst, [webmaster@alexprobst.de](mailto:webmaster@alexprobst.de)" perform the following steps:
+
+
+
+##### Instance configuration
+
+1. Connect to the EC2 instance where your multi instance should be deployed. For example: Connect to the instance "SL Multi-Instance Sailing Server" with dns name  "ec2-34-250-136-229.eu-west-1.compute.amazonaws.com" in region Ireland via SSH.
+
+   <pre>
+   ssh sailing@ec2-34-250-136-229.eu-west-1.compute.amazonaws.com
+   </pre>
+
+2. Navigate to the directory /home/sailing/servers.
+
+   <pre>
+   cd /home/sailing/servers
+   </pre>
+
+3. Create a new directory with name "ssv".
+
+   <pre>
+   mkdir ssv
+   </pre>
+
+4. Copy the file /home/sailing/code/java/target/refreshInstance.sh to your new directory.
+
+   <pre>
+   cp /home/sailing/code/java/target/refreshInstance.sh ssv
+   </pre>
+
+5. Initialize a new environment variable "DEPLOY_TO" with the name of the directory.
+
+   <pre>
+   export DEPLOY_TO=ssv
+   </pre>
+
+6. Execute the refreshInstance.sh script with your desired release build version from releases.sapsailing.com.
+
+   <pre>
+   ./refreshInstance.sh install-release build-201712270844
+   </pre>
+
+7. Once the script finished, uncomment the following lines in your env.sh file.
+
+   <pre>
+   # Uncomment for use with SAP JVM only:
+
+   ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS-XX:+GCHistory -XX:GCHistoryFilename=logs/sapjvm_gc@PID.prf"
+   </pre>
+
+   Afterwards comment out the line where it says "JAVA_HOME=/opt/jdk1.8.0_20" 
+
+   <pre>
+   # JAVA_HOME=/opt/jdk1.8.0_20
+   </pre>
+
+8. Find the next unused ports for the variables SERVER_PORT, TELNET_PORT and EXPEDITION_PORT. You can do this by extracting all existing variable assignments from all env.sh files within the /home/sailing/servers directory. 
+
+   <pre>
+   for i in /home/sailing/servers/*/env.sh; do cat $i | grep "^ *SERVER_PORT=" | tail -1 | tr -d "SERVER_PORT="; done | sort -n
+   </pre>
+
+   Do this for TELNET_PORT and EXPEDITION_PORT likewise.
+
+   If this is the first multi instance on the server, use the values SERVER_PORT=8888, TELNET_PORT=14888, EXPEDITION_PORT=2010.
+
+9. Append the following variable assignments to your env.sh file.
+   <pre>
+   SERVER_NAME=SSV
+   TELNET_PORT=14888
+   SERVER_PORT=8888
+   MONGODB_NAME=SSV
+   EXPEDITION_PORT=2010
+   MONGODB_HOST=dbserver.internal.sapsailing.com
+   MONGODB_PORT=10202
+   DEPLOY_TO=ssv
+   </pre>
+
+10. Append the following description to the /home/sailing/servers/README file.
+
+  <pre>
+  # ssv (Schwartauer Segler-Verein, www.ssv-net.de, Alexander Probst, webmaster@alexprobst.de)
+  SERVER_NAME=SSV
+  TELNET_PORT=14900
+  SERVER_PORT=8888
+  MONGODB_NAME=SSV
+  EXPEDITION_PORT=2000
+  </pre>
+
+11. Start the multi instance.
+    <pre>
+    cd /home/sailing/servers/ssv
+    ./start
+    </pre>
+
+12. Change the admin password now and create a new user with admin role.
+
+13. Your multi instance is now configured and started. It can be reached over ec2-34-250-136-229.eu-west-1.compute.amazonaws.com:8888. 
+
+
+
+
+##### Reachability
+
+To reach your multi instance via "ssv.sapsailing.com", perform the following steps within the AWS Web Console inside region Ireland.
+
+1. Create a new target group with the following details, where the name "S-shared-ssv" is created as follows: "S" for "Sailing", "shared" because it's a shared instance, and "ssv" represents the server instance name:
+
+   <img src="/wiki/images/amazon/TargetGroup_1.png"/>
+
+   <img src="/wiki/images/amazon/TargetGroup_2.png"/>
+   
+   Notice the overwritten health check port that is now pointing directly to the instance with its `SERVER_PORT` 8888.
+
+BE CAREFUL please use for a live-server and live-master-server the traffic port for Health Checks.
+
+2. Add the "SL Multi-Instance Sailing Server" instance to the target group.
+
+  <img src="/wiki/images/amazon/TargetGroup_3.png"/>
+
+3. Create a rule within the application load balancer that is forwarding ssv.sapsailing.com to your created target group. Choose "Load Balancers" from the sidebar an select the load balancer with the name "Sailing-eu-west-1". Click on the tab "Listeners" and then on "View/edit rules" inside the row of the HTTPS Listener.
+
+  <img src="/wiki/images/amazon/ApplicationLoadBalancer_1.png"/>
+
+   Click on the plus sign and insert the new rule at the very top. Enter "ssv.sapsailing.com" into the host-header field and select the target group "S-shared-ssv" under "forward". Then click on "Save".
+
+  <img src="/wiki/images/amazon/ApplicationLoadBalancer_2.png"/>
+
+   Your application load balancer is now configured to redirect all requests with host-header "ssv.sapsailing.com" to the target group "S-shared-ssv". That means all requests will now be routed to the "SL Multi-Instance Sailing Server" instance inside this target group using HTTPS and port 443 as specified in the configuration of the target group. To establish a connection on port 8888 (the `SERVER_PORT` property from above), where our multi instance is listening, we have to modify the apache configuration on the "SL Multi-Instance Sailing Server" instance.
+
+4. Connect to the  "SL Multi-Instance Sailing Server" instance via SSH as user `root`. Navigate to the directory /etc/httpd/conf.d. Open up the file "001-events.conf" and append the following line.
+
+   <pre>
+   Use Plain-SSL ssv.sapsailing.com 127.0.0.1 8888
+   </pre>
+   
+   where 8888 is again the `SERVER_PORT` from before.
+
+5. Save the file and run a configuration file syntax check.
+
+   <pre>
+   apachectl configtest
+   </pre>
+
+   If it reports "Syntax OK", continue with reloading the httpd configuration.
+
+6. Reload the httpd configuration.
+
+   <pre>
+   service httpd reload
+   </pre>
+
+You should now be able to reach your multi instance with the dns name "ssv.sapsailing.com".
+
+
+
+#### Setting up a Dedicated Instance
+[...]
+
 
 ## Costs per month
 
@@ -223,7 +386,7 @@ INSTALL_FROM_RELEASE=
 USE_ENVIRONMENT=
 </pre>
 
-After your instance has been started (and build and tests are through) it will be publicly reachable if you chose a port between 8090 and 8099. If you filled the BUILD_COMPLETE_NOTIFY field then you will get an email once the server has been built. You can also add your email address to the field SERVER_STARTUP_NOTIFY to get an email whenever the server has been started.
+After your instance has been started (and build and tests are through) it will be publicly reachable if you chose a port between 8880 and 8950. If you filled the BUILD_COMPLETE_NOTIFY field then you will get an email once the server has been built. You can also add your email address to the field SERVER_STARTUP_NOTIFY to get an email whenever the server has been started.
 
 You can now access this instance by either using the Administrator key (for root User) or the Sailing User key (for user sailing):
 
@@ -267,18 +430,43 @@ In a live event scenario, the SAP Sailing Analytics are largely bandwidth bound.
 
 To still get the usual logging and URL re-writing features, replicas need to run their local Apache server with a bit of configuration. Luckily, most of the grunt work is done for you automatically. You simply need to tell the replicas in their instance details to start replicating automatically, provide an `EVENT_ID` and set the `SERVER_NAME` variable properly. The Apache configuration on the replica will then automatically be adjusted such that the lower-case version of $SERVER_NAME.sapsailing.com will re-direct users to the event page for the event with ID $EVENT_ID.
 
-Here are the steps to create a load balanced setup:
+Amazon puts up limits regarding to the maximum number of rules that an Application Load Balancer (ALB) may have. We use one such ALB as the DNS CNAME target for ``*.sapsailing.com`` (Sailing-eu-west-1-135628335.eu-west-1.elb.amazonaws.com). Adding rules to this ALB is especially convenient because no DNS / Route53 manipulation is necessary at all. New sub-domains can be mapped to target groups this way quite flexibly and quickly.
 
+However, as the number of sub-domains we use grows, we also approach the limit of 100 rules for this load balancer. In order to keep this flexibility in particular for event set-ups, we started introducing more ALBs in August 2018 that use dedicated Route 53 DNS CNAME records for sepcific sub-domains. This way, with the current AWS limits for load balancers (see https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-limits.html) we will have up to 20 ALBs per region with 100 rules each, giving us 2000 rules per region which should suffice for the foreseeable future.
+
+The set-up process needs to distinguish now between only adding a rule to an ALB listener targeted by the ``*.sapsailing.com`` DNS entry, and adding a rule to an ALB listener targeted only by DNS rules for specific sub-domains. In the latter case, a DNS record set needs to be created, providing the CNAME of the ALB that maps the sub-domain to the target group.
+
+Here are the steps to create a load balanced setup, assuming there is already an "Application" load balancer defined in the region(s) where you need them:
+
+- Add a master+replica target group for the master and its replicas that external users will be directed to, using HTTP port 80 as the protocol settings. Note: as this target group will also be used for the HTTPS listener, "SSL offloading" will take place here. The re-directing from HTTP to HTTPS that shall occur when the user hits the server with an HTTP request will happen in the central instance's Apache server if and only if the `X-Forwarded-Proto` is `http` (https://stackoverflow.com/questions/26620670/apache-httpx-forwarded-proto-in-htaccess-is-causing-redirect-loop-in-dev-envir explains how a. See also http://docs.aws.amazon.com/elasticloadbalancing/latest/classic/x-forwarded-headers.html#x-forwarded-proto.)
+- Add a rule to the HTTPS listener for the hostname ${SERVER_NAME}.sapsailing.com that forwards traffic to the master+replica target group just created.
 - Create a master instance holding all data (see http://wiki.sapsailing.com/wiki/amazon-ec2#Setting-up-Master-and-Replica)
-- When using the Race Committee App (RCApp), try to make sure the app is configured to send its data to the master instance and not the ELB (otherwise, write requests may end up at replicas which then have to reverse-replicate these to the master which is as of this writing (2014-12-18) an EXPERIMENTAL feature). You may want to configure a separate URL for the master server for this purpose, so you don't have to re-configure the RCApp devices when switching to a different master server.
 - Create `n` instances that are configured to connect to the master server, automatically launching replication by using one of the `*...-replica-...*` environment from http://releases.sapsailing.com/environments.
-- Create a load balancer that redirects everything from HTTP port 80 to HTTP port 80 as well as HTTPS port 443 to HTTPS port 443 and leave the other switches and checkboxes on their default value. For the HTTPS listener, use the `sapsailing.com` certificate that should be offered as an existing certificate from IAM.
-- As "Ping Port" enter HTTPS port 443 and use /index.html as the "Ping Path." Leave the other values on their defaults again.
-- Put the ELB into the "Sailing Analytics App" security group as it will appear in the landscape as a regular sailing analytics application server.
-- Associate all your instances
-- Connect your domain with the IP of the load balancer. It could be a good idea to use an Elastic IP that always stays the same for the domain and associate it with your load balancer. That way you can also easily switch between a load balancer and a single instance setup. Again, remember not to let the RCApp devices point to the ELB domain as their updates could hit a replica which wouldn't know how to handle!
+- Add master and replicas as targets into the master+replica target group.
+- Create a second master-only target group that only contains the master server. 
+- Add a rule to the HTTPS listener for the hostname ${SERVER_NAME}-master.sapsailing.com that forwards traffic to the master-only target group just created.
+- Add the master to the master-only target group.
+- For both target groups configure the health checks, choosing HTTP as the protocol, using the default "traffic port" and setting the path to /index.html. Lower the interval to 10s and the "Healthy threshold" to 2 to ensure that servers are quickly recognized after adding them to the ELB. With the default settings (30 seconds interval, healthy threshold 10) this would last up to 5 minutes.
+- When using the Race Committee App (RCApp), make sure the app is configured to send its data to the ${SERVER_NAME}-master.sapsailing.com URL (otherwise, write requests may end up at replicas which then have to reverse-replicate these to the master which adds significant overhead).
 
-It is important to understand that it wouldn't help to let all traffic run through our central Apache httpd server which usually acts as a reverse proxy with comprehensive URL rewriting rules and macros. This would make the Apache server the bandwidth bottleneck. Instead, the event traffic needs to go straight to the ELB which requires the event DNS domain name to be mapped to the ELB's host name. You need to set this up in the "Route 53" DNS server which you find in the Amazon Services drop-down.
+The steps to register such a sub-domain mapping also in Route53 in case you've chosen an ALB that is not the target of ``*.sapsailing.com`` work as follows:
+
+Start by creating a new record set:
+<img src="/wiki/images/amazon/DNS1.png" />
+
+Then enter the sub-domain name you'd like to map. Choose ``CNAME`` for the type, reduce the default TTL to 60s and paste the DNS name of the ALB you'd like to target:
+<img src="/wiki/images/amazon/DNS2.png" />
+
+The DNS name of your load balancer can be copied from the "Basic Configuration" section in the "Description" tab:
+<img src="/wiki/images/amazon/CopyingAlbDnsName.png" />
+
+The insertion of the rule into the ALB that maps your sub-domain's name to the corresponding target group works as usual and as described above:
+<img src="/wiki/images/amazon/DNS3.png" />
+<img src="/wiki/images/amazon/DNS4.png" />
+
+It is important to understand that it wouldn't help to let all traffic run through our central Apache httpd server which usually acts as a reverse proxy with comprehensive URL rewriting rules and macros. This would make the Apache server the bandwidth bottleneck. Instead, the event traffic needs to go straight to the ELB. This is established by the *.sapsailing.com DNS entry pointing to the Application ELB which then applies its filter rules to dispatch to the URL-specific target groups. Other than adding the hostname filter rules in the ELB as described above, no interaction with the Route 53 DNS is generally needed. Neither is it necessary to manually modify any 001-events.conf Apache configuration file.
+
+For testing purposes, however, it may be useful to still have some documentation around that explains how to do the Route 53 DNS setup manually. Remember: this shouldn't be needed for usual operations!
 
 <img src="/wiki/images/amazon/Route53_1.png" />
 
@@ -331,7 +519,10 @@ Follow these steps to upgrade the AMI:
 * Launch a new instance based on the existing AMI
 * Log in as user `root`
 * Run `yum update` to update the operating system
+* Stop the Java instance, e.g., by using `killall -9 java`
 * Remove any obsolete logs from `/home/sailing/servers/server/logs`
+* Stop the httpd server, e.g., using `service httpd stop`
+* Remove httpd logs under `/var/log/httpd`
 * Update the git contents (essential for up-to-date versions of `/etc/init.d/sailing` which links to the git, and the `refreshInstance.sh` script used during automatic instance launch), and clean any build artifacts by doing
 ```
     > su - sailing
@@ -344,6 +535,7 @@ Follow these steps to upgrade the AMI:
 * Check the sizes of the mounted partitions by doing `df; swapon -s`. These will come in handy after creating the new AMI in order to tag the new volume snapshots accordingly
 * Update any keys in `/root/.ssh/authorized_keys` and `/home/sailing/.ssh/authorized_keys`
 * Remove created http rewrite entries in `/etc/httpd/conf.d/001-events.conf`
+* Edit /etc/update-motd.d/30-banner to set the current version
 * In the EC2 administration console go to the "Instances" tab, select your running instance and from the "Actions" drop-down select "Create Image". Give the image the name "SAP Sailing Analytics App x.y" where "x.y" is the updated version number of the image. Just make sure it's greater than the previous one. If you feel like it, you may provide a short description telling the most important features of the image.
 * Once the image creation has completed, go to the Snapshots list in the "Elastic Block Store" category and name the new snapshots appropriately. Now the information about the device sizes obtained earlier from the `df` and `swapon` commands will help you to identify which snapshot is which. Usually, the three snapshots would be something like AMI Analytics Home x.y, AMI Analytics System x.y and AMI Analytics Swap x.y with "x.y" being the version number matching that of your image.
 * Now you can remove any earlier Sailing Server AMI version and the corresponding snapshots.
@@ -369,7 +561,7 @@ cp -rf /home/sailing/servers/server/logs/* /var/log/old/<event-name>/<instance-p
 # <EVENT> <YEAR>
 Use Event-ARCHIVE-SSL-Redirect <EVENT><YEAR>.sapsailing.com "<EVENT-UUID>"
 ```
-- Check the Apache config is correct before reloading it via `apachtctl configtest`
+- Check the Apache config is correct before reloading it via `apachectl configtest`
 - When `SYNTAX OK` go ahead with reload `/etc/init.d/httpd reload`
 - Now let us point the public towards the Archive server with removing the Route53 DNS entry for the event
 - Make sure that you keep running ELB and Master server in it for at least 12 hours, as DNS servers around the world will cache the old entry. If you would already remove ELB and Master, this would result in people may not reaching your event anymore
@@ -451,5 +643,6 @@ Should you want to compare servers of which you know they have different sets of
 <tr><td>Security Group</td><td>Firewall configuration that can be associated to an instance. There is no need of configuring iptables or such. One can associate many instances the the same Security Group.</td></tr>
 <tr><td>Elastic Load Balancer (ELB)</td><td>Service that makes it possible to balance over services running on different instances.</td></tr>
 <tr><td>Network Interfaces</td><td>Virtual network interfaces that are mapped to physical network interfaces on instances. </td></tr>
-<tr><td>Placement Groups</td><td>Enables applications to get the full-bisection bandwidth and low-latency network performance required for tightly coupled, node-to-node communication. Placement Groups can only contain HVM instance and have other limitations described here: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using_cluster_computing.html</td></tr>
+
+<tr><td>Multi instance</td><td>App instance that runs along with other app instances on the same EC2 instance</td></tr><tr><td>Placement Groups</td><td>Enables applications to get the full-bisection bandwidth and low-latency network performance required for tightly coupled, node-to-node communication. Placement Groups can only contain HVM instance and have other limitations described here: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using_cluster_computing.html</td></tr>
 </table>

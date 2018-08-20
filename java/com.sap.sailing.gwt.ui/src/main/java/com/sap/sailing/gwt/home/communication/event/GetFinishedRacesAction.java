@@ -3,14 +3,15 @@ package com.sap.sailing.gwt.home.communication.event;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
+import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.server.EventActionUtil;
 import com.sap.sailing.gwt.home.server.RaceListDataCalculator;
 import com.sap.sse.common.Duration;
 import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
+import com.sap.sse.gwt.dispatch.shared.commands.ListResult;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
-import com.sap.sse.gwt.dispatch.shared.commands.SortedSetResult;
 
 /**
  * <p>
@@ -24,8 +25,8 @@ import com.sap.sse.gwt.dispatch.shared.commands.SortedSetResult;
  * state} using a duration of <i>5 minutes</i> for currently running events.
  * </p>
  */
-public class GetFinishedRacesAction implements SailingAction<ResultWithTTL<SortedSetResult<RaceListRaceDTO>>>,
-        IsClientCacheable {
+public class GetFinishedRacesAction implements SailingAction<ResultWithTTL<ListResult<RaceListRaceDTO>>>,
+        IsClientCacheable, ProvidesLeaderboardRouting {
     
     private UUID eventId;
     private String regattaId;
@@ -47,16 +48,21 @@ public class GetFinishedRacesAction implements SailingAction<ResultWithTTL<Sorte
 
     @Override
     @GwtIncompatible
-    public ResultWithTTL<SortedSetResult<RaceListRaceDTO>> execute(SailingDispatchContext context) {
+    public ResultWithTTL<ListResult<RaceListRaceDTO>> execute(SailingDispatchContext context) {
         RaceListDataCalculator raceListDataCalculator = new RaceListDataCalculator();
         EventActionUtil.forRacesOfRegatta(context, eventId, regattaId, raceListDataCalculator);
         
         return new ResultWithTTL<>(EventActionUtil.getEventStateDependentTTL(context, eventId,
-                Duration.ONE_MINUTE.times(5)), new SortedSetResult<>(raceListDataCalculator.getResult()));
+                Duration.ONE_MINUTE.times(5)), new ListResult<>(raceListDataCalculator.getResult()));
     }
 
     @Override
     public void cacheInstanceKey(StringBuilder key) {
         key.append(eventId).append("_").append(regattaId);
+    }
+
+    @Override
+    public String getLeaderboardName() {
+        return regattaId;
     }
 }

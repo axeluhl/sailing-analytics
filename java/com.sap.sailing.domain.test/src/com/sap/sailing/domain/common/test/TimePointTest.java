@@ -11,6 +11,7 @@ import java.util.GregorianCalendar;
 
 import org.junit.Test;
 
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -39,11 +40,33 @@ public class TimePointTest {
     }
 
     @Test
-    public void testEqualForEuqal() {
+    public void testEqualForEqual() {
         TimePoint t1 = new MillisecondsTimePoint(Long.MIN_VALUE);
         TimePoint t2 = new MillisecondsTimePoint(Long.MIN_VALUE);
         assertThat(t1, is(t2));
         assertThat(t2, is(t1));
+    }
+    
+    @Test
+    public void testAvoidOverflowBeyondEndOfTime() {
+        TimePoint t1 = TimePoint.EndOfTime;
+        assertEquals(TimePoint.EndOfTime, t1.plus(1));
+        assertEquals(TimePoint.EndOfTime, t1.plus(100));
+        assertEquals(TimePoint.EndOfTime, t1.plus(Duration.ONE_MINUTE));
+        TimePoint t2 = TimePoint.EndOfTime.minus(100);
+        assertEquals(TimePoint.EndOfTime, t2.plus(200));
+        assertEquals(TimePoint.EndOfTime, t2.plus(Duration.ONE_HOUR));
+    }
+
+    @Test
+    public void testAvoidUnderflowBeyondBeginningOfTime() {
+        TimePoint t1 = TimePoint.BeginningOfTime;
+        assertEquals(TimePoint.BeginningOfTime, t1.minus(1));
+        assertEquals(TimePoint.BeginningOfTime, t1.minus(100));
+        assertEquals(TimePoint.BeginningOfTime, t1.minus(Duration.ONE_MINUTE));
+        TimePoint t2 = TimePoint.BeginningOfTime.plus(100);
+        assertEquals(TimePoint.BeginningOfTime, t2.minus(200));
+        assertEquals(TimePoint.BeginningOfTime, t2.minus(Duration.ONE_HOUR));
     }
 
     @Test
@@ -53,6 +76,7 @@ public class TimePointTest {
     }
 
     @Test
+    @SuppressWarnings("unlikely-arg-type")
     public void testEqualForString() {
         TimePoint t = new MillisecondsTimePoint(Long.MIN_VALUE);
         assertFalse(t.equals("s"));

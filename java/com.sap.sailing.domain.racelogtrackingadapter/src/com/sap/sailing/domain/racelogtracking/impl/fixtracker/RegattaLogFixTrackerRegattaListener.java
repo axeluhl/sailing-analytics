@@ -6,19 +6,21 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.racelog.tracking.SensorFixStore;
 import com.sap.sailing.domain.racelogsensortracking.SensorFixMapperFactory;
+import com.sap.sailing.domain.tracking.AbstractTrackedRegattaAndRaceObserver;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
+import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaListener;
 import com.sap.sailing.server.RacingEventService;
@@ -40,12 +42,12 @@ import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
  * replicas through the replication mechanism. That's why in replication state, no
  * {@link RegattaLogFixTrackerRaceListener} instances are created at all.
  */
-public class RegattaLogFixTrackerRegattaListener implements TrackedRegattaListener,
+public class RegattaLogFixTrackerRegattaListener extends AbstractTrackedRegattaAndRaceObserver implements TrackedRegattaListener,
         ReplicableWithObjectInputStream<RegattaLogFixTrackerRegattaListener, OperationWithResult<RegattaLogFixTrackerRegattaListener, ?>> {
     
     private static final Logger log = Logger.getLogger(RegattaLogFixTrackerRegattaListener.class.getName());
     
-    private final Map<Serializable, RegattaLogFixTrackerRaceListener> registeredTrackers = new HashMap<>();
+    private final Map<RegattaAndRaceIdentifier, RaceLogFixTrackerManager> dataTrackers = new ConcurrentHashMap<>();
     private final ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
     private final SensorFixMapperFactory sensorFixMapperFactory;
 
@@ -58,35 +60,61 @@ public class RegattaLogFixTrackerRegattaListener implements TrackedRegattaListen
 
     @Override
     public synchronized void regattaAdded(TrackedRegatta trackedRegatta) {
-        final Serializable regattaId = trackedRegatta.getRegatta().getId();
         if (!isReplica()) {
-            RegattaLogFixTrackerRaceListener tracker = new RegattaLogFixTrackerRaceListener((DynamicTrackedRegatta) 
-                    trackedRegatta, racingEventServiceTracker, sensorFixMapperFactory);
-            this.stopIfNotNull(registeredTrackers.put(regattaId, tracker));
-            log.fine("Added sensor data tracker to tracked regatta: " + trackedRegatta.getRegatta().getName());
+            super.regattaAdded(trackedRegatta);
         } else {
             log.warning("Regatta already known, not adding sensor twice");
         }
     }
-
+    
     @Override
-    public synchronized void regattaRemoved(TrackedRegatta trackedRegatta) {
-        final Serializable regattaId = trackedRegatta.getRegatta().getId();
-        try {
-            this.stopIfNotNull(registeredTrackers.get(regattaId));
-        } finally {
-            registeredTrackers.remove(regattaId);
+    protected void onRaceAdded(RegattaAndRaceIdentifier raceIdentifier, DynamicTrackedRegatta trackedRegatta,
+            DynamicTrackedRace trackedRace) {
+        racingEventServiceTracker.getService().getRaceTrackerByRegattaAndRaceIdentifier(raceIdentifier, (raceTracker) -> {
+            if (raceTracker != null) {
+                boolean added = raceTracker.add(new RaceTracker.Listener() {
+                    @Override
+                    public void onTrackerWillStop(boolean preemptive, boolean willBeRemoved) {
+                        raceTracker.remove(this);
+                        removeRaceLogSensorDataTracker(raceIdentifier, preemptive, willBeRemoved);
+                    }
+                });
+                // if !added, the RaceTracker is already stopped, so we are not allowed to start fix tracking
+                if (added) {
+                    RaceLogFixTrackerManager trackerManager = new RaceLogFixTrackerManager(
+                            (DynamicTrackedRace) trackedRace, racingEventServiceTracker.getService().getSensorFixStore(),
+                            sensorFixMapperFactory);
+                    RaceLogFixTrackerManager oldInstance = null;
+                    synchronized (this) {
+                        oldInstance = dataTrackers.put(raceIdentifier, trackerManager);
+                    }
+                    if (oldInstance != null) {
+                        oldInstance.stop(/* preemptive */ true, /* willBeRemoved */ false);
+                    }
+                }
+            }
+        });
+    }
+    
+    @Override
+    protected void onRaceRemoved(DynamicTrackedRace trackedRace) {
+        removeRaceLogSensorDataTracker(trackedRace.getRaceIdentifier());
+    }
+    
+    private void removeRaceLogSensorDataTracker(RegattaAndRaceIdentifier raceIdentifier) {
+        removeRaceLogSensorDataTracker(raceIdentifier, /* preemptive */ false, /* willBeRemoved */ false);
+    }
+
+    private void removeRaceLogSensorDataTracker(RegattaAndRaceIdentifier raceIdentifier, boolean preemptive, boolean willBeRemoved) {
+        RaceLogFixTrackerManager currentActiveDataTracker = dataTrackers.get(raceIdentifier);
+        if (currentActiveDataTracker != null) {
+            currentActiveDataTracker.stop(preemptive, willBeRemoved);
+            trackerStopped(raceIdentifier, currentActiveDataTracker);
         }
     }
     
-    private void stopIfNotNull(RegattaLogFixTrackerRaceListener tracker) {
-        if (tracker != null) {
-            try {
-                tracker.stop();
-            } catch (Exception exc) {
-                log.log(Level.SEVERE, "Stopping of tracker failed: " + tracker, exc);
-            }
-        }
+    private synchronized void trackerStopped(RegattaAndRaceIdentifier raceIdentifier, RaceLogFixTrackerManager trackerManager) {
+        dataTrackers.remove(raceIdentifier, trackerManager);
     }
     
     // Replication related methods and fields
@@ -170,8 +198,7 @@ public class RegattaLogFixTrackerRegattaListener implements TrackedRegattaListen
 
     @Override
     public synchronized void clearReplicaState() throws MalformedURLException, IOException, InterruptedException {
-        this.registeredTrackers.values().forEach(this::stopIfNotNull);
-        this.registeredTrackers.clear();
+        removeAll();
     }
     
     private boolean isReplica() {

@@ -1,12 +1,14 @@
 package com.sap.sailing.racecommittee.app.utils;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.support.annotation.AttrRes;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DimenRes;
@@ -14,6 +16,7 @@ import android.util.TypedValue;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.NumberPicker;
+import android.widget.PopupMenu;
 import android.widget.TimePicker;
 
 import com.sap.sailing.android.shared.logging.ExLog;
@@ -32,6 +35,41 @@ public class ThemeHelper {
             activity.setTheme(R.style.AppTheme_Light);
         } else {
             activity.setTheme(R.style.AppTheme_Dark);
+        }
+    }
+
+    public static void positioningPopupMenu(Context context, PopupMenu popupMenu, View anchor) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+            // Try to force some vertical offset
+            try {
+                Object menuHelper;
+                Field fMenuHelper = PopupMenu.class.getDeclaredField("mPopup");
+                fMenuHelper.setAccessible(true);
+                menuHelper = fMenuHelper.get(popupMenu);
+                Field fListPopup = menuHelper.getClass().getDeclaredField("mPopup");
+                fListPopup.setAccessible(true);
+                Object listPopup = fListPopup.get(menuHelper);
+                Class<?> listPopupClass = listPopup.getClass();
+
+                int height = anchor.getHeight();
+                // Invoke setVerticalOffset() with the negative height to move up by that distance
+                Method setVerticalOffset = listPopupClass.getDeclaredMethod("setVerticalOffset", int.class);
+                setVerticalOffset.invoke(listPopup, -height);
+
+                int width = (Integer) listPopupClass.getDeclaredMethod("getWidth").invoke(listPopup);
+                width -= anchor.getWidth();
+                // Invoke setHorizontalOffset() with the negative height to move up by that distance
+                Method setHorizontalOffset = listPopupClass.getDeclaredMethod("setHorizontalOffset", int.class);
+                setHorizontalOffset.invoke(listPopup, -width);
+
+                // Invoke show() to update the window's position
+                Method show = listPopupClass.getDeclaredMethod("show");
+                show.invoke(listPopup);
+            } catch (Exception e) {
+                // an exception here indicates a programming error rather than an exceptional condition
+                // at runtime
+                ExLog.w(context, TAG, "Unable to force offset" + e.getLocalizedMessage());
+            }
         }
     }
 
@@ -121,7 +159,9 @@ public class ThemeHelper {
         }
     }
 
-    public static @ColorInt int getColor(Context context, @AttrRes int colorId) {
+    public static
+    @ColorInt
+    int getColor(Context context, @AttrRes int colorId) {
         int color = 0;
         TypedValue typedValue = new TypedValue();
         Resources.Theme theme = context.getTheme();

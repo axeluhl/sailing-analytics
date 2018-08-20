@@ -1,6 +1,7 @@
 package com.sap.sse.gwt.dispatch.servlets;
 
 import java.io.IOException;
+import java.util.Locale;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -10,6 +11,7 @@ import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.server.rpc.RPCServletUtils;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.gwt.user.server.rpc.SerializationPolicy;
+import com.sap.sse.gwt.shared.RpcConstants;
 
 /**
  * Using GWT in a proxyfied environment can be tricky and leads to strange errors
@@ -66,5 +68,21 @@ public abstract class ProxiedRemoteServiceServlet extends RemoteServiceServlet {
         } else {
             super.doUnexpectedFailure(e);
         }
-    }    
+    }
+    
+    protected Locale getClientLocale() {
+        final HttpServletRequest request = getThreadLocalRequest();
+        if (request != null) {
+            final String localeString = request.getHeader(RpcConstants.HEADER_LOCALE);
+            if (localeString != null && ! localeString.isEmpty()) {
+                try {
+                    return Locale.forLanguageTag(localeString);
+                } catch (Exception e) {
+                    // non-parseable locales are ignored
+                }
+            }
+        }
+        // Using default locale if the client locale could not be determined
+        return Locale.ENGLISH;
+    }
 }

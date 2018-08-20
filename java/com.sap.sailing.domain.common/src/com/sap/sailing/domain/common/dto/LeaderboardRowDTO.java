@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
 
-import com.sap.sailing.domain.common.Distance;
+import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 
 /**
@@ -16,6 +16,7 @@ import com.sap.sse.common.Duration;
 public class LeaderboardRowDTO implements Serializable {
     private static final long serialVersionUID = -5421934148931661900L;
     public CompetitorDTO competitor;
+    public BoatDTO boat;
     public Map<String, LeaderboardEntryDTO> fieldsByRaceColumnName;
     public Double carriedPoints;
     public Double netPoints;
@@ -26,6 +27,9 @@ public class LeaderboardRowDTO implements Serializable {
     public Double totalTimeSailedUpwindInSeconds;
     public Double totalTimeSailedReachingInSeconds;
     public Double totalDistanceTraveledInMeters;
+    public Double totalDurationFoiledInSeconds;
+    public Double totalDistanceFoiledInMeters;
+    public Integer totalScoredRaces;
     
     @Override
     public int hashCode() {
@@ -33,11 +37,16 @@ public class LeaderboardRowDTO implements Serializable {
         int result = 1;
         result = prime * result + ((carriedPoints == null) ? 0 : carriedPoints.hashCode());
         result = prime * result + ((competitor == null) ? 0 : competitor.hashCode());
+        result = prime * result + ((boat == null) ? 0 : boat.hashCode());
         result = prime * result + ((fieldsByRaceColumnName == null) ? 0 : fieldsByRaceColumnName.hashCode());
         result = prime * result
                 + ((maximumSpeedOverGroundInKnots == null) ? 0 : maximumSpeedOverGroundInKnots.hashCode());
         result = prime * result
                 + ((totalDistanceTraveledInMeters == null) ? 0 : totalDistanceTraveledInMeters.hashCode());
+        result = prime * result
+                + ((totalDurationFoiledInSeconds == null) ? 0 : totalDurationFoiledInSeconds.hashCode());
+        result = prime * result
+                + ((totalDistanceFoiledInMeters == null) ? 0 : totalDistanceFoiledInMeters.hashCode());
         result = prime * result + ((netPoints == null) ? 0 : netPoints.hashCode());
         result = prime * result
                 + ((totalTimeSailedDownwindInSeconds == null) ? 0 : totalTimeSailedDownwindInSeconds.hashCode());
@@ -72,6 +81,11 @@ public class LeaderboardRowDTO implements Serializable {
                 return false;
         } else if (!competitor.equals(other.competitor))
             return false;
+        if (boat == null) {
+            if (other.boat != null)
+                return false;
+        } else if (!boat.equals(other.boat))
+            return false;
         if (fieldsByRaceColumnName == null) {
             if (other.fieldsByRaceColumnName != null)
                 return false;
@@ -86,6 +100,16 @@ public class LeaderboardRowDTO implements Serializable {
             if (other.totalDistanceTraveledInMeters != null)
                 return false;
         } else if (!totalDistanceTraveledInMeters.equals(other.totalDistanceTraveledInMeters))
+            return false;
+        if (totalDurationFoiledInSeconds == null) {
+            if (other.totalDurationFoiledInSeconds != null)
+                return false;
+        } else if (!totalDurationFoiledInSeconds.equals(other.totalDurationFoiledInSeconds))
+            return false;
+        if (totalDistanceFoiledInMeters == null) {
+            if (other.totalDistanceFoiledInMeters != null)
+                return false;
+        } else if (!totalDistanceFoiledInMeters.equals(other.totalDistanceFoiledInMeters))
             return false;
         if (netPoints == null) {
             if (other.netPoints != null)
@@ -120,11 +144,11 @@ public class LeaderboardRowDTO implements Serializable {
         return true;
     }
     
-    public Distance getDistanceTraveledInMeters(String raceColumnName) {
+    public Distance getDistanceTraveled(String raceColumnName) {
         final Distance result;
         LeaderboardEntryDTO fieldsForRace = fieldsByRaceColumnName.get(raceColumnName);
         if (fieldsForRace != null) {
-            result = fieldsForRace.getDistanceTraveledInMeters();
+            result = fieldsForRace.getDistanceTraveled();
         } else {
             result = null;
         }
@@ -135,7 +159,29 @@ public class LeaderboardRowDTO implements Serializable {
         final Duration result;
         LeaderboardEntryDTO fieldsForRace = fieldsByRaceColumnName.get(raceColumnName);
         if (fieldsForRace != null) {
-            result = fieldsForRace.getTimeSailedInMillis();
+            result = fieldsForRace.getTimeSailed();
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
+    public Distance getDistanceFoiled(String raceColumnName) {
+        final Distance result;
+        LeaderboardEntryDTO fieldsForRace = fieldsByRaceColumnName.get(raceColumnName);
+        if (fieldsForRace != null) {
+            result = fieldsForRace.getDistanceFoiled();
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
+    public Duration getDurationFoiled(String raceColumnName) {
+        final Duration result;
+        LeaderboardEntryDTO fieldsForRace = fieldsByRaceColumnName.get(raceColumnName);
+        if (fieldsForRace != null) {
+            result = fieldsForRace.getDurationFoiled();
         } else {
             result = null;
         }

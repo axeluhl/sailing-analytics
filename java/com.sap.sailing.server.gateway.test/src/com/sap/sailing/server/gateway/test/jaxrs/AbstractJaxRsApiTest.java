@@ -13,10 +13,7 @@ import java.util.List;
 
 import javax.ws.rs.core.Response;
 
-import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.base.impl.BoatClassImpl;
-import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
@@ -37,29 +34,27 @@ public abstract class AbstractJaxRsApiTest {
     
     protected static SimpleDateFormat TIMEPOINT_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
-    public void setUp() {
+    public void setUp() throws Exception {
         service = MongoDBConfiguration.getDefaultTestConfiguration().getService();
         service.getDB().dropDatabase();
-
-        racingEventService = new RacingEventServiceImpl(true, new MockSmartphoneUuidServiceFinderFactory());
+        racingEventService = new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true,
+                new MockSmartphoneUuidServiceFinderFactory(), /* restoreTrackedRaces */ false);
     }
 
     protected <T extends AbstractSailingServerResource> T spyResource(T resource) {
         T spyResource = spy(resource);
-        
         doReturn(racingEventService).when(spyResource).getService();
         return spyResource;
     }    
     
     protected String decodeResponseFromByteArray(Response response) throws UnsupportedEncodingException {
         byte[] entity = (byte[]) response.getEntity();
-        
         return new String(entity, "UTF-8");
     }
 
     protected TimePoint parseTimepointFromJsonNumber(Long timePointAsJsonNumber) throws ParseException {
         TimePoint result = null;
-        if(timePointAsJsonNumber != null) {
+        if (timePointAsJsonNumber != null) {
             result = new MillisecondsTimePoint(timePointAsJsonNumber);
         }
         return result;
@@ -67,7 +62,7 @@ public abstract class AbstractJaxRsApiTest {
 
     protected TimePoint parseTimepointFromJsonString(String timePointAsJsonString) throws ParseException {
         TimePoint result = null;
-        if(timePointAsJsonString != null && !timePointAsJsonString.isEmpty()) {
+        if (timePointAsJsonString != null && !timePointAsJsonString.isEmpty()) {
             Date date = TIMEPOINT_FORMATTER.parse(timePointAsJsonString);
             result = new MillisecondsTimePoint(date);
         }
@@ -76,15 +71,14 @@ public abstract class AbstractJaxRsApiTest {
      
     protected List<Competitor> createCompetitors(int numberOfCompetitorsToCreate) {
         List<Competitor> result = new ArrayList<Competitor>();
-        BoatClass boatClass = new BoatClassImpl("505", /* typicallyStartsUpwind */ true);
         for (int i = 1; i <= numberOfCompetitorsToCreate; i++) {
             String competitorName = "C" + i;
-            Competitor competitor = new CompetitorImpl(new Integer(i), competitorName, Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
+            Competitor competitor = new CompetitorImpl(new Integer(i), competitorName, "KYC", Color.RED, null, null, new TeamImpl("STG", Collections.singleton(
                                     new PersonImpl(competitorName, new NationalityImpl("GER"),
                                             /* dateOfBirth */ null, "This is famous "+competitorName)),
                                             new PersonImpl("Rigo van Maas", new NationalityImpl("NED"),
-                                            /* dateOfBirth */null, "This is Rigo, the coach")), new BoatImpl(competitorName + "'s boat",
-                                    boatClass, null), /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null); 
+                                            /* dateOfBirth */null, "This is Rigo, the coach")), 
+                                    /* timeOnTimeFactor */ null, /* timeOnDistanceAllowancePerNauticalMile */ null, null); 
             result.add(competitor);
         }
         return result;

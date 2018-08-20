@@ -64,7 +64,7 @@ public class RectField implements VectorField {
     }
 
     public static RectField read(String jsonData, boolean correctForSphere, StreamletParameters parameters, CoordinateSystem coordinateSystem) {
-        JSONObject data = JSONParser.parseLenient(jsonData).isObject();
+        JSONObject data = JSONParser.parseStrict(jsonData).isObject();
         int w = (int) data.get("gridWidth").isNumber().doubleValue();
         int h = (int) data.get("gridHeight").isNumber().doubleValue();
         Vector[][] field = new Vector[w][h];

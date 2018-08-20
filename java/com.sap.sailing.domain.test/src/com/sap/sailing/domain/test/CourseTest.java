@@ -9,14 +9,19 @@ import static org.mockito.Mockito.mock;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import org.junit.Test;
 
 import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
+import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.ControlPoint;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -25,7 +30,6 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.impl.BoatClassImpl;
-import com.sap.sailing.domain.base.impl.CompetitorImpl;
 import com.sap.sailing.domain.base.impl.ControlPointWithTwoMarksImpl;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.MarkImpl;
@@ -299,10 +303,13 @@ public class CourseTest {
         waypoints.add(wp3);
         Course course = new CourseImpl("Test Course", waypoints);
         assertWaypointIndexes(course);
-        final Set<CompetitorImpl> hasso = Collections.singleton(AbstractLeaderboardTest.createCompetitor("Hasso"));
+        final BoatClass boatClass = new BoatClassImpl("505", /* upwind start */true);
+        final CompetitorWithBoat hasso = AbstractLeaderboardTest.createCompetitorWithBoat("Hasso");
+        final Map<Competitor,Boat> competitorsAndBoats = new HashMap<>();
+        competitorsAndBoats.put(hasso, hasso.getBoat());
         DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(/* trackedRegatta */new DynamicTrackedRegattaImpl(
-                new RegattaImpl("test", null, null, null, new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new)),
-                new RaceDefinitionImpl("Test Race", course, new BoatClassImpl("49er", /* upwind start */true), hasso),
+                new RegattaImpl("test", null, true, null, null, new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new)),
+                new RaceDefinitionImpl("Test Race", course, boatClass, competitorsAndBoats),
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */3000,
                 /* millisecondsOverWhichToAverageWind */30000,
                 /* millisecondsOverWhichToAverageSpeed */8000, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new,
@@ -330,11 +337,13 @@ public class CourseTest {
         final WaypointImpl wp2 = new WaypointImpl(new MarkImpl("Test Mark 2"));
         waypoints.add(wp2);
         Course course = new CourseImpl("Test Course", waypoints);
-        final Set<CompetitorImpl> hasso = Collections.singleton(AbstractLeaderboardTest.createCompetitor("Hasso"));
+        final BoatClass boatClass = new BoatClassImpl("505", /* upwind start */true);
+        final CompetitorWithBoat hasso = AbstractLeaderboardTest.createCompetitorWithBoat("Hasso");
+        final Map<Competitor,Boat> competitorsAndBoats = new HashMap<>();
+        competitorsAndBoats.put(hasso, hasso.getBoat());
         DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(/* trackedRegatta */ new DynamicTrackedRegattaImpl(
-                new RegattaImpl("test", null, null, null, new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new)),
-                new RaceDefinitionImpl("Test Race", course, new BoatClassImpl("49er", /* upwind start */ true),
-                        hasso), Collections.<Sideline> emptyList(),
+                new RegattaImpl("test", null, true, null, null, new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new)),
+                new RaceDefinitionImpl("Test Race", course, boatClass, competitorsAndBoats), Collections.<Sideline> emptyList(),
                 EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
                         /* millisecondsOverWhichToAverageWind */ 30000,
                         /* millisecondsOverWhichToAverageSpeed */ 8000, /*useMarkPassingCalculator*/ false, OneDesignRankingMetric::new,

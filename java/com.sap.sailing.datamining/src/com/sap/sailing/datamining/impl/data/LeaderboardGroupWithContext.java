@@ -5,7 +5,6 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.polars.PolarDataService;
 
 public class LeaderboardGroupWithContext implements HasLeaderboardGroupContext {
-
     private final LeaderboardGroup leaderboardGroup;
     private final PolarDataService polarDataService;
 
@@ -19,9 +18,8 @@ public class LeaderboardGroupWithContext implements HasLeaderboardGroupContext {
         return leaderboardGroup;
     }
 
-	@Override
-	public PolarDataService getPolarDataService() {
-		return polarDataService;
-	}
-
+    @Override
+    public PolarDataService getPolarDataService() {
+        return polarDataService;
+    }
 }

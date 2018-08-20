@@ -8,13 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.SelectionModel;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.shared.UserDTO;
 
@@ -34,7 +35,7 @@ public class UserListDataProvider extends AbstractDataProvider<UserDTO> {
         userManagementService.getFilteredSortedUserList(filterBox.getText(), new AsyncCallback<Collection<UserDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
-                Window.alert(caught.getMessage());
+                Notification.notify(caught.getMessage(), NotificationType.ERROR);
             }
 
             @Override

@@ -1,0 +1,187 @@
+ 
+.cellTableWidget { border-top:1pxsolid#c9caca;
+	border-right: 1px solid #c9caca;
+	border-collapse: separate;
+	height: 100%;
+}
+
+/** v-align images in the table header
+     * grey background for table header
+     */
+.cellTableHeader {
+    position: relative;
+    vertical-align: middle;
+    background-color: #f2f2f2;
+    border-right: 0px solid #c9caca !important;
+    border-top: none !important;
+    border-bottom: 1px solid #c9caca !important;
+    border-left: 1px solid #c9caca !important;
+    padding: 3px 5px;
+    padding-bottom: 5px;
+    text-align: center;
+    text-shadow: none !important;
+    font-size: 30px !important;
+    font-family: 'Open Sans', sans-serif !important;
+    font-weight: 300 !important;
+}
+
+.cellTableFirstColumnHeader {
+	position: relative;
+	vertical-align: bottom;
+	text-align: center;
+}
+
+.cellTableLastColumnHeader {
+	position: relative;
+	vertical-align: bottom;
+	text-align: center;
+}
+
+.cellTableHeader>span>img:first-child {
+	position: relative;
+	vertical-align: middle;
+}
+
+.cellTableEvenRow {
+	background-color: rgba(255, 255, 255, 1);
+}
+
+.cellTableOddRow {
+	background-color: rgba(255, 255, 255, 1);
+}
+
+.cellTableSelectedRow {
+	color: #000000;
+	background-color: rgba(100, 100, 100, 0.1);
+}
+
+.cellTableCell {
+	line-height: 1.7em !important;
+	vertical-align: middle;
+	font-size: 30px !important;
+	font-family: 'Open Sans', sans-serif !important;
+	font-weight: 300 !important;
+	height: literal("calc((100vh - 225px) / 7)");
+}
+
+.cellTableSelectedRowCell .cellTableSelectedRowCell>div,
+	.cellTableSelectedRowCell>div>span, .cellTableSelectedRowCell>div>div,
+	.cellTableSelectedRowCell>div>div>span {
+	
+}
+
+.cellTableSelectedRowCell>div, .cellTableSelectedRowCell>div>span,
+	.cellTableSelectedRowCell>div>div, .cellTableSelectedRowCell>div>div>span
+	{
+	/*color: white !important;*/
+	opacity: 1.0 !important;
+}
+
+.cellTableEvenRowCell, .cellTableOddRowCell {
+	border-top: none;
+	border-bottom: none;
+	border-right: none;
+	border-left: 1px solid #d6d6d6;
+	padding: 0 7px;
+	white-space: nowrap;
+}
+
+.cellTableCheckboxColumnCell {
+	
+}
+
+.cellTableCheckboxSelected {
+	height: 13px;
+	width: 13px;
+	margin: auto auto;
+	border: 1px solid #fcbb22;
+	background-color: #fcbb22;
+}
+
+.cellTableCheckboxDeselected {
+	height: 13px;
+	width: 13px;
+	margin: auto auto;
+	border: solid 1px #acacac;
+}
+
+.cellTableHoveredRow {
+	
+}
+
+
+.cellTableRaceColumnHeader {
+	background-color: #f2f2f2;
+	font-size: 30px !important;
+	font-family: 'Open Sans', sans-serif !important;
+	font-weight: 300 !important;
+}
+
+.cellTableRaceColumnHeader span:first-child {
+	display: block;
+}
+
+.cellTableRaceColumnHeader span input, .cellTableRaceColumnHeader span img
+{
+	margin: 0 auto;
+}
+
+.cellTableRaceColumnHeader span img {
+	float: left;
+}
+
+.cellTableLegColumnHeader {
+	background-color: #f2f2f2;
+}
+
+.cellTableLegDetailColumnHeader {
+	background-color: #f2f2f2;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+.cellTableRaceColumnHeader span>div, .cellTableLegColumnHeader span>div
+	{
+	width: 19px !important;
+	height: 19px !important;
+}
+
+.cellTableRaceColumn {
+	
+}
+
+.cellTableLegColumn {
+	
+}
+
+.cellTableLegDetailColumn {
+	
+}
+
+.cellTableTotalColumn {
+	
+}
+
+
+
+.cellTableSailIdColumn {
+    
+}
+	
+.cellTableSailIdColumn img {
+	max-width: none;
+	margin-right: 20px;
+    margin-left: 10px;
+    margin-bottom: 10px;
+    vertical-align: middle;
+}
+}

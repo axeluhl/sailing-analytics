@@ -1,7 +1,6 @@
 package com.sap.sse.gwt.client.panels;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -13,16 +12,14 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.AbstractKeywordFilter;
 import com.sap.sse.common.filter.AbstractListFilter;
 import com.sap.sse.common.filter.Filter;
-import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
-import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
-import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 
 /**
  * This Panel contains a text box. Text entered into the text box filters the {@link CellTable} passed to the
@@ -37,7 +34,11 @@ import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
  * 
  * Note that this panel does <em>not</em> contain the table that it filters. With this, this class's clients are free to
  * position the table wherever they want, not necessarily related to the text box provided by this panel in any specific
- * way.
+ * way.<p>
+ * 
+ * It is recommended to use the {@link #getAllListDataProvider()} as the data provider for the table's selection model.
+ * This way, when the filter reduces the elements displayed in the table the selection will still refer to all elements
+ * and will not be modified solely by the act of filtering.
  * 
  * @param <T>
  * @author Nicolas Klose, Axel Uhl
@@ -91,7 +92,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         this(all, display, filtered, /* show default filter text box */ true);
     }
 
-    private void setAll(Iterable<T> all) {
+    private void setAll(Iterable<? extends T> all) {
         this.all.getList().clear();
         if (all != null) {
             for (T t : all) {
@@ -117,7 +118,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     /**
      * Updates the set of all objects to be shown in the table and applies the search filter to update the table view.
      */
-    public void updateAll(Iterable<T> all) {
+    public void updateAll(Iterable<? extends T> all) {
         setAll(all);
         filter();
     }
@@ -177,7 +178,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     public void filter() {
         filtered.getList().clear();
         retainElementsInFilteredThatPassFilter();
-        filtered.refresh();
+        filtered.flush();
         sort();
     }
 
@@ -211,7 +212,7 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         getTextBox().addKeyUpHandler(new KeyUpHandler() {
             @Override
             public void onKeyUp(KeyUpEvent event) {
-                filterer.setKeywords(Arrays.asList(getTextBox().getText().split(" ")));
+                filterer.setKeywords(Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(getTextBox().getText()));
                 filter();
             }
         });
@@ -223,28 +224,6 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
 
     public Iterable<T> getAll() {
         return all.getList();
-    }
-
-    /**
-     * Registers a {@link RefreshableSelectionModel} on the all data structure. So the selection can be maintained when
-     * the {@link CellTable} is filtered. You can use the {@link RefreshableSelectionModel} returned by this method e.g.
-     * for a {@link CellTable} using {@link CellTable#setSelectionModel(com.google.gwt.view.client.SelectionModel)}
-     * 
-     * @param comp
-     *            {@link EntityIdentityComparator Comperator} to create the {@link RefreshableSelectionModel selection
-     *            model}
-     * @param multiselection
-     *            set <code>true</code> when the {@link RefreshableSelectionModel selection model} should be a
-     *            {@link RefreshableMultiSelectionModel}. When it's set <code>false</code> the
-     *            {@link RefreshableSelectionModel selection model} will be a {@link RefreshableSingleSelectionModel}.
-     */
-    public RefreshableSelectionModel<T> registerSelectionModelOnAllElements(EntityIdentityComparator<T> comp,
-            boolean multiselection) {
-        if (multiselection) {
-            return new RefreshableMultiSelectionModel<>(comp, all);
-        } else {
-            return new RefreshableSingleSelectionModel<>(comp, all);
-        }
     }
 
     /**

@@ -155,9 +155,9 @@ public class Activator implements BundleActivator {
                             Integer.valueOf(System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_QUEUE_PORT).trim()), 
                             serverReplicationMasterService.getServerIdentifier().toString(), 
                             System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_HOST), 
-                            Integer.valueOf(System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_PORT).trim()));
+                            Integer.valueOf(System.getProperty(PROPERTY_NAME_REPLICATE_MASTER_SERVLET_PORT).trim()), replicables);
                     try {
-                        serverReplicationMasterService.startToReplicateFrom(master, replicables);
+                        serverReplicationMasterService.startToReplicateFrom(master);
                         logger.info("Automatic replication has been started.");
                     } catch (ClassNotFoundException | IOException | InterruptedException e) {
                         logger.log(Level.SEVERE, "Error with automatic replication from "+master, e);
@@ -173,7 +173,7 @@ public class Activator implements BundleActivator {
             serverReplicationMasterService.stopToReplicateFromMaster();
         }
         // stop sending stuff to the exchange for other replicas (if this is a master)
-        serverReplicationMasterService.stopAllReplica();
+        serverReplicationMasterService.stopAllReplicas();
     }
     
     public static BundleContext getDefaultContext() {

@@ -64,7 +64,6 @@ public class FileStoragePanel extends FlowPanel {
     public FileStoragePanel(FileStorageManagementGwtServiceAsync sailingService, ErrorReporter errorReporter) {
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
-
         Button refreshButton = new Button(stringMessages.refresh());
         refreshButton.addClickHandler(new ClickHandler() {
             @Override
@@ -73,12 +72,10 @@ public class FileStoragePanel extends FlowPanel {
             }
         });
         add(refreshButton);
-
         CaptionPanel activeServicePanel = new CaptionPanel(stringMessages.active());
         activeServiceLabel = new Label();
         activeServicePanel.add(activeServiceLabel);
         add(activeServicePanel);
-
         CaptionPanel editServicePanel = new CaptionPanel(stringMessages.edit());
         VerticalPanel editServicePanelContent = new VerticalPanel();
         editServicePanel.add(editServicePanelContent);
@@ -90,16 +87,13 @@ public class FileStoragePanel extends FlowPanel {
             }
         });
         editServicePanelContent.add(servicesListBox);
-
         serviceDescriptionLabel = new Label();
         editServicePanelContent.add(serviceDescriptionLabel);
-
         propertiesTable = new BaseCelltable<>();
         propertiesTable.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.DISABLED); //allow for default tabbing behaviour
         propertiesListDataProvider = new ListDataProvider<>(new ArrayList<FileStorageServicePropertyDTO>());
         properties = propertiesListDataProvider.getList();
         propertiesListDataProvider.addDataDisplay(propertiesTable);
-
         TextColumn<FileStorageServicePropertyDTO> nameColumn = new TextColumn<FileStorageServicePropertyDTO>() {
             @Override
             public String getValue(FileStorageServicePropertyDTO p) {
@@ -107,7 +101,6 @@ public class FileStoragePanel extends FlowPanel {
             }
         };
         propertiesTable.addColumn(nameColumn, stringMessages.name());
-
         Column<FileStorageServicePropertyDTO, String> inputColumn = new Column<FileStorageServicePropertyDTO, String>(
                 new TabbingTextInputCell()) {
             @Override
@@ -122,7 +115,6 @@ public class FileStoragePanel extends FlowPanel {
             }
         });
         propertiesTable.addColumn(inputColumn, stringMessages.value());
-
         TextColumn<FileStorageServicePropertyDTO> descriptionColumn = new TextColumn<FileStorageServicePropertyDTO>() {
             @Override
             public String getValue(FileStorageServicePropertyDTO p) {
@@ -130,7 +122,6 @@ public class FileStoragePanel extends FlowPanel {
             }
         };
         propertiesTable.addColumn(descriptionColumn, stringMessages.description());
-
         TextColumn<FileStorageServicePropertyDTO> errorColumn = new TextColumn<FileStorageServicePropertyDTO>() {
             @Override
             public String getValue(FileStorageServicePropertyDTO p) {
@@ -140,15 +131,11 @@ public class FileStoragePanel extends FlowPanel {
         };
         errorColumn.setCellStyleNames("errorLabel");
         propertiesTable.addColumn(errorColumn, stringMessages.error());
-
         editServicePanelContent.add(propertiesTable);
-
         propertiesErrorLabel = new Label();
         propertiesErrorLabel.setStyleName("errorLabel");
         editServicePanelContent.add(propertiesErrorLabel);
-
         HorizontalPanel buttonsPanel = new HorizontalPanel();
-
         Button saveAndTestPropertiesButton = new Button(stringMessages.save());
         saveAndTestPropertiesButton.addClickHandler(new ClickHandler() {
             @Override
@@ -157,7 +144,6 @@ public class FileStoragePanel extends FlowPanel {
             }
         });
         buttonsPanel.add(saveAndTestPropertiesButton);
-
         Button setAsActiveServiceButton = new Button(stringMessages.setAsActive());
         setAsActiveServiceButton.addClickHandler(new ClickHandler() {
             @Override
@@ -166,11 +152,8 @@ public class FileStoragePanel extends FlowPanel {
             }
         });
         buttonsPanel.add(setAsActiveServiceButton);
-
         editServicePanelContent.add(buttonsPanel);
-
         add(editServicePanel);
-
         refresh();
     }
 
@@ -273,12 +256,10 @@ public class FileStoragePanel extends FlowPanel {
         perPropertyErrors.clear();
         serviceDescriptionLabel.setText("");
         FileStorageServiceDTO selected = availableServices.get(getSelectedServiceName());
-        if (selected == null) {
-            return;
+        if (selected != null) {
+            serviceDescriptionLabel.setText(selected.description);
+            properties.addAll(Arrays.asList(selected.properties));
         }
-
-        serviceDescriptionLabel.setText(selected.description);
-        properties.addAll(Arrays.asList(selected.properties));
     }
     
     private String getLocaleInfo() {
@@ -287,14 +268,12 @@ public class FileStoragePanel extends FlowPanel {
 
     private void refresh() {
         String oldSelectedService = getSelectedServiceName();
-
         servicesListBox.clear();
         servicesListBox.addItem("");
         availableServices.clear();
         propertiesErrorLabel.setText("");
         perPropertyErrors.clear();
         onServiceSelectionChanged();
-
         sailingService.getActiveFileStorageServiceName(new AsyncCallback<String>() {
             @Override
             public void onSuccess(String result) {
@@ -306,7 +285,6 @@ public class FileStoragePanel extends FlowPanel {
                 errorReporter.reportError(stringMessages.couldNotLoadActiveService() + ": " + caught.getMessage());
             }
         });
-
         sailingService.getAvailableFileStorageServices(getLocaleInfo(), new AsyncCallback<FileStorageServiceDTO[]>() {
             @Override
             public void onSuccess(FileStorageServiceDTO[] result) {
@@ -321,14 +299,12 @@ public class FileStoragePanel extends FlowPanel {
                 errorReporter.reportError(stringMessages.couldNotLoadAvailableServices() + ": " + caught.getMessage());
             }
         });
-
         for (int i = 0; i < servicesListBox.getItemCount(); i++) {
             if (servicesListBox.getItemText(i).equals(oldSelectedService)) {
                 servicesListBox.setSelectedIndex(i);
             }
         }
         onServiceSelectionChanged();
-
         testProperties(null);
     }
 }

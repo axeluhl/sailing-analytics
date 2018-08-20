@@ -56,7 +56,7 @@ public class ManeuverClassificationToHasConfidenceAndIsScalableAdapter<ValueType
 
             @Override
             public double getConfidence() {
-                return polarService.getManeuverLikelihoodAndTwsTwa(t.getCompetitor().getBoat().getBoatClass(),
+                return polarService.getManeuverLikelihoodAndTwsTwa(t.getBoat().getBoatClass(),
                         t.getSpeedAtManeuverStart(), t.getManeuverAngleDeg(), maneuverType).getA();
             }
 

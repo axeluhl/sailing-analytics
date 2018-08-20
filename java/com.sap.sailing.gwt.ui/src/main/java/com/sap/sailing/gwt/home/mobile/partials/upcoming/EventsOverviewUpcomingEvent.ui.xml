@@ -5,6 +5,7 @@
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
 	<ui:with field="local_res"
 		type="com.sap.sailing.gwt.home.mobile.partials.upcoming.EventsOverviewUpcomingResources" />
+	<ui:with field="shr" type="com.sap.sailing.gwt.home.shared.resources.SharedHomeResources" />
 	<ui:style>
 	.holder {
 		
@@ -25,7 +26,7 @@
 				</div>
 				<div
 					class="{local_res.css.eventsoverviewupcoming_content_event_link_arrow} {res.mediaCss.small2} {res.mediaCss.columns}">
-					<img src="images/home/arrow-down-grey.png"
+					<img src="{shr.arrowDownGrey.getSafeUri}"
 						class="{local_res.css.eventsoverviewupcoming_content_event_link_arrow_image}"></img>
 				</div>
 			</g:Anchor>

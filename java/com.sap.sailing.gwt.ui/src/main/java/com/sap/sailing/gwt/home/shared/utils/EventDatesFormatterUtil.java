@@ -15,10 +15,10 @@ public class EventDatesFormatterUtil {
     private final static DefaultEventDatesFormatter FORMATTER = GWT.create(DefaultEventDatesFormatter.class);
     
     public static String formatDateRangeWithYear(Date from, Date to) {
-        return FORMATTER.formatDateRangeWithYear(from, to);
+        return (from == null || to == null) ? "" : FORMATTER.formatDateRangeWithYear(from, to);
     }
 
     public static String formatDateRangeWithoutYear(Date from, Date to) {
-        return FORMATTER.formatDateRangeWithoutYear(from, to);
+        return (from == null || to == null) ? "" : FORMATTER.formatDateRangeWithoutYear(from, to);
     }
 }

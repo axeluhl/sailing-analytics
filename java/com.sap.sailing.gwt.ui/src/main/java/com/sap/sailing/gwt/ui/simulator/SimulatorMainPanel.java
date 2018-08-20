@@ -66,8 +66,11 @@ import com.sap.sse.gwt.client.player.TimeRangeWithZoomModel;
 import com.sap.sse.gwt.client.player.TimeRangeWithZoomProvider;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.player.Timer.PlayModes;
+import com.sap.sse.security.ui.client.UserService;
 
 public class SimulatorMainPanel extends SimplePanel {
+
+    private static final String RADIOBOX_GROUP_MAP_DISPLAY_OPTIONS = "Map Display Options";
 
     private class ResizableFlowPanel extends FlowPanel implements RequiresResize {
         @Override
@@ -184,7 +187,7 @@ public class SimulatorMainPanel extends SimplePanel {
 
             @Override
             public void onFailure(Throwable message) {
-                errorReporter.reportError("Error retreiving wind patterns" + message.getMessage());
+                errorReporter.reportError(stringMessages.errorReceivingWindPattern(message.getMessage()));
             }
 
             @Override
@@ -235,7 +238,7 @@ public class SimulatorMainPanel extends SimplePanel {
     SimulatorMainPanel(SimulatorServiceAsync svc, StringMessages stringMessages, ErrorReporter errorReporter,
             int xRes, int yRes, int border, StreamletParameters streamletPars, boolean autoUpdate, char mode,
             char event, boolean showGrid, boolean showLines, char seedLines, boolean showArrows,
-            boolean showLineGuides, boolean showStreamlets, boolean showMapControls) {
+            boolean showLineGuides, boolean showStreamlets, boolean showMapControls, UserService userService) {
        super();
        this.formatter = new WindPatternFormatter(stringMessages);
         this.macroWeather = streamletPars.macroWeather;
@@ -313,9 +316,9 @@ public class SimulatorMainPanel extends SimplePanel {
         timer.setTime(windParams.getStartTime().getTime());
         int secondsTimeStep = (int) windParams.getTimeStep().asSeconds();
         timer.setPlaySpeedFactor(secondsTimeStep);
-        timePanel = new TimePanel<TimePanelSettings>(timer, timeRangeProvider, stringMessages, false,
+        timePanel = new TimePanel<TimePanelSettings>(null, null, timer, timeRangeProvider, stringMessages, false,
                 /* isScreenLargeEnoughToOfferChartSupport: no wind or competitor chart is shown; use full horizontal
-                 * extension of time panel */ false);
+                 * extension of time panel */ false, userService);
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
         simulatorMap = new SimulatorMap(simulatorSvc, stringMessages, errorReporter, xRes, yRes, border, streamletPars,
                 timer, timePanel, windParams, busyIndicator, mode, this, showMapControls,
@@ -359,20 +362,20 @@ public class SimulatorMainPanel extends SimplePanel {
     }
 
     public native void setMapInstance(Object mapInstance) /*-{
-	$wnd.swarmMap = mapInstance;
+		$wnd.swarmMap = mapInstance;
     }-*/;
     
     public native void setCanvasProjectionInstance(Object instance) /*-{
-	$wnd.swarmCanvasProjection = instance;
+		$wnd.swarmCanvasProjection = instance;
     }-*/;
 
     public native void startStreamlets() /*-{
-	if ($wnd.swarmAnimator) {
-	    $wnd.swarmUpdData = true;
-	    $wnd.updateStreamlets($wnd.swarmUpdData);
-	} else {
-	    $wnd.initStreamlets($wnd.swarmMap);
-	}
+		if ($wnd.swarmAnimator) {
+			$wnd.swarmUpdData = true;
+			$wnd.updateStreamlets($wnd.swarmUpdData);
+		} else {
+			$wnd.initStreamlets($wnd.swarmMap);
+		}
     }-*/;
 
     public void setDefaultTimeSettings() {
@@ -451,7 +454,7 @@ public class SimulatorMainPanel extends SimplePanel {
 
             @Override
             public void onFailure(Throwable message) {
-                errorReporter.reportError("Failed to initialize wind patterns\n" + message.getMessage());
+                errorReporter.reportError(stringMessages.errorReceivingWindPattern(message.getMessage()));
             }
 
             @Override
@@ -731,7 +734,7 @@ public class SimulatorMainPanel extends SimplePanel {
             sailingPanel.add(pathPolylineModeSelector);
         }
 
-        this.polarDiagramDialogCloseButton = new Button("Close");
+        this.polarDiagramDialogCloseButton = new Button(stringMessages.close());
         this.polarDiagramDialogCloseButton.getElement().setId("closeButton");
         this.polarDiagramDialogCloseButton.getElement().getStyle().setProperty("marginTop", "10px");
 
@@ -768,7 +771,7 @@ public class SimulatorMainPanel extends SimplePanel {
         this.simulatorSvc.getBoatClasses(new AsyncCallback<BoatClassDTOsAndNotificationMessage>() {
             @Override
             public void onFailure(Throwable error) {
-                errorReporter.reportError("Failed to initialize boat classes!\r\n" + error.getMessage());
+                errorReporter.reportError(stringMessages.errorLoadingBoatClasses(error.getMessage()));
             }
             @Override
             public void onSuccess(BoatClassDTOsAndNotificationMessage boatClassesAndMsg) {
@@ -804,7 +807,7 @@ public class SimulatorMainPanel extends SimplePanel {
             @Override
             public void onFailure(Throwable error) {
 
-                errorReporter.reportError("Failed to initialize boat classes!\r\n" + error.getMessage());
+                errorReporter.reportError(stringMessages.errorLoadingBoatClasses(error.getMessage()));
             }
             @Override
             public void onSuccess(PolarDiagramDTOAndNotificationMessage polar) {
@@ -948,7 +951,7 @@ public class SimulatorMainPanel extends SimplePanel {
 
     private void initDisplayOptions(Panel mapOptions) {
 
-    	this.summaryButton = new RadioButton("Map Display Options", stringMessages.summary());
+    	this.summaryButton = new RadioButton(RADIOBOX_GROUP_MAP_DISPLAY_OPTIONS, stringMessages.summary());
         this.summaryButton.getElement().setClassName("MapDisplayOptions");
         this.summaryButton.addClickHandler(new ClickHandler() {
             @Override
@@ -960,7 +963,7 @@ public class SimulatorMainPanel extends SimplePanel {
             }
         });
 
-        this.replayButton = new RadioButton("Map Display Options", stringMessages.replay());
+        this.replayButton = new RadioButton(RADIOBOX_GROUP_MAP_DISPLAY_OPTIONS, stringMessages.replay());
         this.replayButton.getElement().setClassName("MapDisplayOptions");
         this.replayButton.addClickHandler(new ClickHandler() {
             @Override
@@ -972,7 +975,7 @@ public class SimulatorMainPanel extends SimplePanel {
             }
         });
 
-        this.windDisplayButton = new RadioButton("Map Display Options", stringMessages.windDisplay());
+        this.windDisplayButton = new RadioButton(RADIOBOX_GROUP_MAP_DISPLAY_OPTIONS, stringMessages.windDisplay());
         this.windDisplayButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent arg0) {
@@ -1069,7 +1072,7 @@ public class SimulatorMainPanel extends SimplePanel {
 
             @Override
             public void onFailure(Throwable error) {
-                errorReporter.reportError("Failed to read races information!\r\n" + error.getMessage());
+                errorReporter.reportError(stringMessages.errorLoadingRaceNames(error.getMessage()));
             }
 
             @Override
@@ -1161,7 +1164,7 @@ public class SimulatorMainPanel extends SimplePanel {
         this.simulatorSvc.getBoatClasses(new AsyncCallback<BoatClassDTOsAndNotificationMessage>() {
             @Override
             public void onFailure(Throwable error) {
-                errorReporter.reportError("Failed to initialize boat classes!\r\n" + error.getMessage());
+                errorReporter.reportError(stringMessages.errorLoadingBoatClasses(error.getMessage()));
             }
 
             @Override
@@ -1200,7 +1203,7 @@ public class SimulatorMainPanel extends SimplePanel {
 
             @Override
             public void onFailure(Throwable error) {
-                errorReporter.reportError("Failed to read legs information!\r\n" + error.getMessage());
+                errorReporter.reportError(stringMessages.errorLoadingLegInformation(error.getMessage()));
             }
 
             @Override
@@ -1227,7 +1230,7 @@ public class SimulatorMainPanel extends SimplePanel {
 
             @Override
             public void onFailure(Throwable error) {
-                errorReporter.reportError("Failed to read legs information!\r\n" + error.getMessage());
+                errorReporter.reportError(stringMessages.errorLoadingCompetitors(error.getMessage()));
             }
 
             @Override

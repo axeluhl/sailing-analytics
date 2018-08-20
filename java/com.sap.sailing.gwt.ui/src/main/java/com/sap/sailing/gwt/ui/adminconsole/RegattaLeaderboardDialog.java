@@ -16,7 +16,7 @@ import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 
 
-public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog {
+public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog<LeaderboardDescriptor> {
     protected ListBox regattaListBox;
     protected Collection<RegattaDTO> existingRegattas;
     private Label regattaDefinesDiscardsLabel;
@@ -36,19 +36,18 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
             String errorMessage;
             boolean unique = true;
             for (StrippedLeaderboardDTO dao : existingLeaderboards) {
-                if(dao.name.equals(leaderboardToValidate.getRegattaName())){
+                if (dao.name.equals(leaderboardToValidate.getName())) {
                     unique = false;
                 }
             }
             boolean regattaSelected = leaderboardToValidate.getRegattaName() != null ? true : false;
-
-            if(!regattaSelected){
+            if (!regattaSelected) {
                 errorMessage = stringMessages.pleaseSelectARegatta();
-            } else if(!unique){
+            } else if (!unique) {
                 errorMessage = stringMessages.leaderboardWithThisNameAlreadyExists();
             } else {
-                String discardThresholdErrorMessage = DiscardThresholdBoxes.getErrorMessage(
-                        leaderboardToValidate.getDiscardThresholds(), stringMessages);
+                String discardThresholdErrorMessage = DiscardThresholdBoxes
+                        .getErrorMessage(leaderboardToValidate.getDiscardThresholds(), stringMessages);
                 if (discardThresholdErrorMessage != null) {
                     errorMessage = discardThresholdErrorMessage;
                 } else {
@@ -65,7 +64,6 @@ public abstract class RegattaLeaderboardDialog extends AbstractLeaderboardDialog
         this.existingRegattas = existingRegattas;
         regattaDefinesDiscardsLabel = new Label(stringMessages.regattaDefinesResultDiscardingRules());
     }
-
 
     protected void adjustVisibilityOfResultDiscardingRuleComponent() {
         if (getSelectedRegatta().definesSeriesDiscardThresholds()) {

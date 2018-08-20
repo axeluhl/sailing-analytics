@@ -30,11 +30,6 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.server.gateway.serialization,
  com.sap.sailing.domain.shared.android,
  com.sap.sailing.server.trackfiles,
- org.eclipse.jetty.websocket.api;bundle-version="9.0.4",
- org.eclipse.jetty.websocket.server;bundle-version="9.0.4",
- org.eclipse.jetty.websocket.servlet;bundle-version="9.0.4",
- org.eclipse.jetty.websocket.client;bundle-version="9.0.4",
- org.eclipse.jetty.websocket.common;bundle-version="9.0.4",
  javax.validation;bundle-version="1.0.0",
  com.sun.jersey;bundle-version="1.17.0",
  org.objectweb.asm;bundle-version="3.3.1",
@@ -58,9 +53,15 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.datamining;bundle-version="1.0.0",
  com.sap.sse.datamining.shared;bundle-version="1.0.0",
  com.sap.sailing.datamining,
- com.sap.sailing.server
+ com.sap.sailing.server,
+ com.sap.sailing.grib,
+ com.sap.sailing.nmeaconnector,
+ com.sap.sailing.geocoding,
+ com.googlecode.java-diff-utils
 Bundle-ClassPath: .
 Web-ContextPath: /sailingserver
 Export-Package: com.sap.sailing.server.gateway,
  com.sap.sailing.server.gateway.jaxrs,
- com.sap.sailing.server.gateway.jaxrs.spi
+ com.sap.sailing.server.gateway.jaxrs.spi,
+ com.sap.sailing.server.gateway.windimport.bravo
+Automatic-Module-Name: com.sap.sailing.server.gateway

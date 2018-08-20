@@ -10,18 +10,20 @@ import java.util.Set;
 
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueChangeHandler;
+import com.sap.sailing.gwt.home.shared.partials.filter.FilterValueProvider;
 import com.sap.sailing.gwt.home.shared.partials.regattalist.RegattaListView.RegattaListItem;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 
-public class RegattaListPresenter<D extends DTO> implements FilterValueChangeHandler<RegattaMetadataDTO, String>{
-    
+public class RegattaListPresenter<D extends DTO>
+        implements FilterValueProvider<String>, FilterValueChangeHandler<RegattaMetadataDTO> {
+
     private final RegattaListView view;
     private final Map<RegattaListItem, RegattaMetadataDTO> stucture = new HashMap<>();
     private Filter<RegattaMetadataDTO> latestLeaderboardGroupFilter;
-    
+
     public <V extends RegattaListView & RefreshableWidget<D>> RegattaListPresenter(V view) {
         this.view = view;
     }
@@ -42,9 +44,9 @@ public class RegattaListPresenter<D extends DTO> implements FilterValueChangeHan
                 Util.addAll(regattaMetadata.getLeaderboardGroupNames(), filterableValues);
             }
         }
-        return filterableValues.size() > 1 ? filterableValues : Collections.<String>emptySet();
+        return filterableValues.size() > 1 ? filterableValues : Collections.<String> emptySet();
     }
-    
+
     public RefreshableWidget<D> getRefreshableWidgetWrapper(final RefreshableWidget<D> wrappedWidget) {
         return new RefreshableWidget<D>() {
             @Override

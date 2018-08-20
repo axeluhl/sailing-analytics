@@ -9,22 +9,24 @@ import java.util.Set;
 
 import com.sap.sailing.domain.common.RaceCompetitorIdsAsStringWithMD5Hash;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
+import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
+import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionProvider;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 
 /**
  * As an extension of {@link RaceCompetitorIdsAsStringWithMD5Hash}, adds the link with a
- * {@link CompetitorSelectionProvider} and allows its clients to obtain the {@link CompetitorDTO} objects for those
+ * {@link CompetitorSelectionProvider} and allows its clients to obtain the {@link CompetitorWithBoatDTO} objects for those
  * competitors participating in the race under consideration.
  * <p>
  * 
- * The implementation caches the {@link CompetitorDTO}s and keeps this cache up to date by
+ * The implementation caches the {@link CompetitorWithBoatDTO}s and keeps this cache up to date by
  * {@link CompetitorSelectionProvider#addCompetitorSelectionChangeListener(CompetitorSelectionChangeListener)}
  * listening} on the competitor selection provider for changes. When either the set of competitors for the race
  * {@link #setIdsAsStringsOfCompetitorsInRace(Iterable) changes} or the set of competitors
- * {@link CompetitorSelectionChangeListener#competitorsListChanged(Iterable) changes}, the {@link CompetitorDTO}
+ * {@link CompetitorSelectionChangeListener#competitorsListChanged(Iterable) changes}, the {@link CompetitorWithBoatDTO}
  * collection is re-calculated.
  * 
  * @author Axel Uhl (D043530)
@@ -33,7 +35,7 @@ import com.sap.sse.common.filter.FilterSet;
 public class RaceCompetitorSet extends RaceCompetitorIdsAsStringWithMD5Hash {
     private static final long serialVersionUID = 3357742414149799988L;
 
-    private CompetitorSelectionProvider competitorSelection;
+    private RaceCompetitorSelectionProvider competitorSelection;
     
     /**
      * A subset of the competitor selection's {@link CompetitorSelectionProvider#getAllCompetitors()} describing the
@@ -61,7 +63,7 @@ public class RaceCompetitorSet extends RaceCompetitorIdsAsStringWithMD5Hash {
      * {@link #setIdsAsStringsOfCompetitorsInRace(Iterable)} has been received may this set become adjusted to the
      * actual subset participating in the race.
      */
-    public RaceCompetitorSet(CompetitorSelectionProvider competitorSelection) {
+    public RaceCompetitorSet(RaceCompetitorSelectionProvider competitorSelection) {
         super();
         this.competitorsForRaceDefinedListeners = new HashSet<>();
         this.competitorSelection = competitorSelection;

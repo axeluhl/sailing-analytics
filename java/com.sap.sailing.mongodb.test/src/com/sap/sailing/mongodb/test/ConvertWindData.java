@@ -5,9 +5,9 @@ import java.net.UnknownHostException;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
-import com.sap.sailing.domain.common.impl.DegreeBearingImpl;
 import com.sap.sailing.domain.persistence.impl.FieldNames;
 import com.sap.sailing.domain.persistence.impl.MongoObjectFactoryImpl;
+import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.mongodb.MongoDBService;
 
 /**

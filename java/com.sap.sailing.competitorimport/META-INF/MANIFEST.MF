@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Competitorimport
+Bundle-SymbolicName: com.sap.sailing.competitorimport
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Export-Package: com.sap.sailing.competitorimport
+Require-Bundle: com.sap.sse.common,
+ com.sap.sailing.domain.shared.android,
+ com.sap.sailing.domain.common
+Automatic-Module-Name: com.sap.sailing.competitorimport

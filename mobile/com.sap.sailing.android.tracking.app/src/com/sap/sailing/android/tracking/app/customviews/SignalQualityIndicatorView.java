@@ -1,17 +1,16 @@
 package com.sap.sailing.android.tracking.app.customviews;
 
+import com.sap.sailing.android.tracking.app.R;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
-
-import com.sap.sailing.android.tracking.app.R;
 
 /**
  * Draws one vertical indicator that can is filled green up to a point, 
@@ -72,9 +71,9 @@ public class SignalQualityIndicatorView extends View {
 
 	private void initPaint() {
 		paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		paint.setColor(Color.parseColor("#8ab54e"));
+		paint.setColor(getContext().getResources().getColor(R.color.signal_great));
 		paintDark = new Paint(Paint.ANTI_ALIAS_FLAG);
-		paintDark.setColor(Color.parseColor("#455B27"));
+		paintDark.setColor(getContext().getResources().getColor(R.color.signal_none));
 	}
 	
 	@Override

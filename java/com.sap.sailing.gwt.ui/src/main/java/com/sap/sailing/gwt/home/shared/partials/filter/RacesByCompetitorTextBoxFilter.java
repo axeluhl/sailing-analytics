@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.sap.sailing.gwt.common.client.suggestion.AbstractListSuggestOracle;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
 import com.sap.sailing.gwt.home.communication.race.SimpleRaceMetadataDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.AbstractListFilter;
 import com.sap.sse.common.filter.Filter;
+import com.sap.sse.gwt.client.suggestion.AbstractListSuggestOracle;
 
 public class RacesByCompetitorTextBoxFilter extends AbstractListSuggestBoxFilter<SimpleRaceMetadataDTO, SimpleCompetitorDTO> {
     
@@ -20,12 +20,12 @@ public class RacesByCompetitorTextBoxFilter extends AbstractListSuggestBoxFilter
         super(new AbstractListSuggestOracle<SimpleCompetitorDTO>() {
             @Override
             protected Iterable<String> getMatchingStrings(SimpleCompetitorDTO value) {
-                return Arrays.asList(value.getName(), value.getSailID());
+                return Arrays.asList(value.getName(), value.getShortInfo());
             }
 
             @Override
             protected String createSuggestionKeyString(SimpleCompetitorDTO value) {
-                return value.getSailID();
+                return value.getShortInfo();
             }
 
             @Override
@@ -39,7 +39,7 @@ public class RacesByCompetitorTextBoxFilter extends AbstractListSuggestBoxFilter
     protected Filter<SimpleRaceMetadataDTO> getFilter(String searchValue) {
         this.filter.keywords.clear();
         if (searchValue != null && !searchValue.isEmpty()) {
-            this.filter.keywords.add(searchValue.trim());
+            Util.addAll(Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(searchValue), this.filter.keywords);
         }
         return filter;
     }

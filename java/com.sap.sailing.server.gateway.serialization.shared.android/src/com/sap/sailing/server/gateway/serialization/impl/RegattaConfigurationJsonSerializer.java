@@ -14,15 +14,16 @@ public class RegattaConfigurationJsonSerializer implements JsonSerializer<Regatt
                 RacingProcedureConfigurationJsonSerializer.create(), LeagueConfigurationJsonSerializer.create());
     }
 
-    public static final Object FIELD_DEFAULT_RACING_PROCEDURE_TYPE = "defaultRacingProcedureType";
-    public static final Object FIELD_DEFAULT_COURSE_DESIGNER_MODE = "defaultCourseDesignerMode";
+    public static final String FIELD_DEFAULT_RACING_PROCEDURE_TYPE = "defaultRacingProcedureType";
+    public static final String FIELD_DEFAULT_COURSE_DESIGNER_MODE = "defaultCourseDesignerMode";
+    public static final String FIELD_DEFAULT_PROTEST_TIME_DURATION_MILLIS = "defaultProtestTimeDurationMillis";
     public static final String FIELD_RRS26 = "rrs26";
     public static final String FIELD_SWC_START = "swcStart";
     public static final String FIELD_GATE_START = "gateStart";
     public static final String FIELD_ESS = "ess";
     public static final String FIELD_LEAGUE = "league";
     public static final String FIELD_BASIC = "basic";
-
+    
     private final JsonSerializer<RacingProcedureConfiguration> rrs26Serializer;
     private final JsonSerializer<RacingProcedureConfiguration> swcStartSerializer;
     private final JsonSerializer<RacingProcedureConfiguration> gateStartSerializer;
@@ -47,9 +48,15 @@ public class RegattaConfigurationJsonSerializer implements JsonSerializer<Regatt
         if (object.getDefaultRacingProcedureType() != null) {
             result.put(FIELD_DEFAULT_RACING_PROCEDURE_TYPE, object.getDefaultRacingProcedureType().name());
         }
+
         if (object.getDefaultCourseDesignerMode() != null) {
             result.put(FIELD_DEFAULT_COURSE_DESIGNER_MODE, object.getDefaultCourseDesignerMode().name());
         }
+
+        if (object.getDefaultProtestTimeDuration() != null) {
+            result.put(FIELD_DEFAULT_PROTEST_TIME_DURATION_MILLIS, object.getDefaultProtestTimeDuration().asMillis());
+        }
+
         if (object.getRRS26Configuration() != null) {
             result.put(FIELD_RRS26, rrs26Serializer.serialize(object.getRRS26Configuration()));
         }

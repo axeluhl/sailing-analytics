@@ -29,7 +29,7 @@ html {
 
 
 body {
-	background: url(images/spectatorview-bg.png) no-repeat left top #ebebeb;
+	background: #eee;
 	font-family: 'Open Sans', Arial, Verdana, sans-serif;
 	line-height: 1;
 	font-size: 14px;
@@ -109,23 +109,6 @@ table {
 	margin: 0 12px 18px 12px;
 }
 
-.sapLogo {
-	float: left;
-	margin: 13px 0 0 12px;
-}
-
-.sailingAnalyticsLabelPanel {
-	margin: 10px 0 0 0;
-}
-
-.sailingAnalyticsLabel {
-	float: left;
-	color: #fff;
-	font-size: 14px;
-	font-weight: bold;
-	margin: 15px 0 0 0;
-}
-
 .leaderboardLabel {
 	border-bottom: 2px solid #007dc0;
 	font-weight: bold;
@@ -165,11 +148,6 @@ input.magnifier {
 	background: url(images/footer_shadow.png) left bottom repeat-x;
 	width: 100%;
 	z-index: 2000;
-}
-
-.mainPanel {
-	width: 100%;
-	margin-left: 13px;
 }
 
 .errorLabel {
@@ -238,12 +216,30 @@ input.magnifier {
 	top: 9px;
 }
 
+.groupingProvider {
+    padding: 3px 0px;
+}
+
 .groupingProviderElement {
 	margin: 2px;
+	display: inline-block;
+}
+
+.statisticProvider {
+    padding: 5px 0px 0px 0px;
 }
 
 .statisticProviderElement {
 	margin: 2px;
+	display: inline-block;
+}
+
+.statisticSuggestBoxPopup {
+    z-index: 2;
+}
+.statisticSuggestBoxPopup .suggestPopupContent {
+    max-height: 700px;
+    overflow-y: scroll;
 }
 
 .definitionProviderControls {
@@ -254,7 +250,89 @@ input.magnifier {
 	margin: 2px;
 }
 
+.queryProviderElementLabel {
+    margin-left: 0px;
+}
+
 .queryDefinitionViewerContent {
 	background-color: white;
 	padding: 5px;
+}
+
+.filterDimensionsTitleLabel {
+    padding-top: 5px;
+}
+
+.filterFilterDimensionsPanel {
+	background: #eee;
+}
+
+.dimensionFilterSelectionTablesContainer {
+	overflow-x: auto;
+}
+
+.dimensionFilterSelectionHeader {
+    background: #eee;
+    padding-top: 5px;
+}
+
+.dimensionFilterSelectionHeader .gwt-Label {
+  color: #4b4a4a;
+  text-shadow: #ddf 1px 1px 0;
+}
+
+.dataMiningBorderTop {
+    border-top: 2px solid #6f7277;
+}
+.dataMiningBorderLeft {
+    border-left: 2px solid #6f7277;
+}
+.dataMiningBorderBottom {
+    border-border: 2px solid #6f7277;
+}
+.dataMiningBorderRight {
+    border-right: 2px solid #6f7277;
+}
+
+.gwt-SplitLayoutPanel-VDragger {
+    background: #fff url(images/thumb_horz.png) center center no-repeat;
+    width: 100% !important;
+    height: 100% !important;
+    left: 0 !important;
+    top: 0 !important;
+    border: none;
+    border-radius: 0px;
+    opacity: 1;
+}
+
+.gwt-SplitLayoutPanel-HDragger {
+    background: #fff url(images/thumb_vertical.png) center center no-repeat;
+    width: 100% !important;
+    height: 100% !important;
+    left: 0 !important;
+    top: 0 !important;
+    border: none;
+    border-radius: 0px;
+    margin: 0px;
+    opacity: 1;
+}
+
+.dataMiningMarginBase {
+    margin: 0px 5px;
+}
+.dataMiningMarginLeft {
+    margin-left: 5px;
+}
+.dataMiningMarginRight {
+    margin-right: 5px;
+}
+
+.resultsPresenterTabHeader * {
+    display: inline-block;
+    margin: 0px 3px;
+    vertical-align: bottom;
+}
+
+.emphasizedLabel {
+    font-weight: 600;
 }

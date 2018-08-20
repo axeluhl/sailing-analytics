@@ -57,16 +57,16 @@ public interface ScoreCorrection extends Serializable {
      * @param trackedRankProvider
      *            can provide the tracked rank if needed; will only be called if there is no score correction for the
      *            <code>timePoint</code> specified.
+     * @param leaderboard TODO
      * @param timePoint
      *            the time point for which to get the corrected score; score corrections have a validity time interval.
      *            Only the last score correction valid at <code>timePoint</code> is considered.
-     * 
      * @param numberOfCompetitorsFetcher
      *            can determine the number of competitors to use as the basis for penalty score calculation
      *            ("max points") if needed
      */
     Result getCorrectedScore(Callable<Integer> trackedRankProvider, Competitor competitor, RaceColumn raceColumn,
-            TimePoint timePoint, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsFetcher, ScoringScheme scoringScheme);
+            Leaderboard leaderboard, TimePoint timePoint, NumberOfCompetitorsInLeaderboardFetcher numberOfCompetitorsFetcher, ScoringScheme scoringScheme);
 
     /**
      * @param timePoint

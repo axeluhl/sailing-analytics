@@ -28,10 +28,10 @@ public final class MediaConstants {
     public static final int MIN_LOGO_IMAGE_HEIGHT = 140 / 2;
     public static final int MAX_LOGO_IMAGE_HEIGHT = 140 * 4;
 
-    public static final List<String> imageTagSuggestions = Arrays.asList(new String[] { MediaTagConstants.STAGE, MediaTagConstants.TEASER, 
+    public static final List<String> imageTagSuggestions = Arrays.asList(new String[] { MediaTagConstants.BIGSCREEN,MediaTagConstants.STAGE, MediaTagConstants.TEASER, 
             MediaTagConstants.SPONSOR, MediaTagConstants.LOGO, MediaTagConstants.GALLERY });
-    public static final List<String> videoTagSuggestions = Arrays.asList(new String[] { MediaTagConstants.LIVESTREAM, MediaTagConstants.HIGHLIGHT, MediaTagConstants.FEATURED, MediaTagConstants.STAGE });
-    public static final Set<MimeType> SUPPORTED_VIDEO_TYPES = new HashSet<>(Arrays.asList(MimeType.youtube, MimeType.vimeo, MimeType.mp4));
+    public static final List<String> videoTagSuggestions = Arrays.asList(new String[] { MediaTagConstants.BIGSCREEN,MediaTagConstants.LIVESTREAM, MediaTagConstants.HIGHLIGHT, MediaTagConstants.FEATURED, MediaTagConstants.STAGE });
+    public static final Set<MimeType> SUPPORTED_VIDEO_TYPES = new HashSet<>(Arrays.asList(MimeType.youtube, MimeType.vimeo, MimeType.mp4, MimeType.mp4panorama, MimeType.mp4panoramaflip));
     
     private MediaConstants() {
     }

@@ -3,9 +3,13 @@ package com.sap.sse.gwt.shared;
 import java.util.List;
 
 import com.google.gwt.user.client.Window;
+import com.sap.sse.common.settings.generic.GenericSerializableSettings;
 
 /**
  * A utility class for parsing the request parameters of a HTTP request in a type safe way.
+ * <br>
+ * Be aware, that in most cases, you should use {@link GenericSerializableSettings} to handle URL parameters.
+ * 
  * @author Frank
  *
  */

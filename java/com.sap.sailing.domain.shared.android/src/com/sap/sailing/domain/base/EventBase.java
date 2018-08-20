@@ -4,8 +4,8 @@ import java.net.URL;
 import java.util.Locale;
 import java.util.Map;
 
-import com.sap.sailing.domain.common.Renamable;
 import com.sap.sse.common.NamedWithID;
+import com.sap.sse.common.Renamable;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.media.ImageSize;
 import com.sap.sse.shared.media.WithMedia;

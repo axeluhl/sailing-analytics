@@ -60,14 +60,18 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.ColumnRangePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.ErrorBarPlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.FunnelPlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.GaugePlotOptions;
+import org.moxieapps.gwt.highcharts.client.plotOptions.HeatmapPlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.LinePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.Marker;
 import org.moxieapps.gwt.highcharts.client.plotOptions.OHLCPlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.PiePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.PlotOptions;
+import org.moxieapps.gwt.highcharts.client.plotOptions.PyramidPlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.ScatterPlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
+import org.moxieapps.gwt.highcharts.client.plotOptions.SolidGaugePlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.SplinePlotOptions;
+import org.moxieapps.gwt.highcharts.client.plotOptions.TreemapPlotOptions;
 import org.moxieapps.gwt.highcharts.client.plotOptions.WaterfallPlotOptions;
 
 import com.google.gwt.core.client.JavaScriptObject;
@@ -488,6 +492,20 @@ public abstract class BaseChart<T> extends Widget {
      */
     public T setColors(String... colors) {
         return this.setOption("/colors", colors);
+    }
+
+    /**
+     * Convenience method for setting the 'colorAxis' options of the chart.  Equivalent to:
+     * <pre><code>
+     *     chart.setOption("/colorAxis/min", 0);
+     *     chart.setOption("/colorAxis/minColor", "#FFFFFF");
+     * </code></pre>
+     *
+     * @param colorAxis The options to apply to the colorAxis portion of the chart.
+     * @return A reference to this {@link BaseChart} instance for convenient method chaining.
+     */
+    public T setColorAxis(ColorAxis colorAxis) {
+        return this.setOption("/colorAxis", colorAxis != null ? colorAxis.getOptions() : null);
     }
 
     /**
@@ -1136,10 +1154,11 @@ public abstract class BaseChart<T> extends Widget {
     public T setTitle(ChartTitle chartTitle, ChartSubtitle chartSubtitle) {
         if (isRendered()) {
             nativeSetTitle(chart,
-                chartTitle != null ? chartTitle.getOptions().getJavaScriptObject() : null,
-                chartSubtitle != null ? chartSubtitle.getOptions().getJavaScriptObject() : null
+                    chartTitle != null ? chartTitle.getOptions().getJavaScriptObject() : null,
+                    chartSubtitle != null ? chartSubtitle.getOptions().getJavaScriptObject() : null
             );
-        } else {
+        }
+        if(!isRendered() || isPersistent()) {
             this.setChartTitle(chartTitle);
             this.setChartSubtitle(chartSubtitle);
         }
@@ -1166,6 +1185,8 @@ public abstract class BaseChart<T> extends Widget {
         return this.setOption("/tooltip", toolTip != null ? toolTip.getOptions() : null);
     }
 
+    Series.Type defaultSeriesType = Series.Type.LINE;
+
     /**
      * Sets the defaults series type for the chart (which controls the way the series will be rendered), using
      * an enumeration type in order to ensure a correct value is passed.  This is equivalent to
@@ -1179,6 +1200,7 @@ public abstract class BaseChart<T> extends Widget {
      * @return A reference to this {@link BaseChart} instance for convenient method chaining.
      */
     public T setType(Series.Type type) {
+        this.defaultSeriesType = type;
         return this.setOption("/chart/type", type != null ? type.toString() : null);
     }
 
@@ -1373,11 +1395,15 @@ public abstract class BaseChart<T> extends Widget {
     private ErrorBarPlotOptions errorBarPlotOptions;
     private FunnelPlotOptions funnelPlotOptions;
     private GaugePlotOptions gaugePlotOptions;
+    private HeatmapPlotOptions heatmapPlotOptions;
     private LinePlotOptions linePlotOptions;
     private PiePlotOptions piePlotOptions;
+    private PyramidPlotOptions pyramidPlotOptions;
     private SeriesPlotOptions seriesPlotOptions;
     private ScatterPlotOptions scatterPlotOptions;
+    private SolidGaugePlotOptions solidGaugePlotOptions;
     private SplinePlotOptions splinePlotOptions;
+    private TreemapPlotOptions treemapPlotOptions;
     private WaterfallPlotOptions waterfallPlotOptions;
 
     // The candlestick OHLC and plot options are managed by the StockChart sub class, but the reference is managed here for rendering
@@ -1402,7 +1428,7 @@ public abstract class BaseChart<T> extends Widget {
             this.setOption("/plotOptions/area", areaPlotOptions.getOptions()) :
             returnThis();
     }
-    
+
     /**
      * Updates the options that all area range type series within the chart will use by default.  The settings can then
      * be overridden for each individual series via the {@link Series#setPlotOptions(PlotOptions)} method.
@@ -1442,7 +1468,7 @@ public abstract class BaseChart<T> extends Widget {
             this.setOption("/plotOptions/areaspline", areaSplinePlotOptions.getOptions()) :
             returnThis();
     }
-    
+
     /**
      * Updates the options that all area spline range type series within the chart will use by default.  The settings can then
      * be overridden for each individual series via the {@link Series#setPlotOptions(org.moxieapps.gwt.highcharts.client.plotOptions.PlotOptions)} method.
@@ -1616,6 +1642,25 @@ public abstract class BaseChart<T> extends Widget {
     }
 
     /**
+     * Updates the options that all heatmap type series within the chart will use by default.  The settings can then
+     * be overridden for each individual series via the {@link Series#setPlotOptions(PlotOptions)} method.
+     * <p/>
+     * Note that changing the plot options on a chart that has already been rendered will only affect
+     * series that are subsequently added to the chart (and will not impact any of the series that are already
+     * rendered in the chart.)
+     *
+     * @param heatmapPlotOptions The options to set on the chart as the default settings for all heatmap type series
+     *                           that are part of this chart.
+     * @return A reference to this {@link BaseChart} instance for convenient method chaining.
+     */
+    public T setHeatmapPlotOptions(HeatmapPlotOptions heatmapPlotOptions) {
+        this.heatmapPlotOptions = heatmapPlotOptions;
+        return heatmapPlotOptions!= null && heatmapPlotOptions.getOptions() != null ?
+                this.setOption("/plotOptions/heatmap", heatmapPlotOptions.getOptions()) :
+                returnThis();
+    }
+
+    /**
      * Updates the options that all line type series within the chart will use by default.  The settings can then
      * be overridden for each individual series via the {@link Series#setPlotOptions(PlotOptions)} method.
      * <p/>
@@ -1650,6 +1695,25 @@ public abstract class BaseChart<T> extends Widget {
         this.piePlotOptions = piePlotOptions;
         return piePlotOptions != null && piePlotOptions.getOptions() != null ?
             this.setOption("/plotOptions/pie", piePlotOptions.getOptions()) :
+            returnThis();
+    }
+
+    /**
+     * Updates the options that all pie type series within the chart will use by default.  The settings can then be
+     * overridden for each individual series via the {@link Series#setPlotOptions(PlotOptions)} method.
+     * <p/>
+     * Note that changing the plt options on a chart that has already been rendered will only affect series that
+     * are subseqiently addes to the chart (and will not impact any of the series that are already rendered in
+     * the chart.)
+     *
+     * @param pyramidPlotOptions The options to set on the chart as the default settings for all pyramid type series
+     *                           that are part of this chart.
+     * @return A reference to this {@link BaseChart} instance for convenient method chaining.
+     */
+    public T setPyramidPlotOptions(PyramidPlotOptions pyramidPlotOptions) {
+        this.pyramidPlotOptions = pyramidPlotOptions;
+        return pyramidPlotOptions != null && pyramidPlotOptions.getOptions() != null ?
+            this.setOption("/plotOptions/pyramid", pyramidPlotOptions.getOptions()) :
             returnThis();
     }
 
@@ -1693,6 +1757,25 @@ public abstract class BaseChart<T> extends Widget {
         return scatterPlotOptions != null && scatterPlotOptions.getOptions() != null ?
             this.setOption("/plotOptions/scatter", scatterPlotOptions.getOptions()) :
             returnThis();
+    }
+
+    /**
+     * Updates the options that all treemap type series within the chart will use by default.  The settings can then
+     * be overridden for each individual series via the {@link Series#setPlotOptions(PlotOptions)} method.
+     * <p/>
+     * Note that changing the plot options on a chart that has already been rendered will only affect
+     * series that are subsequently added to the chart (and will not impact any of the series that are already
+     * rendered in the chart.)
+     *
+     * @param treemapPlotOptions The options to set on the chart as the default settings for all treemap type series
+     *                           that are part of this chart.
+     * @return A reference to this {@link BaseChart} instance for convenient method chaining.
+     */
+    public T setTreemapPlotOptions(TreemapPlotOptions treemapPlotOptions) {
+        this.treemapPlotOptions = treemapPlotOptions;
+        return treemapPlotOptions != null && treemapPlotOptions.getOptions() != null ?
+                this.setOption("/plotOptions/treemap", treemapPlotOptions.getOptions()) :
+                returnThis();
     }
 
     /**
@@ -1770,6 +1853,24 @@ public abstract class BaseChart<T> extends Widget {
     public T setSelectionEventHandler(ChartSelectionEventHandler chartSelectionEventHandler) {
         this.chartSelectionEventHandler = chartSelectionEventHandler;
         return returnThis();
+    }
+
+    /**
+     * Updates the options that all solidgauge type series within the chart will use by default.  The settings can then
+     * be overridden for each individual series via the {@link Series#setPlotOptions(PlotOptions)} method.
+     * </p>
+     * Note that changing the plot options on a chart that has already been rendered will only affect series that are
+     * subsequently added to the chart (and will not impact any of the series that are already rendered in the chart.)
+     *
+     * @param solidGaugePlotOptions the options to set on the chart as the default settings for all solidgauge type
+     *                              series that are part of this chart.
+     * @return @return A reference to this {@link BaseChart} instance for convenient method chaining.
+     */
+    public T setSolidGaugePlotOptions(SolidGaugePlotOptions solidGaugePlotOptions) {
+        this.solidGaugePlotOptions = solidGaugePlotOptions;
+        return this.solidGaugePlotOptions != null && solidGaugePlotOptions.getOptions() != null ?
+                this.setOption("/plotOptions/solidgauge", solidGaugePlotOptions.getOptions()) :
+                returnThis();
     }
 
     /**
@@ -1897,10 +1998,8 @@ public abstract class BaseChart<T> extends Widget {
      * @return A reference to this {@link BaseChart} instance for convenient method chaining.
      */
     public T addSeries(Series series, boolean redraw, Animation animation) {
-
         // Whether or not we've been rendered yet or not, maintain a reference to all of the series that we're managing
         seriesList.add(series);
-
         if (isRendered()) {
             final JavaScriptObject seriesOptions = convertSeriesToJSON(series).getJavaScriptObject();
             if (animation == null || animation.getOptions() == null) {
@@ -1911,7 +2010,7 @@ public abstract class BaseChart<T> extends Widget {
                 nativeAddSeries(chart, seriesOptions, redraw, animationOptions);
             }
             series.setRendered(true);
-
+            series.show();
             // Once we're rendered, we're maintaining the point state in the DOM, so we can dump our internal list to save memory
             series.clearInternalPointsList();
         }
@@ -2132,10 +2231,11 @@ public abstract class BaseChart<T> extends Widget {
         }
         return returnThis();
     }
-    
+
     // Purposefully using a specific type instead of the generic List interface for enhanced GWT performance
     private ArrayList<XAxis> xAxes = new ArrayList<XAxis>();
     private ArrayList<YAxis> yAxes = new ArrayList<YAxis>();
+    private ArrayList<ZAxis> zAxes = new ArrayList<ZAxis>();
 
     /**
      * Retrieve a reference to the XAxis for this chart (guaranteed non-null), so that it can then be
@@ -2194,7 +2294,36 @@ public abstract class BaseChart<T> extends Widget {
         }
         return yAxes.get(axisIndex);
     }
-    
+
+    /**
+     * Retrieve a reference to the ZAxis for this chart (guaranteed non-null), so that it can then be
+     * configured or operated on.  Note that you should use this method when you only have one y-axis
+     * to operate on.  If you have multiple y-axis, then utilize the {@link #getZAxis(int)} method instead.
+     *
+     * @return A reference to the YAxis for this chart (never null);
+     */
+    public ZAxis getZAxis() {
+        return getZAxis(0);
+    }
+
+    /**
+     * Retrieve a reference to a specific ZAxis for this chart (guaranteed non-null), so that it can then be
+     * configured or operated on.  Note that you should use this method when you only have multiple y-axis
+     * to operate on.  If you have only a single y-axis, then utilize the {@link #getZAxis()} method instead.
+     *
+     * @param axisIndex The numeric index (zero based) of the YAxis to return.
+     * @return A reference to the ZAxis at the given index for this chart (never null).
+     */
+    public ZAxis getZAxis(int axisIndex) {
+        if (axisIndex < zAxes.size()) {
+            return zAxes.get(axisIndex);
+        }
+        for (int i = zAxes.size(); i <= axisIndex; i++) {
+            zAxes.add(new ZAxis(this));
+        }
+        return zAxes.get(axisIndex);
+    }
+
     /**
      * Get a axis by id
      * @param axisId the id of the Axis
@@ -2209,13 +2338,19 @@ public abstract class BaseChart<T> extends Widget {
                 return xAxis;
             }
         }
-        
+
         for (YAxis yAxis : yAxes) {
             if (axisId.equals(yAxis.getId())) {
                 return yAxis;
             }
         }
-        
+
+        for (ZAxis zAxis : zAxes) {
+            if (axisId.equals(zAxis.getId())) {
+                return zAxis;
+            }
+        }
+
         return null;
     }
 
@@ -2255,6 +2390,25 @@ public abstract class BaseChart<T> extends Widget {
     }
 
     /**
+     * Reflows the chart to its container. By default, the chart reflows automatically to its container following
+     * a window.resize event, as per the {@link #setReflow(boolean)} option. However, there are no reliable events
+     * for div resize, so if the container is resized without a window resize event, this must be called explicitly.
+     * <p/>
+     * The <code>redraw()</code> method only redraws those parts of the chart that are actually changed.
+     * If the data of a series is changed and it doesn't affect the axes, only the series itself is redrawn.
+     * If the new data requires the axis extremes to be altered, the axis and all other series depending
+     * on it are redrawn.
+     *
+     * @return A reference to this {@link BaseChart} instance for convenient method chaining.
+     */
+    public T reflow() {
+        if (isRendered()) {
+            nativeChartReflow(chart);
+        }
+        return returnThis();
+    }
+
+    /**
      * Returns true if the chart has already been rendered to the DOM, or false otherwise.
      *
      * @return 'true' if the chart has been rendered to the DOM
@@ -2275,7 +2429,7 @@ public abstract class BaseChart<T> extends Widget {
         for (int i = 0, xAxesSize = xAxes.size(); i < xAxesSize; i++) {
             XAxis xAxis = xAxes.get(i);
             xAxisLabelFormatters.set(i, JSONBoolean.getInstance(xAxis.getLabels() != null && xAxis.getLabels().getFormatter() != null));
-            
+
             JSONObject axisEventHandlers = new JSONObject();
             axisEventHandlers.put("setExtremes", JSONBoolean.getInstance(xAxis.getAxisSetExtremesEventHandler() != null));
             xAxisEventHandlers.set(i, axisEventHandlers);
@@ -2287,7 +2441,7 @@ public abstract class BaseChart<T> extends Widget {
             YAxis yAxis = yAxes.get(i);
             yAxisLabelFormatters.set(i, JSONBoolean.getInstance(yAxis.getLabels() != null && yAxis.getLabels().getFormatter() != null));
             yAxisStackLabelFormatters.set(i, JSONBoolean.getInstance(yAxis.getStackLabels() != null && yAxis.getStackLabels().getFormatter() != null));
-                        
+
             JSONObject axisEventHandlers = new JSONObject();
             axisEventHandlers.put("setExtremes", JSONBoolean.getInstance(yAxis.getAxisSetExtremesEventHandler() != null));
             yAxisEventHandlers.set(i, axisEventHandlers);
@@ -2308,12 +2462,16 @@ public abstract class BaseChart<T> extends Widget {
         plotOptionsLabelFormatters.put("errorbar", hasDataLabelsFormatter(errorBarPlotOptions));
         plotOptionsLabelFormatters.put("funnel", hasDataLabelsFormatter(funnelPlotOptions));
         plotOptionsLabelFormatters.put("gauge", hasDataLabelsFormatter(gaugePlotOptions));
+        plotOptionsLabelFormatters.put("heatmap", hasDataLabelsFormatter(heatmapPlotOptions));
         plotOptionsLabelFormatters.put("line", hasDataLabelsFormatter(linePlotOptions));
         plotOptionsLabelFormatters.put("pie", hasDataLabelsFormatter(piePlotOptions));
+        plotOptionsLabelFormatters.put("pyramid", hasDataLabelsFormatter(pyramidPlotOptions));
         plotOptionsLabelFormatters.put("ohlc", hasDataLabelsFormatter(ohlcPlotOptions));
         plotOptionsLabelFormatters.put("series", hasDataLabelsFormatter(seriesPlotOptions));
         plotOptionsLabelFormatters.put("scatter", hasDataLabelsFormatter(scatterPlotOptions));
+        plotOptionsLabelFormatters.put("solidgauge", hasDataLabelsFormatter(solidGaugePlotOptions));
         plotOptionsLabelFormatters.put("spline", hasDataLabelsFormatter(splinePlotOptions));
+        plotOptionsLabelFormatters.put("treemap", hasDataLabelsFormatter(treemapPlotOptions));
         plotOptionsLabelFormatters.put("waterfall", hasDataLabelsFormatter(waterfallPlotOptions));
 
         // And one more for dealing with any data label formatters that have been applied directly to a series
@@ -2333,7 +2491,7 @@ public abstract class BaseChart<T> extends Widget {
         // And two more for events that have been applied to the series (or the points within the series)
         JSONObject seriesEventHandlers = new JSONObject();
         JSONObject pointEventHandlers = new JSONObject();
-        
+
         if (seriesPlotOptions != null) {
 
             // Series event
@@ -2500,6 +2658,10 @@ public abstract class BaseChart<T> extends Widget {
         if (yAxisJSONValue != null && yAxisJSONValue.isNull() == null) {
             options.put("yAxis", yAxisJSONValue);
         }
+        final JSONValue zAxisJSONValue = convertToJSONValue(zAxes.toArray(new Configurable[zAxes.size()]));
+        if (zAxisJSONValue != null && zAxisJSONValue.isNull() == null) {
+            options.put("zAxis", zAxisJSONValue);
+        }
 
         // For debugging the raw options that we're passing to the chart on startup, uncomment the following line
         // com.google.gwt.user.client.Window.alert(options.toString());
@@ -2507,7 +2669,7 @@ public abstract class BaseChart<T> extends Widget {
         return options.getJavaScriptObject();
     }
 
-    private JSONObject convertSeriesToJSON(Series series) {
+    protected JSONObject convertSeriesToJSON(Series series) {
         JSONObject seriesOptions = series.getOptions();
         if (seriesOptions == null) {
             seriesOptions = new JSONObject();
@@ -2516,7 +2678,7 @@ public abstract class BaseChart<T> extends Widget {
         if (dataValue == null || dataValue.isArray() == null) {
             seriesOptions.put("data", new JSONArray());
         }
-        copyPointsToJSONArray(series.getPoints(), (JSONArray) seriesOptions.get("data"));
+        copyPointsToJSONArray(series.getPoints(), (JSONArray) seriesOptions.get("data"), series.getType());
         return seriesOptions;
     }
 
@@ -2533,91 +2695,136 @@ public abstract class BaseChart<T> extends Widget {
         return JSONNull.getInstance();
     }
 
-    private void copyPointsToJSONArray(Point[] points, JSONArray jsonArray) {
+    private void copyPointsToJSONArray(Point[] points, JSONArray jsonArray, Series.Type seriesType) {
         for (int i = 0, pointsLength = points.length; i < pointsLength; i++) {
             final Point point = points[i];
-            jsonArray.set(i, convertPointToJSON(point));
+            jsonArray.set(i, convertPointToJSON(point, seriesType));
         }
     }
 
     // Purposefully package scope so we can get to this method from the Series and Point classes as well
-    JSONValue convertPointToJSON(Point point) {
-        JSONObject options = point.getOptions();
+    JSONValue convertPointToJSON(Point point, Series.Type seriesType) {
+        JSONObject options;
+        if(seriesType == null) {
+            seriesType = this.defaultSeriesType;
+        }
+        // stopgap for creating a series from a Point array that has null elements
+        if (point != null) {
+            options = point.getOptions();
+        } else {
+            return JSONNull.getInstance();
+        }
         if (options != null) {
-            addPointScalarValues(point, options);
+            addPointScalarValues(point, options, seriesType);
             return addPointId(point, options);
         } else if(point.hasNativeProperties()) {
             options = new JSONObject();
-            addPointScalarValues(point, options);
+            addPointScalarValues(point, options, seriesType);
             addPointId(point, options);
             return Point.addPointNativeProperties(point, options);
         } else if(isPersistent()) {
             options = new JSONObject();
-            addPointScalarValues(point, options);
+            addPointScalarValues(point, options, seriesType);
             return addPointId(point, options);
         }
 
-        JSONArray jsonArray = new JSONArray();
-        switch (point.getType()) {
-            case FLAG: return convertNumberToJSONValue(point.getX());
-        	case Y: return convertNumberToJSONValue(point.getY());
-        	case X_Y :
-        		jsonArray.set(0, convertNumberToJSONValue(point.getX()));
-        		jsonArray.set(1, convertNumberToJSONValue(point.getY()));
-        		return jsonArray;
-        	case X_LOW_HIGH :
-        		jsonArray.set(0, convertNumberToJSONValue(point.getX()));
-        		jsonArray.set(1, convertNumberToJSONValue(point.getLow()));
-        		jsonArray.set(2, convertNumberToJSONValue(point.getHigh()));
-        		return jsonArray;
-        	case X_OPEN_HIGH_LOW_CLOSE :
-        		jsonArray.set(0, convertNumberToJSONValue(point.getX()));
-        		jsonArray.set(1, convertNumberToJSONValue(point.getOpen()));
-        		jsonArray.set(2, convertNumberToJSONValue(point.getHigh()));
-        		jsonArray.set(3, convertNumberToJSONValue(point.getLow()));
-        		jsonArray.set(4, convertNumberToJSONValue(point.getClose()));
-        		return jsonArray;
-            default:
-                // Should not reach this statement based on the structure of the Point class constructors
-                throw new IllegalArgumentException("Unable to convert point to JSON due to an invalid type");
+        if(point.getValues().length == 1) {
+            return convertNumberToJSONValue(point.getValues()[0]);
+        } else if(point.getValues().length > 1) {
+            Number[] numbers = point.getValues();
+            JSONArray jsonArray = new JSONArray();
+            for( int i = 0; i < numbers.length; i++) {
+                jsonArray.set(i, convertNumberToJSONValue(numbers[i]));
+            }
+            return jsonArray;
+        } else {
+            throw new IllegalArgumentException("Unable to convert point to JSON due to an invalid type");
         }
     }
 
     // Purposefully package scope
     JSONValue addPointId(Point point, JSONObject options) {
         if (isPersistent()) {
-            String id = point.getId();
-            if(id == null) {
-                id = Document.get().createUniqueId();
-                point.setId(id);
-            }
+            String id = point.getId(true);
             options.put("id", new JSONString(id));
         }
         return options;
     }
 
     // Purposefully package scope
-    static JSONValue addPointScalarValues(Point point, JSONObject options) {
-    	Point.Type type = point.getType();
+    static JSONValue addPointScalarValues(Point point, JSONObject options, Series.Type seriesType) {
+        switch (seriesType) {
+            // Provides the proper mappings of ambiguous array values to JSON that is appropriate for the chart type
+            case BOXPLOT:
+                options.put("low", convertNumberToJSONValue(point.getValues()[0]));
+                options.put("q1", convertNumberToJSONValue(point.getValues()[1]));
+                options.put("median", convertNumberToJSONValue(point.getValues()[2]));
+                options.put("q3", convertNumberToJSONValue(point.getValues()[3]));
+                options.put("high", convertNumberToJSONValue(point.getValues()[4]));
+                break;
 
-    	if (type != Point.Type.Y) {
-    		options.put("x", convertNumberToJSONValue(point.getX()));
-    	}
+            case BUBBLE:
+                options.put("x", convertNumberToJSONValue(point.getValues()[0]));
+                options.put("y", convertNumberToJSONValue(point.getValues()[1]));
+                options.put("z", convertNumberToJSONValue(point.getValues()[2]));
+                break;
 
-    	if (type == Point.Type.Y || type == Point.Type.X_Y) {
-    		options.put("y", convertNumberToJSONValue(point.getY()));
-    	}
+            case COLUMN_RANGE:
+            case ERRORBAR:
+                if (point.getValues().length > 2) {
+                    options.put("x", convertNumberToJSONValue(point.getValues()[0]));
+                    options.put("low", convertNumberToJSONValue(point.getValues()[1]));
+                    options.put("high", convertNumberToJSONValue(point.getValues()[2]));
+                } else {
+                    options.put("low", convertNumberToJSONValue(point.getValues()[0]));
+                    options.put("high", convertNumberToJSONValue(point.getValues()[1]));
+                }
+                break;
 
-    	if (type == Point.Type.X_LOW_HIGH || type == Point.Type.X_OPEN_HIGH_LOW_CLOSE) {
-    		options.put("high", convertNumberToJSONValue(point.getHigh()));
-    		options.put("low", convertNumberToJSONValue(point.getLow()));
+            case HEATMAP:
+                options.put("x", convertNumberToJSONValue(point.getValues()[0]));
+                options.put("y", convertNumberToJSONValue(point.getValues()[1]));
+                options.put("value", convertNumberToJSONValue(point.getValues()[2]));
+                break;
 
-            if (type == Point.Type.X_OPEN_HIGH_LOW_CLOSE) {
-                options.put("open", convertNumberToJSONValue(point.getOpen()));
-                options.put("close", convertNumberToJSONValue(point.getClose()));
-            }
-    	}
-
+            case CANDLESTICK:
+            case OHLC:
+                if (point.getValues().length == 4) {
+                    options.put("open", convertNumberToJSONValue(point.getValues()[0]));
+                    options.put("high", convertNumberToJSONValue(point.getValues()[1]));
+                    options.put("low", convertNumberToJSONValue(point.getValues()[2]));
+                    options.put("close", convertNumberToJSONValue(point.getValues()[3]));
+                } else {
+                    options.put("x", convertNumberToJSONValue(point.getValues()[0]));
+                    options.put("open", convertNumberToJSONValue(point.getValues()[1]));
+                    options.put("high", convertNumberToJSONValue(point.getValues()[2]));
+                    options.put("low", convertNumberToJSONValue(point.getValues()[3]));
+                    options.put("close", convertNumberToJSONValue(point.getValues()[4]));
+                }
+                break;
+            case FLAGS:
+                options.put("x", convertNumberToJSONValue(point.getValues()[0]));
+                break;
+            case TREEMAP:
+                // if the point is used as a "parent" it may not have a value
+                if (point.getValues() == null || point.getValues().length <= 0) {
+                    break;
+                } else {
+                    options.put("value", convertNumberToJSONValue(point.getValues()[0]));
+                }
+                break;
+            default:
+                if(point.getValues().length == 1) {
+                    options.put("y", convertNumberToJSONValue(point.getValues()[0]));
+                } else {
+                    options.put("x", convertNumberToJSONValue(point.getValues()[0]));
+                    options.put("y", convertNumberToJSONValue(point.getValues()[1]));
+                }
+                if(point.getValues().length == 3) {
+                    options.put("z", convertNumberToJSONValue(point.getValues()[2]));
+                }
+                break;
+        }
 
         return options;
     }
@@ -2694,7 +2901,7 @@ public abstract class BaseChart<T> extends Widget {
                 options.plotOptions.series.point.events[type3].type = type3;
             }
         }
-        
+
         // Add in GWT interceptor callback functions for the various X axis event handlers
         for (i = 0; i < xAxisEventHandlerFlags.length; i++) {
             if (!xAxisEventHandlerFlags[i]) continue;
@@ -2707,7 +2914,7 @@ public abstract class BaseChart<T> extends Widget {
                 xAxisA.events[type4].type = type4;
             }
         }
-        
+
         // Add in GWT interceptor callback functions for the various Y axis event handlers
         for (i = 0; i < yAxisEventHandlerFlags.length; i++) {
             if (!yAxisEventHandlerFlags[i]) continue;
@@ -2857,7 +3064,7 @@ public abstract class BaseChart<T> extends Widget {
         }
         return true;
     }
-    
+
     @SuppressWarnings({"UnusedDeclaration"})
     private boolean axisEventCallback(String axisId, JavaScriptObject nativeEvent, String eventType) {
         Axis<?> axis = getAxis(axisId);
@@ -2930,12 +3137,16 @@ public abstract class BaseChart<T> extends Widget {
         if ("errorbar".equals(type)) plotOptions = errorBarPlotOptions;
         if ("funnel".equals(type)) plotOptions = funnelPlotOptions;
         if ("gauge".equals(type)) plotOptions = gaugePlotOptions;
+        if ("heatmap".equals(type)) plotOptions = heatmapPlotOptions;
         if ("line".equals(type)) plotOptions = linePlotOptions;
         if ("ohlc".equals(type)) plotOptions = ohlcPlotOptions;
         if ("pie".equals(type)) plotOptions = piePlotOptions;
+        if ("pyramid".equals(type)) plotOptions = pyramidPlotOptions;
         if ("scatter".equals(type)) plotOptions = scatterPlotOptions;
         if ("series".equals(type)) plotOptions = seriesPlotOptions;
+        if ("solidgauge".equals(type)) plotOptions = solidGaugePlotOptions;
         if ("spline".equals(type)) plotOptions = splinePlotOptions;
+        if ("treemap".equals(type)) plotOptions = treemapPlotOptions;
         if ("waterfall".equals(type)) plotOptions = waterfallPlotOptions;
 
         if (plotOptions == null || plotOptions.getDataLabels() == null || plotOptions.getDataLabels().getFormatter() == null) {
@@ -2972,7 +3183,13 @@ public abstract class BaseChart<T> extends Widget {
             }
         }
     }-*/;
-    
+
+    private static native void nativeChartReflow(JavaScriptObject chart) /*-{
+        if (chart) {
+            chart.reflow();
+        }
+    }-*/;
+
     private static native void nativeRedraw(JavaScriptObject chart) /*-{
         chart.redraw();
     }-*/;
@@ -3000,6 +3217,13 @@ public abstract class BaseChart<T> extends Widget {
     private static native void nativeAddSeries(JavaScriptObject chart, JavaScriptObject seriesOptions, boolean redraw, JavaScriptObject animationOptions) /*-{
         chart.addSeries(seriesOptions, redraw, animationOptions);
     }-*/;
+
+
+    // TODO: Add support for adding a drilldown series to a chart after it has been rendered.  Will likely need to be coupled
+    // with adding support for drilldown events.
+ /*   private static native void nativeAddSeriesAsDrilldown(JavaScriptObject point, JavaScriptObject seriesOptions) *//*-{
+        chart.addSeriesAsDrilldown(point, seriesOptions);
+    }-*//*;*/
 
     private static native void nativeRemoveSeries(JavaScriptObject chart, JavaScriptObject nativeSeries, boolean redraw) /*-{
         nativeSeries.remove(redraw);
@@ -3043,7 +3267,28 @@ public abstract class BaseChart<T> extends Widget {
      */
     public native void showResetZoom() /*-{
         var chart = this.@org.moxieapps.gwt.highcharts.client.BaseChart::chart;
-        if (chart) chart.showResetZoom();
+        if (chart){
+            //workaround for multi zoom
+            if(!chart.resetZoomButton){
+                chart.showResetZoom();
+            }
+        }
     }-*/;
 
+
+    /**
+     * Patch, to provide highcharts functionality in Java API. 
+     */
+    public native void hideResetZoom() /*-{
+        var chart = this.@org.moxieapps.gwt.highcharts.client.BaseChart::chart;
+        if (chart) {
+            if (chart.resetZoomButton) {
+                chart.resetZoomButton.destroy();
+                chart.resetZoomButton = null;
+            } else {
+                console.log("Could not remove zoombutton");
+            }
+        }
+    }-*/;
+    
 }

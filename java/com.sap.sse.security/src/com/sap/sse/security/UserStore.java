@@ -10,6 +10,8 @@ import com.sap.sse.security.shared.UserManagementException;
 
 public interface UserStore extends Named {
     Iterable<User> getUsers();
+    
+    boolean hasUsers();
 
     /**
      * The user with that {@link User#getName() name} or {@code null} if no such user exists

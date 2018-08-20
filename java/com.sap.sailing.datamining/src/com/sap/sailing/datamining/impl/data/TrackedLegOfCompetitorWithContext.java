@@ -1,20 +1,32 @@
 package com.sap.sailing.datamining.impl.data;
 
+import java.util.List;
+import java.util.function.BiFunction;
+
 import com.sap.sailing.datamining.Activator;
 import com.sap.sailing.datamining.SailingClusterGroups;
 import com.sap.sailing.datamining.data.HasTrackedLegContext;
 import com.sap.sailing.datamining.data.HasTrackedLegOfCompetitorContext;
 import com.sap.sailing.domain.base.Competitor;
-import com.sap.sailing.domain.common.Distance;
+import com.sap.sailing.domain.base.Leg;
+import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.tracking.BravoFixTrack;
+import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sse.common.Distance;
+import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
 
 public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompetitorContext {
+    private static final long serialVersionUID = 5944904146286262768L;
 
     private final HasTrackedLegContext trackedLegContext;
     
@@ -25,6 +37,7 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
     private boolean isRankAtStartInitialized;
     private Double rankAtFinish;
     private boolean isRankAtFinishInitialized;
+    private Wind wind;
 
     public TrackedLegOfCompetitorWithContext(HasTrackedLegContext trackedLegContext, TrackedLegOfCompetitor trackedLegOfCompetitor) {
         this.trackedLegContext = trackedLegContext;
@@ -46,11 +59,6 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
     public Competitor getCompetitor() {
         return competitor;
     }
-
-    @Override
-    public String getCompetitorSearchTag() {
-        return getCompetitor().getSearchTag();
-    }
     
     @Override
     public ClusterDTO getPercentageClusterForRelativeScoreInRace() {
@@ -64,11 +72,69 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
         return new ClusterDTO(clusterGroups.getPercentageClusterFormatter().format(cluster));
     }
     
+    protected <R> R getSomethingForLegTrackingInterval(BiFunction<TimePoint, TimePoint, R> resultSupplier) {
+        final TimePoint startTime = getTrackedLegOfCompetitor().getStartTime();
+        final TimePoint finishTime = getTrackedLegOfCompetitor().getFinishTime();
+        return getSomethingForInterval(resultSupplier, startTime, finishTime);
+    }
+
+    protected <R> R getSomethingForInterval(BiFunction<TimePoint, TimePoint, R> resultSupplier,
+            final TimePoint startTime, final TimePoint finishTime) {
+        final R result;
+        if (startTime != null) {
+            final TrackedRace trackedRace = getTrackedLegContext().getTrackedLeg().getTrackedRace();
+            final TimePoint effectiveEndOfInterval = finishTime != null ? finishTime :
+                trackedRace.getEndOfTracking() != null ? trackedRace.getEndOfTracking() : MillisecondsTimePoint.now();
+            result = resultSupplier.apply(startTime, effectiveEndOfInterval);
+        } else {
+            result = null;
+        }
+        return result;
+    }
+    
+    @Override
+    public Duration getTimeSpentFoiling() {
+        return getSomethingForLegTrackingInterval((start, end) -> {
+            BravoFixTrack<Competitor> bravoFixTrack = getTrackedLegContext().getTrackedLeg().getTrackedRace().getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
+            return bravoFixTrack == null ? Duration.NULL : bravoFixTrack.getTimeSpentFoiling(start, end);
+        });
+    }
+
+    @Override
+    public Distance getDistanceSpentFoiling() {
+        return getSomethingForLegTrackingInterval((start, end) -> {
+            BravoFixTrack<Competitor> bravoFixTrack = getTrackedLegContext().getTrackedLeg().getTrackedRace().getSensorTrack(getCompetitor(), BravoFixTrack.TRACK_NAME);
+            return bravoFixTrack == null ? Distance.NULL : bravoFixTrack.getDistanceSpentFoiling(start, end);
+        });
+    }
+
     @Override
     public Distance getDistanceTraveled() {
         TimePoint timePoint = getTrackedLegContext().getTrackedRaceContext().getTrackedRace().getEndOfTracking();
         return getTrackedLegOfCompetitor().getDistanceTraveled(timePoint);
     }
+    
+    @Override
+    public Double getSpeedAverage() {
+        if (getTrackedRace() == null) {
+            return null;
+        } else {
+            final List<Leg> legs = getTrackedRace().getRace().getCourse().getLegs();
+            if (legs.isEmpty()) {
+                return null;
+            } else {
+                final Leg lastLeg = legs.get(legs.size() - 1);
+                TimePoint finished = getTrackedRace().getTrackedLeg(getCompetitor(), lastLeg).getFinishTime();
+                return getTrackedRace().getAverageSpeedOverGround(getCompetitor(), finished).getKnots();
+            }
+        }
+    }
+    
+    @Override 
+    public Pair<Double, Double> getSpeedAverageVsDistanceTraveled(){
+        return new Pair<Double, Double>(getSpeedAverage(), getDistanceTraveled().getMeters());
+    }
+    
     
     @Override
     public Double getRankGainsOrLosses() {
@@ -114,11 +180,65 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
     public Long getTimeTakenInSeconds() {
         TimePoint startTime = getTrackedLegOfCompetitor().getStartTime();
         TimePoint finishTime = getTrackedLegOfCompetitor().getFinishTime();
+        final Long result;
         if (startTime == null || finishTime == null) {
-            return null;
+            result = null;
+        } else {
+            result = (finishTime.asMillis() - startTime.asMillis()) / 1000;
         }
-        
-        return (finishTime.asMillis() - startTime.asMillis()) / 1000;
+        return result;
+    }
+
+    @Override
+    public Wind getWindInternal() {
+        return wind;
+    }
+
+    @Override
+    public void setWindInternal(Wind wind) {
+        this.wind = wind;
+    }
+
+    @Override
+    public Position getPosition() {
+        final TrackedLeg trackedLeg = getTrackedLegContext().getTrackedLeg();
+        final TrackedRace trackedRace = trackedLeg.getTrackedRace();
+        final TimePoint timepoint = getTimePointBetweenLegStartAndLegFinish(trackedRace);
+        final Position result;
+        if (timepoint == null) {
+            result = null;
+        } else {
+            result = trackedLeg.getMiddleOfLeg(timepoint);
+        }
+        return result;
+    }
+
+    private TimePoint getTimePointBetweenLegStartAndLegFinish(final TrackedRace trackedRace) {
+        final TimePoint competitorLegStartTime = getTrackedLegOfCompetitor().getStartTime();
+        final TimePoint competitorLegEndTime =  getTrackedLegOfCompetitor().getFinishTime();
+        final TimePoint startTime = competitorLegStartTime != null ? competitorLegStartTime :
+            trackedRace.getStartOfRace() != null ? trackedRace.getStartOfRace() : trackedRace.getStartOfTracking();
+        final TimePoint endTime = competitorLegEndTime != null ? competitorLegEndTime :
+            trackedRace.getEndOfRace() != null ? trackedRace.getEndOfRace() : trackedRace.getEndOfTracking();
+        final TimePoint timepoint = endTime == null ? startTime : startTime == null ? null : startTime.plus(startTime.until(endTime).divide(2));
+        return timepoint;
+    }
+
+    /**
+     * Picks the time point that is in the middle between the time point when the competitor entered
+     * the leg and the time point the competitor finished the leg. If no leg start/finish time exists
+     * for the competitor, start/end of race and then start/end of tracking are used as fall-back values.
+     */
+    @Override
+    public TimePoint getTimePoint() {
+        final TrackedLeg trackedLeg = getTrackedLegContext().getTrackedLeg();
+        final TrackedRace trackedRace = trackedLeg.getTrackedRace();
+        return getTimePointBetweenLegStartAndLegFinish(trackedRace);
+    }
+
+    @Override
+    public HasTrackedLegOfCompetitorContext getTrackedLegOfCompetitorContext() {
+        return this;
     }
     
 }
