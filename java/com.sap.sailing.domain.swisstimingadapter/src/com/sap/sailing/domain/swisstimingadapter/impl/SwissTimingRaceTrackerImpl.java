@@ -128,7 +128,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
             WindStore windStore, DomainFactory domainFactory, SwissTimingFactory factory,
             TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver,
             SwissTimingTrackingConnectivityParameters connectivityParams)
-            throws InterruptedException, UnknownHostException, IOException, ParseException {
+            throws InterruptedException, UnknownHostException, IOException, ParseException, URISyntaxException {
         this(/* regatta */ null, windStore, domainFactory, factory, trackedRegattaRegistry, raceLogStore, regattaLogStore, raceLogResolver, connectivityParams);
     }
 
@@ -136,7 +136,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
             SwissTimingFactory factory, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, RaceLogResolver raceLogResolver,
             SwissTimingTrackingConnectivityParameters connectivityParams)
-            throws InterruptedException, UnknownHostException, IOException, ParseException {
+            throws InterruptedException, UnknownHostException, IOException, ParseException, URISyntaxException {
         super(connectivityParams);
         this.raceLogResolver = raceLogResolver;
         this.tmdMessageQueue = new TMDMessageQueue(this);
@@ -155,6 +155,8 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
                 connectivityParams.getRaceID(), connectivityParams.getRaceName(), connectivityParams.getRaceDescription(), connectivityParams.getBoatClass());
         this.domainFactory = domainFactory;
         this.raceID = connectivityParams.getRaceID();
+        // start out with an empty course, so we don't depend on receiving the CCG message before the timeout
+        this.course = new CourseImpl(this.raceID, /* start with empty marks list */ Collections.emptyList());
         this.raceName = connectivityParams.getRaceName();
         this.startList = connectivityParams.getStartList();
         this.startListFromManage2Sail = connectivityParams.getStartList() != null;
@@ -170,6 +172,9 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
         this.updateURL = connectivityParams.getUpdateURL();
         this.updateUsername = connectivityParams.getUpdateUsername();
         this.updatePassword = connectivityParams.getUpdatePassword();
+        if (connectivityParams.getStartList() != null) {
+            createRaceDefinition(course);
+        }
     }
 
     @Override

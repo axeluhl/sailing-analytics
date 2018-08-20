@@ -68,8 +68,6 @@ public enum CollectionNames {
      */
     REGATTA_FOR_RACE_ID, 
     
-
-    
     /**
      * Legacy store for competitors before implementation of bug2822
      * Contains the old competitors with contained boats.
