@@ -90,6 +90,8 @@
         <item name="course_updown_48dp">@drawable/course_updown_48dp_light</item>
         <item name="course_updown_64dp">@drawable/course_updown_64dp_light</item>
         <item name="dns">@drawable/ic_dns_black</item>
+        <item name="flag_18dp">@drawable/ic_flag_black_18dp</item>
+        <item name="flag_24dp">@drawable/ic_flag_black_24dp</item>
         <item name="hearing">@drawable/ic_hearing_black</item>
         <item name="link_24dp">@drawable/ic_link_black_24dp</item>
         <item name="list_both_24dp">@drawable/ic_list_both_black_24dp</item>
