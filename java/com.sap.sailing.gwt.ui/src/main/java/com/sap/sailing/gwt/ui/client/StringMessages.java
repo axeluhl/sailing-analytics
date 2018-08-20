@@ -2131,6 +2131,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String tagButtonConfirmDeletionHeading();
     String tagButtonConfirmDeletion(String tagButton);
     String tagFilterNotSavable();
+    String tagCurrentFilter();
     String confirm();
     String cancel();
 }
