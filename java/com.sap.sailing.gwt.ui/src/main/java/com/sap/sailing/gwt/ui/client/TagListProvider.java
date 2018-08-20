@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sse.common.Util;
@@ -13,7 +12,7 @@ import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 
 /**
- * @author Julian Rendl(D067890) Used to store tags and filter sets and to apply these filters on the tags
+ * Used to store tags and filter sets and to apply these filters on the tags
  */
 public class TagListProvider extends ListDataProvider<TagDTO> {
 
