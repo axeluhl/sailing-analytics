@@ -353,6 +353,8 @@ public class TaggingPanel extends ComponentWithoutSettings
      */
     private class TagCreationPanel extends FlowPanel {
 
+        private final Panel tagButtonsPanel;
+
         public TagCreationPanel(StringMessages stringMessages) {
             setWidth("100%");
 
@@ -361,7 +363,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             Panel standardButtonsPanel = new FlowPanel();
             standardButtonsPanel.setStyleName(style.buttonsPanel());
 
-            Panel tagButtonsPanel = new FlowPanel();
+            tagButtonsPanel = new FlowPanel();
             tagButtonsPanel.setStyleName(style.buttonsPanel());
 
             Button createTagFromTextBoxes = new Button(stringMessages.tagAddTag());
@@ -379,6 +381,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             });
             standardButtonsPanel.add(createTagFromTextBoxes);
 
+            final TagCreationPanel INSTANCE = this;
             Button editCustomTagButtons = new Button(stringMessages.tagEditCustomTagButtons());
             editCustomTagButtons.setStyleName(style.footerButton());
             editCustomTagButtons.addStyleName("gwt-Button");
@@ -386,8 +389,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                 @Override
                 public void onClick(ClickEvent event) {
                     if (isLoggedInAndRaceLogAvailable()) {
-                        new TagButtonDialog(tagButtonsPanel);
-                        updateButtons(tagButtonsPanel);
+                        new TagButtonDialog(INSTANCE);
                     }
                 }
             });
@@ -398,7 +400,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             add(tagButtonsPanel);
         }
 
-        private void updateButtons(Panel tagButtonsPanel) {
+        public void updateButtons() {
             /*
              * If the height of the customButtonsPanel has changed after deleting (delta not equals to 0 ), the
              * footerWidget of the TaggingPanel has a different height, which in this case might cause the contentWidget
@@ -865,15 +867,15 @@ public class TaggingPanel extends ComponentWithoutSettings
         private Button closeButton, saveButton, cancelButton, addTagButtonButton;
         private TagButton selectedTagButton;
 
-        public TagButtonDialog(Panel customButtonsPanel) {
+        public TagButtonDialog(TagCreationPanel tagCreationPanel) {
             setGlassEnabled(true);
             setText(stringMessages.tagEditCustomTagButtons());
             setWidth("450px");
 
             TagInputPanel inputPanel = new TagInputPanel(stringMessages);
             TagPreviewPanel tagPreviewPanel = new TagPreviewPanel(inputPanel);
-            CellTable<TagButton> tagButtonsTable = createTable(inputPanel, tagPreviewPanel);
-            Panel controlButtonPanel = createButtonPanel(tagButtonsTable, inputPanel, tagPreviewPanel);
+            CellTable<TagButton> tagButtonsTable = createTable(tagCreationPanel, inputPanel, tagPreviewPanel);
+            Panel controlButtonPanel = createButtonPanel(tagButtonsTable, inputPanel, tagPreviewPanel, tagCreationPanel);
 
             Panel mainPanel = new FlowPanel();
             mainPanel.setWidth("100%");
@@ -887,7 +889,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             center();
         }
 
-        private CellTable<TagButton> createTable(TagInputPanel inputPanel, TagPreviewPanel tagPreviewPanel) {
+        private CellTable<TagButton> createTable(TagCreationPanel tagCreationPanel, TagInputPanel inputPanel, TagPreviewPanel tagPreviewPanel) {
             CellTable<TagButton> tagButtonTable = new CellTable<TagButton>();
             tagButtonTable.setStyleName(style.tagButtonTable());
             TextColumn<TagButton> tagColumn = new TextColumn<TagButton>() {
@@ -930,6 +932,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                                     if (confirmed) {
                                         tagButtons.remove(button);
                                         setRowData(tagButtonTable, tagButtons);
+                                        tagCreationPanel.updateButtons();
                                     }
                                 });
                     } else if (LeaderboardConfigImagesBarCell.ACTION_EDIT.equals(value)) {
@@ -941,6 +944,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                         inputPanel.setVisibleForPublic(button.isVisibleForPublic());
 
                         tagPreviewPanel.renderPreview(inputPanel);
+                        tagCreationPanel.updateButtons();
 
                         saveButton.setVisible(true);
                         cancelButton.setVisible(true);
@@ -963,11 +967,11 @@ public class TaggingPanel extends ComponentWithoutSettings
         }
 
         private Panel createButtonPanel(CellTable<TagButton> tagButtonTable, TagInputPanel inputPanel,
-                TagPreviewPanel tagPreviewPanel) {
-            addSaveButton(tagButtonTable, inputPanel, tagPreviewPanel);
+                TagPreviewPanel tagPreviewPanel, TagCreationPanel tagCreationPanel) {
+            addSaveButton(tagCreationPanel, tagButtonTable, inputPanel, tagPreviewPanel);
             addCancelButton(inputPanel, tagPreviewPanel);
-            addCloseButton(tagPreviewPanel);
-            addTagButtonButton(tagButtonTable, inputPanel, tagPreviewPanel);
+            addCloseButton(tagCreationPanel, tagPreviewPanel);
+            addTagButtonButton(tagCreationPanel, tagButtonTable, inputPanel, tagPreviewPanel);
 
             Panel controlButtonPanel = new FlowPanel();
             controlButtonPanel.setStyleName(style.buttonsPanel());
@@ -979,7 +983,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             return controlButtonPanel;
         }
 
-        private void addSaveButton(CellTable<TagButton> tagButtonTable, TagInputPanel inputPanel,
+        private void addSaveButton(TagCreationPanel tagCreationPanel, CellTable<TagButton> tagButtonTable, TagInputPanel inputPanel,
                 TagPreviewPanel tagPreviewPanel) {
             saveButton = new Button(stringMessages.save());
             saveButton.setVisible(false);
@@ -996,6 +1000,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                         inputPanel.clearAllValues();
                         tagPreviewPanel.renderPreview(inputPanel);
                         tagButtonTable.redraw();
+                        tagCreationPanel.updateButtons();
 
                         saveButton.setVisible(false);
                         cancelButton.setVisible(false);
@@ -1028,7 +1033,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             });
         }
 
-        private void addCloseButton(TagPreviewPanel tagPreviewPanel) {
+        private void addCloseButton(TagCreationPanel tagCreationPanel, TagPreviewPanel tagPreviewPanel) {
             closeButton = new Button(stringMessages.close());
             closeButton.setStyleName(style.footerButton());
             closeButton.addStyleName("gwt-Button");
@@ -1036,11 +1041,12 @@ public class TaggingPanel extends ComponentWithoutSettings
                 @Override
                 public void onClick(ClickEvent event) {
                     hide();
+                    tagCreationPanel.updateButtons();
                 }
             });
         }
 
-        private void addTagButtonButton(CellTable<TagButton> tagButtonTable, TagInputPanel inputPanel,
+        private void addTagButtonButton(TagCreationPanel tagCreationPanel, CellTable<TagButton> tagButtonTable, TagInputPanel inputPanel,
                 TagPreviewPanel tagPreviewPanel) {
             addTagButtonButton = new Button(stringMessages.tagAddCustomTagButton());
             addTagButtonButton.setStyleName(style.footerButton());
@@ -1055,6 +1061,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                         tagPreviewPanel.renderPreview(inputPanel);
                         tagButtons.add(tagButton);
                         setRowData(tagButtonTable, tagButtons);
+                        tagCreationPanel.updateButtons();
                     } else {
                         Notification.notify(stringMessages.tagNotSpecified(), NotificationType.WARNING);
                     }
