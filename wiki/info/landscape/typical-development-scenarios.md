@@ -6,7 +6,7 @@
 We distinguish two cases: adding a 3rd-party bundle to the target platform and adding a new development bundle as a Java project.
 
 ## Adding a Bundle to the Target Platform
-Add a New Library which can not be found in any SAP Repository
+* Add a New Library which can not be found in any SAP Repository
 * Check if the library is already OSGi-enabled (normally this means there is a MANIFEST.MF file in the META-INF folder of the JAR file containing valid OSGi metadata.
 * In case the library is not OSGi-enabled someone has to create such a OSGi-enabled version (ask the technical lead of the project)
 * Add the library to an appropriate target folder under plugins/ in the project com.sap.sailing.targetplatform.base (e.g. target-base)
