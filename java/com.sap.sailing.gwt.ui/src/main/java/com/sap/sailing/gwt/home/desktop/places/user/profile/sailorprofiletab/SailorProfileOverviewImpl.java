@@ -24,6 +24,7 @@ import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableRes
 import com.sap.sailing.gwt.home.communication.user.profile.domain.BadgeDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfileResources;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.events.NavigatorColumn;
 import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorDesktop;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -54,6 +55,7 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
     @Override
     public void setPresenter(SailingProfileOverviewPresenter presenter) {
         this.presenter = presenter;
+        SailorProfileResources.INSTANCE.css().ensureInjected();
         decoratorUi = new AuthorizedContentDecoratorDesktop(presenter);
         initWidget(uiBinder.createAndBindUi(this));
         setupTable();

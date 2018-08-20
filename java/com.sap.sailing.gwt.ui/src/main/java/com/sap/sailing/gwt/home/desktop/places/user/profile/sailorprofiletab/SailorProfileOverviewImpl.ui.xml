@@ -4,50 +4,22 @@
     xmlns:c="urn:import:com.google.gwt.user.cellview.client">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:style>
-        .tablex {
-            border-width: 0px;
-            border-radius: 0px;
-        }
-
-        .tablex .empty {
-            margin: 1.033333333333333em;
-            font-style: italic;
-            line-height: 2em;
-        }
-
-        .tablex td {
-            vertical-align: middle;
-        }
-
-        .tableFooter{
-            background-color: #f2f2f2;
-            vertical-align: middle;
-            padding-top: 1.333em;
-            padding-bottom: 1.3333em;
-            padding-left: 1.333em;
-        }
-
-        .panel{
-            border: 1px solid #dedede;
-            border-radius: .333333333333333em;
-            overflow: hidden;
-        }
-    </ui:style>
+    <ui:with field="sp_res"
+        type="com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfileResources" />
     <um:AuthorizedContentDecoratorDesktop ui:field="decoratorUi">
         <um:content>
             <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">
                 <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopmediumsmall}">
-                    <div class="{res.mainCss.spacermargintopmediumsmall} {style.panel}">
+                    <div class="{res.mainCss.spacermargintopmediumsmall} {sp_res.css.overviewTablePanel}">
 
                         <c:CellTable ui:field="sailorProfilesTable"
-                            addStyleNames=" {style.tablex} {res.mediaCss.small12}">
+                            addStyleNames=" {sp_res.css.overviewTable} {res.mediaCss.small12}">
                             <c:emptyTableWidget>
-                                <g:Label text="{i18n.noDataFound}" addStyleNames="{style.empty}" />
+                                <g:Label text="{i18n.noDataFound}" addStyleNames="{sp_res.css.overviewTableEmpty}" />
                             </c:emptyTableWidget>
                         </c:CellTable>
 
-                        <div class="{style.tableFooter}">
+                        <div class="{sp_res.css.overviewTableFooter}">
                             <g:FlowPanel ui:field="footerUi" />
                         </div>
                     </div>
