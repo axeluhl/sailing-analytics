@@ -73,6 +73,7 @@ public class EditSailorProfile extends Composite implements EditSailorProfileVie
         competitorSelectionUi.setSelectedItems(entry.getCompetitors());
         titleUi.setText(entry.getName());
         boatClassesUi.setItems(entry.getBoatclasses());
+        accordionEventsUi.clear();
 
         // Get events
         presenter.getDataProvider().getEvents(entry.getKey(), new AsyncCallback<SailorProfileEventsDTO>() {

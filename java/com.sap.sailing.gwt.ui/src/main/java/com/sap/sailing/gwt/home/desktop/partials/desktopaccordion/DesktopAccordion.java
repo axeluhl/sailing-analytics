@@ -85,4 +85,8 @@ public class DesktopAccordion extends Composite {
             getElement().addClassName(EventsOverviewRecentResources.INSTANCE.css().accordioncollapsed());
         }
     }
+
+    public void clear() {
+        contentPanelUi.clear();
+    }
 }
