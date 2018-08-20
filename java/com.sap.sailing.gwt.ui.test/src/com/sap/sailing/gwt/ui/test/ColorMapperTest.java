@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.test;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 import java.util.HashSet;
@@ -47,13 +46,8 @@ public class ColorMapperTest {
     }
     
     @Test
-    public void testExceptionForValueOutOfBoundaries() {
-        try {
-            colorMapper.getColor(-10.0);
-            fail("Expected illegal argument exception");
-        } catch (IllegalArgumentException e) {
-            // expected
-        }
+    public void testNullForValueOutOfBoundaries() {
+        assertTrue(colorMapper.getColor(-10.0) == null);
     }
 
     @Test
