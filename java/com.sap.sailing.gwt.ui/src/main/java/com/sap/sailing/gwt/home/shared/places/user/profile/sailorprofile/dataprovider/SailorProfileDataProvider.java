@@ -6,14 +6,14 @@ import java.util.UUID;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEventsDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfilesDTO;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.ParticipatedEventDTO;
 
 public interface SailorProfileDataProvider {
 
     void findSailorProfileById(UUID uuid, AsyncCallback<SailorProfileDTO> asyncCallback);
 
-    void getEvents(UUID key, AsyncCallback<Iterable<ParticipatedEventDTO>> asyncCallback);
+    void getEvents(UUID key, AsyncCallback<SailorProfileEventsDTO> callback);
 
     void loadSailorProfiles(AsyncCallback<SailorProfilesDTO> callback);
 
@@ -25,5 +25,6 @@ public interface SailorProfileDataProvider {
     void createNewSailorProfile(UUID key, String name, AsyncCallback<SailorProfileDTO> callback);
 
     void removeSailorProfile(UUID uuid, AsyncCallback<SailorProfileDTO> callback);
+
 
 }

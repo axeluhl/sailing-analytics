@@ -15,12 +15,13 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableResources;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedEventDTO;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedRegattaDTO;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab.RegattaLeaderboardPlace;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorItemDescription;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.ParticipatedEventDTO;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.ParticipatedRegattaDTO;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
+import com.sap.sse.common.Util;
 
 public class SailorProfileEventsTable extends Composite {
 
@@ -52,7 +53,7 @@ public class SailorProfileEventsTable extends Composite {
 
     public void setEvent(ParticipatedEventDTO event) {
         titleUi.setInnerText(event.getEventName());
-        sailorProfilesTable.setPageSize(event.getParticipatedRegattas().size());
+        sailorProfilesTable.setPageSize(Util.size(event.getParticipatedRegattas()));
         sailorProfilesTable.setList(event.getParticipatedRegattas());
     }
 

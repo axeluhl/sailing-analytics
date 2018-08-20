@@ -7,13 +7,14 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedEventDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEventsDTO;
 import com.sap.sailing.gwt.home.desktop.partials.desktopaccordion.DesktopAccordion;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.SailorProfileDetailsView;
 import com.sap.sailing.gwt.home.shared.partials.editable.EditableSuggestedMultiSelectionCompetitor;
 import com.sap.sailing.gwt.home.shared.partials.editable.InlineEditLabel;
 import com.sap.sailing.gwt.home.shared.partials.listview.BoatClassListView;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain.ParticipatedEventDTO;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.events.SailorProfileEventsTable;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -74,15 +75,15 @@ public class EditSailorProfile extends Composite implements EditSailorProfileVie
         boatClassesUi.setItems(entry.getBoatclasses());
 
         // Get events
-        presenter.getDataProvider().getEvents(entry.getKey(), new AsyncCallback<Iterable<ParticipatedEventDTO>>() {
+        presenter.getDataProvider().getEvents(entry.getKey(), new AsyncCallback<SailorProfileEventsDTO>() {
             @Override
             public void onFailure(Throwable caught) {
                 GWT.log(caught.getMessage(), caught);
             }
 
             @Override
-            public void onSuccess(Iterable<ParticipatedEventDTO> result) {
-                for (ParticipatedEventDTO dto : result) {
+            public void onSuccess(SailorProfileEventsDTO result) {
+                for (ParticipatedEventDTO dto : result.getParticipatedEvents()) {
                     SailorProfileEventsTable table = new SailorProfileEventsTable(flagImageResolver);
                     table.setController(presenter.getPlaceController());
                     table.setEvent(dto);

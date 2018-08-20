@@ -1,16 +1,22 @@
-package com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.domain;
+package com.sap.sailing.gwt.home.communication.user.profile.domain;
+
+import java.io.Serializable;
 
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 
-public class ParticipatedRegattaDTO {
+public class ParticipatedRegattaDTO implements Serializable {
+    private static final long serialVersionUID = -126348629933556831L;
 
-    private final String regattaName;
-    private final int regattaRank;
-    private final SimpleCompetitorWithIdDTO competitorDto;
-    private final String clubName;
-    private final String regattaId;
-    private final String eventId;
-    private final double sumPoints;
+    private String regattaName;
+    private int regattaRank;
+    private SimpleCompetitorWithIdDTO competitorDto;
+    private String clubName;
+    private String regattaId;
+    private String eventId;
+    private double sumPoints;
+
+    protected ParticipatedRegattaDTO() {
+    }
 
     public ParticipatedRegattaDTO(String regattaName, int regattaRank, SimpleCompetitorWithIdDTO competitorDto,
             String clubName, String regattaId, String eventId, double sumPoints) {
