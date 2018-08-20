@@ -18,7 +18,6 @@ import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableRes
 import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedEventDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedRegattaDTO;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab.RegattaLeaderboardPlace;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorItemDescription;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sse.common.Util;
@@ -92,19 +91,9 @@ public class SailorProfileEventsTable extends Composite {
             new AbstractCell<ParticipatedRegattaDTO>() {
                 @Override
                 public void render(Context context, ParticipatedRegattaDTO value, SafeHtmlBuilder sb) {
-                    sb.appendHtmlConstant(new SuggestedMultiSelectionCompetitorItemDescription(value.getCompetitorDto(),
-                            flagImageResolver).getElement().getInnerHTML());
-                    // sb.appendHtmlConstant("<div>" + value.getCompetitorDto().getName() + "</div>");
-                    //
-                    // for (BoatClassDTO boatclass : value.getBoatclasses()) {
-                    // sb.appendHtmlConstant(
-                    // "<div style=\"height: 40px; width: 40px; margin-left: 5px; display: inline-block;
-                    // background-size: cover; background-image: url('"
-                    // + BoatClassImageResolver
-                    // .getBoatClassIconResource(boatclass.getName()).getSafeUri().asString()
-                    // + "');\"></div>");
-                    // }
-                    // TODO
+                    sb.appendHtmlConstant(
+                            new CompetitorWithoutClubnameItemDescription(value.getCompetitorDto(), flagImageResolver)
+                                    .getElement().getInnerHTML());
                 }
             }) {
         @Override
