@@ -6,8 +6,14 @@ import java.util.List;
 import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
+import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
@@ -15,8 +21,11 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.BadgeDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedEventDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedRegattaDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEventsDTO;
+import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.server.impl.preferences.model.SailorProfilePreference;
 import com.sap.sailing.server.impl.preferences.model.SailorProfilePreferences;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 
 /**
@@ -43,11 +52,71 @@ public class GetEventsForSailorProfileAction implements SailingAction<SailorProf
 
         SailorProfilePreferences prefs = ctx.getPreferenceForCurrentUser(SailorProfilePreferences.PREF_NAME);
         SailorProfilePreference pref = findSailorProfile(store, prefs);
-        if (pref != null) {
-            return new SailorProfileEventsDTO(createEvents());
-        } else {
-            throw new NullPointerException("Unknown sailor profile with uuid " + uuid);
+        Collection<ParticipatedEventDTO> participatedEvents = new ArrayList<>();
+
+        for (Event event : ctx.getRacingEventService().getAllEvents()) {
+            Collection<ParticipatedRegattaDTO> participatedRegattas = new ArrayList<>();
+            for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
+                if (leaderboardGroup.hasOverallLeaderboard()) {
+                    leaderboardGroup.getOverallLeaderboard();
+
+                }
+                for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+
+                    // check if this leaderboard contains at least one of the selected competitors
+                    Collection<Competitor> containedCompetitors = new ArrayList<>();
+                    for (Competitor competitor : pref.getCompetitors()) {
+                        if (leaderboard.getCompetitors() != null
+                                && Util.contains(leaderboard.getCompetitors(), competitor)) {
+                            containedCompetitors.add(competitor);
+                        }
+                    }
+
+                    // skip if none of the selected competitors is in this leaderboard
+                    if (containedCompetitors.size() == 0) {
+                        continue;
+                    }
+
+                    // create and add ParticipatedRegattaDTO for each of the selected competitors who was in this
+                    // leaderboard
+                    for (Competitor competitor : containedCompetitors) {
+                        int rank = 0;
+                        try {
+                            rank = leaderboard.getTotalRankOfCompetitor(competitor, MillisecondsTimePoint.now());
+                        } catch (NoWindException e1) {
+                            // ignore
+                        }
+                        // final String leaderboardName = leaderboard.getDisplayName();
+                        final double points = leaderboard.getNetPoints(competitor, MillisecondsTimePoint.now());
+
+                        // regatta name is equal to the leaderboard name
+                        String regattaName = leaderboard.getName();
+
+                        Regatta regatta = ctx.getRacingEventService().getRegattaByName(regattaName);
+                        String clubName = competitor.getName();
+
+                        if (regatta == null) {
+                            continue;
+                        }
+
+                        // skip, if regatta is not part of this event (e.g. shared leaderboard group)
+                        if (!HomeServiceUtil.isPartOfEvent(event, leaderboard)) {
+                            continue;
+                        }
+
+                        participatedRegattas.add(
+                                new ParticipatedRegattaDTO(regattaName, rank, new SimpleCompetitorWithIdDTO(competitor),
+                                        clubName, null, event.getId().toString(), points));
+                    }
+                }
+            }
+            if (participatedRegattas.size() > 0) {
+                participatedEvents
+                        .add(new ParticipatedEventDTO(event.getName(), event.getId().toString(), participatedRegattas));
+            }
         }
+
+        return new SailorProfileEventsDTO(participatedEvents);
     }
 
     @GwtIncompatible
