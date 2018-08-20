@@ -1290,44 +1290,41 @@ public class TaggingPanel extends ComponentWithoutSettings
             boolean modifiedTags = false;
             // Will be true if latestReceivedTagTime needs to be updated in raceTimesInfoprovider, otherwise false.
             boolean updatedLatestTag = false;
-            // TODO: Is this if-clause still required?
-            if (raceIdentifier.equals(raceInfo.getRaceIdentifier())) {
-                // local list of already received tags
-                List<TagDTO> currentTags = tagListProvider.getAllTags();
-                // createdAt or revokedAt timepoint of latest received tag
-                TimePoint latestReceivedTagTime = raceTimesInfoProvider.getLatestReceivedTagTime(raceIdentifier);
-                // get difference in tags since latestReceivedTagTime
-                for (TagDTO tag : raceInfo.getTags()) {
-                    if (tag.getRevokedAt() != null) {
-                        // received tag is revoked => latestReceivedTagTime will be revokedAt if revoke event occured
-                        // before latestReceivedTagTime
-                        currentTags.remove(tag);
-                        modifiedTags = true;
-                        if (latestReceivedTagTime == null || (latestReceivedTagTime != null
-                                && latestReceivedTagTime.before(tag.getRevokedAt()))) {
-                            latestReceivedTagTime = tag.getRevokedAt();
-                            updatedLatestTag = true;
-                        }
-                    } else if (!currentTags.contains(tag)) {
-                        // received tag is NOT revoked => latestReceivedTagTime will be createdAt if tag event occured
-                        // before latestReceivedTagTime
-                        currentTags.add(tag);
-                        modifiedTags = true;
-                        if (latestReceivedTagTime == null || (latestReceivedTagTime != null
-                                && latestReceivedTagTime.before(tag.getCreatedAt()))) {
-                            latestReceivedTagTime = tag.getCreatedAt();
-                            updatedLatestTag = true;
-                        }
+            // local list of already received tags
+            List<TagDTO> currentTags = tagListProvider.getAllTags();
+            // createdAt or revokedAt timepoint of latest received tag
+            TimePoint latestReceivedTagTime = raceTimesInfoProvider.getLatestReceivedTagTime(raceIdentifier);
+            // get difference in tags since latestReceivedTagTime
+            for (TagDTO tag : raceInfo.getTags()) {
+                if (tag.getRevokedAt() != null) {
+                    // received tag is revoked => latestReceivedTagTime will be revokedAt if revoke event occured
+                    // before latestReceivedTagTime
+                    currentTags.remove(tag);
+                    modifiedTags = true;
+                    if (latestReceivedTagTime == null || (latestReceivedTagTime != null
+                            && latestReceivedTagTime.before(tag.getRevokedAt()))) {
+                        latestReceivedTagTime = tag.getRevokedAt();
+                        updatedLatestTag = true;
+                    }
+                } else if (!currentTags.contains(tag)) {
+                    // received tag is NOT revoked => latestReceivedTagTime will be createdAt if tag event occured
+                    // before latestReceivedTagTime
+                    currentTags.add(tag);
+                    modifiedTags = true;
+                    if (latestReceivedTagTime == null || (latestReceivedTagTime != null
+                            && latestReceivedTagTime.before(tag.getCreatedAt()))) {
+                        latestReceivedTagTime = tag.getCreatedAt();
+                        updatedLatestTag = true;
                     }
                 }
-                // set new latestReceivedTagTime for next data request
-                if (updatedLatestTag) {
-                    raceTimesInfoProvider.setLatestReceivedTagTime(raceIdentifier, latestReceivedTagTime);
-                }
-                // refresh UI if tags did change
-                if (modifiedTags) {
-                    updateContent();
-                }
+            }
+            // set new latestReceivedTagTime for next data request
+            if (updatedLatestTag) {
+                raceTimesInfoProvider.setLatestReceivedTagTime(raceIdentifier, latestReceivedTagTime);
+            }
+            // refresh UI if tags did change
+            if (modifiedTags) {
+                updateContent();
             }
         });
     }
