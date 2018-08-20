@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.events;
 
 import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.NumberCell;
 import com.google.gwt.cell.client.TextCell;
@@ -63,10 +62,10 @@ public class SailorProfileEventsTable extends Composite {
         sailorProfilesTable.addColumn(competitorColumn, StringMessages.INSTANCE.competitor());
         sailorProfilesTable.addColumn(clubNameColumn, StringMessages.INSTANCE.name());
         sailorProfilesTable.addColumn(sumPointsColumn, "\u2211");
-        sailorProfilesTable.addColumn(showColumn);
+        sailorProfilesTable.addColumn(navigatorColumn);
 
-        showColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
-        showColumn.setFieldUpdater(new FieldUpdater<ParticipatedRegattaDTO, String>() {
+        navigatorColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
+        navigatorColumn.setFieldUpdater(new FieldUpdater<ParticipatedRegattaDTO, String>() {
             @Override
             public void update(int index, ParticipatedRegattaDTO entry, String value) {
                 placeController.goTo(new RegattaLeaderboardPlace(entry.getEventId(), entry.getRegattaId()));
@@ -116,11 +115,6 @@ public class SailorProfileEventsTable extends Composite {
             return entry.getSumPoints();
         }
     };
-    private final Column<ParticipatedRegattaDTO, String> showColumn = new Column<ParticipatedRegattaDTO, String>(
-            new ButtonCell()) {
-        @Override
-        public String getValue(ParticipatedRegattaDTO entry) {
-            return ">";
-        }
-    };
+
+    private final Column<ParticipatedRegattaDTO, String> navigatorColumn = new NavigatorColumn<ParticipatedRegattaDTO>();
 }

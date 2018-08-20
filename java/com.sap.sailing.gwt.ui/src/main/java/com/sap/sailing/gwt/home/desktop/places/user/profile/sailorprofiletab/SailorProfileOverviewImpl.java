@@ -24,6 +24,7 @@ import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableRes
 import com.sap.sailing.gwt.home.communication.user.profile.domain.BadgeDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.events.NavigatorColumn;
 import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorDesktop;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
@@ -70,16 +71,16 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
         sailorProfilesTable.addColumn(badgeColumn, i18n.badges());
         sailorProfilesTable.addColumn(competitorColumn, i18n.competitors());
         sailorProfilesTable.addColumn(boatClassColumn, i18n.boatClasses());
-        sailorProfilesTable.addColumn(showColumn, "");
-        sailorProfilesTable.addColumn(removeColumn, "");
+        sailorProfilesTable.addColumn(navigatorColumn);
+        sailorProfilesTable.addColumn(removeColumn);
 
         profileNameColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().textCellWordWrap());
         badgeColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().textCellWordWrap());
         competitorColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().textCellWordWrap());
         boatClassColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().textCellWordWrap());
 
-        showColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
-        showColumn.setFieldUpdater(new FieldUpdater<SailorProfileDTO, String>() {
+        navigatorColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
+        navigatorColumn.setFieldUpdater(new FieldUpdater<SailorProfileDTO, String>() {
             @Override
             public void update(int index, SailorProfileDTO entry, String value) {
                 presenter.getClientFactory().getPlaceController().goTo(new SailorProfilePlace(entry.getKey()));
@@ -149,12 +150,9 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
             return "-";
         }
     };
-    private final Column<SailorProfileDTO, String> showColumn = new Column<SailorProfileDTO, String>(new ButtonCell()) {
-        @Override
-        public String getValue(SailorProfileDTO entry) {
-            return ">";
-        }
-    };
+
+    private final Column<SailorProfileDTO, String> navigatorColumn = new NavigatorColumn<SailorProfileDTO>();
+
     private final Column<SailorProfileDTO, String> removeColumn = new Column<SailorProfileDTO, String>(
             new ButtonCell()) {
         @Override
