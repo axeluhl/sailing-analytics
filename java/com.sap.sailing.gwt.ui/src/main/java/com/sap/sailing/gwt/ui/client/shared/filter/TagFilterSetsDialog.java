@@ -16,6 +16,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * A dialog to create, edit and delete filter sets for tags
@@ -37,6 +38,7 @@ public class TagFilterSetsDialog extends DataEntryDialog<TagFilterSets> {
     private final List<FilterSet<TagDTO, FilterWithUI<TagDTO>>> filterSets;
     private final String ACTIVE_FILTERSET_RADIOBUTTON_GROUPNAME = "ActiveFilterSetRB";
     private final String filterNothingFiltersetName;
+    private final UserService userService;
 
     protected static class TagsFilterSetsValidator implements Validator<TagFilterSets> {
         public TagsFilterSetsValidator() {
@@ -50,9 +52,10 @@ public class TagFilterSetsDialog extends DataEntryDialog<TagFilterSets> {
     }
 
     public TagFilterSetsDialog(TagFilterSets tagsFilterSets, StringMessages stringMessages,
-            DialogCallback<TagFilterSets> callback) {
+            DialogCallback<TagFilterSets> callback, UserService userService) {
         super(stringMessages.tagsFilter(), null, stringMessages.ok(), stringMessages.cancel(),
                 new TagsFilterSetsValidator(), callback);
+        this.userService = userService;
         this.tagsFilterSets = tagsFilterSets;
         this.stringMessages = stringMessages;
         filterNothingFiltersetName = stringMessages.filterNothing();
@@ -70,9 +73,14 @@ public class TagFilterSetsDialog extends DataEntryDialog<TagFilterSets> {
     @Override
     protected Widget getAdditionalWidget() {
         mainPanel = new VerticalPanel();
+        if (userService.getCurrentUser() == null) {
+            Label notLoggedInLabel = new Label(stringMessages.createTagFilterNotLoggedIn());
+            notLoggedInLabel.getElement().getStyle().setColor("red");
+            mainPanel.add(notLoggedInLabel);
+        }
         String headLineText;
         if (tagsFilterSets.getFilterSets().size() < 1) {
-            headLineText = stringMessages.createFilterHint();
+            headLineText = stringMessages.createTagFilterHint();
         } else {
             headLineText = stringMessages.availableFilters();
         }

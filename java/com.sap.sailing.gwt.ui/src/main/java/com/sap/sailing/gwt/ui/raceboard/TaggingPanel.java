@@ -36,7 +36,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
-import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
@@ -132,35 +131,62 @@ public class TaggingPanel extends ComponentWithoutSettings
         public interface TagPanelStyle extends CssResource {
             // tags
             String tag();
+
             String tagPanel();
+
             String tagHeading();
+
             String tagCreated();
+
             String tagComment();
+
             String tagImage();
+
             String button();
+
             String footerButton();
+
             String tagButtonTable();
+
             String inputPanelTag();
+
             String inputPanelComment();
+
             String inputPanelImageURL();
+
             String buttonsPanel();
+
             String tagPreviewPanel();
 
             // filter tags
             String tagFilterButton();
+
             String tagFilterHiddenButton();
+
             String tagFilterClearButton();
+
             String tagFilterSearchButton();
+
             String tagFilterSettingsButton();
+
             String tagFilterFilterButton();
+
             String tagFilterContainer();
+
             String tagFilterSearchBox();
+
             String tagFilterSearchInput();
+
             String filterInactiveButtonBackgroundImage();
+
             String filterActiveButtonBackgroundImage();
+
             String clearButtonBackgroundImage();
+
             String searchButtonBackgroundImage();
+
             String settingsButtonBackgroundImage();
+
             String inputPanelIsVisibleForPublic();
         }
     }
@@ -174,10 +200,15 @@ public class TaggingPanel extends ComponentWithoutSettings
 
         public interface TagCellListStyle extends CellList.Style {
             String cellListEventItem();
+
             String cellListWidget();
+
             String cellListEvenItem();
+
             String cellListOddItem();
+
             String cellListSelectedItem();
+
             String cellListKeyboardSelectedItem();
         }
     }
@@ -424,9 +455,8 @@ public class TaggingPanel extends ComponentWithoutSettings
 
         // default value for "Visible for public" checkbox
         private static final boolean DEFAULT_VISIBLE_FOR_PUBLIC = true;
-        
-        //default textbox or textarea lengths
 
+        // default textbox or textarea lengths
 
         private final TextBox tagTextBox, imageURLTextBox;
         private final TextArea commentTextArea;
@@ -580,11 +610,11 @@ public class TaggingPanel extends ComponentWithoutSettings
      * Panel used to select and modify tag filter.
      */
     private class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWithUI<TagDTO> {
-        
+
         private final static String LOCAL_STORAGE_TAGS_FILTER_SETS_KEY = "sailingAnalytics.raceBoard.tagsFilterSets";
 
         private FilterSet<TagDTO, FilterWithUI<TagDTO>> lastActiveTagFilterSet;
-        private final TagFilterSets tagFilterSets;
+        private TagFilterSets tagFilterSets;
         private TextBox searchTextBox;
         private Button clearTextBoxButton, filterSettingsButton;
         private final AbstractListFilter<TagDTO> filter;
@@ -592,15 +622,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         public TagFilterPanel() {
             setStyleName(style.tagFilterContainer());
 
-            TagFilterSets loadedTagsFilterSets = loadTagFilterSets();
-
-            if (loadedTagsFilterSets != null) {
-                tagFilterSets = loadedTagsFilterSets;
-                tagListProvider.setTagsFilterSet(tagFilterSets.getActiveFilterSetWithGeneralizedType());
-            } else {
-                tagFilterSets = new TagFilterSets();
-                storeTagsFilterSets(tagFilterSets);
-            }
+            loadTagFilterSets();
 
             filter = new AbstractListFilter<TagDTO>() {
                 @Override
@@ -673,7 +695,9 @@ public class TaggingPanel extends ComponentWithoutSettings
                             tagListProvider.updateFilteredTags();
                             tagListProvider.refresh();
                             updateTagFilterControlState(newTagFilterSets);
-                            storeTagsFilterSets(newTagFilterSets);
+                            if (userService.getCurrentUser() != null) {
+                                storeTagFilterSets(newTagFilterSets);
+                            }
                             updateContent();
                         }
 
@@ -681,7 +705,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                         public void cancel() {
                         }
 
-                    });
+                    }, userService);
 
             tagsFilterSetsDialog.show();
         }
@@ -713,39 +737,54 @@ public class TaggingPanel extends ComponentWithoutSettings
             }
         }
 
-        private TagFilterSets loadTagFilterSets() {
-            TagFilterSets result = null;
-            Storage localStorage = Storage.getLocalStorageIfSupported();
-            if (localStorage != null) {
-                try {
-                    String jsonAsLocalStore = localStorage.getItem(LOCAL_STORAGE_TAGS_FILTER_SETS_KEY);
-                    if (jsonAsLocalStore != null && !jsonAsLocalStore.isEmpty()) {
-                        TagsFilterSetsJsonDeSerializer deserializer = new TagsFilterSetsJsonDeSerializer();
-                        JSONValue value = JSONParser.parseStrict(jsonAsLocalStore);
-                        if (value.isObject() != null) {
-                            result = deserializer.deserialize((JSONObject) value);
-                        }
+        /*
+         * loads users Tag Filter Sets from server and stores it into tagFilterSets
+         */
+        private void loadTagFilterSets() {
+            if (userService.getCurrentUser() != null) {
+                userService.getPreference(LOCAL_STORAGE_TAGS_FILTER_SETS_KEY, new AsyncCallback<String>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        // do nothing
                     }
-                } catch (Exception e) {
-                    // exception during loading of tag filters from local storage
-                }
+
+                    @Override
+                    public void onSuccess(String result) {
+                        if (result != null && !result.isEmpty()) {
+                            final TagsFilterSetsJsonDeSerializer deserializer = new TagsFilterSetsJsonDeSerializer();
+                            final JSONValue value = JSONParser.parseStrict(result);
+                            if (value.isObject() != null) {
+                                tagFilterSets = deserializer.deserialize((JSONObject) value);
+                                tagListProvider.setTagsFilterSet(tagFilterSets.getActiveFilterSetWithGeneralizedType());
+                                return;
+                            }
+                        }
+                        tagFilterSets = new TagFilterSets();
+                        tagListProvider.setTagsFilterSet(null);
+                    }
+                });
+            } else {
+                tagFilterSets = new TagFilterSets();
+                tagListProvider.setTagsFilterSet(null);
             }
-            return result;
         }
 
-        private void storeTagsFilterSets(TagFilterSets newTagsFilterSets) {
-            Storage localStorage = Storage.getLocalStorageIfSupported();
-            if (localStorage != null) {
-                // delete old value
-                localStorage.removeItem(LOCAL_STORAGE_TAGS_FILTER_SETS_KEY);
+        private void storeTagFilterSets(TagFilterSets newTagsFilterSets) {
+            TagsFilterSetsJsonDeSerializer serializer = new TagsFilterSetsJsonDeSerializer();
+            JSONObject jsonObject = serializer.serialize(newTagsFilterSets);
+            userService.setPreference(LOCAL_STORAGE_TAGS_FILTER_SETS_KEY, jsonObject.toString(),
+                    new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            Notification.notify(stringMessages.tagFilterNotSavable(), NotificationType.WARNING);
+                        }
 
-                // store the tags filter set
-                TagsFilterSetsJsonDeSerializer serializer = new TagsFilterSetsJsonDeSerializer();
-                JSONObject jsonObject = serializer.serialize(newTagsFilterSets);
-                localStorage.setItem(LOCAL_STORAGE_TAGS_FILTER_SETS_KEY, jsonObject.toString());
-            } else {
-                Notification.notify(stringMessages.tagFilterNotSavable(), NotificationType.WARNING);
-            }
+                        @Override
+                        public void onSuccess(Void result) {
+                            Notification.notify("succedded storing filters", NotificationType.INFO);
+
+                        }
+                    });
         }
 
         private void clearSelection() {
@@ -875,7 +914,8 @@ public class TaggingPanel extends ComponentWithoutSettings
             TagInputPanel inputPanel = new TagInputPanel(stringMessages);
             TagPreviewPanel tagPreviewPanel = new TagPreviewPanel(inputPanel);
             CellTable<TagButton> tagButtonsTable = createTable(tagCreationPanel, inputPanel, tagPreviewPanel);
-            Panel controlButtonPanel = createButtonPanel(tagButtonsTable, inputPanel, tagPreviewPanel, tagCreationPanel);
+            Panel controlButtonPanel = createButtonPanel(tagButtonsTable, inputPanel, tagPreviewPanel,
+                    tagCreationPanel);
 
             Panel mainPanel = new FlowPanel();
             mainPanel.setWidth("100%");
@@ -889,7 +929,8 @@ public class TaggingPanel extends ComponentWithoutSettings
             center();
         }
 
-        private CellTable<TagButton> createTable(TagCreationPanel tagCreationPanel, TagInputPanel inputPanel, TagPreviewPanel tagPreviewPanel) {
+        private CellTable<TagButton> createTable(TagCreationPanel tagCreationPanel, TagInputPanel inputPanel,
+                TagPreviewPanel tagPreviewPanel) {
             CellTable<TagButton> tagButtonTable = new CellTable<TagButton>();
             tagButtonTable.setStyleName(style.tagButtonTable());
             TextColumn<TagButton> tagColumn = new TextColumn<TagButton>() {
@@ -983,8 +1024,8 @@ public class TaggingPanel extends ComponentWithoutSettings
             return controlButtonPanel;
         }
 
-        private void addSaveButton(TagCreationPanel tagCreationPanel, CellTable<TagButton> tagButtonTable, TagInputPanel inputPanel,
-                TagPreviewPanel tagPreviewPanel) {
+        private void addSaveButton(TagCreationPanel tagCreationPanel, CellTable<TagButton> tagButtonTable,
+                TagInputPanel inputPanel, TagPreviewPanel tagPreviewPanel) {
             saveButton = new Button(stringMessages.save());
             saveButton.setVisible(false);
             saveButton.setStyleName(style.footerButton());
@@ -1046,8 +1087,8 @@ public class TaggingPanel extends ComponentWithoutSettings
             });
         }
 
-        private void addTagButtonButton(TagCreationPanel tagCreationPanel, CellTable<TagButton> tagButtonTable, TagInputPanel inputPanel,
-                TagPreviewPanel tagPreviewPanel) {
+        private void addTagButtonButton(TagCreationPanel tagCreationPanel, CellTable<TagButton> tagButtonTable,
+                TagInputPanel inputPanel, TagPreviewPanel tagPreviewPanel) {
             addTagButtonButton = new Button(stringMessages.tagAddCustomTagButton());
             addTagButtonButton.setStyleName(style.footerButton());
             addTagButtonButton.addStyleName("gwt-Button");
@@ -1137,7 +1178,7 @@ public class TaggingPanel extends ComponentWithoutSettings
 
     private final HeaderPanel panel;
     private final Panel tagCreationPanel;
-    private final Panel filterbarPanel;
+    private final TagFilterPanel filterbarPanel;
     private final Panel contentPanel;
 
     private final StringMessages stringMessages;
@@ -1308,8 +1349,8 @@ public class TaggingPanel extends ComponentWithoutSettings
                     // before latestReceivedTagTime
                     currentTags.remove(tag);
                     modifiedTags = true;
-                    if (latestReceivedTagTime == null || (latestReceivedTagTime != null
-                            && latestReceivedTagTime.before(tag.getRevokedAt()))) {
+                    if (latestReceivedTagTime == null
+                            || (latestReceivedTagTime != null && latestReceivedTagTime.before(tag.getRevokedAt()))) {
                         latestReceivedTagTime = tag.getRevokedAt();
                         updatedLatestTag = true;
                     }
@@ -1318,8 +1359,8 @@ public class TaggingPanel extends ComponentWithoutSettings
                     // before latestReceivedTagTime
                     currentTags.add(tag);
                     modifiedTags = true;
-                    if (latestReceivedTagTime == null || (latestReceivedTagTime != null
-                            && latestReceivedTagTime.before(tag.getCreatedAt()))) {
+                    if (latestReceivedTagTime == null
+                            || (latestReceivedTagTime != null && latestReceivedTagTime.before(tag.getCreatedAt()))) {
                         latestReceivedTagTime = tag.getCreatedAt();
                         updatedLatestTag = true;
                     }
@@ -1343,6 +1384,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         raceTimesInfoProvider.getRaceIdentifiers().forEach((raceIdentifier) -> {
             raceTimesInfoProvider.setLatestReceivedTagTime(raceIdentifier, null);
         });
+        filterbarPanel.loadTagFilterSets();
         updateContent();
     }
 
