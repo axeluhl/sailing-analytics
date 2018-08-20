@@ -506,8 +506,8 @@ public class StartTimeFragment extends BaseFragment
             mTimePicker.setIs24HourView(true);
             int hours = time.get(Calendar.HOUR_OF_DAY);
             int minutes = time.get(Calendar.MINUTE);
-            if (getArguments() != null && getArguments().getInt(START_MODE, START_MODE_PRESETUP) != MODE_TIME_PANEL && mRaceId == null
-                && mStartTimeOffset == null) {
+            if (getArguments() != null && getArguments().getInt(START_MODE, START_MODE_PRESETUP) != MODE_TIME_PANEL
+                && getArguments().getSerializable(MainScheduleFragment.START_TIME) == null) {
                 // In 10 minutes from now, but always a 5-minute-mark.
                 time.add(Calendar.MINUTE, 10);
                 hours = time.get(Calendar.HOUR_OF_DAY);
@@ -515,6 +515,7 @@ public class StartTimeFragment extends BaseFragment
                 minutes = (int) (Math.ceil((minutes / 5.0)) * 5.0);
                 if (minutes >= 60) {
                     hours++;
+                    minutes = 0;
                 }
             }
             mTimePicker.setCurrentHour(hours);
@@ -623,7 +624,7 @@ public class StartTimeFragment extends BaseFragment
                 break;
 
             case R.id.set_start_time_relative:
-                changeFragment(MillisecondsTimePoint.now(), new MillisecondsDurationImpl(mTimeOffset.getValue() * 60 * 1000), identifier);
+                changeFragment(mStartTime, new MillisecondsDurationImpl(mTimeOffset.getValue() * 60 * 1000), identifier);
                 break;
 
             case R.id.sync_to_minute:
@@ -772,9 +773,12 @@ public class StartTimeFragment extends BaseFragment
                 viewId = R.id.race_content;
             }
             args.putAll(getArguments());
-            args.putSerializable(MainScheduleFragment.START_TIME, startTime);
-            args.putSerializable(MainScheduleFragment.START_TIME_DIFF, startTimeDiff);
-            args.putSerializable(MainScheduleFragment.DEPENDENT_RACE, identifier);
+            if (startTimeDiff == null) {
+                args.putSerializable(MainScheduleFragment.START_TIME, startTime);
+            } else {
+                args.putSerializable(MainScheduleFragment.START_TIME_DIFF, startTimeDiff);
+                args.putSerializable(MainScheduleFragment.DEPENDENT_RACE, identifier);
+            }
         }
         fragment.setArguments(args);
         transaction.replace(viewId, fragment);

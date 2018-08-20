@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<body>
+<div id="mainContent">
+	<h4 class="articleHeadline">What's New - SAP Sailing Race Manager</h4>
+	<div class="innerContent">
+		<h5 class="articleSubheadline">July 2016</h5>
+
+		<ul	class="bulletList">
+			<li>Finishing races in the TimePanel show the race duration of the "first ship home."</li>
+		</ul>
+
+		<h5 class="articleSubheadline">June 2016</h5>
+
+		<ul class="bulletList">
+			<li>The start time editing screen has now a "Sync to minute" button, which replaces
+			    the both buttons beside the countdown. This button sets the countdown to the nearest
+			    minute and after "Set time" the new start time will be sent to the server.</li>
+			<li>The "Set Time" button in the start time editing screen remains disabled now until
+			    the user actually makes a change. This also helps to identify that "Set Time"
+			    needs to be tapped in order to transmit a change carried out using the
+			    "Sync to minute" button.</li>
+			<li>Changing the server, signing out, changing hidden event visibility,
+			    and changing the regatta now properly ensures that the
+			    content is refreshed based on the new settings.</li>
+		</ul>
+
+		<h5 class="articleSubheadline">May 2016</h5>
+
+		<ul class="bulletList">
+			<li>A bug related to entering the passing instructions for a waypoint in the "by-marks"
+			    course designer has been fixed. At the same time, for now the passing instructions
+			    "Offset" and "Fixed Bearing" are no longer offered until the application really offers
+			    support for them, particularly during mark passing calculation.</li>
+			<li>Swiping the start time button to the left to reach the other buttons for entering
+			    the racing procedure, start mode flag, etc. now works reliably, also in case
+			    of multi-touch which may have made the app crash before.</li>
+			<li>Regatta-specific preferences now properly take precedence over the device configuration.
+			    They are updated from the server when the regatta content is refreshed.</li>
+		</ul>
+		
+		<h5 class="articleSubheadline">April 2016</h5>
+
+		<ul class="bulletList">
+			<li>Whether or not result entry during or after the finishing phase is offered is now
+			    a preference under "REGATTA CONFIGURATION (DEFAULT)." The device configuration managed
+			    on the server can remotely manage this configuration setting. With this, it is possible
+			    to configure up-front whether a race officer is offered the possibility to manage
+			    results directly from the Race Manager app. This should <em>not</em> be used if an
+			    external, official regatta management system is being used to capture and manage
+			    the official scores.</li>
+		</ul>
+		
+		<h5 class="articleSubheadline">March 2016</h5>
+
+		<ul class="bulletList">
+			<li>Added sign in/sign out into the app. The user has to be create in the backend, with leaderboard
+				permission. Without the permission, the user can't send data to the server.</li>
+			<li>We changed the QR Code, so it includes the user's access token. There is also a possibility to manual login into
+				the app, if no QR Code is available. <b>The app doesn't store username and password.</b></li>
+			<li>The behavior of the red share icon has also slightly changed. If it is red and tapped, it will call the server
+				to check, if the users access token is still valid. If not the server response with a 401 error code and the user
+				has to enter his credentials.</li>
+			<li>You can force a user sign out within the overflow menu, if you need other user credentials.</li>
+		</ul>
+
+		<h5 class="articleSubheadline">February 2016</h5>
+
+		<ul class="bulletList">
+			<li>Added responsive design. You can now use the app on every tablet as well as on <b>mobile phones</b>.</li>
+			<li>We returned the group races switch to ESS races. It's located in the left panel bar (or top on phones).</li>
+			<li>The behavior of ESS course designer is compact in two lists. The marks and rounding can be easily changed by tapping on it.</li>
+		</ul>
+
+		<h5 class="articleSubheadline">August 2015</h5>
+
+		<ul class="bulletList">
+		    <li>Fixes for Android Lollipop were deployed. They solve font size and other display issues.
+		    </li>
+		    <li>The true wind direction provided during wind entry in the app is now interpreted to be a
+		        direction based on magnetic north, not true north. This is common practice as wind readings
+		        are typically produced on a start vessel based on a magnetic compass device.
+		    </li>
+		</ul>
+
+		<h5 class="articleSubheadline">July 2015</h5>
+
+		<ul class="bulletList">
+		    <li>Added support for dependent start times. Races can set their start time relative
+		    	to another race's start time. Caveat: Currently, when aborting races on which other
+		    	races depend, requires either aborting the dependent races before or setting an
+		    	absolute start time on the dependent races.
+		    </li>
+		</ul>
+
+		<h5 class="articleSubheadline">June 2015</h5>
+
+		<ul class="bulletList">
+		    <li>Major overhaul of the entire race committee app. The app has a completely new user interface
+		        with a light and a dark theme. The functionality generally remained unchanged.
+		    </li>
+		</ul>
+
+		<h5 class="articleSubheadline">July 2014</h5>
+		<ul class="bulletList">
+			<li>The race list is now ordered by fleets. This means we display the same order of our backend system in the RCApp.
+			Now the race officials can easily use the order which is displayed and do not have to care about the fleet color order.</li>
+		</ul>
+
+		<h5 class="articleSubheadline">March 2014</h5>
+		<ul class="bulletList">
+			<li>Moved away from using a label to create a course and introduced a big button that
+			eases the input of courses.</li>
+			
+			<li>Added a new countdown button for ESS and RRS26 start configurations. Using this
+			button one can easily set the start time of a race to exactly the time the countdown starts.</li>
+		</ul>
+		
+		<h5 class="articleSubheadline">January 2014</h5>
+		<ul class="bulletList">
+			<li>Server-based device configuration</li>
+
+			<li>Device initialization with QR codes</li>
+
+			<li>Automatic upgrades and downgrades to match server software version</li>
+
+			<li>Multiple devices can work on the same race (e.g., start vessel, finishing vessel, shore control)</li>
+		</ul>
+	</div>
+</div>
+</body>
+</html>

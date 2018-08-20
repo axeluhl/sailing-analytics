@@ -640,7 +640,13 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         echo "TARGET_API_VERSION=$TARGET_API_VERSION"
         sdkmanager --update && yes | sdkmanager --licenses
         sdkmanager "build-tools;$BUILD_TOOLS_VERSION" "platform-tools" "platforms;android-$TARGET_API_VERSION" "tools"
-        
+
+        # TODO: make distinction available for gradle builds as well
+        # Uncomment the following line for testing an artifact stages in the SAP-central Nexus system:
+        # mobile_extra="-P -with-not-android-relevant -P with-mobile -P use-staged-third-party-artifacts -Dmaven.repo.local=${TMP}/temp_maven_repo"
+        # Use the following line for regular builds with no staged Nexus artifacts:
+        # mobile_extra="-P -with-not-android-relevant -P with-mobile"
+
         ./gradlew build
         if [[ ${PIPESTATUS[0]} != 0 ]]; then
             exit 100
