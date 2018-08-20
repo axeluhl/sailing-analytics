@@ -35,24 +35,17 @@ public class ColorMapper implements ValueRangeFlexibleBoundariesChangedListener 
     /**
      * Returns a string with a rgba representation of a the value mapped to the color spectrum in case {@link #isGrey}
      * <c> = true </c> or the hsl representation of the color in case {@link #isGrey} <c> = false </c>. If called with a
-     * value outside the {@link #valueRange} an {@link IllegalArgumentException} will be thrown.
+     * value outside the {@link #valueRange} the return will be <c>null</c>.
      */
     public String getColor(double value) {
         final String result;
-        try {
-            if (value < minValue || value > maxValue) {
-                throw new IllegalArgumentException("The value " + value + " is out of the value range: "
-                        + valueRange.getMinLeft() + " - " + valueRange.getMaxRight());
-            }
-        } catch (IllegalArgumentException e) {
-
-        } finally {
-            if (isGrey) {
-                result = "rgba(255,255,255," + Math.min(1.0, (value - minValue) / (maxValue - minValue)) + ")";
-            } else {
-                double h = (1 - (value - minValue) / (maxValue - minValue)) * 240;
-                result = "hsl(" + Math.round(h) + ", 100%, 50%)";
-            }
+        if (value < minValue || value > maxValue) {
+            result = null;
+        } else if (isGrey) {
+            result = "rgba(255,255,255," + Math.min(1.0, (value - minValue) / (maxValue - minValue)) + ")";
+        } else {
+            double h = (1 - (value - minValue) / (maxValue - minValue)) * 240;
+            result = "hsl(" + Math.round(h) + ", 100%, 50%)";
         }
         return result;
     }

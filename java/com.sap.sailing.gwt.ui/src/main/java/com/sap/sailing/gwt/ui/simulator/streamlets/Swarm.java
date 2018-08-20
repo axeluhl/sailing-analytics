@@ -78,7 +78,7 @@ public class Swarm implements TimeListener {
         timePoint = timer.getTime();
         cosineOfAverageLatitude = 1.0; // default to equator
         diffPx = new Vector(0, 0);
-        valueRange = new ValueRangeFlexibleBoundaries(/*wind speed in knots*/ 0.0,/*wind speed in knots*/ 60.0, /*percentage*/ 0.15);
+        valueRange = new ValueRangeFlexibleBoundaries(/*wind speed in knots*/ 0.0,/*wind speed in knots*/ 60.0, /*percentage*/ 0.2);
         colorMapper = new ColorMapper(valueRange, !colored);
     }
     
@@ -280,13 +280,6 @@ public class Swarm implements TimeListener {
                 particle.stepsToLive--;
                 if ((particle.stepsToLive > 0) && (this.field.inBounds(particle.currentPosition))) {
                     particle.v = field.getVector(particle.currentPosition, timePoint);
-                    final double length = particle.v.length();
-                    if (length > maxSpeedInKnots) {
-                        maxSpeedInKnots = length;
-                    }
-                    if (length < minSpeedInKnots) {
-                        minSpeedInKnots = length;
-                    }
                 } else {
                     particle.v = null;
                 }
@@ -294,11 +287,20 @@ public class Swarm implements TimeListener {
                 // particle timed out (age became 0) or was never created (e.g., weight too low); try to create a new one
                 particles[idx] = this.createParticle();
             }
+            if (particles[idx] != null && particles[idx].v != null) {
+                final double length = particles[idx].v.length();
+                if (length > maxSpeedInKnots) {
+                    maxSpeedInKnots = length;
+                }
+                if (length < minSpeedInKnots) {
+                    minSpeedInKnots = length;
+                }
+            }
         }
         if (minSpeedInKnots <= maxSpeedInKnots) {
             valueRange.setMinMax(minSpeedInKnots, maxSpeedInKnots);
-            drawSwarm();
         }
+        drawSwarm();
         return true;
     }
     
