@@ -88,7 +88,3 @@ We use the Highcharts library to present graphs to the user. These graphs are us
 *	The GWT Highcharts Wrapper – The source code can be found in our project and it’s slightly modified to match our scenario
 *	The actual Highcharts Library
 *	The jQuery Library
-
-To support polar diagrams we use version 3.5.0 of the wrapper. This version is tested with version 2.3.3 of the Highcharts library. We tried using 2.3.5 but that led to problems when resizing the RaceBoard.
-
-Highcharts uses the jQuery library. We do know that version 1.4.2 does NOT work with the versions of Highcharts mentioned above. Multiple yAxis are not initialized correctly. We know use version 1.5.2 of this library.
