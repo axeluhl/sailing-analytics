@@ -6,16 +6,16 @@ import com.sap.sse.common.TimePoint;
 public interface RaceLogTagEvent extends RaceLogEvent, Revokable {
 
     String getTag();
-    
+
     String getUsername();
-    
+
     String getComment();
-    
-    String getImageURL(); 
-    
+
+    String getImageURL();
+
     boolean isVisibleForPublic();
 
     void markAsRevoked(TimePoint revokedAt);
-    
+
     TimePoint getRevokedAt();
 }

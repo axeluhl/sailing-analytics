@@ -21,7 +21,9 @@ public class TagsFilterSetsJsonDeSerializer implements GwtJsonDeSerializer<TagFi
     @Override
     public JSONObject serialize(TagFilterSets filterSets) {
         JSONObject result = new JSONObject();
-        result.put(FIELD_ACTIVE_FILTERSET, filterSets.getActiveFilterSet() != null ? new JSONString(filterSets.getActiveFilterSet().getName()) : JSONNull.getInstance());
+        result.put(FIELD_ACTIVE_FILTERSET,
+                filterSets.getActiveFilterSet() != null ? new JSONString(filterSets.getActiveFilterSet().getName())
+                        : JSONNull.getInstance());
         JSONArray filterSetArray = new JSONArray();
         result.put(FIELD_FILTERSETS, filterSetArray);
         int i = 0;
@@ -35,10 +37,10 @@ public class TagsFilterSetsJsonDeSerializer implements GwtJsonDeSerializer<TagFi
                 JSONArray filterArray = new JSONArray();
                 filterSetObject.put(FIELD_FILTERS, filterArray);
                 int j = 0;
-                for (FilterWithUI<TagDTO> filter: filterSet.getFilters()) {
+                for (FilterWithUI<TagDTO> filter : filterSet.getFilters()) {
                     // Remark: other filter types than ValueFilter's are not stored right now
-                    if(filter instanceof ValueFilter<?,?>) {
-                        ValueFilter<?,?> valueFilter = (ValueFilter<?,?>) filter;
+                    if (filter instanceof ValueFilter<?, ?>) {
+                        ValueFilter<?, ?> valueFilter = (ValueFilter<?, ?>) filter;
                         JSONObject filterObject = ValueFilterJsonDeSerializerUtil.serialize(valueFilter);
                         filterArray.set(j++, filterObject);
                     }
@@ -47,7 +49,7 @@ public class TagsFilterSetsJsonDeSerializer implements GwtJsonDeSerializer<TagFi
         }
         return result;
     }
-    
+
     @Override
     public TagFilterSets deserialize(JSONObject rootObject) {
         TagFilterSets result = null;
@@ -68,11 +70,13 @@ public class TagsFilterSetsJsonDeSerializer implements GwtJsonDeSerializer<TagFi
                 FilterSet<TagDTO, FilterWithUI<TagDTO>> filterSet = new FilterSet<>(filterSetNameValue.stringValue());
                 filterSet.setEditable(filterSetIsEditableValue.booleanValue());
                 result.addFilterSet(filterSet);
-                JSONArray filterArray = (JSONArray) filterSetValue.get(FIELD_FILTERS); 
-                for(int j = 0; j < filterArray.size(); j++) {
+                JSONArray filterArray = (JSONArray) filterSetValue.get(FIELD_FILTERS);
+                for (int j = 0; j < filterArray.size(); j++) {
                     JSONObject filterObject = (JSONObject) filterArray.get(j);
-                    JSONString filterType = (JSONString) filterObject.get(ValueFilterJsonDeSerializerUtil.FIELD_FILTER_TYPE);
-                    if (filterType != null && ValueFilterJsonDeSerializerUtil.VALUE_FILTER_TYPE.equals(filterType.stringValue())) {
+                    JSONString filterType = (JSONString) filterObject
+                            .get(ValueFilterJsonDeSerializerUtil.FIELD_FILTER_TYPE);
+                    if (filterType != null
+                            && ValueFilterJsonDeSerializerUtil.VALUE_FILTER_TYPE.equals(filterType.stringValue())) {
                         FilterWithUI<TagDTO> filterWithUI = TagValueFilterJsonDeSerializerUtil.deserialize(filterObject);
                         if (filterWithUI != null) {
                             filterSet.addFilter(filterWithUI);
@@ -82,7 +86,7 @@ public class TagsFilterSetsJsonDeSerializer implements GwtJsonDeSerializer<TagFi
             }
             // finally set the active filter set
             if (activeFilterSetName != null) {
-                for (FilterSet<TagDTO, FilterWithUI<TagDTO>> filterSet: result.getFilterSets()) {
+                for (FilterSet<TagDTO, FilterWithUI<TagDTO>> filterSet : result.getFilterSets()) {
                     if (activeFilterSetName.equals(filterSet.getName())) {
                         result.setActiveFilterSet(filterSet);
                         break;

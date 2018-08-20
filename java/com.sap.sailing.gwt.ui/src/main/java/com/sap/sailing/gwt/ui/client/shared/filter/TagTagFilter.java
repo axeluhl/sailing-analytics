@@ -18,43 +18,44 @@ public class TagTagFilter extends AbstractTextFilter<TagDTO> implements FilterWi
 
     @Override
     public boolean matches(TagDTO tag) {
-        if(value != null && operator != null) {
+        boolean result = false;
+        if (value != null && operator != null) {
             switch (operator.getOperator()) {
             case Contains:
-                if(tag.getTag().contains(value)) {
-                    return true;       
+                if (tag.getTag().contains(value)) {
+                    result = true;
                 }
                 break;
             case Equals:
-                if(tag.getTag().equals(value)) {
-                    return true;       
+                if (tag.getTag().equals(value)) {
+                    result = true;
                 }
                 break;
             case NotContains:
-                if(!tag.getTag().contains(value)) {
-                    return true;       
+                if (!tag.getTag().contains(value)) {
+                    result = true;
                 }
                 break;
             case NotEqualTo:
-                if(!tag.getTag().equals(value)) {
-                    return true;       
+                if (!tag.getTag().equals(value)) {
+                    result = true;
                 }
                 break;
             case EndsWith:
-                if(tag.getTag().endsWith(value)) {
-                    return true;       
+                if (tag.getTag().endsWith(value)) {
+                    result = true;
                 }
                 break;
             case StartsWith:
-                if(tag.getTag().startsWith(value)) {
-                    return true;       
+                if (tag.getTag().startsWith(value)) {
+                    result = true;
                 }
                 break;
-            default:    
-                throw new RuntimeException("Operator " + operator.getOperator().name() + " is not supported."); 
+            default:
+                throw new RuntimeException("Operator " + operator.getOperator().name() + " is not supported.");
             }
         }
-        return false;
+        return result;
     }
 
     @Override
@@ -86,9 +87,9 @@ public class TagTagFilter extends AbstractTextFilter<TagDTO> implements FilterWi
     @Override
     public String validate(StringMessages stringMessages) {
         String errorMessage = null;
-        if(value == null) {
+        if (value == null) {
             errorMessage = stringMessages.pleaseEnterAValue();
-        } 
+        }
         return errorMessage;
     }
 

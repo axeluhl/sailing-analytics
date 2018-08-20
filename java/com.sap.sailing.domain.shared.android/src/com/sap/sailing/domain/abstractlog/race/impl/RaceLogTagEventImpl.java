@@ -57,8 +57,13 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
         return username;
     }
 
+    @Override
+    public boolean isVisibleForPublic() {
+        return visibleForPublic;
+    }
+
     /**
-     * Only sets revokedAt if tag is not already revoked and given timepoint is not null.
+     * Only sets revokedAt if tag is not already revoked and given TimePoint is not null.
      */
     @Override
     public void markAsRevoked(TimePoint revokedAt) {
@@ -83,10 +88,6 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
     }
 
     @Override
-    public boolean isVisibleForPublic() {
-        return visibleForPublic;
-    }
-
     public boolean equals(Object obj) {
         if (this == obj)
             return true;

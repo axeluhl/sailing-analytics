@@ -10,7 +10,7 @@ import com.sap.sse.common.filter.TextOperator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public abstract class AbstractTagTextFilterUIFactory implements FilterUIFactory<TagDTO> {
-    
+
     protected List<TextOperator.Operators> supportedOperators;
     protected TextOperator.Operators defaultOperator;
     protected TextFilter<TagDTO> tagTextFilter;
@@ -24,9 +24,9 @@ public abstract class AbstractTagTextFilterUIFactory implements FilterUIFactory<
     protected ListBox createOperatorSelectionListBox(DataEntryDialog<?> dataEntryDialog) {
         ListBox operatorsListBox = dataEntryDialog.createListBox(false);
         int i = 0;
-        for(TextOperator.Operators op: supportedOperators) {
+        for (TextOperator.Operators op : supportedOperators) {
             operatorsListBox.addItem(FilterOperatorsFormatter.format(op), op.name());
-            if(tagTextFilter.getOperator() != null && tagTextFilter.getOperator().getName().equals(op.name())) {
+            if (tagTextFilter.getOperator() != null && tagTextFilter.getOperator().getName().equals(op.name())) {
                 operatorsListBox.setSelectedIndex(i);
             } else if (defaultOperator != null && defaultOperator.equals(op)) {
                 operatorsListBox.setSelectedIndex(i);

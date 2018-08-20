@@ -36,18 +36,18 @@ public abstract class AbstractTagsFilterSetDialog extends DataEntryDialog<Filter
     private Label tagsFiltersGridHeadline;
     private Label tagsFiltersGridFooter;
     private VerticalPanel mainPanel;
-    
+
     private final List<Widget> filterEditWidgets;
     private final List<FilterUIFactory<TagDTO>> filterUIFactories;
     private final List<Label> filterNameLabels;
     private final List<String> filterNames;
     private final List<Button> filterDeleteButtons;
-    
+
     protected static class TagsFilterSetValidator implements Validator<FilterSet<TagDTO, FilterWithUI<TagDTO>>> {
         private final StringMessages stringMessages;
         private final List<String> existingFilterSetNames;
-        
-        public TagsFilterSetValidator(List<String> existingFilterSetNames, StringMessages stringMessages){
+
+        public TagsFilterSetValidator(List<String> existingFilterSetNames, StringMessages stringMessages) {
             super();
             this.existingFilterSetNames = existingFilterSetNames;
             this.stringMessages = stringMessages;
@@ -57,17 +57,17 @@ public abstract class AbstractTagsFilterSetDialog extends DataEntryDialog<Filter
         public String getErrorMessage(FilterSet<TagDTO, FilterWithUI<TagDTO>> tagsFilterSet) {
             String errorMessage = null;
             int filterCount = tagsFilterSet.getFilters().size();
-            boolean nameNotEmpty = tagsFilterSet.getName() != null && tagsFilterSet.getName().length() > 0;
+            boolean nameNotEmpty = tagsFilterSet.getName() != null && !tagsFilterSet.getName().isEmpty();
             if (!nameNotEmpty) {
                 errorMessage = stringMessages.pleaseEnterAName();
             } else if (existingFilterSetNames.contains(tagsFilterSet.getName())) {
                 errorMessage = stringMessages.filterThisNameAlreadyExists();
-            } else if(filterCount < 1) {
+            } else if (filterCount < 1) {
                 errorMessage = stringMessages.addAtLeastOneFilterCriteria();
             } else {
-                for(FilterWithUI<TagDTO> filter: tagsFilterSet.getFilters()) {
+                for (FilterWithUI<TagDTO> filter : tagsFilterSet.getFilters()) {
                     errorMessage = filter.validate(stringMessages);
-                    if(errorMessage != null) {
+                    if (errorMessage != null) {
                         break;
                     }
                 }
@@ -78,14 +78,14 @@ public abstract class AbstractTagsFilterSetDialog extends DataEntryDialog<Filter
     }
 
     public AbstractTagsFilterSetDialog(FilterSet<TagDTO, FilterWithUI<TagDTO>> tagsFilterSet,
-            List<String> availableTagFilterNames, List<String> existingFilterSetNames, 
-            String dialogTitle, StringMessages stringMessages, DialogCallback<FilterSet<TagDTO, FilterWithUI<TagDTO>>> callback) {
+            List<String> availableTagFilterNames, List<String> existingFilterSetNames, String dialogTitle,
+            StringMessages stringMessages, DialogCallback<FilterSet<TagDTO, FilterWithUI<TagDTO>>> callback) {
         super(dialogTitle, null, stringMessages.ok(), stringMessages.cancel(),
                 new TagsFilterSetValidator(existingFilterSetNames, stringMessages), callback);
         this.tagsFilterSet = tagsFilterSet;
         this.availableTagFilterNames = availableTagFilterNames;
-        this.stringMessages = stringMessages; 
-        tagsFiltersGrid = new Grid(0,0);
+        this.stringMessages = stringMessages;
+        tagsFiltersGrid = new Grid(0, 0);
         tagsFiltersGridHeadline = new Label();
         tagsFiltersGridFooter = new Label();
         filterEditWidgets = new ArrayList<Widget>();
@@ -96,7 +96,7 @@ public abstract class AbstractTagsFilterSetDialog extends DataEntryDialog<Filter
         addFilterButton = new Button(stringMessages.add());
         filterListBox = createListBox(false);
     }
-    
+
     @Override
     protected Widget getAdditionalWidget() {
         mainPanel = new VerticalPanel();
@@ -105,7 +105,7 @@ public abstract class AbstractTagsFilterSetDialog extends DataEntryDialog<Filter
         mainPanel.add(hPanel);
         hPanel.add(new Label(stringMessages.filterName() + ":"));
         hPanel.add(filterSetNameTextBox);
-        
+
         filterListBox.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
@@ -114,7 +114,7 @@ public abstract class AbstractTagsFilterSetDialog extends DataEntryDialog<Filter
         });
 
         filterListBox.addItem(stringMessages.selectAFilterCriteria() + "...");
-        for(String filterName: availableTagFilterNames) {
+        for (String filterName : availableTagFilterNames) {
             FilterWithUI<?> filter = TagFilterWithUIFactory.createFilter(filterName);
             filterListBox.addItem(filter.getLocalizedName(stringMessages));
         }
@@ -134,13 +134,13 @@ public abstract class AbstractTagsFilterSetDialog extends DataEntryDialog<Filter
                 updateTagsFiltersGrid(mainPanel);
                 validateAndUpdate();
             }
-        });       
-       
+        });
+
         mainPanel.add(tagsFiltersGridHeadline);
         mainPanel.add(tagsFiltersGrid);
         mainPanel.add(tagsFiltersGridFooter);
-        
-        for(FilterWithUI<TagDTO> existingFilter: tagsFilterSet.getFilters()) {
+
+        for (FilterWithUI<TagDTO> existingFilter : tagsFilterSet.getFilters()) {
             FilterWithUI<TagDTO> filter = existingFilter.copy();
             FilterUIFactory<TagDTO> filterUIFactory = filter.createUIFactory();
             filterUIFactories.add(filterUIFactory);
@@ -161,10 +161,10 @@ public abstract class AbstractTagsFilterSetDialog extends DataEntryDialog<Filter
     }
 
     private Label createFilterNameAndLabel(FilterWithUI<TagDTO> filter) {
-        Label filterNameLabel = new Label(filter.getLocalizedName(stringMessages) + ":"); 
+        Label filterNameLabel = new Label(filter.getLocalizedName(stringMessages) + ":");
         filterNameLabels.add(filterNameLabel);
         filterNames.add(filter.getName());
-        return filterNameLabel; 
+        return filterNameLabel;
     }
 
     private Widget createFilterEditWidget(FilterUIFactory<TagDTO> filterUIFactory) {
@@ -174,15 +174,15 @@ public abstract class AbstractTagsFilterSetDialog extends DataEntryDialog<Filter
     }
 
     private Button createFilterDeleteButton(FilterWithUI<TagDTO> filter) {
-        final Button filterDeleteBtn = new Button(stringMessages.delete()); 
+        final Button filterDeleteBtn = new Button(stringMessages.delete());
         filterDeleteBtn.addStyleName("inlineButton");
         filterDeleteButtons.add(filterDeleteBtn);
         filterDeleteBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 int index = 0;
-                for(Button btn: filterDeleteButtons) {
-                    if(filterDeleteBtn == btn) {
+                for (Button btn : filterDeleteButtons) {
+                    if (filterDeleteBtn == btn) {
                         break;
                     }
                     index++;
@@ -196,9 +196,9 @@ public abstract class AbstractTagsFilterSetDialog extends DataEntryDialog<Filter
                 validateAndUpdate();
             }
         });
-        return filterDeleteBtn; 
+        return filterDeleteBtn;
     }
-    
+
     private void updateSelectedFilterInfo() {
         Filter<TagDTO> selectedFilter = getFilterFromSelectedFilterName();
         if (selectedFilter != null) {
@@ -216,7 +216,7 @@ public abstract class AbstractTagsFilterSetDialog extends DataEntryDialog<Filter
         }
         return result;
     }
-    
+
     private FilterWithUI<TagDTO> getFilterFromSelectedFilterName() {
         FilterWithUI<TagDTO> result = null;
         int selectedIndex = filterListBox.getSelectedIndex();
@@ -232,35 +232,35 @@ public abstract class AbstractTagsFilterSetDialog extends DataEntryDialog<Filter
         }
         return result;
     }
-    
+
     private void updateTagsFiltersGrid(VerticalPanel parentPanel) {
         int widgetIndex = parentPanel.getWidgetIndex(tagsFiltersGrid);
         parentPanel.remove(tagsFiltersGrid);
-        
+
         int filterCount = filterNameLabels.size();
-        boolean showGridHeadline = filterCount >= 1 ? true : false;  
-        boolean showGridFooter = filterCount >= 1 ? true : false;  
-        if(filterCount > 0) {
+        boolean showGridHeadline = filterCount >= 1 ? true : false;
+        boolean showGridFooter = filterCount >= 1 ? true : false;
+        if (filterCount > 0) {
             tagsFiltersGrid = new Grid(filterCount, 3);
             tagsFiltersGrid.setCellSpacing(4);
 
             tagsFiltersGridHeadline.setVisible(showGridHeadline);
             tagsFiltersGridFooter.setVisible(showGridFooter);
-            if(showGridHeadline) {
+            if (showGridHeadline) {
                 tagsFiltersGridHeadline.setText(stringMessages.tagFilterExplanation());
             }
-            if(showGridFooter) {
+            if (showGridFooter) {
                 tagsFiltersGridFooter.setText("");
             }
-            
-            for(int i = 0; i < filterCount; i++) {
+
+            for (int i = 0; i < filterCount; i++) {
                 tagsFiltersGrid.setWidget(i, 0, filterNameLabels.get(i));
                 tagsFiltersGrid.setWidget(i, 1, filterEditWidgets.get(i));
                 tagsFiltersGrid.setWidget(i, 2, filterDeleteButtons.get(i));
                 tagsFiltersGrid.getCellFormatter().setVerticalAlignment(i, 0, HasVerticalAlignment.ALIGN_MIDDLE);
                 tagsFiltersGrid.getCellFormatter().setVerticalAlignment(i, 1, HasVerticalAlignment.ALIGN_MIDDLE);
                 tagsFiltersGrid.getCellFormatter().setVerticalAlignment(i, 2, HasVerticalAlignment.ALIGN_MIDDLE);
-           }
+            }
         } else {
             tagsFiltersGrid = new Grid(0, 0);
         }

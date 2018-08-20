@@ -7,24 +7,19 @@ import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 
-/**
- * @author Julian Rendl (D067890)
- *
- */
-
 public class TagFilterSets {
     private List<FilterSet<TagDTO, FilterWithUI<TagDTO>>> filterSets;
-    
+
     private FilterSet<TagDTO, FilterWithUI<TagDTO>> activeFilterSet;
 
     public TagFilterSets() {
         filterSets = new ArrayList<FilterSet<TagDTO, FilterWithUI<TagDTO>>>();
         activeFilterSet = null;
     }
-    
+
     public FilterSet<TagDTO, Filter<TagDTO>> getActiveFilterSetWithGeneralizedType() {
         FilterSet<TagDTO, Filter<TagDTO>> result = null;
-        if(activeFilterSet != null) {
+        if (activeFilterSet != null) {
             result = new FilterSet<TagDTO, Filter<TagDTO>>(activeFilterSet.getName());
             for (Filter<TagDTO> filter : activeFilterSet.getFilters()) {
                 result.addFilter(filter);
@@ -32,7 +27,7 @@ public class TagFilterSets {
         }
         return result;
     }
-    
+
     public FilterSet<TagDTO, FilterWithUI<TagDTO>> getActiveFilterSet() {
         return activeFilterSet;
     }
@@ -47,7 +42,7 @@ public class TagFilterSets {
         }
         return result;
     }
-    
+
     public void setActiveFilterSet(FilterSet<TagDTO, FilterWithUI<TagDTO>> newActiveFilterSet) {
         if (newActiveFilterSet != null) {
             if (filterSets.contains(newActiveFilterSet)) {
@@ -67,12 +62,12 @@ public class TagFilterSets {
     }
 
     public boolean removeFilterSet(FilterSet<TagDTO, FilterWithUI<TagDTO>> filterSet) {
-        if(filterSet == activeFilterSet) {
+        if (filterSet == activeFilterSet) {
             activeFilterSet = null;
         }
         return filterSets.remove(filterSet);
     }
-    
+
     public List<FilterSet<TagDTO, FilterWithUI<TagDTO>>> getFilterSets() {
         return filterSets;
     }

@@ -18,19 +18,19 @@ public class TagUsernameFilterUIFactory extends AbstractTagTextFilterUIFactory {
 
     public TagUsernameFilterUIFactory(TagUsernameFilter tagUsernameFilter) {
         super(tagUsernameFilter, TextOperator.Operators.Equals);
-        
+
         supportedOperators.add(TextOperator.Operators.Equals);
         supportedOperators.add(TextOperator.Operators.NotEqualTo);
         supportedOperators.add(TextOperator.Operators.Contains);
         supportedOperators.add(TextOperator.Operators.NotContains);
         supportedOperators.add(TextOperator.Operators.StartsWith);
         supportedOperators.add(TextOperator.Operators.EndsWith);
-        
+
         valueTextBox = null;
         operatorSelectionListBox = null;
     }
 
-    @Override 
+    @Override
     public Widget createFilterUIWidget(DataEntryDialog<?> dataEntryDialog) {
         HorizontalPanel hp = new HorizontalPanel();
         hp.add(createOperatorSelectionWidget(dataEntryDialog));
@@ -40,7 +40,7 @@ public class TagUsernameFilterUIFactory extends AbstractTagTextFilterUIFactory {
     }
 
     private Widget createValueInputWidget(DataEntryDialog<?> dataEntryDialog) {
-        if(valueTextBox == null) {
+        if (valueTextBox == null) {
             valueTextBox = dataEntryDialog.createTextBox(tagTextFilter.getValue());
             valueTextBox.setVisibleLength(20);
             valueTextBox.setFocus(true);
@@ -49,7 +49,7 @@ public class TagUsernameFilterUIFactory extends AbstractTagTextFilterUIFactory {
     }
 
     private Widget createOperatorSelectionWidget(DataEntryDialog<?> dataEntryDialog) {
-        if(operatorSelectionListBox == null) {
+        if (operatorSelectionListBox == null) {
             operatorSelectionListBox = createOperatorSelectionListBox(dataEntryDialog);
         }
         return operatorSelectionListBox;
@@ -58,7 +58,7 @@ public class TagUsernameFilterUIFactory extends AbstractTagTextFilterUIFactory {
     @Override
     public FilterWithUI<TagDTO> createFilterFromUI() {
         TagUsernameFilter result = null;
-        if(valueTextBox != null && operatorSelectionListBox != null) {
+        if (valueTextBox != null && operatorSelectionListBox != null) {
             result = new TagUsernameFilter();
             TextOperator.Operators op = TextOperator.Operators.valueOf(operatorSelectionListBox.getValue(operatorSelectionListBox.getSelectedIndex()));
             TextOperator textOperator = new TextOperator(op);

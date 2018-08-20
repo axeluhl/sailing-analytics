@@ -8,7 +8,7 @@ import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sse.common.filter.TextOperator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
-public class TagTagFilterUIFactory extends AbstractTagTextFilterUIFactory { 
+public class TagTagFilterUIFactory extends AbstractTagTextFilterUIFactory {
     private TextBox valueTextBox;
     private ListBox operatorSelectionListBox;
 
@@ -18,19 +18,19 @@ public class TagTagFilterUIFactory extends AbstractTagTextFilterUIFactory {
 
     public TagTagFilterUIFactory(TagTagFilter tagTagFilter) {
         super(tagTagFilter, TextOperator.Operators.Equals);
-        
+
         supportedOperators.add(TextOperator.Operators.Equals);
         supportedOperators.add(TextOperator.Operators.NotEqualTo);
         supportedOperators.add(TextOperator.Operators.Contains);
         supportedOperators.add(TextOperator.Operators.NotContains);
         supportedOperators.add(TextOperator.Operators.StartsWith);
         supportedOperators.add(TextOperator.Operators.EndsWith);
-        
+
         valueTextBox = null;
         operatorSelectionListBox = null;
     }
 
-    @Override 
+    @Override
     public Widget createFilterUIWidget(DataEntryDialog<?> dataEntryDialog) {
         HorizontalPanel hp = new HorizontalPanel();
         hp.add(createOperatorSelectionWidget(dataEntryDialog));
@@ -40,7 +40,7 @@ public class TagTagFilterUIFactory extends AbstractTagTextFilterUIFactory {
     }
 
     private Widget createValueInputWidget(DataEntryDialog<?> dataEntryDialog) {
-        if(valueTextBox == null) {
+        if (valueTextBox == null) {
             valueTextBox = dataEntryDialog.createTextBox(tagTextFilter.getValue());
             valueTextBox.setVisibleLength(20);
             valueTextBox.setFocus(true);
@@ -49,7 +49,7 @@ public class TagTagFilterUIFactory extends AbstractTagTextFilterUIFactory {
     }
 
     private Widget createOperatorSelectionWidget(DataEntryDialog<?> dataEntryDialog) {
-        if(operatorSelectionListBox == null) {
+        if (operatorSelectionListBox == null) {
             operatorSelectionListBox = createOperatorSelectionListBox(dataEntryDialog);
         }
         return operatorSelectionListBox;
@@ -58,9 +58,10 @@ public class TagTagFilterUIFactory extends AbstractTagTextFilterUIFactory {
     @Override
     public FilterWithUI<TagDTO> createFilterFromUI() {
         TagTagFilter result = null;
-        if(valueTextBox != null && operatorSelectionListBox != null) {
+        if (valueTextBox != null && operatorSelectionListBox != null) {
             result = new TagTagFilter();
-            TextOperator.Operators op = TextOperator.Operators.valueOf(operatorSelectionListBox.getValue(operatorSelectionListBox.getSelectedIndex()));
+            TextOperator.Operators op = TextOperator.Operators
+                    .valueOf(operatorSelectionListBox.getValue(operatorSelectionListBox.getSelectedIndex()));
             TextOperator textOperator = new TextOperator(op);
             result.setOperator(textOperator);
             result.setValue(valueTextBox.getValue());
