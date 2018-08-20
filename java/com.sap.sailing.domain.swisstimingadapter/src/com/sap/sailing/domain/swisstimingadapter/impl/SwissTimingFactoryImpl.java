@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.swisstimingadapter.impl;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.HashMap;
@@ -91,7 +92,7 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     public SwissTimingRaceTracker createRaceTracker(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry,
             RaceLogResolver raceLogResolver, SwissTimingTrackingConnectivityParameters connectivityParams)
-            throws InterruptedException, UnknownHostException, IOException, ParseException {
+            throws InterruptedException, UnknownHostException, IOException, ParseException, URISyntaxException {
         return new SwissTimingRaceTrackerImpl(raceLogStore, regattaLogStore, windStore, domainFactory, this,
                 trackedRegattaRegistry, raceLogResolver, connectivityParams);
     }
@@ -100,7 +101,7 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     public RaceTracker createRaceTracker(Regatta regatta, WindStore windStore, DomainFactory domainFactory,
             TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, SwissTimingTrackingConnectivityParameters connectivityParams)
-            throws UnknownHostException, InterruptedException, IOException, ParseException {
+            throws UnknownHostException, InterruptedException, IOException, ParseException, URISyntaxException {
         return new SwissTimingRaceTrackerImpl(regatta, windStore, domainFactory, this, trackedRegattaRegistry,
                 raceLogStore, regattaLogStore, raceLogResolver, connectivityParams);
     }

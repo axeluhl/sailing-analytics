@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.mobile.places.event.overview.regatta;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
@@ -19,6 +20,7 @@ import com.sap.sailing.gwt.home.mobile.partials.quickfinder.Quickfinder;
 import com.sap.sailing.gwt.home.mobile.places.QuickfinderPresenter;
 import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase;
 import com.sap.sailing.gwt.home.mobile.places.event.overview.AbstractEventOverview;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -54,7 +56,9 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
     }
     
     private void setupProgress(Panel container) {
-        eventStepsUi = new EventSteps(currentPresenter.getRegatta());
+        final Function<String, PlaceNavigation<?>> racesNavigationFactory = prefSeriesName -> currentPresenter
+                .getRegattaRacesNavigation(getRegattaId(), prefSeriesName);
+        eventStepsUi = new EventSteps(currentPresenter.getRegatta(), racesNavigationFactory);
         refreshManager.add(eventStepsUi, new GetRegattaWithProgressAction(getEventId(), getRegattaId()));
         container.add(eventStepsUi);
     }
