@@ -101,6 +101,7 @@ public abstract class AbstractTracTracLiveTest extends StoredTrackBasedTest {
         try {
             final IRace race = ModelLocator.getEventFactory().createRace(new URI(paramUrl.toString()), (int) /* timeout in milliseconds */ Duration.ONE_MINUTE.asMillis());
             this.race = race;
+            logger.info("Using race "+race.getName()+" with ID "+race.getId()+" for this test");
             ISubscriberFactory subscriberFactory = SubscriptionLocator.getSusbcriberFactory();
             if (storedUri == null) {
                 eventSubscriber = subscriberFactory.createEventSubscriber(race.getEvent());

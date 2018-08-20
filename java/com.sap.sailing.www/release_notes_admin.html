@@ -24,6 +24,15 @@
 
                     <h2 class="articleSubheadline">July 2018</h2>
                     <ul class="bulletList">
+                        <li>The mark passing editor now uses a full date/time format for the mark passing time points.</li>
+                        <li>The TracTrac connector panel no longer shows a password visibly but uses a password text field.</li>
+                        <li>The SwissTiming connector can now handle an "Update URL" together with username/password access
+                            credentials which are used, if present, to send feedback requests about start times, race status
+                            and course changes to that URL.</li>
+                    </ul>
+
+                    <h2 class="articleSubheadline">July 2018</h2>
+                    <ul class="bulletList">
                         <li>When adding a YouTube video for tracked races ("Manage Media" in <tt>RaceBoard.html</tt> or "Tracked Races > Audio & Video" in <tt>AdminConsole.html</tt>) the respective video metadata is now read using YouTube API v3.
                             This functionality used to work some years ago using API v2 but was broken since this API version was discontinued some time ago.
                             Due to limitations of the new API we can't read the start timepoint of videos by now. You still need to provide this value manually.</li>
@@ -32,6 +41,23 @@
                             leaving the value empty and confirming the dialog.</li>
                         <li>Up to 15 discards can now be configured for series and leaderboards. This enables, e.g., "Wednesday Night" scenarios
                             where over the season, say, 20 races are run but due to changing participation only, say, the five best ones shall be scored.</li>
+                        <li>There is a new scoring scheme available to be selected upon regatta creation.
+                            The scoring scheme is named "Low Point System, First with two wins in medals is winner" and introduces the following specifics compared to the standard low point scheme:
+                            <ul>
+                                <li>Medal series does not feature doubling of points in the medal series by default.</li>
+                                <li>A competitor having two wins in the medal series is treated as overall winner.
+                                    If there is a carry forward column in the medal series, having one point there also counts as a win which means the best competitor in the qualification needs a win less than any other finalist to be the overall winner.</li>
+                                <li>If the medal series isn't started yet or no competitor has collected two wins, scoring by points is used.
+                                    This also applies if the regatta is aborted (e.g. due to weather conditions) before any competitor could win two races in the medal series.</li>
+                                <li>If two competitors have the same amount of points in the medal series the tie breaking criteria is the carry forward column of the medal series.
+                                    If there is no carry forward column in the medal series, the last medal race is used as tie breaking criteria.
+                                    For any non-medal series, the standard low point rules apply.</li>
+                            </ul>
+                        </li>
+                        <li>A TracAPI upgrade from version 3.10.1 to 3.11.0 unifies the handling of course updates and solves an issue
+                            observed with updating mark passing instructions.</li>
+                        <li>Bug fix for mark position editor, now providing consistent behavior during adding of new mark fixes</li>
+                        <li>Data Mining now more aggressively terminates running queries if needed.</li>
                     </ul>
 
                     <h2 class="articleSubheadline">June 2018</h2>

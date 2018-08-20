@@ -137,12 +137,11 @@ public class AutoplayHelper {
                     RaceTimesInfoDTO raceTimes = raceTimesInfos.get(raceIdentifier);
                     boolean notNullInRequiredValues = raceTimes != null && raceTimes.startOfTracking != null
                             && raceTimes.getStartOfRace() != null;
-                    
-                    boolean raceHasNotEndedOrOnlyRecentlyEnded = raceTimes.endOfRace == null
+                    Date endTime = raceTimes.getFinishedTime() != null ? raceTimes.getFinishedTime() : raceTimes.getEndOfRace();
+                    boolean raceHasNotEndedOrOnlyRecentlyEnded = endTime == null
                             || serverTimeDuringRequest.getTime()
-                                    - raceTimes.delayToLiveInMs < raceTimes.endOfRace.getTime()
+                                    - raceTimes.delayToLiveInMs < endTime.getTime()
                                             + waitTimeAfterRaceEndInMillis;
-
                     if (notNullInRequiredValues && raceHasNotEndedOrOnlyRecentlyEnded) {
                         long startTimeInMs = raceTimes.getStartOfRace().getTime();
                         long startIn = startTimeInMs - serverTimeDuringRequest.getTime() - raceTimes.delayToLiveInMs;
@@ -284,7 +283,7 @@ public class AutoplayHelper {
         RaceMapZoomSettings autoFollowRace = new RaceMapZoomSettings(typesToConsiderOnZoom, true);
         RaceMapSettings settings = new RaceMapSettings(autoFollowRace, new RaceMapHelpLinesSettings(), false, 15,
                 100000l, false, RaceMapSettings.DEFAULT_BUOY_ZONE_RADIUS, false, true, false, false, false, false,
-                RaceMapSettings.getDefaultManeuvers(), false, false, /* startCountDownFontSizeScaling */ 1.5);
+                RaceMapSettings.getDefaultManeuvers(), false, false, /* startCountDownFontSizeScaling */ 1.5, /* showManeuverLossVisualization */ false);
         RaceMapLifecycle raceMapLifecycle = new RaceMapLifecycle(StringMessages.INSTANCE);
         final CompetitorColorProvider colorProvider = new CompetitorColorProviderImpl(currentLiveRace, competitorsAndTheirBoats);
         RaceCompetitorSelectionModel competitorSelectionProvider = new RaceCompetitorSelectionModel(

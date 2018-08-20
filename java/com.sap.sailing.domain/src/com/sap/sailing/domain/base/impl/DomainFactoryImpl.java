@@ -58,16 +58,22 @@ import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsEightAndInterp
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsFive;
 import com.sap.sailing.domain.leaderboard.impl.HighPointWinnerGetsSix;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
+import com.sap.sailing.domain.leaderboard.impl.LowPointFirstToWinTwoRaces;
 import com.sap.sailing.domain.leaderboard.impl.LowPointForLeagueOverallLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPointTieBreakBasedOnLastSeriesOnly;
 import com.sap.sailing.domain.leaderboard.impl.LowPointWinnerGetsZero;
 import com.sap.sailing.domain.leaderboard.impl.LowPointWithAutomaticRDG;
 import com.sap.sailing.domain.leaderboard.impl.LowPointWithEliminationsAndRoundsWinnerGets07;
+import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
+import com.sap.sailing.domain.tracking.impl.CourseDesignUpdateHandler;
+import com.sap.sailing.domain.tracking.impl.FinishTimeUpdateHandler;
 import com.sap.sailing.domain.tracking.impl.MarkPassingImpl;
+import com.sap.sailing.domain.tracking.impl.RaceAbortedHandler;
+import com.sap.sailing.domain.tracking.impl.StartTimeUpdateHandler;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
 import com.sap.sailing.geocoding.ReverseGeocoder;
 import com.sap.sse.common.Distance;
@@ -144,6 +150,10 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
             return new LowPointTieBreakBasedOnLastSeriesOnly();
         case LOW_POINT_WITH_AUTOMATIC_RDG:
             return new LowPointWithAutomaticRDG();
+        case LOW_POINT_FIRST_TO_WIN_TWO_RACES:
+            return new LowPointFirstToWinTwoRaces();
+        default:
+            break;
         }
         throw new RuntimeException("Unknown scoring scheme type "+scoringSchemeType.name());
     }
@@ -196,11 +206,12 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         assert trackedRace != null;
         raceDTO.startOfRace = trackedRace.getStartOfRace() == null ? null : trackedRace.getStartOfRace().asDate();
         raceDTO.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
+        raceDTO.raceFinishedTime = trackedRace.getFinishedTime() == null ? null : trackedRace.getFinishedTime().asDate();
         raceDTO.status = new RaceStatusDTO();
         raceDTO.status.status = trackedRace.getStatus() == null ? null : trackedRace.getStatus().getStatus();
         raceDTO.status.loadingProgress = trackedRace.getStatus() == null ? 0.0 : trackedRace.getStatus().getLoadingProgress();
     }
-
+    
     @Override
     public TrackedRaceDTO createTrackedRaceDTO(TrackedRace trackedRace) {
         TrackedRaceDTO trackedRaceDTO = new TrackedRaceDTO();
@@ -389,11 +400,22 @@ public class DomainFactoryImpl extends SharedDomainFactoryImpl implements Domain
         return result;
     }
     
+    @Override
     public List<CompetitorAndBoatDTO> getCompetitorDTOList(List<Pair<Competitor, Boat>> competitors) {
         List<CompetitorAndBoatDTO> result = new ArrayList<>();
         for (Pair<Competitor, Boat> competitorAndBoat : competitors) {
             result.add(convertToCompetitorAndBoatDTO(competitorAndBoat.getA(), competitorAndBoat.getB()));
         }
         return result;
+    }
+
+    @Override
+    public void addUpdateHandlers(DynamicTrackedRace trackedRace, CourseDesignUpdateHandler courseDesignHandler,
+            StartTimeUpdateHandler startTimeHandler, RaceAbortedHandler raceAbortedHandler,
+            final FinishTimeUpdateHandler finishTimeUpdateHandler) {
+        trackedRace.addCourseDesignChangedListener(courseDesignHandler);
+        trackedRace.addStartTimeChangedListener(startTimeHandler);
+        trackedRace.addRaceAbortedListener(raceAbortedHandler);
+        trackedRace.addListener(finishTimeUpdateHandler.getListener());
     }
 }

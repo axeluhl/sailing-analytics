@@ -6,7 +6,6 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.UrlBuilder;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -21,6 +20,8 @@ import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaOverviewContex
 import com.sap.sailing.gwt.settings.client.regattaoverview.RegattaRaceStatesSettings;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.settings.SettingsToUrlSerializer;
 
 public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
@@ -60,7 +61,7 @@ public class RegattaOverviewEntryPoint extends AbstractSailingEntryPoint  {
                 .deserializeFromCurrentLocation(new RegattaOverviewContextDefinition());
 
         if (regattaOverviewContextDefinition.getEvent() == null) {
-            Window.alert("Missing parameter");
+            Notification.notify("Missing parameter", NotificationType.ERROR);
             return;
         }
 

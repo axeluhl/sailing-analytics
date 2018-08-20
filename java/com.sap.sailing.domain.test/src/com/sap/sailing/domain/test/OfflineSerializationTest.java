@@ -137,8 +137,8 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
         
         DomainFactory receiverDomainFactory = new DomainFactoryImpl((srlid)->null);
         LeaderboardGroup clone = cloneBySerialization(leaderboardGroup, receiverDomainFactory);
-        assertEquals(FACTOR, overallLeaderboard.getRaceColumnByName("Test Leaderboard").getFactor(), 0.00000001);
-        assertEquals(FACTOR, clone.getOverallLeaderboard().getRaceColumnByName("Test Leaderboard").getFactor(), 0.00000001);
+        assertEquals(FACTOR, overallLeaderboard.getScoringScheme().getScoreFactor(overallLeaderboard.getRaceColumnByName("Test Leaderboard")), 0.00000001);
+        assertEquals(FACTOR, clone.getOverallLeaderboard().getScoringScheme().getScoreFactor(clone.getOverallLeaderboard().getRaceColumnByName("Test Leaderboard")), 0.00000001);
     }
     
     @Test

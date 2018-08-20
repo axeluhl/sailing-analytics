@@ -10,12 +10,13 @@ import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.PasswordTextBoxWithWatermark;
 import com.sap.sse.gwt.client.controls.TextBoxWithWatermark;
 import com.sap.sse.gwt.client.dialog.DialogUtils;
@@ -85,20 +86,20 @@ public class RegisterView extends Composite {
                 if (caught instanceof UserManagementException) {
                     String message = ((UserManagementException) caught).getMessage();
                     if (UserManagementException.USER_ALREADY_EXISTS.equals(message)) {
-                        Window.alert(stringMessages.userAlreadyExists(usernameTextBox.getText()));
+                        Notification.notify(stringMessages.userAlreadyExists(usernameTextBox.getText()), NotificationType.ERROR);
                     }
                 } else {
-                    Window.alert(stringMessages.errorCreatingUser(usernameTextBox.getText(), caught.getMessage()));
+                    Notification.notify(stringMessages.errorCreatingUser(usernameTextBox.getText(), caught.getMessage()), NotificationType.ERROR);
                 }
             }
 
             @Override
             public void onSuccess(UserDTO result) {
                 if (result != null) {
-                    Window.alert(stringMessages.signedUpSuccessfully(result.getName()));
+                    Notification.notify(stringMessages.signedUpSuccessfully(result.getName()), NotificationType.SUCCESS);
                     closeWindow();
                 } else {
-                    Window.alert(stringMessages.unknownErrorCreatingUser(usernameTextBox.getText()));
+                    Notification.notify(stringMessages.unknownErrorCreatingUser(usernameTextBox.getText()), NotificationType.ERROR);
                 }
             }
         });

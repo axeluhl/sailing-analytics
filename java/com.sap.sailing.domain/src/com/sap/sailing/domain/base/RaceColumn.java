@@ -163,14 +163,6 @@ public interface RaceColumn extends Named {
     void releaseTrackedRace(Fleet fleet);
     
     /**
-     * Usually, the scores in each leaderboard column count as they are for the overall score. However, if a column is
-     * a medal race column it usually counts double. Under certain circumstances, columns may also count with factors different
-     * from 1 or 2. For example, we've seen cases in the Extreme Sailing Series where the race committee defined that in the
-     * overall series leaderboard the last two columns each count 1.5 times their scores.
-     */
-    double getFactor();
-    
-    /**
      * By default, a competitor's total score is computed by summing up the non-discarded total points of each race
      * across the leaderboard, considering the {@link RaceColumn#getFactor() column factors}. Some race columns,
      * however, are defined such that participating competitors start with a zero score from this race column on. If

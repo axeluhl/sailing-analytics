@@ -54,6 +54,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
     private CheckBox transparentHoverlines;
     private IntegerBox hoverlineStrokeWeight;
     private DoubleBox startCountDownFontSizeScalingBox;
+    private CheckBox maneuverLossVisualizationCheckBox;
     
     private boolean isSimulationEnabled;
     
@@ -233,6 +234,10 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
         vp.add(createHelpLineCheckBox(dialog, HelpLineTypes.STARTLINETOFIRSTMARKTRIANGLE));
         vp.add(createHelpLineCheckBox(dialog, HelpLineTypes.COURSEGEOMETRY));
         
+        maneuverLossVisualizationCheckBox = dialog.createCheckbox(stringMessages.maneuverLoss());
+        maneuverLossVisualizationCheckBox.setValue(initialSettings.isShowManeuverLossVisualization());
+        vp.add(maneuverLossVisualizationCheckBox);
+        
         transparentHoverlines = dialog.createCheckbox(stringMessages.transparentBufferLineOnHover());
         transparentHoverlines.ensureDebugId("transparentHoverlinesCheckBox");
         transparentHoverlines.setValue(initialSettings.getTransparentHoverlines());
@@ -304,7 +309,7 @@ public class RaceMapSettingsDialogComponent implements SettingsDialogComponent<R
                 buoyZoneRadius, showOnlySelectedCompetitorsCheckBox.getValue(), showSelectedCompetitorsInfoCheckBox.getValue(),
                 showWindStreamletColorsCheckbox.getValue(), showWindStreamletOverlayCheckbox.getValue(), showSimulationOverlay,
                 initialSettings.isShowMapControls(), maneuverTypesToShow, showDouglasPeuckerPointsCheckBox.getValue(),estimatedDuration,
-                startCountDownFontSizeScalingBox.getValue());
+                startCountDownFontSizeScalingBox.getValue(), maneuverLossVisualizationCheckBox.getValue());
     }
     
     private RaceMapZoomSettings getZoomSettings() {

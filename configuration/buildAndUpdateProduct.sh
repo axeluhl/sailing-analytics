@@ -631,9 +631,12 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         PATH=$PATH:$ANDROID_HOME/platform-tools
         SDK_MANAGER="$ANDROID_HOME/tools/bin/sdkmanager"
         if [ \! -x "$SDK_MANAGER" ]; then
-            SDK_MANAGER="$SDK_MANAGER/tools/bin/sdkmanager.bat"
+            SDK_MANAGER="$ANDROID_HOME/tools/bin/sdkmanager.bat"
         fi
         
+	# Uncomment the following line for testing an artifact stages in the SAP-central Nexus system:
+        # mobile_extra="-P -with-not-android-relevant -P with-mobile -P use-staged-third-party-artifacts -Dmaven.repo.local=${TMP}/temp_maven_repo"
+	# Use the following line for regular builds with no staged Nexus artifacts:
         mobile_extra="-P -with-not-android-relevant -P with-mobile"
         
         if [ $testing -eq 0 ]; then

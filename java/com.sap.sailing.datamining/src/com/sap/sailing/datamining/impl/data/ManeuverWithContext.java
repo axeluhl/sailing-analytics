@@ -107,8 +107,8 @@ public class ManeuverWithContext implements HasManeuverContext {
     }
 
     @Override
-    public Distance getManeuverLoss() {
-        return getManeuver().getManeuverLoss();
+    public Distance getManeuverLossDistanceLost() {
+        return getManeuver().getManeuverLoss() == null ? null : getManeuver().getManeuverLoss().getProjectedDistanceLost();
     }
 
     @Override
@@ -147,7 +147,7 @@ public class ManeuverWithContext implements HasManeuverContext {
     
     public Pair<Double, Double> getWindSpeedVsManeuverLoss(){
         Wind wind = getTrackedLegOfCompetitorContext().getTrackedRace().getWind(maneuver.getPosition(), getTimePointBeforeForAnalysis());
-        return new Pair<>(wind.getKnots(), getManeuverLoss().getMeters());
+        return new Pair<>(wind.getKnots(), getManeuverLossDistanceLost().getMeters());
     }
 
     @Override

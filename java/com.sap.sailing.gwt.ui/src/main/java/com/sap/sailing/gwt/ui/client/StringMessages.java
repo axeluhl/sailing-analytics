@@ -435,6 +435,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String insertWaypointAfterSelected();
     String addGate();
     String scoringSchemeLowPointSystem();
+    String scoringSchemeLowPointSystemFirstTwoWins();
+    String scoringSchemeLowPointSystemFirstTwoWinsDescription();
     String scoringSchemeHighPointSystem();
     String scoringSchemeLowPointWinnerGetsZero();
     String scoringSchemeWinnerGetsFive();
@@ -1440,7 +1442,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String courseGeometry();
     String degreesToWind(String diff);
     String miniLeeaderboardLegendText();
-    String currentOfTotal(int current, int total);
+    String currentOfTotalRaces(int current, @PluralCount(DefaultRule_1_0n.class) int total);
     String noFinishedRaces();
     String racesOverview();
     String listFormatLabel();
@@ -2067,6 +2069,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String multiVideoDoNoAdd();
     String multiVideoOffsetInput();
     String multiVideoDescription();
+    String maneuverAngle();
+    String jibeAngle();
+    String tackAngle();
     String multiUrlChangeMediaTrack();
     String multiUrlChangeReplace();
     String multiUrlChangeFind();
@@ -2078,10 +2083,18 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String resetZoom();
     String lastEvent(String locationOrVenue);
     String teaserOverallLinkToolTip();
+    String middleManeuverAngle();
+    String extrapolatedManeuverStartPosition();
+    String projectedExtrapolatedManeuverStartPosition();
+    String projectedManeuverEndPosition();
+    String bearingAtManeuverEndPosition();
     String gender();
     String manage2SailEventIdBox();
     String manage2SailEventURLBox();
     String manage2SailEventIdBoxTooltip();
     String manage2SailPort();
     String windFinderSpotCollectionsList();
+    String swissTimingUpdateURL();
+    String swissTimingUpdateUsername();
+    String swissTimingUpdatePassword();
 }

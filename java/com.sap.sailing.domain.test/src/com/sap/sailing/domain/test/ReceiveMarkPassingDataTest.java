@@ -8,6 +8,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,6 +37,7 @@ import com.tractrac.model.lib.api.event.IRaceCompetitor;
 import com.tractrac.subscription.lib.api.control.IControlPassingsListener;
 
 public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
+    private static final Logger logger = Logger.getLogger(ReceiveMarkPassingDataTest.class.getName());
     final private Object semaphor = new Object();
     final private IControlPassings[] firstData = new IControlPassings[1];
     private RaceDefinition raceDefinition;
@@ -54,6 +56,7 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
     @Before
     public void setupListener() {
         final IRace race = getTracTracRace();
+        logger.info("Setting up listener for race "+race.getName()+" with ID "+race.getId());
         Receiver receiver = new Receiver() {
             @Override
             public void stopPreemptively() {
@@ -82,10 +85,14 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
                     
                     @Override
                     public void gotControlPassings(IRaceCompetitor raceCompetitor, IControlPassings controlPassings) {
+                        logger.info("Received control passings "+controlPassings+" for competitor "+raceCompetitor);
                         if (first) {
+                            logger.info("Was first");
                             synchronized (semaphor) {
                                 firstData[0] = controlPassings;
+                                logger.info("Notifying all");
                                 semaphor.notifyAll();
+                                logger.info("unsubscribing");
                                 getRaceSubscriber().unsubscribeControlPassings(this);
                             }
                             first = false;
@@ -100,10 +107,13 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
         };
         List<Receiver> receivers = new ArrayList<Receiver>();
         receivers.add(receiver);
+        logger.info("Getting update receivers for TracTrac race "+getTracTracRace().getName()+" with ID "+getTracTracRace().getId()+
+                " where the event has as its first race "+getTracTracEvent().getRaces().iterator().next().getName()+" with ID "+
+                getTracTracEvent().getRaces().iterator().next().getId());
         for (Receiver r : DomainFactory.INSTANCE.getUpdateReceivers(
                 new DynamicTrackedRegattaImpl(DomainFactory.INSTANCE.getOrCreateDefaultRegatta(
                         EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, getTracTracRace(), /* trackedRegattaRegistry */null)),
-                        getTracTracEvent().getRaces().iterator().next(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 0l,
+                        getTracTracRace(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 0l,
                 /* simulator */null,
                 new DynamicRaceDefinitionSet() {
                     @Override
@@ -117,6 +127,7 @@ public class ReceiveMarkPassingDataTest extends AbstractTracTracLiveTest {
             addReceiverToStopDuringTearDown(r);
         }
         addListenersForStoredDataAndStartController(receivers);
+        logger.info("Waiting for race definition "+race.getName()+" with ID "+race.getId());
         raceDefinition = DomainFactory.INSTANCE.getAndWaitForRaceDefinition(race.getId());
         synchronized (semaphor) {
             while (firstData[0] == null) {

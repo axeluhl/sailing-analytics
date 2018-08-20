@@ -796,8 +796,8 @@ public class LeaderboardData extends ExportAction {
                 addNamedElementWithValue(maneuverInformation, "type", man.getType().toString());
                 addNamedElementWithValue(maneuverInformation, "position", maneuverCounter);
                 addNamedElementWithValue(maneuverInformation, "direction_change_in_degrees", man.getDirectionChangeInDegrees());
-                Distance maneuverLoss = man.getManeuverLoss();
-                addNamedElementWithValue(maneuverInformation, "loss_in_meters", maneuverLoss != null ? maneuverLoss.getMeters() : 0.0);
+                addNamedElementWithValue(maneuverInformation, "loss_in_meters",
+                        man.getManeuverLoss() != null ? man.getManeuverLoss().getProjectedDistanceLost().getMeters() : 0.0);
                 addNamedElementWithValue(maneuverInformation, "speed_before_in_knots", man.getSpeedWithBearingBefore().getKnots());
                 addNamedElementWithValue(maneuverInformation, "speed_after_in_knots", man.getSpeedWithBearingAfter().getKnots());
                 maneuversElement.addContent(maneuverInformation);

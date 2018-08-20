@@ -8,7 +8,6 @@ import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -23,6 +22,8 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -95,12 +96,12 @@ public class CompetitorToBoatMappingsDialog extends DataEntryDialog<Map<Competit
                             if (!isLinkedToBoat(selectedCompetitor, selectedBoat) && !isBoatUsed(selectedBoat)) {
                                 linkBoatToSelectedCompetitor(selectedCompetitor, selectedBoat);
                             } else {
-                                Window.alert(stringMessages.boatAlreadyLinked());
+                                Notification.notify(stringMessages.boatAlreadyLinked(), NotificationType.ERROR);
                             }
                         } else {
                             // check if boat is already used with another competitor
                             if (isBoatUsed(selectedBoat)) {
-                                Window.alert(stringMessages.boatAlreadyLinked());
+                                Notification.notify(stringMessages.boatAlreadyLinked(), NotificationType.ERROR);
                             } else {
                                 linkBoatToSelectedCompetitor(selectedCompetitor, selectedBoat);
                             }

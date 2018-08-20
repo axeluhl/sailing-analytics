@@ -44,7 +44,7 @@ public class ManeuverJsonSerializer implements JsonSerializer<Maneuver> {
                 : maneuver.getSpeedWithBearingAfter().getBearing().getDegrees());
         result.put(DIRECTION_CHANGE_IN_DEGREES, maneuver.getDirectionChangeInDegrees());
         result.put(MANEUVER_LOSS,
-                maneuver.getManeuverLoss() == null ? null : distanceSerializer.serialize(maneuver.getManeuverLoss()));
+                maneuver.getManeuverLoss() == null ? null : distanceSerializer.serialize(maneuver.getManeuverLoss().getProjectedDistanceLost()));
         result.put(POSITION_AND_TIME, gpsFixSerializer.serialize(maneuver));
         result.put(MAX_TURNING_RATE_IN_DEGREES_PER_SECOND, maneuver.getMaxTurningRateInDegreesPerSecond());
         result.put(AVG_TURNING_RATE_IN_DEGREES_PER_SECOND, maneuver.getAvgTurningRateInDegreesPerSecond());

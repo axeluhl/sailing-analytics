@@ -73,7 +73,7 @@ public class SeriesViewImpl extends Composite implements SeriesView {
 
     private void setupListContent(EventSeriesViewDTO event) {
         leaderboardUi.setAction(MSG.showAll(), currentPresenter.getMiniOverallLeaderboardNavigation());
-        refreshManager.add(leaderboardUi, new GetMiniOverallLeaderbordAction(event.getId(), 3));
+        refreshManager.add(leaderboardUi, new GetMiniOverallLeaderbordAction(event.getId(), event.getLeaderboardId(), 3));
     }
     
     private void setupStatisticsBox(EventSeriesViewDTO series) {

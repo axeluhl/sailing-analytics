@@ -46,8 +46,8 @@ public abstract class AbstractHighPointFirstGetsFixedOr8AndLastBreaksTie extends
     private double getHighestScore(List<com.sap.sse.common.Util.Pair<RaceColumn, Double>> scores) {
         double highestScore = 0;
         for (com.sap.sse.common.Util.Pair<RaceColumn, Double> score : scores) {
-            if ((score.getB() * score.getA().getFactor()) > highestScore) {
-                highestScore = score.getB() * score.getA().getFactor();
+            if ((score.getB() * getScoreFactor(score.getA())) > highestScore) {
+                highestScore = score.getB() * getScoreFactor(score.getA());
             }
         }
         return highestScore;

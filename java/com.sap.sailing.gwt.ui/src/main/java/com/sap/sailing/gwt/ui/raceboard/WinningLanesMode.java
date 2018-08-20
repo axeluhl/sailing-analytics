@@ -49,12 +49,10 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
         raceDetailsToShow.add(DetailType.RACE_TIME_TRAVELED);
         final SingleRaceLeaderboardSettings additiveSettings = LeaderboardSettingsFactory.getInstance().createNewSettingsWithCustomRaceDetails(raceDetailsToShow);
         ((RaceBoardComponentContext) leaderboardPanel.getComponentContext()).addModesPatching(leaderboardPanel, additiveSettings, new OnSettingsReloadedCallback<SingleRaceLeaderboardSettings>() {
-
             @Override
             public void onSettingsReloaded(SingleRaceLeaderboardSettings patchedSettings) {
                 leaderboardPanel.updateSettings(patchedSettings);
             }
-            
         });
     }
 
@@ -77,15 +75,13 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
                 defaultSettings.getManeuverTypesToShow(),
                 defaultSettings.isShowDouglasPeuckerPoints(),
                 defaultSettings.isShowEstimatedDuration(),
-                defaultSettings.getStartCountDownFontSizeScaling());
-        
+                defaultSettings.getStartCountDownFontSizeScaling(),
+                defaultSettings.isShowManeuverLossVisualization());
         ((RaceBoardComponentContext) raceMap.getComponentContext()).addModesPatching(raceMap, additiveSettings, new OnSettingsReloadedCallback<RaceMapSettings>() {
-
             @Override
             public void onSettingsReloaded(RaceMapSettings patchedSettings) {
                 raceMap.updateSettings(patchedSettings);
             }
-            
         });
     }
 
@@ -128,17 +124,16 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
             stopReceivingLeaderboard();
             adjustLeaderboardSettings();
         }
-        if (adjustedLeaderboardSettings && tailLength != null) {
-            adjustMapSettings();
-        }
         if (getLeaderboardForSpecificTimePoint() == null && tailLength != null && getLeaderboard() != null && getRaceColumn() != null) {
             loadLeaderboardForSpecificTimePoint(getLeaderboard().name, getRaceColumn().getName(), getTimer().getTime());
         }
         if (!adjustedCompetitorSelection && getLeaderboardForSpecificTimePoint() != null && getCompetitorsInRace() != null) {
             stopReceivingCompetitorsInRace();
             adjustedCompetitorSelection = true;
+            updateCompetitorSelection();
         }
-        updateCompetitorSelection();
+        if (adjustedLeaderboardSettings && tailLength != null && adjustedCompetitorSelection) {
+            adjustMapSettings();
+        }
     }
-
 }

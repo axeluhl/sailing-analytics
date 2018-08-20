@@ -1,0 +1,13 @@
+[Unit]
+Description=SAP Sailing Analytics Server
+Wants=apache2.service
+After=network.target apache2.service
+
+[Service]
+User=sailing
+Group=sailing
+EnvironmentFile=-/home/sailing/environment
+EnvironmentFile=-/home/sailing/servers/%i/environment
+WorkingDirectory=/home/sailing/servers/%i
+ExecStart=/home/sailing/start_foreground
+Restart=on-failure

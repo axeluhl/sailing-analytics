@@ -397,6 +397,7 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupBaseDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.LegInfoDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
+import com.sap.sailing.gwt.ui.shared.ManeuverLossDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.gwt.ui.shared.MarkPassingTimesDTO;
 import com.sap.sailing.gwt.ui.shared.PathDTO;
@@ -1046,7 +1047,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final TrackedRace trackedRace = raceColumn.getTrackedRace(fleet);
         raceInfoDTO.isTracked = trackedRace != null ? true : false;
         if (raceLog != null) {
-            ReadonlyRaceState state = ReadonlyRaceStateImpl.create(getService(), raceLog);
+            ReadonlyRaceState state = ReadonlyRaceStateImpl.getOrCreate(getService(), raceLog);
             TimePoint startTime = state.getStartTime();
             if (startTime != null) {
                 raceInfoDTO.startTime = startTime.asDate();
@@ -1503,7 +1504,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         assert from != null;
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         WindInfoForRaceDTO result = getAveragedWindInfo(new MillisecondsTimePoint(from), millisecondsStepWidth, numberOfFixes,
-                windSourceTypeNames, trackedRace, /* onlyUpToNewestEvent */ true, includeCombinedWindForAllLegMiddles);
+                windSourceTypeNames, trackedRace, /* onlyUpToNewestEvent FIXME why not pass through onlyUpToNewestEvent here??? */ true, includeCombinedWindForAllLegMiddles);
         return result;
     }
 
@@ -1842,7 +1843,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             boolean extrapolate, LegIdentifier simulationLegIdentifier,
             byte[] md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID,
             Date timeToGetTheEstimatedDurationFor, boolean estimatedDurationRequired) throws NoWindException {
-        Duration estimatedDuration = null;
         final HashSet<String> raceCompetitorIdsAsStrings;
         final TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         // if md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID is null, Arrays.equals will return false, and the
@@ -1855,10 +1855,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 raceCompetitorIdsAsStrings.add(c.getId().toString());
             }
         }
-        if(estimatedDurationRequired){
-            estimatedDuration = getEstimationForTargetTime(timeToGetTheEstimatedDurationFor, estimatedDuration, trackedRace);
+        final Duration estimatedDuration;
+        if (estimatedDurationRequired) {
+            estimatedDuration = getEstimationForTargetTime(timeToGetTheEstimatedDurationFor, trackedRace);
+        } else {
+            estimatedDuration = null;
         }
-        
         final Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatPositions = getBoatPositionsInternal(raceIdentifier,
                 fromPerCompetitorIdAsString, toPerCompetitorIdAsString, extrapolate);
         final CoursePositionsDTO coursePositions = getCoursePositions(raceIdentifier, date);
@@ -1869,18 +1871,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             SimulationService simulationService = getService().getSimulationService();
             simulationResultVersion = simulationService.getSimulationResultsVersion(simulationLegIdentifier);
         }
-       
         return new CompactRaceMapDataDTO(boatPositions, coursePositions, courseSidelines, quickRanks,
                 simulationResultVersion, raceCompetitorIdsAsStrings, estimatedDuration);
     }
 
-    private Duration getEstimationForTargetTime(Date time, Duration estimatedDuration, final TrackedRace trackedRace) {
-        if(trackedRace != null){
+    private Duration getEstimationForTargetTime(Date time, final TrackedRace trackedRace) {
+        Duration estimatedDuration = null;
+        if (trackedRace != null) {
             try {
                 estimatedDuration = trackedRace.getEstimatedTimeToComplete(new MillisecondsTimePoint(time)).getExpectedDuration();
             } catch (NotEnoughDataHasBeenAddedException | NoWindException e) {
-                e.printStackTrace();
-            } finally{
+                logger.log(Level.WARNING, "Problem computing the estimated race duration", e);
             }
         }
         return estimatedDuration;
@@ -2074,6 +2075,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             raceTimesInfo.newestTrackingEvent = trackedRace.getTimePointOfNewestEvent() == null ? null : trackedRace.getTimePointOfNewestEvent().asDate();
             raceTimesInfo.endOfTracking = trackedRace.getEndOfTracking() == null ? null : trackedRace.getEndOfTracking().asDate();
             raceTimesInfo.endOfRace = trackedRace.getEndOfRace() == null ? null : trackedRace.getEndOfRace().asDate();
+            raceTimesInfo.raceFinishedTime = trackedRace.getFinishedTime() == null ? null : trackedRace.getFinishedTime().asDate();
             raceTimesInfo.delayToLiveInMs = trackedRace.getDelayToLiveInMillis();
 
             Iterable<com.sap.sse.common.Util.Pair<Waypoint, com.sap.sse.common.Util.Pair<TimePoint, TimePoint>>> markPassingsTimes = trackedRace.getMarkPassingsTimes();
@@ -2602,7 +2604,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     }
                 }    
                 final FleetDTO fleetDTO = baseDomainFactory.convertToFleetDTO(fleet);
-                RaceColumnDTO raceColumnDTO = leaderboardDTO.addRace(raceColumn.getName(), raceColumn.getExplicitFactor(), raceColumn.getFactor(),
+                RaceColumnDTO raceColumnDTO = leaderboardDTO.addRace(raceColumn.getName(),
+                        raceColumn.getExplicitFactor(), leaderboard.getScoringScheme().getScoreFactor(raceColumn),
                         raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getRegatta().getName() : null,
                         raceColumn instanceof RaceColumnInSeries ? ((RaceColumnInSeries) raceColumn).getSeries().getName() : null,
                         fleetDTO, raceColumn.isMedalRace(), raceIdentifier, raceDTO, raceColumn instanceof MetaLeaderboardColumn);
@@ -2827,7 +2830,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Iterable<SwissTimingConfiguration> configs = swissTimingAdapterPersistence.getSwissTimingConfigurations();
         List<SwissTimingConfigurationDTO> result = new ArrayList<SwissTimingConfigurationDTO>();
         for (SwissTimingConfiguration stConfig : configs) {
-            result.add(new SwissTimingConfigurationDTO(stConfig.getName(), stConfig.getJsonURL(), stConfig.getHostname(), stConfig.getPort()));
+            result.add(new SwissTimingConfigurationDTO(stConfig.getName(), stConfig.getJsonURL(),
+                    stConfig.getHostname(), stConfig.getPort(), stConfig.getUpdateURL(), stConfig.getUpdateUsername(),
+                    stConfig.getUpdatePassword()));
         }
         return result;
     }
@@ -2865,9 +2870,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void storeSwissTimingConfiguration(String configName, String jsonURL, String hostname, Integer port) {
+    public void storeSwissTimingConfiguration(String configName, String jsonURL, String hostname, Integer port, String updateURL, String updateUsername, String updatePassword) {
         if (!jsonURL.equalsIgnoreCase("test")) {
-            swissTimingAdapterPersistence.storeSwissTimingConfiguration(swissTimingFactory.createSwissTimingConfiguration(configName, jsonURL, hostname, port));
+            swissTimingAdapterPersistence.storeSwissTimingConfiguration(swissTimingFactory.createSwissTimingConfiguration(configName, jsonURL, hostname, port, updateURL, updateUsername, updatePassword));
         }
     }
     
@@ -2883,7 +2888,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void trackWithSwissTiming(RegattaIdentifier regattaToAddTo, Iterable<SwissTimingRaceRecordDTO> rrs, String hostname, int port,
-            boolean trackWind, final boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm) throws Exception {
+            boolean trackWind, final boolean correctWindByDeclination, boolean useInternalMarkPassingAlgorithm,
+            String updateURL, String updateUsername, String updatePassword) throws InterruptedException, ParseException, Exception {
         logger.info("tracWithSwissTiming for regatta " + regattaToAddTo + " for race records " + rrs
                 + " with hostname " + hostname + " and port " + port);
         Map<String, RegattaResults> cachedRegattaEntriesLists = new HashMap<String, RegattaResults>();
@@ -2908,7 +2914,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             getSwissTimingAdapter().addSwissTimingRace(getService(), regattaToAddTo,
                     rr.raceId, rr.getName(), raceDescription, boatClass, hostname, port, startList,
                     getRaceLogStore(), getRegattaLogStore(),
-                    RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, useInternalMarkPassingAlgorithm, trackWind, correctWindByDeclination);
+                    RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, useInternalMarkPassingAlgorithm, trackWind,
+                    correctWindByDeclination, updateURL, updateUsername, updatePassword);
         }
     }
     
@@ -3625,16 +3632,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final SpeedWithBearingDTO speedBefore = createSpeedWithBearingDTO(maneuver.getSpeedWithBearingBefore());
             final SpeedWithBearingDTO speedAfter = createSpeedWithBearingDTO(maneuver.getSpeedWithBearingAfter());
             final double directionChangeInDegrees = maneuver.getDirectionChangeInDegrees();
-            final Double maneuverLossInMeters = maneuver.getManeuverLoss() == null ? null : maneuver.getManeuverLoss().getMeters();
             final double maxTurningRateInDegreesPerSecond = maneuver.getMaxTurningRateInDegreesPerSecond();
             final double averageTurningRateInDegreesPerSecond = maneuver.getAvgTurningRateInDegreesPerSecond();
             final double lowestSpeedInKnots = maneuver.getLowestSpeed().getKnots();
             final Date markPassingTimePoint = maneuver.isMarkPassing()
                     ? maneuver.getMarkPassing().getTimePoint().asDate() : null;
             final NauticalSide markPassingSide = maneuver.isMarkPassing() ? maneuver.getToSide() : null;
-            result.add(new ManeuverDTO(type, newTack, position, timepoint, timePointBefore, speedBefore, speedAfter,
-                    directionChangeInDegrees, maneuverLossInMeters, maxTurningRateInDegreesPerSecond,
-                    averageTurningRateInDegreesPerSecond, lowestSpeedInKnots, markPassingTimePoint, markPassingSide));
+            final SpeedWithBearing speedWithBearingBeforeManeuverLoss = maneuver.getManeuverLoss() == null ? null
+                    : maneuver.getManeuverLoss().getSpeedWithBearingBefore();
+            final Double middleManeuverAngle = maneuver.getManeuverLoss() == null ? null : maneuver.getManeuverLoss().getMiddleManeuverAngle().getDegrees();
+            final ManeuverLossDTO maneuverLoss = maneuver.getManeuverLoss() == null ? null
+                    : new ManeuverLossDTO(maneuver.getManeuverLoss().getManeuverStartPosition(),
+                            maneuver.getManeuverLoss().getManeuverEndPosition(), speedWithBearingBeforeManeuverLoss, middleManeuverAngle,
+                            maneuver.getManeuverLoss().getManeuverDuration(), maneuver.getManeuverLoss().getProjectedDistanceLost());
+            result.add(new ManeuverDTO(type, newTack, position, timepoint, timePointBefore, speedBefore,
+                    speedAfter, directionChangeInDegrees, maxTurningRateInDegreesPerSecond,
+                    averageTurningRateInDegreesPerSecond, lowestSpeedInKnots, markPassingTimePoint, markPassingSide, maneuverLoss));
         }
         return result;
     }

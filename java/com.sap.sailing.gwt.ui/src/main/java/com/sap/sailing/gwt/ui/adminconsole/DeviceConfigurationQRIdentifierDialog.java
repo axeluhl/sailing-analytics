@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.ui.adminconsole;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.URL;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -12,6 +11,8 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.impl.DeviceConfigurationQRCodeUtils;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 
 public class DeviceConfigurationQRIdentifierDialog extends DialogBox {
     public static final String rcAppApkPath = "/apps/com.sap.sailing.racecommittee.app.apk";
@@ -38,7 +39,7 @@ public class DeviceConfigurationQRIdentifierDialog extends DialogBox {
         @Override
         protected String generateEncodedQRCodeContent() {
             if (identifierBox.getValue().contains("#")) {
-                Window.alert(stringMessages.notCapableOfGeneratingACodeForIdentifier());
+                Notification.notify(stringMessages.notCapableOfGeneratingACodeForIdentifier(), NotificationType.ERROR);
             } else if (!identifierBox.getValue().isEmpty() && !serverBox.getValue().isEmpty()) {
                 String apkUrl = getServerUrlWithoutFinalSlash() + rcAppApkPath;
                 return DeviceConfigurationQRCodeUtils.composeQRContent(URL.encodeQueryString(identifierBox.getValue()), apkUrl, URL.encodeQueryString(accessToken));

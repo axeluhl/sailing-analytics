@@ -86,7 +86,7 @@ public class CourseUpdateTest extends AbstractTracTracLiveTest {
         domainRegatta = domainFactory.getOrCreateDefaultRegatta(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
                 getTracTracRace(), /* trackedRegattaRegistry */ null);
         trackedRegatta = new DynamicTrackedRegattaImpl(domainRegatta);
-        IRace tractracRace = getTracTracEvent().getRaces().iterator().next();
+        IRace tractracRace = getTracTracRace();
         ArrayList<Receiver> receivers = new ArrayList<Receiver>();
         receivers.add(new RaceCourseReceiver(domainFactory, trackedRegatta, getTracTracEvent(), tractracRace,
                 EmptyWindStore.INSTANCE, new DynamicRaceDefinitionSet() {

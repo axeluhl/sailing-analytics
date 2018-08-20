@@ -281,5 +281,5 @@ public abstract class AbstractLeaderboardImpl extends AbstractSimpleLeaderboardI
         RegattaLogBoatDeregistrator<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> deregisterer = new RegattaLogBoatDeregistrator<>(regattaLog, boats, regattaLogEventAuthorForAbstractLeaderboard);
         deregisterer.deregister(deregisterer.analyze());
     }
-
+    
 }

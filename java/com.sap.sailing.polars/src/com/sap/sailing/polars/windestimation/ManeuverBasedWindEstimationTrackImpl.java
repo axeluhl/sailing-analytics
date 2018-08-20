@@ -181,7 +181,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         private final double maneuverAngleDeg;
         private final SpeedWithBearing speedAtManeuverStart;
         private final Bearing middleManeuverCourse;
-        private final Distance maneuverLoss;
+        private final Distance maneuverLossDistanceLost;
         private Pair<Double, SpeedWithBearingWithConfidence<Void>>[] likelihoodAndTWSBasedOnSpeedAndAngleCache;
         private ScalableBearingAndScalableDouble scalableMiddleManeuverCourseAndManeuverAngleDegCache;
 
@@ -195,7 +195,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
             this.speedAtManeuverStart = maneuver.getSpeedWithBearingBefore();
             this.middleManeuverCourse = maneuver.getSpeedWithBearingBefore().getBearing()
                     .middle(maneuver.getSpeedWithBearingAfter().getBearing());
-            this.maneuverLoss = maneuver.getManeuverLoss();
+            this.maneuverLossDistanceLost = maneuver.getManeuverLoss() == null ? null : maneuver.getManeuverLoss().getProjectedDistanceLost();
             @SuppressWarnings("unchecked")
             Pair<Double, SpeedWithBearingWithConfidence<Void>>[] myLikelihoodAndTWSBasedOnSpeedAndAngleCache = (Pair<Double, SpeedWithBearingWithConfidence<Void>>[]) new Pair<?, ?>[ManeuverType
                     .values().length];
@@ -269,8 +269,8 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
             return result;
         }
 
-        public Distance getManeuverLoss() {
-            return maneuverLoss;
+        public Distance getManeuverLossDistanceLost() {
+            return maneuverLossDistanceLost;
         }
 
         /**
@@ -322,7 +322,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         result.append("\t");
         result.append(mc.getMiddleManeuverCourse().getDegrees());
         result.append("\t");
-        result.append(mc.getManeuverLoss() == null ? 0.0 : mc.getManeuverLoss().getMeters());
+        result.append(mc.getManeuverLossDistanceLost() == null ? 0.0 : mc.getManeuverLossDistanceLost().getMeters());
         result.append("\t");
         result.append(mc.getLikelihoodAndTWSBasedOnSpeedAndAngle(ManeuverType.TACK).getA());
         result.append("\t");

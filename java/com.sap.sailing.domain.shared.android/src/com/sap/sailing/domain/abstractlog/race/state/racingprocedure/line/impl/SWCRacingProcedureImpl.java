@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.abstractlog.race.state.racingprocedure.line.impl;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -69,7 +68,7 @@ public class SWCRacingProcedureImpl extends ConfigurableStartModeFlagRacingProce
     }
 
     @Override
-    protected Collection<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
+    public Iterable<RaceStateEvent> createStartStateEvents(TimePoint startTime) {
         return Arrays.<RaceStateEvent> asList(
                 new RaceStateEventImpl(startTime.minus(CLASS_AND_STARTMODE_UP_INTERVAL), RaceStateEvents.SWC_CLASS_AND_STARTMODE_UP),
                 new RaceStateEventImpl(startTime.minus(FIVE_MINUTES_FLAG_UP_INTERVAL), RaceStateEvents.SWC_FIVE_UP),
