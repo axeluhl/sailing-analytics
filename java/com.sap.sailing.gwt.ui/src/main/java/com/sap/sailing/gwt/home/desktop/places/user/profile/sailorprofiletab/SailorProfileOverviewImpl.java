@@ -129,11 +129,8 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
                 @Override
                 public void render(Context context, SailorProfileDTO value, SafeHtmlBuilder sb) {
                     for (BoatClassDTO boatclass : value.getBoatclasses()) {
-                        sb.appendHtmlConstant(
-                                "<div style=\"height: 40px; width: 40px; margin-left: 5px; display: inline-block; background-size: cover; background-repeat: no-repeat; background-position: center;background-image: url('"
-                                        + BoatClassImageResolver.getBoatClassIconResource(boatclass.getName())
-                                                .getSafeUri().asString()
-                                        + "');\"></div>");
+                        sb.append(SailorProfileResources.TEMPLATES.buildBoatclassIcon(BoatClassImageResolver
+                                .getBoatClassIconResource(boatclass.getName()).getSafeUri().asString()));
                     }
                 }
             }) {
