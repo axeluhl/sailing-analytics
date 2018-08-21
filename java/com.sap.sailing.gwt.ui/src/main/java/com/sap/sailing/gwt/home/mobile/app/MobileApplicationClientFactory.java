@@ -23,6 +23,7 @@ import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationView
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetClientFactory;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetView;
 import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetViewImpl;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.ClientFactoryWithDispatchAndError;
 import com.sap.sailing.gwt.ui.client.refresh.BusyView;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sse.gwt.client.mvp.ErrorView;
@@ -42,7 +43,7 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
 public class MobileApplicationClientFactory extends
         SecureClientFactoryImpl<ApplicationTopLevelView<ResettableNavigationPathDisplay>> implements
         ErrorAndBusyClientFactory, SearchResultClientFactory, ConfirmationClientFactory, PasswordResetClientFactory,
-        WithAuthenticationManager, WithUserService {
+        WithAuthenticationManager, WithUserService, ClientFactoryWithDispatchAndError {
     private final MobilePlacesNavigator navigator;
     private final SailingDispatchSystem dispatch = new SailingDispatchSystemImpl();
     private final AuthenticationManager authenticationManager;

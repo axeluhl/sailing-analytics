@@ -7,10 +7,14 @@ import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 import com.sap.sse.security.ui.authentication.decorator.NotLoggedInPresenter;
 
 public interface UserProfileViewBase extends IsWidget, NeedsAuthenticationContext {
-    
+
     public interface Presenter extends NotLoggedInPresenter {
         PlaceNavigation<? extends AbstractUserProfilePlace> getUserProfileNavigation();
+
         PlaceNavigation<? extends AbstractUserProfilePlace> getUserPreferencesNavigation();
+
         PlaceNavigation<? extends AbstractUserProfilePlace> getUserSettingsNavigation();
+
+        PlaceNavigation<? extends AbstractUserProfilePlace> getSailorProfilesNavigation();
     }
 }
