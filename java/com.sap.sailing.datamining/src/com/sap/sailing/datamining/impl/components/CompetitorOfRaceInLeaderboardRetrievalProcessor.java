@@ -24,7 +24,13 @@ public class CompetitorOfRaceInLeaderboardRetrievalProcessor extends
     protected Iterable<HasRaceResultOfCompetitorContext> retrieveData(HasLeaderboardContext element) {
         Collection<HasRaceResultOfCompetitorContext> raceResultsOfCompetitor = new ArrayList<>();
         for (RaceColumn raceColumn : element.getLeaderboard().getRaceColumns()) {
+            if (isAborted()) {
+                break;
+            }
             for (Competitor competitor : element.getLeaderboard().getCompetitors()) {
+                if (isAborted()) {
+                    break;
+                }
                 HasRaceResultOfCompetitorContext raceResultOfCompetitorContext = new RaceResultOfCompetitorWithContext(element, raceColumn, competitor,
                 		element.getLeaderboardGroupContext().getPolarDataService());
                 raceResultsOfCompetitor.add(raceResultOfCompetitorContext);

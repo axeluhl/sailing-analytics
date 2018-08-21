@@ -55,10 +55,6 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     
     private final AbstractLogEventAuthor author;
     
-    public static ReadonlyRaceState create(RaceLogResolver raceLogResolver, RaceLog raceLog) {
-        return create(raceLogResolver, raceLog, /* forRaceLogIdentifier */ null, Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState>emptyMap());
-    }
-
     /**
      * Creates a {@link RaceState} with the initial racing procedure type set to a fallback value and an empty configuration.
      */
@@ -82,7 +78,7 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     private RaceStateImpl(RaceLogResolver raceLogResolver, RaceLog raceLog, AbstractLogEventAuthor author, RaceStatusAnalyzer.Clock analyzersClock,
             RacingProcedureFactory procedureFactory) {
         super(raceLogResolver, raceLog, /* forRaceLogIdentifier */ null, analyzersClock, procedureFactory,
-                Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState>emptyMap(), /* update */ true);
+                Collections.<SimpleRaceLogIdentifier, ReadonlyRaceState>emptyMap());
         this.author = author;
     }
     

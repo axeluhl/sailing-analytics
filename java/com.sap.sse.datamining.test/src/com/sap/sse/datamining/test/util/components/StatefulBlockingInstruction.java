@@ -5,38 +5,54 @@ import com.sap.sse.datamining.impl.components.ProcessorInstructionPriority;
 
 public class StatefulBlockingInstruction<ResultType> extends StatefulProcessorInstruction<ResultType> {
     
-    protected final long blockDuration;
+    protected final long stepDuration;
+    protected final int numberOfSteps;
     protected final ResultType result;
+    
+    private boolean computeResultWasAborted;
 
-    public StatefulBlockingInstruction(ProcessorInstructionHandler<ResultType> handler, long blockDuration) {
-        this(handler, 0, blockDuration, null);
+    public StatefulBlockingInstruction(ProcessorInstructionHandler<ResultType> handler, long stepDuration, int numberOfSteps) {
+        this(handler, 0, stepDuration, numberOfSteps, null);
     }
     
-    public StatefulBlockingInstruction(ProcessorInstructionHandler<ResultType> handler, ProcessorInstructionPriority priority, long blockDuration, ResultType result) {
-        this(handler, priority.asIntValue(), blockDuration, result);
+    public StatefulBlockingInstruction(ProcessorInstructionHandler<ResultType> handler, ProcessorInstructionPriority priority, long stepDuration, int numberOfSteps, ResultType result) {
+        this(handler, priority.asIntValue(), stepDuration, numberOfSteps, result);
     }
     
-    public StatefulBlockingInstruction(ProcessorInstructionHandler<ResultType> handler, int priority, long blockDuration, ResultType result) {
+    public StatefulBlockingInstruction(ProcessorInstructionHandler<ResultType> handler, int priority, long stepDuration, int numberOfSteps, ResultType result) {
         super(handler, priority);
-        this.blockDuration = blockDuration;
+        this.stepDuration = stepDuration;
+        this.numberOfSteps = numberOfSteps;
         this.result = result;
     }
 
     @Override
     protected ResultType internalComputeResult() throws Exception {
-        actionBeforeBlock();
-        if (blockDuration > 0) {
-            Thread.sleep(blockDuration);
+        if (getTotalBlockDuration() > 0) {
+            actionBeforeBlock();
+            for (int i = 0; i < numberOfSteps; i++) {
+                if (isAborted()) {
+                    actionBeforeAbort();
+                    computeResultWasAborted = true;
+                    break;
+                }
+                Thread.sleep(stepDuration);
+            }
+            actionAfterBlock();
         }
-        actionAfterBlock();
         return result;
     }
-    
+
     protected void actionBeforeBlock() { }
+    protected void actionBeforeAbort() { }
     protected void actionAfterBlock() { }
     
-    public long getBlockDuration() {
-        return blockDuration;
+    public long getTotalBlockDuration() {
+        return stepDuration * numberOfSteps;
+    }
+    
+    public boolean computeResultWasAborted() {
+        return computeResultWasAborted;
     }
     
 }

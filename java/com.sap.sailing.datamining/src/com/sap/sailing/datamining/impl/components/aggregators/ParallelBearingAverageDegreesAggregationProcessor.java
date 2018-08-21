@@ -47,6 +47,9 @@ public class ParallelBearingAverageDegreesAggregationProcessor
     protected Map<GroupKey, Double> aggregateResult() {
         Map<GroupKey, Double> result = new HashMap<>();
         for (Entry<GroupKey, BearingCluster> clusterEntry : results.entrySet()) {
+            if (isAborted()) {
+                break;
+            }
             GroupKey key = clusterEntry.getKey();
             result.put(key, clusterEntry.getValue().getAverage().getDegrees());
         }

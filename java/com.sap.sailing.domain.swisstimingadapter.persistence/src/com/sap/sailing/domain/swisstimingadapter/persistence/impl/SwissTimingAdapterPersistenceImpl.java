@@ -37,8 +37,8 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
             DBCollection stConfigs = database.getCollection(CollectionNames.SWISSTIMING_CONFIGURATIONS.name());
             for (DBObject o : stConfigs.find()) {
                 SwissTimingConfiguration stConfig = loadSwissTimingConfiguration(o);
-                // the old swisstiming config was not based on a json URL -> ignore such configs
-                if(stConfig.getJsonURL() != null) {
+                // the old SwissTiming configuration was not based on a JSON URL -> ignore such configurations
+                if (stConfig.getJsonURL() != null) {
                     result.add(stConfig);
                 }
             }
@@ -57,8 +57,10 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         String jsonURL = (String) object.get(FieldNames.ST_CONFIG_JSON_URL.name());
         String hostname = (String) object.get(FieldNames.ST_CONFIG_HOSTNAME.name());
         Integer port = (Integer) object.get(FieldNames.ST_CONFIG_PORT.name());
-
-        return swissTimingFactory.createSwissTimingConfiguration(name, jsonURL, hostname, port);
+        String updateURL = (String) object.get(FieldNames.ST_CONFIG_UPDATE_URL.name());
+        String updateUsername = (String) object.get(FieldNames.ST_CONFIG_UPDATE_USERNAME.name());
+        String updatePassword = (String) object.get(FieldNames.ST_CONFIG_UPDATE_PASSWORD.name());
+        return swissTimingFactory.createSwissTimingConfiguration(name, jsonURL, hostname, port, updateURL, updateUsername, updatePassword);
     }
 
     @Override
@@ -96,6 +98,9 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         result.put(FieldNames.ST_CONFIG_JSON_URL.name(), swissTimingConfiguration.getJsonURL());
         result.put(FieldNames.ST_CONFIG_HOSTNAME.name(), swissTimingConfiguration.getHostname());
         result.put(FieldNames.ST_CONFIG_PORT.name(), swissTimingConfiguration.getPort());
+        result.put(FieldNames.ST_CONFIG_UPDATE_URL.name(), swissTimingConfiguration.getUpdateURL());
+        result.put(FieldNames.ST_CONFIG_UPDATE_USERNAME.name(), swissTimingConfiguration.getUpdateUsername());
+        result.put(FieldNames.ST_CONFIG_UPDATE_PASSWORD.name(), swissTimingConfiguration.getUpdatePassword());
 
         stConfigCollection.insert(result);
     }

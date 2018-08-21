@@ -7,7 +7,7 @@
 <listAttribute key="com.gwtplugins.gwt.eclipse.core.ENTRY_POINT_MODULES">
 <listEntry value="com.sap.sse.security.ui.Login"/>
 <listEntry value="com.sap.sse.security.ui.Register"/>
-<listEntry value="com.sap.sse.security.ui.UserManagement"/>
+<listEntry value="com.sap.sse.security.ui.UserManagementEntryPoint"/>
 <listEntry value="com.sap.sse.security.ui.OAuthLogin"/>
 <listEntry value="com.sap.sse.security.ui.EmailValidation"/>
 <listEntry value="com.sap.sse.security.ui.EditProfile"/>
@@ -38,7 +38,6 @@
 <listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#10;&lt;runtimeClasspathEntry internalArchive=&quot;/com.sap.sse.common/src&quot; path=&quot;3&quot; type=&quot;2&quot;/&gt;&#10;"/>
 <listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#10;&lt;runtimeClasspathEntry internalArchive=&quot;/com.sap.sse.datamining.annotations/src&quot; path=&quot;3&quot; type=&quot;2&quot;/&gt;&#10;"/>
 <listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#10;&lt;runtimeClasspathEntry internalArchive=&quot;/com.sap.sse.security.common/src&quot; path=&quot;3&quot; type=&quot;2&quot;/&gt;&#10;"/>
-<listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#10;&lt;runtimeClasspathEntry internalArchive=&quot;/com.sap.sse.security.common/resources&quot; path=&quot;3&quot; type=&quot;2&quot;/&gt;&#10;"/>
 <listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#10;&lt;runtimeClasspathEntry internalArchive=&quot;/com.sap.sse.shared.android/src&quot; path=&quot;3&quot; type=&quot;2&quot;/&gt;&#10;"/>
 <listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#10;&lt;runtimeClasspathEntry internalArchive=&quot;/org.json.simple/src&quot; path=&quot;3&quot; type=&quot;2&quot;/&gt;&#10;"/>
 <listEntry value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#10;&lt;runtimeClasspathEntry internalArchive=&quot;/com.sap.sailing.geocoding/src&quot; path=&quot;3&quot; type=&quot;2&quot;/&gt;&#10;"/>
@@ -105,7 +104,7 @@
 <stringAttribute key="org.eclipse.jdt.launching.CLASSPATH_PROVIDER" value="com.gwtplugins.gwt.eclipse.core.moduleClasspathProvider"/>
 <booleanAttribute key="org.eclipse.jdt.launching.DEFAULT_CLASSPATH" value="false"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="com.google.gwt.dev.DevMode"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-incremental -workDir &quot;${project_loc:com.sap.sse.security.ui}/.tmp/gwt-work&quot; -war &quot;${project_loc:com.sap.sse.security.ui}&quot; -noserver -remoteUI &quot;${gwt_remote_ui_server_port}:${unique_id}&quot; -logLevel INFO -codeServerPort 9876 -startupUrl /security/ui/Login.html -startupUrl /security/ui/EditProfile.html -startupUrl /security/ui/EmailValidation.html -startupUrl /security/ui/UserManagement.html -startupUrl /security/ui/Register.html -startupUrl /security/ui/Login.html com.sap.sse.security.ui.EditProfile com.sap.sse.security.ui.EmailValidation com.sap.sse.security.ui.OAuthLogin com.sap.sse.security.ui.UserManagement com.sap.sse.security.ui.Register com.sap.sse.security.ui.Login"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-incremental -workDir &quot;${project_loc:com.sap.sse.security.ui}/.tmp/gwt-work&quot; -war &quot;${project_loc:com.sap.sse.security.ui}&quot; -noserver -remoteUI &quot;${gwt_remote_ui_server_port}:${unique_id}&quot; -logLevel INFO -codeServerPort 9876 -startupUrl /security/ui/Login.html -startupUrl /security/ui/EditProfile.html -startupUrl /security/ui/EmailValidation.html -startupUrl /security/ui/UserManagement.html -startupUrl /security/ui/Register.html -startupUrl /security/ui/Login.html com.sap.sse.security.ui.EditProfile com.sap.sse.security.ui.EmailValidation com.sap.sse.security.ui.OAuthLogin com.sap.sse.security.ui.UserManagementEntryPoint com.sap.sse.security.ui.Register com.sap.sse.security.ui.Login"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="com.sap.sse.security.ui"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-XX:+UseG1GC -XX:+UseStringDeduplication -Dgwt.watchFileChanges=false -Xmx2048m -Dgwt-usearchives=false -Dgwt.persistentunitcache=false"/>
 <stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="${project_loc:com.sap.sailing.gwt.ui}/.tmp/gwt-work"/>

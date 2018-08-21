@@ -1441,7 +1441,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String courseGeometry();
     String degreesToWind(String diff);
     String miniLeeaderboardLegendText();
-    String currentOfTotal(int current, int total);
+    String currentOfTotalRaces(int current, @PluralCount(DefaultRule_1_0n.class) int total);
     String noFinishedRaces();
     String racesOverview();
     String listFormatLabel();
@@ -2094,4 +2094,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String manage2SailPort();
     String windFinderSpotCollectionsList();
     String audioFiles();
+    String swissTimingUpdateURL();
+    String swissTimingUpdateUsername();
+    String swissTimingUpdatePassword();
 }

@@ -1,11 +1,13 @@
 package com.sap.sailing.datamining.impl.components;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
 
 import com.sap.sailing.datamining.data.HasLeaderboardGroupContext;
 import com.sap.sailing.datamining.impl.data.LeaderboardGroupWithContext;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.components.Processor;
@@ -20,12 +22,15 @@ public class LeaderboardGroupRetrievalProcessor extends AbstractRetrievalProcess
 
     @Override
     protected Iterable<HasLeaderboardGroupContext> retrieveData(RacingEventService element) {
-        final PolarDataService polarDataService = element.getPolarDataService();
-        return element.getLeaderboardGroups()
-                .values()
-                .stream()
-                .map(lg -> new LeaderboardGroupWithContext(lg, polarDataService))
-                .collect(Collectors.toSet());
+        Set<HasLeaderboardGroupContext> data = new HashSet<>();
+        PolarDataService polarDataService = element.getPolarDataService();
+        for (LeaderboardGroup leaderboardGroup : element.getLeaderboardGroups().values()) {
+            if (isAborted()) {
+                break;
+            }
+            data.add(new LeaderboardGroupWithContext(leaderboardGroup, polarDataService));
+        }
+        return data;
     }
 
 }

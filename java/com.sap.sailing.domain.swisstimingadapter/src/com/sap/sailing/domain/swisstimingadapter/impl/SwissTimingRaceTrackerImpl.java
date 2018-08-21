@@ -3,6 +3,7 @@ package com.sap.sailing.domain.swisstimingadapter.impl;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.Collection;
@@ -63,6 +64,7 @@ import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
+import com.sap.sailing.domain.tracking.impl.UpdateHandler;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
@@ -110,53 +112,69 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
     private final TMDMessageQueue tmdMessageQueue;
 
     private final RaceLogResolver raceLogResolver;
+
+    /**
+     * If set to a non-{@code null}, non-{@link String#isEmpty() empty} value, updates about start time changes, course
+     * changes, etc. will be sent as REST requests to this URL, using the {@link #updateUsername} /
+     * {@link #updatePassword} as credentials.
+     */
+    private final String updateURL;
+
+    private final String updateUsername;
+
+    private final String updatePassword;
     
-    protected SwissTimingRaceTrackerImpl(String raceID, String raceName, String raceDescription, BoatClass boatClass,
-            String hostname, int port, StartList startList, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
+    protected SwissTimingRaceTrackerImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, DomainFactory domainFactory, SwissTimingFactory factory,
-            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, long delayToLiveInMillis,
-            boolean useInternalMarkPassingAlgorithm, SwissTimingTrackingConnectivityParameters connectivityParams) throws InterruptedException,
-            UnknownHostException, IOException, ParseException {
-        this(/* regatta */ null, raceID, raceName, raceDescription, boatClass, hostname, port, startList, windStore,
-                domainFactory, factory, trackedRegattaRegistry, raceLogStore, regattaLogStore, raceLogResolver,
-                delayToLiveInMillis, useInternalMarkPassingAlgorithm, connectivityParams);
+            TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver,
+            SwissTimingTrackingConnectivityParameters connectivityParams)
+            throws InterruptedException, UnknownHostException, IOException, ParseException, URISyntaxException {
+        this(/* regatta */ null, windStore, domainFactory, factory, trackedRegattaRegistry, raceLogStore, regattaLogStore, raceLogResolver, connectivityParams);
     }
 
-    protected SwissTimingRaceTrackerImpl(Regatta regatta, String raceID, String raceName, String raceDescription,
-            BoatClass boatClass, String hostname, int port, StartList startList, WindStore windStore,
-            DomainFactory domainFactory, SwissTimingFactory factory, TrackedRegattaRegistry trackedRegattaRegistry,
-            RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, RaceLogResolver raceLogResolver,
-            long delayToLiveInMillis, boolean useInternalMarkPassingAlgorithm, SwissTimingTrackingConnectivityParameters connectivityParams)
-            throws InterruptedException, UnknownHostException, IOException, ParseException {
+    protected SwissTimingRaceTrackerImpl(Regatta regatta, WindStore windStore, DomainFactory domainFactory,
+            SwissTimingFactory factory, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogStore raceLogStore,
+            RegattaLogStore regattaLogStore, RaceLogResolver raceLogResolver,
+            SwissTimingTrackingConnectivityParameters connectivityParams)
+            throws InterruptedException, UnknownHostException, IOException, ParseException, URISyntaxException {
         super(connectivityParams);
         this.raceLogResolver = raceLogResolver;
         this.tmdMessageQueue = new TMDMessageQueue(this);
         final Regatta effectiveRegatta;
         // Try to find a pre-associated event based on the Race ID
         if (regatta == null) {
-            effectiveRegatta = trackedRegattaRegistry.getRememberedRegattaForRace(raceID);
+            effectiveRegatta = trackedRegattaRegistry.getRememberedRegattaForRace(connectivityParams.getRaceID());
         } else {
             effectiveRegatta = regatta;
         }
         // if regatta is still null, no previous assignment of any of the races in this TracTrac event to a Regatta was
         // found; in this case, create a default regatta based on the TracTrac event data
         this.regatta = effectiveRegatta == null ? domainFactory.getOrCreateDefaultRegatta(raceLogStore, regattaLogStore,
-                raceID, boatClass, trackedRegattaRegistry) : effectiveRegatta;
-        this.connector = factory.getOrCreateSailMasterConnector(hostname, port, raceID, raceName, raceDescription, boatClass);
+                connectivityParams.getRaceID(), connectivityParams.getBoatClass(), trackedRegattaRegistry) : effectiveRegatta;
+        this.connector = factory.getOrCreateSailMasterConnector(connectivityParams.getHostname(), connectivityParams.getPort(),
+                connectivityParams.getRaceID(), connectivityParams.getRaceName(), connectivityParams.getRaceDescription(), connectivityParams.getBoatClass());
         this.domainFactory = domainFactory;
-        this.raceID = raceID;
-        this.raceName = raceName;
-        this.startList = startList;
-        this.startListFromManage2Sail = startList != null;
-        this.raceDescription = raceDescription;
-        this.boatClass = boatClass;
+        this.raceID = connectivityParams.getRaceID();
+        // start out with an empty course, so we don't depend on receiving the CCG message before the timeout
+        this.course = new CourseImpl(this.raceID, /* start with empty marks list */ Collections.emptyList());
+        this.raceName = connectivityParams.getRaceName();
+        this.startList = connectivityParams.getStartList();
+        this.startListFromManage2Sail = connectivityParams.getStartList() != null;
+        this.raceDescription = connectivityParams.getRaceDescription();
+        this.boatClass = connectivityParams.getBoatClass();
         this.windStore = windStore;
-        this.id = createID(raceID, hostname, port);
+        this.id = createID(connectivityParams.getRaceID(), connectivityParams.getHostname(), connectivityParams.getPort());
         connector.addSailMasterListener(this);
         trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(this.regatta);
-        this.delayToLiveInMillis = delayToLiveInMillis;
+        this.delayToLiveInMillis = connectivityParams.getDelayToLiveInMillis();
         this.competitorsByBoatId = new HashMap<String, Competitor>();
-        this.useInternalMarkPassingAlgorithm = useInternalMarkPassingAlgorithm;
+        this.useInternalMarkPassingAlgorithm = connectivityParams.isUseInternalMarkPassingAlgorithm();
+        this.updateURL = connectivityParams.getUpdateURL();
+        this.updateUsername = connectivityParams.getUpdateUsername();
+        this.updatePassword = connectivityParams.getUpdatePassword();
+        if (connectivityParams.getStartList() != null) {
+            createRaceDefinition(course);
+        }
     }
 
     @Override
@@ -406,7 +424,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
     }
 
     @Override
-    public void receivedStartList(String raceID, StartList startList) {
+    public void receivedStartList(String raceID, StartList startList) throws URISyntaxException {
     	// ignore STL messages if the startlist has been already provided by Manage2Sail  
     	if (!startListFromManage2Sail && this.raceID.equals(raceID)) {
             StartList oldStartList = this.startList;
@@ -435,7 +453,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
         }
     }
 
-    private void createRaceDefinition(Course course) {
+    private void createRaceDefinition(Course course) throws URISyntaxException {
         assert this.raceID.equals(raceID);
         assert startList != null;
         assert course != null;
@@ -465,8 +483,19 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
                     }
                 }, useInternalMarkPassingAlgorithm, raceLogResolver,
                 /* Not needed because the RaceTracker is not active on a replica */ Optional.empty());
+        addUpdateHandlers();
         notifyRaceCreationListeners();
         logger.info("Created SwissTiming RaceDefinition and TrackedRace for "+race.getName());
+    }
+
+    /**
+     * If a non-{@code null}, non-{@link String#isEmpty() empty} {@link #updateURL} is set, adds {@link UpdateHandler}s
+     * to the race that will forward changes to the race such as start time changes or course changes to the URL as REST
+     * requests.
+     */
+    private void addUpdateHandlers() throws URISyntaxException {
+        getDomainFactory().addUpdateHandlers(updateURL, updateUsername, updatePassword,
+                /* TODO using the regatta ID as the "eventId" for now... */ regatta.getId(), trackedRace.getRace(), trackedRace);
     }
     
     /**
@@ -481,7 +510,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
     }
 
     @Override
-    public void receivedCourseConfiguration(String raceID, Course course) {
+    public void receivedCourseConfiguration(String raceID, Course course) throws URISyntaxException {
         Course oldCourse = this.course;
         if (trackedRace == null) {
             if (oldCourse == null && startList != null) {

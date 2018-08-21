@@ -66,7 +66,8 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
         showCompetitorBoatInfoColumn = new BooleanSetting("showCompetitorBoatInfoColumn", this, false);
     }
     
-    public LeaderboardSettings() {
+    public LeaderboardSettings(boolean showCompetitorBoatInfoColumnDefault) {
+        showCompetitorBoatInfoColumn.setDefaultValue(showCompetitorBoatInfoColumnDefault);
     }
     
     /**

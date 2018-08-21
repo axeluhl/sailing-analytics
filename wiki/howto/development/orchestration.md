@@ -13,6 +13,17 @@ To build the software, just call `make build`. Make sure that all dependencies a
 To test the software, just call `make test` and to check the tests, call `make checktest`. There are also make steps for `fmt` and others. Just check out the Makefile in the project root. 
 The verbose output of the test logs is written to a folder called `testlogs` (which initially needs to be created).
 
+### Develop
+As the only Plugin for Eclipse is not really maintained anymore, we do not recommend to use it (goclipse). There is actually also no reason for it, as we are using Go and not Java or any OSGI features.
+As go is pretty simple and straight forward, you can use any Go supported IDE as stated on https://golang.org/doc/editors.html.
+
+Anyways, we recommend either using Goland (from IntelliJ), VS Code or Atom with respective go-plus Plugin.
+All you need to do after [installing go](https://golang.org/doc/install) and the IDE, is to make sure to set the above mentioned environment variable `PREFIX` to the code directory inside your IDE, so that tests can be successfully executed. Furthermore make sure to set the `GOPATH` correctly, create a directory (outside of the git workspace) and point the `GOPATH` to it. Then, add the code directory from git also to the `GOPATH`. This will result in the fact, that go will download all external dependencies with e.g. `make dep` or `go get` to the first folder and not put everything into the code directories. You will find all dependencies needed for the project inside the top lines for the `makefile`.
+
+An example for a correct `GOPATH` could be: `GOPATH=/home/steffen/.godep:/home/steffen/sailing-automation/`
+
+Happy Coding!
+
 ## Get and prepare the software
 You can get the current release of the orchestration software currently from [here](http://static.sapsailing.com/orchestration-0.0.1_7f7e4e40d30f21ffeb8495a370a540c23c496745.tgz) until a release model is decided. The releases of each build can be downloaded directly on hudson via archived artifacts. The currently set up hudson job is called `orchestration-master` and can be started manually (runs on the archive failover, where go is installed).
 
