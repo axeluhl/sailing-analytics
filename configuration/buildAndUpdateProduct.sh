@@ -26,10 +26,10 @@ find_project_home ()
     #editing the filepath, so it fits for eclipse #currently save works for cygwin, gitbash and linux
 	if [ "$OSTYPE" == "cygwin" ]; then
 		echo $1 | sed 's/^\/cygdrive\/\([a-zA-Z]\)\//\1:\//'
-	fi
-	
-	if [ "$OSTYPE" == "msys" ]; then
+	elif [ "$OSTYPE" == "msys" ]; then
 		echo $1 | sed 's/^\/\([a-zA-Z]\)\//\1:\//'
+	else
+	    echo $1
 	fi
 }
 
