@@ -14,6 +14,7 @@ import com.sap.sailing.gwt.ui.simulator.streamlets.ColorMapperChangedListener;
 import com.sap.sailing.gwt.ui.simulator.streamlets.ValueRangeFlexibleBoundaries;
 
 public class ColorMapperTest {
+    private static final double EPSILON = 0.00000001;
     ColorMapper colorMapper;
     ColorMapperChangedListener listener;
     ValueRangeFlexibleBoundaries valueRange;
@@ -30,6 +31,7 @@ public class ColorMapperTest {
         updateValueSet(valueSet);
         colorSet = new HashSet<>();
         fillColorSet();
+        
     }
 
     public void updateValueSet(Set<Integer> valueSet) {
@@ -46,8 +48,9 @@ public class ColorMapperTest {
     }
     
     @Test
-    public void testNullForValueOutOfBoundaries() {
-        assertTrue(colorMapper.getColor(-10.0) == null);
+    public void testForValueOutOfBoundaries() {
+        assertTrue(colorMapper.getColor(valueRange.getMinLeft() - EPSILON) == "hsl(0, 100%, 50%)");
+        assertTrue(colorMapper.getColor(valueRange.getMaxRight() + EPSILON) == "hsl(240, 100%, 50%)");
     }
 
     @Test
