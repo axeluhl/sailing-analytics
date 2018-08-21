@@ -2,9 +2,7 @@ package com.sap.sailing.gwt.home.shared.places.error;
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceTokenizer;
-import com.google.gwt.user.client.Window.Location;
 import com.sap.sailing.gwt.common.client.AbstractBasePlace;
-import com.sap.sailing.gwt.home.shared.app.AbstractPlaceNavigator;
 import com.sap.sailing.gwt.home.shared.app.HasMobileVersion;
 
 public class ErrorPlace extends AbstractBasePlace implements HasMobileVersion {
@@ -24,14 +22,32 @@ public class ErrorPlace extends AbstractBasePlace implements HasMobileVersion {
      */
     private final String errorMessageDetail;
 
+    /**
+     * Flag to determine whether this is the initial {@link ErrorPlace} or a reloaded one.
+     */
+    private final boolean reloadedError;
+
     public ErrorPlace(String errorMessageDetail) {
-        this.errorMessageDetail = errorMessageDetail;
+        this(false, errorMessageDetail);
     }
-    
+
+    private ErrorPlace(final boolean reloadedError, final String errorMessageDetail) {
+        this.errorMessageDetail = errorMessageDetail;
+        this.reloadedError = reloadedError;
+    }
+
     /**
      * Exception ocurred
      */
     private Throwable exception;
+
+    public boolean isReloadedError() {
+        return reloadedError;
+    }
+
+    public String getErrorMessageDetail() {
+        return errorMessageDetail;
+    }
 
     public Place getComingFrom() {
         return comingFrom;
@@ -43,10 +59,6 @@ public class ErrorPlace extends AbstractBasePlace implements HasMobileVersion {
 
     public String getErrorMessage() {
         return errorMessage;
-    }
-
-    public String getErrorMessageDetail() {
-        return errorMessageDetail;
     }
 
     public void setErrorMessage(String errorMessage) {
@@ -63,21 +75,16 @@ public class ErrorPlace extends AbstractBasePlace implements HasMobileVersion {
     public static class Tokenizer implements PlaceTokenizer<ErrorPlace> {
         @Override
         public String getToken(ErrorPlace place) {
-            return null;
+            return "";
         }
 
         @Override
         public ErrorPlace getPlace(String token) {
-            // we do never want an error place to be caused by an url alone, as this is most likely a refresh from a
-            // prior error page.
-            // Redirect to the main page instead.
-            Location.assign(AbstractPlaceNavigator.DEFAULT_SAPSAILING_SERVER_URL);
-            return null;
+            return new ErrorPlace(true, null);
         }
     }
 
     public boolean hasCustomErrorMessages() {
-
         return errorMessage != null && !errorMessage.isEmpty();
     }
 }
