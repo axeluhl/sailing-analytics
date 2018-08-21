@@ -217,7 +217,7 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
     private void updateStatistics(String localeName, Collection<DataRetrieverChainDefinitionDTO> retrieverChains) {
         availableStatistics.clear();
         if (retrieverChains.isEmpty()) {
-            extractionFunctionSuggestBox.setValue(null);
+            extractionFunctionSuggestBox.setExtractionFunction(null);
             extractionFunctionSuggestBox.setSelectableValues(Collections.emptySet());
             return;
         }
@@ -265,7 +265,7 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
 
         awaitingRetrieverChainStatistics--;
         if (awaitingRetrieverChainStatistics <= 0) {
-            extractionFunctionSuggestBox.setValue(null);
+            extractionFunctionSuggestBox.setExtractionFunction(null);
             Collections.sort(availableStatistics);
             extractionFunctionSuggestBox.setSelectableValues(availableStatistics);
             if (awaitingAggregators <= 0) {
@@ -310,7 +310,7 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
             availableAggregators.clear();
             availableAggregators.addAll(aggregatorGroups.values());
             Collections.sort(availableAggregators);
-            aggregatorListBox.setValue(null);
+            aggregatorListBox.setValue(null, true);
             aggregatorListBox.setAcceptableValues(availableAggregators);
             aggregatorListBox.setEnabled(!availableAggregators.isEmpty());
         }
@@ -359,8 +359,9 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
             extractionFunctionSuggestBox.setSelectableValues(selectableExtractionFunctions);
             labelBetweenAggregatorAndStatistic.setText(labelBetweenAggregatorAndStatisticText);
             currentAggregator = newAggregator;
+            
+            notifyAggregatorDefinitionListeners();
         }
-        notifyAggregatorDefinitionListeners();
     }
     
     private void extractionFunctionSelectionChanged(ExtractionFunctionWithContext oldExtractionFunction,

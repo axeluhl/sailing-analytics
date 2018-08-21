@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -138,7 +139,12 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
                                 if (dimensionsToSelect != null) {
                                     setSelectedDimensions(dimensionsToSelect, selectionCallback);
                                 } else {
-                                    firstDimensionToGroupByBox.setValue(availableDimensions.iterator().next(), true);
+                                    Optional<FunctionDTO> dimensionWithLowestOrdinal = availableDimensions.stream().min((d1, d2) -> {
+                                        int ordinal1 = d1 == null ? Integer.MAX_VALUE : d1.getOrdinal();
+                                        int ordinal2 = d2 == null ? Integer.MAX_VALUE : d2.getOrdinal();
+                                        return Integer.compare(ordinal1, ordinal2);
+                                    });
+                                    dimensionWithLowestOrdinal.ifPresent(d -> firstDimensionToGroupByBox.setValue(d, true));
                                 }
                                 dimensionsToSelect = null;
                                 selectionCallback = null;
