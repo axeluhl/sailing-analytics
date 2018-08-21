@@ -23,7 +23,13 @@ find_project_home ()
         return 0
     fi
 
-    echo $1 | sed -e 's/\/cygdrive\/\([a-zA-Z]\)/\1:/'
+    #editing the filepath, so it fits for eclipse #currently save works for cygwin, gitbash and linux
+	if [ "$OSTYPE" == "cygwin" ]; then
+		echo $1 | sed 's/^\/cygdrive\/\(.\)/\/\1:/'
+	fi
+	if [ "$OSTYPE" == "msys" ]; then
+		echo $1 | sed 's/^\(\/[[:alpha:]]\)\//\1:\//'
+	fi
 }
 
 # this holds for default installation
@@ -40,8 +46,14 @@ if [[ "$PROJECT_HOME" == "" ]]; then
     exit 1
 fi
 
-if [ "$SERVERS_HOME" = "" ]; then
-  SERVERS_HOME=`echo "$USER_HOME/servers" | sed -e 's/\/cygdrive\/\([a-zA-Z]\)/\1:/'`
+if [ "$SERVERS_HOME" = "" ]; then#reading the filepath and editing it, so it fits for eclipse #currently save works for cygwin, gitbash and linux
+	SERVERS_HOME="$USER_HOME/servers"
+	if [ "$OSTYPE" == "cygwin" ]; then
+		SERVERS_HOME=`echo "$USER_HOME/servers" | sed 's/^\/cygdrive\/\(.\)/\/\1:/'`
+	fi
+	if [ "$OSTYPE" == "msys" ]; then
+		SERVERS_HOME=`echo "$USER_HOME/servers" | sed 's/^\(\/[[:alpha:]]\)\//\1:\//'`
+	fi
 fi
 
 # x86 or x86_64 should work for most cases
