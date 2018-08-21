@@ -25,11 +25,10 @@ public class MediaTrack implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @Deprecated
     /**
      * Deprecated, as the server only used undefined in all cases. Left in, to not break serialisation/storage
-     *
      */
+    @Deprecated
     public enum Status {
         UNDEFINED('?'), CANNOT_PLAY('-'), NOT_REACHABLE('#'), REACHABLE('+');
 
@@ -51,7 +50,6 @@ public class MediaTrack implements Serializable {
     public Duration duration;
     public MimeType mimeType;
     @Deprecated
-    // should not be used
     public Status status = Status.UNDEFINED;
     public Set<RegattaAndRaceIdentifier> assignedRaces;
 

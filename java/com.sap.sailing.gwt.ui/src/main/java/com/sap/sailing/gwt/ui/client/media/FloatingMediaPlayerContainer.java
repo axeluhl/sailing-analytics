@@ -32,15 +32,15 @@ public class FloatingMediaPlayerContainer extends AbstractMediaContainer impleme
     private final PopupPositionProvider popupPositionProvider;
     private Anchor edit;
 
-    public FloatingMediaPlayerContainer(MediaSynchPlayer videoPlayer, PopupPositionProvider popupPositionProvider,
+    public FloatingMediaPlayerContainer(MediaSynchPlayer mediaPlayer, PopupPositionProvider popupPositionProvider,
             UserService userservice, MediaServiceAsync mediaService, ErrorReporter errorReporter,
             PlayerCloseListener playerCloseListener, PopoutListener popoutListener) {
-        super(new FlowPanel(), videoPlayer, popoutListener, playerCloseListener);
+        super(new FlowPanel(), mediaPlayer, popoutListener, playerCloseListener);
 
         this.popupPositionProvider = popupPositionProvider;
 
         rootPanel.addStyleName("video-root-panel");
-        rootPanel.add(videoPlayer.asWidget());
+        rootPanel.add(mediaPlayer.asWidget());
 
         this.edit = new Anchor();
         this.edit.getElement().getStyle().setBackgroundImage("url('" + res.editIcon().getSafeUri().asString() + "')");
@@ -70,9 +70,9 @@ public class FloatingMediaPlayerContainer extends AbstractMediaContainer impleme
         mediaSynchControl.widget().addStyleName("media-synch-control");
         rootPanel.add(mediaSynchControl.widget());
 
-        videoPlayer.setEditFlag(mediaSynchControl);
+        mediaPlayer.setEditFlag(mediaSynchControl);
 
-        this.dialogBox = new WindowBox(videoPlayer.getMediaTrack().title, videoPlayer.getMediaTrack().toString(),
+        this.dialogBox = new WindowBox(mediaPlayer.getMediaTrack().title, mediaPlayer.getMediaTrack().toString(),
                 rootPanel, new WindowBox.PopoutHandler() {
 
                     @Override

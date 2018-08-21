@@ -34,17 +34,11 @@ public class MediaSingleSelectionControl extends AbstractMediaSelectionControl i
     }
 
     public void show() {
-        Collection<MediaTrack> mediaTracks = new ArrayList<MediaTrack>(mediaPlayerManager.getAssignedMediaTracks());
+        final Collection<MediaTrack> mediaTracks = new ArrayList<>(mediaPlayerManager.getAssignedMediaTracks());
         Panel mediaPanel = new VerticalPanel();
-        addMediaEntriesToGridPanel(mediaTracks, mediaPanel);
+        mediaTracks.forEach(track -> mediaPanel.add(createMediaEntry(track)));
         dialogControl.add(mediaPanel);
         dialogControl.showRelativeTo(popupLocation);
-    }
-
-    private void addMediaEntriesToGridPanel(Collection<MediaTrack> mediaTracks, Panel mediaPanel) {
-        for (MediaTrack videoTrack : mediaTracks) {
-            mediaPanel.add(createMediaEntry(videoTrack));
-        }
     }
 
     private Button createMediaEntry(final MediaTrack mediaTrack) {

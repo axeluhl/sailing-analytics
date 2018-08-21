@@ -152,8 +152,7 @@ public abstract class PopoutWindowPlayer extends AbstractMediaPlayer implements 
             window.parent.videoPlayer.setPlaybackSpeed(playbackSpeed);
         }
     }-*/;
-    
-    
+
     @Override
     public MediaPlayer getMediaPlayer() {
         return this;

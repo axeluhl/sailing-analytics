@@ -12,9 +12,10 @@ public abstract class AbstractMediaContainer implements MediaPlayerContainer {
     protected final MediaSynchPlayer mediaPlayer;
     protected final Panel rootPanel;
 
-    public AbstractMediaContainer(Panel rootPanel, MediaSynchPlayer videoPlayer, PopoutListener popoutListener, PlayerCloseListener playerCloseListener) {
+    public AbstractMediaContainer(Panel rootPanel, MediaSynchPlayer mediaPlayer, PopoutListener popoutListener,
+            PlayerCloseListener playerCloseListener) {
         this.rootPanel = rootPanel;
-        this.mediaPlayer = videoPlayer;
+        this.mediaPlayer = mediaPlayer;
         this.popoutListener = popoutListener;
         this.popupCloseListener = playerCloseListener;
     }

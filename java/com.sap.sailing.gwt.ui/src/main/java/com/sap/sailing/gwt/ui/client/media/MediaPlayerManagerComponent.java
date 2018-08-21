@@ -85,23 +85,6 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     private List<PlayerChangeListener> playerChangeListener = new ArrayList<>();
 
-    public enum Status {
-        UNDEFINED('?'),
-        CANNOT_PLAY('-'),
-        NOT_REACHABLE('#'),
-        REACHABLE('+');
-
-        private final char symbol;
-
-        private Status(char symbol) {
-            this.symbol = symbol;
-        }
-
-        public String toString() {
-            return String.valueOf(this.symbol);
-        }
-    }
-
     public MediaPlayerManagerComponent(Component<?> parent, ComponentContext<?> context,
             MediaPlayerLifecycle mediaPlayerLifecycle,
             RegattaAndRaceIdentifier selectedRaceIdentifier,
@@ -154,19 +137,19 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     }
 
     native void addLoadMetadataHandler(MediaElement mediaElement, MediaTrack mediaTrack) /*-{
-        var that = this;
-        mediaElement
-                .addEventListener(
-                        'loadedmetadata',
-                        function() {
-                            that.@com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent::loadedmetadata(Lcom/sap/sailing/domain/common/media/MediaTrack;)(mediaTrack);
-                        });
-        mediaElement
-                .addEventListener(
-                        'error',
-                        function() {
-                            that.@com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent::mediaError(Lcom/sap/sailing/domain/common/media/MediaTrack;)(mediaTrack);
-                        });
+		var that = this;
+		mediaElement
+				.addEventListener(
+						'loadedmetadata',
+						function() {
+							that.@com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent::loadedmetadata(Lcom/sap/sailing/domain/common/media/MediaTrack;)(mediaTrack);
+						});
+		mediaElement
+				.addEventListener(
+						'error',
+						function() {
+							that.@com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent::mediaError(Lcom/sap/sailing/domain/common/media/MediaTrack;)(mediaTrack);
+						});
     }-*/;
 
     public void loadedmetadata(MediaTrack mediaTrack) {
@@ -179,33 +162,22 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     @Override
     public void playDefault() {
-        MediaTrack defaultVideo = getDefaultVideo();
+        final MediaTrack defaultVideo = getDefaultMedia(MediaType.video);
         if (defaultVideo != null) {
             playFloatingVideo(defaultVideo);
-            playAudio(defaultVideo);
         } else {
-            MediaTrack defaultAudio = getDefaultAudio();
+            final MediaTrack defaultAudio = getDefaultMedia(MediaType.audio);
             if (defaultAudio != null) {
                 playAudio(defaultAudio);
             }
         }
     }
 
-    private MediaTrack getDefaultAudio() {
+    private MediaTrack getDefaultMedia(MediaType mediaType) {
         // TODO: implement a better heuristic than just taking the first to come
         for (MediaTrack mediaTrack : assignedMediaTracks) {
-            if (mediaTrack.mimeType != null && MediaType.audio.equals(mediaTrack.mimeType.mediaType)
-                    && isPotentiallyPlayable(mediaTrack)) {
-                return mediaTrack;
-            }
-        }
-        return null;
-    }
-
-    private MediaTrack getDefaultVideo() {
-        for (MediaTrack mediaTrack : assignedMediaTracks) {
-            if (mediaTrack.mimeType != null && MediaType.video.equals(mediaTrack.mimeType.mediaType)
-                    && isPotentiallyPlayable(mediaTrack)) {
+            if (mediaTrack.mimeType != null && mediaType.equals(mediaTrack.mimeType.mediaType)
+                    && getMediaTrackStatus(mediaTrack).isPotentiallyPlayable()) {
                 return mediaTrack;
             }
         }
@@ -352,8 +324,6 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
                     });
             registerVideoContainer(videoTrack, videoDockedContainer);
             notifyStateChange();
-        } else {
-            // nothing changed
         }
     }
 
@@ -363,8 +333,6 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
             dockedVideoPlayer.shutDown();
             dockedVideoPlayer = null;
             notifyStateChange();
-        } else {
-            // nothing changed
         }
     }
 
@@ -377,7 +345,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     public List<MediaPlayerContainer> getActiveAudioContainers() {
         return activePlayerContainers.entrySet().stream()
-                .filter(f -> (f.getKey().mimeType.mediaType == MediaType.audio)).map(f -> f.getValue())
+                .filter(f -> f.getKey().mimeType.mediaType == MediaType.audio).map(f -> f.getValue())
                 .collect(Collectors.toList());
     }
 
@@ -409,8 +377,6 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
             registerVideoContainer(videoTrack, videoFloatingContainer);
             notifyStateChange();
-        } else {
-            // nothing changed
         }
     }
 
@@ -529,11 +495,8 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     @Override
     public void stopAll() {
-        for (MediaPlayerContainer mediaContainer : new ArrayList<MediaPlayerContainer>(activePlayerContainers.values())) { // using a
-                                                                                                              // copy to
-                                                                                                              // prevent
-                                                                                                              // a
-                                                                                                              // ConcurrentModificationException
+        for (MediaPlayerContainer mediaContainer : new ArrayList<>(activePlayerContainers.values())) {
+            // using a copy to prevent a ConcurrentModificationException
             mediaContainer.shutDown();
         }
         activePlayerContainers.clear();
@@ -652,24 +615,18 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     @Override
     public List<MediaTrack> getVideoTracks() {
-        List<MediaTrack> result = new ArrayList<MediaTrack>();
-        for (MediaTrack mediaTrack : assignedMediaTracks) {
-            if (mediaTrack.mimeType != null && mediaTrack.mimeType.mediaType == MediaType.video) {
-                result.add(mediaTrack);
-            }
-        }
-        return result;
+        return getMediaTracks(MediaType.video);
     }
 
     @Override
     public List<MediaTrack> getAudioTracks() {
-        List<MediaTrack> result = new ArrayList<MediaTrack>();
-        for (MediaTrack mediaTrack : assignedMediaTracks) {
-            if (mediaTrack.mimeType != null && mediaTrack.mimeType.mediaType == MediaType.audio) {
-                result.add(mediaTrack);
-            }
-        }
-        return result;
+        return getMediaTracks(MediaType.audio);
+    }
+
+    private List<MediaTrack> getMediaTracks(MediaType mediaType) {
+        return assignedMediaTracks.stream()
+                .filter(mediaTrack -> mediaTrack.mimeType != null && mediaType == mediaTrack.mimeType.mediaType)
+                .collect(Collectors.toList());
     }
 
     @Override

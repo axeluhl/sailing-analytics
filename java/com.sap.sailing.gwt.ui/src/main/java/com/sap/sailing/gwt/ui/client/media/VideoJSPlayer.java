@@ -40,7 +40,7 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
     @UiField
     DivElement playerHolder;
 
-    Element videoElement;
+    private Element videoElement;
     
     private String elementId;
     private JavaScriptObject player;
@@ -165,8 +165,7 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
     }
     
     private native int getNativeCurrentTime() /*-{
-        return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player
-                .currentTime();
+        return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.currentTime();
     }-*/;
 
     /**
@@ -189,8 +188,7 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
     }
     
     private native void setNativeCurrentTime(int currentTime) /*-{
-        return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player
-                .currentTime(currentTime);
+        return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.currentTime(currentTime);
     }-*/;
     
     public void play() {
@@ -202,8 +200,7 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
     }
     
     private native void nativePlay() /*-{
-        return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player
-                .play();
+        return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.play();
     }-*/;
     
     /**
@@ -215,8 +212,7 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
         if (this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player == null) {
             return false;
         }
-        return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player
-                .isFullscreen();
+        return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.isFullscreen();
     }-*/;
 
     /**
@@ -228,8 +224,7 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
         if (this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player == null) {
             return true;
         }
-        return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player
-                .paused();
+        return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.paused();
     }-*/;
     
     private void onPlay() {
@@ -249,31 +244,22 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
         var that = this;
         var elemid = this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::elementId;
 
-        var player = $wnd
-                .videojs(elemid, {
-                    "playsInline" : true,
-                    "customControlsOnMobile" : true
-                })
-                .ready(
-                        function() {
-                            this
-                                    .on(
-                                            'play',
-                                            function() {
-                                                that.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::onPlay()();
-                                            });
-                            this
-                                    .on(
-                                            'pause',
-                                            function() {
-                                                that.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::onPause()();
-                                            });
+        var player = $wnd.videojs(elemid, {
+            "playsInline" : true,
+            "customControlsOnMobile" : true
+        }).ready(function() {
+            this.on('play', function() {
+                that.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::onPlay()();
+            });
+            this.on('pause', function() {
+                that.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::onPause()();
+            });
 
-                            console.log("play: " + autoplay);
-                            if (autoplay) {
-                                this.play();
-                            }
-                        });
+            console.log("play: " + autoplay);
+            if (autoplay) {
+                this.play();
+            }
+        });
         if (withPanorama) {
             player.panorama({
                 showNotice : true,
@@ -306,8 +292,7 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
         if (this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player == null) {
             return;
         }
-        return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player
-                .pause();
+        return this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.pause();
     }-*/;
 
     public int getVideoWidth() {
@@ -333,8 +318,7 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
     }
     
     private native void setVolumeNative(float volume) /*-{
-        this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player
-                .volume(volume);
+        this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player.volume(volume);
     }-*/;
 
     public void setPlaybackRate(double newPlaySpeedFactor) {

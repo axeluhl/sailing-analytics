@@ -25,7 +25,7 @@ public class VideoPopupWindow extends AbstractPopupWindow implements ContextMenu
         String videoUrl = Window.Location.getParameter("url");
         String mimeType = Window.Location.getParameter("mimetype");
         isDebug = Window.Location.getParameter("gwt.codesvr") != null;
-        
+
         if (videoUrl != null) {
             videoJSDelegate = new VideoJSPlayer(true, false);
             videoJSDelegate.setVideo(MimeType.valueOf(mimeType), videoUrl);
@@ -36,21 +36,19 @@ public class VideoPopupWindow extends AbstractPopupWindow implements ContextMenu
         }
 
     }
-    
-    
 
     native void initPlay(Element videoElement) /*-{
-		var that = this;
-		var deferredPlayState = $wnd.deferredPlayState
-		if (deferredPlayState && !$wnd.videoPlayer) {
-			that.@com.sap.sailing.gwt.ui.client.media.popup.VideoPopupWindow::initPlayState(DZDZ)(deferredPlayState.deferredMediaTime, deferredPlayState.deferredIsMuted, deferredPlayState.deferredPlaybackSpeed, deferredPlayState.deferredIsPlaying);
-		}
+        var that = this;
+        var deferredPlayState = $wnd.deferredPlayState
+        if (deferredPlayState && !$wnd.videoPlayer) {
+            that.@com.sap.sailing.gwt.ui.client.media.popup.VideoPopupWindow::initPlayState(DZDZ)(deferredPlayState.deferredMediaTime, deferredPlayState.deferredIsMuted, deferredPlayState.deferredPlaybackSpeed, deferredPlayState.deferredIsPlaying);
+        }
     }-*/;
 
     public void loadedmetadata() {
         adjustWindowSize();
     }
-    
+
     @Override
     public void play() {
         videoJSDelegate.play();

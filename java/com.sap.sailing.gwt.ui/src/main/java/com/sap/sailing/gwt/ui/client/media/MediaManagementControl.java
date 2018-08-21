@@ -112,9 +112,6 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
                 case audio:
                     audioTracks.add(mediaTrack);
                     break;
-                case image:
-                case unknown:
-                    break;
                 default:
                     break;
                 }
@@ -241,7 +238,7 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
                 if (changeEvent.getValue()) {
                     Set<MediaTrack> currentlyPlaying = mediaPlayerManager.getPlayingAudioTrack();
                     if (audioTrack == null) {
-                        currentlyPlaying.forEach(f -> mediaPlayerManager.closeFloatingPlayer(f));
+                        currentlyPlaying.forEach(mediaPlayerManager::closeFloatingPlayer);
                     } else {
                         mediaPlayerManager.playAudio(audioTrack);
                     }

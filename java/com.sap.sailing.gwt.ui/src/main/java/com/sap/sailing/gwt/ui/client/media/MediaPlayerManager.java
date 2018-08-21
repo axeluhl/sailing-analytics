@@ -7,7 +7,6 @@ import java.util.Set;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
-import com.sap.sailing.gwt.ui.client.media.MediaPlayerManagerComponent.Status;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 
@@ -19,6 +18,24 @@ public interface MediaPlayerManager {
 
     }
     
+    public enum Status {
+        UNDEFINED('?'), CANNOT_PLAY('-'), NOT_REACHABLE('#'), REACHABLE('+');
+
+        private final char symbol;
+
+        private Status(char symbol) {
+            this.symbol = symbol;
+        }
+
+        public String toString() {
+            return String.valueOf(this.symbol);
+        }
+
+        public boolean isPotentiallyPlayable() {
+            return this == UNDEFINED || this == REACHABLE;
+        }
+    }
+
     void addPlayerChangeListener(PlayerChangeListener playerChangeListener);
     
     void playAudio(MediaTrack audioTrack);
