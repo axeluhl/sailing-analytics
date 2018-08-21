@@ -65,13 +65,3 @@
     border-radius: .333333333333333em;
     overflow: hidden;
 }
-
-.boatclassIcon {
-    height: 40px;
-    width: 40px;
-    margin-left: 5px;
-    display: inline-block;
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-}
