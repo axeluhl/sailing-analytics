@@ -6,8 +6,7 @@
     xmlns:p="urn:import:com.sap.sailing.gwt.home.mobile.partials">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">
-        <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermarginbottomsmall}"
-            ui:field="contentUi" />
+    <g:HTMLPanel addStyleNames="{res.mediaCss.grid}">
+        <g:FlowPanel addStyleNames="{res.mediaCss.column} {res.mediaCss.small12}" ui:field="contentUi" />
     </g:HTMLPanel>
 </ui:UiBinder> 
