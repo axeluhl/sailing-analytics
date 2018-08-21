@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.simulator.streamlets;
+package com.sap.sse.common;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -15,6 +15,8 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.BoundsUtil;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
 import com.sap.sailing.gwt.ui.simulator.StreamletParameters;
 import com.sap.sailing.gwt.ui.simulator.racemap.FullCanvasOverlay;
+import com.sap.sse.common.ColorMapper;
+import com.sap.sse.common.ValueRangeFlexibleBoundaries;
 import com.sap.sse.gwt.client.player.TimeListener;
 
 public class Swarm implements TimeListener {

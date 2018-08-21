@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.test;
+package com.sap.sse.common.test;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
@@ -9,9 +9,9 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.gwt.ui.simulator.streamlets.ColorMapper;
-import com.sap.sailing.gwt.ui.simulator.streamlets.ColorMapperChangedListener;
-import com.sap.sailing.gwt.ui.simulator.streamlets.ValueRangeFlexibleBoundaries;
+import com.sap.sse.common.ColorMapper;
+import com.sap.sse.common.ColorMapperChangedListener;
+import com.sap.sse.common.ValueRangeFlexibleBoundaries;
 
 public class ColorMapperTest {
     private static final double EPSILON = 0.00000001;
