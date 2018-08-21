@@ -1725,7 +1725,8 @@ public class RegattasResource extends AbstractSailingServerResource {
 
         Regatta regatta = getService().getRegattaByName(regattaName);
         if (regatta != null) {
-            SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regatta.getName()));
+            SecurityUtils.getSubject()
+                    .checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regatta.getName()));
             String seriesName = (String) requestObject.get("seriesName");
             String seriesNameNew = (String) requestObject.get("seriesNameNew");
             boolean isMedal = (boolean) requestObject.get("isMedal");
@@ -1737,7 +1738,7 @@ public class RegattasResource extends AbstractSailingServerResource {
 
             Integer maximumNumberOfDiscards = null;
             if (requestObject.containsKey("maximumNumberOfDiscards")) {
-                maximumNumberOfDiscards = (int) (long) requestObject.get("maximumNumberOfDiscards");
+                maximumNumberOfDiscards = (int) requestObject.get("maximumNumberOfDiscards");
             }
 
             int[] resultDiscardingThresholds = null;
@@ -1745,7 +1746,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 JSONArray resultDiscardingThresholdsRaw = (JSONArray) requestObject.get("resultDiscardingThresholds");
                 resultDiscardingThresholds = new int[resultDiscardingThresholdsRaw.size()];
                 for (int i = 0; i < resultDiscardingThresholdsRaw.size(); i++) {
-                    resultDiscardingThresholds[i] = (int) (long) resultDiscardingThresholdsRaw.get(i);
+                    resultDiscardingThresholds[i] = (int) resultDiscardingThresholdsRaw.get(i);
                 }
             }
 
@@ -1754,7 +1755,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             for (Object fleetRaw : fleetsRaw) {
                 JSONObject fleet = Helpers.toJSONObjectSafe(fleetRaw);
                 String fleetName = (String) fleet.get("fleetName");
-                int orderNo = (int) (long) fleet.get("orderNo");
+                int orderNo = (int) fleet.get("orderNo");
                 String htmlColor = (String) fleet.get("htmlColor");
                 fleets.add(new FleetDTO(fleetName, orderNo, new RGBColor(htmlColor)));
             }
