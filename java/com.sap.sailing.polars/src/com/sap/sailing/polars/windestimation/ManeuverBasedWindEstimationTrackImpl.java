@@ -156,7 +156,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
         this.weightedAverageMiddleCOGForManeuverType = new HashMap<>();
         long start = System.currentTimeMillis();
         Triple<Set<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>>, List<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>>, List<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>>> clusterStructure = analyzeRace(waitForLatest);
-        logger.info("Computed virtual wind fixes from maneuvers for race " + trackedRace.getRace().getName() + " in "
+        logger.fine("Computed virtual wind fixes from maneuvers for race " + trackedRace.getRace().getName() + " in "
                 + (System.currentTimeMillis() - start) + "ms");
         clusters = clusterStructure.getA();
         tackClusters = clusterStructure.getB();
@@ -387,9 +387,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
      */
     private Triple<Set<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>>, List<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>>, List<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>>> analyzeRace(
             boolean waitForLatest) throws NotEnoughDataHasBeenAddedException {
-        logger.info("Starting wind estimation");
         final Map<Maneuver, CompetitorAndBoat> maneuvers = getAllManeuvers(waitForLatest);
-        logger.info("Maneuvers fixed have been queried");
         // cluster into eight clusters by middle COG first, then aggregate tack likelihoods for each, and jibe
         // likelihoods for opposite cluster
         final int numberOfClusters = 16;
@@ -405,7 +403,7 @@ public class ManeuverBasedWindEstimationTrackImpl extends WindTrackImpl {
                         IntStream.range(0, numberOfClusters / 2).mapToObj(
                                 (i) -> new Pair<>(new DegreeBearingImpl(((double) i) * 360. / (double) numberOfClusters
                                         / 2), -45.))));
-        logger.info("K-Means maneuver clusterer for wind estimation took " + clusterer.getNumberOfIterations()
+        logger.fine("K-Means maneuver clusterer for wind estimation took " + clusterer.getNumberOfIterations()
                 + " iterations");
         final Set<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>> clusters = clusterer
                 .getClusters();
