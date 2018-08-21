@@ -223,72 +223,77 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     
     @Override
     public void reloadComponents() {
-        updateFilterDimensions();
         isAwaitingReload = false;
-        notifyListeners();
+        updateFilterDimensions();
     }
     
     @Override
     public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO newDataRetrieverChainDefinition) {
         if (!Objects.equals(retrieverChain, newDataRetrieverChainDefinition)) {
             retrieverChain = newDataRetrieverChainDefinition;
-            if (!isAwaitingReload && retrieverChain != null) {
-                HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> currentSelection = getSelection();
-                if (!currentSelection.isEmpty()) {
-                    selectionToBeApplied = currentSelection;
-                    selectionCallback = EmptyCallback;
-                }
+            if (!isAwaitingReload) {
                 updateFilterDimensions();
-            } else if (!isAwaitingReload) {
-                clearContent();
-                updateControls();
-                selectionToBeApplied = null;
-                selectionCallback = null;
             }
         }
     }
     
     private void updateFilterDimensions() {
-        isUpdatingFilterDimensions = true;
-        clearContent();
-        dataMiningService.getReducedDimensionsMappedByLevelFor(retrieverChain, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<ReducedDimensionsDTO>() {
-            @Override
-            public void onSuccess(ReducedDimensionsDTO result) {
-                reducedDimensions = result;
-                for (Entry<DataRetrieverLevelDTO, HashSet<FunctionDTO>> entry : reducedDimensions.getReducedDimensions().entrySet()) {
-                    DataRetrieverLevelDTO retrieverlevel = entry.getKey();
-                    for (FunctionDTO dimension : entry.getValue()) {
-                        availableFilterDimensions.add(new DimensionWithContext(dimension, retrieverlevel));
+        if (retrieverChain != null) {
+            isUpdatingFilterDimensions = true;
+            clearContent();
+            HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> currentSelection = getSelection();
+            if (!currentSelection.isEmpty()) {
+                selectionToBeApplied = currentSelection;
+                selectionCallback = EmptyCallback;
+            }
+            dataMiningService.getReducedDimensionsMappedByLevelFor(retrieverChain, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<ReducedDimensionsDTO>() {
+                @Override
+                public void onSuccess(ReducedDimensionsDTO result) {
+                    reducedDimensions = result;
+                    for (Entry<DataRetrieverLevelDTO, HashSet<FunctionDTO>> entry : reducedDimensions.getReducedDimensions().entrySet()) {
+                        DataRetrieverLevelDTO retrieverlevel = entry.getKey();
+                        for (FunctionDTO dimension : entry.getValue()) {
+                            availableFilterDimensions.add(new DimensionWithContext(dimension, retrieverlevel));
+                        }
                     }
+                    availableFilterDimensions.sort(null);
+                    filterFilterDimensionsPanel.updateAll(availableFilterDimensions);
+    
+                    updateControls();
+                    if (selectionToBeApplied != null) {
+                        ignoreSelectionChangedNotifications = true;
+                        setSelection(selectionToBeApplied, selectionCallback);
+                        selectionToBeApplied = null;
+                        selectionCallback = null;
+                    }
+                    isUpdatingFilterDimensions = false;
                 }
-                availableFilterDimensions.sort(null);
-                filterFilterDimensionsPanel.updateAll(availableFilterDimensions);
-
-                updateControls();
-                if (selectionToBeApplied != null) {
-                    ignoreSelectionChangedNotifications = true;
-                    setSelection(selectionToBeApplied, selectionCallback);
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter.reportError("Error fetching the dimensions of the retriever chain from the server: " + caught.getMessage());
+                    updateControls();
                     selectionToBeApplied = null;
                     selectionCallback = null;
+                    isUpdatingFilterDimensions = false;
                 }
-                isUpdatingFilterDimensions = false;
-            }
-            @Override
-            public void onFailure(Throwable caught) {
-                errorReporter.reportError("Error fetching the dimensions of the retriever chain from the server: " + caught.getMessage());
-                updateControls();
-                selectionToBeApplied = null;
-                selectionCallback = null;
-                isUpdatingFilterDimensions = false;
-            }
-        });
+            });
+        } else {
+            clearContent();
+            updateControls();
+            selectionToBeApplied = null;
+            selectionCallback = null;
+        }
     }
 
     private void clearContent() {
+        boolean notifyListeners = !getSelection().isEmpty();
         reducedDimensions = null;
         availableFilterDimensions.clear();
         filterDimensionSelectionModel.clear();
         filterFilterDimensionsPanel.removeAll();
+        if (notifyListeners) {
+            notifyListeners();
+        }
     }
 
     private void updateControls() {
