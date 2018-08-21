@@ -6,11 +6,10 @@ import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfilesDTO;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileClientFactory;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfilePresenter;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView.Presenter;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.HasLoginFormAndFactory;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sse.gwt.client.mvp.ClientFactory;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
@@ -18,23 +17,24 @@ import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 public class SailorProfileOverviewImplPresenter implements SailingProfileOverviewPresenter {
 
     private final SailorProfileView view;
-    private final UserProfileView.Presenter userProfilePresenter;
+    private final HasLoginFormAndFactory loginAndFactory;
     private final EditSailorProfileView.Presenter sharedSailorProfilePresenter;
     private final FlagImageResolver flagImageResolver;
 
     public SailorProfileOverviewImplPresenter(final SailorProfileView view,
-            final UserProfileView.Presenter userProfilePresenter, final FlagImageResolver flagImageResolver) {
+            final HasLoginFormAndFactory loginAndFactory,
+            final FlagImageResolver flagImageResolver) {
         this.view = view;
-        this.userProfilePresenter = userProfilePresenter;
-        this.sharedSailorProfilePresenter = new EditSailorProfilePresenter<UserProfileClientFactory>(
-                userProfilePresenter.getClientFactory());
+        this.loginAndFactory = loginAndFactory;
+        this.sharedSailorProfilePresenter = new EditSailorProfilePresenter(
+                loginAndFactory.getClientFactory());
         this.flagImageResolver = flagImageResolver;
         view.setPresenter(this);
     }
 
     @Override
     public ClientFactory getClientFactory() {
-        return userProfilePresenter.getClientFactory();
+        return loginAndFactory.getClientFactory();
     }
 
     @Override
@@ -90,7 +90,7 @@ public class SailorProfileOverviewImplPresenter implements SailingProfileOvervie
 
     @Override
     public void doTriggerLoginForm() {
-        userProfilePresenter.doTriggerLoginForm();
+        loginAndFactory.doTriggerLoginForm();
     }
 
     @Override

@@ -22,6 +22,7 @@ import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPl
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.preferences.UserProfilePreferencesPlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserProfileSettingsPlace;
 
 public class HomePlacesNavigator extends AbstractPlaceNavigator {
@@ -114,4 +115,9 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
     public PlaceNavigation<? extends AbstractUserProfilePlace> getUserSettingsNavigation() {
         return createLocalPlaceNavigation(new UserProfileSettingsPlace());
     }
+
+    public PlaceNavigation<? extends AbstractUserProfilePlace> getSailorProfilesNavigation() {
+        return createLocalPlaceNavigation(new SailorProfilePlace());
+    }
+
 }

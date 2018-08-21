@@ -19,14 +19,14 @@ import com.sap.sse.gwt.client.mvp.ClientFactory;
  * @param <C>
  *            the provided client factory type
  */
-public class EditSailorProfilePresenter<C extends ClientFactoryWithDispatch & ErrorAndBusyClientFactory & ClientFactory>
+public class EditSailorProfilePresenter
         implements EditSailorProfileView.Presenter {
 
-    private final C clientFactory;
+    private final ClientFactoryWithDispatchAndError clientFactory;
 
     private final StatefulSailorProfileDataProvider sailorProfileDataProvider;
 
-    public EditSailorProfilePresenter(C clientFactory) {
+    public EditSailorProfilePresenter(ClientFactoryWithDispatchAndError clientFactory) {
         this.clientFactory = clientFactory;
         this.sailorProfileDataProvider = new StatefulSailorProfileDataProvider(clientFactory,
                 new SuggestedMultiSelectionCompetitorDataProviderImpl(clientFactory));
@@ -53,5 +53,9 @@ public class EditSailorProfilePresenter<C extends ClientFactoryWithDispatch & Er
     @Override
     public PlaceController getPlaceController() {
         return clientFactory.getPlaceController();
+    }
+
+    public ClientFactoryWithDispatchAndError getClientFactory() {
+        return clientFactory;
     }
 }
