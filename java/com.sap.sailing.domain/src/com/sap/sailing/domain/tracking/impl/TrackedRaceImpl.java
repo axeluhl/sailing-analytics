@@ -2684,11 +2684,11 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
 
     private List<Maneuver> computeManeuvers(Competitor competitor, ManeuverDetector maneuverDetector)
             throws NoWindException {
-        logger.info("computeManeuvers(" + competitor.getName() + ") called in tracked race " + this);
+        logger.finest("computeManeuvers(" + competitor.getName() + ") called in tracked race " + this);
         long startedAt = System.currentTimeMillis();
         // compute the maneuvers for competitor
         List<Maneuver> result = maneuverDetector.detectManeuvers();
-        logger.info("computeManeuvers(" + competitor.getName() + ") called in tracked race " + this + " took "
+        logger.finest("computeManeuvers(" + competitor.getName() + ") called in tracked race " + this + " took "
                 + (System.currentTimeMillis() - startedAt) + "ms");
         return result;
     }
