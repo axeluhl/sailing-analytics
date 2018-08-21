@@ -39,7 +39,6 @@ START_DIR="`pwd`"
 
 if [ "$PROJECT_HOME" = "" ]; then
     PROJECT_HOME=$(find_project_home "$START_DIR")
-    echo "PROJECT_HOME: $PROJECT_HOME"
 fi
 
 # if project_home is still empty we could not determine any suitable directory
