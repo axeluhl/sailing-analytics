@@ -9,23 +9,22 @@ import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
 public class SailorProfilesOverviewViewImpl extends AbstractUserProfileView implements SailorProfilesOverviewView {
 
-    private final SailorProfilesOverview sailorProfilesOverview;
+    private final SailorProfilesOverviewImpl sailorProfilesOverview;
 
     public SailorProfilesOverviewViewImpl(SailorProfilesOverviewView.Presenter presenter) {
         super(presenter);
-        this.sailorProfilesOverview = new SailorProfilesOverview();
+        this.sailorProfilesOverview = new SailorProfilesOverviewImpl();
         this.setViewContent(sailorProfilesOverview);
     }
 
     @Override
     public void setPresenter(SailingProfileOverviewPresenter presenter) {
-        // TODO Auto-generated method stub
+        sailorProfilesOverview.setPresenter(presenter);
 
     }
 
     @Override
     public NeedsAuthenticationContext getAuthenticationContext() {
-        // TODO Auto-generated method stub
         return null;
     }
 

@@ -5,6 +5,7 @@ import java.util.UUID;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -15,6 +16,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
+import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.BadgeDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
@@ -63,7 +65,11 @@ public class SailorProfileOverviewEntry extends Composite {
         }
         for (BoatClassDTO boatclass : entry.getBoatclasses()) {
             Element elem = DOM.createDiv();
-            elem.setInnerText(boatclass.getName());
+            String html2 = "<div style=\"height: 40px; width: 40px; margin-left: 5px; display: inline-block; background-size: cover; background-repeat: no-repeat; background-position: center; background-image: url('"
+                    + BoatClassImageResolver.getBoatClassIconResource(boatclass.getName()).getSafeUri().asString()
+                    + "');\"></div>";
+            elem.setInnerHTML(html2);
+            elem.getStyle().setDisplay(Display.INLINE_BLOCK);
             boatclassesDivUi.appendChild(elem);
         }
         this.uuidRef = entry.getKey();

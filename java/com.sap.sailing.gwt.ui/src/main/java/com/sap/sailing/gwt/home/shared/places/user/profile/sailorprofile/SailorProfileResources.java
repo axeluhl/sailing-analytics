@@ -29,5 +29,7 @@ public interface SailorProfileResources extends ClientBundle {
         String overviewTablePanel();
 
         String overviewTableEmpty();
+
+        String boatclassIcon();
     }
 }

@@ -17,11 +17,11 @@ import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 /**
  * Implementation of {@link UserSettingsView} where users can change their preferred selections and notifications.
  */
-public class SailorProfilesOverview extends Composite implements SailorProfileOverview {
+public class SailorProfilesOverviewImpl extends Composite implements SailorProfileOverview {
 
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
-    interface MyUiBinder extends UiBinder<Widget, SailorProfilesOverview> {
+    interface MyUiBinder extends UiBinder<Widget, SailorProfilesOverviewImpl> {
     }
 
     @UiField
@@ -29,7 +29,7 @@ public class SailorProfilesOverview extends Composite implements SailorProfileOv
 
     private SailingProfileOverviewPresenter presenter;
 
-    public SailorProfilesOverview() {
+    public SailorProfilesOverviewImpl() {
         initWidget(uiBinder.createAndBindUi(this));
     }
 
@@ -41,7 +41,6 @@ public class SailorProfilesOverview extends Composite implements SailorProfileOv
 
     @Override
     public NeedsAuthenticationContext getAuthenticationContext() {
-        // TODO Auto-generated method stub
         return null;
     }
 
