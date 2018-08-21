@@ -1,8 +1,9 @@
+/**************************** General ****************************/
 b {
 	font-weight: bold;
 }
 
-.hidden{
+.hidden {
 	display: none;
 	height: 0;
 	width: 0;
@@ -11,205 +12,259 @@ b {
 	border: none;
 }
 
-.tagPanel {
+.taggingPanel {
 	position: absolute;
 	top: 0;
 	bottom: 0;
 	left: 0;
 	right: 0;
-	margin: 6px;
-	margin-top: 10px;
-	margin-bottom: 0;
+	margin: 0;
+	margin-left: 3px;
+	overflow: visible !important;
+	/* set visible to show outline of input fields */
 }
 
-.tagPreviewPanel{
-	margin: 5px;
+.buttonsPanel {
+	display: inline-block;
+	width: 100%;
+	text-align: right;
 }
 
-.tag {
-    box-shadow: 2px 2px 3px lightgrey;
+.taggingPanel .buttonsPanel {
+	padding-right: 5px;
+}
+
+.taggingPanel .buttonsPanel button {
     margin-bottom: 5px;
-    margin-right: 3px;
-    border: 1px solid lightgrey;
-    border-radius: 3px;
-    padding: 5px;
 }
 
-.tagHeading {
+.taggingPanel .buttonsPanel:empty {
+	display: none;
+	margin: 0;
+}
+
+.confirmationDialog {
+	background-color: white;
+}
+
+.confirmationDialogPanel {
+	display: inline-block;
+}
+
+/**************************** Tag-Cells ****************************/
+.tagCell {
+	box-shadow: 2px 2px 3px lightgrey;
+	margin-bottom: 5px;
+	margin-right: 3px;
+	padding: 5px;
+	border: 1px solid lightgrey;
+	border-radius: 3px;
+}
+
+.tagCellHeading {
 	font-weight: bold;
 }
 
-.tagHeading button {
-	float: right;
-    border: none;
-    background: transparent;
+.tagCellHeading button {
+	position: absolute;
+	right: 5px;
+	border: none;
+	background: transparent;
 }
 
-.tagImage {
-    text-align: center;
-    margin: 0 -5px;
-    padding: 5px 0;
+.tagCellImage {
+	text-align: center;
+	margin: 0 -5px;
+	padding: 5px 0;
 }
 
-.tagImage img {
+.tagCellImage img {
 	min-width: 100%;
 	max-Width: 100%;
 	height: auto;
 }
 
-.tagCreated {
+.tagCellCreated {
 	font-size: 75%;
-	padding-top: 2px;
-	padding-bottom: 5px;
+	padding: 2px 0 5px;
 }
 
-.tagComment {
+.tagCellComment {
 	font-size: 85%;
 }
 
-
-.button {
-    border: 1px solid #cecece;
-    margin-left: 5px;
-    margin-bottom: 5px;
-    padding: 4px 4px;
-    border-radius: 4px;
-    cursor: pointer;
+.tagCellListPanel {
+	height: 100%;
+	margin-top: 10px;
 }
 
-.footerButton {
-    border: 1px solid #cecece;
-    margin-left: 5px;
-    margin-bottom: 5px;
-    padding: 4px 4px;
-    border-radius: 4px;
-    cursor: pointer;
-    float: right;
+/**************************** Tag-Buttons ****************************/
+.tagButtonDialog {
+	max-width: 75%;
+	/*
+    position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);*/
+	background-color: white;
 }
 
-.buttonsPanel {
-	float: right;
-	width: 100%;
+.tagButtonDialogPanel {
+	display: inline-block;
+}
+
+.tagDialogButton {
+	padding: 4px 4px;
+	cursor: pointer;
+}
+
+.buttonsPanel>.tagDialogButton:not\(:first-child\) {
+	margin-left: 5px;
 }
 
 .tagButtonTable {
-    margin-top: 5px;
-    margin-bottom: -1px;
-    border-radius: 4px 4px 4px 4px; 
-    border: 1px solid #cecece;
-    padding: 2px;
+	width: 100%;
+	margin: 5px 0 -1px;
+	padding: 2px;
+	border-radius: 4px;
+	border: 1px solid #cecece;
+    overflow: scroll;
+	table-layout: fixed;
 }
 
-.inputPanelTag {
-	margin-top: 5px;
-    margin-bottom: -1px;
-	border-radius: 4px 4px 0px 0px; 
-	border: 1px solid #cecece;
-	padding: 2px;
+.tagPreviewPanel {
+	margin: 5px;
+	max-width: 500px;
+}
+
+@media screen and \(max-width: 500px\) {
+    .tagPreviewPanel {
+        max-width: 90%;
+    }
+}
+
+/**************************** Tag input / creation ****************************/
+.tagCreationPanel {
 	width: 100%;
 }
 
-.inputPanelImageURL {
-    border: 1px solid #cecece;
-    padding: 2px;
-    width: 100%;
+.tagInputPanel {
+	width: 100%;
+	margin: 5px 0 0;
+	padding-right: 5px;
 }
 
-.inputPanelComment {
+.tagInputPanel>*:not\(:first-child\) {
+	border-top: none;
+}
+
+/* CSS Hack: When selected input is :active or :hover, increase z-index and set position relative 
+   to get default outline of browser not cut off */
+.tagInputPanel>*:active, .tagInputPanel>*:focus {
+	position: relative;
+	z-index: 1;
+}
+
+.tagInputPanel>* {
+	width: 100%;
 	padding: 2px;
 	border: 1px solid #cecece;
-	margin-top: -1px;
-	resize: none;
-    width: 100%;
 }
 
-.inputPanelIsVisibleForPublic {	
-    width: 100%;
-	padding: 2px;
-    border: 1px solid #cecece;
-    resize: none;
-    border-radius: 0px 0px 4px 4px;
-    margin-bottom: 5px;
-    margin-top: -2px;
+.tagInputPanelTag {
+	border-radius: 4px 4px 0px 0px;
+}
+
+.tagInputPanelImageURL {
+	
+}
+
+.tagInputPanelComment {
+	border-radius: 0 0 4px 0;
+	resize: none;
+}
+
+.tagInputPanelIsVisibleForPublic {
+	display: inline-block;
+	width: auto;
+	margin: -2px 0 5px;
+	padding: 2px 5px 2px 2px;
+	border: 1px solid #cecece;
+	border-radius: 0px 0px 4px 4px;
+	resize: none;
+	font-size: 80%;
 }
 
 /**************************** Tag filtering ****************************/
-.tagFilterContainer {
-    width: 100%;
-    background-color: #FFFFFF;
-    margin: 5px 0 0 0;
-    font-size: 1rem;
-    position: relative;
-    border: none;
-    outline: 0;
+.tagFilterPanel {
+	width: 100%;
+	position: relative;
+	outline: 0;
+	margin: 10px 0 0 0;
+	border: none;
+	font-size: 1rem;
+	background-color: #FFFFFF;
 }
 
 .tagFilterSearchBox {
-    border: 1px solid #ccc;
-    background-color: #eaeaea;
-    border-radius: 4px;
-    margin-right: 2.9em;
+	margin-right: 2.9em;
+	border: 1px solid #ccc;
+	background-color: #eaeaea;
+	border-radius: 4px;
 }
 
 .tagFilterSearchInput {
-    font-size: .933333333333333em;
-    height: 2.142857142857143em;
-    width: 70%;
-    border: none;
-    background-color: #eaeaea;
-    padding: 0;
-    margin-left: 2.4em;
-    margin-right: 0px;
-    margin-bottom: 1px;
-    outline: 0 !important;
+	width: 70%;
+	height: 2.142857142857143em;
+	outline: 0 !important;
+	margin: 0 0 1px 2.4em;
+	padding: 0;
+	border: none;
+	font-size: .933333333333333em;
+	background-color: #eaeaea;
 }
 
 .tagFilterButton {
-    position: absolute;
-    top: .4em;
-    width: 2em;
-    height: 2em;
-    background-repeat: no-repeat;
-    background-position: center;
-    border: none;
-    -webkit-border-radius: 4px;
-    border-radius: 4px;
-    text-indent: -9999em;
-    -webkit-transition: background-color .2s;
-    -moz-transition: background-color .2s;
-    -o-transition: background-color .2s;
-    -ms-transition: background-color .2s;
-    transition: background-color .2s;
-    cursor: pointer;
+	position: absolute;
+	top: .4em;
+	width: 2em;
+	height: 2em;
+	background-repeat: no-repeat;
+	background-position: center;
+	border: none;
+	border-radius: 4px;
+	transition: background-color .2s;
+	cursor: pointer;
+	text-indent: -9999em;
 }
 
 .tagFilterButton:focus, .tagFilterButton:hover {
-    background-color: #e2e2e2;
+	background-color: #e2e2e2;
 }
 
 .tagFilterClearButton {
-    right: 3.8em;
-    top: 0.2em;
+	right: 3.8em;
+	top: 0.2em;
 }
 
 .tagFilterSettingsButton {
-    right: 2.4em;
-    top: 0.2em;
+	right: 2.4em;
+	top: 0.2em;
 }
 
 .tagFilterFilterButton {
-    right: 0.8em;
-    top: 0.2em;
+	right: 0.8em;
+	top: 0.2em;
 }
 
 .tagFilterSearchButton {
-    top: 0.2em;
-    left: 0.2em;
-    opacity: 0.3;
+	top: 0.2em;
+	left: 0.2em;
+	opacity: 0.3;
 }
 
 .tagFilterHiddenButton {
-    display: none;
+	display: none;
 }
 
 .tagFilterCurrentSelection {
@@ -217,37 +272,38 @@ b {
 	margin-top: 5px;
 }
 
-@sprite .clearButtonBackgroundImage {
-  gwt-image: "clearButton";
-  width: 2em;
-  height: 2em;
-  background-size: contain;
+/**************************** Images ****************************/
+@sprite .imageActiveFilter {
+	gwt-image: "filterActiveButton";
+	width: 2em;
+	height: 2em;
+	background-size: contain;
 }
 
-@sprite .filterInactiveButtonBackgroundImage {
-  gwt-image: "filterInactiveButton";
-  width: 2em;
-  height: 2em;
-  background-size: contain;
+@sprite .imageInactiveFilter {
+	gwt-image: "filterInactiveButton";
+	width: 2em;
+	height: 2em;
+	background-size: contain;
 }
 
-@sprite .filterActiveButtonBackgroundImage {
-  gwt-image: "filterActiveButton";
-  width: 2em;
-  height: 2em;
-  background-size: contain;
+@sprite .imageSearch {
+	gwt-image: "searchButton";
+	width: 2em;
+	height: 2em;
+	background-size: contain;
 }
 
-@sprite .searchButtonBackgroundImage {
-  gwt-image: "searchButton";
-  width: 2em;
-  height: 2em;
-  background-size: contain;
+@sprite .imageClearSearch {
+	gwt-image: "clearButton";
+	width: 2em;
+	height: 2em;
+	background-size: contain;
 }
 
-@sprite .settingsButtonBackgroundImage {
-  gwt-image: "settingsButton";
-  width: 2em;
-  height: 2em;
-  background-size: contain;
+@sprite .imageSettings {
+	gwt-image: "settingsButton";
+	width: 2em;
+	height: 2em;
+	background-size: contain;
 }

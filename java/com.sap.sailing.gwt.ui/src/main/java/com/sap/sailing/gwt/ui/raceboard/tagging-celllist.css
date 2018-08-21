@@ -1,11 +1,15 @@
-.cellListWidget,
 .cellListEvenItem,
 .cellListOddItem,
 .cellListEventItem{
 	
 }
 
+.cellListWidget {
+	margin-bottom: 15px;
+}
+
 .cellListSelectedItem,
 .cellListKeyboardSelectedItem {
 	background-color: #e5f2f9;
+	border-radius: 3px
 }

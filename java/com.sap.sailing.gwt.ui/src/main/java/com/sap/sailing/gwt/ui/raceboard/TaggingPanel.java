@@ -50,6 +50,7 @@ import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -130,42 +131,54 @@ public class TaggingPanel extends ComponentWithoutSettings
         public TagPanelStyle style();
 
         public interface TagPanelStyle extends CssResource {
-            // tags
-            String tag();
-            String tagPanel();
-            String tagHeading();
-            String tagCreated();
-            String tagComment();
-            String tagImage();
-            String button();
-            String footerButton();
-            String tagButtonTable();
-            String inputPanelTag();
-            String inputPanelComment();
-            String inputPanelImageURL();
+            // general
+            String hidden();
+            String taggingPanel();
             String buttonsPanel();
-            String tagPreviewPanel();
+            String confirmationDialog();
+            String confirmationDialogPanel();
 
-            // filter tags
+            // tag cells
+            String tagCell();
+            String tagCellHeading();
+            String tagCellCreated();
+            String tagCellComment();
+            String tagCellImage();
+            String tagCellListPanel();
+
+            // tag-buttons
+            String tagButtonDialog(); // dialog itself
+            String tagButtonDialogPanel();
+            String tagDialogButton(); // button in dialog
+            String tagButtonTable();
+            String tagPreviewPanel();
+            
+            // tag input / creation
+            String tagCreationPanel();
+            String tagInputPanel();
+            String tagInputPanelTag();
+            String tagInputPanelComment();
+            String tagInputPanelImageURL();
+            String tagInputPanelIsVisibleForPublic();
+
+            // tag filtering
             String tagFilterButton();
             String tagFilterHiddenButton();
             String tagFilterClearButton();
             String tagFilterSearchButton();
             String tagFilterSettingsButton();
             String tagFilterFilterButton();
-            String tagFilterContainer();
+            String tagFilterPanel();
             String tagFilterSearchBox();
             String tagFilterSearchInput();
             String tagFilterCurrentSelection();
-            String filterInactiveButtonBackgroundImage();
-            String filterActiveButtonBackgroundImage();
-            String clearButtonBackgroundImage();
-            String searchButtonBackgroundImage();
-            String settingsButtonBackgroundImage();
-            String inputPanelIsVisibleForPublic();
-
-            // misc.
-            String hidden();
+            
+            // images
+            String imageActiveFilter();
+            String imageInactiveFilter();
+            String imageSearch();
+            String imageClearSearch();
+            String imageSettings();
         }
     }
 
@@ -245,11 +258,11 @@ public class TaggingPanel extends ComponentWithoutSettings
             SafeHtml content = SafeHtmlUtils.EMPTY_SAFE_HTML;
 
             if (!tag.getComment().isEmpty() && tag.getImageURL().isEmpty()) {
-                content = tagCellTemplate.contentWithCommentWithoutImage(style.tagComment(), safeComment);
+                content = tagCellTemplate.contentWithCommentWithoutImage(style.tagCellComment(), safeComment);
             } else if (tag.getComment().isEmpty() && !tag.getImageURL().isEmpty()) {
-                content = tagCellTemplate.contentWithoutCommentWithImage(style.tagImage(), trustedImageURL);
+                content = tagCellTemplate.contentWithoutCommentWithImage(style.tagCellImage(), trustedImageURL);
             } else if (!tag.getComment().isEmpty() && !tag.getImageURL().isEmpty()) {
-                content = tagCellTemplate.contentWithCommentWithImage(style.tagImage(), style.tagComment(),
+                content = tagCellTemplate.contentWithCommentWithImage(style.tagCellImage(), style.tagCellComment(),
                         trustedImageURL, safeComment);
             }
 
@@ -258,19 +271,19 @@ public class TaggingPanel extends ComponentWithoutSettings
                     && (tag.getUsername().equals(userService.getCurrentUser().getName())
                             || userService.getCurrentUser().hasRole("admin"))) {
                 if (tag.isVisibleForPublic()) {
-                    cell = tagCellTemplate.cellRemovable(style.tag(), style.tagHeading(), style.tagCreated(), safeTag,
+                    cell = tagCellTemplate.cellRemovable(style.tagCell(), style.tagCellHeading(), style.tagCellCreated(), safeTag,
                             safeCreated, content);
                 } else {
-                    cell = tagCellTemplate.privateCellRemovable(style.tag(), style.tagHeading(), style.tagCreated(),
+                    cell = tagCellTemplate.privateCellRemovable(style.tagCell(), style.tagCellHeading(), style.tagCellCreated(),
                             safeTag, safeCreated, content, safeIsPrivateImageUri);
                 }
 
             } else {
                 if (tag.isVisibleForPublic()) {
-                    cell = tagCellTemplate.cell(style.tag(), style.tagHeading(), style.tagCreated(), safeTag,
+                    cell = tagCellTemplate.cell(style.tagCell(), style.tagCellHeading(), style.tagCellCreated(), safeTag,
                             safeCreated, content);
                 } else {
-                    cell = tagCellTemplate.privateCell(style.tag(), style.tagHeading(), style.tagCreated(), safeTag,
+                    cell = tagCellTemplate.privateCell(style.tagCell(), style.tagCellHeading(), style.tagCellCreated(), safeTag,
                             safeCreated, content, safeIsPrivateImageUri);
                 }
             }
@@ -308,11 +321,13 @@ public class TaggingPanel extends ComponentWithoutSettings
 
         public TagButton(String buttonName, String tag, String imageURL, String comment, boolean visibleForPublic) {
             super(buttonName);
+            setStyleName(style.tagDialogButton());
+
             this.tag = tag;
             this.imageURL = imageURL;
             this.comment = comment;
             this.visibleForPublic = visibleForPublic;
-            setStyleName(style.footerButton());
+
             addStyleName("gwt-Button");
             addClickHandler(new ClickHandler() {
                 @Override
@@ -360,18 +375,15 @@ public class TaggingPanel extends ComponentWithoutSettings
         private final Panel tagButtonsPanel;
 
         public TagCreationPanel(StringMessages stringMessages) {
-            setWidth("100%");
+            setStyleName(style.tagCreationPanel());
 
             TagInputPanel inputPanel = new TagInputPanel(stringMessages);
-
-            Panel standardButtonsPanel = new FlowPanel();
-            standardButtonsPanel.setStyleName(style.buttonsPanel());
-
+            
             tagButtonsPanel = new FlowPanel();
             tagButtonsPanel.setStyleName(style.buttonsPanel());
 
             Button createTagFromTextBoxes = new Button(stringMessages.tagAddTag());
-            createTagFromTextBoxes.setStyleName(style.footerButton());
+            createTagFromTextBoxes.setStyleName(style.tagDialogButton());
             createTagFromTextBoxes.addStyleName("gwt-Button");
             createTagFromTextBoxes.addClickHandler(new ClickHandler() {
                 @Override
@@ -383,11 +395,10 @@ public class TaggingPanel extends ComponentWithoutSettings
                     }
                 }
             });
-            standardButtonsPanel.add(createTagFromTextBoxes);
 
             final TagCreationPanel INSTANCE = this;
             Button editCustomTagButtons = new Button(stringMessages.tagEditCustomTagButtons());
-            editCustomTagButtons.setStyleName(style.footerButton());
+            editCustomTagButtons.setStyleName(style.tagDialogButton());
             editCustomTagButtons.addStyleName("gwt-Button");
             editCustomTagButtons.addClickHandler(new ClickHandler() {
                 @Override
@@ -397,7 +408,11 @@ public class TaggingPanel extends ComponentWithoutSettings
                     }
                 }
             });
+
+            Panel standardButtonsPanel = new FlowPanel();
+            standardButtonsPanel.setStyleName(style.buttonsPanel());
             standardButtonsPanel.add(editCustomTagButtons);
+            standardButtonsPanel.add(createTagFromTextBoxes);
 
             add(inputPanel);
             add(standardButtonsPanel);
@@ -428,43 +443,42 @@ public class TaggingPanel extends ComponentWithoutSettings
 
         // default value for "Visible for public" checkbox
         private static final boolean DEFAULT_VISIBLE_FOR_PUBLIC = true;
-        
-        //default textbox or textarea lengths
-
 
         private final TextBox tagTextBox, imageURLTextBox;
         private final TextArea commentTextArea;
         private final CheckBox visibleForPublicCheckBox;
 
         public TagInputPanel(StringMessages stringMessages) {
-            setWidth("100%");
+            setStyleName(style.tagInputPanel());
 
             tagTextBox = new TextBox();
-            tagTextBox.setStyleName(style.inputPanelTag());
+            tagTextBox.setStyleName(style.tagInputPanelTag());
             tagTextBox.setTitle(stringMessages.tagLabelTag());
             tagTextBox.getElement().setAttribute("maxlength", Integer.toString(TagDTO.MAX_TAG_LENGTH));
             tagTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelTag());
             add(tagTextBox);
 
             imageURLTextBox = new TextBox();
-            imageURLTextBox.setStyleName(style.inputPanelImageURL());
+            imageURLTextBox.setStyleName(style.tagInputPanelImageURL());
             imageURLTextBox.setTitle(stringMessages.tagLabelImageURL());
             imageURLTextBox.getElement().setAttribute("maxlength", Integer.toString(TagDTO.MAX_IMAGE_URL_LENGTH));
             imageURLTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelImageURL());
             add(imageURLTextBox);
 
             commentTextArea = new TextArea();
-            commentTextArea.setStyleName(style.inputPanelComment());
+            commentTextArea.setStyleName(style.tagInputPanelComment());
             commentTextArea.setVisibleLines(4);
             commentTextArea.getElement().setAttribute("maxlength", Integer.toString(TagDTO.MAX_COMMENT_LENGTH));
             commentTextArea.setTitle(stringMessages.tagLabelComment());
             commentTextArea.getElement().setPropertyString("placeholder", stringMessages.tagLabelComment());
             add(commentTextArea);
 
+            SimplePanel checkboxWrapper = new SimplePanel();
             visibleForPublicCheckBox = new CheckBox(stringMessages.tagVisibleForPublicCheckBox());
-            visibleForPublicCheckBox.setStyleName(style.inputPanelIsVisibleForPublic());
             visibleForPublicCheckBox.setValue(DEFAULT_VISIBLE_FOR_PUBLIC);
-            add(visibleForPublicCheckBox);
+            checkboxWrapper.setStyleName(style.tagInputPanelIsVisibleForPublic());
+            checkboxWrapper.setWidget(visibleForPublicCheckBox);
+            add(checkboxWrapper);
         }
 
         public TextBox getTagTextBox() {
@@ -532,10 +546,11 @@ public class TaggingPanel extends ComponentWithoutSettings
         private List<TagDTO> listContainingPreviewTag;
 
         public TagPreviewPanel(TagInputPanel inputPanel) {
+            setStyleName(style.tagPreviewPanel());
+
             tagPreviewCellList = new CellList<TagDTO>(new TagCell(true), cellResources);
             listContainingPreviewTag = new ArrayList<TagDTO>();
 
-            setStyleName(style.tagPreviewPanel());
             add(new Label(stringMessages.tagPreview()));
             add(tagPreviewCellList);
 
@@ -595,8 +610,6 @@ public class TaggingPanel extends ComponentWithoutSettings
         private final AbstractListFilter<TagDTO> filter;
 
         public TagFilterPanel() {
-            setStyleName(style.tagFilterContainer());
-
             TagFilterSets loadedTagsFilterSets = loadTagFilterSets();
 
             if (loadedTagsFilterSets != null) {
@@ -620,11 +633,13 @@ public class TaggingPanel extends ComponentWithoutSettings
         }
 
         private void initializeUI() {
+            setStyleName(style.tagFilterPanel());
+
             Button submitButton = new Button();
             submitButton.setStyleName(style.tagFilterButton());
             submitButton.addStyleName("gwt-Button");
             submitButton.addStyleName(style.tagFilterSearchButton());
-            submitButton.addStyleName(style.searchButtonBackgroundImage());
+            submitButton.addStyleName(style.imageSearch());
 
             searchTextBox = new TextBox();
             searchTextBox.getElement().setAttribute("placeholder", stringMessages.tagSearchTags());
@@ -634,7 +649,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             clearTextBoxButton = new Button();
             clearTextBoxButton.setStyleName(style.tagFilterButton());
             clearTextBoxButton.addStyleName(style.tagFilterClearButton());
-            clearTextBoxButton.addStyleName(style.clearButtonBackgroundImage());
+            clearTextBoxButton.addStyleName(style.imageClearSearch());
             clearTextBoxButton.addStyleName(style.tagFilterHiddenButton());
             clearTextBoxButton.addStyleName("gwt-Button");
             clearTextBoxButton.addClickHandler(new ClickHandler() {
@@ -647,7 +662,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             filterSettingsButton = new Button();
             filterSettingsButton.setStyleName(style.tagFilterButton());
             filterSettingsButton.addStyleName(style.tagFilterFilterButton());
-            filterSettingsButton.addStyleName(style.filterInactiveButtonBackgroundImage());
+            filterSettingsButton.addStyleName(style.imageInactiveFilter());
             filterSettingsButton.addStyleName("gwt-Button");
             filterSettingsButton.setTitle(stringMessages.tagsFilter());
             filterSettingsButton.addClickHandler(new ClickHandler() {
@@ -709,14 +724,14 @@ public class TaggingPanel extends ComponentWithoutSettings
             FilterSet<TagDTO, FilterWithUI<TagDTO>> activeFilterSet = filterSets.getActiveFilterSet();
             if (activeFilterSet != null) {
                 if (lastActiveTagFilterSet == null) {
-                    filterSettingsButton.removeStyleName(style.filterInactiveButtonBackgroundImage());
-                    filterSettingsButton.addStyleName(style.filterActiveButtonBackgroundImage());
+                    filterSettingsButton.removeStyleName(style.imageInactiveFilter());
+                    filterSettingsButton.addStyleName(style.imageActiveFilter());
                 }
                 lastActiveTagFilterSet = activeFilterSet;
             } else {
                 if (lastActiveTagFilterSet != null) {
-                    filterSettingsButton.removeStyleName(style.filterActiveButtonBackgroundImage());
-                    filterSettingsButton.addStyleName(style.filterInactiveButtonBackgroundImage());
+                    filterSettingsButton.removeStyleName(style.imageActiveFilter());
+                    filterSettingsButton.addStyleName(style.imageInactiveFilter());
                 }
                 lastActiveTagFilterSet = null;
             }
@@ -897,7 +912,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         public TagButtonDialog(TagCreationPanel tagCreationPanel) {
             setGlassEnabled(true);
             setText(stringMessages.tagEditCustomTagButtons());
-            setWidth("450px");
+            addStyleName(style.tagButtonDialog());
 
             TagInputPanel inputPanel = new TagInputPanel(stringMessages);
             TagPreviewPanel tagPreviewPanel = new TagPreviewPanel(inputPanel);
@@ -905,12 +920,11 @@ public class TaggingPanel extends ComponentWithoutSettings
             Panel controlButtonPanel = createButtonPanel(tagButtonsTable, inputPanel, tagPreviewPanel, tagCreationPanel);
 
             Panel mainPanel = new FlowPanel();
-            mainPanel.setWidth("100%");
+            mainPanel.setStyleName(style.tagButtonDialogPanel());
             mainPanel.add(tagButtonsTable);
             mainPanel.add(inputPanel);
             mainPanel.add(controlButtonPanel);
             mainPanel.add(tagPreviewPanel);
-            getElement().getStyle().setBackgroundColor("white");
 
             setWidget(mainPanel);
             center();
@@ -980,6 +994,7 @@ public class TaggingPanel extends ComponentWithoutSettings
 
                         tagButtonTable.setVisible(false);
                     }
+                    center();
                 }
             });
 
@@ -988,6 +1003,14 @@ public class TaggingPanel extends ComponentWithoutSettings
             tagButtonTable.addColumn(commentColumn, stringMessages.tagLabelComment());
             tagButtonTable.addColumn(visibleForPublicColumn, stringMessages.tagVisibility());
             tagButtonTable.addColumn(actionsColumn, stringMessages.tagLabelAction());
+
+            // set these width values manually as they are not accessable via CSS classes
+            tagButtonTable.setColumnWidth(tagColumn, "30%");
+            tagButtonTable.setColumnWidth(imageURLColumn, "20%");
+            tagButtonTable.setColumnWidth(commentColumn, "30%");
+            tagButtonTable.setColumnWidth(visibleForPublicColumn, "10%");
+            tagButtonTable.setColumnWidth(actionsColumn, "10%");
+
             setRowData(tagButtonTable, tagButtons);
 
             return tagButtonTable;
@@ -1002,10 +1025,10 @@ public class TaggingPanel extends ComponentWithoutSettings
 
             Panel controlButtonPanel = new FlowPanel();
             controlButtonPanel.setStyleName(style.buttonsPanel());
-            controlButtonPanel.add(closeButton);
             controlButtonPanel.add(addTagButtonButton);
-            controlButtonPanel.add(cancelButton);
+            controlButtonPanel.add(closeButton);
             controlButtonPanel.add(saveButton);
+            controlButtonPanel.add(cancelButton);
 
             return controlButtonPanel;
         }
@@ -1014,7 +1037,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                 TagPreviewPanel tagPreviewPanel) {
             saveButton = new Button(stringMessages.save());
             saveButton.setVisible(false);
-            saveButton.setStyleName(style.footerButton());
+            saveButton.setStyleName(style.tagDialogButton());
             saveButton.addStyleName("gwt-Button");
             saveButton.addClickHandler(new ClickHandler() {
                 @Override
@@ -1038,6 +1061,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                     } else {
                         Notification.notify(stringMessages.tagNotSpecified(), NotificationType.WARNING);
                     }
+                    center();
                 }
             });
         }
@@ -1045,7 +1069,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         private void addCancelButton(TagInputPanel inputPanel, TagPreviewPanel tagPreviewPanel) {
             cancelButton = new Button(stringMessages.cancel());
             cancelButton.setVisible(false);
-            cancelButton.setStyleName(style.footerButton());
+            cancelButton.setStyleName(style.tagDialogButton());
             cancelButton.addStyleName("gwt-Button");
             cancelButton.addClickHandler(new ClickHandler() {
                 @Override
@@ -1056,13 +1080,14 @@ public class TaggingPanel extends ComponentWithoutSettings
                     cancelButton.setVisible(false);
                     closeButton.setVisible(true);
                     addTagButtonButton.setVisible(true);
+                    center();
                 }
             });
         }
 
         private void addCloseButton(TagCreationPanel tagCreationPanel, TagPreviewPanel tagPreviewPanel) {
             closeButton = new Button(stringMessages.close());
-            closeButton.setStyleName(style.footerButton());
+            closeButton.setStyleName(style.tagDialogButton());
             closeButton.addStyleName("gwt-Button");
             closeButton.addClickHandler(new ClickHandler() {
                 @Override
@@ -1076,7 +1101,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         private void addTagButtonButton(TagCreationPanel tagCreationPanel, CellTable<TagButton> tagButtonTable, TagInputPanel inputPanel,
                 TagPreviewPanel tagPreviewPanel) {
             addTagButtonButton = new Button(stringMessages.tagAddCustomTagButton());
-            addTagButtonButton.setStyleName(style.footerButton());
+            addTagButtonButton.setStyleName(style.tagDialogButton());
             addTagButtonButton.addStyleName("gwt-Button");
             addTagButtonButton.addClickHandler(new ClickHandler() {
                 @Override
@@ -1092,6 +1117,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                     } else {
                         Notification.notify(stringMessages.tagNotSpecified(), NotificationType.WARNING);
                     }
+                    center();
                 }
             });
         }
@@ -1107,18 +1133,15 @@ public class TaggingPanel extends ComponentWithoutSettings
      */
     private class ConfirmationDialog extends DialogBox {
 
-        private final Panel mainPanel;
-        private final TagPanelStyle style = TagPanelResources.INSTANCE.style();
-
         public ConfirmationDialog(String title, String text, Consumer<Boolean> consumer) {
-            mainPanel = new FlowPanel();
-            setGlassEnabled(true);
+            Panel mainPanel = new FlowPanel();
+            mainPanel.setStyleName(style.confirmationDialogPanel());
 
             Label label = new Label(text);
             label.getElement().getStyle().setMarginBottom(10, Unit.PX);
 
             Button confirm = new Button(stringMessages.confirm());
-            confirm.setStyleName(style.footerButton());
+            confirm.setStyleName(style.tagDialogButton());
             confirm.addStyleName("gwt-Button");
             confirm.addClickHandler(new ClickHandler() {
                 @Override
@@ -1129,7 +1152,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             });
 
             Button cancel = new Button(stringMessages.cancel());
-            cancel.setStyleName(style.footerButton());
+            cancel.setStyleName(style.tagDialogButton());
             cancel.addStyleName("gwt-Button");
             cancel.addClickHandler(new ClickHandler() {
                 @Override
@@ -1142,10 +1165,11 @@ public class TaggingPanel extends ComponentWithoutSettings
             mainPanel.add(label);
             mainPanel.add(cancel);
             mainPanel.add(confirm);
-
-            setText(title);
-            getElement().getStyle().setBackgroundColor("white");
             setWidget(mainPanel);
+
+            addStyleName(style.confirmationDialog());
+            setGlassEnabled(true);
+            setText(title);
             center();
         }
     }
@@ -1163,8 +1187,8 @@ public class TaggingPanel extends ComponentWithoutSettings
     private final List<TagButton> tagButtons;
 
     private final HeaderPanel panel;
-    private final Panel tagCreationPanel;
-    private final Panel filterbarPanel;
+    private final TagCreationPanel tagCreationPanel;
+    private final TagFilterPanel filterbarPanel;
     private final Panel contentPanel;
 
     private final StringMessages stringMessages;
@@ -1215,7 +1239,7 @@ public class TaggingPanel extends ComponentWithoutSettings
 
     private void initializePanel() {
         // Panel
-        panel.setStyleName(style.tagPanel());
+        panel.setStyleName(style.taggingPanel());
 
         // Searchbar
         panel.setHeaderWidget(filterbarPanel);
@@ -1235,8 +1259,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         });
 
         contentPanel.add(tagCellList);
-        contentPanel.getElement().getStyle().setMarginTop(10, Unit.PX);
-        contentPanel.getElement().getStyle().setHeight(100, Unit.PCT);
+        contentPanel.addStyleName(style.tagCellListPanel());
 
         panel.setContentWidget(contentPanel);
         updateContent();
