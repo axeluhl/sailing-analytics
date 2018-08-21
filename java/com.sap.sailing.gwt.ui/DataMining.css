@@ -263,14 +263,17 @@ input.magnifier {
 .statisticSuggestBoxPopup {
     z-index: 2;
 }
-.statisticSuggestBoxPopup .suggestPopupContent {
+.statisticSuggestBoxPopupContent {
     max-height: 700px;
     overflow-y: scroll;
+    background: white;
 }
 .statisticSuggestBoxPopup .item {
     padding: 2px;
     color: #000;
     cursor: default;
+    white-space: nowrap;
+    font-size: 105%;
 }
 .statisticSuggestBoxPopup .item-selected {
     background: #D5E2FF;
@@ -315,7 +318,7 @@ input.magnifier {
     border-left: 2px solid #6f7277;
 }
 .dataMiningBorderBottom {
-    border-border: 2px solid #6f7277;
+    border-bottom: 2px solid #6f7277;
 }
 .dataMiningBorderRight {
     border-right: 2px solid #6f7277;
