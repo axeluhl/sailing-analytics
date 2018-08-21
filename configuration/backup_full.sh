@@ -18,7 +18,7 @@ BACKUP_DIRECTORIES="/etc /var/log/mongodb"
 PREFIX="database"
 
 # Directory for temporary files
-TARGET_DIR=/var/lib/mysql/backup
+TARGET_DIR=/var/lib/mongodb/backup
 
 # Configuration for MongoDB backup
 MONGO_PORTS="10202 10201"
@@ -26,7 +26,7 @@ MONGO_INSTALLATION=/opt/mongodb-linux-x86_64-2.6.7
 MONGO_CMD=$MONGO_INSTALLATION/bin/mongo
 MONGOEXPORT_CMD=$MONGO_INSTALLATION/bin/mongoexport
 MONGODB_COLLECTION_WIND="WIND_TRACKS"
-MONGODB_COLLECTION_LOCAL="local"
+MONGODB_EXCLUDE_DBS="local 29erWorlds2016 29erWorlds2016-replica 49er-n17-euros2017 49er-n17-euros2017-replica 49erEuros2015 49erEuros2016 49erEuros2016-replica 49erJWC2015 49erWorlds_2016 49erWorlds_2016-replica 49erWorlds_2016-replica2 49erWorlds_2016-replica3 49erworlds2015 505-2017 505-2017-replica 505-2017-replica-1 505-2017-replica-2 505Worlds2016 505Worlds2016-replica 505_WORLDS_2015 6mworlds2017 6mworlds2017-replica 8MWORLDS2017 8MWORLDS2017-replica AustrianLeague2015 Bodenseewoche_2015 Championsleague_2015 Championsleague_2015-Replica DANISHLEAGUE2017 DANISHLEAGUE2017-replica DUTCH_LEAGUE_2017 DUTCH_LEAGUE_2017-replica DanishSailingLeague_2015 DutchSailingLeague_2015 FinnishSailingLeague_2015 GermanSailingLeague_2015 GermanSailingLeague_2015-Replica HANSESAIL2017 IDMFINN2017 KW2015 KW2015-replica KW2015-replica2 KW2017 KW2017-replica Norwegianleague_2015 POLISHLEAGUE2017 RosAtomCup_2015 SAPOPTICUP2015 SCL2017 SCL2017-replica SGCN_Smartphone_2016 SGCN_Smartphone_2016-replica SPEEDSAILING2016 SWC2016-Melbourne SWC2016-Melbourne-replica SWC2016-Qingdao SWC2016-Qingdao-replica SWC2017-Aarhus SWC2017-HYERES SWC2017-HYERES-replica SWC2017-Miami SWC2017-Miami-replica SWC2017-SANTANDER SWC2017-SANTANDER-replica SWEDISHLEAGUE2017 SWEDISHLEAGUE2017-replica TW2015 TW2015-REPLICA TW2015-test-replica TW2017 TW2017-replica WORLDCUPSYLT2015 YES2015 YES2015-REPLICA YES2015-REPLICA2 allsvenskan2015 austrianleague2016 austrianleague2017 bartsbash2015 bundesliga2-2017 bundesliga2-2017-replica bundesliga2016 bundesliga2016-replica bundesliga2016_2 bundesliga2017 bundesliga2017-replica crw2016 crw2016-replica danishleague2016 danishleague2016-replica dsl-pokal2017 dutchleague2016 dutchleague2016-replica ess2015 ess2016 ess2017 ess2017_foiling_test ess40-2015-replica2 finnishleague2016 finnishleague2017 forumvostok2016 frenchleague2017 germanleague2016-replica idmstar2016 isafwc2014 kielerwoche2016 kielerwoche2016-replica kiellauf2017 northsearegatta2017 northstreamrace2017 norwegianleague2016 norwegianleague2016-replica norwegianleague2017 norwegianleague2017-replica rsc2016 scl2016 scl2016-replica swedishleague2016 swedishleague2016-replica tw2016 tw2016-replica usoda2016 wmrt2016"
 
 # Configuration for MySQL
 MYSQL_DATABASES="bugs mysql"
@@ -40,7 +40,8 @@ BACKUP_SERVER="backup@172.31.25.136"
 BACKUP_DATE=`date +%s`
 
 # Aliases
-BUP_CMD="/opt/bup/bup"
+BUP_DIR=/var/lib/mongodb/backup/bup
+BUP_CMD="/opt/bup/bup -d $BUP_DIR"
 BUP_ADDITIONAL="-r $BACKUP_SERVER:/home/backup/$PREFIX"
 BUP_IGNORES='--exclude-rx=/war/$'
 BUP_CMD_INDEX="$BUP_CMD index $BUP_IGNORES"
@@ -92,7 +93,14 @@ show collections" | $MONGO_CMD --port $MONGO_PORT | tail -n +4 | grep -v "^syste
 			else
 				DB_DIR=$TARGET_DIR/mongodb-$MONGO_PORT$WIND_SUFFIX
 			fi
-			if [ "$i" != "$MONGODB_COLLECTION_LOCAL" -a \( "$i" != "$MONGODB_COLLECTION_WIND" -o "$PARAM" = "weekly" \) ]; then
+			exclude=0
+			for exclude_collection in $MONGODB_EXCLUDE_DBS; do
+			        if [ "$i" = "$exclude_collection" ]; then
+					  echo "Excluding $i from backup based on exclude list"
+				          exclude=1
+				fi
+			done
+			if [ "$exclude" = "0" -a \( "$j" != "$MONGODB_COLLECTION_WIND" -o "$PARAM" = "weekly" \) ]; then
 				echo "    Backing up collection $j in MongoDB $i running on port $MONGO_PORT"
 				echo "$MONGOEXPORT_CMD --port $MONGO_PORT -d $i -c $j > $DB_DIR/$j.json"
 				mkdir -p $DB_DIR
