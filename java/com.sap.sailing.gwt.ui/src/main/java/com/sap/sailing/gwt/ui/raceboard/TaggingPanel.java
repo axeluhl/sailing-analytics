@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,8 +25,11 @@ import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
@@ -59,6 +63,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.ui.adminconsole.ImagesBarColumn;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigImagesBarCell;
+import com.sap.sailing.gwt.ui.client.GwtJsonDeSerializer;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -131,62 +136,35 @@ public class TaggingPanel extends ComponentWithoutSettings
         public interface TagPanelStyle extends CssResource {
             // tags
             String tag();
-
             String tagPanel();
-
             String tagHeading();
-
             String tagCreated();
-
             String tagComment();
-
             String tagImage();
-
             String button();
-
             String footerButton();
-
             String tagButtonTable();
-
             String inputPanelTag();
-
             String inputPanelComment();
-
             String inputPanelImageURL();
-
             String buttonsPanel();
-
             String tagPreviewPanel();
 
             // filter tags
             String tagFilterButton();
-
             String tagFilterHiddenButton();
-
             String tagFilterClearButton();
-
             String tagFilterSearchButton();
-
             String tagFilterSettingsButton();
-
             String tagFilterFilterButton();
-
             String tagFilterContainer();
-
             String tagFilterSearchBox();
-
             String tagFilterSearchInput();
-
             String filterInactiveButtonBackgroundImage();
-
             String filterActiveButtonBackgroundImage();
-
             String clearButtonBackgroundImage();
-
             String searchButtonBackgroundImage();
-
             String settingsButtonBackgroundImage();
-
             String inputPanelIsVisibleForPublic();
         }
     }
@@ -200,15 +178,10 @@ public class TaggingPanel extends ComponentWithoutSettings
 
         public interface TagCellListStyle extends CellList.Style {
             String cellListEventItem();
-
             String cellListWidget();
-
             String cellListEvenItem();
-
             String cellListOddItem();
-
             String cellListSelectedItem();
-
             String cellListKeyboardSelectedItem();
         }
     }
@@ -329,7 +302,11 @@ public class TaggingPanel extends ComponentWithoutSettings
     /**
      * Used to store tag button data and creates new tag event when clicking the button.
      */
-    private class TagButton extends Button {
+    private class TagButton extends Button implements Serializable {
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -722157125410637316L;
         private String tag, imageURL, comment;
         private boolean visibleForPublic;
 
@@ -378,11 +355,65 @@ public class TaggingPanel extends ComponentWithoutSettings
         }
     }
 
+    public class TagButtonsJsonDeSerializer implements GwtJsonDeSerializer<List<TagButton>> {
+
+        private static final String FIELD_TAG_BUTTONS = "tagButtons";
+        private static final String FIELD_BUTTON_NAME = "buttonName";
+        private static final String FIELD_TAG = "tag";
+        private static final String FIELD_COMMENT = "comment";
+        private static final String FIELD_IMAGE_URL = "imageURL";
+        private static final String FIELD_VISIBLE_FOR_PUBLIC = "public";
+
+        @Override
+        public JSONObject serialize(List<TagButton> tagButtons) {
+            JSONObject result = new JSONObject();
+
+            JSONArray tagButtonsArray = new JSONArray();
+            result.put(FIELD_TAG_BUTTONS, tagButtonsArray);
+
+            int i = 0;
+            for (TagButton button : tagButtons) {
+                JSONObject tagButtonObject = new JSONObject();
+                tagButtonsArray.set(i++, tagButtonObject);
+                tagButtonObject.put(FIELD_BUTTON_NAME, new JSONString(button.getText()));
+                tagButtonObject.put(FIELD_TAG, new JSONString(button.getTag()));
+                tagButtonObject.put(FIELD_COMMENT, new JSONString(button.getComment()));
+                tagButtonObject.put(FIELD_IMAGE_URL, new JSONString(button.getImageURL()));
+                tagButtonObject.put(FIELD_VISIBLE_FOR_PUBLIC, JSONBoolean.getInstance(button.isVisibleForPublic()));
+            }
+            return result;
+        }
+
+        @Override
+        public List<TagButton> deserialize(JSONObject rootObject) {
+            List<TagButton> result = null;
+            if (rootObject != null) {
+                result = new ArrayList<TagButton>();
+                JSONArray tagButtonsArray = (JSONArray) rootObject.get(FIELD_TAG_BUTTONS);
+                for (int i = 0; i < tagButtonsArray.size(); i++) {
+                    JSONObject tagButtonValue = (JSONObject) tagButtonsArray.get(i);
+                    JSONString tagButtonName = (JSONString) tagButtonValue.get(FIELD_BUTTON_NAME);
+                    JSONString tagButtonTag = (JSONString) tagButtonValue.get(FIELD_TAG);
+                    JSONString tagButtonComment = (JSONString) tagButtonValue.get(FIELD_COMMENT);
+                    JSONString tagButtonImageURL = (JSONString) tagButtonValue.get(FIELD_IMAGE_URL);
+                    JSONBoolean tagButtonVisibleForPublic = (JSONBoolean) tagButtonValue.get(FIELD_VISIBLE_FOR_PUBLIC);
+                    result.add(new TagButton(tagButtonName.stringValue(), tagButtonTag.stringValue(),
+                            tagButtonComment.stringValue(), tagButtonImageURL.stringValue(),
+                            tagButtonVisibleForPublic.booleanValue()));
+                }
+            }
+            return result;
+        }
+
+    }
+
     /* Panel */
     /**
      * Panel used to create tags and tag buttons in side menu of RaceBoard.
      */
     private class TagCreationPanel extends FlowPanel {
+
+        private static final String LOCAL_STORAGE_TAG_BUTTONS_KEY = "sailingAnalytics.raceBoard.tagButtons";
 
         private final Panel tagButtonsPanel;
 
@@ -396,6 +427,8 @@ public class TaggingPanel extends ComponentWithoutSettings
 
             tagButtonsPanel = new FlowPanel();
             tagButtonsPanel.setStyleName(style.buttonsPanel());
+            loadAllTagButtons();
+            updateButtons();
 
             Button createTagFromTextBoxes = new Button(stringMessages.tagAddTag());
             createTagFromTextBoxes.setStyleName(style.footerButton());
@@ -444,6 +477,51 @@ public class TaggingPanel extends ComponentWithoutSettings
             });
             if ((tagButtonsPanel.getOffsetHeight() - oldHeight) != 0) {
                 panel.setContentWidget(contentPanel);
+            }
+        }
+
+        public void storeAllTagButtons() {
+            TagButtonsJsonDeSerializer serializer = new TagButtonsJsonDeSerializer();
+            JSONObject jsonObject = serializer.serialize(tagButtons);
+            userService.setPreference(LOCAL_STORAGE_TAG_BUTTONS_KEY, jsonObject.toString(), new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    Notification.notify(stringMessages.tagButtonNotSavable(), NotificationType.WARNING);
+                }
+
+                @Override
+                public void onSuccess(Void result) {
+                }
+            });
+        }
+
+        public void loadAllTagButtons() {
+            tagButtonsPanel.clear();
+            if (userService.getCurrentUser() != null) {
+                userService.getPreference(LOCAL_STORAGE_TAG_BUTTONS_KEY, new AsyncCallback<String>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        // do nothing
+                    }
+
+                    @Override
+                    public void onSuccess(String result) {
+                        if (result != null && !result.isEmpty()) {
+                            final TagButtonsJsonDeSerializer deserializer = new TagButtonsJsonDeSerializer();
+                            final JSONValue value = JSONParser.parseStrict(result);
+                            if (value.isObject() != null) {
+                                tagButtons = deserializer.deserialize((JSONObject) value);
+                                updateButtons();
+                                return;
+                            }
+                        }
+                        tagButtons = new ArrayList<TagButton>();
+                        updateButtons();
+                    }
+                });
+            } else {
+                tagButtons = new ArrayList<TagButton>();
+                updateButtons();
             }
         }
     }
@@ -781,8 +859,6 @@ public class TaggingPanel extends ComponentWithoutSettings
 
                         @Override
                         public void onSuccess(Void result) {
-                            Notification.notify("succedded storing filters", NotificationType.INFO);
-
                         }
                     });
         }
@@ -972,6 +1048,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                                 stringMessages.tagButtonConfirmDeletion(button.getTag()), (confirmed) -> {
                                     if (confirmed) {
                                         tagButtons.remove(button);
+                                        tagCreationPanel.storeAllTagButtons();
                                         setRowData(tagButtonTable, tagButtons);
                                         tagCreationPanel.updateButtons();
                                     }
@@ -985,7 +1062,6 @@ public class TaggingPanel extends ComponentWithoutSettings
                         inputPanel.setVisibleForPublic(button.isVisibleForPublic());
 
                         tagPreviewPanel.renderPreview(inputPanel);
-                        tagCreationPanel.updateButtons();
 
                         saveButton.setVisible(true);
                         cancelButton.setVisible(true);
@@ -1038,10 +1114,10 @@ public class TaggingPanel extends ComponentWithoutSettings
                         selectedTagButton.setTag(inputPanel.getTag());
                         selectedTagButton.setComment(inputPanel.getComment());
                         selectedTagButton.setImageURL(inputPanel.getImageURL());
+                        tagCreationPanel.storeAllTagButtons();
                         inputPanel.clearAllValues();
                         tagPreviewPanel.renderPreview(inputPanel);
                         tagButtonTable.redraw();
-                        tagCreationPanel.updateButtons();
 
                         saveButton.setVisible(false);
                         cancelButton.setVisible(false);
@@ -1101,8 +1177,8 @@ public class TaggingPanel extends ComponentWithoutSettings
                         inputPanel.clearAllValues();
                         tagPreviewPanel.renderPreview(inputPanel);
                         tagButtons.add(tagButton);
+                        tagCreationPanel.storeAllTagButtons();
                         setRowData(tagButtonTable, tagButtons);
-                        tagCreationPanel.updateButtons();
                     } else {
                         Notification.notify(stringMessages.tagNotSpecified(), NotificationType.WARNING);
                     }
@@ -1174,10 +1250,10 @@ public class TaggingPanel extends ComponentWithoutSettings
     private final SingleSelectionModel<TagDTO> tagSelectionModel;
     private final TagListProvider tagListProvider;
 
-    private final List<TagButton> tagButtons;
+    private List<TagButton> tagButtons;
 
     private final HeaderPanel panel;
-    private final Panel tagCreationPanel;
+    private final TagCreationPanel tagCreationPanel;
     private final TagFilterPanel filterbarPanel;
     private final Panel contentPanel;
 
@@ -1385,6 +1461,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             raceTimesInfoProvider.setLatestReceivedTagTime(raceIdentifier, null);
         });
         filterbarPanel.loadTagFilterSets();
+        tagCreationPanel.loadAllTagButtons();
         updateContent();
     }
 

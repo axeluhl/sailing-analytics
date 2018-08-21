@@ -2135,4 +2135,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String cancel();
     String createTagFilterNotLoggedIn();
     String createTagFilterHint();
+    String tagButtonNotSavable();
 }
