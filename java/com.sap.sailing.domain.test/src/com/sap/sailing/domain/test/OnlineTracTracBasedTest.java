@@ -14,6 +14,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -184,7 +185,16 @@ public abstract class OnlineTracTracBasedTest extends AbstractTracTracLiveTest i
                 getSemaphor().wait();
             }
         }
-        logger.info("Stored data has been loaded for " + race.getName());
+        logger.info("Stored data has been loaded for " + race.getName()+". Waiting for receivers to process it...");
+        final CountDownLatch latch = new CountDownLatch(receivers.size());
+        for (Receiver receiver : receivers) {
+            receiver.callBackWhenLoadingQueueIsDone(r->{
+                latch.countDown();
+                logger.info(receiver+" done loading");
+            });
+        }
+        latch.await();
+        logger.info("Stored data has been processed by receivers");
         for (Receiver receiver : receivers) {
             logger.info("Stopping receiver "+receiver);
             receiver.stopAfterNotReceivingEventsForSomeTime(/* timeoutInMilliseconds */ 5000l);

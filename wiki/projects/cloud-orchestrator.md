@@ -1,6 +1,6 @@
 # Cloud Orchestration - Project Plan
 
-[TOC]
+[[_TOC_]]
 
 The cloud landscape used to run the SAP Sailing Analytics as well as its development infrastructure has grown increasingly comprehensive and elaborate over the last few years. It has largely been configured through manual efforts on behalf of event and infrastructure operators and administrators.
 
@@ -48,11 +48,41 @@ The orchestrator needs to log in detail on behalf of which user which landscape 
 
 ### Application Load Balancers (ALBs)
 
-### ALB Rules
+Up to 20 application load balancers (ALBs) can be used in a single AWS region. Each of them can have up to 100 rules that map requests to a target group based on hostname and URL path patterns. We use a default ALB that is the CNAME target for **.sapsailing.com*, and as such allows the orchestrator to add rules to it without the need to add new DNS records to Route53. Dedicated ALBs can be used in addition to circumvent the limit of 100 rules per ALB. To ensure those dedicated ALBs are targeted by user requests, DNS records for the sub-domains that those ALBs have rules for need to be added to Route53.
+
+All ALBs need default rules that forward requests to the archive server (production or fail-over).
+
+Currently, several sub-domain names exist (e.g., wiki, bugzilla and hudson) that are also handled by the default ALB, forwarding to our central webserver which then acts as a reverse proxy, using rewrite rules to redirect the clients to the specific hosts running those services. We may consider changing this and introduce DNS records for those service-based sub-domains, mapping them explicitly to the elastic IP of the central webserver. This would allow us to separate the Apache httpd instances for those central services from the httpd instances used for the archive servers.
 
 ### Target Groups
 
+Those hold the nodes responding to requests. In a replication cluster we usually want to have one for the "-master" URL that event administrators use
+
+### Volumes
+
+There are a number of disk volumes that are critical to monitor and, where necessary, scale. This includes:
+
+- Backup server (*/home/backup*)
+- Database server (*/var/lib/mongodb* and sub-mounts, */var/lib/mysql*)
+- Central Webserver (*/var/log/old*, */var/log/old/cache*, */var/www/static*, */var/www/home* hosting the git repository)
+
+Through the AWS API the read/write throughputs can be observed, and peaks as well as bottlenecks may be identified. At least as importantly, the file system fill state has to be observed which is not possible through the AWS API and needs to happen through the respective instances' operating systems.
+
+It shall be possible to define alerts based on file systems whose free space drops below a given threshold. Re-sizing volumes automatically may be an interesting option in the future.
+
+### Alerts
+
+Alerts can be defined for different metrics and with different notification targets. SMS text messages and e-mail notifications are available.
+
+The orchestrator shall be able of managing such alerts. It shall be possible to attach such alerting rules to an entire replication cluster, meaning that all target groups used for managing the cluster shall receive the same monitoring and alerting rule (see also [Sharding](#sharding)).
+
 ### DNS Record Sets
+
+As the number of rules per load balancer is limited to 100 as of now, and only one ALB can be set up to handle **.sapsailing.com*, this ALB can only be used for the volatile, fast-changing sub-domain names and event-driven set-ups, given there are not even too many of those happening concurrently to exceed the limit.
+
+All other, specifically the longer-running, sub-domains shall be mapped through a dedicated Route53 DNS entry in the *sapsailing.com* hosted zone. Up to 20 ALBs can be created per region, and each of those can have up to 100 rules. This should suffice for some time to come. We should also consider asking users to pay for the special service of a dedicated sub-domain in the future.
+
+Those dedicated DNS entries then point to a non-default ALB that has the rules for that sub-domain. Those ALBs also default to the archive server and central web server if no other rule matches. Should a sub-domain's content be archived, the DNS entry can be removed. The default rules of both, the dedicated ALB and the default ALB for **.sapsailing.com* will forward requests to the archive server.
 
 ### Apache Web Servers
 
@@ -66,6 +96,8 @@ All httpd instances have common elements for SSL certificate configuration as we
 
 Other macros set up end points for server monitoring (*/internal-server-status*) and for the health checks performed by the load balancer's target group which uses the host's internal IP address as the request server name.
 
+All our hosts can run their own Apache httpd process. Currently, the two archive servers don't. Instead, they rely on the single central www.sapsailing.com webserver which hosts all redirect macro usages for all sub-domains that shall be handled by the archive server. This should probably be changed in the future, such that each archive server runs its own httpd process. It would remove the single point of failure that the current central webserver represents and may make room for a more clever set-up where the fail-over archive server is handled by a target group that is the default in the ALB rule set even after the default rule that points at the target group for the production archive server. This way, together with an alarm defined, failover to the secondary archive server could be automatic and instant.
+
 The interface for such a web server will need to allow the orchestrator to add and remove such rewrite macro usages, configure the macro parameters such as the event ID to use for the Event-SSL-Redirect macro, and to tell the *httpd* process to re-load its configuration to make any changes effective.
 
 ### Java Application Instances and their Health
@@ -75,6 +107,8 @@ Application nodes have to provide a REST API with reliable health information.
 A replica is not healthy while its initial load is about to start, or is still on-going or its replication queue is yet to drain after the initial load has finished. A replica will take harm from requests received while the initial load is received or being processed. Requests may be permitted after the initial load has finished processing and while the replication queue is being drained, although the replica will not yet have reached the state that the master is in.
 
 A master is not healthy until it has finished loading all data from the MongoDB during the activation of the *RacingEventService*. It will take harm from requests received during this loading phase. After loading the "master data," a master server will try to restore all race trackers, starting to track the races for which a so-called "restore record" exists. During this phase the master is not fully ready yet but will not take harm from requests after loading all master data has completed. For example, in an emergency situation where otherwise the replication cluster would be unavailable it may be useful to already direct requests at such a master to at least display a landing page or a meaningful error page.
+
+The Java instances have a few and shall have more interesting observable parameters. Some values can be observed through the AWS API, such as general network and CPU loads. So far, the number of leaderboards and the restore process can be observed using JMX managed beans, as can be seen in the JConsole. Other interesting parameters to observe by the orchestrator would be the memory usage and garbage collection (GC) stats, as well as information about the thread pools, their usage and their contention. It would be great if the orchestrator could find out about bottlenecks and how they may be avoided, e.g., hitting bandwidth limitations or not having enough CPUs available to serialize data fast enough for the bandwidth available and the demand observed.
 
 ### Multi-Instances
 
@@ -102,15 +136,75 @@ Part of such a scenario can also be to manage the remote server references on th
 
 ### Archive Servers
 
+We run a production copy of the "archive server" that hosts selected events for which we decide that they have sufficient quality to be promoted through sapsailing.com's landing page. Most events sponsored by SAP fall into this category. The archive server is the target of a "Master Data Import" (MDI) after an event is finished, where data is moved from a dedicated event server into the archive.
+
+As the archive server requires several hours for a re-start, a failover instance exists that usually runs a release that is not as new as the one on the production archive server. The reason for this choice of release is that in case we run into a regression that tests have not revealed, switching to the failover archive allows us to "revert" to a release that hopefully does not have this regression while we then have some time to fix the issue on the production archive server.
+
+The failover archive server may be used for special purposes such as tricky data-mining queries that we don't want to affect the performance of the production archive server, or acting as an additional Hudson build slave because its CPUs are usually idling.
+
+The orchestrator shall be aware of the two archive server instances and shall know which one is the production and which one the fail-over copy. It should have an awareness of the releases installed and should offer the release upgrade as an action that will install the latest release to the fail-over copy, restart it, wait for it to become "healthy" and then compare the contents with the production archive server. If all runs well, routing/ALB/Apache rules can be switched to swap production and fail-over copy.
+
+There should in the future be dedicated target groups for production and fail-over archive servers that can be used to define an automatic fail-over order in the ALB. A severe alert should be sent out if the production archive target group has no healthy target.
+
 ### Sharding
+
+Requests to the */gwt/service/sailing* RPC service that cause calculations for a specific leaderboard are suffixed with the leaderboard name to which they are specific. Example: */gwt/service/sailing/leaderboard/Sailing_World_Championships_Aarhus_2018___Laser_Radial*. The leaderboard name undergoes escaping of special characters which are then replaced by an underscore character each.
+
+With this approach, a load balancer can use the URL path with the escaped leaderboard name as criterion in a rule that dispatches requests to target groups based on the leaderboard. This way, although all replicas in a replication cluster maintain an equal memory content, calculations in a replica can be constrained to only a subset of the leaderboards the replica maintains.
+
+Without this mechanism, all replicas in a replication cluster would be targeted with requests for all leaderboards in a random, round-robin fashion, leading to all replicas running the live calculations for all leaderboards redundantly. As more replicas are added to a replication cluster for a domain with several live leaderboards, using this sharding feature makes more sense because the recalculation load can be split evenly across the replicas.
+
+A target group for each subset of leaderboards has to be created. The ALB will then have to have a rule for each leaderboard name, deciding the target group to which to route requests for that leaderboard. A default target group for the replication cluster shall exist which catches all other requests and which becomes the default in case a sharding target group runs out of healthy hosts.
 
 ### MongoDB Databases
 
+We currently have a single server node *dbserver.internal.sapsailing.com* on which there are four MongoDB processes running. Three of those are for testing (*dev.sapsailing.com* uses the process listening on port 10201) or legacy purposes, and only one, listening on port 10202, has all the content relevant for the entire production landscape.
+
+This MongoDB process hosts various MongoDB databases, each with their separate names and separate collections. With the exception of the production and fail-over archive servers which use the *winddb* database, all other master servers use a DB name that should equal that of the server name which usually is a technical short name for the event. Example: *KW2018* represents the server and DB name for the *Kieler Woche 2018* event.
+
+Replication clusters use a second database that is used by all replicas in the cluster. Right now, replicas don't interact in any well-defined way with the database, and we say that a database accessed by a replica is not in a well-defined state. Replicas don't read from their database which is the reason why this does not matter. For example, in addition to the *KW2018* database there is a *KW2018-replica* database used by all replicas in the *KW2018* replication cluster.
+
+The MongoDB host currently has a fast EBS volume attached to which it stores all the databases. There is only a single instance in the landscape, making this currently a single point of failure. We should consider changing this.
+
+The orchestrator shall know about the MongoDB instances we run in the landscape, shall know their ports and hosts and thereby shall be able to monitor in particular the disk volume holding the DB contents. Alerts should be put in place in case those volumes reach critical fill states. In the future, the orchestrator should learn to run MongoDB in various regions, optionally in replicated mode also across regions, making it easier for us to deploy master/replica set-ups across regions. There may even be MongoDB instances in each region that are not part of the cluster that are used only for the phony replica databases.
+
 ### RabbitMQ Servers and Exchanges
+
+Replication is based on RabbitMQ which is used to establish a channel through which the initial load can be transferred safely even under unstable network conditions, and through which the shipping of operations from master to replicas happens, using a "fanout" exchange.
+
+We currently have only a single RabbitMQ instance in the landscape that hosts all exchanges and all initial load queues. As such, it represents a single point of failure.
+
+The orchestrator should know about all RabbitMQ instances in the landscape and should know how its exchanges relate to replication clusters, and how its queues relate to the master and replica instances in the landscape. It can thus observe whether all those objects are cleanly removed again when replicas or replication clusters are dismantled and can, if necessary, clean up remnants.
+
+### Backup Server
+
+A single EC2 instance called "Backup" with large EBS disk volumes attached hosts various forms of backups. We use *bup*, a variant of *git* capable of dealing well with large binary files. This gives us historizing backups where each version may be fully restored.
+
+Subject to backup are all production MongoDB databases, the MySQL database content for our Bugzilla server, as well as the file system of the central Webserver, there in particular the configuration and log files.
+
+The backup script on *dbserver.internal.sapsailing.com:/opt/backup.sh* does *not* backup all MongoDB databases available. I think that it should. See also *configuration/backup_full.sh* in our git repository for a new version.
 
 ## Orchestration Use Cases
 
 ### Create a New Event on a Dedicated Replication Cluster
+
+A user wants to create a new event. But instead of creating it on an existing server instance, such as the archive server or a club server, he/she would like to create a new dedicated server instance such that the server is a master which later may receive its own replicas and thus form the core of a new replication cluster. The user defines the technical event name, such as *TW2018* for the "Travemünder Woche 2018," which is then used as the server name, MongoDB database name, and replication channel name.
+
+The steps are:
+
+- Launch a new instance from a prepared AMI (either the AMI is regularly updated with the latest packages and kernel patches, or a "yum update" needs to be run and then the instance rebooted)
+- The latest (or a specified) release is installed to */home/sailing/servers/server*
+- The */home/sailing/servers/server/env.sh* file is adjusted to reflect the server name, MongoDB settings, as well as the ports to be used (for a dedicated server probably the defaults at 8888 for the HTTP server, 14888 for the OSGi console telnet port, and 2010 for the Expedition UDP connector)
+- The Java process is launched
+- An event is created; it doesn't necessarily have to have the correct name and attributes yet; it's only important to obtain its UUID.
+- With the new security implementation, the event will be owned by the user requesting the dedicated replication cluster, and a new group named after the unique server name is created of which the user is made a part.
+- The user obtains a qualified *admin:&lt;servername&gt;* role that grants him/her administrative permissions for all objects owned by the group pertinent to the new replication cluster.
+- An Apache *httpd* macro call for the event with its UUID is inserted into a *.conf* file in the instance's */etc/httpd/conf.d* directory
+- The Apache *httpd* server is launched
+- Two target groups *S-ded-&lt;servername&gt;* and *S-ded-&lt;servername&gt;-master* are created, and the new instance is added to both of them
+- Two new ALB rules for *&lt;servername&gt;.sapsailing.com* and *&lt;servername&gt;-master.sapsailing.com* are created, forwarding their requests to the respective target group from the previous step
+
+asdf
 
 ### Create a New "Club Set-Up" in a Multi-Instance
 
