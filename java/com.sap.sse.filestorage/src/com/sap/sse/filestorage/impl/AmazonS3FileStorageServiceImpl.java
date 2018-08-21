@@ -8,10 +8,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.amazonaws.AmazonClientException;
-import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
@@ -55,22 +56,22 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
     }
 
     private AmazonS3Client createS3Client() throws InvalidPropertiesException {
-        AWSCredentials creds;
+        AWSCredentialsProvider creds;
 
         // first try to use properties
         if (accessId.getValue() != null && accessKey.getValue() != null) {
-            creds = new BasicAWSCredentials(accessId.getValue(), accessKey.getValue());
+            creds = new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessId.getValue(), accessKey.getValue()));
         } else {
             // if properties are empty, read credentials from ~/.aws/credentials
             try {
-                creds = new ProfileCredentialsProvider().getCredentials();
+                creds = new ProfileCredentialsProvider();
             } catch (Exception e) {
                 throw new InvalidPropertiesException(
                         "credentials in ~/.aws/credentials seem to be invalid (tried this as fallback because properties were empty)",
                         e);
             }
         }
-        return (AmazonS3Client) AmazonS3ClientBuilder.standard().withCredentials(new AWSStaticCredentialsProvider(creds)).build();
+        return (AmazonS3Client) AmazonS3ClientBuilder.standard().withCredentials(creds).withRegion(regionRetrievalHost).enableForceGlobalBucketAccess().build();
     }
 
     private static String getKey(String fileExtension) {

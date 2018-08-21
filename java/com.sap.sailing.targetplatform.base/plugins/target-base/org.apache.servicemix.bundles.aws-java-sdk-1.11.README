@@ -8,3 +8,5 @@ and hence suggests that the patch described above as necessary for version 1.9.8
 
 Note: with bug 4656 we're upgrading to version 1.11.373_1 of the org.apache.servicemix.bundles.aws-java-sdk component.
 This version already includes the awssdk_config_default.json, thus the patch is not necessary anymore.
+Nevertheless the bug is still not resolved, since the awssdk_config_default.json in the package is not a valid json file. 
+To validate it, you have to remove all "Java-Style" comments "//".
