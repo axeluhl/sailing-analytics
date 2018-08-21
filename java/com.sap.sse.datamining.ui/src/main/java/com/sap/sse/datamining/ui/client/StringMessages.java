@@ -46,6 +46,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String noDimensionToGroupBySelectedError();
     String noDataRetrieverChainDefinitonSelectedError();
     String noStatisticSelectedError();
+    String noAggregatorSelectedError();
     String calculateThe();
     String statisticProvider();
     String groupingProvider();    
@@ -92,5 +93,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String any();
     String of();
     String the();
+    String and();
     
 }

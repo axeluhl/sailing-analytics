@@ -1,6 +1,7 @@
 package com.sap.sse.datamining.ui.client.execution;
 
 import java.io.Serializable;
+import java.util.Iterator;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -67,7 +68,6 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
         this.resultsPresenter = resultsPresenter;
 
         runButton = new Button(getDataMiningStringMessages().run());
-        runButton.setEnabled(false);
         runButton.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
@@ -81,6 +81,8 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
                 SimpleQueryRunner.this.run(queryDefinitionProvider.getQueryDefinition());
             }
         };
+        
+        queryDefinitionChanged(queryDefinitionProvider.getQueryDefinition());
     }
 
     @Override
@@ -121,8 +123,16 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
         Iterable<String> errors = queryDefinitionProvider.validateQueryDefinition(newQueryDefinition);
         boolean isValid = Util.isEmpty(errors);
         runButton.setEnabled(isValid);
-        if (isValid && settings.isRunAutomatically()) {
-            queryReleaseTimer.schedule(queryBufferTimeInMillis);
+        if (isValid) {
+            runButton.setTitle(null);
+            if (settings.isRunAutomatically()) {
+                queryReleaseTimer.schedule(queryBufferTimeInMillis);
+            }
+        } else {
+            Iterator<String> errorsIterator = errors.iterator();
+            StringBuilder tooltipBuilder = new StringBuilder(errorsIterator.next());
+            errorsIterator.forEachRemaining(e -> tooltipBuilder.append("\n").append(e));
+            runButton.setTitle(tooltipBuilder.toString());
         }
     }
 
