@@ -4,7 +4,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -56,6 +58,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -68,7 +71,6 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.TagListProvider;
 import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterUIFactory;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
@@ -300,6 +302,25 @@ public class TaggingPanel extends ComponentWithoutSettings
                             });
                 }
             }
+        }
+    }
+
+    private class TagFilterLabel extends Label {
+        public TagFilterLabel() {
+            addStyleName(style.tagFilterCurrentSelection());
+            setText(stringMessages.tagCurrentFilter());
+            tagListProvider.addObserveringLabel(this);
+        }
+
+        public void update(FilterSet<TagDTO, Filter<TagDTO>> tagsFilterSet) {
+            if (tagsFilterSet != null && !tagsFilterSet.getName().isEmpty()) {
+                setText(stringMessages.tagCurrentFilter() + " " + tagsFilterSet.getName());
+                removeStyleName(style.hidden());
+            } else {
+                setText("");
+                addStyleName(style.hidden());
+            }
+            panel.setContentWidget(contentPanel);
         }
     }
 
@@ -699,7 +720,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         private TagFilterSets tagFilterSets;
         private TextBox searchTextBox;
         private Button clearTextBoxButton, filterSettingsButton;
-        private Label currentFilter;
+        private TagFilterLabel currentFilter;
         private final AbstractListFilter<TagDTO> filter;
 
         public TagFilterPanel() {
@@ -756,9 +777,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                 }
             });
 
-            currentFilter = new Label();
-            currentFilter.addStyleName(style.tagFilterCurrentSelection());
-            currentFilter.setText(stringMessages.tagCurrentFilter());
+            currentFilter = new TagFilterLabel();
 
             Panel searchBoxPanel = new FlowPanel();
             searchBoxPanel.setStyleName(style.tagFilterSearchBox());
@@ -769,8 +788,6 @@ public class TaggingPanel extends ComponentWithoutSettings
             add(searchBoxPanel);
             add(filterSettingsButton);
             add(currentFilter);
-
-            updateFilterLabel(lastActiveTagFilterSet);
         }
 
         private void showFilterDialog() {
@@ -827,7 +844,6 @@ public class TaggingPanel extends ComponentWithoutSettings
             } else {
                 filterSettingsButton.setTitle(tagsFilterTitle);
             }
-            updateFilterLabel(lastActiveTagFilterSet);
         }
 
         /*
@@ -910,17 +926,6 @@ public class TaggingPanel extends ComponentWithoutSettings
                 }
                 tagListProvider.setTagsFilterSet(newFilterSetWithThis);
             }
-        }
-        
-        private void updateFilterLabel(FilterSet<TagDTO, FilterWithUI<TagDTO>> activeTagFilterSet) {
-            if (activeTagFilterSet == null || (activeTagFilterSet != null && activeTagFilterSet.getName().isEmpty())) {
-                currentFilter.setText("");
-                currentFilter.addStyleName(style.hidden());
-            } else {
-                currentFilter.setText(stringMessages.tagCurrentFilter() + " " + activeTagFilterSet.getName());
-                currentFilter.removeStyleName(style.hidden());
-            }
-            panel.setContentWidget(contentPanel);
         }
 
         @Override
@@ -1215,6 +1220,104 @@ public class TaggingPanel extends ComponentWithoutSettings
         private void setRowData(CellTable<TagButton> tagButtonTable, List<TagButton> buttons) {
             tagButtonTable.setRowData(buttons);
             tagButtonTable.setVisible(!buttons.isEmpty());
+        }
+    }
+
+    /**
+     * Used to store tags and filter sets and to apply these filters on the tags
+     */
+    private class TagListProvider extends ListDataProvider<TagDTO> {
+
+        private List<TagDTO> allTags;
+        private FilterSet<TagDTO, Filter<TagDTO>> currentFilterSet;
+        private TagFilterLabel observingLabel;
+
+        public TagListProvider() {
+            allTags = new ArrayList<TagDTO>();
+        }
+
+        public void addObserveringLabel(TagFilterLabel tagFilterLabel) {
+            observingLabel = tagFilterLabel;
+        }
+
+        public List<TagDTO> getAllTags() {
+            return allTags;
+        }
+
+        /**
+         * adds new tags, call {@link #updateFilteredTags() updateFilteredTags} afterwards so list of filtered tags can
+         * contain new tags
+         * 
+         * @param list
+         *            of tags which shall be added
+         */
+        public void addTags(final List<TagDTO> tags) {
+            if (tags != null) {
+                for (TagDTO tag : tags) {
+                    addTag(tag);
+                }
+            }
+        }
+
+        /**
+         * adds a new tag, call {@link #updateFilteredTags() updateFilteredTags} afterwards so list of filtered tag can
+         * contain new tags
+         * 
+         * @param tag
+         *            which shall be added
+         */
+        public void addTag(final TagDTO tag) {
+            if (tag != null) {
+                allTags.add(tag);
+            }
+        }
+
+        public List<TagDTO> getFilteredTags() {
+            return getList();
+        }
+
+        /**
+         * filter all tags by tagsFilterSet
+         */
+        public void updateFilteredTags() {
+            List<TagDTO> currentFilteredList = new ArrayList<TagDTO>(getAllTags());
+            if (currentFilterSet != null) {
+                for (Filter<TagDTO> filter : currentFilterSet.getFilters()) {
+                    for (Iterator<TagDTO> i = currentFilteredList.iterator(); i.hasNext();) {
+                        TagDTO tag = i.next();
+                        if (!filter.matches(tag)) {
+                            i.remove();
+                        }
+                    }
+                }
+            }
+
+            currentFilteredList.sort(new Comparator<TagDTO>() {
+                @Override
+                public int compare(TagDTO tag1, TagDTO tag2) {
+                    long time1 = tag1.getRaceTimepoint().asMillis();
+                    long time2 = tag2.getRaceTimepoint().asMillis();
+                    return time1 < time2 ? -1 : time1 == time2 ? 0 : 1;
+                }
+            });
+            setList(currentFilteredList);
+        }
+
+        public FilterSet<TagDTO, Filter<TagDTO>> getTagFilterSet() {
+            return currentFilterSet;
+        }
+
+        public void setTagsFilterSet(FilterSet<TagDTO, Filter<TagDTO>> tagsFilterSet) {
+            currentFilterSet = tagsFilterSet;
+            if (observingLabel != null) {
+                observingLabel.update(tagsFilterSet);
+            }
+            updateFilteredTags();
+            refresh();
+        }
+
+        public int getFilteredTagsListSize() {
+            return Util.size(getFilteredTags());
         }
     }
 
