@@ -160,12 +160,16 @@ public class TaggingPanel extends ComponentWithoutSettings
             String tagFilterContainer();
             String tagFilterSearchBox();
             String tagFilterSearchInput();
+            String tagFilterCurrentSelection();
             String filterInactiveButtonBackgroundImage();
             String filterActiveButtonBackgroundImage();
             String clearButtonBackgroundImage();
             String searchButtonBackgroundImage();
             String settingsButtonBackgroundImage();
             String inputPanelIsVisibleForPublic();
+
+            // misc.
+            String hidden();
         }
     }
 
@@ -695,6 +699,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         private TagFilterSets tagFilterSets;
         private TextBox searchTextBox;
         private Button clearTextBoxButton, filterSettingsButton;
+        private Label currentFilter;
         private final AbstractListFilter<TagDTO> filter;
 
         public TagFilterPanel() {
@@ -751,13 +756,21 @@ public class TaggingPanel extends ComponentWithoutSettings
                 }
             });
 
+            currentFilter = new Label();
+            currentFilter.addStyleName(style.tagFilterCurrentSelection());
+            currentFilter.setText(stringMessages.tagCurrentFilter());
+
             Panel searchBoxPanel = new FlowPanel();
             searchBoxPanel.setStyleName(style.tagFilterSearchBox());
             searchBoxPanel.add(submitButton);
             searchBoxPanel.add(searchTextBox);
             searchBoxPanel.add(clearTextBoxButton);
+
             add(searchBoxPanel);
             add(filterSettingsButton);
+            add(currentFilter);
+
+            updateFilterLabel(lastActiveTagFilterSet);
         }
 
         private void showFilterDialog() {
@@ -772,6 +785,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                             tagListProvider.setTagsFilterSet(newTagFilterSets.getActiveFilterSetWithGeneralizedType());
                             tagListProvider.updateFilteredTags();
                             tagListProvider.refresh();
+
                             updateTagFilterControlState(newTagFilterSets);
                             if (userService.getCurrentUser() != null) {
                                 storeTagFilterSets(newTagFilterSets);
@@ -782,7 +796,6 @@ public class TaggingPanel extends ComponentWithoutSettings
                         @Override
                         public void cancel() {
                         }
-
                     }, userService);
 
             tagsFilterSetsDialog.show();
@@ -808,11 +821,13 @@ public class TaggingPanel extends ComponentWithoutSettings
                 }
                 lastActiveTagFilterSet = null;
             }
+
             if (lastActiveTagFilterSet != null) {
                 filterSettingsButton.setTitle(tagsFilterTitle + " (" + lastActiveTagFilterSet.getName() + ")");
             } else {
                 filterSettingsButton.setTitle(tagsFilterTitle);
             }
+            updateFilterLabel(lastActiveTagFilterSet);
         }
 
         /*
@@ -895,6 +910,17 @@ public class TaggingPanel extends ComponentWithoutSettings
                 }
                 tagListProvider.setTagsFilterSet(newFilterSetWithThis);
             }
+        }
+        
+        private void updateFilterLabel(FilterSet<TagDTO, FilterWithUI<TagDTO>> activeTagFilterSet) {
+            if (activeTagFilterSet == null || (activeTagFilterSet != null && activeTagFilterSet.getName().isEmpty())) {
+                currentFilter.setText("");
+                currentFilter.addStyleName(style.hidden());
+            } else {
+                currentFilter.setText(stringMessages.tagCurrentFilter() + " " + activeTagFilterSet.getName());
+                currentFilter.removeStyleName(style.hidden());
+            }
+            panel.setContentWidget(contentPanel);
         }
 
         @Override
@@ -1325,8 +1351,8 @@ public class TaggingPanel extends ComponentWithoutSettings
         });
 
         contentPanel.add(tagCellList);
+        contentPanel.getElement().getStyle().setMarginTop(10, Unit.PX);
         contentPanel.getElement().getStyle().setHeight(100, Unit.PCT);
-        contentPanel.getElement().getStyle().setPaddingTop(10, Unit.PX);
 
         panel.setContentWidget(contentPanel);
         updateContent();
