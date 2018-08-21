@@ -25,10 +25,11 @@ find_project_home ()
 
     #editing the filepath, so it fits for eclipse #currently save works for cygwin, gitbash and linux
 	if [ "$OSTYPE" == "cygwin" ]; then
-		echo $1 | sed 's/^\/cygdrive\/\(.\)/\/\1:/'
+		echo $1 | sed 's/^\/cygdrive\/\([a-zA-Z]\)\//\1:\//'
 	fi
+	
 	if [ "$OSTYPE" == "msys" ]; then
-		echo $1 | sed 's/^\(\/[[:alpha:]]\)\//\1:\//'
+		echo $1 | sed 's/^\/\([a-zA-Z]\)\//\1:\//'
 	fi
 }
 
@@ -38,6 +39,7 @@ START_DIR="`pwd`"
 
 if [ "$PROJECT_HOME" = "" ]; then
     PROJECT_HOME=$(find_project_home "$START_DIR")
+    echo "PROJECT_HOME: $PROJECT_HOME"
 fi
 
 # if project_home is still empty we could not determine any suitable directory
@@ -46,13 +48,14 @@ if [[ "$PROJECT_HOME" == "" ]]; then
     exit 1
 fi
 
-if [ "$SERVERS_HOME" = "" ]; then#reading the filepath and editing it, so it fits for eclipse #currently save works for cygwin, gitbash and linux
+#reading the filepath and editing it, so it fits for eclipse #currently save works for cygwin, gitbash and linux
+if [ "$SERVERS_HOME" = "" ]; then
 	SERVERS_HOME="$USER_HOME/servers"
 	if [ "$OSTYPE" == "cygwin" ]; then
-		SERVERS_HOME=`echo "$USER_HOME/servers" | sed 's/^\/cygdrive\/\(.\)/\/\1:/'`
+		SERVERS_HOME=`echo "$USER_HOME/servers" | sed 's/^\/cygdrive\/\([a-zA-Z]\)\//\1:\//'`
 	fi
 	if [ "$OSTYPE" == "msys" ]; then
-		SERVERS_HOME=`echo "$USER_HOME/servers" | sed 's/^\(\/[[:alpha:]]\)\//\1:\//'`
+		SERVERS_HOME=`echo "$USER_HOME/servers" | sed 's/^\/\([a-zA-Z]\)\//\1:\//'`
 	fi
 fi
 
