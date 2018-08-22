@@ -108,7 +108,7 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
             CreateModelException, NotEnoughDataHasBeenAddedException {
         setUp("event_20110609_KielerWoch-505_race_4");
         Wind average = getManeuverBasedAverageWind();
-        assertEquals(270, average.getFrom().getDegrees(), 9.0);
+        assertEquals(265, average.getFrom().getDegrees(), 9.0);
     }
     
     @Test
