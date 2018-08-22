@@ -49,7 +49,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
-        Branch.getInstance().application(app, open: url, options: options)
+        let branchQueryItems = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems
+        if (branchQueryItems?.first(where: {$0.name == "checkin_url"})) != nil {
+            Branch.getInstance().application(app, open: url, options: options)
+        } else {
+            Preferences.newCheckInURL = urlStringForDeeplink(url: url)
+        }
         return true
     }
 
@@ -122,5 +127,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     fileprivate func setupSVProgressHUD() {
         SVProgressHUD.setDefaultMaskType(.clear)
     }
+
+    // MARK: - Helper
+
+    fileprivate func urlStringForDeeplink(url: URL) -> String {
+        var urlString = url.absoluteString
+        let appPrefix : String = "comsapsailingtracker://"
+
+        // FIXME: - Two prefixes are not allowed
+        // Deeplink needs another structure (if possible) because of allowed characters in URL
+        // https:// -> http//
+
+        urlString = urlString.hasPrefix(appPrefix) ? urlString.substring(from: appPrefix.endIndex) : urlString
+        let httpPrefix : String = "http//"
+        urlString = urlString.hasPrefix(httpPrefix) ? "http://" + urlString.substring(from: httpPrefix.endIndex) : urlString
+        let httpsPrefix : String = "https//"
+        urlString = urlString.hasPrefix(httpsPrefix) ? "https://" + urlString.substring(from: httpsPrefix.endIndex) : urlString
+        return urlString
+    }
+
     
 }

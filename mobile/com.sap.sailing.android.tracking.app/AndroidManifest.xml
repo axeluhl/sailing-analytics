@@ -5,7 +5,7 @@
           android:versionName="1.11">
 
     <uses-sdk
-        android:minSdkVersion="14"
+        android:minSdkVersion="16"
         android:targetSdkVersion="22"/>
 
     <permission
@@ -54,6 +54,14 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:host="*" android:pathPattern="/tracking/checkin.*" android:scheme="http"/>
+                <data android:host="*" android:pathPattern="/tracking/checkin.*" android:scheme="https"/>
             </intent-filter>
 
             <intent-filter>

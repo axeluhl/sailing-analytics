@@ -24,6 +24,7 @@ public abstract class CheckinDataActivity<C extends BaseCheckinData> extends Abs
             }
 
         });
-        builder.show();
+        AlertDialog alert = builder.show();
+        alert.setCanceledOnTouchOutside(false);
     }
 }

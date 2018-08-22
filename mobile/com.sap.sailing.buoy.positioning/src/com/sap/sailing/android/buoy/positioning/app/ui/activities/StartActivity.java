@@ -29,10 +29,6 @@ public class StartActivity extends AbstractStartActivity<CheckinData> {
             toolbar.setPadding(sidePadding, 0, 0, 0);
         }
         replaceFragment(R.id.content_frame, new HomeFragment());
-
-        if (!EulaHelper.with(this).isEulaAccepted()) {
-            EulaHelper.with(this).showEulaDialog(R.style.AppTheme_AlertDialog);
-        }
     }
 
     @Override
