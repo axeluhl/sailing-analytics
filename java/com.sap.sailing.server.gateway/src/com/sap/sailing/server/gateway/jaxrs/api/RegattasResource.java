@@ -326,7 +326,8 @@ public class RegattasResource extends AbstractSailingServerResource {
             @QueryParam("nationalityIOC") String nationalityThreeLetterIOCCode,
             @QueryParam("timeontimefactor") Double timeOnTimeFactor,
             @QueryParam("timeondistanceallowancepernauticalmileasmillis") Long timeOnDistanceAllowancePerNauticalMileAsMillis,
-            @QueryParam("searchtag") String searchTag) {
+            @QueryParam("searchtag") String searchTag, @QueryParam("competitorName") String competitorName,
+            @QueryParam("competitorEmail") String competitorEmail) {
         final Subject subject = SecurityUtils.getSubject();
         subject.checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regattaName));
         Response response;
@@ -337,18 +338,39 @@ public class RegattasResource extends AbstractSailingServerResource {
             response = getBadBoatClassResponse(boatClassName);
         } else {
             final User user = getService(SecurityService.class).getCurrentUser();
-            final Boat boat = new BoatImpl(UUID.randomUUID(), user.getName(),
-                    getService().getBaseDomainFactory().getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */ true),
-                    sailId);
-            final CompetitorWithBoat competitor = getService().getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(UUID.randomUUID(),
-                    user.getFullName() == null ? user.getName() : user.getFullName(), /* shortName */ null,
-                    /* displayColor */ null, user.getEmail(), /* flagImageURI */ null,
-                    new TeamImpl(user.getName(), Collections.singleton(new PersonImpl(user.getFullName() == null ? user.getName() : user.getFullName(),
-                            getService().getBaseDomainFactory().getOrCreateNationality(nationalityThreeLetterIOCCode),
+            final String shortName;
+            final String name;
+            if (competitorName != null) {
+                name = competitorName;
+                shortName = competitorName;
+            } else {
+                shortName = user.getName();
+                name = user.getFullName() == null ? shortName : user.getFullName();
+            }
+            final String email;
+            if (competitorEmail != null) {
+                email = competitorEmail;
+            } else {
+                email = user.getEmail();
+            }
+
+            final Boat boat = new BoatImpl(UUID.randomUUID(), shortName, getService().getBaseDomainFactory()
+                    .getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */ true), sailId);
+
+            final TeamImpl team = new TeamImpl(shortName,
+                    Collections.singleton(new PersonImpl(name,
+                            getService().getBaseDomainFactory()
+                                    .getOrCreateNationality(nationalityThreeLetterIOCCode),
                             /* dateOfBirth */ null, /* description */ null)),
-                            /* coach */ null), timeOnTimeFactor,
-                    timeOnDistanceAllowancePerNauticalMileAsMillis == null ? null : new MillisecondsDurationImpl(timeOnDistanceAllowancePerNauticalMileAsMillis),
-                    searchTag, (DynamicBoat) boat);
+                    /* coach */ null);
+            final CompetitorWithBoat competitor = getService().getCompetitorAndBoatStore()
+                    .getOrCreateCompetitorWithBoat(UUID.randomUUID(),
+                            name, /* shortName */ null, /* displayColor */ null, email, /* flagImageURI */ null,
+                            team,
+                            timeOnTimeFactor,
+                            timeOnDistanceAllowancePerNauticalMileAsMillis == null ? null
+                                    : new MillisecondsDurationImpl(timeOnDistanceAllowancePerNauticalMileAsMillis),
+                            searchTag, (DynamicBoat) boat);
             regatta.registerCompetitor(competitor);
             response = Response.ok(CompetitorJsonSerializer.create().serialize(competitor).toJSONString()).
                     header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
