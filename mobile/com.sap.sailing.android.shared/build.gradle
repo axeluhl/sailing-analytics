@@ -12,13 +12,13 @@ android {
 
     sourceSets {
         main {
-            manifest.srcFile "AndroidManifest.xml"
-            java.srcDirs = ["src"]
-            res.srcDirs = ["res"]
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            res.srcDirs = ['res']
         }
 
         test {
-            java.srcDirs = ["tests-jvm/src"]
+            java.srcDirs = ['tests-jvm/src']
         }
     }
 
@@ -37,34 +37,27 @@ android {
         }
     }
 }
-
 dependencies {
     /* support libraries */
-    api "com.android.support:support-v4:${rootProject.ext.support}"
-    api "com.android.support:support-v13:${rootProject.ext.support}"
-    api "com.android.support:appcompat-v7:${rootProject.ext.support}"
-    api "com.android.support:preference-v14:${rootProject.ext.support}"
+    api 'com.android.support:support-v4:${rootProject.ext.support}'
+    api 'com.android.support:support-v13:${rootProject.ext.support}'
+    api 'com.android.support:appcompat-v7:${rootProject.ext.support}'
+    api 'com.android.support:preference-v14:${rootProject.ext.support}'
 
     /* local dependencies */
-    api project(':java:com.sap.sailing.domain.common')
-    api project(':java:com.sap.sailing.domain.shared.android')
-    api project(':java:com.sap.sailing.server.gateway.serialization.shared.android')
-    api project(':java:com.sap.sse.common')
-    api project(':java:com.sap.sse.shared.android')
-    api project(':java:org.json.simple')
+    api project(':com.sap.sailing.domain.shared.android')
+    api project(':com.sap.sailing.server.gateway.serialization.shared.android')
+    api project(':com.sap.sse.shared.android')
 
     /* Google Play Services */
-    api "com.google.android.gms:play-services-maps:${rootProject.ext.play_services}"
-    api "com.google.android.gms:play-services-vision:${rootProject.ext.play_services}"
-    api "com.google.android.gms:play-services-location:${rootProject.ext.play_services}"
+    api 'com.google.android.gms:play-services-maps:${rootProject.ext.play_services}'
+    api 'com.google.android.gms:play-services-vision:${rootProject.ext.play_services}'
+    api 'com.google.android.gms:play-services-location:${rootProject.ext.play_services}'
 
     /* license dialog */
-    api "de.psdev.licensesdialog:licensesdialog:${rootProject.ext.license_dialog}"
-
-    /* all local jar-libs */
-    api fileTree(dir: "libs", include: ["*.jar"])
+    api 'de.psdev.licensesdialog:licensesdialog:${rootProject.ext.license_dialog}'
 
     /* JVM tests */
-    testImplementation "junit:junit:${rootProject.ext.junit}"
-    testImplementation "org.mockito:mockito-core:${rootProject.ext.mockito}"
+    testImplementation 'junit:junit:${rootProject.ext.junit}'
+    testImplementation 'org.mockito:mockito-core:${rootProject.ext.mockito}'
 }

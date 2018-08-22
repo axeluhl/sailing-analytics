@@ -91,17 +91,14 @@ android {
 
 dependencies {
     /* Google Play Services */
-    api "com.google.android.gms:play-services-gcm:${rootProject.ext.play_services}"
-
-    /* license dialog */
-    api "de.psdev.licensesdialog:licensesdialog:${rootProject.ext.license_dialog}"
+    implementation 'com.google.android.gms:play-services-gcm:${rootProject.ext.play_services}'
 
     /* local dependencies */
-    api project(":mobile:com.sap.sailing.android.shared")
+    implementation project(':mobile:com.sap.sailing.android.shared')
 
     /* JVM tests */
-    testImplementation "junit:junit:${rootProject.ext.junit}"
-    testImplementation "org.mockito:mockito-core:${rootProject.ext.mockito}"
+    testImplementation 'junit:junit:${rootProject.ext.junit}'
+    testImplementation 'org.mockito:mockito-core:${rootProject.ext.mockito}'
 }
 
 // Custom tasks

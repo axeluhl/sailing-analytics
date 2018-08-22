@@ -1,12 +1,13 @@
-apply plugin: "java"
+apply plugin: 'java-library'
 
 sourceSets {
     main {
-        java.srcDirs = ["src"]
+        java.srcDirs = ['src']
     }
 }
 
 dependencies {
     /* local dependencies */
-    compile project(":java:com.sap.sse.common")
+    api project(':com.sap.sse.common')
+    api project(':org.json.simple')
 }

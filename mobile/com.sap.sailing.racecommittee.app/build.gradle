@@ -92,21 +92,14 @@ android {
 
 dependencies {
     /* support libraries */
-    api "com.android.support:recyclerview-v7:${rootProject.ext.support}"
-
-    /* license dialog */
-    api "de.psdev.licensesdialog:licensesdialog:${rootProject.ext.license_dialog}"
+    implementation 'com.android.support:recyclerview-v7:${rootProject.ext.support}'
 
     /* local dependencies */
-    api project(":mobile:com.sap.sailing.android.shared")
-    api project(":java:com.sap.sse.common")
-
-    /* all local jar-libs */
-    api fileTree(dir: "libs", include: ["*.jar"])
+    implementation project(':mobile:com.sap.sailing.android.shared')
 
     /* JVM tests */
-    testImplementation "junit:junit:${rootProject.ext.junit}"
-    testImplementation "org.mockito:mockito-core:${rootProject.ext.mockito}"
+    testImplementation 'junit:junit:${rootProject.ext.junit}'
+    testImplementation 'org.mockito:mockito-core:${rootProject.ext.mockito}'
 }
 
 // Custom tasks

@@ -1,15 +1,15 @@
-apply plugin: "java"
+apply plugin: 'java-library'
 
 sourceSets {
     main {
-        java.srcDirs = ["src"]
+        java.srcDirs = ['src']
     }
 }
 
 dependencies {
     /* local dependencies */
-    implementation project(":java:com.sap.sailing.domain.common")
-    implementation project(":java:com.sap.sse.common")
-    implementation project(":java:com.sap.sse.datamining.annotations")
-    implementation project(":java:com.sap.sse.shared.android")
+    api project(':com.sap.sailing.domain.common')
+    api project(':com.sap.sse.common')
+    api project(':com.sap.sse.datamining.annotations')
+    api project(':com.sap.sse.shared.android')
 }
