@@ -199,7 +199,6 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
         dimensionFilterSelectionProvidersPanel.addStyleName("dataMiningBorderLeft");
         
         filterSelectionPresenter = new PlainFilterSelectionPresenter(this, context, stringMessages, this);
-        filterSelectionPresenter.getEntryWidget().addStyleName("dataMiningMarginLeft");
         filterSelectionPresenterContainer = new ScrollPanel(filterSelectionPresenter.getEntryWidget());
         filterSelectionPresenterContainer.addStyleName("dataMiningBorderTop");
         
