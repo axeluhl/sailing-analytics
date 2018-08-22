@@ -28,7 +28,7 @@ public class MediaSingleSelectionControl extends AbstractMediaSelectionControl i
 
         this.dialogControl = new DialogBox(true, false);
         this.dialogControl.addStyleName("Media-Select-Popup");
-        this.dialogControl.setText("Select Video");
+        this.dialogControl.setText(stringMessages.selectMedia());
         this.dialogControl.addCloseHandler(this);
 
     }
