@@ -35,6 +35,7 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 import com.google.gwt.text.shared.AbstractRenderer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
@@ -185,6 +186,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
         
         sortByPanel = new HorizontalPanel();
         sortByPanel.setSpacing(5);
+        sortByPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         sortByPanel.add(new Label(getDataMiningStringMessages().sortBy() + ":"));
         keyComparatorListBox = new ValueListBox<>(new AbstractRenderer<Comparator<?>>() {
             @Override
@@ -202,6 +204,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
 
         HorizontalPanel decimalsPanel = new HorizontalPanel();
         decimalsPanel.setSpacing(5);
+        decimalsPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         decimalsPanel.add(new Label(getDataMiningStringMessages().shownDecimals() + ":"));
         decimalsListBox = new ValueListBox<Integer>(new SimpleObjectRenderer<Integer>());
         decimalsPanel.add(decimalsListBox);
@@ -216,6 +219,7 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
         
         HorizontalPanel showDataLabelsPanel = new HorizontalPanel();
         showDataLabelsPanel.setSpacing(5);
+        showDataLabelsPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         showDataLabelsPanel.add(new Label(getDataMiningStringMessages().showDataLabels() + ":"));
         showDataLabelsCheckBox = new CheckBox();
         showDataLabelsPanel.add(showDataLabelsCheckBox);

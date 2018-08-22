@@ -24,7 +24,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String useClassGetName();
     String useStringLiteralsTooltip();
     String queryDefinitionViewer();
-    String runAsSubstantive();
+    String run();
     String queryNotValidBecause();
     String queryRunner();
     String runAQuery();
@@ -46,6 +46,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String noDimensionToGroupBySelectedError();
     String noDataRetrieverChainDefinitonSelectedError();
     String noStatisticSelectedError();
+    String noAggregatorSelectedError();
     String calculateThe();
     String statisticProvider();
     String groupingProvider();    
@@ -65,5 +66,33 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String filter();
     String filterShownDimensions();
     String selectDimensionsToFilterBy();
+    String clear();
+    String changesWillBeLost();
+    String confirmQueryDefinitionChangeLoss();
+    String discardChanges();
+    String keepChanges();
+    String anErrorOccurredWhileApplyingTheQuery();
+    String queryBasedOnRetrieverChainCanNotBeApplied(String retrieverChainName);
+    String statisticNotAvailable(String statisticName);
+    String aggregatorNotAvailable(String aggregatorName);
+    String filterDimensionsAreNotAvailable(String listedDimensions);
+    String filterValuesOfDimensionAreNotAvailable(String dimensionName, String listedValues);
+    String groupingDimensionsAreNotAvailable(String listedDimensions);
+    String rememberDecisionCanBeChangedInSettings();
+    String changeLossStrategy();
+    String changeLossStrageyTooltip();
+    String askChangeLossStrategyName();
+    String askChangeLossStrategyTooltip();
+    String discardChangesChangeLossStrategyName();
+    String discardChangesChangeLossStrategyTooltip();
+    String keepChangesChangeLossStrategyName();
+    String keepChangesChangeLossStrategyTooltip();
+    String applyingQuery();
+    String searchAvailableStatistics();
+    String reloadComponents();
+    String any();
+    String of();
+    String the();
+    String and();
     
 }

@@ -17,6 +17,6 @@ public interface FilterSelectionProvider
 
     public void clearSelection();
 
-    void setHighestRetrieverLevelWithFilterDimension(FunctionDTO dimension, Serializable groupKey);
+    void setFilterSelectionForUnreducedDimension(FunctionDTO unreducedDimension, Serializable filterValue, Runnable onCompletion);
 
 }
