@@ -272,6 +272,7 @@ input.magnifier {
 .statisticSuggestBoxPopupContent table {
     border-spacing: 0px;
 }
+
 .statisticSuggestBoxPopupContent .item {
     padding: 2px 5px;
     color: #000;
@@ -288,12 +289,25 @@ input.magnifier {
 .statisticSuggestBoxPopupContent .item-selected {
     background: #d5e2ff;
 }
+.statisticSuggestBoxPopupContent .item-unsupported {
+    color: gray;
+}
 
-.statisticSuggestBoxPopupContentSeparator {
+.statisticSuggestBoxPopupContent .separator {
     padding: 8px 5px 0px 5px;
     border-bottom: 2px solid #6f7277;
     font-weight: 600;
     font-size: 15px;
+}
+.statisticSuggestBoxPopupContent .separator-message {
+    padding: 8px 5px 0px 5px;
+    font-weight: bold;
+    font-size: 15px;
+    text-align: center;
+    white-space: pre-wrap;
+}
+.statisticSuggestBoxPopupContent .separator-unsupported {
+    color: gray;
 }
 
 .dataMiningListBox {

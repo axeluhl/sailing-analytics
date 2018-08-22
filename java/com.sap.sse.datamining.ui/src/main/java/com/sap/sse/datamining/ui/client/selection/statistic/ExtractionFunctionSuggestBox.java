@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
@@ -20,6 +21,7 @@ import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.sap.sse.common.Util;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
+import com.sap.sse.datamining.ui.client.StringMessages;
 import com.sap.sse.gwt.client.suggestion.AbstractListSuggestOracle;
 import com.sap.sse.gwt.client.suggestion.CustomSuggestBox;
 
@@ -37,8 +39,8 @@ public class ExtractionFunctionSuggestBox extends CustomSuggestBox<ExtractionFun
     private ExtractionFunctionWithContext extractionFunction;
 
     @SuppressWarnings("unchecked")
-    public ExtractionFunctionSuggestBox() {
-        super(new ExtractionFunctionSuggestOracle(), new ExtractionFunctionSuggestionDisplay());
+    public ExtractionFunctionSuggestBox(Predicate<ExtractionFunctionWithContext> extractionFunctionSupportedPredicate) {
+        super(new ExtractionFunctionSuggestOracle(extractionFunctionSupportedPredicate), new ExtractionFunctionSuggestionDisplay());
         suggestOracle = (AbstractListSuggestOracle<ExtractionFunctionWithContext>) getSuggestOracle();
         display = (ExtractionFunctionSuggestionDisplay) getSuggestionDisplay();
         addSuggestionSelectionHandler(this::setExtractionFunction);
@@ -87,6 +89,12 @@ public class ExtractionFunctionSuggestBox extends CustomSuggestBox<ExtractionFun
     
     private static class ExtractionFunctionSuggestOracle extends AbstractListSuggestOracle<ExtractionFunctionWithContext> {
 
+        private final Predicate<ExtractionFunctionWithContext> extractionFunctionSupportedPredicate;
+
+        public ExtractionFunctionSuggestOracle(Predicate<ExtractionFunctionWithContext> extractionFunctionSupportedPredicate) {
+            this.extractionFunctionSupportedPredicate = extractionFunctionSupportedPredicate;
+        }
+
         @Override
         protected Iterable<String> getKeywordStrings(Iterable<String> queryTokens) {
             String filterText = Util.first(queryTokens);
@@ -113,14 +121,21 @@ public class ExtractionFunctionSuggestBox extends CustomSuggestBox<ExtractionFun
         
         @Override
         protected SimpleSuggestion createSuggestion(ExtractionFunctionWithContext match, Iterable<String> queryTokens) {
-            return new ExtractionFunctionSuggestion(match, queryTokens);
+            return new ExtractionFunctionSuggestion(match, queryTokens, extractionFunctionSupportedPredicate.test(match));
         }
         
         private class ExtractionFunctionSuggestion extends SimpleSuggestion implements Comparable<ExtractionFunctionSuggestion> {
 
+            private final boolean supported;
+
             public ExtractionFunctionSuggestion(ExtractionFunctionWithContext suggestObject,
-                    Iterable<String> queryTokens) {
+                    Iterable<String> queryTokens, boolean supported) {
                 super(suggestObject, queryTokens);
+                this.supported = supported;
+            }
+            
+            public boolean isSupported() {
+                return supported;
             }
 
             @Override
@@ -138,6 +153,8 @@ public class ExtractionFunctionSuggestBox extends CustomSuggestBox<ExtractionFun
     }
     
     private static class ExtractionFunctionSuggestionDisplay extends SuggestionDisplay implements HasAnimation {
+
+        private final StringMessages stringMessages = StringMessages.INSTANCE;
         
         private final ExtractionFunctionSuggestionMenu suggestionMenu;
         private final PopupPanel suggestionPopup;
@@ -206,17 +223,30 @@ public class ExtractionFunctionSuggestBox extends CustomSuggestBox<ExtractionFun
                 suggestionPopup.hide();
             }
 
-            // TODO Show unavailable extraction functions at the bottom of the list
+            Collection<ExtractionFunctionSuggestOracle.ExtractionFunctionSuggestion> supportedSuggestions = new ArrayList<>();
+            Collection<ExtractionFunctionSuggestOracle.ExtractionFunctionSuggestion> unsupportedSuggestions = new ArrayList<>();
+            for (Suggestion suggestion : suggestions) {
+                ExtractionFunctionSuggestOracle.ExtractionFunctionSuggestion extractionFunctionSuggestion =
+                        (ExtractionFunctionSuggestOracle.ExtractionFunctionSuggestion) suggestion;
+                if (extractionFunctionSuggestion.isSupported()) {
+                    supportedSuggestions.add(extractionFunctionSuggestion);
+                } else {
+                    unsupportedSuggestions.add(extractionFunctionSuggestion);
+                }
+            }
+
             suggestionMenu.clearItems();
             if (groupingSuggestionsByRetrieverChain) {
-                showSuggestionsGroupedByRetrieverChain(suggestions, isDisplayStringHTML, callback);
+                showSuggestionsGroupedByRetrieverChain(supportedSuggestions, isDisplayStringHTML, callback);
             } else {
-                int count = 0;
-                for (Suggestion suggestion : suggestions) {
-                    boolean isEven = count % 2 == 0;
-                    SuggestionMenuItem menuItem = createSuggestionMenuItem(suggestion, isDisplayStringHTML, isEven, callback);
-                    suggestionMenu.addItem(menuItem);
-                    count++;
+                addSuggestionMenuItems(supportedSuggestions, isDisplayStringHTML, callback);
+            }
+            if (!unsupportedSuggestions.isEmpty()) {
+                suggestionMenu.addSeparator(new UnsupportedExtractionFunctionsSeparator(stringMessages.followingStatisticsAreNotSupportedByAggregatorWarning()));
+                if (groupingSuggestionsByRetrieverChain) {
+                    showSuggestionsGroupedByRetrieverChain(unsupportedSuggestions, isDisplayStringHTML, callback);
+                } else {
+                    addSuggestionMenuItems(unsupportedSuggestions, isDisplayStringHTML, callback);
                 }
             }
             
@@ -230,42 +260,62 @@ public class ExtractionFunctionSuggestBox extends CustomSuggestBox<ExtractionFun
 
         private void showSuggestionsGroupedByRetrieverChain(Collection<? extends Suggestion> suggestions,
                 boolean isDisplayStringHTML, SuggestionCallback callback) {
-            Map<DataRetrieverChainDefinitionDTO, List<Suggestion>> groupedSuggestions = new HashMap<>();
+            Map<DataRetrieverChainDefinitionDTO, List<ExtractionFunctionSuggestOracle.ExtractionFunctionSuggestion>> groupedSuggestions =
+                    groupSuggestionsByRetrieverChain(suggestions);
+            List<DataRetrieverChainDefinitionDTO> orderedRetrieverChains = new ArrayList<>(groupedSuggestions.keySet());
+            Collections.sort(orderedRetrieverChains);
+            for (DataRetrieverChainDefinitionDTO retrieverChain : orderedRetrieverChains) {
+                List<ExtractionFunctionSuggestOracle.ExtractionFunctionSuggestion> suggestionsOfRetrieverChain = groupedSuggestions.get(retrieverChain);
+                suggestionsOfRetrieverChain.sort(null);
+                
+                ExtractionFunctionSeparator separator = new ExtractionFunctionSeparator(retrieverChain);
+                suggestionMenu.addSeparator(separator);
+                if (!suggestionsOfRetrieverChain.get(0).isSupported()) {
+                    separator.addStyleName("separator-unsupported");
+                }
+                addSuggestionMenuItems(suggestionsOfRetrieverChain, isDisplayStringHTML, callback);
+            }
+        }
+
+        private Map<DataRetrieverChainDefinitionDTO, List<ExtractionFunctionSuggestOracle.ExtractionFunctionSuggestion>> groupSuggestionsByRetrieverChain(
+                Collection<? extends Suggestion> suggestions) {
+            Map<DataRetrieverChainDefinitionDTO, List<ExtractionFunctionSuggestOracle.ExtractionFunctionSuggestion>> groupedSuggestions = new HashMap<>();
             for (Suggestion suggestion : suggestions) {
-                ExtractionFunctionSuggestOracle.ExtractionFunctionSuggestion extractionFunctionSuggestion =
+                ExtractionFunctionSuggestOracle.ExtractionFunctionSuggestion extractionFunctionSuggestion = 
                         (ExtractionFunctionSuggestOracle.ExtractionFunctionSuggestion) suggestion;
                 ExtractionFunctionWithContext extractionFunction = extractionFunctionSuggestion.getSuggestObject();
                 DataRetrieverChainDefinitionDTO retrieverChain = extractionFunction.getRetrieverChain();
-                List<Suggestion> suggestionsOfRetrieverChain = groupedSuggestions.get(retrieverChain);
+                List<ExtractionFunctionSuggestOracle.ExtractionFunctionSuggestion> suggestionsOfRetrieverChain = groupedSuggestions
+                        .get(retrieverChain);
                 if (suggestionsOfRetrieverChain == null) {
                     suggestionsOfRetrieverChain = new ArrayList<>();
                     groupedSuggestions.put(retrieverChain, suggestionsOfRetrieverChain);
                 }
                 suggestionsOfRetrieverChain.add(extractionFunctionSuggestion);
             }
-            
-            List<DataRetrieverChainDefinitionDTO> orderedRetrieverChains = new ArrayList<>(groupedSuggestions.keySet());
-            Collections.sort(orderedRetrieverChains);
-            for (DataRetrieverChainDefinitionDTO retrieverChain : orderedRetrieverChains) {
-                suggestionMenu.addSeparator(new ExtractionFunctionSeparator(retrieverChain));
-                
-                List<Suggestion> suggestionsOfRetrieverChain = groupedSuggestions.get(retrieverChain);
-                suggestionsOfRetrieverChain.sort(null);
-                int count = 0;
-                for (Suggestion suggestion : suggestionsOfRetrieverChain) {
-                    boolean isEven = count % 2 == 0;
-                    SuggestionMenuItem menuItem = createSuggestionMenuItem(suggestion, isDisplayStringHTML, isEven, callback);
-                    suggestionMenu.addItem(menuItem);
-                    count++;
-                }
+            return groupedSuggestions;
+        }
+
+        private void addSuggestionMenuItems(
+                Collection<ExtractionFunctionSuggestOracle.ExtractionFunctionSuggestion> suggestions,
+                boolean isDisplayStringHTML, SuggestionCallback callback) {
+            int count = 0;
+            for (ExtractionFunctionSuggestOracle.ExtractionFunctionSuggestion suggestion : suggestions) {
+                boolean isEven = count % 2 == 0;
+                SuggestionMenuItem menuItem = createSuggestionMenuItem(suggestion, isDisplayStringHTML, isEven, callback);
+                suggestionMenu.addItem(menuItem);
+                count++;
             }
         }
 
-        private SuggestionMenuItem createSuggestionMenuItem(Suggestion suggestion, boolean isDisplayStringHTML,
-                boolean isEven, SuggestionCallback callback) {
+        private SuggestionMenuItem createSuggestionMenuItem(ExtractionFunctionSuggestOracle.ExtractionFunctionSuggestion suggestion,
+                boolean isDisplayStringHTML, boolean isEven, SuggestionCallback callback) {
             SuggestionMenuItem menuItem = new SuggestionMenuItem(suggestion, isDisplayStringHTML,
                     () -> callback.onSuggestionSelected(suggestion));
             menuItem.addStyleName("item-" + (isEven ? "even" : "odd"));
+            if (!suggestion.isSupported()) {
+                menuItem.addStyleName("item-unsupported");
+            }
             return menuItem;
         }
 
@@ -325,8 +375,17 @@ public class ExtractionFunctionSuggestBox extends CustomSuggestBox<ExtractionFun
     private static class ExtractionFunctionSeparator extends MenuItemSeparator {
         
         public ExtractionFunctionSeparator(DataRetrieverChainDefinitionDTO retrieverChain) {
-            setStyleName("statisticSuggestBoxPopupContentSeparator");
+            setStyleName("separator");
             getElement().getFirstChildElement().setInnerText(retrieverChain.getName());
+        }
+        
+    }
+    
+    private static class UnsupportedExtractionFunctionsSeparator extends MenuItemSeparator {
+        
+        public UnsupportedExtractionFunctionsSeparator(String text) {
+            setStyleName("separator-message");
+            getElement().getFirstChildElement().setInnerText(text);
         }
         
     }

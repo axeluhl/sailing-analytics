@@ -94,5 +94,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String of();
     String the();
     String and();
+    String followingStatisticsAreNotSupportedByAggregatorWarning();
     
 }
