@@ -24,6 +24,17 @@ public class MP4MediaParser {
      */
     public static final int REQUIRED_SIZE_IN_BYTES = 10000000;
 
+    /**
+     * Determine whether or not the provided {@link IsoFile ISO file} contains any "spherical" information within the
+     * user defined box <code>moov[0]/trak[0]/uuid</code>.
+     * 
+     * @param isof
+     *            {@link IsoFile ISO file} to analyze
+     * @return <code>true</code> if spherical information are contained, <code>false</code> otherwise
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
     public static boolean determine360(IsoFile isof) throws ParserConfigurationException, SAXException, IOException {
         boolean spherical = false;
         UserBox uuidBox = Path.getPath(isof, "moov[0]/trak[0]/uuid");
@@ -43,6 +54,14 @@ public class MP4MediaParser {
         return spherical;
     }
 
+    /**
+     * Tries to determine the {@link Long duration} of the provided {@link IsoFile ISO file} based on its
+     * {@link IsoFile#getMovieBox() movie header}.
+     * 
+     * @param isof
+     *            {@link IsoFile ISO file} to analyze
+     * @return the determined duration in {@link Long millis}, <code>-1</code> if the duration could not be determined
+     */
     public static long determineDurationInMillis(IsoFile isof) {
         long duration = -1;
         MovieBox mbox = isof.getMovieBox();
@@ -55,6 +74,15 @@ public class MP4MediaParser {
         return duration;
     }
 
+    /**
+     * Tries to determine the {@link Date point in time} when the recording started from the provided {@link IsoFile ISO
+     * file} based on its {@link IsoFile#getMovieBox() movie header}.
+     * 
+     * @param isof
+     *            {@link IsoFile ISO file} to analyze
+     * @return the determined {@link Date point in time} when the recording started, <code>null</code> if the recording
+     *         start could not be determined
+     */
     public static Date determineRecordingStart(IsoFile isof) {
         Date creationTime = null;
         MovieBox mbox = isof.getMovieBox();

@@ -202,8 +202,8 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
         connection.setConnectTimeout(METADATA_CONNECTION_TIMEOUT);
         connection.setRequestMethod("GET");
         connection.setRequestProperty("Range", range);
-        try (InputStream inStream = connection.getInputStream()) {
-            try (DataInputStream dataInStream = new DataInputStream(inStream)) {
+        try (final InputStream inStream = connection.getInputStream()) {
+            try (final DataInputStream dataInStream = new DataInputStream(inStream)) {
                 dataInStream.readFully(store);
             }
         } finally {
@@ -217,9 +217,9 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
         VideoMetadataDTO result;
         try {
             try (final ReadableByteChannel rbc = Channels.newChannel(input.openStream())) {
-                try (FileOutputStream fos = new FileOutputStream(tmp)) {
+                try (final FileOutputStream fos = new FileOutputStream(tmp)) {
                     fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-                    try (MP4ParserFakeFile inputFile = new MP4ParserFakeFile(tmp)) {
+                    try (final MP4ParserFakeFile inputFile = new MP4ParserFakeFile(tmp)) {
                         Files.delete(tmp.toPath());
                         result = checkMetadata(inputFile);
                     } catch (Exception e) {
