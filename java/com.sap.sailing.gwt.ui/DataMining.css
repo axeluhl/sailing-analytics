@@ -263,20 +263,37 @@ input.magnifier {
 .statisticSuggestBoxPopup {
     z-index: 2;
 }
+
 .statisticSuggestBoxPopupContent {
     max-height: 700px;
-    overflow-y: scroll;
+    overflow-y: auto;
     background: white;
 }
-.statisticSuggestBoxPopup .item {
-    padding: 2px;
+.statisticSuggestBoxPopupContent table {
+    border-spacing: 0px;
+}
+.statisticSuggestBoxPopupContent .item {
+    padding: 2px 5px;
     color: #000;
     cursor: default;
     white-space: nowrap;
-    font-size: 105%;
+    font-size: 15px;
 }
-.statisticSuggestBoxPopup .item-selected {
-    background: #D5E2FF;
+.statisticSuggestBoxPopupContent .item-even {
+    background: #fff;
+}
+.statisticSuggestBoxPopupContent .item-odd {
+    background: #f3f7fb;
+}
+.statisticSuggestBoxPopupContent .item-selected {
+    background: #d5e2ff;
+}
+
+.statisticSuggestBoxPopupContentSeparator {
+    padding: 8px 5px 0px 5px;
+    border-bottom: 2px solid #6f7277;
+    font-weight: 600;
+    font-size: 15px;
 }
 
 .dataMiningListBox {
@@ -304,11 +321,6 @@ input.magnifier {
 .dimensionFilterSelectionHeader {
     background: #eee;
     padding-top: 5px;
-}
-
-.dimensionFilterSelectionHeader .gwt-Label {
-  color: #4b4a4a;
-  text-shadow: #ddf 1px 1px 0;
 }
 
 .dataMiningBorderTop {

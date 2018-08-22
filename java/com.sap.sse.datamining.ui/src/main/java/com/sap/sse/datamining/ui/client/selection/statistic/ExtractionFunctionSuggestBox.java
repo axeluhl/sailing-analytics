@@ -1,6 +1,11 @@
 package com.sap.sse.datamining.ui.client.selection.statistic;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
@@ -8,11 +13,13 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.HasAnimation;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.MenuItem;
+import com.google.gwt.user.client.ui.MenuItemSeparator;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.PopupPanel.AnimationType;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.sap.sse.common.Util;
+import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.gwt.client.suggestion.AbstractListSuggestOracle;
 import com.sap.sse.gwt.client.suggestion.CustomSuggestBox;
 
@@ -24,45 +31,25 @@ public class ExtractionFunctionSuggestBox extends CustomSuggestBox<ExtractionFun
     }
 
     private final AbstractListSuggestOracle<ExtractionFunctionWithContext> suggestOracle;
-    private final GroupingSuggestionDisplay display;
+    private final ExtractionFunctionSuggestionDisplay display;
     private ValueChangeHandler valueChangeHandler;
     
     private ExtractionFunctionWithContext extractionFunction;
 
     @SuppressWarnings("unchecked")
     public ExtractionFunctionSuggestBox() {
-        super(new AbstractListSuggestOracle<ExtractionFunctionWithContext>() {
-            @Override
-            protected Iterable<String> getKeywordStrings(Iterable<String> queryTokens) {
-                String filterText = Util.first(queryTokens);
-                if (filterText == null) {
-                    return queryTokens;
-                }
-                return Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(filterText);
-            }
-
-            @Override
-            protected Iterable<String> getMatchingStrings(ExtractionFunctionWithContext value) {
-                return value.getMatchingStrings();
-            }
-
-            @Override
-            protected String createSuggestionKeyString(ExtractionFunctionWithContext value) {
-                return value.getDisplayString();
-            }
-
-            @Override
-            protected String createSuggestionAdditionalDisplayString(ExtractionFunctionWithContext value) {
-                return value.getAdditionalDisplayString();
-            }
-        }, new GroupingSuggestionDisplay());
+        super(new ExtractionFunctionSuggestOracle(), new ExtractionFunctionSuggestionDisplay());
         suggestOracle = (AbstractListSuggestOracle<ExtractionFunctionWithContext>) getSuggestOracle();
-        display = (GroupingSuggestionDisplay) getSuggestionDisplay();
+        display = (ExtractionFunctionSuggestionDisplay) getSuggestionDisplay();
         addSuggestionSelectionHandler(this::setExtractionFunction);
     }
     
     public void setValueChangeHandler(ValueChangeHandler valueChangeHandler) {
         this.valueChangeHandler = valueChangeHandler;
+    }
+    
+    public Collection<ExtractionFunctionWithContext> getSelectableValues() {
+        return suggestOracle.getSelectableValues();
     }
 
     public void setSelectableValues(Collection<? extends ExtractionFunctionWithContext> selectableValues) {
@@ -90,15 +77,76 @@ public class ExtractionFunctionSuggestBox extends CustomSuggestBox<ExtractionFun
         display.hideSuggestions();
     }
     
-    private static class GroupingSuggestionDisplay extends SuggestionDisplay implements HasAnimation {
+    public boolean isGroupingSuggestionsByRetrieverChain() {
+        return display.isGroupingSuggestionsByRetrieverChain();
+    }
+    
+    public void setGroupingSuggestionsByRetrieverChain(boolean groupingSuggestionsByRetrieverChain) {
+        display.setGroupingSuggestionsByRetrieverChain(groupingSuggestionsByRetrieverChain);
+    }
+    
+    private static class ExtractionFunctionSuggestOracle extends AbstractListSuggestOracle<ExtractionFunctionWithContext> {
+
+        @Override
+        protected Iterable<String> getKeywordStrings(Iterable<String> queryTokens) {
+            String filterText = Util.first(queryTokens);
+            if (filterText == null) {
+                return queryTokens;
+            }
+            return Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(filterText);
+        }
+
+        @Override
+        protected Iterable<String> getMatchingStrings(ExtractionFunctionWithContext value) {
+            return value.getMatchingStrings();
+        }
+
+        @Override
+        protected String createSuggestionKeyString(ExtractionFunctionWithContext value) {
+            return value.getDisplayString();
+        }
+
+        @Override
+        protected String createSuggestionAdditionalDisplayString(ExtractionFunctionWithContext value) {
+            return null;
+        }
         
-        private final GroupingSuggestionMenu suggestionMenu;
+        @Override
+        protected SimpleSuggestion createSuggestion(ExtractionFunctionWithContext match, Iterable<String> queryTokens) {
+            return new ExtractionFunctionSuggestion(match, queryTokens);
+        }
+        
+        private class ExtractionFunctionSuggestion extends SimpleSuggestion implements Comparable<ExtractionFunctionSuggestion> {
+
+            public ExtractionFunctionSuggestion(ExtractionFunctionWithContext suggestObject,
+                    Iterable<String> queryTokens) {
+                super(suggestObject, queryTokens);
+            }
+
+            @Override
+            public int compareTo(ExtractionFunctionSuggestion other) {
+                if (other == null) {
+                    return -1;
+                }
+                String displayName = getSuggestObject().getExtractionFunction().getDisplayName();
+                String otherDisplayName = other.getSuggestObject().getExtractionFunction().getDisplayName();
+                return displayName.compareToIgnoreCase(otherDisplayName);
+            }
+            
+        }
+        
+    }
+    
+    private static class ExtractionFunctionSuggestionDisplay extends SuggestionDisplay implements HasAnimation {
+        
+        private final ExtractionFunctionSuggestionMenu suggestionMenu;
         private final PopupPanel suggestionPopup;
         
+        private boolean groupingSuggestionsByRetrieverChain;
         private Element autoHidePartner;
         
-        public GroupingSuggestionDisplay() {
-            suggestionMenu = new GroupingSuggestionMenu(/*vertical*/ true);
+        public ExtractionFunctionSuggestionDisplay() {
+            suggestionMenu = new ExtractionFunctionSuggestionMenu(/*vertical*/ true);
             suggestionPopup = new PopupPanel(/*autoHide*/ true, /*modal*/ false);
             suggestionPopup.setStyleName("statisticSuggestBoxPopup");
             suggestionPopup.addStyleName("dataMiningBorderLeft");
@@ -142,6 +190,14 @@ public class ExtractionFunctionSuggestBox extends CustomSuggestBox<ExtractionFun
                 }
             }
         }
+        
+        public boolean isGroupingSuggestionsByRetrieverChain() {
+            return groupingSuggestionsByRetrieverChain;
+        }
+        
+        public void setGroupingSuggestionsByRetrieverChain(boolean groupingSuggestionsByRetrieverChain) {
+            this.groupingSuggestionsByRetrieverChain = groupingSuggestionsByRetrieverChain;
+        }
 
         @Override
         protected void showSuggestions(SuggestBox suggestBox, Collection<? extends Suggestion> suggestions,
@@ -149,12 +205,19 @@ public class ExtractionFunctionSuggestBox extends CustomSuggestBox<ExtractionFun
             if (suggestionPopup.isAttached()) {
                 suggestionPopup.hide();
             }
-            
+
+            // TODO Show unavailable extraction functions at the bottom of the list
             suggestionMenu.clearItems();
-            for (Suggestion suggestion : suggestions) {
-                SuggestionMenuItem menuItem = new SuggestionMenuItem(suggestion, isDisplayStringHTML,
-                        () -> callback.onSuggestionSelected(suggestion));
-                suggestionMenu.addItem(menuItem);
+            if (groupingSuggestionsByRetrieverChain) {
+                showSuggestionsGroupedByRetrieverChain(suggestions, isDisplayStringHTML, callback);
+            } else {
+                int count = 0;
+                for (Suggestion suggestion : suggestions) {
+                    boolean isEven = count % 2 == 0;
+                    SuggestionMenuItem menuItem = createSuggestionMenuItem(suggestion, isDisplayStringHTML, isEven, callback);
+                    suggestionMenu.addItem(menuItem);
+                    count++;
+                }
             }
             
             if (isAutoSelectEnabled && suggestionMenu.size() > 0) {
@@ -163,6 +226,47 @@ public class ExtractionFunctionSuggestBox extends CustomSuggestBox<ExtractionFun
             
             updateAutoHidePartner(suggestBox.getElement());
             suggestionPopup.showRelativeTo(suggestBox);
+        }
+
+        private void showSuggestionsGroupedByRetrieverChain(Collection<? extends Suggestion> suggestions,
+                boolean isDisplayStringHTML, SuggestionCallback callback) {
+            Map<DataRetrieverChainDefinitionDTO, List<Suggestion>> groupedSuggestions = new HashMap<>();
+            for (Suggestion suggestion : suggestions) {
+                ExtractionFunctionSuggestOracle.ExtractionFunctionSuggestion extractionFunctionSuggestion =
+                        (ExtractionFunctionSuggestOracle.ExtractionFunctionSuggestion) suggestion;
+                ExtractionFunctionWithContext extractionFunction = extractionFunctionSuggestion.getSuggestObject();
+                DataRetrieverChainDefinitionDTO retrieverChain = extractionFunction.getRetrieverChain();
+                List<Suggestion> suggestionsOfRetrieverChain = groupedSuggestions.get(retrieverChain);
+                if (suggestionsOfRetrieverChain == null) {
+                    suggestionsOfRetrieverChain = new ArrayList<>();
+                    groupedSuggestions.put(retrieverChain, suggestionsOfRetrieverChain);
+                }
+                suggestionsOfRetrieverChain.add(extractionFunctionSuggestion);
+            }
+            
+            List<DataRetrieverChainDefinitionDTO> orderedRetrieverChains = new ArrayList<>(groupedSuggestions.keySet());
+            Collections.sort(orderedRetrieverChains);
+            for (DataRetrieverChainDefinitionDTO retrieverChain : orderedRetrieverChains) {
+                suggestionMenu.addSeparator(new ExtractionFunctionSeparator(retrieverChain));
+                
+                List<Suggestion> suggestionsOfRetrieverChain = groupedSuggestions.get(retrieverChain);
+                suggestionsOfRetrieverChain.sort(null);
+                int count = 0;
+                for (Suggestion suggestion : suggestionsOfRetrieverChain) {
+                    boolean isEven = count % 2 == 0;
+                    SuggestionMenuItem menuItem = createSuggestionMenuItem(suggestion, isDisplayStringHTML, isEven, callback);
+                    suggestionMenu.addItem(menuItem);
+                    count++;
+                }
+            }
+        }
+
+        private SuggestionMenuItem createSuggestionMenuItem(Suggestion suggestion, boolean isDisplayStringHTML,
+                boolean isEven, SuggestionCallback callback) {
+            SuggestionMenuItem menuItem = new SuggestionMenuItem(suggestion, isDisplayStringHTML,
+                    () -> callback.onSuggestionSelected(suggestion));
+            menuItem.addStyleName("item-" + (isEven ? "even" : "odd"));
+            return menuItem;
         }
 
         private void updateAutoHidePartner(Element newAutoHidePartner) {
@@ -187,9 +291,9 @@ public class ExtractionFunctionSuggestBox extends CustomSuggestBox<ExtractionFun
         
     }
     
-    private static class GroupingSuggestionMenu extends MenuBar {
+    private static class ExtractionFunctionSuggestionMenu extends MenuBar {
         
-        public GroupingSuggestionMenu(boolean vertical) {
+        public ExtractionFunctionSuggestionMenu(boolean vertical) {
             super(vertical);
             setStyleName("statisticSuggestBoxPopupContent");
             setFocusOnHoverEnabled(false);
@@ -214,6 +318,15 @@ public class ExtractionFunctionSuggestBox extends CustomSuggestBox<ExtractionFun
 
         public Suggestion getSelectedSuggestion() {
             return ((SuggestionMenuItem) getSelectedItem()).getSuggestion();
+        }
+        
+    }
+    
+    private static class ExtractionFunctionSeparator extends MenuItemSeparator {
+        
+        public ExtractionFunctionSeparator(DataRetrieverChainDefinitionDTO retrieverChain) {
+            setStyleName("statisticSuggestBoxPopupContentSeparator");
+            getElement().getFirstChildElement().setInnerText(retrieverChain.getName());
         }
         
     }

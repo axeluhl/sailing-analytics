@@ -40,6 +40,8 @@ import com.sap.sse.datamining.ui.client.ExtractionFunctionChangedListener;
 import com.sap.sse.datamining.ui.client.StatisticChangedListener;
 import com.sap.sse.datamining.ui.client.StatisticProvider;
 import com.sap.sse.datamining.ui.client.selection.RetrieverLevelSettingsComponent;
+import com.sap.sse.datamining.ui.client.selection.statistic.ExtractionFunctionWithContext.IdentityFunctionWithContext;
+import com.sap.sse.datamining.ui.client.selection.statistic.ExtractionFunctionWithContext.StatisticWithContext;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
@@ -266,8 +268,8 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         awaitingRetrieverChainStatistics--;
         if (awaitingRetrieverChainStatistics <= 0) {
             extractionFunctionSuggestBox.setExtractionFunction(null);
-            Collections.sort(availableStatistics);
             extractionFunctionSuggestBox.setSelectableValues(availableStatistics);
+            extractionFunctionSuggestBox.setGroupingSuggestionsByRetrieverChain(true);
             if (awaitingAggregators <= 0) {
                 collectAggregators(null, null);
             }
@@ -357,6 +359,7 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
             }
             Collections.sort(selectableExtractionFunctions);
             extractionFunctionSuggestBox.setSelectableValues(selectableExtractionFunctions);
+            extractionFunctionSuggestBox.setGroupingSuggestionsByRetrieverChain(!newAggregatorSupportsIdentityFunction);
             labelBetweenAggregatorAndStatistic.setText(labelBetweenAggregatorAndStatisticText);
             currentAggregator = newAggregator;
             
