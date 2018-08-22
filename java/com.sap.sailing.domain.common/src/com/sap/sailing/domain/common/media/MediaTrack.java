@@ -81,7 +81,7 @@ public class MediaTrack implements Serializable {
     }
 
     public TimePoint deriveEndTime() {
-        if (startTime != null) {
+        if (startTime != null && duration != null) {
             return startTime.plus(duration);
         } else {
             return null;
