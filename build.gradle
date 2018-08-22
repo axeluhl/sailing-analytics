@@ -68,18 +68,7 @@ ext {
     isXmakeBuild = project.hasProperty("xmake")
     isReleaseBuild = Boolean.parseBoolean(System.env.XMAKE_RELEASE_BUILD)
 
-    createCopyTask = { name, buildDir, variantName ->
-        String taskName = name + "CopyTask" + variantName.baseName;
-        def destinationFolder = new File("").absolutePath + "/java/com.sap.sailing.www/apps/"
-        def sourceFolder = buildDir
-        print "Copying APK folder from: $sourceFolder into $destinationFolder\n"
-        return tasks.create(name: taskName, type: org.gradle.api.tasks.Copy) {
-            description "Archive/copy APK folder to a shared folder."
-            from sourceFolder
-            into destinationFolder
-            include "*.apk", "*.version"
-        }
-    }
+    destinationFolder = new File("").absolutePath + "/java/com.sap.sailing.www/apps/"
 }
 
 spotless {

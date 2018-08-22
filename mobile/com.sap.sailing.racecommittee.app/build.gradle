@@ -1,9 +1,9 @@
-apply plugin: 'com.android.application'
-apply plugin: 'com.getkeepsafe.dexcount'
-apply from: '../git.gradle'
+apply plugin: "com.android.application"
+apply plugin: "com.getkeepsafe.dexcount"
+apply from: "../git.gradle"
 
 def packageName="com.sap.sailing.racecommittee.app"
-def verCode=7
+def verCode=1
 
 android {
     buildToolsVersion rootProject.ext.buildTools
@@ -17,18 +17,33 @@ android {
     /**
      * Copies apk into www apps directory and create version file
      */
-    applicationVariants.all { variant ->
-        variant.outputs.all { output ->
-            def newName = outputFileName.replace(".apk", "-v" + variant.versionName + ".apk");
-            newName = newName.replace("-" + variant.buildType.name, "");
-            outputFileName = new File(newName)
-            def outputDir = "$buildDir/outputs/apk/${output.baseName.replace("-", "/")}/";
-            def versionFile = new File(outputDir + "$packageName." + "version")
-            // Create version file
-            versionFile.text = "$packageName" + ".apk=$verCode"
-            def taskName = variant.name.capitalize()
-            tasks["assemble$taskName"].finalizedBy = [rootProject.ext.createCopyTask('racecommittee', outputDir, output)]
+   applicationVariants.all { variant ->
+       variant.outputs.all { output ->
+           def newName = outputFileName.replace(".apk", "-v" + variant.versionName + ".apk");
+           newName = newName.replace("-" + variant.buildType.name, "");
+           outputFileName = new File(newName)
+       }
+       variant.assemble.doLast { assemble ->
+           // Create version file
+           def versionFile = new File(rootProject.ext.destinationFolder, "$packageName." + "version")
+           versionFile.text = "$packageName" + ".apk=$verCode"
+           copy {
+               from variant.outputs*.outputFile
+               into rootProject.ext.destinationFolder
+           }
+       }
+   }
+
+    def versionPropertiesFile = file('project.properties')
+    if (versionPropertiesFile.canRead()) {
+        def versionProps = new Properties()
+        versionProps.load(new FileInputStream(versionPropertiesFile))
+        verCode = versionProps['VERSION_CODE'].toInteger()
+        def runTasks = gradle.startParameter.taskNames
+        if ('assemble' in runTasks || 'assembleRelease' in runTasks || 'aR' in runTasks) {
+            verCode = verCode + 1
         }
+        versionProps.store(versionPropertiesFile.newWriter(), null)
     }
 
     defaultConfig {
