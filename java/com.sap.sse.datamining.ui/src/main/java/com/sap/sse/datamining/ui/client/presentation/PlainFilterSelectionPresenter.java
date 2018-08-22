@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.dom.client.Style.Unit;
@@ -17,12 +16,8 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.AbstractSettings;
-import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
-import com.sap.sse.datamining.ui.client.DataRetrieverChainDefinitionChangedListener;
-import com.sap.sse.datamining.ui.client.DataRetrieverChainDefinitionProvider;
-import com.sap.sse.datamining.ui.client.FilterSelectionChangedListener;
 import com.sap.sse.datamining.ui.client.FilterSelectionPresenter;
 import com.sap.sse.datamining.ui.client.FilterSelectionProvider;
 import com.sap.sse.datamining.ui.client.StringMessages;
@@ -31,24 +26,18 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class PlainFilterSelectionPresenter extends AbstractComponent<AbstractSettings> implements
-        FilterSelectionPresenter, FilterSelectionChangedListener, DataRetrieverChainDefinitionChangedListener {
+public class PlainFilterSelectionPresenter extends AbstractComponent<AbstractSettings> implements FilterSelectionPresenter {
 
     private final FilterSelectionProvider filterSelectionProvider;
-    private DataRetrieverChainDefinitionDTO retrieverChain;
 
     private final HorizontalPanel mainPanel;
     private final VerticalPanel presentationPanel;
 
     public PlainFilterSelectionPresenter(Component<?> parent, ComponentContext<?> context,
-            StringMessages stringMessages, DataRetrieverChainDefinitionProvider retrieverChainProvider,
-            FilterSelectionProvider filterSelectionProvider) {
+            StringMessages stringMessages, FilterSelectionProvider filterSelectionProvider) {
         super(parent, context);
         this.filterSelectionProvider = filterSelectionProvider;
         this.filterSelectionProvider.addSelectionChangedListener(this);
-        // TODO Is listening to the retriever chain really necessary? Shouldn't the filter selection change
-        // if the filter selection provider is affected by a changing retriever chain?
-        retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(this);
 
         Label currentSelectionLabel = new Label(stringMessages.currentFilterSelection());
         currentSelectionLabel.setWidth("75px");
@@ -58,14 +47,6 @@ public class PlainFilterSelectionPresenter extends AbstractComponent<AbstractSet
         mainPanel = new HorizontalPanel();
         mainPanel.add(currentSelectionLabel);
         mainPanel.add(presentationPanel);
-    }
-
-    @Override
-    public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO newDataRetrieverChainDefinition) {
-        if (!Objects.equals(retrieverChain, newDataRetrieverChainDefinition)) {
-            retrieverChain = newDataRetrieverChainDefinition;
-            presentationPanel.clear();
-        }
     }
 
     @Override

@@ -23,10 +23,13 @@ public interface DataMiningService extends RemoteService {
 
     Date getComponentsChangedTimepoint();
 
+    FunctionDTO getIdentityFunction(String localeInfoName);
     HashSet<FunctionDTO> getAllStatistics(String localeInfoName);
 
     HashSet<FunctionDTO> getStatisticsFor(DataRetrieverChainDefinitionDTO retrieverChainDefinition,
             String localeInfoName);
+    
+    HashSet<AggregationProcessorDefinitionDTO> getAggregatorDefinitions(String localeInfoName);
 
     HashSet<AggregationProcessorDefinitionDTO> getAggregatorDefinitionsFor(FunctionDTO extractionFunction,
             String localeInfoName);
@@ -52,9 +55,13 @@ public interface DataMiningService extends RemoteService {
             StatisticQueryDefinitionDTO queryDefinition);
 
     HashSet<PredefinedQueryIdentifier> getPredefinedQueryIdentifiers();
+    
+    StatisticQueryDefinitionDTO getPredefinedQueryDefinition(PredefinedQueryIdentifier identifier, String localeInfoName);
 
     <ResultType extends Serializable> QueryResultDTO<ResultType> runPredefinedQuery(DataMiningSession session,
             PredefinedQueryIdentifier identifier, String localeInfoName);
+    
+    StatisticQueryDefinitionDTO localize(StatisticQueryDefinitionDTO queryDefinition, String localeInfoName);
 
     SerializationDummy pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy();
 }
