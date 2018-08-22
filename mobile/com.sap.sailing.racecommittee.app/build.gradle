@@ -92,14 +92,14 @@ android {
 
 dependencies {
     /* support libraries */
-    implementation 'com.android.support:recyclerview-v7:${rootProject.ext.support}'
+    implementation "com.android.support:recyclerview-v7:${rootProject.ext.support}"
 
     /* local dependencies */
-    implementation project(':mobile:com.sap.sailing.android.shared')
+    implementation project(":mobile:com.sap.sailing.android.shared")
 
     /* JVM tests */
-    testImplementation 'junit:junit:${rootProject.ext.junit}'
-    testImplementation 'org.mockito:mockito-core:${rootProject.ext.mockito}'
+    testImplementation "junit:junit:${rootProject.ext.junit}"
+    testImplementation "org.mockito:mockito-core:${rootProject.ext.mockito}"
 }
 
 // Custom tasks

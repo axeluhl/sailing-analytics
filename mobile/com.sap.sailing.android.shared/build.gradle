@@ -1,5 +1,5 @@
-apply plugin: 'com.android.library'
-apply plugin: 'com.getkeepsafe.dexcount'
+apply plugin: "com.android.library"
+apply plugin: "com.getkeepsafe.dexcount"
 
 android {
     buildToolsVersion rootProject.ext.buildTools
@@ -12,22 +12,22 @@ android {
 
     sourceSets {
         main {
-            manifest.srcFile 'AndroidManifest.xml'
-            java.srcDirs = ['src']
-            res.srcDirs = ['res']
+            manifest.srcFile "AndroidManifest.xml"
+            java.srcDirs = ["src"]
+            res.srcDirs = ["res"]
         }
 
         test {
-            java.srcDirs = ['tests-jvm/src']
+            java.srcDirs = ["tests-jvm/src"]
         }
     }
 
     signingConfigs {
         stg_debug {
-            keyAlias 'stg_debug'
-            keyPassword 'stg_debug'
-            storeFile file('../android-keystore/STG-debug.jks')
-            storePassword 'stg_debug'
+            keyAlias "stg_debug"
+            keyPassword "stg_debug"
+            storeFile file("../android-keystore/STG-debug.jks")
+            storePassword "stg_debug"
         }
     }
 
@@ -39,25 +39,25 @@ android {
 }
 dependencies {
     /* support libraries */
-    api 'com.android.support:support-v4:${rootProject.ext.support}'
-    api 'com.android.support:support-v13:${rootProject.ext.support}'
-    api 'com.android.support:appcompat-v7:${rootProject.ext.support}'
-    api 'com.android.support:preference-v14:${rootProject.ext.support}'
+    api "com.android.support:support-v4:${rootProject.ext.support}"
+    api "com.android.support:support-v13:${rootProject.ext.support}"
+    api "com.android.support:appcompat-v7:${rootProject.ext.support}"
+    api "com.android.support:preference-v14:${rootProject.ext.support}"
 
     /* local dependencies */
-    api project(':com.sap.sailing.domain.shared.android')
-    api project(':com.sap.sailing.server.gateway.serialization.shared.android')
-    api project(':com.sap.sse.shared.android')
+    api project(":com.sap.sailing.domain.shared.android")
+    api project(":com.sap.sailing.server.gateway.serialization.shared.android")
+    api project(":com.sap.sse.shared.android")
 
     /* Google Play Services */
-    api 'com.google.android.gms:play-services-maps:${rootProject.ext.play_services}'
-    api 'com.google.android.gms:play-services-vision:${rootProject.ext.play_services}'
-    api 'com.google.android.gms:play-services-location:${rootProject.ext.play_services}'
+    api "com.google.android.gms:play-services-maps:${rootProject.ext.play_services}"
+    api "com.google.android.gms:play-services-vision:${rootProject.ext.play_services}"
+    api "com.google.android.gms:play-services-location:${rootProject.ext.play_services}"
 
     /* license dialog */
-    api 'de.psdev.licensesdialog:licensesdialog:${rootProject.ext.license_dialog}'
+    api "de.psdev.licensesdialog:licensesdialog:${rootProject.ext.license_dialog}"
 
     /* JVM tests */
-    testImplementation 'junit:junit:${rootProject.ext.junit}'
-    testImplementation 'org.mockito:mockito-core:${rootProject.ext.mockito}'
+    testImplementation "junit:junit:${rootProject.ext.junit}"
+    testImplementation "org.mockito:mockito-core:${rootProject.ext.mockito}"
 }

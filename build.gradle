@@ -1,6 +1,6 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
-    if (project.hasProperty('xmake')) {
+    if (project.hasProperty("xmake")) {
         repositories {
             maven {
                 url commonRepoURL
@@ -13,16 +13,15 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.4'
-        classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.3'
+        classpath "com.android.tools.build:gradle:3.1.4"
+        classpath "com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.3"
     }
 }
 plugins {
-    id 'com.diffplug.gradle.spotless' version '3.14.0'
+    id "com.diffplug.gradle.spotless" version "3.14.0"
 }
-
 allprojects {
-    if (project.hasProperty('xmake')) {
+    if (project.hasProperty("xmake")) {
         repositories {
             maven {
                 url commonRepoURL
@@ -46,7 +45,7 @@ allprojects {
 // dependency versions for all sub modules
 ext {
     // regular
-    buildTools = '27.0.3'
+    buildTools = "27.0.3"
     compileSdk = 27
     minSdk = 16
     targetSdk = 27
@@ -54,19 +53,19 @@ ext {
     sourceCompatibilityVersion = JavaVersion.VERSION_1_8
     targetCompatibilityVersion = JavaVersion.VERSION_1_8
 
-    support = '27.1.1'
-    play_services = '12.0.1'
+    support = "27.1.1"
+    play_services = "12.0.1"
 
-    license_dialog = '1.8.0'
+    license_dialog = "1.8.0"
 
     // testing - jvm
-    junit = '4.12'
-    mockito = '1.9.5'
+    junit = "4.12"
+    mockito = "1.9.5"
 
     // testing - ui
-    test = '0.2'
-    espresso = '2.1'
-    isXmakeBuild = project.hasProperty('xmake')
+    test = "0.2"
+    espresso = "2.1"
+    isXmakeBuild = project.hasProperty("xmake")
     isReleaseBuild = Boolean.parseBoolean(System.env.XMAKE_RELEASE_BUILD)
 
     createCopyTask = { name, buildDir, variantName ->
@@ -78,29 +77,29 @@ ext {
             description "Archive/copy APK folder to a shared folder."
             from sourceFolder
             into destinationFolder
-            include '*.apk', '*.version'
+            include "*.apk", "*.version"
         }
     }
 }
 
 spotless {
     java {
-        importOrder 'java', 'javax', 'org', 'com', ''
+        importOrder "java", "javax", "org", "com", ""
         removeUnusedImports()
-        eclipse().configFile('java/CodeFormatter.xml')
+        eclipse().configFile("java/CodeFormatter.xml")
         target project.fileTree(project.rootDir) {
-            include 'mobile/com.sap.*/**/*.java'
-            exclude '**/generated*/**/*.*', '**/gen/**/*'
+            include "mobile/com.sap.*/**/*.java"
+            exclude "**/generated*/**/*.*", "**/gen/**/*"
         }
     }
 }
 
-if (project.hasProperty('xmake')) {
-    sapGradleDistBaseUrl = 'http://nexus.wdf.sap.corp:8081/nexus/content/repositories/build.releases/org/gradle/download/gradle/gradle'
+if (project.hasProperty("xmake")) {
+    sapGradleDistBaseUrl = "http://nexus.wdf.sap.corp:8081/nexus/content/repositories/build.releases/org/gradle/download/gradle/gradle"
     sapGradleVersion = 4.4
 
     task wrapper(type: Wrapper) {
-        distributionUrl '${sapGradleDistBaseUrl}/${sapGradleVersion}/gradle-${sapGradleVersion}-all.zip'
+        distributionUrl "${sapGradleDistBaseUrl}/${sapGradleVersion}/gradle-${sapGradleVersion}-all.zip"
     }
 }
 
