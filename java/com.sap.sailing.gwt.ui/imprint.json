@@ -741,7 +741,7 @@
             "owner": "\"Mr.doob\"",
             "homepage": "https://threejs.org/",
             "acknowledgements": [
-                "Copyright � 2010-2017 three.js authors"
+                "Copyright (c) 2010-2017 three.js authors"
             ],
             "key": "MIT"
         },
