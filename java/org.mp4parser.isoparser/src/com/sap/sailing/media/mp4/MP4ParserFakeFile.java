@@ -15,11 +15,10 @@ import java.nio.file.Files;
  * This class pretends to be a complete larger file, while only carrying the first 10 and last 10 megabytes. It is
  * specifically meant to be used for the mp4Parser and only supports the required subset for it. It extends FileChannel
  * as the library uses that to skip input for skipped boxes
- * 
  */
 public class MP4ParserFakeFile extends FileChannel {
-    final long totalSizeOfFile;
-    long currentPos = 0;
+    private final long totalSizeOfFile;
+    private long currentPos = 0;
     private byte[] startOfFileByteArray;
     private byte[] endOfFileByteArray;
 
@@ -51,20 +50,20 @@ public class MP4ParserFakeFile extends FileChannel {
                 }
             }
         } catch (Exception e) {
-            // some filesystem error? we cannot handle it here, so rethrow
+            // File system error? Re-throwing, cause it cannot be handled here.
             throw new RuntimeException(e);
         }
     }
 
     @Override
     public int read(ByteBuffer dst) throws IOException {
-        // we ignore boundary crossings into the nulled part, as we cannot parse in that case. Only the actual movie
-        // data should be nulled
+        // Ignore boundary crossings into nulled part, as it cannot be parsed in that case.
+        // Only the actual movie data should be nulled.
         int read = 0;
         int toRead = dst.remaining();
         final long startOfEndSegment = totalSizeOfFile - (endOfFileByteArray.length + 1);
         if (currentPos < startOfFileByteArray.length) {
-            // in startbuffer, read one byte
+            // in start buffer, read one byte
             dst.put(startOfFileByteArray, (int) currentPos, toRead);
             read = toRead;
         } else if (currentPos < startOfEndSegment) {
