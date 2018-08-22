@@ -25,7 +25,7 @@ public class ParallelGroupedNumberPairAverageAggregationProcessor
     
     private static final AggregationProcessorDefinition<Pair, PairWithStats<Number>> DEFINITION =
             new SimpleAggregationProcessorDefinition<>(Pair.class,
-                    _cc, "PairAverage", ParallelGroupedNumberPairAverageAggregationProcessor.class);
+                    _cc, "Average", ParallelGroupedNumberPairAverageAggregationProcessor.class);
     
     public static AggregationProcessorDefinition<Pair, PairWithStats<Number>> getDefinition() {
         return DEFINITION;

@@ -58,6 +58,18 @@ Currently, several sub-domain names exist (e.g., wiki, bugzilla and hudson) that
 
 Those hold the nodes responding to requests. In a replication cluster we usually want to have one for the "-master" URL that event administrators use
 
+### Volumes
+
+There are a number of disk volumes that are critical to monitor and, where necessary, scale. This includes:
+
+- Backup server (*/home/backup*)
+- Database server (*/var/lib/mongodb* and sub-mounts, */var/lib/mysql*)
+- Central Webserver (*/var/log/old*, */var/log/old/cache*, */var/www/static*, */var/www/home* hosting the git repository)
+
+Through the AWS API the read/write throughputs can be observed, and peaks as well as bottlenecks may be identified. At least as importantly, the file system fill state has to be observed which is not possible through the AWS API and needs to happen through the respective instances' operating systems.
+
+It shall be possible to define alerts based on file systems whose free space drops below a given threshold. Re-sizing volumes automatically may be an interesting option in the future.
+
 ### Alerts
 
 Alerts can be defined for different metrics and with different notification targets. SMS text messages and e-mail notifications are available.
@@ -95,6 +107,8 @@ Application nodes have to provide a REST API with reliable health information.
 A replica is not healthy while its initial load is about to start, or is still on-going or its replication queue is yet to drain after the initial load has finished. A replica will take harm from requests received while the initial load is received or being processed. Requests may be permitted after the initial load has finished processing and while the replication queue is being drained, although the replica will not yet have reached the state that the master is in.
 
 A master is not healthy until it has finished loading all data from the MongoDB during the activation of the *RacingEventService*. It will take harm from requests received during this loading phase. After loading the "master data," a master server will try to restore all race trackers, starting to track the races for which a so-called "restore record" exists. During this phase the master is not fully ready yet but will not take harm from requests after loading all master data has completed. For example, in an emergency situation where otherwise the replication cluster would be unavailable it may be useful to already direct requests at such a master to at least display a landing page or a meaningful error page.
+
+The Java instances have a few and shall have more interesting observable parameters. Some values can be observed through the AWS API, such as general network and CPU loads. So far, the number of leaderboards and the restore process can be observed using JMX managed beans, as can be seen in the JConsole. Other interesting parameters to observe by the orchestrator would be the memory usage and garbage collection (GC) stats, as well as information about the thread pools, their usage and their contention. It would be great if the orchestrator could find out about bottlenecks and how they may be avoided, e.g., hitting bandwidth limitations or not having enough CPUs available to serialize data fast enough for the bandwidth available and the demand observed.
 
 ### Multi-Instances
 
@@ -173,6 +187,24 @@ The backup script on *dbserver.internal.sapsailing.com:/opt/backup.sh* does *not
 ## Orchestration Use Cases
 
 ### Create a New Event on a Dedicated Replication Cluster
+
+A user wants to create a new event. But instead of creating it on an existing server instance, such as the archive server or a club server, he/she would like to create a new dedicated server instance such that the server is a master which later may receive its own replicas and thus form the core of a new replication cluster. The user defines the technical event name, such as *TW2018* for the "Travemünder Woche 2018," which is then used as the server name, MongoDB database name, and replication channel name.
+
+The steps are:
+
+- Launch a new instance from a prepared AMI (either the AMI is regularly updated with the latest packages and kernel patches, or a "yum update" needs to be run and then the instance rebooted)
+- The latest (or a specified) release is installed to */home/sailing/servers/server*
+- The */home/sailing/servers/server/env.sh* file is adjusted to reflect the server name, MongoDB settings, as well as the ports to be used (for a dedicated server probably the defaults at 8888 for the HTTP server, 14888 for the OSGi console telnet port, and 2010 for the Expedition UDP connector)
+- The Java process is launched
+- An event is created; it doesn't necessarily have to have the correct name and attributes yet; it's only important to obtain its UUID.
+- With the new security implementation, the event will be owned by the user requesting the dedicated replication cluster, and a new group named after the unique server name is created of which the user is made a part.
+- The user obtains a qualified *admin:&lt;servername&gt;* role that grants him/her administrative permissions for all objects owned by the group pertinent to the new replication cluster.
+- An Apache *httpd* macro call for the event with its UUID is inserted into a *.conf* file in the instance's */etc/httpd/conf.d* directory
+- The Apache *httpd* server is launched
+- Two target groups *S-ded-&lt;servername&gt;* and *S-ded-&lt;servername&gt;-master* are created, and the new instance is added to both of them
+- Two new ALB rules for *&lt;servername&gt;.sapsailing.com* and *&lt;servername&gt;-master.sapsailing.com* are created, forwarding their requests to the respective target group from the previous step
+
+asdf
 
 ### Create a New "Club Set-Up" in a Multi-Instance
 

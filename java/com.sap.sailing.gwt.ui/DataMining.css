@@ -160,7 +160,7 @@ input.magnifier {
     font-size: 20px;
     height: 70px;
     margin: 0 auto;
-    padding: 49px 0 0 80px;
+    padding: 25px 0 0 80px;
     width: 400px;
     color: #7c7c7c;
 	background: url(images/important-message.png) left center no-repeat;
@@ -172,7 +172,7 @@ input.magnifier {
     font-size: 20px;
     height: 70px;
     margin: 0 auto;
-    padding: 49px 0 0 40px;
+    padding: 25px 0 0 40px;
     width: 400px;
     color: #7c7c7c;
 	background: url(images/busy_indicator_circle.gif) left center no-repeat;
@@ -211,13 +211,23 @@ input.magnifier {
     border-bottom: 1px solid rgba(0, 0, 0, 0.25);
 }
 
+.definitionProviderControlsElements {
+    margin: 2px;
+}
+
 .settingsAnchor {
 	position: relative;
-	top: 9px;
+	top: 7.5px;
 }
 
 .groupingProvider {
     padding: 3px 0px;
+    overflow-y: auto;
+}
+
+.groupingProviderLabel{
+	margin: 2px 2px 2px 0px;
+    display: inline-block;
 }
 
 .groupingProviderElement {
@@ -226,12 +236,28 @@ input.magnifier {
 }
 
 .statisticProvider {
-    padding: 5px 0px 0px 0px;
+    padding: 5px 0px;
+    display: table;
+}
+
+.statisticProviderLabel {
+    display: table-cell;
+    white-space: nowrap;
+    padding: 0px 3px;
 }
 
 .statisticProviderElement {
-	margin: 2px;
-	display: inline-block;
+    display: table-cell;
+    width: auto;
+}
+
+.unsupportedAggregatorListItem {
+	color: gray;
+}
+
+.statisticSuggestBoxContainer {
+	width: 100%;
+	min-width: 300px;
 }
 
 .statisticSuggestBoxPopup {
@@ -241,17 +267,17 @@ input.magnifier {
     max-height: 700px;
     overflow-y: scroll;
 }
-
-.definitionProviderControls {
-	margin: 2px;
+.statisticSuggestBoxPopup .item {
+    padding: 2px;
+    color: #000;
+    cursor: default;
+}
+.statisticSuggestBoxPopup .item-selected {
+    background: #D5E2FF;
 }
 
-.definitionProviderControlsElements {
-	margin: 2px;
-}
-
-.queryProviderElementLabel {
-    margin-left: 0px;
+.dataMiningListBox {
+	min-width: 120px;
 }
 
 .queryDefinitionViewerContent {
@@ -261,6 +287,7 @@ input.magnifier {
 
 .filterDimensionsTitleLabel {
     padding-top: 5px;
+    display: inline-block;
 }
 
 .filterFilterDimensionsPanel {
@@ -323,8 +350,14 @@ input.magnifier {
 .dataMiningMarginLeft {
     margin-left: 5px;
 }
+.dataMiningMarginTop {
+    margin-top: 5px;
+}
 .dataMiningMarginRight {
     margin-right: 5px;
+}
+.dataMiningMarginBottom {
+    margin-bottom: 5px;
 }
 
 .resultsPresenterTabHeader * {
@@ -335,4 +368,27 @@ input.magnifier {
 
 .emphasizedLabel {
     font-weight: 600;
+}
+
+.floatRight {
+	float: right;
+}
+
+.whiteGlass {
+	background-color: #fff;
+	opacity: 0.6;
+	z-index: 19;
+}
+
+.applyQueryBusyMessage {
+    font-family: 'Open Sans',Arial,Verdana,sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    height: 70px;
+    margin: auto auto;
+    padding: 25px 0 0 40px;
+    width: 200px;
+    color: #7c7c7c;
+    background: url(images/busy_indicator_circle.gif) left center no-repeat;
+    z-index: 20;
 }

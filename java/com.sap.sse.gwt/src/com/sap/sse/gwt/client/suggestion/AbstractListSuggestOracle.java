@@ -31,7 +31,7 @@ public abstract class AbstractListSuggestOracle<C> extends AbstractSuggestOracle
         return suggestionMatchingFilter;
     }
     
-    public void setSelectableValues(Collection<C> selectableValues) {
+    public void setSelectableValues(Collection<? extends C> selectableValues) {
         suggestionObjectList.clear();
         suggestionObjectList.addAll(selectableValues);
     }
