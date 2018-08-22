@@ -1101,6 +1101,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                                         setRowData(tagButtonTable, tagButtons);
                                         tagCreationPanel.updateButtons();
                                     }
+                                    center();
                                 });
                     } else if (LeaderboardConfigImagesBarCell.ACTION_EDIT.equals(value)) {
                         selectedTagButton = button;
@@ -1118,8 +1119,8 @@ public class TaggingPanel extends ComponentWithoutSettings
                         addTagButtonButton.setVisible(false);
 
                         tagButtonTable.setVisible(false);
+                        center();
                     }
-                    center();
                 }
             });
 
@@ -1335,6 +1336,9 @@ public class TaggingPanel extends ComponentWithoutSettings
             Label label = new Label(text);
             label.getElement().getStyle().setMarginBottom(10, Unit.PX);
 
+            Panel buttonsPanel = new FlowPanel();
+            buttonsPanel.setStyleName(style.buttonsPanel());
+
             Button confirm = new Button(stringMessages.confirm());
             confirm.setStyleName(style.tagDialogButton());
             confirm.addStyleName("gwt-Button");
@@ -1345,6 +1349,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                     hide();
                 }
             });
+            buttonsPanel.add(confirm);
 
             Button cancel = new Button(stringMessages.cancel());
             cancel.setStyleName(style.tagDialogButton());
@@ -1356,10 +1361,10 @@ public class TaggingPanel extends ComponentWithoutSettings
                     hide();
                 }
             });
+            buttonsPanel.add(cancel);
 
             mainPanel.add(label);
-            mainPanel.add(cancel);
-            mainPanel.add(confirm);
+            mainPanel.add(buttonsPanel);
             setWidget(mainPanel);
 
             addStyleName(style.confirmationDialog());
