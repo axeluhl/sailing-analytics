@@ -34,9 +34,9 @@ public class CompleteManeuverCurveWithEstimationDataRetrievalProcessor extends
 
     public CompleteManeuverCurveWithEstimationDataRetrievalProcessor(ExecutorService executor,
             Collection<Processor<HasCompleteManeuverCurveWithEstimationDataContext, ?>> resultReceivers,
-            ManeuverSettings settings, int retrievalLevel) {
+            ManeuverSettings settings, int retrievalLevel, String retrievedDataTypeMessageKey) {
         super(HasRaceOfCompetitorContext.class, HasCompleteManeuverCurveWithEstimationDataContext.class, executor,
-                resultReceivers, retrievalLevel);
+                resultReceivers, retrievalLevel, retrievedDataTypeMessageKey);
         this.settings = settings;
     }
 

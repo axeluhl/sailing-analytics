@@ -49,7 +49,6 @@ public class SimulatorField implements VectorField {
     private final Position nvX;
 
     private final double[][][] data;
-    private final String[] colorsForSpeeds;
     private final Date startTime;
     private final Duration timeStep;
     private final CoordinateSystem coordinateSystem;
@@ -58,7 +57,6 @@ public class SimulatorField implements VectorField {
         this.coordinateSystem = coordinateSystem;
         this.startTime = windParams.getStartTime();
         this.timeStep = windParams.getTimeStep();
-        this.colorsForSpeeds = createColorsForSpeeds();
         this.rcStart = new DegreePosition(windData.windData.rcStart.getLatDeg(), windData.windData.rcStart.getLngDeg());
         this.rcEnd = new DegreePosition(windData.windData.rcEnd.getLatDeg(), windData.windData.rcEnd.getLngDeg());
         this.resX = windData.windData.resX;
@@ -226,38 +224,6 @@ public class SimulatorField implements VectorField {
     @Override
     public double getParticleWeight(LatLng p, Vector v) {
         return v == null ? 0 : (v.length() / this.maxLength + 0.1);
-    }
-
-    private String[] createColorsForSpeeds() {
-        String[] colors = new String[256];
-        double alphaMin = 0.0;
-        double alphaMax = 0.9;
-        int greyValue = 255;
-        for (int i = 0; i < 256; i++) {
-            colors[i] = "rgba(" + (greyValue) + "," + (greyValue) + "," + (greyValue) + ","
-                    + (alphaMin + (alphaMax - alphaMin) * i / 255.0) + ")";
-        }
-        return colors;
-    }
-    
-    @Override
-    public String getColor(double speed) {
-        return colorsForSpeeds[getIntensity(speed)];
-    }
-
-    private int getIntensity(double speed) {
-        /*
-         * normalized intensity: speed == average wind speed => intensity 0.5 speed <= minimum wind speed => intensity
-         * 0.0 speed between 0.0 and 1.0 double s; if (minLength == maxLength) { s = 0.5; } else if (speed <= minLength)
-         * { s = 0.0; } else { s = (speed - minLength) / (maxLength - minLength); }
-         */
-
-        /*
-         * absolute intensity speed == 12kn => intensity 0.7 speed == 20kn => intensity 1.0 speed == 0kn => intensity
-         * 0.25
-         */
-        double s = 0.7 + 0.0375 * (speed - 12.0);
-        return (int) Math.max(0, Math.min(255, Math.round(255 * s)));
     }
 
     @Override
