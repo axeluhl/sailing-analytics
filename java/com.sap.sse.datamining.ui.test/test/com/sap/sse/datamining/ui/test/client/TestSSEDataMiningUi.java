@@ -54,15 +54,15 @@ public class TestSSEDataMiningUi extends GWTTestCase {
         presenter.registerResultsPresenter(String.class, stringResultsPresenter);
         presenter.registerResultsPresenter(Double.class, doubleResultsPresenter);
 
-        presenter.showResult(new DummyQueryResultDTO<>(String.class));
+        presenter.showResult(null, new DummyQueryResultDTO<>(String.class));
         assertTrue(executedPresenter.size() == 1);
         assertEquals(executedPresenter.get(0), stringResultsPresenter);
 
-        presenter.showResult(new DummyQueryResultDTO<>(Double.class));
+        presenter.showResult(null, new DummyQueryResultDTO<>(Double.class));
         assertTrue(executedPresenter.size() == 2);
         assertEquals(executedPresenter.get(1), doubleResultsPresenter);
 
-        presenter.showResult(new DummyQueryResultDTO<>(Number.class));
+        presenter.showResult(null, new DummyQueryResultDTO<>(Number.class));
         assertTrue(executedPresenter.size() == 2);
         assertEquals(executedPresenter.get(0), stringResultsPresenter);
         assertEquals(executedPresenter.get(1), doubleResultsPresenter);

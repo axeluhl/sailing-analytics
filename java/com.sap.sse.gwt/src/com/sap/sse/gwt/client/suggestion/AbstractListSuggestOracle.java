@@ -2,6 +2,7 @@ package com.sap.sse.gwt.client.suggestion;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.sap.sse.common.filter.AbstractListFilter;
@@ -29,6 +30,10 @@ public abstract class AbstractListSuggestOracle<C> extends AbstractSuggestOracle
     
     public final AbstractListFilter<C> getSuggestionMatchingFilter() {
         return suggestionMatchingFilter;
+    }
+    
+    public Collection<C> getSelectableValues() {
+        return Collections.unmodifiableList(suggestionObjectList);
     }
     
     public void setSelectableValues(Collection<? extends C> selectableValues) {

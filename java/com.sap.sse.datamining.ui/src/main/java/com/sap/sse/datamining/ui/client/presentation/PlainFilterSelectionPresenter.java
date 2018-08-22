@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -41,10 +40,11 @@ public class PlainFilterSelectionPresenter extends AbstractComponent<AbstractSet
 
         Label currentSelectionLabel = new Label(stringMessages.currentFilterSelection());
         currentSelectionLabel.setWidth("75px");
-        currentSelectionLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
+        currentSelectionLabel.addStyleName("emphasizedLabel");
         presentationPanel = new VerticalPanel();
 
         mainPanel = new HorizontalPanel();
+        mainPanel.setStyleName("filterSelectionPresenter");
         mainPanel.add(currentSelectionLabel);
         mainPanel.add(presentationPanel);
     }
@@ -57,16 +57,12 @@ public class PlainFilterSelectionPresenter extends AbstractComponent<AbstractSet
                 .getSelection();
         List<DataRetrieverLevelDTO> sortedLevels = new ArrayList<>(selection.keySet());
         Collections.sort(sortedLevels);
-        boolean first = true;
         for (DataRetrieverLevelDTO retrieverLevel : sortedLevels) {
             Map<FunctionDTO, HashSet<? extends Serializable>> levelSelection = selection.get(retrieverLevel);
             RetrieverLevelFilterSelectionPresenter levelSelectionPresenter = new RetrieverLevelFilterSelectionPresenter(
                     retrieverLevel, levelSelection);
-            if (!first) {
-                levelSelectionPresenter.getEntryWidget().getElement().getStyle().setMarginTop(5, Unit.PX);
-            }
+            levelSelectionPresenter.getEntryWidget().addStyleName("dataMiningMarginBottom");
             presentationPanel.add(levelSelectionPresenter.getEntryWidget());
-            first = false;
         }
     }
 
@@ -78,17 +74,22 @@ public class PlainFilterSelectionPresenter extends AbstractComponent<AbstractSet
                 Map<FunctionDTO, HashSet<? extends Serializable>> levelSelection) {
 
             Label levelLabel = new Label(retrieverLevel.getRetrievedDataType().getDisplayName());
-            levelLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
             levelLabel.setWidth("100px");
+            levelLabel.addStyleName("emphasizedLabel");
 
             VerticalPanel presentationPanel = new VerticalPanel();
             List<FunctionDTO> sortedDimensions = new ArrayList<>(levelSelection.keySet());
             Collections.sort(sortedDimensions);
+            boolean first = true;
             for (FunctionDTO dimension : sortedDimensions) {
                 Collection<? extends Serializable> dimensionSelection = levelSelection.get(dimension);
                 DimensionFilterSelectionPresenter dimensionSelectionPresenter = new DimensionFilterSelectionPresenter(
                         dimension, dimensionSelection);
+                if (!first) {
+                    dimensionSelectionPresenter.getEntryWidget().getElement().getStyle().setMarginTop(2, Unit.PX);
+                }
                 presentationPanel.add(dimensionSelectionPresenter.getEntryWidget());
+                first = false;
             }
 
             mainPanel = new HorizontalPanel();
@@ -110,7 +111,7 @@ public class PlainFilterSelectionPresenter extends AbstractComponent<AbstractSet
                 Collection<? extends Serializable> dimensionSelection) {
             mainPanel = new HorizontalPanel();
             Label dimensionLabel = new Label(dimension.getDisplayName() + ":");
-            dimensionLabel.getElement().getStyle().setMarginRight(2, Unit.PX);
+            dimensionLabel.addStyleName("dimensionLabel");
             mainPanel.add(dimensionLabel);
 
             StringBuilder selectionStringBuilder = new StringBuilder();
@@ -153,7 +154,7 @@ public class PlainFilterSelectionPresenter extends AbstractComponent<AbstractSet
 
     @Override
     public String getDependentCssClassName() {
-        return "plainFilterSelectionPresenter";
+        return "filterSelectionPresenter";
     }
 
     @Override
