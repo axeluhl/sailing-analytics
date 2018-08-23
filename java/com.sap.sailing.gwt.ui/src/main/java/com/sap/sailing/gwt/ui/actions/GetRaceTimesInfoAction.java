@@ -16,6 +16,10 @@ public class GetRaceTimesInfoAction implements AsyncAction<List<RaceTimesInfoDTO
     private final Collection<RegattaAndRaceIdentifier> raceIdentifiers;
     private final Map<RegattaAndRaceIdentifier, TimePoint> latestReceivedTagTimes;
 
+    public GetRaceTimesInfoAction(SailingServiceAsync sailingService, Collection<RegattaAndRaceIdentifier> raceIdentifiers) {
+        this(sailingService, raceIdentifiers, null);
+    }
+    
     public GetRaceTimesInfoAction(SailingServiceAsync sailingService, Collection<RegattaAndRaceIdentifier> raceIdentifiers, Map<RegattaAndRaceIdentifier, TimePoint> latestReceivedTagTimes) {
         this.sailingService = sailingService;
         this.raceIdentifiers = raceIdentifiers;
@@ -24,6 +28,10 @@ public class GetRaceTimesInfoAction implements AsyncAction<List<RaceTimesInfoDTO
 
     @Override
     public void execute(AsyncCallback<List<RaceTimesInfoDTO>> callback) {
-        sailingService.getRaceTimesInfos(raceIdentifiers, latestReceivedTagTimes, callback);
+        if (latestReceivedTagTimes == null) {
+            sailingService.getRaceTimesInfos(raceIdentifiers, callback);
+        } else {
+            sailingService.getRaceTimesInfosIncludingTags(raceIdentifiers, latestReceivedTagTimes, callback);
+        }
     }
 }
