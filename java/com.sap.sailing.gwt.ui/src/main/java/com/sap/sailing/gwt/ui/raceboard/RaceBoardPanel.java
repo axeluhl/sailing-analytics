@@ -304,7 +304,6 @@ public class RaceBoardPanel
         // add panel for tagging functionality, hidden by default
         taggingPanel = new TaggingPanel(parent, componentContext, stringMessages, sailingService, userService, timer, raceTimesInfoProvider);
         addChildComponent(taggingPanel);
-        taggingPanel.setVisible(true);
         taggingPanel.setVisible(false);
         
         // Determine if the screen is large enough to initially display the leaderboard panel on the left side of the

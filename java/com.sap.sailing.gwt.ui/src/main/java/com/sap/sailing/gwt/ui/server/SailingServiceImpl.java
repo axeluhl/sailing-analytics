@@ -2153,7 +2153,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
     }
 
     @Override
-    public RaceTimesInfoDTO getRaceTimesInfo(RegattaAndRaceIdentifier raceIdentifier, TimePoint latestReceivedTagTime) {
+    public RaceTimesInfoDTO getRaceTimesInfo(RegattaAndRaceIdentifier raceIdentifier) {
         RaceTimesInfoDTO raceTimesInfo = null;
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
 
@@ -2163,8 +2163,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
             raceTimesInfo.setLegInfos(legInfos);
             List<MarkPassingTimesDTO> markPassingTimesDTOs = new ArrayList<MarkPassingTimesDTO>();
             raceTimesInfo.setMarkPassingTimes(markPassingTimesDTOs);
-            List<TagDTO> tags = new ArrayList<TagDTO>();
-            raceTimesInfo.setTags(tags);
 
             raceTimesInfo.startOfRace = trackedRace.getStartOfRace() == null ? null
                     : trackedRace.getStartOfRace().asDate();
@@ -2223,30 +2221,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
             } finally {
                 trackedRace.getRace().getCourse().unlockAfterRead();
             }
-
-            // check if logged in user is the same user as the creator or logged in user is Administrator
-            Subject subject = SecurityUtils.getSubject();
-
-            Iterable<RaceLog> raceLogs = trackedRace.getAttachedRaceLogs();
-            for (RaceLog raceLog : raceLogs) {
-                ReadonlyRaceState raceState = ReadonlyRaceStateImpl.getOrCreate(getService(), raceLog);
-                Iterable<RaceLogTagEvent> foundTagEvents = raceState.getTagEvents();
-                for (RaceLogTagEvent tagEvent : foundTagEvents) {
-                    if (tagEvent.isVisibleForPublic() || (subject.getPrincipals() != null
-                            && (subject.getPrincipals().getPrimaryPrincipal().equals(tagEvent.getUsername())
-                                    || subject.hasRole("admin")))) {
-                        if ((latestReceivedTagTime == null && tagEvent.getRevokedAt() == null)
-                                || (latestReceivedTagTime != null && tagEvent.getRevokedAt() == null
-                                        && tagEvent.getCreatedAt().after(latestReceivedTagTime))
-                                || (latestReceivedTagTime != null && tagEvent.getRevokedAt() != null
-                                        && tagEvent.getRevokedAt().after(latestReceivedTagTime))) {
-                            tags.add(new TagDTO(tagEvent.getTag(), tagEvent.getComment(), tagEvent.getImageURL(),
-                                    tagEvent.getUsername(), tagEvent.isVisibleForPublic(),
-                                    tagEvent.getLogicalTimePoint(), tagEvent.getCreatedAt(), tagEvent.getRevokedAt()));
-                        }
-                    }
-                }
-            }
         }
         if (raceTimesInfo != null) {
             raceTimesInfo.currentServerTime = new Date();
@@ -2255,11 +2229,59 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
     }
 
     @Override
-    public List<RaceTimesInfoDTO> getRaceTimesInfos(Collection<RegattaAndRaceIdentifier> raceIdentifiers,
+    public RaceTimesInfoDTO getRaceTimesInfoIncludingTags(RegattaAndRaceIdentifier raceIdentifier,
+            TimePoint latestReceivedTagTime) {
+        RaceTimesInfoDTO raceTimesInfo = getRaceTimesInfo(raceIdentifier);
+        List<TagDTO> tags = new ArrayList<TagDTO>();
+        raceTimesInfo.setTags(tags);
+        Subject subject = SecurityUtils.getSubject();
+        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        Iterable<RaceLog> raceLogs = trackedRace.getAttachedRaceLogs();
+
+        for (RaceLog raceLog : raceLogs) {
+            ReadonlyRaceState raceState = ReadonlyRaceStateImpl.getOrCreate(getService(), raceLog);
+            Iterable<RaceLogTagEvent> foundTagEvents = raceState.getTagEvents();
+            for (RaceLogTagEvent tagEvent : foundTagEvents) {
+                // TODO: As soon as permission-vertical branch got merged into master, apply
+                // new permission system at this if-statement and remove this old way of 
+                // checking for permissions. (see bug 4104, comment 9)
+                // functionality: Check if user has the permission to see this tag.
+                if (tagEvent.isVisibleForPublic() || (subject.getPrincipals() != null
+                        && (subject.getPrincipals().getPrimaryPrincipal().equals(tagEvent.getUsername())
+                                || subject.hasRole("admin")))) {
+                    if ((latestReceivedTagTime == null && tagEvent.getRevokedAt() == null)
+                            || (latestReceivedTagTime != null && tagEvent.getRevokedAt() == null
+                                    && tagEvent.getCreatedAt().after(latestReceivedTagTime))
+                            || (latestReceivedTagTime != null && tagEvent.getRevokedAt() != null
+                                    && tagEvent.getRevokedAt().after(latestReceivedTagTime))) {
+                        tags.add(new TagDTO(tagEvent.getTag(), tagEvent.getComment(), tagEvent.getImageURL(),
+                                tagEvent.getUsername(), tagEvent.isVisibleForPublic(), tagEvent.getLogicalTimePoint(),
+                                tagEvent.getCreatedAt(), tagEvent.getRevokedAt()));
+                    }
+                }
+            }
+        }
+        return raceTimesInfo;
+    }
+
+    @Override
+    public List<RaceTimesInfoDTO> getRaceTimesInfos(Collection<RegattaAndRaceIdentifier> raceIdentifiers) {
+        List<RaceTimesInfoDTO> raceTimesInfos = new ArrayList<RaceTimesInfoDTO>();
+        for (RegattaAndRaceIdentifier raceIdentifier : raceIdentifiers) {
+            RaceTimesInfoDTO raceTimesInfo = getRaceTimesInfo(raceIdentifier);
+            if (raceTimesInfo != null) {
+                raceTimesInfos.add(raceTimesInfo);
+            }
+        }
+        return raceTimesInfos;
+    }
+
+    @Override
+    public List<RaceTimesInfoDTO> getRaceTimesInfosIncludingTags(Collection<RegattaAndRaceIdentifier> raceIdentifiers,
             Map<RegattaAndRaceIdentifier, TimePoint> latestReceivedTagTimes) {
         List<RaceTimesInfoDTO> raceTimesInfos = new ArrayList<RaceTimesInfoDTO>();
         for (RegattaAndRaceIdentifier raceIdentifier : raceIdentifiers) {
-            RaceTimesInfoDTO raceTimesInfo = getRaceTimesInfo(raceIdentifier,
+            RaceTimesInfoDTO raceTimesInfo = getRaceTimesInfoIncludingTags(raceIdentifier,
                     latestReceivedTagTimes.get(raceIdentifier));
             if (raceTimesInfo != null) {
                 raceTimesInfos.add(raceTimesInfo);

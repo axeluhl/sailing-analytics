@@ -237,9 +237,16 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void removeWind(RegattaAndRaceIdentifier raceIdentifier, WindDTO windDTO, AsyncCallback<Void> callback);
 
-    void getRaceTimesInfo(RegattaAndRaceIdentifier raceIdentifier, TimePoint latestReceivedTagTime, AsyncCallback<RaceTimesInfoDTO> callback);
+    void getRaceTimesInfo(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<RaceTimesInfoDTO> callback);
 
-    void getRaceTimesInfos(Collection<RegattaAndRaceIdentifier> raceIdentifiers, Map<RegattaAndRaceIdentifier, TimePoint> latestReceivedTagTimes,
+    void getRaceTimesInfoIncludingTags(RegattaAndRaceIdentifier raceIdentifier, TimePoint latestReceivedTagTime,
+            AsyncCallback<RaceTimesInfoDTO> callback);
+
+    void getRaceTimesInfos(Collection<RegattaAndRaceIdentifier> raceIdentifiers,
+            AsyncCallback<List<RaceTimesInfoDTO>> callback);
+
+    void getRaceTimesInfosIncludingTags(Collection<RegattaAndRaceIdentifier> raceIdentifiers,
+            Map<RegattaAndRaceIdentifier, TimePoint> latestReceivedTagTimes,
             AsyncCallback<List<RaceTimesInfoDTO>> callback);
 
     void getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date,

@@ -11,6 +11,7 @@ import java.util.Set;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -35,7 +36,11 @@ public class RaceTimesInfoProvider {
     private final HashMap<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfos;
     private final Set<RaceTimesInfoProviderListener> listeners;
     private boolean terminated = false;
-    
+
+    // Should server send tag updates for this RaceTimesInfoProvider instance? Default is set to false,
+    // TaggingPanel will set value to true for corresponding instance. 
+    //   => decrease server load by not requesting tags every roundtrip.
+    private boolean requestTags = false;
     private Map<RegattaAndRaceIdentifier, TimePoint> latestReceivedTagTimes;
     
     /**
@@ -86,7 +91,7 @@ public class RaceTimesInfoProvider {
         raceIdentifiers.add(raceIdentifier);
         if (forceTimesInfoRequest) {
             final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
-            sailingService.getRaceTimesInfo(raceIdentifier, latestReceivedTagTimes.get(raceIdentifier), new AsyncCallback<RaceTimesInfoDTO>() {
+            AsyncCallback<RaceTimesInfoDTO> callback = new AsyncCallback<RaceTimesInfoDTO>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     errorReporter.reportError("Error trying to obtain the time infos for race "
@@ -101,14 +106,25 @@ public class RaceTimesInfoProvider {
                         notifyListeners(clientTimeWhenRequestWasSent, raceTimesInfo.currentServerTime, clientTimeWhenResponseWasReceived);
                     }
                 }
-            });
+            };
+            if (requestTags) {
+                sailingService.getRaceTimesInfoIncludingTags(raceIdentifier, latestReceivedTagTimes.get(raceIdentifier), callback);
+            } else {
+                sailingService.getRaceTimesInfo(raceIdentifier, callback);
+            }
         }
     }
     
     private void readTimesInfos() {
         if (!raceIdentifiers.isEmpty()) {
             final long clientTimeWhenRequestWasSent = System.currentTimeMillis();
-            GetRaceTimesInfoAction getRaceTimesInfoAction = new GetRaceTimesInfoAction(sailingService, raceIdentifiers, latestReceivedTagTimes);
+            GetRaceTimesInfoAction getRaceTimesInfoAction;
+            if (requestTags) {
+                getRaceTimesInfoAction = new GetRaceTimesInfoAction(sailingService, raceIdentifiers, latestReceivedTagTimes);
+            } else {                
+                getRaceTimesInfoAction = new GetRaceTimesInfoAction(sailingService, raceIdentifiers);
+            }
+
             asyncActionsExecutor.execute(getRaceTimesInfoAction, new AsyncCallback<List<RaceTimesInfoDTO>>() {
                 @Override
                 public void onFailure(Throwable caught) {
@@ -236,5 +252,13 @@ public class RaceTimesInfoProvider {
     
     public void setLatestReceivedTagTime(RegattaAndRaceIdentifier raceIdentifier, TimePoint latestReceivedTagTime) {
         latestReceivedTagTimes.put(raceIdentifier, latestReceivedTagTime);
+    }
+
+    public void enableTagRequests() {
+        requestTags = true;
+    }
+
+    public void disableTagRequests() {
+        requestTags = false;
     }
 }
