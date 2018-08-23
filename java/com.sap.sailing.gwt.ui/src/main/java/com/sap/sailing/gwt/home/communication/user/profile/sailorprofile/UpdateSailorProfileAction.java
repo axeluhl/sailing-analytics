@@ -36,6 +36,9 @@ public abstract class UpdateSailorProfileAction implements SailingAction<SailorP
         CompetitorAndBoatStore store = ctx.getRacingEventService().getCompetitorAndBoatStore();
 
         SailorProfilePreferences prefs = ctx.getPreferenceForCurrentUser(SailorProfilePreferences.PREF_NAME);
+        if (prefs == null) {
+            prefs = new SailorProfilePreferences(store);
+        }
         Pair<SailorProfilePreferences, SailorProfilePreference> pair = findAndUpdateCorrectPreference(store, prefs);
         prefs = pair.getA();
         ctx.setPreferenceForCurrentUser(SailorProfilePreferences.PREF_NAME, prefs);
