@@ -3,6 +3,7 @@ set -o functrace
 
 # This indicates the type of the project
 # and is used to correctly resolve bundle names
+source ./correctFilePathInRelationToCurrentOs.sh
 PROJECT_TYPE="sailing"
 
 find_project_home ()
@@ -23,14 +24,7 @@ find_project_home ()
         return 0
     fi
 
-    #editing the filepath, so it fits for eclipse #currently save works for cygwin, gitbash and linux
-	if [ "$OSTYPE" == "cygwin" ]; then
-		echo $1 | sed 's/^\/cygdrive\/\([a-zA-Z]\)\//\1:\//'
-	elif [ "$OSTYPE" == "msys" ]; then
-		echo $1 | sed 's/^\/\([a-zA-Z]\)\//\1:\//'
-	else
-	    echo $1
-	fi
+    echo $(correct_file_path  "$1")
 }
 
 # this holds for default installation
@@ -49,13 +43,7 @@ fi
 
 #reading the filepath and editing it, so it fits for eclipse #currently save works for cygwin, gitbash and linux
 if [ "$SERVERS_HOME" = "" ]; then
-	SERVERS_HOME="$USER_HOME/servers"
-	if [ "$OSTYPE" == "cygwin" ]; then
-		SERVERS_HOME=`echo "$USER_HOME/servers" | sed 's/^\/cygdrive\/\([a-zA-Z]\)\//\1:\//'`
-	fi
-	if [ "$OSTYPE" == "msys" ]; then
-		SERVERS_HOME=`echo "$USER_HOME/servers" | sed 's/^\/\([a-zA-Z]\)\//\1:\//'`
-	fi
+	SERVERS_HOME=$(correct_file_path  "$USER_HOME/servers")
 fi
 
 # x86 or x86_64 should work for most cases
