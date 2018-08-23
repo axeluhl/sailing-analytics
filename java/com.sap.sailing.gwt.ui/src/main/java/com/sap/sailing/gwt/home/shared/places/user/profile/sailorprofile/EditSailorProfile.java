@@ -99,7 +99,7 @@ public class EditSailorProfile extends Composite implements EditSailorProfileVie
             }
         });
 
-
+        accordionStatisticsUi.clear();
         for (SailorProfileNumericStatisticType type : SailorProfileNumericStatisticType.values()) {
             TextArea dummy = new TextArea();
             dummy.setText(type.name());
@@ -112,9 +112,8 @@ public class EditSailorProfile extends Composite implements EditSailorProfileVie
                 }
 
                 @Override
-                public void onSuccess(SailorProfileStatisticDTO result) {
-                    dummy.setText(type.name() + " " + result.getValue() + " @ " + result.getTimeOfBest() + " @@ "
-                            + result.getBestCompetitorIdAsString());
+                public void onSuccess(SailorProfileStatisticDTO answer) {
+                    dummy.setText(type.name() + ": " + answer.getResult().toString());
                 }
             });
         }
