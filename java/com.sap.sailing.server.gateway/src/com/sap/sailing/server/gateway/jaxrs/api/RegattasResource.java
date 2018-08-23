@@ -1760,7 +1760,7 @@ public class RegattasResource extends AbstractSailingServerResource {
 
             Integer maximumNumberOfDiscards = null;
             if (requestObject.containsKey("maximumNumberOfDiscards")) {
-                maximumNumberOfDiscards = (int) requestObject.get("maximumNumberOfDiscards");
+                maximumNumberOfDiscards = ((Long) requestObject.get("maximumNumberOfDiscards")).intValue();
             }
 
             int[] resultDiscardingThresholds = null;
@@ -1768,7 +1768,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 JSONArray resultDiscardingThresholdsRaw = (JSONArray) requestObject.get("resultDiscardingThresholds");
                 resultDiscardingThresholds = new int[resultDiscardingThresholdsRaw.size()];
                 for (int i = 0; i < resultDiscardingThresholdsRaw.size(); i++) {
-                    resultDiscardingThresholds[i] = (int) resultDiscardingThresholdsRaw.get(i);
+                    resultDiscardingThresholds[i] = ((Long) resultDiscardingThresholdsRaw.get(i)).intValue();
                 }
             }
 
@@ -1777,7 +1777,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             for (Object fleetRaw : fleetsRaw) {
                 JSONObject fleet = Helpers.toJSONObjectSafe(fleetRaw);
                 String fleetName = (String) fleet.get("fleetName");
-                int orderNo = (int) fleet.get("orderNo");
+                int orderNo = ((Long) fleet.get("orderNo")).intValue();
                 String htmlColor = (String) fleet.get("htmlColor");
                 fleets.add(new FleetDTO(fleetName, orderNo, new RGBColor(htmlColor)));
             }
