@@ -54,7 +54,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
@@ -133,6 +132,9 @@ public class TaggingPanel extends ComponentWithoutSettings
         @Source("com/sap/sailing/gwt/ui/client/images/SAP_RV_Settings.png")
         ImageResource settingsButton();
 
+        @Source("com/sap/sailing/gwt/ui/client/images/pen.png")
+        ImageResource pen();
+
         @Source("tagging-panel.css")
         public TagPanelStyle style();
 
@@ -140,6 +142,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             // general
             String hidden();
             String taggingPanel();
+            String toggleEditState();
             String buttonsPanel();
             String confirmationDialog();
             String confirmationDialogPanel();
@@ -161,6 +164,9 @@ public class TaggingPanel extends ComponentWithoutSettings
 
             // tag input / creation
             String tagCreationPanel();
+            String tagCreationPanelHeader();
+            String tagCreationPanelHeaderLabel();
+            String tagCreationPanelHeaderButton();
             String tagInputPanel();
             String tagInputPanelTag();
             String tagInputPanelComment();
@@ -185,6 +191,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             String imageSearch();
             String imageClearSearch();
             String imageSettings();
+            String imagePen();
         }
     }
 
@@ -210,7 +217,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         SafeHtml cell(String styleTag, String styleTagHeading, String styleTagCreated, SafeHtml tag, SafeHtml createdAt,
                 SafeHtml content);
 
-        @Template("<div class='{0}'><div class='{1}'>{3}<button>X</button></div><div class='{2}'>{4}</div>{5}</div>")
+        @Template("<div class='{0}'><div class='{1}'>{3}<div style=\"position: relative\"><button>X</button></div></div><div class='{2}'>{4}</div>{5}</div>")
         SafeHtml cellRemovable(String styleTag, String styleTagHeading, String styleTagCreated, SafeHtml tag,
                 SafeHtml createdAt, SafeHtml content);
 
@@ -218,7 +225,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         SafeHtml privateCell(String styleTag, String styleTagHeading, String styleTagCreated, SafeHtml tag,
                 SafeHtml createdAt, SafeHtml content, SafeUri safeUri);
 
-        @Template("<div class='{0}'><div class='{1}'><img src='{6}'>{3}<button>X</button></div><div class='{2}'>{4}</div>{5}</div>")
+        @Template("<div class='{0}'><div class='{1}'><img src='{6}'>{3}<div style=\"position: relative\"><button>X</button></div></div><div class='{2}'>{4}</div>{5}</div>")
         SafeHtml privateCellRemovable(String styleTag, String styleTagHeading, String styleTagCreated, SafeHtml tag,
                 SafeHtml createdAt, SafeHtml content, SafeUri safeUri);
 
@@ -340,7 +347,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                 setText("");
                 addStyleName(style.hidden());
             }
-            panel.setContentWidget(contentPanel);
+            taggingPanel.setContentWidget(contentPanel);
         }
     }
 
@@ -505,6 +512,20 @@ public class TaggingPanel extends ComponentWithoutSettings
             standardButtonsPanel.add(editCustomTagButtons);
             standardButtonsPanel.add(createTagFromTextBoxes);
 
+            Panel headerPanel = new FlowPanel();
+            headerPanel.setStyleName(style.tagCreationPanelHeader());
+            Label heading = new Label(stringMessages.tagAddTags());
+            heading.setStyleName(style.tagCreationPanelHeaderLabel());
+            headerPanel.add(heading);
+            Button closeFooterButton = new Button("X");
+            closeFooterButton.setStyleName(style.tagCreationPanelHeaderButton());
+            closeFooterButton.setTitle(stringMessages.close());
+            closeFooterButton.addClickHandler(event -> {
+                setCurrentState(State.VIEW);
+            });
+            headerPanel.add(closeFooterButton);
+            
+            add(headerPanel);
             add(inputPanel);
             add(standardButtonsPanel);
             add(tagButtonsPanel);
@@ -522,7 +543,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                 tagButtonsPanel.add(button);
             });
             if ((tagButtonsPanel.getOffsetHeight() - oldHeight) != 0) {
-                panel.setContentWidget(contentPanel);
+                taggingPanel.setContentWidget(contentPanel);
             }
         }
 
@@ -1378,6 +1399,11 @@ public class TaggingPanel extends ComponentWithoutSettings
         }
     }
 
+    private enum State {
+        VIEW, // default
+        EDIT
+    }
+
     private final TagPanelResources resources;
     private final TagPanelStyle style;
 
@@ -1390,10 +1416,11 @@ public class TaggingPanel extends ComponentWithoutSettings
 
     private List<TagButton> tagButtons;
 
-    private final HeaderPanel panel;
+    private final HeaderPanel taggingPanel;
     private final TagCreationPanel tagCreationPanel;
     private final TagFilterPanel filterbarPanel;
     private final Panel contentPanel;
+    private final Button createTagsButton;
 
     private final StringMessages stringMessages;
     private final SailingServiceAsync sailingService;
@@ -1404,6 +1431,8 @@ public class TaggingPanel extends ComponentWithoutSettings
     private String leaderboardName = null;
     private RaceColumnDTO raceColumn = null;
     private FleetDTO fleet = null;
+
+    private State currentState;
 
     public TaggingPanel(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages,
             SailingServiceAsync sailingService, UserService userService, Timer timer,
@@ -1430,24 +1459,27 @@ public class TaggingPanel extends ComponentWithoutSettings
 
         tagButtons = new ArrayList<TagButton>();
 
-        panel = new HeaderPanel();
+        taggingPanel = new HeaderPanel();
         tagCreationPanel = new TagCreationPanel(stringMessages);
         filterbarPanel = new TagFilterPanel();
-        contentPanel = new ScrollPanel();
+        contentPanel = new FlowPanel();
+        createTagsButton = new Button();
 
         userService.addUserStatusEventHandler(this);
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(this);
 
+        setCurrentState(State.VIEW);
+        
         initializePanel();
     }
 
     private void initializePanel() {
         // Panel
-        panel.setStyleName(style.taggingPanel());
+        taggingPanel.setStyleName(style.taggingPanel());
 
         // Searchbar
-        panel.setHeaderWidget(filterbarPanel);
-        panel.setFooterWidget(tagCreationPanel);
+        taggingPanel.setHeaderWidget(filterbarPanel);
+        taggingPanel.setFooterWidget(tagCreationPanel);
 
         // Content (tags)
         tagListProvider.addDataDisplay(tagCellList);
@@ -1465,7 +1497,14 @@ public class TaggingPanel extends ComponentWithoutSettings
         contentPanel.add(tagCellList);
         contentPanel.addStyleName(style.tagCellListPanel());
 
-        panel.setContentWidget(contentPanel);
+        createTagsButton.setStyleName(style.toggleEditState());
+        createTagsButton.addStyleName(style.imagePen());
+        createTagsButton.addClickHandler(event -> {
+            setCurrentState(State.EDIT);
+        });
+        contentPanel.add(createTagsButton);
+
+        taggingPanel.setContentWidget(contentPanel);
         updateContent();
     }
 
@@ -1537,10 +1576,37 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     private void updateContent() {
-        tagCreationPanel.setVisible(userService.getCurrentUser() != null);
+        setFooterPanelVisibility(currentState == State.EDIT);
+        setCreateTagsButtonVisibility(currentState == State.VIEW);
         tagListProvider.updateFilteredTags();
         tagCellList.setVisibleRange(0, tagListProvider.getFilteredTagsListSize());
         tagListProvider.refresh();
+    }
+
+    private void setCurrentState(State state) {
+        currentState = state;
+        updateContent();
+    }
+
+    /**
+     * Footer will NOT get displayed if user is not logged in, even if showFooter is set to true!
+     */
+    private void setFooterPanelVisibility(boolean showFooter) {
+        // Setting tagCreationPanel.setVisible(false) is not sufficient as panel would still be
+        // rendered as 20px high white space instead of being hidden.
+        // Fix: remove panel completly from footer.
+        if (userService.getCurrentUser() != null && showFooter) {
+            taggingPanel.setFooterWidget(tagCreationPanel);
+        } else {
+            taggingPanel.setFooterWidget(null);
+        }
+    }
+
+    /**
+     * Button will NOT get displayed if user is not logged in, even if showButton is set to true!
+     */
+    private void setCreateTagsButtonVisibility(boolean showButton) {
+        createTagsButton.setVisible(userService.getCurrentUser() != null && showButton);
     }
 
     @Override
@@ -1605,6 +1671,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         });
         filterbarPanel.loadTagFilterSets();
         tagCreationPanel.loadAllTagButtons();
+        setCurrentState(State.VIEW);
         updateContent();
     }
 
@@ -1620,12 +1687,12 @@ public class TaggingPanel extends ComponentWithoutSettings
 
     @Override
     public Widget getEntryWidget() {
-        return panel;
+        return taggingPanel;
     }
 
     @Override
     public boolean isVisible() {
-        return panel.isVisible();
+        return taggingPanel.isVisible();
     }
 
     @Override
@@ -1637,7 +1704,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                 raceTimesInfoProvider.disableTagRequests();
             }
         }
-        panel.setVisible(visible);
+        taggingPanel.setVisible(visible);
     }
 
     @Override

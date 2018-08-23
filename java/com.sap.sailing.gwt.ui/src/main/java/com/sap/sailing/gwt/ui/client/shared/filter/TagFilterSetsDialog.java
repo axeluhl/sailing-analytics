@@ -74,13 +74,13 @@ public class TagFilterSetsDialog extends DataEntryDialog<TagFilterSets> {
     protected Widget getAdditionalWidget() {
         mainPanel = new VerticalPanel();
         if (userService.getCurrentUser() == null) {
-            Label notLoggedInLabel = new Label(stringMessages.createTagFilterNotLoggedIn());
+            Label notLoggedInLabel = new Label(stringMessages.tagCreateFilterNotLoggedIn());
             notLoggedInLabel.getElement().getStyle().setColor("red");
             mainPanel.add(notLoggedInLabel);
         }
         String headLineText;
         if (tagsFilterSets.getFilterSets().size() < 1) {
-            headLineText = stringMessages.createTagFilterHint();
+            headLineText = stringMessages.tagCreateFilterHint();
         } else {
             headLineText = stringMessages.availableFilters();
         }

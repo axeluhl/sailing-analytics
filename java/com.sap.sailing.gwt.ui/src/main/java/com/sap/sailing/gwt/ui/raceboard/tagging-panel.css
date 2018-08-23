@@ -1,8 +1,4 @@
 /**************************** General ****************************/
-b {
-	font-weight: bold;
-}
-
 .hidden {
 	display: none;
 	height: 0;
@@ -20,8 +16,8 @@ b {
 	right: 0;
 	margin: 0;
 	margin-left: 3px;
-	overflow: visible !important;
 	/* set visible to show outline of input fields */
+	overflow: visible !important;
 }
 
 .buttonsPanel {
@@ -41,6 +37,22 @@ b {
 .taggingPanel .buttonsPanel:empty {
 	display: none;
 	margin: 0;
+}
+
+.taggingPanel button.toggleEditState {
+	position: absolute;
+	bottom: 10px;
+	left: 50%;
+	transform: translate(-50%, 0);
+	height: 40px;
+	width: 40px;
+	border: none;
+	border-radius: 20px;
+	box-shadow: 2px 2px 3px lightgrey;
+	background-color: #efaa00;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 60%;
 }
 
 .confirmationDialog {
@@ -67,9 +79,19 @@ b {
 
 .tagCellHeading button {
 	position: absolute;
-	right: 5px;
+	right: 0;
+	bottom: 0;
 	border: none;
 	background: transparent;
+}
+
+.tagCellHeading button:hover {
+	cursor: pointer;
+	outline: none;
+	border-radius: 3px;
+	background-color: lightgrey;
+	transition-duration: 0.2s;
+	transition-property: background-color;
 }
 
 .tagCellImage {
@@ -106,6 +128,7 @@ b {
 .tagCellListPanel {
 	height: 100%;
 	margin-top: 10px;
+	overflow: scroll;
 }
 
 /**************************** Tag-Buttons ****************************/
@@ -156,6 +179,30 @@ b {
 /**************************** Tag input / creation ****************************/
 .tagCreationPanel {
 	width: 100%;
+}
+
+.tagCreationPanelHeader {
+	padding-top: 5px;
+}
+
+.tagCreationPanelHeader .tagCreationPanelHeaderLabel {
+    font-weight: bold;
+}
+
+.tagCreationPanelHeader .tagCreationPanelHeaderButton {
+	position: absolute;
+	top: 5px;
+	right: 5px;
+	border: none;
+	border-radius: 3px;
+	background-color: transparent;
+}
+
+.tagCreationPanelHeader .tagCreationPanelHeaderButton:hover {
+    background-color: lightgrey;
+    cursor: pointer;
+    transition-duration: 0.2s;
+    transition-property: background-color;
 }
 
 .tagInputPanel {
@@ -316,4 +363,11 @@ b {
 	width: 2em;
 	height: 2em;
 	background-size: contain;
+}
+
+@sprite .imagePen {
+    gwt-image: "pen";
+    width: 2em;
+    height: 2em;
+    background-size: contain;
 }
