@@ -2242,6 +2242,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
             ReadonlyRaceState raceState = ReadonlyRaceStateImpl.getOrCreate(getService(), raceLog);
             Iterable<RaceLogTagEvent> foundTagEvents = raceState.getTagEvents();
             for (RaceLogTagEvent tagEvent : foundTagEvents) {
+                // TODO: As soon as permission-vertical branch got merged into master, apply
+                // new permission system at this if-statement and remove this old way of 
+                // checking for permissions. (see bug 4104, comment 9)
+                // functionality: Check if user has the permission to see this tag.
                 if (tagEvent.isVisibleForPublic() || (subject.getPrincipals() != null
                         && (subject.getPrincipals().getPrimaryPrincipal().equals(tagEvent.getUsername())
                                 || subject.hasRole("admin")))) {

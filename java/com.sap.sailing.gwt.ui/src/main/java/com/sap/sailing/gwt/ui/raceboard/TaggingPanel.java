@@ -273,6 +273,10 @@ public class TaggingPanel extends ComponentWithoutSettings
             }
 
             SafeHtml cell;
+            // TODO: As soon as permission-vertical branch got merged into master, apply
+            // new permission system at this if-statement and remove this old way of 
+            // checking for permissions. (see bug 4104, comment 9)
+            // functionality: Check if user has the permission to delete this tag.
             if (!isPreviewCell && userService.getCurrentUser() != null
                     && (tag.getUsername().equals(userService.getCurrentUser().getName())
                             || userService.getCurrentUser().hasRole("admin"))) {
