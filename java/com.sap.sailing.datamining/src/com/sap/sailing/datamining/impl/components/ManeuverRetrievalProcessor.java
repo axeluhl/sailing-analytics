@@ -25,9 +25,9 @@ public class ManeuverRetrievalProcessor
 
     public ManeuverRetrievalProcessor(ExecutorService executor,
             Collection<Processor<HasManeuverContext, ?>> resultReceivers, ManeuverSettings settings,
-            int retrievalLevel) {
+            int retrievalLevel, String retrievedDataTypeMessageKey) {
         super(HasTrackedLegOfCompetitorContext.class, HasManeuverContext.class, executor, resultReceivers,
-                retrievalLevel);
+                retrievalLevel, retrievedDataTypeMessageKey);
         this.settings = settings;
     }
 

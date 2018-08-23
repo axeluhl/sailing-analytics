@@ -20,7 +20,7 @@ public abstract class AbstractSuggestOracle<T> extends SuggestOracle {
         }
         int count = 0;
         for (T match : suggestionObjects) {
-            suggestions.add(new SimpleSuggestion(match, normalizedQueryTokens));
+            suggestions.add(createSuggestion(match, normalizedQueryTokens));
             if (++count >= request.getLimit()) {
                 break;
             }
@@ -28,6 +28,10 @@ public abstract class AbstractSuggestOracle<T> extends SuggestOracle {
         Response response = new Response(suggestions);
         response.setMoreSuggestionsCount(Util.size(suggestionObjects) - count);
         callback.onSuggestionsReady(request, response);
+    }
+
+    protected SimpleSuggestion createSuggestion(T match, Iterable<String> queryTokens) {
+        return new SimpleSuggestion(match, queryTokens);
     }
 
     protected abstract void getSuggestions(Request request, Callback callback, Iterable<String> queryTokens);
@@ -57,14 +61,14 @@ public abstract class AbstractSuggestOracle<T> extends SuggestOracle {
         return true;
     }
 
-    class SimpleSuggestion implements Suggestion {
+    public class SimpleSuggestion implements Suggestion {
 
         private static final String STRONG_TAG_OPEN = "<strong>", STRONG_TAG_CLOSE = "</strong>";
         private static final String ITALIC_TAG_OPEN = "<em>", ITALIC_TAG_CLOSE = "</em>";
         private final T suggestObject;
         private final Iterable<String> queryTokens;
 
-        private SimpleSuggestion(T suggestObject, Iterable<String> queryTokens) {
+        public SimpleSuggestion(T suggestObject, Iterable<String> queryTokens) {
             this.suggestObject = suggestObject;
             this.queryTokens = queryTokens;
         }
