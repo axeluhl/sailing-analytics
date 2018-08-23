@@ -8,6 +8,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEventsDTO;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfilesDTO;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
 import com.sap.sailing.gwt.home.shared.partials.editable.EditableSuggestedMultiSelection.EditModeChangeHandler;
@@ -130,6 +132,11 @@ public class StatefulSailorProfileDataProvider implements
 
     public void removeSailorProfile(UUID uuid, AsyncCallback<SailorProfileDTO> callback) {
         sailorProfileDataProvider.removeSailorProfile(uuid, callback);
+    }
+
+    public void getStatisticFor(SailorProfileNumericStatisticType type, AsyncCallback<SailorProfileStatisticDTO> callback) {
+        sailorProfileDataProvider.getNumericStatistics(uuid, type, callback);
+        
     }
 
 }

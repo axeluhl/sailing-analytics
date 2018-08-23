@@ -7,6 +7,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEventsDTO;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfilesDTO;
 
 public interface SailorProfileDataProvider {
@@ -26,5 +28,7 @@ public interface SailorProfileDataProvider {
 
     void removeSailorProfile(UUID uuid, AsyncCallback<SailorProfileDTO> callback);
 
+    void getNumericStatistics(UUID key, SailorProfileNumericStatisticType type,
+            AsyncCallback<SailorProfileStatisticDTO> callback);
 
 }

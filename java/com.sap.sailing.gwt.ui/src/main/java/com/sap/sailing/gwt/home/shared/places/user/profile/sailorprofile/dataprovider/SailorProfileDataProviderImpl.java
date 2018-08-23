@@ -7,10 +7,13 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEventsDTO;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfilesDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.sailorprofile.CreateSailorProfileAction;
 import com.sap.sailing.gwt.home.communication.user.profile.sailorprofile.GetAllSailorProfilesAction;
 import com.sap.sailing.gwt.home.communication.user.profile.sailorprofile.GetEventsForSailorProfileAction;
+import com.sap.sailing.gwt.home.communication.user.profile.sailorprofile.GetNumericStatisticForSailorProfileAction;
 import com.sap.sailing.gwt.home.communication.user.profile.sailorprofile.GetSailorProfileAction;
 import com.sap.sailing.gwt.home.communication.user.profile.sailorprofile.RemoveSailorProfileAction;
 import com.sap.sailing.gwt.home.communication.user.profile.sailorprofile.UpdateSailorProfileCompetitorsAction;
@@ -38,6 +41,12 @@ public class SailorProfileDataProviderImpl implements SailorProfileDataProvider 
     @Override
     public void getEvents(UUID key, AsyncCallback<SailorProfileEventsDTO> callback) {
         clientFactory.getDispatch().execute(new GetEventsForSailorProfileAction(key), callback);
+    }
+
+    @Override
+    public void getNumericStatistics(UUID key, SailorProfileNumericStatisticType type,
+            AsyncCallback<SailorProfileStatisticDTO> callback) {
+        clientFactory.getDispatch().execute(new GetNumericStatisticForSailorProfileAction(key, type), callback);
     }
 
     @Override

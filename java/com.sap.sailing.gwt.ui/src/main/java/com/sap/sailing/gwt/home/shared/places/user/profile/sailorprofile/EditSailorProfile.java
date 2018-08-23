@@ -5,11 +5,14 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedEventDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEventsDTO;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO;
 import com.sap.sailing.gwt.home.desktop.partials.desktopaccordion.DesktopAccordion;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.SailorProfileDetailsView;
 import com.sap.sailing.gwt.home.shared.partials.editable.EditableSuggestedMultiSelectionCompetitor;
@@ -95,5 +98,25 @@ public class EditSailorProfile extends Composite implements EditSailorProfileVie
                 }
             }
         });
+
+
+        for (SailorProfileNumericStatisticType type : SailorProfileNumericStatisticType.values()) {
+            TextArea dummy = new TextArea();
+            dummy.setText(type.name());
+            accordionStatisticsUi.addWidget(dummy);
+            presenter.getDataProvider().getStatisticFor(type, new AsyncCallback<SailorProfileStatisticDTO>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    dummy.setText(type.name() + "-");
+                }
+
+                @Override
+                public void onSuccess(SailorProfileStatisticDTO result) {
+                    dummy.setText(type.name() + " " + result.getValue() + " @ " + result.getTimeOfBest() + " @@ "
+                            + result.getBestCompetitorIdAsString());
+                }
+            });
+        }
     }
 }
