@@ -459,7 +459,7 @@ public class TaggingPanel extends ComponentWithoutSettings
      */
     private class TagCreationPanel extends FlowPanel {
 
-        private static final String LOCAL_STORAGE_TAG_BUTTONS_KEY = "sailingAnalytics.raceBoard.tagButtons";
+        private static final String USER_STORAGE_TAG_BUTTONS_KEY = "sailingAnalytics.raceBoard.tagButtons";
 
         private final Panel tagButtonsPanel;
 
@@ -529,7 +529,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         public void storeAllTagButtons() {
             TagButtonsJsonDeSerializer serializer = new TagButtonsJsonDeSerializer();
             JSONObject jsonObject = serializer.serialize(tagButtons);
-            userService.setPreference(LOCAL_STORAGE_TAG_BUTTONS_KEY, jsonObject.toString(), new AsyncCallback<Void>() {
+            userService.setPreference(USER_STORAGE_TAG_BUTTONS_KEY, jsonObject.toString(), new AsyncCallback<Void>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     Notification.notify(stringMessages.tagButtonNotSavable(), NotificationType.WARNING);
@@ -544,7 +544,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         public void loadAllTagButtons() {
             tagButtonsPanel.clear();
             if (userService.getCurrentUser() != null) {
-                userService.getPreference(LOCAL_STORAGE_TAG_BUTTONS_KEY, new AsyncCallback<String>() {
+                userService.getPreference(USER_STORAGE_TAG_BUTTONS_KEY, new AsyncCallback<String>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         // do nothing
