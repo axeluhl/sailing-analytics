@@ -263,17 +263,51 @@ input.magnifier {
 .statisticSuggestBoxPopup {
     z-index: 2;
 }
-.statisticSuggestBoxPopup .suggestPopupContent {
+
+.statisticSuggestBoxPopupContent {
     max-height: 700px;
-    overflow-y: scroll;
+    overflow-y: auto;
+    background: white;
 }
-.statisticSuggestBoxPopup .item {
-    padding: 2px;
+.statisticSuggestBoxPopupContent table {
+    border-spacing: 0px;
+}
+
+.statisticSuggestBoxPopupContent .item {
+    padding: 2px 5px;
     color: #000;
     cursor: default;
+    white-space: nowrap;
+    font-size: 15px;
 }
-.statisticSuggestBoxPopup .item-selected {
-    background: #D5E2FF;
+.statisticSuggestBoxPopupContent .item-even {
+    background: #fff;
+}
+.statisticSuggestBoxPopupContent .item-odd {
+    background: #f3f7fb;
+}
+.statisticSuggestBoxPopupContent .item-selected {
+    background: #d5e2ff;
+}
+.statisticSuggestBoxPopupContent .item-unsupported {
+    color: gray;
+}
+
+.statisticSuggestBoxPopupContent .separator {
+    padding: 8px 5px 0px 5px;
+    border-bottom: 2px solid #6f7277;
+    font-weight: 600;
+    font-size: 15px;
+}
+.statisticSuggestBoxPopupContent .separator-message {
+    padding: 8px 5px 0px 5px;
+    font-weight: bold;
+    font-size: 15px;
+    text-align: center;
+    white-space: pre-wrap;
+}
+.statisticSuggestBoxPopupContent .separator-unsupported {
+    color: gray;
 }
 
 .dataMiningListBox {
@@ -303,9 +337,12 @@ input.magnifier {
     padding-top: 5px;
 }
 
-.dimensionFilterSelectionHeader .gwt-Label {
-  color: #4b4a4a;
-  text-shadow: #ddf 1px 1px 0;
+.filterSelectionPresenter {
+    margin: 5px;
+}
+.filterSelectionPresenter .dimensionLabel {
+    margin-right: 2px;
+    text-shadow: 0 0 1px #888;
 }
 
 .dataMiningBorderTop {
@@ -315,7 +352,7 @@ input.magnifier {
     border-left: 2px solid #6f7277;
 }
 .dataMiningBorderBottom {
-    border-border: 2px solid #6f7277;
+    border-bottom: 2px solid #6f7277;
 }
 .dataMiningBorderRight {
     border-right: 2px solid #6f7277;
