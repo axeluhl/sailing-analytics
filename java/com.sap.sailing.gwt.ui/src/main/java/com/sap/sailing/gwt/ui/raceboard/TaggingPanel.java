@@ -20,8 +20,6 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -281,7 +279,7 @@ public class TaggingPanel extends ComponentWithoutSettings
 
             SafeHtml cell;
             // TODO: As soon as permission-vertical branch got merged into master, apply
-            // new permission system at this if-statement and remove this old way of 
+            // new permission system at this if-statement and remove this old way of
             // checking for permissions. (see bug 4104, comment 9)
             // functionality: Check if user has the permission to delete this tag.
             if (!isPreviewCell && userService.getCurrentUser() != null
@@ -371,11 +369,8 @@ public class TaggingPanel extends ComponentWithoutSettings
             this.visibleForPublic = visibleForPublic;
 
             addStyleName("gwt-Button");
-            addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    addTagToRaceLog(getTag(), getComment(), getImageURL(), isVisibleForPublic());
-                }
+            addClickHandler(event -> {
+                addTagToRaceLog(getTag(), getComment(), getImageURL(), isVisibleForPublic());
             });
         }
 
@@ -483,14 +478,11 @@ public class TaggingPanel extends ComponentWithoutSettings
             Button createTagFromTextBoxes = new Button(stringMessages.tagAddTag());
             createTagFromTextBoxes.setStyleName(style.tagDialogButton());
             createTagFromTextBoxes.addStyleName("gwt-Button");
-            createTagFromTextBoxes.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    if (isLoggedInAndRaceLogAvailable()) {
-                        addTagToRaceLog(inputPanel.getTag(), inputPanel.getComment(), inputPanel.getImageURL(),
-                                inputPanel.isVisibleForPublic());
-                        inputPanel.clearAllValues();
-                    }
+            createTagFromTextBoxes.addClickHandler(event -> {
+                if (isLoggedInAndRaceLogAvailable()) {
+                    addTagToRaceLog(inputPanel.getTag(), inputPanel.getComment(), inputPanel.getImageURL(),
+                            inputPanel.isVisibleForPublic());
+                    inputPanel.clearAllValues();
                 }
             });
 
@@ -498,12 +490,9 @@ public class TaggingPanel extends ComponentWithoutSettings
             Button editCustomTagButtons = new Button(stringMessages.tagEditCustomTagButtons());
             editCustomTagButtons.setStyleName(style.tagDialogButton());
             editCustomTagButtons.addStyleName("gwt-Button");
-            editCustomTagButtons.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    if (isLoggedInAndRaceLogAvailable()) {
-                        new TagButtonDialog(INSTANCE);
-                    }
+            editCustomTagButtons.addClickHandler(event -> {
+                if (isLoggedInAndRaceLogAvailable()) {
+                    new TagButtonDialog(INSTANCE);
                 }
             });
 
@@ -524,7 +513,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                 setCurrentState(State.VIEW);
             });
             headerPanel.add(closeFooterButton);
-            
+
             add(headerPanel);
             add(inputPanel);
             add(standardButtonsPanel);
@@ -801,11 +790,8 @@ public class TaggingPanel extends ComponentWithoutSettings
             clearTextBoxButton.addStyleName(style.imageClearSearch());
             clearTextBoxButton.addStyleName(style.tagFilterHiddenButton());
             clearTextBoxButton.addStyleName("gwt-Button");
-            clearTextBoxButton.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    clearSelection();
-                }
+            clearTextBoxButton.addClickHandler(event -> {
+                clearSelection();
             });
 
             filterSettingsButton = new Button();
@@ -814,11 +800,8 @@ public class TaggingPanel extends ComponentWithoutSettings
             filterSettingsButton.addStyleName(style.imageInactiveFilter());
             filterSettingsButton.addStyleName("gwt-Button");
             filterSettingsButton.setTitle(stringMessages.tagsFilter());
-            filterSettingsButton.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    showFilterDialog();
-                }
+            filterSettingsButton.addClickHandler(event -> {
+                showFilterDialog();
             });
 
             currentFilter = new TagFilterLabel();
@@ -1190,30 +1173,27 @@ public class TaggingPanel extends ComponentWithoutSettings
             saveButton.setVisible(false);
             saveButton.setStyleName(style.tagDialogButton());
             saveButton.addStyleName("gwt-Button");
-            saveButton.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    if (!inputPanel.getTag().isEmpty()) {
-                        selectedTagButton.setText(inputPanel.getTag());
-                        selectedTagButton.setTag(inputPanel.getTag());
-                        selectedTagButton.setComment(inputPanel.getComment());
-                        selectedTagButton.setImageURL(inputPanel.getImageURL());
-                        tagCreationPanel.storeAllTagButtons();
-                        inputPanel.clearAllValues();
-                        tagPreviewPanel.renderPreview(inputPanel);
-                        tagButtonTable.redraw();
+            saveButton.addClickHandler(event -> {
+                if (!inputPanel.getTag().isEmpty()) {
+                    selectedTagButton.setText(inputPanel.getTag());
+                    selectedTagButton.setTag(inputPanel.getTag());
+                    selectedTagButton.setComment(inputPanel.getComment());
+                    selectedTagButton.setImageURL(inputPanel.getImageURL());
+                    tagCreationPanel.storeAllTagButtons();
+                    inputPanel.clearAllValues();
+                    tagPreviewPanel.renderPreview(inputPanel);
+                    tagButtonTable.redraw();
 
-                        saveButton.setVisible(false);
-                        cancelButton.setVisible(false);
-                        closeButton.setVisible(true);
-                        addTagButtonButton.setVisible(true);
-                        selectedTagButton = null;
-                        setRowData(tagButtonTable, tagButtons);
-                    } else {
-                        Notification.notify(stringMessages.tagNotSpecified(), NotificationType.WARNING);
-                    }
-                    center();
+                    saveButton.setVisible(false);
+                    cancelButton.setVisible(false);
+                    closeButton.setVisible(true);
+                    addTagButtonButton.setVisible(true);
+                    selectedTagButton = null;
+                    setRowData(tagButtonTable, tagButtons);
+                } else {
+                    Notification.notify(stringMessages.tagNotSpecified(), NotificationType.WARNING);
                 }
+                center();
             });
         }
 
@@ -1222,17 +1202,14 @@ public class TaggingPanel extends ComponentWithoutSettings
             cancelButton.setVisible(false);
             cancelButton.setStyleName(style.tagDialogButton());
             cancelButton.addStyleName("gwt-Button");
-            cancelButton.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    inputPanel.clearAllValues();
-                    tagPreviewPanel.renderPreview(inputPanel);
-                    saveButton.setVisible(false);
-                    cancelButton.setVisible(false);
-                    closeButton.setVisible(true);
-                    addTagButtonButton.setVisible(true);
-                    center();
-                }
+            cancelButton.addClickHandler(event -> {
+                inputPanel.clearAllValues();
+                tagPreviewPanel.renderPreview(inputPanel);
+                saveButton.setVisible(false);
+                cancelButton.setVisible(false);
+                closeButton.setVisible(true);
+                addTagButtonButton.setVisible(true);
+                center();
             });
         }
 
@@ -1240,12 +1217,9 @@ public class TaggingPanel extends ComponentWithoutSettings
             closeButton = new Button(stringMessages.close());
             closeButton.setStyleName(style.tagDialogButton());
             closeButton.addStyleName("gwt-Button");
-            closeButton.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    hide();
-                    tagCreationPanel.updateButtons();
-                }
+            closeButton.addClickHandler(event -> {
+                hide();
+                tagCreationPanel.updateButtons();
             });
         }
 
@@ -1254,22 +1228,19 @@ public class TaggingPanel extends ComponentWithoutSettings
             addTagButtonButton = new Button(stringMessages.tagAddCustomTagButton());
             addTagButtonButton.setStyleName(style.tagDialogButton());
             addTagButtonButton.addStyleName("gwt-Button");
-            addTagButtonButton.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    if (!inputPanel.getTag().isEmpty()) {
-                        TagButton tagButton = new TagButton(inputPanel.getTag(), inputPanel.getTag(),
-                                inputPanel.getImageURL(), inputPanel.getComment(), inputPanel.isVisibleForPublic());
-                        inputPanel.clearAllValues();
-                        tagPreviewPanel.renderPreview(inputPanel);
-                        tagButtons.add(tagButton);
-                        tagCreationPanel.storeAllTagButtons();
-                        setRowData(tagButtonTable, tagButtons);
-                    } else {
-                        Notification.notify(stringMessages.tagNotSpecified(), NotificationType.WARNING);
-                    }
-                    center();
+            addTagButtonButton.addClickHandler(event -> {
+                if (!inputPanel.getTag().isEmpty()) {
+                    TagButton tagButton = new TagButton(inputPanel.getTag(), inputPanel.getTag(),
+                            inputPanel.getImageURL(), inputPanel.getComment(), inputPanel.isVisibleForPublic());
+                    inputPanel.clearAllValues();
+                    tagPreviewPanel.renderPreview(inputPanel);
+                    tagButtons.add(tagButton);
+                    tagCreationPanel.storeAllTagButtons();
+                    setRowData(tagButtonTable, tagButtons);
+                } else {
+                    Notification.notify(stringMessages.tagNotSpecified(), NotificationType.WARNING);
                 }
+                center();
             });
         }
 
@@ -1367,24 +1338,18 @@ public class TaggingPanel extends ComponentWithoutSettings
             Button confirm = new Button(stringMessages.confirm());
             confirm.setStyleName(style.tagDialogButton());
             confirm.addStyleName("gwt-Button");
-            confirm.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    consumer.accept(true);
-                    hide();
-                }
+            confirm.addClickHandler(event -> {
+                consumer.accept(true);
+                hide();
             });
             buttonsPanel.add(confirm);
 
             Button cancel = new Button(stringMessages.cancel());
             cancel.setStyleName(style.tagDialogButton());
             cancel.addStyleName("gwt-Button");
-            cancel.addClickHandler(new ClickHandler() {
-                @Override
-                public void onClick(ClickEvent event) {
-                    consumer.accept(false);
-                    hide();
-                }
+            cancel.addClickHandler(event -> {
+                consumer.accept(false);
+                hide();
             });
             buttonsPanel.add(cancel);
 
@@ -1469,7 +1434,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(this);
 
         setCurrentState(State.VIEW);
-        
+
         initializePanel();
     }
 
