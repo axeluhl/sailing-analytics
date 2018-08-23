@@ -8,10 +8,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.amazonaws.AmazonClientException;
-import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
@@ -53,22 +56,22 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
     }
 
     private AmazonS3Client createS3Client() throws InvalidPropertiesException {
-        AWSCredentials creds;
+        AWSCredentialsProvider creds;
 
         // first try to use properties
         if (accessId.getValue() != null && accessKey.getValue() != null) {
-            creds = new BasicAWSCredentials(accessId.getValue(), accessKey.getValue());
+            creds = new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessId.getValue(), accessKey.getValue()));
         } else {
             // if properties are empty, read credentials from ~/.aws/credentials
             try {
-                creds = new ProfileCredentialsProvider().getCredentials();
+                creds = new ProfileCredentialsProvider();
             } catch (Exception e) {
                 throw new InvalidPropertiesException(
                         "credentials in ~/.aws/credentials seem to be invalid (tried this as fallback because properties were empty)",
                         e);
             }
         }
-        return new AmazonS3Client(creds);
+        return (AmazonS3Client) AmazonS3ClientBuilder.standard().withCredentials(creds).withRegion(Regions.EU_WEST_1).enableForceGlobalBucketAccess().build();
     }
 
     private static String getKey(String fileExtension) {
@@ -128,12 +131,10 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
             throw new InvalidPropertiesException("empty bucketname is not allowed");
         }
         // test if credentials are valid
-        // TODO seems to even work if credentials are not valid if bucket is publicly visible
-        // Fix is probably available with doesBucketExistsV2 in a later version of amazons3 library
         try {
-            s3.doesBucketExist(bucketName.getValue());
+            s3.doesBucketExistV2(bucketName.getValue());
         } catch (Exception e) {
-            throw new InvalidPropertiesException("invalid credentials or not enough access rights for the bucket", e,
+            throw new InvalidPropertiesException("invalid credentials or not enough access rights for the bucket" + e.getCause(), e,
                     new Pair<FileStorageServiceProperty, String>(accessId, "seems to be invalid"),
                     new Pair<FileStorageServiceProperty, String>(accessKey, "seems to be invalid"));
         }

@@ -1,0 +1,12 @@
+OSGI-ified version of AWS Java SDK from http://mvnrepository.com/artifact/org.apache.servicemix.bundles/org.apache.servicemix.bundles.aws-java-sdk
+Due to bug (https://issues.apache.org/jira/browse/SMX4-1921): add awssdk_config_default.json (obtained from original AWS Java SDK) to downloaded jar.
+Note: with bug 3683 we're upgrading to version 1.10.17_1 of the org.apache.servicemix.bundles.aws-java-sdk component. It has an entry
+
+	5004 Fri Apr 29 18:48:10 CEST 2016 com/amazonaws/internal/config/awssdk_config_default.json
+	
+and hence suggests that the patch described above as necessary for version 1.9.8_1 may no longer be necessary.
+
+Note: with bug 4656 we're upgrading to version 1.11.373_1 of the org.apache.servicemix.bundles.aws-java-sdk component.
+This version already includes the awssdk_config_default.json, thus the patch is not necessary anymore.
+Nevertheless the bug is still not resolved, since the awssdk_config_default.json in the package is not a valid json file. 
+To validate it, you have to remove all "Java-Style" comments "//".
