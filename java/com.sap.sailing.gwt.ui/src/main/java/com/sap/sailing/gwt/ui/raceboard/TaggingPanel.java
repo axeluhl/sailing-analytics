@@ -1462,6 +1462,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         contentPanel.add(tagCellList);
         contentPanel.addStyleName(style.tagCellListPanel());
 
+        createTagsButton.setTitle(stringMessages.tagAddTags());
         createTagsButton.setStyleName(style.toggleEditState());
         createTagsButton.addStyleName(style.imagePen());
         createTagsButton.addClickHandler(event -> {
