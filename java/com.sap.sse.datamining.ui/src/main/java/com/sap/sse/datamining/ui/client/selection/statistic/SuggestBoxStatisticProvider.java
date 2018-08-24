@@ -124,7 +124,7 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         availableStatistics = new ArrayList<>();
         extractionFunctionSuggestBox = new ExtractionFunctionSuggestBox(extractionFunction -> {
             AggregatorGroup aggregator = aggregatorListBox.getValue();
-            return aggregator == null || aggregator.supportsType(extractionFunction.getExtractionFunction().getReturnTypeName());
+            return aggregator == null || aggregator.supportsFunction(extractionFunction);
         });
         extractionFunctionSuggestBox.setValueChangeHandler(this::extractionFunctionSelectionChanged);
         extractionFunctionSuggestBox.getValueBox().addFocusHandler(e -> {
@@ -324,9 +324,9 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
     private void aggregatorSelectionChanged(AggregatorGroup newAggregator) {
         if (!Objects.equals(currentAggregator, newAggregator)) {
             boolean currentAggregatorSupportsIdentityFunction = currentAggregator != null
-                    && currentAggregator.supportsType(identityFunction.getReturnTypeName());
+                    && currentAggregator.supportsFunction(identityFunction);
             boolean newAggregatorSupportsIdentityFunction = newAggregator != null
-                    && newAggregator.supportsType(identityFunction.getReturnTypeName());
+                    && newAggregator.supportsFunction(identityFunction);
             
             List<? extends ExtractionFunctionWithContext> selectableExtractionFunctions;
             String labelBetweenAggregatorAndStatisticText = null;
@@ -339,8 +339,8 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
             }
             
             ExtractionFunctionWithContext currentExtractionFunction = extractionFunctionSuggestBox.getExtractionFunction();
-            if (currentExtractionFunction != null && !selectableExtractionFunctions.contains(currentExtractionFunction)) {
-                // Current extraction function isn't contained by the new selectable extraction functions
+            if (currentExtractionFunction != null && newAggregator != null && !newAggregator.supportsFunction(currentExtractionFunction)) {
+                // Current extraction function isn't supported by the new aggregator
                 if (newAggregatorSupportsIdentityFunction && !currentAggregatorSupportsIdentityFunction) {
                     // Switch to the corresponding identity function, if the identity functions aren't already the selectable functions
                     for (IdentityFunctionWithContext identityFunction : availableIdentityFunctions) {
@@ -364,12 +364,9 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
     
     private void extractionFunctionSelectionChanged(ExtractionFunctionWithContext oldExtractionFunction,
             ExtractionFunctionWithContext newExtractionFunction) {
-        String returnTypeName = newExtractionFunction == null ? null
-                : newExtractionFunction.getExtractionFunction().getReturnTypeName();
-        aggregatorListBox.updateItemStyles(returnTypeName);
-        
+        aggregatorListBox.updateItemStyles(newExtractionFunction);
         AggregatorGroup aggregator = aggregatorListBox.getValue();
-        if (returnTypeName != null && aggregator != null && !aggregator.supportsType(returnTypeName)) {
+        if (aggregator != null && newExtractionFunction != null && !aggregator.supportsFunction(newExtractionFunction)) {
             aggregatorListBox.setValue(null, true);
         }
         

@@ -27,15 +27,15 @@ public class AggregatorListBox extends ValueListBox<AggregatorGroup> {
         aggregatorsByDisplayName = new HashMap<>();
     }
     
-    public void updateItemStyles(String extractionFunctionReturnTypeName) {
+    public void updateItemStyles(ExtractionFunctionWithContext extractionFunction) {
         ListBox listBox = (ListBox) getWidget();
         SelectElement selectElement = SelectElement.as(listBox.getElement());
         NodeList<OptionElement> options = selectElement.getOptions();
         for (int i = 0; i < options.getLength(); i++) {
             OptionElement option = options.getItem(i);
             AggregatorGroup aggregator = aggregatorsByDisplayName.get(option.getText());
-            String className = aggregator == null || extractionFunctionReturnTypeName == null
-                    || aggregator.supportsType(extractionFunctionReturnTypeName) ? "" : UnsupportedItemStyle;
+            String className = aggregator == null || extractionFunction == null
+                    || aggregator.supportsFunction(extractionFunction) ? "" : UnsupportedItemStyle;
             option.setClassName(className);
         }
     }
