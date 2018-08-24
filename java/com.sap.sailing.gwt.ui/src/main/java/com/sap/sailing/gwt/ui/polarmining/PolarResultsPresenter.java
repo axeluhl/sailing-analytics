@@ -113,7 +113,6 @@ public class PolarResultsPresenter extends AbstractSailingResultsPresenter<Setti
 
         Button exportStatisticsCurveToCsvButton = new Button(stringMessages.exportStatisticsCurveToCsv(),
                 new ClickHandler() {
-
                     @Override
                     public void onClick(ClickEvent event) {
                         chartToCsvExporter.exportChartAsCsvToClipboard(polarChart);
@@ -124,9 +123,18 @@ public class PolarResultsPresenter extends AbstractSailingResultsPresenter<Setti
         setSeriesShowAndHideHandler();
     }
 
+    private void setSeriesShowAndHideHandler() {
+        SeriesPlotOptions seriesPlotOptions = new SeriesPlotOptions();
+        seriesPlotOptions.setSeriesShowEventHandler(createSeriesShowEventHandler());
+        seriesPlotOptions.setSeriesHideEventHandler(createSeriesHideEventHandler());
+        seriesPlotOptions.setPointSelectEventHandler(createPointSelectEventHandler());
+        seriesPlotOptions.setPointUnselectEventHandler(createPointUnselectEventHandler());
+        seriesPlotOptions.setAllowPointSelect(true);
+        polarChart.setSeriesPlotOptions(seriesPlotOptions);
+    }
+
     private PointUnselectEventHandler createPointUnselectEventHandler() {
         return new PointUnselectEventHandler() {
-
             @Override
             public boolean onUnselect(PointUnselectEvent pointUnselectEvent) {
                 long angle = pointUnselectEvent.getXAsLong();
@@ -140,7 +148,6 @@ public class PolarResultsPresenter extends AbstractSailingResultsPresenter<Setti
 
     private PointSelectEventHandler createPointSelectEventHandler() {
         return new PointSelectEventHandler() {
-
             @Override
             public boolean onSelect(PointSelectEvent pointSelectEvent) {
                 long angle = pointSelectEvent.getXAsLong();
@@ -152,19 +159,8 @@ public class PolarResultsPresenter extends AbstractSailingResultsPresenter<Setti
         };
     }
 
-    private void setSeriesShowAndHideHandler() {
-        SeriesPlotOptions seriesPlotOptions = new SeriesPlotOptions();
-        seriesPlotOptions.setSeriesShowEventHandler(createSeriesShowEventHandler());
-        seriesPlotOptions.setSeriesHideEventHandler(createSeriesHideEventHandler());
-        seriesPlotOptions.setPointSelectEventHandler(createPointSelectEventHandler());
-        seriesPlotOptions.setPointUnselectEventHandler(createPointUnselectEventHandler());
-        seriesPlotOptions.setAllowPointSelect(true);
-        polarChart.setSeriesPlotOptions(seriesPlotOptions);
-    }
-
     private SeriesShowEventHandler createSeriesShowEventHandler() {
         return new SeriesShowEventHandler() {
-
             @Override
             public boolean onShow(SeriesShowEvent seriesShowEvent) {
                 String id = seriesShowEvent.getSeriesId();
@@ -178,7 +174,6 @@ public class PolarResultsPresenter extends AbstractSailingResultsPresenter<Setti
 
     private SeriesHideEventHandler createSeriesHideEventHandler() {
         return new SeriesHideEventHandler() {
-
             @Override
             public boolean onHide(SeriesHideEvent seriesHideEvent) {
                 String id = seriesHideEvent.getSeriesId();
@@ -197,6 +192,12 @@ public class PolarResultsPresenter extends AbstractSailingResultsPresenter<Setti
 
     @Override
     protected void internalShowResults(QueryResultDTO<?> result) {
+        polarChart.removeAllSeries(false);
+        dataCountHistogramChart.removeAllSeries(false);
+        dataCountPerAngleHistogramChart.removeAllSeries(false);
+        histogramSeriesForPolarSeries.clear();
+        perAngleHistogramSeriesForAngle.clear();
+        
         Map<GroupKey, ?> results = result.getResults();
         List<GroupKey> sortedNaturally = new ArrayList<GroupKey>(results.keySet());
         Collections.sort(sortedNaturally, new Comparator<GroupKey>() {

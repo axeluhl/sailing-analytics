@@ -108,6 +108,10 @@ public class PolarBackendResultsPresenter extends AbstractSailingResultsPresente
 
     @Override
     protected void internalShowResults(QueryResultDTO<?> result) {
+        polarChart.removeAllSeries(false);
+        speedChart.removeAllSeries(false);
+        angleChart.removeAllSeries(false);
+        
         final Set<Series> seriesToHideAfterRendering = new HashSet<>();
         Map<GroupKey, ?> results = result.getResults();
         List<GroupKey> sortedNaturally = new ArrayList<GroupKey>(results.keySet());

@@ -84,6 +84,9 @@ public class NumberPairResultsPresenter extends AbstractSailingResultsPresenter<
 
     @Override
     protected void internalShowResults(QueryResultDTO<?> res) {
+        chart.removeAllSeries(false);
+        seriesMappedByGroupKey.clear();
+        
         result = res;
         createAndAddSeriesToChart();
         for (Entry<GroupKey, ?> resultEntry : result.getResults().entrySet()) {
