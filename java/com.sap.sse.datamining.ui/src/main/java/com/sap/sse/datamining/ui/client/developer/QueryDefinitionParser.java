@@ -23,6 +23,9 @@ import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinition
 
 public class QueryDefinitionParser {
     
+    private static final String NullComponentText = "None selected";
+    private static final String NullComponentCode = "UNDEFINED";
+    
     public SafeHtml parseToDetailsAsSafeHtml(StatisticQueryDefinitionDTO queryDefinition) {
         String safeHtml = parseToDetails(queryDefinition, new HtmlBuilder());
         return new OnlyToBeUsedInGeneratedCodeStringBlessedAsSafeHtml(safeHtml);
@@ -33,24 +36,34 @@ public class QueryDefinitionParser {
     }
     
     private String parseToDetails(StatisticQueryDefinitionDTO queryDefinition, Builder builder) {
-        builder.appendText("Locale: " + queryDefinition.getLocaleInfoName()).appendLineBreak();
+        if (queryDefinition == null) {
+            return "";
+        }
+        
+        builder.appendText("Locale: " + queryDefinition.getLocaleInfoName())
+                .appendLineBreak().appendLineBreak();
         
         DataRetrieverChainDefinitionDTO chainDefinition = queryDefinition.getDataRetrieverChainDefinition();
-        builder.appendLineBreak()
-               .appendText("Retrieval: " + chainDefinition).appendLineBreak()
-               .appendTab(1).appendText("Levels: ").appendLineBreak();
-        for (int levelIndex = 0; levelIndex < chainDefinition.getLevelAmount(); levelIndex++) {
-            builder.appendTab(2).appendText(levelIndex + ": " + chainDefinition.getRetrieverLevel(levelIndex)).appendLineBreak();
+        builder.appendText("Retrieval: ");
+        if (chainDefinition != null) {
+            builder.appendText(chainDefinition.toString()).appendLineBreak()
+                   .appendTab(1).appendText("Levels: ").appendLineBreak();
+            for (int levelIndex = 0; levelIndex < chainDefinition.getLevelAmount(); levelIndex++) {
+                builder.appendTab(2).appendText(levelIndex + ": " + chainDefinition.getRetrieverLevel(levelIndex)).appendLineBreak();
+            }
+        } else {
+            builder.appendText(NullComponentText).appendLineBreak();
         }
+        builder.appendLineBreak();
          
         HashMap<DataRetrieverLevelDTO, SerializableSettings> retrieverSettings = queryDefinition.getRetrieverSettings();
-        if (!retrieverSettings.isEmpty()) {
+        if (retrieverSettings != null && !retrieverSettings.isEmpty()) {
             // TODO Display retriever settings
         }
         
         HashMap<DataRetrieverLevelDTO,HashMap<FunctionDTO,HashSet<? extends Serializable>>> filterSelection = queryDefinition.getFilterSelection();
-        if (!filterSelection.isEmpty()) {
-            builder.appendLineBreak().appendText("Filter Selection:").appendLineBreak();
+        if (filterSelection != null && !filterSelection.isEmpty()) {
+            builder.appendText("Filter Selection:").appendLineBreak();
             List<DataRetrieverLevelDTO> retrieverLevels = new ArrayList<>(filterSelection.keySet());
             Collections.sort(retrieverLevels);
             for (DataRetrieverLevelDTO retrieveLevel : retrieverLevels) {
@@ -70,18 +83,25 @@ public class QueryDefinitionParser {
                     builder.appendLineBreak();
                 }
             }
+            builder.appendLineBreak();
         }
 
-        builder.appendLineBreak()
-               .appendText("Group By:").appendLineBreak();
         ArrayList<FunctionDTO> dimensionsToGroupBy = queryDefinition.getDimensionsToGroupBy();
-        for (int index = 0; index < dimensionsToGroupBy.size(); index++) {
-            builder.appendTab(1).appendText(index + ": " + dimensionsToGroupBy.get(index)).appendLineBreak();
+        builder.appendText("Group By: ");
+        if (dimensionsToGroupBy != null && !dimensionsToGroupBy.isEmpty()) {
+            builder.appendLineBreak();
+            for (int index = 0; index < dimensionsToGroupBy.size(); index++) {
+                builder.appendTab(1).appendText(index + ": " + dimensionsToGroupBy.get(index)).appendLineBreak();
+            }
+        } else {
+            builder.appendText(NullComponentText).appendLineBreak();
         }
+        builder.appendLineBreak();
         
-        builder.appendLineBreak()
-               .appendText("Statistic: " + queryDefinition.getStatisticToCalculate()).appendLineBreak();
-        builder.appendText("Aggregator: " + queryDefinition.getAggregatorDefinition());
+        FunctionDTO statistic = queryDefinition.getStatisticToCalculate();
+        builder.appendText("Statistic: " + (statistic == null ? NullComponentText : statistic)).appendLineBreak();
+        AggregationProcessorDefinitionDTO aggregator = queryDefinition.getAggregatorDefinition();
+        builder.appendText("Aggregator: " + (aggregator == null ? NullComponentText : aggregator));
         
         return builder.toString();
     }
@@ -96,6 +116,10 @@ public class QueryDefinitionParser {
     }
     
     private String parseToCode(StatisticQueryDefinitionDTO queryDefinition, TypeToCodeStrategy typeStrategy, Builder builder) {
+        if (queryDefinition == null) {
+            return "";
+        }
+        
         String functionClassName = FunctionDTO.class.getSimpleName();
         String aggregatorClassName = AggregationProcessorDefinitionDTO.class.getSimpleName();
         String retrieverLevelClassName = DataRetrieverLevelDTO.class.getSimpleName();
@@ -106,96 +130,115 @@ public class QueryDefinitionParser {
         String hashMapClassName = HashMap.class.getSimpleName();
         String hashSetClassName = HashSet.class.getSimpleName();
         String serializableClassName = Serializable.class.getSimpleName();
-        
-        DataRetrieverChainDefinitionDTO retrieverChain = queryDefinition.getDataRetrieverChainDefinition();
 
         // Extraction Function
         String statisticVariable = "statistic";
-        if (statisticVariable != null && queryDefinition.getStatisticToCalculate() != null) {
-            builder.appendText(functionToCode(statisticVariable, queryDefinition.getStatisticToCalculate(), typeStrategy));
-        } else {
-            builder.appendText("null");
-        }
+        builder.appendText(functionToCode(statisticVariable, queryDefinition.getStatisticToCalculate(), typeStrategy));
         builder.appendLineBreak();
-
         // Aggregator Definition
         String aggregatorVariable = "aggregator";
         AggregationProcessorDefinitionDTO aggregator = queryDefinition.getAggregatorDefinition();
+        builder.appendText(aggregatorClassName + " " + aggregatorVariable + " = ");
         if (aggregator != null) {
-            builder.appendText(aggregatorClassName + " " + aggregatorVariable + " = new " + aggregatorClassName + "(" + literal(aggregator.getMessageKey()) + ", " +
-                    typeStrategy.toCode(aggregator.getExtractedTypeName()) + ", " + typeStrategy.toCode(aggregator.getAggregatedTypeName()) + ", \"\");");
+            builder.appendText("new " + aggregatorClassName + "(" + literal(aggregator.getMessageKey()) + ", "
+                    + typeStrategy.toCode(aggregator.getExtractedTypeName()) + ", "
+                    + typeStrategy.toCode(aggregator.getAggregatedTypeName()) + ", \"\")");
         } else {
-            builder.appendText("null");
+            builder.appendText(NullComponentCode);
+        }
+        builder.appendText(";").appendLineBreak().appendLineBreak();
+        
+        // Retriever Levels and Retriever Chain Definition
+        DataRetrieverChainDefinitionDTO retrieverChain = queryDefinition.getDataRetrieverChainDefinition();
+        String retrieverChainVariable = "retrieverChain";
+        
+        if (retrieverChain != null) {
+            String retrieverLevelsVariable = "retrieverLevels";
+            builder.appendText(arrayListClassName + "<" + retrieverLevelClassName + "> " + retrieverLevelsVariable
+                    + " = new " + arrayListClassName + "<>();").appendLineBreak();
+            for (DataRetrieverLevelDTO retrieverLevel : retrieverChain.getRetrieverLevels()) {
+                LocalizedTypeDTO retrievedType = retrieverLevel.getRetrievedDataType();
+                String retrievedTypeAsCode = "new " + localizedTypeClassName + "("
+                        + typeStrategy.toCode(retrievedType.getTypeName()) + ", \"\")";
+                String retrieverSettingsAsCode = "null";
+                // TODO Handle the retriever level settings
+                builder.appendText(retrieverLevelsVariable + ".add(new " + retrieverLevelClassName + "("
+                        + retrieverLevel.getLevel() + ", " + typeStrategy.toCode(retrieverLevel.getRetrieverTypeName())
+                        + ", " + retrievedTypeAsCode + ", " + retrieverSettingsAsCode + "));").appendLineBreak();
+            }
+            builder.appendText(retrieverChainClassName + " " + retrieverChainVariable + " = new "
+                    + retrieverChainClassName + "(\"\", " + typeStrategy.toCode(retrieverChain.getDataSourceTypeName())
+                    + ", " + retrieverLevelsVariable + ");");
+        } else {
+            builder.appendText(retrieverChainClassName + " " + retrieverChainVariable + " = " + NullComponentCode + ";");
         }
         builder.appendLineBreak().appendLineBreak();
         
-        // Retriever Levels and Retriever Chain Definition
-        String retrieverLevelsVariable = "retrieverLevels";
-        builder.appendText(arrayListClassName + "<" + retrieverLevelClassName + "> " + retrieverLevelsVariable + " = new " + arrayListClassName + "<>();").appendLineBreak();
-        for (DataRetrieverLevelDTO retrieverLevel : retrieverChain.getRetrieverLevels()) {
-            LocalizedTypeDTO retrievedType = retrieverLevel.getRetrievedDataType();
-            String retrievedTypeAsCode = "new " + localizedTypeClassName + "(" + typeStrategy.toCode(retrievedType.getTypeName()) + ", \"\")";
-            String retrieverSettingsAsCode = "null";
-            // TODO Handle the retriever level settings
-            builder.appendText(retrieverLevelsVariable + ".add(new " + retrieverLevelClassName + "(" + retrieverLevel.getLevel() + ", " +
-                               typeStrategy.toCode(retrieverLevel.getRetrieverTypeName()) + ", " + retrievedTypeAsCode + ", " + retrieverSettingsAsCode + "));").appendLineBreak();
-        }
-        String retrieverChainVariable = "retrieverChain";
-        builder.appendText(retrieverChainClassName + " " + retrieverChainVariable + " = new " + retrieverChainClassName + "(\"\", " + 
-                           typeStrategy.toCode(retrieverChain.getDataSourceTypeName()) + ", " + retrieverLevelsVariable + ");").appendLineBreak()
-               .appendLineBreak();
-        
         // Query Definition instantiation
         String queryDefinitionVariable = "queryDefinition";
-        builder.appendText(queryDefinitionClassName + " " + queryDefinitionVariable + " = new " + queryDefinitionClassName + "(" + literal(queryDefinition.getLocaleInfoName()) + 
-                           ", " + statisticVariable + ", " + aggregatorVariable + ", " + retrieverChainVariable + ");").appendLineBreak()
-               .appendLineBreak();
+        builder.appendText(queryDefinitionClassName + " " + queryDefinitionVariable + " = new "
+                + queryDefinitionClassName + "(" + literal(queryDefinition.getLocaleInfoName()) + ", "
+                + statisticVariable + ", " + aggregatorVariable + ", " + retrieverChainVariable + ");")
+                .appendLineBreak().appendLineBreak();
         
         // Filter Selection per Retriever Level separated by two line breaks
-        for (DataRetrieverLevelDTO retrieverLevel : retrieverChain.getRetrieverLevels()) {
-            HashMap<FunctionDTO, HashSet<? extends Serializable>> levelFilterSelection = queryDefinition.getFilterSelection().get(retrieverLevel);
-            if (levelFilterSelection != null && !levelFilterSelection.isEmpty()) {
-                String levelFilterSelectionVariable = "retrieverlevel" + retrieverLevel.getLevel() + "_FilterSelection";
-                builder.appendText(hashMapClassName + "<" + functionClassName + ", " + hashSetClassName + "<? extends " + serializableClassName +
-                                   ">> " + levelFilterSelectionVariable + " = new " + hashMapClassName + "<>();").appendLineBreak();
-                
-                int filterDimensionCounter = 0;
-                for (FunctionDTO filterDimension : levelFilterSelection.keySet()) {
-                    String filterDimensionVariable = "filterDimension" + filterDimensionCounter;
-                    builder.appendText(functionToCode(filterDimensionVariable, filterDimension, typeStrategy)).appendLineBreak();
-                    
-                    String dimensionFilterSelectionVariable = filterDimensionVariable + "_Selection";
-                    builder.appendText(hashSetClassName + "<" + serializableClassName + "> " + dimensionFilterSelectionVariable +
-                                       " = new " + hashSetClassName + "<>();").appendLineBreak();
-                    for (Serializable filterValue : levelFilterSelection.get(filterDimension)) {
-                        builder.appendText(dimensionFilterSelectionVariable + ".add(" + literal(filterValue) + ");").appendLineBreak();
-                    }
-                    
-                    builder.appendText(levelFilterSelectionVariable + ".put(" + filterDimensionVariable + ", " + dimensionFilterSelectionVariable + ");").appendLineBreak();
-                    filterDimensionCounter++;
-                }
-                
-                builder.appendText(queryDefinitionVariable + ".setFilterSelectionFor(" + retrieverChainVariable + ".getRetrieverLevel(" +
-                                   retrieverLevel.getLevel() + "), " + levelFilterSelectionVariable + ");").appendLineBreak()
-                       .appendLineBreak();
-            }
-            
-        }
+        HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelection = queryDefinition.getFilterSelection();
+        if (filterSelection != null && retrieverChain != null) {
+            for (DataRetrieverLevelDTO retrieverLevel : retrieverChain.getRetrieverLevels()) {
+                HashMap<FunctionDTO, HashSet<? extends Serializable>> levelFilterSelection = filterSelection.get(retrieverLevel);
+                if (levelFilterSelection != null && !levelFilterSelection.isEmpty()) {
+                    String levelFilterSelectionVariable = "retrieverlevel" + retrieverLevel.getLevel() + "_FilterSelection";
+                    builder.appendText(hashMapClassName + "<" + functionClassName + ", " + hashSetClassName
+                            + "<? extends " + serializableClassName + ">> " + levelFilterSelectionVariable + " = new "
+                            + hashMapClassName + "<>();").appendLineBreak();
 
-        // Dimensions to Group By separated by two line breaks
-        int dimensionToGroupByCounter = 0;
-        boolean first = true;
-        for (FunctionDTO dimensionToGroupBy : queryDefinition.getDimensionsToGroupBy()) {
-            if (!first) {
-                builder.appendLineBreak().appendLineBreak();
+                    int filterDimensionCounter = 0;
+                    for (FunctionDTO filterDimension : levelFilterSelection.keySet()) {
+                        String filterDimensionVariable = "filterDimension" + filterDimensionCounter;
+                        builder.appendText(functionToCode(filterDimensionVariable, filterDimension, typeStrategy))
+                                .appendLineBreak();
+
+                        String dimensionFilterSelectionVariable = filterDimensionVariable + "_Selection";
+                        builder.appendText(hashSetClassName + "<" + serializableClassName + "> "
+                                + dimensionFilterSelectionVariable + " = new " + hashSetClassName + "<>();")
+                                .appendLineBreak();
+                        for (Serializable filterValue : levelFilterSelection.get(filterDimension)) {
+                            builder.appendText(dimensionFilterSelectionVariable + ".add(" + literal(filterValue) + ");")
+                                    .appendLineBreak();
+                        }
+
+                        builder.appendText(levelFilterSelectionVariable + ".put(" + filterDimensionVariable + ", "
+                                + dimensionFilterSelectionVariable + ");").appendLineBreak();
+                        filterDimensionCounter++;
+                    }
+
+                    builder.appendText(queryDefinitionVariable + ".setFilterSelectionFor(" + retrieverChainVariable
+                            + ".getRetrieverLevel(" + retrieverLevel.getLevel() + "), " + levelFilterSelectionVariable
+                            + ");").appendLineBreak().appendLineBreak();
+                }
+
             }
-            
-            String dimensionToGroupByVariable = "dimensionToGroupBy" + dimensionToGroupByCounter;
-            builder.appendText(functionToCode(dimensionToGroupByVariable, dimensionToGroupBy, typeStrategy)).appendLineBreak();
-            builder.appendText(queryDefinitionVariable + ".appendDimensionToGroupBy(" + dimensionToGroupByVariable + ");");
-            
-            first = false;
-            dimensionToGroupByCounter++;
+        }
+        
+        // Dimensions to Group By separated by two line breaks
+        ArrayList<FunctionDTO> dimensionsToGroupBy = queryDefinition.getDimensionsToGroupBy();
+        if (dimensionsToGroupBy != null) {
+            int dimensionToGroupByCounter = 0;
+            boolean first = true;
+            for (FunctionDTO dimensionToGroupBy : dimensionsToGroupBy) {
+                if (!first) {
+                    builder.appendLineBreak().appendLineBreak();
+                }
+
+                String dimensionToGroupByVariable = "dimensionToGroupBy" + dimensionToGroupByCounter;
+                builder.appendText(functionToCode(dimensionToGroupByVariable, dimensionToGroupBy, typeStrategy))
+                        .appendLineBreak();
+                builder.appendText(
+                        queryDefinitionVariable + ".appendDimensionToGroupBy(" + dimensionToGroupByVariable + ");");
+
+                first = false;
+                dimensionToGroupByCounter++;
+            }
         }
         
         return builder.toString();
@@ -203,9 +246,15 @@ public class QueryDefinitionParser {
     
     private String functionToCode(String functionVariable, FunctionDTO function, TypeToCodeStrategy typeStrategy) {
         String functionClassName = FunctionDTO.class.getSimpleName();
-        return functionClassName + " " + functionVariable + " = new " + functionClassName + "(" + function.isDimension() + ", " + literal(function.getFunctionName()) + ", " +
-               typeStrategy.toCode(function.getSourceTypeName()) + ", " + typeStrategy.toCode(function.getReturnTypeName()) + ", " +
-               functionParametersToCode(function, typeStrategy) + ", \"\", 0);";
+        String functionConstruction;
+        if (function != null) {
+            functionConstruction = "new " + functionClassName + "(" + function.isDimension() + ", " + literal(function.getFunctionName()) + ", " +
+                    typeStrategy.toCode(function.getSourceTypeName()) + ", " + typeStrategy.toCode(function.getReturnTypeName()) + ", " +
+                    functionParametersToCode(function, typeStrategy) + ", \"\", 0)";
+        } else {
+            functionConstruction = NullComponentCode;
+        }
+        return functionClassName + " " + functionVariable + " = " + functionConstruction + ";"; 
     }
     
     private String functionParametersToCode(FunctionDTO function, TypeToCodeStrategy typeStrategy) {
@@ -214,7 +263,6 @@ public class QueryDefinitionParser {
             return "new " + ArrayList.class.getSimpleName() + "<" + String.class.getSimpleName() + ">()";
         }
         
-        Arrays.asList("Test", "test");
         StringBuilder builder = new StringBuilder(Arrays.class.getSimpleName() + ".asList(");
         boolean first = true;
         for (String parameterTypeName : parameterTypeNames) {
