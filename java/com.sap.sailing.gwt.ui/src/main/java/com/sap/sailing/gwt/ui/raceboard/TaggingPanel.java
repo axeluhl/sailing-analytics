@@ -1364,39 +1364,49 @@ public class TaggingPanel extends ComponentWithoutSettings
         }
     }
 
+    /**
+     * Describes the current state of the Tagging-Panel.
+     *
+     */
     private enum State {
         VIEW, // default
         EDIT
     }
 
+    // resources
     private final TagPanelResources resources;
     private final TagPanelStyle style;
-
     private final TagCellListResources cellResources;
     private final TagCellListStyle cellStyle;
 
+    // required to display tags
     private final CellList<TagDTO> tagCellList;
     private final SingleSelectionModel<TagDTO> tagSelectionModel;
     private final TagListProvider tagListProvider;
 
+    // custom tag buttons of current user
     private List<TagButton> tagButtons;
 
+    // UI elements
     private final HeaderPanel taggingPanel;
     private final TagCreationPanel tagCreationPanel;
     private final TagFilterPanel filterbarPanel;
     private final Panel contentPanel;
     private final Button createTagsButton;
 
+    // misc. elements
     private final StringMessages stringMessages;
     private final SailingServiceAsync sailingService;
     private final UserService userService;
     private final Timer timer;
     private final RaceTimesInfoProvider raceTimesInfoProvider;
 
+    // race log identifiers
     private String leaderboardName = null;
     private RaceColumnDTO raceColumn = null;
     private FleetDTO fleet = null;
 
+    // current state of the Tagging-Panel
     private State currentState;
 
     public TaggingPanel(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages,
@@ -1438,6 +1448,9 @@ public class TaggingPanel extends ComponentWithoutSettings
         initializePanel();
     }
 
+    /**
+     * Initializes UI of Tagging-Panel.
+     */
     private void initializePanel() {
         // Panel
         taggingPanel.setStyleName(style.taggingPanel());
@@ -1474,6 +1487,9 @@ public class TaggingPanel extends ComponentWithoutSettings
         updateContent();
     }
 
+    /**
+     * Updates parameters required to save to/revoke from race log.
+     */
     public void updateRace(String leaderboardName, RaceColumnDTO raceColumn, FleetDTO fleet) {
         if (leaderboardName != null && !leaderboardName.equals(this.leaderboardName)) {
             this.leaderboardName = leaderboardName;
@@ -1486,6 +1502,10 @@ public class TaggingPanel extends ComponentWithoutSettings
         }
     }
 
+    /**
+     * Sends request to SailingService to add the given tag to the race log.
+     * @param tag tag which should get deleted
+     */
     private void addTagToRaceLog(String tag, String comment, String imageURL, boolean isPublic) {
         if (isLoggedInAndRaceLogAvailable()) {
             if (!tag.isEmpty()) {
@@ -1514,6 +1534,10 @@ public class TaggingPanel extends ComponentWithoutSettings
         }
     }
 
+    /**
+     * Sends request to SailingService to revoke the given tag in race log.
+     * @param tag tag which should get deleted
+     */
     private void removeTagFromRaceLog(TagDTO tag) {
         sailingService.removeTagFromRaceLog(leaderboardName, raceColumn.getName(), fleet.getName(), tag,
                 new AsyncCallback<SuccessInfo>() {
@@ -1537,10 +1561,18 @@ public class TaggingPanel extends ComponentWithoutSettings
                 });
     }
 
+    /**
+     * Checks if currentUser (read from UserService) is non-<code>null</code> and if 
+     * leaderboardName, fleet and raceColumn are not <code>null</code>.
+     * @return true if current user, leaderboardName, raceColumn and fleet are non-<code>null</code>, otherwise false.
+     */
     private boolean isLoggedInAndRaceLogAvailable() {
         return userService.getCurrentUser() != null && leaderboardName != null && raceColumn != null && fleet != null;
     }
 
+    /**
+     * Controls the visibility of UI elements in case the content or current state changes.
+     */
     private void updateContent() {
         setFooterPanelVisibility(currentState == State.EDIT);
         setCreateTagsButtonVisibility(currentState == State.VIEW);
@@ -1549,12 +1581,17 @@ public class TaggingPanel extends ComponentWithoutSettings
         tagListProvider.refresh();
     }
 
+    /**
+     * Sets the current state and updates the UI.
+     * @param state new state
+     */
     private void setCurrentState(State state) {
         currentState = state;
         updateContent();
     }
 
     /**
+     * Updates the visibility of the footer.
      * Footer will NOT get displayed if user is not logged in, even if showFooter is set to true!
      */
     private void setFooterPanelVisibility(boolean showFooter) {
@@ -1569,12 +1606,18 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     /**
+     * Updates the visibility of the "Add Tags"-button.
      * Button will NOT get displayed if user is not logged in, even if showButton is set to true!
      */
     private void setCreateTagsButtonVisibility(boolean showButton) {
         createTagsButton.setVisible(userService.getCurrentUser() != null && showButton);
     }
 
+    /**
+     * Update local list of tags when response of server gets dispatched to all listeners by
+     * RaceTimesInfoProvider. Server sends only difference of tags in comparison based on the
+     * createdAt-timestamp of the latest received tag event.
+     */
     @Override
     public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo,
             long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest, long clientTimeWhenResponseWasReceived) {
@@ -1593,8 +1636,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                     for (TagDTO tag : raceInfo.getTags()) {
                         if (tag.getRevokedAt() != null) {
                             // received tag is revoked => latestReceivedTagTime will be revokedAt if revoke event
-                            // occured
-                            // before latestReceivedTagTime
+                            // occured before latestReceivedTagTime
                             currentTags.remove(tag);
                             modifiedTags = true;
                             if (latestReceivedTagTime == null || (latestReceivedTagTime != null
@@ -1604,8 +1646,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                             }
                         } else if (!currentTags.contains(tag)) {
                             // received tag is NOT revoked => latestReceivedTagTime will be createdAt if tag event
-                            // occured
-                            // before latestReceivedTagTime
+                            // occured before latestReceivedTagTime
                             currentTags.add(tag);
                             modifiedTags = true;
                             if (latestReceivedTagTime == null || (latestReceivedTagTime != null
@@ -1628,6 +1669,11 @@ public class TaggingPanel extends ComponentWithoutSettings
         }
     }
 
+    /**
+     * When the user logs in or out the content needs to be reset to hide private
+     * tags of the previous user. This gets achieved by resetting the local list
+     * of tags and resetting all latest received tag times at the RaceTimesInfoProvider.
+     */
     @Override
     public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
         // clear list of local tags to hide private tags of previous user
@@ -1661,6 +1707,9 @@ public class TaggingPanel extends ComponentWithoutSettings
         return taggingPanel.isVisible();
     }
 
+    /**
+     * Only request tags from server if Tagging-Panel is visible.
+     */
     @Override
     public void setVisible(boolean visible) {
         if (raceTimesInfoProvider != null) {
