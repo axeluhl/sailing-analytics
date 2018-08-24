@@ -16,10 +16,13 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
     private static final long DEFAULT_REFRESH_INTERVAL = 1000L;
     
     private final boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard;
+    private final boolean canBoatsOfCompetitorsChangePerRace;
 
-    public SingleRaceLeaderboardPanelLifecycle(StringMessages stringMessages, Iterable<DetailType> availableDetailTypes) {
+    public SingleRaceLeaderboardPanelLifecycle(final StringMessages stringMessages,
+            final Iterable<DetailType> availableDetailTypes, final boolean canBoatsOfCompetitorsChangePerRace) {
         super(stringMessages, availableDetailTypes);
         this.isScreenLargeEnoughToInitiallyDisplayLeaderboard = Document.get().getClientWidth() >= 1024;
+        this.canBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRace;
     }
     
     @Override
@@ -31,25 +34,22 @@ public class SingleRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecyc
         raceDetails.add(DetailType.NUMBER_OF_MANEUVERS);
         raceDetails.add(DetailType.RACE_DISPLAY_LEGS);
         List<DetailType> overallDetails = new ArrayList<>();
-        SingleRaceLeaderboardSettings defaultSettings = new SingleRaceLeaderboardSettings();
+        SingleRaceLeaderboardSettings defaultSettings = new SingleRaceLeaderboardSettings(canBoatsOfCompetitorsChangePerRace);
 
+        // don't show competitor fullName column if even leaderboard isn't shown initially
+        final boolean showCompetitorFullNameColumn = isScreenLargeEnoughToInitiallyDisplayLeaderboard;
         SingleRaceLeaderboardSettings settings = new SingleRaceLeaderboardSettings(
                 defaultSettings.getManeuverDetailsToShow(), defaultSettings.getLegDetailsToShow(),
                 defaultSettings.getRaceDetailsToShow(), overallDetails, DEFAULT_REFRESH_INTERVAL,
                 defaultSettings.isShowAddedScores(),
                 /* showCompetitorShortNameColumn */ true,
-                /*
-                 * don't showCompetitorFullNameColumn in case screen is so small that we don't even display the
-                 * leaderboard initially
-                 */ isScreenLargeEnoughToInitiallyDisplayLeaderboard, 
-                 /* showCompetitorBoatInfoColumn */ true, false, false);
+                showCompetitorFullNameColumn, 
+                /* showCompetitorBoatInfoColumn */ canBoatsOfCompetitorsChangePerRace,
+                /* isCompetitorNationalityColumnVisible */ false, 
+                /* showRaceRankColumn */ false);
         SettingsUtil.copyDefaultsFromValues(settings, settings);
         
         return settings;
-    }
-    
-    public boolean isScreenLargeEnoughToInitiallyDisplayLeaderboard() {
-        return isScreenLargeEnoughToInitiallyDisplayLeaderboard;
     }
     
     @Override
