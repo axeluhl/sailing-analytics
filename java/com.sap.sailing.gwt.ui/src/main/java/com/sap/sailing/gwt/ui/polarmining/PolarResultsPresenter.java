@@ -222,7 +222,7 @@ public class PolarResultsPresenter extends AbstractSailingResultsPresenter<Setti
                 Map<Integer, Map<Double, Integer>> histogramData = aggregation.getCountHistogramPerAngle();
                 Map<Long, Series> seriesPerAngle = new HashMap<>();
                 perAngleHistogramSeriesForAngle.put(polarSeries, seriesPerAngle);
-                // Ensure that the points are added in ascending x coordinates to prevent Highcharts error 15
+                // Ensure that the points are added with ascending x coordinates to prevent Highcharts error 15
                 for (int convertedAngle = -179; convertedAngle <= 180; convertedAngle++) {
                     int index = convertedAngle < 0 ? convertedAngle + 360 : convertedAngle;
                     double speed = speedsPerAngle[index];

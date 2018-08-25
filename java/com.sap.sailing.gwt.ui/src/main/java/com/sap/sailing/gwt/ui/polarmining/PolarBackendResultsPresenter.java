@@ -171,8 +171,9 @@ public class PolarBackendResultsPresenter extends AbstractSailingResultsPresente
                 Series polarSeries = polarChart.createSeries();
                 polarSeries.setName(key.asString() + "-" + i + "kn");
                 double[][] data = aggregation.getPolarDataPerWindspeedAndAngle();
-                for (int j = 0; j < 360; j++) {
-                    int convertedAngle = j > 180 ? j - 360 : j;
+                // Ensure that the points are added with ascending x coordinates to prevent Highcharts error 15
+                for (int convertedAngle = -179; convertedAngle <= 180; convertedAngle++) {
+                    int j = convertedAngle < 0 ? convertedAngle + 360 : convertedAngle;
                     polarSeries.addPoint(convertedAngle, hasDataForAngle[j] ? data[j][i] : 0, false, false, false);
                 }
                 if (i != 11) {
