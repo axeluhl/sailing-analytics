@@ -1,5 +1,6 @@
 package com.sap.sse.datamining.ui.client.selection.statistic;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,11 +43,18 @@ public class AggregatorListBox extends ValueListBox<AggregatorGroup> {
     
     @Override
     public void setAcceptableValues(Collection<AggregatorGroup> newValues) {
+        Collection<AggregatorGroup> newValuesWithNull = new ArrayList<>();
+        newValuesWithNull.add(null);
+        
         aggregatorsByDisplayName.clear();
         for (AggregatorGroup aggregator : newValues) {
-            aggregatorsByDisplayName.put(aggregator.getDisplayName(), aggregator);
+            if (aggregator != null) {
+                aggregatorsByDisplayName.put(aggregator.getDisplayName(), aggregator);
+                newValuesWithNull.add(aggregator);
+            }
         }
-        super.setAcceptableValues(newValues);
+        
+        super.setAcceptableValues(newValuesWithNull);
     }
     
 }
