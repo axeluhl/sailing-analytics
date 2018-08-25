@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.moxieapps.gwt.highcharts.client.Chart;
+import org.moxieapps.gwt.highcharts.client.ChartSubtitle;
 import org.moxieapps.gwt.highcharts.client.ChartTitle;
 import org.moxieapps.gwt.highcharts.client.Color;
 import org.moxieapps.gwt.highcharts.client.Credits;
@@ -61,7 +62,8 @@ public class NumberPairResultsPresenter extends AbstractSailingResultsPresenter<
                 .setBorderColor(new Color("#F0AB00"))
                 .setPlotBorderWidth(0)
                 .setCredits(new Credits().setEnabled(false))
-                .setChartTitle(new ChartTitle().setText(getDataMiningStringMessages().dataMiningResult()));
+                .setChartTitle(new ChartTitle().setText(""))
+                .setChartSubtitle(new ChartSubtitle().setText(""));
         chart.setExporting(new Exporting().setEnabled(false));
         chart.getXAxis().setAllowDecimals(false);
         chart.getYAxis().setAxisTitleText("");
