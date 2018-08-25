@@ -80,8 +80,6 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     private static final double FilterFilterDimensionsHeight = 40;
     private static final double FilterSelectionTableWidth = 250;
     
-    private static final Consumer<Iterable<String>> EmptyCallback = m -> { };
-
     private final DataMiningSession session;
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
@@ -241,7 +239,7 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
         HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> currentSelection = getSelection();
         if (!currentSelection.isEmpty()) {
             selectionToBeApplied = currentSelection;
-            selectionCallback = EmptyCallback;
+            selectionCallback = EmptyApplyCallback;
         }
         
         if (retrieverChain != null) {
