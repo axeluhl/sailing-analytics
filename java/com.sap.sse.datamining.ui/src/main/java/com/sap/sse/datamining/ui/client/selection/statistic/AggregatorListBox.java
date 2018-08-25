@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.OptionElement;
@@ -14,9 +15,16 @@ import com.google.gwt.user.client.ui.ValueListBox;
 
 public class AggregatorListBox extends ValueListBox<AggregatorGroup> {
     
+    @FunctionalInterface
+    public static interface ValueChangeHandler {
+        void valueChanged(AggregatorGroup oldValue, AggregatorGroup newValue);
+    }
+    
     private static final String UnsupportedItemStyle = "unsupportedAggregatorListItem";
     
     private final Map<String, AggregatorGroup> aggregatorsByDisplayName;
+    private AggregatorGroup value;
+    private ValueChangeHandler valueChangeHandler;
     
     public AggregatorListBox(String nullDisplayString) {
         super(new AbstractRenderer<AggregatorGroup>() {
@@ -26,6 +34,21 @@ public class AggregatorListBox extends ValueListBox<AggregatorGroup> {
             }
         });
         aggregatorsByDisplayName = new HashMap<>();
+        
+        addValueChangeHandler(event -> {
+            AggregatorGroup newValue = event.getValue();
+            if (!Objects.equals(value, newValue)) {
+                AggregatorGroup oldValue = value;
+                value = newValue;
+                if (valueChangeHandler != null) {
+                    valueChangeHandler.valueChanged(oldValue, value);
+                }
+            }
+        });
+    }
+    
+    public void setValueChangeHandler(ValueChangeHandler valueChangeHandler) {
+        this.valueChangeHandler = valueChangeHandler;
     }
     
     public void updateItemStyles(ExtractionFunctionWithContext extractionFunction) {

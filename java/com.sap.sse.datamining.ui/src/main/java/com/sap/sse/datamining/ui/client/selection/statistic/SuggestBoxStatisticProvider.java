@@ -13,8 +13,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -82,7 +80,6 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
     private final Label labelBetweenAggregatorAndStatistic;
     
     private final Map<String, Set<AggregationProcessorDefinitionDTO>> collectedAggregators;
-    private AggregatorGroup currentAggregator;
     private final List<AggregatorGroup> availableAggregators;
     private final AggregatorListBox aggregatorListBox;
 
@@ -110,12 +107,7 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         collectedAggregators = new HashMap<>();
         availableAggregators = new ArrayList<>();
         aggregatorListBox = new AggregatorListBox("<" + getDataMiningStringMessages().any() + ">");
-        aggregatorListBox.addValueChangeHandler(new ValueChangeHandler<AggregatorGroup>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<AggregatorGroup> event) {
-                aggregatorSelectionChanged(event.getValue());
-            }
-        });
+        aggregatorListBox.setValueChangeHandler(this::aggregatorSelectionChanged);
         aggregatorListBox.addStyleName(StatisticProviderElementStyle);
         aggregatorListBox.addStyleName("dataMiningListBox");
         aggregatorListBox.setEnabled(false);
@@ -321,45 +313,42 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         }
     }
 
-    private void aggregatorSelectionChanged(AggregatorGroup newAggregator) {
-        if (!Objects.equals(currentAggregator, newAggregator)) {
-            boolean currentAggregatorSupportsIdentityFunction = currentAggregator != null
-                    && currentAggregator.supportsFunction(identityFunction);
-            boolean newAggregatorSupportsIdentityFunction = newAggregator != null
-                    && newAggregator.supportsFunction(identityFunction);
-            
-            List<? extends ExtractionFunctionWithContext> selectableExtractionFunctions;
-            String labelBetweenAggregatorAndStatisticText = null;
-            if (newAggregatorSupportsIdentityFunction) {
-                selectableExtractionFunctions = availableIdentityFunctions;
-                labelBetweenAggregatorAndStatisticText = getDataMiningStringMessages().the();
-            } else {
-                selectableExtractionFunctions = availableStatistics;
-                labelBetweenAggregatorAndStatisticText = getDataMiningStringMessages().of();
-            }
-            
-            ExtractionFunctionWithContext currentExtractionFunction = extractionFunctionSuggestBox.getExtractionFunction();
-            if (currentExtractionFunction != null && newAggregator != null && !newAggregator.supportsFunction(currentExtractionFunction)) {
-                // Current extraction function isn't supported by the new aggregator
-                if (newAggregatorSupportsIdentityFunction && !currentAggregatorSupportsIdentityFunction) {
-                    // Switch to the corresponding identity function, if the identity functions aren't already the selectable functions
-                    for (IdentityFunctionWithContext identityFunction : availableIdentityFunctions) {
-                        if (identityFunction.getRetrieverChain().equals(currentExtractionFunction.getRetrieverChain())) {
-                            extractionFunctionSuggestBox.setExtractionFunction(identityFunction);
-                            break;
-                        }
-                    }
-                } else {
-                    extractionFunctionSuggestBox.setExtractionFunction(null);
-                }
-            }
-            extractionFunctionSuggestBox.setSelectableValues(selectableExtractionFunctions);
-            extractionFunctionSuggestBox.setGroupingSuggestionsByRetrieverChain(!newAggregatorSupportsIdentityFunction);
-            labelBetweenAggregatorAndStatistic.setText(labelBetweenAggregatorAndStatisticText);
-            currentAggregator = newAggregator;
-            
-            notifyAggregatorDefinitionListeners();
+    private void aggregatorSelectionChanged(AggregatorGroup oldAggregator, AggregatorGroup newAggregator) {
+        boolean currentAggregatorSupportsIdentityFunction = oldAggregator != null
+                && oldAggregator.supportsFunction(identityFunction);
+        boolean newAggregatorSupportsIdentityFunction = newAggregator != null
+                && newAggregator.supportsFunction(identityFunction);
+        
+        List<? extends ExtractionFunctionWithContext> selectableExtractionFunctions;
+        String labelBetweenAggregatorAndStatisticText = null;
+        if (newAggregatorSupportsIdentityFunction) {
+            selectableExtractionFunctions = availableIdentityFunctions;
+            labelBetweenAggregatorAndStatisticText = getDataMiningStringMessages().the();
+        } else {
+            selectableExtractionFunctions = availableStatistics;
+            labelBetweenAggregatorAndStatisticText = getDataMiningStringMessages().of();
         }
+        
+        ExtractionFunctionWithContext currentExtractionFunction = extractionFunctionSuggestBox.getExtractionFunction();
+        if (currentExtractionFunction != null && newAggregator != null && !newAggregator.supportsFunction(currentExtractionFunction)) {
+            // Current extraction function isn't supported by the new aggregator
+            if (newAggregatorSupportsIdentityFunction && !currentAggregatorSupportsIdentityFunction) {
+                // Switch to the corresponding identity function, if the identity functions aren't already the selectable functions
+                for (IdentityFunctionWithContext identityFunction : availableIdentityFunctions) {
+                    if (identityFunction.getRetrieverChain().equals(currentExtractionFunction.getRetrieverChain())) {
+                        extractionFunctionSuggestBox.setExtractionFunction(identityFunction);
+                        break;
+                    }
+                }
+            } else {
+                extractionFunctionSuggestBox.setExtractionFunction(null);
+            }
+        }
+        extractionFunctionSuggestBox.setSelectableValues(selectableExtractionFunctions);
+        extractionFunctionSuggestBox.setGroupingSuggestionsByRetrieverChain(!newAggregatorSupportsIdentityFunction);
+        labelBetweenAggregatorAndStatistic.setText(labelBetweenAggregatorAndStatisticText);
+        
+        notifyAggregatorDefinitionListeners();
     }
     
     private void extractionFunctionSelectionChanged(ExtractionFunctionWithContext oldExtractionFunction,
