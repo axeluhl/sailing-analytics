@@ -237,14 +237,16 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
     }
     
     private void updateFilterDimensions() {
+        // Try to retain the selection even if the retriever chain has been null in between
+        HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> currentSelection = getSelection();
+        if (!currentSelection.isEmpty()) {
+            selectionToBeApplied = currentSelection;
+            selectionCallback = EmptyCallback;
+        }
+        
         if (retrieverChain != null) {
             isUpdatingFilterDimensions = true;
             clearContent();
-            HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> currentSelection = getSelection();
-            if (!currentSelection.isEmpty()) {
-                selectionToBeApplied = currentSelection;
-                selectionCallback = EmptyCallback;
-            }
             dataMiningService.getReducedDimensionsMappedByLevelFor(retrieverChain, LocaleInfo.getCurrentLocale().getLocaleName(), new AsyncCallback<ReducedDimensionsDTO>() {
                 @Override
                 public void onSuccess(ReducedDimensionsDTO result) {
@@ -279,8 +281,6 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
         } else {
             clearContent();
             updateControls();
-            selectionToBeApplied = null;
-            selectionCallback = null;
         }
     }
 
