@@ -104,3 +104,21 @@
     font-size: 0.8em;
     margin-left: 5px;
 }
+
+.mobileEventTableHeader {
+    font-weight: normal;
+    font-size: 0.8em;
+    padding-left: 0;
+    text-align: center;
+    color: white;
+    background-color: #008fcc;
+}
+.inverseButton {
+    width: 100%;
+    color: #0591cd;
+    background-color: white;
+    border: 1px solid #cccccc;
+    border-radius: 2px;
+    font-weight: bold;
+    font-size: 1.3333333em;
+}

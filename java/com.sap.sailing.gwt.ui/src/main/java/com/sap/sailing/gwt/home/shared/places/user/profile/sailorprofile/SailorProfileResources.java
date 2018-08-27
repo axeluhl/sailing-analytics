@@ -46,5 +46,9 @@ public interface SailorProfileResources extends ClientBundle {
         String competitorWithClubnameItemDescriptionId();
 
         String competitorWithClubnameItemDescriptionClubname();
+
+        String mobileEventTableHeader();
+
+        String inverseButton();
     }
 }

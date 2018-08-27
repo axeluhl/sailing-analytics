@@ -1,0 +1,22 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    xmlns:p="urn:import:com.sap.sailing.gwt.home.mobile.partials"
+    xmlns:ms="urn:import:com.sap.sailing.gwt.home.mobile.partials.section">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="spr"
+        type="com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfileResources" />
+    <ui:style>
+        .panel{
+        font-size: 0.8em;
+        font-weight: normal;
+        background-color: white;
+        }
+    </ui:style>
+    <g:HTMLPanel>
+        <div ui:field="sectionTitleUi" class="{spr.css.mobileEventTableHeader}" />
+        <g:HTMLPanel ui:field="contentContainerRegattasUi"
+            addStyleNames="{style.panel} {res.mediaCss.columns}">
+        </g:HTMLPanel>
+    </g:HTMLPanel>
+</ui:UiBinder> 

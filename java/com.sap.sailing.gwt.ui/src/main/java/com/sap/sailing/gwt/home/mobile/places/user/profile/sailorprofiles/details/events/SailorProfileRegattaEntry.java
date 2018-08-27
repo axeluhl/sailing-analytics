@@ -1,0 +1,67 @@
+package com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.details.events;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.place.shared.PlaceController;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedRegattaDTO;
+import com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab.RegattaLeaderboardPlace;
+
+public class SailorProfileRegattaEntry extends Composite {
+
+    private static SailorProfileOverviewEntryUiBinder uiBinder = GWT.create(SailorProfileOverviewEntryUiBinder.class);
+
+    interface SailorProfileOverviewEntryUiBinder extends UiBinder<Widget, SailorProfileRegattaEntry> {
+    }
+
+    @UiField
+    DivElement regattaNameUi;
+
+    @UiField
+    DivElement regattaRankUi;
+
+    @UiField
+    DivElement competitorUi;
+
+    @UiField
+    DivElement clubNameUi;
+
+    @UiField
+    DivElement sumPointsUi;
+
+    @UiField
+    Button showLeaderboardButtonUi;
+
+    @UiField
+    HTMLPanel contentContainerRegattasUi;
+
+    private final String eventId, regattaId;
+
+    private final PlaceController placeController;
+
+    public SailorProfileRegattaEntry(ParticipatedRegattaDTO regatta, PlaceController placeController) {
+        initWidget(uiBinder.createAndBindUi(this));
+        this.placeController = placeController;
+        this.regattaId = regatta.getRegattaId();
+        this.eventId = regatta.getEventId();
+        this.regattaNameUi.setInnerText(regatta.getRegattaName());
+        this.regattaRankUi.setInnerText("Rank " + regatta.getRegattaRank());
+        this.competitorUi.setInnerText(regatta.getCompetitorDto().getShortInfo());
+        this.clubNameUi.setInnerText(regatta.getCompetitorDto().getName());
+        this.sumPointsUi.setInnerText("" + regatta.getSumPoints());
+
+    }
+
+    @UiHandler("showLeaderboardButtonUi")
+    void onClick(ClickEvent e) {
+        placeController.goTo(new RegattaLeaderboardPlace(eventId, regattaId));
+    }
+
+}

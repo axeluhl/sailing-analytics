@@ -18,7 +18,8 @@
         <g:FlowPanel addStyleNames="{res.mediaCss.column} {res.mediaCss.small12}" ui:field="contentUi">
             <ms:MobileSection>
                 <ms:header>
-                    <p:sectionHeader.SectionHeaderContent ui:field="competitorsUi" sectionTitle="{i18n.competitors}"/>
+                    <p:sectionHeader.SectionHeaderContent ui:field="competitorsUi"
+                        sectionTitle="{i18n.competitors}" />
                 </ms:header>
                 <ms:content>
                     <g:HTMLPanel ui:field="contentContainerCompetitorsUi"
@@ -29,7 +30,8 @@
 
             <ms:MobileSection>
                 <ms:header>
-                    <p:sectionHeader.SectionHeaderContent ui:field="imagesUi" sectionTitle="{i18n.images}" />
+                    <p:sectionHeader.SectionHeaderContent ui:field="imagesUi"
+                        sectionTitle="{i18n.images}" />
                 </ms:header>
                 <ms:content>
                     <g:HTMLPanel ui:field="contentContainerImagesUi"
@@ -40,7 +42,8 @@
 
             <ms:MobileSection>
                 <ms:header>
-                    <p:sectionHeader.SectionHeaderContent ui:field="boatclassesUi" sectionTitle="{i18n.boatClasses}" />
+                    <p:sectionHeader.SectionHeaderContent ui:field="boatclassesUi"
+                        sectionTitle="{i18n.boatClasses}" />
                 </ms:header>
                 <ms:content>
                     <g:HTMLPanel ui:field="contentContainerBoatclassesUi"
@@ -51,18 +54,19 @@
 
             <ms:MobileSection>
                 <ms:header>
-                    <p:sectionHeader.SectionHeaderContent ui:field="eventsUi" sectionTitle="{i18n.events}" />
+                    <p:sectionHeader.SectionHeaderContent ui:field="eventsUi"
+                        sectionTitle="{i18n.events}" />
                 </ms:header>
                 <ms:content>
-                    <g:HTMLPanel ui:field="contentContainerEventsUi"
-                        addStyleNames="{style.panel} {res.mainCss.spacermarginbottomsmall}">
+                    <g:HTMLPanel ui:field="contentContainerEventsUi">
                     </g:HTMLPanel>
                 </ms:content>
             </ms:MobileSection>
 
             <ms:MobileSection>
                 <ms:header>
-                    <p:sectionHeader.SectionHeaderContent ui:field="statisticsUi" sectionTitle="{i18n.statistics}" />
+                    <p:sectionHeader.SectionHeaderContent ui:field="statisticsUi"
+                        sectionTitle="{i18n.statistics}" />
                 </ms:header>
                 <ms:content>
                     <g:HTMLPanel ui:field="contentContainerStatisticsUi"
@@ -73,7 +77,8 @@
 
             <ms:MobileSection>
                 <ms:header>
-                    <p:sectionHeader.SectionHeaderContent ui:field="polarDiagramUi" sectionTitle="{i18n.polarSheetChart}" />
+                    <p:sectionHeader.SectionHeaderContent ui:field="polarDiagramUi"
+                        sectionTitle="{i18n.polarSheetChart}" />
                 </ms:header>
                 <ms:content>
                     <g:HTMLPanel ui:field="contentContainerPolarDiagramUi"
