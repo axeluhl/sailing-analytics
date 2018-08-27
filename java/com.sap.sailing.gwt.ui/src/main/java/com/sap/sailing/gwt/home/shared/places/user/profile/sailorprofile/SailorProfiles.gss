@@ -65,7 +65,8 @@
     border-radius: .333333333333333em;
     overflow: hidden;
 }
-.overviewTableFooterMobile{
+
+.overviewTableFooterMobile {
     cursor: pointer;
     border-top: 2px solid #ccc;
     border-bottom: 2px solid #ccc;
@@ -77,4 +78,13 @@
     position: relative;
     margin-left: -1em;
     margin-right: -1em
+}
+
+.competitorWithoutClubnameItemDescription {
+    display: inline-block;
+    width: 1.666666666666667em !important;
+    height: 2em !important;
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
 }

@@ -18,16 +18,15 @@ import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.Sai
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileView;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionBoatClassItemDescription;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorItemDescription;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.events.CompetitorWithoutClubnameItemDescription;
 import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserSettingsView;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
 /**
  * Implementation of {@link UserSettingsView} where users can change their preferred selections and notifications.
  */
-public class SailorProfilesDetailsImpl extends Composite implements SailorProfileView, EditSailorProfileView
-{
+public class SailorProfilesDetailsImpl extends Composite implements SailorProfileView, EditSailorProfileView {
 
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
@@ -115,7 +114,7 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
 
     private void setCompetitors(Iterable<SimpleCompetitorWithIdDTO> competitors) {
         for (SimpleCompetitorWithIdDTO competitor : competitors) {
-            IsWidget competitorWidget = new SuggestedMultiSelectionCompetitorItemDescription(competitor,
+            IsWidget competitorWidget = new CompetitorWithoutClubnameItemDescription(competitor,
                     presenter.getFlagImageResolver());
             contentContainerCompetitorsUi.add(competitorWidget);
         }
