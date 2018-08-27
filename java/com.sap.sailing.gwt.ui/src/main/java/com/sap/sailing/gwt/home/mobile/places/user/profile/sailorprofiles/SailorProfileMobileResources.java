@@ -46,5 +46,7 @@ public interface SailorProfileMobileResources extends ClientBundle {
         String gotoEventButton();
 
         String eventTableHeaderText();
+
+        String detailsEventsContainer();
     }
 }

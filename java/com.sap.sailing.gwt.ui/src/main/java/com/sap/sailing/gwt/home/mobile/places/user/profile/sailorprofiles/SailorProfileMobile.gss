@@ -3,6 +3,8 @@
     font-weight: normal;
     background-color: white;
     float: none;
+    padding-left: 2em;
+    padding-right: 2em;
 }
 
 .regattaEntryPanel {
@@ -44,7 +46,7 @@
 
 .regattaInfoRight {
     display: inline-block;
-    right: 1em;
+    right: 3em;
     position: absolute;
     vertical-align: middle;
 }
@@ -117,4 +119,9 @@
 
 .eventTableHeaderText {
     display: inline-block;
+}
+
+.detailsEventsContainer {
+    margin-left: -2em;
+    margin-right: -2em;
 }
