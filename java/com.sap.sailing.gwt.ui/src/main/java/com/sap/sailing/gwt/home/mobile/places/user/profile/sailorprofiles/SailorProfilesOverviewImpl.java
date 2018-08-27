@@ -63,8 +63,7 @@ public class SailorProfilesOverviewImpl extends Composite implements SailorProfi
         lab.addStyleName(SailorProfileResources.INSTANCE.css().overviewTableFooterMobile());
         contentUi.add(lab);
         lab.addClickHandler((event) -> {
-            presenter.getClientFactory().getPlaceController()
-                    .goTo(new SailorProfilePlace(true));
+            presenter.getClientFactory().getPlaceController().goTo(new SailorProfilePlace(true));
         });
     }
 }
