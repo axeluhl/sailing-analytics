@@ -63,6 +63,7 @@ public class EditSailorProfile extends Composite implements EditSailorProfileVie
         SailorProfileResources.INSTANCE.css().ensureInjected();
         boatClassesUi.setText(i18n.boatClasses());
         setupTitleChangeListener();
+        accordionPolarDiagramUi.setVisible(false);
     }
 
     private void setupTitleChangeListener() {
