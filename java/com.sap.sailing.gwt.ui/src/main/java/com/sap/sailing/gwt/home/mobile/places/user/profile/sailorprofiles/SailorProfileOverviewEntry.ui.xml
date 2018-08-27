@@ -4,19 +4,11 @@
     xmlns:ms="urn:import:com.sap.sailing.gwt.home.mobile.partials.section">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:style>
-        .important {
-        font-weight: bold;
-        width: 100%;
-        height: 3em;
-        }
-        .panel h3{
-        font-size: 1.3333em;
-        font-weight: bold;
-        margin-bottom: 3px;
-        margin-top:10px;
-        }
-    </ui:style>
+    <ui:with field="spmr"
+        type="com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfileMobileResources" />
+    <ui:with field="spr"
+        type="com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfileResources" />
+
     <g:HTMLPanel>
         <ms:MobileSection>
             <ms:header>
@@ -24,7 +16,7 @@
             </ms:header>
             <ms:content>
                 <g:HTMLPanel ui:field="contentContainerCompetitorsUi"
-                    addStyleNames="{style.panel} {res.mainCss.spacermarginbottomsmall}">
+                    addStyleNames="{spmr.css.overviewPanel} {res.mainCss.spacermarginbottomsmall}">
                     <h3>
                         <ui:text from="{i18n.badges}" />
                     </h3>
@@ -37,7 +29,8 @@
                         <ui:text from="{i18n.boatClasses}" />
                     </h3>
                     <div ui:field="boatclassesDivUi" />
-                    <g:Button styleName="{style.important} {res.mainCss.spacermarginbottomsmall} spacermargintopsmall}"
+                    <g:Button
+                        styleName="{spr.css.inverseButton} {res.mainCss.spacermarginbottomsmall} spacermargintopsmall}"
                         ui:field="detailsButtonUi" text="{i18n.showDetails}" />
                 </g:HTMLPanel>
             </ms:content>

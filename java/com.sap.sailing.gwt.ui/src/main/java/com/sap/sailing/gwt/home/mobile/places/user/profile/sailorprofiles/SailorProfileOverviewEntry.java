@@ -53,6 +53,7 @@ public class SailorProfileOverviewEntry extends Composite {
     public SailorProfileOverviewEntry(SailorProfileDTO entry, SailingProfileOverviewPresenter presenter) {
         this.presenter = presenter;
         initWidget(uiBinder.createAndBindUi(this));
+        SailorProfileMobileResources.INSTANCE.css().ensureInjected();
         this.sectionTitleUi.setSectionTitle(entry.getName());
         for (BadgeDTO badge : entry.getBadges()) {
             Element elem = DOM.createDiv();

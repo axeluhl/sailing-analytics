@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedEventDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedRegattaDTO;
+import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfileMobileResources;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 
@@ -35,6 +36,7 @@ public class SailorProfileEventEntry extends Composite {
     public SailorProfileEventEntry(ParticipatedEventDTO event, PlaceController placeController,
             FlagImageResolver flagImageResolver) {
         initWidget(uiBinder.createAndBindUi(this));
+        SailorProfileMobileResources.INSTANCE.css().ensureInjected();
         this.placeController = placeController;
         this.eventId = event.getEventId();
         this.sectionTitleUi.setInnerText(event.getEventName());

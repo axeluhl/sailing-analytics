@@ -22,6 +22,7 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileE
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailingProfileOverviewPresenter;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileView;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
+import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfileMobileResources;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.details.events.SailorProfileEventEntry;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfileResources;
@@ -78,6 +79,7 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
     public SailorProfilesDetailsImpl() {
         initWidget(uiBinder.createAndBindUi(this));
         SailorProfileResources.INSTANCE.css().ensureInjected();
+        SailorProfileMobileResources.INSTANCE.css().ensureInjected();
         competitorsUi.initCollapsibility(contentContainerCompetitorsUi.getElement(), false);
         imagesUi.initCollapsibility(contentContainerImagesUi.getElement(), false);
         boatclassesUi.initCollapsibility(contentContainerBoatclassesUi.getElement(), false);

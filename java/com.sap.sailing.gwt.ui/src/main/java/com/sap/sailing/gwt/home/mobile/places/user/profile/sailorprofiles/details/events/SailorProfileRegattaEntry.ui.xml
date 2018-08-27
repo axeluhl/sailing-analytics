@@ -3,72 +3,23 @@
     xmlns:p="urn:import:com.sap.sailing.gwt.home.mobile.partials"
     xmlns:ms="urn:import:com.sap.sailing.gwt.home.mobile.partials.section">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
-    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="spr"
         type="com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfileResources" />
-    <ui:style>
-        .panel{
-        font-size: 0.8em;
-        font-weight: normal;
-        }
-        .sumPoints{
-        font-weight: bold;
-        background-color: #ebebeb;
-        border: 1px solid #cccccc;
-        border-radius: 2px;
-        padding: 0.5em;
-        vertical-align:middle;
-        display:inline-block;
-        }
-        .regattaName{
-        margin-top: 1em;
-        font-size:
-        1.333333em;
-        margin-bottom: 1em;
-        }
-        .regattaRank{
-        font-weight: bold;
-        display:inline-block;
-        }
-        .competitor{
-        font-weight:bold;
-        display:inline-block;
-        margin-bottom: 0.1em;
-        margin-left: 1em;
-        }
-        .regattaInfoLeft{
-        display:inline-block;
-        }
-        .regattaInfoRight{
-        display:inline-block;
-        right: 1em;
-        position: absolute;
-        vertical-align:middle;
-        }
-        .showLeaderboardButton{
-        display: block;
-        width: 100%;
-        margin-top: 1em;
-        }
-        .splitter1px{
-        margin-left: -1.66666666667em;
-        margin-right: -1.66666666667em;
-        border-bottom: 1px solid #ccc;
-        margin-top: 1em;
-        }
-    </ui:style>
-    <g:HTMLPanel ui:field="contentContainerRegattasUi" addStyleNames="{style.panel}">
-        <div ui:field="regattaNameUi" class="{style.regattaName}" />
-        <div class="{style.regattaInfoLeft}">
-            <div ui:field="regattaRankUi" class="{style.regattaRank}" />
-            <g:FlowPanel ui:field="competitorUi" addStyleNames="{style.competitor}" />
+    <ui:with field="spmr"
+        type="com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfileMobileResources" />
+
+    <g:HTMLPanel ui:field="contentContainerRegattasUi" addStyleNames="{spmr.css.regattaEntryPanel}">
+        <div ui:field="regattaNameUi" class="{spmr.css.regattaName}" />
+        <div class="{spmr.css.regattaInfoLeft}">
+            <div ui:field="regattaRankUi" class="{spmr.css.regattaRank}" />
+            <g:FlowPanel ui:field="competitorUi" addStyleNames="{spmr.css.competitor}" />
             <div ui:field="clubNameUi" />
         </div>
-        <div class="{style.regattaInfoRight}">
-            <div ui:field="sumPointsUi" class="{style.sumPoints}" />
+        <div class="{spmr.css.regattaInfoRight}">
+            <div ui:field="sumPointsUi" class="{spmr.css.sumPoints}" />
         </div>
         <g:Button ui:field="showLeaderboardButtonUi" text="{i18n.showLeaderboard}"
-            addStyleNames="{style.showLeaderboardButton} {spr.css.inverseButton}" />
-        <div class="{style.splitter1px}" />
+            addStyleNames="{spmr.css.showLeaderboardButton} {spr.css.inverseButton}" />
+        <div class="{spmr.css.regattaSplitter1px}" />
     </g:HTMLPanel>
 </ui:UiBinder> 

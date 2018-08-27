@@ -4,19 +4,12 @@
     xmlns:ms="urn:import:com.sap.sailing.gwt.home.mobile.partials.section">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:with field="spr"
-        type="com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfileResources" />
-    <ui:style>
-        .panel{
-        font-size: 0.8em;
-        font-weight: normal;
-        background-color: white;
-        }
-    </ui:style>
+    <ui:with field="spmr"
+        type="com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfileMobileResources" />
     <g:HTMLPanel>
-        <div ui:field="sectionTitleUi" class="{spr.css.mobileEventTableHeader}" />
+        <div ui:field="sectionTitleUi" class="{spmr.css.mobileEventTableHeader}" />
         <g:HTMLPanel ui:field="contentContainerRegattasUi"
-            addStyleNames="{style.panel} {res.mediaCss.columns}">
+            addStyleNames="{spmr.css.eventEntryPanel} {res.mediaCss.columns}">
         </g:HTMLPanel>
     </g:HTMLPanel>
 </ui:UiBinder> 

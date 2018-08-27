@@ -1,0 +1,100 @@
+.eventEntryPanel {
+    font-size: 0.8em;
+    font-weight: normal;
+    background-color: white;
+}
+
+.regattaEntryPanel {
+    font-size: 0.8em;
+    font-weight: normal;
+}
+
+.sumPoints {
+    font-weight: bold;
+    background-color: #ebebeb;
+    border: 1px solid #cccccc;
+    border-radius: 2px;
+    padding: 0.5em;
+    vertical-align: middle;
+    display: inline-block;
+}
+
+.regattaName {
+    margin-top: 1em;
+    font-size: 1.333333em;
+    margin-bottom: 1em;
+}
+
+.regattaRank {
+    font-weight: bold;
+    display: inline-block;
+}
+
+.competitor {
+    font-weight: bold;
+    display: inline-block;
+    margin-bottom: 0.1em;
+    margin-left: 1em;
+}
+
+.regattaInfoLeft {
+    display: inline-block;
+}
+
+.regattaInfoRight {
+    display: inline-block;
+    right: 1em;
+    position: absolute;
+    vertical-align: middle;
+}
+
+.showLeaderboardButton {
+    display: block;
+    width: 100%;
+    margin-top: 1em;
+}
+
+.regattaSplitter1px {
+    margin-left: -1.66666666667em;
+    margin-right: -1.66666666667em;
+    border-bottom: 1px solid #ccc;
+    margin-top: 1em;
+}
+
+.detailsSectionPanel {
+    font-size: 1.3333em;
+    font-weight: bold;
+    margin-bottom: 3px;
+    margin-top: 10px;
+}
+
+.competitorWithClubnameItemDescriptionId {
+    display: inline-block;
+    font-weight: 600;
+    font-size: 0.8em;
+    min-width: 5.5em;
+    margin-left: 3px;
+}
+
+.competitorWithClubnameItemDescriptionClubname {
+    display: inline-block;
+    font-weight: normal;
+    font-size: 0.8em;
+    margin-left: 5px;
+}
+
+.mobileEventTableHeader {
+    font-weight: normal;
+    font-size: 0.8em;
+    padding-left: 0;
+    text-align: center;
+    color: white;
+    background-color: #008fcc;
+}
+
+.overviewPanel h3 {
+    font-size: 1.3333em;
+    font-weight: bold;
+    margin-bottom: 3px;
+    margin-top: 10px;
+}

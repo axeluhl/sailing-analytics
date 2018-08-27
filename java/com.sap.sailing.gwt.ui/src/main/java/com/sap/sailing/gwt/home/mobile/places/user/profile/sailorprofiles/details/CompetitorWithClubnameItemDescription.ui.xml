@@ -6,11 +6,14 @@
         type="com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionResources" />
     <ui:with field="spr"
         type="com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfileResources" />
+    <ui:with field="spmr"
+        type="com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfileMobileResources" />
+
     <div>
         <div
             class="{local_res.css.suggestionsItemDescriptionImage} {spr.css.competitorWithoutClubnameItemDescription} "
             ui:field="flagImageUi"></div>
-        <span class="{spr.css.competitorWithClubnameItemDescriptionClubname} " ui:field="sailIdUi"></span>
-        <span class=" {spr.css.competitorWithClubnameItemDescriptionId}" ui:field="clubnameUi"></span>
+        <span class="{spmr.css.competitorWithClubnameItemDescriptionClubname} " ui:field="sailIdUi"></span>
+        <span class=" {spmr.css.competitorWithClubnameItemDescriptionId}" ui:field="clubnameUi"></span>
     </div>
 </ui:UiBinder> 

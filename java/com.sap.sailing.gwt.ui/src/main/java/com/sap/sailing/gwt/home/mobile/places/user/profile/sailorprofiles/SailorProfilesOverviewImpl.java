@@ -35,6 +35,7 @@ public class SailorProfilesOverviewImpl extends Composite implements SailorProfi
 
     public SailorProfilesOverviewImpl() {
         initWidget(uiBinder.createAndBindUi(this));
+        SailorProfileMobileResources.INSTANCE.css().ensureInjected();
     }
 
     @Override

@@ -6,14 +6,9 @@
     xmlns:p="urn:import:com.sap.sailing.gwt.home.mobile.partials">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:style>
-        .panel{
-        font-size: 1.3333em;
-        font-weight: bold;
-        margin-bottom: 3px;
-        margin-top:10px;
-        }
-    </ui:style>
+    <ui:with field="spmr"
+        type="com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfileMobileResources" />
+
     <g:HTMLPanel addStyleNames="{res.mediaCss.grid}">
         <g:FlowPanel addStyleNames="{res.mediaCss.column} {res.mediaCss.small12}" ui:field="contentUi">
             <ms:MobileSection>
@@ -23,7 +18,7 @@
                 </ms:header>
                 <ms:content>
                     <g:HTMLPanel ui:field="contentContainerCompetitorsUi"
-                        addStyleNames="{style.panel} {res.mainCss.spacermarginbottomsmall}">
+                        addStyleNames="{spmr.css.detailsSectionPanel} {res.mainCss.spacermarginbottomsmall}">
                     </g:HTMLPanel>
                 </ms:content>
             </ms:MobileSection>
@@ -35,7 +30,7 @@
                 </ms:header>
                 <ms:content>
                     <g:HTMLPanel ui:field="contentContainerImagesUi"
-                        addStyleNames="{style.panel} {res.mainCss.spacermarginbottomsmall}">
+                        addStyleNames="{spmr.css.detailsSectionPanel} {res.mainCss.spacermarginbottomsmall}">
                     </g:HTMLPanel>
                 </ms:content>
             </ms:MobileSection>
@@ -47,7 +42,7 @@
                 </ms:header>
                 <ms:content>
                     <g:HTMLPanel ui:field="contentContainerBoatclassesUi"
-                        addStyleNames="{style.panel} {res.mainCss.spacermarginbottomsmall}">
+                        addStyleNames="{spmr.css.detailsSectionPanel} {res.mainCss.spacermarginbottomsmall}">
                     </g:HTMLPanel>
                 </ms:content>
             </ms:MobileSection>
@@ -70,7 +65,7 @@
                 </ms:header>
                 <ms:content>
                     <g:HTMLPanel ui:field="contentContainerStatisticsUi"
-                        addStyleNames="{style.panel} {res.mainCss.spacermarginbottomsmall}">
+                        addStyleNames="{spmr.css.detailsSectionPanel} {res.mainCss.spacermarginbottomsmall}">
                     </g:HTMLPanel>
                 </ms:content>
             </ms:MobileSection>
@@ -82,7 +77,7 @@
                 </ms:header>
                 <ms:content>
                     <g:HTMLPanel ui:field="contentContainerPolarDiagramUi"
-                        addStyleNames="{style.panel} {res.mainCss.spacermarginbottomsmall}">
+                        addStyleNames="{spmr.css.detailsSectionPanel} {res.mainCss.spacermarginbottomsmall}">
                     </g:HTMLPanel>
                 </ms:content>
             </ms:MobileSection>
