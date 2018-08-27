@@ -12,29 +12,26 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
     private static final long serialVersionUID = 7213518902555323432L;
 
     private final String tag, comment, imageURL, username;
-    private final boolean visibleForPublic;
     private TimePoint revokedAt;
 
-    public RaceLogTagEventImpl(String tag, String comment, String imageURL, boolean visibleForPublic,
-            TimePoint createdAt, TimePoint logicalTimePoint, AbstractLogEventAuthor author, Serializable id,
-            int passId) {
+    public RaceLogTagEventImpl(String tag, String comment, String imageURL, TimePoint createdAt,
+            TimePoint logicalTimePoint, AbstractLogEventAuthor author, Serializable id, int passId) {
         super(createdAt, logicalTimePoint, author, id, passId);
         this.tag = tag;
         this.comment = comment;
         this.imageURL = imageURL;
-        this.visibleForPublic = visibleForPublic;
         username = author.getName();
         revokedAt = null;
     }
 
-    public RaceLogTagEventImpl(String tag, String comment, String imageURL, boolean visibleForPublic,
-            TimePoint createdAt, TimePoint logicalTimePoint, AbstractLogEventAuthor author, int passId) {
-        this(tag, comment, imageURL, visibleForPublic, createdAt, logicalTimePoint, author, randId(), passId);
+    public RaceLogTagEventImpl(String tag, String comment, String imageURL, TimePoint createdAt,
+            TimePoint logicalTimePoint, AbstractLogEventAuthor author, int passId) {
+        this(tag, comment, imageURL, createdAt, logicalTimePoint, author, randId(), passId);
     }
 
-    public RaceLogTagEventImpl(String tag, String comment, String imageURL, boolean visibleForPublic,
-            TimePoint logicalTimePoint, AbstractLogEventAuthor author, int passId) {
-        this(tag, comment, imageURL, visibleForPublic, now(), logicalTimePoint, author, randId(), passId);
+    public RaceLogTagEventImpl(String tag, String comment, String imageURL, TimePoint logicalTimePoint,
+            AbstractLogEventAuthor author, int passId) {
+        this(tag, comment, imageURL, now(), logicalTimePoint, author, randId(), passId);
     }
 
     @Override
@@ -55,11 +52,6 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
     @Override
     public String getUsername() {
         return username;
-    }
-
-    @Override
-    public boolean isVisibleForPublic() {
-        return visibleForPublic;
     }
 
     /**
@@ -132,6 +124,6 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
     @Override
     public String toString() {
         return "RaceLogTagEvent [tag=" + tag + ", comment=" + comment + ", imageURL=" + imageURL + ", username="
-                + username + ", visibleForPublic=" + visibleForPublic + ", revokedAt=" + revokedAt + "]";
+                + username +  ", revokedAt=" + revokedAt + "]";
     }
 }

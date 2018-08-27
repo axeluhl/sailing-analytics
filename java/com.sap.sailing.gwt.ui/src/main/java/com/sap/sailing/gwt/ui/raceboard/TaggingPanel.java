@@ -274,7 +274,7 @@ public class TaggingPanel extends ComponentWithoutSettings
 
             SafeHtml cell;
             // TODO: As soon as permission-vertical branch got merged into master, apply
-            // new permission system at this if-statement and remove this old way of 
+            // new permission system at this if-statement and remove this old way of
             // checking for permissions. (see bug 4104, comment 9)
             // functionality: Check if user has the permission to delete this tag.
             if (!isPreviewCell && userService.getCurrentUser() != null
@@ -1378,6 +1378,92 @@ public class TaggingPanel extends ComponentWithoutSettings
         }
     }
 
+    public class TagDTOJSONDeSerializer {
+
+        private static final String FIELD_TAGS = "tags";
+        private static final String FIELD_TAG = "tag";
+        private static final String FIELD_COMMENT = "comment";
+        private static final String FIELD_IMAGE_URL = "image";
+        private static final String FIELD_USERNAME = "username";
+        private static final String FIELD_VISIBLE_FOR_PUBLIC = "public";
+        private static final String FIELD_RACE_TIMEPOINT = "raceTimepoint";
+        private static final String FIELD_CREATED_AT = "createdAt";
+        private static final String FIELD_REVOKED_AT = "revokedAt";
+
+        public JSONObject serialize(List<TagDTO> tags) {
+            JSONObject result = new JSONObject();
+
+            JSONArray tagsArray = new JSONArray();
+            result.put(FIELD_TAGS, tagsArray);
+
+            int i = 0;
+            for (TagDTO tag : tags) {
+                JSONObject tagObject = new JSONObject();
+                tagsArray.set(i++, tagObject);
+                tagObject.put(FIELD_TAG, new JSONString(tag.getTag()));
+                tagObject.put(FIELD_COMMENT, new JSONString(tag.getComment()));
+                tagObject.put(FIELD_IMAGE_URL, new JSONString(tag.getImageURL()));
+                tagObject.put(FIELD_USERNAME, new JSONString(tag.getUsername()));
+                tagObject.put(FIELD_VISIBLE_FOR_PUBLIC, JSONBoolean.getInstance(tag.isVisibleForPublic()));
+                tagObject.put(FIELD_RACE_TIMEPOINT, timePointToString(tag.getRaceTimepoint()));
+                tagObject.put(FIELD_CREATED_AT, timePointToString(tag.getCreatedAt()));
+                tagObject.put(FIELD_REVOKED_AT, timePointToString(tag.getRevokedAt()));
+            }
+            return result;
+        }
+
+        public List<TagDTO> deserialize(JSONObject rootObject) {
+            List<TagDTO> result = null;
+            if (rootObject != null) {
+                result = new ArrayList<TagDTO>();
+                JSONArray tagsArray = (JSONArray) rootObject.get(FIELD_TAGS);
+                for (int i = 0; i < tagsArray.size(); i++) {
+                    JSONObject tagValue = (JSONObject) tagsArray.get(i);
+                    JSONString tag = (JSONString) tagValue.get(FIELD_TAG);
+                    JSONString comment = (JSONString) tagValue.get(FIELD_COMMENT);
+                    JSONString imageURL = (JSONString) tagValue.get(FIELD_IMAGE_URL);
+                    JSONString username = (JSONString) tagValue.get(FIELD_USERNAME);
+
+                    boolean visibleForPublic = Boolean.valueOf(tagValue.get(FIELD_VISIBLE_FOR_PUBLIC).toString());
+
+                    TimePoint raceTimepoint = deserilizeTimePoint(
+                            ((JSONString) (tagValue.get(FIELD_RACE_TIMEPOINT))).stringValue());
+                    TimePoint createdAt = deserilizeTimePoint(
+                            ((JSONString) (tagValue.get(FIELD_CREATED_AT))).stringValue());
+                    TimePoint revokedAt = deserilizeTimePoint(
+                            ((JSONString) (tagValue.get(FIELD_REVOKED_AT))).stringValue());
+                    result.add(new TagDTO(tag.stringValue(), comment.stringValue(), imageURL.stringValue(),
+                            username.stringValue(), visibleForPublic, raceTimepoint, createdAt, revokedAt));
+                }
+            }
+            return result;
+        }
+
+        private JSONString timePointToString(TimePoint timepoint) {
+            if (timepoint != null) {
+                return new JSONString(Long.toString(timepoint.asMillis()));
+            } else {
+                return new JSONString("");
+            }
+        }
+
+        private TimePoint deserilizeTimePoint(String timepoint) {
+            if (!timepoint.isEmpty()) {
+                return new MillisecondsTimePoint(Long.parseLong(timepoint));
+            } else {
+                return null;
+            }
+        }
+
+        public String createIdenticalKeyFromThreeStrings(String racecolumn, String fleet, String leaderboard) {
+            return "Private tags:" + escape(racecolumn) + "+" + escape(fleet) + "+" + escape(leaderboard);
+        }
+
+        private String escape(String string) {
+            return string.replaceAll("/", "//").replaceAll("\\+", "/p");
+        }
+    }
+
     private final TagPanelResources resources;
     private final TagPanelStyle style;
 
@@ -1479,57 +1565,162 @@ public class TaggingPanel extends ComponentWithoutSettings
         if (raceColumn != null && !raceColumn.equals(this.raceColumn)) {
             this.raceColumn = raceColumn;
         }
+        loadAllPrivateTags(new AsyncCallback<List<TagDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+
+            @Override
+            public void onSuccess(List<TagDTO> result) {
+                if (result != null) {
+                    result.forEach(privateTag -> tagListProvider.getAllTags().add(privateTag));
+                }
+            }
+        });
     }
 
-    private void addTagToRaceLog(String tag, String comment, String imageURL, boolean isPublic) {
+    private void addTagToRaceLog(String tag, String comment, String imageURL, boolean isVisibleForPublic) {
         if (isLoggedInAndRaceLogAvailable()) {
             if (!tag.isEmpty()) {
-                sailingService.addTagToRaceLog(leaderboardName, raceColumn.getName(), fleet.getName(), tag, comment,
-                        imageURL, isPublic, new MillisecondsTimePoint(timer.getTime()),
-                        new AsyncCallback<SuccessInfo>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                Notification.notify(stringMessages.tagNotAddedReason(caught.toString()),
-                                        NotificationType.ERROR);
-                            }
-
-                            @Override
-                            public void onSuccess(SuccessInfo result) {
-                                if (result.isSuccessful()) {
-                                    Notification.notify(stringMessages.tagAddedSuccessfully(), NotificationType.INFO);
-                                } else {
-                                    Notification.notify(stringMessages.tagNotAddedReason(result.getMessage()),
+                if (isVisibleForPublic) {// public tags are saved in race log so others can access them, private ones in
+                                         // the user storage
+                    sailingService.addTagToRaceLog(leaderboardName, raceColumn.getName(), fleet.getName(), tag, comment,
+                            imageURL, new MillisecondsTimePoint(timer.getTime()), new AsyncCallback<SuccessInfo>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    Notification.notify(stringMessages.tagNotAddedReason(caught.toString()),
                                             NotificationType.ERROR);
                                 }
-                            }
-                        });
+
+                                @Override
+                                public void onSuccess(SuccessInfo result) {
+                                    if (result.isSuccessful()) {
+                                        Notification.notify(stringMessages.tagAddedSuccessfully(),
+                                                NotificationType.INFO);
+                                    } else {
+                                        Notification.notify(stringMessages.tagNotAddedReason(result.getMessage()),
+                                                NotificationType.ERROR);
+                                    }
+                                }
+                            });
+                } else {
+                    loadAllPrivateTags(new AsyncCallback<List<TagDTO>>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                        }
+
+                        @Override
+                        public void onSuccess(List<TagDTO> loadedPrivateTags) {
+                            // remove all private tags
+                            tagListProvider.getAllTags().removeIf(tag -> !tag.isVisibleForPublic());
+                            // add new ones
+                            loadedPrivateTags.forEach(tag -> tagListProvider.getAllTags().add(tag));
+
+                            TagDTO newTag = new TagDTO(tag, comment, imageURL, userService.getCurrentUser().getName(),
+                                    false, new MillisecondsTimePoint(timer.getTime()), MillisecondsTimePoint.now());
+
+                            // Add new Tag to loaded private tags
+                            loadedPrivateTags.add(newTag);
+
+                            // store list of loaded private tags also containing the new tag
+                            TagDTOJSONDeSerializer serializer = new TagDTOJSONDeSerializer();
+                            JSONObject jsonObject = serializer.serialize(loadedPrivateTags);
+                            userService
+                                    .setPreference(
+                                            serializer.createIdenticalKeyFromThreeStrings(leaderboardName,
+                                                    raceColumn.getName(), fleet.getName()),
+                                            jsonObject.toString(), new AsyncCallback<Void>() {
+                                                @Override
+                                                public void onFailure(Throwable caught) {
+                                                    Notification.notify(stringMessages.tagButtonNotSavable(),
+                                                            NotificationType.WARNING);
+                                                }
+
+                                                @Override
+                                                public void onSuccess(Void result) {
+                                                    tagListProvider.getAllTags().add(newTag);// add new tag to
+                                                                                             // TagListProvider
+                                                    updateContent();
+                                                }
+                                            });
+                        }
+                    });// refresh private tags
+                }
             } else {
                 Notification.notify(stringMessages.tagNotSpecified(), NotificationType.WARNING);
             }
         }
     }
 
-    private void removeTagFromRaceLog(TagDTO tag) {
-        sailingService.removeTagFromRaceLog(leaderboardName, raceColumn.getName(), fleet.getName(), tag,
-                new AsyncCallback<SuccessInfo>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        Notification.notify(stringMessages.tagNotRemoved(), NotificationType.ERROR);
-                        GWT.log(caught.toString());
-                    }
+    private void removeTagFromRaceLog(TagDTO tagToRemove) {
+        if (tagToRemove.isVisibleForPublic()) {// remove the public tag from the race log
+            sailingService.removeTagFromRaceLog(leaderboardName, raceColumn.getName(), fleet.getName(), tagToRemove,
+                    new AsyncCallback<SuccessInfo>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            Notification.notify(stringMessages.tagNotRemoved(), NotificationType.ERROR);
+                            GWT.log(caught.toString());
+                        }
 
-                    @Override
-                    public void onSuccess(SuccessInfo result) {
-                        if (result.isSuccessful()) {
-                            tagListProvider.getAllTags().remove(tag);
-                            updateContent();
-                            Notification.notify(stringMessages.tagRemovedSuccessfully(), NotificationType.SUCCESS);
-                        } else {
-                            Notification.notify(stringMessages.tagNotRemoved() + " " + result.getMessage(),
-                                    NotificationType.ERROR);
+                        @Override
+                        public void onSuccess(SuccessInfo result) {
+                            if (result.isSuccessful()) {
+                                tagListProvider.getAllTags().remove(tagToRemove);
+                                updateContent();
+                                Notification.notify(stringMessages.tagRemovedSuccessfully(), NotificationType.SUCCESS);
+                            } else {
+                                Notification.notify(stringMessages.tagNotRemoved() + " " + result.getMessage(),
+                                        NotificationType.ERROR);
+                            }
+                        }
+                    });
+        } else {// remove the private tag from the user storage
+            loadAllPrivateTags(new AsyncCallback<List<TagDTO>>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                }
+
+                @Override
+                public void onSuccess(List<TagDTO> loadedPrivateTags) {
+                    // remove all private tags
+                    tagListProvider.getAllTags().removeIf(tag -> !tag.isVisibleForPublic());
+                    // add new ones
+                    loadedPrivateTags.forEach(tag -> tagListProvider.getAllTags().add(tag));
+
+                    // list containing all private tags except the one tag which shall be deleted
+                    List<TagDTO> updatedPrivateTags = new ArrayList<TagDTO>();
+                    for (TagDTO tag : tagListProvider.getAllTags()) {
+                        if (!tag.isVisibleForPublic() && !tag.equals(tagToRemove)) {
+                            updatedPrivateTags.add(tag);
                         }
                     }
-                });
+
+                    // store list in user storage
+                    TagDTOJSONDeSerializer serializer = new TagDTOJSONDeSerializer();
+                    JSONObject jsonObject = serializer.serialize(updatedPrivateTags);
+                    userService.setPreference(serializer.createIdenticalKeyFromThreeStrings(leaderboardName,
+                            raceColumn.getName(), fleet.getName()), jsonObject.toString(), new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                }
+
+                                @Override
+                                public void onSuccess(Void result) {
+                                    tagListProvider.getAllTags().removeIf(tag -> !tag.isVisibleForPublic());// remove
+                                                                                                            // old
+                                                                                                            // private
+                                                                                                            // tags
+                                    updatedPrivateTags.forEach(tag -> tagListProvider.getAllTags().add(tag));// add
+                                                                                                             // updated
+                                                                                                             // private
+                                                                                                             // tags
+                                                                                                             // again
+                                    updateContent();
+                                }
+                            });
+                }
+            });
+        }
     }
 
     private boolean isLoggedInAndRaceLogAvailable() {
@@ -1541,6 +1732,35 @@ public class TaggingPanel extends ComponentWithoutSettings
         tagListProvider.updateFilteredTags();
         tagCellList.setVisibleRange(0, tagListProvider.getFilteredTagsListSize());
         tagListProvider.refresh();
+    }
+
+    private void loadAllPrivateTags(AsyncCallback<List<TagDTO>> callback) {
+        if (userService.getCurrentUser() != null) {// only reload tags if user is logged in
+
+            TagDTOJSONDeSerializer tagDTODeSerializer = new TagDTOJSONDeSerializer();
+            // tagListProvider.getAllTags().removeIf(tag -> !tag.isVisibleForPublic());//remove all private tags
+
+            // load all private tags from user storage
+            userService.getPreference(tagDTODeSerializer.createIdenticalKeyFromThreeStrings(leaderboardName,
+                    raceColumn.getName(), fleet.getName()), new AsyncCallback<String>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                        }
+
+                        @Override
+                        public void onSuccess(String result) {
+                            // parse and deserialize String result into List of private tags
+                            if (result != null && !result.isEmpty()) {
+                                final JSONValue value = JSONParser.parseStrict(result);
+                                if (value.isObject() != null) {
+                                    callback.onSuccess(tagDTODeSerializer.deserialize((JSONObject) value));
+                                }
+                            }
+                        }
+                    });
+        } else {
+            callback.onSuccess(null);// should not happen
+        }
     }
 
     @Override
@@ -1602,6 +1822,16 @@ public class TaggingPanel extends ComponentWithoutSettings
         tagListProvider.getAllTags().clear();
         raceTimesInfoProvider.getRaceIdentifiers().forEach((raceIdentifier) -> {
             raceTimesInfoProvider.setLatestReceivedTagTime(raceIdentifier, null);
+        });
+        loadAllPrivateTags(new AsyncCallback<List<TagDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+
+            @Override
+            public void onSuccess(List<TagDTO> result) {
+                result.forEach(tag -> tagListProvider.getAllTags().add(tag));
+            }
         });
         filterbarPanel.loadTagFilterSets();
         tagCreationPanel.loadAllTagButtons();

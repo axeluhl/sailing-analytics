@@ -13,8 +13,6 @@ public interface RaceLogTagEvent extends RaceLogEvent, Revokable {
 
     String getImageURL();
 
-    boolean isVisibleForPublic();
-
     void markAsRevoked(TimePoint revokedAt);
 
     TimePoint getRevokedAt();

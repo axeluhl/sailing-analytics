@@ -2234,7 +2234,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
         RaceTimesInfoDTO raceTimesInfo = getRaceTimesInfo(raceIdentifier);
         List<TagDTO> tags = new ArrayList<TagDTO>();
         raceTimesInfo.setTags(tags);
-        Subject subject = SecurityUtils.getSubject();
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         Iterable<RaceLog> raceLogs = trackedRace.getAttachedRaceLogs();
 
@@ -2243,21 +2242,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
             Iterable<RaceLogTagEvent> foundTagEvents = raceState.getTagEvents();
             for (RaceLogTagEvent tagEvent : foundTagEvents) {
                 // TODO: As soon as permission-vertical branch got merged into master, apply
-                // new permission system at this if-statement and remove this old way of 
+                // new permission system at this if-statement and remove this old way of
                 // checking for permissions. (see bug 4104, comment 9)
                 // functionality: Check if user has the permission to see this tag.
-                if (tagEvent.isVisibleForPublic() || (subject.getPrincipals() != null
-                        && (subject.getPrincipals().getPrimaryPrincipal().equals(tagEvent.getUsername())
-                                || subject.hasRole("admin")))) {
-                    if ((latestReceivedTagTime == null && tagEvent.getRevokedAt() == null)
-                            || (latestReceivedTagTime != null && tagEvent.getRevokedAt() == null
-                                    && tagEvent.getCreatedAt().after(latestReceivedTagTime))
-                            || (latestReceivedTagTime != null && tagEvent.getRevokedAt() != null
-                                    && tagEvent.getRevokedAt().after(latestReceivedTagTime))) {
-                        tags.add(new TagDTO(tagEvent.getTag(), tagEvent.getComment(), tagEvent.getImageURL(),
-                                tagEvent.getUsername(), tagEvent.isVisibleForPublic(), tagEvent.getLogicalTimePoint(),
-                                tagEvent.getCreatedAt(), tagEvent.getRevokedAt()));
-                    }
+                if ((latestReceivedTagTime == null && tagEvent.getRevokedAt() == null)
+                        || (latestReceivedTagTime != null && tagEvent.getRevokedAt() == null
+                                && tagEvent.getCreatedAt().after(latestReceivedTagTime))
+                        || (latestReceivedTagTime != null && tagEvent.getRevokedAt() != null
+                                && tagEvent.getRevokedAt().after(latestReceivedTagTime))) {
+                    tags.add(new TagDTO(tagEvent.getTag(), tagEvent.getComment(), tagEvent.getImageURL(),
+                            tagEvent.getUsername(), true, tagEvent.getLogicalTimePoint(), tagEvent.getCreatedAt(),
+                            tagEvent.getRevokedAt()));
                 }
             }
         }
@@ -6484,29 +6479,29 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
 
     @Override
     public SuccessInfo addTagToRaceLog(String leaderboardName, String raceColumnName, String fleetName, String tag,
-            String comment, String imageURL, boolean isPublic, TimePoint raceTimepoint) {
+            String comment, String imageURL, TimePoint raceTimepoint) {
         SuccessInfo successInfo = new SuccessInfo(true, null, null, null);
         try {
-            if(tag.length() > TagDTO.MAX_TAG_LENGTH) {
+            if (tag.length() > TagDTO.MAX_TAG_LENGTH) {
                 throw new Exception("tagTagIsToLong");
             }
-            if(comment.length() > TagDTO.MAX_COMMENT_LENGTH) {
+            if (comment.length() > TagDTO.MAX_COMMENT_LENGTH) {
                 throw new Exception("tagCommentIsToLong");
             }
-            if(imageURL.length() > TagDTO.MAX_IMAGE_URL_LENGTH) {
+            if (imageURL.length() > TagDTO.MAX_IMAGE_URL_LENGTH) {
                 throw new Exception("tagImageURLIsToLong");
             }
             SecurityUtils.getSubject().checkPermission(
                     Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
             RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
-            raceLog.add(new RaceLogTagEventImpl(tag, comment, imageURL, isPublic, raceTimepoint,
-                    getService().getServerAuthor(), raceLog.getCurrentPassId()));
+            raceLog.add(new RaceLogTagEventImpl(tag, comment, imageURL, raceTimepoint, getService().getServerAuthor(),
+                    raceLog.getCurrentPassId()));
         } catch (AuthorizationException e) {
             successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "tagMissingPermissions"),
                     null, null);
         } catch (Exception e) {
-            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), e.getMessage()),
-                    null, null);           
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), e.getMessage()), null,
+                    null);
         }
         return successInfo;
     }
@@ -8372,8 +8367,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
                         // TODO check if if condition is correct D067890
                         if (hasStartTime && isLatestPass(event)) {
                             raceLog.add(new RaceLogTagEventImpl(event.getTag(), event.getComment(), event.getImageURL(),
-                                    event.isVisibleForPublic(), event.getCreatedAt(), event.getLogicalTimePoint(),
-                                    event.getAuthor(), raceLog.getCurrentPassId()));
+                                    event.getCreatedAt(), event.getLogicalTimePoint(), event.getAuthor(),
+                                    raceLog.getCurrentPassId()));
                         }
                     }
 
