@@ -2101,6 +2101,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String tagCreated(String author, String time);
     String tagNoTagsFound();
     String tagAddTag();
+    String tagAddTags();
     String tagAddedSuccessfully();
     String tagNotAdded();
     String tagNotAddedReason(String reason);
@@ -2132,9 +2133,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String tagButtonConfirmDeletion(String tagButton);
     String tagFilterNotSavable();
     String tagCurrentFilter();
+    String tagCreateFilterNotLoggedIn();
+    String tagCreateFilterHint();
+    String tagButtonNotSavable();
     String confirm();
     String cancel();
-    String createTagFilterNotLoggedIn();
-    String createTagFilterHint();
-    String tagButtonNotSavable();
+    String close();
 }

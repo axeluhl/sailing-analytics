@@ -1,11 +1,8 @@
+.cellListWidget,
 .cellListEvenItem,
 .cellListOddItem,
 .cellListEventItem{
 	
-}
-
-.cellListWidget {
-	margin-bottom: 15px;
 }
 
 .cellListSelectedItem,
