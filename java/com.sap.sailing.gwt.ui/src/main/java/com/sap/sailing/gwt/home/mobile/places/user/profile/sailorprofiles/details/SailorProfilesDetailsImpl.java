@@ -143,7 +143,8 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
     private void setEvents(Iterable<ParticipatedEventDTO> participatedEvents) {
         for (ParticipatedEventDTO event : participatedEvents) {
             contentContainerEventsUi.add(new SailorProfileEventEntry(event,
-                    presenter.getSharedSailorProfilePresenter().getPlaceController()));
+                    presenter.getSharedSailorProfilePresenter().getPlaceController(),
+                    presenter.getFlagImageResolver()));
         }
     }
 }

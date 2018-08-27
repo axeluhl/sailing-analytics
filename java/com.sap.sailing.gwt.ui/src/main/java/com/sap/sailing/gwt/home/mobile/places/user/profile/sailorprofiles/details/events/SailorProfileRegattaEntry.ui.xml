@@ -34,6 +34,7 @@
         font-weight:bold;
         display:inline-block;
         margin-bottom: 0.1em;
+        margin-left: 1em;
         }
         .regattaInfoLeft{
         display:inline-block;
@@ -56,12 +57,11 @@
         margin-top: 1em;
         }
     </ui:style>
-    <g:HTMLPanel ui:field="contentContainerRegattasUi"
-        addStyleNames="{style.panel}">
+    <g:HTMLPanel ui:field="contentContainerRegattasUi" addStyleNames="{style.panel}">
         <div ui:field="regattaNameUi" class="{style.regattaName}" />
         <div class="{style.regattaInfoLeft}">
             <div ui:field="regattaRankUi" class="{style.regattaRank}" />
-            <div ui:field="competitorUi" class="{style.competitor}" />
+            <g:FlowPanel ui:field="competitorUi" addStyleNames="{style.competitor}" />
             <div ui:field="clubNameUi" />
         </div>
         <div class="{style.regattaInfoRight}">

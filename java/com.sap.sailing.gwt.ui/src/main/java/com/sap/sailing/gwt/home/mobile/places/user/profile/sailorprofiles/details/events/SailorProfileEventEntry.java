@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedEventDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedRegattaDTO;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 
 public class SailorProfileEventEntry extends Composite {
 
@@ -31,7 +32,8 @@ public class SailorProfileEventEntry extends Composite {
 
     private final PlaceController placeController;
 
-    public SailorProfileEventEntry(ParticipatedEventDTO event, PlaceController placeController) {
+    public SailorProfileEventEntry(ParticipatedEventDTO event, PlaceController placeController,
+            FlagImageResolver flagImageResolver) {
         initWidget(uiBinder.createAndBindUi(this));
         this.placeController = placeController;
         this.eventId = event.getEventId();
@@ -42,13 +44,14 @@ public class SailorProfileEventEntry extends Composite {
         gotoEventButton.addClickHandler((e) -> placeController.goTo(new EventDefaultPlace(eventId)));
 
         sectionTitleUi.appendChild(gotoEventButton.getElement());
-        buildRegattaUis(event.getParticipatedRegattas());
+        buildRegattaUis(event.getParticipatedRegattas(), flagImageResolver);
     }
 
-    private void buildRegattaUis(Iterable<ParticipatedRegattaDTO> regattas) {
+    private void buildRegattaUis(Iterable<ParticipatedRegattaDTO> regattas, FlagImageResolver flagImageResolver) {
         this.contentContainerRegattasUi.clear();
         for (ParticipatedRegattaDTO regatta : regattas) {
-            this.contentContainerRegattasUi.add(new SailorProfileRegattaEntry(regatta, placeController));
+            this.contentContainerRegattasUi
+                    .add(new SailorProfileRegattaEntry(regatta, placeController, flagImageResolver));
         }
     }
 

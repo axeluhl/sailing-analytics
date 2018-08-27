@@ -9,10 +9,13 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedRegattaDTO;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab.RegattaLeaderboardPlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.events.CompetitorWithoutClubnameItemDescription;
+import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 
 public class SailorProfileRegattaEntry extends Composite {
 
@@ -28,7 +31,7 @@ public class SailorProfileRegattaEntry extends Composite {
     DivElement regattaRankUi;
 
     @UiField
-    DivElement competitorUi;
+    FlowPanel competitorUi;
 
     @UiField
     DivElement clubNameUi;
@@ -46,14 +49,18 @@ public class SailorProfileRegattaEntry extends Composite {
 
     private final PlaceController placeController;
 
-    public SailorProfileRegattaEntry(ParticipatedRegattaDTO regatta, PlaceController placeController) {
+    public SailorProfileRegattaEntry(ParticipatedRegattaDTO regatta, PlaceController placeController,
+            FlagImageResolver flagImageResolver) {
         initWidget(uiBinder.createAndBindUi(this));
         this.placeController = placeController;
         this.regattaId = regatta.getRegattaId();
         this.eventId = regatta.getEventId();
         this.regattaNameUi.setInnerText(regatta.getRegattaName());
         this.regattaRankUi.setInnerText("Rank " + regatta.getRegattaRank());
-        this.competitorUi.setInnerText(regatta.getCompetitorDto().getShortInfo());
+        CompetitorWithoutClubnameItemDescription competitorDescription = new CompetitorWithoutClubnameItemDescription(
+                regatta.getCompetitorDto(), flagImageResolver);
+        competitorDescription.fixFlagPosition(-2);
+        this.competitorUi.add(competitorDescription);
         this.clubNameUi.setInnerText(regatta.getCompetitorDto().getName());
         this.sumPointsUi.setInnerText("" + regatta.getSumPoints());
 
