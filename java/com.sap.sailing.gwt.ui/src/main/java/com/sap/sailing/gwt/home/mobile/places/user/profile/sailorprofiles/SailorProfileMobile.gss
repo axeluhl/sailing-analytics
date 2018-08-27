@@ -2,6 +2,7 @@
     font-size: 0.8em;
     font-weight: normal;
     background-color: white;
+    float: none;
 }
 
 .regattaEntryPanel {
@@ -83,13 +84,16 @@
     margin-left: 5px;
 }
 
-.mobileEventTableHeader {
+.eventTableHeader {
     font-weight: normal;
     font-size: 0.8em;
     padding-left: 0;
     text-align: center;
     color: white;
     background-color: #008fcc;
+    padding-top: 1em;
+    padding-bottom: 1em;
+    width: 100%;
 }
 
 .overviewPanel h3 {
@@ -97,4 +101,20 @@
     font-weight: bold;
     margin-bottom: 3px;
     margin-top: 10px;
+}
+
+.gotoEventButton {
+    position: absolute;
+    right: 1em;
+    -webkit-transform: rotate(270deg);
+    -moz-transform: rotate(270deg);
+    -ms-transform: rotate(270deg);
+    transform: rotate(270deg);
+    width: 1.33333333333em;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.eventTableHeaderText {
+    display: inline-block;
 }
