@@ -11,10 +11,20 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePl
 public class SailorProfilePlace extends AbstractUserProfilePlace implements HasMobileVersion {
 
     private final UUID sailorProfileUuid;
+    private final boolean createNew;
 
     public SailorProfilePlace(UUID sailorProfileUuid) {
+        this(sailorProfileUuid, false);
+    }
+
+    private SailorProfilePlace(UUID sailorProfileUuid, boolean createNew) {
         super();
+        this.createNew = createNew;
         this.sailorProfileUuid = sailorProfileUuid;
+    }
+
+    public SailorProfilePlace(boolean createNew) {
+        this(null, createNew);
     }
 
     public SailorProfilePlace() {
@@ -23,6 +33,10 @@ public class SailorProfilePlace extends AbstractUserProfilePlace implements HasM
 
     public UUID getSailorProfileUuid() {
         return sailorProfileUuid;
+    }
+
+    public boolean isCreateNew() {
+        return createNew;
     }
 
     @Prefix(PlaceTokenPrefixes.SailorProfile)

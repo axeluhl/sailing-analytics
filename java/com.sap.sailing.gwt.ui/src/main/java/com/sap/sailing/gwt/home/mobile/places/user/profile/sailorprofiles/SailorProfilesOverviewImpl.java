@@ -64,7 +64,7 @@ public class SailorProfilesOverviewImpl extends Composite implements SailorProfi
         contentUi.add(lab);
         lab.addClickHandler((event) -> {
             presenter.getClientFactory().getPlaceController()
-                    .goTo(new SailorProfilePlace(SailorProfileDTO.SAILOR_PROFILE_KEY_NEW));
+                    .goTo(new SailorProfilePlace(true));
         });
     }
 }
