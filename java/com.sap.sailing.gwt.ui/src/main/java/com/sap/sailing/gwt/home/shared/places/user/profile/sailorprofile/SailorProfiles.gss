@@ -87,4 +87,20 @@
     background-repeat: no-repeat;
     background-size: contain;
     background-position: center;
+    vertical-align: middle;
+}
+
+.competitorWithClubnameItemDescriptionId {
+    display: inline-block;
+    font-weight: 600;
+    font-size: 0.8em;
+    min-width: 5.5em;
+    margin-left: 3px;
+}
+
+.competitorWithClubnameItemDescriptionClubname {
+    display: inline-block;
+    font-weight: normal;
+    font-size: 0.8em;
+    margin-left: 5px;
 }

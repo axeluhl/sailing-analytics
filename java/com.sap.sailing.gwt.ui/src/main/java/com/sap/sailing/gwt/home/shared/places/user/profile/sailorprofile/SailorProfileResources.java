@@ -42,5 +42,9 @@ public interface SailorProfileResources extends ClientBundle {
         String overviewTableFooterMobile();
 
         String competitorWithoutClubnameItemDescription();
+
+        String competitorWithClubnameItemDescriptionId();
+
+        String competitorWithClubnameItemDescriptionClubname();
     }
 }
