@@ -23,7 +23,6 @@ import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.Sai
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfileResources;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.events.CompetitorWithoutClubnameItemDescription;
 import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserSettingsView;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
@@ -118,7 +117,7 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
 
     private void setCompetitors(Iterable<SimpleCompetitorWithIdDTO> competitors) {
         for (SimpleCompetitorWithIdDTO competitor : competitors) {
-            IsWidget competitorWidget = new CompetitorWithoutClubnameItemDescription(competitor,
+            IsWidget competitorWidget = new CompetitorWithClubnameItemDescription(competitor,
                     presenter.getFlagImageResolver());
             contentContainerCompetitorsUi.add(competitorWidget);
         }
