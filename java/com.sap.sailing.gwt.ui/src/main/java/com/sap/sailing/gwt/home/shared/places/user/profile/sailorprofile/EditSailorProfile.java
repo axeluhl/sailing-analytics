@@ -60,6 +60,7 @@ public class EditSailorProfile extends Composite implements EditSailorProfileVie
         presenter.getDataProvider().setView(this);
         competitorSelectionUi = new EditableSuggestedMultiSelectionCompetitor(presenter, flagImageResolver);
         initWidget(uiBinder.createAndBindUi(this));
+        SailorProfileResources.INSTANCE.css().ensureInjected();
         boatClassesUi.setText(i18n.boatClasses());
         setupTitleChangeListener();
     }

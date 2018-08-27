@@ -57,7 +57,7 @@ public class SailorProfilePlace extends AbstractUserProfilePlace implements HasM
 
         @Override
         public String getToken(SailorProfilePlace place) {
-            return "";
+            return place.getSailorProfileUuid() == null ? "" : place.getSailorProfileUuid().toString();
         }
     }
 }
