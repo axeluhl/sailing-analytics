@@ -50,13 +50,14 @@
         margin-top: 1em;
         }
         .splitter1px{
-        padding-left: -1em;
-        padding-right: -1em;
+        margin-left: -1.66666666667em;
+        margin-right: -1.66666666667em;
         border-bottom: 1px solid #ccc;
+        margin-top: 1em;
         }
     </ui:style>
     <g:HTMLPanel ui:field="contentContainerRegattasUi"
-        addStyleNames="{style.panel} {res.mainCss.spacermarginbottomsmall}">
+        addStyleNames="{style.panel}">
         <div ui:field="regattaNameUi" class="{style.regattaName}" />
         <div class="{style.regattaInfoLeft}">
             <div ui:field="regattaRankUi" class="{style.regattaRank}" />
@@ -68,6 +69,6 @@
         </div>
         <g:Button ui:field="showLeaderboardButtonUi" text="{i18n.showLeaderboard}"
             addStyleNames="{style.showLeaderboardButton} {spr.css.inverseButton}" />
-        <div />
+        <div class="{style.splitter1px}" />
     </g:HTMLPanel>
 </ui:UiBinder> 
