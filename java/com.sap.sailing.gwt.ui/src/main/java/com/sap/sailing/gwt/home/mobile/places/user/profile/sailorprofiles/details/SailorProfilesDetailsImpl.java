@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.detai
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Display;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.DOM;
@@ -73,7 +72,6 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
     @UiField
     HTMLPanel contentContainerPolarDiagramUi;
 
-
     private SailingProfileOverviewPresenter presenter;
 
     public SailorProfilesDetailsImpl() {
@@ -86,9 +84,6 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
         eventsUi.initCollapsibility(contentContainerEventsUi.getElement(), false);
         statisticsUi.initCollapsibility(contentContainerStatisticsUi.getElement(), false);
         polarDiagramUi.initCollapsibility(contentContainerPolarDiagramUi.getElement(), false);
-
-        // remove columns style to get full width for subtables
-        contentContainerEventsUi.getElement().getParentElement().getParentElement().getStyle().setPadding(0, Unit.PX);
     }
 
     @Override
@@ -144,9 +139,9 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
 
     private void setEvents(Iterable<ParticipatedEventDTO> participatedEvents) {
         for (ParticipatedEventDTO event : participatedEvents) {
-            contentContainerEventsUi.add(new SailorProfileEventEntry(event,
-                    presenter.getSharedSailorProfilePresenter().getPlaceController(),
-                    presenter.getFlagImageResolver()));
+            contentContainerEventsUi.add(
+                    new SailorProfileEventEntry(event, presenter.getSharedSailorProfilePresenter().getPlaceController(),
+                            presenter.getFlagImageResolver()));
         }
     }
 }

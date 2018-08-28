@@ -39,8 +39,14 @@ public interface SailorProfileMobileResources extends ClientBundle {
 
         String competitorWithClubnameItemDescriptionClubname();
 
-        String mobileEventTableHeader();
+        String eventTableHeader();
 
         String overviewPanel();
+
+        String gotoEventButton();
+
+        String eventTableHeaderText();
+
+        String detailsEventsContainer();
     }
 }

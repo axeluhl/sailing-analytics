@@ -53,7 +53,8 @@
                         sectionTitle="{i18n.events}" />
                 </ms:header>
                 <ms:content>
-                    <g:HTMLPanel ui:field="contentContainerEventsUi">
+                    <g:HTMLPanel ui:field="contentContainerEventsUi"
+                        addStyleNames="{spmr.css.detailsEventsContainer}">
                     </g:HTMLPanel>
                 </ms:content>
             </ms:MobileSection>

@@ -5,15 +5,15 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedEventDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedRegattaDTO;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfileMobileResources;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
+import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 
 public class SailorProfileEventEntry extends Composite {
@@ -25,6 +25,9 @@ public class SailorProfileEventEntry extends Composite {
 
     @UiField
     DivElement sectionTitleUi;
+
+    @UiField
+    HTMLPanel sectionTitleContainerUi;
 
     @UiField
     HTMLPanel contentContainerRegattasUi;
@@ -40,12 +43,11 @@ public class SailorProfileEventEntry extends Composite {
         this.placeController = placeController;
         this.eventId = event.getEventId();
         this.sectionTitleUi.setInnerText(event.getEventName());
-        Button gotoEventButton = new Button(">");
-        gotoEventButton.addStyleName(SharedResources.INSTANCE.mainCss().spacermarginbottomsmall());
-        gotoEventButton.addStyleName(SharedResources.INSTANCE.mainCss().spacermargintopsmall());
-        gotoEventButton.addClickHandler((e) -> placeController.goTo(new EventDefaultPlace(eventId)));
+        Image img = new Image(SharedHomeResources.INSTANCE.arrowDownWhite());
+        img.addStyleName(SailorProfileMobileResources.INSTANCE.css().gotoEventButton());
+        img.addClickHandler((e) -> placeController.goTo(new EventDefaultPlace(eventId)));
 
-        sectionTitleUi.appendChild(gotoEventButton.getElement());
+        sectionTitleContainerUi.add(img);
         buildRegattaUis(event.getParticipatedRegattas(), flagImageResolver);
     }
 
