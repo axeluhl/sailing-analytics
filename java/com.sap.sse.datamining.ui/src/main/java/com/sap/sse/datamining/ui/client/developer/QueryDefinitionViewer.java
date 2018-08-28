@@ -37,6 +37,7 @@ public class QueryDefinitionViewer extends ComponentWithoutSettings implements Q
     private final HTML codeHtml;
     private final RadioButton useClassGetNameRadioButton;
     private final RadioButton useStringLiteralsRadioButton;
+    private final Button copyToClipboardButton;
     
     private StatisticQueryDefinitionDTO currentDefinition;
     private boolean active;
@@ -74,7 +75,7 @@ public class QueryDefinitionViewer extends ComponentWithoutSettings implements Q
         codeScrollPanel.getElement().addClassName("queryDefinitionViewerContent");
         codeDockPanel.add(codeScrollPanel);
         
-        Button copyToClipboardButton = new Button(stringMessages.copyToClipboard(), new ClickHandler() {
+        copyToClipboardButton = new Button(stringMessages.copyToClipboard(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
                 switch (contentPanel.getSelectedIndex()) {
@@ -89,6 +90,7 @@ public class QueryDefinitionViewer extends ComponentWithoutSettings implements Q
                 }
             }
         });
+        copyToClipboardButton.setEnabled(false);
 
         HorizontalPanel controlsPanel = new HorizontalPanel();
         controlsPanel.setSpacing(5);
@@ -109,6 +111,7 @@ public class QueryDefinitionViewer extends ComponentWithoutSettings implements Q
     @Override
     public void queryDefinitionChanged(StatisticQueryDefinitionDTO newQueryDefinition) {
         currentDefinition = newQueryDefinition;
+        copyToClipboardButton.setEnabled(currentDefinition != null);
         if (active) {
             updateDetails();
             updateCode();
@@ -138,11 +141,11 @@ public class QueryDefinitionViewer extends ComponentWithoutSettings implements Q
     }
 
     public void setActive(boolean active) {
-        if (active && this.active != active) {
-            updateDetails();
-            updateCode();
-        }
+        boolean needsUpdate = !this.active && active;
         this.active = active;
+        if (needsUpdate) {
+            queryDefinitionChanged(currentDefinition);
+        }
     }
 
     @Override

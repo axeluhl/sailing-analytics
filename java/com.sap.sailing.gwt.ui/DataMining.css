@@ -160,7 +160,7 @@ input.magnifier {
     font-size: 20px;
     height: 70px;
     margin: 0 auto;
-    padding: 49px 0 0 80px;
+    padding: 25px 0 0 80px;
     width: 400px;
     color: #7c7c7c;
 	background: url(images/important-message.png) left center no-repeat;
@@ -172,7 +172,7 @@ input.magnifier {
     font-size: 20px;
     height: 70px;
     margin: 0 auto;
-    padding: 49px 0 0 40px;
+    padding: 25px 0 0 40px;
     width: 400px;
     color: #7c7c7c;
 	background: url(images/busy_indicator_circle.gif) left center no-repeat;
@@ -211,13 +211,23 @@ input.magnifier {
     border-bottom: 1px solid rgba(0, 0, 0, 0.25);
 }
 
+.definitionProviderControlsElements {
+    margin: 2px;
+}
+
 .settingsAnchor {
 	position: relative;
-	top: 9px;
+	top: 7.5px;
 }
 
 .groupingProvider {
     padding: 3px 0px;
+    overflow-y: auto;
+}
+
+.groupingProviderLabel{
+	margin: 2px 2px 2px 0px;
+    display: inline-block;
 }
 
 .groupingProviderElement {
@@ -226,32 +236,82 @@ input.magnifier {
 }
 
 .statisticProvider {
-    padding: 5px 0px 0px 0px;
+    padding: 5px 0px;
+    display: table;
+}
+
+.statisticProviderLabel {
+    display: table-cell;
+    white-space: nowrap;
+    padding: 0px 3px;
 }
 
 .statisticProviderElement {
-	margin: 2px;
-	display: inline-block;
+    display: table-cell;
+    width: auto;
+}
+
+.unsupportedAggregatorListItem {
+	color: gray;
+}
+
+.statisticSuggestBoxContainer {
+	width: 100%;
+	min-width: 300px;
 }
 
 .statisticSuggestBoxPopup {
     z-index: 2;
 }
-.statisticSuggestBoxPopup .suggestPopupContent {
+
+.statisticSuggestBoxPopupContent {
     max-height: 700px;
-    overflow-y: scroll;
+    overflow-y: auto;
+    background: white;
+}
+.statisticSuggestBoxPopupContent table {
+    border-spacing: 0px;
 }
 
-.definitionProviderControls {
-	margin: 2px;
+.statisticSuggestBoxPopupContent .item {
+    padding: 2px 5px;
+    color: #000;
+    cursor: default;
+    white-space: nowrap;
+    font-size: 15px;
+}
+.statisticSuggestBoxPopupContent .item-even {
+    background: #fff;
+}
+.statisticSuggestBoxPopupContent .item-odd {
+    background: #f3f7fb;
+}
+.statisticSuggestBoxPopupContent .item-selected {
+    background: #d5e2ff;
+}
+.statisticSuggestBoxPopupContent .item-unsupported {
+    color: gray;
 }
 
-.definitionProviderControlsElements {
-	margin: 2px;
+.statisticSuggestBoxPopupContent .separator {
+    padding: 8px 5px 0px 5px;
+    border-bottom: 2px solid #6f7277;
+    font-weight: 600;
+    font-size: 15px;
+}
+.statisticSuggestBoxPopupContent .separator-message {
+    padding: 8px 5px 0px 5px;
+    font-weight: bold;
+    font-size: 15px;
+    text-align: center;
+    white-space: pre-wrap;
+}
+.statisticSuggestBoxPopupContent .separator-unsupported {
+    color: gray;
 }
 
-.queryProviderElementLabel {
-    margin-left: 0px;
+.dataMiningListBox {
+	min-width: 120px;
 }
 
 .queryDefinitionViewerContent {
@@ -261,6 +321,7 @@ input.magnifier {
 
 .filterDimensionsTitleLabel {
     padding-top: 5px;
+    display: inline-block;
 }
 
 .filterFilterDimensionsPanel {
@@ -276,9 +337,12 @@ input.magnifier {
     padding-top: 5px;
 }
 
-.dimensionFilterSelectionHeader .gwt-Label {
-  color: #4b4a4a;
-  text-shadow: #ddf 1px 1px 0;
+.filterSelectionPresenter {
+    margin: 5px;
+}
+.filterSelectionPresenter .dimensionLabel {
+    margin-right: 2px;
+    text-shadow: 0 0 1px #888;
 }
 
 .dataMiningBorderTop {
@@ -288,7 +352,7 @@ input.magnifier {
     border-left: 2px solid #6f7277;
 }
 .dataMiningBorderBottom {
-    border-border: 2px solid #6f7277;
+    border-bottom: 2px solid #6f7277;
 }
 .dataMiningBorderRight {
     border-right: 2px solid #6f7277;
@@ -323,8 +387,14 @@ input.magnifier {
 .dataMiningMarginLeft {
     margin-left: 5px;
 }
+.dataMiningMarginTop {
+    margin-top: 5px;
+}
 .dataMiningMarginRight {
     margin-right: 5px;
+}
+.dataMiningMarginBottom {
+    margin-bottom: 5px;
 }
 
 .resultsPresenterTabHeader * {
@@ -335,4 +405,27 @@ input.magnifier {
 
 .emphasizedLabel {
     font-weight: 600;
+}
+
+.floatRight {
+	float: right;
+}
+
+.whiteGlass {
+	background-color: #fff;
+	opacity: 0.6;
+	z-index: 19;
+}
+
+.applyQueryBusyMessage {
+    font-family: 'Open Sans',Arial,Verdana,sans-serif;
+    font-weight: 600;
+    font-size: 20px;
+    height: 70px;
+    margin: auto auto;
+    padding: 25px 0 0 40px;
+    width: 200px;
+    color: #7c7c7c;
+    background: url(images/busy_indicator_circle.gif) left center no-repeat;
+    z-index: 20;
 }
