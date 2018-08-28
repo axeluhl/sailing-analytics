@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.moxieapps.gwt.highcharts.client.Chart;
 import org.moxieapps.gwt.highcharts.client.Point;
@@ -113,7 +112,6 @@ public class PolarResultsPresenter extends AbstractSailingResultsPresenter<Setti
 
         Button exportStatisticsCurveToCsvButton = new Button(stringMessages.exportStatisticsCurveToCsv(),
                 new ClickHandler() {
-
                     @Override
                     public void onClick(ClickEvent event) {
                         chartToCsvExporter.exportChartAsCsvToClipboard(polarChart);
@@ -122,34 +120,6 @@ public class PolarResultsPresenter extends AbstractSailingResultsPresenter<Setti
         addControl(exportStatisticsCurveToCsvButton);
 
         setSeriesShowAndHideHandler();
-    }
-
-    private PointUnselectEventHandler createPointUnselectEventHandler() {
-        return new PointUnselectEventHandler() {
-
-            @Override
-            public boolean onUnselect(PointUnselectEvent pointUnselectEvent) {
-                long angle = pointUnselectEvent.getXAsLong();
-                Series series = polarChart.getSeries(pointUnselectEvent.getSeriesId());
-                Series seriesToHide = perAngleHistogramSeriesForAngle.get(series).get(angle);
-                seriesToHide.setVisible(false, true);
-                return true;
-            }
-        };
-    }
-
-    private PointSelectEventHandler createPointSelectEventHandler() {
-        return new PointSelectEventHandler() {
-
-            @Override
-            public boolean onSelect(PointSelectEvent pointSelectEvent) {
-                long angle = pointSelectEvent.getXAsLong();
-                Series series = polarChart.getSeries(pointSelectEvent.getSeriesId());
-                Series seriesToHide = perAngleHistogramSeriesForAngle.get(series).get(angle);
-                seriesToHide.setVisible(true, true);
-                return true;
-            }
-        };
     }
 
     private void setSeriesShowAndHideHandler() {
@@ -162,9 +132,38 @@ public class PolarResultsPresenter extends AbstractSailingResultsPresenter<Setti
         polarChart.setSeriesPlotOptions(seriesPlotOptions);
     }
 
+    private PointUnselectEventHandler createPointUnselectEventHandler() {
+        return new PointUnselectEventHandler() {
+            @Override
+            public boolean onUnselect(PointUnselectEvent pointUnselectEvent) {
+                long angle = pointUnselectEvent.getXAsLong();
+                Series series = polarChart.getSeries(pointUnselectEvent.getSeriesId());
+                Series seriesToHide = perAngleHistogramSeriesForAngle.get(series).get(angle);
+                if (seriesToHide != null) {
+                    seriesToHide.setVisible(false, true);
+                }
+                return true;
+            }
+        };
+    }
+
+    private PointSelectEventHandler createPointSelectEventHandler() {
+        return new PointSelectEventHandler() {
+            @Override
+            public boolean onSelect(PointSelectEvent pointSelectEvent) {
+                long angle = pointSelectEvent.getXAsLong();
+                Series series = polarChart.getSeries(pointSelectEvent.getSeriesId());
+                Series seriesToShow = perAngleHistogramSeriesForAngle.get(series).get(angle);
+                if (seriesToShow != null) {
+                    seriesToShow.setVisible(true, true);
+                }
+                return true;
+            }
+        };
+    }
+
     private SeriesShowEventHandler createSeriesShowEventHandler() {
         return new SeriesShowEventHandler() {
-
             @Override
             public boolean onShow(SeriesShowEvent seriesShowEvent) {
                 String id = seriesShowEvent.getSeriesId();
@@ -178,7 +177,6 @@ public class PolarResultsPresenter extends AbstractSailingResultsPresenter<Setti
 
     private SeriesHideEventHandler createSeriesHideEventHandler() {
         return new SeriesHideEventHandler() {
-
             @Override
             public boolean onHide(SeriesHideEvent seriesHideEvent) {
                 String id = seriesHideEvent.getSeriesId();
@@ -197,6 +195,12 @@ public class PolarResultsPresenter extends AbstractSailingResultsPresenter<Setti
 
     @Override
     protected void internalShowResults(QueryResultDTO<?> result) {
+        polarChart.removeAllSeries(false);
+        dataCountHistogramChart.removeAllSeries(false);
+        dataCountPerAngleHistogramChart.removeAllSeries(false);
+        histogramSeriesForPolarSeries.clear();
+        perAngleHistogramSeriesForAngle.clear();
+        
         Map<GroupKey, ?> results = result.getResults();
         List<GroupKey> sortedNaturally = new ArrayList<GroupKey>(results.keySet());
         Collections.sort(sortedNaturally, new Comparator<GroupKey>() {
@@ -218,33 +222,39 @@ public class PolarResultsPresenter extends AbstractSailingResultsPresenter<Setti
                 Map<Integer, Map<Double, Integer>> histogramData = aggregation.getCountHistogramPerAngle();
                 Map<Long, Series> seriesPerAngle = new HashMap<>();
                 perAngleHistogramSeriesForAngle.put(polarSeries, seriesPerAngle);
-                for (int i = 0; i < 360; i++) {
-                    int convertedAngle = i > 180 ? i - 360 : i;
-                    double speed = speedsPerAngle[i];
+                // Ensure that the points are added with ascending x coordinates to prevent Highcharts error 15
+                for (int convertedAngle = -179; convertedAngle <= 180; convertedAngle++) {
+                    int index = convertedAngle < 0 ? convertedAngle + 360 : convertedAngle;
+                    double speed = speedsPerAngle[index];
                     Point point = null;
-                    if (countPerAngle[i] >= settings.getMinimumDataCountPerAngle() && speed != 0) {
+                    if (countPerAngle[index] >= settings.getMinimumDataCountPerAngle() && speed != 0) {
                         point = new Point(convertedAngle, speed);
                         polarSeries.addPoint(point, false, false, false);
                     } else {
                         polarSeries.addPoint(convertedAngle, 0, false, false, false);
                     }
-                    histogramSeries.addPoint(convertedAngle, countPerAngle[i], false, false, false);
-                    Series dataCountPerAngleSeries = dataCountPerAngleHistogramChart.createSeries();
-                    Map<Double, Integer> histogramDataForAngle = histogramData.get(i);
-                    for (Entry<Double, Integer> entry : histogramDataForAngle.entrySet()) {
-                        dataCountPerAngleSeries.addPoint(entry.getKey(), entry.getValue());
-                    }
-                    dataCountPerAngleHistogramChart.addSeries(dataCountPerAngleSeries, false, false);
-                    dataCountPerAngleSeries.setVisible(false, false);
+                    histogramSeries.addPoint(convertedAngle, countPerAngle[index], false, false, false);
+                    
                     if (point != null) {
+                        Map<Double, Integer> histogramDataForAngle = histogramData.get(index);
+                        Series dataCountPerAngleSeries = dataCountPerAngleHistogramChart.createSeries();
+                        // Iterating over the histogram data without sorting the x coordinates ascending leads
+                        // to a massive occurrence of Highcharts error 15, freezing the complete UI
+                        List<Double> sortedAngles = new ArrayList<>(histogramDataForAngle.keySet());
+                        Collections.sort(sortedAngles);
+                        for (Double angle : sortedAngles) {
+                            dataCountPerAngleSeries.addPoint(angle, histogramDataForAngle.get(angle));
+                        }
+                        dataCountPerAngleHistogramChart.addSeries(dataCountPerAngleSeries, false, false);
+                        dataCountPerAngleSeries.setVisible(false, false);
                         seriesPerAngle.put((long) convertedAngle, dataCountPerAngleSeries);
                     }
                 }
                 polarSeries.setName(key.asString());
                 histogramSeries.setName(key.asString());
-                polarChart.addSeries(polarSeries, false, false);
                 histogramSeries.setVisible(false, false);
                 histogramSeriesForPolarSeries.put(polarSeries, histogramSeries);
+                polarChart.addSeries(polarSeries, false, false);
                 dataCountHistogramChart.addSeries(histogramSeries);
                 for (Series seriesToHide : seriesPerAngle.values()) {
                     seriesToHide.setVisible(false, false);

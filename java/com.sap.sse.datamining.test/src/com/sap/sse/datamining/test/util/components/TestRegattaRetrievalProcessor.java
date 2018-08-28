@@ -10,8 +10,11 @@ import com.sap.sse.datamining.test.domain.Test_Regatta;
 public class TestRegattaRetrievalProcessor extends AbstractRetrievalProcessor<Collection<Test_Regatta>, Test_Regatta> {
 
     @SuppressWarnings("unchecked")
-    public TestRegattaRetrievalProcessor(ExecutorService executor, Collection<Processor<Test_Regatta, ?>> resultReceivers, int retrievalLevel) {
-        super((Class<Collection<Test_Regatta>>)(Class<?>) Collection.class, Test_Regatta.class, executor, resultReceivers, retrievalLevel);
+    public TestRegattaRetrievalProcessor(ExecutorService executor,
+            Collection<Processor<Test_Regatta, ?>> resultReceivers, int retrievalLevel,
+            String retrievedDataTypeMessageKey) {
+        super((Class<Collection<Test_Regatta>>) (Class<?>) Collection.class, Test_Regatta.class, executor,
+                resultReceivers, retrievalLevel, retrievedDataTypeMessageKey);
     }
 
     @Override

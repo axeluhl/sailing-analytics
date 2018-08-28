@@ -4,6 +4,7 @@ import java.util.Locale;
 
 import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.functions.Function;
+import com.sap.sse.datamining.impl.functions.IdentityFunction;
 import com.sap.sse.datamining.shared.AdditionalResultData;
 import com.sap.sse.datamining.shared.impl.AdditionalResultDataImpl;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
@@ -16,8 +17,11 @@ import com.sap.sse.i18n.ResourceBundleStringMessages;
  * </ul>
  */
 public class OverwritingResultDataBuilder implements AdditionalResultDataBuilder {
+    
+    private static final Function<?> IdentityFunction = new IdentityFunction();
 
     private int retrievedDataAmount;
+    private String dataTypeMessageKey;
     private Function<?> extractionFunction;
     private String aggregationNameMessageKey;
     private int resultDecimals;
@@ -40,8 +44,14 @@ public class OverwritingResultDataBuilder implements AdditionalResultDataBuilder
         if (extractionFunction == null || aggregationNameMessageKey == null) {
             return "";
         }
+
+        String extractedStatisticName;
+        if (extractionFunction.equals(IdentityFunction)) {
+            extractedStatisticName = stringMessages.get(locale, dataTypeMessageKey);
+        } else {
+            extractedStatisticName = extractionFunction.getLocalizedName(locale, stringMessages);
+        }
         
-        String extractedStatisticName = extractionFunction.getLocalizedName(locale, stringMessages);
         String aggregationName = stringMessages.get(locale, aggregationNameMessageKey);
         return stringMessages.get(locale, "ResultSignifier", extractedStatisticName, aggregationName);
     }
@@ -54,6 +64,15 @@ public class OverwritingResultDataBuilder implements AdditionalResultDataBuilder
     @Override
     public int getRetrievedDataAmount() {
         return retrievedDataAmount;
+    }
+    
+    @Override
+    public void setDataTypeMessageKey(String dataTypeMessageKey) {
+        this.dataTypeMessageKey = dataTypeMessageKey;
+    }
+    
+    public String getDataTypeMessageKey() {
+        return dataTypeMessageKey;
     }
 
     @Override
