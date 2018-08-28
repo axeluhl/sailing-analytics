@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.home.communication.user.profile.domain;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,18 +14,19 @@ import com.sap.sse.gwt.dispatch.shared.commands.Result;
 /** Contains the result of a single statistic, to allow async loading of statistics without blocking the rest **/
 public class SailorProfileStatisticDTO implements Result, Serializable {
     private static final long serialVersionUID = 2924378586764418626L;
-    private Map<String, SingleEntry> result = new HashMap<>();
+    // keep as specified as possible to save gwt compiler time
+    private HashMap<String, ArrayList<SingleEntry>> result = new HashMap<>();
 
     // GWTSerialisation only
     protected SailorProfileStatisticDTO() {
         super();
     }
 
-    public SailorProfileStatisticDTO(Map<String, SingleEntry> result) {
+    public SailorProfileStatisticDTO(Map<String, ArrayList<SingleEntry>> result) {
         this.result.putAll(result);
     }
 
-    public Map<String, SingleEntry> getResult() {
+    public HashMap<String, ArrayList<SingleEntry>> getResult() {
         return result;
     }
 
