@@ -2103,4 +2103,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String addSailorProfileMessage();
     String badges();
     String newSailorProfileName();
+
+    String maxSpeedTitle();
+    String maxStartLineSpeed();
+    String shortestDistanceToStartline();
+
+    String averageDistanceToStartLine();
 }

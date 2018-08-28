@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.dispatch.shared.commands.Result;
@@ -15,18 +16,18 @@ import com.sap.sse.gwt.dispatch.shared.commands.Result;
 public class SailorProfileStatisticDTO implements Result, Serializable {
     private static final long serialVersionUID = 2924378586764418626L;
     // keep as specified as possible to save gwt compiler time
-    private HashMap<String, ArrayList<SingleEntry>> result = new HashMap<>();
+    private HashMap<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>> result = new HashMap<>();
 
     // GWTSerialisation only
     protected SailorProfileStatisticDTO() {
         super();
     }
 
-    public SailorProfileStatisticDTO(Map<String, ArrayList<SingleEntry>> result) {
+    public SailorProfileStatisticDTO(Map<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>> result) {
         this.result.putAll(result);
     }
 
-    public HashMap<String, ArrayList<SingleEntry>> getResult() {
+    public HashMap<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>> getResult() {
         return result;
     }
 
@@ -34,8 +35,7 @@ public class SailorProfileStatisticDTO implements Result, Serializable {
         private static final long serialVersionUID = -7722750678632551505L;
 
         @GwtIncompatible
-        public SingleEntry(Double value, RegattaAndRaceIdentifier relatedRaceOrNull,
-                TimePoint relatedTimePointOrNull) {
+        public SingleEntry(Double value, RegattaAndRaceIdentifier relatedRaceOrNull, TimePoint relatedTimePointOrNull) {
             super();
             this.value = value;
             this.relatedRaceOrNull = relatedRaceOrNull;

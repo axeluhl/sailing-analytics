@@ -1,0 +1,23 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder' xmlns:g='urn:import:com.google.gwt.user.client.ui'
+    xmlns:um="urn:import:com.sap.sailing.gwt.home.shared.usermanagement.decorator"
+    xmlns:up="urn:import:com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile"
+    xmlns:c="urn:import:com.google.gwt.user.cellview.client">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="sp_res"
+        type="com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfileResources" />
+    <ui:style>
+    </ui:style>
+    <g:HTMLPanel>
+        <div class="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall} {sp_res.css.eventsTablePanel}">
+            <div class="{sp_res.css.eventsTableTitle}">
+                <span ui:field="titleUi" />
+            </div>
+            <c:CellTable ui:field="sailorProfilesTable" addStyleNames="{sp_res.css.eventsTable}">
+                <c:emptyTableWidget>
+                    <g:Label text="{i18n.noDataFound}" addStyleNames="{sp_res.css.eventsTableEmpty}" />
+                </c:emptyTableWidget>
+            </c:CellTable>
+        </div>
+    </g:HTMLPanel>
+</ui:UiBinder>

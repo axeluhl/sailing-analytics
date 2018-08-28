@@ -18,6 +18,7 @@ import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
+import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO.SingleEntry;
@@ -59,7 +60,7 @@ public class GetNumericStatisticForSailorProfileAction
     @Override
     @GwtIncompatible
     public SailorProfileStatisticDTO execute(SailingDispatchContext ctx) throws DispatchException {
-        final Map<String, ArrayList<SingleEntry>> result = new HashMap<>();
+        final Map<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>> result = new HashMap<>();
 
         CompetitorAndBoatStore store = ctx.getRacingEventService().getCompetitorAndBoatStore();
 
@@ -71,7 +72,6 @@ public class GetNumericStatisticForSailorProfileAction
             if (aggregator == null) {
                 continue;
             }
-            String competitorIdAsString = competitor.getId().toString();
             for (Event event : ctx.getRacingEventService().getAllEvents()) {
                 // determine end of event, or now in live case
                 TimePoint end = event.getEndDate();
@@ -101,7 +101,7 @@ public class GetNumericStatisticForSailorProfileAction
                     }
                 }
             }
-            result.put(competitorIdAsString, aggregator.getResult());
+            result.put(new SimpleCompetitorWithIdDTO(competitor), aggregator.getResult());
         }
         return new SailorProfileStatisticDTO(result);
     }

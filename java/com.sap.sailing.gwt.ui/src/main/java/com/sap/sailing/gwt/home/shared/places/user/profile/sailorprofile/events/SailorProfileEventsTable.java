@@ -40,17 +40,13 @@ public class SailorProfileEventsTable extends Composite {
 
     private FlagImageResolver flagImageResolver;
 
-    public SailorProfileEventsTable(FlagImageResolver flagImageResolver) {
+    public SailorProfileEventsTable(FlagImageResolver flagImageResolver, PlaceController placeController,
+            ParticipatedEventDTO event) {
         this.flagImageResolver = flagImageResolver;
-    }
-
-    public void setController(PlaceController placeController) {
         this.placeController = placeController;
         initWidget(uiBinder.createAndBindUi(this));
         setupTable();
-    }
 
-    public void setEvent(ParticipatedEventDTO event) {
         titleUi.setInnerText(event.getEventName());
         sailorProfilesTable.setPageSize(Util.size(event.getParticipatedRegattas()));
         sailorProfilesTable.setList(event.getParticipatedRegattas());
