@@ -31,6 +31,7 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
@@ -86,7 +87,9 @@ public class SailorProfileStatisticTable extends Composite {
                         raceIdentifier.getRegattaName(), raceIdentifier.getRaceName(),
                         entry.getB().getLeaderboardNameOrNull(), entry.getB().getLeaderboardGroupNameOrNull(),
                         entry.getB().getEventIdOrNull(), type.getPlayerMode());
-                RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings();
+                RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings(
+                        new MillisecondsDurationImpl(entry.getB().getRelatedTimePointOrNull().asMillis()
+                                - entry.getB().getRelatedRaceStartTimePointOrNull().asMillis()));
 
                 HashMap<String, Settings> innerSettings = new HashMap<>();
                 innerSettings.put(RaceMapLifecycle.ID, RaceMapSettings.getDefaultWithShowMapControls(true));

@@ -37,7 +37,8 @@ public class SailorProfileStatisticDTO implements Result, Serializable {
 
         @GwtIncompatible
         public SingleEntry(Double value, RegattaAndRaceIdentifier relatedRaceOrNull, TimePoint relatedTimePointOrNull,
-                String leaderboardNameOrNull, String leaderboardGroupNameOrNull, UUID eventIdOrNull) {
+                TimePoint relatedRaceStartTimePointOrNull, String leaderboardNameOrNull,
+                String leaderboardGroupNameOrNull, UUID eventIdOrNull) {
             super();
             this.value = value;
             this.relatedRaceOrNull = relatedRaceOrNull;
@@ -52,6 +53,14 @@ public class SailorProfileStatisticDTO implements Result, Serializable {
                     this.relatedTimePointOrNull = new MillisecondsTimePoint(relatedTimePointOrNull.asMillis());
                 }
             }
+            if (relatedRaceStartTimePointOrNull != null) {
+                if (relatedRaceStartTimePointOrNull instanceof MillisecondsTimePoint) {
+                    this.relatedRaceStartTimePointOrNull = (MillisecondsTimePoint) relatedRaceStartTimePointOrNull;
+                } else {
+                    this.relatedRaceStartTimePointOrNull = new MillisecondsTimePoint(
+                            relatedRaceStartTimePointOrNull.asMillis());
+                }
+            }
         }
 
         // GWTSerialisation only
@@ -62,6 +71,7 @@ public class SailorProfileStatisticDTO implements Result, Serializable {
         private RegattaAndRaceIdentifier relatedRaceOrNull;
         // not generic, to reduce possible permutations for gwt compiler
         private MillisecondsTimePoint relatedTimePointOrNull;
+        private MillisecondsTimePoint relatedRaceStartTimePointOrNull;
         private String leaderboardNameOrNull;
         private String leaderboardGroupNameOrNull;
         private UUID eventIdOrNull;
@@ -83,9 +93,11 @@ public class SailorProfileStatisticDTO implements Result, Serializable {
 
         @Override
         public String toString() {
-            return "SingleEntry [" + (value != null ? "value=" + value + ", " : "")
-                    + (relatedRaceOrNull != null ? "relatedRaceOrNull=" + relatedRaceOrNull + ", " : "")
-                    + (relatedTimePointOrNull != null ? "relatedTimePointOrNull=" + relatedTimePointOrNull : "") + "]";
+            return "SingleEntry [value=" + value + ", relatedRaceOrNull=" + relatedRaceOrNull
+                    + ", relatedTimePointOrNull=" + relatedTimePointOrNull + ", relatedRaceStartTimePointOrNull="
+                    + relatedRaceStartTimePointOrNull + ", leaderboardNameOrNull=" + leaderboardNameOrNull
+                    + ", leaderboardGroupNameOrNull=" + leaderboardGroupNameOrNull + ", eventIdOrNull=" + eventIdOrNull
+                    + "]";
         }
 
         public String getLeaderboardNameOrNull() {
@@ -98,6 +110,10 @@ public class SailorProfileStatisticDTO implements Result, Serializable {
 
         public String getLeaderboardGroupNameOrNull() {
             return leaderboardGroupNameOrNull;
+        }
+
+        public MillisecondsTimePoint getRelatedRaceStartTimePointOrNull() {
+            return relatedRaceStartTimePointOrNull;
         }
 
     }

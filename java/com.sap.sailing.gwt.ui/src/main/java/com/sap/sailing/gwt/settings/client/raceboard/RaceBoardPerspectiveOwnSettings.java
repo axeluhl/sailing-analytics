@@ -36,6 +36,10 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
     
     public RaceBoardPerspectiveOwnSettings() {
     }
+
+    public RaceBoardPerspectiveOwnSettings(Duration initialDurationAfterRaceStartInReplay) {
+        this.initialDurationAfterRaceStartInReplay.setValue(initialDurationAfterRaceStartInReplay);
+    }
     
     public static RaceBoardPerspectiveOwnSettings createDefaultWithCanReplayDuringLiveRaces(
             boolean canReplayDuringLiveRaces) {
