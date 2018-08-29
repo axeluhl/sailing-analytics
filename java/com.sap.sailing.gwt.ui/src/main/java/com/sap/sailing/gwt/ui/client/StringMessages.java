@@ -2099,6 +2099,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
 
     String boatClasses();
     String sailorProfiles();
+
+    String unknownSailorProfile(String message);
     String profileName();
     String addSailorProfileMessage();
     String badges();
@@ -2107,6 +2109,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String maxSpeedTitle();
     String maxStartLineSpeed();
     String shortestDistanceToStartline();
-
     String averageDistanceToStartLine();
 }

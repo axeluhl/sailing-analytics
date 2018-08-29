@@ -7,6 +7,6 @@ public interface SailorProfileView extends IsWidget {
 
     void setPresenter(SailingProfileOverviewPresenter presenter);
 
-    NeedsAuthenticationContext getAuthenticationContext();
+    NeedsAuthenticationContext authentificationContextConsumer();
 
 }

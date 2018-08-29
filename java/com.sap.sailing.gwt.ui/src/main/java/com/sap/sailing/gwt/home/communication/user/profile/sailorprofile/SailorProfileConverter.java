@@ -19,12 +19,23 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileD
 import com.sap.sailing.server.impl.preferences.model.SailorProfilePreference;
 
 public interface SailorProfileConverter {
-    /** @return converted SailorProfileDTO from SailorProfilePreference */
+    /**
+     * @param notFoundOnServer
+     * @return converted SailorProfileDTO from SailorProfilePreference
+     */
     @GwtIncompatible
     default SailorProfileDTO convertSailorProfilePreferenceToDto(final SailorProfilePreference pref,
             final CompetitorAndBoatStore store) {
-        return new SailorProfileDTO(pref.getUuid(), pref.getName(), convertCompetitorsToDTOs(pref.getCompetitors()),
-                new ArrayList<BadgeDTO>(), getCorrespondingBoatDTOs(pref.getCompetitors(), store));
+        SailorProfileDTO result;
+        if (pref == null) {
+            result = new SailorProfileDTO(true);
+        } else {
+            result = new SailorProfileDTO(pref.getUuid(), pref.getName(),
+                    convertCompetitorsToDTOs(pref.getCompetitors()),
+                    new ArrayList<BadgeDTO>(), getCorrespondingBoatDTOs(pref.getCompetitors(), store));
+        }
+        return result;
+
     }
 
     /** @return converted list of SimpleCompetitorWithIdDTOs from Competitors */

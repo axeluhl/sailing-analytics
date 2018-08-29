@@ -45,7 +45,7 @@ public class SailorProfilesOverviewImpl extends Composite implements SailorProfi
     }
 
     @Override
-    public NeedsAuthenticationContext getAuthenticationContext() {
+    public NeedsAuthenticationContext authentificationContextConsumer() {
         return null;
     }
 

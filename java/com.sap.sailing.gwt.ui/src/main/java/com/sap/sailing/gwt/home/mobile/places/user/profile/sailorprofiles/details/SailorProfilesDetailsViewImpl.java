@@ -26,8 +26,8 @@ public class SailorProfilesDetailsViewImpl extends AbstractUserProfileView
     }
 
     @Override
-    public NeedsAuthenticationContext getAuthenticationContext() {
-        return sailorProfilesDetailsView.getAuthenticationContext();
+    public NeedsAuthenticationContext authentificationContextConsumer() {
+        return sailorProfilesDetailsView.authentificationContextConsumer();
     }
 
     @Override

@@ -14,6 +14,7 @@ import com.sap.sse.gwt.dispatch.shared.commands.Result;
 public class SailorProfileDTO implements Result, Serializable {
     private static final long serialVersionUID = -5957161570595861618L;
 
+    private boolean notFoundOnServer;
     private UUID key;
     private String name;
     private ArrayList<SimpleCompetitorWithIdDTO> competitors = new ArrayList<>();
@@ -22,6 +23,10 @@ public class SailorProfileDTO implements Result, Serializable {
 
     protected SailorProfileDTO() {
 
+    }
+
+    public SailorProfileDTO(boolean notFound) {
+        this.notFoundOnServer = notFound;
     }
 
     public SailorProfileDTO(UUID key, String name) {
@@ -37,6 +42,10 @@ public class SailorProfileDTO implements Result, Serializable {
         Util.addAll(competitors, this.competitors);
         Util.addAll(badges, this.badges);
         Util.addAll(boatclasses, this.boatclasses);
+    }
+
+    public boolean isNotFoundOnServer() {
+        return notFoundOnServer;
     }
 
     public UUID getKey() {

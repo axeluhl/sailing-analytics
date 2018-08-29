@@ -101,7 +101,7 @@ public class SailorProfileEventsTable extends Composite {
             new TextCell()) {
         @Override
         public String getValue(ParticipatedRegattaDTO entry) {
-            return entry.getClubName();
+            return entry.getCompetitorDto().getName();
         }
     };
     private final Column<ParticipatedRegattaDTO, Number> sumPointsColumn = new Column<ParticipatedRegattaDTO, Number>(

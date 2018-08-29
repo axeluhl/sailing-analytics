@@ -29,31 +29,26 @@ public class GetSailorProfileAction implements SailingAction<SailorProfileDTO>, 
     @Override
     @GwtIncompatible
     public SailorProfileDTO execute(SailingDispatchContext ctx) throws DispatchException {
-
         CompetitorAndBoatStore store = ctx.getRacingEventService().getCompetitorAndBoatStore();
 
         SailorProfilePreferences prefs = ctx.getPreferenceForCurrentUser(SailorProfilePreferences.PREF_NAME);
         SailorProfilePreference pref = findSailorProfile(store, prefs);
-        if (pref != null) {
-
-            return convertSailorProfilePreferenceToDto(pref, store);
-        } else {
-            throw new NullPointerException("Unknown sailor profile with uuid " + uuid);
-        }
+        return convertSailorProfilePreferenceToDto(pref, store);
     }
 
     @GwtIncompatible
     private SailorProfilePreference findSailorProfile(CompetitorAndBoatStore store, SailorProfilePreferences prefs) {
-        if (prefs == null) {
-            throw new NullPointerException("no sailor profile present");
-        } else {
+        SailorProfilePreference result = null;
+        if (prefs != null) {
             for (SailorProfilePreference p : prefs.getSailorProfiles()) {
                 if (p.getUuid().equals(uuid)) {
-                    return p;
+                    result = p;
+                    break;
                 }
             }
-            return null;
         }
+        return result;
+
     }
 
 }

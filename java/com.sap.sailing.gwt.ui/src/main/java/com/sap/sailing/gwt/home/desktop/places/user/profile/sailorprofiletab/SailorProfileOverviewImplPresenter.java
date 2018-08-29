@@ -44,6 +44,7 @@ public class SailorProfileOverviewImplPresenter implements SailingProfileOvervie
 
     @Override
     public void setAuthenticationContext(AuthenticationContext authenticationContext) {
+        view.authentificationContextConsumer().setAuthenticationContext(authenticationContext);
         if (authenticationContext.isLoggedIn() && view instanceof SailorProfileOverview) {
             sharedSailorProfilePresenter.getDataProvider().loadSailorProfiles(new AsyncCallback<SailorProfilesDTO>() {
 

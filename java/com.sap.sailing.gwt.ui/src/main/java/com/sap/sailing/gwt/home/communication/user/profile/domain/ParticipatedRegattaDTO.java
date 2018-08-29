@@ -10,7 +10,6 @@ public class ParticipatedRegattaDTO implements Serializable {
     private String regattaName;
     private int regattaRank;
     private SimpleCompetitorWithIdDTO competitorDto;
-    private String clubName;
     private String regattaId;
     private String eventId;
     private double sumPoints;
@@ -19,12 +18,11 @@ public class ParticipatedRegattaDTO implements Serializable {
     }
 
     public ParticipatedRegattaDTO(String regattaName, int regattaRank, SimpleCompetitorWithIdDTO competitorDto,
-            String clubName, String regattaId, String eventId, double sumPoints) {
+            String regattaId, String eventId, double sumPoints) {
         super();
         this.regattaName = regattaName;
         this.regattaRank = regattaRank;
         this.competitorDto = competitorDto;
-        this.clubName = clubName;
         this.regattaId = regattaId;
         this.eventId = eventId;
         this.sumPoints = sumPoints;
@@ -40,10 +38,6 @@ public class ParticipatedRegattaDTO implements Serializable {
 
     public SimpleCompetitorWithIdDTO getCompetitorDto() {
         return competitorDto;
-    }
-
-    public String getClubName() {
-        return clubName;
     }
 
     public String getRegattaId() {

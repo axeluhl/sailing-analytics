@@ -16,10 +16,11 @@ import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 public class SailorProfileTabView extends Composite implements UserProfileTabView<SailorProfilePlace> {
 
     private SailingProfileOverviewPresenter currentPresenter;
-    private SailorProfileView view;
     private final FlagImageResolver flagImageResolver;
 
     UserProfileView.Presenter ownPresenter;
+    private AcceptsOneWidget contentArea;
+    private SailorProfilePlace place;
 
     public SailorProfileTabView(FlagImageResolver flagImageResolver) {
         this.flagImageResolver = flagImageResolver;
@@ -37,33 +38,36 @@ public class SailorProfileTabView extends Composite implements UserProfileTabVie
 
     @Override
     public void start(SailorProfilePlace myPlace, AcceptsOneWidget contentArea) {
-        UUID uuid = myPlace.getSailorProfileUuid();
-        if (uuid != null || myPlace.isCreateNew()) {
-            final SailorProfileDetails sailorView = new SailorProfileDetails();
-            currentPresenter = new SailorProfileOverviewImplPresenter(sailorView,
-                    new ClientFactoryAdapter(this.ownPresenter), flagImageResolver);
-            contentArea.setWidget(sailorView);
-            view = sailorView;
-            currentPresenter.getSharedSailorProfilePresenter().getDataProvider().setView(sailorView.getEditView());
-
-            if (myPlace.isCreateNew()) {
-                currentPresenter.getSharedSailorProfilePresenter().getDataProvider().createNewEntry(UUID.randomUUID(),
-                        StringMessages.INSTANCE.newSailorProfileName());
-            } else {
-                currentPresenter.getSharedSailorProfilePresenter().getDataProvider().loadSailorProfile(uuid);
-            }
-        } else {
-            view = new SailorProfileOverviewImpl();
-            this.currentPresenter = new SailorProfileOverviewImplPresenter(view,
-                    new ClientFactoryAdapter(this.ownPresenter), flagImageResolver);
-            contentArea.setWidget(view);
-        }
+        this.place = myPlace;
+        this.contentArea = contentArea;
     }
 
     @Override
     public void setAuthenticationContext(AuthenticationContext authenticationContext) {
+        UUID uuid = place.getSailorProfileUuid();
+        SailorProfileView view;
+        if (uuid != null || place.isCreateNew()) {
+            view = new SailorProfileDetails();
+        } else {
+            view = new SailorProfileOverviewImpl();
+        }
+
+        this.currentPresenter = new SailorProfileOverviewImplPresenter(view,
+                new ClientFactoryAdapter(this.ownPresenter), flagImageResolver);
         currentPresenter.setAuthenticationContext(authenticationContext);
-        view.getAuthenticationContext().setAuthenticationContext(authenticationContext);
+        contentArea.setWidget(view);
+
+        if (authenticationContext.isLoggedIn()) {
+            if (uuid != null || place.isCreateNew()) {
+                if (place.isCreateNew()) {
+                    currentPresenter.getSharedSailorProfilePresenter().getDataProvider()
+                            .createNewEntry(UUID.randomUUID(), StringMessages.INSTANCE.newSailorProfileName());
+                } else {
+                    currentPresenter.getSharedSailorProfilePresenter().getDataProvider()
+                            .loadSailorProfile(place.getSailorProfileUuid());
+                }
+            }
+        }
     }
 
     @Override

@@ -29,10 +29,11 @@ public class SailorProfileDetails extends Composite implements SailorProfileDeta
         editSailorProfileUi = new EditSailorProfile(presenter.getSharedSailorProfilePresenter(),
                 presenter.getFlagImageResolver(), this);
         initWidget(uiBinder.createAndBindUi(this));
+        presenter.getSharedSailorProfilePresenter().getDataProvider().setView(editSailorProfileUi);
     }
 
     @Override
-    public NeedsAuthenticationContext getAuthenticationContext() {
+    public NeedsAuthenticationContext authentificationContextConsumer() {
         return decoratorUi;
     }
 

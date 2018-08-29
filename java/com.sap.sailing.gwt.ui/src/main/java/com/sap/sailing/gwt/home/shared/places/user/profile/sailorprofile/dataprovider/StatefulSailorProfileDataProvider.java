@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.datapr
 import java.util.Collection;
 import java.util.UUID;
 
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
@@ -16,6 +15,9 @@ import com.sap.sailing.gwt.home.shared.partials.editable.EditableSuggestedMultiS
 import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggestedCompetitorMultiSelectionPresenter;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionPresenter;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 
 public class StatefulSailorProfileDataProvider implements
         SuggestedMultiSelectionPresenter<SimpleCompetitorWithIdDTO, SuggestedMultiSelectionPresenter.Display<SimpleCompetitorWithIdDTO>>,
@@ -31,7 +33,7 @@ public class StatefulSailorProfileDataProvider implements
 
     public StatefulSailorProfileDataProvider(ClientFactoryWithDispatch clientFactory,
             AbstractSuggestedCompetitorMultiSelectionPresenter<Display<SimpleCompetitorWithIdDTO>> competitorDataProvider) {
-        sailorProfileDataProvider = new SailorProfileDataProviderImpl(clientFactory);
+        this.sailorProfileDataProvider = new SailorProfileDataProviderImpl(clientFactory);
         this.competitorDataProvider = competitorDataProvider;
     }
 
@@ -40,26 +42,12 @@ public class StatefulSailorProfileDataProvider implements
     }
 
     public void loadSailorProfile(UUID uuid) {
-        sailorProfileDataProvider.findSailorProfileById(uuid, refreshCallback);
+        sailorProfileDataProvider.findSailorProfileById(uuid, createRefreshCallback(uuid));
     }
 
-    private AsyncCallback<SailorProfileDTO> refreshCallback = new AsyncCallback<SailorProfileDTO>() {
-
-        @Override
-        public void onFailure(Throwable caught) {
-            GWT.log(caught.getMessage(), caught);
-        }
-
-        @Override
-        public void onSuccess(SailorProfileDTO result) {
-            competitors = result.getCompetitors();
-            uuid = result.getKey();
-            sailorView.setEntry(result);
-        }
-    };
 
     public void updateTitle(String newTitle) {
-        sailorProfileDataProvider.updateTitle(uuid, newTitle, refreshCallback);
+        sailorProfileDataProvider.updateTitle(uuid, newTitle, createRefreshCallback(uuid));
     }
 
     public void getEvents(UUID key, AsyncCallback<SailorProfileEventsDTO> asyncCallback) {
@@ -71,7 +59,7 @@ public class StatefulSailorProfileDataProvider implements
     }
 
     public void createNewEntry(UUID uuid, String newTitle) {
-        sailorProfileDataProvider.createNewSailorProfile(uuid, newTitle, refreshCallback);
+        sailorProfileDataProvider.createNewSailorProfile(uuid, newTitle, createRefreshCallback(uuid));
     }
 
     @Override
@@ -126,7 +114,7 @@ public class StatefulSailorProfileDataProvider implements
     @Override
     public void onEditModeChanged(boolean edit) {
         if (!edit) {
-            sailorProfileDataProvider.updateCompetitors(uuid, competitors, refreshCallback);
+            sailorProfileDataProvider.updateCompetitors(uuid, competitors, createRefreshCallback(uuid));
         }
     }
 
@@ -134,9 +122,33 @@ public class StatefulSailorProfileDataProvider implements
         sailorProfileDataProvider.removeSailorProfile(uuid, callback);
     }
 
-    public void getStatisticFor(SailorProfileNumericStatisticType type, AsyncCallback<SailorProfileStatisticDTO> callback) {
+    public void getStatisticFor(SailorProfileNumericStatisticType type,
+            AsyncCallback<SailorProfileStatisticDTO> callback) {
         sailorProfileDataProvider.getNumericStatistics(uuid, type, callback);
-        
+
+    }
+
+    public AsyncCallback<SailorProfileDTO> createRefreshCallback(UUID uuid) {
+        return new AsyncCallback<SailorProfileDTO>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                Notification.notify(caught.getMessage(), NotificationType.ERROR);
+            }
+
+            @Override
+            public void onSuccess(SailorProfileDTO result) {
+                if (result.isNotFoundOnServer()) {
+                    String uuidAsString = uuid == null ? StringMessages.INSTANCE.unknown() : uuid.toString();
+                    Notification.notify(StringMessages.INSTANCE.unknownSailorProfile(uuidAsString),
+                            NotificationType.ERROR);
+                } else {
+                    competitors = result.getCompetitors();
+                    StatefulSailorProfileDataProvider.this.uuid = result.getKey();
+                    sailorView.setEntry(result);
+                }
+            }
+        };
     }
 
 }
