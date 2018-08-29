@@ -4,22 +4,23 @@
     xmlns:c="urn:import:com.google.gwt.user.cellview.client">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:with field="sp_res"
-        type="com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileResources" />
+    <ui:with field="spr"
+        type="com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileDesktopResources" />
+
     <um:AuthorizedContentDecoratorDesktop ui:field="decoratorUi">
         <um:content>
             <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">
                 <div class="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopmediumsmall}">
-                    <div class="{res.mainCss.spacermargintopmediumsmall} {sp_res.css.overviewTablePanel}">
+                    <div class="{res.mainCss.spacermargintopmediumsmall} {spr.css.overviewTablePanel}">
 
                         <c:CellTable ui:field="sailorProfilesTable"
-                            addStyleNames=" {sp_res.css.overviewTable} {res.mediaCss.small12}">
+                            addStyleNames=" {spr.css.overviewTable} {res.mediaCss.small12}">
                             <c:emptyTableWidget>
-                                <g:Label text="{i18n.noDataFound}" addStyleNames="{sp_res.css.overviewTableEmpty}" />
+                                <g:Label text="{i18n.noDataFound}" addStyleNames="{spr.css.overviewTableEmpty}" />
                             </c:emptyTableWidget>
                         </c:CellTable>
 
-                        <div class="{sp_res.css.overviewTableFooter}">
+                        <div class="{spr.css.overviewTableFooter}">
                             <g:FlowPanel ui:field="footerUi" />
                         </div>
                     </div>

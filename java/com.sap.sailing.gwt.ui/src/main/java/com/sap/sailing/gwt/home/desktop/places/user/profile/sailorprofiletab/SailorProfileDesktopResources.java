@@ -13,5 +13,21 @@ public interface SailorProfileDesktopResources extends ClientBundle {
 
     public interface SailorProfilesCss extends CssResource {
         String showAndEditHeader();
+
+        String eventsTable();
+
+        String eventsTableTitle();
+
+        String eventsTableEmpty();
+
+        String eventsTablePanel();
+
+        String overviewTable();
+
+        String overviewTableFooter();
+
+        String overviewTablePanel();
+
+        String overviewTableEmpty();
     }
 }

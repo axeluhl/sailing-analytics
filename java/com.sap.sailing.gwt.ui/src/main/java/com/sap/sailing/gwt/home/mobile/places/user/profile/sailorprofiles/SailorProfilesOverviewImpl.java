@@ -61,7 +61,8 @@ public class SailorProfilesOverviewImpl extends Composite implements SailorProfi
     private void createFooter() {
         Label lab = new Label("+ " + StringMessages.INSTANCE.addSailorProfileMessage());
         SharedSailorProfileResources.INSTANCE.css().ensureInjected();
-        lab.addStyleName(SharedSailorProfileResources.INSTANCE.css().overviewTableFooterMobile());
+        SailorProfileMobileResources.INSTANCE.css().ensureInjected();
+        lab.addStyleName(SailorProfileMobileResources.INSTANCE.css().overviewTableFooterMobile());
         contentUi.add(lab);
         lab.addClickHandler((event) -> {
             presenter.getClientFactory().getPlaceController().goTo(new SailorProfilePlace(true));

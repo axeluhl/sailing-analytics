@@ -23,24 +23,6 @@ public interface SharedSailorProfileResources extends ClientBundle {
     public interface SailorProfilesCss extends CssResource {
         String rotateLeft();
 
-        String eventsTable();
-
-        String eventsTableTitle();
-
-        String eventsTableEmpty();
-
-        String eventsTablePanel();
-
-        String overviewTable();
-
-        String overviewTableFooter();
-
-        String overviewTablePanel();
-
-        String overviewTableEmpty();
-
-        String overviewTableFooterMobile();
-
         String competitorWithoutClubnameItemDescription();
 
         String inverseButton();
