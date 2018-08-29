@@ -23,17 +23,6 @@
                 </ms:content>
             </ms:MobileSection>
 
-            <ms:MobileSection>
-                <ms:header>
-                    <p:sectionHeader.SectionHeaderContent ui:field="imagesUi"
-                        sectionTitle="{i18n.images}" />
-                </ms:header>
-                <ms:content>
-                    <g:HTMLPanel ui:field="contentContainerImagesUi"
-                        addStyleNames="{spmr.css.detailsSectionPanel} {res.mainCss.spacermarginbottomsmall}">
-                    </g:HTMLPanel>
-                </ms:content>
-            </ms:MobileSection>
 
             <ms:MobileSection>
                 <ms:header>
@@ -67,18 +56,6 @@
                 <ms:content>
                     <g:HTMLPanel ui:field="contentContainerStatisticsUi"
                         addStyleNames="{spmr.css.detailsEventsContainer}">
-                    </g:HTMLPanel>
-                </ms:content>
-            </ms:MobileSection>
-
-            <ms:MobileSection>
-                <ms:header>
-                    <p:sectionHeader.SectionHeaderContent ui:field="polarDiagramUi"
-                        sectionTitle="{i18n.polarSheetChart}" />
-                </ms:header>
-                <ms:content>
-                    <g:HTMLPanel ui:field="contentContainerPolarDiagramUi"
-                        addStyleNames="{spmr.css.detailsSectionPanel} {res.mainCss.spacermarginbottomsmall}">
                     </g:HTMLPanel>
                 </ms:content>
             </ms:MobileSection>

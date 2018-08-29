@@ -52,11 +52,6 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
     @UiField
     HTMLPanel contentContainerCompetitorsUi;
     @UiField
-    SectionHeaderContent imagesUi;
-
-    @UiField
-    HTMLPanel contentContainerImagesUi;
-    @UiField
     SectionHeaderContent boatclassesUi;
 
     @UiField
@@ -71,11 +66,6 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
 
     @UiField
     HTMLPanel contentContainerStatisticsUi;
-    @UiField
-    SectionHeaderContent polarDiagramUi;
-
-    @UiField
-    HTMLPanel contentContainerPolarDiagramUi;
 
     private SailingProfileOverviewPresenter presenter;
 
@@ -84,11 +74,9 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
         SharedSailorProfileResources.INSTANCE.css().ensureInjected();
         SailorProfileMobileResources.INSTANCE.css().ensureInjected();
         competitorsUi.initCollapsibility(contentContainerCompetitorsUi.getElement(), false);
-        imagesUi.initCollapsibility(contentContainerImagesUi.getElement(), false);
         boatclassesUi.initCollapsibility(contentContainerBoatclassesUi.getElement(), false);
         eventsUi.initCollapsibility(contentContainerEventsUi.getElement(), false);
         statisticsUi.initCollapsibility(contentContainerStatisticsUi.getElement(), false);
-        polarDiagramUi.initCollapsibility(contentContainerPolarDiagramUi.getElement(), false);
     }
 
     @Override
