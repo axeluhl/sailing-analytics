@@ -90,10 +90,9 @@ public class SailorProfileStatisticTable extends Composite {
             navigatorColumn.setFieldUpdater(new FieldUpdater<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, Boolean>() {
                 @Override
                 public void update(int index, Pair<SimpleCompetitorWithIdDTO, SingleEntry> entry, Boolean value) {
-                    // AbstractEvent
-                    // placeController.goTo(new RegattaLeaderboardPlace(entry.getB().getEventId(),
-                    // entry.getRegattaId()));
                     final RegattaAndRaceIdentifier raceIdentifier = entry.getB().getRelatedRaceOrNull();
+
+                    // create raceboard context
                     RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(
                             raceIdentifier.getRegattaName(), raceIdentifier.getRaceName(),
                             entry.getB().getLeaderboardNameOrNull(), entry.getB().getLeaderboardGroupNameOrNull(),
@@ -102,14 +101,15 @@ public class SailorProfileStatisticTable extends Composite {
                             new MillisecondsDurationImpl(entry.getB().getRelatedTimePointOrNull().asMillis()
                                     - entry.getB().getRelatedRaceStartTimePointOrNull().asMillis()));
 
+                    // create raceboard settings
                     HashMap<String, Settings> innerSettings = new HashMap<>();
                     innerSettings.put(RaceMapLifecycle.ID, RaceMapSettings.getDefaultWithShowMapControls(true));
                     PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(
                             perspectiveOwnSettings, innerSettings);
                     String targetUrl = EntryPointWithSettingsLinkFactory.createRaceBoardLink(raceboardContext,
                             settings);
-                    Window.Location.assign(targetUrl);
 
+                    Window.Location.assign(targetUrl);
                 }
             });
         }
