@@ -71,6 +71,8 @@ public class SailorProfileStatisticTable extends Composite {
     }
 
     private void setupTable() {
+        sailorProfilesTable.addColumn(eventNameColumn, StringMessages.INSTANCE.eventName());
+        sailorProfilesTable.addColumn(timeColumn, StringMessages.INSTANCE.time());
         sailorProfilesTable.addColumn(actualValueColumn, StringMessages.INSTANCE.regattaName());
         sailorProfilesTable.addColumn(competitorColumn, StringMessages.INSTANCE.competitor());
         sailorProfilesTable.addColumn(clubNameColumn, StringMessages.INSTANCE.name());
@@ -135,6 +137,20 @@ public class SailorProfileStatisticTable extends Composite {
         @Override
         public String getValue(Pair<SimpleCompetitorWithIdDTO, SingleEntry> entry) {
             return entry.getA().getName();
+        }
+    };
+    private final Column<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, String> eventNameColumn = new Column<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, String>(
+            new TextCell()) {
+        @Override
+        public String getValue(Pair<SimpleCompetitorWithIdDTO, SingleEntry> entry) {
+            return entry.getB().getLeaderboardNameOrNull() + " " + entry.getB().getRaceNameOrNull();
+        }
+    };
+    private final Column<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, String> timeColumn = new Column<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, String>(
+            new TextCell()) {
+        @Override
+        public String getValue(Pair<SimpleCompetitorWithIdDTO, SingleEntry> entry) {
+            return SailorProfileNumericStatisticTypeFormater.format(entry.getB().getRelatedTimePointOrNull());
         }
     };
 }
