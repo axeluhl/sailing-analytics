@@ -29,8 +29,29 @@ public class SailorProfileNumericStatisticTypeFormater {
     }
 
     public static String format(SailorProfileNumericStatisticType type, Double value, StringMessages stringMessages) {
-        // FIXME
-        return "" + value;
+        switch (type) {
+        case AVERAGE_STARTLINE_DISTANCE:
+        case BEST_DISTANCE_TO_START:
+            return stringMessages.metersValue(value);
+        case BEST_STARTLINE_SPEED:
+        case MAX_SPEED:
+            return stringMessages.knotsValue(value);
+        default:
+            return "" + value;
+        }
+    }
+
+    public static String getColumnHeadingName(SailorProfileNumericStatisticType type, StringMessages stringMessages) {
+        switch (type) {
+        case AVERAGE_STARTLINE_DISTANCE:
+        case BEST_DISTANCE_TO_START:
+            return stringMessages.distance();
+        case BEST_STARTLINE_SPEED:
+        case MAX_SPEED:
+            return stringMessages.speed();
+        default:
+            return stringMessages.value();
+        }
     }
 
 }

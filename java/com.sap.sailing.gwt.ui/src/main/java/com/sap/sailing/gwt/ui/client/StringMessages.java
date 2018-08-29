@@ -2110,4 +2110,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String maxStartLineSpeed();
     String shortestDistanceToStartline();
     String averageDistanceToStartLine();
+
+    String metersValue(Double value);
 }

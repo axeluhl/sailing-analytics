@@ -219,7 +219,7 @@ public class GetNumericStatisticForSailorProfileAction
                 RegattaAndRaceIdentifier regattaAndRaceIdentifierOrNull, String bestLeaderboardName,
                 String bestLeaderboardGroupName, UUID eventId, String bestRaceName) {
             if (speed != null) {
-                add(speed.getMetersPerSecond(), bestTimePointOrNull, startTimePointOrNull,
+                add(speed.getKnots(), bestTimePointOrNull, startTimePointOrNull,
                         regattaAndRaceIdentifierOrNull, bestLeaderboardName, bestLeaderboardGroupName, eventId,
                         bestRaceName);
             }

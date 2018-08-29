@@ -73,7 +73,8 @@ public class SailorProfileStatisticTable extends Composite {
     private void setupTable() {
         sailorProfilesTable.addColumn(eventNameColumn, StringMessages.INSTANCE.eventName());
         sailorProfilesTable.addColumn(timeColumn, StringMessages.INSTANCE.time());
-        sailorProfilesTable.addColumn(actualValueColumn, StringMessages.INSTANCE.regattaName());
+        sailorProfilesTable.addColumn(actualValueColumn,
+                SailorProfileNumericStatisticTypeFormater.getColumnHeadingName(type, stringMessages));
         sailorProfilesTable.addColumn(competitorColumn, StringMessages.INSTANCE.competitor());
         sailorProfilesTable.addColumn(clubNameColumn, StringMessages.INSTANCE.name());
         sailorProfilesTable.addColumn(navigatorColumn);
@@ -103,7 +104,6 @@ public class SailorProfileStatisticTable extends Composite {
             }
         });
     }
-
 
     private final Column<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, Boolean> navigatorColumn = new NavigatorColumn<Pair<SimpleCompetitorWithIdDTO, SingleEntry>>() {
         @Override
