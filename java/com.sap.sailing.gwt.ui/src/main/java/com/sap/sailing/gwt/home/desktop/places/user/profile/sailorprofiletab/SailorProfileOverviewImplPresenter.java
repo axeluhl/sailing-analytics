@@ -22,12 +22,10 @@ public class SailorProfileOverviewImplPresenter implements SailingProfileOvervie
     private final FlagImageResolver flagImageResolver;
 
     public SailorProfileOverviewImplPresenter(final SailorProfileView view,
-            final HasLoginFormAndFactory loginAndFactory,
-            final FlagImageResolver flagImageResolver) {
+            final HasLoginFormAndFactory loginAndFactory, final FlagImageResolver flagImageResolver) {
         this.view = view;
         this.loginAndFactory = loginAndFactory;
-        this.sharedSailorProfilePresenter = new EditSailorProfilePresenter(
-                loginAndFactory.getClientFactory());
+        this.sharedSailorProfilePresenter = new EditSailorProfilePresenter(loginAndFactory.getClientFactory());
         this.flagImageResolver = flagImageResolver;
         view.setPresenter(this);
     }

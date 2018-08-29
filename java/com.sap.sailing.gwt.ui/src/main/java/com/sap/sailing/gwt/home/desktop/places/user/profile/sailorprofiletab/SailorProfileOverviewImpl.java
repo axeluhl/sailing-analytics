@@ -103,8 +103,7 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
         lab.getElement().getStyle().setDisplay(Display.INLINE);
         footerUi.add(lab);
         lab.addClickHandler((event) -> {
-            presenter.getClientFactory().getPlaceController()
-                    .goTo(new SailorProfilePlace(true));
+            presenter.getClientFactory().getPlaceController().goTo(new SailorProfilePlace(true));
         });
     }
 

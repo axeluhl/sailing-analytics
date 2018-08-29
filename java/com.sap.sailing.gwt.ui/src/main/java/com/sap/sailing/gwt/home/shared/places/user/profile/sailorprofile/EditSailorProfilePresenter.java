@@ -19,8 +19,7 @@ import com.sap.sse.gwt.client.mvp.ClientFactory;
  * @param <C>
  *            the provided client factory type
  */
-public class EditSailorProfilePresenter
-        implements EditSailorProfileView.Presenter {
+public class EditSailorProfilePresenter implements EditSailorProfileView.Presenter {
 
     private final ClientFactoryWithDispatchAndError clientFactory;
 
