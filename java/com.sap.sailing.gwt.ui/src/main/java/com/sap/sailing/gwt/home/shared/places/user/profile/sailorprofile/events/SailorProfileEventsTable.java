@@ -61,9 +61,9 @@ public class SailorProfileEventsTable extends Composite {
         sailorProfilesTable.addColumn(navigatorColumn);
 
         navigatorColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
-        navigatorColumn.setFieldUpdater(new FieldUpdater<ParticipatedRegattaDTO, String>() {
+        navigatorColumn.setFieldUpdater(new FieldUpdater<ParticipatedRegattaDTO, Boolean>() {
             @Override
-            public void update(int index, ParticipatedRegattaDTO entry, String value) {
+            public void update(int index, ParticipatedRegattaDTO entry, Boolean value) {
                 placeController.goTo(new RegattaLeaderboardPlace(entry.getEventId(), entry.getRegattaId()));
             }
         });
@@ -112,5 +112,12 @@ public class SailorProfileEventsTable extends Composite {
         }
     };
 
-    private final Column<ParticipatedRegattaDTO, String> navigatorColumn = new NavigatorColumn<ParticipatedRegattaDTO>();
+    private final Column<ParticipatedRegattaDTO, Boolean> navigatorColumn = new NavigatorColumn<ParticipatedRegattaDTO>() {
+
+        @Override
+        public Boolean getValue(ParticipatedRegattaDTO object) {
+            return Boolean.TRUE;
+        }
+
+    };
 }

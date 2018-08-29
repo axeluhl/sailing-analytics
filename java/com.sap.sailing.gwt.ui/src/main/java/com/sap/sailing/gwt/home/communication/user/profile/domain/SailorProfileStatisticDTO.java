@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -35,10 +36,14 @@ public class SailorProfileStatisticDTO implements Result, Serializable {
         private static final long serialVersionUID = -7722750678632551505L;
 
         @GwtIncompatible
-        public SingleEntry(Double value, RegattaAndRaceIdentifier relatedRaceOrNull, TimePoint relatedTimePointOrNull) {
+        public SingleEntry(Double value, RegattaAndRaceIdentifier relatedRaceOrNull, TimePoint relatedTimePointOrNull,
+                String leaderboardNameOrNull, String leaderboardGroupNameOrNull, UUID eventIdOrNull) {
             super();
             this.value = value;
             this.relatedRaceOrNull = relatedRaceOrNull;
+            this.leaderboardNameOrNull = leaderboardNameOrNull;
+            this.leaderboardGroupNameOrNull = leaderboardGroupNameOrNull;
+            this.eventIdOrNull = eventIdOrNull;
             if (relatedTimePointOrNull != null) {
                 // not all TimePoints are GWT compatible, ensure we have a compatible one!
                 if (relatedTimePointOrNull instanceof MillisecondsTimePoint) {
@@ -57,6 +62,9 @@ public class SailorProfileStatisticDTO implements Result, Serializable {
         private RegattaAndRaceIdentifier relatedRaceOrNull;
         // not generic, to reduce possible permutations for gwt compiler
         private MillisecondsTimePoint relatedTimePointOrNull;
+        private String leaderboardNameOrNull;
+        private String leaderboardGroupNameOrNull;
+        private UUID eventIdOrNull;
 
         /**
          * All values will be in SI Units if not otherwise stated in the Type documentation
@@ -78,6 +86,18 @@ public class SailorProfileStatisticDTO implements Result, Serializable {
             return "SingleEntry [" + (value != null ? "value=" + value + ", " : "")
                     + (relatedRaceOrNull != null ? "relatedRaceOrNull=" + relatedRaceOrNull + ", " : "")
                     + (relatedTimePointOrNull != null ? "relatedTimePointOrNull=" + relatedTimePointOrNull : "") + "]";
+        }
+
+        public String getLeaderboardNameOrNull() {
+            return leaderboardNameOrNull;
+        }
+
+        public UUID getEventIdOrNull() {
+            return eventIdOrNull;
+        }
+
+        public String getLeaderboardGroupNameOrNull() {
+            return leaderboardGroupNameOrNull;
         }
 
     }

@@ -82,9 +82,9 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
         boatClassColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().textCellWordWrap());
 
         navigatorColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
-        navigatorColumn.setFieldUpdater(new FieldUpdater<SailorProfileDTO, String>() {
+        navigatorColumn.setFieldUpdater(new FieldUpdater<SailorProfileDTO, Boolean>() {
             @Override
-            public void update(int index, SailorProfileDTO entry, String value) {
+            public void update(int index, SailorProfileDTO entry, Boolean value) {
                 presenter.getClientFactory().getPlaceController().goTo(new SailorProfilePlace(entry.getKey()));
             }
         });
@@ -150,7 +150,14 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
         }
     };
 
-    private final Column<SailorProfileDTO, String> navigatorColumn = new NavigatorColumn<SailorProfileDTO>();
+    private final Column<SailorProfileDTO, Boolean> navigatorColumn = new NavigatorColumn<SailorProfileDTO>() {
+
+        @Override
+        public Boolean getValue(SailorProfileDTO object) {
+            return true;
+        }
+
+    };
 
     private final Column<SailorProfileDTO, String> removeColumn = new Column<SailorProfileDTO, String>(
             new ButtonCell()) {

@@ -108,7 +108,7 @@ public class EditSailorProfile extends Composite implements EditSailorProfileVie
 
         accordionStatisticsUi.clear();
         for (SailorProfileNumericStatisticType type : SailorProfileNumericStatisticType.values()) {
-            SailorProfileStatisticTable dummy = new SailorProfileStatisticTable(flagImageResolver, type, i18n, null);
+            SailorProfileStatisticTable dummy = new SailorProfileStatisticTable(flagImageResolver, type, i18n);
             accordionStatisticsUi.addWidget(dummy);
             presenter.getDataProvider().getStatisticFor(type, new AsyncCallback<SailorProfileStatisticDTO>() {
 

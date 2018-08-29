@@ -21,4 +21,8 @@ public enum SailorProfileNumericStatisticType {
         HIGHEST_IS_BEST,
         AVERAGE
     }
+
+    public String getPlayerMode() {
+        return "PLAYER";
+    }
 }

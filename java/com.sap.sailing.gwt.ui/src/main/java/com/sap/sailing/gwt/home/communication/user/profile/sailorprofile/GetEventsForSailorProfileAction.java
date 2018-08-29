@@ -90,7 +90,6 @@ public class GetEventsForSailorProfileAction implements SailingAction<SailorProf
                         String regattaName = leaderboard.getName();
 
                         Regatta regatta = ctx.getRacingEventService().getRegattaByName(regattaName);
-                        String clubName = competitor.getName();
 
                         if (regatta == null) {
                             continue;

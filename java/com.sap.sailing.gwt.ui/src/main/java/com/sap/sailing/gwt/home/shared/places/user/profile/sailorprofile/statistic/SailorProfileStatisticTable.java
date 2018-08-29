@@ -1,32 +1,38 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.statistic;
 
+import java.util.HashMap;
 import java.util.List;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
-import com.google.gwt.cell.client.NumberCell;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableResources;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
-import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedRegattaDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO.SingleEntry;
-import com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab.RegattaLeaderboardPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.events.CompetitorWithoutClubnameItemDescription;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.events.NavigatorColumn;
+import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
+import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
+import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.settings.Settings;
+import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
 public class SailorProfileStatisticTable extends Composite {
 
@@ -34,8 +40,6 @@ public class SailorProfileStatisticTable extends Composite {
     }
 
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
-
-    private PlaceController placeController;
 
     @UiField(provided = true)
     final SortedCellTable<Pair<SimpleCompetitorWithIdDTO, SingleEntry>> sailorProfilesTable = new SortedCellTable<>(0,
@@ -51,11 +55,10 @@ public class SailorProfileStatisticTable extends Composite {
     private StringMessages stringMessages;
 
     public SailorProfileStatisticTable(FlagImageResolver flagImageResolver, SailorProfileNumericStatisticType type,
-            StringMessages stringMessages, PlaceController placeController) {
+            StringMessages stringMessages) {
         this.flagImageResolver = flagImageResolver;
         this.type = type;
         this.stringMessages = stringMessages;
-        this.placeController = placeController;
         initWidget(uiBinder.createAndBindUi(this));
         setupTable();
         titleUi.setInnerText(SailorProfileNumericStatisticTypeFormater.getDisplayName(type, stringMessages));
@@ -68,33 +71,47 @@ public class SailorProfileStatisticTable extends Composite {
 
     private void setupTable() {
         sailorProfilesTable.addColumn(actualValueColumn, StringMessages.INSTANCE.regattaName());
-        // sailorProfilesTable.addColumn(regattaRank, StringMessages.INSTANCE.regattaRank());
-        // sailorProfilesTable.addColumn(sumPointsColumn, "\u2211");
         sailorProfilesTable.addColumn(competitorColumn, StringMessages.INSTANCE.competitor());
         sailorProfilesTable.addColumn(clubNameColumn, StringMessages.INSTANCE.name());
-        // sailorProfilesTable.addColumn(navigatorColumn);
+        sailorProfilesTable.addColumn(navigatorColumn);
 
         navigatorColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
-        navigatorColumn.setFieldUpdater(new FieldUpdater<ParticipatedRegattaDTO, String>() {
+        navigatorColumn.setFieldUpdater(new FieldUpdater<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, Boolean>() {
             @Override
-            public void update(int index, ParticipatedRegattaDTO entry, String value) {
-                placeController.goTo(new RegattaLeaderboardPlace(entry.getEventId(), entry.getRegattaId()));
+            public void update(int index, Pair<SimpleCompetitorWithIdDTO, SingleEntry> entry, Boolean value) {
+                // AbstractEvent
+                // placeController.goTo(new RegattaLeaderboardPlace(entry.getB().getEventId(), entry.getRegattaId()));
+                final RegattaAndRaceIdentifier raceIdentifier = entry.getB().getRelatedRaceOrNull();
+                RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(
+                        raceIdentifier.getRegattaName(), raceIdentifier.getRaceName(),
+                        entry.getB().getLeaderboardNameOrNull(), entry.getB().getLeaderboardGroupNameOrNull(),
+                        entry.getB().getEventIdOrNull(), type.getPlayerMode());
+                RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings();
+
+                HashMap<String, Settings> innerSettings = new HashMap<>();
+                innerSettings.put(RaceMapLifecycle.ID, RaceMapSettings.getDefaultWithShowMapControls(true));
+                PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(
+                        perspectiveOwnSettings, innerSettings);
+                String targetUrl = EntryPointWithSettingsLinkFactory.createRaceBoardLink(raceboardContext, settings);
+                Window.Location.assign(targetUrl);
+
             }
         });
     }
+
+
+    private final Column<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, Boolean> navigatorColumn = new NavigatorColumn<Pair<SimpleCompetitorWithIdDTO, SingleEntry>>() {
+        @Override
+        public Boolean getValue(Pair<SimpleCompetitorWithIdDTO, SingleEntry> entry) {
+            return entry.getB().getEventIdOrNull() != null;
+        }
+    };
 
     private final Column<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, String> actualValueColumn = new Column<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, String>(
             new TextCell()) {
         @Override
         public String getValue(Pair<SimpleCompetitorWithIdDTO, SingleEntry> entry) {
             return SailorProfileNumericStatisticTypeFormater.format(type, entry.getB().getValue(), stringMessages);
-        }
-    };
-    private final Column<ParticipatedRegattaDTO, Number> regattaRank = new Column<ParticipatedRegattaDTO, Number>(
-            new NumberCell()) {
-        @Override
-        public Number getValue(ParticipatedRegattaDTO entry) {
-            return entry.getRegattaRank();
         }
     };
     private final Column<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, SimpleCompetitorWithIdDTO> competitorColumn = new Column<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, SimpleCompetitorWithIdDTO>(
@@ -117,13 +134,4 @@ public class SailorProfileStatisticTable extends Composite {
             return entry.getA().getName();
         }
     };
-    private final Column<ParticipatedRegattaDTO, Number> sumPointsColumn = new Column<ParticipatedRegattaDTO, Number>(
-            new NumberCell()) {
-        @Override
-        public Number getValue(ParticipatedRegattaDTO entry) {
-            return entry.getSumPoints();
-        }
-    };
-
-    private final Column<ParticipatedRegattaDTO, String> navigatorColumn = new NavigatorColumn<ParticipatedRegattaDTO>();
 }
