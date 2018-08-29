@@ -8,7 +8,7 @@
         type="com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfileResources" />
     <ui:style>
     </ui:style>
-    <g:HTMLPanel>
+    <g:HTMLPanel addStyleNames="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopmediumsmall}">
         <div class="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall} {sp_res.css.eventsTablePanel}">
             <div class="{sp_res.css.eventsTableTitle}">
                 <span ui:field="titleUi" />

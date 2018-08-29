@@ -9,7 +9,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedEventDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
@@ -98,9 +97,6 @@ public class EditSailorProfile extends Composite implements EditSailorProfileVie
                 for (ParticipatedEventDTO dto : result.getParticipatedEvents()) {
                     SailorProfileEventsTable table = new SailorProfileEventsTable(flagImageResolver,
                             presenter.getPlaceController(), dto);
-                    table.addStyleName(SharedResources.INSTANCE.mediaCss().column());
-                    table.addStyleName(SharedResources.INSTANCE.mediaCss().small12());
-                    table.addStyleName(SharedResources.INSTANCE.mainCss().spacermargintopmediumsmall());
                     accordionEventsUi.addWidget(table);
                 }
             }
@@ -108,8 +104,8 @@ public class EditSailorProfile extends Composite implements EditSailorProfileVie
 
         accordionStatisticsUi.clear();
         for (SailorProfileNumericStatisticType type : SailorProfileNumericStatisticType.values()) {
-            SailorProfileStatisticTable dummy = new SailorProfileStatisticTable(flagImageResolver, type, i18n);
-            accordionStatisticsUi.addWidget(dummy);
+            SailorProfileStatisticTable table = new SailorProfileStatisticTable(flagImageResolver, type, i18n);
+            accordionStatisticsUi.addWidget(table);
             presenter.getDataProvider().getStatisticFor(type, new AsyncCallback<SailorProfileStatisticDTO>() {
 
                 @Override
@@ -125,7 +121,7 @@ public class EditSailorProfile extends Composite implements EditSailorProfileVie
                             data.add(new Pair<SimpleCompetitorWithIdDTO, SingleEntry>(entry.getKey(), value));
                         }
                     }
-                    dummy.setData(data);
+                    table.setData(data);
                 }
             });
         }
