@@ -19,6 +19,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableResources;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType.StatisticType;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO.SingleEntry;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.events.CompetitorWithoutClubnameItemDescription;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.events.NavigatorColumn;
@@ -71,38 +72,47 @@ public class SailorProfileStatisticTable extends Composite {
     }
 
     private void setupTable() {
-        sailorProfilesTable.addColumn(eventNameColumn, StringMessages.INSTANCE.eventName());
-        sailorProfilesTable.addColumn(timeColumn, StringMessages.INSTANCE.time());
+        boolean isAverage = type.getAggregationType() != StatisticType.AVERAGE;
+
+        if (isAverage) {
+            sailorProfilesTable.addColumn(eventNameColumn, StringMessages.INSTANCE.eventName());
+            sailorProfilesTable.addColumn(timeColumn, StringMessages.INSTANCE.time());
+        }
+
         sailorProfilesTable.addColumn(actualValueColumn,
                 SailorProfileNumericStatisticTypeFormater.getColumnHeadingName(type, stringMessages));
         sailorProfilesTable.addColumn(competitorColumn, StringMessages.INSTANCE.competitor());
         sailorProfilesTable.addColumn(clubNameColumn, StringMessages.INSTANCE.name());
         sailorProfilesTable.addColumn(navigatorColumn);
 
-        navigatorColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
-        navigatorColumn.setFieldUpdater(new FieldUpdater<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, Boolean>() {
-            @Override
-            public void update(int index, Pair<SimpleCompetitorWithIdDTO, SingleEntry> entry, Boolean value) {
-                // AbstractEvent
-                // placeController.goTo(new RegattaLeaderboardPlace(entry.getB().getEventId(), entry.getRegattaId()));
-                final RegattaAndRaceIdentifier raceIdentifier = entry.getB().getRelatedRaceOrNull();
-                RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(
-                        raceIdentifier.getRegattaName(), raceIdentifier.getRaceName(),
-                        entry.getB().getLeaderboardNameOrNull(), entry.getB().getLeaderboardGroupNameOrNull(),
-                        entry.getB().getEventIdOrNull(), type.getPlayerMode());
-                RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings(
-                        new MillisecondsDurationImpl(entry.getB().getRelatedTimePointOrNull().asMillis()
-                                - entry.getB().getRelatedRaceStartTimePointOrNull().asMillis()));
+        if (isAverage) {
+            navigatorColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
+            navigatorColumn.setFieldUpdater(new FieldUpdater<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, Boolean>() {
+                @Override
+                public void update(int index, Pair<SimpleCompetitorWithIdDTO, SingleEntry> entry, Boolean value) {
+                    // AbstractEvent
+                    // placeController.goTo(new RegattaLeaderboardPlace(entry.getB().getEventId(),
+                    // entry.getRegattaId()));
+                    final RegattaAndRaceIdentifier raceIdentifier = entry.getB().getRelatedRaceOrNull();
+                    RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(
+                            raceIdentifier.getRegattaName(), raceIdentifier.getRaceName(),
+                            entry.getB().getLeaderboardNameOrNull(), entry.getB().getLeaderboardGroupNameOrNull(),
+                            entry.getB().getEventIdOrNull(), type.getPlayerMode());
+                    RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings(
+                            new MillisecondsDurationImpl(entry.getB().getRelatedTimePointOrNull().asMillis()
+                                    - entry.getB().getRelatedRaceStartTimePointOrNull().asMillis()));
 
-                HashMap<String, Settings> innerSettings = new HashMap<>();
-                innerSettings.put(RaceMapLifecycle.ID, RaceMapSettings.getDefaultWithShowMapControls(true));
-                PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(
-                        perspectiveOwnSettings, innerSettings);
-                String targetUrl = EntryPointWithSettingsLinkFactory.createRaceBoardLink(raceboardContext, settings);
-                Window.Location.assign(targetUrl);
+                    HashMap<String, Settings> innerSettings = new HashMap<>();
+                    innerSettings.put(RaceMapLifecycle.ID, RaceMapSettings.getDefaultWithShowMapControls(true));
+                    PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(
+                            perspectiveOwnSettings, innerSettings);
+                    String targetUrl = EntryPointWithSettingsLinkFactory.createRaceBoardLink(raceboardContext,
+                            settings);
+                    Window.Location.assign(targetUrl);
 
-            }
-        });
+                }
+            });
+        }
     }
 
     private final Column<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, Boolean> navigatorColumn = new NavigatorColumn<Pair<SimpleCompetitorWithIdDTO, SingleEntry>>() {
@@ -127,11 +137,13 @@ public class SailorProfileStatisticTable extends Composite {
                             .getElement().getInnerHTML());
                 }
             }) {
+
         @Override
         public SimpleCompetitorWithIdDTO getValue(Pair<SimpleCompetitorWithIdDTO, SingleEntry> object) {
             return object.getA();
         }
     };
+
     private final Column<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, String> clubNameColumn = new Column<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, String>(
             new TextCell()) {
         @Override

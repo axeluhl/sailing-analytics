@@ -31,6 +31,7 @@ public class SailorProfileNumericStatisticTypeFormater {
     public static String format(SailorProfileNumericStatisticType type, Double value, StringMessages stringMessages) {
         switch (type) {
         case AVERAGE_STARTLINE_DISTANCE:
+            return "\u00D8  " + stringMessages.metersValue(value);
         case BEST_DISTANCE_TO_START:
             return stringMessages.metersValue(value);
         case BEST_STARTLINE_SPEED:
