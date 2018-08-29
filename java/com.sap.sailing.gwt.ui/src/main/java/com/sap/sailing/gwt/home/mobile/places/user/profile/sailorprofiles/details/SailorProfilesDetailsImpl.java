@@ -18,14 +18,18 @@ import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedEventDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEventsDTO;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailingProfileOverviewPresenter;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileView;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfileMobileResources;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.details.events.SailorProfileEventEntry;
+import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.details.statistics.SailorProfileStatisticTable;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfileResources;
 import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserSettingsView;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
 /**
@@ -34,6 +38,7 @@ import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 public class SailorProfilesDetailsImpl extends Composite implements SailorProfileView, EditSailorProfileView {
 
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
+    private static StringMessages stringMessages = GWT.create(StringMessages.class);
 
     interface MyUiBinder extends UiBinder<Widget, SailorProfilesDetailsImpl> {
     }
@@ -117,6 +122,23 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
                     }
 
                 });
+
+        // Get statistics
+        for (SailorProfileNumericStatisticType type : SailorProfileNumericStatisticType.values()) {
+            presenter.getSharedSailorProfilePresenter().getDataProvider().getStatisticFor(entry.getKey(), type,
+                    new AsyncCallback<SailorProfileStatisticDTO>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            GWT.log(caught.getMessage(), caught);
+                        }
+
+                        @Override
+                        public void onSuccess(SailorProfileStatisticDTO result) {
+                            setStatistic(type, result);
+                        }
+
+                    });
+        }
     }
 
     private void setCompetitors(Iterable<SimpleCompetitorWithIdDTO> competitors) {
@@ -143,5 +165,11 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
                     new SailorProfileEventEntry(event, presenter.getSharedSailorProfilePresenter().getPlaceController(),
                             presenter.getFlagImageResolver()));
         }
+    }
+
+    private void setStatistic(SailorProfileNumericStatisticType type, SailorProfileStatisticDTO statistic) {
+        contentContainerStatisticsUi
+                .add(new SailorProfileStatisticTable(type, statistic, presenter.getFlagImageResolver(),
+                        stringMessages));
     }
 }

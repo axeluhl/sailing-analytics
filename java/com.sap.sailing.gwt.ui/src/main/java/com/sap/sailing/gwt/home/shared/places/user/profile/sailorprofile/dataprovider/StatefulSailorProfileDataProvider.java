@@ -124,7 +124,7 @@ public class StatefulSailorProfileDataProvider implements
         sailorProfileDataProvider.removeSailorProfile(uuid, callback);
     }
 
-    public void getStatisticFor(SailorProfileNumericStatisticType type,
+    public void getStatisticFor(UUID uuid, SailorProfileNumericStatisticType type,
             AsyncCallback<SailorProfileStatisticDTO> callback) {
         sailorProfileDataProvider.getNumericStatistics(uuid, type, callback);
 

@@ -1,0 +1,47 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
+    xmlns:p="urn:import:com.sap.sailing.gwt.home.mobile.partials"
+    xmlns:ms="urn:import:com.sap.sailing.gwt.home.mobile.partials.section">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="spr"
+        type="com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfileResources" />
+    <ui:with field="spmr"
+        type="com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfileMobileResources" />
+
+    <ui:style>
+        .statisticTime{
+        display:inline-block;
+        }
+        .statisticValue{
+        display:inline-block;
+        }
+        .statisticCompetitor{
+        margin-top: 1em;
+        font-weight: bold;
+
+        }
+        .statisticLabel{
+        display:inline-block;
+        font-weight: bold;
+        }
+
+    </ui:style>
+    <g:HTMLPanel addStyleNames="{spmr.css.regattaEntryPanel}">
+        <div ui:field="statisticNameUi" class="{spmr.css.regattaName}" />
+        <div ui:field="eventNameUi" class="{spmr.css.regattaName}" />
+        <div ui:field="timeDivUi">
+            <div ui:field="timeLabelUi" class="{style.statisticLabel}" />
+            <div ui:field="timeUi" class="{style.statisticTime}" />
+        </div>
+        <div>
+            <div ui:field="valueLabelUi" class="{style.statisticLabel}" />
+            <div ui:field="valueUi" class="{style.statisticValue}" />
+        </div>
+        <g:FlowPanel ui:field="competitorUi" addStyleNames="{style.statisticCompetitor}" />
+        <div ui:field="clubNameUi" />
+        <g:Button ui:field="showPointInTimeButtonUi" text="{i18n.showInRaceboard}"
+            addStyleNames="{spmr.css.showLeaderboardButton} {spr.css.inverseButton}" />
+        <div class="{spmr.css.regattaSplitter1px}" />
+    </g:HTMLPanel>
+</ui:UiBinder> 

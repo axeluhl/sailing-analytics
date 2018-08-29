@@ -106,7 +106,8 @@ public class EditSailorProfile extends Composite implements EditSailorProfileVie
         for (SailorProfileNumericStatisticType type : SailorProfileNumericStatisticType.values()) {
             SailorProfileStatisticTable table = new SailorProfileStatisticTable(flagImageResolver, type, i18n);
             accordionStatisticsUi.addWidget(table);
-            presenter.getDataProvider().getStatisticFor(type, new AsyncCallback<SailorProfileStatisticDTO>() {
+            presenter.getDataProvider().getStatisticFor(entry.getKey(), type,
+                    new AsyncCallback<SailorProfileStatisticDTO>() {
 
                 @Override
                 public void onFailure(Throwable caught) {

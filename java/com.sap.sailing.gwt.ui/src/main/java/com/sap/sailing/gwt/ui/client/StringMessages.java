@@ -2112,4 +2112,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String averageDistanceToStartLine();
 
     String metersValue(Double value);
+
+    String showInRaceboard();
 }
