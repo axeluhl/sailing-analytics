@@ -25,7 +25,7 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.BadgeDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.events.NavigatorColumn;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfileResources;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileResources;
 import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorDesktop;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
@@ -55,7 +55,7 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
     @Override
     public void setPresenter(SailingProfileOverviewPresenter presenter) {
         this.presenter = presenter;
-        SailorProfileResources.INSTANCE.css().ensureInjected();
+        SharedSailorProfileResources.INSTANCE.css().ensureInjected();
         decoratorUi = new AuthorizedContentDecoratorDesktop(presenter);
         initWidget(uiBinder.createAndBindUi(this));
         setupTable();
@@ -129,7 +129,7 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
                 @Override
                 public void render(Context context, SailorProfileDTO value, SafeHtmlBuilder sb) {
                     for (BoatClassDTO boatclass : value.getBoatclasses()) {
-                        sb.append(SailorProfileResources.TEMPLATES.buildBoatclassIcon(BoatClassImageResolver
+                        sb.append(SharedSailorProfileResources.TEMPLATES.buildBoatclassIcon(BoatClassImageResolver
                                 .getBoatClassIconResource(boatclass.getName()).getSafeUri().asString()));
                     }
                 }

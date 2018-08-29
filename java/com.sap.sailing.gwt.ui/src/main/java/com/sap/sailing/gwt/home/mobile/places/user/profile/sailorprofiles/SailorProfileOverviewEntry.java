@@ -23,7 +23,7 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileD
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailingProfileOverviewPresenter;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfileResources;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileResources;
 
 public class SailorProfileOverviewEntry extends Composite {
 
@@ -67,7 +67,7 @@ public class SailorProfileOverviewEntry extends Composite {
         }
         for (BoatClassDTO boatclass : entry.getBoatclasses()) {
             Element elem = DOM.createDiv();
-            elem.setInnerSafeHtml(SailorProfileResources.TEMPLATES.buildBoatclassIcon(
+            elem.setInnerSafeHtml(SharedSailorProfileResources.TEMPLATES.buildBoatclassIcon(
                     BoatClassImageResolver.getBoatClassIconResource(boatclass.getName()).getSafeUri().asString()));
             elem.getStyle().setDisplay(Display.INLINE_BLOCK);
             boatclassesDivUi.appendChild(elem);

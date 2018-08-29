@@ -6,9 +6,9 @@ import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 
-public interface SailorProfileResources extends ClientBundle {
+public interface SharedSailorProfileResources extends ClientBundle {
 
-    public static final SailorProfileResources INSTANCE = GWT.create(SailorProfileResources.class);
+    public static final SharedSailorProfileResources INSTANCE = GWT.create(SharedSailorProfileResources.class);
 
     public static final SailorProfileTemplates TEMPLATES = GWT.create(SailorProfileTemplates.class);
 

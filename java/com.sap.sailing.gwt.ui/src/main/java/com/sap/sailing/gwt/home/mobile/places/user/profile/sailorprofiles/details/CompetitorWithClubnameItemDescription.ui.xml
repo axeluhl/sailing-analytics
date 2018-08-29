@@ -5,7 +5,7 @@
     <ui:with field="local_res"
         type="com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionResources" />
     <ui:with field="spr"
-        type="com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfileResources" />
+        type="com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileResources" />
     <ui:with field="spmr"
         type="com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfileMobileResources" />
 

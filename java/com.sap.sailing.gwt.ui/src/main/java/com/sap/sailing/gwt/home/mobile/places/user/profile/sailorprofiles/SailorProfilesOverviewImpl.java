@@ -13,7 +13,7 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileD
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailingProfileOverviewPresenter;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileOverview;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfileResources;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileResources;
 import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserSettingsView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
@@ -60,8 +60,8 @@ public class SailorProfilesOverviewImpl extends Composite implements SailorProfi
 
     private void createFooter() {
         Label lab = new Label("+ " + StringMessages.INSTANCE.addSailorProfileMessage());
-        SailorProfileResources.INSTANCE.css().ensureInjected();
-        lab.addStyleName(SailorProfileResources.INSTANCE.css().overviewTableFooterMobile());
+        SharedSailorProfileResources.INSTANCE.css().ensureInjected();
+        lab.addStyleName(SharedSailorProfileResources.INSTANCE.css().overviewTableFooterMobile());
         contentUi.add(lab);
         lab.addClickHandler((event) -> {
             presenter.getClientFactory().getPlaceController().goTo(new SailorProfilePlace(true));

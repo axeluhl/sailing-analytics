@@ -5,7 +5,7 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="spr"
-        type="com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfileResources" />
+        type="com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileResources" />
     <ui:with field="spmr"
         type="com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfileMobileResources" />
 

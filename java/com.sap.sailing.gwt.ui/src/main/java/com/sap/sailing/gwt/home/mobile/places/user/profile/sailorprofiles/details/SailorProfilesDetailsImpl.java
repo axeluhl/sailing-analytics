@@ -27,7 +27,7 @@ import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.Sailor
 import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.details.events.SailorProfileEventEntry;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.details.statistics.SailorProfileStatisticTable;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfileResources;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileResources;
 import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserSettingsView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
@@ -81,7 +81,7 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
 
     public SailorProfilesDetailsImpl() {
         initWidget(uiBinder.createAndBindUi(this));
-        SailorProfileResources.INSTANCE.css().ensureInjected();
+        SharedSailorProfileResources.INSTANCE.css().ensureInjected();
         SailorProfileMobileResources.INSTANCE.css().ensureInjected();
         competitorsUi.initCollapsibility(contentContainerCompetitorsUi.getElement(), false);
         imagesUi.initCollapsibility(contentContainerImagesUi.getElement(), false);
@@ -152,7 +152,7 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
     private void setBoatclasses(Iterable<BoatClassDTO> boatclasses) {
         for (BoatClassDTO boatclass : boatclasses) {
             Element elem = DOM.createDiv();
-            elem.setInnerSafeHtml(SailorProfileResources.TEMPLATES.buildBoatclassIcon(
+            elem.setInnerSafeHtml(SharedSailorProfileResources.TEMPLATES.buildBoatclassIcon(
                     BoatClassImageResolver.getBoatClassIconResource(boatclass.getName()).getSafeUri().asString()));
             elem.getStyle().setDisplay(Display.INLINE_BLOCK);
             contentContainerBoatclassesUi.getElement().appendChild(elem);

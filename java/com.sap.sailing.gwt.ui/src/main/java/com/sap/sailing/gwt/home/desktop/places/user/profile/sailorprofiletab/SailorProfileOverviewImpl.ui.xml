@@ -5,7 +5,7 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="sp_res"
-        type="com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfileResources" />
+        type="com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileResources" />
     <um:AuthorizedContentDecoratorDesktop ui:field="decoratorUi">
         <um:content>
             <g:HTMLPanel addStyleNames="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall}">

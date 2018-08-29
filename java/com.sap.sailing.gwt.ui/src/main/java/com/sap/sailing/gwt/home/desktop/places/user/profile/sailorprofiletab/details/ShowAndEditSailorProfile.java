@@ -17,13 +17,14 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileN
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO.SingleEntry;
 import com.sap.sailing.gwt.home.desktop.partials.desktopaccordion.DesktopAccordion;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileDesktopResources;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.events.SailorProfileEventsTable;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.statistic.SailorProfileStatisticTable;
 import com.sap.sailing.gwt.home.shared.partials.editable.EditableSuggestedMultiSelectionCompetitor;
 import com.sap.sailing.gwt.home.shared.partials.editable.InlineEditLabel;
 import com.sap.sailing.gwt.home.shared.partials.listview.BoatClassListView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfileResources;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileResources;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util.Pair;
@@ -66,7 +67,8 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
         presenter.getDataProvider().setView(this);
         competitorSelectionUi = new EditableSuggestedMultiSelectionCompetitor(presenter, flagImageResolver);
         initWidget(uiBinder.createAndBindUi(this));
-        SailorProfileResources.INSTANCE.css().ensureInjected();
+        SharedSailorProfileResources.INSTANCE.css().ensureInjected();
+        SailorProfileDesktopResources.INSTANCE.css().ensureInjected();
         boatClassesUi.setText(i18n.boatClasses());
         setupTitleChangeListener();
         accordionPolarDiagramUi.setVisible(false);

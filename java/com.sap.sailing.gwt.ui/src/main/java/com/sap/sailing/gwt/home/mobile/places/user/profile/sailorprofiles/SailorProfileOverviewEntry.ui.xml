@@ -7,7 +7,7 @@
     <ui:with field="spmr"
         type="com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfileMobileResources" />
     <ui:with field="spr"
-        type="com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfileResources" />
+        type="com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileResources" />
 
     <g:HTMLPanel>
         <ms:MobileSection>
