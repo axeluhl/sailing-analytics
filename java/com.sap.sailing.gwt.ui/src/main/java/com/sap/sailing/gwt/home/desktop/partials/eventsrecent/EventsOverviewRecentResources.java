@@ -16,6 +16,7 @@ public interface EventsOverviewRecentResources extends ClientBundle {
         String accordion();
         String accordion_trigger();
         String accordion_content();
+        String accordion_panel();
         String eventsoverviewrecent();
         String eventsoverviewrecent_year();
         String accordioncollapsed();
