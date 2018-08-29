@@ -14,8 +14,8 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedRegattaDTO;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab.RegattaLeaderboardPlace;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.events.CompetitorWithoutClubnameItemDescription;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfileMobileResources;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.events.CompetitorWithoutClubnameItemDescription;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 
 public class SailorProfileRegattaEntry extends Composite {

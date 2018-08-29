@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.events;
+package com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.events;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;

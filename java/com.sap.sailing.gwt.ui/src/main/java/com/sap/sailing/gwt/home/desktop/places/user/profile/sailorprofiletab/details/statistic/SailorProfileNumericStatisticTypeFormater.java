@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.statistic;
+package com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.statistic;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType;

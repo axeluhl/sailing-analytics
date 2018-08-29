@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile;
+package com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details;
 
 import java.util.ArrayList;
 import java.util.Map.Entry;
@@ -17,12 +17,13 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileN
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO.SingleEntry;
 import com.sap.sailing.gwt.home.desktop.partials.desktopaccordion.DesktopAccordion;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.SailorProfileDetailsView;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.events.SailorProfileEventsTable;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.statistic.SailorProfileStatisticTable;
 import com.sap.sailing.gwt.home.shared.partials.editable.EditableSuggestedMultiSelectionCompetitor;
 import com.sap.sailing.gwt.home.shared.partials.editable.InlineEditLabel;
 import com.sap.sailing.gwt.home.shared.partials.listview.BoatClassListView;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.events.SailorProfileEventsTable;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.statistic.SailorProfileStatisticTable;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfileResources;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util.Pair;
@@ -30,11 +31,11 @@ import com.sap.sse.common.Util.Pair;
 /**
  * Implementation of {@link EditSailorProfileView} where users can view the details of a SailorProfile and edit them.
  */
-public class EditSailorProfile extends Composite implements EditSailorProfileView {
+public class ShowAndEditSailorProfile extends Composite implements EditSailorProfileView {
 
     private static SharedSailorProfileUiBinder uiBinder = GWT.create(SharedSailorProfileUiBinder.class);
 
-    interface SharedSailorProfileUiBinder extends UiBinder<Widget, EditSailorProfile> {
+    interface SharedSailorProfileUiBinder extends UiBinder<Widget, ShowAndEditSailorProfile> {
     }
 
     @UiField
@@ -58,7 +59,7 @@ public class EditSailorProfile extends Composite implements EditSailorProfileVie
 
     private FlagImageResolver flagImageResolver;
 
-    public EditSailorProfile(EditSailorProfileView.Presenter presenter, FlagImageResolver flagImageResolver,
+    public ShowAndEditSailorProfile(EditSailorProfileView.Presenter presenter, FlagImageResolver flagImageResolver,
             SailorProfileDetailsView parent) {
         this.presenter = presenter;
         this.flagImageResolver = flagImageResolver;
