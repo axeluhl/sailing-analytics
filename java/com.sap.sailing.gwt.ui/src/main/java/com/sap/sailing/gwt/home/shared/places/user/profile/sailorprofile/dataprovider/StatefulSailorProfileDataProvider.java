@@ -10,11 +10,12 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileE
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfilesDTO;
-import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
 import com.sap.sailing.gwt.home.shared.partials.editable.EditableSuggestedMultiSelection.EditModeChangeHandler;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggestedCompetitorMultiSelectionPresenter;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionPresenter;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.ClientFactoryWithDispatchAndError;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -30,9 +31,11 @@ public class StatefulSailorProfileDataProvider implements
 
     private Collection<SimpleCompetitorWithIdDTO> competitors;
     private UUID uuid;
+    private final ClientFactoryWithDispatchAndError clientFactory;
 
-    public StatefulSailorProfileDataProvider(ClientFactoryWithDispatch clientFactory,
+    public StatefulSailorProfileDataProvider(ClientFactoryWithDispatchAndError clientFactory,
             AbstractSuggestedCompetitorMultiSelectionPresenter<Display<SimpleCompetitorWithIdDTO>> competitorDataProvider) {
+        this.clientFactory = clientFactory;
         this.sailorProfileDataProvider = new SailorProfileDataProviderImpl(clientFactory);
         this.competitorDataProvider = competitorDataProvider;
     }
@@ -44,7 +47,6 @@ public class StatefulSailorProfileDataProvider implements
     public void loadSailorProfile(UUID uuid) {
         sailorProfileDataProvider.findSailorProfileById(uuid, createRefreshCallback(uuid));
     }
-
 
     public void updateTitle(String newTitle) {
         sailorProfileDataProvider.updateTitle(uuid, newTitle, createRefreshCallback(uuid));
@@ -142,6 +144,7 @@ public class StatefulSailorProfileDataProvider implements
                     String uuidAsString = uuid == null ? StringMessages.INSTANCE.unknown() : uuid.toString();
                     Notification.notify(StringMessages.INSTANCE.unknownSailorProfile(uuidAsString),
                             NotificationType.ERROR);
+                    clientFactory.getPlaceController().goTo(new SailorProfilePlace());
                 } else {
                     competitors = result.getCompetitors();
                     StatefulSailorProfileDataProvider.this.uuid = result.getKey();
