@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileN
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO.SingleEntry;
 import com.sap.sailing.gwt.home.desktop.partials.desktopaccordion.DesktopAccordion;
+import com.sap.sailing.gwt.home.desktop.partials.desktopaccordion.DesktopAccordion.InitialAccordionExpansionListener;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileDesktopResources;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.events.SailorProfileEventsTable;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.statistic.SailorProfileStatisticTable;
@@ -28,6 +29,8 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedS
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 
 /**
  * Implementation of {@link EditSailorProfileView} where users can view the details of a SailorProfile and edit them.
@@ -109,23 +112,31 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
         for (SailorProfileNumericStatisticType type : SailorProfileNumericStatisticType.values()) {
             SailorProfileStatisticTable table = new SailorProfileStatisticTable(flagImageResolver, type, i18n);
             accordionStatisticsUi.addWidget(table);
-            presenter.getDataProvider().getStatisticFor(entry.getKey(), type,
-                    new AsyncCallback<SailorProfileStatisticDTO>() {
+            accordionStatisticsUi.addAccordionListener(new InitialAccordionExpansionListener() {
 
                 @Override
-                public void onFailure(Throwable caught) {
-                }
+                public void onFirstExpansion() {
+                    presenter.getDataProvider().getStatisticFor(entry.getKey(), type,
+                            new AsyncCallback<SailorProfileStatisticDTO>() {
 
-                @Override
-                public void onSuccess(SailorProfileStatisticDTO answer) {
-                    ArrayList<Pair<SimpleCompetitorWithIdDTO, SingleEntry>> data = new ArrayList<>();
-                    for (Entry<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>> entry : answer.getResult()
-                            .entrySet()) {
-                        for (SingleEntry value : entry.getValue()) {
-                            data.add(new Pair<SimpleCompetitorWithIdDTO, SingleEntry>(entry.getKey(), value));
-                        }
-                    }
-                    table.setData(data);
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    Notification.notify(i18n.couldNotDetermineStatistic(), NotificationType.WARNING);
+                                }
+
+                                @Override
+                                public void onSuccess(SailorProfileStatisticDTO answer) {
+                                    ArrayList<Pair<SimpleCompetitorWithIdDTO, SingleEntry>> data = new ArrayList<>();
+                                    for (Entry<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>> entry : answer
+                                            .getResult().entrySet()) {
+                                        for (SingleEntry value : entry.getValue()) {
+                                            data.add(new Pair<SimpleCompetitorWithIdDTO, SingleEntry>(entry.getKey(),
+                                                    value));
+                                        }
+                                    }
+                                    table.setData(data);
+                                }
+                            });
                 }
             });
         }

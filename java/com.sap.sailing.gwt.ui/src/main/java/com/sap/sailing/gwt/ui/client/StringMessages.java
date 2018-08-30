@@ -2114,4 +2114,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String metersValue(Double value);
 
     String showInRaceboard();
+
+    String couldNotDetermineStatistic();
 }

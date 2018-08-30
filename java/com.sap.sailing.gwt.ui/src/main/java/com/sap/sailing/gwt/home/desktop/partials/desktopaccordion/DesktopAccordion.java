@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.home.desktop.partials.desktopaccordion;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.SpanElement;
@@ -37,12 +40,19 @@ public class DesktopAccordion extends Composite {
 
     private final CollapseAnimation animation;
 
+    private boolean wasOpenend;
+    private List<InitialAccordionExpansionListener> accordionListeners;
+
+    public interface InitialAccordionExpansionListener {
+        void onFirstExpansion();
+    }
+
     public DesktopAccordion() {
         this(false);
     }
 
     public DesktopAccordion(boolean showInitial) {
-
+        accordionListeners = new ArrayList<>();
         EventsOverviewRecentResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
 
@@ -81,6 +91,13 @@ public class DesktopAccordion extends Composite {
     private void updateAccordionState() {
         if (isContentVisible) {
             getElement().removeClassName(EventsOverviewRecentResources.INSTANCE.css().accordioncollapsed());
+            if (!wasOpenend) {
+                wasOpenend = true;
+                for (InitialAccordionExpansionListener accordionListener : accordionListeners) {
+                    accordionListener.onFirstExpansion();
+                }
+                accordionListeners.clear();
+            }
         } else {
             getElement().addClassName(EventsOverviewRecentResources.INSTANCE.css().accordioncollapsed());
         }
@@ -88,5 +105,10 @@ public class DesktopAccordion extends Composite {
 
     public void clear() {
         contentPanelUi.clear();
+        accordionListeners.clear();
+    }
+
+    public void addAccordionListener(InitialAccordionExpansionListener listener) {
+        accordionListeners.add(listener);
     }
 }
