@@ -75,9 +75,9 @@ public interface SailorProfileConverter {
     default BoatClass getBoatClassForCompetitorWithoutBoatClass(RacingEventService racingEventService, Competitor c) {
         for (Event event : racingEventService.getAllEvents()) {
             for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
-                for (Competitor competitor : leaderboardGroup.getOverallLeaderboard().getCompetitors()) {
-                    if (competitor.getId().equals(c.getId())) {
-                        for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+                for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+                    for (Competitor competitor : leaderboard.getCompetitors()) {
+                        if (competitor.getId().equals(c.getId())) {
                             if (leaderboard.getBoatClass() != null) {
                                 return leaderboard.getBoatClass();
                             }
