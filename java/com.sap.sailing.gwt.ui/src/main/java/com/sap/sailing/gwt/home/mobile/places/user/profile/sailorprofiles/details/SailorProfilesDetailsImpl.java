@@ -23,6 +23,7 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileS
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailingProfileOverviewPresenter;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileView;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
+import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent.InitialAccordionExpansionListener;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfileMobileResources;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.details.events.SailorProfileEventEntry;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.details.statistics.SailorProfileStatisticTable;
@@ -111,22 +112,27 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
 
                 });
 
-        // Get statistics
-        for (SailorProfileNumericStatisticType type : SailorProfileNumericStatisticType.values()) {
-            presenter.getSharedSailorProfilePresenter().getDataProvider().getStatisticFor(entry.getKey(), type,
-                    new AsyncCallback<SailorProfileStatisticDTO>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            GWT.log(caught.getMessage(), caught);
-                        }
+        statisticsUi.addAccordionListener(new InitialAccordionExpansionListener() {
 
-                        @Override
-                        public void onSuccess(SailorProfileStatisticDTO result) {
-                            setStatistic(type, result);
-                        }
+            @Override
+            public void onFirstExpansion() {
+                // Get statistics
+                for (SailorProfileNumericStatisticType type : SailorProfileNumericStatisticType.values()) {
+                    presenter.getSharedSailorProfilePresenter().getDataProvider().getStatisticFor(entry.getKey(), type,
+                            new AsyncCallback<SailorProfileStatisticDTO>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    GWT.log(caught.getMessage(), caught);
+                                }
 
-                    });
-        }
+                                @Override
+                                public void onSuccess(SailorProfileStatisticDTO result) {
+                                    setStatistic(type, result);
+                                }
+                            });
+                }
+            }
+        });
     }
 
     private void setCompetitors(Iterable<SimpleCompetitorWithIdDTO> competitors) {
@@ -156,8 +162,7 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
     }
 
     private void setStatistic(SailorProfileNumericStatisticType type, SailorProfileStatisticDTO statistic) {
-        contentContainerStatisticsUi
-                .add(new SailorProfileStatisticTable(type, statistic, presenter.getFlagImageResolver(),
-                        stringMessages));
+        contentContainerStatisticsUi.add(
+                new SailorProfileStatisticTable(type, statistic, presenter.getFlagImageResolver(), stringMessages));
     }
 }

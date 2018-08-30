@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.home.mobile.partials.sectionHeader;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
@@ -44,7 +47,14 @@ public class SectionHeaderContent extends Composite {
     @UiField DivElement actionArrowUi;
     @UiField SimplePanel filterSelectContainerUi;
 
+    private List<InitialAccordionExpansionListener> accordionListeners;
+
+    public interface InitialAccordionExpansionListener {
+        void onFirstExpansion();
+    }
+
     public SectionHeaderContent() {
+        accordionListeners = new ArrayList<>();
         SectionHeaderResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         filterSelectContainerUi.setVisible(false);
@@ -86,11 +96,21 @@ public class SectionHeaderContent extends Composite {
         final CollapseAnimation animation = new CollapseAnimation(content, showInitial);
         setClassName(actionArrowUi, ACCORDION_COLLAPSED_STYLE, !showInitial);
         LinkUtil.configureForAction(headerMainUi, new Runnable() {
+            private boolean wasOpenend;
             @Override
             public void run() {
                 boolean collapsed = actionArrowUi.hasClassName(ACCORDION_COLLAPSED_STYLE);
                 setClassName(actionArrowUi, ACCORDION_COLLAPSED_STYLE, !collapsed);
                 animation.animate(collapsed);
+                if (collapsed) {
+                    if (!wasOpenend) {
+                        wasOpenend = true;
+                        for (InitialAccordionExpansionListener accordionListener : accordionListeners) {
+                            accordionListener.onFirstExpansion();
+                        }
+                        accordionListeners.clear();
+                    }
+                }
             }
         });
         actionArrowUi.addClassName(SectionHeaderResources.INSTANCE.css().accordion());
@@ -148,6 +168,10 @@ public class SectionHeaderContent extends Composite {
         Bubble.DefaultPresenter presenter = new Bubble.DefaultPresenter(content, getElement(), imageUi,
                 Direction.RIGHT);
         presenter.registerTarget(imageUi);
+    }
+
+    public void addAccordionListener(InitialAccordionExpansionListener listener) {
+        accordionListeners.add(listener);
     }
 
 }
