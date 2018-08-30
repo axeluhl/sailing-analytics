@@ -94,7 +94,7 @@ public class SailorProfileStatisticEntry extends Composite {
         // create raceboard context
         RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(raceIdentifier.getRegattaName(),
                 raceIdentifier.getRaceName(), entry.getLeaderboardNameOrNull(), entry.getLeaderboardGroupNameOrNull(),
-                entry.getEventIdOrNull(), type.getPlayerMode());
+                entry.getEventIdOrNull(), type.getPlayerMode().name());
         RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings(
                 new MillisecondsDurationImpl(entry.getRelatedTimePointOrNull().asMillis()
                         - entry.getRelatedRaceStartTimePointOrNull().asMillis()));
