@@ -9,7 +9,6 @@
             <li>The windstreamlets are now colored dynamically according to the wind fields maximum and minimum wind speed.</li>  
             <li>Changes of <tt>DataMining.html</tt>
                <ul class="bulletList">
-                  <li>The data type used by a statistic is now displayed by default.</li>
                   <li>The currently selected result tab will be remembered when a query is run. It is now possible
                      to change tabs while a long query is executed, without overwriting the result of another tab when
                      the query finishes. The result will be displayed in the tab that was selected when the execution
@@ -27,6 +26,8 @@
                   <li>Counting aggregators now work directly on the retrieved data elements and don't require the
                      selection of a specific statistic. Changing to a counting aggregator when a statistic is selected
                      automatically changes it to the corresponding data type.</li>
+                  <li>The filter selection and dimensions to group by are now retained (where possible), if the statistic
+                     is changed to one that is based on a different data type.</li>
                </ul>
             </li>
          </ul>

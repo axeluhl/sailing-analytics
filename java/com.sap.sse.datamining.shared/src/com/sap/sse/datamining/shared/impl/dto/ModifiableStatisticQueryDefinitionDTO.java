@@ -8,16 +8,50 @@ import java.util.HashSet;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 
+/**
+ * Definition for a data mining query that can be shared between client and server. Instances are usually created in the
+ * Data Mining UI, but can also by constructed from a backend instance (StatisticQueryDefinition) using a
+ * DataMiningDTOFactory. The corresponding backend instance for a DTO can be created using the DataMiningServer.
+ */
 public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefinitionDTO {
     private static final long serialVersionUID = -6438771277564908352L;
     
-    private String localeInfoName;
+    /**
+     * The extraction function used to get the statistic from the retrieved data elements.
+     */
     private FunctionDTO statisticToCalculate;
+    /**
+     * The aggregator used to aggregate the extracted statistics.
+     */
     private AggregationProcessorDefinitionDTO aggregatorDefinition;
+    /**
+     * The list of dimensions to group the results by.
+     */
     private ArrayList<FunctionDTO> dimensionsToGroupBy;
+    /**
+     * The retriever chain used to retrieve the data elements.
+     */
     private DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition;
+    /**
+     * The settings to be used for the retriever levels. Can be empty, if no retriever level has settings.
+     */
     private HashMap<DataRetrieverLevelDTO, SerializableSettings> retrieverSettings;
+    /**
+     * The values used to filter the data elements during the retrieval process. Each set of values is mapped by the
+     * dimension used to extract the value from a data element and the retriever level the dimension belongs to. The
+     * dimensions are declared by the data type retrieved by the corresponding retriever level and not by the data type
+     * the query is based on (return type of the retriever chain).
+     * 
+     * The actual filter values can be anything that is returned by a dimension, which will be mostly simple data like
+     * Strings or Enums, but can also be more complex data structures like {@link ClusterDTO}.
+     */
     private HashMap<DataRetrieverLevelDTO, HashMap<FunctionDTO, HashSet<? extends Serializable>>> filterSelection;
+
+    /**
+     * The LocalInfo name that will be used for internationalization. Should be omitted when persisting a
+     * ModifiableStatisticQueryDefinitionDTO.
+     */
+    private String localeInfoName;
     
     /**
      * <b>Constructor for the GWT-Serialization. Don't use this!</b>
@@ -25,7 +59,9 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
     @Deprecated
     ModifiableStatisticQueryDefinitionDTO() { }
 
-    public ModifiableStatisticQueryDefinitionDTO(String localeInfoName, FunctionDTO statisticToCalculate, AggregationProcessorDefinitionDTO aggregatorDefinition, DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition) {
+    public ModifiableStatisticQueryDefinitionDTO(String localeInfoName, FunctionDTO statisticToCalculate,
+            AggregationProcessorDefinitionDTO aggregatorDefinition,
+            DataRetrieverChainDefinitionDTO dataRetrieverChainDefinition) {
         this.localeInfoName = localeInfoName;
         this.statisticToCalculate = statisticToCalculate;
         this.aggregatorDefinition = aggregatorDefinition;
@@ -47,18 +83,6 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
         for (DataRetrieverLevelDTO retrieverLevel : filterSelectionToCopy.keySet()) {
             filterSelection.put(retrieverLevel, new HashMap<>(filterSelectionToCopy.get(retrieverLevel)));
         }
-    }
-
-    @Override
-    public String getLocaleInfoName() {
-        return localeInfoName;
-    }
-    
-    public void setLocaleInfoName(String localeInfoName) {
-        if (localeInfoName == null) {
-            throw new NullPointerException("The locale info name mustn't be null");
-        }
-        this.localeInfoName = localeInfoName;
     }
     
     @Override
@@ -138,6 +162,18 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
     }
 
     @Override
+    public String getLocaleInfoName() {
+        return localeInfoName;
+    }
+    
+    public void setLocaleInfoName(String localeInfoName) {
+        if (localeInfoName == null) {
+            throw new NullPointerException("The locale info name mustn't be null");
+        }
+        this.localeInfoName = localeInfoName;
+    }
+
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
@@ -146,7 +182,6 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
                 + ((dataRetrieverChainDefinition == null) ? 0 : dataRetrieverChainDefinition.hashCode());
         result = prime * result + ((dimensionsToGroupBy == null) ? 0 : dimensionsToGroupBy.hashCode());
         result = prime * result + ((filterSelection == null) ? 0 : filterSelection.hashCode());
-        result = prime * result + ((localeInfoName == null) ? 0 : localeInfoName.hashCode());
         result = prime * result + ((retrieverSettings == null) ? 0 : retrieverSettings.hashCode());
         result = prime * result + ((statisticToCalculate == null) ? 0 : statisticToCalculate.hashCode());
         return result;
@@ -180,11 +215,6 @@ public class ModifiableStatisticQueryDefinitionDTO implements StatisticQueryDefi
             if (other.filterSelection != null)
                 return false;
         } else if (!filterSelection.equals(other.filterSelection))
-            return false;
-        if (localeInfoName == null) {
-            if (other.localeInfoName != null)
-                return false;
-        } else if (!localeInfoName.equals(other.localeInfoName))
             return false;
         if (retrieverSettings == null) {
             if (other.retrieverSettings != null)

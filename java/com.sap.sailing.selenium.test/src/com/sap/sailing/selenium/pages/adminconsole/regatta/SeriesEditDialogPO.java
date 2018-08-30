@@ -141,7 +141,7 @@ public class SeriesEditDialogPO extends DataEntryDialogPO {
     
     public void setMedalSeries(boolean medal) {
         if(medalSeriesCheckbox.isSelected() != medal) {
-            medalSeriesCheckbox.click();
+            new Actions(driver).moveToElement(medalSeriesCheckbox).click().build().perform();
         }
     }
 }

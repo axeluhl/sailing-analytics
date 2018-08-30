@@ -35,12 +35,13 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
     private static final String IdPrefix = "Tab";
     
     private final AtomicInteger idCounter;
-    protected final ScrolledTabLayoutPanel tabPanel;
-    protected final Map<String, CloseablePresenterTab> tabsMappedById;
-    protected final DrillDownCallback drillDownCallback;
-    protected final Map<String, ResultsPresenter<Settings>> registeredResultPresenterMap;
+    private final ScrolledTabLayoutPanel tabPanel;
+    private final Map<String, CloseablePresenterTab> tabsMappedById;
+    private final DrillDownCallback drillDownCallback;
+    private final Map<String, ResultsPresenterFactory<?>> registeredPresenterFactories;
+    private final ResultsPresenterFactory<MultiResultsPresenter> defaultFactory;
     private final Set<CurrentPresenterChangedListener> listeners;
-
+    
     public TabbedResultsPresenter(Component<?> parent, ComponentContext<?> context, DrillDownCallback drillDownCallback) {
         super(parent, context);
         idCounter = new AtomicInteger();
@@ -48,7 +49,9 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
         tabPanel.setAnimationDuration(0);
         tabsMappedById = new HashMap<>();
         this.drillDownCallback = drillDownCallback;
-        registeredResultPresenterMap = new HashMap<>();
+        registeredPresenterFactories = new HashMap<>();
+        defaultFactory = new ResultsPresenterFactory<>(MultiResultsPresenter.class,
+                () -> new MultiResultsPresenter(this, getComponentContext(), drillDownCallback));
         listeners = new HashSet<>();
 
         addNewTabTab();
@@ -108,27 +111,24 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
 
     @Override
     public void showResult(String presenterId, StatisticQueryDefinitionDTO queryDefinition, QueryResultDTO<?> result) {
-        CloseablePresenterTab oldTab = getTab(presenterId);
-        if (oldTab == null) {
+        CloseablePresenterTab presenterTab = getTab(presenterId);
+        if (presenterTab == null) {
             return;
         }
         
-        try {
-            if (result != null) {
-                if (registeredResultPresenterMap.containsKey(result.getResultType())) {
-                    presenterId = addTabAndFocus(registeredResultPresenterMap.get(result.getResultType()));
-                    removeTab(oldTab);
-                } else {
-                    if (!(oldTab.getPresenter() instanceof MultiResultsPresenter)) {
-                        presenterId = addTabAndFocus(new MultiResultsPresenter(this, getComponentContext(), drillDownCallback));
-                        removeTab(oldTab);
-                    }
-                }
-                getTab(presenterId).setText(result.getResultSignifier());
+        if (result != null) {
+            ResultsPresenter<?> presenter = presenterTab.getPresenter();
+            ResultsPresenterFactory<?> factory = registeredPresenterFactories.getOrDefault(result.getResultType(), defaultFactory);
+            if (presenter.getClass() != factory.getProducedType()) {
+                CloseablePresenterTab newPresenterTab = addTabAndFocus(factory.createPresenter());
+                removeTab(presenterTab);
+                presenterTab = newPresenterTab;
             }
-        } finally {
-            getTab(presenterId).getPresenter().showResult(queryDefinition, result);
+            presenterTab.setText(result.getResultSignifier());
+        } else {
+            presenterTab.setText(getDataMiningStringMessages().empty());
         }
+        presenterTab.getPresenter().showResult(queryDefinition, result);
     }
 
     @Override
@@ -175,24 +175,24 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
     }
 
     /**
-     * Register a {@link ResultsPresenter} to handle the retrieved {@link resultType}. Each {@link resultType} can only
-     * be registered once. Multiple registrations will cause an {@link IllegalStateException}. When
-     * {@link #showResult(QueryResultDTO)} executes it checks whether the {@link resultType} was registered before and
-     * triggers the corresponding {@link ResultsPresenter}.
+     * Register a {@link ResultsPresenterFactory} that creates {@link ResultsPresenter} to handle the retrieved
+     * {@link resultType}. Each {@link resultType} can only be registered once. Multiple registrations will cause an
+     * {@link IllegalStateException}. When {@link #showResult(QueryResultDTO)} executes it checks whether the
+     * {@link resultType} was registered before and triggers the corresponding {@link ResultsPresenterFactory}.
      * 
      * @param resultType
-     *            of the datamining query.
-     * @param resultPresenter
-     *            which shall be used to handle the datamaining query result.
+     *            of the data mining query.
+     * @param presenterFactory
+     *            creates {@link ResultsPresenter} which shall be used to handle the data mining query result.
      * 
      * @throws IllegalStateException
      *             if the {@link resultType} is already registered.
      */
-    public void registerResultsPresenter(Class<?> resultType, ResultsPresenter<Settings> resultPresenter)
+    public void registerResultsPresenter(Class<?> resultType, ResultsPresenterFactory<?> presenterFactory)
             throws IllegalStateException {
         String className = resultType.getName();
-        if (!registeredResultPresenterMap.containsKey(className)) {
-            registeredResultPresenterMap.put(className, resultPresenter);
+        if (!registeredPresenterFactories.containsKey(className)) {
+            registeredPresenterFactories.put(className, presenterFactory);
         } else {
             throw new IllegalStateException(
                     "Multiple registration for result type key: " + resultType.toString() + "not allowed.");
@@ -207,16 +207,16 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
         return tabsMappedById.get(id);
     }
 
-    protected String addTabAndFocus(ResultsPresenter<?> tabPresenter) {
+    protected CloseablePresenterTab addTabAndFocus(ResultsPresenter<?> presenter) {
         String tabId = IdPrefix + idCounter.getAndIncrement();
-        CloseablePresenterTab tabHeader = new CloseablePresenterTab(tabId, tabPresenter);
-        tabsMappedById.put(tabId, tabHeader);
+        CloseablePresenterTab presenterTab = new CloseablePresenterTab(tabId, presenter);
+        tabsMappedById.put(tabId, presenterTab);
 
-        tabPanel.insert(tabPresenter.getEntryWidget(), tabHeader, tabPanel.getWidgetCount() - 1);
-        int presenterIndex = tabPanel.getWidgetIndex(tabPresenter.getEntryWidget());
+        tabPanel.insert(presenter.getEntryWidget(), presenterTab, tabPanel.getWidgetCount() - 1);
+        int presenterIndex = tabPanel.getWidgetIndex(presenter.getEntryWidget());
         tabPanel.selectTab(presenterIndex);
         tabPanel.scrollToTab(presenterIndex);
-        return tabId;
+        return presenterTab;
     }
 
     protected void removeTab(CloseablePresenterTab tab) {
@@ -272,6 +272,31 @@ public class TabbedResultsPresenter extends AbstractDataMiningComponent<Settings
     @Override
     public String getDependentCssClassName() {
         return "tabbedResultsPresenters";
+    }
+    
+    @FunctionalInterface
+    public static interface ResultsPresenterSupplier<T extends ResultsPresenter<?>> {
+        T create();
+    }
+    
+    public static class ResultsPresenterFactory<T extends ResultsPresenter<?>> {
+        
+        private final Class<T> presenterType;
+        private final ResultsPresenterSupplier<T> presenterSupplier;
+        
+        public ResultsPresenterFactory(Class<T> presenterType, ResultsPresenterSupplier<T> presenterSupplier) {
+            this.presenterType = presenterType;
+            this.presenterSupplier = presenterSupplier;
+        }
+
+        public Class<T> getProducedType() {
+            return presenterType;
+        }
+        
+        public T createPresenter() {
+            return presenterSupplier.create();
+        }
+        
     }
 
     private class CloseablePresenterTab extends FlowPanel {
