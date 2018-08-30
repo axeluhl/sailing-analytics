@@ -17,6 +17,7 @@ import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableRes
 import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedEventDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedRegattaDTO;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab.RegattaLeaderboardPlace;
+import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
@@ -28,7 +29,7 @@ public class SailorProfileEventsTable extends Composite {
     }
 
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
-
+    private ApplicationHistoryMapper historyMapper = GWT.create(ApplicationHistoryMapper.class);
     private PlaceController placeController;
 
     @UiField(provided = true)
@@ -80,6 +81,7 @@ public class SailorProfileEventsTable extends Composite {
             return entry.getRegattaName();
         }
     };
+
     private final Column<ParticipatedRegattaDTO, Number> regattaRank = new Column<ParticipatedRegattaDTO, Number>(
             new NumberCell()) {
         @Override
@@ -87,6 +89,7 @@ public class SailorProfileEventsTable extends Composite {
             return entry.getRegattaRank();
         }
     };
+
     private final Column<ParticipatedRegattaDTO, ParticipatedRegattaDTO> competitorColumn = new Column<ParticipatedRegattaDTO, ParticipatedRegattaDTO>(
             new AbstractCell<ParticipatedRegattaDTO>() {
                 @Override
@@ -101,6 +104,7 @@ public class SailorProfileEventsTable extends Composite {
             return object;
         }
     };
+
     private final Column<ParticipatedRegattaDTO, String> clubNameColumn = new Column<ParticipatedRegattaDTO, String>(
             new TextCell()) {
         @Override
@@ -108,6 +112,7 @@ public class SailorProfileEventsTable extends Composite {
             return entry.getCompetitorDto().getName();
         }
     };
+
     private final Column<ParticipatedRegattaDTO, Number> sumPointsColumn = new Column<ParticipatedRegattaDTO, Number>(
             new NumberCell()) {
         @Override
@@ -117,10 +122,9 @@ public class SailorProfileEventsTable extends Composite {
     };
 
     private final Column<ParticipatedRegattaDTO, String> navigatorColumn = new NavigatorColumn<ParticipatedRegattaDTO>() {
-
         @Override
         public String getValue(ParticipatedRegattaDTO object) {
-            return "";
+            return "#" + historyMapper.getToken(getTargetPlace(object));
         }
     };
 }

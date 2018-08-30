@@ -24,6 +24,7 @@ import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableRes
 import com.sap.sailing.gwt.home.communication.user.profile.domain.BadgeDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.events.NavigatorColumn;
+import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileResources;
 import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorDesktop;
@@ -32,6 +33,7 @@ import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
 public class SailorProfileOverviewImpl extends Composite implements SailorProfileOverview {
+    ApplicationHistoryMapper historyMapper = GWT.create(ApplicationHistoryMapper.class);
 
     interface MyBinder extends UiBinder<Widget, SailorProfileOverviewImpl> {
     }
@@ -86,7 +88,7 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
         navigatorColumn.setFieldUpdater(new FieldUpdater<SailorProfileDTO, String>() {
             @Override
             public void update(int index, SailorProfileDTO entry, String value) {
-                presenter.getClientFactory().getPlaceController().goTo(new SailorProfilePlace(entry.getKey()));
+                presenter.getClientFactory().getPlaceController().goTo(getTargetPlace(entry));
             }
         });
         removeColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
@@ -139,6 +141,7 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
             return object;
         }
     };
+
     private final Column<SailorProfileDTO, String> competitorColumn = new Column<SailorProfileDTO, String>(
             new TextCell()) {
         @Override
@@ -154,10 +157,8 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
 
         @Override
         public String getValue(SailorProfileDTO object) {
-            // FIXME can we determine the url here?
-            return "";
+            return "#" + historyMapper.getToken(getTargetPlace(object));
         }
-
     };
 
     private final Column<SailorProfileDTO, String> removeColumn = new Column<SailorProfileDTO, String>(
@@ -171,5 +172,9 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
     @Override
     public NeedsAuthenticationContext authentificationContextConsumer() {
         return decoratorUi;
+    }
+
+    private SailorProfilePlace getTargetPlace(SailorProfileDTO entry) {
+        return new SailorProfilePlace(entry.getKey());
     }
 }
