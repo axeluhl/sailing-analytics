@@ -56,6 +56,7 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
     public void setPresenter(SailingProfileOverviewPresenter presenter) {
         this.presenter = presenter;
         SharedSailorProfileResources.INSTANCE.css().ensureInjected();
+        SailorProfileDesktopResources.INSTANCE.css().ensureInjected();
         decoratorUi = new AuthorizedContentDecoratorDesktop(presenter);
         initWidget(uiBinder.createAndBindUi(this));
         setupTable();

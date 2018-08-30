@@ -33,7 +33,8 @@ public class GetSailorProfileAction implements SailingAction<SailorProfileDTO>, 
 
         SailorProfilePreferences prefs = ctx.getPreferenceForCurrentUser(SailorProfilePreferences.PREF_NAME);
         SailorProfilePreference pref = findSailorProfile(store, prefs);
-        return convertSailorProfilePreferenceToDto(pref, store);
+
+        return convertSailorProfilePreferenceToDto(pref, store, ctx.getRacingEventService());
     }
 
     @GwtIncompatible
