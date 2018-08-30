@@ -87,38 +87,46 @@ public class SailorProfileStatisticTable extends Composite {
 
         if (isAverage) {
             navigatorColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
-            navigatorColumn.setFieldUpdater(new FieldUpdater<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, Boolean>() {
+            navigatorColumn.setFieldUpdater(new FieldUpdater<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, String>() {
                 @Override
-                public void update(int index, Pair<SimpleCompetitorWithIdDTO, SingleEntry> entry, Boolean value) {
-                    final RegattaAndRaceIdentifier raceIdentifier = entry.getB().getRelatedRaceOrNull();
-
-                    // create raceboard context
-                    RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(
-                            raceIdentifier.getRegattaName(), raceIdentifier.getRaceName(),
-                            entry.getB().getLeaderboardNameOrNull(), entry.getB().getLeaderboardGroupNameOrNull(),
-                            entry.getB().getEventIdOrNull(), type.getPlayerMode().name());
-                    RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings(
-                            new MillisecondsDurationImpl(entry.getB().getRelatedTimePointOrNull().asMillis()
-                                    - entry.getB().getRelatedRaceStartTimePointOrNull().asMillis()));
-
-                    // create raceboard settings
-                    HashMap<String, Settings> innerSettings = new HashMap<>();
-                    innerSettings.put(RaceMapLifecycle.ID, RaceMapSettings.getDefaultWithShowMapControls(true));
-                    PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(
-                            perspectiveOwnSettings, innerSettings);
-                    String targetUrl = EntryPointWithSettingsLinkFactory.createRaceBoardLink(raceboardContext,
-                            settings);
-
-                    Window.Location.assign(targetUrl);
+                public void update(int index, Pair<SimpleCompetitorWithIdDTO, SingleEntry> entry, String value) {
+                    Window.Location.assign(value);
                 }
             });
         }
     }
 
-    private final Column<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, Boolean> navigatorColumn = new NavigatorColumn<Pair<SimpleCompetitorWithIdDTO, SingleEntry>>() {
+    private String createRaceboardURL(Pair<SimpleCompetitorWithIdDTO, SingleEntry> entry) {
+        String result = null;
+        if (type.getAggregationType() != StatisticType.AVERAGE) {
+            final RegattaAndRaceIdentifier raceIdentifier = entry.getB().getRelatedRaceOrNull();
+            if (raceIdentifier != null) {
+
+            }
+
+            // create raceboard context
+            RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(
+                    raceIdentifier.getRegattaName(), raceIdentifier.getRaceName(),
+                    entry.getB().getLeaderboardNameOrNull(), entry.getB().getLeaderboardGroupNameOrNull(),
+                    entry.getB().getEventIdOrNull(), type.getPlayerMode().name());
+            RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings(
+                    new MillisecondsDurationImpl(entry.getB().getRelatedTimePointOrNull().asMillis()
+                            - entry.getB().getRelatedRaceStartTimePointOrNull().asMillis()));
+
+            // create raceboard settings
+            HashMap<String, Settings> innerSettings = new HashMap<>();
+            innerSettings.put(RaceMapLifecycle.ID, RaceMapSettings.getDefaultWithShowMapControls(true));
+            PerspectiveCompositeSettings<RaceBoardPerspectiveOwnSettings> settings = new PerspectiveCompositeSettings<>(
+                    perspectiveOwnSettings, innerSettings);
+            result = EntryPointWithSettingsLinkFactory.createRaceBoardLink(raceboardContext, settings);
+        }
+        return result;
+    }
+
+    private final Column<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, String> navigatorColumn = new NavigatorColumn<Pair<SimpleCompetitorWithIdDTO, SingleEntry>>() {
         @Override
-        public Boolean getValue(Pair<SimpleCompetitorWithIdDTO, SingleEntry> entry) {
-            return entry.getB().getEventIdOrNull() != null;
+        public String getValue(Pair<SimpleCompetitorWithIdDTO, SingleEntry> entry) {
+            return createRaceboardURL(entry);
         }
     };
 

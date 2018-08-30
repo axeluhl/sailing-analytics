@@ -82,9 +82,9 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
         boatClassColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().textCellWordWrap());
 
         navigatorColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
-        navigatorColumn.setFieldUpdater(new FieldUpdater<SailorProfileDTO, Boolean>() {
+        navigatorColumn.setFieldUpdater(new FieldUpdater<SailorProfileDTO, String>() {
             @Override
-            public void update(int index, SailorProfileDTO entry, Boolean value) {
+            public void update(int index, SailorProfileDTO entry, String value) {
                 presenter.getClientFactory().getPlaceController().goTo(new SailorProfilePlace(entry.getKey()));
             }
         });
@@ -149,11 +149,12 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
         }
     };
 
-    private final Column<SailorProfileDTO, Boolean> navigatorColumn = new NavigatorColumn<SailorProfileDTO>() {
+    private final Column<SailorProfileDTO, String> navigatorColumn = new NavigatorColumn<SailorProfileDTO>() {
 
         @Override
-        public Boolean getValue(SailorProfileDTO object) {
-            return true;
+        public String getValue(SailorProfileDTO object) {
+            // FIXME can we determine the url here?
+            return "";
         }
 
     };
