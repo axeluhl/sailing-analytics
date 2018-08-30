@@ -42,7 +42,9 @@ public abstract class UpdateSailorProfileAction implements SailingAction<SailorP
         Pair<SailorProfilePreferences, SailorProfilePreference> pair = findAndUpdateCorrectPreference(store, prefs);
         prefs = pair.getA();
         ctx.setPreferenceForCurrentUser(SailorProfilePreferences.PREF_NAME, prefs);
-        return pair.getB() != null ? convertSailorProfilePreferenceToDto(pair.getB(), store) : null;
+        return pair.getB() != null
+                ? convertSailorProfilePreferenceToDto(pair.getB(), store, ctx.getRacingEventService())
+                : null;
     }
 
     @GwtIncompatible

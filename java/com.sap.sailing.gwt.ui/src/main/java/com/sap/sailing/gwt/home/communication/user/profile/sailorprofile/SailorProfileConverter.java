@@ -12,10 +12,14 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
+import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.BadgeDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
+import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.preferences.model.SailorProfilePreference;
 
 public interface SailorProfileConverter {
@@ -25,14 +29,14 @@ public interface SailorProfileConverter {
      */
     @GwtIncompatible
     default SailorProfileDTO convertSailorProfilePreferenceToDto(final SailorProfilePreference pref,
-            final CompetitorAndBoatStore store) {
+            final CompetitorAndBoatStore store, RacingEventService racingEventService) {
         SailorProfileDTO result;
         if (pref == null) {
             result = new SailorProfileDTO(true);
         } else {
             result = new SailorProfileDTO(pref.getUuid(), pref.getName(),
-                    convertCompetitorsToDTOs(pref.getCompetitors()),
-                    new ArrayList<BadgeDTO>(), getCorrespondingBoatDTOs(pref.getCompetitors(), store));
+                    convertCompetitorsToDTOs(pref.getCompetitors()), new ArrayList<BadgeDTO>(),
+                    getCorrespondingBoatDTOs(pref.getCompetitors(), store, racingEventService));
         }
         return result;
 
@@ -48,18 +52,41 @@ public interface SailorProfileConverter {
     /** get the corresponding boat for each competitor in the list of competitors */
     @GwtIncompatible
     default Set<BoatClassDTO> getCorrespondingBoatDTOs(final Iterable<Competitor> comps,
-            final CompetitorAndBoatStore store) {
+            final CompetitorAndBoatStore store, RacingEventService racingEventService) {
         final Set<BoatClassDTO> boatclasses = new HashSet<>();
         for (Competitor c : comps) {
             if (c != null) {
                 CompetitorWithBoat cwd = store.getExistingCompetitorWithBoatById(c.getId());
-                if (cwd != null && cwd.getBoat() != null && cwd.getBoat().getBoatClass() != null) {
+                if (cwd != null && cwd.hasBoat() && cwd.getBoat().getBoatClass() != null) {
                     BoatClassDTO dto = convertBoatClassToDTO(cwd.getBoat().getBoatClass());
                     boatclasses.add(dto);
+                } else {
+                    BoatClass boatclass = getBoatClassForCompetitorWithoutBoatClass(racingEventService, c);
+                    if (boatclass != null) {
+                        boatclasses.add(convertBoatClassToDTO(boatclass));
+                    }
                 }
             }
         }
         return boatclasses;
+    }
+
+    @GwtIncompatible
+    default BoatClass getBoatClassForCompetitorWithoutBoatClass(RacingEventService racingEventService, Competitor c) {
+        for (Event event : racingEventService.getAllEvents()) {
+            for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
+                for (Competitor competitor : leaderboardGroup.getOverallLeaderboard().getCompetitors()) {
+                    if (competitor.getId().equals(c.getId())) {
+                        for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+                            if (leaderboard.getBoatClass() != null) {
+                                return leaderboard.getBoatClass();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     /** @return converted BoatClassDTO from BoatClass */
