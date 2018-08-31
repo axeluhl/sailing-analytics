@@ -324,9 +324,10 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
             if (isVisible) {
                 this.startStreamlets();
                 this.visible = isVisible;
-                if (this.swarm.isColored()) {
+                if (colored) {
                     this.streamletLegend.setVisible(true);
                 }
+                swarm.setColors(colored);
                 this.startStreamlets();
                 if (isAttached) {
                     Scheduler.get().scheduleDeferred(() -> addObserverIfNecessary());
@@ -350,7 +351,9 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
         if ((isColored) && (firstColoring)) {
             firstColoring = false;
         }
-        this.streamletLegend.setVisible(isColored);
+        if (visible) {
+            this.streamletLegend.setVisible(isColored);
+        }
         if (swarm != null) {
             swarm.setColors(isColored);
         }
@@ -384,14 +387,12 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
 
                         @Override
                         public void onStyleChanged() {
-                            if (!dragging && isVisible()) {
+                            if (isVisible()) {
                                 stopStreamlets();
                                 setCanvasSettings();
                                 startStreamlets();
                             }
                         }
-
-
             });
             observer.observe(super.canvas.getElement().getParentElement().getParentElement());
         }
@@ -407,7 +408,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
     }
 
     public void onBoundsChanged(boolean zoomChanged) {
-        if (swarm != null) {
+        if (swarm != null && !dragging) {
             int swarmPause = (zoomChanged ? 5 : 2);
             swarm.onBoundsChanged(zoomChanged, swarmPause);
         }

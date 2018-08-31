@@ -786,8 +786,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
               streamletOverlay = new WindStreamletsRaceboardOverlay(getMap(), /* zIndex */ 0,
                       timer, raceIdentifier, sailingService, asyncActionsExecutor, stringMessages, coordinateSystem);
               streamletOverlay.addToMap();
+                streamletOverlay.setColors(settings.isShowWindStreamletColors());
               if (settings.isShowWindStreamletOverlay()) {
-                  streamletOverlay.setColors(settings.isShowWindStreamletColors());
                   streamletOverlay.setVisible(true);
               }
 
@@ -2701,6 +2701,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         }
         if (newSettings.isShowWindStreamletOverlay() != settings.isShowWindStreamletOverlay()) {
             streamletOverlay.setVisible(newSettings.isShowWindStreamletOverlay());
+            streamletOverlay.setColors(newSettings.isShowWindStreamletColors());
         }
         if (newSettings.isShowWindStreamletColors() != settings.isShowWindStreamletColors()) {
             streamletOverlay.setColors(newSettings.isShowWindStreamletColors());
