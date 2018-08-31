@@ -730,7 +730,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         settings = new RaceMapSettings(settings, clearedZoomSettings);
                         currentlyDragging = false;
                         refreshMapWithoutAnimation();
-                        if (streamletOverlay != null) {
+                        if (streamletOverlay != null && settings.isShowWindStreamletOverlay()) {
                             streamletOverlay.onDragEnd();
                         }
                     }
@@ -738,7 +738,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
                 map.addDragStartHandler(event -> {
                     currentlyDragging = true;
-                    if (streamletOverlay != null) {
+                    if (streamletOverlay != null && settings.isShowWindStreamletOverlay()) {
                         streamletOverlay.onDragStart();
                     }
                 });
@@ -766,7 +766,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                       if (!isAutoZoomInProgress() && (newZoomLevel != currentZoomLevel)) {
                           removeTransitions();
                       }
-                      if ((streamletOverlay != null) && !map.getBounds().equals(currentMapBounds)) {
+                        if ((streamletOverlay != null) && !map.getBounds().equals(currentMapBounds)
+                                && settings.isShowWindStreamletOverlay()) {
                           streamletOverlay.onBoundsChanged(newZoomLevel != currentZoomLevel);
                       }
                       currentMapBounds = map.getBounds();
@@ -2657,7 +2658,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         boolean showManeuverLossChanged = false;
         boolean requiresRedraw = false;
         boolean requiresUpdateCoordinateSystem = false;
-        
+
         if (newSettings.isShowManeuverLossVisualization() != settings.isShowManeuverLossVisualization()) {
             showManeuverLossChanged = true;
         }

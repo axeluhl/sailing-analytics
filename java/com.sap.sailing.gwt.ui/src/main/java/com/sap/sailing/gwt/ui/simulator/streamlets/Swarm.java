@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.simulator.streamlets;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
@@ -63,7 +65,7 @@ public class Swarm implements TimeListener {
     private Date timePoint;
     private double cosineOfAverageLatitude;
 
-    private HandlerRegistration handlerRegistration;
+    private final Map<BoundsChangeMapHandler, HandlerRegistration> boundsChangeHandlers = new HashMap<>();
     
     private boolean colored = false;
     private final ValueRangeFlexibleBoundaries valueRange;
@@ -90,16 +92,19 @@ public class Swarm implements TimeListener {
         if (map.getBounds() != null) {
             startWithMap(animationIntervalMillis);
         } else {
-            handlerRegistration = map.addBoundsChangeHandler(new BoundsChangeMapHandler() {
+            removeBoundsChangeHandler();
+            BoundsChangeMapHandler handler = new BoundsChangeMapHandler() {
                 @Override
                 public void onEvent(BoundsChangeMapEvent event) {
-                    Swarm.this.handlerRegistration.removeHandler();
-                    startWithMap(animationIntervalMillis);
+                    if (swarmContinue) {
+                        startWithMap(animationIntervalMillis);
+                    }
                 }
-            });
+            };
+            boundsChangeHandlers.put(handler, map.addBoundsChangeHandler(handler));
         }
     }
-    
+
     private void startWithMap(int animationIntervalMillis) {
         projection = new Mercator(fullcanvas, map);
         projection.calibrate();
@@ -109,8 +114,16 @@ public class Swarm implements TimeListener {
         startLoop(animationIntervalMillis);
     }
     
+    private void removeBoundsChangeHandler() {
+        for (HandlerRegistration reg : boundsChangeHandlers.values()) {
+            reg.removeHandler();
+        }
+        
+    }
+
     public void stop() {
         swarmContinue = false;
+        removeBoundsChangeHandler();
     }
     private Particle createParticle() {
         Particle particle = null;
@@ -165,6 +178,8 @@ public class Swarm implements TimeListener {
         this.zoomChanged |= zoomChanged;
         if (this.zoomChanged) {
             projection.clearCanvas();
+        } else {
+            fullcanvas.setCanvasSettings();
         }
         this.swarmPause = swarmPause;
     }
