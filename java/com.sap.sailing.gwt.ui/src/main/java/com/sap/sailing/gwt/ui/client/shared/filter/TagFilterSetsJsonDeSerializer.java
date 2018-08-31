@@ -11,7 +11,7 @@ import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.common.filter.ValueFilter;
 
-public class TagsFilterSetsJsonDeSerializer implements GwtJsonDeSerializer<TagFilterSets> {
+public class TagFilterSetsJsonDeSerializer implements GwtJsonDeSerializer<TagFilterSets> {
     public static final String FIELD_ACTIVE_FILTERSET = "activeFilterSet";
     public static final String FIELD_FILTERSETS = "filterSets";
     public static final String FIELD_FILTERSET_NAME = "name";

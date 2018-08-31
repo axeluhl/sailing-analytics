@@ -86,6 +86,7 @@ import com.sap.sailing.gwt.ui.leaderboard.ClassicLeaderboardStyle;
 import com.sap.sailing.gwt.ui.leaderboard.CompetitorFilterPanel;
 import com.sap.sailing.gwt.ui.leaderboard.SingleRaceLeaderboardPanel;
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardResources.RaceBoardMainCss;
+import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanel;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;

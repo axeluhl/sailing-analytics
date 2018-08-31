@@ -71,4 +71,8 @@ public class TagFilterSets {
     public List<FilterSet<TagDTO, FilterWithUI<TagDTO>>> getFilterSets() {
         return filterSets;
     }
+    
+    public void removeAllFilterSets() {
+        filterSets.clear();
+    }
 }

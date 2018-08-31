@@ -23,11 +23,11 @@ import com.sap.sse.security.ui.client.UserService;
  *
  */
 public class TagFilterSetsDialog extends DataEntryDialog<TagFilterSets> {
-    private final TagFilterSets tagsFilterSets;
+    private final TagFilterSets tagFilterSets;
     private final StringMessages stringMessages;
 
     private final Button addFilterSetButton;
-    private Grid tagsFilterSetsGrid;
+    private Grid tagFilterSetsGrid;
     private VerticalPanel mainPanel;
 
     private final List<String> availableTagFilterNames;
@@ -51,15 +51,15 @@ public class TagFilterSetsDialog extends DataEntryDialog<TagFilterSets> {
         }
     }
 
-    public TagFilterSetsDialog(TagFilterSets tagsFilterSets, StringMessages stringMessages,
+    public TagFilterSetsDialog(TagFilterSets tagFilterSets, StringMessages stringMessages,
             DialogCallback<TagFilterSets> callback, UserService userService) {
         super(stringMessages.tagsFilter(), null, stringMessages.ok(), stringMessages.cancel(),
                 new TagsFilterSetsValidator(), callback);
         this.userService = userService;
-        this.tagsFilterSets = tagsFilterSets;
+        this.tagFilterSets = tagFilterSets;
         this.stringMessages = stringMessages;
         filterNothingFiltersetName = stringMessages.filterNothing();
-        tagsFilterSetsGrid = new Grid(0, 0);
+        tagFilterSetsGrid = new Grid(0, 0);
         activeFilterSetRadioButtons = new ArrayList<RadioButton>();
         editFilterSetButtons = new ArrayList<Button>();
         deleteFilterSetButtons = new ArrayList<Button>();
@@ -79,23 +79,23 @@ public class TagFilterSetsDialog extends DataEntryDialog<TagFilterSets> {
             mainPanel.add(notLoggedInLabel);
         }
         String headLineText;
-        if (tagsFilterSets.getFilterSets().size() < 1) {
+        if (tagFilterSets.getFilterSets().size() < 1) {
             headLineText = stringMessages.tagCreateFilterHint();
         } else {
             headLineText = stringMessages.availableFilters();
         }
         mainPanel.add(new Label(headLineText));
-        mainPanel.add(tagsFilterSetsGrid);
+        mainPanel.add(tagFilterSetsGrid);
         // create a dummy filter for the "filter nothing" option
         FilterSet<TagDTO, FilterWithUI<TagDTO>> noFilterSet = new FilterSet<>(filterNothingFiltersetName);
-        createActiveFilterSetRadioButton(noFilterSet, tagsFilterSets.getActiveFilterSet() == null);
+        createActiveFilterSetRadioButton(noFilterSet, tagFilterSets.getActiveFilterSet() == null);
         Button noFilterSetEditBtn = createEditFilterSetButton(noFilterSet);
         Button noFilterSetDeleteBtn = createDeleteFilterSetButton(noFilterSet);
         filterSets.add(noFilterSet);
         noFilterSetEditBtn.setVisible(false);
         noFilterSetDeleteBtn.setVisible(false);
-        for (FilterSet<TagDTO, FilterWithUI<TagDTO>> filterSet : tagsFilterSets.getFilterSets()) {
-            createActiveFilterSetRadioButton(filterSet, tagsFilterSets.getActiveFilterSet() == filterSet);
+        for (FilterSet<TagDTO, FilterWithUI<TagDTO>> filterSet : tagFilterSets.getFilterSets()) {
+            createActiveFilterSetRadioButton(filterSet, tagFilterSets.getActiveFilterSet() == filterSet);
             createEditFilterSetButton(filterSet);
             createDeleteFilterSetButton(filterSet);
             filterSets.add(filterSet);
@@ -249,24 +249,24 @@ public class TagFilterSetsDialog extends DataEntryDialog<TagFilterSets> {
     }
 
     private void updateTagsFilterSetsGrid(VerticalPanel parentPanel) {
-        int widgetIndex = parentPanel.getWidgetIndex(tagsFilterSetsGrid);
-        parentPanel.remove(tagsFilterSetsGrid);
+        int widgetIndex = parentPanel.getWidgetIndex(tagFilterSetsGrid);
+        parentPanel.remove(tagFilterSetsGrid);
 
         int filterCount = activeFilterSetRadioButtons.size();
         if (filterCount > 0) {
-            tagsFilterSetsGrid = new Grid(filterCount, 3);
-            tagsFilterSetsGrid.setCellSpacing(3);
+            tagFilterSetsGrid = new Grid(filterCount, 3);
+            tagFilterSetsGrid.setCellSpacing(3);
             for (int i = 0; i < filterCount; i++) {
-                tagsFilterSetsGrid.setWidget(i, 0, activeFilterSetRadioButtons.get(i));
-                tagsFilterSetsGrid.setWidget(i, 1, editFilterSetButtons.get(i));
-                tagsFilterSetsGrid.setWidget(i, 2, deleteFilterSetButtons.get(i));
-                tagsFilterSetsGrid.getCellFormatter().setVerticalAlignment(i, 0, HasVerticalAlignment.ALIGN_MIDDLE);
-                tagsFilterSetsGrid.getCellFormatter().setVerticalAlignment(i, 1, HasVerticalAlignment.ALIGN_MIDDLE);
-                tagsFilterSetsGrid.getCellFormatter().setVerticalAlignment(i, 2, HasVerticalAlignment.ALIGN_MIDDLE);
+                tagFilterSetsGrid.setWidget(i, 0, activeFilterSetRadioButtons.get(i));
+                tagFilterSetsGrid.setWidget(i, 1, editFilterSetButtons.get(i));
+                tagFilterSetsGrid.setWidget(i, 2, deleteFilterSetButtons.get(i));
+                tagFilterSetsGrid.getCellFormatter().setVerticalAlignment(i, 0, HasVerticalAlignment.ALIGN_MIDDLE);
+                tagFilterSetsGrid.getCellFormatter().setVerticalAlignment(i, 1, HasVerticalAlignment.ALIGN_MIDDLE);
+                tagFilterSetsGrid.getCellFormatter().setVerticalAlignment(i, 2, HasVerticalAlignment.ALIGN_MIDDLE);
             }
         } else {
-            tagsFilterSetsGrid = new Grid(0, 0);
+            tagFilterSetsGrid = new Grid(0, 0);
         }
-        parentPanel.insert(tagsFilterSetsGrid, widgetIndex);
+        parentPanel.insert(tagFilterSetsGrid, widgetIndex);
     }
 }

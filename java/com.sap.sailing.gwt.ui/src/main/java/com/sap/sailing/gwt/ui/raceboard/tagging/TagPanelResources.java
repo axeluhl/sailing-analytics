@@ -1,0 +1,97 @@
+package com.sap.sailing.gwt.ui.raceboard.tagging;
+
+import com.google.gwt.core.shared.GWT;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.CssResource;
+import com.google.gwt.resources.client.ImageResource;
+
+public interface TagPanelResources extends ClientBundle {
+    public static final TagPanelResources INSTANCE = GWT.create(TagPanelResources.class);
+
+    // TODO image is stored in wrong folder
+    @Source("com/sap/sailing/gwt/ui/client/images/edit.png")
+    ImageResource editIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/lock.png")
+    ImageResource privateIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/unlock.png")
+    ImageResource publicIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/SAP_RV_Clear.png")
+    ImageResource clearButton();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/SAP_RV_CompetitorsFilter_INACTIVE.png")
+    ImageResource filterInactiveButton();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/SAP_RV_CompetitorsFilter_ACTIVE.png")
+    ImageResource filterActiveButton();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/SAP_RV_Search.png")
+    ImageResource searchButton();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/SAP_RV_Settings.png")
+    ImageResource settingsButton();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/pen.png")
+    ImageResource pen();
+
+    @Source("tagging-panel.css")
+    public TagPanelStyle style();
+
+    public interface TagPanelStyle extends CssResource {
+        // general
+        String hidden();
+        String taggingPanel();
+        String toggleEditState();
+        String buttonsPanel();
+        String confirmationDialog();
+        String confirmationDialogPanel();
+
+        // tag cells
+        String tagCell();
+        String tagCellHeading();
+        String tagCellCreated();
+        String tagCellComment();
+        String tagCellImage();
+        String tagCellListPanel();
+
+        // tag-buttons
+        String tagButtonDialog(); // dialog itself
+        String tagButtonDialogPanel();
+        String tagDialogButton(); // button in dialog
+        String tagButtonTable();
+        String tagPreviewPanel();
+
+        // tag input / creation
+        String tagCreationPanel();
+        String tagCreationPanelHeader();
+        String tagCreationPanelHeaderLabel();
+        String tagCreationPanelHeaderButton();
+        String tagInputPanel();
+        String tagInputPanelTag();
+        String tagInputPanelComment();
+        String tagInputPanelImageURL();
+        String tagInputPanelIsVisibleForPublic();
+
+        // tag filtering
+        String tagFilterButton();
+        String tagFilterHiddenButton();
+        String tagFilterClearButton();
+        String tagFilterSearchButton();
+        String tagFilterSettingsButton();
+        String tagFilterFilterButton();
+        String tagFilterPanel();
+        String tagFilterSearchBox();
+        String tagFilterSearchInput();
+        String tagFilterCurrentSelection();
+
+        // images
+        String imageActiveFilter();
+        String imageInactiveFilter();
+        String imageSearch();
+        String imageClearSearch();
+        String imageSettings();
+        String imagePen();
+    }
+}
