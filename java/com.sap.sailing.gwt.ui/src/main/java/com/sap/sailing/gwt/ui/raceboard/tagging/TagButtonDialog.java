@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.ImageResourceCell;
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
@@ -13,6 +14,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.gwt.ui.adminconsole.ImagesBarColumn;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigImagesBarCell;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -26,6 +28,7 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
  * Dialog for modifying tag buttons
  */
 public class TagButtonDialog extends DialogBox {
+
     private class EditTagButtonsImagesBarCell extends ImagesBarCell {
         public static final String ACTION_REMOVE = "ACTION_REMOVE";
         public static final String ACTION_EDIT = "ACTION_EDIT";
@@ -46,6 +49,7 @@ public class TagButtonDialog extends DialogBox {
 
     private final TagPanelResources resources = TagPanelResources.INSTANCE;
     private final TagPanelStyle style = resources.style();
+    private final TagButtonCellTableResources buttonTableResources = GWT.create(TagButtonCellTableResources.class);
 
     private final TaggingPanel taggingPanel;
     private final StringMessages stringMessages;
@@ -66,20 +70,26 @@ public class TagButtonDialog extends DialogBox {
         CellTable<TagButton> tagButtonsTable = createTable(tagCreationPanel, inputPanel, tagPreviewPanel);
         Panel controlButtonPanel = createButtonPanel(tagButtonsTable, inputPanel, tagPreviewPanel, tagCreationPanel);
 
+        // wrap tag buttons table to control max-height of table
+        Panel tagButtonsTableWrapper = new SimplePanel();
+        tagButtonsTableWrapper.setStyleName(style.tagButtonTableWrapper());
+        tagButtonsTableWrapper.add(tagButtonsTable);
+
         Panel mainPanel = new FlowPanel();
         mainPanel.setStyleName(style.tagButtonDialogPanel());
-        mainPanel.add(tagButtonsTable);
+        mainPanel.add(tagButtonsTableWrapper);
         mainPanel.add(inputPanel);
         mainPanel.add(controlButtonPanel);
         mainPanel.add(tagPreviewPanel);
 
         setWidget(mainPanel);
+        // TODO: content gets added delayed => center again when content changes.
         center();
     }
 
     private CellTable<TagButton> createTable(TagCreationPanel tagCreationPanel, TagInputPanel inputPanel,
             TagPreviewPanel tagPreviewPanel) {
-        CellTable<TagButton> tagButtonTable = new CellTable<TagButton>();
+        CellTable<TagButton> tagButtonTable = new CellTable<TagButton>(15, buttonTableResources);
         tagButtonTable.setStyleName(style.tagButtonTable());
         TextColumn<TagButton> tagColumn = new TextColumn<TagButton>() {
             @Override
@@ -154,9 +164,9 @@ public class TagButtonDialog extends DialogBox {
         tagButtonTable.addColumn(actionsColumn, stringMessages.tagLabelAction());
 
         // set these width values manually as they are not accessable via CSS classes
-        tagButtonTable.setColumnWidth(tagColumn, "30%");
+        tagButtonTable.setColumnWidth(tagColumn, "20%");
         tagButtonTable.setColumnWidth(imageURLColumn, "20%");
-        tagButtonTable.setColumnWidth(commentColumn, "30%");
+        tagButtonTable.setColumnWidth(commentColumn, "40%");
         tagButtonTable.setColumnWidth(visibleForPublicColumn, "10%");
         tagButtonTable.setColumnWidth(actionsColumn, "10%");
 
@@ -168,7 +178,7 @@ public class TagButtonDialog extends DialogBox {
     private Panel createButtonPanel(CellTable<TagButton> tagButtonTable, TagInputPanel inputPanel,
             TagPreviewPanel tagPreviewPanel, TagCreationPanel tagCreationPanel) {
         addSaveButton(tagCreationPanel, tagButtonTable, inputPanel, tagPreviewPanel);
-        addCancelButton(inputPanel, tagPreviewPanel);
+        addCancelButton(inputPanel, tagPreviewPanel, tagButtonTable);
         addCloseButton(tagCreationPanel, tagPreviewPanel);
         addTagButtonButton(tagCreationPanel, tagButtonTable, inputPanel, tagPreviewPanel);
 
@@ -213,14 +223,17 @@ public class TagButtonDialog extends DialogBox {
         });
     }
 
-    private void addCancelButton(TagInputPanel inputPanel, TagPreviewPanel tagPreviewPanel) {
+    private void addCancelButton(TagInputPanel inputPanel, TagPreviewPanel tagPreviewPanel,
+            CellTable<TagButton> tagButtonTable) {
         cancelButton = new Button(stringMessages.cancel());
         cancelButton.setVisible(false);
         cancelButton.setStyleName(style.tagDialogButton());
         cancelButton.addStyleName("gwt-Button");
         cancelButton.addClickHandler(event -> {
+
             inputPanel.clearAllValues();
             tagPreviewPanel.renderPreview(inputPanel);
+            tagButtonTable.setVisible(true);
             saveButton.setVisible(false);
             cancelButton.setVisible(false);
             closeButton.setVisible(true);

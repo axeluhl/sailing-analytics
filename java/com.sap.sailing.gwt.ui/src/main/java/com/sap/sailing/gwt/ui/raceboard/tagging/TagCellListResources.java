@@ -7,15 +7,6 @@ public interface TagCellListResources extends CellList.Resources {
     public static final TagCellListResources INSTANCE = GWT.create(TagCellListResources.class);
 
     @Override
-    @Source("tagging-celllist.gss")
-    public TagCellListStyle cellListStyle();
-
-    public interface TagCellListStyle extends CellList.Style {
-        String cellListEventItem();
-        String cellListWidget();
-        String cellListEvenItem();
-        String cellListOddItem();
-        String cellListSelectedItem();
-        String cellListKeyboardSelectedItem();
-    }
+    @Source("tag-celllist.gss")
+    public CellList.Style cellListStyle();
 }
