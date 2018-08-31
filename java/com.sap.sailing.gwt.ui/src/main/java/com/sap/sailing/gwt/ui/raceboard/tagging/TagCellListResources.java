@@ -7,7 +7,7 @@ public interface TagCellListResources extends CellList.Resources {
     public static final TagCellListResources INSTANCE = GWT.create(TagCellListResources.class);
 
     @Override
-    @Source("tagging-celllist.css")
+    @Source("tagging-celllist.gss")
     public TagCellListStyle cellListStyle();
 
     public interface TagCellListStyle extends CellList.Style {

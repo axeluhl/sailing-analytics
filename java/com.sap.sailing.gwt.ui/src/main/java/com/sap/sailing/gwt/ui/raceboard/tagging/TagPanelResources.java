@@ -36,7 +36,7 @@ public interface TagPanelResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/pen.png")
     ImageResource pen();
 
-    @Source("tagging-panel.css")
+    @Source("tagging-panel.gss")
     public TagPanelStyle style();
 
     public interface TagPanelStyle extends CssResource {

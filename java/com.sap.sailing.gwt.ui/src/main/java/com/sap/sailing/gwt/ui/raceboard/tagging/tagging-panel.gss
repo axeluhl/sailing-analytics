@@ -113,7 +113,7 @@
 	height: auto;
 }
 
-.tagCellImage:not\(:last-child\) {
+.tagCellImage:not(:last-child) {
 	margin-bottom: 0;
 	padding-bottom: 5px;
 }
@@ -158,7 +158,7 @@
 	cursor: pointer;
 }
 
-.buttonsPanel>.tagDialogButton:not\(:first-child\) {
+.buttonsPanel>.tagDialogButton:not(:first-child) {
 	margin-left: 5px;
 }
 
@@ -177,7 +177,7 @@
 	max-width: 500px;
 }
 
-@media screen and \(max-width: 500px\) {
+@media screen and (max-width: 500px) {
     .tagPreviewPanel {
         max-width: 90%;
     }
@@ -218,7 +218,7 @@
 	padding-right: 5px;
 }
 
-.tagInputPanel>*:not\(:first-child\) {
+.tagInputPanel>*:not(:first-child) {
 	border-top: none;
 }
 
@@ -337,43 +337,43 @@
 }
 
 /**************************** Images ****************************/
-@sprite .imageActiveFilter {
-	gwt-image: "filterActiveButton";
+.imageActiveFilter {
+	gwt-sprite: "filterActiveButton";
 	width: 2em;
 	height: 2em;
 	background-size: contain;
 }
 
-@sprite .imageInactiveFilter {
-	gwt-image: "filterInactiveButton";
+.imageInactiveFilter {
+	gwt-sprite: "filterInactiveButton";
 	width: 2em;
 	height: 2em;
 	background-size: contain;
 }
 
-@sprite .imageSearch {
-	gwt-image: "searchButton";
+.imageSearch {
+	gwt-sprite: "searchButton";
 	width: 2em;
 	height: 2em;
 	background-size: contain;
 }
 
-@sprite .imageClearSearch {
-	gwt-image: "clearButton";
+.imageClearSearch {
+	gwt-sprite: "clearButton";
 	width: 2em;
 	height: 2em;
 	background-size: contain;
 }
 
-@sprite .imageSettings {
-	gwt-image: "settingsButton";
+.imageSettings {
+	gwt-sprite: "settingsButton";
 	width: 2em;
 	height: 2em;
 	background-size: contain;
 }
 
-@sprite .imagePen {
-    gwt-image: "pen";
+.imagePen {
+    gwt-sprite: "pen";
     width: 2em;
     height: 2em;
     background-size: contain;
