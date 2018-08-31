@@ -11,6 +11,7 @@ import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.TextMetrics;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.controls.ControlPosition;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -18,6 +19,7 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.gwt.ui.actions.GetWindInfoAction;
+import com.sap.sailing.gwt.ui.client.NumberFormatterFactory;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.CoordinateSystem;
@@ -29,6 +31,7 @@ import com.sap.sailing.gwt.ui.simulator.racemap.MovingCanvasOverlay;
 import com.sap.sailing.gwt.ui.simulator.streamlets.Swarm;
 import com.sap.sailing.gwt.ui.simulator.streamlets.VectorField;
 import com.sap.sailing.gwt.ui.simulator.streamlets.WindInfoForRaceVectorField;
+import com.sap.sse.common.ColorMapperChangedListener;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -46,7 +49,7 @@ import com.sap.sse.gwt.client.player.Timer;
  * @author Axel Uhl (D043530)
  * 
  */
-public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
+public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implements ColorMapperChangedListener{
     public static final String LOAD_WIND_STREAMLET_DATA_CATEGORY = "loadWindStreamletData";
     private static final int animationIntervalMillis = 40;
     private static final long RESOLUTION_IN_MILLIS = 5000;
@@ -65,9 +68,10 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
     private final Scheduler scheduler;
     private Canvas streamletLegend;
     private boolean firstColoring = true;
-    
+    private boolean colored;
     private long latitudeCount;
     private double latitudeSum;
+    private final NumberFormat numberFormatOneDecimal = NumberFormatterFactory.getDecimalFormat(1);
     private ElementStyleMutationObserver observer;
     private boolean dragging = false;
     private boolean isAttached = false, startObserverWhenAttached = false;
@@ -113,19 +117,6 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
     private void createStreamletLegend(MapWidget map) {
         streamletLegend = Canvas.createIfSupported();
         streamletLegend.addStyleName("MapStreamletLegend");
-        //streamletLegend.setTitle(stringMessages.simulationLegendTooltip());
-        /*streamletLegend.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                int clickPixelY = event.getRelativeY(streamletLegend.getElement());
-                int legendRow = clickPixelY / ((int) rectHeight);
-                int pathRow = legendRow - (racePath!=null ? 1 : 0);
-                //Window.alert("clickPixelY: " + clickPixelY + "\nlegendRow: " + legendRow);
-                visiblePaths[pathRow] = !visiblePaths[pathRow];
-                clearCanvas();
-                drawPaths();
-            }
-        });*/
         map.setControls(ControlPosition.LEFT_BOTTOM, streamletLegend);
         int canvasWidth = 500;
         int canvasHeight = 60;
@@ -133,20 +124,37 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
         streamletLegend.setWidth(String.valueOf(canvasWidth));
         streamletLegend.setHeight(String.valueOf(canvasHeight));
         streamletLegend.setCoordinateSpaceWidth(canvasWidth);
-        streamletLegend.setCoordinateSpaceHeight(canvasHeight);    }
+        streamletLegend.setCoordinateSpaceHeight(canvasHeight);
+    }
 
-    private void drawLegend() {
-        double x, y;
-        x=100;
-        y=16;
-        double w = 1;
-        double h = 20;
-        int maxIdx = 300;
+    public void drawLegend() {
+        if (streamletLegend.isVisible()) {
+            streamletLegend.getContext2d().clearRect(0, 0, streamletLegend.getCoordinateSpaceWidth(),
+                    streamletLegend.getCoordinateSpaceHeight());
+            if (swarm != null && swarm.isColored()) {
+                final double x = 100;
+                final double y = 16;
+                final double w = 1;
+                final double h = 20;
+                final double speed_max = swarm.getValueRange().getMaxRight();
+                final double speed_min = swarm.getValueRange().getMinLeft();
+                final double speed_spread = speed_max - speed_min;
+                final int scale_spread;
+                if (speed_spread < 0.5) {
+                    scale_spread = 300;
+                }
+                else if (speed_spread < 1) {
+                    scale_spread = 100;
+                }
+                else {
+                    scale_spread = 50;
+                }
+                final int maxIdx = 300;
         Context2d context2d = streamletLegend.getContext2d();
         context2d.setFillStyle("rgba(0,0,0,.3)");
         context2d.setLineWidth(1.0);
         context2d.beginPath();
-        context2d.fillRect(x-7.0, y-16.0, w*maxIdx+15.0, 56.0);
+                context2d.fillRect(x - 10.0, y - 16.0, w * maxIdx + 20.0, 56.0);
         context2d.closePath();
         context2d.stroke();
         context2d.setFillStyle("white");
@@ -155,14 +163,13 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
         txtmet = context2d.measureText(label);
         context2d.fillText(label, x + (w*maxIdx - txtmet.getWidth())/2.0, y - 5.0);
         for(int idx=0; idx <= maxIdx; idx++) {
-            //double speed = idx * 24.0 / maxIdx;
-            double speed = 4.0 + idx * 16.0 / maxIdx;
-            context2d.setFillStyle(windField.getColor(speed));
+                    final double speedSteps = speed_min + idx * (speed_spread) / maxIdx;
+                    context2d.setFillStyle(swarm.getColorMapper().getColor(speedSteps));
             context2d.beginPath();
             context2d.fillRect(x + idx*w, y, w, h);
             context2d.closePath();
             context2d.stroke();
-            if (Math.abs(speed % 2.0) < (12.0/maxIdx)) {
+                    if (idx % scale_spread == 0) {
                 context2d.setStrokeStyle("white");
                 context2d.setLineWidth(1.0);
                 context2d.beginPath();
@@ -171,10 +178,12 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
                 context2d.closePath();
                 context2d.stroke();
                 context2d.setFillStyle("white");
-                label = ""+Math.round(speed);
+                        label = numberFormatOneDecimal.format(speedSteps);
                 txtmet = context2d.measureText(label);
                 context2d.fillText(label, x + idx*w - txtmet.getWidth()/2.0, y + h + 8.0 + 8.0);
             }
+        }
+    }
         }
     }
 
@@ -185,7 +194,9 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
             this.swarm = new Swarm(this, map, timer, windField, new StreamletParameters());
         }
         initCanvasOrigin();
+        this.swarm.setColors(colored);
         this.swarm.start(animationIntervalMillis);
+        this.swarm.getColorMapper().addListener(this);
     }
 
     private void scheduleWindDataRefresh() {
@@ -208,8 +219,9 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
     }
 
     private void stopStreamlets() {
-        if (swarm != null) {
+        if (this.swarm != null) {
             this.swarm.stop();
+            this.swarm.getColorMapper().removeListener(this);
         }
     }
     
@@ -223,8 +235,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
         sailingService.getWindSourcesInfo(raceIdentifier, new MarkedAsyncCallback<>(new AsyncCallback<WindInfoForRaceDTO>() {
             @Override
             public void onFailure(Throwable caught) {
-                        Notification.notify(stringMessages.errorFetchingWindStreamletData(caught.getMessage()),
-                                NotificationType.WARNING);
+                Notification.notify(stringMessages.errorFetchingWindStreamletData(caught.getMessage()), NotificationType.WARNING);
             }
 
             @Override
@@ -311,7 +322,9 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
     public void setVisible(boolean isVisible) {
         if (getCanvas() != null) {
             if (isVisible) {
-                if (this.windField.getColors()) {
+                this.startStreamlets();
+                this.visible = isVisible;
+                if (this.swarm.isColored()) {
                     this.streamletLegend.setVisible(true);
                 }
                 this.startStreamlets();
@@ -322,7 +335,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
                 }
                 this.visible = isVisible;
             } else {
-                if (this.windField.getColors()) {
+                if (this.swarm.isColored()) {
                     this.streamletLegend.setVisible(false);
                 }
                 this.stopStreamlets();
@@ -333,12 +346,14 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
     }
 
     public void setColors(boolean isColored) {
-        this.windField.setColors(isColored);
+        this.colored = isColored;
         if ((isColored) && (firstColoring)) {
             firstColoring = false;
-            this.drawLegend();
         }
         this.streamletLegend.setVisible(isColored);
+        if (swarm != null) {
+            swarm.setColors(isColored);
+        }
     }
 
     @Override
@@ -396,5 +411,10 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay {
             int swarmPause = (zoomChanged ? 5 : 1);
             swarm.onBoundsChanged(zoomChanged, swarmPause);
         }
+    }
+    
+    @Override
+    public void onColorMappingChanged() {
+        drawLegend();
     }
 }

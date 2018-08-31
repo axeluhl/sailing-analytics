@@ -168,17 +168,19 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
         
         Class<Processor<?, ResultType>> retrieverType = (Class<Processor<?, ResultType>>)(Class<?>) retrieverLevel.getRetrieverType();
         Class<?> settingsType = retrieverLevel.getSettingsType();
-        return createRetriever(retrieverType, retrievedDataType, resultReceivers, filter, settingsType, retrieverLevelIndex);
+        String retrievedDataTypeMessageKey = retrieverLevel.getRetrievedDataTypeMessageKey();
+        return createRetriever(retrieverType, retrievedDataType, resultReceivers, filter, settingsType, retrieverLevelIndex, retrievedDataTypeMessageKey);
     }
 
     private <ResultType> Processor<?, ResultType> createRetriever(Class<Processor<?, ResultType>> retrieverType, Class<ResultType> retrievedDataType,
-            Collection<Processor<ResultType, ?>> resultReceivers, FilterCriterion<ResultType> filter, Class<?> settingsType, int retrieverLevelIndex) {
+            Collection<Processor<ResultType, ?>> resultReceivers, FilterCriterion<ResultType> filter, Class<?> settingsType, int retrieverLevelIndex,
+            String retrievedDataTypeMessageKey) {
         Constructor<Processor<?, ResultType>> retrieverConstructor = null;
         try {
             if (settingsType == null) {
-                retrieverConstructor = retrieverType.getConstructor(ExecutorService.class, Collection.class, int.class);
+                retrieverConstructor = retrieverType.getConstructor(ExecutorService.class, Collection.class, int.class, String.class);
             } else {
-                retrieverConstructor = retrieverType.getConstructor(ExecutorService.class, Collection.class, settingsType, int.class);
+                retrieverConstructor = retrieverType.getConstructor(ExecutorService.class, Collection.class, settingsType, int.class, String.class);
             }
         } catch (NoSuchMethodException | SecurityException e) {
             throw new IllegalArgumentException("Couldn't get an usable constructor from the given retrieverType '"
@@ -190,11 +192,12 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
             SerializableSettings storedSettings = this.settings.get(retrieverLevelIndex);
             settings = storedSettings != null ? storedSettings : retrieverLevels.get(retrieverLevelIndex).getDefaultSettings();
         }
-        return constructRetriever(retrieverConstructor, retrievedDataType, resultReceivers, filter, settings, settingsType, retrieverLevelIndex);
+        return constructRetriever(retrieverConstructor, retrievedDataType, resultReceivers, filter, settings, settingsType, retrieverLevelIndex, retrievedDataTypeMessageKey);
     }
 
     private <ResultType> Processor<?, ResultType> constructRetriever(Constructor<Processor<?, ResultType>> retrieverConstructor, Class<ResultType> retrievedDataType,
-            Collection<Processor<ResultType, ?>> resultReceivers, FilterCriterion<ResultType> filter, SerializableSettings settings, Class<?> settingsType, int retrieverLevelIndex) {
+            Collection<Processor<ResultType, ?>> resultReceivers, FilterCriterion<ResultType> filter, SerializableSettings settings, Class<?> settingsType,
+            int retrieverLevelIndex, String retrievedDataTypeMessageKey) {
         try {
             Collection<Processor<ResultType, ?>> retrievalResultReceivers = resultReceivers;
             if (filter != null) {
@@ -211,9 +214,9 @@ public class SimpleDataRetrieverChainBuilder<DataSourceType> implements DataRetr
             }
             
             if (settingsType == null) {
-                return retrieverConstructor.newInstance(executor, retrievalResultReceivers, retrieverLevelIndex);
+                return retrieverConstructor.newInstance(executor, retrievalResultReceivers, retrieverLevelIndex, retrievedDataTypeMessageKey);
             } else {
-                return retrieverConstructor.newInstance(executor, retrievalResultReceivers, settings, retrieverLevelIndex);
+                return retrieverConstructor.newInstance(executor, retrievalResultReceivers, settings, retrieverLevelIndex, retrievedDataTypeMessageKey);
             }
         } catch (InstantiationException | IllegalAccessException |
                  IllegalArgumentException | InvocationTargetException e) {

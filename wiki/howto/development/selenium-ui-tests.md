@@ -107,6 +107,26 @@ Since a full Maven build needs some time, you can also execute the tests in the 
 
 For a more practical example of how to write page objects and test you should take a look at the [[tutorial|wiki/howto/misc/ui-tests-tutorial]].
 
+## Running Selenium tests on IE11
+
+You need IEDriverServer.exe to successfully run selenium tests using IE 11. The download is listed on the official Selenium download page: https://www.seleniumhq.org/download/
+
+In local-test-environment.xml you need to set the property "webdriver.ie.driver"  to point to the downloaded and unzipped IEDriverServer.exe, not the ie.exe!
+       
+With IE 10/11, only the 32Bit version works by the time of writing.
+       
+Some further configuration steps may be required depending on the Windows version:
+https://github.com/SeleniumHQ/selenium/wiki/InternetExplorerDriver#required-configuration
+
+Be aware that Selenium tests tend to fail on IE11 if the browser window does not keep the focus. This means you must not touch the mouse or keyboard in order to get consistent test results. You may lock your machine while the tests run but ensure that standby mode isn't triggered after a short period.
+
+In case you see test cases fail with a java.net.BindException with message "Address already in use: connect" you can tune Windows' TCP settings via registry (as admin). In "Computer\HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters" set the following values:
+
+* "MaxUserPort" to decimal value 65534 (create a DWORD if it does not exist)
+* "TcpTimedWaitDelay" to decimal value 30 (create a DWORD if it does not exist)
+
+You need to reboot the system after changing the values above.
+
 ## Updating Selenium
 
 While our build environment is stable regarding to the used browser version, this may not be the case in your development environment, where you have the newest browser version installed probably. The short release cycles of the browsers often bring changes in the implementation, which are incompatible with Selenium. Therefore you have to update the used Selenium version by performing the following steps to be able to run the tests local.

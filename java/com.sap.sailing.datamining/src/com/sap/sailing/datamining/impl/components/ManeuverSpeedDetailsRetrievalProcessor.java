@@ -34,9 +34,9 @@ public class ManeuverSpeedDetailsRetrievalProcessor
 
     public ManeuverSpeedDetailsRetrievalProcessor(ExecutorService executor,
             Collection<Processor<HasManeuverSpeedDetailsContext, ?>> resultReceivers,
-            ManeuverSpeedDetailsSettings settings, int retrievalLevel) {
+            ManeuverSpeedDetailsSettings settings, int retrievalLevel, String retrievedDataTypeMessageKey) {
         super(HasManeuverContext.class, HasManeuverSpeedDetailsContext.class, executor, resultReceivers,
-                retrievalLevel);
+                retrievalLevel, retrievedDataTypeMessageKey);
         this.settings = settings;
     }
 
