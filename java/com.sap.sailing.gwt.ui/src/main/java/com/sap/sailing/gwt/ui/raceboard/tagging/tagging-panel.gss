@@ -132,9 +132,14 @@
 	padding-bottom: 5px;
 }
 
+/*
+ * In HeaderPanel (panel from GWT used for tagging panel), margin
+ * between content panel (tag cell list) and footer/header (tag creation 
+ * panel/filterbar) needs to be provided by footer/header and NOT by the
+ * content panel (which class tagCellListPanel is used for)!
+ */
 .tagCellListPanel {
 	height: 100%;
-	margin-top: 10px;
 	overflow: auto;
 }
 
@@ -262,7 +267,7 @@
 	width: 100%;
 	position: relative;
 	outline: 0;
-	margin: 10px 0 0 0;
+	margin: 10px 0;
 	border: none;
 	font-size: 1rem;
 	background-color: #FFFFFF;
