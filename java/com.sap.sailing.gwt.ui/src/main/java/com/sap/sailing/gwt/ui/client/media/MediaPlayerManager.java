@@ -18,6 +18,24 @@ public interface MediaPlayerManager {
 
     }
     
+    public enum Status {
+        UNDEFINED('?'), CANNOT_PLAY('-'), NOT_REACHABLE('#'), REACHABLE('+');
+
+        private final char symbol;
+
+        private Status(char symbol) {
+            this.symbol = symbol;
+        }
+
+        public String toString() {
+            return String.valueOf(this.symbol);
+        }
+
+        public boolean isPotentiallyPlayable() {
+            return this == UNDEFINED || this == REACHABLE;
+        }
+    }
+
     void addPlayerChangeListener(PlayerChangeListener playerChangeListener);
     
     void playAudio(MediaTrack audioTrack);
@@ -26,7 +44,7 @@ public interface MediaPlayerManager {
     
     void playFloatingVideo(MediaTrack videoTrack);
     
-    void closeFloatingVideo(MediaTrack videoTrack);
+    void closeFloatingPlayer(MediaTrack videoTrack);
     
     void playDockedVideo(MediaTrack videoTrack);
     
@@ -44,7 +62,7 @@ public interface MediaPlayerManager {
 
     Boolean isPlaying();
 
-    MediaTrack getPlayingAudioTrack();
+    Set<MediaTrack> getPlayingAudioTrack();
 
     Set<MediaTrack> getPlayingVideoTracks();
 
@@ -53,7 +71,7 @@ public interface MediaPlayerManager {
     Collection<MediaTrack> getOverlappingMediaTracks();
 
     List<MediaTrack> getAudioTracks();
-    
+
     List<MediaTrack> getVideoTracks();
 
     MediaTrack getDockedVideoTrack();
@@ -65,6 +83,8 @@ public interface MediaPlayerManager {
     MediaServiceAsync getMediaService();
 
     ErrorReporter getErrorReporter();
+
+    Status getMediaTrackStatus(MediaTrack track);
 
 }
 

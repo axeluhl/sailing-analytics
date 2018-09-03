@@ -11,6 +11,7 @@ import java.util.function.Predicate;
 
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.user.client.ui.HasAnimation;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.MenuItem;
@@ -44,6 +45,7 @@ public class ExtractionFunctionSuggestBox extends CustomSuggestBox<ExtractionFun
         suggestOracle = (AbstractListSuggestOracle<ExtractionFunctionWithContext>) getSuggestOracle();
         display = (ExtractionFunctionSuggestionDisplay) getSuggestionDisplay();
         addSuggestionSelectionHandler(this::setExtractionFunction);
+        getValueBox().addBlurHandler(this::onBlur);
     }
     
     public void setValueChangeHandler(ValueChangeHandler valueChangeHandler) {
@@ -72,6 +74,10 @@ public class ExtractionFunctionSuggestBox extends CustomSuggestBox<ExtractionFun
 
     public ExtractionFunctionWithContext getExtractionFunction() {
         return extractionFunction;
+    }
+    
+    private void onBlur(BlurEvent event) {
+        setValue(extractionFunction == null ? null : extractionFunction.getDisplayString(), false);
     }
     
     @Override

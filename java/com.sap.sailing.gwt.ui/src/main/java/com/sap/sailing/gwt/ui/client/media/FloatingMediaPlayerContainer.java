@@ -18,12 +18,12 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.media.MediaSynchControl.EditButtonProxy;
 import com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer.PlayerCloseListener;
-import com.sap.sailing.gwt.ui.client.media.shared.VideoSynchPlayer;
+import com.sap.sailing.gwt.ui.client.media.shared.MediaSynchPlayer;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.WindowBox;
 import com.sap.sse.security.ui.client.UserService;
 
-public class VideoFloatingContainer extends AbstractVideoContainer implements VideoContainer {
+public class FloatingMediaPlayerContainer extends AbstractMediaContainer implements MediaPlayerContainer {
     VideoContainerRessource res = GWT.create(VideoContainerRessource.class);
 
     private static final int MIN_WIDTH = 420;
@@ -32,15 +32,15 @@ public class VideoFloatingContainer extends AbstractVideoContainer implements Vi
     private final PopupPositionProvider popupPositionProvider;
     private Anchor edit;
 
-    public VideoFloatingContainer(VideoSynchPlayer videoPlayer, PopupPositionProvider popupPositionProvider,
+    public FloatingMediaPlayerContainer(MediaSynchPlayer mediaPlayer, PopupPositionProvider popupPositionProvider,
             UserService userservice, MediaServiceAsync mediaService, ErrorReporter errorReporter,
             PlayerCloseListener playerCloseListener, PopoutListener popoutListener) {
-        super(new FlowPanel(), videoPlayer, popoutListener, playerCloseListener);
+        super(new FlowPanel(), mediaPlayer, popoutListener, playerCloseListener);
 
         this.popupPositionProvider = popupPositionProvider;
 
         rootPanel.addStyleName("video-root-panel");
-        rootPanel.add(videoPlayer.getWidget());
+        rootPanel.add(mediaPlayer.asWidget());
 
         this.edit = new Anchor();
         this.edit.getElement().getStyle().setBackgroundImage("url('" + res.editIcon().getSafeUri().asString() + "')");
@@ -66,19 +66,19 @@ public class VideoFloatingContainer extends AbstractVideoContainer implements Vi
                 edit.getElement().getStyle().setDisplay(b ? Display.BLOCK : Display.NONE);
             }
         };
-        mediaSynchControl = new MediaSynchControl(this.videoPlayer, mediaService, errorReporter, proxy, userservice);
+        mediaSynchControl = new MediaSynchControl(this.mediaPlayer, mediaService, errorReporter, proxy, userservice);
         mediaSynchControl.widget().addStyleName("media-synch-control");
         rootPanel.add(mediaSynchControl.widget());
 
-        videoPlayer.setEditFlag(mediaSynchControl);
+        mediaPlayer.setEditFlag(mediaSynchControl);
 
-        this.dialogBox = new WindowBox(videoPlayer.getMediaTrack().title, videoPlayer.getMediaTrack().toString(),
+        this.dialogBox = new WindowBox(mediaPlayer.getMediaTrack().title, mediaPlayer.getMediaTrack().toString(),
                 rootPanel, new WindowBox.PopoutHandler() {
 
                     @Override
                     public void popout() {
-                        VideoFloatingContainer.this.popoutListener
-                                .popoutVideo(VideoFloatingContainer.this.videoPlayer.getMediaTrack());
+                        FloatingMediaPlayerContainer.this.popoutListener
+                                .popoutVideo(FloatingMediaPlayerContainer.this.mediaPlayer.getMediaTrack());
                     }
                 });
         // values required for js and youtube player to stay useable
@@ -90,8 +90,8 @@ public class VideoFloatingContainer extends AbstractVideoContainer implements Vi
 
             @Override
             public void onClose(CloseEvent<PopupPanel> event) {
-                VideoFloatingContainer.this.videoPlayer.pauseMedia();
-                VideoFloatingContainer.this.popupCloseListener.playerClosed();
+                FloatingMediaPlayerContainer.this.mediaPlayer.pauseMedia();
+                FloatingMediaPlayerContainer.this.popupCloseListener.playerClosed();
             }
 
         });
@@ -140,7 +140,7 @@ public class VideoFloatingContainer extends AbstractVideoContainer implements Vi
                 int absoluteTop = popupPositionProvider.getYPositionUiObject().getAbsoluteTop();
                 int posY = absoluteTop - dialogBox.getOffsetHeight() - 40;
                 dialogBox.setPopupPosition(5, posY);
-                dialogBox.setPixelSize(videoPlayer.getDefaultWidth(), videoPlayer.getDefaultHeight());
+                dialogBox.setPixelSize(mediaPlayer.getDefaultWidth(), mediaPlayer.getDefaultHeight());
                 dialogBox.setVisible(true);
             }
         });

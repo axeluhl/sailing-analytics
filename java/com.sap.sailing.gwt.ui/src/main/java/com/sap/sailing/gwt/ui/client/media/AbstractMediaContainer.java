@@ -2,20 +2,20 @@ package com.sap.sailing.gwt.ui.client.media;
 
 import com.google.gwt.user.client.ui.Panel;
 import com.sap.sailing.gwt.ui.client.media.popup.PopoutWindowPlayer.PlayerCloseListener;
-import com.sap.sailing.gwt.ui.client.media.shared.VideoPlayer;
-import com.sap.sailing.gwt.ui.client.media.shared.VideoSynchPlayer;
+import com.sap.sailing.gwt.ui.client.media.shared.MediaSynchPlayer;
 
-public abstract class AbstractVideoContainer {
+public abstract class AbstractMediaContainer implements MediaPlayerContainer {
 
     protected final PlayerCloseListener popupCloseListener;
 
     protected final PopoutListener popoutListener;
-    protected final VideoSynchPlayer videoPlayer;
+    protected final MediaSynchPlayer mediaPlayer;
     protected final Panel rootPanel;
 
-    public AbstractVideoContainer(Panel rootPanel, VideoSynchPlayer videoPlayer, PopoutListener popoutListener, PlayerCloseListener playerCloseListener) {
+    public AbstractMediaContainer(Panel rootPanel, MediaSynchPlayer mediaPlayer, PopoutListener popoutListener,
+            PlayerCloseListener playerCloseListener) {
         this.rootPanel = rootPanel;
-        this.videoPlayer = videoPlayer;
+        this.mediaPlayer = mediaPlayer;
         this.popoutListener = popoutListener;
         this.popupCloseListener = playerCloseListener;
     }
@@ -24,13 +24,15 @@ public abstract class AbstractVideoContainer {
     
     abstract void show();
     
+    @Override
     public void shutDown() {
-        videoPlayer.shutDown();
+        mediaPlayer.shutDown();
         hide();
     }
 
-    public VideoPlayer getVideoPlayer() {
-        return videoPlayer;
+    @Override
+    public MediaSynchPlayer getMediaPlayer() {
+        return mediaPlayer;
     }
 
 }
