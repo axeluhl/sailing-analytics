@@ -2099,6 +2099,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String swissTimingUpdateUsername();
     String swissTimingUpdatePassword();
     String tag();
+    String tagButtons();
     String tagPanel();
     String tagCreated(String author, String time);
     String tagNoTagsFound();

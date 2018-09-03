@@ -36,7 +36,7 @@ public class TagButtonPanel extends FlowPanel {
         this.stringMessages = taggingPanel.getStringMessages();
         this.userService = taggingPanel.getUserSerivce();
 
-        heading = new Label("Tag-Buttons");
+        heading = new Label(stringMessages.tagButtons());
         heading.setStyleName(style.tagButtonPanelHeader());
         add(heading);
 
