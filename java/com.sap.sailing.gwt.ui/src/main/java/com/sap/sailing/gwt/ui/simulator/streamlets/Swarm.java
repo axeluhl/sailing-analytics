@@ -71,6 +71,8 @@ public class Swarm implements TimeListener {
     private final ValueRangeFlexibleBoundaries valueRange;
     private final ColorMapper colorMapper;
 
+    private boolean clearNextFrame = false;
+
     public Swarm(FullCanvasOverlay fullcanvas, MapWidget map, com.sap.sse.gwt.client.player.Timer timer,
             VectorField vectorField, StreamletParameters streamletPars) {
         this.field = vectorField;
@@ -90,7 +92,7 @@ public class Swarm implements TimeListener {
         fullcanvas.setCanvasSettings();
         // if map is not yet loaded, wait for it
         if (map.getBounds() != null) {
-            startWithMap(animationIntervalMillis);
+            // startWithMap(animationIntervalMillis);
         } else {
             removeBoundsChangeHandler();
             BoundsChangeMapHandler handler = new BoundsChangeMapHandler() {
@@ -109,7 +111,11 @@ public class Swarm implements TimeListener {
         projection = new Mercator(fullcanvas, map);
         projection.calibrate();
         updateBounds();
-        particles = createParticles();
+        if (particles == null) {
+            particles = createParticles();
+        } else {
+            clearNextFrame = true;
+        }
         swarmContinue = true;
         startLoop(animationIntervalMillis);
     }
@@ -125,18 +131,22 @@ public class Swarm implements TimeListener {
         swarmContinue = false;
         removeBoundsChangeHandler();
     }
-    private Particle createParticle() {
-        Particle particle = null;
+
+    private Particle recycleOrCreateParticle(Particle particle) {
         boolean done = false;
         int attempts = 10;
-        // try a few times to create a particle at a random position until the weight is high enough for it to be displayed
+        // try a few times to create a particle at a random position until the weight is high enough for it to be
+        // displayed
         while (!done && attempts-- > 0) {
-            particle = new Particle();
-            particle.currentPosition = getRandomPosition();
-            if(field.inBounds(particle.currentPosition)) {
-                Vector v = field.getVector(particle.currentPosition, timePoint);
-                double weight = field.getParticleWeight(particle.currentPosition, v);
+            LatLng newRandomPosition = getRandomPosition();
+            if (field.inBounds(newRandomPosition)) {
+                Vector v = field.getVector(newRandomPosition, timePoint);
+                double weight = field.getParticleWeight(newRandomPosition, v);
                 if (weight >= Math.random()) {
+                    if (particle == null) {
+                        particle = new Particle();
+                    }
+                    particle.currentPosition = newRandomPosition;
                     if (v == null || v.length() == 0) {
                         particle.stepsToLive = 0;
                     } else {
@@ -169,7 +179,8 @@ public class Swarm implements TimeListener {
     private Particle[] createParticles() {
         Particle[] newParticles = new Particle[nParticles];
         for (int idx = 0; idx < newParticles.length; idx++) {
-            newParticles[idx] = this.createParticle();
+
+            newParticles[idx] = this.recycleOrCreateParticle(newParticles[idx]);
         }
         return newParticles;
     }
@@ -238,7 +249,12 @@ public class Swarm implements TimeListener {
     
     private void drawSwarm() {
         Context2d ctxt = canvas.getContext2d();
-        ctxt.setGlobalAlpha(0.08);
+        ctxt.setGlobalAlpha(0.06);
+        if (clearNextFrame) {
+            // ctxt.setGlobalAlpha(1);
+            clearNextFrame = false;
+            return;
+        }
         ctxt.setGlobalCompositeOperation("destination-out");
         ctxt.setFillStyle("black");
         ctxt.fillRect(0, 0, canvas.getOffsetWidth(), canvas.getOffsetHeight());
@@ -302,7 +318,7 @@ public class Swarm implements TimeListener {
                 }
             } else {
                 // particle timed out (age became 0) or was never created (e.g., weight too low); try to create a new one
-                particles[idx] = this.createParticle();
+                particles[idx] = this.recycleOrCreateParticle(particles[idx]);
             }
             if (particles[idx] != null && particles[idx].v != null) {
                 final double length = particles[idx].v.length();
