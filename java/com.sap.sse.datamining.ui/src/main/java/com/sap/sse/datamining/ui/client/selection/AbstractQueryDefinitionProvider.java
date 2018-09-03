@@ -13,16 +13,16 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
-import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.ui.client.AbstractDataMiningComponent;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.client.QueryDefinitionChangedListener;
 import com.sap.sse.datamining.ui.client.QueryDefinitionProvider;
+import com.sap.sse.datamining.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
@@ -101,9 +101,8 @@ public abstract class AbstractQueryDefinitionProvider<SettingsType extends Setti
                 .appendEscapedLines(getDataMiningStringMessages().dataMiningComponentsNeedReloadDialogMessage())
                 .toSafeHtml()));
 
-        HorizontalPanel buttonPanel = new HorizontalPanel();
-        buttonPanel.setSpacing(5);
-        buttonPanel.setHorizontalAlignment(HorizontalPanel.ALIGN_RIGHT);
+        FlowPanel buttonPanel = new FlowPanel();
+        buttonPanel.addStyleName("floatRight");
         contentPanel.add(buttonPanel);
 
         Button reloadButton = new Button(getDataMiningStringMessages().reload());
@@ -114,6 +113,7 @@ public abstract class AbstractQueryDefinitionProvider<SettingsType extends Setti
                 reloadComponents();
             }
         });
+        reloadButton.addStyleName("dataMiningMarginLeft");
         buttonPanel.add(reloadButton);
 
         Button closeButton = new Button(getDataMiningStringMessages().close());
@@ -123,6 +123,7 @@ public abstract class AbstractQueryDefinitionProvider<SettingsType extends Setti
                 AbstractQueryDefinitionProvider.this.componentsChangedDialog.hide();
             }
         });
+        closeButton.addStyleName("dataMiningMarginLeft");
         buttonPanel.add(closeButton);
 
         componentsChangedDialog.setWidget(contentPanel);
@@ -134,40 +135,23 @@ public abstract class AbstractQueryDefinitionProvider<SettingsType extends Setti
         Collection<String> errorMessages = new ArrayList<String>();
 
         if (queryDefinition != null) {
-            String grouperError = validateGrouper(queryDefinition);
-            if (grouperError != null && !grouperError.isEmpty()) {
-                errorMessages.add(grouperError);
-            }
-            String statisticError = validateStatisticAndAggregator(queryDefinition);
-            if (statisticError != null && !statisticError.isEmpty()) {
-                errorMessages.add(statisticError);
-            }
-            String retrieverChainError = validateDataRetrieverChain(queryDefinition);
-            if (retrieverChainError != null && !retrieverChainError.isEmpty()) {
-                errorMessages.add(retrieverChainError);
+            StringMessages stringMessages = getDataMiningStringMessages();
+            if (queryDefinition.getStatisticToCalculate() == null ||
+                    queryDefinition.getDataRetrieverChainDefinition() == null) {
+                errorMessages.add(stringMessages.noStatisticSelectedError());
+            } else {
+                // Other components aren't available if no statistic has been selected
+                // Reporting an error for something that isn't there would be misleading
+                if (queryDefinition.getAggregatorDefinition() == null) {
+                    errorMessages.add(stringMessages.noAggregatorSelectedError());
+                }
+                if (queryDefinition.getDimensionsToGroupBy().isEmpty()) {
+                    errorMessages.add(stringMessages.noDimensionToGroupBySelectedError());
+                }
             }
         }
 
         return errorMessages;
-    }
-
-    private String validateGrouper(StatisticQueryDefinitionDTO queryDefinition) {
-        for (FunctionDTO dimension : queryDefinition.getDimensionsToGroupBy()) {
-            if (dimension != null) {
-                return null;
-            }
-        }
-        return getDataMiningStringMessages().noDimensionToGroupBySelectedError();
-    }
-
-    private String validateStatisticAndAggregator(StatisticQueryDefinitionDTO queryDefinition) {
-        return queryDefinition.getStatisticToCalculate() == null || queryDefinition.getAggregatorDefinition() == null
-                ? getDataMiningStringMessages().noStatisticSelectedError() : null;
-    }
-
-    private String validateDataRetrieverChain(StatisticQueryDefinitionDTO queryDefinition) {
-        return queryDefinition.getDataRetrieverChainDefinition() == null
-                ? getDataMiningStringMessages().noDataRetrieverChainDefinitonSelectedError() : null;
     }
 
     @Override
@@ -187,32 +171,10 @@ public abstract class AbstractQueryDefinitionProvider<SettingsType extends Setti
     protected void notifyQueryDefinitionChanged() {
         if (!blockChangeNotification) {
             StatisticQueryDefinitionDTO queryDefinition = getQueryDefinition();
-            if (isQueryDefinitionConsistent(queryDefinition)) {
-                for (QueryDefinitionChangedListener listener : listeners) {
-                    listener.queryDefinitionChanged(queryDefinition);
-                }
+            for (QueryDefinitionChangedListener listener : listeners) {
+                listener.queryDefinitionChanged(queryDefinition);
             }
         }
-    }
-
-    private boolean isQueryDefinitionConsistent(StatisticQueryDefinitionDTO queryDefinition) {
-        if (queryDefinition.getStatisticToCalculate() != null) { // The consistency can't be checked, if no statistic is
-                                                                 // selected
-            String sourceTypeName = queryDefinition.getStatisticToCalculate().getSourceTypeName();
-
-            if (queryDefinition.getDataRetrieverChainDefinition() != null && !sourceTypeName
-                    .equals(queryDefinition.getDataRetrieverChainDefinition().getRetrievedDataTypeName())) {
-                return false;
-            }
-
-            for (FunctionDTO dimensionToGroupBy : queryDefinition.getDimensionsToGroupBy()) {
-                if (!sourceTypeName.equals(dimensionToGroupBy.getSourceTypeName())) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
     }
 
     protected DataMiningServiceAsync getDataMiningService() {

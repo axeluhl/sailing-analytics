@@ -20,6 +20,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.model.FrameworkMethod;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
@@ -90,13 +91,22 @@ public abstract class AbstractSeleniumTest {
         // To be able to access LocalStorage we need to load a page having the target origin
         getWebDriver().get(contextRoot);
         
-        // clear local storage
-        final WebStorage webStorage = (WebStorage)getWebDriver();
-        webStorage.getLocalStorage().clear();
-        
-        // extending the timeout of notifications to 100s to prevent timing failures
-        webStorage.getLocalStorage().setItem("sse.notification.customTimeOutInSeconds",
-                Integer.toString(PageObject.DEFAULT_WAIT_TIMEOUT_SECONDS));
+        final String notificationTimeoutKey = "sse.notification.customTimeOutInSeconds";
+        final String notificationTimeoutValue = Integer.toString(PageObject.DEFAULT_WAIT_TIMEOUT_SECONDS);
+        if (getWebDriver() instanceof WebStorage) {
+            // clear local storage
+            final WebStorage webStorage = (WebStorage)getWebDriver();
+            webStorage.getLocalStorage().clear();
+            
+            // extending the timeout of notifications to 100s to prevent timing failures
+            webStorage.getLocalStorage().setItem(notificationTimeoutKey,
+                    notificationTimeoutValue);
+        } else {
+            // Fallback solution for IE
+            ((JavascriptExecutor)getWebDriver()).executeScript("window.localStorage.clear();");
+            ((JavascriptExecutor) getWebDriver()).executeScript("window.localStorage.setItem(\""
+                    + notificationTimeoutKey + "\", \"" + notificationTimeoutValue + "\");");
+        }
         
         try {
             // In IE 11 we sometimes see the problem that IE somehow automatically changes the zoom level to 75%.
@@ -108,15 +118,15 @@ public abstract class AbstractSeleniumTest {
         }
     }
     
-    protected void setUpAuthenticatedSession() {
+    protected void setUpAuthenticatedSession(WebDriver webDriver) {
         // To be able to set a cookie we need to load a page having the target origin
-        getWebDriver().get(getContextRoot());
+        webDriver.get(getContextRoot());
         
         logger.info("Authenticating session...");
         Cookie sessionCookie = authenticate(getContextRoot());
-        getWebDriver().get(getContextRoot() + "index.html"); // initialize web driver so setting a cookie for the local domain is possible
+        webDriver.get(getContextRoot() + "index.html"); // initialize web driver so setting a cookie for the local domain is possible
         final Cookie cookieWithoutDomain = new Cookie(sessionCookie.getName(), sessionCookie.getValue(), null, sessionCookie.getPath(), sessionCookie.getExpiry(), sessionCookie.isSecure(), sessionCookie.isHttpOnly());
-        getWebDriver().manage().addCookie(cookieWithoutDomain);
+        webDriver.manage().addCookie(cookieWithoutDomain);
         logger.info("...obtained session cookie "+sessionCookie);
     }
 
@@ -128,7 +138,7 @@ public abstract class AbstractSeleniumTest {
      */
     @Before
     public void setUp() {
-        setUpAuthenticatedSession();
+        setUpAuthenticatedSession(getWebDriver());
     }
     
     /**
@@ -178,13 +188,22 @@ public abstract class AbstractSeleniumTest {
     //    }
     //}
     
-    private class ScreenShotRule extends TestWatchman {
+    private class ScreenShotAndCloseWindowRule extends TestWatchman {
         @Override
         public void failed(Throwable cause, FrameworkMethod method) {
             try {
-                captureScreenshot(UUID.randomUUID().toString());
+                captureScreenshots();
             } catch (Exception exception) {
                 exception.printStackTrace();
+            }
+        }
+        
+        @Override
+        public void finished(FrameworkMethod method) {
+            try {
+                environment.getWindowManager().closeAllWindows();
+            } finally {
+                super.finished(method);
             }
         }
     }
@@ -193,7 +212,7 @@ public abstract class AbstractSeleniumTest {
      * <p>Rule for capturing of a screenshot if a test fails.</p>
      */
     @Rule
-    public final ScreenShotRule takeScreenshoot = new ScreenShotRule(/*generator*/);
+    public final ScreenShotAndCloseWindowRule takeScreenshotAndCloseWindows = new ScreenShotAndCloseWindowRule(/*generator*/);
 
     /**
      * <p>The test environment used for the execution of the the tests.</p>
@@ -246,28 +265,32 @@ public abstract class AbstractSeleniumTest {
      * @throws IOException
      *   if an I/O error occurs.
      */
-    protected void captureScreenshot(String filename) {
+    protected void captureScreenshots() {
         File screenshotFolder = this.environment.getScreenshotFolder();
         if (screenshotFolder != null) {
-            WebDriver driver = getWebDriver();
-            if (RemoteWebDriver.class.equals(driver.getClass())) {
-                driver = new Augmenter().augment(driver);
-            }
-            InputStream source = getScreenshotNotSupportedImage();
-            if (driver instanceof TakesScreenshot) {
-                source = new ByteArrayInputStream(((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
-            }
-            try {
-                File destinationDir = new File(screenshotFolder, getClass().getName());
-                destinationDir.mkdirs();
-                File destination = new File(destinationDir, filename + SCREENSHOT_FILE_EXTENSION); //$NON-NLS-1$
-                Path path = destination.toPath();
-                Files.copy(source, path, StandardCopyOption.REPLACE_EXISTING);
-                // ATTENTION: Do not remove this line because it is needed for the JUnit Attachment Plugin!
-                System.out.println(String.format(ATTACHMENT_FORMAT, destination.getCanonicalFile().toURI()));
-            } catch (IOException exception) {
-                throw new RuntimeException(exception);
-            }
+            this.environment.getWindowManager().forEachOpenedWindow(window -> {
+                final String filename = UUID.randomUUID().toString();
+                
+                WebDriver driver = window.getWebDriver();
+                if (RemoteWebDriver.class.equals(driver.getClass())) {
+                    driver = new Augmenter().augment(driver);
+                }
+                InputStream source = getScreenshotNotSupportedImage();
+                if (driver instanceof TakesScreenshot) {
+                    source = new ByteArrayInputStream(((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
+                }
+                try {
+                    File destinationDir = new File(screenshotFolder, getClass().getName());
+                    destinationDir.mkdirs();
+                    File destination = new File(destinationDir, filename + SCREENSHOT_FILE_EXTENSION); //$NON-NLS-1$
+                    Path path = destination.toPath();
+                    Files.copy(source, path, StandardCopyOption.REPLACE_EXISTING);
+                    // ATTENTION: Do not remove this line because it is needed for the JUnit Attachment Plugin!
+                    System.out.println(String.format(ATTACHMENT_FORMAT, destination.getCanonicalFile().toURI()));
+                } catch (IOException exception) {
+                    throw new RuntimeException(exception);
+                }
+            });
         }
     }
     
