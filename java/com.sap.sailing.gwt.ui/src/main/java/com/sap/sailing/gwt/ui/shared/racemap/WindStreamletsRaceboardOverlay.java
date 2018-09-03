@@ -388,9 +388,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
                         @Override
                         public void onStyleChanged() {
                             if (isVisible()) {
-                                stopStreamlets();
                                 setCanvasSettings();
-                                startStreamlets();
                             }
                         }
             });
