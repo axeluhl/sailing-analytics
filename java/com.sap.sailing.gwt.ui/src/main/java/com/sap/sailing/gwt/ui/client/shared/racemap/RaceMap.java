@@ -700,8 +700,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                 showLayoutsAfterAnimationFinishes();
                             }
                         }
-                        // TODO bug489 when in wind-up mode, avoid zooming out too far; perhaps zoom back in if zoomed
-                        // out too far
+
+                        if ((streamletOverlay != null) && !map.getBounds().equals(currentMapBounds)
+                                && settings.isShowWindStreamletOverlay()) {
+                            streamletOverlay.onBoundsChanged(map.getZoom() != currentZoomLevel);
+                        }
                     }
 
                     private void showLayoutsAfterAnimationFinishes() {
@@ -766,17 +769,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                       if (!isAutoZoomInProgress() && (newZoomLevel != currentZoomLevel)) {
                           removeTransitions();
                       }
-                        if ((streamletOverlay != null) && !map.getBounds().equals(currentMapBounds)
-                                && settings.isShowWindStreamletOverlay()) {
-                          streamletOverlay.onBoundsChanged(newZoomLevel != currentZoomLevel);
-                      }
+
                       currentMapBounds = map.getBounds();
                       currentZoomLevel = newZoomLevel;
                       headerPanel.getElement().getStyle().setWidth(map.getOffsetWidth(), Unit.PX);
                         refreshMapWithoutAnimation();
                   }
               });
-              
+
               // If there was a time change before the API was loaded, reset the time
               if (lastTimeChangeBeforeInitialization != null) {
                   timeChanged(lastTimeChangeBeforeInitialization, null);
