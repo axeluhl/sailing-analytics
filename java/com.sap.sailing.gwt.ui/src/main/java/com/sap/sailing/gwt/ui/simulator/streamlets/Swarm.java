@@ -92,7 +92,7 @@ public class Swarm implements TimeListener {
         fullcanvas.setCanvasSettings();
         // if map is not yet loaded, wait for it
         if (map.getBounds() != null) {
-            // startWithMap(animationIntervalMillis);
+            startWithMap(animationIntervalMillis);
         } else {
             removeBoundsChangeHandler();
             BoundsChangeMapHandler handler = new BoundsChangeMapHandler() {
