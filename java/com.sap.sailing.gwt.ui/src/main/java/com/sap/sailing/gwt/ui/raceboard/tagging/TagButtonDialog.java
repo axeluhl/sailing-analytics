@@ -57,7 +57,7 @@ public class TagButtonDialog extends DialogBox {
     private Button closeButton, saveButton, cancelButton, addTagButtonButton;
     private TagButton selectedTagButton;
 
-    public TagButtonDialog(TaggingPanel taggingPanel, TagCreationPanel tagCreationPanel) {
+    public TagButtonDialog(TaggingPanel taggingPanel, TagFooterPanel footerPanel) {
         this.taggingPanel = taggingPanel;
         this.stringMessages = taggingPanel.getStringMessages();
 
@@ -67,8 +67,8 @@ public class TagButtonDialog extends DialogBox {
 
         TagInputPanel inputPanel = new TagInputPanel(stringMessages);
         TagPreviewPanel tagPreviewPanel = new TagPreviewPanel(taggingPanel, inputPanel);
-        CellTable<TagButton> tagButtonsTable = createTable(tagCreationPanel, inputPanel, tagPreviewPanel);
-        Panel controlButtonPanel = createButtonPanel(tagButtonsTable, inputPanel, tagPreviewPanel, tagCreationPanel);
+        CellTable<TagButton> tagButtonsTable = createTable(footerPanel, inputPanel, tagPreviewPanel);
+        Panel controlButtonPanel = createButtonPanel(tagButtonsTable, inputPanel, tagPreviewPanel, footerPanel);
 
         // wrap tag buttons table to control max-height of table
         Panel tagButtonsTableWrapper = new SimplePanel();
@@ -87,7 +87,7 @@ public class TagButtonDialog extends DialogBox {
         center();
     }
 
-    private CellTable<TagButton> createTable(TagCreationPanel tagCreationPanel, TagInputPanel inputPanel,
+    private CellTable<TagButton> createTable(TagFooterPanel footerPanel, TagInputPanel inputPanel,
             TagPreviewPanel tagPreviewPanel) {
         CellTable<TagButton> tagButtonTable = new CellTable<TagButton>(15, buttonTableResources);
         tagButtonTable.setStyleName(style.tagButtonTable());
@@ -130,9 +130,9 @@ public class TagButtonDialog extends DialogBox {
                             stringMessages.tagButtonConfirmDeletion(button.getTag()), (confirmed) -> {
                                 if (confirmed) {
                                     taggingPanel.getTagButtons().remove(button);
-                                    tagCreationPanel.storeAllTagButtons();
+                                    footerPanel.storeAllTagButtons();
                                     setRowData(tagButtonTable, taggingPanel.getTagButtons());
-                                    tagCreationPanel.updateButtons();
+                                    footerPanel.recalculateHeight();
                                 }
                                 center();
                             });
@@ -176,11 +176,11 @@ public class TagButtonDialog extends DialogBox {
     }
 
     private Panel createButtonPanel(CellTable<TagButton> tagButtonTable, TagInputPanel inputPanel,
-            TagPreviewPanel tagPreviewPanel, TagCreationPanel tagCreationPanel) {
-        addSaveButton(tagCreationPanel, tagButtonTable, inputPanel, tagPreviewPanel);
+            TagPreviewPanel tagPreviewPanel, TagFooterPanel footerPanel) {
+        addSaveButton(footerPanel, tagButtonTable, inputPanel, tagPreviewPanel);
         addCancelButton(inputPanel, tagPreviewPanel, tagButtonTable);
-        addCloseButton(tagCreationPanel, tagPreviewPanel);
-        addTagButtonButton(tagCreationPanel, tagButtonTable, inputPanel, tagPreviewPanel);
+        addCloseButton(footerPanel, tagPreviewPanel);
+        addTagButtonButton(footerPanel, tagButtonTable, inputPanel, tagPreviewPanel);
 
         Panel controlButtonPanel = new FlowPanel();
         controlButtonPanel.setStyleName(style.buttonsPanel());
@@ -192,7 +192,7 @@ public class TagButtonDialog extends DialogBox {
         return controlButtonPanel;
     }
 
-    private void addSaveButton(TagCreationPanel tagCreationPanel, CellTable<TagButton> tagButtonTable,
+    private void addSaveButton(TagFooterPanel footerPanel, CellTable<TagButton> tagButtonTable,
             TagInputPanel inputPanel, TagPreviewPanel tagPreviewPanel) {
         saveButton = new Button(stringMessages.save());
         saveButton.setVisible(false);
@@ -205,7 +205,7 @@ public class TagButtonDialog extends DialogBox {
                 selectedTagButton.setComment(inputPanel.getComment());
                 selectedTagButton.setImageURL(inputPanel.getImageURL());
                 selectedTagButton.setVisibleForPublic(inputPanel.isVisibleForPublic());
-                tagCreationPanel.storeAllTagButtons();
+                footerPanel.storeAllTagButtons();
                 inputPanel.clearAllValues();
                 tagPreviewPanel.renderPreview(inputPanel);
                 tagButtonTable.redraw();
@@ -242,17 +242,14 @@ public class TagButtonDialog extends DialogBox {
         });
     }
 
-    private void addCloseButton(TagCreationPanel tagCreationPanel, TagPreviewPanel tagPreviewPanel) {
+    private void addCloseButton(TagFooterPanel footerPanel, TagPreviewPanel tagPreviewPanel) {
         closeButton = new Button(stringMessages.close());
         closeButton.setStyleName(style.tagDialogButton());
         closeButton.addStyleName("gwt-Button");
-        closeButton.addClickHandler(event -> {
-            hide();
-            tagCreationPanel.updateButtons();
-        });
+        closeButton.addClickHandler(event -> hide());
     }
 
-    private void addTagButtonButton(TagCreationPanel tagCreationPanel, CellTable<TagButton> tagButtonTable,
+    private void addTagButtonButton(TagFooterPanel footerPanel, CellTable<TagButton> tagButtonTable,
             TagInputPanel inputPanel, TagPreviewPanel tagPreviewPanel) {
         addTagButtonButton = new Button(stringMessages.tagAddCustomTagButton());
         addTagButtonButton.setStyleName(style.tagDialogButton());
@@ -264,7 +261,8 @@ public class TagButtonDialog extends DialogBox {
                 inputPanel.clearAllValues();
                 tagPreviewPanel.renderPreview(inputPanel);
                 taggingPanel.getTagButtons().add(tagButton);
-                tagCreationPanel.storeAllTagButtons();
+                footerPanel.storeAllTagButtons();
+                footerPanel.recalculateHeight();
                 setRowData(tagButtonTable, taggingPanel.getTagButtons());
             } else {
                 Notification.notify(stringMessages.tagNotSpecified(), NotificationType.WARNING);

@@ -41,7 +41,7 @@
 
 .taggingPanel button.toggleEditState {
 	position: absolute;
-	bottom: 10px;
+	bottom: 5px;
 	left: 50%;
 	transform: translate(-50%, 0);
 	height: 40px;
@@ -158,6 +158,7 @@
 }
 
 .tagDialogButton {
+	max-width: 100%;
 	padding: 4px 4px;
 	cursor: pointer;
 }
@@ -184,6 +185,16 @@
 .tagPreviewPanel {
 	margin: 5px;
 	max-width: 500px;
+}
+
+.tagButtonPanel {
+	text-align: left;
+}
+
+.tagButtonPanelHeader {
+	font-weight: bold;
+	margin-bottom: 5px;
+	padding-top: 5px;
 }
 
 /**************************** Tag input / creation ****************************/

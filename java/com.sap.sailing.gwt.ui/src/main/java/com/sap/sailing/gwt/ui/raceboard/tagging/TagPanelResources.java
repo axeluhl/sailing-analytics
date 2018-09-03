@@ -63,6 +63,8 @@ public interface TagPanelResources extends ClientBundle {
         String tagButtonTable();
         String tagButtonTableWrapper();
         String tagPreviewPanel();
+        String tagButtonPanel();
+        String tagButtonPanelHeader();
 
         // tag input / creation
         String tagCreationPanel();

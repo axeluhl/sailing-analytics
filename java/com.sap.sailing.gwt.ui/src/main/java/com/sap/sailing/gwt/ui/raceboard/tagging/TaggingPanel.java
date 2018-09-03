@@ -66,9 +66,9 @@ public class TaggingPanel extends ComponentWithoutSettings
 
     // UI elements
     private final HeaderPanel taggingPanel;
-    private final TagCreationPanel tagCreationPanel;
     private final TagFilterPanel filterbarPanel;
     private final Panel contentPanel;
+    private final TagFooterPanel footerPanel;
     private final Button createTagsButton;
 
     // misc. elements
@@ -108,7 +108,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         tagButtons = new ArrayList<TagButton>();
 
         taggingPanel = new HeaderPanel();
-        tagCreationPanel = new TagCreationPanel(this);
+        footerPanel = new TagFooterPanel(this);
         filterbarPanel = new TagFilterPanel(this);
         contentPanel = new FlowPanel();
         createTagsButton = new Button();
@@ -125,14 +125,15 @@ public class TaggingPanel extends ComponentWithoutSettings
      * Initializes UI of Tagging-Panel.
      */
     private void initializePanel() {
-        // Panel
         taggingPanel.setStyleName(style.taggingPanel());
 
-        // Searchbar
+        // header
         taggingPanel.setHeaderWidget(filterbarPanel);
-        taggingPanel.setFooterWidget(tagCreationPanel);
 
-        // Content (tags)
+        // footer
+        taggingPanel.setFooterWidget(footerPanel);
+
+        // content (tags)
         tagListProvider.addDataDisplay(tagCellList);
         tagCellList.setEmptyListWidget(new Label(stringMessages.tagNoTagsFound()));
 
@@ -356,10 +357,17 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     /**
-     * Forces tagging panel to rerender content. May fix visual bugs.
+     * Forces tagging panel to rerender content.
      */
     protected void refreshContentPanel() {
         taggingPanel.setContentWidget(contentPanel);
+    }
+    
+    /**
+     * Forces tagging panel to rerender footer.
+     */
+    protected void refreshFooterPanel() {
+        taggingPanel.setFooterWidget(footerPanel);
     }
 
     protected Date getTimerTime() {
@@ -435,15 +443,18 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     /**
-     * Updates the visibility of the footer. Footer will NOT get displayed if user is not logged in, even if showFooter
-     * is set to true!
+     * Updates the visibility of the footer and it's components. Input fields will NOT get displayed if user is not
+     * logged in, even if showInputFields is set to true! Tag buttons can't be hidden and will get displayed
+     * automatically when user is logged in.
      */
-    private void setFooterPanelVisibility(boolean showFooter) {
-        // Setting tagCreationPanel.setVisible(false) is not sufficient as panel would still be
+    private void setFooterPanelVisibility(boolean showInputFields) {
+        // Setting footerPanel.setVisible(false) is not sufficient as panel would still be
         // rendered as 20px high white space instead of being hidden.
-        // Fix: remove panel completly from footer.
-        if (userService.getCurrentUser() != null && showFooter) {
-            taggingPanel.setFooterWidget(tagCreationPanel);
+        // Fix: remove panel completely from footer.
+        if (userService.getCurrentUser() != null && (currentState == State.EDIT || getTagButtons().size() > 0)) {
+            taggingPanel.setFooterWidget(footerPanel);
+            footerPanel.setInputFieldsVisibility(showInputFields);
+            footerPanel.setTagButtonsVisibility(true);
         } else {
             taggingPanel.setFooterWidget(null);
         }
@@ -538,7 +549,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             }
         });
         filterbarPanel.loadTagFilterSets();
-        tagCreationPanel.loadAllTagButtons();
+        footerPanel.loadAllTagButtons();
         setCurrentState(State.VIEW);
         updateContent();
     }
