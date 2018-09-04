@@ -12,8 +12,8 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.windestimation.WindEstimator;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
-import com.sap.sailing.windestimation.data.LoggingUtil;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
+import com.sap.sailing.windestimation.util.LoggingUtil;
 import com.sap.sse.common.TimePoint;
 
 /**
