@@ -73,7 +73,6 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
     private double latitudeSum;
     private final NumberFormat numberFormatOneDecimal = NumberFormatterFactory.getDecimalFormat(1);
     private ElementStyleMutationObserver observer;
-    private boolean dragging = false;
     private boolean isAttached = false, startObserverWhenAttached = false;
 
     public WindStreamletsRaceboardOverlay(MapWidget map, int zIndex, final Timer timer,
@@ -407,24 +406,20 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
         }
     }
 
-    public void onDragStart() {
-        dragging = true;
-
-    }
-
-    public void onDragEnd() {
-        dragging = false;
-    }
-
-    public void onBoundsChanged(boolean zoomChanged) {
-        if (swarm != null && !dragging) {
-            int swarmPause = (zoomChanged ? 5 : 2);
-            swarm.onBoundsChanged(zoomChanged, swarmPause);
+    public void onBoundsChanged() {
+        if (swarm != null) {
+            swarm.pause(2);
         }
     }
 
     @Override
     public void onColorMappingChanged() {
         drawLegend();
+    }
+
+    public void onZoomChange() {
+        if (swarm != null) {
+            swarm.onBoundsChanged(true, 5);
+        }
     }
 }

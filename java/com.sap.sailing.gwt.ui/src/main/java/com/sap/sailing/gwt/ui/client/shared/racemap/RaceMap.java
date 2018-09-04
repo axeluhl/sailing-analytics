@@ -703,7 +703,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
                         if ((streamletOverlay != null) && !map.getBounds().equals(currentMapBounds)
                                 && settings.isShowWindStreamletOverlay()) {
-                            streamletOverlay.onBoundsChanged(map.getZoom() != currentZoomLevel);
+                            streamletOverlay.onZoomChange();
                         }
                     }
 
@@ -733,17 +733,11 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         settings = new RaceMapSettings(settings, clearedZoomSettings);
                         currentlyDragging = false;
                         refreshMapWithoutAnimation();
-                        if (streamletOverlay != null && settings.isShowWindStreamletOverlay()) {
-                            streamletOverlay.onDragEnd();
-                        }
                     }
               });
 
                 map.addDragStartHandler(event -> {
                     currentlyDragging = true;
-                    if (streamletOverlay != null && settings.isShowWindStreamletOverlay()) {
-                        streamletOverlay.onDragStart();
-                    }
                 });
 
               map.addIdleHandler(new IdleMapHandler() {
@@ -762,20 +756,25 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                       }
                   }
               });
-              map.addBoundsChangeHandler(new BoundsChangeMapHandler() {
-                  @Override
-                  public void onEvent(BoundsChangeMapEvent event) {
-                      int newZoomLevel = map.getZoom(); 
-                      if (!isAutoZoomInProgress() && (newZoomLevel != currentZoomLevel)) {
-                          removeTransitions();
-                      }
+                map.addBoundsChangeHandler(new BoundsChangeMapHandler() {
+                    @Override
+                    public void onEvent(BoundsChangeMapEvent event) {
+                        int newZoomLevel = map.getZoom();
+                        if (!isAutoZoomInProgress() && (newZoomLevel != currentZoomLevel)) {
+                            removeTransitions();
+                        }
 
-                      currentMapBounds = map.getBounds();
-                      currentZoomLevel = newZoomLevel;
-                      headerPanel.getElement().getStyle().setWidth(map.getOffsetWidth(), Unit.PX);
+                        currentMapBounds = map.getBounds();
+                        currentZoomLevel = newZoomLevel;
+                        headerPanel.getElement().getStyle().setWidth(map.getOffsetWidth(), Unit.PX);
                         refreshMapWithoutAnimation();
-                  }
-              });
+                    }
+                });
+                map.addDragHandler(event -> {
+                        if (streamletOverlay != null && settings.isShowWindStreamletOverlay()) {
+                            streamletOverlay.onBoundsChanged();
+                    }
+                });
 
               // If there was a time change before the API was loaded, reset the time
               if (lastTimeChangeBeforeInitialization != null) {
