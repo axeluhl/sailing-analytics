@@ -25,48 +25,48 @@ public class Swarm implements TimeListener {
     private final FullCanvasOverlay fullcanvas;
     private final Canvas canvas;
     private final MapWidget map;
-    private StreamletParameters parameters; 
+    private StreamletParameters parameters;
 
     private Timer loopTimer;
     private Mercator projection;
     private final VectorField field;
-    
+
     private boolean zoomChanged = false;
     private Vector diffPx;
-    
+
     /**
      * The number of particles to show. After {@link #updateBounds()} has been run, this also reflects the size of the
      * {@link #particles} array. Note that since elements in {@link #particles} can be <code>null</code>, this number
      * not necessarily represents the exact number of particles visible.
      */
     private int nParticles;
-    
+
     /**
      * The particles shown in this swarm. Elements in the array may be <code>null</code>.
      */
     private Particle[] particles;
-    
+
     /**
      * Tells if nothing of this swarm is currently visible on the {@link #map}. This is the case when there is no
      * intersection between the {@link #field vector field's} {@link VectorField#getFieldCorners() bounds} and the
      * visible map area.
      */
     private boolean swarmOffScreen = false;
-    
+
     private int swarmPause = 0;
     private boolean swarmContinue = true;
-    
+
     /**
      * Bounds in the map's coordinate system which may have undergone rotation and translation. See the
      * {@link CoordinateSystem} instance in place which facilitates the mapping.
      */
     private LatLngBounds visibleBoundsOfField;
-    
+
     private Date timePoint;
     private double cosineOfAverageLatitude;
 
     private final Map<BoundsChangeMapHandler, HandlerRegistration> boundsChangeHandlers = new HashMap<>();
-    
+
     private boolean colored = false;
     private final ValueRangeFlexibleBoundaries valueRange;
     private final ColorMapper colorMapper;
@@ -84,10 +84,11 @@ public class Swarm implements TimeListener {
         timePoint = timer.getTime();
         cosineOfAverageLatitude = 1.0; // default to equator
         diffPx = new Vector(0, 0);
-        valueRange = new ValueRangeFlexibleBoundaries(/*wind speed in knots*/ 0.0,/*wind speed in knots*/ 60.0, /*percentage*/ 0.15);
+        valueRange = new ValueRangeFlexibleBoundaries(/* wind speed in knots */ 0.0, /* wind speed in knots */ 60.0,
+                /* percentage */ 0.15);
         colorMapper = new ColorMapper(valueRange, !colored);
     }
-    
+
     public void start(final int animationIntervalMillis) {
         fullcanvas.setCanvasSettings();
         // if map is not yet loaded, wait for it
@@ -119,12 +120,12 @@ public class Swarm implements TimeListener {
         swarmContinue = true;
         startLoop(animationIntervalMillis);
     }
-    
+
     private void removeBoundsChangeHandler() {
         for (HandlerRegistration reg : boundsChangeHandlers.values()) {
             reg.removeHandler();
         }
-        
+
     }
 
     public void stop() {
@@ -165,17 +166,19 @@ public class Swarm implements TimeListener {
         }
         return particle;
     }
-    
+
     private LatLng getRandomPosition() {
         final LatLng result;
         double rndY = Math.random();
         double rndX = Math.random();
-        double latDeg = rndY * this.visibleBoundsOfField.getSouthWest().getLatitude() + (1 - rndY) * this.visibleBoundsOfField.getNorthEast().getLatitude();
-        double lngDeg = rndX * this.visibleBoundsOfField.getSouthWest().getLongitude() + (1 - rndX) * this.visibleBoundsOfField.getNorthEast().getLongitude();
+        double latDeg = rndY * this.visibleBoundsOfField.getSouthWest().getLatitude()
+                + (1 - rndY) * this.visibleBoundsOfField.getNorthEast().getLatitude();
+        double lngDeg = rndX * this.visibleBoundsOfField.getSouthWest().getLongitude()
+                + (1 - rndX) * this.visibleBoundsOfField.getNorthEast().getLongitude();
         result = LatLng.newInstance(latDeg, lngDeg);
         return result;
     }
-    
+
     private void recycleParticles() {
         for (int idx = 0; idx < particles.length; idx++) {
             particles[idx] = this.recycleOrCreateParticle(particles[idx]);
@@ -196,7 +199,7 @@ public class Swarm implements TimeListener {
         }
         this.swarmPause = swarmPause;
     }
-    
+
     private void updateBounds() {
         LatLngBounds fieldBounds = this.field.getFieldCorners();
         final LatLngBounds mapBounds = map.getBounds();
@@ -213,8 +216,8 @@ public class Swarm implements TimeListener {
             createParticles();
         }
         this.nParticles = newNParticles;
-        cosineOfAverageLatitude = Math.cos((visibleBoundsOfField.getSouthWest().getLatitude()/180.*Math.PI+
-                visibleBoundsOfField.getNorthEast().getLatitude()/180.*Math.PI)/2);
+        cosineOfAverageLatitude = Math.cos((visibleBoundsOfField.getSouthWest().getLatitude() / 180. * Math.PI
+                + visibleBoundsOfField.getNorthEast().getLatitude() / 180. * Math.PI) / 2);
     }
 
     private void startLoop(final int animationIntervalMillis) {
@@ -229,7 +232,7 @@ public class Swarm implements TimeListener {
                     projection.calibrate();
                     updateBounds();
                     if (zoomChanged) {
-                        diffPx = new Vector(0,0);
+                        diffPx = new Vector(0, 0);
                         recycleParticles();
                         zoomChanged = false;
                     } else {
@@ -243,9 +246,10 @@ public class Swarm implements TimeListener {
                 }
                 Date time1 = new Date();
                 if (swarmContinue) {
-                    // wait at least 10ms for the next iteration; try to get one iteration done every animationIntervalMillis if possible
+                    // wait at least 10ms for the next iteration; try to get one iteration done every
+                    // animationIntervalMillis if possible
                     long timeDelta = time1.getTime() - time0.getTime();
-                    //log("fps: "+(1000.0/timeDelta));
+                    // log("fps: "+(1000.0/timeDelta));
                     loopTimer.schedule((int) Math.max(10, animationIntervalMillis - timeDelta));
                 } else {
                     projection.clearCanvas();
@@ -254,7 +258,7 @@ public class Swarm implements TimeListener {
         };
         loopTimer.schedule(animationIntervalMillis);
     }
-    
+
     private void drawSwarm() {
         Context2d ctxt = canvas.getContext2d();
         ctxt.setGlobalAlpha(0.06);
@@ -283,19 +287,19 @@ public class Swarm implements TimeListener {
             ctxt.stroke();
         }
     }
-    
+
     public void setColors(boolean isColored) {
         this.colored = isColored;
         colorMapper.setGrey(!isColored);
     }
-    
+
     public boolean isColored() {
         return colored;
     }
-    
+
     /**
      * Moves each particle by its vector {@link Particle#v} multiplied by the speed which is 0.01 times the
-     * {@link VectorField#getMotionScale(int)} at the map's current zoom level. 
+     * {@link VectorField#getMotionScale(int)} at the map's current zoom level.
      */
     private boolean execute(Vector diffPx) {
         double minSpeedInKnots = 120.0;
@@ -315,7 +319,8 @@ public class Swarm implements TimeListener {
                     particle.previousPixelCoordinate.y += diffPx.y;
                 }
                 double latDeg = particle.currentPosition.getLatitude() + speed * particle.v.y;
-                double lngDeg = particle.currentPosition.getLongitude() + speed * particle.v.x / cosineOfAverageLatitude;
+                double lngDeg = particle.currentPosition.getLongitude()
+                        + speed * particle.v.x / cosineOfAverageLatitude;
                 particle.currentPosition = LatLng.newInstance(latDeg, lngDeg);
                 particle.currentPixelCoordinate = projection.latlng2pixel(particle.currentPosition);
                 particle.stepsToLive--;
@@ -325,7 +330,8 @@ public class Swarm implements TimeListener {
                     particle.v = null;
                 }
             } else {
-                // particle timed out (age became 0) or was never created (e.g., weight too low); try to create a new one
+                // particle timed out (age became 0) or was never created (e.g., weight too low); try to create a new
+                // one
                 particles[idx] = this.recycleOrCreateParticle(particles[idx]);
             }
             if (particles[idx] != null && particles[idx].v != null) {
@@ -340,22 +346,21 @@ public class Swarm implements TimeListener {
         }
         if (Math.abs(maxSpeedInKnots - minSpeedInKnots) <= 0.01 && minSpeedInKnots < maxSpeedInKnots) {
             valueRange.setMinMax(minSpeedInKnots - 0.1, maxSpeedInKnots + 0.1);
-        }
-        else if (minSpeedInKnots <= maxSpeedInKnots) {
+        } else if (minSpeedInKnots <= maxSpeedInKnots) {
             valueRange.setMinMax(minSpeedInKnots, maxSpeedInKnots);
         }
         drawSwarm();
         return true;
     }
-    
+
     public ValueRangeFlexibleBoundaries getValueRange() {
         return valueRange;
     }
-    
+
     public ColorMapper getColorMapper() {
         return colorMapper;
     }
-    
+
     @Override
     public void timeChanged(Date newTime, Date oldTime) {
         timePoint = newTime;
