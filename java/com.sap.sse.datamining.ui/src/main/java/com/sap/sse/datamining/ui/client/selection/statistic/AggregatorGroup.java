@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
 class AggregatorGroup implements Comparable<AggregatorGroup> {
     
@@ -21,6 +22,14 @@ class AggregatorGroup implements Comparable<AggregatorGroup> {
         return key;
     }
     
+    public boolean supportsFunction(ExtractionFunctionWithContext extractionFunction) {
+        return extractionFunction != null && supportsFunction(extractionFunction.getExtractionFunction());
+    }
+    
+    public boolean supportsFunction(FunctionDTO function) {
+        return function != null && supportsType(function.getReturnTypeName());
+    }
+
     public boolean supportsType(String typeName) {
         return aggregatorsBySupportedTypeName.containsKey(typeName);
     }

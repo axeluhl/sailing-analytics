@@ -299,7 +299,10 @@ public class Swarm implements TimeListener {
                 }
             }
         }
-        if (minSpeedInKnots <= maxSpeedInKnots) {
+        if (Math.abs(maxSpeedInKnots - minSpeedInKnots) <= 0.01 && minSpeedInKnots < maxSpeedInKnots) {
+            valueRange.setMinMax(minSpeedInKnots - 0.1, maxSpeedInKnots + 0.1);
+        }
+        else if (minSpeedInKnots <= maxSpeedInKnots) {
             valueRange.setMinMax(minSpeedInKnots, maxSpeedInKnots);
         }
         drawSwarm();
