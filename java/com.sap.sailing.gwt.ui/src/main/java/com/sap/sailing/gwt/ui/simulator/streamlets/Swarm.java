@@ -112,7 +112,7 @@ public class Swarm implements TimeListener {
         projection.calibrate();
         updateBounds();
         if (particles == null) {
-            particles = createParticles();
+            createParticles();
         } else {
             clearNextFrame = true;
         }
@@ -176,15 +176,17 @@ public class Swarm implements TimeListener {
         return result;
     }
     
-    private Particle[] createParticles() {
-        Particle[] newParticles = new Particle[nParticles];
-        for (int idx = 0; idx < newParticles.length; idx++) {
-
-            newParticles[idx] = this.recycleOrCreateParticle(newParticles[idx]);
+    private void recycleParticles() {
+        for (int idx = 0; idx < particles.length; idx++) {
+            particles[idx] = this.recycleOrCreateParticle(particles[idx]);
         }
-        return newParticles;
     }
-    
+
+    private void createParticles() {
+        this.particles = new Particle[nParticles];
+        recycleParticles();
+    }
+
     public void onBoundsChanged(boolean zoomChanged, int swarmPause) {
         this.zoomChanged |= zoomChanged;
         if (this.zoomChanged) {
@@ -204,7 +206,13 @@ public class Swarm implements TimeListener {
         Vector boundsNEpx = this.projection.latlng2pixel(visibleBoundsOfField.getNorthEast());
         double boundsWidthpx = Math.abs(boundsNEpx.x - boundsSWpx.x);
         double boundsHeightpx = Math.abs(boundsSWpx.y - boundsNEpx.y);
-        this.nParticles = (int)Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.getParticleFactor() * this.parameters.swarmScale);
+        int newNParticles = (int) Math.round(Math.sqrt(boundsWidthpx * boundsHeightpx) * this.field.getParticleFactor()
+                * this.parameters.swarmScale);
+        if (newNParticles > this.nParticles) {
+            this.nParticles = newNParticles;
+            createParticles();
+        }
+        this.nParticles = newNParticles;
         cosineOfAverageLatitude = Math.cos((visibleBoundsOfField.getSouthWest().getLatitude()/180.*Math.PI+
                 visibleBoundsOfField.getNorthEast().getLatitude()/180.*Math.PI)/2);
     }
@@ -222,7 +230,7 @@ public class Swarm implements TimeListener {
                     updateBounds();
                     if (zoomChanged) {
                         diffPx = new Vector(0,0);
-                        particles = createParticles();
+                        recycleParticles();
                         zoomChanged = false;
                     } else {
                         diffPx = fullcanvas.getDiffPx();
@@ -261,7 +269,7 @@ public class Swarm implements TimeListener {
         ctxt.setGlobalAlpha(1.0);
         ctxt.setGlobalCompositeOperation("source-over");
         ctxt.setFillStyle("white");
-        for (int idx = 0; idx < particles.length; idx++) {
+        for (int idx = 0; idx < nParticles && idx < particles.length; idx++) {
             Particle particle = particles[idx];
             if (particle == null || particle.stepsToLive == 0) {
                 continue;
@@ -293,7 +301,7 @@ public class Swarm implements TimeListener {
         double minSpeedInKnots = 120.0;
         double maxSpeedInKnots = 0.0;
         double speed = field.getMotionScale(map.getZoom());
-        for (int idx = 0; idx < particles.length; idx++) {
+        for (int idx = 0; idx < particles.length && idx < nParticles; idx++) {
             Particle particle = particles[idx];
             if (particle != null && particle.stepsToLive > 0 && particle.v != null) {
                 // move the particle one step in the direction and with the speed indicated by particle.v and
