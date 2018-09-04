@@ -16,15 +16,16 @@ import com.sap.sse.common.filter.FilterSet;
  */
 public class TagListProvider extends ListDataProvider<TagDTO> {
 
-    private List<TagDTO> allTags;
     private FilterSet<TagDTO, Filter<TagDTO>> currentFilterSet;
-    private TagFilterLabel observingLabel;
+    private final List<TagDTO> allTags;
+    private final List<TagFilterLabel> observingLabels;
 
     /**
      * Creates instance without tags or filters.
      */
     protected TagListProvider() {
         allTags = new ArrayList<TagDTO>();
+        observingLabels = new ArrayList<TagFilterLabel>();
     }
 
     /**
@@ -34,7 +35,17 @@ public class TagListProvider extends ListDataProvider<TagDTO> {
      * @param tagFilterLabel
      */
     protected void addObserveringLabel(TagFilterLabel tagFilterLabel) {
-        observingLabel = tagFilterLabel;
+        observingLabels.add(tagFilterLabel);
+    }
+
+    /**
+     * Informs {@link #observingLabels observing labels} about the changed {@link #currentFilterSet selected filter
+     * set}.
+     */
+    private void updateOberservingLabels() {
+        for (TagFilterLabel label : observingLabels) {
+            label.update(currentFilterSet);
+        }
     }
 
     /**
@@ -92,16 +103,15 @@ public class TagListProvider extends ListDataProvider<TagDTO> {
     }
 
     /**
-     * Sets {@link #currentFilterSet current selected filter set} to given <code>tagFilterSet</code>.
+     * Sets {@link #currentFilterSet current selected filter set} to given <code>tagFilterSet</code> and informs all
+     * observing labels.
      * 
      * @param tagFilterSet
      *            selected filter set
      */
     protected void setCurrentFilterSet(FilterSet<TagDTO, Filter<TagDTO>> tagFilterSet) {
         currentFilterSet = tagFilterSet;
-        if (observingLabel != null) {
-            observingLabel.update(tagFilterSet);
-        }
+        updateOberservingLabels();
         updateFilteredTags();
         refresh();
     }
