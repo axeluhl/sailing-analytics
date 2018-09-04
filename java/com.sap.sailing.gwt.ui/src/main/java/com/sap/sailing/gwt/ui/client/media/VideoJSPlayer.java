@@ -12,6 +12,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
@@ -42,15 +43,25 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
     @UiField
     DivElement playerHolder;
 
-    private Element videoElement;
+    private final boolean fullHeightWidth;
+    private final Timer resizeChecker = new Timer() {
+        @Override
+        public void run() {
+            VideoJSPlayer.this.onResize();
+        }
+    };
 
     private String elementId;
     private JavaScriptObject player;
-    private boolean autoplay;
 
-    private Boolean panorama;
-    private Timer resizeChecker;
-    private boolean fullHeightWidth;
+    private boolean autoplay;
+    private boolean panorama;
+
+    public VideoJSPlayer(boolean fullHeightWidth, boolean autoplay) {
+        this.autoplay = autoplay;
+        this.fullHeightWidth = fullHeightWidth;
+        setElement(uiBinder.createAndBindUi(this));
+    }
 
     public HandlerRegistration addPlayHandler(PlayEvent.Handler handler) {
         return addHandler(handler, PlayEvent.getType());
@@ -60,13 +71,8 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
         return addHandler(handler, PauseEvent.getType());
     }
 
-    public VideoJSPlayer(boolean fullHeightWidth, boolean autoplay) {
-        this.autoplay = autoplay;
-        this.fullHeightWidth = fullHeightWidth;
-        setElement(uiBinder.createAndBindUi(this));
-    }
-
     public void setVideo(MimeType mimeType, String source) {
+        final Element videoElement;
         if (mimeType.mediaType == MediaType.audio) {
             videoElement = Document.get().createAudioElement();
         } else {
@@ -85,13 +91,6 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
         }
         videoElement.setAttribute("controls", "");
 
-        resizeChecker = new Timer() {
-            @Override
-            public void run() {
-                onResize();
-            }
-        };
-
         this.panorama = mimeType.isPanorama();
         if (this.panorama) {
             videoElement.setAttribute("crossorigin", "anonymous");
@@ -100,14 +99,7 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
             videoElement.addClassName(style.invertedVideoPlayer());
         }
         if (isAttached()) {
-            prepareDependencies(new Runnable() {
-
-                @Override
-                public void run() {
-                    _onLoad(autoplay, panorama, StringMessages.INSTANCE.threeSixtyVideoHint());
-                    resizeChecker.scheduleRepeating(RESIZE_CHECK);
-                }
-            });
+            prepareDependencies();
         }
         String type = null;
         if (mimeType.mediaSubType == MediaSubType.youtube) {
@@ -130,40 +122,92 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
     @Override
     protected void onLoad() {
         super.onLoad();
-        if (panorama != null) {
-            prepareDependencies(new Runnable() {
-                @Override
-                public void run() {
-                    _onLoad(autoplay, panorama, StringMessages.INSTANCE.threeSixtyVideoHint());
-                    resizeChecker.scheduleRepeating(RESIZE_CHECK);
-                }
+        if (elementId != null) {
+            prepareDependencies();
+        }
+    }
+
+    @Override
+    protected void onDetach() {
+        super.onDetach();
+        resizeChecker.cancel();
+    }
+
+    private native void setupPlayer(String elementId, boolean autoplay, boolean withPanorama,
+            String messageThreeSixty) /*-{
+        var that = this;
+
+        var player = $wnd.videojs(elementId, {
+            "playsInline" : true,
+            "customControlsOnMobile" : true
+        }).ready(function() {
+            this.on('play', function() {
+                that.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::onPlay()();
+            });
+            this.on('pause', function() {
+                that.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::onPause()();
+            });
+
+            console.log("play: " + autoplay);
+            if (autoplay) {
+                this.play();
+            }
+        });
+        if (withPanorama) {
+            player.panorama({
+                showNotice : true,
+                autoMobileOrientation : true,
+                clickAndDrag : true,
+                clickToToggle : false,
+                NoticeMessage : messageThreeSixty,
+                backToVerticalCenter : false,
+                backToHorizonCenter : false,
             });
         }
-    }
 
-    private void prepareDependencies(Runnable runnable) {
-        if (Boolean.TRUE.equals(panorama)) {
-            ScriptInjector.fromUrl("js/three.js").setWindow(ScriptInjector.TOP_WINDOW)
-                    .setCallback(new Callback<Void, Exception>() {
+        this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player = player;
+    }-*/;
 
-                        @Override
-                        public void onSuccess(Void result) {
-                            runnable.run();
-                        }
+    private native void disposeNative() /*-{
+        var player = this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player;
+        player.dispose();
+    }-*/;
 
-                        @Override
-                        public void onFailure(Exception reason) {
-                        }
-                    }).inject();
+    private native void handleResize() /*-{
+        var player = this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player;
+        var canvas = player.getChild('Canvas');
+        if (canvas) {
+            canvas.handleResize();
+        }
+    }-*/;
+
+    private void prepareDependencies() {
+        final Command setupPlayerCommand = () -> {
+            setupPlayer(elementId, autoplay, panorama, StringMessages.INSTANCE.threeSixtyVideoHint());
+            resizeChecker.scheduleRepeating(RESIZE_CHECK);
+        };
+        if (panorama) {
+            final Callback<Void, Exception> callback = new Callback<Void, Exception>() {
+                @Override
+                public void onSuccess(Void result) {
+                    setupPlayerCommand.execute();
+                }
+
+                @Override
+                public void onFailure(Exception reason) {
+                }
+            };
+            ScriptInjector.fromUrl("js/three.js").setWindow(ScriptInjector.TOP_WINDOW).setCallback(callback).inject();
         } else {
-            runnable.run();
+            setupPlayerCommand.execute();
         }
     }
 
-    public Element getVideoElement() {
-        return videoElement;
-    }
-
+    /**
+     * Get the length of the video in seconds
+     *
+     * @return duration in seconds
+     */
     public int getDuration() {
         if (player == null) {
             return 0;
@@ -172,19 +216,14 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
         }
     }
 
-    /**
-     * Get the length in time of the video in seconds
-     *
-     * @return duration in seconds
-     */
     private native int getNativeDuration() /*-{
         var player = this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player;
         return player.duration();
     }-*/;
 
     /**
-     * Get the current time (in seconds)
-     * 
+     * Get the current time in seconds
+     *
      * @return duration in seconds
      */
     public int getCurrentTime() {
@@ -210,12 +249,6 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
         } else {
             setNativeCurrentTime(currentTime);
         }
-    }
-
-    @Override
-    protected void onDetach() {
-        super.onDetach();
-        resizeChecker.cancel();
     }
 
     private native void setNativeCurrentTime(int currentTime) /*-{
@@ -265,59 +298,6 @@ public class VideoJSPlayer extends Widget implements RequiresResize {
     private void onPause() {
         fireEvent(new PauseEvent());
     }
-
-    /**
-     * JSNI wrapper that does setup the video player
-     *
-     * @param uniqueId
-     */
-    native void _onLoad(boolean autoplay, boolean withPanorama, String messageThreeSixty) /*-{
-        var that = this;
-        var elemid = this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::elementId;
-
-        var player = $wnd.videojs(elemid, {
-            "playsInline" : true,
-            "customControlsOnMobile" : true
-        }).ready(function() {
-            this.on('play', function() {
-                that.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::onPlay()();
-            });
-            this.on('pause', function() {
-                that.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::onPause()();
-            });
-
-            console.log("play: " + autoplay);
-            if (autoplay) {
-                this.play();
-            }
-        });
-        if (withPanorama) {
-            player.panorama({
-                showNotice : true,
-                autoMobileOrientation : true,
-                clickAndDrag : true,
-                clickToToggle : false,
-                NoticeMessage : messageThreeSixty,
-                backToVerticalCenter : false,
-                backToHorizonCenter : false,
-            });
-        }
-
-        this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player = player;
-    }-*/;
-
-    private native void disposeNative() /*-{
-        var player = this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player;
-        player.dispose();
-    }-*/;
-
-    private native void handleResize() /*-{
-        var player = this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player;
-        var canvas = player.getChild('Canvas');
-        if (canvas) {
-            canvas.handleResize();
-        }
-    }-*/;
 
     public native void pause() /*-{
         if (this.@com.sap.sailing.gwt.ui.client.media.VideoJSPlayer::player == null) {
