@@ -54,7 +54,13 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
     private FilterSet<TagDTO, FilterWithUI<TagDTO>> lastActiveTagFilterSet;
     private final TagFilterLabel currentFilter;
 
-    public TagFilterPanel(TaggingPanel taggingPanel) {
+    /**
+     * Creates panel which allows filtering of tags and shows current selected filter.
+     * 
+     * @param taggingPanel
+     *            provides reference to {@link StringMessages}, {@link UserService} and {@link TagListProvider}.
+     */
+    protected TagFilterPanel(TaggingPanel taggingPanel) {
         this.taggingPanel = taggingPanel;
         this.stringMessages = taggingPanel.getStringMessages();
         this.userService = taggingPanel.getUserSerivce();
@@ -80,6 +86,9 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
         initializeUI();
     }
 
+    /**
+     * Initializes UI.
+     */
     private void initializeUI() {
         setStyleName(style.tagFilterPanel());
 
@@ -122,9 +131,16 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
         add(currentFilter);
     }
 
+    /**
+     * Opens up filter dialog to configure filters.
+     */
     private void showFilterDialog() {
         TagFilterSetsDialog tagsFilterSetsDialog = new TagFilterSetsDialog(tagFilterSets, stringMessages,
                 new DialogCallback<TagFilterSets>() {
+                    @Override
+                    public void cancel() {
+                    }
+
                     @Override
                     public void ok(final TagFilterSets newTagFilterSets) {
                         tagFilterSets.getFilterSets().clear();
@@ -141,18 +157,14 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
                         }
                         taggingPanel.updateContent();
                     }
-
-                    @Override
-                    public void cancel() {
-                    }
                 }, userService);
 
         tagsFilterSetsDialog.show();
     }
 
     /**
-     * Updates the tags filter checkbox state by setting its check mark and updating its label according to the current
-     * filter selected
+     * Updates the {@link #filterSettingsButton tag filter checkbox} state by setting its check mark and updating its
+     * title according to the {@link #lastActiveTagFilterSet current selected filter}.
      */
     private void updateTagFilterControlState(TagFilterSets filterSets) {
         String tagsFilterTitle = stringMessages.tagsFilter();
@@ -178,8 +190,8 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
         }
     }
 
-    /*
-     * loads users Tag Filter Sets from server and stores it into tagFilterSets
+    /**
+     * Loads the users {@link TagFilterSets} from {@link UserService} and saves it into {@link #tagFilterSets}.
      */
     protected void loadTagFilterSets() {
         if (userService.getCurrentUser() != null) {
@@ -213,6 +225,12 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
         }
     }
 
+    /**
+     * Stores <code>newTagsFilterSets</code> via {@link UserService}.
+     * 
+     * @param newTagsFilterSets
+     *            filter sets to be stored
+     */
     private void storeTagFilterSets(TagFilterSets newTagsFilterSets) {
         TagFilterSetsJsonDeSerializer serializer = new TagFilterSetsJsonDeSerializer();
         JSONObject jsonObject = serializer.serialize(newTagsFilterSets);
@@ -228,12 +246,18 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
         });
     }
 
+    /**
+     * Clears searchbox and removes key-up-listener.
+     */
     private void clearSelection() {
         searchTextBox.setText("");
         clearTextBoxButton.addStyleName(style.tagFilterHiddenButton());
         onKeyUp(null);
     }
 
+    /**
+     * Adds {@link TagFilterPanel} to applied filters at {@link TagListProvider} to apply searchbox filter.
+     */
     private void ensureSetSearchFilter() {
         if (tagListProvider.getTagFilterSet() == null
                 || !Util.contains(tagListProvider.getTagFilterSet().getFilters(), this)) {
@@ -248,6 +272,9 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
         }
     }
 
+    /**
+     * Removes {@link TagFilterPanel} from applied filters at {@link TagListProvider} to remove searchbox filter.
+     */
     private void removeSearchFilter() {
         if (tagListProvider.getTagFilterSet() != null
                 && Util.contains(tagListProvider.getTagFilterSet().getFilters(), this)) {
@@ -262,6 +289,13 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
         }
     }
 
+    /**
+     * Checks if given <code>tag</code> matches the current filter.
+     * 
+     * @param tag
+     *            tag to be compared to
+     * @return <code>true</code> if tag matches filter, otherwise <code>false</code>
+     */
     @Override
     public boolean matches(TagDTO tag) {
         final Iterable<String> lowercaseKeywords = Util
@@ -300,6 +334,8 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
     }
 
     /**
+     * Applies filter entered by using search textbox to filterset.
+     * 
      * @param event
      *            ignored; may be <code>null</code>
      */

@@ -10,7 +10,8 @@ import com.google.gwt.json.client.JSONString;
 import com.sap.sailing.gwt.ui.client.GwtJsonDeSerializer;
 
 /**
- * Serializes and deserializes TagButtons to save them in User Storage.
+ * Serializes and deserializes {@link TagButton tag-buttons} to save them in the {@link com.sap.sse.security.UserStore
+ * UserStore}.
  */
 public class TagButtonJsonDeSerializer implements GwtJsonDeSerializer<List<TagButton>> {
 

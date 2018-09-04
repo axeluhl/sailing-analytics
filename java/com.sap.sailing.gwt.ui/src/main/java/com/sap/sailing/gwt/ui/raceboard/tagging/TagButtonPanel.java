@@ -14,7 +14,7 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
- * Displays tag buttons of current user.
+ * Panel used to show the {@link TagButton tag-buttons} of {@link UserService#getCurrentUser() current user}.
  */
 public class TagButtonPanel extends FlowPanel {
 
@@ -30,7 +30,11 @@ public class TagButtonPanel extends FlowPanel {
     private final Label heading;
     private final Panel tagButtonsPanel;
 
-    public TagButtonPanel(TagFooterPanel footerPanel, TaggingPanel taggingPanel) {
+    /**
+     * Displays {@link TagButton tag-buttons} of {@link UserService#getCurrentUser() current user} at the footer of the
+     * {@link TaggingPanel}.
+     */
+    protected TagButtonPanel(TaggingPanel taggingPanel, TagFooterPanel footerPanel) {
         this.footerPanel = footerPanel;
         this.taggingPanel = taggingPanel;
         this.stringMessages = taggingPanel.getStringMessages();
@@ -47,25 +51,8 @@ public class TagButtonPanel extends FlowPanel {
     }
 
     /**
-     * Stores local copy of tag buttons from current user in user storage.
-     */
-    protected void storeAllTagButtons() {
-        TagButtonJsonDeSerializer serializer = new TagButtonJsonDeSerializer();
-        JSONObject jsonObject = serializer.serialize(taggingPanel.getTagButtons());
-        userService.setPreference(USER_STORAGE_TAG_BUTTONS_KEY, jsonObject.toString(), new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                Notification.notify(stringMessages.tagButtonNotSavable(), NotificationType.WARNING);
-            }
-
-            @Override
-            public void onSuccess(Void result) {
-            }
-        });
-    }
-
-    /**
-     * Loads all tag buttons from current user from user storage and displays them.
+     * Loads all {@link TagButton tag-buttons} of {@link UserService#getCurrentUser() current user} from
+     * {@link com.sap.sse.security.UserStore UserStore} and displays them.
      */
     protected void loadAllTagButtons() {
         tagButtonsPanel.clear();
@@ -100,9 +87,31 @@ public class TagButtonPanel extends FlowPanel {
     }
 
     /**
-     * If the height of the tagButtonsPanel has changed after deleting all tag buttons (delta not equals 0 ), the
-     * footerWidget of the TaggingPanel has a different height, which in this case might cause the contentWidget to be
-     * to small. In case no tag buttons are available for the current user, tag button panel will be hidden.
+     * Stores {@link TaggingPanel#getTagButtons() local copy} of {@link TagButton tag-buttons} of the
+     * {@link UserService#getCurrentUser() current user} in {@link com.sap.sse.security.UserStore UserStore}.
+     */
+    protected void storeAllTagButtons() {
+        TagButtonJsonDeSerializer serializer = new TagButtonJsonDeSerializer();
+        JSONObject jsonObject = serializer.serialize(taggingPanel.getTagButtons());
+        userService.setPreference(USER_STORAGE_TAG_BUTTONS_KEY, jsonObject.toString(), new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                Notification.notify(stringMessages.tagButtonNotSavable(), NotificationType.WARNING);
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+            }
+        });
+    }
+
+    /**
+     * If the height of the {@link #tagButtonsPanel} has changed after deleting all {@link TagButton tag-buttons} (delta
+     * height does not equal 0), the {@link TaggingPanel}s
+     * {@link com.google.gwt.user.client.ui.HeaderPanel#getFooterWidget() footer widget} has a different height, which
+     * in this case might cause the {@link TaggingPanel#contentPanel contentWidget} to be to small. In case no
+     * {@link TagButton tag-buttons} are available for the {@link UserService#getCurrentUser() current user},
+     * {@link TagButtonPanel} will be hidden.
      */
     protected void recalculateHeight() {
         if (taggingPanel.getTagButtons().size() == 0) {

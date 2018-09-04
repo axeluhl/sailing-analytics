@@ -42,11 +42,18 @@ import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 
+/**
+ * A view showing tags which are connected to a specific race and allowing users to add own tags to a race. This view is
+ * shown at the {@link com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel RaceBoard}. Tags consist of a heading and
+ * optional a comment and/or image. Tag-Buttons allow to preset tags which are used more frequently by an user. Public
+ * tags will be stored as an {@link com.sap.sailing.domain.abstractlog.race.RaceLogEvent RaceLogEvent}, private tags
+ * will be stored in the {@link com.sap.sse.security.UserStore UserStore}.
+ */
 public class TaggingPanel extends ComponentWithoutSettings
         implements RaceTimesInfoProviderListener, UserStatusEventHandler {
 
     /**
-     * Describes the current state of the Tagging-Panel.
+     * Describes the {@link TaggingPanel#currentState current state} of the {@link TaggingPanel}.
      */
     protected enum State {
         VIEW, // default
@@ -122,7 +129,7 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     /**
-     * Initializes UI of Tagging-Panel.
+     * Initializes UI of {@link TaggingPanel}.
      */
     private void initializePanel() {
         taggingPanel.setStyleName(style.taggingPanel());
@@ -162,7 +169,8 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     /**
-     * Updates parameters required to save to/revoke from race log.
+     * Updates parameters required to save/revoke {@link com.sap.sailing.domain.abstractlog.race.RaceLogEvent events}
+     * to/from {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog}.
      */
     public void updateRace(String leaderboardName, RaceColumnDTO raceColumn, FleetDTO fleet) {
         if (leaderboardName != null && !leaderboardName.equals(this.leaderboardName)) {
@@ -189,8 +197,21 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     /**
-     * Sends request to SailingService to add the given tag to the race log if the parameter
-     * <code>isVisibleForPublic</code> is set to true. Otherwise tag will be stored in the user storage.
+     * Checks if {@link UserService#getCurrentUser() current user} is non-<code>null</code> and if
+     * {@link #leaderboardName}, {@link #raceColumn} and {@link #fleet} are non-<code>null</code>.
+     * 
+     * @return <code>true</code> if current user, {@link #leaderboardName}, {@link #raceColumn} and {@link #fleet} are
+     *         non-<code>null</code>, otherwise <code>false</code>.
+     */
+    protected boolean isLoggedInAndRaceLogAvailable() {
+        return userService.getCurrentUser() != null && leaderboardName != null && raceColumn != null && fleet != null;
+    }
+
+    /**
+     * Sends request to {@link SailingServiceAsync SailingService} to add the given tag to the
+     * {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog} if the parameter <code>isVisibleForPublic</code>
+     * is set to <code>true</code>. Otherwise tag will be stored in the {@link com.sap.sse.security.UserStore
+     * UserStore}.
      */
     protected void saveTag(String tag, String comment, String imageURL, boolean isVisibleForPublic) {
         if (!isLoggedInAndRaceLogAvailable()) {
@@ -241,8 +262,8 @@ public class TaggingPanel extends ComponentWithoutSettings
                     // store list of loaded private tags also containing the new tag
                     TagDTOJsonDeSerializer serializer = new TagDTOJsonDeSerializer();
                     JSONObject jsonObject = serializer.serialize(loadedPrivateTags);
-                    userService.setPreference(serializer.createIdenticalKeyFromThreeStrings(leaderboardName,
-                            raceColumn.getName(), fleet.getName()), jsonObject.toString(), new AsyncCallback<Void>() {
+                    userService.setPreference(serializer.createIdenticalKeyFromThreeStrings(fleet.getName(),
+                            leaderboardName, raceColumn.getName()), jsonObject.toString(), new AsyncCallback<Void>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
                                     Notification.notify(stringMessages.tagButtonNotSavable(), NotificationType.WARNING);
@@ -262,9 +283,11 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     /**
-     * If the parameter <code>tag</code> is visible for the public a request to the SailingService is sent to revoke the
-     * given tag in race log. Otherwise the parameter <code>tag</code> is private and so the tag must be removed from
-     * the user storage.
+     * If attribute <code>isVisibleForPublic</code> of given tag is set to true, a request to the
+     * {@link SailingServiceAsync SailingService} is sent to revoke the given
+     * {@link com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent RaceLogTagEvent} in
+     * {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog}. Otherwise the given tag is private and must be
+     * removed from the {@link com.sap.sse.security.UserStore UserStore}.
      */
     protected void removeTag(TagDTO tagToRemove) {
         if (tagToRemove.isVisibleForPublic()) {
@@ -305,8 +328,8 @@ public class TaggingPanel extends ComponentWithoutSettings
                     // store list in user storage
                     TagDTOJsonDeSerializer serializer = new TagDTOJsonDeSerializer();
                     JSONObject jsonObject = serializer.serialize(privateTags);
-                    userService.setPreference(serializer.createIdenticalKeyFromThreeStrings(leaderboardName,
-                            raceColumn.getName(), fleet.getName()), jsonObject.toString(), new AsyncCallback<Void>() {
+                    userService.setPreference(serializer.createIdenticalKeyFromThreeStrings(fleet.getName(),
+                            leaderboardName, raceColumn.getName()), jsonObject.toString(), new AsyncCallback<Void>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
                                     Notification.notify(stringMessages.tagNotRemoved(), NotificationType.ERROR);
@@ -327,57 +350,49 @@ public class TaggingPanel extends ComponentWithoutSettings
         }
     }
 
-    private void removePrivateTagsFromProvider() {
-        tagListProvider.getAllTags().removeIf(tag -> !tag.isVisibleForPublic());
-    }
-
+    /**
+     * Adds a list of {@link TagDTO tags} to the {@link TagListProvider}.
+     */
     private void addTagsToProvider(List<TagDTO> tags) {
         tags.forEach(tag -> tagListProvider.getAllTags().add(tag));
     }
 
     /**
-     * Checks if currentUser (read from UserService) is non-<code>null</code> and if leaderboardName, fleet and
-     * raceColumn are not <code>null</code>.
-     * 
-     * @return true if current user, leaderboardName, raceColumn and fleet are non-<code>null</code>, otherwise false.
+     * Removes all private tags from {@link TagListProvider}.
      */
-    protected boolean isLoggedInAndRaceLogAvailable() {
-        return userService.getCurrentUser() != null && leaderboardName != null && raceColumn != null && fleet != null;
+    private void removePrivateTagsFromProvider() {
+        tagListProvider.getAllTags().removeIf(tag -> !tag.isVisibleForPublic());
     }
 
     /**
-     * Controls the visibility of UI elements in case the content or current state changes.
+     * Controls the visibility of UI elements in case the content or {@link #currentState} changes.
      */
     protected void updateContent() {
         setFooterPanelVisibility(currentState == State.EDIT);
         setCreateTagsButtonVisibility(currentState == State.VIEW);
         tagListProvider.updateFilteredTags();
-        tagCellList.setVisibleRange(0, tagListProvider.getFilteredTagsListSize());
+        tagCellList.setVisibleRange(0, tagListProvider.getFilteredTags().size());
         tagListProvider.refresh();
     }
 
     /**
-     * Forces tagging panel to rerender content.
+     * Forces {@link #contentPanel} to rerender.
      */
     protected void refreshContentPanel() {
         taggingPanel.setContentWidget(contentPanel);
     }
-    
+
     /**
-     * Forces tagging panel to rerender footer.
+     * Forces {@link #footerPanel} to rerender.
      */
     protected void refreshFooterPanel() {
         taggingPanel.setFooterWidget(footerPanel);
     }
 
-    protected Date getTimerTime() {
-        return timer.getTime();
-    }
-
-    protected List<TagButton> getTagButtons() {
-        return tagButtons;
-    }
-
+    /**
+     * Adds {@link TagButton} to {@link #tagButtons list} of all {@link TagButton tag-buttons} and applies
+     * {@link com.google.gwt.event.dom.client.ClickHandler ClickHandler} on it which allows saving of tags.
+     */
     protected void addTagButton(TagButton tagButton) {
         tagButton.addClickHandler(event -> {
             saveTag(tagButton.getTag(), tagButton.getComment(), tagButton.getImageURL(),
@@ -386,26 +401,18 @@ public class TaggingPanel extends ComponentWithoutSettings
         tagButtons.add(tagButton);
     }
 
-    protected TagListProvider getTagListProvider() {
-        return tagListProvider;
-    }
-
-    protected UserService getUserSerivce() {
-        return userService;
-    }
-
-    protected StringMessages getStringMessages() {
-        return stringMessages;
-    }
-
+    /**
+     * Loads private tags of {@link UserService#getCurrentUser() current user} from
+     * {@link com.sap.sse.security.UserStore UserStore}. Callback will be triggered if receiving of tags was successful.
+     */
     private void loadAllPrivateTags(AsyncCallback<List<TagDTO>> callback) {
         // only reload tags if user is logged in
         if (userService.getCurrentUser() != null) {
             TagDTOJsonDeSerializer tagDTODeSerializer = new TagDTOJsonDeSerializer();
 
             // load all private tags from user storage
-            userService.getPreference(tagDTODeSerializer.createIdenticalKeyFromThreeStrings(leaderboardName,
-                    raceColumn.getName(), fleet.getName()), new AsyncCallback<String>() {
+            userService.getPreference(tagDTODeSerializer.createIdenticalKeyFromThreeStrings(fleet.getName(),
+                    leaderboardName, raceColumn.getName()), new AsyncCallback<String>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             // TODO: Add error handling
@@ -432,7 +439,46 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     /**
-     * Sets the current state and updates the UI.
+     * Returns time of {@link #timer}.
+     */
+    protected Date getTimerTime() {
+        return timer.getTime();
+    }
+
+    /**
+     * Returns {@link #tagButtons list} of all {@link TagButton tag-buttons} of the {@link UserService#getCurrentUser()
+     * current user}.
+     */
+    protected List<TagButton> getTagButtons() {
+        return tagButtons;
+    }
+
+    /**
+     * Returns instance of {@link TagListProvider} so it does not have to be a constructor parameter of every sub
+     * component of the {@link TaggingPanel}.
+     */
+    protected TagListProvider getTagListProvider() {
+        return tagListProvider;
+    }
+
+    /**
+     * Returns instance of {@link UserService} so it does not have to be a constructor parameter of every sub component
+     * of the {@link TaggingPanel}.
+     */
+    protected UserService getUserSerivce() {
+        return userService;
+    }
+
+    /**
+     * Returns instance of {@link StringMessages} so it does not have to be a constructor parameter of every sub
+     * component of the {@link TaggingPanel}.
+     */
+    protected StringMessages getStringMessages() {
+        return stringMessages;
+    }
+
+    /**
+     * Sets the {@link #currentState} to the given {@link State state} and updates the UI.
      * 
      * @param state
      *            new state
@@ -443,9 +489,10 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     /**
-     * Updates the visibility of the footer and it's components. Input fields will NOT get displayed if user is not
-     * logged in, even if showInputFields is set to true! Tag buttons can't be hidden and will get displayed
-     * automatically when user is logged in.
+     * Updates the visibility of the {@link #footerPanel} and it's components. Input fields will NOT get displayed if
+     * user is not logged in, even if <code>showInputFields</code> is set to <code>true</code>! {@link TagButton}s can't
+     * be hidden and will get displayed automatically when {@link UserService#getCurrentUser() current user} is logged
+     * in.
      */
     private void setFooterPanelVisibility(boolean showInputFields) {
         // Setting footerPanel.setVisible(false) is not sufficient as panel would still be
@@ -461,19 +508,20 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     /**
-     * Updates the visibility of the "Add Tags"-button. Button will NOT get displayed if user is not logged in, even if
-     * showButton is set to true!
+     * Updates the visibility of the {@link #createTagsButton "Add Tags"-button}. {@link #createTagsButton Button} will
+     * NOT get displayed if {@link UserService#getCurrentUser() current user} is not logged in, even if
+     * <code>showButton</code> is set to <code>true</code>!
      */
     private void setCreateTagsButtonVisibility(boolean showButton) {
         createTagsButton.setVisible(userService.getCurrentUser() != null && showButton);
     }
 
     /**
-     * Update local list of tags when response of server gets dispatched to all listeners by RaceTimesInfoProvider.
-     * Server sends only difference of tags in comparison based on the createdAt-timestamp of the latest received tag
-     * event.
+     * Updates {@link TagListProvider#getAllTags() local list of tags} when response of {@link SailingServiceAsync
+     * SailingService} gets dispatched to all listeners by {@link RaceTimesInfoProvider}. {@link SailingServiceAsync
+     * SailingService} sends only difference of tags in comparison based on the <code>createdAt</code>-timestamp of the
+     * {@link RaceTimesInfoProvider#latestReceivedTagTimes latest received tag events}.
      */
-
     @Override
     public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo,
             long clientTimeWhenRequestWasSent, Date serverTimeDuringRequest, long clientTimeWhenResponseWasReceived) {
@@ -526,9 +574,11 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     /**
-     * When the user logs in or out the content needs to be reset to hide private tags of the previous user. This gets
-     * achieved by resetting the local list of tags and resetting all latest received tag times at the
-     * RaceTimesInfoProvider.
+     * When the {@link UserService#getCurrentUser() current user} logs in or out the {@link #contentPanel content} needs
+     * to be reset to hide private tags of the previous {@link UserService#getCurrentUser() current user}. This gets
+     * achieved by resetting the {@link TagListProvider#getAllTags() local list of tags} and resetting all
+     * {@link RaceTimesInfoProvider#latestReceivedTagTimes latest received tag events} at the
+     * {@link RaceTimesInfoProvider}.
      */
     @Override
     public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
@@ -575,7 +625,7 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     /**
-     * Only request tags from server if Tagging-Panel is visible.
+     * Only request tags from server if {@link TaggingPanel} is visible.
      */
     @Override
     public void setVisible(boolean visible) {

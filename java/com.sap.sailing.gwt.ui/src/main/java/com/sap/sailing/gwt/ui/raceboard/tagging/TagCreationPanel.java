@@ -9,7 +9,8 @@ import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanel.State;
 
 /**
- * Panel used to create tags and tag buttons in side menu of RaceBoard.
+ * Panel used to create tags and {@link TagButton tag-buttons} at the {@link TaggingPanel#footerPanel footer} of the
+ * {@link TaggingPanel}.
  */
 public class TagCreationPanel extends FlowPanel {
 
@@ -17,7 +18,15 @@ public class TagCreationPanel extends FlowPanel {
 
     private final StringMessages stringMessages;
 
-    public TagCreationPanel(TagFooterPanel tagFooterPanel, TaggingPanel taggingPanel) {
+    /**
+     * Creates panel used to create tags and {@link TagButton tag-buttons}.
+     * 
+     * @param taggingPanel
+     *            provides reference to {@link StringMessages}
+     * @param tagFooterPanel
+     *            required for creation of {@link TagButton tag-buttons}
+     */
+    protected TagCreationPanel(TaggingPanel taggingPanel, TagFooterPanel tagFooterPanel) {
         this.stringMessages = taggingPanel.getStringMessages();
 
         setStyleName(style.tagCreationPanel());

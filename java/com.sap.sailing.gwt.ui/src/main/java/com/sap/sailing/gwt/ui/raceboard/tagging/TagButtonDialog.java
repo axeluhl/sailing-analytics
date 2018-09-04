@@ -25,10 +25,14 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 
 /**
- * Dialog for modifying tag buttons
+ * Dialog which allows users to modify their personal {@link TagButton tag-buttons}.
  */
 public class TagButtonDialog extends DialogBox {
 
+    /**
+     * Preset layout for action column at the {@link TagButtonDialog#createTable tag button table} used in the
+     * {@link TagButtonDialog}.
+     */
     private class EditTagButtonsImagesBarCell extends ImagesBarCell {
         public static final String ACTION_REMOVE = "ACTION_REMOVE";
         public static final String ACTION_EDIT = "ACTION_EDIT";
@@ -57,6 +61,14 @@ public class TagButtonDialog extends DialogBox {
     private Button closeButton, saveButton, cancelButton, addTagButtonButton;
     private TagButton selectedTagButton;
 
+    /**
+     * Centered dialog wich allows users to edit their personal {@link TagButton tag-buttons}.
+     * 
+     * @param taggingPanel
+     *            {@link TaggingPanel} which creates this {@link TagButtonDialog}.
+     * @param footerPanel
+     *            footer panel of {@link TaggingPanel}
+     */
     public TagButtonDialog(TaggingPanel taggingPanel, TagFooterPanel footerPanel) {
         this.taggingPanel = taggingPanel;
         this.stringMessages = taggingPanel.getStringMessages();
@@ -87,6 +99,18 @@ public class TagButtonDialog extends DialogBox {
         center();
     }
 
+    /**
+     * Creates table which shows tag buttons as a compact overview in form of a table.
+     * 
+     * @param footerPanel
+     *            footer panel of {@link TaggingPanel}
+     * @param inputPanel
+     *            input fields of {@link TagButtonDialog} which allow to create new and modify existing {@link TagButton
+     *            tag-buttons}
+     * @param tagPreviewPanel
+     *            renders {@link TagPreviewPanel} preview of current input fields
+     * @return {@link com.google.gwt.user.cellview.client.CellTable CellTable} containing {@link TagButton tag-buttons}
+     */
     private CellTable<TagButton> createTable(TagFooterPanel footerPanel, TagInputPanel inputPanel,
             TagPreviewPanel tagPreviewPanel) {
         CellTable<TagButton> tagButtonTable = new CellTable<TagButton>(15, buttonTableResources);
@@ -175,6 +199,22 @@ public class TagButtonDialog extends DialogBox {
         return tagButtonTable;
     }
 
+    /**
+     * Creates a {@link Panel} containing all action buttons of the {@link TagButtonDialog} to create {@link TagButton
+     * tag-buttons}, save changes, discard changes and close the {@link TagButtonDialog}.
+     * 
+     * @param tagButtonTable
+     *            {@link com.google.gwt.user.cellview.client.CellTable CellTable} containing {@link TagButton
+     *            tag-buttons}
+     * @param inputPanel
+     *            input fields of {@link TagButtonDialog} which allow to create new and modify existing {@link TagButton
+     *            tag-buttons}
+     * @param tagPreviewPanel
+     *            renders {@link TagPreviewPanel} preview of current input fields
+     * @param footerPanel
+     *            footer panel of {@link TaggingPanel}
+     * @return {@link Panel} containing all action buttons
+     */
     private Panel createButtonPanel(CellTable<TagButton> tagButtonTable, TagInputPanel inputPanel,
             TagPreviewPanel tagPreviewPanel, TagFooterPanel footerPanel) {
         addSaveButton(footerPanel, tagButtonTable, inputPanel, tagPreviewPanel);
@@ -192,6 +232,20 @@ public class TagButtonDialog extends DialogBox {
         return controlButtonPanel;
     }
 
+    /**
+     * Creates a button allowing users to save their changes on a {@link TagButton}.
+     * 
+     * @param footerPanel
+     *            footer panel of {@link TaggingPanel}
+     * @param tagButtonTable
+     *            {@link com.google.gwt.user.cellview.client.CellTable CellTable} containing {@link TagButton
+     *            tag-buttons}
+     * @param inputPanel
+     *            input fields of {@link TagButtonDialog} which allow to create new and modify existing {@link TagButton
+     *            tag-buttons}
+     * @param tagPreviewPanel
+     *            renders {@link TagPreviewPanel} preview of current input fields
+     */
     private void addSaveButton(TagFooterPanel footerPanel, CellTable<TagButton> tagButtonTable,
             TagInputPanel inputPanel, TagPreviewPanel tagPreviewPanel) {
         saveButton = new Button(stringMessages.save());
@@ -223,6 +277,18 @@ public class TagButtonDialog extends DialogBox {
         });
     }
 
+    /**
+     * Creates a button allowing users to discard their changes on a {@link TagButton}.
+     * 
+     * @param tagButtonTable
+     *            {@link com.google.gwt.user.cellview.client.CellTable CellTable} containing {@link TagButton
+     *            tag-buttons}
+     * @param inputPanel
+     *            input fields of {@link TagButtonDialog} which allow to create new and modify existing {@link TagButton
+     *            tag-buttons}
+     * @param tagPreviewPanel
+     *            renders {@link TagPreviewPanel} preview of current input fields
+     */
     private void addCancelButton(TagInputPanel inputPanel, TagPreviewPanel tagPreviewPanel,
             CellTable<TagButton> tagButtonTable) {
         cancelButton = new Button(stringMessages.cancel());
@@ -242,6 +308,18 @@ public class TagButtonDialog extends DialogBox {
         });
     }
 
+    /**
+     * Creates a button allowing users to close the {@link TagButtonDialog}.
+     * 
+     * @param tagButtonTable
+     *            {@link com.google.gwt.user.cellview.client.CellTable CellTable} containing {@link TagButton
+     *            tag-buttons}
+     * @param inputPanel
+     *            input fields of {@link TagButtonDialog} which allow to create new and modify existing {@link TagButton
+     *            tag-buttons}
+     * @param tagPreviewPanel
+     *            renders {@link TagPreviewPanel} preview of current input fields
+     */
     private void addCloseButton(TagFooterPanel footerPanel, TagPreviewPanel tagPreviewPanel) {
         closeButton = new Button(stringMessages.close());
         closeButton.setStyleName(style.tagDialogButton());
@@ -249,6 +327,20 @@ public class TagButtonDialog extends DialogBox {
         closeButton.addClickHandler(event -> hide());
     }
 
+    /**
+     * Creates a button allowing users to add a new {@link TagButton}.
+     * 
+     * @param footerPanel
+     *            footer panel of {@link TaggingPanel}
+     * @param tagButtonTable
+     *            {@link com.google.gwt.user.cellview.client.CellTable CellTable} containing {@link TagButton
+     *            tag-buttons}
+     * @param inputPanel
+     *            input fields of {@link TagButtonDialog} which allow to create new and modify existing {@link TagButton
+     *            tag-buttons}
+     * @param tagPreviewPanel
+     *            renders {@link TagPreviewPanel} preview of current input fields
+     */
     private void addTagButtonButton(TagFooterPanel footerPanel, CellTable<TagButton> tagButtonTable,
             TagInputPanel inputPanel, TagPreviewPanel tagPreviewPanel) {
         addTagButtonButton = new Button(stringMessages.tagAddCustomTagButton());
@@ -271,6 +363,17 @@ public class TagButtonDialog extends DialogBox {
         });
     }
 
+    /**
+     * Sets the given <code>buttons</code> as value for the given <code>tagButtonTable</code>. If <code>buttons</code>
+     * is empty, <code>tagButtonTable</code> will be hidden.
+     * 
+     * @param tagButtonTable
+     *            {@link com.google.gwt.user.cellview.client.CellTable CellTable} containing {@link TagButton
+     *            tag-buttons}
+     * @param buttons
+     *            List of {@link TagButton tag-buttons} which represents the local version of the current users
+     *            {@link TagButton tag-buttons}.
+     */
     private void setRowData(CellTable<TagButton> tagButtonTable, List<TagButton> buttons) {
         tagButtonTable.setRowData(buttons);
         tagButtonTable.setVisible(!buttons.isEmpty());

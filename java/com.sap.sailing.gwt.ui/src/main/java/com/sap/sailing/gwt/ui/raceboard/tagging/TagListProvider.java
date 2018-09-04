@@ -7,12 +7,12 @@ import java.util.List;
 
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
-import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 
 /**
- * Used to store tags and filter sets and to apply these filters on the tags
+ * Provides list of {@link TagDTO tags} and is able to filter theses {@link TagDTO tags} with the current selected
+ * {@link FilterSet}.
  */
 public class TagListProvider extends ListDataProvider<TagDTO> {
 
@@ -20,26 +20,45 @@ public class TagListProvider extends ListDataProvider<TagDTO> {
     private FilterSet<TagDTO, Filter<TagDTO>> currentFilterSet;
     private TagFilterLabel observingLabel;
 
-    public TagListProvider() {
+    /**
+     * Creates instance without tags or filters.
+     */
+    protected TagListProvider() {
         allTags = new ArrayList<TagDTO>();
     }
 
-    public void addObserveringLabel(TagFilterLabel tagFilterLabel) {
+    /**
+     * Used by {@link TagFilterLabel} to inform {@link TagFilterLabel} about changes of the {@link #currentFilterSet
+     * current filter set}.
+     * 
+     * @param tagFilterLabel
+     */
+    protected void addObserveringLabel(TagFilterLabel tagFilterLabel) {
         observingLabel = tagFilterLabel;
     }
 
-    public List<TagDTO> getAllTags() {
+    /**
+     * Returns list of all {@link TagDTO tags} ignoring the {@link #currentFilterSet current filter set}.
+     * 
+     * @return list of all {@link TagDTO tags}
+     */
+    protected List<TagDTO> getAllTags() {
         return allTags;
     }
 
-    public List<TagDTO> getFilteredTags() {
+    /**
+     * Returns list of all {@link TagDTO tags} which are filtered by {@link #currentFilterSet current filter set}.
+     * 
+     * @return list of filtered {@link TagDTO tags}
+     */
+    protected List<TagDTO> getFilteredTags() {
         return getList();
     }
 
     /**
-     * filter all tags by tagsFilterSet
+     * Updates {@link #getList() list} of filtered {@link TagDTO tags} by applying {@link #currentFilterSet}.
      */
-    public void updateFilteredTags() {
+    protected void updateFilteredTags() {
         List<TagDTO> currentFilteredList = new ArrayList<TagDTO>(getAllTags());
         if (currentFilterSet != null) {
             for (Filter<TagDTO> filter : currentFilterSet.getFilters()) {
@@ -63,20 +82,27 @@ public class TagListProvider extends ListDataProvider<TagDTO> {
         setList(currentFilteredList);
     }
 
-    public FilterSet<TagDTO, Filter<TagDTO>> getTagFilterSet() {
+    /**
+     * Returns {@link #currentFilterSet current filter set}.
+     * 
+     * @return current selected filter set
+     */
+    protected FilterSet<TagDTO, Filter<TagDTO>> getTagFilterSet() {
         return currentFilterSet;
     }
 
-    public void setCurrentFilterSet(FilterSet<TagDTO, Filter<TagDTO>> tagsFilterSet) {
-        currentFilterSet = tagsFilterSet;
+    /**
+     * Sets {@link #currentFilterSet current selected filter set} to given <code>tagFilterSet</code>.
+     * 
+     * @param tagFilterSet
+     *            selected filter set
+     */
+    protected void setCurrentFilterSet(FilterSet<TagDTO, Filter<TagDTO>> tagFilterSet) {
+        currentFilterSet = tagFilterSet;
         if (observingLabel != null) {
-            observingLabel.update(tagsFilterSet);
+            observingLabel.update(tagFilterSet);
         }
         updateFilteredTags();
         refresh();
-    }
-
-    public int getFilteredTagsListSize() {
-        return Util.size(getFilteredTags());
     }
 }

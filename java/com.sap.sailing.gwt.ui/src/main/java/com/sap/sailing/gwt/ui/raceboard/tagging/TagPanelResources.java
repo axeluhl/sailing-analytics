@@ -5,10 +5,12 @@ import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
 
+/**
+ * Interface for styling {@link TaggingPanel} and its content.
+ */
 public interface TagPanelResources extends ClientBundle {
     public static final TagPanelResources INSTANCE = GWT.create(TagPanelResources.class);
 
-    // TODO image is stored in wrong folder
     @Source("com/sap/sailing/gwt/ui/client/images/edit.png")
     ImageResource editIcon();
 

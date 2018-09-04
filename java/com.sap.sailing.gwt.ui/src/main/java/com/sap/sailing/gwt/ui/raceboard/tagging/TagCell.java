@@ -23,30 +23,108 @@ import com.sap.sse.security.ui.client.UserService;
  */
 public class TagCell extends AbstractCell<TagDTO> {
 
-    public interface TagCellTemplate extends SafeHtmlTemplates {
+    /**
+     * Contains different configurations for {@link TagCell}s. Used as {@link SafeHtmlTemplates template} for
+     * {@link TagCell}s. <br/>
+     * <br/>
+     * <b>Notice:</b> CSS classes need to be provied as parameters as CSS classnames are context sensitive and can't be
+     * hardcoded.
+     */
+    protected interface TagCellTemplate extends SafeHtmlTemplates {
+        /**
+         * Renders public, non-removable cell with different content configurations
+         * 
+         * @param tag
+         *            title
+         * @param createdAt
+         *            contains author name and createdAt time
+         * @param content
+         *            available configurations are {@link #contentWithCommentWithImage},
+         *            {@link #contentWithCommentWithoutImage} and {@link #contentWithoutCommentWithImage}.
+         * @return {@link SafeHtml HTML template}
+         */
         @Template("<div class='{0}'><div class='{1}'>{3}</div><div class='{2}'>{4}</div>{5}</div>")
         SafeHtml cell(String styleTag, String styleTagHeading, String styleTagCreated, SafeHtml tag, SafeHtml createdAt,
                 SafeHtml content);
 
+        /**
+         * Renders public, removable cell with different content configurations
+         * 
+         * @param tag
+         *            title
+         * @param createdAt
+         *            contains author name and createdAt time
+         * @param content
+         *            available configurations are {@link #contentWithCommentWithImage},
+         *            {@link #contentWithCommentWithoutImage} and {@link #contentWithoutCommentWithImage}.
+         * @return {@link SafeHtml HTML template}
+         */
         @Template("<div class='{0}'><div class='{1}'>{3}<div style=\"position: relative\"><button>X</button></div></div><div class='{2}'>{4}</div>{5}</div>")
         SafeHtml cellRemovable(String styleTag, String styleTagHeading, String styleTagCreated, SafeHtml tag,
                 SafeHtml createdAt, SafeHtml content);
 
+        /**
+         * Renders private, non-removable cell with different content configurations
+         * 
+         * @param tag
+         *            title
+         * @param createdAt
+         *            contains author name and createdAt time
+         * @param content
+         *            available configurations are {@link #contentWithCommentWithImage},
+         *            {@link #contentWithCommentWithoutImage} and {@link #contentWithoutCommentWithImage}.
+         * @return {@link SafeHtml HTML template}
+         */
         @Template("<div class='{0}'><div class='{1}'><img src='{6}'>{3}</div><div class='{2}'>{4}</div>{5}</div>")
         SafeHtml privateCell(String styleTag, String styleTagHeading, String styleTagCreated, SafeHtml tag,
                 SafeHtml createdAt, SafeHtml content, SafeUri safeUri);
 
+        /**
+         * Renders private, removable cell with different content configurations
+         * 
+         * @param tag
+         *            title
+         * @param createdAt
+         *            contains author name and createdAt time
+         * @param content
+         *            available configurations are {@link #contentWithCommentWithImage},
+         *            {@link #contentWithCommentWithoutImage} and {@link #contentWithoutCommentWithImage}.
+         * @return {@link SafeHtml HTML template}
+         */
         @Template("<div class='{0}'><div class='{1}'><img src='{6}'>{3}<div style=\"position: relative\"><button>X</button></div></div><div class='{2}'>{4}</div>{5}</div>")
         SafeHtml privateCellRemovable(String styleTag, String styleTagHeading, String styleTagCreated, SafeHtml tag,
                 SafeHtml createdAt, SafeHtml content, SafeUri safeUri);
 
+        /**
+         * Renders content with maximal configuration (comment and image).
+         * 
+         * @param imageURL
+         *            image URL
+         * @param comment
+         *            comment
+         * @return {@link SafeHtml HTML template}
+         */
         @Template("<div class='{0}'><img src='{2}'/></div><div class='{1}'>{3}</div>")
         SafeHtml contentWithCommentWithImage(String styleTagImage, String styleTagComment, SafeUri imageURL,
                 SafeHtml comment);
 
+        /**
+         * Renders content with mixed configuration (comment, no image).
+         * 
+         * @param comment
+         *            comment
+         * @return {@link SafeHtml HTML template}
+         */
         @Template("<div class='{0}'>{1}</div>")
         SafeHtml contentWithCommentWithoutImage(String styleTagComment, SafeHtml comment);
 
+        /**
+         * Renders content with mixed configuration (image, no comment).
+         * 
+         * @param imageURL
+         *            image URL
+         * @return {@link SafeHtml HTML template}
+         */
         @Template("<div class='{0}'><img src='{1}'/></div>")
         SafeHtml contentWithoutCommentWithImage(String styleTagImage, SafeUri imageURL);
     }
@@ -60,6 +138,15 @@ public class TagCell extends AbstractCell<TagDTO> {
     private final UserService userService;
     private final boolean isPreviewCell;
 
+    /**
+     * Displays the content of a {@link TagDTO tag} by using {@link SafeHtmlTemplates}.
+     * 
+     * @param taggingPanel
+     *            instance of {@link TaggingPanel}
+     * @param isPreviewCell
+     *            should be <code>true</code> if {@link TagCell cell} is used as {@link TagPreviewPanel preview cell},
+     *            otherwise <code>false</code>
+     */
     public TagCell(TaggingPanel taggingPanel, boolean isPreviewCell) {
         super("click");
         this.taggingPanel = taggingPanel;
@@ -68,6 +155,10 @@ public class TagCell extends AbstractCell<TagDTO> {
         this.isPreviewCell = isPreviewCell;
     }
 
+    /**
+     * Renders {@link TagDTO tag} and appends it to given {@link SafeHtmlBuilder html builder}. Checks tag for available
+     * attributes and chooses suitable {@link TagCellTemplate rendering template}.
+     */
     @Override
     public void render(Context context, TagDTO tag, SafeHtmlBuilder htmlBuilder) {
         if (tag == null) {
@@ -121,6 +212,12 @@ public class TagCell extends AbstractCell<TagDTO> {
         htmlBuilder.append(cell);
     }
 
+    /**
+     * Asks user for confirmation if user presses the delete button on the {@link TagCell}. If user confirms deletion,
+     * {@link TagDTO tag} will be deleted from {@link TaggingPanel} including
+     * {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog} or {@link com.sap.sse.security.UserStore
+     * UserStore}, depending on where the tag is saved.
+     */
     @Override
     public void onBrowserEvent(Context context, Element parent, TagDTO tag, NativeEvent event,
             ValueUpdater<TagDTO> valueUpdater) {

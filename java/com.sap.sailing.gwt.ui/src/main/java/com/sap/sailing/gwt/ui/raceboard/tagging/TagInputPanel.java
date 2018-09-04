@@ -23,7 +23,10 @@ public class TagInputPanel extends FlowPanel {
     private final TextArea commentTextArea;
     private final CheckBox visibleForPublicCheckBox;
 
-    public TagInputPanel(StringMessages stringMessages) {
+    /**
+     * Creates view allowing users to input values for tags and {@link TagButton tag-buttons}.
+     */
+    protected TagInputPanel(StringMessages stringMessages) {
         setStyleName(style.tagInputPanel());
 
         tagTextBox = new TextBox();
@@ -56,58 +59,61 @@ public class TagInputPanel extends FlowPanel {
         add(checkboxWrapper);
     }
 
-    public TextBox getTagTextBox() {
-        return tagTextBox;
-    }
-
-    public TextBox getImageURLTextBox() {
-        return imageURLTextBox;
-    }
-
-    public TextArea getCommentTextArea() {
-        return commentTextArea;
-    }
-
-    public CheckBox getVisibleForPublicCheckBox() {
-        return visibleForPublicCheckBox;
-    }
-
-    public String getTag() {
-        return tagTextBox.getValue();
-    }
-
-    public String getComment() {
-        return commentTextArea.getValue();
-    }
-
-    public String getImageURL() {
-        return imageURLTextBox.getValue();
-    }
-
-    public boolean isVisibleForPublic() {
-        return visibleForPublicCheckBox.getValue();
-    }
-
-    public void setTag(String tag) {
-        tagTextBox.setValue(tag);
-    }
-
-    public void setComment(String comment) {
-        commentTextArea.setValue(comment);
-    }
-
-    public void setImageURL(String imageURL) {
-        imageURLTextBox.setValue(imageURL);
-    }
-
-    public void setVisibleForPublic(boolean visibleForPublic) {
-        visibleForPublicCheckBox.setValue(visibleForPublic);
-    }
-
-    public void clearAllValues() {
+    /**
+     * Clears all input fields.
+     */
+    protected void clearAllValues() {
         tagTextBox.setText("");
         imageURLTextBox.setText("");
         commentTextArea.setText("");
         setVisibleForPublic(DEFAULT_VISIBLE_FOR_PUBLIC);
+    }
+
+    protected String getTag() {
+        return tagTextBox.getValue();
+    }
+
+    protected String getComment() {
+        return commentTextArea.getValue();
+    }
+
+    protected String getImageURL() {
+        return imageURLTextBox.getValue();
+    }
+
+    protected boolean isVisibleForPublic() {
+        return visibleForPublicCheckBox.getValue();
+    }
+
+    protected void setTag(String tag) {
+        tagTextBox.setValue(tag);
+    }
+
+    protected void setComment(String comment) {
+        commentTextArea.setValue(comment);
+    }
+
+    protected void setImageURL(String imageURL) {
+        imageURLTextBox.setValue(imageURL);
+    }
+
+    protected void setVisibleForPublic(boolean visibleForPublic) {
+        visibleForPublicCheckBox.setValue(visibleForPublic);
+    }
+
+    protected TextBox getTagTextBox() {
+        return tagTextBox;
+    }
+
+    protected TextBox getImageURLTextBox() {
+        return imageURLTextBox;
+    }
+
+    protected TextArea getCommentTextArea() {
+        return commentTextArea;
+    }
+
+    protected CheckBox getVisibleForPublicCheckBox() {
+        return visibleForPublicCheckBox;
     }
 }
