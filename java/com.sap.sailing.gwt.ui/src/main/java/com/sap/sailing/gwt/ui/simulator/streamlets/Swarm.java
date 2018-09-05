@@ -263,27 +263,28 @@ public class Swarm implements TimeListener {
         Context2d ctxt = canvas.getContext2d();
         ctxt.setGlobalAlpha(0.06);
         if (clearNextFrame) {
+            // ctxt.setGlobalAlpha(1);
             clearNextFrame = false;
-        } else {
-            ctxt.setGlobalCompositeOperation("destination-out");
-            ctxt.setFillStyle("black");
-            ctxt.fillRect(0, 0, canvas.getOffsetWidth(), canvas.getOffsetHeight());
-            ctxt.setGlobalAlpha(1.0);
-            ctxt.setGlobalCompositeOperation("source-over");
-            ctxt.setFillStyle("white");
-            for (int idx = 0; idx < nParticles && idx < particles.length; idx++) {
-                Particle particle = particles[idx];
-                if (particle == null || particle.stepsToLive == 0) {
-                    continue;
-                }
-                double particleSpeed = particle.v == null ? 0 : particle.v.length();
-                ctxt.setLineWidth(field.getLineWidth(particleSpeed));
-                ctxt.setStrokeStyle(colorMapper.getColor(particleSpeed));
-                ctxt.beginPath();
-                ctxt.moveTo(particle.previousPixelCoordinate.x, particle.previousPixelCoordinate.y);
-                ctxt.lineTo(particle.currentPixelCoordinate.x, particle.currentPixelCoordinate.y);
-                ctxt.stroke();
+            return;
+        }
+        ctxt.setGlobalCompositeOperation("destination-out");
+        ctxt.setFillStyle("black");
+        ctxt.fillRect(0, 0, canvas.getOffsetWidth(), canvas.getOffsetHeight());
+        ctxt.setGlobalAlpha(1.0);
+        ctxt.setGlobalCompositeOperation("source-over");
+        ctxt.setFillStyle("white");
+        for (int idx = 0; idx < nParticles && idx < particles.length; idx++) {
+            Particle particle = particles[idx];
+            if (particle == null || particle.stepsToLive == 0) {
+                continue;
             }
+            double particleSpeed = particle.v == null ? 0 : particle.v.length();
+            ctxt.setLineWidth(field.getLineWidth(particleSpeed));
+            ctxt.setStrokeStyle(colorMapper.getColor(particleSpeed));
+            ctxt.beginPath();
+            ctxt.moveTo(particle.previousPixelCoordinate.x, particle.previousPixelCoordinate.y);
+            ctxt.lineTo(particle.currentPixelCoordinate.x, particle.currentPixelCoordinate.y);
+            ctxt.stroke();
         }
     }
 
@@ -363,9 +364,5 @@ public class Swarm implements TimeListener {
     @Override
     public void timeChanged(Date newTime, Date oldTime) {
         timePoint = newTime;
-    }
-
-    public void pause(int swarmPause) {
-        this.swarmPause = swarmPause;
     }
 }
