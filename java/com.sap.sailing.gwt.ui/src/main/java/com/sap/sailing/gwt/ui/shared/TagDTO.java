@@ -1,8 +1,14 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanel;
 import com.sap.sse.common.TimePoint;
 
+/**
+ * Used to send tags over network. Allows to create tags with all possible combinations of states (private/public and
+ * valid/revoked).
+ * @see com.sap.sailing.domain.base.Tag Tag
+ */
 public class TagDTO implements IsSerializable {
 
     private String tag, comment, imageURL, username;
@@ -12,15 +18,56 @@ public class TagDTO implements IsSerializable {
     public static final int MAX_TAG_LENGTH = 100;
     public static final int MAX_COMMENT_LENGTH = 400;
 
-    // for GWT
-    public TagDTO() {
+    /**
+     * Required by GWT, do <b>NOT</b> use this constructor! Use the other constructors instead to allow information
+     * transfer.
+     */
+    TagDTO() {
     }
 
+    /**
+     * Creates tag which is not revoked and therefor valid.
+     * 
+     * @param tag
+     *            title of tag
+     * @param comment
+     *            comment of tag, may be <code>null</code> as comment is optional
+     * @param imageURL
+     *            image URL of tag, may be <code>null</code> as image is optional
+     * @param username
+     *            name of user who created the tag
+     * @param visibleForPublic
+     *            should be <code>true</code> if everbidy should see this tag, otherwise <code>false</code>
+     * @param raceTimepoint
+     *            timepoint of race where tag ot created
+     * @param createdAt
+     *            timepoint where <code>username</code> created the tag
+     */
     public TagDTO(String tag, String comment, String imageURL, String username, boolean visibleForPublic,
             TimePoint raceTimepoint, TimePoint createdAt) {
         this(tag, comment, imageURL, username, visibleForPublic, raceTimepoint, createdAt, null);
     }
 
+    /**
+     * Creates tag which may be revoked.
+     * 
+     * @param tag
+     *            title of tag
+     * @param comment
+     *            comment of tag, may be <code>null</code> as comment is optional
+     * @param imageURL
+     *            image URL of tag, may be <code>null</code> as image is optional
+     * @param username
+     *            name of user who created the tag
+     * @param visibleForPublic
+     *            should be <code>true</code> if everbidy should see this tag, otherwise <code>false</code>
+     * @param raceTimepoint
+     *            timepoint of race where tag ot created
+     * @param createdAt
+     *            timepoint where <code>username</code> created the tag
+     * @param revokedAt
+     *            timepoint where tag got revoked, may be <code>null</code> if tag is not revoked
+     */
     public TagDTO(String tag, String comment, String imageURL, String username, boolean visibleForPublic,
             TimePoint raceTimepoint, TimePoint createdAt, TimePoint revokedAt) {
         this.tag = tag;
@@ -33,34 +80,74 @@ public class TagDTO implements IsSerializable {
         this.revokedAt = revokedAt;
     }
 
+    /**
+     * Returns title of tag.
+     * 
+     * @return title of tag
+     */
     public String getTag() {
         return tag;
     }
 
+    /**
+     * Returns optional comment of tag.
+     * 
+     * @return comment of tag, may be <code>null</code>
+     */
     public String getComment() {
         return comment;
     }
 
+    /**
+     * Returns optional image URL of tag.
+     * 
+     * @return image URL of tag, may be <code>null</code>
+     */
     public String getImageURL() {
         return imageURL;
     }
 
+    /**
+     * Returns name of user who created this tag.
+     * 
+     * @return username
+     */
     public String getUsername() {
         return username;
     }
 
+    /**
+     * Returns visibilty of tag.
+     * 
+     * @return <code>true</code> if everybody should see the tag, otherwise <code>false</code>
+     */
     public boolean isVisibleForPublic() {
         return visibleForPublic;
     }
 
+    /**
+     * Returns logical timepoint of race where tag was created.
+     * 
+     * @return logical timepoint
+     */
     public TimePoint getRaceTimepoint() {
         return raceTimepoint;
     }
 
+    /**
+     * Returns creation timestamp of tag.
+     * 
+     * @return creation timestamp
+     */
     public TimePoint getCreatedAt() {
         return createdAt;
     }
 
+    /**
+     * Returns revokaction timestamp if tag is already revoked.
+     * 
+     * @return timepoint if tag is already revoked, otherwise <code>null</code>
+     */
     public TimePoint getRevokedAt() {
         return revokedAt;
     }
@@ -106,6 +193,11 @@ public class TagDTO implements IsSerializable {
         return true;
     }
 
+    /**
+     * Compares {@link TagDTO} with given attributes. Used by {@link TaggingPanel} to check if tag already exists.
+     * 
+     * @return <code>true</code> if all parameters match the attributes of {@link TagDTO}, otherwise <code>false</code>
+     */
     public boolean equals(String tag, String comment, String imageURL, String username, boolean visibleForPublic,
             TimePoint raceTimepoint) {
         if (this.comment == null) {

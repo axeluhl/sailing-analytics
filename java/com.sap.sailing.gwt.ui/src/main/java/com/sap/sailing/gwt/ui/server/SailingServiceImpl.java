@@ -2228,6 +2228,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
         return raceTimesInfo;
     }
 
+    /**
+     * Returns {@link RaceTimesInfoDTO race times info} for specified race (<code>raceIdentifier</code>) including
+     * {@link RaceLogTagEvent tag events} since received timestamp (<code>latestReceivedTagTime</code>). Loads tags from
+     * {@link ReadonlyRaceState cache} instead of scanning the whole {@link RaceLog} every request.
+     */
     @Override
     public RaceTimesInfoDTO getRaceTimesInfoIncludingTags(RegattaAndRaceIdentifier raceIdentifier,
             TimePoint latestReceivedTagTime) {
@@ -2271,6 +2276,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
         return raceTimesInfos;
     }
 
+    /**
+     * Collects besides {@link RaceTimesInfoDTO race times infos} public {@link RaceLogTagEvent tag events} from
+     * {@link ReadonlyRaceState cache} and compares the <code>createdAt</code> timepoint to the received latest tag
+     * creation timepoint. Returns {@link RaceTimesInfoDTO race times infos} including {@link RaceLogTagEvents public
+     * tag events} since the latest client-side received tag.
+     */
     @Override
     public List<RaceTimesInfoDTO> getRaceTimesInfosIncludingTags(Collection<RegattaAndRaceIdentifier> raceIdentifiers,
             Map<RegattaAndRaceIdentifier, TimePoint> latestReceivedTagTimes) {
@@ -6477,6 +6488,33 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
         raceLog.add(event);
     }
 
+    /**
+     * Adds tag as {@link RaceLogTagEvent} to {@link RaceLog}. Checks following aspects:
+     * <ul>
+     * <li>tag title does not exceed max length</li>
+     * <li>comment does not exceed max length</li>
+     * <li>user has required permissions to write {@link RaceLogEvent RaceLogEvents}</li>
+     * </ul>
+     * 
+     * @param leaderboardName
+     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
+     * @param raceColumnName
+     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
+     * @param fleetName
+     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
+     * @param tag
+     *            title of tag, must <b>NOT</b> be <code>null</code>
+     * @param comment
+     *            optional comment of tag, must <b>NOT</b> be <code>null</code> (use empty string if no comment was
+     *            provided)
+     * @param imageURL
+     *            optional image URL of tag, must <b>NOT</b> be <code>null</code> (use empty string if no image was
+     *            provided)
+     * @param raceTimepoint
+     *            timepoint in race where user created tag, must <b>NOT</b> be <code>null</code>
+     * @return <code>successful</code> {@link SuccessInfo} if tag was added to {@link RaceLog}, otherwise
+     *         <code>non-successful</code> {@link SuccessInfo}
+     */
     @Override
     public SuccessInfo addTagToRaceLog(String leaderboardName, String raceColumnName, String fleetName, String tag,
             String comment, String imageURL, TimePoint raceTimepoint) {
@@ -6488,6 +6526,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
             if (comment.length() > TagDTO.MAX_COMMENT_LENGTH) {
                 throw new Exception("tagCommentIsToLong");
             }
+            
+            // TODO: As soon as permission-vertical branch got merged into master, apply
+            // new permission system at this permission check (see bug 4104, comment 9)
+            // functionality: Check if user has the permission to add RaceLogEvents to RaceLog.
             SecurityUtils.getSubject().checkPermission(
                     Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
             RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);

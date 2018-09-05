@@ -8,15 +8,30 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogRevokeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
 
+/**
+ * Scans {@link RaceLog} for {@link RaceLogTagEvent RaceLogTagEvents} and {@link RaceLogRevokeEvent
+ * RaceLogRevokeEvents}.
+ */
 public class TagFinder extends RaceLogAnalyzer<List<RaceLogTagEvent>> {
 
     private final RaceLog raceLog;
 
+    /**
+     * Creates instance of {@link TagFinder}.
+     * 
+     * @param raceLog
+     *            racelog to scan for {@link RaceLogTagEvent RaceLogTagEvents}
+     */
     public TagFinder(RaceLog raceLog) {
         super(raceLog);
         this.raceLog = raceLog;
     }
 
+    /**
+     * Scans {@link RaceLog} for {@link RaceLogTagEvent RaceLogTagEvents} and {@link RaceLogRevokeEvent
+     * RaceLogRevokeEvents}. If a {@link RaceLogTagEvent} is revoked, the event will be
+     * {@link RaceLogTagEvent#markAsRevoked() marked as revoked}.
+     */
     @Override
     protected List<RaceLogTagEvent> performAnalysis() {
         Iterable<RaceLogEvent> raceLogEvents = getAllEvents();

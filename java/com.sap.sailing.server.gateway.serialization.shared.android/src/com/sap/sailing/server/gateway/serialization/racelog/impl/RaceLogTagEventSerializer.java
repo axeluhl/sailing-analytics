@@ -7,6 +7,9 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
+/**
+ * Serializer for {@link com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent RaceLogTagEvent}.
+ */
 public class RaceLogTagEventSerializer extends BaseRaceLogEventSerializer {
 
     public static final String VALUE_CLASS = RaceLogTagEvent.class.getSimpleName();

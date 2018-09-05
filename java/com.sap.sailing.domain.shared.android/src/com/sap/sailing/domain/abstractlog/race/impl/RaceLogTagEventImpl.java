@@ -7,6 +7,9 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
 import com.sap.sse.common.TimePoint;
 
+/**
+ * Default implementation of {@link RaceLogTagEvent}.
+ */
 public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagEvent {
 
     private static final long serialVersionUID = 7213518902555323432L;
@@ -14,6 +17,9 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
     private final String tag, comment, imageURL, username;
     private TimePoint revokedAt;
 
+    /**
+     * Creates {@link RaceLogTagEvent} with all required information.
+     */
     public RaceLogTagEventImpl(String tag, String comment, String imageURL, TimePoint createdAt,
             TimePoint logicalTimePoint, AbstractLogEventAuthor author, Serializable id, int passId) {
         super(createdAt, logicalTimePoint, author, id, passId);
@@ -24,11 +30,17 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
         revokedAt = null;
     }
 
+    /**
+     * Creates {@link RaceLogTagEvent} without required serializable id by generating it.
+     */
     public RaceLogTagEventImpl(String tag, String comment, String imageURL, TimePoint createdAt,
             TimePoint logicalTimePoint, AbstractLogEventAuthor author, int passId) {
         this(tag, comment, imageURL, createdAt, logicalTimePoint, author, randId(), passId);
     }
 
+    /**
+     * Creates {@link RaceLogTagEvent} with minimal required information.
+     */
     public RaceLogTagEventImpl(String tag, String comment, String imageURL, TimePoint logicalTimePoint,
             AbstractLogEventAuthor author, int passId) {
         this(tag, comment, imageURL, now(), logicalTimePoint, author, randId(), passId);
@@ -55,7 +67,7 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
     }
 
     /**
-     * Only sets revokedAt if tag is not already revoked and given TimePoint is not null.
+     * Only sets revokedAt if tag is not already revoked and given {@link TimePoint} is non-<code>null</code>.
      */
     @Override
     public void markAsRevoked(TimePoint revokedAt) {
@@ -124,6 +136,6 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
     @Override
     public String toString() {
         return "RaceLogTagEvent [tag=" + tag + ", comment=" + comment + ", imageURL=" + imageURL + ", username="
-                + username +  ", revokedAt=" + revokedAt + "]";
+                + username + ", revokedAt=" + revokedAt + "]";
     }
 }

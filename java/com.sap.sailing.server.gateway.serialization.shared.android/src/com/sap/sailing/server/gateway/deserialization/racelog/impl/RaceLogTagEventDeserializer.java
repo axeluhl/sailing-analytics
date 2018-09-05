@@ -15,7 +15,10 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogTagEventSerializer;
 import com.sap.sse.common.TimePoint;
 
-public class RaceLogTagEventDeserializer extends BaseRaceLogEventDeserializer{
+/**
+ * Deserializer for {@link com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent RaceLogTagEvent}.
+ */
+public class RaceLogTagEventDeserializer extends BaseRaceLogEventDeserializer {
 
     public RaceLogTagEventDeserializer(JsonDeserializer<DynamicCompetitor> competitorDeserializer) {
         super(competitorDeserializer);
@@ -30,5 +33,4 @@ public class RaceLogTagEventDeserializer extends BaseRaceLogEventDeserializer{
         String imageURL = object.get(RaceLogTagEventSerializer.FIELD_URL).toString();
         return new RaceLogTagEventImpl(tag, comment, imageURL, createdAt, timePoint, author, id, passId);
     }
-
 }
