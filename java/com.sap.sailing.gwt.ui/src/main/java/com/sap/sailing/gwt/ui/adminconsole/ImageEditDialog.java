@@ -7,10 +7,11 @@ import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.media.ImageDTO;
+import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
 
 public class ImageEditDialog extends ImageDialog {
-    public ImageEditDialog(ImageDTO imageDTO, SailingServiceAsync sailingService, StringMessages stringMessages, DialogCallback<ImageDTO> callback) {
-        super(imageDTO.getCreatedAtDate(), sailingService, stringMessages, callback);
+    public ImageEditDialog(ImageDTO imageDTO, SailingServiceAsync sailingService, StringMessages stringMessages, DialogCallback<ImageResizingTaskDTO> dialogCallback) {
+        super(imageDTO.getCreatedAtDate(), sailingService, stringMessages, dialogCallback);
         createdAtLabel = new Label(imageDTO.getCreatedAtDate().toString());
         imageURLAndUploadComposite.setURL(imageDTO.getSourceRef());
         titleTextBox = createTextBox(imageDTO.getTitle());

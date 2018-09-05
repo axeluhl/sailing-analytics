@@ -87,6 +87,5 @@ Export-Package: com.google.gwt.user.client.rpc.core.com.sap.sailing.domain.commo
  com.sap.sailing.gwt.ui.client.shared.racemap,
  com.sap.sailing.gwt.ui.server,
  com.sap.sailing.gwt.ui.shared,
- com.sap.sailing.gwt.ui.shared.media,
  com.sap.sailing.gwt.ui.shared.racemap
 Automatic-Module-Name: com.sap.sailing.gwt.ui

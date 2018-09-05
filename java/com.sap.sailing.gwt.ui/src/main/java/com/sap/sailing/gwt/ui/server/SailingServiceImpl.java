@@ -53,6 +53,7 @@ import java.util.regex.Pattern;
 import java.util.stream.StreamSupport;
 import java.util.zip.GZIPInputStream;
 
+import javax.imageio.metadata.IIOMetadata;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -450,7 +451,6 @@ import com.sap.sailing.gwt.ui.shared.WaypointDTO;
 import com.sap.sailing.gwt.ui.shared.WindDTO;
 import com.sap.sailing.gwt.ui.shared.WindInfoForRaceDTO;
 import com.sap.sailing.gwt.ui.shared.WindTrackInfoDTO;
-import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
 import com.sap.sailing.manage2sail.EventResultDescriptor;
 import com.sap.sailing.manage2sail.Manage2SailEventResultsParserImpl;
 import com.sap.sailing.manage2sail.RaceResultDescriptor;
@@ -554,7 +554,7 @@ import com.sap.sse.filestorage.InvalidPropertiesException;
 import com.sap.sse.filestorage.OperationFailedException;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.media.ImageDTO;
-import com.sap.sse.gwt.client.media.ToResizeImageDTO;
+import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.gwt.dispatch.servlets.ProxiedRemoteServiceServlet;
 import com.sap.sse.gwt.server.filestorage.FileStorageServiceDTOUtils;
@@ -583,6 +583,7 @@ import com.sap.sse.shared.media.impl.ImageDescriptorImpl;
 import com.sap.sse.shared.media.impl.VideoDescriptorImpl;
 import com.sap.sse.util.HttpUrlConnectionHelper;
 import com.sap.sse.util.ImageConverter;
+import com.sap.sse.util.ImageConverter.ImageWithMetadata;
 import com.sap.sse.util.ServiceTrackerFactory;
 import com.sap.sse.util.ThreadPoolUtil;
 import com.sapsailing.xrr.structureimport.eventimport.RegattaJSON;
@@ -7890,110 +7891,54 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public ImageDTO[] resizeImage(ToResizeImageDTO toResizeImage) throws Exception {
-        // In following size tag will describe the tags, that have a defined size in MediaConstants, which is LOGO,
-        // TEASER and STAGE at the moment
-        // create ArrayList that will contain all images that are to return
-        List<ImageDTO> resizedImages = new ArrayList<ImageDTO>();
+    public ImageDTO[] resizeImage(ImageResizingTaskDTO resizingTask) throws Exception {
+        ImageConverter converter = new ImageConverter();
         // calculating the fileType of the image by its uri
-        String fileType = toResizeImage.getSourceRef().substring(toResizeImage.getSourceRef().lastIndexOf(".") + 1);
-        // deleting all size-tags from the tags list, because after resizing there should only be one size tag per image
-        toResizeImage.getTags().removeAll(toResizeImage.getMap().keySet());
-        // Create ImageConverter for further use
-        ImageConverter converter = new ImageConverter(
-                HttpUrlConnectionHelper.redirectConnection(new URL(toResizeImage.getSourceRef())).getInputStream(),
-                fileType, toResizeImage.getMap());
-        addImagesThatNeedResizing(converter, resizedImages, toResizeImage);
-        addImagesThatDoNotNeedResizing(converter, resizedImages, toResizeImage);
-        return resizedImages.toArray(new ImageDTO[resizedImages.size()]);
+        String sourceRef = resizingTask.getImage().getSourceRef();
+        String fileType = sourceRef.substring(sourceRef.lastIndexOf(".") + 1);
+        ImageWithMetadata imageAndMetadata = converter.loadImage(HttpUrlConnectionHelper.redirectConnection(new URL(sourceRef)).getInputStream(), fileType);
+        List<BufferedImage> resizedImages = converter.convertImage(imageAndMetadata.getImage(), resizingTask.getImage().getWidthInPx(), resizingTask.getImage().getHeightInPx(), resizingTask.getResizingTask());
+        List<String> sourceRefs = storeImages(resizedImages, fileType, imageAndMetadata.getMetadata());
+        List<ImageDTO> resizedImagesAsDTOs = createImageDTOsFromURLsAndResizingTask(sourceRefs,resizingTask);
+        for(String tag : resizingTask.getImage().getTags()) {
+            MediaTagConstants predefinedTag = MediaTagConstants.fromName(tag);
+            if(predefinedTag != null && !resizingTask.getResizingTask().contains(predefinedTag)) {
+                ImageDTO image = resizingTask.getImage();
+                for(MediaTagConstants tagConstant : resizingTask.getResizingTask()) {
+                    image.getTags().remove(tagConstant.getName());
+                }
+                resizedImagesAsDTOs.add(image);
+            }
+        }
+        return resizedImagesAsDTOs.toArray(new ImageDTO[resizedImages.size()]);
+    }
+    
+    private List<ImageDTO> createImageDTOsFromURLsAndResizingTask(List<String> sourceRefs,
+            ImageResizingTaskDTO resizingTask) {
+        List<ImageDTO> images = new ArrayList<ImageDTO>();
+        for(int i= 0; i < sourceRefs.size(); i++) {
+            ImageDTO image = resizingTask.cloneImageDTO();
+            for(MediaTagConstants tag : MediaTagConstants.values()) {
+                image.getTags().remove(tag.getName());
+            }
+            image.getTags().add(resizingTask.getResizingTask().get(i).getName());
+            image.setSourceRef(sourceRefs.get(i));
+        }
+        return images;
     }
 
-    private void addImagesThatDoNotNeedResizing(ImageConverter converter, List<ImageDTO> resizedImages,
-            ToResizeImageDTO toResizeImage) {
-        // if there is no size tag that does not need a resize we can delete the original source
-        if (converter.getNotResizeSizeTags().isEmpty()) {
+    private List<String> storeImages(List<BufferedImage> resizedImages, String fileType, IIOMetadata metadata) {
+        List<String> sourceRefs = new ArrayList<>();
+        for(BufferedImage resizedImage : resizedImages) {
+            InputStream fileStorageStream = new ImageConverter().imageWithMetadataToInputStream(resizedImage, fileType, metadata);
             try {
-                getService().getFileStorageManagementService().getActiveFileStorageService()
-                        .removeFile(new URI(toResizeImage.getSourceRef()));
-            } catch (NoCorrespondingServiceRegisteredException | OperationFailedException | InvalidPropertiesException
-                    | IOException | URISyntaxException e) {
-                logger.log(Level.WARNING,
-                        "Deleting original image after resize did not work because of: " + e.getMessage());
-                // file deleting did not work -> no important error, because the "only" result of this is one more
-                // stored image and only if the source image was is on the file storage
-            }
-        } else {
-            // otherwise we have to create an ImageDTO object for every non-resize-size-tag
-            for (String resizeTag : converter.getNotResizeSizeTags()) {
-                ImageDTO image = toImageDTO(toResizeImage);
-                // re-add the deleted specific size tag
-                image.getTags().add(resizeTag);
-                resizedImages.add(image);
+                sourceRefs.add(getService().getFileStorageManagementService().getActiveFileStorageService().storeFile(
+                    fileStorageStream, "." + fileType, new Long(fileStorageStream.available())).toString());
+            } catch (NoCorrespondingServiceRegisteredException | IOException | OperationFailedException
+                    | InvalidPropertiesException e) {
+                logger.log(Level.SEVERE, "Could not store file. Cause: " + e.getMessage());
             }
         }
-    }
-
-    private void addImagesThatNeedResizing(ImageConverter converter, List<ImageDTO> resizedImages,
-            ToResizeImageDTO toResizeImage) throws Exception {
-        // iterating over every size-tag that needs a resize
-        for (String resizeTag : converter.getResizeTags()) {
-            // creating a new ImageDTO object with all values from the ToResizeImageDTO object
-            ImageDTO image = toImageDTO(toResizeImage);
-            // re-adding the size-tag for this iteration, so every ImageDTO object only has one size-tag
-            image.getTags().add(resizeTag);
-            // resizing the image
-            BufferedImage resizedBufferedImage = resizeImage(converter, resizeTag);
-            // adding the new width and h eight to the ImageDTO object
-            image.setSizeInPx(resizedBufferedImage.getWidth(), resizedBufferedImage.getHeight());
-            // storing the image on FileStorageService
-            InputStream fileStorageStream = converter.resizedImageToInputStream(resizedBufferedImage);
-            URI newUri = getService().getFileStorageManagementService().getActiveFileStorageService().storeFile(
-                    fileStorageStream, "." + converter.getImageFormat(), new Long(fileStorageStream.available()));
-            // saving the new image ref uri to the ImageDTO object
-            image.setSourceRef(newUri.toString());
-            // adding the resized ImageDTO object to arraylist
-            resizedImages.add(image);
-        }
-    }
-
-    private BufferedImage resizeImage(ImageConverter converter, String resizeTag) {
-        BufferedImage resizedImage = null;
-        switch (resizeTag) {
-        case MediaTagConstants.LOGO:
-            resizedImage = converter.resize(MediaConstants.MIN_LOGO_IMAGE_WIDTH, MediaConstants.MAX_LOGO_IMAGE_WIDTH,
-                    MediaConstants.MIN_LOGO_IMAGE_HEIGHT, MediaConstants.MAX_LOGO_IMAGE_HEIGHT);
-            break;
-        case MediaTagConstants.STAGE:
-            resizedImage = converter.resize(MediaConstants.MIN_STAGE_IMAGE_WIDTH, MediaConstants.MAX_STAGE_IMAGE_WIDTH,
-                    MediaConstants.MIN_STAGE_IMAGE_HEIGHT, MediaConstants.MAX_STAGE_IMAGE_HEIGHT);
-            break;
-        case MediaTagConstants.TEASER:
-            resizedImage = converter.resize(MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH,
-                    MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT,
-                    MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT);
-            break;
-        default:// can not occur, because we only loop over the sizeTags, which are the same as in the switch case
-            logger.log(Level.WARNING, "No resizing for avaylable for tag " + resizeTag
-                    + ". Code has to be adjusted to allow resizing for that tag.");
-            break;
-        }
-        return resizedImage;
-    }
-
-    private ImageDTO toImageDTO(ToResizeImageDTO toResizeImage) {
-        ImageDTO toReturn = new ImageDTO(toResizeImage.getSourceRef(), toResizeImage.getCreatedAtDate());
-        toReturn.setTitle(toResizeImage.getTitle());
-        toReturn.setCopyright(toResizeImage.getCopyright());
-        toReturn.setLocale(toResizeImage.getLocale());
-        toReturn.setMimeType(MimeType.byName(toResizeImage.getMimeType().name()));
-        // creating a new mimetype object so they do not use the same reference
-        toReturn.setSizeInPx(toResizeImage.getWidthInPx(), toResizeImage.getHeightInPx());
-        toReturn.setSubtitle(toResizeImage.getSubtitle());
-        List<String> tags = new ArrayList<>();
-        // Creating a new list, so they have the same tags, but not use the same reference to these tags, otherwise they
-        // could affect each other by editing this list
-        tags.addAll(toResizeImage.getTags());
-        toReturn.setTags(tags);
-        return toReturn;
+        return sourceRefs;
     }
 }

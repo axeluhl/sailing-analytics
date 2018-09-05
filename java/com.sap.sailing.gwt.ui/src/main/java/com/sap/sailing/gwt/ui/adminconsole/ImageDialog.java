@@ -1,9 +1,9 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -22,7 +22,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.media.MediaTagConstants;
@@ -35,9 +34,9 @@ import com.sap.sse.gwt.client.controls.listedit.GenericStringListInlineEditorWit
 import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.media.ImageDTO;
-import com.sap.sse.gwt.client.media.ToResizeImageDTO;
+import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
 
-public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
+public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO> {
     private final SailingServiceAsync sailingService;
     
     protected final StringMessages stringMessages;
@@ -55,7 +54,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
     protected Label doResizeLabel;
     private final BusyIndicator busyIndicator;
 
-    protected static class ImageParameterValidator implements Validator<ImageDTO> {
+    protected static class ImageParameterValidator implements Validator<ImageResizingTaskDTO> {
         private StringMessages stringMessages;
         private List<CheckBox> doResize;
         public ImageParameterValidator(StringMessages stringMessages, ArrayList<CheckBox> doResize) {
@@ -64,8 +63,9 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
         }
 
         @Override
-        public String getErrorMessage(ImageDTO imageToValidate) {
+        public String getErrorMessage(ImageResizingTaskDTO resizingTask) {
             String errorMessage = null;
+            ImageDTO imageToValidate = resizingTask.getImage();
             Integer imageWidth = imageToValidate.getWidthInPx();
             Integer imageHeight = imageToValidate.getHeightInPx();
             
@@ -80,50 +80,19 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
             } else {
                 //check if image is too small for resizing
                 errorMessage = "";
-                if (imageToValidate.hasTag(MediaTagConstants.LOGO) && (imageWidth < MediaConstants.MIN_LOGO_IMAGE_WIDTH || imageHeight < MediaConstants.MIN_LOGO_IMAGE_HEIGHT)) {
-                    errorMessage += getImageToSmallErrorMessage(MediaTagConstants.LOGO, MediaConstants.MIN_LOGO_IMAGE_WIDTH,
-                            MediaConstants.MIN_LOGO_IMAGE_HEIGHT, stringMessages) + "\n";
-                }
-                if (imageToValidate.hasTag(MediaTagConstants.TEASER) && (imageWidth < MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH || imageHeight < MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT)) {
-                    errorMessage += getImageToSmallErrorMessage(MediaTagConstants.TEASER, MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH,
-                            MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT, stringMessages) + "\n";
-                }
-                if (imageToValidate.hasTag(MediaTagConstants.STAGE) && (imageWidth < MediaConstants.MIN_STAGE_IMAGE_WIDTH || imageHeight < MediaConstants.MIN_STAGE_IMAGE_HEIGHT)) {
-                    errorMessage += getImageToSmallErrorMessage(MediaTagConstants.STAGE, MediaConstants.MIN_STAGE_IMAGE_WIDTH,
-                            MediaConstants.MIN_STAGE_IMAGE_HEIGHT, stringMessages) + "\n";
+                for(MediaTagConstants mediaTag : MediaTagConstants.values()) {
+                    if(imageToValidate.hasTag(mediaTag.getName()) && (imageWidth < mediaTag.getMinWidth() || imageHeight < mediaTag.getMinHeight())) {
+                        errorMessage += getImageToSmallErrorMessage(mediaTag, stringMessages) + "\n";
+                    }
                 }
                 if (errorMessage.equals("")) {//Check if image ratio fits for resizing
                     errorMessage = imageRatioFits(imageToValidate);
                 }
                 if(errorMessage.equals("")) {//check for ckeckboxes and resizing
-                    if (imageToValidate.hasTag(MediaTagConstants.LOGO) && !isValidSize(imageWidth, imageHeight,
-                            MediaConstants.MIN_LOGO_IMAGE_WIDTH, MediaConstants.MAX_LOGO_IMAGE_WIDTH,
-                            MediaConstants.MIN_LOGO_IMAGE_HEIGHT, MediaConstants.MAX_LOGO_IMAGE_HEIGHT)) {
-                        getCheckBoxForTag(MediaTagConstants.LOGO, imageToValidate).setVisible(true);
-                        if (!getCheckBoxForTag(MediaTagConstants.LOGO, imageToValidate).getValue()) {
-                            errorMessage += getSizeErrorMessage(MediaTagConstants.LOGO, MediaConstants.MIN_LOGO_IMAGE_WIDTH,
-                                    MediaConstants.MAX_LOGO_IMAGE_WIDTH, MediaConstants.MIN_LOGO_IMAGE_HEIGHT,
-                                    MediaConstants.MAX_LOGO_IMAGE_HEIGHT, stringMessages) + "\n";
-                        }
-                    }
-                    if (imageToValidate.hasTag(MediaTagConstants.TEASER) && !isValidSize(imageWidth, imageHeight,
-                            MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH,
-                            MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT, MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT)) {
-                        getCheckBoxForTag(MediaTagConstants.TEASER, imageToValidate).setVisible(true);
-                        if (!getCheckBoxForTag(MediaTagConstants.TEASER, imageToValidate).getValue()) {
-                            errorMessage += getSizeErrorMessage(MediaTagConstants.TEASER, MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH,
-                                    MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH, MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT,
-                                    MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT, stringMessages) + "\n";
-                        }
-                    }
-                    if (imageToValidate.hasTag(MediaTagConstants.STAGE) && !isValidSize(imageWidth, imageHeight,
-                            MediaConstants.MIN_STAGE_IMAGE_WIDTH, MediaConstants.MAX_STAGE_IMAGE_WIDTH,
-                            MediaConstants.MIN_STAGE_IMAGE_HEIGHT, MediaConstants.MAX_STAGE_IMAGE_HEIGHT)) {
-                        getCheckBoxForTag(MediaTagConstants.STAGE, imageToValidate).setVisible(true);
-                        if (!getCheckBoxForTag(MediaTagConstants.STAGE, imageToValidate).getValue()) {
-                            errorMessage += getSizeErrorMessage(MediaTagConstants.STAGE, MediaConstants.MIN_STAGE_IMAGE_WIDTH,
-                                    MediaConstants.MAX_STAGE_IMAGE_WIDTH, MediaConstants.MIN_STAGE_IMAGE_HEIGHT,
-                                    MediaConstants.MAX_STAGE_IMAGE_HEIGHT, stringMessages) + "\n";
+                    for(MediaTagConstants mediaTag : MediaTagConstants.values()) {
+                        if(imageToValidate.hasTag(mediaTag.getName()) && (imageWidth > mediaTag.getMaxWidth() || imageHeight > mediaTag.getMaxHeight()) && !resizingTask.getResizingTask().contains(mediaTag)) {
+                            getCheckBoxForTag(mediaTag.getName(), imageToValidate).setVisible(true);
+                            errorMessage += getSizeErrorMessage(mediaTag, stringMessages) + "\n";
                         }
                     }
                 }
@@ -153,43 +122,33 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
         private String imageRatioFits(ImageDTO imageToValidate) {
             String errorMessage = "";
             double ratio = ((double)imageToValidate.getWidthInPx())/imageToValidate.getHeightInPx();
-            double minRatio = ((double)MediaConstants.MAX_LOGO_IMAGE_WIDTH)/MediaConstants.MIN_LOGO_IMAGE_HEIGHT;
-            double maxRatio = ((double)MediaConstants.MIN_LOGO_IMAGE_WIDTH)/MediaConstants.MAX_LOGO_IMAGE_HEIGHT;
-            if (imageToValidate.hasTag(MediaTagConstants.LOGO) && (minRatio < ratio || maxRatio > ratio)) {
-                errorMessage += stringMessages.imageResizeError(MediaTagConstants.LOGO, minRatio, maxRatio, ratio);
-            }
-            minRatio = ((double)MediaConstants.MAX_EVENTTEASER_IMAGE_WIDTH)/MediaConstants.MIN_EVENTTEASER_IMAGE_HEIGHT;
-            maxRatio = ((double)MediaConstants.MIN_EVENTTEASER_IMAGE_WIDTH)/MediaConstants.MAX_EVENTTEASER_IMAGE_HEIGHT;
-            if (imageToValidate.hasTag(MediaTagConstants.TEASER) && (minRatio < ratio || maxRatio > ratio)) {
-                errorMessage += stringMessages.imageResizeError(MediaTagConstants.TEASER, minRatio, maxRatio, ratio);
-            }
-            minRatio = ((double)MediaConstants.MAX_STAGE_IMAGE_WIDTH)/MediaConstants.MIN_STAGE_IMAGE_HEIGHT;
-            maxRatio = ((double)MediaConstants.MIN_STAGE_IMAGE_WIDTH)/MediaConstants.MAX_STAGE_IMAGE_HEIGHT;
-            if (imageToValidate.hasTag(MediaTagConstants.STAGE) && (minRatio < ratio || maxRatio > ratio)) {
-                errorMessage += stringMessages.imageResizeError(MediaTagConstants.STAGE, minRatio, maxRatio, ratio);
+            for(MediaTagConstants mediaTag : MediaTagConstants.values()) {
+                if(imageToValidate.hasTag(mediaTag.getName())) {
+                    double minRatio = ((double)mediaTag.getMaxWidth())/mediaTag.getMinHeight();
+                    double maxRatio = ((double)mediaTag.getMinWidth())/mediaTag.getMaxHeight();
+                    if (minRatio < ratio || maxRatio > ratio) {
+                        errorMessage += stringMessages.imageResizeError(mediaTag.getName(), minRatio, maxRatio, ratio);
+                    }
+                }
             }
             return errorMessage;
         }
-
-        private boolean isValidSize(int width, int height, int minWidth, int maxWidth, int minHeight, int maxHeight) {
-            return width >= minWidth && width <= maxWidth && height >= minHeight && height <= maxHeight;
-        }
         
-        private String getSizeErrorMessage(String imageType, int minWidth, int maxWidth, int minHeight, int maxHeight, StringMessages stringMessages) {
-            String errorMessage = stringMessages.imageSizeError(imageType, minWidth, maxWidth, minHeight, maxHeight);
+        private String getSizeErrorMessage(MediaTagConstants mediaTag, StringMessages stringMessages) {
+            String errorMessage = stringMessages.imageSizeError(mediaTag.getName(), mediaTag.getMinWidth(), mediaTag.getMaxWidth(), mediaTag.getMinHeight(), mediaTag.getMaxHeight());
             return errorMessage;
         }
         
-        private String getImageToSmallErrorMessage(String imageType, int minWidth, int minHeight, StringMessages stringMessages) {
-            String errorMessage = stringMessages.imageToSmallError(imageType,minWidth,minHeight);
+        private String getImageToSmallErrorMessage(MediaTagConstants mediaTag, StringMessages stringMessages) {
+            String errorMessage = stringMessages.imageToSmallError(mediaTag.getName(),mediaTag.getMinWidth(),mediaTag.getMinHeight());
             return errorMessage;
         }
     }
-    public ImageDialog(Date creationDate, SailingServiceAsync sailingService, StringMessages stringMessages, DialogCallback<ImageDTO> callback) {
-        this(creationDate, sailingService, stringMessages, new ArrayList<>(), stringMessages.allowResizing(), callback);
+    public ImageDialog(Date creationDate, SailingServiceAsync sailingService, StringMessages stringMessages, DialogCallback<ImageResizingTaskDTO> dialogCallback) {
+        this(creationDate, sailingService, stringMessages, new ArrayList<>(), stringMessages.allowResizing(), dialogCallback);
     }
     
-    private ImageDialog(Date creationDate, SailingServiceAsync sailingService, StringMessages stringMessages, ArrayList<CheckBox> doResize, String resizeStringMessage, DialogCallback<ImageDTO> callback) {
+    private ImageDialog(Date creationDate, SailingServiceAsync sailingService, StringMessages stringMessages, ArrayList<CheckBox> doResize, String resizeStringMessage, DialogCallback<ImageResizingTaskDTO> callback) {
         super(stringMessages.image(), null, stringMessages.ok(), stringMessages.cancel(), new ImageParameterValidator(stringMessages, doResize), callback);
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
@@ -231,7 +190,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
         
         tagsListEditor = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new GenericStringListInlineEditorWithCheckboxesComposite.ExpandedUi<String>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
-                        MediaConstants.imageTagSuggestions, stringMessages.enterTagsForTheImage(), 30, doResize, stringMessages.allowResizing(), new ClickHandler() {
+                        MediaTagConstants.imageTagSuggestions, stringMessages.enterTagsForTheImage(), 30, doResize, stringMessages.allowResizing(), new ClickHandler() {
                             
                             @Override
                             public void onClick(ClickEvent event) {
@@ -253,26 +212,26 @@ public abstract class ImageDialog extends DataEntryDialog<ImageDTO> {
     }
 
     @Override
-    protected ImageDTO getResult() {
+    protected ImageResizingTaskDTO getResult() {
         List<String> tags = new ArrayList<String>();
         for (String tag: tagsListEditor.getValue()) {
             tags.add(tag);
         }
-        HashMap<String,Boolean> map = new HashMap<String, Boolean>();
+        List<MediaTagConstants> resizingTask = new ArrayList<MediaTagConstants>();
         for (int i= 0; i < tags.size(); i++) {
-            if (tags.get(i).equals(MediaTagConstants.LOGO) || tags.get(i).equals(MediaTagConstants.TEASER) || tags.get(i).equals(MediaTagConstants.STAGE) || tags.get(i).equals(MediaTagConstants.GALLERY)) {
-                map.put(tags.get(i), doResize.get(i).getValue());
+            if (Arrays.asList(MediaTagConstants.values()).contains(MediaTagConstants.fromName(tags.get(i))) && doResize.get(i).getValue()) {
+                resizingTask.add(MediaTagConstants.fromName(tags.get(i)));
             }
         }
-        ImageDTO result = new ToResizeImageDTO(imageURLAndUploadComposite.getURL(), creationDate, map);
-        result.setTitle(titleTextBox.getValue());
-        result.setSubtitle(subtitleTextBox.getValue());
-        result.setCopyright(copyrightTextBox.getValue());
+        ImageDTO image = new ImageDTO(imageURLAndUploadComposite.getURL(), creationDate);
+        image.setTitle(titleTextBox.getValue());
+        image.setSubtitle(subtitleTextBox.getValue());
+        image.setCopyright(copyrightTextBox.getValue());
         if (widthInPxBox.getValue() != null && heightInPxBox.getValue() != null) {
-            result.setSizeInPx(widthInPxBox.getValue(), heightInPxBox.getValue());
+            image.setSizeInPx(widthInPxBox.getValue(), heightInPxBox.getValue());
         }
-        result.setTags(tags);
-        return (ImageDTO)result;
+        image.setTags(tags);
+        return new ImageResizingTaskDTO(image, resizingTask);
     }
 
     @Override

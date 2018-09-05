@@ -108,7 +108,7 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ServerInfoRetriever;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtServiceAsync;
 import com.sap.sse.gwt.client.media.ImageDTO;
-import com.sap.sse.gwt.client.media.ToResizeImageDTO;
+import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.gwt.client.replication.RemoteReplicationServiceAsync;
 import com.sap.sse.pairinglist.PairingList;
@@ -991,5 +991,5 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      */
     void checkIfRaceIsTracking(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Boolean> asyncCallback);
 
-    void resizeImage(ToResizeImageDTO updatedImage, AsyncCallback<ImageDTO[]> asyncCallback);
+    void resizeImage(ImageResizingTaskDTO updatedImage, AsyncCallback<ImageDTO[]> asyncCallback);
 }

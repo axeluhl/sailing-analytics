@@ -89,7 +89,7 @@ public class VideosListComposite extends Composite {
         createVideoBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                openCreateVideoDialog(MediaTagConstants.GALLERY);
+                openCreateVideoDialog(MediaTagConstants.GALLERY.getName());
             }
         });
         videosControlsPanel.add(createVideoBtn);
@@ -98,7 +98,7 @@ public class VideosListComposite extends Composite {
         addLiveStreamBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                openCreateVideoDialog(MediaTagConstants.LIVESTREAM);
+                openCreateVideoDialog(MediaTagConstants.LIVESTREAM.getName());
             }
         });
         videosControlsPanel.add(addLiveStreamBtn);
@@ -107,7 +107,7 @@ public class VideosListComposite extends Composite {
         addHighlightBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                openCreateVideoDialog(MediaTagConstants.HIGHLIGHT);
+                openCreateVideoDialog(MediaTagConstants.HIGHLIGHT.getName());
             }
         });
         videosControlsPanel.add(addHighlightBtn);

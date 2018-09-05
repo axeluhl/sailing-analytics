@@ -15,8 +15,8 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.gwt.adminconsole.URLFieldWithFileUpload;
 import com.sap.sse.gwt.client.GWTLocaleUtil;
@@ -93,7 +93,7 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
         thumbnailURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
         tagsListEditor = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new GenericStringListInlineEditorComposite.ExpandedUi<String>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
-                        MediaConstants.videoTagSuggestions, stringMessages.enterTagsForTheVideo(), 50));
+                        MediaTagConstants.videoTagSuggestions, stringMessages.enterTagsForTheVideo(), 50));
     }
 
     @Override

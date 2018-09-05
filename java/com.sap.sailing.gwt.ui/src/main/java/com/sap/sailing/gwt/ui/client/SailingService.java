@@ -121,7 +121,7 @@ import com.sap.sse.common.mail.MailException;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtService;
 import com.sap.sse.gwt.client.media.ImageDTO;
-import com.sap.sse.gwt.client.media.ToResizeImageDTO;
+import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.gwt.client.replication.RemoteReplicationService;
 
@@ -785,5 +785,5 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      */
     Boolean checkIfRaceIsTracking(RegattaAndRaceIdentifier race);
 
-    ImageDTO[] resizeImage(ToResizeImageDTO toResizeImage) throws Exception;
+    ImageDTO[] resizeImage(ImageResizingTaskDTO toResizeImage) throws Exception;
 }

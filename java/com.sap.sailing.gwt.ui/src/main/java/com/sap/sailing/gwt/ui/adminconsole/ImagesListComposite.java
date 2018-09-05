@@ -39,7 +39,7 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.media.ImageDTO;
-import com.sap.sse.gwt.client.media.ToResizeImageDTO;
+import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
 
 /**
  * /** A composite showing the list of media images
@@ -93,7 +93,7 @@ public class ImagesListComposite extends Composite {
         addPhotoBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                openCreateImageDialog(MediaTagConstants.GALLERY);
+                openCreateImageDialog(MediaTagConstants.GALLERY.getName());
             }
         });
         imagesControlsPanel.add(addPhotoBtn);
@@ -102,7 +102,7 @@ public class ImagesListComposite extends Composite {
         addStateImageBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                openCreateImageDialog(MediaTagConstants.STAGE);
+                openCreateImageDialog(MediaTagConstants.STAGE.getName());
             }
         });
         imagesControlsPanel.add(addStateImageBtn);
@@ -111,7 +111,7 @@ public class ImagesListComposite extends Composite {
         addEventTeaseImageBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                openCreateImageDialog(MediaTagConstants.TEASER);
+                openCreateImageDialog(MediaTagConstants.TEASER.getName());
             }
         });
         imagesControlsPanel.add(addEventTeaseImageBtn);
@@ -120,7 +120,7 @@ public class ImagesListComposite extends Composite {
         addLogoImageBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                openCreateImageDialog(MediaTagConstants.LOGO);
+                openCreateImageDialog(MediaTagConstants.LOGO.getName());
             }
         });
         imagesControlsPanel.add(addLogoImageBtn);
@@ -273,24 +273,15 @@ public class ImagesListComposite extends Composite {
     }
 
     private void openCreateImageDialog(String initialTag) {
-        if (!storageServiceAvailable.getValue()) {
-            Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
-            return;
-        }
         ImageCreateDialog dialog = new ImageCreateDialog(initialTag, sailingService, stringMessages,
-                new DialogCallback<ImageDTO>() {
+                new DialogCallback<ImageResizingTaskDTO>() {
                     @Override
                     public void cancel() {
                     }
 
                     @Override
-                    public void ok(ImageDTO newImage) {
-                        if (newImage.getClass().equals(ToResizeImageDTO.class)) {
-                            callResizingService(newImage, null);
-                        } else {
-                            imageListDataProvider.getList().add(newImage);
-                            updateTableVisisbilty();
-                        }
+                    public void ok(ImageResizingTaskDTO resizingTask) {
+                        callResizingService(resizingTask, null);
                     }
                 });
         dialog.show();
@@ -301,28 +292,22 @@ public class ImagesListComposite extends Composite {
             Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
         } else {
             ImageEditDialog dialog = new ImageEditDialog(selectedImage, sailingService, stringMessages,
-                    new DialogCallback<ImageDTO>() {
+                    new DialogCallback<ImageResizingTaskDTO>() {
                         @Override
                         public void cancel() {
                         }
 
                         @Override
-                        public void ok(ImageDTO updatedImage) {
-                            if (updatedImage.getClass().equals(ToResizeImageDTO.class)) {
-                                callResizingService(updatedImage, selectedImage);
-                            } else {
-                                imageListDataProvider.getList().remove(selectedImage);
-                                imageListDataProvider.getList().add(updatedImage);
-                                updateTableVisisbilty();
-                            }
+                        public void ok(ImageResizingTaskDTO resizingTask) {
+                            callResizingService(resizingTask, selectedImage);
                         }
                     });
             dialog.show();
         }
     }
 
-    protected void callResizingService(ImageDTO newImage, ImageDTO originalImage) {
-        sailingService.resizeImage((ToResizeImageDTO) newImage, new AsyncCallback<ImageDTO[]>() {
+    protected void callResizingService(ImageResizingTaskDTO resizingTask, ImageDTO originalImage) {
+        sailingService.resizeImage(resizingTask, new AsyncCallback<ImageDTO[]>() {
             @Override
             public void onFailure(Throwable caught) {
                 Notification.notify(stringMessages.resizeUnsuccessfull(), NotificationType.ERROR);
