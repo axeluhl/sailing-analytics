@@ -118,7 +118,7 @@ public class Swarm implements TimeListener {
             clearNextFrame = true;
         }
         swarmContinue = true;
-        startLoop(animationIntervalMillis);
+        startLoopIfNecessary(animationIntervalMillis);
     }
 
     private void removeBoundsChangeHandler() {
@@ -220,43 +220,45 @@ public class Swarm implements TimeListener {
                 + visibleBoundsOfField.getNorthEast().getLatitude() / 180. * Math.PI) / 2);
     }
 
-    private void startLoop(final int animationIntervalMillis) {
-        // Create animation-loop based on timer timeout
-        loopTimer = new com.google.gwt.user.client.Timer() {
-            public void run() {
-                Date time0 = new Date();
-                if (swarmPause > 1) {
-                    swarmPause--;
-                } else if (swarmPause == 1) {
-                    fullcanvas.setCanvasSettings();
-                    projection.calibrate();
-                    updateBounds();
-                    if (zoomChanged) {
-                        diffPx = new Vector(0, 0);
-                        recycleParticles();
-                        zoomChanged = false;
-                    } else {
-                        diffPx = fullcanvas.getDiffPx();
+    private void startLoopIfNecessary(final int animationIntervalMillis) {
+        if (loopTimer == null) {
+            // Create animation-loop based on timer timeout
+            loopTimer = new com.google.gwt.user.client.Timer() {
+                public void run() {
+                    Date time0 = new Date();
+                    if (swarmPause > 1) {
+                        swarmPause--;
+                    } else if (swarmPause == 1) {
+                        fullcanvas.setCanvasSettings();
+                        projection.calibrate();
+                        updateBounds();
+                        if (zoomChanged) {
+                            diffPx = new Vector(0, 0);
+                            recycleParticles();
+                            zoomChanged = false;
+                        } else {
+                            diffPx = fullcanvas.getDiffPx();
+                        }
+                        swarmPause = 0;
                     }
-                    swarmPause = 0;
+                    if ((!swarmOffScreen) && (swarmPause == 0)) {
+                        execute(diffPx);
+                        diffPx = new Vector(0, 0);
+                    }
+                    Date time1 = new Date();
+                    if (swarmContinue) {
+                        // wait at least 10ms for the next iteration; try to get one iteration done every
+                        // animationIntervalMillis if possible
+                        long timeDelta = time1.getTime() - time0.getTime();
+                        // log("fps: "+(1000.0/timeDelta));
+                        loopTimer.schedule((int) Math.max(10, animationIntervalMillis - timeDelta));
+                    } else {
+                        projection.clearCanvas();
+                    }
                 }
-                if ((!swarmOffScreen) && (swarmPause == 0)) {
-                    execute(diffPx);
-                    diffPx = new Vector(0, 0);
-                }
-                Date time1 = new Date();
-                if (swarmContinue) {
-                    // wait at least 10ms for the next iteration; try to get one iteration done every
-                    // animationIntervalMillis if possible
-                    long timeDelta = time1.getTime() - time0.getTime();
-                    // log("fps: "+(1000.0/timeDelta));
-                    loopTimer.schedule((int) Math.max(10, animationIntervalMillis - timeDelta));
-                } else {
-                    projection.clearCanvas();
-                }
-            }
-        };
-        loopTimer.schedule(animationIntervalMillis);
+            };
+            loopTimer.schedule(animationIntervalMillis);
+        }
     }
 
     private void drawSwarm() {
@@ -265,26 +267,26 @@ public class Swarm implements TimeListener {
         if (clearNextFrame) {
             // ctxt.setGlobalAlpha(1);
             clearNextFrame = false;
-            return;
-        }
-        ctxt.setGlobalCompositeOperation("destination-out");
-        ctxt.setFillStyle("black");
-        ctxt.fillRect(0, 0, canvas.getOffsetWidth(), canvas.getOffsetHeight());
-        ctxt.setGlobalAlpha(1.0);
-        ctxt.setGlobalCompositeOperation("source-over");
-        ctxt.setFillStyle("white");
-        for (int idx = 0; idx < nParticles && idx < particles.length; idx++) {
-            Particle particle = particles[idx];
-            if (particle == null || particle.stepsToLive == 0) {
-                continue;
+        } else {
+            ctxt.setGlobalCompositeOperation("destination-out");
+            ctxt.setFillStyle("black");
+            ctxt.fillRect(0, 0, canvas.getOffsetWidth(), canvas.getOffsetHeight());
+            ctxt.setGlobalAlpha(1.0);
+            ctxt.setGlobalCompositeOperation("source-over");
+            ctxt.setFillStyle("white");
+            for (int idx = 0; idx < nParticles && idx < particles.length; idx++) {
+                Particle particle = particles[idx];
+                if (particle == null || particle.stepsToLive == 0) {
+                    continue;
+                }
+                double particleSpeed = particle.v == null ? 0 : particle.v.length();
+                ctxt.setLineWidth(field.getLineWidth(particleSpeed));
+                ctxt.setStrokeStyle(colorMapper.getColor(particleSpeed));
+                ctxt.beginPath();
+                ctxt.moveTo(particle.previousPixelCoordinate.x, particle.previousPixelCoordinate.y);
+                ctxt.lineTo(particle.currentPixelCoordinate.x, particle.currentPixelCoordinate.y);
+                ctxt.stroke();
             }
-            double particleSpeed = particle.v == null ? 0 : particle.v.length();
-            ctxt.setLineWidth(field.getLineWidth(particleSpeed));
-            ctxt.setStrokeStyle(colorMapper.getColor(particleSpeed));
-            ctxt.beginPath();
-            ctxt.moveTo(particle.previousPixelCoordinate.x, particle.previousPixelCoordinate.y);
-            ctxt.lineTo(particle.currentPixelCoordinate.x, particle.currentPixelCoordinate.y);
-            ctxt.stroke();
         }
     }
 
