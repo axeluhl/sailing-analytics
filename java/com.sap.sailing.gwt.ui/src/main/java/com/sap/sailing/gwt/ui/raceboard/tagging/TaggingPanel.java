@@ -158,7 +158,7 @@ public class TaggingPanel extends ComponentWithoutSettings
 
         createTagsButton.setTitle(stringMessages.tagAddTags());
         createTagsButton.setStyleName(style.toggleEditState());
-        createTagsButton.addStyleName(style.imagePen());
+        createTagsButton.addStyleName(style.imagePusTransparent());
         createTagsButton.addClickHandler(event -> {
             setCurrentState(State.EDIT);
         });

@@ -386,8 +386,8 @@
 	background-size: contain;
 }
 
-.imagePen {
-    gwt-sprite: "pen";
+.imagePusTransparent {
+    gwt-sprite: "plusTransparent";
     width: 2em;
     height: 2em;
     background-size: contain;

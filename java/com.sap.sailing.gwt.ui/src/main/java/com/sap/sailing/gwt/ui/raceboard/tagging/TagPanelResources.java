@@ -35,8 +35,8 @@ public interface TagPanelResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/SAP_RV_Settings.png")
     ImageResource settingsButton();
 
-    @Source("com/sap/sailing/gwt/ui/client/images/pen.png")
-    ImageResource pen();
+    @Source("com/sap/sailing/gwt/ui/client/images/plus_transparent.png")
+    ImageResource plusTransparent();
 
     @Source("tagging-panel.gss")
     public TagPanelStyle style();
@@ -97,6 +97,6 @@ public interface TagPanelResources extends ClientBundle {
         String imageSearch();
         String imageClearSearch();
         String imageSettings();
-        String imagePen();
+        String imagePusTransparent();
     }
 }
