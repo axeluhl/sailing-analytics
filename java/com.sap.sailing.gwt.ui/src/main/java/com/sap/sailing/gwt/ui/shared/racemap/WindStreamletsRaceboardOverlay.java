@@ -417,9 +417,13 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
     }
 
     public void onBoundsChanged(boolean zoomChanged) {
-        if (swarm != null && !dragging) {
-            int swarmPause = (zoomChanged ? 5 : 2);
-            swarm.onBoundsChanged(zoomChanged, swarmPause);
+        if (swarm != null) {
+            if (dragging) {
+                swarm.pause(2);
+            } else {
+                int swarmPause = (zoomChanged ? 5 : 2);
+                swarm.onBoundsChanged(zoomChanged, swarmPause);
+            }
         }
     }
 

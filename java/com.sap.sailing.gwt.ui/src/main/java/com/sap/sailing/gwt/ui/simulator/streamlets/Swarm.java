@@ -367,4 +367,8 @@ public class Swarm implements TimeListener {
     public void timeChanged(Date newTime, Date oldTime) {
         timePoint = newTime;
     }
+
+    public void pause(int swarmPause) {
+        this.swarmPause = swarmPause;
+    }
 }
