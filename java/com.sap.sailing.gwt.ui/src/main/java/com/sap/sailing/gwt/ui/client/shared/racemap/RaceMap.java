@@ -667,21 +667,21 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         loadLibraries.add(LoadLibrary.GEOMETRY);
 
         Runnable onLoad = new Runnable() {
-          @Override
-          public void run() {
-              MapOptions mapOptions = getMapOptions(showMapControls, /* wind up */ false);
-              map = new MapWidget(mapOptions);
-              rootPanel.add(map, 0, 0);
-              if (showHeaderPanel) {
-                  Image sapLogo = createSAPLogo();
-                  rootPanel.add(sapLogo);
-              }
-              
-              map.setControls(ControlPosition.LEFT_TOP, topLeftControlsWrapperPanel);
-              adjustLeftControlsIndent();
+            @Override
+            public void run() {
+                MapOptions mapOptions = getMapOptions(showMapControls, /* wind up */ false);
+                map = new MapWidget(mapOptions);
+                rootPanel.add(map, 0, 0);
+                if (showHeaderPanel) {
+                    Image sapLogo = createSAPLogo();
+                    rootPanel.add(sapLogo);
+                }
 
-              RaceMap.this.raceMapImageManager.loadMapIcons(map);
-              map.setSize("100%", "100%");
+                map.setControls(ControlPosition.LEFT_TOP, topLeftControlsWrapperPanel);
+                adjustLeftControlsIndent();
+
+                RaceMap.this.raceMapImageManager.loadMapIcons(map);
+                map.setSize("100%", "100%");
                 map.addZoomChangeHandler(new ZoomChangeMapHandler() {
                     @Override
                     public void onEvent(ZoomChangeMapEvent event) {
@@ -721,9 +721,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         }.schedule(500);
                     }
                 });
-              map.addDragEndHandler(new DragEndMapHandler() {
-                  @Override
-                  public void onEvent(DragEndMapEvent event) {
+                map.addDragEndHandler(new DragEndMapHandler() {
+                    @Override
+                    public void onEvent(DragEndMapEvent event) {
                         // stop automatic zoom after a manual drag event
                         autoZoomIn = false;
                         autoZoomOut = false;
@@ -737,7 +737,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             streamletOverlay.onDragEnd();
                         }
                     }
-              });
+                });
 
                 map.addDragStartHandler(event -> {
                     currentlyDragging = true;
@@ -746,79 +746,80 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     }
                 });
 
-              map.addIdleHandler(new IdleMapHandler() {
-                  @Override
-                  public void onEvent(IdleMapEvent event) {
-                      // the "idle"-event is raised at the end of map-animations
-                      if (autoZoomIn) {
-                          // finalize zoom-in that was started with panTo() in zoomMapToNewBounds()
-                          map.setZoom(autoZoomLevel);
-                          autoZoomIn = false;
-                      }
-                      if (autoZoomOut) {
-                          // finalize zoom-out that was started with setZoom() in zoomMapToNewBounds()
-                          map.panTo(autoZoomLatLngBounds.getCenter());
-                          autoZoomOut = false;
-                      }
+                map.addIdleHandler(new IdleMapHandler() {
+                    @Override
+                    public void onEvent(IdleMapEvent event) {
+                        // the "idle"-event is raised at the end of map-animations
+                        if (autoZoomIn) {
+                            // finalize zoom-in that was started with panTo() in zoomMapToNewBounds()
+                            map.setZoom(autoZoomLevel);
+                            autoZoomIn = false;
+                        }
+                        if (autoZoomOut) {
+                            // finalize zoom-out that was started with setZoom() in zoomMapToNewBounds()
+                            map.panTo(autoZoomLatLngBounds.getCenter());
+                            autoZoomOut = false;
+                        }
 
                         if (streamletOverlay != null && settings.isShowWindStreamletOverlay()) {
                             streamletOverlay.setCanvasSettings();
                         }
-                  }
-              });
-              map.addBoundsChangeHandler(new BoundsChangeMapHandler() {
-                  @Override
-                  public void onEvent(BoundsChangeMapEvent event) {
-                      int newZoomLevel = map.getZoom(); 
-                      if (!isAutoZoomInProgress() && (newZoomLevel != currentZoomLevel)) {
-                          removeTransitions();
-                      }
+                    }
+                });
+                map.addBoundsChangeHandler(new BoundsChangeMapHandler() {
+                    @Override
+                    public void onEvent(BoundsChangeMapEvent event) {
+                        int newZoomLevel = map.getZoom();
+                        if (!isAutoZoomInProgress() && (newZoomLevel != currentZoomLevel)) {
+                            removeTransitions();
+                        }
 
-                      currentMapBounds = map.getBounds();
-                      currentZoomLevel = newZoomLevel;
-                      headerPanel.getElement().getStyle().setWidth(map.getOffsetWidth(), Unit.PX);
+                        currentMapBounds = map.getBounds();
+                        currentZoomLevel = newZoomLevel;
+                        headerPanel.getElement().getStyle().setWidth(map.getOffsetWidth(), Unit.PX);
                         refreshMapWithoutAnimation();
-                  }
-              });
+                    }
+                });
 
-
-              // If there was a time change before the API was loaded, reset the time
-              if (lastTimeChangeBeforeInitialization != null) {
-                  timeChanged(lastTimeChangeBeforeInitialization, null);
-                  lastTimeChangeBeforeInitialization = null;
-              }
-              // Initialize streamlet canvas for wind visualization; it shouldn't be doing anything unless it's visible
-              streamletOverlay = new WindStreamletsRaceboardOverlay(getMap(), /* zIndex */ 0,
-                      timer, raceIdentifier, sailingService, asyncActionsExecutor, stringMessages, coordinateSystem);
-              streamletOverlay.addToMap();
+                // If there was a time change before the API was loaded, reset the time
+                if (lastTimeChangeBeforeInitialization != null) {
+                    timeChanged(lastTimeChangeBeforeInitialization, null);
+                    lastTimeChangeBeforeInitialization = null;
+                }
+                // Initialize streamlet canvas for wind visualization; it shouldn't be doing anything unless it's
+                // visible
+                streamletOverlay = new WindStreamletsRaceboardOverlay(getMap(), /* zIndex */ 0, timer, raceIdentifier,
+                        sailingService, asyncActionsExecutor, stringMessages, coordinateSystem);
+                streamletOverlay.addToMap();
                 streamletOverlay.setColors(settings.isShowWindStreamletColors());
-              if (settings.isShowWindStreamletOverlay()) {
-                  streamletOverlay.setVisible(true);
-              }
+                if (settings.isShowWindStreamletOverlay()) {
+                    streamletOverlay.setVisible(true);
+                }
 
-              if (isSimulationEnabled) {
-                  // determine availability of polar diagram
-                  setHasPolar();
-                  // initialize simulation canvas
-                  simulationOverlay = new RaceSimulationOverlay(getMap(), /* zIndex */ 0, raceIdentifier, sailingService, stringMessages, asyncActionsExecutor, coordinateSystem);
-                  simulationOverlay.addToMap();
-                  showSimulationOverlay(settings.isShowSimulationOverlay());
-              }
-              if (showHeaderPanel) {
-                  createHeaderPanel(map);
-              }
-              if (showMapControls) {
-                  createSettingsButton(map);
-              }
-              // Data has been initialized
-              RaceMap.this.isMapInitialized = true;
-              RaceMap.this.redraw();
-              trueNorthIndicatorPanel.redraw();
-              showAdditionalControls(map);
-              RaceMap.this.managedInfoWindow = new ManagedInfoWindow(map);
-          }
+                if (isSimulationEnabled) {
+                    // determine availability of polar diagram
+                    setHasPolar();
+                    // initialize simulation canvas
+                    simulationOverlay = new RaceSimulationOverlay(getMap(), /* zIndex */ 0, raceIdentifier,
+                            sailingService, stringMessages, asyncActionsExecutor, coordinateSystem);
+                    simulationOverlay.addToMap();
+                    showSimulationOverlay(settings.isShowSimulationOverlay());
+                }
+                if (showHeaderPanel) {
+                    createHeaderPanel(map);
+                }
+                if (showMapControls) {
+                    createSettingsButton(map);
+                }
+                // Data has been initialized
+                RaceMap.this.isMapInitialized = true;
+                RaceMap.this.redraw();
+                trueNorthIndicatorPanel.redraw();
+                showAdditionalControls(map);
+                RaceMap.this.managedInfoWindow = new ManagedInfoWindow(map);
+            }
         };
-        LoadApi.go(onLoad, loadLibraries, GoogleMapAPIKey.V3_PARAMS); 
+        LoadApi.go(onLoad, loadLibraries, GoogleMapAPIKey.V3_PARAMS);
     }
 
     /**
