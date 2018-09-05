@@ -760,6 +760,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                           map.panTo(autoZoomLatLngBounds.getCenter());
                           autoZoomOut = false;
                       }
+
+                        if (streamletOverlay != null && settings.isShowWindStreamletOverlay()) {
+                            streamletOverlay.setCanvasSettings();
+                        }
                   }
               });
               map.addBoundsChangeHandler(new BoundsChangeMapHandler() {
@@ -776,6 +780,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         refreshMapWithoutAnimation();
                   }
               });
+
 
               // If there was a time change before the API was loaded, reset the time
               if (lastTimeChangeBeforeInitialization != null) {
