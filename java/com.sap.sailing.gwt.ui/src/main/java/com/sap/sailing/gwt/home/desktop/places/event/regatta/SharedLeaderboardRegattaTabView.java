@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.desktop.places.event.regatta;
 
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.user.client.ui.Composite;
@@ -19,7 +18,6 @@ import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.gwt.client.shared.settings.PipelineLevel;
 import com.sap.sse.gwt.shared.GwtHttpRequestUtils;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.settings.ComponentContextWithSettingsStorageAndAdditionalSettingsLayers.OnSettingsReloadedCallback;
 import com.sap.sse.security.ui.settings.PlaceBasedComponentContextWithSettingsStorage;
 import com.sap.sse.security.ui.settings.StoredSettingsLocation;
 
@@ -72,17 +70,10 @@ public abstract class SharedLeaderboardRegattaTabView<T extends AbstractEventReg
                                 if (newWidth > 0 && newHeight > 0 && newWidth > 1500) {
                                     final int numberOfLastRacesToShow = (1500 - 600) / 50;
                                     MultiRaceLeaderboardSettings newSettings = MultiRaceLeaderboardSettings
-                                            .createDefaultSettingsWithLastNMode(numberOfLastRacesToShow);
+                                            .createDefaultSettingsWithLastNRaceColumnSelection(numberOfLastRacesToShow);
                                     componentContext.addAdditionalSettingsLayerForComponent(leaderboardPanel,
                                             PipelineLevel.SYSTEM_DEFAULTS, newSettings,
-                                            new OnSettingsReloadedCallback<MultiRaceLeaderboardSettings>() {
-                                                @Override
-                                                public void onSettingsReloaded(
-                                                        MultiRaceLeaderboardSettings patchedSettings) {
-                                                    GWT.log("Switching to last_n mode with settings" + patchedSettings);
-                                                    leaderboardPanel.updateSettings(patchedSettings);
-                                                }
-                                            });
+                                            leaderboardPanel::updateSettings);
                                 }
                             }
                         }

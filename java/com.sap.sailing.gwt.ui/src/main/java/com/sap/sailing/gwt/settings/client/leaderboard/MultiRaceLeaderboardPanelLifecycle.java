@@ -30,7 +30,7 @@ public class MultiRaceLeaderboardPanelLifecycle extends LeaderboardPanelLifecycl
     @Override
     public MultiRaceLeaderboardSettings extractUserSettings(MultiRaceLeaderboardSettings currentLeaderboardSettings) {
         // All settings except namesOfRaceColumnsToShow are used for the user settings
-        return currentLeaderboardSettings.withDefaultNamesOfRaceColumnsToShow(namesOfRaceColumns);
+        return currentLeaderboardSettings.withNamesOfRaceColumnsToShowDefaultsAndValues(namesOfRaceColumns);
     }
     
     @Override

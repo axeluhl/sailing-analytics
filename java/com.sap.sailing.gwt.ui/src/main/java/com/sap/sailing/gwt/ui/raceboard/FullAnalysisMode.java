@@ -53,7 +53,7 @@ public class FullAnalysisMode extends AbstractRaceBoardMode {
         raceDetailsToShow.add(DetailType.RACE_DISTANCE_TRAVELED);
         raceDetailsToShow.add(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS);
         final SingleRaceLeaderboardSettings additiveSettings = SingleRaceLeaderboardSettings
-                .createNewWithDefaultsAndwithRaceDetailsToShow(raceDetailsToShow);
+                .createDefaultSettingsWithRaceDetailValues(raceDetailsToShow);
         ((RaceBoardComponentContext) leaderboardPanel.getComponentContext()).addModesPatching(leaderboardPanel, additiveSettings, new OnSettingsReloadedCallback<SingleRaceLeaderboardSettings>() {
             @Override
             public void onSettingsReloaded(SingleRaceLeaderboardSettings patchedSettings) {

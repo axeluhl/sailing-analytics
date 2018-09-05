@@ -35,7 +35,7 @@ public class PlayerMode extends AbstractRaceBoardMode {
         raceDetailsToShow.add(DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS);
         raceDetailsToShow.add(DetailType.RACE_GAP_TO_LEADER_IN_SECONDS);
         final SingleRaceLeaderboardSettings additiveSettings = SingleRaceLeaderboardSettings
-                .createNewWithDefaultsAndwithRaceDetailsToShow(raceDetailsToShow);
+                .createDefaultSettingsWithRaceDetailValues(raceDetailsToShow);
         ((RaceBoardComponentContext) leaderboardPanel.getComponentContext()).addModesPatching(leaderboardPanel, additiveSettings, new OnSettingsReloadedCallback<SingleRaceLeaderboardSettings>() {
 
             @Override

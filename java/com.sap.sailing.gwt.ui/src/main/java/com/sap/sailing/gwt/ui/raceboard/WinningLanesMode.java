@@ -47,7 +47,7 @@ public class WinningLanesMode extends RaceBoardModeWithPerRaceCompetitors {
         raceDetailsToShow.add(DetailType.RACE_DISTANCE_TRAVELED);
         raceDetailsToShow.add(DetailType.RACE_TIME_TRAVELED);
         final SingleRaceLeaderboardSettings additiveSettings = SingleRaceLeaderboardSettings
-                .createNewWithDefaultsAndwithRaceDetailsToShow(raceDetailsToShow);
+                .createDefaultSettingsWithRaceDetailValues(raceDetailsToShow);
         ((RaceBoardComponentContext) leaderboardPanel.getComponentContext()).addModesPatching(leaderboardPanel, additiveSettings, new OnSettingsReloadedCallback<SingleRaceLeaderboardSettings>() {
             @Override
             public void onSettingsReloaded(SingleRaceLeaderboardSettings patchedSettings) {

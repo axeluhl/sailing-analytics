@@ -234,7 +234,7 @@ public class MultiLeaderboardProxyPanel extends AbstractLazyComponent<MultiRaceL
 
             MultiRaceLeaderboardSettings toMerge = contextStore.get(newSelectedLeaderboardName);
             if (toMerge != null) {
-                toMerge = loadedSettings.withRaceColumnSelectionFrom(toMerge);
+                toMerge = loadedSettings.withRaceColumnSelectionValuesFrom(toMerge);
             } else {
                 toMerge = loadedSettings;
             }
