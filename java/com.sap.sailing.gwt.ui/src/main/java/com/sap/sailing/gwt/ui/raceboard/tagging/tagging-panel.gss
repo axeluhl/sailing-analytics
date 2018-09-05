@@ -82,20 +82,22 @@
 
 .tagCellHeading {
 	font-weight: bold;
+	word-wrap: break-word;
 }
 
-.tagCellHeading button {
+.tagCellHeading button[role="delete"] {
 	position: absolute;
 	right: 0;
 	bottom: 0;
 	border: none;
-	background: transparent;
+	border-radius: 3px;
+	background: white;
+	line-height: initial;
 }
 
-.tagCellHeading button:hover {
+.tagCellHeading button[role="delete"]:hover {
 	cursor: pointer;
 	outline: none;
-	border-radius: 3px;
 	background-color: lightgrey;
 	transition-duration: 0.2s;
 	transition-property: background-color;

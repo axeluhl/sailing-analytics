@@ -59,7 +59,7 @@ public class TagCell extends AbstractCell<TagDTO> {
          *            {@link #contentWithCommentWithoutImage} and {@link #contentWithoutCommentWithImage}.
          * @return {@link SafeHtml HTML template}
          */
-        @Template("<div class='{0}'><div class='{1}'>{3}<div style=\"position: relative\"><button>X</button></div></div><div class='{2}'>{4}</div>{5}</div>")
+        @Template("<div class='{0}'><div class='{1}'>{3}<div style='position: relative'><button role='delete'>X</button></div></div><div class='{2}'>{4}</div>{5}</div>")
         SafeHtml cellRemovable(String styleTag, String styleTagHeading, String styleTagCreated, SafeHtml tag,
                 SafeHtml createdAt, SafeHtml content);
 
@@ -91,7 +91,7 @@ public class TagCell extends AbstractCell<TagDTO> {
          *            {@link #contentWithCommentWithoutImage} and {@link #contentWithoutCommentWithImage}.
          * @return {@link SafeHtml HTML template}
          */
-        @Template("<div class='{0}'><div class='{1}'><img src='{6}'>{3}<div style=\"position: relative\"><button>X</button></div></div><div class='{2}'>{4}</div>{5}</div>")
+        @Template("<div class='{0}'><div class='{1}'><img src='{6}'>{3}<div style='position: relative'><button role='delete'>X</button></div></div><div class='{2}'>{4}</div>{5}</div>")
         SafeHtml privateCellRemovable(String styleTag, String styleTagHeading, String styleTagCreated, SafeHtml tag,
                 SafeHtml createdAt, SafeHtml content, SafeUri safeUri);
 
