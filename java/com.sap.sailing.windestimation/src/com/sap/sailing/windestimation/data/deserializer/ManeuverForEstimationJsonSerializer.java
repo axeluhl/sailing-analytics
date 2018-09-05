@@ -46,7 +46,7 @@ public class ManeuverForEstimationJsonSerializer implements JsonSerializer<Maneu
     @Override
     public JSONObject serialize(ManeuverForEstimation maneuver) {
         JSONObject json = new JSONObject();
-        json.put(TIMEPOINT, maneuver.getManeuverTimePoint());
+        json.put(TIMEPOINT, maneuver.getManeuverTimePoint().asMillis());
         json.put(POSITION_LATITUDE, maneuver.getManeuverPosition().getLatDeg());
         json.put(POSITION_LONGITUDE, maneuver.getManeuverPosition().getLngDeg());
         json.put(MIDDLE_COURSE, maneuver.getMiddleCourse().getDegrees());

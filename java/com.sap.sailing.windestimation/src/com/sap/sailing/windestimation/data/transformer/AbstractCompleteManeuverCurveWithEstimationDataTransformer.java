@@ -107,13 +107,13 @@ public abstract class AbstractCompleteManeuverCurveWithEstimationDataTransformer
                 && (!validateManeuverExiting || maneuver.getCurveWithUnstableCourseAndSpeed()
                         .getIntervalBetweenLastFixOfCurveAndNextFix().asSeconds() <= 4)
                 && (!validateManeuverEntering || maneuver.getCurveWithUnstableCourseAndSpeed()
-                        .getGpsFixesCountFromPreviousManeuverEndToManeuverStart()
+                        .getDurationFromPreviousManeuverEndToManeuverStart().asSeconds()
                         / maneuver.getCurveWithUnstableCourseAndSpeed()
-                                .getDurationFromPreviousManeuverEndToManeuverStart().asSeconds() <= 8)
+                                .getGpsFixesCountFromPreviousManeuverEndToManeuverStart() <= 8)
                 && (!validateManeuverExiting || maneuver.getCurveWithUnstableCourseAndSpeed()
-                        .getGpsFixesCountFromManeuverEndToNextManeuverStart()
-                        / maneuver.getCurveWithUnstableCourseAndSpeed().getDurationFromManeuverEndToNextManeuverStart()
-                                .asSeconds() <= 8)
+                        .getDurationFromManeuverEndToNextManeuverStart().asSeconds()
+                        / maneuver.getCurveWithUnstableCourseAndSpeed()
+                                .getGpsFixesCountFromManeuverEndToNextManeuverStart() <= 8)
                 && (!validateManeuverEntering
                         || maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getKnots() > 2)
                 && (!validateManeuverExiting
@@ -122,18 +122,14 @@ public abstract class AbstractCompleteManeuverCurveWithEstimationDataTransformer
                         || maneuver.getCurveWithUnstableCourseAndSpeed()
                                 .getDurationFromPreviousManeuverEndToManeuverStart().asSeconds() >= 4
                         || previousManeuver != null
-                                && Math.abs(previousManeuver.getCurveWithUnstableCourseAndSpeed()
-                                        .getDirectionChangeInDegrees()) < Math.abs(maneuver
-                                                .getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees())
-                                                * 0.3)
+                                && Math.abs(previousManeuver.getMainCurve().getDirectionChangeInDegrees()) < Math
+                                        .abs(maneuver.getMainCurve().getDirectionChangeInDegrees()) * 0.3)
                 && (!validateManeuverExiting
                         || maneuver.getCurveWithUnstableCourseAndSpeed().getDurationFromManeuverEndToNextManeuverStart()
                                 .asSeconds() >= 4
                         || nextManeuver != null
-                                && Math.abs(nextManeuver.getCurveWithUnstableCourseAndSpeed()
-                                        .getDirectionChangeInDegrees()) < Math.abs(maneuver
-                                                .getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees())
-                                                * 0.3);
+                                && Math.abs(nextManeuver.getMainCurve().getDirectionChangeInDegrees()) < Math
+                                        .abs(maneuver.getMainCurve().getDirectionChangeInDegrees()) * 0.3);
     }
 
     protected boolean isManeuverClean(CompleteManeuverCurveWithEstimationData maneuver,

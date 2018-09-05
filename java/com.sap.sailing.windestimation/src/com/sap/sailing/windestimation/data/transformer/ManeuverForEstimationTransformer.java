@@ -73,8 +73,8 @@ public class ManeuverForEstimationTransformer
         if (maneuver.getWind() == null) {
             maneuverForEstimation = new ManeuverForEstimation(maneuver.getTimePoint(), maneuver.getPosition(),
                     maneuver.getCurveWithUnstableCourseAndSpeed().getMiddleCourse(),
-                    maneuver.getCurveWithUnstableCourseAndSpeed().getAverageSpeedWithBearingBefore(),
-                    maneuver.getCurveWithUnstableCourseAndSpeed().getAverageSpeedWithBearingAfter(),
+                    maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore(),
+                    maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter(),
                     maneuver.getMainCurve().getLowestSpeed().getBearing(),
                     maneuver.getCurveWithUnstableCourseAndSpeed().getAverageSpeedWithBearingBefore(),
                     maneuver.getCurveWithUnstableCourseAndSpeed().getAverageSpeedWithBearingAfter(),
@@ -87,8 +87,8 @@ public class ManeuverForEstimationTransformer
         } else {
             maneuverForEstimation = new LabelledManeuverForEstimation(maneuver.getTimePoint(), maneuver.getPosition(),
                     maneuver.getCurveWithUnstableCourseAndSpeed().getMiddleCourse(),
-                    maneuver.getCurveWithUnstableCourseAndSpeed().getAverageSpeedWithBearingBefore(),
-                    maneuver.getCurveWithUnstableCourseAndSpeed().getAverageSpeedWithBearingAfter(),
+                    maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore(),
+                    maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter(),
                     maneuver.getMainCurve().getLowestSpeed().getBearing(),
                     maneuver.getCurveWithUnstableCourseAndSpeed().getAverageSpeedWithBearingBefore(),
                     maneuver.getCurveWithUnstableCourseAndSpeed().getAverageSpeedWithBearingAfter(),
