@@ -28,38 +28,25 @@ public class MediaSingleSelectionControl extends AbstractMediaSelectionControl i
 
         this.dialogControl = new DialogBox(true, false);
         this.dialogControl.addStyleName("Media-Select-Popup");
-        this.dialogControl.setText("Select Video");
+        this.dialogControl.setText(stringMessages.selectMedia());
         this.dialogControl.addCloseHandler(this);
 
     }
 
     public void show() {
-        Collection<MediaTrack> mediaTracks = new ArrayList<MediaTrack>();
-        addPotentiallyPlayableMediaTracksTo(mediaTracks);
+        final Collection<MediaTrack> mediaTracks = new ArrayList<>(mediaPlayerManager.getAssignedMediaTracks());
         Panel mediaPanel = new VerticalPanel();
-        addMediaEntriesToGridPanel(mediaTracks, mediaPanel);
+        mediaTracks.forEach(track -> mediaPanel.add(createMediaEntry(track)));
         dialogControl.add(mediaPanel);
         dialogControl.showRelativeTo(popupLocation);
     }
 
-    private void addMediaEntriesToGridPanel(Collection<MediaTrack> mediaTracks, Panel mediaPanel) {
-        for (MediaTrack videoTrack : mediaTracks) {
-            mediaPanel.add(createMediaEntry(videoTrack));
-        }
-    }
-
-    private void addPotentiallyPlayableMediaTracksTo(Collection<MediaTrack> mediaTracks) {
-        for (MediaTrack mediaTrack : mediaPlayerManager.getAssignedMediaTracks()) {
-            if (isPotentiallyPlayable(mediaTrack)) {
-                mediaTracks.add(mediaTrack);
-            }
-        }
-    }
-
     private Button createMediaEntry(final MediaTrack mediaTrack) {
-        Button mediaSelectButton = new Button(mediaTrack.title);
+        Button mediaSelectButton = new Button(
+                mediaPlayerManager.getMediaTrackStatus(mediaTrack).toString() + " " + mediaTrack.title);
         mediaSelectButton.setStyleName("Media-Select-Button");
-        if (mediaTrack.equals(mediaPlayerManager.getPlayingAudioTrack()) || mediaPlayerManager.getPlayingVideoTracks().contains(mediaTrack)) {
+        if (mediaPlayerManager.getPlayingAudioTrack().contains(mediaTrack)
+                || mediaPlayerManager.getPlayingVideoTracks().contains(mediaTrack)) {
             mediaSelectButton.setTitle(stringMessages.mediaHideVideoTooltip());
             mediaSelectButton.addStyleName("Media-Select-Button-playing");
             mediaSelectButton.addClickHandler(new ClickHandler() {
@@ -69,7 +56,7 @@ public class MediaSingleSelectionControl extends AbstractMediaSelectionControl i
                     if (mediaPlayerManager.getPlayingAudioTrack() == mediaTrack) {
                         mediaPlayerManager.muteAudio();
                     }
-                    mediaPlayerManager.closeFloatingVideo(mediaTrack);
+                    mediaPlayerManager.closeFloatingPlayer(mediaTrack);
                     hide();
                 };
             });

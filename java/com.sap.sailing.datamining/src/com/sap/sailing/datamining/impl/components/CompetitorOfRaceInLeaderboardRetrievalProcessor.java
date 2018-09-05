@@ -16,8 +16,10 @@ public class CompetitorOfRaceInLeaderboardRetrievalProcessor extends
         AbstractRetrievalProcessor<HasLeaderboardContext, HasRaceResultOfCompetitorContext> {
 
     public CompetitorOfRaceInLeaderboardRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<HasRaceResultOfCompetitorContext, ?>> resultReceivers, int retrievalLevel) {
-        super(HasLeaderboardContext.class, HasRaceResultOfCompetitorContext.class, executor, resultReceivers, retrievalLevel);
+            Collection<Processor<HasRaceResultOfCompetitorContext, ?>> resultReceivers, int retrievalLevel,
+            String retrievedDataTypeMessageKey) {
+        super(HasLeaderboardContext.class, HasRaceResultOfCompetitorContext.class, executor, resultReceivers,
+                retrievalLevel, retrievedDataTypeMessageKey);
     }
 
     @Override

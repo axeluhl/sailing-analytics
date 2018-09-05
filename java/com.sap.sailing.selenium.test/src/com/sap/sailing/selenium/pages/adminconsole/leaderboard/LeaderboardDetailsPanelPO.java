@@ -3,9 +3,11 @@ package com.sap.sailing.selenium.pages.adminconsole.leaderboard;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.sap.sailing.selenium.core.BySeleniumId;
 import com.sap.sailing.selenium.core.FindBy;
@@ -166,10 +168,19 @@ public class LeaderboardDetailsPanelPO extends PageArea {
     }
     
     public void linkRace(RaceDescriptor race, TrackedRaceDescriptor tracking) {
-        DataEntryPO raceRow = findRace(race);
-        DataEntryPO trackingRow = findTracking(tracking);
-        if(raceRow == null || trackingRow == null) {
-        }
+        WebDriverWait webDriverWait = new WebDriverWait(driver, DEFAULT_LOOKUP_TIMEOUT);
+        DataEntryPO raceRow = webDriverWait.until(new Function<WebDriver, DataEntryPO>() {
+            @Override
+            public DataEntryPO apply(WebDriver t) {
+                return findRace(race);
+            }
+        });
+        DataEntryPO trackingRow = webDriverWait.until(new Function<WebDriver, DataEntryPO>() {
+            @Override
+            public DataEntryPO apply(WebDriver t) {
+                return findTracking(tracking);
+            }
+        });
         raceRow.select();
         trackingRow.select();
         waitForAjaxRequests(); // the selection will update elements of the cell table; wait until the callback has been received

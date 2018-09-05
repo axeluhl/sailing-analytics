@@ -45,6 +45,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsFromRaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogCloseOpenEndedDeviceMappingEventImpl;
@@ -64,11 +65,13 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.AbstractRaceColumn;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -82,6 +85,7 @@ import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.RaceColumnConstants;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
+import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.common.security.Permission;
@@ -1242,4 +1246,63 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         }
         return response;
     }
+
+    @POST
+    @Path("{leaderboardName}/denoteForTracking")
+    public Response denoteForTracking(@PathParam("leaderboardName") String leaderboardName,
+            @QueryParam("raceColumnName") String raceColumnName, @QueryParam("fleetName") String fleetName,
+            @QueryParam("raceName") String raceName) throws NotFoundException, NotDenotableForRaceLogTrackingException {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        SecurityUtils.getSubject().checkPermission(Permission.MANAGE_TRACKED_RACES.getStringPermission(Mode.UPDATE));
+        if (leaderboard == null) {
+            throw new NotFoundException("leaderboard with name " + leaderboardName + " not found");
+        }
+        RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+        if (raceColumn == null) {
+            throw new NotFoundException("raceColumn with name " + raceColumnName + " not found");
+        }
+        Fleet fleet = raceColumn.getFleetByName(fleetName);
+        if (fleet == null) {
+            throw new NotFoundException("fleet with name " + fleetName + " not found");
+        }
+
+        boolean result = getRaceLogTrackingAdapter().denoteRaceForRaceLogTracking(getService(), leaderboard, raceColumn,
+                fleet, raceName);
+        return (result ? Response.ok() : Response.notModified()).build();
+    }
+
+    @POST
+    @Path("{leaderboardName}/enableRaceLogForCompetitorRegistration")
+    public Response enableRaceLogForCompetitorRegistration(@PathParam("leaderboardName") String leaderboardName,
+            @QueryParam("raceColumnName") String raceColumnName, @QueryParam("fleetName") String fleetName,
+            @QueryParam("raceName") String raceName) throws NotFoundException, NotDenotableForRaceLogTrackingException {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        SecurityUtils.getSubject().checkPermission(Permission.MANAGE_ALL_COMPETITORS.getStringPermission(Mode.UPDATE));
+        if (leaderboard == null) {
+            throw new NotFoundException("leaderboard with name " + leaderboardName + " not found");
+        }
+        RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+        if (raceColumn == null) {
+            throw new NotFoundException("raceColumn with name " + raceColumnName + " not found");
+        }
+        Fleet fleet = raceColumn.getFleetByName(fleetName);
+        if (fleet == null) {
+            throw new NotFoundException("fleet with name " + fleetName + " not found");
+        }
+
+        final AbstractLogEventAuthor raceLogEventAuthorForRaceColumn = new LogEventAuthorImpl(
+                AbstractRaceColumn.class.getName(), 0);
+
+        TimePoint now = MillisecondsTimePoint.now();
+        RaceLog raceLog = raceColumn.getRaceLog(fleet);
+        if (raceLog == null) {
+            throw new IllegalStateException("Racelog for fleet is null");
+        }
+        int passId = raceLog.getCurrentPassId();
+        raceLog.add(new RaceLogUseCompetitorsFromRaceLogEventImpl(now, raceLogEventAuthorForRaceColumn, now,
+                UUID.randomUUID(), passId));
+        return (raceColumn.isCompetitorRegistrationInRacelogEnabled(fleet) ? Response.ok() : Response.notModified())
+                .build();
+    }
+
 }

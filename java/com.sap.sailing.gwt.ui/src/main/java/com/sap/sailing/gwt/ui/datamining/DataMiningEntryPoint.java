@@ -17,13 +17,14 @@ import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.datamining.presentation.TabbedSailingResultsPresenter;
 import com.sap.sse.datamining.shared.DataMiningSession;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.UUIDDataMiningSession;
 import com.sap.sse.datamining.ui.client.AnchorDataMiningSettingsControl;
+import com.sap.sse.datamining.ui.client.CompositeResultsPresenter;
 import com.sap.sse.datamining.ui.client.DataMiningService;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.client.DataMiningSettingsControl;
 import com.sap.sse.datamining.ui.client.DataMiningSettingsInfoManager;
-import com.sap.sse.datamining.ui.client.ResultsPresenter;
 import com.sap.sse.datamining.ui.client.execution.SimpleQueryRunner;
 import com.sap.sse.datamining.ui.client.selection.QueryDefinitionProviderWithControls;
 import com.sap.sse.gwt.client.EntryPointHelper;
@@ -40,10 +41,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
     public static final ComponentResources resources = GWT.create(ComponentResources.class);
 
     private final DataMiningServiceAsync dataMiningService = GWT.create(DataMiningService.class);
-
     private DataMiningSession session;
-
-    private QueryDefinitionProviderWithControls queryDefinitionProviderWithControls;
 
     @Override
     protected void doOnModuleLoad() {
@@ -64,6 +62,8 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         authorizedContentDecorator.setPermissionToCheck(Permission.DATA_MINING,
                 SailingPermissionsForRoleProvider.INSTANCE);
         authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
+            
+            private QueryDefinitionProviderWithControls queryDefinitionProvider;
             private SimpleQueryRunner queryRunner;
             private final DataMiningSettingsInfoManager settingsManager = new DataMiningSettingsInfoManagerImpl(
                     getStringMessages());
@@ -71,26 +71,36 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
             @Override
             public Widget get() {
                 DataMiningSettingsControl settingsControl = new AnchorDataMiningSettingsControl(null, null);
-                ResultsPresenter<?> resultsPresenter = new TabbedSailingResultsPresenter(/*parent*/ null, /*context*/ null, 
-                        /*drillDownCallback*/ groupKey -> queryDefinitionProviderWithControls.drillDown(groupKey, queryRunner::runQuery),
-                        getStringMessages());
-                DockLayoutPanel selectionDockPanel = new DockLayoutPanel(Unit.PX);
-                queryDefinitionProviderWithControls = new QueryDefinitionProviderWithControls(null, null, session,
+                CompositeResultsPresenter<?> resultsPresenter = new TabbedSailingResultsPresenter(/* parent */ null,
+                        /* context */ null, /* drillDownCallback */ groupKey -> {
+                            queryDefinitionProvider.drillDown(groupKey, () -> {
+                                queryRunner.run(queryDefinitionProvider.getQueryDefinition());
+                            });
+                        }, getStringMessages());
+                resultsPresenter.addCurrentPresenterChangedListener(presenterId -> {
+                    StatisticQueryDefinitionDTO queryDefinition = resultsPresenter.getQueryDefinition(presenterId);
+                    if (queryDefinition != null) {
+                        queryDefinitionProvider.applyQueryDefinition(queryDefinition);
+                    }
+                });
+                
+                queryDefinitionProvider = new QueryDefinitionProviderWithControls(null, null, session,
                         dataMiningService, DataMiningEntryPoint.this, settingsControl, settingsManager,
-                        resultsPresenter);
-                selectionDockPanel.add(queryDefinitionProviderWithControls.getEntryWidget());
+                        queryDefinition -> queryRunner.run(queryDefinition));
+
                 queryRunner = new SimpleQueryRunner(null, null, session, dataMiningService, DataMiningEntryPoint.this,
-                        queryDefinitionProviderWithControls, resultsPresenter);
-                queryDefinitionProviderWithControls.addControl(queryRunner.getEntryWidget());
+                        queryDefinitionProvider, resultsPresenter);
+                queryDefinitionProvider.addControl(queryRunner.getEntryWidget());
                 /*
                  * Running queries automatically when they've been changed is currently unnecessary, if not even
                  * counterproductive. This removes the query runner settings to prevent that the user can enable the
                  * automatic execution of queries. Re-enable this, when this functionality is desired again.
                  */
                 // settingsControl.addSettingsComponent(queryRunner);
+                
                 SplitLayoutPanel splitPanel = new SplitLayoutPanel(10);
                 splitPanel.addSouth(resultsPresenter.getEntryWidget(), 350);
-                splitPanel.add(selectionDockPanel);
+                splitPanel.add(queryDefinitionProvider.getEntryWidget());
                 return splitPanel;
             }
         });
