@@ -20,8 +20,10 @@ import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 public class PolarLegRetrievalProcessor extends AbstractRetrievalProcessor<HasFleetPolarContext, HasLegPolarContext> {
 
     public PolarLegRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<HasLegPolarContext, ?>> resultReceivers, int retrievalLevel) {
-        super(HasFleetPolarContext.class, HasLegPolarContext.class, executor, resultReceivers, retrievalLevel);
+            Collection<Processor<HasLegPolarContext, ?>> resultReceivers, int retrievalLevel,
+            String retrievedDataTypeMessageKey) {
+        super(HasFleetPolarContext.class, HasLegPolarContext.class, executor, resultReceivers, retrievalLevel,
+                retrievedDataTypeMessageKey);
     }
 
     @Override

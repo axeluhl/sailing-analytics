@@ -14,8 +14,9 @@ import com.sap.sse.datamining.test.domain.Test_Regatta;
 public class TestRaceWithContextRetrievalProcessor extends AbstractRetrievalProcessor<Test_Regatta, Test_HasRaceContext> {
 
     public TestRaceWithContextRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<Test_HasRaceContext, ?>> resultReceivers, int retrievalLevel) {
-        super(Test_Regatta.class, Test_HasRaceContext.class, executor, resultReceivers, retrievalLevel);
+            Collection<Processor<Test_HasRaceContext, ?>> resultReceivers, int retrievalLevel,
+            String retrievedDataTypeMessageKey) {
+        super(Test_Regatta.class, Test_HasRaceContext.class, executor, resultReceivers, retrievalLevel, retrievedDataTypeMessageKey);
     }
 
     @Override

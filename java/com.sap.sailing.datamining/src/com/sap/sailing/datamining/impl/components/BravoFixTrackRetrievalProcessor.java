@@ -22,8 +22,11 @@ import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
  */
 public class BravoFixTrackRetrievalProcessor extends AbstractRetrievalProcessor<HasRaceOfCompetitorContext, HasBravoFixTrackContext> {
 
-    public BravoFixTrackRetrievalProcessor(ExecutorService executor, Collection<Processor<HasBravoFixTrackContext, ?>> resultReceivers, int retrievalLevel) {
-        super(HasRaceOfCompetitorContext.class, HasBravoFixTrackContext.class, executor, resultReceivers, retrievalLevel);
+    public BravoFixTrackRetrievalProcessor(ExecutorService executor,
+            Collection<Processor<HasBravoFixTrackContext, ?>> resultReceivers, int retrievalLevel,
+            String retrievedDataTypeMessageKey) {
+        super(HasRaceOfCompetitorContext.class, HasBravoFixTrackContext.class, executor, resultReceivers,
+                retrievalLevel, retrievedDataTypeMessageKey);
     }
 
     @Override

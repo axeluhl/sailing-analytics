@@ -16,8 +16,10 @@ import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 public class LeaderboardGroupRetrievalProcessor extends AbstractRetrievalProcessor<RacingEventService, HasLeaderboardGroupContext> {
 
     public LeaderboardGroupRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<HasLeaderboardGroupContext, ?>> resultReceivers, int retrievalLevel) {
-        super(RacingEventService.class, HasLeaderboardGroupContext.class, executor, resultReceivers, retrievalLevel);
+            Collection<Processor<HasLeaderboardGroupContext, ?>> resultReceivers, int retrievalLevel,
+            String retrievedDataTypeMessageKey) {
+        super(RacingEventService.class, HasLeaderboardGroupContext.class, executor, resultReceivers, retrievalLevel,
+                retrievedDataTypeMessageKey);
     }
 
     @Override

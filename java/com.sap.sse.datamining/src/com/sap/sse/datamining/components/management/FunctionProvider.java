@@ -7,9 +7,12 @@ import com.sap.sse.datamining.components.DataRetrieverChainDefinition;
 import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.datamining.impl.components.management.ReducedDimensions;
+import com.sap.sse.datamining.impl.functions.IdentityFunction;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 
 public interface FunctionProvider {
+    
+    public IdentityFunction getIdentityFunction();
     
     public Collection<Function<?>> getAllStatistics();
 
