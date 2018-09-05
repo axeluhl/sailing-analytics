@@ -214,7 +214,19 @@ public class TaggingPanel extends ComponentWithoutSettings
      * UserStore}.
      */
     protected void saveTag(String tag, String comment, String imageURL, boolean isVisibleForPublic) {
-        if (!isLoggedInAndRaceLogAvailable()) {
+        boolean tagIsNewTag = true;
+        // check if tag already exists
+        for (TagDTO tagDTO : tagListProvider.getAllTags()) {
+            if (tagDTO.equals(tag, comment, imageURL, userService.getCurrentUser().getName(), isVisibleForPublic, new MillisecondsTimePoint(getTimerTime()))) {
+                tagIsNewTag = false;
+                break;
+            }
+        }
+        if (!tagIsNewTag) {
+            // tag does already exist
+            Notification.notify(stringMessages.tagNotAddedReason(" " + stringMessages.tagAlreadyExists()), NotificationType.WARNING);
+            
+        } else if (!isLoggedInAndRaceLogAvailable()) {
             // User is not logged in or race can not be identifed because regatta, race column or fleet are missing.
             Notification.notify(stringMessages.tagNotAdded(), NotificationType.ERROR);
 

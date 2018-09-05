@@ -8,20 +8,22 @@ public class TagDTO implements IsSerializable {
     private String tag, comment, imageURL, username;
     private boolean visibleForPublic;
     private TimePoint raceTimepoint, createdAt, revokedAt;
-    
+
     public static final int MAX_TAG_LENGTH = 100;
     public static final int MAX_IMAGE_URL_LENGTH = 200;
     public static final int MAX_COMMENT_LENGTH = 400;
 
     // for GWT
-    public TagDTO() {}
+    public TagDTO() {
+    }
 
-    public TagDTO(String tag, String comment, String imageURL, String username, boolean visibleForPublic, TimePoint raceTimepoint, TimePoint createdAt) {
+    public TagDTO(String tag, String comment, String imageURL, String username, boolean visibleForPublic,
+            TimePoint raceTimepoint, TimePoint createdAt) {
         this(tag, comment, imageURL, username, visibleForPublic, raceTimepoint, createdAt, null);
     }
-    
-    public TagDTO(String tag, String comment, String imageURL, String username, boolean visibleForPublic, TimePoint raceTimepoint,
-            TimePoint createdAt, TimePoint revokedAt) {
+
+    public TagDTO(String tag, String comment, String imageURL, String username, boolean visibleForPublic,
+            TimePoint raceTimepoint, TimePoint createdAt, TimePoint revokedAt) {
         this.tag = tag;
         this.comment = comment;
         this.imageURL = imageURL;
@@ -47,7 +49,7 @@ public class TagDTO implements IsSerializable {
     public String getUsername() {
         return username;
     }
-    
+
     public boolean isVisibleForPublic() {
         return visibleForPublic;
     }
@@ -105,15 +107,50 @@ public class TagDTO implements IsSerializable {
         return true;
     }
 
+    public boolean equals(String tag, String comment, String imageURL, String username, boolean visibleForPublic,
+            TimePoint raceTimepoint) {
+        if (this.comment == null) {
+            if (comment != null)
+                return false;
+        } else if (!this.comment.equals(comment))
+            return false;
+        if (this.imageURL == null) {
+            if (imageURL != null)
+                return false;
+        } else if (!this.imageURL.equals(imageURL))
+            return false;
+        if (this.raceTimepoint == null) {
+            if (raceTimepoint != null)
+                return false;
+        } else if (!this.raceTimepoint.equals(raceTimepoint))
+            return false;
+        if (this.tag == null) {
+            if (tag != null)
+                return false;
+        } else if (!this.tag.equals(tag))
+            return false;
+        if (this.username == null) {
+            if (username != null)
+                return false;
+        } else if (!this.username.equals(username)) {
+            return false;
+        }
+        if (isVisibleForPublic() != visibleForPublic) {
+            return false;
+        }
+        if (this.raceTimepoint == null) {
+            if (raceTimepoint != null)
+                return false;
+        } else if (!this.raceTimepoint.equals(raceTimepoint)) {
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public String toString() {
-        return "TagDTO [tag=" + tag
-                + ", comment=" + comment
-                + ", imageURL=" + imageURL
-                + ", username=" + username
-                + ", raceTimepoint=" + raceTimepoint
-                + ", createdAt=" + createdAt
-                + ", isPublic=" + visibleForPublic
+        return "TagDTO [tag=" + tag + ", comment=" + comment + ", imageURL=" + imageURL + ", username=" + username
+                + ", raceTimepoint=" + raceTimepoint + ", createdAt=" + createdAt + ", isPublic=" + visibleForPublic
                 + ", revokedAt=" + revokedAt + "]";
     }
 }

@@ -2108,6 +2108,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String tagAddedSuccessfully();
     String tagNotAdded();
     String tagNotAddedReason(String reason);
+    String tagAlreadyExists();
     String tagNotLoaded();
     String tagNotLoggedIn();
     String tagNotRemoved();
