@@ -17,7 +17,6 @@ import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -145,12 +144,9 @@ public class TaggingPanel extends ComponentWithoutSettings
         tagCellList.setEmptyListWidget(new Label(stringMessages.tagNoTagsFound()));
 
         tagCellList.setSelectionModel(tagSelectionModel);
-        tagSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                // set time slider to corresponding position
-                timer.setTime(tagSelectionModel.getSelectedObject().getRaceTimepoint().asMillis());
-            }
+        tagSelectionModel.addSelectionChangeHandler(event -> {
+            // set time slider to corresponding position
+            timer.setTime(tagSelectionModel.getSelectedObject().getRaceTimepoint().asMillis());
         });
 
         contentPanel.add(tagCellList);
@@ -217,15 +213,17 @@ public class TaggingPanel extends ComponentWithoutSettings
         boolean tagIsNewTag = true;
         // check if tag already exists
         for (TagDTO tagDTO : tagListProvider.getAllTags()) {
-            if (tagDTO.equals(tag, comment, imageURL, userService.getCurrentUser().getName(), isVisibleForPublic, new MillisecondsTimePoint(getTimerTime()))) {
+            if (tagDTO.equals(tag, comment, imageURL, userService.getCurrentUser().getName(), isVisibleForPublic,
+                    new MillisecondsTimePoint(getTimerTime()))) {
                 tagIsNewTag = false;
                 break;
             }
         }
         if (!tagIsNewTag) {
             // tag does already exist
-            Notification.notify(stringMessages.tagNotAddedReason(" " + stringMessages.tagAlreadyExists()), NotificationType.WARNING);
-            
+            Notification.notify(stringMessages.tagNotAddedReason(" " + stringMessages.tagAlreadyExists()),
+                    NotificationType.WARNING);
+
         } else if (!isLoggedInAndRaceLogAvailable()) {
             // User is not logged in or race can not be identifed because regatta, race column or fleet are missing.
             Notification.notify(stringMessages.tagNotAdded(), NotificationType.ERROR);
