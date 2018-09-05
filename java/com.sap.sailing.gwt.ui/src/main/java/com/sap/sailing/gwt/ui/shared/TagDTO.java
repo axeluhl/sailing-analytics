@@ -10,7 +10,6 @@ public class TagDTO implements IsSerializable {
     private TimePoint raceTimepoint, createdAt, revokedAt;
 
     public static final int MAX_TAG_LENGTH = 100;
-    public static final int MAX_IMAGE_URL_LENGTH = 200;
     public static final int MAX_COMMENT_LENGTH = 400;
 
     // for GWT

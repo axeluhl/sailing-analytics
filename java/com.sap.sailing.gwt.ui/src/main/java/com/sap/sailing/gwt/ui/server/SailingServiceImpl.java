@@ -6488,9 +6488,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
             if (comment.length() > TagDTO.MAX_COMMENT_LENGTH) {
                 throw new Exception("tagCommentIsToLong");
             }
-            if (imageURL.length() > TagDTO.MAX_IMAGE_URL_LENGTH) {
-                throw new Exception("tagImageURLIsToLong");
-            }
             SecurityUtils.getSubject().checkPermission(
                     Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
             RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);

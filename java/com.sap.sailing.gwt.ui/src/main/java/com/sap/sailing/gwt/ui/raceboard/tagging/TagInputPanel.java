@@ -39,7 +39,6 @@ public class TagInputPanel extends FlowPanel {
         imageURLTextBox = new TextBox();
         imageURLTextBox.setStyleName(style.tagInputPanelImageURL());
         imageURLTextBox.setTitle(stringMessages.tagLabelImageURL());
-        imageURLTextBox.getElement().setAttribute("maxlength", Integer.toString(TagDTO.MAX_IMAGE_URL_LENGTH));
         imageURLTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelImageURL());
         add(imageURLTextBox);
 
