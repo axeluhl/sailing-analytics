@@ -145,8 +145,26 @@
 
 /**************************** Tag-Buttons ****************************/
 .tagButtonDialog {
-	max-width: 75%;
 	background-color: white;
+	max-width: 95%;
+}
+
+@media screen and (min-width: 800px) {
+	.tagButtonDialog {
+		max-width: 90%;
+	}
+}
+
+@media screen and (min-width: 1000px) {
+	.tagButtonDialog {
+		max-width: 75%;
+	}
+}
+
+@media screen and (min-width: 1200px) {
+    .tagButtonDialog {
+        max-width: 65%;
+    }
 }
 
 .tagButtonDialogPanel {

@@ -11,6 +11,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.user.cellview.client.AbstractHasData.RedrawEvent.Handler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -108,6 +109,13 @@ public class TagButtonDialog extends DialogBox {
         TagInputPanel inputPanel = new TagInputPanel(stringMessages);
         TagPreviewPanel tagPreviewPanel = new TagPreviewPanel(taggingPanel, inputPanel);
         CellTable<TagButton> tagButtonsTable = createTable(footerPanel, inputPanel, tagPreviewPanel);
+        tagButtonsTable.addRedrawHandler(new Handler() {
+            @Override
+            public void onRedraw() {
+                // center dialog when content of tagButtonsTable changes (table needs to be redrawn)
+                center();
+            }
+        });
         Panel controlButtonPanel = createButtonPanel(tagButtonsTable, inputPanel, tagPreviewPanel, footerPanel);
 
         // wrap tag buttons table to control max-height of table
@@ -123,7 +131,6 @@ public class TagButtonDialog extends DialogBox {
         mainPanel.add(tagPreviewPanel);
 
         setWidget(mainPanel);
-        // TODO: content gets added delayed => center again when content changes.
         center();
     }
 
