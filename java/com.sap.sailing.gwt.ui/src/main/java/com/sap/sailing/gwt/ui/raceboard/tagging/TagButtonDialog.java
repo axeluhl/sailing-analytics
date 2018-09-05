@@ -3,10 +3,14 @@ package com.sap.sailing.gwt.ui.raceboard.tagging;
 import java.util.Arrays;
 import java.util.List;
 
+import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
-import com.google.gwt.cell.client.ImageResourceCell;
 import com.google.gwt.core.shared.GWT;
-import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -48,6 +52,30 @@ public class TagButtonDialog extends DialogBox {
                     new ImageSpec(ACTION_EDIT, stringMessages.actionEdit(), makeImagePrototype(resources.editIcon())),
                     new ImageSpec(ACTION_REMOVE, stringMessages.actionRemove(),
                             makeImagePrototype(IconResources.INSTANCE.removeIcon())));
+        }
+    }
+
+    protected interface ImageWithTextCellTemplate extends SafeHtmlTemplates {
+        @Template("<div><img src='{0}' /><span style=\"vertical-align: top\">&nbsp;&nbsp;{1}</span></div>")
+        SafeHtml cell(SafeUri imageUrl, SafeHtml text);
+    }
+
+    private class ImageWithTextCell extends AbstractCell<TagButton> {
+
+        ImageWithTextCellTemplate template = GWT.create(ImageWithTextCellTemplate.class);
+
+        @Override
+        public void render(Context context, TagButton tagButton, SafeHtmlBuilder sb) {
+
+            SafeUri trustedImageURL;
+            SafeHtml safeTag = SafeHtmlUtils.fromString(tagButton.getTag());
+
+            if (tagButton.isVisibleForPublic()) {
+                trustedImageURL = resources.publicIcon().getSafeUri();
+            } else {
+                trustedImageURL = resources.privateIcon().getSafeUri();
+            }
+            sb.append(template.cell(trustedImageURL, safeTag));
         }
     }
 
@@ -115,10 +143,13 @@ public class TagButtonDialog extends DialogBox {
             TagPreviewPanel tagPreviewPanel) {
         CellTable<TagButton> tagButtonTable = new CellTable<TagButton>(15, buttonTableResources);
         tagButtonTable.setStyleName(style.tagButtonTable());
-        TextColumn<TagButton> tagColumn = new TextColumn<TagButton>() {
+
+        // columns
+        ImageWithTextCell imageWithTextCell = new ImageWithTextCell();
+        Column<TagButton, TagButton> tagColumn = new Column<TagButton, TagButton>(imageWithTextCell) {
             @Override
-            public String getValue(TagButton button) {
-                return button.getTag();
+            public TagButton getValue(TagButton button) {
+                return button;
             }
         };
         TextColumn<TagButton> imageURLColumn = new TextColumn<TagButton>() {
@@ -131,17 +162,6 @@ public class TagButtonDialog extends DialogBox {
             @Override
             public String getValue(TagButton button) {
                 return button.getComment();
-            }
-        };
-        Column<TagButton, ImageResource> visibleForPublicColumn = new Column<TagButton, ImageResource>(
-                new ImageResourceCell()) {
-            @Override
-            public ImageResource getValue(TagButton tagButton) {
-                if (tagButton.isVisibleForPublic()) {
-                    return resources.publicIcon();
-                } else {
-                    return resources.privateIcon();
-                }
             }
         };
         ImagesBarColumn<TagButton, EditTagButtonsImagesBarCell> actionsColumn = new ImagesBarColumn<TagButton, EditTagButtonsImagesBarCell>(
@@ -184,15 +204,13 @@ public class TagButtonDialog extends DialogBox {
         tagButtonTable.addColumn(tagColumn, stringMessages.tagLabelTag());
         tagButtonTable.addColumn(imageURLColumn, stringMessages.tagLabelImageURL());
         tagButtonTable.addColumn(commentColumn, stringMessages.tagLabelComment());
-        tagButtonTable.addColumn(visibleForPublicColumn, stringMessages.tagVisibility());
         tagButtonTable.addColumn(actionsColumn, stringMessages.tagLabelAction());
 
         // set these width values manually as they are not accessable via CSS classes
-        tagButtonTable.setColumnWidth(tagColumn, "20%");
+        tagButtonTable.setColumnWidth(tagColumn, "25%");
         tagButtonTable.setColumnWidth(imageURLColumn, "20%");
         tagButtonTable.setColumnWidth(commentColumn, "40%");
-        tagButtonTable.setColumnWidth(visibleForPublicColumn, "10%");
-        tagButtonTable.setColumnWidth(actionsColumn, "10%");
+        tagButtonTable.setColumnWidth(actionsColumn, "15%");
 
         setRowData(tagButtonTable, taggingPanel.getTagButtons());
 
