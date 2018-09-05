@@ -349,6 +349,13 @@ public abstract class CellTablePO<T extends DataEntryPO> extends PageArea {
     }
     
     public void waitForTableToShowData() {
-        waitUntil(() -> !getRows().isEmpty());
+        waitUntil(() -> {
+            try {
+                return !getRows().isEmpty();
+            } catch (Exception e) {
+                // This can fail while the table is just updating
+                return false;
+            }
+        });
     }
 }

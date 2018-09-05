@@ -157,7 +157,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
                 txtmet = context2d.measureText(label);
                 context2d.fillText(label, x + (w * maxIdx - txtmet.getWidth()) / 2.0, y - 5.0);
                 for (int idx = 0; idx <= maxIdx; idx++) {
-                    final double speedSteps = speed_min + idx * (speed_max - speed_min) / maxIdx;
+                    final double speedSteps = speed_min + idx * (speed_spread) / maxIdx;
                     context2d.setFillStyle(swarm.getColorMapper().getColor(speedSteps));
                     context2d.beginPath();
                     context2d.fillRect(x + idx * w, y, w, h);

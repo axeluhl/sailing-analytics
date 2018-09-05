@@ -76,6 +76,7 @@ The primary Git repository for the project is hosted on sapsailing.com. It is mi
   * Ensure that your git username and email is set properly: In case you are unsure, use the commands `git config user.name "My Name"` and `git config user.email my.email@sap.com` in the git repository.
 3. Setup and configure Eclipse
   * Make absolutely sure to import CodeFormatter.xml (from $GIT_HOME/java) into your Eclipse preferences (Preferences->Java->Code Style->Formatter)
+  * It is also strongly recommended to import CodeFormatter\_JavaScript.xml (from $GIT_HOME/java) into your Eclipse preferences (Preferences->JavaScript->Code Style->Formatter) to ensure correct formatting of JavaScript Native Interface (JSNI) implementations.
   * Install the required plugins using the script provided above. Further configuration steps depend on the plugins being installed successfully.
   * In Eclipse go to "Window->Preferences->Java->Build Path->Classpath Variables" and create a new classpath variable called ``ANDROID_HOME``. Set its value to the install location of your Android SDK, e.g., ``c:\apps\android-sdk-windows`` or ``/usr/local/android-sdk-linux``.
   * Install GWT SDK and add the SDK in Eclipse (Preferences -> GWT -> GWT Settings -> Add...)
