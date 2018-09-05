@@ -43,10 +43,10 @@ public class AbstractUserProfileView extends Composite implements UserProfileVie
         this.layout.quickfinderUi.addPlaceholderItem(i18n.profileQuickfinder());
         this.layout.quickfinderUi.addItem(i18n.details(), presenter.getUserProfileNavigation());
         this.layout.quickfinderUi.addItem(i18n.favoritesAndNotifications(), presenter.getUserPreferencesNavigation());
+        this.layout.quickfinderUi.addItem(i18n.sailorProfiles(), presenter.getSailorProfilesNavigation());
         if(ExperimentalFeatures.SHOW_MY_SETTINGS_IN_USER_PROFILE) {
             this.layout.quickfinderUi.addItem(i18n.settings(), presenter.getUserSettingsNavigation());
         }
-        this.layout.quickfinderUi.addItem(i18n.sailorProfiles(), presenter.getSailorProfilesNavigation());
     }
     
     protected final void setViewContent(IsWidget content) {
