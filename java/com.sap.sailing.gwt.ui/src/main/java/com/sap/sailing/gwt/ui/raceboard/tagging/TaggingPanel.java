@@ -56,7 +56,7 @@ public class TaggingPanel extends ComponentWithoutSettings
      */
     protected enum State {
         VIEW, // default
-        EDIT
+        CREATE_TAG
     }
 
     // styling
@@ -156,7 +156,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         createTagsButton.setStyleName(style.toggleEditState());
         createTagsButton.addStyleName(style.imagePusTransparent());
         createTagsButton.addClickHandler(event -> {
-            setCurrentState(State.EDIT);
+            setCurrentState(State.CREATE_TAG);
         });
         contentPanel.add(createTagsButton);
 
@@ -378,7 +378,7 @@ public class TaggingPanel extends ComponentWithoutSettings
      * Controls the visibility of UI elements in case the content or {@link #currentState} changes.
      */
     protected void updateContent() {
-        setFooterPanelVisibility(currentState == State.EDIT);
+        setFooterPanelVisibility(currentState == State.CREATE_TAG);
         setCreateTagsButtonVisibility(currentState == State.VIEW);
         tagListProvider.updateFilteredTags();
         tagCellList.setVisibleRange(0, tagListProvider.getFilteredTags().size());
@@ -508,7 +508,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         // Setting footerPanel.setVisible(false) is not sufficient as panel would still be
         // rendered as 20px high white space instead of being hidden.
         // Fix: remove panel completely from footer.
-        if (userService.getCurrentUser() != null && (currentState == State.EDIT || getTagButtons().size() > 0)) {
+        if (userService.getCurrentUser() != null && (currentState == State.CREATE_TAG || getTagButtons().size() > 0)) {
             taggingPanel.setFooterWidget(footerPanel);
             footerPanel.setInputFieldsVisibility(showInputFields);
             footerPanel.setTagButtonsVisibility(true);
