@@ -349,7 +349,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
             if (newValue.length() >= 2) {
                 clearTextBoxButton.removeStyleName(style.tagFilterHiddenButton());
                 ensureSetSearchFilter();
-                tagListProvider.setCurrentFilterSet(tagListProvider.getTagFilterSet()); //
+                tagListProvider.setCurrentFilterSet(tagListProvider.getTagFilterSet());
             }
         }
     }
