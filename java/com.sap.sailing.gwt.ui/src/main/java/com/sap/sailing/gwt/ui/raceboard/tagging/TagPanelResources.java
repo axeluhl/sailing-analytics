@@ -14,6 +14,9 @@ public interface TagPanelResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/edit.png")
     ImageResource editIcon();
 
+    @Source("com/sap/sse/gwt/client/images/remove.png")
+    ImageResource deleteIcon();
+
     @Source("com/sap/sailing/gwt/ui/client/images/lock.png")
     ImageResource privateIcon();
 
@@ -45,6 +48,7 @@ public interface TagPanelResources extends ClientBundle {
         // general
         String hidden();
         String taggingPanel();
+        String taggingPanelDisabled();
         String toggleEditState();
         String buttonsPanel();
         String confirmationDialog();
@@ -53,6 +57,10 @@ public interface TagPanelResources extends ClientBundle {
         // tag cells
         String tagCell();
         String tagCellHeading();
+        String tagCellHeadingButtons();
+        String tagActionButton();
+        String tagEditButton();
+        String tagDeleteButton();
         String tagCellCreated();
         String tagCellComment();
         String tagCellImage();
@@ -69,10 +77,10 @@ public interface TagPanelResources extends ClientBundle {
         String tagButtonPanelHeader();
 
         // tag input / creation
-        String tagCreationPanel();
-        String tagCreationPanelHeader();
-        String tagCreationPanelHeaderLabel();
-        String tagCreationPanelHeaderButton();
+        String tagModificationPanel();
+        String tagModificationPanelHeader();
+        String tagModificationPanelHeaderLabel();
+        String tagModificationPanelHeaderButton();
         String tagInputPanel();
         String tagInputPanelTag();
         String tagInputPanelComment();
@@ -98,5 +106,7 @@ public interface TagPanelResources extends ClientBundle {
         String imageClearSearch();
         String imageSettings();
         String imagePusTransparent();
+        String imageEdit();
+        String imageDelete();
     }
 }

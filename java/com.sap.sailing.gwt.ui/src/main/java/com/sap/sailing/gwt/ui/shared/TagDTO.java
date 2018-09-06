@@ -7,7 +7,6 @@ import com.sap.sse.common.TimePoint;
 /**
  * Used to send tags over network. Allows to create tags with all possible combinations of states (private/public and
  * valid/revoked).
- * @see com.sap.sailing.domain.base.Tag Tag
  */
 public class TagDTO implements IsSerializable {
 

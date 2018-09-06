@@ -1,16 +1,17 @@
 package com.sap.sailing.gwt.ui.raceboard.tagging;
 
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanel.State;
 
 /**
- * Panel containg {@link TagCreationPanel} and {@link TagButtonPanel} which is used as {@link TaggingPanel#footerPanel
+ * Panel containg {@link TagModificationPanel} and {@link TagButtonPanel} which is used as {@link TaggingPanel#footerPanel
  * footer} in {@link TaggingPanel}.
  */
 public class TagFooterPanel extends FlowPanel {
 
     private final TaggingPanel taggingPanel;
 
-    private final TagCreationPanel tagCreationPanel;
+    private final TagModificationPanel tagModificationPanel;
     private final TagButtonPanel tagButtonPanel;
 
     /**
@@ -18,12 +19,12 @@ public class TagFooterPanel extends FlowPanel {
      * UserStore}.
      * 
      * @param taggingPanel
-     *            required to instantiate {@link TagCreationPanel} and {@link TagButtonPanel}
+     *            required to instantiate {@link TagModificationPanel} and {@link TagButtonPanel}
      */
     protected TagFooterPanel(TaggingPanel taggingPanel) {
         this.taggingPanel = taggingPanel;
 
-        tagCreationPanel = new TagCreationPanel(taggingPanel, this);
+        tagModificationPanel = new TagModificationPanel(taggingPanel, this);
         tagButtonPanel = new TagButtonPanel(taggingPanel, this);
 
         // Tag-buttons are only shown if amount of tag-buttons is greater then 0!
@@ -36,8 +37,8 @@ public class TagFooterPanel extends FlowPanel {
     }
 
     /**
-     * Sets visibility of {@link TagCreationPanel input fields} for new tag and {@link TaggingPanel#createTagsButton
-     * "Edit Tag-Buttons"-button}. {@link TagCreationPanel Input fields} will not be hidden but removed completly from
+     * Sets visibility of {@link TagModificationPanel input fields} for new tag and {@link TaggingPanel#createTagsButton
+     * "Edit Tag-Buttons"-button}. {@link TagModificationPanel Input fields} will not be hidden but removed completly from
      * DOM in case <code>visible</code> is set to <code>false</code>!
      * 
      * @param visible
@@ -46,10 +47,10 @@ public class TagFooterPanel extends FlowPanel {
      */
     protected void setInputFieldsVisibility(boolean visible) {
         if (visible) {
-            add(tagCreationPanel);
+            add(tagModificationPanel);
             taggingPanel.refreshFooterPanel();
         } else {
-            remove(tagCreationPanel);
+            remove(tagModificationPanel);
             taggingPanel.refreshFooterPanel();
         }
     }
@@ -62,7 +63,7 @@ public class TagFooterPanel extends FlowPanel {
      *            should be <code>true</code> when user is logged in, otherwise <code>false</code>
      */
     protected void setTagButtonsVisibility(boolean visible) {
-        if (taggingPanel.getTagButtons().size() > 0) {
+        if (visible && taggingPanel.getTagButtons().size() > 0) {
             add(tagButtonPanel);
             taggingPanel.refreshFooterPanel();
         } else {
@@ -71,6 +72,22 @@ public class TagFooterPanel extends FlowPanel {
         }
     }
 
+    protected void setCurrentState(State state) {
+        if (state == State.CREATE_TAG) {
+            setInputFieldsVisibility(true);
+            setTagButtonsVisibility(true);
+            tagModificationPanel.setCurrentStatus(state);
+        } else if (state == State.EDIT_TAG) {
+            setInputFieldsVisibility(true);
+            setTagButtonsVisibility(false);
+            tagModificationPanel.setCurrentStatus(state);
+        } else {
+            setInputFieldsVisibility(false);
+            setTagButtonsVisibility(true);
+            tagModificationPanel.setCurrentStatus(state);
+        }
+    }
+    
     /**
      * If height of the {@link TagButtonPanel tagButtonPanel} has changed after deleting (delta height does not equal
      * 0), the {@link TaggingPanel#footerPanel footer widget} of the {@link TaggingPanel} has a different height, which

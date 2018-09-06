@@ -81,26 +81,31 @@
 }
 
 .tagCellHeading {
+	position: relative;
 	font-weight: bold;
 	word-wrap: break-word;
 }
 
-.tagCellHeading button[role="delete"] {
-	position: absolute;
-	right: 0;
-	bottom: 0;
+.tagCellHeading .tagCellHeadingButtons {
+	/* Use float instead of position:absolute to allow tag heading wrap around action buttons */
+	float: right;
+	text-align: right;
+}
+
+.tagCellHeading .tagCellHeadingButtons .tagActionButton {
+	padding: 2px;
 	border: none;
 	border-radius: 3px;
-	background: white;
+	background: transparent;
 	line-height: initial;
 }
 
-.tagCellHeading button[role="delete"]:hover {
+.tagCellHeading .tagCellHeadingButtons .tagActionButton:hover {
 	cursor: pointer;
 	outline: none;
-	background-color: lightgrey;
+	/* background-color: lightgrey;
 	transition-duration: 0.2s;
-	transition-property: background-color;
+	transition-property: background-color; */
 }
 
 .tagCellImage {
@@ -217,20 +222,20 @@
 	padding-top: 5px;
 }
 
-/**************************** Tag input / creation ****************************/
-.tagCreationPanel {
+/**************************** Tag input / modification ****************************/
+.tagModificationPanel {
 	width: 100%;
 }
 
-.tagCreationPanelHeader {
+.tagModificationPanelHeader {
 	padding-top: 5px;
 }
 
-.tagCreationPanelHeader .tagCreationPanelHeaderLabel {
+.tagModificationPanelHeader .tagModificationPanelHeaderLabel {
     font-weight: bold;
 }
 
-.tagCreationPanelHeader .tagCreationPanelHeaderButton {
+.tagModificationPanelHeader .tagModificationPanelHeaderButton {
 	position: absolute;
 	top: 5px;
 	right: 5px;
@@ -239,7 +244,7 @@
 	background-color: transparent;
 }
 
-.tagCreationPanelHeader .tagCreationPanelHeaderButton:hover {
+.tagModificationPanelHeader .tagModificationPanelHeaderButton:hover {
     background-color: lightgrey;
     cursor: pointer;
     transition-duration: 0.2s;
@@ -370,7 +375,35 @@
 	margin-top: 5px;
 }
 
+/**************************** Disabled tags (during editing) ****************************/
+.taggingPanelDisabled .tagCell {
+	background-color: lightgrey;
+	cursor: context-menu;
+}
+
+.taggingPanelDisabled .tagCellHeadingButtons,
+.taggingPanelDisabled .tagCellHeadingButtons .tagEditButton,
+.taggingPanelDisabled .tagCellHeadingButtons .tagEditButton:hover,
+.taggingPanelDisabled .tagCellHeadingButtons .tagDeleteButton,
+.taggingPanelDisabled .tagCellHeadingButtons .tagDeleteButton:hover {
+	cursor: not-allowed;
+}
+
 /**************************** Images ****************************/
+.imageEdit {
+    gwt-sprite: "editIcon";
+    width: 2em;
+    height: 2em;
+    background-size: contain;
+}
+
+.imageDelete {
+    gwt-sprite: "deleteIcon";
+    width: 2em;
+    height: 2em;
+    background-size: contain;
+}
+
 .imageActiveFilter {
 	gwt-sprite: "filterActiveButton";
 	width: 2em;

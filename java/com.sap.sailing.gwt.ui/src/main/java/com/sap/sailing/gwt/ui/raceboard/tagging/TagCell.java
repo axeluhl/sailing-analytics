@@ -6,6 +6,7 @@ import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.EventTarget;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -15,6 +16,7 @@ import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
+import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanel.State;
 import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -31,27 +33,17 @@ public class TagCell extends AbstractCell<TagDTO> {
      * hardcoded.
      */
     protected interface TagCellTemplate extends SafeHtmlTemplates {
-        /**
-         * Renders public, non-removable cell with different content configurations
-         * 
-         * @param tag
-         *            title
-         * @param createdAt
-         *            contains author name and createdAt time
-         * @param content
-         *            available configurations are {@link #contentWithCommentWithImage},
-         *            {@link #contentWithCommentWithoutImage} and {@link #contentWithoutCommentWithImage}.
-         * @return {@link SafeHtml HTML template}
-         */
-        @Template("<div class='{0}'><div class='{1}'>{3}</div><div class='{2}'>{4}</div>{5}</div>")
-        SafeHtml cell(String styleTag, String styleTagHeading, String styleTagCreated, SafeHtml tag, SafeHtml createdAt,
-                SafeHtml content);
 
         /**
-         * Renders public, removable cell with different content configurations
+         * Renders cell with dynamic content.
          * 
          * @param tag
          *            title
+         * @param icon
+         *            available configurations are {@link #icon} or empty {@link SafeHtml}
+         * @param buttons
+         *            available configurations are {@link #headerButtonsDeletable},
+         *            {@link #headerButtonsDeletableAndModifyable} or empty {@link SafeHtml}
          * @param createdAt
          *            contains author name and createdAt time
          * @param content
@@ -59,41 +51,9 @@ public class TagCell extends AbstractCell<TagDTO> {
          *            {@link #contentWithCommentWithoutImage} and {@link #contentWithoutCommentWithImage}.
          * @return {@link SafeHtml HTML template}
          */
-        @Template("<div class='{0}'><div class='{1}'>{3}<div style='position: relative'><button role='delete'>X</button></div></div><div class='{2}'>{4}</div>{5}</div>")
-        SafeHtml cellRemovable(String styleTag, String styleTagHeading, String styleTagCreated, SafeHtml tag,
-                SafeHtml createdAt, SafeHtml content);
-
-        /**
-         * Renders private, non-removable cell with different content configurations
-         * 
-         * @param tag
-         *            title
-         * @param createdAt
-         *            contains author name and createdAt time
-         * @param content
-         *            available configurations are {@link #contentWithCommentWithImage},
-         *            {@link #contentWithCommentWithoutImage} and {@link #contentWithoutCommentWithImage}.
-         * @return {@link SafeHtml HTML template}
-         */
-        @Template("<div class='{0}'><div class='{1}'><img src='{6}'>{3}</div><div class='{2}'>{4}</div>{5}</div>")
-        SafeHtml privateCell(String styleTag, String styleTagHeading, String styleTagCreated, SafeHtml tag,
-                SafeHtml createdAt, SafeHtml content, SafeUri safeUri);
-
-        /**
-         * Renders private, removable cell with different content configurations
-         * 
-         * @param tag
-         *            title
-         * @param createdAt
-         *            contains author name and createdAt time
-         * @param content
-         *            available configurations are {@link #contentWithCommentWithImage},
-         *            {@link #contentWithCommentWithoutImage} and {@link #contentWithoutCommentWithImage}.
-         * @return {@link SafeHtml HTML template}
-         */
-        @Template("<div class='{0}'><div class='{1}'><img src='{6}'>{3}<div style='position: relative'><button role='delete'>X</button></div></div><div class='{2}'>{4}</div>{5}</div>")
-        SafeHtml privateCellRemovable(String styleTag, String styleTagHeading, String styleTagCreated, SafeHtml tag,
-                SafeHtml createdAt, SafeHtml content, SafeUri safeUri);
+        @Template("<div class='{0}'><div class='{1}'>{3}{4}{5}</div><div class='{2}'>{6}</div>{7}</div>")
+        SafeHtml cell(String classTag, String classTagHeading, String classTagCreated, SafeHtml icon, SafeHtml buttons,
+                SafeHtml tag, SafeHtml created, SafeHtml content);
 
         /**
          * Renders content with maximal configuration (comment and image).
@@ -105,7 +65,7 @@ public class TagCell extends AbstractCell<TagDTO> {
          * @return {@link SafeHtml HTML template}
          */
         @Template("<div class='{0}'><img src='{2}'/></div><div class='{1}'>{3}</div>")
-        SafeHtml contentWithCommentWithImage(String styleTagImage, String styleTagComment, SafeUri imageURL,
+        SafeHtml contentWithCommentWithImage(String classTagImage, String classTagComment, SafeUri imageURL,
                 SafeHtml comment);
 
         /**
@@ -116,7 +76,7 @@ public class TagCell extends AbstractCell<TagDTO> {
          * @return {@link SafeHtml HTML template}
          */
         @Template("<div class='{0}'>{1}</div>")
-        SafeHtml contentWithCommentWithoutImage(String styleTagComment, SafeHtml comment);
+        SafeHtml contentWithCommentWithoutImage(String classTagComment, SafeHtml comment);
 
         /**
          * Renders content with mixed configuration (image, no comment).
@@ -126,7 +86,42 @@ public class TagCell extends AbstractCell<TagDTO> {
          * @return {@link SafeHtml HTML template}
          */
         @Template("<div class='{0}'><img src='{1}'/></div>")
-        SafeHtml contentWithoutCommentWithImage(String styleTagImage, SafeUri imageURL);
+        SafeHtml contentWithoutCommentWithImage(String classTagImage, SafeUri imageURL);
+
+        /**
+         * Renders heading button to delete a tag.
+         * 
+         * @return {@link SafeHtml HTML template}
+         */
+        @Template("<div class='{0}'>{1}</div>")
+        SafeHtml headerButtonsDeletable(String classTagHeadingButtons, SafeHtml deleteButton);
+
+        /**
+         * Renders heading button to edit and delete a tag.
+         * 
+         * @return {@link SafeHtml HTML template}
+         */
+        @Template("<div class='{0}'>{1}{2}</div>")
+        SafeHtml headerButtonsDeletableAndModifyable(String classTagHeadingButtons, SafeHtml editButton,
+                SafeHtml deleteButton);
+
+        /**
+         * Renders icon with given source.
+         * 
+         * @return {@link SafeHtml HTML template}
+         */
+        @Template("<img src='{0}'>")
+        SafeHtml icon(SafeUri safeUri);
+
+        /**
+         * Renders button with given content.
+         * 
+         * @param content
+         *            content of button
+         * @return {@link SafeHtml HTML template}
+         */
+        @Template("<button class='{0}'>{1}</button>")
+        SafeHtml button(String classButton, SafeHtml content);
     }
 
     private final TagCellTemplate tagCellTemplate = GWT.create(TagCellTemplate.class);
@@ -174,7 +169,6 @@ public class TagCell extends AbstractCell<TagDTO> {
         SafeUri safeIsPrivateImageUri = resources.privateIcon().getSafeUri();
 
         SafeHtml content = SafeHtmlUtils.EMPTY_SAFE_HTML;
-
         if (!tag.getComment().isEmpty() && tag.getImageURL().isEmpty()) {
             content = tagCellTemplate.contentWithCommentWithoutImage(style.tagCellComment(), safeComment);
         } else if (tag.getComment().isEmpty() && !tag.getImageURL().isEmpty()) {
@@ -184,31 +178,34 @@ public class TagCell extends AbstractCell<TagDTO> {
                     trustedImageURL, safeComment);
         }
 
-        SafeHtml cell;
-        // TODO: As soon as permission-vertical branch got merged into master, apply
-        // new permission system at this if-statement and remove this old way of
-        // checking for permissions. (see bug 4104, comment 9)
-        // functionality: Check if user has the permission to delete this tag.
-        if (!isPreviewCell && userService.getCurrentUser() != null
-                && (tag.getUsername().equals(userService.getCurrentUser().getName())
-                        || userService.getCurrentUser().hasRole("admin"))) {
-            if (tag.isVisibleForPublic()) {
-                cell = tagCellTemplate.cellRemovable(style.tagCell(), style.tagCellHeading(), style.tagCellCreated(),
-                        safeTag, safeCreated, content);
-            } else {
-                cell = tagCellTemplate.privateCellRemovable(style.tagCell(), style.tagCellHeading(),
-                        style.tagCellCreated(), safeTag, safeCreated, content, safeIsPrivateImageUri);
-            }
+        SafeHtml icon = SafeHtmlUtils.EMPTY_SAFE_HTML;
+        if (!tag.isVisibleForPublic()) {
+            icon = tagCellTemplate.icon(safeIsPrivateImageUri);
+        }
 
-        } else {
-            if (tag.isVisibleForPublic()) {
-                cell = tagCellTemplate.cell(style.tagCell(), style.tagCellHeading(), style.tagCellCreated(), safeTag,
-                        safeCreated, content);
-            } else {
-                cell = tagCellTemplate.privateCell(style.tagCell(), style.tagCellHeading(), style.tagCellCreated(),
-                        safeTag, safeCreated, content, safeIsPrivateImageUri);
+        SafeHtml headingButtons = SafeHtmlUtils.EMPTY_SAFE_HTML;
+        // preview cells do not show buttons
+        if (!isPreviewCell) {
+            // create buttons with icons
+            SafeHtml deleteButton = tagCellTemplate.button(style.tagActionButton() + " " + style.tagDeleteButton(),
+                    tagCellTemplate.icon(resources.deleteIcon().getSafeUri()));
+            SafeHtml editButton = tagCellTemplate.button(style.tagActionButton() + " " + style.tagEditButton(),
+                    tagCellTemplate.icon(resources.editIcon().getSafeUri()));
+
+            // TODO: As soon as permission-vertical branch got merged into master, apply
+            // new permission system at this if-statement and remove this old way of
+            // checking for permissions. (see bug 4104, comment 9)
+            // functionality: Check if user has the permission to delete or edit this tag.
+            if (tag.getUsername().equals(userService.getCurrentUser().getName())) {
+                headingButtons = tagCellTemplate.headerButtonsDeletableAndModifyable(style.tagCellHeadingButtons(),
+                        editButton, deleteButton);
+            } else if (userService.getCurrentUser().hasRole("admin")) {
+                headingButtons = tagCellTemplate.headerButtonsDeletable(style.tagCellHeadingButtons(), deleteButton);
             }
         }
+
+        SafeHtml cell = tagCellTemplate.cell(style.tagCell(), style.tagCellHeading(), style.tagCellCreated(), icon,
+                headingButtons, safeTag, safeCreated, content);
         htmlBuilder.append(cell);
     }
 
@@ -216,25 +213,38 @@ public class TagCell extends AbstractCell<TagDTO> {
      * Asks user for confirmation if user presses the delete button on the {@link TagCell}. If user confirms deletion,
      * {@link TagDTO tag} will be deleted from {@link TaggingPanel} including
      * {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog} or {@link com.sap.sse.security.UserStore
-     * UserStore}, depending on where the tag is saved.
+     * UserStore}, depending on where the tag is saved. Also allows users to edit {@link TagDTO tags}, by putting
+     * {@link TaggingPanel} into state {@link TaggingPanel.State#EDIT_TAG edit} when user presses the edit button.
      */
     @Override
     public void onBrowserEvent(Context context, Element parent, TagDTO tag, NativeEvent event,
             ValueUpdater<TagDTO> valueUpdater) {
         super.onBrowserEvent(context, parent, tag, event, valueUpdater);
-        if ("click".equals(event.getType())) {
-            EventTarget eventTarget = event.getEventTarget();
-            if (!Element.is(eventTarget)) {
-                return;
-            }
-            Element button = parent.getElementsByTagName("button").getItem(0);
-            if (button != null && button.isOrHasChild(Element.as(eventTarget))) {
-                new ConfirmationDialog(stringMessages, stringMessages.tagConfirmDeletionHeading(),
-                        stringMessages.tagConfirmDeletion(tag.getTag()), (confirmed) -> {
-                            if (confirmed) {
-                                taggingPanel.removeTag(tag);
-                            }
-                        });
+        // Ignore browser events when tagging panel is in "Edit-Tag" mode so selection can't change during editing of
+        // tags.
+        if (!taggingPanel.getCurrentState().equals(State.EDIT_TAG)) {
+            if ("click".equals(event.getType())) {
+                EventTarget eventTarget = event.getEventTarget();
+                if (!Element.is(eventTarget)) {
+                    return;
+                }
+                NodeList<Element> elements = parent.getElementsByTagName("button");
+                for (int i = 0; i < elements.getLength(); i++) {
+                    Element button = elements.getItem(i);
+                    // identify intended button-functionality by classname
+                    if (button == null || !button.isOrHasChild(Element.as(eventTarget))) {
+                        continue;
+                    } else if (button.hasClassName(style.tagDeleteButton())) {
+                        new ConfirmationDialog(stringMessages, stringMessages.tagConfirmDeletionHeading(),
+                                stringMessages.tagConfirmDeletion(tag.getTag()), (confirmed) -> {
+                                    if (confirmed) {
+                                        taggingPanel.removeTag(tag);
+                                    }
+                                });
+                    } else if (button.hasClassName(style.tagEditButton())) {
+                        taggingPanel.setCurrentState(State.EDIT_TAG);
+                    }
+                }
             }
         }
     }

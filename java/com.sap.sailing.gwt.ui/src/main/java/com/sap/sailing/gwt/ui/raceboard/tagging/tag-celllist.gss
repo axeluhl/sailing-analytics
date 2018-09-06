@@ -7,11 +7,6 @@
 
 .cellListSelectedItem,
 .cellListKeyboardSelectedItem {
-	background-color: #e5f2f9;
-	border-radius: 3px
-}
-
-.cellListSelectedItem button[role="delete"],
-.cellListKeyboardSelectedItem button[role="delete"] {
-	background-color: transparent;
+	background-color: #e5f2f9 !important;
+	border-radius: 3px;
 }

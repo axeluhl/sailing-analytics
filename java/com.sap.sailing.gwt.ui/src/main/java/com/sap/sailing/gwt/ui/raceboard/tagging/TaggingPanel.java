@@ -10,6 +10,7 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.cellview.client.CellList;
+import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -56,7 +57,7 @@ public class TaggingPanel extends ComponentWithoutSettings
      */
     protected enum State {
         VIEW, // default
-        CREATE_TAG
+        CREATE_TAG, EDIT_TAG
     }
 
     // styling
@@ -143,10 +144,13 @@ public class TaggingPanel extends ComponentWithoutSettings
         tagListProvider.addDataDisplay(tagCellList);
         tagCellList.setEmptyListWidget(new Label(stringMessages.tagNoTagsFound()));
 
+        tagCellList.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.DISABLED);
         tagCellList.setSelectionModel(tagSelectionModel);
         tagSelectionModel.addSelectionChangeHandler(event -> {
-            // set time slider to corresponding position
-            timer.setTime(tagSelectionModel.getSelectedObject().getRaceTimepoint().asMillis());
+            if (!currentState.equals(State.EDIT_TAG)) {
+                // set time slider to corresponding position
+                timer.setTime(tagSelectionModel.getSelectedObject().getRaceTimepoint().asMillis());
+            }
         });
 
         contentPanel.add(tagCellList);
@@ -204,12 +208,25 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     /**
+     * Saves tag at current timer position.
+     * 
+     * @see #saveTag(String, Sting, String, boolean, TimePoint, boolean)
+     */
+    protected void saveTag(String tag, String comment, String imageURL, boolean isVisibleForPublic) {
+        saveTag(tag, comment, imageURL, isVisibleForPublic, null);
+    }
+
+    /**
      * Sends request to {@link SailingServiceAsync SailingService} to add the given tag to the
      * {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog} if the parameter <code>isVisibleForPublic</code>
      * is set to <code>true</code>. Otherwise tag will be stored in the {@link com.sap.sse.security.UserStore
-     * UserStore}.
+     * UserStore}. <br/>
+     * Checks parameters for valid values and replaces optional parameters with value <code>null</code> by default
+     * values: <code>comment</code> and <code>imageURL</code> will be replaced by an empty string,
+     * <code>raceTimePoint</code> by current {@link #getTimerTime() timer position}.
      */
-    protected void saveTag(String tag, String comment, String imageURL, boolean isVisibleForPublic) {
+    protected void saveTag(String tag, String comment, String imageURL, boolean isVisibleForPublic,
+            TimePoint raceTimePoint) {
         boolean tagIsNewTag = true;
         // check if tag already exists
         for (TagDTO tagDTO : tagListProvider.getAllTags()) {
@@ -221,142 +238,270 @@ public class TaggingPanel extends ComponentWithoutSettings
         }
         if (!tagIsNewTag) {
             // tag does already exist
-            Notification.notify(stringMessages.tagNotAddedReason(" " + stringMessages.tagAlreadyExists()),
+            Notification.notify(stringMessages.tagNotSavedReason(" " + stringMessages.tagAlreadyExists()),
                     NotificationType.WARNING);
 
         } else if (!isLoggedInAndRaceLogAvailable()) {
             // User is not logged in or race can not be identifed because regatta, race column or fleet are missing.
-            Notification.notify(stringMessages.tagNotAdded(), NotificationType.ERROR);
+            Notification.notify(stringMessages.tagNotSaved(), NotificationType.ERROR);
 
         } else if (tag.isEmpty()) {
             // Tag heading is empty. Empty tags are not allowed.
             Notification.notify(stringMessages.tagNotSpecified(), NotificationType.WARNING);
 
-        } else if (isVisibleForPublic) {
-            // public tags are saved to race log
-            sailingService.addTagToRaceLog(leaderboardName, raceColumn.getName(), fleet.getName(), tag, comment,
-                    imageURL, new MillisecondsTimePoint(timer.getTime()), new AsyncCallback<SuccessInfo>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            Notification.notify(stringMessages.tagNotAddedReason(caught.toString()),
-                                    NotificationType.ERROR);
-                        }
-
-                        @Override
-                        public void onSuccess(SuccessInfo result) {
-                            if (result.isSuccessful()) {
-                                Notification.notify(stringMessages.tagAddedSuccessfully(), NotificationType.INFO);
-                            } else {
-                                Notification.notify(stringMessages.tagNotAddedReason(result.getMessage()),
-                                        NotificationType.ERROR);
-                            }
-                        }
-                    });
         } else {
-            // private tags are saved to user storage
-            loadAllPrivateTags(new AsyncCallback<List<TagDTO>>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    // TODO: Add error handling
-                }
+            // replace null values with default values
+            final String saveComment = (comment == null ? "" : comment);
+            final String saveImageURL = (imageURL == null ? "" : imageURL);
+            final TimePoint saveRaceTimePoint = (raceTimePoint == null ? new MillisecondsTimePoint(getTimerTime())
+                    : raceTimePoint);
 
-                @Override
-                public void onSuccess(List<TagDTO> loadedPrivateTags) {
-                    removePrivateTagsFromProvider();
-                    addTagsToProvider(loadedPrivateTags);
-
-                    TagDTO newTag = new TagDTO(tag, comment, imageURL, userService.getCurrentUser().getName(), false,
-                            new MillisecondsTimePoint(getTimerTime()), MillisecondsTimePoint.now());
-                    loadedPrivateTags.add(newTag);
-
-                    // store list of loaded private tags also containing the new tag
-                    TagDTOJsonDeSerializer serializer = new TagDTOJsonDeSerializer();
-                    JSONObject jsonObject = serializer.serialize(loadedPrivateTags);
-                    userService.setPreference(serializer.createIdenticalKeyFromThreeStrings(fleet.getName(),
-                            leaderboardName, raceColumn.getName()), jsonObject.toString(), new AsyncCallback<Void>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    Notification.notify(stringMessages.tagButtonNotSavable(), NotificationType.WARNING);
-                                }
-
-                                @Override
-                                public void onSuccess(Void result) {
-                                    Notification.notify(stringMessages.tagAddedSuccessfully(), NotificationType.INFO);
-                                    tagListProvider.getAllTags().add(newTag);
-                                    updateContent();
-                                }
-                            });
-                }
-            });
+            // parameters are valid and tag is ready to be saved
+            if (isVisibleForPublic) {
+                savePublicTag(tag, saveComment, saveImageURL, saveRaceTimePoint);
+            } else {
+                savePrivateTag(tag, saveComment, saveImageURL, saveRaceTimePoint);
+            }
         }
-
     }
 
     /**
-     * If attribute <code>isVisibleForPublic</code> of given tag is set to true, a request to the
+     * Saves public tag to {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog}. Must <b>NOT</b> be called
+     * directly, instead use {@link #saveTag(String, Sting, String, boolean, TimePoint, boolean)}!
+     * 
+     * @see #saveTag(String, Sting, String, boolean, TimePoint, boolean)
+     */
+    private void savePublicTag(String tag, String comment, String imageURL, TimePoint raceTimePoint) {
+        sailingService.addTagToRaceLog(leaderboardName, raceColumn.getName(), fleet.getName(), tag, comment, imageURL,
+                raceTimePoint, new AsyncCallback<SuccessInfo>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Notification.notify(stringMessages.tagNotSavedReason(caught.toString()),
+                                NotificationType.ERROR);
+                    }
+
+                    @Override
+                    public void onSuccess(SuccessInfo result) {
+                        if (result.isSuccessful()) {
+
+                            Notification.notify(stringMessages.tagSavedSuccessfully(), NotificationType.INFO);
+
+                        } else {
+                            Notification.notify(stringMessages.tagNotSavedReason(result.getMessage()),
+                                    NotificationType.ERROR);
+                        }
+                    }
+                });
+    }
+
+    /**
+     * Saves private tag to {@link com.sap.sse.security.UserStore UserStore}. Must <b>NOT</b> be called directly,
+     * instead use {@link #saveTag(String, Sting, String, boolean, TimePoint, boolean)}!
+     * 
+     * @see #saveTag(String, Sting, String, boolean, TimePoint, boolean)
+     */
+    private void savePrivateTag(String tag, String comment, String imageURL, TimePoint raceTimePoint) {
+        loadAllPrivateTags(new AsyncCallback<List<TagDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                Notification.notify(stringMessages.tagNotSaved(), NotificationType.WARNING);
+            }
+
+            @Override
+            public void onSuccess(List<TagDTO> loadedPrivateTags) {
+                removePrivateTagsFromProvider();
+                addTagsToProvider(loadedPrivateTags);
+
+                TagDTO newTag = new TagDTO(tag, comment, imageURL, userService.getCurrentUser().getName(), false,
+                        raceTimePoint, MillisecondsTimePoint.now());
+                loadedPrivateTags.add(newTag);
+
+                // store list of loaded private tags also containing the new tag
+                TagDTOJsonDeSerializer serializer = new TagDTOJsonDeSerializer();
+                JSONObject jsonObject = serializer.serialize(loadedPrivateTags);
+                userService.setPreference(serializer.createIdenticalKeyFromThreeStrings(fleet.getName(),
+                        leaderboardName, raceColumn.getName()), jsonObject.toString(), new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                Notification.notify(stringMessages.tagNotSaved(), NotificationType.WARNING);
+                            }
+
+                            @Override
+                            public void onSuccess(Void result) {
+
+                                Notification.notify(stringMessages.tagSavedSuccessfully(), NotificationType.INFO);
+
+                                tagListProvider.getAllTags().add(newTag);
+                                updateContent();
+                            }
+                        });
+            }
+        });
+    }
+
+    /**
+     * Removes tag in non-<code>silent</code> mode ignoring async callbacks. Error handling is part of
+     * {@link #removeTag(TagDTO, boolean, AsyncCallback)}.
+     * 
+     * @param tag
+     *            tag to remove
+     * 
+     * @see #removeTag(TagDTO, boolean)
+     */
+    protected void removeTag(TagDTO tag) {
+        removeTag(tag, false);
+    }
+
+    /**
+     * Removes tag ignoring callbacks. Error handling is part of {@link #removeTag(TagDTO, boolean, AsyncCallback)}.
+     * 
+     * @param tag
+     *            tag to remove
+     * @param silent
+     *            when set to <code>true</code>, only error messages will get displayed to user
+     * 
+     * @see #removeTag(TagDTO, boolean, AsyncCallback)
+     */
+    protected void removeTag(TagDTO tag, boolean silent) {
+        removeTag(tag, silent, new AsyncCallback<Boolean>() {
+            // ignore callbacks
+            @Override
+            public void onFailure(Throwable caught) {
+            }
+
+            @Override
+            public void onSuccess(Boolean result) {
+            }
+        });
+    }
+
+    /**
+     * Removes tag waiting for async operations to finish. When all operations finished, callback will be resolved.
+     * <br/>
+     * If attribute <code>isVisibleForPublic</code> of given tag is set to <code>true</code>, a request to the
      * {@link SailingServiceAsync SailingService} is sent to revoke the given
      * {@link com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent RaceLogTagEvent} in
      * {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog}. Otherwise the given tag is private and must be
      * removed from the {@link com.sap.sse.security.UserStore UserStore}.
+     * 
+     * @param tag
+     *            tag to be removed
+     * @param silent
+     *            when set to <code>true</code>, only error messages will get displayed to user
      */
-    protected void removeTag(TagDTO tagToRemove) {
-        if (tagToRemove.isVisibleForPublic()) {
-            // remove public tag from race log
-            sailingService.removeTagFromRaceLog(leaderboardName, raceColumn.getName(), fleet.getName(), tagToRemove,
-                    new AsyncCallback<SuccessInfo>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            Notification.notify(stringMessages.tagNotRemoved(), NotificationType.ERROR);
-                            GWT.log(caught.getMessage());
-                        }
-
-                        @Override
-                        public void onSuccess(SuccessInfo result) {
-                            if (result.isSuccessful()) {
-                                tagListProvider.getAllTags().remove(tagToRemove);
-                                updateContent();
-                                Notification.notify(stringMessages.tagRemovedSuccessfully(), NotificationType.SUCCESS);
-                            } else {
-                                Notification.notify(stringMessages.tagNotRemoved() + " " + result.getMessage(),
-                                        NotificationType.ERROR);
-                            }
-                        }
-                    });
+    private void removeTag(TagDTO tag, boolean silent, AsyncCallback<Boolean> callback) {
+        if (tag.isVisibleForPublic()) {
+            removePublicTag(tag, silent, callback);
         } else {
-            // remove private tag from user storage
-            loadAllPrivateTags(new AsyncCallback<List<TagDTO>>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                }
+            removePrivateTag(tag, silent, callback);
+        }
+    }
 
-                @Override
-                public void onSuccess(List<TagDTO> privateTags) {
-                    removePrivateTagsFromProvider();
-                    privateTags.remove(tagToRemove);
-                    addTagsToProvider(privateTags);
+    /**
+     * Removes public tag from {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog}. Must <b>NOT</b> be
+     * called directly, instead use {@link #removeTag(TagDTO, boolean, AsyncCallback)}!
+     * 
+     * @see #removeTag(TagDTO, boolean, AsyncCallback)
+     */
+    private void removePublicTag(TagDTO tag, boolean silent, AsyncCallback<Boolean> callback) {
+        sailingService.removeTagFromRaceLog(leaderboardName, raceColumn.getName(), fleet.getName(), tag,
+                new AsyncCallback<SuccessInfo>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Notification.notify(stringMessages.tagNotRemoved(), NotificationType.ERROR);
+                        GWT.log(caught.getMessage());
+                        callback.onFailure(caught);
+                    }
 
-                    // store list in user storage
-                    TagDTOJsonDeSerializer serializer = new TagDTOJsonDeSerializer();
-                    JSONObject jsonObject = serializer.serialize(privateTags);
-                    userService.setPreference(serializer.createIdenticalKeyFromThreeStrings(fleet.getName(),
-                            leaderboardName, raceColumn.getName()), jsonObject.toString(), new AsyncCallback<Void>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    Notification.notify(stringMessages.tagNotRemoved(), NotificationType.ERROR);
-                                    GWT.log(caught.getMessage());
-                                }
+                    @Override
+                    public void onSuccess(SuccessInfo result) {
+                        if (result.isSuccessful()) {
+                            tagListProvider.getAllTags().remove(tag);
+                            updateContent();
+                            if (!silent) {
+                                Notification.notify(stringMessages.tagRemovedSuccessfully(), NotificationType.SUCCESS);
+                            }
+                            callback.onSuccess(true);
+                        } else {
+                            Notification.notify(stringMessages.tagNotRemoved() + " " + result.getMessage(),
+                                    NotificationType.ERROR);
+                            callback.onSuccess(false);
+                        }
+                    }
+                });
+    }
 
-                                @Override
-                                public void onSuccess(Void result) {
-                                    removePrivateTagsFromProvider();
-                                    addTagsToProvider(privateTags);
-                                    updateContent();
+    /**
+     * Removes private tag from {@link com.sap.sse.security.UserStore UserStore}. Must <b>NOT</b> be called directly,
+     * instead use {@link #removeTag(TagDTO, boolean, AsyncCallback)}!
+     * 
+     * @see #removeTag(TagDTO, boolean, AsyncCallback)
+     */
+    private void removePrivateTag(TagDTO tag, boolean silent, AsyncCallback<Boolean> callback) {
+        loadAllPrivateTags(new AsyncCallback<List<TagDTO>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                callback.onFailure(caught);
+            }
+
+            @Override
+            public void onSuccess(List<TagDTO> privateTags) {
+                removePrivateTagsFromProvider();
+                privateTags.remove(tag);
+                addTagsToProvider(privateTags);
+
+                // store list in user storage
+                TagDTOJsonDeSerializer serializer = new TagDTOJsonDeSerializer();
+                JSONObject jsonObject = serializer.serialize(privateTags);
+                userService.setPreference(serializer.createIdenticalKeyFromThreeStrings(fleet.getName(),
+                        leaderboardName, raceColumn.getName()), jsonObject.toString(), new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                Notification.notify(stringMessages.tagNotRemoved(), NotificationType.ERROR);
+                                GWT.log(caught.getMessage());
+                                callback.onFailure(caught);
+                            }
+
+                            @Override
+                            public void onSuccess(Void result) {
+                                removePrivateTagsFromProvider();
+                                addTagsToProvider(privateTags);
+                                updateContent();
+                                if (!silent) {
                                     Notification.notify(stringMessages.tagRemovedSuccessfully(),
                                             NotificationType.SUCCESS);
                                 }
-                            });
+                                callback.onSuccess(true);
+                            }
+                        });
+            }
+        });
+    }
+
+    /**
+     * Updates given <code>tagToUpdate</code> with the given parameters <code>tag</code>, <code>comment</code>,
+     * <code>imageURL</code> and <code>isPublic</code>.
+     * 
+     * @see TagDTO
+     */
+    protected void updateTag(TagDTO tagToUpdate, String tag, String comment, String imageURL, boolean isPublic) {
+        if (tagToUpdate.getUsername().equals(userService.getCurrentUser().getName())) {
+            removeTag(tagToUpdate, true, new AsyncCallback<Boolean>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    // errors are handled in removeTag(TagDTO, boolean, AsyncCallback<Boolen>), can be ignored here
+                }
+
+                @Override
+                public void onSuccess(Boolean successful) {
+                    // only save tag when deletion of old tag was successful.
+                    if (successful) {
+                        saveTag(tag, comment, imageURL, isPublic, tagToUpdate.getRaceTimepoint());
+                    }
                 }
             });
+        } else {
+            Notification.notify(stringMessages.tagNotEditable(), NotificationType.WARNING);
         }
     }
 
@@ -378,8 +523,13 @@ public class TaggingPanel extends ComponentWithoutSettings
      * Controls the visibility of UI elements in case the content or {@link #currentState} changes.
      */
     protected void updateContent() {
-        setFooterPanelVisibility(currentState == State.CREATE_TAG);
-        setCreateTagsButtonVisibility(currentState == State.VIEW);
+        ensureFooterPanelVisibility();
+        setCreateTagsButtonVisibility(currentState.equals(State.VIEW));
+        if (currentState.equals(State.EDIT_TAG)) {
+            taggingPanel.addStyleName(style.taggingPanelDisabled());
+        } else {
+            taggingPanel.removeStyleName(style.taggingPanelDisabled());
+        }
         tagListProvider.updateFilteredTags();
         tagCellList.setVisibleRange(0, tagListProvider.getFilteredTags().size());
         tagListProvider.refresh();
@@ -425,7 +575,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                     leaderboardName, raceColumn.getName()), new AsyncCallback<String>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            // TODO: Add error handling
+                            callback.onFailure(caught);
                         }
 
                         @Override
@@ -453,6 +603,13 @@ public class TaggingPanel extends ComponentWithoutSettings
      */
     protected Date getTimerTime() {
         return timer.getTime();
+    }
+
+    /**
+     * Returns the {@link SingleSelectionModel#getSelectedObject() current selected} {@link TagDTO tag}.
+     */
+    protected TagDTO getSelectedTag() {
+        return tagSelectionModel.getSelectedObject();
     }
 
     /**
@@ -488,6 +645,15 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     /**
+     * Returns current state of {@link TaggingPanel}.
+     * 
+     * @return current state
+     */
+    protected State getCurrentState() {
+        return currentState;
+    }
+
+    /**
      * Sets the {@link #currentState} to the given {@link State state} and updates the UI.
      * 
      * @param state
@@ -499,19 +665,17 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     /**
-     * Updates the visibility of the {@link #footerPanel} and it's components. Input fields will NOT get displayed if
-     * user is not logged in, even if <code>showInputFields</code> is set to <code>true</code>! {@link TagButton}s can't
-     * be hidden and will get displayed automatically when {@link UserService#getCurrentUser() current user} is logged
-     * in.
+     * Updates the visibility of the {@link #footerPanel} and it's components. Input fields will not get displayed if
+     * user is not logged in. {@link TagButton}s can't be hidden and will get displayed automatically when
+     * {@link UserService#getCurrentUser() current user} is logged in.
      */
-    private void setFooterPanelVisibility(boolean showInputFields) {
+    private void ensureFooterPanelVisibility() {
         // Setting footerPanel.setVisible(false) is not sufficient as panel would still be
         // rendered as 20px high white space instead of being hidden.
         // Fix: remove panel completely from footer.
-        if (userService.getCurrentUser() != null && (currentState == State.CREATE_TAG || getTagButtons().size() > 0)) {
+        if (userService.getCurrentUser() != null) {
             taggingPanel.setFooterWidget(footerPanel);
-            footerPanel.setInputFieldsVisibility(showInputFields);
-            footerPanel.setTagButtonsVisibility(true);
+            footerPanel.setCurrentState(currentState);
         } else {
             taggingPanel.setFooterWidget(null);
         }
@@ -592,15 +756,17 @@ public class TaggingPanel extends ComponentWithoutSettings
      */
     @Override
     public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
-        // clear list of local tags to hide private tags of previous user
+        // clear list of local tags to hide private tags of previous user and reset cache
         tagListProvider.getAllTags().clear();
         raceTimesInfoProvider.getRaceIdentifiers().forEach((raceIdentifier) -> {
             raceTimesInfoProvider.setLatestReceivedTagTime(raceIdentifier, null);
         });
+
+        // load content for new user
         loadAllPrivateTags(new AsyncCallback<List<TagDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
-                // TODO: add error handling
+                Notification.notify(stringMessages.tagNotLoaded(), NotificationType.WARNING);
             }
 
             @Override
@@ -610,6 +776,8 @@ public class TaggingPanel extends ComponentWithoutSettings
         });
         filterbarPanel.loadTagFilterSets();
         footerPanel.loadAllTagButtons();
+
+        // update UI
         setCurrentState(State.VIEW);
         updateContent();
     }
@@ -635,7 +803,7 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     /**
-     * Only request tags from server if {@link TaggingPanel} is visible.
+     * Requests tags from server only if {@link TaggingPanel} is visible.
      */
     @Override
     public void setVisible(boolean visible) {

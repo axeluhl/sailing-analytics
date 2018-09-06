@@ -17,6 +17,9 @@ public class TagInputPanel extends FlowPanel {
     private final TagPanelStyle style = TagPanelResources.INSTANCE.style();
 
     // default value for "Visible for public" checkbox
+    private static final String DEFAULT_TAG = "";
+    private static final String DEFAULT_COMMENT = "";
+    private static final String DEFAULT_IMAGE_URL = "";
     private static final boolean DEFAULT_VISIBLE_FOR_PUBLIC = true;
 
     private final TextBox tagTextBox, imageURLTextBox;
@@ -62,10 +65,33 @@ public class TagInputPanel extends FlowPanel {
      * Clears all input fields.
      */
     protected void clearAllValues() {
-        tagTextBox.setText("");
-        imageURLTextBox.setText("");
-        commentTextArea.setText("");
+        tagTextBox.setText(DEFAULT_TAG);
+        imageURLTextBox.setText(DEFAULT_COMMENT);
+        commentTextArea.setText(DEFAULT_IMAGE_URL);
         setVisibleForPublic(DEFAULT_VISIBLE_FOR_PUBLIC);
+    }
+
+    /**
+     * Returns whether values of given <code>tag</code> are different from input fields.
+     * 
+     * @param tag
+     *            tag to compare to input fields
+     * @return <code>true</code> if title, comment, imageURL and visibility are equal to input fields, otherwise
+     *         <code>false</code>
+     */
+    protected boolean compareFieldsToTag(TagDTO tag) {
+        return getTag().equals(tag.getTag()) && getComment().equals(tag.getComment())
+                && getImageURL().equals(tag.getImageURL()) && isVisibleForPublic() == tag.isVisibleForPublic();
+    }
+
+    /**
+     * Returns whether input fields are equal to default values.
+     * 
+     * @return <code>true</code> if all input fields are equal to default values, otherwise <code>false</code>
+     */
+    protected boolean isInputEmpty() {
+        return getTag().equals(DEFAULT_TAG) && getComment().equals(DEFAULT_COMMENT)
+                && getImageURL().equals(DEFAULT_IMAGE_URL) && isVisibleForPublic() == DEFAULT_VISIBLE_FOR_PUBLIC;
     }
 
     protected String getTag() {
@@ -82,6 +108,19 @@ public class TagInputPanel extends FlowPanel {
 
     protected boolean isVisibleForPublic() {
         return visibleForPublicCheckBox.getValue();
+    }
+
+    /**
+     * Sets all input fields to values of given {@link TagDTO tag}.
+     * 
+     * @param tag
+     *            tag
+     */
+    protected void setTag(TagDTO tag) {
+        setTag(tag.getTag());
+        setComment(tag.getComment());
+        setImageURL(tag.getImageURL());
+        setVisibleForPublic(tag.isVisibleForPublic());
     }
 
     protected void setTag(String tag) {
