@@ -49,6 +49,8 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
     private double knotsInDegreePerFrame;
     private final CoordinateSystem coordinateSystem;
     
+    private final BearingWithConfidenceCluster<Position> bearingCluster;
+
     private final Comparator<WindDTO> windByRequestTimePointComparator = new Comparator<WindDTO>() {
         @Override
         public int compare(WindDTO o1, WindDTO o2) {
@@ -62,6 +64,7 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
         this.windInfoForRace = windInfoForRace;
         this.knotsInDegreePerFrame = 1.0 / (60*3600) / framesPerSecond; // 1kn = 1/60 deg/h = 1/(60*3600) deg/s
         weigher = new PositionDTOWeigher(/* halfConfidenceDistance */new MeterDistance(100), this);
+        bearingCluster = new BearingWithConfidenceCluster<>(weigher);
     }
     
     /**
@@ -100,7 +103,7 @@ public class WindInfoForRaceVectorField implements VectorField, AverageLatitudeP
         final Position p = coordinateSystem.getPosition(mappedPosition);
         double speedConfidenceSum = 0;
         double knotSpeedSumScaledByConfidence = 0;
-        final BearingWithConfidenceCluster<Position> bearingCluster = new BearingWithConfidenceCluster<>(weigher);
+        bearingCluster.clear();
         for (final Entry<WindSource, WindTrackInfoDTO> windSourceAndWindTrack : windInfoForRace.windTrackInfoByWindSource.entrySet()) {
            if (!Util.contains(windInfoForRace.windSourcesToExclude, windSourceAndWindTrack.getKey())) {
                 WindDTO timewiseClosestFixForWindSource = getTimewiseClosestFix(windSourceAndWindTrack.getValue(), at);
