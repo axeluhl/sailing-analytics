@@ -10,7 +10,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -18,7 +17,6 @@ import java.util.stream.Stream;
 
 import org.junit.Test;
 
-import com.sap.sailing.domain.base.CompetitorAndBoat;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.confidence.impl.ScalableDouble;
@@ -26,10 +24,8 @@ import com.sap.sailing.domain.common.confidence.impl.ScalableWind;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.test.OnlineTracTracBasedTest;
-import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tractracadapter.ReceiverType;
 import com.sap.sailing.polars.impl.PolarDataServiceImpl;
-import com.sap.sailing.polars.windestimation.ManeuverBasedWindEstimationTrackImpl.ManeuverClassification;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.DegreeBearingImpl;
@@ -118,11 +114,11 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
         setUp("event_20110609_KielerWoch-505_Race_3");
         ManeuverBasedWindEstimationTrackImpl windTrack = new ManeuverBasedWindEstimationTrackImpl(new PolarDataServiceImpl(),
                 getTrackedRace(), /* millisecondsOverWhichToAverage */ 30000, /* waitForLatest */ true);
-        final Map<Maneuver, CompetitorAndBoat> maneuvers = windTrack.getAllManeuvers(/* waitForLatest */ true);
+//        windTrack.initialize();
         final int numberOfClusters = 16;
         KMeansMappingClusterer<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble> clusterer =
                 new KMeansMappingClusterer<>(numberOfClusters,
-                        windTrack.getManeuverClassifications(maneuvers),
+                        windTrack.getManeuverClassifications(),
                         (mc)->new ScalableBearingAndScalableDouble(mc.getMiddleManeuverCourse(), mc.getManeuverAngleDeg()), // maps maneuver classification to cluster metric
                         // use an evenly distributed set of cluster seeds for clustering wind direction estimations
                         Stream.concat(IntStream.range(0, numberOfClusters/2).mapToObj((i)->
@@ -148,12 +144,13 @@ public class TestWindEstimationFromManeuversOnAFew505Races extends OnlineTracTra
     private double getAverageLikelihood(
             Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble> cluster,
             ManeuverType maneuverType) {
-        return cluster.stream().mapToDouble((mc)->mc.getLikelihoodAndTWSBasedOnSpeedAndAngle(maneuverType).getA()).average().getAsDouble();
+        return cluster.stream().mapToDouble((mc)->mc.getLikelihoodForManeuverType(maneuverType)).average().getAsDouble();
     }
     
     private Wind getManeuverBasedAverageWind() throws NotEnoughDataHasBeenAddedException {
         ManeuverBasedWindEstimationTrackImpl windTrack = new ManeuverBasedWindEstimationTrackImpl(new PolarDataServiceImpl(),
                 getTrackedRace(), /* millisecondsOverWhichToAverage */ 30000, /* waitForLatest */ true);
+        windTrack.initialize();
         ScalableWind windSum = null;
         int count = 0;
         windTrack.lockForRead();

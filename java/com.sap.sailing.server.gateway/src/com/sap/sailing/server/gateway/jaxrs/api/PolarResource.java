@@ -32,8 +32,9 @@ import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.polars.windestimation.ManeuverBasedWindEstimationTrack;
 import com.sap.sailing.polars.windestimation.ManeuverBasedWindEstimationTrackImpl;
-import com.sap.sailing.polars.windestimation.ManeuverBasedWindEstimationTrackImpl.ManeuverClassification;
+import com.sap.sailing.polars.windestimation.ManeuverClassification;
 import com.sap.sailing.polars.windestimation.ScalableBearingAndScalableDouble;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.impl.PositionJsonSerializer;
@@ -160,8 +161,9 @@ public class PolarResource extends AbstractSailingServerResource {
                 JSONArray resultAsJson = new JSONArray();
                 WindJsonSerializer serializer = new WindJsonSerializer(new PositionJsonSerializer());
                 PolarDataService service = getService().getPolarDataService();
-                ManeuverBasedWindEstimationTrackImpl maneuverBasedWindEstimationTrackImpl = new ManeuverBasedWindEstimationTrackImpl(
+                ManeuverBasedWindEstimationTrack maneuverBasedWindEstimationTrackImpl = new ManeuverBasedWindEstimationTrackImpl(
                         service, trackedRace, /* millisecondsOverWhichToAverage */ 30000, /* waitForLatest */ false);
+                maneuverBasedWindEstimationTrackImpl.initialize();
                 maneuverBasedWindEstimationTrackImpl.lockForRead();
                 try {
                     for (Wind wind : maneuverBasedWindEstimationTrackImpl.getFixes()) {
@@ -205,7 +207,7 @@ public class PolarResource extends AbstractSailingServerResource {
                 } else {
                     clusters = maneuverBasedWindEstimationTrackImpl.getClusters().stream();
                 }
-                response = Response.ok(maneuverBasedWindEstimationTrackImpl.getStringRepresentation(clusters, /* waitForLatest */ true),
+                response = Response.ok(maneuverBasedWindEstimationTrackImpl.getStringRepresentation(clusters),
                         MediaType.TEXT_PLAIN).build();
             }
         }

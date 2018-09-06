@@ -6,7 +6,6 @@ import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.confidence.ConfidenceBasedAverager;
 import com.sap.sailing.domain.common.confidence.HasConfidenceAndIsScalable;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.polars.windestimation.ManeuverBasedWindEstimationTrackImpl.ManeuverClassification;
 import com.sap.sse.common.scalablevalue.ScalableValue;
 
 /**
@@ -56,7 +55,7 @@ public class ManeuverClassificationToHasConfidenceAndIsScalableAdapter<ValueType
 
             @Override
             public double getConfidence() {
-                return polarService.getManeuverLikelihoodAndTwsTwa(t.getBoat().getBoatClass(),
+                return polarService.getManeuverLikelihoodAndTwsTwa(t.getBoatClass(),
                         t.getSpeedAtManeuverStart(), t.getManeuverAngleDeg(), maneuverType).getA();
             }
 
