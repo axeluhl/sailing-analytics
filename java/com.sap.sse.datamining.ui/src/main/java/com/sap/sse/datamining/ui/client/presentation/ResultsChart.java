@@ -260,7 +260,6 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
         updateKeyComparatorListBox();
         resetChartSeries();
         updateChartLabels();
-        updateChartSubtitle();
         showResultData();
     }
 
@@ -295,11 +294,6 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     private void updateChartLabels() {
         chart.getYAxis().setAxisTitleText(getCurrentResult().getResultSignifier());
         chart.setToolTip(new ToolTip().setValueDecimals(decimalsListBox.getValue()));
-    }
-
-    private void updateChartSubtitle() {
-        chart.setChartSubtitle(new ChartSubtitle().setText(getDataMiningStringMessages().queryResultsChartSubtitle(
-                getCurrentResult().getRetrievedDataAmount(), getCurrentResult().getCalculationTimeInSeconds())));
     }
 
     private void showResultData() {
@@ -439,8 +433,8 @@ public class ResultsChart extends AbstractNumericResultsPresenter<Settings> {
     private Chart createChart() {
         Chart chart = new Chart().setType(Series.Type.COLUMN).setMarginLeft(100).setMarginRight(45).setWidth100()
                 .setHeight100().setBorderColor(new Color("#F0AB00")).setPlotBorderWidth(0)
-                .setCredits(new Credits().setEnabled(false))
-                .setChartTitle(new ChartTitle().setText(getDataMiningStringMessages().dataMiningResult()));
+                .setTitle(new ChartTitle().setText(""), new ChartSubtitle().setText(""))
+                .setCredits(new Credits().setEnabled(false));
         chart.setExporting(new Exporting().setEnabled(false));
         chart.getXAxis().setAllowDecimals(false);
         chart.getYAxis().setAxisTitleText("Result").setLabels(new YAxisLabels().setFormatter(new AxisLabelsFormatter() {

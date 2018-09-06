@@ -4,12 +4,34 @@ import java.io.Serializable;
 
 import com.sap.sse.common.settings.SerializableSettings;
 
+/**
+ * A data mining retriever level that can be shared between client and server. Instances are usually constructed by a
+ * DataMiningDTOFactory based on a given backend DataRetrieverLevel.
+ */
 public class DataRetrieverLevelDTO implements Serializable, Comparable<DataRetrieverLevelDTO> {
     private static final long serialVersionUID = 6911713148350359643L;
     
+    /**
+     * The index of this retriever level in the retriever chain.
+     */
     private int retrieverLevel;
+    /**
+     * The fully qualified name of the Processor performing the retrieval of this level.
+     */
     private String retrieverTypeName;
+    /**
+     * The type of the retrieved data elements in form of a {@link LocalizedTypeDTO}. Its type name is the fully
+     * qualified name of the retrieved data type and is used for identification purposes.
+     * 
+     * The display name is used as human readable string representation of this retriever level and should be omitted
+     * when persisting a DataRetrieverLevelDTO.
+     */
     private LocalizedTypeDTO retrievedDataType;
+
+    /**
+     * The default settings for this retriever level or <code>null</code>, if the level doesn't have settings. Should be
+     * omitted when persisting a DataRetrieverLevelDTO.
+     */
     private SerializableSettings defaultSettings;
 
     /**

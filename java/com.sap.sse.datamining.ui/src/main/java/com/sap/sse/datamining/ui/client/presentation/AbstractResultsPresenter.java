@@ -83,7 +83,7 @@ public abstract class AbstractResultsPresenter<SettingsType extends Settings>
     public void showResult(StatisticQueryDefinitionDTO queryDefinition, QueryResultDTO<?> result) {
         if (result != null && !result.isEmpty()) {
             if (state != ResultsPresenterState.RESULT) {
-                mainPanel.setWidgetHidden(controlsPanel, false);
+                mainPanel.setWidgetHidden(controlsPanel, controlsPanel.getWidgetCount() == 0);
                 presentationPanel.setWidget(getPresentationWidget());
                 state = ResultsPresenterState.RESULT;
             }

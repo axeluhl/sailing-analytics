@@ -7,6 +7,8 @@ import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.gwt.client.shared.components.Component;
 
 public interface DataMiningComponentProvider<SettingsType extends Settings> extends Component<SettingsType> {
+    
+    static final Consumer<Iterable<String>> EmptyApplyCallback = m -> { };
 
     /**
      * Tells the provider, that {@link #reloadComponents()} will be called in the future.
