@@ -13,5 +13,7 @@ public interface TrainableSingleManeuverOfflineClassifier extends SingleManeuver
     double getTrainScore();
 
     void setTrainScore(double trainScore);
+    
+    void setFixesCountForBoatClass(int fixesCountForBoatClass);
 
 }

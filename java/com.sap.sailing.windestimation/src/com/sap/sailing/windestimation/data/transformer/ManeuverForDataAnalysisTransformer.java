@@ -7,7 +7,7 @@ import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimat
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.ManeuverCategory;
 import com.sap.sailing.windestimation.data.ManeuverForDataAnalysis;
-import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
+import com.sap.sailing.windestimation.data.ManeuverTypeForDataAnalysis;
 
 public class ManeuverForDataAnalysisTransformer
         extends AbstractCompleteManeuverCurveWithEstimationDataTransformer<ManeuverForDataAnalysis> {
@@ -47,7 +47,7 @@ public class ManeuverForDataAnalysisTransformer
         if (maneuver.getWind() == null) {
             return null;
         }
-        ManeuverTypeForClassification maneuverType = getManeuverTypeForClassification(maneuver);
+        ManeuverTypeForDataAnalysis maneuverType = getManeuverTypeForClassification(maneuver);
         double absoluteTotalCourseChangeInDegrees = Math
                 .abs(maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees());
         double absoluteTotalCourseChangeWithinMainCurveInDegrees = Math
@@ -78,23 +78,12 @@ public class ManeuverForDataAnalysisTransformer
         Double deviationFromOptimalJibeAngleInDegrees = maneuver.getTargetJibeAngleInDegrees() == null ? null
                 : Math.abs(maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees())
                         - maneuver.getTargetJibeAngleInDegrees();
-        Double highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees;
-        if (maneuver.getRelativeBearingToNextMarkBeforeManeuver() == null
-                && maneuver.getRelativeBearingToNextMarkAfterManeuver() == null) {
-            highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees = null;
-        } else if (maneuver.getRelativeBearingToNextMarkBeforeManeuver() == null) {
-            highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees = Math
-                    .abs(maneuver.getRelativeBearingToNextMarkAfterManeuver().getDegrees());
-        } else if (maneuver.getRelativeBearingToNextMarkAfterManeuver() == null) {
-            highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees = Math
-                    .abs(maneuver.getRelativeBearingToNextMarkBeforeManeuver().getDegrees());
-        } else {
-            highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees = Math
-                    .abs(maneuver.getRelativeBearingToNextMarkBeforeManeuver().getDegrees()) > Math
-                            .abs(maneuver.getRelativeBearingToNextMarkAfterManeuver().getDegrees())
-                                    ? Math.abs(maneuver.getRelativeBearingToNextMarkBeforeManeuver().getDegrees())
-                                    : Math.abs(maneuver.getRelativeBearingToNextMarkAfterManeuver().getDegrees());
-        }
+        Double relativeBearingToNextMarkBeforeManeuverInDegrees = maneuver
+                .getRelativeBearingToNextMarkBeforeManeuver() == null ? null
+                        : maneuver.getRelativeBearingToNextMarkBeforeManeuver().getDegrees();
+        Double relativeBearingToNextMarkAfterManeuverInDegrees = maneuver
+                .getRelativeBearingToNextMarkAfterManeuver() == null ? null
+                        : maneuver.getRelativeBearingToNextMarkAfterManeuver().getDegrees();
         double mainCurveDurationInSeconds = maneuver.getMainCurve().getDuration().asSeconds();
         double maneuverDurationInSeconds = maneuver.getCurveWithUnstableCourseAndSpeed().getDuration().asSeconds();
         double recoveryPhaseDurationInSeconds = maneuver.getMainCurve().getTimePointAfter()
@@ -131,7 +120,7 @@ public class ManeuverForDataAnalysisTransformer
                 speedInSpeedOutRatio, oversteeringInDegrees, speedLossRatio, speedGainRatio,
                 lowestSpeedVsExitingSpeedRatio, maneuver.getMainCurve().getMaxTurningRateInDegreesPerSecond(),
                 deviationFromOptimalTackAngleInDegrees, deviationFromOptimalJibeAngleInDegrees,
-                highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees,
+                relativeBearingToNextMarkBeforeManeuverInDegrees, relativeBearingToNextMarkAfterManeuverInDegrees,
                 mainCurveDurationInSeconds, maneuverDurationInSeconds, recoveryPhaseDurationInSeconds,
                 timeLossInSeconds, clean, maneuverCategory, twaBeforeInDegrees, twaAfterInDegrees, twsInKnots,
                 speedBeforeInKnots, speedAfterInKnots, twaAtMiddleCourseInDegrees, twaAtMiddleCourseMainCurveInDegrees,

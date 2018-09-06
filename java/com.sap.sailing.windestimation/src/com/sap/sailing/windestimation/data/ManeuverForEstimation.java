@@ -23,6 +23,7 @@ public class ManeuverForEstimation {
     private final Double deviationFromOptimalJibeAngleInDegrees;
     private final double speedLossRatio;
     private final double speedGainRatio;
+    private final double lowestSpeedVsExitingSpeedRatio;
     private final boolean clean;
     private final boolean cleanBefore;
     private final boolean cleanAfter;
@@ -37,8 +38,9 @@ public class ManeuverForEstimation {
             SpeedWithBearing averageSpeedWithBearingAfter, double courseChangeInDegrees,
             double courseChangeWithinMainCurveInDegrees, double maxTurningRateInDegreesPerSecond,
             Double deviationFromOptimalTackAngleInDegrees, Double deviationFromOptimalJibeAngleInDegrees,
-            double speedLossRatio, double speedGainRatio, boolean clean, boolean cleanBefore, boolean cleanAfter,
-            ManeuverCategory maneuverCategory, double scaledSpeedBefore, double scaledSpeedAfter, BoatClass boatClass) {
+            double speedLossRatio, double speedGainRatio, double lowestSpeedVsExitingSpeedRatio, boolean clean,
+            boolean cleanBefore, boolean cleanAfter, ManeuverCategory maneuverCategory, double scaledSpeedBefore,
+            double scaledSpeedAfter, BoatClass boatClass) {
         this.maneuverTimePoint = maneuverTimePoint;
         this.maneuverPosition = maneuverPosition;
         this.middleCourse = middleCourse;
@@ -54,6 +56,7 @@ public class ManeuverForEstimation {
         this.deviationFromOptimalJibeAngleInDegrees = deviationFromOptimalJibeAngleInDegrees;
         this.speedLossRatio = speedLossRatio;
         this.speedGainRatio = speedGainRatio;
+        this.lowestSpeedVsExitingSpeedRatio = lowestSpeedVsExitingSpeedRatio;
         this.clean = clean;
         this.cleanBefore = cleanBefore;
         this.cleanAfter = cleanAfter;
@@ -123,6 +126,10 @@ public class ManeuverForEstimation {
         return speedGainRatio;
     }
 
+    public double getLowestSpeedVsExitingSpeedRatio() {
+        return lowestSpeedVsExitingSpeedRatio;
+    }
+    
     public boolean isClean() {
         return clean;
     }

@@ -7,10 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.maneuvergraph.CoarseGrainedPointOfSail;
+import com.sap.sailing.windestimation.maneuvergraph.FineGrainedManeuverType;
 import com.sap.sailing.windestimation.maneuvergraph.FineGrainedPointOfSail;
 import com.sap.sailing.windestimation.maneuvergraph.GraphLevel;
-import com.sap.sailing.windestimation.maneuvergraph.ProbabilityUtil;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
@@ -21,8 +24,8 @@ import com.sap.sse.common.Util.Pair;
  */
 public class BestPathsCalculator {
 
-    private static final double INTERVAL_FOR_WIND_PATH_DEVIATION_ANALYSIS_IN_SECONDS = 30 * 60;
-    private static final double MAX_ABS_WIND_COURSE_DEVIATION_TOLERANCE_WITHIN_ANALYSIS_INTERVAL_IN_DEGREES = 45;
+    protected static final double INTERVAL_FOR_WIND_PATH_DEVIATION_ANALYSIS_IN_SECONDS = 30 * 60;
+    protected static final double MAX_ABS_WIND_COURSE_DEVIATION_TOLERANCE_WITHIN_ANALYSIS_INTERVAL_IN_DEGREES = 45;
 
     private GraphLevel lastLevel;
 
@@ -87,8 +90,8 @@ public class BestPathsCalculator {
             bestPathsPerLevel = new HashMap<>();
             BestPathsUntilLevel bestPathsUntilLevel = new BestPathsUntilLevel();
             for (FineGrainedPointOfSail currentNode : FineGrainedPointOfSail.values()) {
-                bestPathsUntilLevel.windDeviationWithinBestPaths[currentNode.ordinal()] = new WindRange(
-                        currentLevel.getWindCourseInDegrees(currentNode), 0, 0, 0);
+                bestPathsUntilLevel.setWindDeviation(currentNode,
+                        new WindRange(currentLevel.getWindCourseInDegrees(currentNode), 0, 0, 0));
                 double maxProbability = 0;
                 for (FineGrainedPointOfSail previousNode : FineGrainedPointOfSail.values()) {
                     double probability = currentLevel.getProbabilityFromPreviousLevelNodeToThisLevelNode(previousNode,
@@ -97,7 +100,11 @@ public class BestPathsCalculator {
                         maxProbability = probability;
                     }
                 }
-                bestPathsUntilLevel.probabilitiesOfBestPathToNodeFromStart[currentNode.ordinal()] = maxProbability;
+                bestPathsUntilLevel.setProbabilityOfBestPathToNodeFromStart(currentNode, maxProbability);
+                SailingStatistics pathStats = new SailingStatistics();
+                pathStats.addRecordToStatistics(currentLevel.getManeuver(),
+                        currentLevel.getTypeOfCleanManeuver(currentNode), currentNode);
+                bestPathsUntilLevel.setPathStatistics(currentLevel, currentNode, pathStats);
             }
             bestPathsPerLevel.put(currentLevel, bestPathsUntilLevel);
         } else {
@@ -106,6 +113,8 @@ public class BestPathsCalculator {
                     .getManeuverTimePoint().until(currentLevel.getManeuver().getManeuverTimePoint()).asSeconds();
             BestPathsUntilLevel bestPathsUntilLevel = new BestPathsUntilLevel();
             for (FineGrainedPointOfSail currentNode : FineGrainedPointOfSail.values()) {
+                SailingStatistics previousPathStats = bestPathsUntilPreviousLevel.getPathStatistics(currentLevel,
+                        currentNode);
                 double currentWindCourse = currentLevel.getWindCourseInDegrees(currentNode);
                 double maxProbability = 0;
                 FineGrainedPointOfSail bestPreviousNode = null;
@@ -114,48 +123,45 @@ public class BestPathsCalculator {
                     WindRange newWindDeviationUntilNodeWithinBestPath = getWindDeviationRangeForNextNode(previousLevel,
                             previousNode, currentLevel, currentNode, currentWindCourse,
                             secondsPassedSincePreviousManeuver);
-                    double probability = bestPathsUntilPreviousLevel.probabilitiesOfBestPathToNodeFromStart[previousNode
-                            .ordinal()]
+                    double probability = bestPathsUntilPreviousLevel
+                            .getProbabilityOfBestPathToNodeFromStart(previousNode)
+
                             * currentLevel.getProbabilityFromPreviousLevelNodeToThisLevelNode(previousNode, currentNode)
                             * getPenaltyFactorForTransitionConsideringWindRangeWithinBestPath(
-                                    newWindDeviationUntilNodeWithinBestPath.getWindCourseDeviationRangeInDegrees());
+                                    newWindDeviationUntilNodeWithinBestPath.getWindCourseDeviationRangeInDegrees())
+                            * getPenaltyFactorForTransitionConsideringPreviousPathStats(currentLevel, currentNode,
+                                    previousPathStats);
                     if (probability > maxProbability) {
                         maxProbability = probability;
                         bestPreviousNode = previousNode;
                         windDeviationUntilNodeWithinBestPath = newWindDeviationUntilNodeWithinBestPath;
                     }
                 }
-                bestPathsUntilLevel.probabilitiesOfBestPathToNodeFromStart[currentNode.ordinal()] = maxProbability;
-                bestPathsUntilLevel.bestPreviousNodes[currentNode.ordinal()] = bestPreviousNode;
-                setNewWindDeviationWithinProvidedWindDeviationArray(currentLevel, currentNode,
-                        windDeviationUntilNodeWithinBestPath, bestPathsUntilLevel.windDeviationWithinBestPaths);
+                bestPathsUntilLevel.setProbabilityOfBestPathToNodeFromStart(currentNode, maxProbability);
+                bestPathsUntilLevel.setBestPreviousNode(currentNode, bestPreviousNode);
+                if (windDeviationUntilNodeWithinBestPath
+                        .getWindCourseDeviationRangeInDegrees() > BestPathsCalculator.MAX_ABS_WIND_COURSE_DEVIATION_TOLERANCE_WITHIN_ANALYSIS_INTERVAL_IN_DEGREES) {
+                    windDeviationUntilNodeWithinBestPath = new WindRange(
+                            currentLevel.getWindCourseInDegrees(currentNode), 0, 0, 0);
+                }
+                bestPathsUntilLevel.setWindDeviation(currentNode, windDeviationUntilNodeWithinBestPath);
+                SailingStatistics currentPathStats = previousPathStats.cloneAndAddRecordToStatistics(
+                        currentLevel.getManeuver(), currentLevel.getTypeOfCleanManeuver(currentNode), currentNode);
+                bestPathsUntilLevel.setPathStatistics(currentLevel, currentNode, currentPathStats);
             }
             // avoid that probability product becomes zero due to precision of Double
-            ProbabilityUtil.normalizeLikelihoodArray(bestPathsUntilLevel.probabilitiesOfBestPathToNodeFromStart);
+            bestPathsUntilLevel.normalizeProbabilities();
             bestPathsPerLevel.put(currentLevel, bestPathsUntilLevel);
         }
         this.lastLevel = currentLevel;
     }
 
-    private void setNewWindDeviationWithinProvidedWindDeviationArray(GraphLevel currentLevel,
-            FineGrainedPointOfSail currentNode, WindRange windDeviationUntilNodeWithinBestPath,
-            WindRange[] windDeviationWithinBestPaths) {
-        WindRange windDeviationToSet;
-        if (windDeviationUntilNodeWithinBestPath
-                .getWindCourseDeviationRangeInDegrees() > MAX_ABS_WIND_COURSE_DEVIATION_TOLERANCE_WITHIN_ANALYSIS_INTERVAL_IN_DEGREES) {
-            windDeviationToSet = new WindRange(currentLevel.getWindCourseInDegrees(currentNode), 0, 0, 0);
-        } else {
-            windDeviationToSet = windDeviationUntilNodeWithinBestPath;
-        }
-        windDeviationWithinBestPaths[currentNode.ordinal()] = windDeviationToSet;
-    }
-
     private WindRange getWindDeviationRangeForNextNode(GraphLevel previousLevel, FineGrainedPointOfSail previousNode,
             GraphLevel currentLevel, FineGrainedPointOfSail currentNode, double currentWindCourse,
             double secondsPassedSincePreviousManeuver) {
-        WindRange newWindDeviationUntilNodeWithinBestPath = bestPathsPerLevel
-                .get(previousLevel).windDeviationWithinBestPaths[previousNode.ordinal()]
-                        .calculateForNextManeuverNodesLevel(currentWindCourse, secondsPassedSincePreviousManeuver);
+        WindRange newWindDeviationUntilNodeWithinBestPath = bestPathsPerLevel.get(previousLevel)
+                .getWindDeviation(previousNode)
+                .calculateForNextGraphLevel(currentWindCourse, secondsPassedSincePreviousManeuver);
         if (newWindDeviationUntilNodeWithinBestPath
                 .getWindCourseDeviationRangeInDegrees() > MAX_ABS_WIND_COURSE_DEVIATION_TOLERANCE_WITHIN_ANALYSIS_INTERVAL_IN_DEGREES
                 && !newWindDeviationUntilNodeWithinBestPath
@@ -174,8 +180,8 @@ public class BestPathsCalculator {
                         .until(currentTimePoint).asSeconds() <= INTERVAL_FOR_WIND_PATH_DEVIATION_ANALYSIS_IN_SECONDS) {
                     levelWithinTimePeriodLimitForWindDeviationAnalysis = previousLevelToCheck;
                     bestPreviousNodeForLevelWithinTimePeriodLimitForWindDeviationAnalysis = bestPathsPerLevel
-                            .get(previousLevelToCheck).bestPreviousNodes[bestPreviousNodeForLevelWithinTimePeriodLimitForWindDeviationAnalysis
-                                    .ordinal()];
+                            .get(previousLevelToCheck)
+                            .getBestPreviousNode(bestPreviousNodeForLevelWithinTimePeriodLimitForWindDeviationAnalysis);
                 } else {
                     break;
                 }
@@ -192,13 +198,13 @@ public class BestPathsCalculator {
                 double windCourseInDegrees = levelWithinTimePeriodLimitForWindDeviationAnalysis
                         .getWindCourseInDegrees(pointOfSail.ordinal());
                 newWindDeviationUntilNodeWithinBestPath = newWindDeviationUntilNodeWithinBestPath
-                        .calculateForNextManeuverNodesLevel(windCourseInDegrees, secondsPassed);
+                        .calculateForNextGraphLevel(windCourseInDegrees, secondsPassed);
             }
         }
         return newWindDeviationUntilNodeWithinBestPath;
     }
 
-    private double getPenaltyFactorForTransitionConsideringWindRangeWithinBestPath(
+    protected double getPenaltyFactorForTransitionConsideringWindRangeWithinBestPath(
             double windCourseDeviationInDegrees) {
         if (MAX_ABS_WIND_COURSE_DEVIATION_TOLERANCE_WITHIN_ANALYSIS_INTERVAL_IN_DEGREES < windCourseDeviationInDegrees) {
             return 1 / (4
@@ -210,6 +216,129 @@ public class BestPathsCalculator {
         return 1;
     }
 
+    protected double getPenaltyFactorForTransitionConsideringPreviousPathStats(GraphLevel currentLevel,
+            FineGrainedPointOfSail currentNode, SailingStatistics previousPathStats) {
+        if (previousPathStats == null) {
+            return 1.0;
+        } else {
+            ManeuverForEstimation maneuver = currentLevel.getManeuver();
+            double speedPenaltyFactorBefore = 1;
+            double speedPenaltyFactorAfter = 1;
+            double lowestSpeedAndTurningRatePenaltyFactor = 1;
+            if (maneuver.isCleanBefore()) {
+                FineGrainedPointOfSail pointOfSailBeforeManeuver = currentNode
+                        .getNextPointOfSail(maneuver.getCourseChangeInDegrees() * -1);
+                speedPenaltyFactorBefore = getSpeedPenaltyFactorForPointOfSail(previousPathStats,
+                        pointOfSailBeforeManeuver, maneuver.getAverageSpeedWithBearingBefore().getKnots(), maneuver.getBoatClass());
+            }
+            if (maneuver.isCleanAfter()) {
+                speedPenaltyFactorAfter = getSpeedPenaltyFactorForPointOfSail(previousPathStats, currentNode,
+                        maneuver.getAverageSpeedWithBearingAfter().getKnots(), maneuver.getBoatClass());
+            }
+            if (maneuver.isClean()) {
+                lowestSpeedAndTurningRatePenaltyFactor = getLowestSpeedAndTurningRatePenaltyFactor(previousPathStats,
+                        currentLevel, currentNode);
+            }
+            return speedPenaltyFactorBefore * speedPenaltyFactorAfter * lowestSpeedAndTurningRatePenaltyFactor;
+        }
+    }
+
+    protected double getLowestSpeedAndTurningRatePenaltyFactor(SailingStatistics averageStatistics,
+            GraphLevel currentLevel, FineGrainedPointOfSail currentNode) {
+        double tackProbabilityBonus = 0;
+        ManeuverForEstimation maneuver = currentLevel.getManeuver();
+        FineGrainedManeuverType maneuverType = currentLevel.getTypeOfCleanManeuver(currentNode);
+        double absDirectionChangeInDegrees = Math.abs(maneuver.getCourseChangeWithinMainCurveInDegrees());
+        double lowestSpeedRatio = (maneuver.getSpeedLossRatio() + maneuver.getLowestSpeedVsExitingSpeedRatio()) / 2.0;
+        double turningRate = maneuver.getMaxTurningRateInDegreesPerSecond();
+        switch (maneuverType) {
+        case TACK:
+            for (FineGrainedManeuverType otherManeuverType : FineGrainedManeuverType.values()) {
+                if (otherManeuverType != FineGrainedManeuverType.TACK
+                        && otherManeuverType != FineGrainedManeuverType._180_JIBE
+                        && otherManeuverType != FineGrainedManeuverType._180_TACK
+                        && otherManeuverType != FineGrainedManeuverType._360
+                        && averageStatistics.getNumberOfCleanManeuvers(otherManeuverType) > 0) {
+                    double lowestSpeedRatioDifference = lowestSpeedRatio
+                            - averageStatistics.getAverageSpeedLossForManeuverType(otherManeuverType);
+                    double turningRateDifference = turningRate
+                            - averageStatistics.getAverageTurningRateForManeuverType(otherManeuverType);
+                    if (lowestSpeedRatioDifference > 0 && turningRateDifference < 0) {
+                        tackProbabilityBonus -= lowestSpeedRatioDifference * 2 + turningRateDifference / -100;
+                    }
+                }
+            }
+            double courseChangeDifference = absDirectionChangeInDegrees
+                    - averageStatistics.getAverageAbsCourseChangeInDegreesForManeuverType(FineGrainedManeuverType.JIBE);
+            if (courseChangeDifference < 0) {
+                tackProbabilityBonus -= courseChangeDifference / -180;
+            }
+            break;
+        case _180_TACK:
+            // if (averageStatistics.getNumberOfCleanManeuvers(FineGrainedManeuverType._180_JIBE) > 0) {
+            // double lowestSpeedRatioDifference = lowestSpeedRatio - averageStatistics
+            // .getAverageSpeedLossForManeuverType(
+            // FineGrainedManeuverType._180_JIBE);
+            // if (lowestSpeedRatioDifference > 0) {
+            // tackProbabilityBonus -= lowestSpeedRatioDifference;
+            // }
+            // }
+            break;
+        case _180_JIBE:
+            // double lowestSpeedRatioDifference = lowestSpeedRatio
+            // - averageStatistics.getAverageSpeedLossForManeuverType(
+            // FineGrainedManeuverType._180_TACK);
+            // if (lowestSpeedRatioDifference < 0) {
+            // tackProbabilityBonus += lowestSpeedRatioDifference * -1;
+            // }
+            break;
+        case _360:
+            break;
+        default:
+            if (averageStatistics.getNumberOfCleanManeuvers(FineGrainedManeuverType.TACK) > 0) {
+                double lowestSpeedRatioDifference = lowestSpeedRatio
+                        - averageStatistics.getAverageSpeedLossForManeuverType(FineGrainedManeuverType.TACK);
+                double turningRateDifference = turningRate
+                        - averageStatistics.getAverageTurningRateForManeuverType(FineGrainedManeuverType.TACK);
+                if (lowestSpeedRatioDifference < 0 && turningRateDifference > 0) {
+                    tackProbabilityBonus += lowestSpeedRatioDifference * -2 + turningRateDifference / 100;
+                }
+                // courseChangeDifference = absDirectionChangeInDegrees - averageStatistics
+                // .getAverageAbsCourseChangeInDegreesForManeuverType(FineGrainedManeuverType.TACK);
+                // if (courseChangeDifference > 0) {
+                // tackProbabilityBonus += courseChangeDifference / 180;
+                // }
+            }
+            break;
+        }
+        return 1 - Math.abs(tackProbabilityBonus);
+    }
+
+    protected double getSpeedPenaltyFactorForPointOfSail(SailingStatistics averageStatistics,
+            FineGrainedPointOfSail pointOfSail, double speedAtPointOfSail, BoatClass boatClass) {
+        double lowestAverageSpeedUpwind = averageStatistics.getLowestUpwindAvgSpeed();
+        double upwindProbabilityBonus = 0.0;
+        if (pointOfSail.getLegType() == LegType.UPWIND) {
+            for (FineGrainedPointOfSail otherPointOfSail : FineGrainedPointOfSail.values()) {
+                if (otherPointOfSail.getLegType() == LegType.REACHING
+                        || otherPointOfSail.getLegType() == LegType.DOWNWIND
+                                && averageStatistics.getNumberOfCleanTracks(otherPointOfSail) > 0) {
+                    double speedRatio = speedAtPointOfSail
+                            / averageStatistics.getAverageSpeedInKnotsForPointOfSail(otherPointOfSail);
+                    if (speedRatio > 1.05) {
+                        upwindProbabilityBonus = Math.min(upwindProbabilityBonus, Math.max((1 - speedRatio), -0.8));
+                    }
+                }
+            }
+        } else if (lowestAverageSpeedUpwind != 0) {
+            double speedRatio = lowestAverageSpeedUpwind / speedAtPointOfSail;
+            if (speedRatio > 1.05) {
+                upwindProbabilityBonus = Math.max((1 - speedRatio), -0.8);
+            }
+        }
+        return 1.0 - Math.abs(upwindProbabilityBonus);
+    }
+
     public List<Pair<GraphLevel, FineGrainedPointOfSail>> getBestPath(GraphLevel lastLevel,
             FineGrainedPointOfSail lastNode) {
         List<Pair<GraphLevel, FineGrainedPointOfSail>> result = new LinkedList<>();
@@ -218,7 +347,7 @@ public class BestPathsCalculator {
         while (currentLevel != null) {
             Pair<GraphLevel, FineGrainedPointOfSail> entry = new Pair<>(currentLevel, currentNode);
             result.add(0, entry);
-            currentNode = bestPathsPerLevel.get(currentLevel).bestPreviousNodes[currentNode.ordinal()];
+            currentNode = bestPathsPerLevel.get(currentLevel).getBestPreviousNode(currentNode);
             currentLevel = currentLevel.getPreviousLevel();
         }
         return result;
@@ -229,7 +358,7 @@ public class BestPathsCalculator {
         double maxProbability = 0;
         FineGrainedPointOfSail bestLastNode = null;
         for (FineGrainedPointOfSail pointOfSail : FineGrainedPointOfSail.values()) {
-            double probability = bestPathsUntilLevel.probabilitiesOfBestPathToNodeFromStart[pointOfSail.ordinal()];
+            double probability = bestPathsUntilLevel.getProbabilityOfBestPathToNodeFromStart(pointOfSail);
             if (maxProbability < probability) {
                 maxProbability = probability;
                 bestLastNode = pointOfSail;
@@ -245,7 +374,7 @@ public class BestPathsCalculator {
         double[] probabilitiesOfBestPathToCoarseGrainedPointOfSail = new double[CoarseGrainedPointOfSail
                 .values().length];
         for (FineGrainedPointOfSail pointOfSail : FineGrainedPointOfSail.values()) {
-            double probability = bestPathsUntilLastLevel.probabilitiesOfBestPathToNodeFromStart[pointOfSail.ordinal()];
+            double probability = bestPathsUntilLastLevel.getProbabilityOfBestPathToNodeFromStart(pointOfSail);
             if (lastNode == pointOfSail
                     || lastNode.getCoarseGrainedPointOfSail() != pointOfSail.getCoarseGrainedPointOfSail()
                             && probability > probabilitiesOfBestPathToCoarseGrainedPointOfSail[pointOfSail
@@ -262,67 +391,6 @@ public class BestPathsCalculator {
         double bestPathConfidence = probabilitiesOfBestPathToCoarseGrainedPointOfSail[lastNode
                 .getCoarseGrainedPointOfSail().ordinal()] / sumOfprobabilitiesOfBestPathToCoarseGrainedPointOfSail;
         return bestPathConfidence;
-    }
-
-    private static class BestPathsUntilLevel {
-        private FineGrainedPointOfSail[] bestPreviousNodes = new FineGrainedPointOfSail[FineGrainedPointOfSail
-                .values().length];
-        private double[] probabilitiesOfBestPathToNodeFromStart = new double[bestPreviousNodes.length];
-        private WindRange[] windDeviationWithinBestPaths = new WindRange[bestPreviousNodes.length];
-    }
-
-    private static class WindRange {
-
-        private final double windCourseOnPortsideBoundary;
-        private final double windCourseDeviationTowardStarboardInDegrees;
-        private final double secondsPassedSincePortsideBoundaryRecord;
-        private final double secondsPassedSinceStarboardBoundaryRecord;
-
-        public WindRange(double windCourseOnPortsideBoundary, double windCourseDeviationTowardStarboardInDegrees,
-                double secondsPassedSincePortsideBoundaryRecord, double secondsPassedSinceStarboardBoundaryRecord) {
-            this.windCourseOnPortsideBoundary = windCourseOnPortsideBoundary;
-            this.windCourseDeviationTowardStarboardInDegrees = windCourseDeviationTowardStarboardInDegrees;
-            this.secondsPassedSincePortsideBoundaryRecord = secondsPassedSincePortsideBoundaryRecord;
-            this.secondsPassedSinceStarboardBoundaryRecord = secondsPassedSinceStarboardBoundaryRecord;
-        }
-
-        public WindRange calculateForNextManeuverNodesLevel(double nextWindCourse,
-                double secondsPassedSincePreviousManeuver) {
-            double deviationFromPortsideBoundaryTowardStarboard = nextWindCourse - windCourseOnPortsideBoundary;
-            if (deviationFromPortsideBoundaryTowardStarboard < 0) {
-                deviationFromPortsideBoundaryTowardStarboard += 360;
-            }
-            double deviationFromRecordedWindCourseDeviationTowardStarboardInDegrees = deviationFromPortsideBoundaryTowardStarboard
-                    - windCourseDeviationTowardStarboardInDegrees;
-            if (deviationFromRecordedWindCourseDeviationTowardStarboardInDegrees <= 0) {
-                // new wind course is within the previous wind deviation range
-                return new WindRange(windCourseOnPortsideBoundary, windCourseDeviationTowardStarboardInDegrees,
-                        secondsPassedSincePortsideBoundaryRecord + secondsPassedSincePreviousManeuver,
-                        secondsPassedSinceStarboardBoundaryRecord + secondsPassedSincePreviousManeuver);
-            } else {
-                double deviationFromRecordedPortsideBoundaryTowardPortside = 360
-                        - deviationFromPortsideBoundaryTowardStarboard;
-                if (deviationFromRecordedWindCourseDeviationTowardStarboardInDegrees > deviationFromRecordedPortsideBoundaryTowardPortside) {
-                    return new WindRange(nextWindCourse,
-                            windCourseDeviationTowardStarboardInDegrees
-                                    + deviationFromRecordedPortsideBoundaryTowardPortside,
-                            0, secondsPassedSinceStarboardBoundaryRecord + secondsPassedSincePreviousManeuver);
-                } else {
-                    return new WindRange(windCourseOnPortsideBoundary, deviationFromPortsideBoundaryTowardStarboard,
-                            secondsPassedSincePortsideBoundaryRecord + secondsPassedSincePreviousManeuver, 0);
-                }
-            }
-        }
-
-        public boolean isCalculatedWithinLastSeconds(double lastSeconds) {
-            return secondsPassedSinceStarboardBoundaryRecord < lastSeconds
-                    && secondsPassedSincePortsideBoundaryRecord < lastSeconds;
-        }
-
-        public double getWindCourseDeviationRangeInDegrees() {
-            return windCourseDeviationTowardStarboardInDegrees;
-        }
-
     }
 
 }

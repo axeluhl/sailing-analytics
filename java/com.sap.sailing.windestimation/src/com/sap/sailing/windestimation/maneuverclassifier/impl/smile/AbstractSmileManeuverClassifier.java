@@ -30,6 +30,7 @@ public abstract class AbstractSmileManeuverClassifier<T extends SoftClassifier<d
     private PCA pca = null;
     private FeatureTransform scaler = null;
     private final PreprocessingConfig preprocessingConfig;
+    private int fixesCountForBoatClass = 0;
 
     public AbstractSmileManeuverClassifier(ManeuverFeatures maneuverFeatures, PreprocessingConfig preprocessingConfig,
             ManeuverTypeForClassification... supportedManeuverTypes) {
@@ -51,6 +52,7 @@ public abstract class AbstractSmileManeuverClassifier<T extends SoftClassifier<d
             this.testScore = copy.testScore;
             this.pca = copy.pca;
             this.scaler = copy.scaler;
+            this.fixesCountForBoatClass = copy.fixesCountForBoatClass;
             if (!getBoatClass().equals(copy.getBoatClass())) {
                 throw new ClassifierPersistenceException("The boat class of the loaded classifier is: "
                         + copy.getBoatClass() + ". \nExpected: " + getBoatClass());
@@ -158,6 +160,16 @@ public abstract class AbstractSmileManeuverClassifier<T extends SoftClassifier<d
     @Override
     public void setTrainScore(double trainScore) {
         this.trainScore = trainScore;
+    }
+
+    @Override
+    public int getFixesCountForBoatClass() {
+        return fixesCountForBoatClass;
+    }
+
+    @Override
+    public void setFixesCountForBoatClass(int fixesCountForBoatClass) {
+        this.fixesCountForBoatClass = fixesCountForBoatClass;
     }
 
 }

@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.windestimation.data.ManeuverCategory;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.maneuverclassifier.impl.ManeuverFeatures;
+import com.sap.sailing.windestimation.maneuvergraph.CoarseGrainedManeuverType;
 
 public abstract class AbstractManeuverClassifier implements ManeuverClassifier, SingleManeuverClassifier {
 
@@ -32,9 +34,32 @@ public abstract class AbstractManeuverClassifier implements ManeuverClassifier, 
     @Override
     public ManeuverEstimationResult classifyManeuver(ManeuverForEstimation maneuver) {
         double[] likelihoodPerManeuverType = classifyManeuverWithProbabilities(maneuver);
+        double[] likelihoodPerCoarseGrainedManeuverType = mapManeuverTypesToCoarseGrainedManeuverTypes(
+                likelihoodPerManeuverType, maneuver.getManeuverCategory());
         ManeuverEstimationResult maneuverClassificationResult = new ManeuverEstimationResult(maneuver,
-                likelihoodPerManeuverType);
+                likelihoodPerCoarseGrainedManeuverType);
         return maneuverClassificationResult;
+    }
+
+    private double[] mapManeuverTypesToCoarseGrainedManeuverTypes(double[] likelihoodPerManeuverType,
+            ManeuverCategory maneuverCategory) {
+        double[] newLikelihoods = new double[CoarseGrainedManeuverType.values().length];
+        switch (maneuverCategory) {
+        case MARK_PASSING:
+        case REGULAR:
+            newLikelihoods[CoarseGrainedManeuverType.TACK
+                    .ordinal()] = likelihoodPerManeuverType[ManeuverTypeForClassification.TACK.ordinal()];
+            newLikelihoods[CoarseGrainedManeuverType.JIBE
+                    .ordinal()] = likelihoodPerManeuverType[ManeuverTypeForClassification.JIBE.ordinal()];
+            newLikelihoods[CoarseGrainedManeuverType.BEAR_AWAY
+                    .ordinal()] = likelihoodPerManeuverType[ManeuverTypeForClassification.OTHER.ordinal()];
+            newLikelihoods[CoarseGrainedManeuverType.HEAD_UP
+                    .ordinal()] = likelihoodPerManeuverType[ManeuverTypeForClassification.OTHER.ordinal()];
+            break;
+        default:
+            break;
+        }
+        return newLikelihoods;
     }
 
     @Override

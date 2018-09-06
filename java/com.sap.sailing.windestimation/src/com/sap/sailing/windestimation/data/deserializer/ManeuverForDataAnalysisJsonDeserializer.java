@@ -6,13 +6,13 @@ import com.sap.sailing.server.gateway.deserialization.JsonDeserializationExcepti
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
 import com.sap.sailing.windestimation.data.ManeuverCategory;
 import com.sap.sailing.windestimation.data.ManeuverForDataAnalysis;
-import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
+import com.sap.sailing.windestimation.data.ManeuverTypeForDataAnalysis;
 
 public class ManeuverForDataAnalysisJsonDeserializer implements JsonDeserializer<ManeuverForDataAnalysis> {
 
     @Override
     public ManeuverForDataAnalysis deserialize(JSONObject object) throws JsonDeserializationException {
-        ManeuverTypeForClassification maneuverType = ManeuverTypeForClassification
+        ManeuverTypeForDataAnalysis maneuverType = ManeuverTypeForDataAnalysis
                 .valueOf((String) object.get(ManeuverForDataAnalysisJsonSerializer.MANEUVER_TYPE));
         double absoluteTotalCourseChangeInDegrees = (double) object
                 .get(ManeuverForDataAnalysisJsonSerializer.ABSOLUTE_TOTAL_COURSE_CHANGE_IN_DEGREES);
@@ -32,8 +32,10 @@ public class ManeuverForDataAnalysisJsonDeserializer implements JsonDeserializer
                 .get(ManeuverForDataAnalysisJsonSerializer.DEVIATION_FROM_OPTIMAL_TACK_ANGLE_IN_DEGREES);
         Double deviationFromOptimalJibeAngleInDegrees = (Double) object
                 .get(ManeuverForDataAnalysisJsonSerializer.DEVIATION_FROM_OPTIMAL_JIBE_ANGLE_IN_DEGREES);
-        double highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees = (double) object.get(
-                ManeuverForDataAnalysisJsonSerializer.HIGHEST_ABSOLUTE_DEVIATION_OF_BOATS_COURSE_TO_BEARING_FROM_BOAT_TO_NEXT_WAYPOINT_IN_DEGREES);
+        Double relativeBearingToNextMarkBeforeInDegrees = (Double) object
+                .get(ManeuverForDataAnalysisJsonSerializer.RELATIVE_BEARING_TO_NEXT_MARK_BEFORE_IN_DEGREES);
+        Double relativeBearingToNextMarkAfterInDegrees = (Double) object
+                .get(ManeuverForDataAnalysisJsonSerializer.RELATIVE_BEARING_TO_NEXT_MARK_AFTER_IN_DEGREES);
         double mainCurveDurationInSeconds = (double) object
                 .get(ManeuverForDataAnalysisJsonSerializer.MAIN_CURVE_DURATION_IN_SECONDS);
         double maneuverDurationInSeconds = (double) object
@@ -67,7 +69,7 @@ public class ManeuverForDataAnalysisJsonDeserializer implements JsonDeserializer
                 absoluteTotalCourseChangeWithinMainCurveInDegrees, speedInSpeedOutRatio, oversteeringInDegrees,
                 speedLossRatio, speedGainRatio, lowestSpeedVsExitingSpeedRatio, maximalTurningRateInDegreesPerSecond,
                 deviationFromOptimalTackAngleInDegrees, deviationFromOptimalJibeAngleInDegrees,
-                highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees,
+                relativeBearingToNextMarkBeforeInDegrees, relativeBearingToNextMarkAfterInDegrees,
                 mainCurveDurationInSeconds, maneuverDurationInSeconds, recoveryPhaseDurationInSeconds,
                 timeLossInSeconds, clean, maneuverCategory, twaBeforeInDegrees, twaAfterInDegrees, twsInKnots,
                 speedBeforeInKnots, speedAfterInKnots, twaAtMiddleCourseInDegrees, twaAtMiddleCourseMainCurveInDegrees,

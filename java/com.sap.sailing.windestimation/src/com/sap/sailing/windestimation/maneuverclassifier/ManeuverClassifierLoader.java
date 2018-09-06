@@ -7,33 +7,32 @@ import java.util.List;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.windestimation.maneuverclassifier.impl.ManeuverFeatures;
 import com.sap.sailing.windestimation.maneuverclassifier.impl.smile.ClassifierPersistenceException;
-import com.sap.sailing.windestimation.maneuverclassifier.impl.smile.RandomForestManeuverClassifier;
 
 public class ManeuverClassifierLoader {
 
-    public static final ManeuverTypeForClassification[] supportedManeuverTypes = { ManeuverTypeForClassification.TACK,
-            ManeuverTypeForClassification.JIBE, ManeuverTypeForClassification.OTHER };
-
     public static SingleManeuverClassifier loadBestClassifier(ManeuverFeatures maneuverFeatures, BoatClass boatClass) {
-        List<RandomForestManeuverClassifier> classifiers = new ArrayList<>();
+        List<TrainableSingleManeuverOfflineClassifier> classifiers = new ArrayList<>();
         for (ManeuverFeatures possibleFeatures : ManeuverFeatures.values()) {
             if (possibleFeatures.isSubset(maneuverFeatures)) {
-                RandomForestManeuverClassifier classifier = new RandomForestManeuverClassifier(possibleFeatures, null,
-                        supportedManeuverTypes);
+                TrainableSingleManeuverOfflineClassifier classifier = ManeuverClassifiersFactory
+                        .getNewClassifierInstance(possibleFeatures, null);
                 classifiers.add(classifier);
                 if (boatClass != null) {
-                    RandomForestManeuverClassifier classifierForBoatClass = new RandomForestManeuverClassifier(
-                            possibleFeatures, boatClass, supportedManeuverTypes);
+                    TrainableSingleManeuverOfflineClassifier classifierForBoatClass = ManeuverClassifiersFactory
+                            .getNewClassifierInstance(possibleFeatures, boatClass);
                     classifiers.add(classifierForBoatClass);
                 }
             }
         }
 
-        List<RandomForestManeuverClassifier> loadedClassifiers = new ArrayList<>();
-        for (RandomForestManeuverClassifier classifier : classifiers) {
+        List<TrainableSingleManeuverOfflineClassifier> loadedClassifiers = new ArrayList<>();
+        for (TrainableSingleManeuverOfflineClassifier classifier : classifiers) {
             try {
                 classifier.loadPersistedModel();
-                loadedClassifiers.add(classifier);
+                if (!classifier.getManeuverFeatures().isPolarsInformation() || classifier
+                        .getFixesCountForBoatClass() >= ManeuverClassifiersCache.MIN_FIXES_FOR_POLARS_INFORMATION) {
+                    loadedClassifiers.add(classifier);
+                }
             } catch (ClassifierPersistenceException e) {
             }
         }
@@ -41,10 +40,10 @@ public class ManeuverClassifierLoader {
         if (loadedClassifiers.isEmpty()) {
             return null;
         }
-        Iterator<RandomForestManeuverClassifier> loadedClassifiersIterator = loadedClassifiers.iterator();
-        RandomForestManeuverClassifier bestClassifier = loadedClassifiersIterator.next();
+        Iterator<TrainableSingleManeuverOfflineClassifier> loadedClassifiersIterator = loadedClassifiers.iterator();
+        TrainableSingleManeuverOfflineClassifier bestClassifier = loadedClassifiersIterator.next();
         while (loadedClassifiersIterator.hasNext()) {
-            RandomForestManeuverClassifier otherClassifier = loadedClassifiersIterator.next();
+            TrainableSingleManeuverOfflineClassifier otherClassifier = loadedClassifiersIterator.next();
             if (bestClassifier.getTestScore() < otherClassifier.getTestScore()) {
                 bestClassifier = otherClassifier;
             }

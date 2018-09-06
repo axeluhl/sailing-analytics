@@ -10,6 +10,7 @@ import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.transformer.ManeuverForEstimationTransformer;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverClassifiersCache;
 import com.sap.sailing.windestimation.maneuvergraph.PointOfSailSequenceGraph;
+import com.sap.sailing.windestimation.maneuvergraph.bestpath.BestPathsCalculator;
 import com.sap.sse.common.TimePoint;
 
 /**
@@ -32,7 +33,7 @@ public class ManeuverSequenceGraphBasedWindEstimatorImpl
         List<CompetitorTrackWithEstimationData<ManeuverForEstimation>> transformedCompetitorTracks = maneuverForEstimationTransformer
                 .transform(filteredCompetitorTracks);
         PointOfSailSequenceGraph maneuverGraph = new PointOfSailSequenceGraph(transformedCompetitorTracks,
-                new ManeuverClassifiersCache(60000, false, getPolarService()));
+                new ManeuverClassifiersCache(60000, false, getPolarService()), new BestPathsCalculator());
         return maneuverGraph.estimateWindTrack();
     }
 

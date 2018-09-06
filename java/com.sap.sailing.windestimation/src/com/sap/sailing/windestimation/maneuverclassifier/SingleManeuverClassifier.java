@@ -31,4 +31,6 @@ public interface SingleManeuverClassifier extends ManeuverClassifier {
 
     BoatClass getBoatClass();
 
+    int getFixesCountForBoatClass();
+
 }

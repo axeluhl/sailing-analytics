@@ -8,6 +8,8 @@ import com.sap.sailing.windestimation.maneuverclassifier.impl.ManeuverFeatures;
 
 public class ManeuverClassifiersCache {
 
+    public static final int MIN_FIXES_FOR_POLARS_INFORMATION = 1000;
+
     private final ShortTimeAfterLastHitCache<ClassifierType, SingleManeuverClassifier> classifierCache;
     private final boolean liveRace;
     private final PolarDataService polarDataService;
@@ -21,14 +23,14 @@ public class ManeuverClassifiersCache {
                         .loadBestClassifier(classifierType.maneuverFeatures, classifierType.boatClass));
     }
 
-    public ManeuverClassifier getBestClassifier(ManeuverForEstimation maneuver) {
+    public SingleManeuverClassifier getBestClassifier(ManeuverForEstimation maneuver) {
         ManeuverFeatures maneuverFeatures = determineManeuverFeatures(maneuver);
         return classifierCache.getValue(new ClassifierType(maneuverFeatures, maneuver.getBoatClass()));
     }
 
     private ManeuverFeatures determineManeuverFeatures(ManeuverForEstimation maneuver) {
         Long fixesCountForBoatClass = polarDataService.getFixCountPerBoatClass().get(maneuver.getBoatClass());
-        boolean polars = fixesCountForBoatClass != null && fixesCountForBoatClass > 10000;
+        boolean polars = fixesCountForBoatClass != null && fixesCountForBoatClass >= MIN_FIXES_FOR_POLARS_INFORMATION;
         return new ManeuverFeatures(polars, !liveRace);
     }
 

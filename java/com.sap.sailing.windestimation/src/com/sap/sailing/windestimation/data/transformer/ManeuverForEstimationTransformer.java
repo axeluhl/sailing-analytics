@@ -9,7 +9,7 @@ import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.LabelledManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverCategory;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
-import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
+import com.sap.sailing.windestimation.data.ManeuverTypeForDataAnalysis;
 
 public class ManeuverForEstimationTransformer
         extends AbstractCompleteManeuverCurveWithEstimationDataTransformer<ManeuverForEstimation> {
@@ -46,7 +46,7 @@ public class ManeuverForEstimationTransformer
     private ManeuverForEstimation getManeuverForEstimation(CompleteManeuverCurveWithEstimationData maneuver,
             CompleteManeuverCurveWithEstimationData previousManeuver,
             CompleteManeuverCurveWithEstimationData nextManeuver, double speedScalingDivisor, BoatClass boatClass) {
-        ManeuverTypeForClassification maneuverType = getManeuverTypeForClassification(maneuver);
+        ManeuverTypeForDataAnalysis maneuverType = getManeuverTypeForClassification(maneuver);
         double speedLossRatio = maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getKnots() > 0
                 ? maneuver.getCurveWithUnstableCourseAndSpeed().getLowestSpeed().getKnots()
                         / maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getKnots()
@@ -55,6 +55,11 @@ public class ManeuverForEstimationTransformer
                 ? maneuver.getMainCurve().getSpeedWithBearingBefore().getKnots()
                         / maneuver.getMainCurve().getHighestSpeed().getKnots()
                 : 0;
+        double lowestSpeedVsExitingSpeedRatio = maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter()
+                .getKnots() > 0
+                        ? maneuver.getCurveWithUnstableCourseAndSpeed().getLowestSpeed().getKnots()
+                                / maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingAfter().getKnots()
+                        : 0;
         Double deviationFromOptimalTackAngleInDegrees = maneuver.getTargetTackAngleInDegrees() == null ? null
                 : Math.abs(maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees())
                         - maneuver.getTargetTackAngleInDegrees();
@@ -82,8 +87,8 @@ public class ManeuverForEstimationTransformer
                     maneuver.getMainCurve().getDirectionChangeInDegrees(),
                     maneuver.getMainCurve().getMaxTurningRateInDegreesPerSecond(),
                     deviationFromOptimalTackAngleInDegrees, deviationFromOptimalJibeAngleInDegrees, speedLossRatio,
-                    speedGainRatio, clean, cleanBefore, cleanAfter, maneuverCategory, scaledSpeedBeforeInKnots,
-                    scaledSpeedAfterInKnots, boatClass);
+                    speedGainRatio, lowestSpeedVsExitingSpeedRatio, clean, cleanBefore, cleanAfter, maneuverCategory,
+                    scaledSpeedBeforeInKnots, scaledSpeedAfterInKnots, boatClass);
         } else {
             maneuverForEstimation = new LabelledManeuverForEstimation(maneuver.getTimePoint(), maneuver.getPosition(),
                     maneuver.getCurveWithUnstableCourseAndSpeed().getMiddleCourse(),
@@ -96,8 +101,8 @@ public class ManeuverForEstimationTransformer
                     maneuver.getMainCurve().getDirectionChangeInDegrees(),
                     maneuver.getMainCurve().getMaxTurningRateInDegreesPerSecond(),
                     deviationFromOptimalTackAngleInDegrees, deviationFromOptimalJibeAngleInDegrees, speedLossRatio,
-                    speedGainRatio, clean, cleanBefore, cleanAfter, maneuverCategory, scaledSpeedBeforeInKnots,
-                    scaledSpeedAfterInKnots, boatClass, maneuverType, maneuver.getWind());
+                    speedGainRatio, lowestSpeedVsExitingSpeedRatio, clean, cleanBefore, cleanAfter, maneuverCategory,
+                    scaledSpeedBeforeInKnots, scaledSpeedAfterInKnots, boatClass, maneuverType, maneuver.getWind());
         }
         return maneuverForEstimation;
     }

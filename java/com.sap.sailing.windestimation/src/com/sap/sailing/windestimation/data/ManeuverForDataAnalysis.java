@@ -2,7 +2,7 @@ package com.sap.sailing.windestimation.data;
 
 public class ManeuverForDataAnalysis {
 
-    private final ManeuverTypeForClassification maneuverType;
+    private final ManeuverTypeForDataAnalysis maneuverType;
     private final double absoluteTotalCourseChangeInDegrees;
     private final double speedInSpeedOutRatio;
     private final double oversteeringInDegrees;
@@ -11,7 +11,8 @@ public class ManeuverForDataAnalysis {
     private final double maximalTurningRateInDegreesPerSecond;
     private final Double deviationFromOptimalTackAngleInDegrees;
     private final Double deviationFromOptimalJibeAngleInDegrees;
-    private final Double highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees;
+    private final Double relativeBearingToNextMarkBefore;
+    private final Double relativeBearingToNextMarkAfter;
     private final double mainCurveDurationInSeconds;
     private final double maneuverDurationInSeconds;
     private final double recoveryPhaseDurationInSeconds;
@@ -33,12 +34,12 @@ public class ManeuverForDataAnalysis {
     private final double scaledSpeedBeforeInKnots;
     private final double scaledSpeedAfterInKnots;
 
-    public ManeuverForDataAnalysis(ManeuverTypeForClassification maneuverType,
-            double absoluteTotalCourseChangeInDegrees, double absoluteTotalCourseChangeWithinMainCurveInDegrees,
-            double speedInSpeedOutRatio, double oversteeringInDegrees, double speedLossRatio, double speedGainRatio,
+    public ManeuverForDataAnalysis(ManeuverTypeForDataAnalysis maneuverType, double absoluteTotalCourseChangeInDegrees,
+            double absoluteTotalCourseChangeWithinMainCurveInDegrees, double speedInSpeedOutRatio,
+            double oversteeringInDegrees, double speedLossRatio, double speedGainRatio,
             double lowestSpeedVsExitingSpeedRatio, double maximalTurningRateInDegreesPerSecond,
             Double deviationFromOptimalTackAngleInDegrees, Double deviationFromOptimalJibeAngleInDegrees,
-            Double highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees,
+            Double relativeBearingToNextMarkBefore, Double relativeBearingToNextMarkAfter,
             double mainCurveDurationInSeconds, double maneuverDurationInSeconds, double recoveryPhaseDurationInSeconds,
             double timeLossInSeconds, boolean clean, ManeuverCategory maneuverCategory, double twaBeforeInDegrees,
             double twaAfterInDegrees, double twsInKnots, double speedBeforeInKnots, double speedAfterInKnots,
@@ -56,7 +57,8 @@ public class ManeuverForDataAnalysis {
         this.maximalTurningRateInDegreesPerSecond = maximalTurningRateInDegreesPerSecond;
         this.deviationFromOptimalTackAngleInDegrees = deviationFromOptimalTackAngleInDegrees;
         this.deviationFromOptimalJibeAngleInDegrees = deviationFromOptimalJibeAngleInDegrees;
-        this.highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees = highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees;
+        this.relativeBearingToNextMarkBefore = relativeBearingToNextMarkBefore;
+        this.relativeBearingToNextMarkAfter = relativeBearingToNextMarkAfter;
         this.mainCurveDurationInSeconds = mainCurveDurationInSeconds;
         this.maneuverDurationInSeconds = maneuverDurationInSeconds;
         this.recoveryPhaseDurationInSeconds = recoveryPhaseDurationInSeconds;
@@ -133,12 +135,16 @@ public class ManeuverForDataAnalysis {
         return timeLossInSeconds;
     }
 
-    public ManeuverTypeForClassification getManeuverType() {
+    public ManeuverTypeForDataAnalysis getManeuverType() {
         return maneuverType;
     }
 
-    public Double getHighestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees() {
-        return highestAbsoluteDeviationOfBoatsCourseToBearingFromBoatToNextWaypointInDegrees;
+    public Double getRelativeBearingToNextMarkBefore() {
+        return relativeBearingToNextMarkBefore;
+    }
+
+    public Double getRelativeBearingToNextMarkAfter() {
+        return relativeBearingToNextMarkAfter;
     }
 
     public boolean isClean() {

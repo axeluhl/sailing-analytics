@@ -10,19 +10,19 @@ import com.sap.sailing.windestimation.data.persistence.PolarDataServiceAccessUti
 import com.sap.sailing.windestimation.data.persistence.RegularManeuversForEstimationPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.TransformedManeuversPersistenceManager;
 import com.sap.sailing.windestimation.maneuverclassifier.impl.ManeuverFeatures;
-import com.sap.sailing.windestimation.maneuverclassifier.impl.smile.RandomForestManeuverClassifier;
-import com.sap.sailing.windestimation.maneuverclassifier.impl.smile.SVMManeuverClassifier;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
 public class ManeuverClassifierTrainer {
-
-    private final TransformedManeuversPersistenceManager<ManeuverForEstimation> persistenceManager;
-
     private static final double TRAIN_TEST_SPLIT_RATIO = 0.8;
     private static final int MIN_MANEUVERS_COUNT = 500;
 
-    public ManeuverClassifierTrainer(TransformedManeuversPersistenceManager<ManeuverForEstimation> persistenceManager) {
+    private final TransformedManeuversPersistenceManager<ManeuverForEstimation> persistenceManager;
+    private final PolarDataService polarService;
+
+    public ManeuverClassifierTrainer(TransformedManeuversPersistenceManager<ManeuverForEstimation> persistenceManager,
+            PolarDataService polarService) {
         this.persistenceManager = persistenceManager;
+        this.polarService = polarService;
     }
 
     public void trainClassifier(TrainableSingleManeuverOfflineClassifier classifier) throws Exception {
@@ -30,6 +30,7 @@ public class ManeuverClassifierTrainer {
         persistenceManager.createIfNotExistsCollectionWithTransformedManeuvers();
         LoggingUtil.logInfo("Querying train dataset...");
         BoatClass boatClass = classifier.getBoatClass();
+        Long fixesCountForBoatClass = polarService.getFixCountPerBoatClass().get(boatClass);
         String query = null;
         if (boatClass != null) {
             query = "{\"boatClass\" : {$eq: \"" + boatClass.getName() + "\"}}";
@@ -58,6 +59,8 @@ public class ManeuverClassifierTrainer {
             LoggingUtil.logInfo("Test score:\n" + printScoring);
             classifier.setTestScore(classifierScoring.getLastAvgF1Score());
             LoggingUtil.logInfo("Persisting trained classifier...");
+            classifier
+                    .setFixesCountForBoatClass(fixesCountForBoatClass == null ? 0 : fixesCountForBoatClass.intValue());
             classifier.persistModel();
             LoggingUtil.logInfo("Classifier persisted successfully. Finished!");
         }
@@ -68,10 +71,10 @@ public class ManeuverClassifierTrainer {
         Set<BoatClass> allBoatClasses = polarService.getAllBoatClassesWithPolarSheetsAvailable();
         for (ManeuverFeatures maneuverFeatures : ManeuverFeatures.values()) {
             LoggingUtil.logInfo("##### Training classifier with features: " + maneuverFeatures);
-            RandomForestManeuverClassifier classifier = new RandomForestManeuverClassifier(maneuverFeatures, null,
-                    ManeuverClassifierLoader.supportedManeuverTypes);
+            TrainableSingleManeuverOfflineClassifier classifier = ManeuverClassifiersFactory
+                    .getNewClassifierInstance(maneuverFeatures, null);
             ManeuverClassifierTrainer classifierTrainer = new ManeuverClassifierTrainer(
-                    new RegularManeuversForEstimationPersistenceManager());
+                    new RegularManeuversForEstimationPersistenceManager(), polarService);
             classifierTrainer.trainClassifier(classifier);
         }
 
@@ -79,10 +82,10 @@ public class ManeuverClassifierTrainer {
             for (BoatClass boatClass : allBoatClasses) {
                 LoggingUtil.logInfo("### Training classifier for boat class " + boatClass + " with maneuver features: "
                         + maneuverFeatures);
-                SVMManeuverClassifier classifier = new SVMManeuverClassifier(maneuverFeatures, boatClass,
-                        ManeuverClassifierLoader.supportedManeuverTypes);
+                TrainableSingleManeuverOfflineClassifier classifier = ManeuverClassifiersFactory
+                        .getNewClassifierInstance(maneuverFeatures, boatClass);
                 ManeuverClassifierTrainer classifierTrainer = new ManeuverClassifierTrainer(
-                        new RegularManeuversForEstimationPersistenceManager());
+                        new RegularManeuversForEstimationPersistenceManager(), polarService);
                 classifierTrainer.trainClassifier(classifier);
             }
         }

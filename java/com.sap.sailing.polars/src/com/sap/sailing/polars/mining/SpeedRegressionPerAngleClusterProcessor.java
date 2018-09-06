@@ -1,8 +1,10 @@
 package com.sap.sailing.polars.mining;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
@@ -16,10 +18,12 @@ import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarsChangedListener;
+import com.sap.sailing.polars.impl.CubicEquation;
 import com.sap.sailing.polars.regression.IncrementalLeastSquares;
 import com.sap.sailing.polars.regression.impl.IncrementalAnyOrderLeastSquaresImpl;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Speed;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.datamining.components.AdditionalResultDataBuilder;
 import com.sap.sse.datamining.components.Processor;
@@ -98,7 +102,7 @@ public class SpeedRegressionPerAngleClusterProcessor implements
      * regression for boatspeed over windspeed. We don't know the thresholds or centers of the angle clusters here, so
      * we roughly interpolate by taking 10 values from angle-5 deg to angle+5 deg and average the speeds.
      * 
-     * At the time of writing the size of each angle range is 5° so this method provides a pretty smooth interpolation.
+     * At the time of writing the size of each angle range is 5ï¿½ so this method provides a pretty smooth interpolation.
      */
     public SpeedWithConfidence<Void> estimateBoatSpeed(BoatClass boatClass, Speed windSpeed, Bearing trueWindAngle)
             throws NotEnoughDataHasBeenAddedException {
@@ -127,6 +131,42 @@ public class SpeedRegressionPerAngleClusterProcessor implements
         }
         Speed speed = new KnotSpeedImpl(speedSum / numberOfSpeeds);
         return new SpeedWithConfidenceImpl<Void>(speed, Math.min(1, 5.0 * ((double) fixCount / fixCountOverall)), null);
+    }
+    
+    public Pair<List<Speed>, Double> estimateWindSpeeds(BoatClass boatClass, Speed boatSpeed, Bearing trueWindAngle)
+            throws NotEnoughDataHasBeenAddedException {
+        long numberOfWindSpeeds = 0;
+        long allFixesCount = 0;
+        List<Speed> windSpeeds = new ArrayList<>();
+        for (int i = -2; i <= 2; i++) {
+            GroupKey key = createGroupKey(boatClass, new DegreeBearingImpl(Math.abs(trueWindAngle.getDegrees()) + i));
+            if (regressions.containsKey(key)) {
+                IncrementalLeastSquares incrementalLeastSquares = regressions.get(key);
+                long fixesCount = incrementalLeastSquares.getNumberOfAddedPoints();
+                if (fixesCount > 10) {
+                    double[] coefficiants = incrementalLeastSquares.getOrCreatePolynomialFunction().getCoefficients();
+                    CubicEquation equation = new CubicEquation(coefficiants[2], coefficiants[1], coefficiants[0],
+                            -boatSpeed.getKnots());
+
+                    double[] windSpeedCandidates = equation.solve();
+                    for (double windSpeedCandidateInKnots : windSpeedCandidates) {
+                        windSpeeds.add(new KnotSpeedImpl(windSpeedCandidateInKnots));
+                    }
+                    allFixesCount += fixesCount;
+                    numberOfWindSpeeds++;
+                }
+            }
+        }
+        long avgFixesCount = allFixesCount / numberOfWindSpeeds;
+        long fixCountOverall = 0;
+        if (numberOfWindSpeeds < 2 || allFixesCount < 10) {
+            throw new NotEnoughDataHasBeenAddedException("Not enough data has been added to Per Course Regressions");
+        } else {
+            synchronized (fixCountPerBoatClass) {
+                fixCountOverall = fixCountPerBoatClass.get(boatClass);
+            }
+        }
+        return new Pair<>(windSpeeds, Math.min(1, 5.0 * avgFixesCount / fixCountOverall));
     }
 
     private GroupKey createGroupKey(final BoatClass boatClass, final Bearing angle) {

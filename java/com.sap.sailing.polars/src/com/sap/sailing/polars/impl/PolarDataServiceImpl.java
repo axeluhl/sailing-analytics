@@ -7,6 +7,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -115,6 +116,16 @@ public class PolarDataServiceImpl implements ReplicablePolarService, ClearStateT
                     "Polar Data Miner is currently unavailable. Maybe we are in the process of replication initial load?");
         }
         return polarDataMiner.estimateBoatSpeed(boatClass, windSpeed, trueWindAngle);
+    }
+    
+    @Override
+    public Pair<List<Speed>, Double> estimateWindSpeeds(BoatClass boatClass, Speed boatSpeed, Bearing trueWindAngle)
+            throws NotEnoughDataHasBeenAddedException {
+        if (polarDataMiner == null) {
+            throw new NotEnoughDataHasBeenAddedException(
+                    "Polar Data Miner is currently unavailable. Maybe we are in the process of replication initial load?");
+        }
+        return polarDataMiner.estimateWindSpeeds(boatClass, boatSpeed, trueWindAngle);
     }
 
     @Override

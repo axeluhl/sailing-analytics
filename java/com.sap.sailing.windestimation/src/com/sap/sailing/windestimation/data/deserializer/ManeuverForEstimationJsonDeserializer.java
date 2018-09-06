@@ -12,7 +12,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.DetailedBoatClassJson
 import com.sap.sailing.windestimation.data.LabelledManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverCategory;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
-import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
+import com.sap.sailing.windestimation.data.ManeuverTypeForDataAnalysis;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -45,6 +45,8 @@ public class ManeuverForEstimationJsonDeserializer implements JsonDeserializer<M
                 .get(ManeuverForEstimationJsonSerializer.DEVIATION_FROM_OPTIMAL_JIBE_ANGLE);
         double speedLossRatio = (double) object.get(ManeuverForEstimationJsonSerializer.SPEED_LOSS_RATIO);
         double speedGainRatio = (double) object.get(ManeuverForEstimationJsonSerializer.SPEED_GAIN_RATIO);
+        double lowestVsExitingSpeedRatio = (double) object
+                .get(ManeuverForEstimationJsonSerializer.LOWEST_VS_EXITING_SPEED_RATIO);
         boolean clean = (boolean) object.get(ManeuverForEstimationJsonSerializer.CLEAN);
         boolean cleanBefore = (boolean) object.get(ManeuverForEstimationJsonSerializer.CLEAN_BEFORE);
         boolean cleanAfter = (boolean) object.get(ManeuverForEstimationJsonSerializer.CLEAN_AFTER);
@@ -66,10 +68,10 @@ public class ManeuverForEstimationJsonDeserializer implements JsonDeserializer<M
                         : new KnotSpeedWithBearingImpl(avgSpeedAfterInKnots, new DegreeBearingImpl(avgCogAfter)),
                 courseChangeInDegrees, courseChangeMainCurveInDegrees, maxTurningRateInDegrees,
                 deviationFromOptimalTackAngleInDegrees, deviationFromOptimalJibeAngleInDegrees, speedLossRatio,
-                speedGainRatio, clean, cleanBefore, cleanAfter, maneuverCategory, scaledSpeedBefore, scaledSpeedAfter,
-                boatClass);
+                speedGainRatio, lowestVsExitingSpeedRatio, clean, cleanBefore, cleanAfter, maneuverCategory,
+                scaledSpeedBefore, scaledSpeedAfter, boatClass);
         if (object.containsKey(ManeuverForEstimationJsonSerializer.WIND_SPEED)) {
-            ManeuverTypeForClassification maneuverType = ManeuverTypeForClassification
+            ManeuverTypeForDataAnalysis maneuverType = ManeuverTypeForDataAnalysis
                     .valueOf((String) object.get(ManeuverForDataAnalysisJsonSerializer.MANEUVER_TYPE));
             Double windSpeedInKnots = (Double) object.get(ManeuverForEstimationJsonSerializer.WIND_SPEED);
             Double windCourse = (Double) object.get(ManeuverForEstimationJsonSerializer.WIND_COURSE);
@@ -81,10 +83,10 @@ public class ManeuverForEstimationJsonDeserializer implements JsonDeserializer<M
                     maneuver.getMaxTurningRateInDegreesPerSecond(),
                     maneuver.getDeviationFromOptimalTackAngleInDegrees(),
                     maneuver.getDeviationFromOptimalJibeAngleInDegrees(), maneuver.getSpeedLossRatio(),
-                    maneuver.getSpeedGainRatio(), maneuver.isClean(), maneuver.isCleanBefore(), maneuver.isCleanAfter(),
-                    maneuver.getManeuverCategory(), maneuver.getScaledSpeedBefore(), maneuver.getScaledSpeedAfter(),
-                    maneuver.getBoatClass(), maneuverType,
-                    new WindImpl(maneuver.getManeuverPosition(), maneuver.getManeuverTimePoint(),
+                    maneuver.getSpeedGainRatio(), maneuver.getLowestSpeedVsExitingSpeedRatio(), maneuver.isClean(),
+                    maneuver.isCleanBefore(), maneuver.isCleanAfter(), maneuver.getManeuverCategory(),
+                    maneuver.getScaledSpeedBefore(), maneuver.getScaledSpeedAfter(), maneuver.getBoatClass(),
+                    maneuverType, new WindImpl(maneuver.getManeuverPosition(), maneuver.getManeuverTimePoint(),
                             new KnotSpeedWithBearingImpl(windSpeedInKnots, new DegreeBearingImpl(windCourse))));
         }
         return maneuver;

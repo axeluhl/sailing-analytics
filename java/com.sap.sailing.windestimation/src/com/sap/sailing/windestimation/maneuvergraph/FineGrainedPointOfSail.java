@@ -10,10 +10,26 @@ import com.sap.sailing.domain.common.Tack;
  *
  */
 public enum FineGrainedPointOfSail {
-    VERY_CLOSE_HAULED_STARBOARD(30, CoarseGrainedPointOfSail.UPWIND_STARBOARD), CLOSE_HAULED_STARBOARD(45, CoarseGrainedPointOfSail.UPWIND_STARBOARD), CLOSE_REACH_STARBOARD(60, CoarseGrainedPointOfSail.UPWIND_STARBOARD), BEAM_REACH_STARBOARD(
-            90, CoarseGrainedPointOfSail.REACHING_STARBOARD), BROAD_REACH_STARBOARD(120, CoarseGrainedPointOfSail.DOWNWIND_STARBOARD), VERY_BROAD_REACH_STARBOARD(150, CoarseGrainedPointOfSail.DOWNWIND_STARBOARD), RUNNING_STARBOARD(175, CoarseGrainedPointOfSail.DOWNWIND_STARBOARD), RUNNING_PORT(
-                    185, CoarseGrainedPointOfSail.DOWNWIND_PORT), VERY_BROAD_REACH_PORT(210, CoarseGrainedPointOfSail.DOWNWIND_PORT), BROAD_REACH_PORT(240, CoarseGrainedPointOfSail.DOWNWIND_PORT), BEAM_REACH_PORT(
-                            270, CoarseGrainedPointOfSail.REACHING_PORT), CLOSE_REACH_PORT(300, CoarseGrainedPointOfSail.UPWIND_PORT), CLOSE_HAULED_PORT(315, CoarseGrainedPointOfSail.UPWIND_PORT), VERY_CLOSE_HAULED_PORT(330, CoarseGrainedPointOfSail.UPWIND_PORT);
+    VERY_CLOSE_HAULED_STARBOARD(30, CoarseGrainedPointOfSail.UPWIND_STARBOARD), CLOSE_HAULED_STARBOARD(45,
+            CoarseGrainedPointOfSail.UPWIND_STARBOARD), CLOSE_REACH_STARBOARD(60,
+                    CoarseGrainedPointOfSail.UPWIND_STARBOARD), BEAM_REACH_STARBOARD(90,
+                            CoarseGrainedPointOfSail.REACHING_STARBOARD), BROAD_REACH_STARBOARD(120,
+                                    CoarseGrainedPointOfSail.DOWNWIND_STARBOARD), VERY_BROAD_REACH_STARBOARD(150,
+                                            CoarseGrainedPointOfSail.DOWNWIND_STARBOARD), RUNNING_STARBOARD(175,
+                                                    CoarseGrainedPointOfSail.DOWNWIND_STARBOARD), RUNNING_PORT(185,
+                                                            CoarseGrainedPointOfSail.DOWNWIND_PORT), VERY_BROAD_REACH_PORT(
+                                                                    210,
+                                                                    CoarseGrainedPointOfSail.DOWNWIND_PORT), BROAD_REACH_PORT(
+                                                                            240,
+                                                                            CoarseGrainedPointOfSail.DOWNWIND_PORT), BEAM_REACH_PORT(
+                                                                                    270,
+                                                                                    CoarseGrainedPointOfSail.REACHING_PORT), CLOSE_REACH_PORT(
+                                                                                            300,
+                                                                                            CoarseGrainedPointOfSail.UPWIND_PORT), CLOSE_HAULED_PORT(
+                                                                                                    315,
+                                                                                                    CoarseGrainedPointOfSail.UPWIND_PORT), VERY_CLOSE_HAULED_PORT(
+                                                                                                            330,
+                                                                                                            CoarseGrainedPointOfSail.UPWIND_PORT);
 
     private final int twa;
     private final CoarseGrainedPointOfSail coarseGrainedPointOfSail;
@@ -36,17 +52,22 @@ public enum FineGrainedPointOfSail {
         }
         return FineGrainedPointOfSail.values()[nextOrdinal];
     }
-    
+
     public FineGrainedPointOfSail getNextPointOfSail(double degreesToAdd) {
         double newTwa = (this.getTwa() + degreesToAdd) % 360;
-        if(newTwa < 0) {
+        if (newTwa < 0) {
             newTwa += 360;
         }
+        return valueOf(newTwa);
+    }
+
+    public static FineGrainedPointOfSail valueOf(double twa) {
+        double twa360 = twa < 0 ? twa + 360 : twa;
         double smallestAbsTwaDeviation = Double.POSITIVE_INFINITY;
         FineGrainedPointOfSail bestPointOfSail = null;
         for (FineGrainedPointOfSail pointOfSail : FineGrainedPointOfSail.values()) {
-            double absTwaDeviation = Math.abs(pointOfSail.getTwa() - newTwa);
-            if(absTwaDeviation < smallestAbsTwaDeviation) {
+            double absTwaDeviation = Math.abs(pointOfSail.getTwa() - twa360);
+            if (absTwaDeviation < smallestAbsTwaDeviation) {
                 smallestAbsTwaDeviation = absTwaDeviation;
                 bestPointOfSail = pointOfSail;
             }
@@ -112,7 +133,7 @@ public enum FineGrainedPointOfSail {
     public int getTwa() {
         return twa;
     }
-    
+
     public CoarseGrainedPointOfSail getCoarseGrainedPointOfSail() {
         return coarseGrainedPointOfSail;
     }

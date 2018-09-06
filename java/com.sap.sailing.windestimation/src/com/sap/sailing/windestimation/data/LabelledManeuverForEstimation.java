@@ -9,7 +9,7 @@ import com.sap.sse.common.TimePoint;
 
 public class LabelledManeuverForEstimation extends ManeuverForEstimation {
 
-    private final ManeuverTypeForClassification maneuverType;
+    private final ManeuverTypeForDataAnalysis maneuverType;
     private final Wind wind;
 
     public LabelledManeuverForEstimation(TimePoint maneuverTimePoint, Position maneuverPosition, Bearing middleCourse,
@@ -18,20 +18,20 @@ public class LabelledManeuverForEstimation extends ManeuverForEstimation {
             SpeedWithBearing averageSpeedWithBearingAfter, double courseChangeInDegrees,
             double courseChangeWithinMainCurveInDegrees, double maxTurningRateInDegreesPerSecond,
             Double deviationFromOptimalTackAngleInDegrees, Double deviationFromOptimalJibeAngleInDegrees,
-            double speedLossRatio, double speedGainRatio, boolean clean, boolean cleanBefore, boolean cleanAfter,
-            ManeuverCategory maneuverCategory, double scaledSpeedBefore, double scaledSpeedAfter, BoatClass boatClass,
-            ManeuverTypeForClassification maneuverType, Wind wind) {
+            double speedLossRatio, double speedGainRatio, double lowestSpeedVsExitingSpeedRatio, boolean clean,
+            boolean cleanBefore, boolean cleanAfter, ManeuverCategory maneuverCategory, double scaledSpeedBefore,
+            double scaledSpeedAfter, BoatClass boatClass, ManeuverTypeForDataAnalysis maneuverType, Wind wind) {
         super(maneuverTimePoint, maneuverPosition, middleCourse, speedWithBearingBefore, speedWithBearingAfter,
                 courseAtLowestSpeed, averageSpeedWithBearingBefore, averageSpeedWithBearingAfter, courseChangeInDegrees,
                 courseChangeWithinMainCurveInDegrees, maxTurningRateInDegreesPerSecond,
                 deviationFromOptimalTackAngleInDegrees, deviationFromOptimalJibeAngleInDegrees, speedLossRatio,
-                speedGainRatio, clean, cleanBefore, cleanAfter, maneuverCategory, scaledSpeedBefore, scaledSpeedAfter,
-                boatClass);
+                speedGainRatio, lowestSpeedVsExitingSpeedRatio, clean, cleanBefore, cleanAfter, maneuverCategory,
+                scaledSpeedBefore, scaledSpeedAfter, boatClass);
         this.maneuverType = maneuverType;
         this.wind = wind;
     }
 
-    public ManeuverTypeForClassification getManeuverType() {
+    public ManeuverTypeForDataAnalysis getManeuverType() {
         return maneuverType;
     }
 

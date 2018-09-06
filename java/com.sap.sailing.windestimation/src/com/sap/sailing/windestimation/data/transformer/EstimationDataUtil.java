@@ -1,6 +1,7 @@
 package com.sap.sailing.windestimation.data.transformer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.NavigableSet;
 
@@ -23,6 +24,7 @@ import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
+import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util;
@@ -141,6 +143,21 @@ public class EstimationDataUtil {
     private static int getWaypointsCount(TrackedRace trackedRace) {
         Iterable<Waypoint> waypoints = trackedRace.getRace().getCourse().getWaypoints();
         return Util.size(waypoints);
+    }
+
+    public static List<ManeuverForEstimation> getUsefulManeuversSortedByTimePoint(
+            List<CompetitorTrackWithEstimationData<ManeuverForEstimation>> competitorTracks) {
+        List<ManeuverForEstimation> usefulManeuversSortedByTimePoint = new ArrayList<>();
+        for (CompetitorTrackWithEstimationData<ManeuverForEstimation> competitorTrack : competitorTracks) {
+            for (ManeuverForEstimation maneuver : competitorTrack.getElements()) {
+                if (maneuver.isClean() || maneuver.isCleanBefore() || maneuver.isCleanAfter()) {
+                    usefulManeuversSortedByTimePoint.add(maneuver);
+                }
+            }
+        }
+        Collections.sort(usefulManeuversSortedByTimePoint,
+                (o1, o2) -> o1.getManeuverTimePoint().compareTo(o2.getManeuverTimePoint()));
+        return usefulManeuversSortedByTimePoint;
     }
 
 }

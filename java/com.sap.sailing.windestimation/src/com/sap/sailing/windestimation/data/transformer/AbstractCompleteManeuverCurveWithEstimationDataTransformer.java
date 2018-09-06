@@ -6,7 +6,7 @@ import java.util.List;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.windestimation.data.ManeuverCategory;
-import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
+import com.sap.sailing.windestimation.data.ManeuverTypeForDataAnalysis;
 
 import smile.sort.QuickSelect;
 
@@ -148,24 +148,24 @@ public abstract class AbstractCompleteManeuverCurveWithEstimationDataTransformer
                                 40);
     }
 
-    protected ManeuverTypeForClassification getManeuverTypeForClassification(
+    protected ManeuverTypeForDataAnalysis getManeuverTypeForClassification(
             CompleteManeuverCurveWithEstimationData maneuver) {
         ManeuverType maneuverType = maneuver.getManeuverTypeForCompleteManeuverCurve();
         switch (maneuverType) {
         case BEAR_AWAY:
-            return ManeuverTypeForClassification.BEAR_AWAY;
+            return ManeuverTypeForDataAnalysis.BEAR_AWAY;
         case HEAD_UP:
-            return ManeuverTypeForClassification.HEAD_UP;
+            return ManeuverTypeForDataAnalysis.HEAD_UP;
         case PENALTY_CIRCLE:
-            return ManeuverTypeForClassification._360;
+            return ManeuverTypeForDataAnalysis._360;
         case UNKNOWN:
             return null;
         case JIBE:
             return Math.abs(maneuver.getMainCurve().getDirectionChangeInDegrees()) > 120
-                    ? ManeuverTypeForClassification._180_JIBE : ManeuverTypeForClassification.JIBE;
+                    ? ManeuverTypeForDataAnalysis._180_JIBE : ManeuverTypeForDataAnalysis.JIBE;
         case TACK:
             return Math.abs(maneuver.getMainCurve().getDirectionChangeInDegrees()) > 120
-                    ? ManeuverTypeForClassification._180_TACK : ManeuverTypeForClassification.TACK;
+                    ? ManeuverTypeForDataAnalysis._180_TACK : ManeuverTypeForDataAnalysis.TACK;
         }
         throw new IllegalStateException();
     }
