@@ -1,9 +1,9 @@
 #!/bin/bash
 set -o functrace
+source ./correctFilePathInRelationToCurrentOs.sh
 
 # This indicates the type of the project
 # and is used to correctly resolve bundle names
-source ./correctFilePathInRelationToCurrentOs.sh
 PROJECT_TYPE="sailing"
 
 find_project_home ()

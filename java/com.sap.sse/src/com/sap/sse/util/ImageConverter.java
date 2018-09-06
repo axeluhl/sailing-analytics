@@ -9,7 +9,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
@@ -23,6 +22,7 @@ import javax.imageio.ImageWriter;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.ImageOutputStream;
 
+import com.sap.sse.common.Base64Utils;
 import com.sap.sse.common.media.MediaTagConstants;
 
 public class ImageConverter {
@@ -74,13 +74,10 @@ public class ImageConverter {
         return null;
     }
 
-    private BufferedImage resize(BufferedImage image, int demandWidth, int demandHeight) {
-        return resizeScale(image, demandWidth, demandHeight);
-    }
-
-    private BufferedImage resizeScale(BufferedImage image, int demandedWidth, int demandedHeight) {
+    private BufferedImage resize(BufferedImage image, int demandedWidth, int demandedHeight) {
         BufferedImage resizedImage = new BufferedImage((int) demandedWidth, (int) demandedHeight, image.getType());
         Graphics2D g = resizedImage.createGraphics();
+        //TODO BufferedImageOP BufferedImageFilter
         g.drawImage(image, 0, 0, (int) demandedWidth, (int) demandedHeight, null);
         g.dispose();
         return resizedImage;
@@ -165,7 +162,7 @@ public class ImageConverter {
     }
 
     private String convertToBase64(byte[] bytes) {
-        return Base64.getEncoder().encodeToString(bytes);
+        return Base64Utils.toBase64(bytes);
     }
 
     private BufferedImage loadBufferedImageFromInputStream(InputStream is) {

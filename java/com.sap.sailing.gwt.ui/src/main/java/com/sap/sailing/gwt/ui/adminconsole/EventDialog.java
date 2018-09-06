@@ -33,6 +33,7 @@ import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
+import com.sap.sse.common.observer.ObservableBoolean;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -63,7 +64,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
     protected ImagesListComposite imagesListComposite;
     protected VideosListComposite videosListComposite;
     protected ExternalLinksComposite externalLinksComposite;
-    private final MutableBoolean storageServiceAvailable = new MutableBoolean();
+    private ObservableBoolean storageServiceAvailable = new ObservableBoolean(false);
     
     protected static class EventParameterValidator implements Validator<EventDTO> {
 
@@ -127,19 +128,6 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         }
 
     }
-    
-    public static class MutableBoolean{
-        private boolean value;
-        public MutableBoolean() {
-            
-        }
-        public void setValue(boolean value) {
-            this.value = value;
-        }
-        public boolean getValue() {
-            return value;
-        }
-    }
 
     /**
      * @param leaderboardGroupsOfEvent even though not editable in this dialog, this parameter gives an editing subclass a chance to "park" the leaderboard group
@@ -180,8 +168,8 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
                 new StringConstantsListEditorComposite.ExpandedUi(stringMessages, IconResources.INSTANCE.removeIcon(),
                         leaderboardGroupNames, stringMessages.selectALeaderboardGroup()));
         leaderboardGroupList.addValueChangeHandler(valueChangeHandler);
-        imagesListComposite = new ImagesListComposite(sailingService, stringMessages,storageServiceAvailable);
-        videosListComposite = new VideosListComposite(sailingService,stringMessages,storageServiceAvailable);
+        imagesListComposite = new ImagesListComposite(sailingService, stringMessages, storageServiceAvailable);
+        videosListComposite = new VideosListComposite(sailingService,stringMessages, storageServiceAvailable);
         externalLinksComposite = new ExternalLinksComposite(stringMessages);
         final List<String> suggestedWindFinderSpotCollections = AvailableWindFinderSpotCollections
                 .getAllAvailableWindFinderSpotCollectionsInAlphabeticalOrder() == null ? Collections.emptyList()
@@ -287,7 +275,6 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
     // try it first
     private void testFileStorageService(FileStorageManagementGwtServiceAsync sailingService) {
         // double callback to test if a fileStorageService is enabled and enable upload if it is
-        storageServiceAvailable.setValue(false);
         sailingService.getActiveFileStorageServiceName(new AsyncCallback<String>() {
             @Override
             public void onSuccess(String result) {
@@ -299,6 +286,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
                                 @Override
                                 public void onFailure(Throwable caught) {
                                     Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
+                                    storageServiceAvailable.setValue(false);
                                 }
 
                                 @Override
@@ -308,9 +296,13 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
                                     } else {
                                         Notification.notify(stringMessages.setUpStorageService(),
                                                 NotificationType.ERROR);
+                                        storageServiceAvailable.setValue(false);
                                     }
                                 }
                             });
+                } else {
+                    Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
+                    storageServiceAvailable.setValue(false);
                 }
             }
 

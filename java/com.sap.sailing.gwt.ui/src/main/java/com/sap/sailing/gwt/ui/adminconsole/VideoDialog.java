@@ -18,6 +18,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.MimeType;
+import com.sap.sse.common.observer.GenericObserver;
+import com.sap.sse.common.observer.ObservableBoolean;
 import com.sap.sse.gwt.adminconsole.URLFieldWithFileUpload;
 import com.sap.sse.gwt.client.GWTLocaleUtil;
 import com.sap.sse.gwt.client.IconResources;
@@ -27,7 +29,7 @@ import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
-public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
+public abstract class VideoDialog extends DataEntryDialog<VideoDTO> implements GenericObserver<Boolean> {
     protected final StringMessages stringMessages;
     protected final URLFieldWithFileUpload videoURLAndUploadComposite;
     protected final Date creationDate;
@@ -40,6 +42,7 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
     protected IntegerBox lengthIntegerBox;
     protected final URLFieldWithFileUpload thumbnailURLAndUploadComposite;
     protected StringListInlineEditorComposite tagsListEditor;
+    private final ObservableBoolean storageServiceAvailable;
     
     protected static class VideoParameterValidator implements Validator<VideoDTO> {
         private StringMessages stringMessages;
@@ -61,11 +64,13 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
         }
     }
 
-    public VideoDialog(Date createdAtDate, VideoParameterValidator validator, StringMessages stringMessages, DialogCallback<VideoDTO> callback) {
+    public VideoDialog(Date createdAtDate, VideoParameterValidator validator, StringMessages stringMessages, ObservableBoolean storageServiceAvailable, DialogCallback<VideoDTO> callback) {
         super(stringMessages.video(), null, stringMessages.ok(), stringMessages.cancel(), validator,
                 callback);
         this.stringMessages = stringMessages;
         this.creationDate = createdAtDate;
+        this.storageServiceAvailable = storageServiceAvailable;
+        storageServiceAvailable.registerObserver(this);
         getDialogBox().getWidget().setWidth("730px");
 
         mimeTypeListBox = createListBox(false);
@@ -90,10 +95,13 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
                 validateAndUpdate();
             }
         });
+        videoURLAndUploadComposite.setUploadEnabled(storageServiceAvailable.getValue());
         thumbnailURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
         tagsListEditor = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new GenericStringListInlineEditorComposite.ExpandedUi<String>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
                         MediaTagConstants.videoTagSuggestions, stringMessages.enterTagsForTheVideo(), 50));
+
+        thumbnailURLAndUploadComposite.setUploadEnabled(storageServiceAvailable.getValue());
     }
 
     @Override
@@ -186,5 +194,11 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> {
     @Override
     protected FocusWidget getInitialFocusWidget() {
         return videoURLAndUploadComposite.getInitialFocusWidget();
+    }
+    
+    @Override
+    public void getNotified(Boolean data) {
+        videoURLAndUploadComposite.setUploadEnabled(storageServiceAvailable.getValue());
+        thumbnailURLAndUploadComposite.setUploadEnabled(storageServiceAvailable.getValue());
     }
 }

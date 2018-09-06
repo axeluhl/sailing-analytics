@@ -1,4 +1,5 @@
-#editing the filepath, so it fits for eclipse #currently save works for cygwin, gitbash and linux
+#!/bin/bash
+#editing the filepath, so it fits for operating system #currently savely works for cygwin, gitbash and linux
 correct_file_path()
 {
     if [[ "$1" == '/' ]] || [[ "$1" == "" ]]; then

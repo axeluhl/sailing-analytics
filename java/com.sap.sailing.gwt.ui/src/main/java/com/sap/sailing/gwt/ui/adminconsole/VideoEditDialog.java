@@ -5,11 +5,12 @@ import java.util.List;
 
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.observer.ObservableBoolean;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
 public class VideoEditDialog extends VideoDialog {
-    public VideoEditDialog(VideoDTO video, StringMessages stringMessages, DialogCallback<VideoDTO> callback) {
-        super(video.getCreatedAtDate(), new VideoParameterValidator(stringMessages), stringMessages, callback);
+    public VideoEditDialog(VideoDTO video, StringMessages stringMessages, ObservableBoolean storageServiceAvailable, DialogCallback<VideoDTO> callback) {
+        super(video.getCreatedAtDate(), new VideoParameterValidator(stringMessages), stringMessages, storageServiceAvailable, callback);
         createdAtLabel = new Label(video.getCreatedAtDate().toString());
         videoURLAndUploadComposite.setURL(video.getSourceRef());
         titleTextBox = createTextBox(video.getTitle());

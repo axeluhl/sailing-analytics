@@ -27,14 +27,13 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sailing.gwt.ui.adminconsole.EventDialog.MutableBoolean;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sse.common.media.MediaTagConstants;
+import com.sap.sse.common.observer.GenericObserver;
+import com.sap.sse.common.observer.ObservableBoolean;
 import com.sap.sse.common.util.NaturalComparator;
-import com.sap.sse.gwt.client.Notification;
-import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.media.VideoDTO;
@@ -44,7 +43,7 @@ import com.sap.sse.gwt.client.media.VideoDTO;
  * 
  * @author Frank Mittag (C5163974)
  */
-public class VideosListComposite extends Composite {
+public class VideosListComposite extends Composite implements GenericObserver<Boolean> {
     private final StringMessages stringMessages;
 
     private CellTable<VideoDTO> videoTable;
@@ -54,8 +53,6 @@ public class VideosListComposite extends Composite {
 
     private final SimplePanel mainPanel;
     private final VerticalPanel panel;
-
-    private final MutableBoolean storageServiceAvailable;
 
     public static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
@@ -73,10 +70,9 @@ public class VideosListComposite extends Composite {
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
-    public VideosListComposite(SailingServiceAsync sailingService, final StringMessages stringMessages, MutableBoolean storageServiceAvailable) {
+    public VideosListComposite(SailingServiceAsync sailingService, final StringMessages stringMessages, ObservableBoolean storageServiceAvailable) {
         this.stringMessages = stringMessages;
-        this.storageServiceAvailable = storageServiceAvailable;
-
+        storageServiceAvailable.registerObserver(this);
         mainPanel = new SimplePanel();
         panel = new VerticalPanel();
         mainPanel.setWidget(panel);
@@ -89,7 +85,7 @@ public class VideosListComposite extends Composite {
         createVideoBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                openCreateVideoDialog(MediaTagConstants.GALLERY.getName());
+                openCreateVideoDialog(MediaTagConstants.GALLERY.getName(), storageServiceAvailable);
             }
         });
         videosControlsPanel.add(createVideoBtn);
@@ -98,7 +94,7 @@ public class VideosListComposite extends Composite {
         addLiveStreamBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                openCreateVideoDialog(MediaTagConstants.LIVESTREAM.getName());
+                openCreateVideoDialog(MediaTagConstants.LIVESTREAM.getName(), storageServiceAvailable);
             }
         });
         videosControlsPanel.add(addLiveStreamBtn);
@@ -107,14 +103,14 @@ public class VideosListComposite extends Composite {
         addHighlightBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                openCreateVideoDialog(MediaTagConstants.HIGHLIGHT.getName());
+                openCreateVideoDialog(MediaTagConstants.HIGHLIGHT.getName(), storageServiceAvailable);
             }
         });
         videosControlsPanel.add(addHighlightBtn);
 
         videoSelectionModel = new SingleSelectionModel<VideoDTO>();
         videoListDataProvider = new ListDataProvider<VideoDTO>();
-        videoTable = createVideosTable();
+        videoTable = createVideosTable(storageServiceAvailable);
         videoTable.ensureDebugId("VideosCellTable");
         videoTable.setVisible(false);
 
@@ -134,7 +130,7 @@ public class VideosListComposite extends Composite {
         initWidget(mainPanel);
     }
 
-    private CellTable<VideoDTO> createVideosTable() {
+    private CellTable<VideoDTO> createVideosTable(ObservableBoolean storageServiceAvailable) {
         CellTable<VideoDTO> table = new BaseCelltable<VideoDTO>(/* pageSize */10000, tableRes);
         videoListDataProvider.addDataDisplay(table);
         table.setWidth("100%");
@@ -203,7 +199,7 @@ public class VideosListComposite extends Composite {
                     videoListDataProvider.getList().remove(video);
                     updateTableVisisbilty();
                 } else if (ImageConfigImagesBarCell.ACTION_EDIT.equals(value)) {
-                    openEditVideoDialog(video);
+                    openEditVideoDialog(video, storageServiceAvailable);
                 }
             }
         });
@@ -251,12 +247,8 @@ public class VideosListComposite extends Composite {
         return result;
     }
 
-    private void openCreateVideoDialog(String initialTag) {
-        if (!storageServiceAvailable.getValue()) {
-            Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
-            return;
-        }
-        VideoCreateDialog dialog = new VideoCreateDialog(initialTag, stringMessages, new DialogCallback<VideoDTO>() {
+    private void openCreateVideoDialog(String initialTag, ObservableBoolean storageServiceAvailable) {
+        VideoCreateDialog dialog = new VideoCreateDialog(initialTag, stringMessages, storageServiceAvailable, new DialogCallback<VideoDTO>() {
             @Override
             public void cancel() {
             }
@@ -270,12 +262,8 @@ public class VideosListComposite extends Composite {
         dialog.show();
     }
 
-    private void openEditVideoDialog(final VideoDTO selectedVideo) {
-        if (!storageServiceAvailable.getValue()) {
-            Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
-            return;
-        }
-        VideoEditDialog dialog = new VideoEditDialog(selectedVideo, stringMessages, new DialogCallback<VideoDTO>() {
+    private void openEditVideoDialog(final VideoDTO selectedVideo, ObservableBoolean storageServiceAvailable) {
+        VideoEditDialog dialog = new VideoEditDialog(selectedVideo, stringMessages, storageServiceAvailable, new DialogCallback<VideoDTO>() {
             @Override
             public void cancel() {
             }
@@ -310,5 +298,10 @@ public class VideosListComposite extends Composite {
 
     public List<VideoDTO> getAllVideos() {
         return videoListDataProvider.getList();
+    }
+
+    @Override
+    public void getNotified(Boolean data) {
+        // TODO Auto-generated method stub
     }
 }

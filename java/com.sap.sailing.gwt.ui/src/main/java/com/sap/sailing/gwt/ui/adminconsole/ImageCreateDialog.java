@@ -7,12 +7,13 @@ import java.util.List;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.observer.ObservableBoolean;
 import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
 
 public class ImageCreateDialog extends ImageDialog {
 
-    public ImageCreateDialog(String initialTag, SailingServiceAsync sailingService, StringMessages stringMessages, DialogCallback<ImageResizingTaskDTO> dialogCallback) {
-        super(new Date(), sailingService, stringMessages, dialogCallback);
+    public ImageCreateDialog(String initialTag, SailingServiceAsync sailingService, StringMessages stringMessages, ObservableBoolean storageServiceAvailable, DialogCallback<ImageResizingTaskDTO> dialogCallback) {
+        super(new Date(), sailingService, stringMessages, storageServiceAvailable, dialogCallback);
         createdAtLabel = new Label(creationDate.toString());
         titleTextBox = createTextBox(null);
         titleTextBox.setVisibleLength(40);

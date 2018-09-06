@@ -28,11 +28,11 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sailing.gwt.ui.adminconsole.EventDialog.MutableBoolean;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sse.common.media.MediaTagConstants;
+import com.sap.sse.common.observer.ObservableBoolean;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -57,7 +57,6 @@ public class ImagesListComposite extends Composite {
 
     private final SimplePanel mainPanel;
     private final VerticalPanel panel;
-    private final MutableBoolean storageServiceAvailable;
 
     public static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
@@ -75,12 +74,9 @@ public class ImagesListComposite extends Composite {
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
-    public ImagesListComposite(SailingServiceAsync sailingService, final StringMessages stringMessages,
-            MutableBoolean storageServiceAvailable) {
+    public ImagesListComposite(SailingServiceAsync sailingService, final StringMessages stringMessages, ObservableBoolean storageServiceAvailable) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
-        this.storageServiceAvailable = storageServiceAvailable;
-        
         mainPanel = new SimplePanel();
         panel = new VerticalPanel();
         mainPanel.setWidget(panel);
@@ -93,7 +89,7 @@ public class ImagesListComposite extends Composite {
         addPhotoBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                openCreateImageDialog(MediaTagConstants.GALLERY.getName());
+                openCreateImageDialog(MediaTagConstants.GALLERY.getName(), storageServiceAvailable);
             }
         });
         imagesControlsPanel.add(addPhotoBtn);
@@ -102,7 +98,7 @@ public class ImagesListComposite extends Composite {
         addStateImageBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                openCreateImageDialog(MediaTagConstants.STAGE.getName());
+                openCreateImageDialog(MediaTagConstants.STAGE.getName(), storageServiceAvailable);
             }
         });
         imagesControlsPanel.add(addStateImageBtn);
@@ -111,7 +107,7 @@ public class ImagesListComposite extends Composite {
         addEventTeaseImageBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                openCreateImageDialog(MediaTagConstants.TEASER.getName());
+                openCreateImageDialog(MediaTagConstants.TEASER.getName(), storageServiceAvailable);
             }
         });
         imagesControlsPanel.add(addEventTeaseImageBtn);
@@ -120,14 +116,14 @@ public class ImagesListComposite extends Composite {
         addLogoImageBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                openCreateImageDialog(MediaTagConstants.LOGO.getName());
+                openCreateImageDialog(MediaTagConstants.LOGO.getName(), storageServiceAvailable);
             }
         });
         imagesControlsPanel.add(addLogoImageBtn);
  
         imageSelectionModel = new SingleSelectionModel<ImageDTO>();
         imageListDataProvider = new ListDataProvider<ImageDTO>();
-        imageTable = createImagesTable();
+        imageTable = createImagesTable(storageServiceAvailable);
         imageTable.ensureDebugId("ImagesCellTable");
         imageTable.setVisible(false);
 
@@ -147,7 +143,7 @@ public class ImagesListComposite extends Composite {
         initWidget(mainPanel);
     }
 
-    private CellTable<ImageDTO> createImagesTable() {
+    private CellTable<ImageDTO> createImagesTable(ObservableBoolean storageServiceAvailable) {
         CellTable<ImageDTO> table = new BaseCelltable<ImageDTO>(/* pageSize */10000, tableRes);
         imageListDataProvider.addDataDisplay(table);
         table.setWidth("100%");
@@ -224,7 +220,7 @@ public class ImagesListComposite extends Composite {
                     imageListDataProvider.getList().remove(image);
                     updateTableVisisbilty();
                 } else if (ImageConfigImagesBarCell.ACTION_EDIT.equals(value)) {
-                    openEditImageDialog(image);
+                    openEditImageDialog(image, storageServiceAvailable);
                 }
             }
         });
@@ -272,8 +268,8 @@ public class ImagesListComposite extends Composite {
         return result;
     }
 
-    private void openCreateImageDialog(String initialTag) {
-        ImageCreateDialog dialog = new ImageCreateDialog(initialTag, sailingService, stringMessages,
+    private void openCreateImageDialog(String initialTag, ObservableBoolean storageServiceAvailable) {
+        ImageCreateDialog dialog = new ImageCreateDialog(initialTag, sailingService, stringMessages, storageServiceAvailable,
                 new DialogCallback<ImageResizingTaskDTO>() {
                     @Override
                     public void cancel() {
@@ -287,23 +283,19 @@ public class ImagesListComposite extends Composite {
         dialog.show();
     }
 
-    private void openEditImageDialog(final ImageDTO selectedImage) {
-        if (!storageServiceAvailable.getValue()) {
-            Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
-        } else {
-            ImageEditDialog dialog = new ImageEditDialog(selectedImage, sailingService, stringMessages,
-                    new DialogCallback<ImageResizingTaskDTO>() {
-                        @Override
-                        public void cancel() {
-                        }
+    private void openEditImageDialog(final ImageDTO selectedImage, ObservableBoolean storageServiceAvailable) {
+        ImageEditDialog dialog = new ImageEditDialog(selectedImage, sailingService, stringMessages, storageServiceAvailable,
+                new DialogCallback<ImageResizingTaskDTO>() {
+                    @Override
+                    public void cancel() {
+                    }
 
-                        @Override
-                        public void ok(ImageResizingTaskDTO resizingTask) {
-                            callResizingService(resizingTask, selectedImage);
-                        }
-                    });
-            dialog.show();
-        }
+                    @Override
+                    public void ok(ImageResizingTaskDTO resizingTask) {
+                        callResizingService(resizingTask, selectedImage);
+                    }
+                });
+        dialog.show();
     }
 
     protected void callResizingService(ImageResizingTaskDTO resizingTask, ImageDTO originalImage) {
