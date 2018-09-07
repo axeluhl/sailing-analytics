@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.detai
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Display;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.DOM;
@@ -10,7 +11,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
@@ -23,10 +23,13 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileS
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailingProfileOverviewPresenter;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileView;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
+import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent.AccordionExpansionListener;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent.InitialAccordionExpansionListener;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfileMobileResources;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.details.events.SailorProfileEventEntry;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.details.statistics.SailorProfileStatisticTable;
+import com.sap.sailing.gwt.home.shared.partials.editable.EditableSuggestedMultiSelectionCompetitor;
+import com.sap.sailing.gwt.home.shared.partials.editable.InlineEditButton;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileResources;
 import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserSettingsView;
@@ -136,11 +139,22 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
     }
 
     private void setCompetitors(Iterable<SimpleCompetitorWithIdDTO> competitors) {
-        for (SimpleCompetitorWithIdDTO competitor : competitors) {
-            IsWidget competitorWidget = new CompetitorWithClubnameItemDescription(competitor,
-                    presenter.getFlagImageResolver());
-            contentContainerCompetitorsUi.add(competitorWidget);
-        }
+        EditableSuggestedMultiSelectionCompetitor editableSuggestedMultiselect = new EditableSuggestedMultiSelectionCompetitor(
+                presenter.getSharedSailorProfilePresenter(), presenter.getFlagImageResolver(), true);
+        contentContainerCompetitorsUi.add(editableSuggestedMultiselect);
+        editableSuggestedMultiselect.setSelectedItems(competitors);
+        final InlineEditButton editButton = editableSuggestedMultiselect.getEditButton();
+        editButton.setVisible(false);
+        editButton.getElement().getStyle().setTop(-0.5, Unit.EM);
+        editButton.getElement().getStyle().setRight(3.1, Unit.EM);
+        competitorsUi.setHeaderElement(editButton);
+
+        competitorsUi.addAccordionListener(new AccordionExpansionListener() {
+            @Override
+            public void onExpansionChange(boolean collapsed) {
+                editButton.setVisible(!collapsed);
+            }
+        });
     }
 
     private void setBoatclasses(Iterable<BoatClassDTO> boatclasses) {
