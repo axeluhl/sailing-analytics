@@ -31,6 +31,8 @@ public class RegattaStatus extends Composite implements RefreshableWidget<Regatt
     interface RegattaStatusUiBinder extends UiBinder<Widget, RegattaStatus> {
     }
 
+    @UiField
+    RegattaStatusResources local_res;
     @UiField SectionHeaderContent sectionHeaderUi;
     @UiField MobileSection regattaContainerUi;
     @UiField MobileSection collapsableContainerUi;
@@ -55,7 +57,8 @@ public class RegattaStatus extends Composite implements RefreshableWidget<Regatt
     }
     
     public void setFilterSectionWidget(AbstractSelectionFilter<RegattaMetadataDTO, ?> filterWidget) {
-        sectionHeaderUi.initFilterSelectUi(filterWidget);
+        filterWidget.setStyleName(local_res.css().regattastatus_filter());
+        sectionHeaderUi.initAdditionalWidget(filterWidget);
     }
     
     @Override

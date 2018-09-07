@@ -32,6 +32,7 @@ public class RegattaStatusRegatta extends Composite implements IsMobileSection, 
     public RegattaStatusRegatta(RegattaMetadataDTO regatta, PlaceNavigation<?> placeNavigation) {
         initWidget(uiBinder.createAndBindUi(this));
         initRegattaHeader(regatta, placeNavigation);
+        headerUi.initAdditionalWidget(new RegattaStatusDataIndicators(regatta.getRaceDataInfo()));
     }
     
     @Override
