@@ -14,9 +14,6 @@
         }
     </ui:style>
     <g:HTMLPanel>
-        <g:HTMLPanel
-            addStyleNames="{local_res.css.sectionheader_item} {local_res.css.sectionheader_itemright}"
-            ui:field="headerContentUi" />
         <a style="display:block;" ui:field="headerMainUi">
             <div class="{local_res.css.sectionheader_item}" ui:field="headerLeftUi">
                 <div class="{local_res.css.sectionheader_item_image}" style="display:none;" ui:field="imageUi">
@@ -36,5 +33,8 @@
                 <g:SimplePanel ui:field="filterSelectContainerUi"></g:SimplePanel>
             </div>
         </a>
+        <g:HTMLPanel
+            addStyleNames="{local_res.css.sectionheader_item} {local_res.css.sectionheader_itemright}"
+            ui:field="headerContentUi" />
     </g:HTMLPanel>
 </ui:UiBinder>
