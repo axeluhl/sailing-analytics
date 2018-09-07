@@ -32,12 +32,12 @@ import com.sap.sailing.gwt.home.shared.partials.editable.EditableSuggestedMultiS
 import com.sap.sailing.gwt.home.shared.partials.editable.InlineEditButton;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileResources;
-import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserSettingsView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
 /**
- * Implementation of {@link UserSettingsView} where users can change their preferred selections and notifications.
+ * Implementation of {@link SailorProfileView} and {@link EditSailorProfileView} where users can change the details of
+ * the sailor profiles.
  */
 public class SailorProfilesDetailsImpl extends Composite implements SailorProfileView, EditSailorProfileView {
 
@@ -139,6 +139,7 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
             }
         });
     }
+
     private EditableSuggestedMultiSelectionCompetitor createMultiSelection() {
         editableSuggestedMultiselect = new EditableSuggestedMultiSelectionCompetitor(
                 presenter.getSharedSailorProfilePresenter().getDataProvider(), presenter.getFlagImageResolver(), true);

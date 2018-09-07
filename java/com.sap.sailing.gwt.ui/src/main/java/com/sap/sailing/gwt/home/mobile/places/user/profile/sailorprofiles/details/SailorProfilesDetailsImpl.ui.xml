@@ -23,7 +23,6 @@
                 </ms:content>
             </ms:MobileSection>
 
-
             <ms:MobileSection>
                 <ms:header>
                     <p:sectionHeader.SectionHeaderContent ui:field="boatclassesUi"
