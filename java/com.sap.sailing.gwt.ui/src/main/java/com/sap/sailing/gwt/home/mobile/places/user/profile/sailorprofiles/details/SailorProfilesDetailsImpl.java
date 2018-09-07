@@ -140,7 +140,7 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
 
     private void setCompetitors(Iterable<SimpleCompetitorWithIdDTO> competitors) {
         EditableSuggestedMultiSelectionCompetitor editableSuggestedMultiselect = new EditableSuggestedMultiSelectionCompetitor(
-                presenter.getSharedSailorProfilePresenter(), presenter.getFlagImageResolver(), true);
+                presenter.getSharedSailorProfilePresenter().getDataProvider(), presenter.getFlagImageResolver(), true);
         contentContainerCompetitorsUi.add(editableSuggestedMultiselect);
         editableSuggestedMultiselect.setSelectedItems(competitors);
         final InlineEditButton editButton = editableSuggestedMultiselect.getEditButton();
