@@ -73,6 +73,8 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
 
     private SailingProfileOverviewPresenter presenter;
 
+    private EditableSuggestedMultiSelectionCompetitor editableSuggestedMultiselect;
+
     public SailorProfilesDetailsImpl() {
         initWidget(uiBinder.createAndBindUi(this));
         SharedSailorProfileResources.INSTANCE.css().ensureInjected();
@@ -87,6 +89,7 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
     public void setPresenter(SailingProfileOverviewPresenter presenter) {
         this.presenter = presenter;
         presenter.getSharedSailorProfilePresenter().getDataProvider().setView(this);
+        createMultiSelection();
 
     }
 
@@ -116,7 +119,6 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
                 });
 
         statisticsUi.addAccordionListener(new InitialAccordionExpansionListener() {
-
             @Override
             public void onFirstExpansion() {
                 // Get statistics
@@ -137,12 +139,10 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
             }
         });
     }
-
-    private void setCompetitors(Iterable<SimpleCompetitorWithIdDTO> competitors) {
-        EditableSuggestedMultiSelectionCompetitor editableSuggestedMultiselect = new EditableSuggestedMultiSelectionCompetitor(
+    private EditableSuggestedMultiSelectionCompetitor createMultiSelection() {
+        editableSuggestedMultiselect = new EditableSuggestedMultiSelectionCompetitor(
                 presenter.getSharedSailorProfilePresenter().getDataProvider(), presenter.getFlagImageResolver(), true);
         contentContainerCompetitorsUi.add(editableSuggestedMultiselect);
-        editableSuggestedMultiselect.setSelectedItems(competitors);
         final InlineEditButton editButton = editableSuggestedMultiselect.getEditButton();
         editButton.setVisible(false);
         editButton.getElement().getStyle().setTop(-0.5, Unit.EM);
@@ -155,9 +155,15 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
                 editButton.setVisible(!collapsed);
             }
         });
+        return editableSuggestedMultiselect;
+    }
+
+    private void setCompetitors(Iterable<SimpleCompetitorWithIdDTO> competitors) {
+        editableSuggestedMultiselect.setSelectedItems(competitors);
     }
 
     private void setBoatclasses(Iterable<BoatClassDTO> boatclasses) {
+        contentContainerBoatclassesUi.getElement().removeAllChildren();
         for (BoatClassDTO boatclass : boatclasses) {
             Element elem = DOM.createDiv();
             elem.setInnerSafeHtml(SharedSailorProfileResources.TEMPLATES.buildBoatclassIcon(
@@ -168,6 +174,7 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
     }
 
     private void setEvents(Iterable<ParticipatedEventDTO> participatedEvents) {
+        contentContainerEventsUi.clear();
         for (ParticipatedEventDTO event : participatedEvents) {
             contentContainerEventsUi.add(
                     new SailorProfileEventEntry(event, presenter.getSharedSailorProfilePresenter().getPlaceController(),
@@ -176,6 +183,7 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
     }
 
     private void setStatistic(SailorProfileNumericStatisticType type, SailorProfileStatisticDTO statistic) {
+        contentContainerStatisticsUi.clear();
         contentContainerStatisticsUi.add(
                 new SailorProfileStatisticTable(type, statistic, presenter.getFlagImageResolver(), stringMessages));
     }
