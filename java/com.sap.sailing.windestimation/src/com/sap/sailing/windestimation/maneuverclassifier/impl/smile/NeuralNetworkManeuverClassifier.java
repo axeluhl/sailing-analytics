@@ -2,13 +2,15 @@ package com.sap.sailing.windestimation.maneuverclassifier.impl.smile;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverTypeForClassification;
+import com.sap.sailing.windestimation.maneuverclassifier.PreprocessingConfig.PreprocessingConfigBuilder;
 import com.sap.sailing.windestimation.maneuverclassifier.impl.MLUtil;
 import com.sap.sailing.windestimation.maneuverclassifier.impl.ManeuverFeatures;
-import com.sap.sailing.windestimation.maneuverclassifier.impl.smile.PreprocessingConfig.PreprocessingConfigBuilder;
 
 import smile.classification.NeuralNetwork;
 
 public class NeuralNetworkManeuverClassifier extends AbstractSmileManeuverClassifier<NeuralNetwork> {
+
+    private static final long serialVersionUID = -3364152319152090775L;
 
     public NeuralNetworkManeuverClassifier(ManeuverFeatures maneuverFeatures, BoatClass boatClass,
             ManeuverTypeForClassification[] supportedManeuverTypes) {
@@ -25,7 +27,7 @@ public class NeuralNetworkManeuverClassifier extends AbstractSmileManeuverClassi
                     NeuralNetwork.ActivationFunction.LOGISTIC_SIGMOID, numberOfInputFeatures, 100, 100, 1);
         } else {
             net = new NeuralNetwork(NeuralNetwork.ErrorFunction.CROSS_ENTROPY, NeuralNetwork.ActivationFunction.SOFTMAX,
-                    100, 100, k);
+                    numberOfInputFeatures, 100, 100, k);
         }
 
         for (int i = 0; i < 20; i++) {

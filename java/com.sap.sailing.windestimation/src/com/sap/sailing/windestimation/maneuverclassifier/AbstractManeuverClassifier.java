@@ -1,5 +1,6 @@
 package com.sap.sailing.windestimation.maneuverclassifier;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,8 +10,9 @@ import com.sap.sailing.windestimation.data.ManeuverCategory;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.maneuverclassifier.impl.ManeuverFeatures;
 
-public abstract class AbstractManeuverClassifier implements ManeuverClassifier, SingleManeuverClassifier {
+public abstract class AbstractManeuverClassifier implements SingleManeuverClassifier, Serializable {
 
+    private static final long serialVersionUID = 908308394572292148L;
     private final ManeuverFeatures maneuverFeatures;
     private final BoatClass boatClass;
     private final int[] supportedManeuverTypesMapping;

@@ -61,8 +61,8 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
     private final ManeuverForDataAnalysisJsonSerializer maneuverForDataAnalysisJsonSerializer;
     private final ManeuverForEstimationJsonSerializer maneuverForEstimationJsonSerializer;
     private boolean skipRace = true;
-    private final String startFromRegattaName = "WCS 2018 Hyeres - Laser";
-    private final String startFromRegattaRace = "R4 (Laser)";
+    private final String startFromRegattaName = "KW 2016 International - 29er";
+    private final String startFromRegattaRace = "F4 Silver (29er)";
 
     public CompleteManeuverCurveWithEstimationDataImporter() throws UnknownHostException {
         this.completeManeuverCurvePersistanceManager = new RaceWithCompleteManeuverCurvePersistenceManager();

@@ -25,6 +25,7 @@ public class ManeuverNodeGraphLevel {
     private ManeuverNodeGraphLevel nextLevel = null;
 
     private final List<ManeuverNode> levelNodes = new ArrayList<>();
+    private double probabilitiesSum = 1.0;
 
     public ManeuverNodeGraphLevel(ManeuverForEstimation maneuver, ManeuverEstimationResult maneuverEstimationResult) {
         this.maneuver = maneuver;
@@ -51,8 +52,8 @@ public class ManeuverNodeGraphLevel {
 
     private void addManeuverNode(ManeuverTypeForClassification maneuverType, Tack tackAfter,
             WindRangeForManeuverNode windRange, boolean windRangeToExclude, double confidence) {
-        ManeuverNode maneuverNode = new ManeuverNode(maneuverType, tackAfter, windRange, windRangeToExclude, confidence,
-                levelNodes.size() - 1);
+        ManeuverNode maneuverNode = new ManeuverNode(maneuverType, tackAfter, windRange, windRangeToExclude,
+                confidence / probabilitiesSum, levelNodes.size() - 1);
         levelNodes.add(maneuverNode);
     }
 
@@ -62,10 +63,15 @@ public class ManeuverNodeGraphLevel {
     }
 
     private void initNodesAsRegular() {
+        probabilitiesSum = 0;
+        probabilitiesSum += maneuverEstimationResult.getManeuverTypeLikelihood(CoarseGrainedManeuverType.TACK);
+        probabilitiesSum += maneuverEstimationResult.getManeuverTypeLikelihood(CoarseGrainedManeuverType.JIBE);
+        probabilitiesSum += maneuverEstimationResult.getManeuverTypeLikelihood(CoarseGrainedManeuverType.BEAR_AWAY);
+        probabilitiesSum += maneuverEstimationResult.getManeuverTypeLikelihood(CoarseGrainedManeuverType.HEAD_UP);
         for (ManeuverTypeForClassification maneuverType : ManeuverTypeForClassification.values()) {
             switch (maneuverType) {
             case TACK:
-                initTackNode();
+                initTackNode(probabilitiesSum);
                 break;
             case JIBE:
                 initJibeNode();
@@ -133,7 +139,7 @@ public class ManeuverNodeGraphLevel {
         addManeuverNode(ManeuverTypeForClassification.JIBE, tackAfter, windRange, false, confidence);
     }
 
-    private void initTackNode() {
+    private void initTackNode(double probabilitiesSum) {
         Bearing middleCourse = maneuver.getMiddleCourse();
         double absCourseChangeDeg = Math.abs(maneuver.getCourseChangeInDegrees());
         Double optimalTackDeviationDeg = maneuver.getDeviationFromOptimalTackAngleInDegrees();

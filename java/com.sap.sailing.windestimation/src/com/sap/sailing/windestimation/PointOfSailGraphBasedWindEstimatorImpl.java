@@ -32,7 +32,7 @@ public class PointOfSailGraphBasedWindEstimatorImpl
         List<CompetitorTrackWithEstimationData<ManeuverForEstimation>> transformedCompetitorTracks = maneuverForEstimationTransformer
                 .transform(filteredCompetitorTracks);
         PointOfSailSequenceGraph maneuverGraph = new PointOfSailSequenceGraph(transformedCompetitorTracks,
-                new ManeuverClassifiersCache(60000, false, getPolarService()), new BestPathsCalculator());
+                new ManeuverClassifiersCache(60000, false, true, getPolarService()), new BestPathsCalculator());
         return maneuverGraph.estimateWindTrack();
     }
 

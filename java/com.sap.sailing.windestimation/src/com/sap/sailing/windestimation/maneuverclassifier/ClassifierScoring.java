@@ -71,21 +71,30 @@ public class ClassifierScoring {
         }
         str.append("AVG");
         double avgStatisticValue = statisticValueSum / supportedManeuverTypesCount;
-        str.append(String.format("%.03f | ", avgStatisticValue));
+        str.append(String.format(" %.03f | ", avgStatisticValue));
         return avgStatisticValue;
     }
 
     private double recall(int tp, int fn) {
+        if (tp + fn == 0) {
+            return 0;
+        }
         return 1.0 * tp / (tp + fn);
     }
 
     private double precision(int tp, int fp) {
+        if (tp + fp == 0) {
+            return 0;
+        }
         return 1.0 * tp / (tp + fp);
     }
 
     private double f1score(int tp, int fp, int fn) {
         double p = precision(tp, fp);
         double r = recall(tp, fn);
+        if (p + r == 0) {
+            return 0;
+        }
         return 2.0 * (p * r) / (p + r);
     }
 

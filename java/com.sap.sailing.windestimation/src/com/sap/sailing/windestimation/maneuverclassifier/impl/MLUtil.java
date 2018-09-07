@@ -2,6 +2,7 @@ package com.sap.sailing.windestimation.maneuverclassifier.impl;
 
 import java.util.List;
 
+import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.windestimation.data.LabelledManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 
@@ -26,7 +27,29 @@ public class MLUtil {
             inputVector[i++] = maneuver.getScaledSpeedBefore();
             inputVector[i++] = maneuver.getScaledSpeedAfter();
         }
+        if (maneuverFeatures.isMarksInformation()) {
+            inputVector[i++] = maneuver.isMarkPassing() ? 1.0 : 0.0;
+            inputVector[i++] = maneuver.getRelativeBearingToNextMarkBefore();
+            inputVector[i++] = maneuver.getRelativeBearingToNextMarkAfter();
+        }
         return inputVector;
+    }
+
+    public static boolean isManeuverContainsAllFeatures(ManeuverForEstimation maneuver,
+            ManeuverFeatures maneuverFeatures, BoatClass boatClass) {
+        if (maneuverFeatures.isPolarsInformation()) {
+            if (maneuver.getDeviationFromOptimalJibeAngleInDegrees() == null
+                    || maneuver.getDeviationFromOptimalTackAngleInDegrees() == null) {
+                return false;
+            }
+        }
+        if (maneuverFeatures.isMarksInformation()) {
+            if (maneuver.getRelativeBearingToNextMarkBefore() == null
+                    || maneuver.getRelativeBearingToNextMarkAfter() == null) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static double[][] getInputMatrixAsDoubleArray(List<ManeuverForEstimation> maneuvers,
@@ -44,7 +67,7 @@ public class MLUtil {
         int[] output = new int[maneuvers.size()];
         int i = 0;
         for (ManeuverForEstimation maneuver : maneuvers) {
-            output[i] = supportedManeuverTypesMapping[((LabelledManeuverForEstimation) maneuver).getManeuverType()
+            output[i++] = supportedManeuverTypesMapping[((LabelledManeuverForEstimation) maneuver).getManeuverType()
                     .ordinal()];
         }
         return output;
@@ -57,6 +80,9 @@ public class MLUtil {
         }
         if (maneuverFeatures.isScaledSpeed()) {
             numberOfFeatures += 2;
+        }
+        if (maneuverFeatures.isMarksInformation()) {
+            numberOfFeatures += 3;
         }
         return numberOfFeatures;
     }

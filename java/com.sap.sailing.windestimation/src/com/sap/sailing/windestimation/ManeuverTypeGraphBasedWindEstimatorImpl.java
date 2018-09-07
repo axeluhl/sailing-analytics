@@ -32,7 +32,7 @@ public class ManeuverTypeGraphBasedWindEstimatorImpl
         List<CompetitorTrackWithEstimationData<ManeuverForEstimation>> transformedCompetitorTracks = maneuverForEstimationTransformer
                 .transform(filteredCompetitorTracks);
         ManeuverTypeSequenceGraph maneuverGraph = new ManeuverTypeSequenceGraph(transformedCompetitorTracks,
-                new ManeuverClassifiersCache(60000, false, getPolarService()), new ManeuverNodeBestPathsCalculator());
+                new ManeuverClassifiersCache(60000, false, true, getPolarService()), new ManeuverNodeBestPathsCalculator());
         return maneuverGraph.estimateWindTrack();
     }
 

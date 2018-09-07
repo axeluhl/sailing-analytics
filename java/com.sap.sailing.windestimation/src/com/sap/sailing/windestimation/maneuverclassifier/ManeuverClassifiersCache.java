@@ -13,10 +13,12 @@ public class ManeuverClassifiersCache {
     private final ShortTimeAfterLastHitCache<ClassifierType, SingleManeuverClassifier> classifierCache;
     private final boolean liveRace;
     private final PolarDataService polarDataService;
+    private final boolean marksAvailable;
 
-    public ManeuverClassifiersCache(long preserveLoadedClassifiersMillis, boolean liveRace,
+    public ManeuverClassifiersCache(long preserveLoadedClassifiersMillis, boolean liveRace, boolean marksAvailable,
             PolarDataService polarDataService) {
         this.liveRace = liveRace;
+        this.marksAvailable = marksAvailable;
         this.polarDataService = polarDataService;
         this.classifierCache = new ShortTimeAfterLastHitCache<ClassifierType, SingleManeuverClassifier>(
                 preserveLoadedClassifiersMillis, classifierType -> ManeuverClassifierLoader
@@ -30,8 +32,12 @@ public class ManeuverClassifiersCache {
 
     private ManeuverFeatures determineManeuverFeatures(ManeuverForEstimation maneuver) {
         Long fixesCountForBoatClass = polarDataService.getFixCountPerBoatClass().get(maneuver.getBoatClass());
-        boolean polars = fixesCountForBoatClass != null && fixesCountForBoatClass >= MIN_FIXES_FOR_POLARS_INFORMATION;
-        return new ManeuverFeatures(polars, !liveRace);
+        boolean polars = fixesCountForBoatClass != null && fixesCountForBoatClass >= MIN_FIXES_FOR_POLARS_INFORMATION
+                && maneuver.getDeviationFromOptimalJibeAngleInDegrees() != null
+                && maneuver.getDeviationFromOptimalTackAngleInDegrees() != null;
+        boolean marks = marksAvailable && maneuver.getRelativeBearingToNextMarkAfter() != null
+                && maneuver.getRelativeBearingToNextMarkBefore() != null;
+        return new ManeuverFeatures(polars, !liveRace, marks);
     }
 
     public PolarDataService getPolarDataService() {

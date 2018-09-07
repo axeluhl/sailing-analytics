@@ -11,7 +11,9 @@ import java.util.List;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.maneuverclassifier.AbstractManeuverClassifier;
+import com.sap.sailing.windestimation.maneuverclassifier.ClassifierPersistenceException;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverTypeForClassification;
+import com.sap.sailing.windestimation.maneuverclassifier.PreprocessingConfig;
 import com.sap.sailing.windestimation.maneuverclassifier.TrainableSingleManeuverOfflineClassifier;
 import com.sap.sailing.windestimation.maneuverclassifier.impl.MLUtil;
 import com.sap.sailing.windestimation.maneuverclassifier.impl.ManeuverFeatures;
@@ -24,6 +26,7 @@ import smile.projection.PCA;
 public abstract class AbstractSmileManeuverClassifier<T extends SoftClassifier<double[]>>
         extends AbstractManeuverClassifier implements TrainableSingleManeuverOfflineClassifier {
 
+    private static final long serialVersionUID = -8548600189459410079L;
     private T classifier = null;
     private double trainScore = 0;
     private double testScore = 0;
@@ -82,14 +85,10 @@ public abstract class AbstractSmileManeuverClassifier<T extends SoftClassifier<d
         }
     }
 
-    private String getFileNameForClassifier() {
-        String filename = "SMILE_" + getClass().getName() + "-" + getManeuverFeatures().toString() + "-"
-                + getBoatClass();
-        return filename;
-    }
-
     private File getFileForClassifier() {
-        return new File("persisted_classifiers" + File.pathSeparator + getFileNameForClassifier());
+        String filename = "classifier_smile_" + getClass().getSimpleName() + "-" + getManeuverFeatures().toString()
+                + "-" + (getBoatClass() == null ? "All" : getBoatClass().getName());
+        return new File(filename);
     }
 
     @Override
@@ -170,6 +169,11 @@ public abstract class AbstractSmileManeuverClassifier<T extends SoftClassifier<d
     @Override
     public void setFixesCountForBoatClass(int fixesCountForBoatClass) {
         this.fixesCountForBoatClass = fixesCountForBoatClass;
+    }
+
+    @Override
+    public boolean hasSupportForProvidedFeatures() {
+        return true;
     }
 
 }

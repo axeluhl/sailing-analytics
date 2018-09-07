@@ -33,4 +33,6 @@ public interface SingleManeuverClassifier extends ManeuverClassifier {
 
     int getFixesCountForBoatClass();
 
+    boolean hasSupportForProvidedFeatures();
+
 }

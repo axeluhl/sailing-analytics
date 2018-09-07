@@ -158,6 +158,8 @@ public class ManeuverNodeBestPathsCalculator {
                 penaltyFactor = 1 / (1
                         + (MAX_ABS_WIND_COURSE_DEVIATION_TOLERANCE_WITHIN_ANALYSIS_INTERVAL_IN_DEGREES + violationRange)
                                 * 0.01);
+            } else if (violationRange <= MAX_ABS_WIND_COURSE_DEVIATION_TOLERANCE_WITHIN_ANALYSIS_INTERVAL_IN_DEGREES) {
+                penaltyFactor = 1 / (1 + Math.pow((violationRange) / 15, 2));
             } else {
                 penaltyFactor = 1 / (4 + Math.pow((violationRange) / 5, 2));
             }

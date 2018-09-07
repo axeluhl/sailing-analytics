@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.windestimation.maneuverclassifier.impl.ManeuverFeatures;
-import com.sap.sailing.windestimation.maneuverclassifier.impl.smile.ClassifierPersistenceException;
 
 public class ManeuverClassifierLoader {
 
