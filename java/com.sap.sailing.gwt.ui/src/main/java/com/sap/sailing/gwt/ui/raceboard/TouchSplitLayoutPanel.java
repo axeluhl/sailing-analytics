@@ -677,6 +677,7 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                 public void onClick(ClickEvent event) {
                     boolean componentWasVisibleUntilNow = associatedComponent.isVisible();
                     associatedComponent.setVisible(!componentWasVisibleUntilNow);
+                    // TODO: Safe to remove style management here? Will also be handled by "componentViewer.forceLayout();" => duplicated style management
                     splitter.setVisible(!componentWasVisibleUntilNow);
                     splitter.setDraggerVisible(!componentWasVisibleUntilNow);
                     if (!componentWasVisibleUntilNow == true) {
@@ -846,6 +847,14 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                     }
                 }
                 splitter.setAssociatedWidgetSize(0, /* defer */false);
+
+                // need to ensure visibility of dragger and style of toggle button
+                splitter.setDraggerVisible(!hidden);
+                splitter.setVisible(!hidden);
+                splitter.getToggleButton().addStyleDependentName("Closed");
+                splitter.getToggleButton().addStyleDependentName("Closed-"+associatedComponentToWidget.getDependentCssClassName());
+                splitter.getToggleButton().removeStyleDependentName("Open");
+                splitter.getToggleButton().removeStyleDependentName("Open-"+associatedComponentToWidget.getDependentCssClassName());
             } else {
                 widget.setVisible(true);
                 if (associatedComponentToWidget != null) {
