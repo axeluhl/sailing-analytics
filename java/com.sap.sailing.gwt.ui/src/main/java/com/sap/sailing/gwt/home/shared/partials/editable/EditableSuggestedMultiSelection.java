@@ -19,7 +19,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionResources;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -38,7 +37,7 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
     StringMessages i18n;
 
     @UiField
-    DivElement parentPanel;
+    DivElement parentPanelUi;
 
     @UiField(provided = true)
     SuggestedMultiSelectionView<T> multiSelect;
@@ -53,9 +52,6 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
     FlowPanel itemContainerUi;
 
     @UiField
-    DivElement listContainerUi;
-
-    @UiField
     InlineEditButton editButtonUi;
 
     private final Map<T, IsWidget> tableElements = new HashMap<>();
@@ -64,34 +60,24 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
     private boolean editMode = false;
     private EditModeChangeHandler editModeChangeHandler;
 
-    public EditableSuggestedMultiSelection(Function<T, IsWidget> itemProducer, SuggestedMultiSelectionView<T> multis) {
-        this(itemProducer, multis, null, false);
-    }
-
     public EditableSuggestedMultiSelection(Function<T, IsWidget> itemProducer, SuggestedMultiSelectionView<T> multis,
-            EditModeChangeHandler editModeChangeHandler, boolean headless) {
+            EditModeChangeHandler editModeChangeHandler) {
         this.itemProducer = itemProducer;
         multiSelect = multis;
         this.editModeChangeHandler = editModeChangeHandler;
         initWidget(uiBinder.createAndBindUi(this));
 
         multiSelect.getElement().removeFromParent();
-        if (headless) {
-            listContainerUi.removeClassName(SuggestedMultiSelectionResources.INSTANCE.css().suggestions());
-            headerElementUi.removeFromParent();
-            editButtonUi.removeFromParent();
-        }
     }
 
     public void setEditMode(boolean state) {
         this.editMode = state;
-        listContainerUi.removeFromParent();
-        multiSelect.getElement().removeFromParent();
+        parentPanelUi.removeAllChildren();
         editModeChangeHandler.onEditModeChanged(state);
         if (state) {
-            parentPanel.appendChild(multiSelect.getElement());
+            parentPanelUi.appendChild(multiSelect.getElement());
         } else {
-            parentPanel.appendChild(listContainerUi);
+            parentPanelUi.appendChild(itemContainerUi.getElement());
         }
     }
 

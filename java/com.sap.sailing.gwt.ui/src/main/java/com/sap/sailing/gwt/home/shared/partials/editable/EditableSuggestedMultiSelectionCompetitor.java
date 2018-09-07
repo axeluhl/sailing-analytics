@@ -15,14 +15,13 @@ public class EditableSuggestedMultiSelectionCompetitor
 
     public EditableSuggestedMultiSelectionCompetitor(final StatefulSailorProfileDataProvider dataProvider,
             final FlagImageResolver flagImageResolver) {
-        this(dataProvider, flagImageResolver, false);
+        this(dataProvider, flagImageResolver, true);
     }
 
     public EditableSuggestedMultiSelectionCompetitor(final StatefulSailorProfileDataProvider dataProvider,
             final FlagImageResolver flagImageResolver, final boolean headless) {
         super(competitor -> new SuggestedMultiSelectionCompetitorItemDescription(competitor, flagImageResolver),
-                new CompetitorDisplayImpl(dataProvider, flagImageResolver, headless).selectionUi, dataProvider,
-                headless);
+                new CompetitorDisplayImpl(dataProvider, flagImageResolver, headless).selectionUi, dataProvider);
         super.setText(i18n.competitors());
     }
 
