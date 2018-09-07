@@ -3,13 +3,17 @@
     xmlns:f="urn:import:com.sap.sailing.gwt.home.shared.partials.filter"
     xmlns:ms="urn:import:com.sap.sailing.gwt.home.mobile.partials.section"
     xmlns:sh="urn:import:com.sap.sailing.gwt.home.mobile.partials.sectionHeader"
-    xmlns:p="urn:import:com.sap.sailing.gwt.home.mobile.partials">
+    xmlns:p="urn:import:com.sap.sailing.gwt.home.mobile.partials"
+    xmlns:p2="urn:import:com.sap.sailing.gwt.home.shared.partials">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="spmr"
         type="com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfileMobileResources" />
 
     <g:HTMLPanel addStyleNames="{res.mediaCss.grid}">
+        <g:SimplePanel addStyleNames="{spmr.css.inlineTitleUi}">
+            <p2:editable.InlineEditLabel ui:field="profileTitleUi" />
+        </g:SimplePanel>
         <g:FlowPanel addStyleNames="{res.mediaCss.column} {res.mediaCss.small12}" ui:field="contentUi">
             <ms:MobileSection>
                 <ms:header>

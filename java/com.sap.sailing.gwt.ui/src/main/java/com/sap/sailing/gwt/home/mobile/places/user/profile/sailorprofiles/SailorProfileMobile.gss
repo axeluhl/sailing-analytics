@@ -144,3 +144,9 @@
     margin-left: -1em;
     margin-right: -1em
 }
+
+.inlineTitleUi {
+    padding-left: 1em;
+    font-weight: bold;
+    background-color: #ebebeb;
+}

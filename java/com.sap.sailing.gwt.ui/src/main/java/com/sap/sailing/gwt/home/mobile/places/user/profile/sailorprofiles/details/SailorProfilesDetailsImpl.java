@@ -30,6 +30,7 @@ import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.detail
 import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.details.statistics.SailorProfileStatisticTable;
 import com.sap.sailing.gwt.home.shared.partials.editable.EditableSuggestedMultiSelectionCompetitor;
 import com.sap.sailing.gwt.home.shared.partials.editable.InlineEditButton;
+import com.sap.sailing.gwt.home.shared.partials.editable.InlineEditLabel;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -46,6 +47,9 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
 
     interface MyUiBinder extends UiBinder<Widget, SailorProfilesDetailsImpl> {
     }
+
+    @UiField
+    InlineEditLabel profileTitleUi;
 
     @UiField
     FlowPanel contentUi;
@@ -90,7 +94,7 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
         this.presenter = presenter;
         presenter.getSharedSailorProfilePresenter().getDataProvider().setView(this);
         createMultiSelection();
-
+        setupTitleChangeHandler();
     }
 
     @Override
@@ -100,6 +104,8 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
 
     @Override
     public void setEntry(SailorProfileDTO entry) {
+        profileTitleUi.setText(entry.getName());
+
         setCompetitors(entry.getCompetitors());
         setBoatclasses(entry.getBoatclasses());
 
@@ -140,7 +146,12 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
         });
     }
 
-    private EditableSuggestedMultiSelectionCompetitor createMultiSelection() {
+    private void setupTitleChangeHandler() {
+        profileTitleUi.addTextChangeHandler(
+                text -> presenter.getSharedSailorProfilePresenter().getDataProvider().updateTitle(text));
+    }
+
+    private void createMultiSelection() {
         editableSuggestedMultiselect = new EditableSuggestedMultiSelectionCompetitor(
                 presenter.getSharedSailorProfilePresenter().getDataProvider(), presenter.getFlagImageResolver(), true);
         contentContainerCompetitorsUi.add(editableSuggestedMultiselect);
@@ -156,7 +167,6 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
                 editButton.setVisible(!collapsed);
             }
         });
-        return editableSuggestedMultiselect;
     }
 
     private void setCompetitors(Iterable<SimpleCompetitorWithIdDTO> competitors) {
