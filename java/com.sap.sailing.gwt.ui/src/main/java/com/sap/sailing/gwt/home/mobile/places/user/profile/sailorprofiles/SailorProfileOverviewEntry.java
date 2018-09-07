@@ -6,6 +6,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Display;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -74,6 +75,12 @@ public class SailorProfileOverviewEntry extends Composite {
         }
         this.uuidRef = entry.getKey();
         sectionTitleUi.initCollapsibility(contentContainerCompetitorsUi.getElement(), false);
+
+        Button removeButton = new Button("X");
+        removeButton.addClickHandler(
+                e -> presenter.removeSailorProfile(uuidRef));
+        removeButton.getElement().getStyle().setRight(2.1, Unit.EM);
+        sectionTitleUi.setHeaderElement(removeButton);
     }
 
     @UiHandler("detailsButtonUi")
