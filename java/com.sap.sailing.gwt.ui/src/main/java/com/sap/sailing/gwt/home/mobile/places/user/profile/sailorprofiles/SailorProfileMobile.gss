@@ -14,7 +14,7 @@
 
 .sumPoints {
     font-weight: bold;
-    background-color: #ebebeb;
+    background-color: #f2f2f2;
     border: 1px solid #cccccc;
     border-radius: 2px;
     padding: 0.5em;
@@ -148,5 +148,5 @@
 .inlineTitleUi {
     padding-left: 1em;
     font-weight: bold;
-    background-color: #ebebeb;
+    background-color: #f2f2f2;
 }
