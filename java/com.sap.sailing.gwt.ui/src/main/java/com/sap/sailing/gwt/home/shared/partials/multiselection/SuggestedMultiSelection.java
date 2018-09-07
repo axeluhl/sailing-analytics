@@ -34,8 +34,8 @@ import com.sap.sse.gwt.client.suggestion.AbstractSuggestOracle;
  * @param <T>
  *            actual class of selectable entries
  */
-public final class SuggestedMultiSelection<T> extends Composite
-        implements SuggestedMultiSelectionPresenter.Display<T> {
+public final class SuggestedMultiSelection<T> extends Composite implements SuggestedMultiSelectionView<T>
+{
 
     private static SuggestedMultiSelectionUiBinder uiBinder = GWT.create(SuggestedMultiSelectionUiBinder.class);
 

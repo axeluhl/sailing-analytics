@@ -19,7 +19,8 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelection;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionResources;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class EditableSuggestedMultiSelection<T> extends Composite implements HasText {
@@ -40,7 +41,10 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
     DivElement parentPanel;
 
     @UiField(provided = true)
-    SuggestedMultiSelection<T> multiSelect;
+    SuggestedMultiSelectionView<T> multiSelect;
+
+    @UiField
+    DivElement headerElementUi;
 
     @UiField
     SpanElement headerTitleUi;
@@ -51,24 +55,32 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
     @UiField
     DivElement listContainerUi;
 
+    @UiField
+    InlineEditButton editButtonUi;
+
     private final Map<T, IsWidget> tableElements = new HashMap<>();
     private final Function<T, IsWidget> itemProducer;
 
     private boolean editMode = false;
     private EditModeChangeHandler editModeChangeHandler;
 
-    public EditableSuggestedMultiSelection(Function<T, IsWidget> itemProducer, SuggestedMultiSelection<T> multis) {
-        this(itemProducer, multis, null);
+    public EditableSuggestedMultiSelection(Function<T, IsWidget> itemProducer, SuggestedMultiSelectionView<T> multis) {
+        this(itemProducer, multis, null, false);
     }
 
-    public EditableSuggestedMultiSelection(Function<T, IsWidget> itemProducer, SuggestedMultiSelection<T> multis,
-            EditModeChangeHandler editModeChangeHandler) {
+    public EditableSuggestedMultiSelection(Function<T, IsWidget> itemProducer, SuggestedMultiSelectionView<T> multis,
+            EditModeChangeHandler editModeChangeHandler, boolean headless) {
         this.itemProducer = itemProducer;
         multiSelect = multis;
         this.editModeChangeHandler = editModeChangeHandler;
         initWidget(uiBinder.createAndBindUi(this));
 
         multiSelect.getElement().removeFromParent();
+        if (headless) {
+            listContainerUi.removeClassName(SuggestedMultiSelectionResources.INSTANCE.css().suggestions());
+            headerElementUi.removeFromParent();
+            editButtonUi.removeFromParent();
+        }
     }
 
     public void setEditMode(boolean state) {
@@ -86,6 +98,10 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
     @UiHandler("editButtonUi")
     void onEditButtonClicked(ClickEvent event) {
         setEditMode(!editMode);
+    }
+
+    public InlineEditButton getEditButton() {
+        return editButtonUi;
     }
 
     public void addListItem(T listItem) {
