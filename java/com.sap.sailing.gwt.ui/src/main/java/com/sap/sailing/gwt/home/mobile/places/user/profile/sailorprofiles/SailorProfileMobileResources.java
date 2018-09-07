@@ -50,5 +50,7 @@ public interface SailorProfileMobileResources extends ClientBundle {
         String detailsEventsContainer();
 
         String overviewTableFooterMobile();
+
+        String detailsCompetitorsContainer();
     }
 }
