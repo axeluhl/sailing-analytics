@@ -3,26 +3,26 @@
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="shr" type="com.sap.sailing.gwt.home.shared.resources.SharedHomeResources" />
-    <ui:with field="spdr"
-        type="com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileDesktopResources" />
+    <ui:with field="ares"
+        type="com.sap.sailing.gwt.home.desktop.partials.desktopaccordion.DesktopAccordionResources" />
 
     <g:HTMLPanel>
-        <div class="{spdr.css.accordion}">
-            <g:HTMLPanel ui:field="headerDivUi" addStyleNames="{spdr.css.accordionHeader}">
+        <div class="{ares.css.accordion}">
+            <g:HTMLPanel ui:field="headerDivUi" addStyleNames="{ares.css.accordionHeader}">
                 <div class="{res.mediaCss.grid}">
                     <div class="{res.mediaCss.small2} {res.mediaCss.columns}">
-                        <div class="{spdr.css.accordionTitle}">
+                        <div class="{ares.css.accordionTitle}">
                             <span ui:field="titleUi" />
                         </div>
                     </div>
-                    <div class="{res.mediaCss.small10} {res.mediaCss.columns} {spdr.css.accordionHeaderRight}">
-                        <div class="{spdr.css.accordionHeaderRightArrow}">
-                            <img src="{shr.arrowDownGrey.getSafeUri}" class="{spdr.css.accordionArrowImage}"></img>
+                    <div class="{res.mediaCss.small10} {res.mediaCss.columns} {ares.css.accordionHeaderRight}">
+                        <div class="{ares.css.accordionHeaderRightArrow}">
+                            <img src="{shr.arrowDownGrey.getSafeUri}" class="{ares.css.accordionArrowImage}"></img>
                         </div>
                     </div>
                 </div>
             </g:HTMLPanel>
-            <g:FlowPanel addStyleNames="{spdr.css.accordionContentPanel}" ui:field="contentPanelUi" />
+            <g:FlowPanel addStyleNames="{ares.css.accordionContentPanel}" ui:field="contentPanelUi" />
         </div>
     </g:HTMLPanel>
 </ui:UiBinder>
