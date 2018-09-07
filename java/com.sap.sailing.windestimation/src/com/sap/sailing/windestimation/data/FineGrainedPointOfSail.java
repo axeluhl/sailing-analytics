@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.maneuvergraph;
+package com.sap.sailing.windestimation.data;
 
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NauticalSide;
@@ -136,6 +136,14 @@ public enum FineGrainedPointOfSail {
 
     public CoarseGrainedPointOfSail getCoarseGrainedPointOfSail() {
         return coarseGrainedPointOfSail;
+    }
+
+    public double getWindCourse(double boatCourseInDegrees) {
+        double windCourse = (boatCourseInDegrees - twa + 180) % 360;
+        if (windCourse < 0) {
+            windCourse += 360;
+        }
+        return windCourse;
     }
 
 }

@@ -1,8 +1,9 @@
-package com.sap.sailing.windestimation.maneuvergraph.bestpath;
+package com.sap.sailing.windestimation.maneuvergraph.pointofsail;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.windestimation.maneuvergraph.FineGrainedPointOfSail;
+import com.sap.sailing.windestimation.data.FineGrainedPointOfSail;
 import com.sap.sailing.windestimation.polarsfitting.PolarsFittingWindEstimation;
+import com.sap.sailing.windestimation.polarsfitting.SailingStatistics;
 import com.sap.sailing.windestimation.polarsfitting.WindSpeedRange;
 
 public class BestPathCalculatorWithPolars extends BestPathsCalculator {
@@ -20,7 +21,10 @@ public class BestPathCalculatorWithPolars extends BestPathsCalculator {
         for (FineGrainedPointOfSail previousPointOfSail : FineGrainedPointOfSail.values()) {
             if (speedStatistics.getNumberOfCleanTracks(previousPointOfSail) > 0) {
                 double avgSpeedInKnots = speedStatistics.getAverageSpeedInKnotsForPointOfSail(previousPointOfSail);
-                int absTwaInDegrees = pointOfSail.getTwa();
+                int absTwaInDegrees = previousPointOfSail.getTwa();
+                if (absTwaInDegrees > 180) {
+                    absTwaInDegrees = 360 - absTwaInDegrees;
+                }
                 WindSpeedRange currentTwaWindSpeedRange = polarsFittingWindEstimation.getWindSpeedRange(boatClass,
                         avgSpeedInKnots, absTwaInDegrees);
                 if (currentTwaWindSpeedRange != null) {
@@ -29,8 +33,12 @@ public class BestPathCalculatorWithPolars extends BestPathsCalculator {
                 }
             }
         }
+        int absTwaInDegrees = pointOfSail.getTwa();
+        if (absTwaInDegrees > 180) {
+            absTwaInDegrees = 360 - absTwaInDegrees;
+        }
         WindSpeedRange newTwaWindSpeedRange = polarsFittingWindEstimation.getWindSpeedRange(boatClass,
-                speedAtPointOfSail, Math.abs(pointOfSail.getTwa()));
+                speedAtPointOfSail, absTwaInDegrees);
         if (newTwaWindSpeedRange == null) {
             return 0.8;
         }

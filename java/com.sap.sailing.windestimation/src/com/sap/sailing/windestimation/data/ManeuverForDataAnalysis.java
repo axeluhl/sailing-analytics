@@ -33,6 +33,7 @@ public class ManeuverForDataAnalysis {
     private final double twaAtMiddleCourseMainCurveInDegrees;
     private final double scaledSpeedBeforeInKnots;
     private final double scaledSpeedAfterInKnots;
+    private final boolean markPassing;
 
     public ManeuverForDataAnalysis(ManeuverTypeForDataAnalysis maneuverType, double absoluteTotalCourseChangeInDegrees,
             double absoluteTotalCourseChangeWithinMainCurveInDegrees, double speedInSpeedOutRatio,
@@ -45,7 +46,7 @@ public class ManeuverForDataAnalysis {
             double twaAfterInDegrees, double twsInKnots, double speedBeforeInKnots, double speedAfterInKnots,
             double twaAtMiddleCourseInDegrees, double twaAtMiddleCourseMainCurveInDegrees,
             double twaAtLowestSpeedInDegrees, double twaAtMaxTurningRateInDegrees, boolean starboardManeuver,
-            double scaledSpeedBeforeInKnots, double scaledSpeedAfterInKnots) {
+            double scaledSpeedBeforeInKnots, double scaledSpeedAfterInKnots, boolean markPassing) {
         this.maneuverType = maneuverType;
         this.absoluteTotalCourseChangeInDegrees = absoluteTotalCourseChangeInDegrees;
         this.absoluteTotalCourseChangeWithinMainCurveInDegrees = absoluteTotalCourseChangeWithinMainCurveInDegrees;
@@ -77,6 +78,7 @@ public class ManeuverForDataAnalysis {
         this.starboardManeuver = starboardManeuver;
         this.scaledSpeedBeforeInKnots = scaledSpeedBeforeInKnots;
         this.scaledSpeedAfterInKnots = scaledSpeedAfterInKnots;
+        this.markPassing = markPassing;
     }
 
     public double getAbsoluteTotalCourseChangeInDegrees() {
@@ -201,6 +203,10 @@ public class ManeuverForDataAnalysis {
 
     public double getScaledSpeedAfterInKnots() {
         return scaledSpeedAfterInKnots;
+    }
+
+    public boolean isMarkPassing() {
+        return markPassing;
     }
 
 }

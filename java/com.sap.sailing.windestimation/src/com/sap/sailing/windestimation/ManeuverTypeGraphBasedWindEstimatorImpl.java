@@ -9,31 +9,30 @@ import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.transformer.ManeuverForEstimationTransformer;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverClassifiersCache;
-import com.sap.sailing.windestimation.maneuvergraph.PointOfSailSequenceGraph;
-import com.sap.sailing.windestimation.maneuvergraph.bestpath.BestPathsCalculator;
-import com.sap.sse.common.TimePoint;
+import com.sap.sailing.windestimation.maneuvergraph.maneuvernode.ManeuverNodeBestPathsCalculator;
+import com.sap.sailing.windestimation.maneuvergraph.maneuvernode.ManeuverTypeSequenceGraph;
 
 /**
  * 
  * @author Vladislav Chumak (D069712)
  *
  */
-public class ManeuverSequenceGraphBasedWindEstimatorImpl
+public class ManeuverTypeGraphBasedWindEstimatorImpl
         extends AbstractWindEstimatorImpl<CompleteManeuverCurveWithEstimationData> {
 
     private final ManeuverForEstimationTransformer maneuverForEstimationTransformer = new ManeuverForEstimationTransformer();
 
-    public ManeuverSequenceGraphBasedWindEstimatorImpl(PolarDataService polarService) {
+    public ManeuverTypeGraphBasedWindEstimatorImpl(PolarDataService polarService) {
         super(polarService);
     }
 
     @Override
-    protected List<WindWithConfidence<TimePoint>> estimateWindByFilteredCompetitorTracks(
+    protected List<WindWithConfidence<ManeuverForEstimation>> estimateWindByFilteredCompetitorTracks(
             List<CompetitorTrackWithEstimationData<CompleteManeuverCurveWithEstimationData>> filteredCompetitorTracks) {
         List<CompetitorTrackWithEstimationData<ManeuverForEstimation>> transformedCompetitorTracks = maneuverForEstimationTransformer
                 .transform(filteredCompetitorTracks);
-        PointOfSailSequenceGraph maneuverGraph = new PointOfSailSequenceGraph(transformedCompetitorTracks,
-                new ManeuverClassifiersCache(60000, false, getPolarService()), new BestPathsCalculator());
+        ManeuverTypeSequenceGraph maneuverGraph = new ManeuverTypeSequenceGraph(transformedCompetitorTracks,
+                new ManeuverClassifiersCache(60000, false, getPolarService()), new ManeuverNodeBestPathsCalculator());
         return maneuverGraph.estimateWindTrack();
     }
 

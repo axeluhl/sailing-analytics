@@ -31,6 +31,9 @@ public class ManeuverForEstimation {
     private final double scaledSpeedBefore;
     private final double scaledSpeedAfter;
     private final BoatClass boatClass;
+    private final boolean markPassing;
+    private final Double relativeBearingToNextMarkBefore;
+    private final Double relativeBearingToNextMarkAfter;
 
     public ManeuverForEstimation(TimePoint maneuverTimePoint, Position maneuverPosition, Bearing middleCourse,
             SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
@@ -40,7 +43,8 @@ public class ManeuverForEstimation {
             Double deviationFromOptimalTackAngleInDegrees, Double deviationFromOptimalJibeAngleInDegrees,
             double speedLossRatio, double speedGainRatio, double lowestSpeedVsExitingSpeedRatio, boolean clean,
             boolean cleanBefore, boolean cleanAfter, ManeuverCategory maneuverCategory, double scaledSpeedBefore,
-            double scaledSpeedAfter, BoatClass boatClass) {
+            double scaledSpeedAfter, BoatClass boatClass, boolean markPassing, Double relativeBearingToNextMarkBefore,
+            Double relativeBearingToNextMarkAfter) {
         this.maneuverTimePoint = maneuverTimePoint;
         this.maneuverPosition = maneuverPosition;
         this.middleCourse = middleCourse;
@@ -64,6 +68,9 @@ public class ManeuverForEstimation {
         this.scaledSpeedBefore = scaledSpeedBefore;
         this.scaledSpeedAfter = scaledSpeedAfter;
         this.boatClass = boatClass;
+        this.markPassing = markPassing;
+        this.relativeBearingToNextMarkBefore = relativeBearingToNextMarkBefore;
+        this.relativeBearingToNextMarkAfter = relativeBearingToNextMarkAfter;
     }
 
     public TimePoint getManeuverTimePoint() {
@@ -129,7 +136,7 @@ public class ManeuverForEstimation {
     public double getLowestSpeedVsExitingSpeedRatio() {
         return lowestSpeedVsExitingSpeedRatio;
     }
-    
+
     public boolean isClean() {
         return clean;
     }
@@ -156,6 +163,18 @@ public class ManeuverForEstimation {
 
     public BoatClass getBoatClass() {
         return boatClass;
+    }
+
+    public Double getRelativeBearingToNextMarkBefore() {
+        return relativeBearingToNextMarkBefore;
+    }
+
+    public Double getRelativeBearingToNextMarkAfter() {
+        return relativeBearingToNextMarkAfter;
+    }
+
+    public boolean isMarkPassing() {
+        return markPassing;
     }
 
 }

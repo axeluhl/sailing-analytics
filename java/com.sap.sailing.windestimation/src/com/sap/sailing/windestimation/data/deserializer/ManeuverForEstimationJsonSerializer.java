@@ -41,6 +41,9 @@ public class ManeuverForEstimationJsonSerializer implements JsonSerializer<Maneu
     public static final String MANEUVER_TYPE = "type";
     public static final String WIND_COURSE = "windCourse";
     public static final String WIND_SPEED = "windSpeed";
+    public static final String RELATIVE_BEARING_TO_NEXT_MARK_BEFORE_IN_DEGREES = "nextMarkBefore";
+    public static final String RELATIVE_BEARING_TO_NEXT_MARK_AFTER_IN_DEGREES = "nextMarkAfter";
+    public static final String MARK_PASSING = "markPassing";
 
     private final BoatClassJsonSerializer boatClassSerializer = new DetailedBoatClassJsonSerializer();
 
@@ -80,6 +83,9 @@ public class ManeuverForEstimationJsonSerializer implements JsonSerializer<Maneu
         json.put(SCALED_SPEED_BEFORE_IN_KNOTS, maneuver.getScaledSpeedBefore());
         json.put(SCALED_SPEED_AFTER_IN_KNOTS, maneuver.getScaledSpeedAfter());
         json.put(BOAT_CLASS, boatClassSerializer.serialize(maneuver.getBoatClass()));
+        json.put(RELATIVE_BEARING_TO_NEXT_MARK_BEFORE_IN_DEGREES, maneuver.getRelativeBearingToNextMarkBefore());
+        json.put(RELATIVE_BEARING_TO_NEXT_MARK_AFTER_IN_DEGREES, maneuver.getRelativeBearingToNextMarkAfter());
+        json.put(MARK_PASSING, maneuver.isMarkPassing());
         if (maneuver instanceof LabelledManeuverForEstimation) {
             LabelledManeuverForEstimation labelledManeuver = (LabelledManeuverForEstimation) maneuver;
             json.put(MANEUVER_TYPE, labelledManeuver.getManeuverType().name());

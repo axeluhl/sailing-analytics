@@ -6,7 +6,7 @@ import java.util.List;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
-import com.sap.sse.common.TimePoint;
+import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 
 /**
  * 
@@ -21,12 +21,13 @@ public abstract class AbstractWindEstimatorImpl<T> implements WindEstimator<T> {
         this.polarService = polarService;
     }
 
-    public List<WindWithConfidence<TimePoint>> estimateWind(
+    @Override
+    public List<WindWithConfidence<ManeuverForEstimation>> estimateWind(
             Iterable<CompetitorTrackWithEstimationData<T>> competitorTracks) {
         List<CompetitorTrackWithEstimationData<T>> filteredCompetitorTracks = filterOutImplausibleTracks(
                 competitorTracks);
         filterOutIrrelevantElementsFromCompetitorTracks(filteredCompetitorTracks);
-        List<WindWithConfidence<TimePoint>> windTrack = estimateWindByFilteredCompetitorTracks(
+        List<WindWithConfidence<ManeuverForEstimation>> windTrack = estimateWindByFilteredCompetitorTracks(
                 filteredCompetitorTracks);
         return windTrack;
     }
@@ -34,7 +35,7 @@ public abstract class AbstractWindEstimatorImpl<T> implements WindEstimator<T> {
     protected abstract void filterOutIrrelevantElementsFromCompetitorTracks(
             List<CompetitorTrackWithEstimationData<T>> filteredCompetitorTracks);
 
-    protected abstract List<WindWithConfidence<TimePoint>> estimateWindByFilteredCompetitorTracks(
+    protected abstract List<WindWithConfidence<ManeuverForEstimation>> estimateWindByFilteredCompetitorTracks(
             List<CompetitorTrackWithEstimationData<T>> filteredCompetitorTracks);
 
     public List<CompetitorTrackWithEstimationData<T>> filterOutImplausibleTracks(

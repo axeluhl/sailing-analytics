@@ -19,10 +19,14 @@ public class RegularManeuversForEstimationPersistenceManager
         return "db.getCollection('maneuversForEstimation').aggregate([\r\n" + 
                 "{$match: {\r\n" + 
                 "    $and: [\r\n" + 
-                "                $or: [\r\n" + 
-                "                                {'category': 'REGULAR'},\r\n" + 
-                "                                {'category': 'MARK_PASSING'}\r\n" + 
-                "                        ],\r\n" + 
+                "                {$or: [\r\n" + 
+                "                                {'category':\r\n" + 
+                "                                        {$eq: 'REGULAR'}\r\n" + 
+                "                },\r\n" + 
+                "                                {'category':\r\n" + 
+                "                                        {$eq: 'MARK_PASSING'}\r\n" + 
+                "                                }\r\n" + 
+                "                        ]},\r\n" + 
                 "        {'deviationTackAngle': {\r\n" + 
                 "            $ne: null\r\n" + 
                 "        }},\r\n" + 

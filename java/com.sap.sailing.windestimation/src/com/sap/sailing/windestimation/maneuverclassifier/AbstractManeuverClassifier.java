@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.windestimation.data.CoarseGrainedManeuverType;
 import com.sap.sailing.windestimation.data.ManeuverCategory;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.maneuverclassifier.impl.ManeuverFeatures;
-import com.sap.sailing.windestimation.maneuvergraph.CoarseGrainedManeuverType;
 
 public abstract class AbstractManeuverClassifier implements ManeuverClassifier, SingleManeuverClassifier {
 

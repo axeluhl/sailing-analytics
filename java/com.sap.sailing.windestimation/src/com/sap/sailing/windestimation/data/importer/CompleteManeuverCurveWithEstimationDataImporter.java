@@ -60,6 +60,9 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
     private final ManeuverForEstimationTransformer maneuverForEstimationTransformer;
     private final ManeuverForDataAnalysisJsonSerializer maneuverForDataAnalysisJsonSerializer;
     private final ManeuverForEstimationJsonSerializer maneuverForEstimationJsonSerializer;
+    private boolean skipRace = true;
+    private final String startFromRegattaName = "WCS 2018 Hyeres - Laser";
+    private final String startFromRegattaRace = "R4 (Laser)";
 
     public CompleteManeuverCurveWithEstimationDataImporter() throws UnknownHostException {
         this.completeManeuverCurvePersistanceManager = new RaceWithCompleteManeuverCurvePersistenceManager();
@@ -85,10 +88,13 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
 
     public void importAllRegattas()
             throws IllegalStateException, ClientProtocolException, IOException, ParseException, URISyntaxException {
+        skipRace = startFromRegattaName != null;
         LoggingUtil.logInfo("Importer for CompleteManeuverCurveWithEstimationData just started");
         LoggingUtil.logInfo("Dropping old database");
-        completeManeuverCurvePersistanceManager.dropDb();
-        maneuverForDataAnalysisPersistenceManager.dropDb();
+        if (!skipRace) {
+            completeManeuverCurvePersistanceManager.dropDb();
+            maneuverForDataAnalysisPersistenceManager.dropDb();
+        }
         LoggingUtil.logInfo("Fetching all existing regatta names");
         ImportStatistics importStatistics = new ImportStatistics();
         HttpGet getAllRegattas = new HttpGet(REST_API_BASE_URL + REST_API_REGATTAS_PATH);
@@ -160,6 +166,14 @@ public class CompleteManeuverCurveWithEstimationDataImporter {
 
     private void importRace(String regattaName, String trackedRaceName, ImportStatistics importStatistics)
             throws Exception {
+        if (skipRace) {
+            if (regattaName.equals(startFromRegattaName)
+                    && (startFromRegattaRace == null || startFromRegattaRace.equals(trackedRaceName))) {
+                skipRace = false;
+            } else {
+                return;
+            }
+        }
         String encodedRegattaName = encodeUrlPathPart(regattaName);
         String encodedRaceName = encodeUrlPathPart(trackedRaceName);
         HttpGet getEstimationData = new HttpGet(REST_API_BASE_URL + REST_API_REGATTAS_PATH + "/" + encodedRegattaName

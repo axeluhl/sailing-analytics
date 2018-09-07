@@ -2,7 +2,7 @@ package com.sap.sailing.windestimation.evaluation;
 
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.windestimation.ManeuverSequenceGraphBasedWindEstimatorImpl;
+import com.sap.sailing.windestimation.ManeuverTypeGraphBasedWindEstimatorImpl;
 import com.sap.sailing.windestimation.WindEstimator;
 
 /**
@@ -21,7 +21,7 @@ public class ManeuverSequenceGraphBasedWindEstimatorFactory
 
     @Override
     public WindEstimator<CompleteManeuverCurveWithEstimationData> createNewEstimatorInstance() {
-        return new ManeuverSequenceGraphBasedWindEstimatorImpl(polarService);
+        return new ManeuverTypeGraphBasedWindEstimatorImpl(polarService);
     }
 
 }

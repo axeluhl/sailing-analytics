@@ -3,6 +3,7 @@ package com.sap.sailing.windestimation.data.transformer;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.ManeuverCategory;
@@ -47,7 +48,7 @@ public class ManeuverForDataAnalysisTransformer
         if (maneuver.getWind() == null) {
             return null;
         }
-        ManeuverTypeForDataAnalysis maneuverType = getManeuverTypeForClassification(maneuver);
+        ManeuverTypeForDataAnalysis maneuverType = getManeuverTypeForDataAnalysis(maneuver);
         double absoluteTotalCourseChangeInDegrees = Math
                 .abs(maneuver.getCurveWithUnstableCourseAndSpeed().getDirectionChangeInDegrees());
         double absoluteTotalCourseChangeWithinMainCurveInDegrees = Math
@@ -125,8 +126,31 @@ public class ManeuverForDataAnalysisTransformer
                 timeLossInSeconds, clean, maneuverCategory, twaBeforeInDegrees, twaAfterInDegrees, twsInKnots,
                 speedBeforeInKnots, speedAfterInKnots, twaAtMiddleCourseInDegrees, twaAtMiddleCourseMainCurveInDegrees,
                 twaAtLowestSpeedInDegrees, twaAtMaxTurningRateInDegrees, starboardManeuver,
-                speedBeforeInKnots / speedScalingDivisor, speedAfterInKnots / speedScalingDivisor);
+                speedBeforeInKnots / speedScalingDivisor, speedAfterInKnots / speedScalingDivisor,
+                maneuver.isMarkPassing());
         return maneuverForClassification;
+    }
+
+    protected ManeuverTypeForDataAnalysis getManeuverTypeForDataAnalysis(
+            CompleteManeuverCurveWithEstimationData maneuver) {
+        ManeuverType maneuverType = maneuver.getManeuverTypeForCompleteManeuverCurve();
+        switch (maneuverType) {
+        case BEAR_AWAY:
+            return ManeuverTypeForDataAnalysis.BEAR_AWAY;
+        case HEAD_UP:
+            return ManeuverTypeForDataAnalysis.HEAD_UP;
+        case PENALTY_CIRCLE:
+            return ManeuverTypeForDataAnalysis._360;
+        case UNKNOWN:
+            return null;
+        case JIBE:
+            return Math.abs(maneuver.getMainCurve().getDirectionChangeInDegrees()) > 120
+                    ? ManeuverTypeForDataAnalysis._180_JIBE : ManeuverTypeForDataAnalysis.JIBE;
+        case TACK:
+            return Math.abs(maneuver.getMainCurve().getDirectionChangeInDegrees()) > 120
+                    ? ManeuverTypeForDataAnalysis._180_TACK : ManeuverTypeForDataAnalysis.TACK;
+        }
+        throw new IllegalStateException();
     }
 
 }

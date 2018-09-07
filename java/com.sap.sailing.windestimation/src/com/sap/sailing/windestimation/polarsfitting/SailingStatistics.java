@@ -1,9 +1,9 @@
-package com.sap.sailing.windestimation.maneuvergraph.bestpath;
+package com.sap.sailing.windestimation.polarsfitting;
 
 import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.windestimation.data.FineGrainedManeuverType;
+import com.sap.sailing.windestimation.data.FineGrainedPointOfSail;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
-import com.sap.sailing.windestimation.maneuvergraph.FineGrainedManeuverType;
-import com.sap.sailing.windestimation.maneuvergraph.FineGrainedPointOfSail;
 import com.sap.sse.common.Speed;
 
 public class SailingStatistics implements Cloneable {
@@ -49,12 +49,7 @@ public class SailingStatistics implements Cloneable {
     public void addRecordToStatistics(ManeuverForEstimation maneuver, FineGrainedManeuverType maneuverType,
             FineGrainedPointOfSail pointOfSailAfterManeuver) {
         if (maneuver.isClean()) {
-            sumOfAbsCourseChangesInDegreesPerManeuverType[maneuverType.ordinal()] += Math
-                    .abs(maneuver.getCourseChangeWithinMainCurveInDegrees());
-            sumOfTurningRatesPerManeuverType[maneuverType.ordinal()] += maneuver.getMaxTurningRateInDegreesPerSecond();
-            sumOfSpeedLossesPerManeuverType[maneuverType
-                    .ordinal()] += (maneuver.getSpeedLossRatio() + maneuver.getLowestSpeedVsExitingSpeedRatio()) / 2.0;
-            maneuversCountPerManeuverType[maneuverType.ordinal()]++;
+            addRecordToStatistics(maneuver, maneuverType);
         }
         if (maneuver.isCleanBefore()) {
             FineGrainedPointOfSail pointOfSailBeforeManeuver = pointOfSailAfterManeuver
@@ -74,6 +69,15 @@ public class SailingStatistics implements Cloneable {
                 && (lowestUpwindAvgSpeed == 0 || averageSpeedInKnotsForPointOfSail < lowestUpwindAvgSpeed)) {
             lowestUpwindAvgSpeed = averageSpeedInKnotsForPointOfSail;
         }
+    }
+
+    public void addRecordToStatistics(ManeuverForEstimation maneuver, FineGrainedManeuverType maneuverType) {
+        sumOfAbsCourseChangesInDegreesPerManeuverType[maneuverType.ordinal()] += Math
+                .abs(maneuver.getCourseChangeWithinMainCurveInDegrees());
+        sumOfTurningRatesPerManeuverType[maneuverType.ordinal()] += maneuver.getMaxTurningRateInDegreesPerSecond();
+        sumOfSpeedLossesPerManeuverType[maneuverType
+                .ordinal()] += (maneuver.getSpeedLossRatio() + maneuver.getLowestSpeedVsExitingSpeedRatio()) / 2.0;
+        maneuversCountPerManeuverType[maneuverType.ordinal()]++;
     }
 
     public int getNumberOfCleanManeuvers(FineGrainedManeuverType maneuverType) {

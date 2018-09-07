@@ -36,6 +36,7 @@ public class ManeuverForDataAnalysisJsonDeserializer implements JsonDeserializer
                 .get(ManeuverForDataAnalysisJsonSerializer.RELATIVE_BEARING_TO_NEXT_MARK_BEFORE_IN_DEGREES);
         Double relativeBearingToNextMarkAfterInDegrees = (Double) object
                 .get(ManeuverForDataAnalysisJsonSerializer.RELATIVE_BEARING_TO_NEXT_MARK_AFTER_IN_DEGREES);
+        boolean markPassing = ((int) object.get(ManeuverForDataAnalysisJsonSerializer.MARK_PASSING)) == 1;
         double mainCurveDurationInSeconds = (double) object
                 .get(ManeuverForDataAnalysisJsonSerializer.MAIN_CURVE_DURATION_IN_SECONDS);
         double maneuverDurationInSeconds = (double) object
@@ -74,7 +75,7 @@ public class ManeuverForDataAnalysisJsonDeserializer implements JsonDeserializer
                 timeLossInSeconds, clean, maneuverCategory, twaBeforeInDegrees, twaAfterInDegrees, twsInKnots,
                 speedBeforeInKnots, speedAfterInKnots, twaAtMiddleCourseInDegrees, twaAtMiddleCourseMainCurveInDegrees,
                 twaAtLowestSpeedInDegrees, twaAtMaxTurningRateInDegrees, starboardManeuver, scaledSpeedBeforeInKnots,
-                scaledSpeedAfterInKnots);
+                scaledSpeedAfterInKnots, markPassing);
     }
 
 }

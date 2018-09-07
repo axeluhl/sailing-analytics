@@ -6,7 +6,7 @@ import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.persistence.PersistedElementsIterator;
 import com.sap.sailing.windestimation.data.persistence.PolarDataServiceAccessUtil;
 import com.sap.sailing.windestimation.data.persistence.RaceWithCompleteManeuverCurvePersistenceManager;
-import com.sap.sailing.windestimation.maneuvergraph.TargetWindFromCompleteManeuverCurveWithEstimationDataExtractor;
+import com.sap.sailing.windestimation.maneuvergraph.pointofsail.TargetWindFromCompleteManeuverCurveWithEstimationDataExtractor;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
 public class ManeuverSequenceGraphBasedWindEstimatorEvaluationRunner {

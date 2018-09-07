@@ -4,9 +4,9 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import com.sap.sailing.domain.common.LegType;
+import com.sap.sailing.windestimation.data.CoarseGrainedManeuverType;
+import com.sap.sailing.windestimation.data.CoarseGrainedPointOfSail;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
-import com.sap.sailing.windestimation.maneuvergraph.CoarseGrainedManeuverType;
-import com.sap.sailing.windestimation.maneuvergraph.CoarseGrainedPointOfSail;
 import com.sap.sailing.windestimation.maneuvergraph.ProbabilityUtil;
 
 /**

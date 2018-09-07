@@ -1,18 +1,17 @@
-package com.sap.sailing.windestimation.maneuvergraph;
+package com.sap.sailing.windestimation.maneuvergraph.maneuvernode;
 
 import java.util.Collections;
 import java.util.List;
 
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.windestimation.WindTrackEstimator;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.transformer.EstimationDataUtil;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverClassifier;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverClassifiersCache;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverEstimationResult;
-import com.sap.sailing.windestimation.maneuvergraph.bestpath.BestPathsCalculator;
-import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
 
 /**
@@ -20,16 +19,16 @@ import com.sap.sse.common.Util.Pair;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class PointOfSailSequenceGraph {
+public class ManeuverTypeSequenceGraph implements WindTrackEstimator {
 
-    private GraphLevel firstGraphLevel = null;
-    private GraphLevel lastGraphLevel = null;
+    private ManeuverNodeGraphLevel firstGraphLevel = null;
+    private ManeuverNodeGraphLevel lastGraphLevel = null;
     private final PolarDataService polarService;
-    private final BestPathsCalculator bestPathsCalculator;
+    private final ManeuverNodeBestPathsCalculator bestPathsCalculator;
     private ManeuverClassifiersCache maneuverClassifiersCache;
 
-    public PointOfSailSequenceGraph(List<CompetitorTrackWithEstimationData<ManeuverForEstimation>> competitorTracks,
-            ManeuverClassifiersCache maneuverClassifiersCache, BestPathsCalculator bestPathsCalculator) {
+    public ManeuverTypeSequenceGraph(List<CompetitorTrackWithEstimationData<ManeuverForEstimation>> competitorTracks,
+            ManeuverClassifiersCache maneuverClassifiersCache, ManeuverNodeBestPathsCalculator bestPathsCalculator) {
         this.polarService = maneuverClassifiersCache.getPolarDataService();
         this.maneuverClassifiersCache = maneuverClassifiersCache;
         this.bestPathsCalculator = bestPathsCalculator;
@@ -43,7 +42,7 @@ public class PointOfSailSequenceGraph {
     private void appendManeuverAsGraphLevel(ManeuverForEstimation maneuver) {
         ManeuverClassifier bestClassifier = maneuverClassifiersCache.getBestClassifier(maneuver);
         ManeuverEstimationResult maneuverEstimationResult = bestClassifier.classifyManeuver(maneuver);
-        GraphLevel newManeuverNodesLevel = new GraphLevel(maneuver, maneuverEstimationResult);
+        ManeuverNodeGraphLevel newManeuverNodesLevel = new ManeuverNodeGraphLevel(maneuver, maneuverEstimationResult);
         if (firstGraphLevel == null) {
             firstGraphLevel = newManeuverNodesLevel;
             lastGraphLevel = newManeuverNodesLevel;
@@ -52,15 +51,14 @@ public class PointOfSailSequenceGraph {
             lastGraphLevel.appendNextManeuverNodesLevel(newManeuverNodesLevel);
             lastGraphLevel = newManeuverNodesLevel;
         }
-        newManeuverNodesLevel.computeProbabilitiesFromPreviousLevelToThisLevel();
         bestPathsCalculator.computeBestPathsToNextLevel(newManeuverNodesLevel);
     }
 
-    public GraphLevel getFirstGraphLevel() {
+    public ManeuverNodeGraphLevel getFirstGraphLevel() {
         return firstGraphLevel;
     }
 
-    public GraphLevel getLastGraphLevel() {
+    public ManeuverNodeGraphLevel getLastGraphLevel() {
         return lastGraphLevel;
     }
 
@@ -68,28 +66,12 @@ public class PointOfSailSequenceGraph {
         return polarService;
     }
 
-    protected GraphLevel recomputeTransitionProbabilitiesAtLevelsWhereNeeded() {
-        GraphLevel currentLevel = this.getLastGraphLevel();
-        GraphLevel lastReadjustedLevel = null;
-        while (currentLevel != null) {
-            if (currentLevel.isCalculationOfTransitionProbabilitiesNeeded()) {
-                currentLevel.computeProbabilitiesFromPreviousLevelToThisLevel();
-                lastReadjustedLevel = currentLevel;
-            }
-            currentLevel = currentLevel.getPreviousLevel();
-        }
-        return lastReadjustedLevel;
-    }
-
-    public List<WindWithConfidence<TimePoint>> estimateWindTrack() {
-        List<WindWithConfidence<TimePoint>> windTrack = Collections.emptyList();
-        GraphLevel lastGraphLevel = this.lastGraphLevel;
+    public List<WindWithConfidence<ManeuverForEstimation>> estimateWindTrack() {
+        List<WindWithConfidence<ManeuverForEstimation>> windTrack = Collections.emptyList();
+        ManeuverNodeGraphLevel lastGraphLevel = this.lastGraphLevel;
         if (lastGraphLevel != null) {
-            WindTrackFromManeuverGraphExtractor windTrackFromManeuverGraphExtractor = new WindTrackFromManeuverGraphExtractor(
-                    polarService);
-            List<Pair<GraphLevel, FineGrainedPointOfSail>> bestPath = bestPathsCalculator.getBestPath(lastGraphLevel);
-            double bestPathConfidence = bestPathsCalculator.getConfidenceOfBestPath(bestPath);
-            windTrack = windTrackFromManeuverGraphExtractor.getWindTrack(bestPath, bestPathConfidence);
+            List<Pair<ManeuverNodeGraphLevel, ManeuverNode>> bestPath = bestPathsCalculator.getBestPath(lastGraphLevel);
+            windTrack = bestPathsCalculator.getWindTrack(bestPath);
         }
         return windTrack;
     }

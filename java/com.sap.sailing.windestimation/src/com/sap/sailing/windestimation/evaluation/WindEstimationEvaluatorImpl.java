@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.windestimation.WindEstimator;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
+import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 import com.sap.sse.common.TimePoint;
@@ -61,10 +62,10 @@ public class WindEstimationEvaluatorImpl<T> implements WindEstimatorEvaluator<T>
                 targetWindPerTimePoint.put(wind.getTimePoint(), wind);
             }
         }
-        List<WindWithConfidence<TimePoint>> windTrack = windEstimator
+        List<WindWithConfidence<ManeuverForEstimation>> windTrack = windEstimator
                 .estimateWind(raceWithEstimationData.getCompetitorTracks());
         WindEstimatorEvaluationResult result = new WindEstimatorEvaluationResult();
-        for (WindWithConfidence<TimePoint> windWithConfidence : windTrack) {
+        for (WindWithConfidence<ManeuverForEstimation> windWithConfidence : windTrack) {
             Wind estimatedWind = windWithConfidence.getObject();
             Wind targetWind = targetWindPerTimePoint.get(estimatedWind.getTimePoint());
             if (targetWind.getBearing().getDegrees() > 0.00001) {

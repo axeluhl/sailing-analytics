@@ -1,17 +1,17 @@
-package com.sap.sailing.windestimation.maneuvergraph.bestpath;
+package com.sap.sailing.windestimation.maneuvergraph.pointofsail;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import com.sap.sailing.windestimation.maneuvergraph.FineGrainedPointOfSail;
-import com.sap.sailing.windestimation.maneuvergraph.GraphLevel;
+import com.sap.sailing.windestimation.data.FineGrainedPointOfSail;
 import com.sap.sailing.windestimation.maneuvergraph.ProbabilityUtil;
+import com.sap.sailing.windestimation.polarsfitting.SailingStatistics;
 
 class BestPathsUntilLevel {
     private FineGrainedPointOfSail[] bestPreviousNodes = new FineGrainedPointOfSail[FineGrainedPointOfSail
             .values().length];
     private double[] probabilitiesOfBestPathToNodeFromStart = new double[bestPreviousNodes.length];
-    private WindRange[] windDeviationWithinBestPaths = new WindRange[bestPreviousNodes.length];
+    private WindCourseRange[] windDeviationWithinBestPaths = new WindCourseRange[bestPreviousNodes.length];
     private Map<String, SailingStatistics[]> pathStatisticsForNodesPerBoatClassName = new HashMap<>();
 
     public SailingStatistics getPathStatistics(GraphLevel currentLevel, FineGrainedPointOfSail currentNode) {
@@ -32,7 +32,7 @@ class BestPathsUntilLevel {
         existingPathStatistics[currentNode.ordinal()] = pathStatisticsUntilNode;
     }
 
-    public void setWindDeviation(FineGrainedPointOfSail currentNode, WindRange windDeviation) {
+    public void setWindDeviation(FineGrainedPointOfSail currentNode, WindCourseRange windDeviation) {
         windDeviationWithinBestPaths[currentNode.ordinal()] = windDeviation;
     }
 
@@ -52,7 +52,7 @@ class BestPathsUntilLevel {
         bestPreviousNodes[currentNode.ordinal()] = bestPreviousNode;
     }
 
-    public WindRange getWindDeviation(FineGrainedPointOfSail pointOfSail) {
+    public WindCourseRange getWindDeviation(FineGrainedPointOfSail pointOfSail) {
         return windDeviationWithinBestPaths[pointOfSail.ordinal()];
     }
 

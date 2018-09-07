@@ -1,11 +1,14 @@
-package com.sap.sailing.windestimation.maneuvergraph;
+package com.sap.sailing.windestimation.maneuvergraph.pointofsail;
 
 import com.sap.sailing.domain.common.BearingChangeAnalyzer;
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NauticalSide;
 import com.sap.sailing.domain.common.Tack;
+import com.sap.sailing.windestimation.data.FineGrainedManeuverType;
+import com.sap.sailing.windestimation.data.FineGrainedPointOfSail;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverEstimationResult;
+import com.sap.sailing.windestimation.maneuvergraph.ProbabilityUtil;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
@@ -38,8 +41,9 @@ public class GraphLevel {
 
     public double getProbabilityFromPreviousLevelNodeToThisLevelNode(FineGrainedPointOfSail previousLevelNode,
             FineGrainedPointOfSail thisLevelNode) {
-        return transitionProbabilitiesFromPreviousToThisNodesLevel[previousLevelNode.ordinal()][thisLevelNode
-                .ordinal()];
+        double probability = transitionProbabilitiesFromPreviousToThisNodesLevel[previousLevelNode
+                .ordinal()][thisLevelNode.ordinal()];
+        return probability;
     }
 
     protected void setProbabilityFromPreviousLevelNodeToThisLevelNode(FineGrainedPointOfSail previousLevelNode,
@@ -101,6 +105,7 @@ public class GraphLevel {
 
     protected void setPreviousLevel(GraphLevel previousLevel) {
         this.previousLevel = previousLevel;
+        this.calculationOfTransitionProbabilitiesNeeded = true;
     }
 
     public GraphLevel getPreviousLevel() {
@@ -121,11 +126,7 @@ public class GraphLevel {
     }
 
     public double getWindCourseInDegrees(FineGrainedPointOfSail node) {
-        double windCourse = (getCourseAfter().getDegrees() - node.getTwa() + 180) % 360;
-        if (windCourse < 0) {
-            windCourse += 360;
-        }
-        return windCourse;
+        return node.getWindCourse(getCourseAfter().getDegrees());
     }
 
     public double getWindCourseInDegrees(double twa) {

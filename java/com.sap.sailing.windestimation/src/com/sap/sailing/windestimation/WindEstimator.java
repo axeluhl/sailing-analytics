@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
-import com.sap.sse.common.TimePoint;
+import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 
 /**
  * 
@@ -13,6 +13,7 @@ import com.sap.sse.common.TimePoint;
  */
 public interface WindEstimator<T> {
 
-    List<WindWithConfidence<TimePoint>> estimateWind(Iterable<CompetitorTrackWithEstimationData<T>> competitorTracks);
+    List<WindWithConfidence<ManeuverForEstimation>> estimateWind(
+            Iterable<CompetitorTrackWithEstimationData<T>> competitorTracks);
 
 }

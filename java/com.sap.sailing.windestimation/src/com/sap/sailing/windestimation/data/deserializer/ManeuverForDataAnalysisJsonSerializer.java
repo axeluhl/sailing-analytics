@@ -20,6 +20,7 @@ public class ManeuverForDataAnalysisJsonSerializer implements JsonSerializer<Man
     public static final String DEVIATION_FROM_OPTIMAL_JIBE_ANGLE_IN_DEGREES = "deviationJibeAngle";
     public static final String RELATIVE_BEARING_TO_NEXT_MARK_BEFORE_IN_DEGREES = "nextMarkBefore";
     public static final String RELATIVE_BEARING_TO_NEXT_MARK_AFTER_IN_DEGREES = "nextMarkAfter";
+    public static final String MARK_PASSING = "markPassing";
     public static final String MANEUVER_DURATION_IN_SECONDS = "maneuverDuration";
     public static final String MAIN_CURVE_DURATION_IN_SECONDS = "mainCurveDuration";
     public static final String RECOVERY_PHASE_DURATION_IN_SECONDS = "recoveryPhaseDuration";
@@ -56,6 +57,7 @@ public class ManeuverForDataAnalysisJsonSerializer implements JsonSerializer<Man
         json.put(DEVIATION_FROM_OPTIMAL_JIBE_ANGLE_IN_DEGREES, maneuver.getDeviationFromOptimalJibeAngleInDegrees());
         json.put(RELATIVE_BEARING_TO_NEXT_MARK_BEFORE_IN_DEGREES, maneuver.getRelativeBearingToNextMarkBefore());
         json.put(RELATIVE_BEARING_TO_NEXT_MARK_AFTER_IN_DEGREES, maneuver.getRelativeBearingToNextMarkAfter());
+        json.put(MARK_PASSING, maneuver.isMarkPassing() ? 1 : 0);
         json.put(MANEUVER_DURATION_IN_SECONDS, maneuver.getManeuverDurationInSeconds());
         json.put(MAIN_CURVE_DURATION_IN_SECONDS, maneuver.getMainCurveDurationInSeconds());
         json.put(RECOVERY_PHASE_DURATION_IN_SECONDS, maneuver.getRecoveryPhaseDurationInSeconds());
