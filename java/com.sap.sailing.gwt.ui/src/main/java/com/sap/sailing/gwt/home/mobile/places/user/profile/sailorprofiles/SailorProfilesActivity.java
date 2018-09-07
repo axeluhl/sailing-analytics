@@ -48,7 +48,6 @@ public class SailorProfilesActivity extends AbstractUserProfileActivity
         }
         sailorProfileOverviewPresenter = new SailorProfileOverviewImplPresenter(this.currentView, this,
                 FlagImageResolverImpl.get(), editSailorProfilePresenter);
-        currentView.setPresenter(sailorProfileOverviewPresenter);
 
     }
 
