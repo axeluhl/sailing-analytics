@@ -384,9 +384,12 @@
 .taggingPanelDisabled .tagCellHeadingButtons,
 .taggingPanelDisabled .tagCellHeadingButtons .tagEditButton,
 .taggingPanelDisabled .tagCellHeadingButtons .tagEditButton:hover,
+.taggingPanelDisabled .tagCellHeadingButtons .tagEditButton:focus,
 .taggingPanelDisabled .tagCellHeadingButtons .tagDeleteButton,
-.taggingPanelDisabled .tagCellHeadingButtons .tagDeleteButton:hover {
+.taggingPanelDisabled .tagCellHeadingButtons .tagDeleteButton:hover,
+.taggingPanelDisabled .tagCellHeadingButtons .tagDeleteButton:focus {
 	cursor: not-allowed;
+	outline: none;
 }
 
 /**************************** Images ****************************/

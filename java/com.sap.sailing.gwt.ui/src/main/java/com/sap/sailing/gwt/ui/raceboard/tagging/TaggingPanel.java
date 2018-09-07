@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.NoSelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -141,20 +142,18 @@ public class TaggingPanel extends ComponentWithoutSettings
         taggingPanel.setFooterWidget(footerPanel);
 
         // content (tags)
+        contentPanel.addStyleName(style.tagCellListPanel());
+        contentPanel.add(tagCellList);
+        contentPanel.add(createTagsButton);
+
         tagListProvider.addDataDisplay(tagCellList);
         tagCellList.setEmptyListWidget(new Label(stringMessages.tagNoTagsFound()));
-
         tagCellList.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.DISABLED);
         tagCellList.setSelectionModel(tagSelectionModel);
         tagSelectionModel.addSelectionChangeHandler(event -> {
-            if (!currentState.equals(State.EDIT_TAG)) {
-                // set time slider to corresponding position
-                timer.setTime(tagSelectionModel.getSelectedObject().getRaceTimepoint().asMillis());
-            }
+            // set time slider to corresponding position
+            timer.setTime(tagSelectionModel.getSelectedObject().getRaceTimepoint().asMillis());
         });
-
-        contentPanel.add(tagCellList);
-        contentPanel.addStyleName(style.tagCellListPanel());
 
         createTagsButton.setTitle(stringMessages.tagAddTags());
         createTagsButton.setStyleName(style.toggleEditState());
@@ -162,7 +161,6 @@ public class TaggingPanel extends ComponentWithoutSettings
         createTagsButton.addClickHandler(event -> {
             setCurrentState(State.CREATE_TAG);
         });
-        contentPanel.add(createTagsButton);
 
         taggingPanel.setContentWidget(contentPanel);
         updateContent();
@@ -527,8 +525,11 @@ public class TaggingPanel extends ComponentWithoutSettings
         setCreateTagsButtonVisibility(currentState.equals(State.VIEW));
         if (currentState.equals(State.EDIT_TAG)) {
             taggingPanel.addStyleName(style.taggingPanelDisabled());
+            // disable selection of tags when another tags gets edited (currentState == EDIT_TAG)
+            tagCellList.setSelectionModel(new NoSelectionModel<TagDTO>());
         } else {
             taggingPanel.removeStyleName(style.taggingPanelDisabled());
+            tagCellList.setSelectionModel(tagSelectionModel);
         }
         tagListProvider.updateFilteredTags();
         tagCellList.setVisibleRange(0, tagListProvider.getFilteredTags().size());
@@ -766,7 +767,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         loadAllPrivateTags(new AsyncCallback<List<TagDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
-                Notification.notify(stringMessages.tagNotLoaded(), NotificationType.WARNING);
+                // no private tags available, e.g. when user is not logged in or does not have private tags
             }
 
             @Override

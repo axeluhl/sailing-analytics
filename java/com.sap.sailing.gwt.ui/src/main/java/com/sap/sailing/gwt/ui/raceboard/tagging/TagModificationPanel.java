@@ -78,12 +78,18 @@ public class TagModificationPanel extends FlowPanel {
         cancelTagChanges.setStyleName(style.tagDialogButton());
         cancelTagChanges.addStyleName("gwt-Button");
         cancelTagChanges.addClickHandler(event -> {
-            new ConfirmationDialog(stringMessages, stringMessages.tagDiscardChangesHeading(),
-                    stringMessages.tagDiscardChanges(), result -> {
-                        if (result) {
-                            resetState();
-                        }
-                    });
+            if ((taggingPanel.getCurrentState().equals(State.CREATE_TAG) && !inputPanel.isInputEmpty())
+                    || (taggingPanel.getCurrentState().equals(State.EDIT_TAG)
+                            && !inputPanel.compareFieldsToTag(taggingPanel.getSelectedTag()))) {
+                new ConfirmationDialog(stringMessages, stringMessages.tagDiscardChangesHeading(),
+                        stringMessages.tagDiscardChanges(), result -> {
+                            if (result) {
+                                resetState();
+                            }
+                        });
+            } else {
+                resetState();
+            }
         });
 
         editButtonsPanel = new FlowPanel();
