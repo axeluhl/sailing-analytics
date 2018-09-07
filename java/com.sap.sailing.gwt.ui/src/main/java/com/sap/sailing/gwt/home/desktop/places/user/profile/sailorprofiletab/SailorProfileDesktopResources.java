@@ -29,5 +29,21 @@ public interface SailorProfileDesktopResources extends ClientBundle {
         String overviewTablePanel();
 
         String overviewTableEmpty();
+
+        String accordionTitle();
+
+        String accordionHeader();
+
+        String accordionHeaderRight();
+
+        String accordionHeaderRightArrow();
+
+        String accordionArrowImage();
+
+        String accordionCollapsed();
+
+        String accordion();
+
+        String accordionContentPanel();
     }
 }

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.SpanElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -14,7 +13,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.desktop.partials.eventsrecent.EventsOverviewRecentResources;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileDesktopResources;
 import com.sap.sailing.gwt.home.shared.utils.CollapseAnimation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
@@ -29,8 +28,6 @@ public class DesktopAccordion extends Composite {
     SpanElement titleUi;
     @UiField
     FlowPanel contentPanelUi;
-    @UiField
-    DivElement contentDivUi;
     @UiField
     HTMLPanel headerDivUi;
     @UiField
@@ -53,7 +50,7 @@ public class DesktopAccordion extends Composite {
 
     public DesktopAccordion(boolean showInitial) {
         accordionListeners = new ArrayList<>();
-        EventsOverviewRecentResources.INSTANCE.css().ensureInjected();
+        SailorProfileDesktopResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
 
         this.titleUi.setInnerText("Title");
@@ -66,7 +63,7 @@ public class DesktopAccordion extends Composite {
         }, ClickEvent.getType());
 
         isContentVisible = showInitial;
-        animation = new CollapseAnimation(contentDivUi, showInitial);
+        animation = new CollapseAnimation(contentPanelUi.getElement(), showInitial);
         updateAccordionState();
     }
 
@@ -90,7 +87,7 @@ public class DesktopAccordion extends Composite {
 
     private void updateAccordionState() {
         if (isContentVisible) {
-            getElement().removeClassName(EventsOverviewRecentResources.INSTANCE.css().accordioncollapsed());
+            getElement().removeClassName(SailorProfileDesktopResources.INSTANCE.css().accordionCollapsed());
             if (!wasOpenend) {
                 wasOpenend = true;
                 for (InitialAccordionExpansionListener accordionListener : accordionListeners) {
@@ -99,7 +96,7 @@ public class DesktopAccordion extends Composite {
                 accordionListeners.clear();
             }
         } else {
-            getElement().addClassName(EventsOverviewRecentResources.INSTANCE.css().accordioncollapsed());
+            getElement().addClassName(SailorProfileDesktopResources.INSTANCE.css().accordionCollapsed());
         }
     }
 
