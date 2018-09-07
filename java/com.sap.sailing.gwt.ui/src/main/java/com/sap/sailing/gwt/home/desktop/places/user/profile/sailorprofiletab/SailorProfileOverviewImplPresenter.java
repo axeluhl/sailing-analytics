@@ -23,9 +23,15 @@ public class SailorProfileOverviewImplPresenter implements SailingProfileOvervie
 
     public SailorProfileOverviewImplPresenter(final SailorProfileView view,
             final HasLoginFormAndFactory loginAndFactory, final FlagImageResolver flagImageResolver) {
+        this(view, loginAndFactory, flagImageResolver,
+                new EditSailorProfilePresenter(loginAndFactory.getClientFactory()));
+    }
+
+    public SailorProfileOverviewImplPresenter(final SailorProfileView view,
+            final HasLoginFormAndFactory loginAndFactory, final FlagImageResolver flagImageResolver, final EditSailorProfilePresenter presenter) {
         this.view = view;
         this.loginAndFactory = loginAndFactory;
-        this.sharedSailorProfilePresenter = new EditSailorProfilePresenter(loginAndFactory.getClientFactory());
+        this.sharedSailorProfilePresenter = presenter;
         this.flagImageResolver = flagImageResolver;
         view.setPresenter(this);
     }
