@@ -2,8 +2,8 @@
     font-size: 1.866666666666667em;
     font-weight: bold;
     color: #333;
-    margin-top: 0.3333333em;
-    margin-left: 3em;
+    margin-left: 1em;
+    margin-top: 0.7143em;
 }
 
 .eventsTable {
