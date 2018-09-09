@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Arrays;
 import java.util.List;
 
 import com.sap.sailing.domain.base.BoatClass;
@@ -56,7 +57,8 @@ public abstract class AbstractSmileManeuverClassifier<T extends SoftClassifier<d
             this.pca = copy.pca;
             this.scaler = copy.scaler;
             this.fixesCountForBoatClass = copy.fixesCountForBoatClass;
-            if (!getBoatClass().equals(copy.getBoatClass())) {
+            if (getBoatClass() != copy.getBoatClass() && getBoatClass() != null && (copy.getBoatClass() == null
+                    || !getBoatClass().getName().equals(copy.getBoatClass().getName()))) {
                 throw new ClassifierPersistenceException("The boat class of the loaded classifier is: "
                         + copy.getBoatClass() + ". \nExpected: " + getBoatClass());
             }
@@ -64,7 +66,7 @@ public abstract class AbstractSmileManeuverClassifier<T extends SoftClassifier<d
                 throw new ClassifierPersistenceException("The maneuver features of the loaded classifier are: "
                         + copy.getManeuverFeatures() + ". \nExpected: " + getManeuverFeatures());
             }
-            if (!getSupportedManeuverTypesMapping().equals(copy.getSupportedManeuverTypesMapping())) {
+            if (!Arrays.equals(getSupportedManeuverTypesMapping(), copy.getSupportedManeuverTypesMapping())) {
                 throw new ClassifierPersistenceException("The supported maneuver types of the loaded classifier are: "
                         + copy.getSupportedManeuverTypes() + ". \nExpected: " + getSupportedManeuverTypes());
             }

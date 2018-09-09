@@ -32,7 +32,7 @@ public abstract class AbstractRaceWithEstimationDataPersistenceManager<T> extend
 
     @Override
     public void dropDb() {
-        getDb().dropDatabase();
+        getDb().getCollection(getCollectionName()).drop();
     }
 
     public abstract CompetitorTrackWithEstimationDataJsonDeserializer<T> getNewCompetitorTrackWithEstimationDataJsonDeserializer();

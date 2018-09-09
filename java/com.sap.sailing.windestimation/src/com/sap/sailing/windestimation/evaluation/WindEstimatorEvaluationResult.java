@@ -238,11 +238,11 @@ public class WindEstimatorEvaluationResult {
                 + (numberOfCorrectWindDirectionEstimations + numberOfIncorrectWindDirectionEstimations) + " correct)");
         System.out.println(" Avg. wind course error : "
                 + formatDegrees(getAvgAbsWindCourseErrorInDegreesOfCorrectWindDirectionEstimations()));
+        System.out.println(" Avg. wind course error of incorrect estimations : "
+                + formatDegrees(getAvgAbsWindCourseErrorInDegreesOfIncorrectWindDirectionEstimations()));
+        System.out.println(" Avg. wind course error of all estimations : "
+                + formatDegrees(getAvgAbsWindCourseErrorInDegreesOfCorrectAndIncorrectWindDirectionEstimations()));
         if (detailed) {
-            System.out.println(" Avg. wind course error of incorrect estimations : "
-                    + formatDegrees(getAvgAbsWindCourseErrorInDegreesOfIncorrectWindDirectionEstimations()));
-            System.out.println(" Avg. wind course error of all estimations : "
-                    + formatDegrees(getAvgAbsWindCourseErrorInDegreesOfCorrectAndIncorrectWindDirectionEstimations()));
             System.out.println();
             System.out.println("### Wind speed ###");
             System.out.println(" Accuracy: " + formatPercentage(getAccuracyOfWindSpeedEstimation()) + " ("

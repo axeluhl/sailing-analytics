@@ -38,10 +38,4 @@ public class RaceWithCompleteManeuverCurvePersistenceManager
                 completeManeuverCurveDeserializer);
     }
 
-    @Override
-    public void dropDb() {
-        // TODO Auto-generated method stub
-
-    }
-
 }

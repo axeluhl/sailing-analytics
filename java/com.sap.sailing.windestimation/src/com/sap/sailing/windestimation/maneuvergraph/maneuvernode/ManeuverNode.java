@@ -6,18 +6,16 @@ import com.sap.sailing.windestimation.maneuverclassifier.ManeuverTypeForClassifi
 public class ManeuverNode {
 
     private final WindRangeForManeuverNode validWindRange;
-    private final boolean windRangeToExclude;
     private double confidence;
     private final int indexInLevel;
     private final ManeuverTypeForClassification maneuverType;
     private final Tack tackAfter;
 
     public ManeuverNode(ManeuverTypeForClassification maneuverType, Tack tackAfter,
-            WindRangeForManeuverNode validWindRange, boolean windRangeToExclude, double confidence, int indexInLevel) {
+            WindRangeForManeuverNode validWindRange, double confidence, int indexInLevel) {
         this.maneuverType = maneuverType;
         this.tackAfter = tackAfter;
         this.validWindRange = validWindRange;
-        this.windRangeToExclude = windRangeToExclude;
         this.confidence = confidence;
         this.indexInLevel = indexInLevel;
     }
@@ -28,10 +26,6 @@ public class ManeuverNode {
 
     public WindRangeForManeuverNode getValidWindRange() {
         return validWindRange;
-    }
-
-    public boolean isWindRangeToExclude() {
-        return windRangeToExclude;
     }
 
     public double getConfidence() {

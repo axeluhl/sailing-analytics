@@ -157,7 +157,7 @@ public class SpeedRegressionPerAngleClusterProcessor implements
                 }
             }
         }
-        long avgFixesCount = allFixesCount / numberOfWindSpeeds;
+        long avgFixesCount = numberOfWindSpeeds == 0 ? 0 : allFixesCount / numberOfWindSpeeds;
         long fixCountOverall = 0;
         if (numberOfWindSpeeds < 2 || allFixesCount < 10) {
             throw new NotEnoughDataHasBeenAddedException("Not enough data has been added to Per Course Regressions");

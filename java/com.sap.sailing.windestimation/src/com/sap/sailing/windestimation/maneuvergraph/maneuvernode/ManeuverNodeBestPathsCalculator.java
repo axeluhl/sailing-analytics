@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
@@ -18,9 +17,9 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
-import com.sap.sailing.windestimation.data.FineGrainedManeuverType;
 import com.sap.sailing.windestimation.data.FineGrainedPointOfSail;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
+import com.sap.sailing.windestimation.maneuverclassifier.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.polarsfitting.SailingStatistics;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Speed;
@@ -35,7 +34,7 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 public class ManeuverNodeBestPathsCalculator {
 
     protected static final double INTERVAL_FOR_WIND_PATH_DEVIATION_ANALYSIS_IN_SECONDS = 30 * 60;
-    protected static final double MAX_ABS_WIND_COURSE_DEVIATION_TOLERANCE_WITHIN_ANALYSIS_INTERVAL_IN_DEGREES = 45;
+    protected static final double MAX_ABS_WIND_COURSE_DEVIATION_TOLERANCE_WITHIN_ANALYSIS_INTERVAL_IN_DEGREES = 30;
 
     private ManeuverNodeGraphLevel lastLevel;
 
@@ -123,13 +122,14 @@ public class ManeuverNodeBestPathsCalculator {
                             .getPathSailingStatistics(previousLevel.getManeuver().getBoatClass());
                     IntersectedWindRange intersectedWindRangeUntilCurrentNode = bestPreviousNodeInfo.getWindRange()
                             .intersect(currentNode.getValidWindRange());
-                    double probability = bestPathsUntilPreviousLevel
-                            .getNormalizedProbabilityToNodeFromStart(previousNode)
+                    double probability = bestPathsUntilPreviousLevel.getNormalizedProbabilityToNodeFromStart(
+                            previousNode) * getPenaltyFactorForTackTransition(currentLevel, previousNode, currentNode)
                             * currentNode.getConfidence()
                             * getPenaltyFactorForTransitionConsideringWindRangeWithinBestPath(
                                     intersectedWindRangeUntilCurrentNode, secondsPassedSincePreviousManeuver)
                             * getPenaltyFactorForTransitionConsideringPreviousPathStats(currentLevel, currentNode,
                                     previousPathStats, intersectedWindRangeUntilCurrentNode);
+                    assert (probability > 0.0001);
                     if (probability > maxProbability) {
                         maxProbability = probability;
                         bestPreviousNode = previousNode;
@@ -145,6 +145,33 @@ public class ManeuverNodeBestPathsCalculator {
         this.lastLevel = currentLevel;
     }
 
+    protected double getPenaltyFactorForTackTransition(ManeuverNodeGraphLevel currentLevel, ManeuverNode previousNode,
+            ManeuverNode currentNode) {
+//        if (previousNode.getManeuverType() != ManeuverTypeForClassification.OTHER
+//                && currentNode.getManeuverType() != ManeuverTypeForClassification.OTHER) {
+//            if (previousNode.getTackAfter() == currentNode.getTackAfter()) {
+//                return 0.05;
+//            }
+//        } else if (previousNode.getManeuverType() == currentNode.getManeuverType()) {
+//            // maneuver type is OTHER
+//            if (previousNode.getTackAfter() != currentNode.getTackAfter()) {
+//                return 0.05;
+//            }
+//        } else {
+//            // one maneuver is OTHER, other maneuver is tack or jibe
+//            if (previousNode.getManeuverType() == ManeuverTypeForClassification.OTHER) {
+//                if (previousNode.getTackAfter() == currentNode.getTackAfter()) {
+//                    return 0.05;
+//                }
+//            } else {
+//                if (previousNode.getTackAfter() != currentNode.getTackAfter()) {
+//                    return 0.05;
+//                }
+//            }
+//        }
+        return 1;
+    }
+
     protected double getPenaltyFactorForTransitionConsideringWindRangeWithinBestPath(
             IntersectedWindRange intersectedWindRangeUntilCurrentNode, double secondsPassedSincePreviousWindRange) {
         double violationRange = intersectedWindRangeUntilCurrentNode.getViolationRange();
@@ -152,18 +179,19 @@ public class ManeuverNodeBestPathsCalculator {
         if (violationRange == 0) {
             penaltyFactor = 1.0;
         } else {
-            violationRange -= secondsPassedSincePreviousWindRange / 3600
-                    * MAX_ABS_WIND_COURSE_DEVIATION_TOLERANCE_WITHIN_ANALYSIS_INTERVAL_IN_DEGREES;
-            if (violationRange <= 0) {
-                penaltyFactor = 1 / (1
-                        + (MAX_ABS_WIND_COURSE_DEVIATION_TOLERANCE_WITHIN_ANALYSIS_INTERVAL_IN_DEGREES + violationRange)
-                                * 0.01);
-            } else if (violationRange <= MAX_ABS_WIND_COURSE_DEVIATION_TOLERANCE_WITHIN_ANALYSIS_INTERVAL_IN_DEGREES) {
-                penaltyFactor = 1 / (1 + Math.pow((violationRange) / 15, 2));
-            } else {
-                penaltyFactor = 1 / (4 + Math.pow((violationRange) / 5, 2));
-            }
+            // violationRange -= Math.max(1, secondsPassedSincePreviousWindRange / 3600)
+            // * MAX_ABS_WIND_COURSE_DEVIATION_TOLERANCE_WITHIN_ANALYSIS_INTERVAL_IN_DEGREES;
+            // if (violationRange <= 0) {
+            // penaltyFactor = 1 / (1
+            // + (MAX_ABS_WIND_COURSE_DEVIATION_TOLERANCE_WITHIN_ANALYSIS_INTERVAL_IN_DEGREES + violationRange)
+            // * 0.1);
+            // if (violationRange <= MAX_ABS_WIND_COURSE_DEVIATION_TOLERANCE_WITHIN_ANALYSIS_INTERVAL_IN_DEGREES) {
+            // penaltyFactor = 1 / (1 + Math.pow((violationRange) / 15, 2));
+            // } else {
+            penaltyFactor = 1 / (1 + (Math.pow(violationRange, 2)));
+            // }
         }
+        assert (penaltyFactor > 0.0001);
         return penaltyFactor;
     }
 
@@ -188,7 +216,9 @@ public class ManeuverNodeBestPathsCalculator {
                 lowestSpeedAndTurningRatePenaltyFactor = getLowestSpeedAndTurningRatePenaltyFactor(previousPathStats,
                         currentLevel, currentNode);
             }
-            return speedPenaltyFactorBefore * speedPenaltyFactorAfter * lowestSpeedAndTurningRatePenaltyFactor;
+            double finalPenaltyFactor = speedPenaltyFactorBefore * speedPenaltyFactorAfter
+                    * lowestSpeedAndTurningRatePenaltyFactor;
+            return finalPenaltyFactor;
         }
     }
 
@@ -212,78 +242,12 @@ public class ManeuverNodeBestPathsCalculator {
 
     protected double getLowestSpeedAndTurningRatePenaltyFactor(SailingStatistics averageStatistics,
             ManeuverNodeGraphLevel currentLevel, ManeuverNode currentNode) {
-        double tackProbabilityBonus = 0;
-        ManeuverForEstimation maneuver = currentLevel.getManeuver();
-        double absDirectionChangeInDegrees = Math.abs(maneuver.getCourseChangeWithinMainCurveInDegrees());
-        double lowestSpeedRatio = (maneuver.getSpeedLossRatio() + maneuver.getLowestSpeedVsExitingSpeedRatio()) / 2.0;
-        double turningRate = maneuver.getMaxTurningRateInDegreesPerSecond();
-        switch (currentNode.getManeuverType()) {
-        case TACK:
-            for (FineGrainedManeuverType otherManeuverType : FineGrainedManeuverType.values()) {
-                if (otherManeuverType != FineGrainedManeuverType.TACK
-                        && otherManeuverType != FineGrainedManeuverType._180_JIBE
-                        && otherManeuverType != FineGrainedManeuverType._180_TACK
-                        && otherManeuverType != FineGrainedManeuverType._360
-                        && averageStatistics.getNumberOfCleanManeuvers(otherManeuverType) > 0) {
-                    double lowestSpeedRatioDifference = lowestSpeedRatio
-                            - averageStatistics.getAverageSpeedLossForManeuverType(otherManeuverType);
-                    double turningRateDifference = turningRate
-                            - averageStatistics.getAverageTurningRateForManeuverType(otherManeuverType);
-                    if (lowestSpeedRatioDifference > 0 && turningRateDifference < 0) {
-                        tackProbabilityBonus -= lowestSpeedRatioDifference * 2 + turningRateDifference / -100;
-                    }
-                }
-            }
-            double courseChangeDifference = absDirectionChangeInDegrees
-                    - averageStatistics.getAverageAbsCourseChangeInDegreesForManeuverType(FineGrainedManeuverType.JIBE);
-            if (courseChangeDifference < 0) {
-                tackProbabilityBonus -= courseChangeDifference / -180;
-            }
-            break;
-        case JIBE:
-        case OTHER:
-            if (averageStatistics.getNumberOfCleanManeuvers(FineGrainedManeuverType.TACK) > 0) {
-                double lowestSpeedRatioDifference = lowestSpeedRatio
-                        - averageStatistics.getAverageSpeedLossForManeuverType(FineGrainedManeuverType.TACK);
-                double turningRateDifference = turningRate
-                        - averageStatistics.getAverageTurningRateForManeuverType(FineGrainedManeuverType.TACK);
-                if (lowestSpeedRatioDifference < 0 && turningRateDifference > 0) {
-                    tackProbabilityBonus += lowestSpeedRatioDifference * -2 + turningRateDifference / 100;
-                }
-                // courseChangeDifference = absDirectionChangeInDegrees - averageStatistics
-                // .getAverageAbsCourseChangeInDegreesForManeuverType(FineGrainedManeuverType.TACK);
-                // if (courseChangeDifference > 0) {
-                // tackProbabilityBonus += courseChangeDifference / 180;
-                // }
-            }
-            break;
-        }
-        return 1 - Math.abs(tackProbabilityBonus);
+        return 1;
     }
 
     protected double getSpeedPenaltyFactorForPointOfSail(SailingStatistics averageStatistics,
             FineGrainedPointOfSail pointOfSail, double speedAtPointOfSail, BoatClass boatClass) {
-        double lowestAverageSpeedUpwind = averageStatistics.getLowestUpwindAvgSpeed();
-        double upwindProbabilityBonus = 0.0;
-        if (pointOfSail.getLegType() == LegType.UPWIND) {
-            for (FineGrainedPointOfSail otherPointOfSail : FineGrainedPointOfSail.values()) {
-                if (otherPointOfSail.getLegType() == LegType.REACHING
-                        || otherPointOfSail.getLegType() == LegType.DOWNWIND
-                                && averageStatistics.getNumberOfCleanTracks(otherPointOfSail) > 0) {
-                    double speedRatio = speedAtPointOfSail
-                            / averageStatistics.getAverageSpeedInKnotsForPointOfSail(otherPointOfSail);
-                    if (speedRatio > 1.05) {
-                        upwindProbabilityBonus = Math.min(upwindProbabilityBonus, Math.max((1 - speedRatio), -0.8));
-                    }
-                }
-            }
-        } else if (lowestAverageSpeedUpwind != 0) {
-            double speedRatio = lowestAverageSpeedUpwind / speedAtPointOfSail;
-            if (speedRatio > 1.05) {
-                upwindProbabilityBonus = Math.max((1 - speedRatio), -0.8);
-            }
-        }
-        return 1.0 - Math.abs(upwindProbabilityBonus);
+        return 1;
     }
 
     public List<Pair<ManeuverNodeGraphLevel, ManeuverNode>> getBestPath(ManeuverNodeGraphLevel lastLevel,
@@ -345,7 +309,8 @@ public class ManeuverNodeBestPathsCalculator {
                         .getBestPreviousNodeInfo(currentNode);
                 globalWindRange = globalWindRange == null ? bestPreviousNodeInfo.getWindRange()
                         : globalWindRange.intersect(bestPreviousNodeInfo.getWindRange());
-                if (!globalWindRange.isViolation() && globalWindRange.getAngleTowardStarboard() <= 40) {
+                if (!globalWindRange.isViolation() && globalWindRange.getAngleTowardStarboard() <= 20
+                        && currentNode.getManeuverType() == ManeuverTypeForClassification.OTHER) {
                     DegreeBearingImpl windCourse = new DegreeBearingImpl(globalWindRange.getAvgWindCourse());
                     Speed avgWindSpeed = getAvgWindSpeed(currentLevel.getManeuver(), windCourse);
                     Wind wind = new WindImpl(currentLevel.getManeuver().getManeuverPosition(),

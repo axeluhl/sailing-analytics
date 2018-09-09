@@ -112,6 +112,7 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
         private final long numberOfElements;
         private long currentElementNumber = 0;
         private int numberOfCharsDuringLastStatusLog = 0;
+        private long limit = Long.MAX_VALUE;
 
         public PersistedElementsIteratorImpl() {
             numberOfElements = countElements();
@@ -133,26 +134,38 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
 
         private void prepareNext() {
             long nextElementNumber = currentElementNumber + 1;
-            if (nextElementNumber % (numberOfElements / 100) == 0) {
-                LoggingUtil.delete(numberOfCharsDuringLastStatusLog);
-                numberOfCharsDuringLastStatusLog = LoggingUtil
-                        .logInfo("Loading element " + nextElementNumber + "/" + numberOfElements + " ("
-                                + (nextElementNumber * 100 / numberOfElements) + " %) from " + getCollectionName());
-            }
-            try {
-                Pair<String, T> nextElementWithDbId = getNextElement(lastDbId);
-                if (this.nextElement != null) {
-                    this.lastDbId = nextElementWithDbId.getA();
-                    this.nextElement = nextElementWithDbId.getB();
-                    this.currentElementNumber = nextElementNumber;
+            if (nextElementNumber <= limit) {
+                if (nextElementNumber % (numberOfElements / 100) == 0) {
+                    LoggingUtil.delete(numberOfCharsDuringLastStatusLog);
+                    numberOfCharsDuringLastStatusLog = LoggingUtil
+                            .logInfo("Loading element " + nextElementNumber + "/" + numberOfElements + " ("
+                                    + (nextElementNumber * 100 / numberOfElements) + " %) from " + getCollectionName());
                 }
-            } catch (JsonDeserializationException | ParseException e) {
-                throw new RuntimeException(e);
+                try {
+                    Pair<String, T> nextElementWithDbId = getNextElement(lastDbId);
+                    if (nextElementWithDbId != null) {
+                        this.lastDbId = nextElementWithDbId.getA();
+                        this.nextElement = nextElementWithDbId.getB();
+                        this.currentElementNumber = nextElementNumber;
+                    } else {
+                        this.nextElement = null;
+                    }
+                } catch (JsonDeserializationException | ParseException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                this.nextElement = null;
             }
         }
 
         public long getNumberOfElements() {
             return numberOfElements;
+        }
+
+        @Override
+        public PersistedElementsIterator<T> limit(long limit) {
+            this.limit = limit;
+            return this;
         }
 
     }

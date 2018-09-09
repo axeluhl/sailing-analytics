@@ -24,6 +24,7 @@ import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
+import com.sap.sailing.windestimation.data.ManeuverCategory;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
@@ -150,7 +151,8 @@ public class EstimationDataUtil {
         List<ManeuverForEstimation> usefulManeuversSortedByTimePoint = new ArrayList<>();
         for (CompetitorTrackWithEstimationData<ManeuverForEstimation> competitorTrack : competitorTracks) {
             for (ManeuverForEstimation maneuver : competitorTrack.getElements()) {
-                if (maneuver.isClean() || maneuver.isCleanBefore() || maneuver.isCleanAfter()) {
+                if (maneuver.isClean() && maneuver.getManeuverCategory() == ManeuverCategory.REGULAR
+                        || maneuver.getManeuverCategory() == ManeuverCategory.MARK_PASSING) {
                     usefulManeuversSortedByTimePoint.add(maneuver);
                 }
             }
@@ -158,6 +160,19 @@ public class EstimationDataUtil {
         Collections.sort(usefulManeuversSortedByTimePoint,
                 (o1, o2) -> o1.getManeuverTimePoint().compareTo(o2.getManeuverTimePoint()));
         return usefulManeuversSortedByTimePoint;
+    }
+
+    public static List<ManeuverForEstimation> getManeuversSortedByTimePoint(
+            List<CompetitorTrackWithEstimationData<ManeuverForEstimation>> competitorTracks) {
+        List<ManeuverForEstimation> maneuversSortedByTimePoint = new ArrayList<>();
+        for (CompetitorTrackWithEstimationData<ManeuverForEstimation> competitorTrack : competitorTracks) {
+            for (ManeuverForEstimation maneuver : competitorTrack.getElements()) {
+                maneuversSortedByTimePoint.add(maneuver);
+            }
+        }
+        Collections.sort(maneuversSortedByTimePoint,
+                (o1, o2) -> o1.getManeuverTimePoint().compareTo(o2.getManeuverTimePoint()));
+        return maneuversSortedByTimePoint;
     }
 
 }

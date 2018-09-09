@@ -6,6 +6,7 @@ import com.sap.sailing.windestimation.maneuverclassifier.PreprocessingConfig.Pre
 import com.sap.sailing.windestimation.maneuverclassifier.impl.ManeuverFeatures;
 
 import smile.classification.SVM;
+import smile.classification.SVM.Multiclass;
 import smile.math.kernel.GaussianKernel;
 
 public class SVMManeuverClassifier extends AbstractSmileManeuverClassifier<SVM<double[]>> {
@@ -22,9 +23,11 @@ public class SVMManeuverClassifier extends AbstractSmileManeuverClassifier<SVM<d
         int featuresCount = x[0].length;
         double gamma = 1.0 / featuresCount;
         double sigma = Math.sqrt(0.5 / gamma);
-        SVM<double[]> svm = new SVM<>(new GaussianKernel(sigma), 10.0);
+        SVM<double[]> svm = new SVM<>(new GaussianKernel(sigma), 10.0, getSupportedManeuverTypesCount(),
+                Multiclass.ONE_VS_ALL);
         svm.learn(x, y);
         svm.finish();
+        svm.trainPlattScaling(x, y);
         return svm;
     }
 

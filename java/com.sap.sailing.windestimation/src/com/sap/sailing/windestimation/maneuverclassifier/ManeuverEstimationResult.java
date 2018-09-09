@@ -26,6 +26,10 @@ public class ManeuverEstimationResult {
 
     public ManeuverEstimationResult(ManeuverForEstimation maneuver, double[] likelihoodPerManeuverType) {
         this.maneuver = maneuver;
+        for (int i = 0; i < likelihoodPerManeuverType.length; i++) {
+            likelihoodPerManeuverType[i] += 0.1;
+        }
+        ProbabilityUtil.normalizeLikelihoodArray(likelihoodPerManeuverType);
         this.likelihoodPerManeuverType = likelihoodPerManeuverType;
         computeLikelihoodsForPointOfSailAfterManeuver();
     }

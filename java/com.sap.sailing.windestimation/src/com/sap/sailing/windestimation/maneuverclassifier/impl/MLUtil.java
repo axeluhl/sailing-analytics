@@ -49,6 +49,10 @@ public class MLUtil {
                 return false;
             }
         }
+        if (boatClass == null
+                || maneuver.getBoatClass() != null && !boatClass.getName().equals(maneuver.getBoatClass().getName())) {
+            return false;
+        }
         return true;
     }
 

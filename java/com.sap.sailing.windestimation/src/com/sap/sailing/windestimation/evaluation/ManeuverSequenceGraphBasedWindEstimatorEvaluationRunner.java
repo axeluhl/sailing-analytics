@@ -13,14 +13,14 @@ public class ManeuverSequenceGraphBasedWindEstimatorEvaluationRunner {
 
     public static void main(String[] args) throws Exception {
         WindEstimatorEvaluator<CompleteManeuverCurveWithEstimationData> evaluator = new WindEstimationEvaluatorImpl<>(
-                15, 2, 0.8);
+                20, 2, 0.8);
         LoggingUtil.logInfo("Connecting to MongoDB");
         RaceWithCompleteManeuverCurvePersistenceManager persistenceManager = new RaceWithCompleteManeuverCurvePersistenceManager();
         LoggingUtil.logInfo("Loading polar data");
         PolarDataService polarService = PolarDataServiceAccessUtil.getPersistedPolarService();
         LoggingUtil.logInfo("Wind estimator evaluation started...");
         PersistedElementsIterator<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> racesIterator = persistenceManager
-                .getIterator();
+                .getIterator().limit(20);
 
         WindEstimatorEvaluationResult evaluationResult = evaluator.evaluateWindEstimator(
                 new ManeuverSequenceGraphBasedWindEstimatorFactory(polarService),

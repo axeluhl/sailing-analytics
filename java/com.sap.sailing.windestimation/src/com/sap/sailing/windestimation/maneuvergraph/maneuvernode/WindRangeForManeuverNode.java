@@ -35,12 +35,19 @@ public class WindRangeForManeuverNode {
         return angleTowardStarboard;
     }
 
+    public WindRangeForManeuverNode invert() {
+        double newFromPortside = fromPortside + angleTowardStarboard;
+        if (newFromPortside >= 360) {
+            newFromPortside -= 360;
+        }
+        double newAngleTowardStarboard = 360 - angleTowardStarboard;
+        return new WindRangeForManeuverNode(newFromPortside, newAngleTowardStarboard);
+    }
+
     public double getAvgWindCourse() {
         double avgWindCourse = fromPortside + angleTowardStarboard / 2.0;
         if (avgWindCourse > 360) {
             avgWindCourse -= 360;
-        } else if (avgWindCourse < 0) {
-            avgWindCourse += 360;
         }
         return avgWindCourse;
     }
@@ -88,11 +95,11 @@ public class WindRangeForManeuverNode {
                     // newFromPortside = nextWindRange.angleTowardStarboard -
                     // deviationFromPortsideTowardStarboardInDegrees;
                     // newAngleTowardStarboard = deviationFromPortsideTowardStarboardInDegrees;
-                    violationRange = newAngleTowardStarboard;
+                    violationRange = deviationFromPortsideTowardStarboardInDegrees;
                 } else {
                     // newFromPortside = angleTowardStarboard - deviationFromPortsideTowardPortsideInDegrees;
                     // newAngleTowardStarboard = deviationFromPortsideTowardPortsideInDegrees;
-                    violationRange = newAngleTowardStarboard;
+                    violationRange = deviationFromPortsideTowardPortsideInDegrees;
                 }
             }
         }
@@ -228,6 +235,34 @@ public class WindRangeForManeuverNode {
             }
         }
         throw new IllegalStateException();
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        long temp;
+        temp = Double.doubleToLongBits(angleTowardStarboard);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(fromPortside);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        WindRangeForManeuverNode other = (WindRangeForManeuverNode) obj;
+        if (Double.doubleToLongBits(angleTowardStarboard) != Double.doubleToLongBits(other.angleTowardStarboard))
+            return false;
+        if (Double.doubleToLongBits(fromPortside) != Double.doubleToLongBits(other.fromPortside))
+            return false;
+        return true;
     }
 
 }
