@@ -63,8 +63,8 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
         super.setUp();
     }
 
-    private TrackedRacesCompetitorsPanelPO goToCompetitorsPanel() {
-        final AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+    private TrackedRacesCompetitorsPanelPO goToCompetitorsPanel(WebDriver driver) {
+        final AdminConsolePage adminConsole = AdminConsolePage.goToPage(driver, getContextRoot());
         final TrackedRacesCompetitorsPanelPO competitorsPanel = adminConsole.goToTrackedRacesCompetitors();
         return competitorsPanel;
     }
@@ -72,8 +72,10 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
     @Test
     public void testMaintenanceOfSelectionAfterDataChanges() {
         this.environment.getWindowManager().withExtraWindow((windowForSelection, windowForEdit) -> {
-            windowForEdit.switchToWindow();
-            final TrackedRacesCompetitorsPanelPO competitorsPanel = goToCompetitorsPanel();
+            final WebDriver windowForEditDriver = windowForEdit.switchToWindow();
+            setUpAuthenticatedSession(windowForEditDriver);
+            final TrackedRacesCompetitorsPanelPO competitorsPanel = goToCompetitorsPanel(
+                    windowForEditDriver);
             
             for (int i = 0; i < 2; i++) {
                 TrackedRacesCompetitorEditDialogPO dialog = competitorsPanel.pushAddCompetitorButton();
@@ -100,8 +102,8 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
             }
             assertTrue(found);
             
-            windowForSelection.switchToWindow();
-            TrackedRacesCompetitorsPanelPO competitorPanelForSelection = goToCompetitorsPanel();
+            TrackedRacesCompetitorsPanelPO competitorPanelForSelection = goToCompetitorsPanel(
+                    windowForSelection.switchToWindow());
             found = false;
             for (final CompetitorEntry it : competitorPanelForSelection.getCompetitorTable().getEntries()) {
                 String itName = it.getName();
@@ -195,7 +197,6 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
     @Test
     public void testRefreshOfDependingUIElements() {
         this.environment.getWindowManager().withExtraWindow((windowForSelection, windowForEdit) -> {
-            windowForSelection.switchToWindow();
             setUpTestRefreshOfDependingUIElements();
             AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
             SmartphoneTrackingEventManagementPanelPO smartphoneTrackingPanel = adminConsole.goToSmartphoneTrackingPanel();
@@ -217,9 +218,9 @@ public class TestRefreshableSelectionModel extends AbstractSeleniumTest {
             assertEquals(5, anzRaceColumns);
             
             // Open a second window & setup second window
-            windowForEdit.switchToWindow();
-            
-            AdminConsolePage adminConsoleForEdit = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
+            final WebDriver windowForEditDriver = windowForEdit.switchToWindow();
+            setUpAuthenticatedSession(windowForEditDriver);
+            AdminConsolePage adminConsoleForEdit = AdminConsolePage.goToPage(windowForEditDriver, getContextRoot());
             RegattaStructureManagementPanelPO regattaStructure = adminConsoleForEdit.goToRegattaStructure();
             
             RegattaDetailsCompositePO regattaDetails = regattaStructure.getRegattaDetails(this.regatta);

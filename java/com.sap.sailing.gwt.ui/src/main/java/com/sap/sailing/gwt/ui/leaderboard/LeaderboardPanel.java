@@ -2465,6 +2465,11 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                                 final boolean wasEmptyRaceColumnSelection = Util
                                         .isEmpty(raceColumnSelection.getSelectedRaceColumns());
                                 updateLeaderboard(result);
+                                // This constructs a new settings object with juse the default for namesOfRaceColumnsToShow being adjusted.
+                                // In case the namesOfRaceColumnsToShow setting isn't changed this will also cause the value to change.
+                                // This causes in consequence potentiallyChangedSettings to not be equal to currentSettings anymore.
+                                // We then apply the new settings to make all new race columns visible.
+                                // TODO check if there is an easier way to get to know if we need to reapply the settings.
                                 LS potentiallyChangedSettings = overrideDefaultsForNamesOfRaceColumns(currentSettings,
                                         result);
                                 // reapply, when this is the first time we received the race columns or if columns have

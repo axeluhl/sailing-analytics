@@ -39,10 +39,11 @@ public abstract class AbstractLaunchPadController<D> implements LaunchPadControl
         panel.show();
         Scheduler.get().scheduleDeferred(() -> {
             Widget panelContent = panel.getWidget();
-            int alignRight = relTo.getAbsoluteLeft() + relTo.getOffsetWidth() - panelContent.getOffsetWidth();
-            int left = (alignRight - Window.getScrollLeft() < 0 ? relTo.getAbsoluteLeft() - 1 : alignRight + 1);
-            int alignBottom = relTo.getAbsoluteTop() + relTo.getOffsetHeight() - panelContent.getOffsetHeight();
-            int top = (alignBottom - Window.getScrollTop() < 0 ? relTo.getAbsoluteTop() - 1 : alignBottom + 1);
+            final int alignRight = relTo.getAbsoluteLeft() + relTo.getOffsetWidth() - panelContent.getOffsetWidth();
+            final int left = (alignRight - Window.getScrollLeft() < 0 ? relTo.getAbsoluteLeft() - 1 : alignRight + 1);
+            final int alignBottom = relTo.getAbsoluteTop() + relTo.getOffsetHeight() - panelContent.getOffsetHeight();
+            final int top = (relTo.getAbsoluteTop() + panelContent.getOffsetHeight() - Window.getScrollTop()) > Window
+                    .getClientHeight() ? alignBottom + 1 : relTo.getAbsoluteTop() - 1;
             panel.setPopupPosition(left, top);
             panel.setVisible(true);
         });

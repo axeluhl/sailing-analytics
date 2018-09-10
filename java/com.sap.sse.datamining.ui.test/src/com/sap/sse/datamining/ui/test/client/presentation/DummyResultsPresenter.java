@@ -6,6 +6,7 @@ import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.datamining.ui.client.presentation.AbstractResultsPresenter;
 import com.sap.sse.datamining.ui.client.presentation.TabbedResultsPresenter;
@@ -35,7 +36,7 @@ public class DummyResultsPresenter extends AbstractResultsPresenter<Settings> {
      * Stores <code>this</code> ResultsPresenter for test purposes.
      */
     @Override
-    public void showResult(QueryResultDTO<?> result) {
+    public void showResult(StatisticQueryDefinitionDTO queryDefinition, QueryResultDTO<?> result) {
         executedResultsPresenter.add(this);
     }
 
