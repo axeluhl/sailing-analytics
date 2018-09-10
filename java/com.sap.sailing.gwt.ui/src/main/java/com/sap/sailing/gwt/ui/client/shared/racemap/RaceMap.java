@@ -441,6 +441,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private boolean currentlyDragging = false;
 
     private int zoomingAnimationsInProgress = 0;
+    private int droppedZooms = -1;
+    private static final int ZOOMS_TO_DROP_IN_AUTOZOOM = 15;
 
     static class MultiHashSet<T> {
         private HashMap<T, List<T>> map = new HashMap<>();
@@ -1212,21 +1214,29 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                             
                         // Rezoom the map
                         LatLngBounds zoomToBounds = null;
-                        if (!settings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) { // Auto zoom if setting is not manual
-                            zoomToBounds = settings.getZoomSettings().getNewBounds(RaceMap.this);
-                            if (zoomToBounds == null && !mapFirstZoomDone) {
-                                zoomToBounds = getDefaultZoomBounds(); // the user-specified zoom couldn't find what it was looking for; try defaults once
+                        if (!settings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) {
+                            // Auto zoom if setting is not manual
+                            if (droppedZooms < ZOOMS_TO_DROP_IN_AUTOZOOM && droppedZooms > -1) {
+                                droppedZooms++;
+                            } else {
+                                droppedZooms = 0;
+                                zoomToBounds = settings.getZoomSettings().getNewBounds(RaceMap.this);
+                                if (zoomToBounds == null && !mapFirstZoomDone) {
+                                    // the user-specified zoom couldn't find what it was looking for; try defaults once
+                                    zoomToBounds = getDefaultZoomBounds();
+                                }
                             }
-                        } else if (!mapFirstZoomDone) { // Zoom once to the marks if marks exist
+                        } else if (!mapFirstZoomDone) {
+                            // Zoom once to the marks if marks exist
                             zoomToBounds = new CourseMarksBoundsCalculator().calculateNewBounds(RaceMap.this);
                             if (zoomToBounds == null) {
-                                zoomToBounds = getDefaultZoomBounds(); // use default zoom, e.g., 
+                                // use default zoom, e.g.,
+                                zoomToBounds = getDefaultZoomBounds();
                             }
                             /*
-                             * Reset the mapZoomedOrPannedSinceLastRaceSelection: In spite of the fact that
-                             * the map was just zoomed to the bounds of the marks, it was not a zoom or pan
-                             * triggered by the user. As a consequence the
-                             * mapZoomedOrPannedSinceLastRaceSelection option has to reset again.
+                             * Reset the mapZoomedOrPannedSinceLastRaceSelection: In spite of the fact that the map was
+                             * just zoomed to the bounds of the marks, it was not a zoom or pan triggered by the user.
+                             * As a consequence the mapZoomedOrPannedSinceLastRaceSelection option has to reset again.
                              */
                         }
                         zoomMapToNewBounds(zoomToBounds);
@@ -2082,7 +2092,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         int zoomLat = (int) Math.floor(Math.log(map.getDiv().getClientHeight() * 2 * Math.PI / deltaLat / GLOBE_PXSIZE) / LOG2);
         return Math.min(Math.min(zoomLat, zoomLng), MAX_ZOOM);
     }
-   
+
     private void zoomMapToNewBounds(LatLngBounds newBounds) {
         if (newBounds != null) {
             LatLngBounds currentMapBounds;
@@ -2103,7 +2113,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     autoZoomIn = newZoomLevel > map.getZoom();
                     autoZoomOut = !autoZoomIn;
                     autoZoomLevel = newZoomLevel;
-                    removeTransitions();
                     if (autoZoomIn) {
                         map.panTo(autoZoomLatLngBounds.getCenter());
                     } else {
