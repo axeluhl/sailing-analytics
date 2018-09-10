@@ -991,5 +991,10 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      */
     void checkIfRaceIsTracking(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Boolean> asyncCallback);
 
-    void resizeImage(ImageResizingTaskDTO updatedImage, AsyncCallback<ImageDTO[]> asyncCallback);
+    /**
+     * @see SailingService#resizeImage(ImageResizingTaskDTO)
+     * @param imageResizingTask the information on how the contained ImageDTO should be resized
+     * @param asyncCallback The callback called after finishing resizing, storing the returned ImageDTOs somewhere is proposed
+     */
+    void resizeImage(ImageResizingTaskDTO imageResizingTask, AsyncCallback<ImageDTO[]> asyncCallback);
 }

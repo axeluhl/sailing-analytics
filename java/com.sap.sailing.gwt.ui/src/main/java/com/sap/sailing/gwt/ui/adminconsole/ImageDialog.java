@@ -54,7 +54,6 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO> 
     protected List<CheckBox> doResize;
     protected Label doResizeLabel;
     private final BusyIndicator busyIndicator;
-    private final ObservableBoolean storageServiceAvailable;
 
     protected static class ImageParameterValidator implements Validator<ImageResizingTaskDTO>{
         private StringMessages stringMessages;
@@ -160,7 +159,6 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO> 
         this.sailingService = sailingService;
         this.creationDate = creationDate;
         this.doResize = doResize;
-        this.storageServiceAvailable = storageServiceAvailable;
         storageServiceAvailable.registerObserver(this);
         getDialogBox().getWidget().setWidth("730px");
         busyIndicator = new SimpleBusyIndicator();
@@ -282,6 +280,6 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO> 
     
     @Override
     public void getNotified(Boolean data) {
-        imageURLAndUploadComposite.setUploadEnabled(storageServiceAvailable.getValue());      
+        imageURLAndUploadComposite.setUploadEnabled(data.booleanValue());      
     }
 }

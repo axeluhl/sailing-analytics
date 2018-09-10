@@ -30,7 +30,6 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sse.common.media.MediaTagConstants;
-import com.sap.sse.common.observer.GenericObserver;
 import com.sap.sse.common.observer.ObservableBoolean;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
@@ -42,7 +41,7 @@ import com.sap.sse.gwt.client.media.VideoDTO;
  * 
  * @author Frank Mittag (C5163974)
  */
-public class VideosListComposite extends Composite implements GenericObserver<Boolean> {
+public class VideosListComposite extends Composite {
     private final StringMessages stringMessages;
 
     private CellTable<VideoDTO> videoTable;
@@ -71,7 +70,6 @@ public class VideosListComposite extends Composite implements GenericObserver<Bo
 
     public VideosListComposite(final StringMessages stringMessages, ObservableBoolean storageServiceAvailable) {
         this.stringMessages = stringMessages;
-        storageServiceAvailable.registerObserver(this);
         mainPanel = new SimplePanel();
         panel = new VerticalPanel();
         mainPanel.setWidget(panel);
@@ -297,10 +295,5 @@ public class VideosListComposite extends Composite implements GenericObserver<Bo
 
     public List<VideoDTO> getAllVideos() {
         return videoListDataProvider.getList();
-    }
-
-    @Override
-    public void getNotified(Boolean data) {
-        // TODO Auto-generated method stub
     }
 }

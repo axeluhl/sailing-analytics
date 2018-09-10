@@ -1,9 +1,0 @@
-diff a/java/com.sap.sailing.gwt.ui/src/main/java/com/sap/sailing/gwt/ui/adminconsole/ImageDialog.java b/java/com.sap.sailing.gwt.ui/src/main/java/com/sap/sailing/gwt/ui/adminconsole/ImageDialog.java	(rejected hunks)
-@@ -58,6 +58,7 @@
-     protected static class ImageParameterValidator implements Validator<ImageDTO> {
-         private StringMessages stringMessages;
-         private List<CheckBox> doResize;
-+        
-         public ImageParameterValidator(StringMessages stringMessages, ArrayList<CheckBox> doResize) {
-             this.stringMessages = stringMessages;
-             this.doResize = doResize;

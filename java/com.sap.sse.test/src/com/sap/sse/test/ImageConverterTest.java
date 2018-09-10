@@ -53,10 +53,10 @@ public class ImageConverterTest {
     public void testConversions() {
         byte[] byteArray;
         byteArray = converter.inputStreamToByteArray(
-                converter.imageWithMetadataToInputStream(jpgImage.getImage(), "jpg", jpgImage.getMetadata()));
+                converter.imageWithMetadataToInputStream(jpgImage.getImage(), jpgImage.getMetadata(), "jpg"));
         assertArrayEquals(onePixelJpgExample, byteArray);
         byteArray = converter.inputStreamToByteArray(
-                converter.imageWithMetadataToInputStream(pngImage.getImage(), "png", pngImage.getMetadata()));
+                converter.imageWithMetadataToInputStream(pngImage.getImage(), pngImage.getMetadata(), "png"));
         assertArrayEquals(onePixelPngExample, byteArray);
     }
 }

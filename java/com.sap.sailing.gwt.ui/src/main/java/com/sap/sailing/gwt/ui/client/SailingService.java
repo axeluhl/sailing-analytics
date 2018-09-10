@@ -785,5 +785,11 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      */
     Boolean checkIfRaceIsTracking(RegattaAndRaceIdentifier race);
 
-    ImageDTO[] resizeImage(ImageResizingTaskDTO toResizeImage) throws Exception;
+    /**
+     * Resizes an ImageDTO that is part of an ImageResizingTaskDTO into an array of resized versions. This array contains only one entry in most real cases
+     * @param imageResizingTask is an ImageResizingTaskDTO with the information on how the image saved in the ImageDTO should be resized
+     * @return returns an array of ImageDTOs, that contain the resized variants of the ImageDTO in toResizeImage
+     * @throws Exception can throw different type of exceptions
+     */
+    ImageDTO[] resizeImage(ImageResizingTaskDTO imageResizingTask) throws Exception;
 }

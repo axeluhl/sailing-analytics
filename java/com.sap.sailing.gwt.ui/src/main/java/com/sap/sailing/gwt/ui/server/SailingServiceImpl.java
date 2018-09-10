@@ -7897,7 +7897,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         String sourceRef = resizingTask.getImage().getSourceRef();
         String fileType = sourceRef.substring(sourceRef.lastIndexOf(".") + 1);
         ImageWithMetadata imageAndMetadata = converter.loadImage(HttpUrlConnectionHelper.redirectConnection(new URL(sourceRef)).getInputStream(), fileType);
-        List<BufferedImage> resizedImages = converter.convertImage(imageAndMetadata.getImage(), resizingTask.getImage().getWidthInPx(), resizingTask.getImage().getHeightInPx(), resizingTask.getResizingTask());
+        List<BufferedImage> resizedImages = converter.convertImage(imageAndMetadata.getImage(), resizingTask.getResizingTask());
         List<String> sourceRefs = storeImages(resizedImages, fileType, imageAndMetadata.getMetadata());
         List<ImageDTO> resizedImagesAsDTOs = createImageDTOsFromURLsAndResizingTask(sourceRefs,resizingTask, resizedImages);
         for(String tag : resizingTask.getImage().getTags()) {
@@ -7932,7 +7932,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private List<String> storeImages(List<BufferedImage> resizedImages, String fileType, IIOMetadata metadata) {
         List<String> sourceRefs = new ArrayList<>();
         for(BufferedImage resizedImage : resizedImages) {
-            InputStream fileStorageStream = new ImageConverter().imageWithMetadataToInputStream(resizedImage, fileType, metadata);
+            InputStream fileStorageStream = new ImageConverter().imageWithMetadataToInputStream(resizedImage, metadata, fileType);
             try {
                 sourceRefs.add(getService().getFileStorageManagementService().getActiveFileStorageService().storeFile(
                     fileStorageStream, "." + fileType, new Long(fileStorageStream.available())).toString());
