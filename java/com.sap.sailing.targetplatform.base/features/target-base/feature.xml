@@ -93,7 +93,7 @@
          id="org.apache.servicemix.bundles.aws-java-sdk"
          download-size="0"
          install-size="0"
-         version="1.11.373.1"
+         version="1.10.73.1"
          unpack="false"/>
 
    <plugin
