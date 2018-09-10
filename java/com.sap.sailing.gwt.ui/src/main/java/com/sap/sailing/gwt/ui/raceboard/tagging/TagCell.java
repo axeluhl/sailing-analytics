@@ -188,16 +188,16 @@ public class TagCell extends AbstractCell<TagDTO> {
         SafeHtml headingButtons = SafeHtmlUtils.EMPTY_SAFE_HTML;
         // preview cells do not show buttons
         if (!isPreviewCell) {
-            // TODO: As soon as permission-vertical branch got merged into master, apply
-            // new permission system at this if-statement and remove this old way of
-            // checking for permissions. (see bug 4104, comment 9)
-            // functionality: Check if user has the permission to delete or edit this tag.
             if (userService.getCurrentUser() != null) {
                 // create buttons with icons
                 SafeHtml deleteButton = tagCellTemplate.button(style.tagActionButton() + " " + style.tagDeleteButton(),
                         stringMessages.tagDeleteTag(), tagCellTemplate.icon(resources.deleteIcon().getSafeUri()));
                 SafeHtml editButton = tagCellTemplate.button(style.tagActionButton() + " " + style.tagEditButton(),
                         stringMessages.tagEditTag(), tagCellTemplate.icon(resources.editIcon().getSafeUri()));
+                // TODO: As soon as permission-vertical branch got merged into master, apply
+                // new permission system at this if-statement and remove this old way of
+                // checking for permissions. (see bug 4104, comment 9)
+                // functionality: Check if user has the permission to delete or edit this tag.
                 if (tag.getUsername().equals(userService.getCurrentUser().getName())) {
                     headingButtons = tagCellTemplate.headerButtonsDeletableAndModifyable(style.tagCellHeadingButtons(),
                             editButton, deleteButton);
