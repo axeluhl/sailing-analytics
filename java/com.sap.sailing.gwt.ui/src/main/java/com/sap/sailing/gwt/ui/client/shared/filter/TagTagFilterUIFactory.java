@@ -4,7 +4,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.ui.shared.TagDTO;
+import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sse.common.filter.TextOperator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 

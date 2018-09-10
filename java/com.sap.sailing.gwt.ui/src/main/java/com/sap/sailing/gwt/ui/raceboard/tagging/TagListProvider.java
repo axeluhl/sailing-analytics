@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.view.client.ListDataProvider;
-import com.sap.sailing.gwt.ui.shared.TagDTO;
+import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 

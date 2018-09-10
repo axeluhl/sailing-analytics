@@ -29,7 +29,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
-import com.sap.sailing.gwt.ui.shared.TagDTO;
+import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.Notification;

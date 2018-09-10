@@ -14,10 +14,10 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
+import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanel.State;
-import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
