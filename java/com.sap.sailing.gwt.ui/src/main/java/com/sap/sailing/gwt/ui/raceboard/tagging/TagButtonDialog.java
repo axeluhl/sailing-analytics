@@ -321,15 +321,31 @@ public class TagButtonDialog extends DialogBox {
         cancelButton.setStyleName(style.tagDialogButton());
         cancelButton.addStyleName("gwt-Button");
         cancelButton.addClickHandler(event -> {
-
-            inputPanel.clearAllValues();
-            tagPreviewPanel.renderPreview(inputPanel);
-            tagButtonTable.setVisible(true);
-            saveButton.setVisible(false);
-            cancelButton.setVisible(false);
-            closeButton.setVisible(true);
-            addTagButtonButton.setVisible(true);
-            center();
+            // ask user for confirmation to discard changes if values of input fields changed
+            if (!inputPanel.compareFieldsToTagButton(selectedTagButton)) {
+                new ConfirmationDialog(stringMessages, stringMessages.tagDiscardChangesHeading(),
+                        stringMessages.tagDiscardChanges(), confirmed -> {
+                            if (confirmed) {
+                                inputPanel.clearAllValues();
+                                tagPreviewPanel.renderPreview(inputPanel);
+                                tagButtonTable.setVisible(true);
+                                saveButton.setVisible(false);
+                                cancelButton.setVisible(false);
+                                closeButton.setVisible(true);
+                                addTagButtonButton.setVisible(true);
+                                center();
+                            }
+                        });
+            } else {
+                inputPanel.clearAllValues();
+                tagPreviewPanel.renderPreview(inputPanel);
+                tagButtonTable.setVisible(true);
+                saveButton.setVisible(false);
+                cancelButton.setVisible(false);
+                closeButton.setVisible(true);
+                addTagButtonButton.setVisible(true);
+                center();
+            }
         });
     }
 
