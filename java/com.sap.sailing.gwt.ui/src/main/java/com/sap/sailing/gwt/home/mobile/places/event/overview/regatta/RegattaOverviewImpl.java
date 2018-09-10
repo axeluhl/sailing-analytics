@@ -41,12 +41,12 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
             this.setupProgress(container);
             this.setupLiveRaces(container);
         }
+        this.setupMiniLeaderboard(container);
+        this.initRacesNavigation(container);
         if (!isMultiRegattaEvent()) {
             this.setupOverviewStage(container);
             this.setupEventDescription(container);
         }
-        this.setupMiniLeaderboard(container);
-        initRacesNavigation(container);
         if (!isMultiRegattaEvent()) {
             this.setupUpdateBox(container);
             this.setupImpressions(container);
