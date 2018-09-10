@@ -17,7 +17,7 @@
 				<div class="{local_res.css.sectionheader_item_subtitle}" style="display:none;" ui:field="subtitleUi"></div>
 			</div>
 			<div class="{local_res.css.sectionheader_item} {local_res.css.sectionheader_itemright}" style="display:none;" ui:field="headerRightUi">
-				<g:SimplePanel ui:field="widgetContainerUi"></g:SimplePanel>
+				<g:SimplePanel addStyleNames="{local_res.css.sectionheader_itemright_container}" ui:field="widgetContainerUi" />
 				<div class="{local_res.css.sectionheader_item_infotext}" style="display:none;" ui:field="infoTextUi"></div>
 				<div class="{local_res.css.sectionheader_item_arrow}" style="display:none;" ui:field="actionArrowUi"></div>
 			</div>

@@ -4,9 +4,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.DataResource;
 import com.google.gwt.resources.client.DataResource.MimeType;
-import com.sap.sailing.gwt.home.desktop.resources.SharedDesktopResources;
+import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 
-public interface RegattaStatusResources extends SharedDesktopResources {
+public interface RegattaStatusResources extends SharedHomeResources {
     public static final RegattaStatusResources INSTANCE = GWT.create(RegattaStatusResources.class);
 
     @Source("RegattaStatus.gss")
@@ -21,7 +21,6 @@ public interface RegattaStatusResources extends SharedDesktopResources {
         String grid();
         String regattastatus_header();
         String regattastatus_header_title();
-        String regattastatus_header_indicators();
         String regattastatus_filter();
         String regattastatus_content();
         String regattastatus_content_regatta();
@@ -35,9 +34,5 @@ public interface RegattaStatusResources extends SharedDesktopResources {
         String regattastatus_content_regatta_race_arrow();
         String sectionheader();
         String togglecontainerhidden();
-        String iconHeaderGPS();
-        String iconHeaderWind();
-        String iconHeaderVideo();
-        String iconHeaderAudio();
     }
 }

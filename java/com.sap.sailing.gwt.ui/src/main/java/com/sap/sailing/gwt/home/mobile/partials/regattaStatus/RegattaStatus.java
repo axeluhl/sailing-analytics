@@ -61,19 +61,21 @@ public class RegattaStatus extends Composite implements RefreshableWidget<Regatt
 
     @Override
     public void setData(RegattasAndLiveRacesDTO data) {
-        stucture.clear();
-        regattaContainerUi.clearContent();
-        collapsableContainerUi.clearContent();
-        if (data.hasRegattasWithRaces()) {
-            for (Entry<RegattaMetadataDTO, Set<LiveRaceDTO>> pair : data.getRegattasWithRaces().entrySet()) {
-                RegattaStatusRegatta regattaWidget = addRegatta(regattaContainerUi, pair.getKey());
-                regattaWidget.addRaces(pair.getValue());
+        if (stucture.isEmpty()) {
+            stucture.clear();
+            regattaContainerUi.clearContent();
+            collapsableContainerUi.clearContent();
+            if (data.hasRegattasWithRaces()) {
+                for (Entry<RegattaMetadataDTO, Set<LiveRaceDTO>> pair : data.getRegattasWithRaces().entrySet()) {
+                    RegattaStatusRegatta regattaWidget = addRegatta(regattaContainerUi, pair.getKey());
+                    regattaWidget.addRaces(pair.getValue());
+                }
             }
-        }
-        toggleButtonUi.setStyleName(TOGGLEHIDDEN_STYLE,
-                !data.hasRegattasWithRaces() || !data.hasRegattasWithoutRaces());
-        for (RegattaMetadataDTO regatta : data.getRegattasWithoutRaces()) {
-            addRegatta(data.hasRegattasWithRaces() ? collapsableContainerUi : regattaContainerUi, regatta);
+            toggleButtonUi.setStyleName(TOGGLEHIDDEN_STYLE,
+                    !data.hasRegattasWithRaces() || !data.hasRegattasWithoutRaces());
+            for (RegattaMetadataDTO regatta : data.getRegattasWithoutRaces()) {
+                addRegatta(data.hasRegattasWithRaces() ? collapsableContainerUi : regattaContainerUi, regatta);
+            }
         }
     }
     

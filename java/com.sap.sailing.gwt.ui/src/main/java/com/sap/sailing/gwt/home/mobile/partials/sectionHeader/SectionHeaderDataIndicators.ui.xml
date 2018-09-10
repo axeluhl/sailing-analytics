@@ -2,8 +2,8 @@
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
-    <ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.regattaStatus.RegattaStatusResources" />
-    <div class="{local_res.css.regattastatus_header_indicators}">
+    <ui:with field="local_res" type="com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderResources" />
+    <div class="{local_res.css.sectionheader_item_indicators}">
         <div class="{local_res.css.iconHeaderGPS}" ui:field="gpsDataIndicatorUi"></div>
         <div class="{local_res.css.iconHeaderWind}" ui:field="windDataIndicatorUi"></div>
         <div class="{local_res.css.iconHeaderVideo}" ui:field="videoDataIndicatorUi"></div>

@@ -128,7 +128,7 @@ public class SectionHeaderContent extends Composite {
         widgetContainerUi.setWidget(additionalWidget);
         additionalWidget.getElement().setAttribute("dir", "rtl");
         Scheduler.get().scheduleDeferred(
-                () -> titleAndLabelContainerUi.getStyle().setMarginRight(additionalWidget.getOffsetWidth(), Unit.PX));
+                () -> titleAndLabelContainerUi.getStyle().setMarginRight(widgetContainerUi.getOffsetWidth(), Unit.PX));
     }
 
     public void initBoatClassPopup(String boatClassName) {

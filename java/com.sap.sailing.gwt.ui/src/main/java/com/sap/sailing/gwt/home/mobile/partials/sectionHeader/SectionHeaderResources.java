@@ -21,11 +21,17 @@ public interface SectionHeaderResources extends SharedHomeResources {
         String sectionheader_item_title();
         String sectionheader_item_label();
         String sectionheader_item_subtitle();
+        String sectionheader_itemright_container();
         String sectionheader_item_infotext();
+        String sectionheader_item_indicators();
         String sectionheader_item_arrow();
         String sectionheader_item_adjust_title_left();
         String sectionheader_item_adjust_title_right();
         String accordion();
         String collapsed();
+        String iconHeaderGPS();
+        String iconHeaderWind();
+        String iconHeaderVideo();
+        String iconHeaderAudio();
     }
 }

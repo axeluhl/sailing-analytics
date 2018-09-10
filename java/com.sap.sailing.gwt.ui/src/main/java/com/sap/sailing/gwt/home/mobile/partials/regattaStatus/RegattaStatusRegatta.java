@@ -15,6 +15,7 @@ import com.sap.sailing.gwt.home.communication.event.LiveRaceDTO;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.mobile.partials.section.IsMobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
+import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderDataIndicators;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
 import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase.Presenter;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
@@ -35,7 +36,7 @@ public class RegattaStatusRegatta extends Composite implements IsMobileSection, 
         this.presenter = presenter;
         initWidget(uiBinder.createAndBindUi(this));
         initRegattaHeader(regatta, presenter.getRegattaOverviewNavigation(regatta.getId()));
-        headerUi.initAdditionalWidget(new RegattaStatusDataIndicators(regatta.getRaceDataInfo()));
+        headerUi.initAdditionalWidget(new SectionHeaderDataIndicators(regatta.getRaceDataInfo()));
     }
 
     @Override
