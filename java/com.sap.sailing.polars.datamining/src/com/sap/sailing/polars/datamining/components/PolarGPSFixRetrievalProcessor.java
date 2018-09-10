@@ -38,8 +38,9 @@ public class PolarGPSFixRetrievalProcessor extends AbstractRetrievalProcessor<Ha
     private final PolarDataMiningSettings settings;
 
     public PolarGPSFixRetrievalProcessor(ExecutorService executor, Collection<Processor<HasGPSFixPolarContext, ?>> resultReceivers,
-            PolarDataMiningSettings settings, int retrievalLevel) {
-        super(HasCompetitorPolarContext.class, HasGPSFixPolarContext.class, executor, resultReceivers, retrievalLevel);
+            PolarDataMiningSettings settings, int retrievalLevel, String retrievedDataTypeMessageKey) {
+        super(HasCompetitorPolarContext.class, HasGPSFixPolarContext.class, executor, resultReceivers, retrievalLevel,
+                retrievedDataTypeMessageKey);
         this.settings = settings;
     }
 

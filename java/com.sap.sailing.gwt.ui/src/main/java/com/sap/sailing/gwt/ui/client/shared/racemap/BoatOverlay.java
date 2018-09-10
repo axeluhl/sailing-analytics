@@ -126,7 +126,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
             Size scaleFactor, Color color) {
         return lastLegType == null || lastLegType != legType || lastTack == null || lastTack != tack
                 || lastSelected == null || lastSelected != isSelected || lastWidth == null || lastWidth != width
-                || lastHeight == null || lastHeight != height || lastScale == null || lastScale.equals(scaleFactor)
+                || lastHeight == null || lastHeight != height || lastScale == null || !lastScale.equals(scaleFactor)
                 || lastColor == null || !lastColor.equals(color);
     }
 

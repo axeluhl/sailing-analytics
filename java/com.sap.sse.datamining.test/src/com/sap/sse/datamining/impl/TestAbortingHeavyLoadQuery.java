@@ -333,7 +333,7 @@ public class TestAbortingHeavyLoadQuery {
                     protected void setAdditionalData(AdditionalResultDataBuilder additionalDataBuilder) { }
                 };
                 
-                Processor<String, Element> retriever1 = new AbstractRetrievalProcessor<String, Element>(String.class, Element.class, executor, Collections.singleton(heavyLoadProcessor), 1) {
+                Processor<String, Element> retriever1 = new AbstractRetrievalProcessor<String, Element>(String.class, Element.class, executor, Collections.singleton(heavyLoadProcessor), 1, "") {
                     @Override
                     protected ProcessorInstruction<Element> createInstruction(String element) {
                         AbstractProcessorInstruction<Element> instruction = (AbstractProcessorInstruction<Element>) super.createInstruction(element);
@@ -365,7 +365,7 @@ public class TestAbortingHeavyLoadQuery {
                         if(canProcessElements()) unfinishedInstructions.remove(instruction);
                     }
                 };
-                Processor<Iterable<String>, String> retriever0 = new AbstractRetrievalProcessor<Iterable<String>, String>(dataSourceType, String.class, executor, Collections.singleton(retriever1), 0) {
+                Processor<Iterable<String>, String> retriever0 = new AbstractRetrievalProcessor<Iterable<String>, String>(dataSourceType, String.class, executor, Collections.singleton(retriever1), 0, "") {
                     @Override
                     protected ProcessorInstruction<String> createInstruction(Iterable<String> element) {
                         AbstractProcessorInstruction<String> instruction = (AbstractProcessorInstruction<String>) super.createInstruction(element);
