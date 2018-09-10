@@ -848,13 +848,8 @@ public class TouchSplitLayoutPanel extends DockLayoutPanel {
                 }
                 splitter.setAssociatedWidgetSize(0, /* defer */false);
 
-                // need to ensure visibility of dragger and style of toggle button
+                // need to ensure visibility of dragger, do NOT use setVisible() as south/north splitter should be shown always
                 splitter.setDraggerVisible(!hidden);
-                splitter.setVisible(!hidden);
-                splitter.getToggleButton().addStyleDependentName("Closed");
-                splitter.getToggleButton().addStyleDependentName("Closed-"+associatedComponentToWidget.getDependentCssClassName());
-                splitter.getToggleButton().removeStyleDependentName("Open");
-                splitter.getToggleButton().removeStyleDependentName("Open-"+associatedComponentToWidget.getDependentCssClassName());
             } else {
                 widget.setVisible(true);
                 if (associatedComponentToWidget != null) {
