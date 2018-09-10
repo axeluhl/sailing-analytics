@@ -192,7 +192,7 @@ A user wants to create a new event. But instead of creating it on an existing se
 
 The steps are:
 
-- Launch a new instance from a prepared AMI (either the AMI is regularly updated with the latest packages and kernel patches, or a "yum update" needs to be run and then the instance rebooted)
+- Launch a new instance from a prepared AMI (either the AMI is regularly updated with the latest packages and kernel patches, or a "yum update" needs to be run and then the instance rebooted). The user provide hints as to the sizing of the instance in terms of CPU and memory. Ideally, these sizing parameters would be given in domain concepts, such as number of tracked competitors expected, or number of competitors in largest leaderboard in the event.
 - The latest (or a specified) release is installed to */home/sailing/servers/server*
 - The */home/sailing/servers/server/env.sh* file is adjusted to reflect the server name, MongoDB settings, as well as the ports to be used (for a dedicated server probably the defaults at 8888 for the HTTP server, 14888 for the OSGi console telnet port, and 2010 for the Expedition UDP connector)
 - The Java process is launched
@@ -203,24 +203,99 @@ The steps are:
 - The Apache *httpd* server is launched
 - Two target groups *S-ded-&lt;servername&gt;* and *S-ded-&lt;servername&gt;-master* are created, and the new instance is added to both of them
 - Two new ALB rules for *&lt;servername&gt;.sapsailing.com* and *&lt;servername&gt;-master.sapsailing.com* are created, forwarding their requests to the respective target group from the previous step
+- If requested, a remote server reference is added to www.sapsailing.com that points to the public URL of the replication cluster
 
-asdf
+Monitoring for the target groups shall be established and wired to the auto-scaling procedures which will launch more replicas or terminate replicas as needed. See also [Observe and Automatically Scale a Replication Cluster](#observe-and-automatically-scale-a-replication-cluster).
 
 ### Create a New "Club Set-Up" in a Multi-Instance
 
+This is a variant of [Create a New Event on a Dedicated Replication Cluster](#create-a-new-event-on-a-dedicated-replication-cluster). Likewise, the user will provide a technical server name, such as "LYC" for "Lübecker Yacht-Club."  A point of contact may be provided, in the form of a name and an e-mail address, telling whom to contact for questions about the instance.
+
+The difference compared to a dedicated replication cluster set-up is that a multi-instance host needs to be identified that has resources available to run the new Java process. This requires enough disk space, as well as enough available fast swap space and a CPU usage that is not saturated. When such a host has been identified, no *yum* activity or anything related to the AMI will be conducted. Otherwise, a new multi-instance host needs to be launched from an AMI, and the same *yum* activities as above apply.
+
+A port combination for Jetty/Telnet/Expedition UDP is identified based on any already mapped Java processes on that host. The port combination together with the MongoDB and RabbitMQ settings are stored in an *env.sh* file under */home/sailing/servers/&lt;servername&gt;* and the process can be launched as usual.
+
+The Apache configuration entry needs to be added, pointing to the respective Jetty port, usually with a "*Plain*" or "*Home*" macro because such club servers usually don't serve a single event. As in the scenario above, the Apache *httpd* server process will then need to load the new configuration.
+
+The load balancer handling varies slightly compared to the dedicated replication cluster set-up. The health checks need to be set to probe the Java instance using HTTP at the registered Jetty port, not the HTTPS set-up through the Apache server because the Apache server on a multi-instance can handle several Java processes.
+
+Using a separate *-master* URL seems advisable because when migrating the Java process to a larger set-up later, all devices have already been bound to the *-master* URL, and no re-configuration will be required.
+
 ### Migrate from a Multi-Instance to a Dedicated Replication Cluster
+
+When the orchestrator figures that an event is approaching on a Java server hosted in a multi-instance set-up and the event seems too large to be handled successfully by such set-up, migration to a dedicated replication cluster is a good way to handle the load. This migration should ideally happen when there is no write-load applied to the instance.
+
+As a first step, the *-master* target group is emptied. This will avoid any write requests such as those coming from the Race Manager app or the Sail InSight app reaching a master process that is deprecated and will be stopped anytime soon. Then, the [Create a New Event on a Dedicated Replication Cluster](#create-a-new-event-on-a-dedicated-replication-cluster) scenario is executed, except for the step of creating a new event and new load balancer rules and target groups. Just by configuring the MongoDB database name, all existing data held so far by the Java process hosted in the multi-instance set-up will be loaded into a dedicated master instance.
+
+The new dedicated master server can be added to the public-facing target group for the server name as well as to the *-master* target group. The health checks of both, public and *-master* target group need to be changed to the default health check rules for dedicated replication clusters (using the default HTTPS port). When healthy, the old master server will be removed from the public-facing target group. The Java process on the multi-instance host can be shut down. Its resources such as the directory on the multi-host and the port "reservations" that this entailed can be freed. The Apache httpd configuration entry on the multi-instance host shall be removed, and the Apache configuration shall be reloaded.
 
 ### Migrate from a Dedicated Replication Cluster into a Multi-Instance
 
+This is the reverse case to [Migrate from a Multi-Instance to a Dedicated Replication Cluster](#migrate-from-a-multi-instance-to-a-dedicated-replication-cluster). In detail:
+
+- Start out with removing the existing master server from the *-master* target group
+- [Create a New "Club Set-Up" in a Multi-Instance](#create-a-new-club-set-up-in-a-multi-instance), except that the database already exists, and the data will be loaded from that existing database, and the target groups and load balancer rules do not have to be created
+- add the new multi-instance Java server to the two target groups
+- change the health check rules for both target groups so they use HTTP for the multi-instance Java server's HTTPS port
+- when the new Java server process is considered healthy by both target groups, remove the dedicated master and all replicas from all target groups
+- terminate all instances of dedicated replication cluster
+
 ### Observe and Automatically Scale a Replication Cluster
+
+According to our experience, in most cases scalability limitations are caused by bandwidth bottlenecks. Less frequently, CPU limitations cause performance degradations when several large leaderboards need to be re-calculated at high frequency. This can also be caused by several dedicated requests for specific, non-live time points. There are different approaches to handling these two different kinds of bottlenecks. The former requires more bandwidth in the form or more instances to be made available to the load balancer. The latter requires more CPU resources and optionally the use of [sharding](#sharding).
+
+When bandwidth limitations are observed, adding replicas is the simple remedy. The replicas are launched with the exact same release as the master to which they shall belong. Note that replication can also be used for master server processes running on a multi-instance host. The master server may or may not be part of the public-facing target group. If it is low on network resources it may be a good idea to not include it in the public-facing target group. The new replica will be added to the public-facing target group. A solid health check will avoid that it receives any application domain-oriented requests unless the replication process has completed the initial load phase successfully.
+
+When a master server process is CPU bound, this will usually be because of abundant leaderboard (re-)calculation requests hitting that server. The quickest remedy is to add replicas to the public-facing target group and to remove the master server from that group. Those replicas can have more CPU resources than the master. Their memory should not be less than that of the master.
+
+If replicas are bound by their CPU power, simply adding more replicas will usually not help. Instead, [sharding](#sharding) may provide a solution (see also [Configure Sharding in a Replication Cluster](#configure-sharding-in-a-replication-cluster)). It allows spreading leaderboard (re-)calculation load across several target groups, avoiding a situation where all replicas have to (re-)calculate all leaderboards all the time. Target groups will then receive only a subset of the leaderboard (re-)calculation requests, based on the leaderboard names.
+
+When the CPU and/or network load drop under a given threshold for a given period of time, replicas may be removed from the public-facing target group and can then be terminated, once the *draining* status is over. During termination the replica will automatically save its logs.
 
 ### Archiving
 
+When an event is over, a dedicated replication cluster is no longer required, and the scaling requirements change from high-CPU, high ingestion rates to read-only with decreasing, rather sporadic access. The archive server(s) are geared towards this load profile. Furthermore, with our current data mining architecture, archived races are amenable to holistic analysis.
+
+The archive server, as described in [Archive Servers](#archive-servers), comes as a production and a fail-over instance. Archiving is done using the Master Data Import (MDI) on the production archive server, using the dedicated replication cluster's master as source. An API shall be provided that lets the importing server discover the restore records needed to load the races. The importing archive server shall then restore the tracked races, before a comparison with the exporting source server can be carried out.
+
+After the comparison was successful, the remote server reference from the archive server to the dedicated replication cluster can be removed, avoiding event duplication on the archive server. An Apache macro for the event imported has to be added to the central web server. Then, the ALB rules for the *-master* and public-facing sub-domain of the dedicated replication cluster can be removed, the instances terminated and the target groups deleted. The default "catch-all" rule will delegate requests for the event to the archive server where the Apache rule re-writes it accordingly.
+
 ### Archive Server Upgrade and Switch
+
+Upon administrator request a release upgrade can be performed for the archive server. Based on the principles discussed in [Archive Servers](#archive-servers), the fail-over server will receive the new release and will have its Java process re-started. Restoring the many races can take several hours. When done, a comparison with the production archive server is carried out. Only when no differences are found and a few spot checks show reasonable results the switch is performed.
+
+Today, these spot checks are done "manually" by looking at a few sample races and a few leaderboards. These steps will need automation.
+
+The switch is currently performed by adjusting the rule in *sapsailing.com:/etc/httpd/conf.d/000-macros.conf* that tells the internal IP address of the production archive server, followed by a *service httpd reload* command.
 
 ### Automatic Archive Server Fail-Over
 
+When the production archive server becomes "unhealthy" a fast switch to the fail-over archive server is required. The reasons for an unhealthy production archive server may vary. Recently, for example, we experienced an unexpected AWS-enforced and not announced reboot of the EC2 instance. Other cases may involve regressions in a release to which the archive server was upgraded.
+
+We may use the ALB architecture and separate web servers for the two archive servers, sharing their configuration rules, to implement such an automatic fail-over. With the ALB rules implementing a precedence order, the default rule could forward to the target group containing the web server for the fail-over archive server, whereas a last-but-one rule would catch **.sapsailing.com* and would forward to the target group containing the production archive server's web server. This way, when the production archive server becomes unhealthy, the default rule will apply and will forward events to the fail-over archive server.
+
+A severe alert shall be triggered when the production archive server becomes unavailable.
+
 ### Configure Sharding in a Replication Cluster
+
+Sharding works by the GWT RPC requests targeting a specific leaderboard being identified by a specific URL path suffix that mentions the leaderboard to which the request is specific. This way, an ALB rule can be established that matches the specific leaderboard suffix and forwards to a dedicated target group. A replication cluster then will have more than the two typical target groups (*-master* and public-facing). The rule forwarding to the public-facing target group will act as the default after all leaderboard-specific routing rules.
+
+The decision which and how many target groups to create shall be made based on monitoring the leaderboard re-calculation times. If the times exceed a certain threshold, and the general decision to use sharding is made by the orchestrator, the orchestrator should start by creating a target group for the leaderboard that is most expensive to calculate, considering the re-calculation frequency over some current time range such as a few minutes, as well as the duration required per re-calculation.
+
+Depending on the number of replicas already available, the orchestrator may choose to partition the existing replica set such that after a target group and ALB rule for a specific leaderboard has been established, the replicas added to that target group will be removed from the public-facing target group. The problem with this set-up could be that then those replicas cannot serve as default target in case other replicas become unhealthy.
+
+Better would be a complete partitioning based on all the leaderboard requests observed over a recent time range. The public-facing target group then would only serve as a default rule for requests not specific to any leaderboard, and in case target groups for specific leaderboards have no healthy targets anymore.
 
 ### Amazon Machine Image (AMI) Upgrades
 
+The Linux installation that our images are based upon receives regular updates for all sorts of packages. Most package updates can be obtained after an instance was booted, simply by running the command *yum update*. However, kernel updates require the instance to be re-booted and this is not something we would like to have to do each time an instance needs to be started.
+
+Instead, the AMI used to launch such instances should regularly and automatically be maintained, and there shall be a test procedure in place for the updated AMI before it is made the new default. A few older revisions may be kept as fallback, in case the tests don't catch a problem with an upgrade.
+
+Part of the upgrade process needs to be an adjustable, parameterizable boot-up script that can understand whether a re-boot is performed as part of an image upgrade. In this case, certain actions need to be skipped, such as launching the Apache server or the Java process or patching any files based on the user details, assuming the instance were to become part of an ALB's target group.
+
+### Add Disk Space to MongoDB
+
+When monitoring shows that the disk volumes holding the MongoDB contents crosses a certain threshold (such as 90%) then more disk space needs to be provided automatically. [https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-modify-volume.html](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-modify-volume.html) explains the process with AWS and Linux tools.
+
+Currently, the instance used to run the MongoDB processes is of type m1.large which is an "old" instance type that does not support in-place volume size changes without detaching the volume. Therefore, as a first step towards this goal the MongoDB/RabbitMQ instance should be migrated to a new instance type with similar resources, such as *m4.large*. Then, growing the file-system "in-flight" should not be a problem according to the documentation...

@@ -36,20 +36,15 @@ public interface DataMiningServer {
     Date getComponentsChangedTimepoint();
 
     FunctionProvider getFunctionProvider();
-    Iterable<Function<?>> getAllStatistics();
-    Iterable<Function<?>> getFunctionsFor(Class<?> sourceType);
-    Iterable<Function<?>> getStatisticsFor(Class<?> sourceType);
-    Iterable<Function<?>> getDimensionsFor(Class<?> sourceType);
-    Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getDimensionsMappedByLevelFor(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
-    ReducedDimensions getReducedDimensionsMappedByLevelFor(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition);
     Function<?> getFunctionForDTO(FunctionDTO functionDTO);
 
     DataRetrieverChainDefinitionProvider getDataRetrieverChainDefinitionProvider();
-    Iterable<DataRetrieverChainDefinition<?, ?>> getDataRetrieverChainDefinitions();
-    <DataSourceType> Iterable<DataRetrieverChainDefinition<DataSourceType, ?>> getDataRetrieverChainDefinitionsBySourceType(Class<DataSourceType> dataSourceType);
-    <DataType> Iterable<DataRetrieverChainDefinition<?, DataType>> getDataRetrieverChainDefinitionsByDataType(Class<DataType> retrievedDataType);
-    <DataSourceType, DataType> Iterable<DataRetrieverChainDefinition<DataSourceType, DataType>> getDataRetrieverChainDefinitions(Class<DataSourceType> dataSourceType, Class<DataType> retrievedDataType);
     <DataSourceType, DataType> DataRetrieverChainDefinition<DataSourceType, DataType> getDataRetrieverChainDefinitionForDTO(DataRetrieverChainDefinitionDTO retrieverChainDTO);
+    
+    AggregationProcessorDefinitionProvider getAggregationProcessorProvider();
+    <ExtractedType, ResultType> AggregationProcessorDefinition<ExtractedType, ResultType> getAggregationProcessorDefinitionForDTO(AggregationProcessorDefinitionDTO aggregatorDefinitionDTO);
+    
+    QueryDefinitionDTOProvider getQueryDefinitionDTOProvider();
     
     <DataSourceType> Query<HashSet<Object>> createDimensionValuesQuery(DataRetrieverChainDefinition<DataSourceType, ?> dataRetrieverChainDefinition, DataRetrieverLevel<?, ?> retrieverLevel,
      Iterable<Function<?>> dimensions, Map<DataRetrieverLevel<?, ?>, SerializableSettings> settings, Map<DataRetrieverLevel<?, ?>, Map<Function<?>, Collection<?>>> filterSelection, Locale locale);
@@ -58,13 +53,80 @@ public interface DataMiningServer {
     <ResultType> QueryResult<ResultType> runNewQueryAndAbortPreviousQueries(DataMiningSession session, Query<ResultType> query);
     int getNumberOfRunningQueries();
     
-    AggregationProcessorDefinitionProvider getAggregationProcessorProvider();
-    <ExtractedType> Iterable<AggregationProcessorDefinition<? super ExtractedType, ?>> getAggregationProcessorDefinitions(Class<ExtractedType> extractedType);
-    <ExtractedType> AggregationProcessorDefinition<? super ExtractedType, ?> getAggregationProcessorDefinition(Class<ExtractedType> extractedType, String aggregationNameMessageKey);
-    <ExtractedType, ResultType> AggregationProcessorDefinition<ExtractedType, ResultType> getAggregationProcessorDefinitionForDTO(AggregationProcessorDefinitionDTO aggregatorDefinitionDTO);
+    //-----------------------------------------------------------------------------------------------------------------
+    // Component Accessors as default methods
+    //-----------------------------------------------------------------------------------------------------------------
+
+    // Functions ------------------------------------------------------------------------------------------------------
     
-    QueryDefinitionDTOProvider getQueryDefinitionDTOProvider();
-    Iterable<PredefinedQueryIdentifier> getPredefinedQueryIdentifiers();
-    ModifiableStatisticQueryDefinitionDTO getPredefinedQueryDefinitionDTO(PredefinedQueryIdentifier identifier);
+    default Function<?> getIdentityFunction() {
+        return getFunctionProvider().getIdentityFunction();
+    }
+    
+    default Iterable<Function<?>> getAllStatistics() {
+        return getFunctionProvider().getAllStatistics();
+    }
+    
+    default Iterable<Function<?>> getFunctionsFor(Class<?> sourceType) {
+        return getFunctionProvider().getFunctionsFor(sourceType);
+    }
+    
+    default Iterable<Function<?>> getStatisticsFor(Class<?> sourceType) {
+        return getFunctionProvider().getStatisticsFor(sourceType);
+    }
+    
+    default Iterable<Function<?>> getDimensionsFor(Class<?> sourceType) {
+        return getFunctionProvider().getDimensionsFor(sourceType);
+    }
+    
+    default Map<DataRetrieverLevel<?, ?>, Iterable<Function<?>>> getDimensionsMappedByLevelFor(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
+        return getFunctionProvider().getDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
+    }
+    
+    default ReducedDimensions getReducedDimensionsMappedByLevelFor(DataRetrieverChainDefinition<?, ?> dataRetrieverChainDefinition) {
+        return getFunctionProvider().getReducedDimensionsMappedByLevelFor(dataRetrieverChainDefinition);
+    }
+    
+    // Retriever Chains -----------------------------------------------------------------------------------------------
+
+    default Iterable<DataRetrieverChainDefinition<?, ?>> getDataRetrieverChainDefinitions() {
+        return getDataRetrieverChainDefinitionProvider().getAll();
+    }
+    
+    default <DataSourceType> Iterable<DataRetrieverChainDefinition<DataSourceType, ?>> getDataRetrieverChainDefinitionsBySourceType(Class<DataSourceType> dataSourceType) {
+        return getDataRetrieverChainDefinitionProvider().getBySourceType(dataSourceType);
+    }
+    
+    default <DataType> Iterable<DataRetrieverChainDefinition<?, DataType>> getDataRetrieverChainDefinitionsByDataType(Class<DataType> retrievedDataType) {
+        return getDataRetrieverChainDefinitionProvider().getByDataType(retrievedDataType);
+    }
+    
+    default <DataSourceType, DataType> Iterable<DataRetrieverChainDefinition<DataSourceType, DataType>> getDataRetrieverChainDefinitions(Class<DataSourceType> dataSourceType, Class<DataType> retrievedDataType) {
+        return getDataRetrieverChainDefinitionProvider().get(dataSourceType, retrievedDataType);
+    }
+    
+    // Aggregators ----------------------------------------------------------------------------------------------------
+    
+    default Iterable<AggregationProcessorDefinition<?, ?>> getAllAggregationProcessorDefinitions() {
+        return getAggregationProcessorProvider().getAll();
+    }
+
+    default <ExtractedType> Iterable<AggregationProcessorDefinition<? super ExtractedType, ?>> getAggregationProcessorDefinitions(Class<ExtractedType> extractedType) {
+        return getAggregationProcessorProvider().getByExtractedType(extractedType);
+    }
+    
+    default <ExtractedType> AggregationProcessorDefinition<? super ExtractedType, ?> getAggregationProcessorDefinition(Class<ExtractedType> extractedType, String aggregationNameMessageKey) {
+        return getAggregationProcessorProvider().get(extractedType, aggregationNameMessageKey);
+    }
+    
+    // Predefined Queries ---------------------------------------------------------------------------------------------
+
+    default Iterable<PredefinedQueryIdentifier> getPredefinedQueryIdentifiers() {
+        return getQueryDefinitionDTOProvider().getIdentifiers();
+    }
+    
+    default ModifiableStatisticQueryDefinitionDTO getPredefinedQueryDefinitionDTO(PredefinedQueryIdentifier identifier) {
+        return getQueryDefinitionDTOProvider().get(identifier);
+    }
     
 }

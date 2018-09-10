@@ -35,4 +35,15 @@ public class SingleRaceLeaderboardSettings extends LeaderboardSettings {
         super.addChildSettings();
         showRaceRankColumn = new BooleanSetting("racerank", this, false);
     }
+
+    /**
+     * Constructs a new {@link SingleRaceLeaderboardSettings} instance using defaults except the values for
+     * raceDetailsToShow which are set to the given values.
+     */
+    public static SingleRaceLeaderboardSettings createDefaultSettingsWithRaceDetailValues(
+            final Iterable<DetailType> raceDetailsToShow) {
+        final SingleRaceLeaderboardSettings newSettings = new SingleRaceLeaderboardSettings(false);
+        newSettings.raceDetailsToShow.setValues(raceDetailsToShow);
+        return newSettings;
+    }
 }

@@ -111,7 +111,7 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
     @Override
     protected MultiRaceLeaderboardSettings overrideDefaultsForNamesOfRaceColumns(
             MultiRaceLeaderboardSettings currentSettings, LeaderboardDTO result) {
-        return currentSettings.overrideDefaultsForNamesOfRaceColumns(result.getNamesOfRaceColumns());
+        return currentSettings.withNamesOfRaceColumnsToShowDefaults(result.getNamesOfRaceColumns());
     }
 
     @Override

@@ -564,6 +564,16 @@
             ],
             "key": "MITL"
         },
+                {
+            "name": "JQuery",
+            "version": "3.3.1",
+            "owner": "jQuery Foundation and other contributors",
+            "homepage": "http://jquery.com/",
+            "acknowledgements": [
+                "Copyright 2018 jQuery Foundation and other contributors"
+            ],
+            "key": "MITL"
+        },
         {
             "name": "json-simple",
             "version": "1.1",
@@ -731,7 +741,7 @@
             "owner": "\"Mr.doob\"",
             "homepage": "https://threejs.org/",
             "acknowledgements": [
-                "Copyright © 2010-2017 three.js authors"
+                "Copyright (c) 2010-2017 three.js authors"
             ],
             "key": "MIT"
         },

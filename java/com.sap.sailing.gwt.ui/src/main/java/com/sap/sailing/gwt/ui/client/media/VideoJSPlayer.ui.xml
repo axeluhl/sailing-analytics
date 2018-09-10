@@ -15,7 +15,6 @@
             transform: rotate(180deg) translateX(50%) translateZ(0) !important;
         }
     </ui:style>
-    <div class="{style.player}">
-        <video class="{style.player} video-js vjs-default-skin vjs-big-play-centered" ui:field="videoElement" preload="auto"></video>
+    <div ui:field="playerHolder" class="{style.player}">
     </div>
 </ui:UiBinder>

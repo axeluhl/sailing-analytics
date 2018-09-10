@@ -16,8 +16,10 @@ import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 public class BackendPolarsBoatClassRetrievalProcessor extends AbstractRetrievalProcessor<RacingEventService, HasBackendPolarBoatClassContext> {
 
     public BackendPolarsBoatClassRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<HasBackendPolarBoatClassContext, ?>> resultReceivers, int retrievalLevel) {
-        super(RacingEventService.class, HasBackendPolarBoatClassContext.class, executor, resultReceivers, retrievalLevel);
+            Collection<Processor<HasBackendPolarBoatClassContext, ?>> resultReceivers, int retrievalLevel,
+            String retrievedDataTypeMessageKey) {
+        super(RacingEventService.class, HasBackendPolarBoatClassContext.class, executor, resultReceivers,
+                retrievalLevel, retrievedDataTypeMessageKey);
     }
 
     @Override
