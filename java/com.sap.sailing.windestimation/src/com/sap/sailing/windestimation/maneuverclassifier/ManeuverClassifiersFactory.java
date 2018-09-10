@@ -5,11 +5,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.windestimation.maneuverclassifier.impl.ManeuverFeatures;
-import com.sap.sailing.windestimation.maneuverclassifier.impl.smile.GradientBoostingManeuverClassifier;
-import com.sap.sailing.windestimation.maneuverclassifier.impl.smile.NeuralNetworkManeuverClassifier;
-import com.sap.sailing.windestimation.maneuverclassifier.impl.smile.RandomForestManeuverClassifier;
-import com.sap.sailing.windestimation.maneuverclassifier.impl.smile.SVMManeuverClassifier;
+import com.sap.sailing.windestimation.maneuverclassifier.impl.GradientBoostingManeuverClassifier;
+import com.sap.sailing.windestimation.maneuverclassifier.impl.NeuralNetworkManeuverClassifier;
+import com.sap.sailing.windestimation.maneuverclassifier.impl.RandomForestManeuverClassifier;
+import com.sap.sailing.windestimation.maneuverclassifier.impl.SVMManeuverClassifier;
 
 public class ManeuverClassifiersFactory {
 

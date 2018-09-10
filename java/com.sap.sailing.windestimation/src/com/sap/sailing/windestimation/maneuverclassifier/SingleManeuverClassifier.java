@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
-import com.sap.sailing.windestimation.maneuverclassifier.impl.ManeuverFeatures;
 
 /**
  * 

@@ -340,10 +340,14 @@ public class BestPathsCalculator {
                 zerosCount++;
             }
         }
+        if (zerosCount == windSpeedsInKnots.length) {
+            return windFixes;
+        }
         if (zerosCount > 0) {
             windSpeedsInKnots = Arrays.copyOfRange(windSpeedsInKnots, 0, windSpeedsInKnots.length - zerosCount);
         }
-        double avgWindSpeedInKnots = QuickSelect.median(windSpeedsInKnots);
+        double avgWindSpeedInKnots = windSpeedsInKnots.length == 1 ? windSpeedsInKnots[0]
+                : QuickSelect.median(windSpeedsInKnots);
         List<WindWithConfidence<Void>> result = new ArrayList<>();
         for (WindWithConfidence<Void> windFix : windFixes) {
             Wind wind = windFix.getObject();

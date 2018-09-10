@@ -8,7 +8,6 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.windestimation.data.CoarseGrainedManeuverType;
 import com.sap.sailing.windestimation.data.ManeuverCategory;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
-import com.sap.sailing.windestimation.maneuverclassifier.impl.ManeuverFeatures;
 
 public abstract class AbstractManeuverClassifier implements SingleManeuverClassifier, Serializable {
 

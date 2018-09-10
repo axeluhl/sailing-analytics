@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.maneuverclassifier.impl;
+package com.sap.sailing.windestimation.maneuverclassifier;
 
 import java.io.Serializable;
 

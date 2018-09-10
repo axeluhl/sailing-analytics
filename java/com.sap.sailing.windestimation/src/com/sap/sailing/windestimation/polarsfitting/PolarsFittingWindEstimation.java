@@ -14,9 +14,11 @@ import com.sap.sailing.domain.base.impl.SpeedWithConfidenceImpl;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
+import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
 import com.sap.sailing.windestimation.AverageWindEstimator;
 import com.sap.sailing.windestimation.data.CoarseGrainedPointOfSail;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
@@ -252,16 +254,21 @@ public class PolarsFittingWindEstimation implements AverageWindEstimator {
                 }
             }
         }
-//        if(maxSpeed - minSpeed > 2) {
-//            maxSpeed = minSpeed + 2;
-//        }
+        // if(maxSpeed - minSpeed > 2) {
+        // maxSpeed = minSpeed + 2;
+        // }
         return minSpeed == 0 ? null : new WindSpeedRange(minSpeed, maxSpeed);
     }
 
     @Override
     public WindWithConfidence<Void> estimateAverageWind() {
-        // TODO Auto-generated method stub
-        return null;
+        SpeedWithBearingWithConfidence<Void> wind = estimateWind();
+        WindWithConfidenceImpl<Void> windWithConfidence = null;
+        if (wind != null) {
+            windWithConfidence = new WindWithConfidenceImpl<Void>(new WindImpl(null, null, wind.getObject()),
+                    wind.getConfidence(), null, wind.getObject().getKnots() > 0);
+        }
+        return windWithConfidence;
     }
 
 }

@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.maneuverclassifier.impl.smile;
+package com.sap.sailing.windestimation.maneuverclassifier.impl;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,11 +13,11 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.maneuverclassifier.AbstractManeuverClassifier;
 import com.sap.sailing.windestimation.maneuverclassifier.ClassifierPersistenceException;
+import com.sap.sailing.windestimation.maneuverclassifier.MLUtil;
+import com.sap.sailing.windestimation.maneuverclassifier.ManeuverFeatures;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.maneuverclassifier.PreprocessingConfig;
 import com.sap.sailing.windestimation.maneuverclassifier.TrainableSingleManeuverOfflineClassifier;
-import com.sap.sailing.windestimation.maneuverclassifier.impl.MLUtil;
-import com.sap.sailing.windestimation.maneuverclassifier.impl.ManeuverFeatures;
 
 import smile.classification.SoftClassifier;
 import smile.feature.FeatureTransform;

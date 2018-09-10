@@ -13,7 +13,6 @@ import java.util.regex.Pattern;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.windestimation.data.persistence.PolarDataServiceAccessUtil;
-import com.sap.sailing.windestimation.maneuverclassifier.impl.ManeuverFeatures;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
 public class PersistedManeuverClassifiersScorePrinter {

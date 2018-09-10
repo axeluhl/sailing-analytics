@@ -1,9 +1,9 @@
-package com.sap.sailing.windestimation.maneuverclassifier.impl.smile;
+package com.sap.sailing.windestimation.maneuverclassifier.impl;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.windestimation.maneuverclassifier.ManeuverFeatures;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.maneuverclassifier.PreprocessingConfig.PreprocessingConfigBuilder;
-import com.sap.sailing.windestimation.maneuverclassifier.impl.ManeuverFeatures;
 
 import smile.classification.SVM;
 import smile.classification.SVM.Multiclass;

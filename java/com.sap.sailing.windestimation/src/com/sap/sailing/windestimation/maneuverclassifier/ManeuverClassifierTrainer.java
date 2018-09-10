@@ -14,8 +14,6 @@ import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.persistence.PolarDataServiceAccessUtil;
 import com.sap.sailing.windestimation.data.persistence.RegularManeuversForEstimationPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.TransformedManeuversPersistenceManager;
-import com.sap.sailing.windestimation.maneuverclassifier.impl.MLUtil;
-import com.sap.sailing.windestimation.maneuverclassifier.impl.ManeuverFeatures;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 import com.sap.sse.common.Util.Pair;
 

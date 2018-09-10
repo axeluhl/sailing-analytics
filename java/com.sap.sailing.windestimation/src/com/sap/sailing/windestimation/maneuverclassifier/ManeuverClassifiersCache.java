@@ -4,7 +4,6 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.maneuverdetection.ShortTimeAfterLastHitCache;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
-import com.sap.sailing.windestimation.maneuverclassifier.impl.ManeuverFeatures;
 
 public class ManeuverClassifiersCache {
 
