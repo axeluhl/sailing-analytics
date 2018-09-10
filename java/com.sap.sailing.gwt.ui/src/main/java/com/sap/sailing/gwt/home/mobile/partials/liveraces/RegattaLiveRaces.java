@@ -9,6 +9,7 @@ import com.sap.sailing.gwt.home.mobile.partials.regattaStatus.RegattaStatusRace;
 import com.sap.sailing.gwt.home.mobile.partials.regattaStatus.RegattaStatusResources;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
+import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase.Presenter;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.dispatch.shared.commands.SortedSetResult;
@@ -22,8 +23,10 @@ public class RegattaLiveRaces extends Composite implements RefreshableWidget<Sor
 
     @UiField SectionHeaderContent sectionHeaderUi;
     private final MobileSection mobileSection;
+    private final Presenter presenter;
 
-    public RegattaLiveRaces() {
+    public RegattaLiveRaces(final Presenter presenter) {
+        this.presenter = presenter;
         RegattaStatusResources.INSTANCE.css().ensureInjected();
         initWidget(mobileSection = uiBinder.createAndBindUi(this));
         sectionHeaderUi.setSectionTitle(StringMessages.INSTANCE.liveNow());
@@ -36,7 +39,7 @@ public class RegattaLiveRaces extends Composite implements RefreshableWidget<Sor
         mobileSection.clearContent();
         if (data != null) {
             for (LiveRaceDTO liveRace : data.getValues()) {
-                mobileSection.addContent(new RegattaStatusRace(liveRace));
+                mobileSection.addContent(new RegattaStatusRace(liveRace, presenter::getRaceViewerURL));
             }
         }
     }

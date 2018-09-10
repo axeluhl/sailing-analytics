@@ -16,6 +16,7 @@ import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.mobile.partials.section.IsMobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
+import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase.Presenter;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.partials.regattalist.RegattaListView.RegattaListItem;
 
@@ -28,22 +29,22 @@ public class RegattaStatusRegatta extends Composite implements IsMobileSection, 
     
     @UiField MobileSection itemContainerUi;
     @UiField SectionHeaderContent headerUi;
+    private final Presenter presenter;
 
-    public RegattaStatusRegatta(RegattaMetadataDTO regatta, PlaceNavigation<?> placeNavigation) {
+    public RegattaStatusRegatta(final RegattaMetadataDTO regatta, final Presenter presenter) {
+        this.presenter = presenter;
         initWidget(uiBinder.createAndBindUi(this));
-        initRegattaHeader(regatta, placeNavigation);
+        initRegattaHeader(regatta, presenter.getRegattaOverviewNavigation(regatta.getId()));
         headerUi.initAdditionalWidget(new RegattaStatusDataIndicators(regatta.getRaceDataInfo()));
     }
-    
+
     @Override
     public MobileSection getMobileSection() {
         return itemContainerUi;
     }
     
     public void addRaces(Set<LiveRaceDTO> races) {
-        for (LiveRaceDTO race : races) {
-            itemContainerUi.addContent(new RegattaStatusRace(race));
-        }
+        races.forEach(race -> itemContainerUi.addContent(new RegattaStatusRace(race, presenter::getRaceViewerURL)));
         headerUi.setLabelType(LabelType.LIVE);
     }
 

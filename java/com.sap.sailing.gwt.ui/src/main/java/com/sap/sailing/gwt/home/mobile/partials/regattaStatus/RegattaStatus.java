@@ -18,7 +18,6 @@ import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderConte
 import com.sap.sailing.gwt.home.mobile.partials.toggleButton.ToggleButton;
 import com.sap.sailing.gwt.home.mobile.partials.toggleButton.ToggleButton.ToggleButtonCommand;
 import com.sap.sailing.gwt.home.mobile.places.event.EventViewBase.Presenter;
-import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.partials.filter.AbstractSelectionFilter;
 import com.sap.sailing.gwt.home.shared.partials.regattalist.RegattaListView;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
@@ -31,8 +30,7 @@ public class RegattaStatus extends Composite implements RefreshableWidget<Regatt
     interface RegattaStatusUiBinder extends UiBinder<Widget, RegattaStatus> {
     }
 
-    @UiField
-    RegattaStatusResources local_res;
+    @UiField RegattaStatusResources local_res;
     @UiField SectionHeaderContent sectionHeaderUi;
     @UiField MobileSection regattaContainerUi;
     @UiField MobileSection collapsableContainerUi;
@@ -60,30 +58,27 @@ public class RegattaStatus extends Composite implements RefreshableWidget<Regatt
         filterWidget.setStyleName(local_res.css().regattastatus_filter());
         sectionHeaderUi.initAdditionalWidget(filterWidget);
     }
-    
+
     @Override
     public void setData(RegattasAndLiveRacesDTO data) {
-        if (stucture.isEmpty()) {
-            stucture.clear();
-            regattaContainerUi.clearContent();
-            collapsableContainerUi.clearContent();
-            if (data.hasRegattasWithRaces()) {
-                for (Entry<RegattaMetadataDTO, Set<LiveRaceDTO>> pair : data.getRegattasWithRaces().entrySet()) {
-                    RegattaStatusRegatta regattaWidget = addRegatta(regattaContainerUi, pair.getKey());
-                    regattaWidget.addRaces(pair.getValue());
-                }
+        stucture.clear();
+        regattaContainerUi.clearContent();
+        collapsableContainerUi.clearContent();
+        if (data.hasRegattasWithRaces()) {
+            for (Entry<RegattaMetadataDTO, Set<LiveRaceDTO>> pair : data.getRegattasWithRaces().entrySet()) {
+                RegattaStatusRegatta regattaWidget = addRegatta(regattaContainerUi, pair.getKey());
+                regattaWidget.addRaces(pair.getValue());
             }
-            toggleButtonUi.setStyleName(TOGGLEHIDDEN_STYLE,
-                    !data.hasRegattasWithRaces() || !data.hasRegattasWithoutRaces());
-            for (RegattaMetadataDTO regatta : data.getRegattasWithoutRaces()) {
-                addRegatta(data.hasRegattasWithRaces() ? collapsableContainerUi : regattaContainerUi, regatta);
-            }
+        }
+        toggleButtonUi.setStyleName(TOGGLEHIDDEN_STYLE,
+                !data.hasRegattasWithRaces() || !data.hasRegattasWithoutRaces());
+        for (RegattaMetadataDTO regatta : data.getRegattasWithoutRaces()) {
+            addRegatta(data.hasRegattasWithRaces() ? collapsableContainerUi : regattaContainerUi, regatta);
         }
     }
     
     private RegattaStatusRegatta addRegatta(MobileSection container, RegattaMetadataDTO regatta) {
-        PlaceNavigation<?> placeNavigation = presenter.getRegattaOverviewNavigation(regatta.getId());
-        RegattaStatusRegatta regattaWidget = new RegattaStatusRegatta(regatta, placeNavigation);
+        final RegattaStatusRegatta regattaWidget = new RegattaStatusRegatta(regatta, presenter);
         container.addContent(regattaWidget);
         stucture.put(regattaWidget, regatta);
         return regattaWidget;

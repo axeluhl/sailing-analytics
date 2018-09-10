@@ -64,7 +64,7 @@ public class RegattaOverviewImpl extends AbstractEventOverview {
     }
     
     private void setupLiveRaces(Panel container) {
-        liveRacesUi = new RegattaLiveRaces();
+        liveRacesUi = new RegattaLiveRaces(currentPresenter);
         refreshManager.add(liveRacesUi, new GetLiveRacesForRegattaAction(getEventId(), getRegattaId()));
         container.add(liveRacesUi);
     }
