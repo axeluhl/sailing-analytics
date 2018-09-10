@@ -16,7 +16,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.client.shared.filter.FilterUIFactory;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagFilterSets;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagFilterSetsDialog;
@@ -35,7 +34,7 @@ import com.sap.sse.security.ui.client.UserService;
 /**
  * Panel used to select and modify tag filter.
  */
-public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWithUI<TagDTO> {
+public class TagFilterPanel extends FlowPanel implements KeyUpHandler, Filter<TagDTO> {
 
     private final static String LOCAL_STORAGE_TAGS_FILTER_SETS_KEY = "sailingAnalytics.raceBoard.tagsFilterSets";
 
@@ -46,7 +45,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
     private final UserService userService;
     private final TagListProvider tagListProvider;
 
-    private final TagFilterSets tagFilterSets;
+    private TagFilterSets tagFilterSets;
     private final TextBox searchTextBox;
     private final Button clearTextBoxButton, filterSettingsButton;
     private final AbstractListFilter<TagDTO> filter;
@@ -138,8 +137,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
         TagFilterSetsDialog tagsFilterSetsDialog = new TagFilterSetsDialog(tagFilterSets, stringMessages,
                 new DialogCallback<TagFilterSets>() {
                     @Override
-                    public void cancel() {
-                    }
+                    public void cancel() {}
 
                     @Override
                     public void ok(final TagFilterSets newTagFilterSets) {
@@ -148,8 +146,6 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
                         tagFilterSets.setActiveFilterSet(newTagFilterSets.getActiveFilterSet());
 
                         tagListProvider.setCurrentFilterSet(newTagFilterSets.getActiveFilterSetWithGeneralizedType());
-                        tagListProvider.updateFilteredTags();
-                        tagListProvider.refresh();
 
                         updateTagFilterControlState(newTagFilterSets);
                         if (userService.getCurrentUser() != null) {
@@ -197,9 +193,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
         if (userService.getCurrentUser() != null) {
             userService.getPreference(LOCAL_STORAGE_TAGS_FILTER_SETS_KEY, new AsyncCallback<String>() {
                 @Override
-                public void onFailure(Throwable caught) {
-                    // do nothing
-                }
+                public void onFailure(Throwable caught) {}
 
                 @Override
                 public void onSuccess(String result) {
@@ -208,15 +202,15 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
                         final TagFilterSetsJsonDeSerializer deserializer = new TagFilterSetsJsonDeSerializer();
                         final JSONValue value = JSONParser.parseStrict(result);
                         if (value.isObject() != null) {
-                            for (FilterSet<TagDTO, FilterWithUI<TagDTO>> filterSet : deserializer
-                                    .deserialize((JSONObject) value).getFilterSets()) {
-                                tagFilterSets.addFilterSet(filterSet);
-                            }
+                            tagFilterSets = deserializer.deserialize((JSONObject) value);
                             tagListProvider.setCurrentFilterSet(tagFilterSets.getActiveFilterSetWithGeneralizedType());
                         }
-                    } else {
-                        tagListProvider.setCurrentFilterSet(null);
                     }
+                    else {
+                        tagFilterSets = new TagFilterSets();
+                        tagListProvider.setCurrentFilterSet(null);                       
+                    }
+                    tagFilterSets.toString();
                 }
             });
         } else {
@@ -258,14 +252,18 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
     /**
      * Adds {@link TagFilterPanel} to applied filters at {@link TagListProvider} to apply searchbox filter.
      */
-    private void ensureSetSearchFilter() {
-        if (tagListProvider.getTagFilterSet() == null
-                || !Util.contains(tagListProvider.getTagFilterSet().getFilters(), this)) {
-            FilterSet<TagDTO, Filter<TagDTO>> newFilterSetWithThis = new FilterSet<>(getName());
-            if (tagListProvider.getTagFilterSet() != null) {
-                for (Filter<TagDTO> oldFilter : tagListProvider.getTagFilterSet().getFilters()) {
+    private void ensureSearchFilterIsSet() {
+        FilterSet<TagDTO, Filter<TagDTO>> tagProviderFilterSet = tagListProvider.getTagFilterSet();
+        if (tagProviderFilterSet == null || !Util.contains(tagProviderFilterSet.getFilters(), this)) {
+            FilterSet<TagDTO, Filter<TagDTO>> newFilterSetWithThis;
+            if (tagProviderFilterSet != null) {
+                newFilterSetWithThis = new FilterSet<>(tagProviderFilterSet.getName());
+                for (Filter<TagDTO> oldFilter : tagProviderFilterSet.getFilters()) {
                     newFilterSetWithThis.addFilter(oldFilter);
                 }
+            }
+            else {
+                newFilterSetWithThis = new FilterSet<>(null);
             }
             newFilterSetWithThis.addFilter(this);
             tagListProvider.setCurrentFilterSet(newFilterSetWithThis);
@@ -308,30 +306,6 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
         return null;
     }
 
-    @Override
-    public String validate(StringMessages stringMessages) {
-        return null;
-    }
-
-    @Override
-    public String getLocalizedName(StringMessages stringMessages) {
-        return getName();
-    }
-
-    @Override
-    public String getLocalizedDescription(StringMessages stringMessages) {
-        return getName();
-    }
-
-    @Override
-    public FilterWithUI<TagDTO> copy() {
-        return null;
-    }
-
-    @Override
-    public FilterUIFactory<TagDTO> createUIFactory() {
-        return null;
-    }
 
     /**
      * Applies filter entered by using search textbox to filterset.
@@ -348,8 +322,8 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, FilterWit
         } else {
             if (newValue.length() >= 2) {
                 clearTextBoxButton.removeStyleName(style.tagFilterHiddenButton());
-                ensureSetSearchFilter();
-                tagListProvider.setCurrentFilterSet(tagListProvider.getTagFilterSet()); //
+                ensureSearchFilterIsSet();
+                tagListProvider.setCurrentFilterSet(tagListProvider.getTagFilterSet());
             }
         }
     }

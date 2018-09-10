@@ -94,6 +94,8 @@ public class TagFilterSetsJsonDeSerializer implements GwtJsonDeSerializer<TagFil
                 }
             }
         }
+        result = new TagFilterSets();
+        result.addFilterSet(new FilterSet<TagDTO, FilterWithUI<TagDTO>>("TEst"));
         return result;
     }
 }

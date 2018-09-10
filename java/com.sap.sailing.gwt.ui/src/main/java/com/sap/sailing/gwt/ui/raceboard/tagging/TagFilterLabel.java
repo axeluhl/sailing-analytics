@@ -41,7 +41,7 @@ public class TagFilterLabel extends Label {
      *            current selected filter
      */
     public void update(FilterSet<TagDTO, Filter<TagDTO>> tagFilterSet) {
-        if (tagFilterSet != null && !tagFilterSet.getName().isEmpty()) {
+        if (tagFilterSet != null && tagFilterSet.getName() != null && !tagFilterSet.getName().isEmpty()) {
             setText(stringMessages.tagCurrentFilter() + " " + tagFilterSet.getName());
             removeStyleName(style.hidden());
         } else {

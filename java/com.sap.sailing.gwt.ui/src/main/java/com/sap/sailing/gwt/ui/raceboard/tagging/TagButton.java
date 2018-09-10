@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.raceboard.tagging;
 
-import java.io.Serializable;
-
 import com.google.gwt.user.client.ui.Button;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
 
@@ -10,9 +8,7 @@ import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
  * as buttons for quick and easy access. Clicking on tag-buttons does not have any effect until click listener gets
  * added manually! See example at {@link TaggingPanel#addTagButton(TagButton) addTagButton()}.
  */
-public class TagButton extends Button implements Serializable {
-
-    private static final long serialVersionUID = -722157125410637316L;
+public class TagButton extends Button{
 
     private final TagPanelStyle style = TagPanelResources.INSTANCE.style();
 
