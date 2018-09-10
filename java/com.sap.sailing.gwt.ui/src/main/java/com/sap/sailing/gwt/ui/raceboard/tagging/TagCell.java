@@ -116,12 +116,14 @@ public class TagCell extends AbstractCell<TagDTO> {
         /**
          * Renders button with given content.
          * 
+         * @param title
+         *            will be shown as tooltip of button
          * @param content
          *            content of button
          * @return {@link SafeHtml HTML template}
          */
-        @Template("<button class='{0}'>{1}</button>")
-        SafeHtml button(String classButton, SafeHtml content);
+        @Template("<button class='{0}' title='{1}'>{2}</button>")
+        SafeHtml button(String classButton, String title, SafeHtml content);
     }
 
     private final TagCellTemplate tagCellTemplate = GWT.create(TagCellTemplate.class);
@@ -193,9 +195,9 @@ public class TagCell extends AbstractCell<TagDTO> {
             if (userService.getCurrentUser() != null) {
                 // create buttons with icons
                 SafeHtml deleteButton = tagCellTemplate.button(style.tagActionButton() + " " + style.tagDeleteButton(),
-                        tagCellTemplate.icon(resources.deleteIcon().getSafeUri()));
+                        stringMessages.tagDeleteTag(), tagCellTemplate.icon(resources.deleteIcon().getSafeUri()));
                 SafeHtml editButton = tagCellTemplate.button(style.tagActionButton() + " " + style.tagEditButton(),
-                        tagCellTemplate.icon(resources.editIcon().getSafeUri()));
+                        stringMessages.tagEditTag(), tagCellTemplate.icon(resources.editIcon().getSafeUri()));
                 if (tag.getUsername().equals(userService.getCurrentUser().getName())) {
                     headingButtons = tagCellTemplate.headerButtonsDeletableAndModifyable(style.tagCellHeadingButtons(),
                             editButton, deleteButton);
@@ -206,7 +208,11 @@ public class TagCell extends AbstractCell<TagDTO> {
             }
         }
 
-        SafeHtml cell = tagCellTemplate.cell(style.tagCell(), style.tagCellHeading(), style.tagCellCreated(), icon,
+        String cellStyle = style.tagCell();
+        if (tag.equals(taggingPanel.getSelectedTag())) {
+            cellStyle = style.tagCell() + " " + style.tagCellActive();
+        }
+        SafeHtml cell = tagCellTemplate.cell(cellStyle, style.tagCellHeading(), style.tagCellCreated(), icon,
                 headingButtons, safeTag, safeCreated, content);
         htmlBuilder.append(cell);
     }

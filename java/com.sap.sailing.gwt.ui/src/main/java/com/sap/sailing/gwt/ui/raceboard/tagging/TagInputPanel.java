@@ -75,13 +75,27 @@ public class TagInputPanel extends FlowPanel {
      * Returns whether values of given <code>tag</code> are different from input fields.
      * 
      * @param tag
-     *            tag to compare to input fields
+     *            {@link TagDTO} to compare to input fields
      * @return <code>true</code> if title, comment, imageURL and visibility are equal to input fields, otherwise
      *         <code>false</code>
      */
     protected boolean compareFieldsToTag(TagDTO tag) {
         return getTag().equals(tag.getTag()) && getComment().equals(tag.getComment())
                 && getImageURL().equals(tag.getImageURL()) && isVisibleForPublic() == tag.isVisibleForPublic();
+    }
+
+    /**
+     * Returns whether values of given <code>tagButton</code> are different from input fields.
+     * 
+     * @param tagButton
+     *            {@link TagButton} to compare to input fields
+     * @return <code>true</code> if title, comment, imageURL and visibility are equal to input fields, otherwise
+     *         <code>false</code>
+     */
+    protected boolean compareFieldsToTagButton(TagButton tagButton) {
+        return getTag().equals(tagButton.getTag()) && getComment().equals(tagButton.getComment())
+                && getImageURL().equals(tagButton.getImageURL())
+                && isVisibleForPublic() == tagButton.isVisibleForPublic();
     }
 
     /**

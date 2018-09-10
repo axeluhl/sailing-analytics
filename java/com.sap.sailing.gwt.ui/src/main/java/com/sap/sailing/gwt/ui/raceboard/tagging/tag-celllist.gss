@@ -7,6 +7,6 @@
 
 .cellListSelectedItem,
 .cellListKeyboardSelectedItem {
-	background-color: #e5f2f9 !important;
+	background-color: #e5f2f9;
 	border-radius: 3px;
 }

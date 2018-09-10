@@ -2105,6 +2105,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String tagNoTagsFound();
     String tagAddTag();
     String tagEditTag();
+    String tagDeleteTag();
     String tagAddTags();
     String tagSavedSuccessfully();
     String tagNotSaved();
