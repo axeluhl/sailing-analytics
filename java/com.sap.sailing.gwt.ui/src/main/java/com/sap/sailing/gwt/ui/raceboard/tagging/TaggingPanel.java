@@ -674,7 +674,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         // Setting footerPanel.setVisible(false) is not sufficient as panel would still be
         // rendered as 20px high white space instead of being hidden.
         // Fix: remove panel completely from footer.
-        if (userService.getCurrentUser() != null) {
+        if (!currentState.equals(State.VIEW) || (currentState.equals(State.VIEW) && !getTagButtons().isEmpty())) {
             taggingPanel.setFooterWidget(footerPanel);
             footerPanel.setCurrentState(currentState);
         } else {
