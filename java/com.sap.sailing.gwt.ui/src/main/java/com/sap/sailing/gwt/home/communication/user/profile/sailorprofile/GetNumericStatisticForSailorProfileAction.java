@@ -128,8 +128,8 @@ public class GetNumericStatisticForSailorProfileAction
                     leaderboard.getName(), leaderboardGroup.getName(), event.getId(), tr.getRace().getName());
             break;
         case AVERAGE_STARTLINE_DISTANCE:
-            aggregator.add(tr.getDistanceToStartLine(competitor, 0).getMeters(), null, null, null, null, null, null,
-                    null);
+            Distance distance = tr.getDistanceToStartLine(competitor, 0);
+            aggregator.add(distance, null, null, null, null, null, null, null);
         default:
             break;
         }
@@ -241,7 +241,7 @@ public class GetNumericStatisticForSailorProfileAction
         private RegattaAndRaceIdentifier bestRace;
 
         public MinMaxAggregator(boolean max) {
-            this.max = true;
+            this.max = max;
         }
 
         @Override

@@ -37,10 +37,12 @@ public class DesktopAccordion extends Composite {
     private final CollapseAnimation animation;
 
     private boolean wasOpenend;
-    private List<InitialAccordionExpansionListener> accordionListeners;
+    private List<AccordionExpansionListener> accordionListeners;
 
-    public interface InitialAccordionExpansionListener {
-        void onFirstExpansion();
+    private boolean expanded;
+
+    public interface AccordionExpansionListener {
+        void onExpansion(boolean expanded);
     }
 
     public DesktopAccordion() {
@@ -89,12 +91,14 @@ public class DesktopAccordion extends Composite {
             getElement().removeClassName(DesktopAccordionResources.INSTANCE.css().accordionCollapsed());
             if (!wasOpenend) {
                 wasOpenend = true;
-                for (InitialAccordionExpansionListener accordionListener : accordionListeners) {
-                    accordionListener.onFirstExpansion();
+                expanded = true;
+                for (AccordionExpansionListener accordionListener : accordionListeners) {
+                    accordionListener.onExpansion(expanded);
                 }
                 accordionListeners.clear();
             }
         } else {
+            expanded = false;
             getElement().addClassName(DesktopAccordionResources.INSTANCE.css().accordionCollapsed());
         }
     }
@@ -104,7 +108,11 @@ public class DesktopAccordion extends Composite {
         accordionListeners.clear();
     }
 
-    public void addAccordionListener(InitialAccordionExpansionListener listener) {
+    public void addAccordionListener(AccordionExpansionListener listener) {
         accordionListeners.add(listener);
+    }
+
+    public boolean isExpanded() {
+        return expanded;
     }
 }

@@ -28,41 +28,45 @@ import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sse.gwt.client.LinkUtil;
 
 public class SectionHeaderContent extends Composite {
-    
+
     protected static final String ACCORDION_COLLAPSED_STYLE = SectionHeaderResources.INSTANCE.css().collapsed();
     private static MyBinder uiBinder = GWT.create(MyBinder.class);
 
     interface MyBinder extends UiBinder<Widget, SectionHeaderContent> {
     }
 
-    @UiField SectionHeaderResources local_res;
-    @UiField AnchorElement headerMainUi;
-    @UiField DivElement headerLeftUi; 
-    @UiField DivElement titleAndLabelContainerUi;
-    @UiField HeadingElement titleUi;
-    @UiField DivElement labelUi;
-    @UiField DivElement imageUi;
-    @UiField DivElement subtitleUi;
-    @UiField DivElement headerRightUi;
-    @UiField DivElement infoTextUi;
-    @UiField DivElement actionArrowUi;
-    @UiField SimplePanel filterSelectContainerUi;
+    @UiField
+    SectionHeaderResources local_res;
+    @UiField
+    AnchorElement headerMainUi;
+    @UiField
+    DivElement headerLeftUi;
+    @UiField
+    DivElement titleAndLabelContainerUi;
+    @UiField
+    HeadingElement titleUi;
+    @UiField
+    DivElement labelUi;
+    @UiField
+    DivElement imageUi;
+    @UiField
+    DivElement subtitleUi;
+    @UiField
+    DivElement headerRightUi;
+    @UiField
+    DivElement infoTextUi;
+    @UiField
+    DivElement actionArrowUi;
+    @UiField
+    SimplePanel filterSelectContainerUi;
     @UiField
     HTMLPanel headerContentUi;
 
-    private final Collection<InitialAccordionExpansionListener> initialAccordionListeners = new ArrayList<>();
+    private boolean expanded = false;;
+
     private final Collection<AccordionExpansionListener> accordionListeners = new ArrayList<>();
 
-    public interface AccordionListener {
-
-    }
-
-    public interface InitialAccordionExpansionListener extends AccordionListener {
-        void onFirstExpansion();
-    }
-
-    public interface AccordionExpansionListener extends AccordionListener {
-
+    public interface AccordionExpansionListener {
         public void onExpansionChange(boolean collapsed);
     }
 
@@ -71,17 +75,17 @@ public class SectionHeaderContent extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         filterSelectContainerUi.setVisible(false);
     }
-    
+
     public void setSectionTitle(String sectionHeaderTitle) {
         titleUi.setInnerText(sectionHeaderTitle);
     }
-    
+
     public void setSubtitle(String subtitle) {
         subtitleUi.getStyle().clearDisplay();
         subtitleUi.setInnerText(subtitle);
         headerLeftUi.addClassName(SectionHeaderResources.INSTANCE.css().sectionheader_itemdoublerow());
     }
-    
+
     public void setLabelType(LabelType labelType) {
         if (labelType == null || !labelType.isRendered()) {
             labelUi.getStyle().setDisplay(Display.NONE);
@@ -90,37 +94,30 @@ public class SectionHeaderContent extends Composite {
             LabelTypeUtil.renderLabelType(labelUi, labelType);
         }
     }
-    
+
     public void setImageUrl(String imageUrl) {
         imageUi.getStyle().clearDisplay();
         imageUi.getStyle().setBackgroundImage("url(" + imageUrl + ")");
         titleAndLabelContainerUi
                 .addClassName(SectionHeaderResources.INSTANCE.css().sectionheader_item_adjust_title_left());
     }
-    
+
     public void setInfoText(String infoText) {
         headerRightUi.getStyle().clearDisplay();
         infoTextUi.getStyle().clearDisplay();
         infoTextUi.setInnerText(infoText);
     }
-    
+
     public void initCollapsibility(Element content, boolean showInitial) {
         final CollapseAnimation animation = new CollapseAnimation(content, showInitial);
         setClassName(actionArrowUi, ACCORDION_COLLAPSED_STYLE, !showInitial);
         LinkUtil.configureForAction(headerMainUi, new Runnable() {
-            private boolean wasOpenend;
             @Override
             public void run() {
                 boolean collapsed = actionArrowUi.hasClassName(ACCORDION_COLLAPSED_STYLE);
+                expanded = collapsed;
                 setClassName(actionArrowUi, ACCORDION_COLLAPSED_STYLE, !collapsed);
                 animation.animate(collapsed);
-                if (collapsed) {
-                    if (!wasOpenend) {
-                        wasOpenend = true;
-                        initialAccordionListeners.forEach(l -> l.onFirstExpansion());
-                        initialAccordionListeners.clear();
-                    }
-                }
                 accordionListeners.forEach(l -> l.onExpansionChange(!collapsed));
             }
         });
@@ -130,7 +127,7 @@ public class SectionHeaderContent extends Composite {
         actionArrowUi.getStyle().clearDisplay();
         headerRightUi.getStyle().clearDisplay();
     }
-    
+
     public void setClickAction(final PlaceNavigation<?> placeNavigation) {
         placeNavigation.configureAnchorElement(headerMainUi);
         this.adjustedActionStyles();
@@ -139,7 +136,7 @@ public class SectionHeaderContent extends Composite {
         headerRightUi.getStyle().clearDisplay();
         actionArrowUi.getStyle().clearDisplay();
     }
-    
+
     public void setClickAction(final String url) {
         headerMainUi.setHref(url);
         DOM.setEventListener(headerMainUi, event -> {
@@ -160,17 +157,19 @@ public class SectionHeaderContent extends Composite {
         actionArrowUi.getStyle().clearDisplay();
         LinkUtil.configureForAction(headerMainUi, commandToExecute);
     }
-    
+
     private void setClassName(Element element, String className, boolean set) {
-        if (set) element.addClassName(className);
-        else element.removeClassName(className);
+        if (set)
+            element.addClassName(className);
+        else
+            element.removeClassName(className);
     }
-    
+
     public void setHeaderElement(Widget widget) {
         headerContentUi.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
         headerContentUi.add(widget);
     }
-    
+
     public void initFilterSelectUi(AbstractSelectionFilter<?, ?> selectionFilter) {
         headerRightUi.getStyle().clearDisplay();
         filterSelectContainerUi.setVisible(true);
@@ -178,7 +177,7 @@ public class SectionHeaderContent extends Composite {
         selectionFilter.addStyleName(local_res.css().sectionheader_item_select());
         selectionFilter.getElement().setAttribute("dir", "rtl");
     }
-    
+
     public void initBoatClassPopup(String boatClassName) {
         BubbleContentBoatClass content = new BubbleContentBoatClass(boatClassName);
         Bubble.DefaultPresenter presenter = new Bubble.DefaultPresenter(content, getElement(), imageUi,
@@ -186,12 +185,12 @@ public class SectionHeaderContent extends Composite {
         presenter.registerTarget(imageUi);
     }
 
-    public void addAccordionListener(AccordionListener listener) {
-        if (listener instanceof InitialAccordionExpansionListener) {
-            initialAccordionListeners.add((InitialAccordionExpansionListener) listener);
-        } else if (listener instanceof AccordionExpansionListener) {
-            accordionListeners.add((AccordionExpansionListener) listener);
-        }
+    public void addAccordionListener(AccordionExpansionListener listener) {
+        accordionListeners.add((AccordionExpansionListener) listener);
+    }
+
+    public boolean isExpanded() {
+        return expanded;
     }
 
 }

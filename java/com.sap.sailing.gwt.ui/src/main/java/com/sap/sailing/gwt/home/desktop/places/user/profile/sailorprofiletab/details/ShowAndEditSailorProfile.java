@@ -17,7 +17,7 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileN
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO.SingleEntry;
 import com.sap.sailing.gwt.home.desktop.partials.desktopaccordion.DesktopAccordion;
-import com.sap.sailing.gwt.home.desktop.partials.desktopaccordion.DesktopAccordion.InitialAccordionExpansionListener;
+import com.sap.sailing.gwt.home.desktop.partials.desktopaccordion.DesktopAccordion.AccordionExpansionListener;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileDesktopResources;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.events.SailorProfileEventsTable;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.statistic.SailorProfileStatisticTable;
@@ -113,33 +113,44 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
         for (SailorProfileNumericStatisticType type : SailorProfileNumericStatisticType.values()) {
             SailorProfileStatisticTable table = new SailorProfileStatisticTable(flagImageResolver, type, i18n);
             accordionStatisticsUi.addWidget(table);
-            accordionStatisticsUi.addAccordionListener(new InitialAccordionExpansionListener() {
+            if (accordionStatisticsUi.isExpanded()) {
+                updateStatistic(entry, type, table);
+            } else {
+                accordionStatisticsUi.addAccordionListener(new AccordionExpansionListener() {
+                    @Override
+                    public void onExpansion(boolean expanded) {
+                        if (expanded) {
+                            updateStatistic(entry, type, table);
+                        }
+                    }
 
-                @Override
-                public void onFirstExpansion() {
-                    presenter.getDataProvider().getStatisticFor(entry.getKey(), type,
-                            new AsyncCallback<SailorProfileStatisticDTO>() {
-
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    Notification.notify(i18n.couldNotDetermineStatistic(), NotificationType.WARNING);
-                                }
-
-                                @Override
-                                public void onSuccess(SailorProfileStatisticDTO answer) {
-                                    ArrayList<Pair<SimpleCompetitorWithIdDTO, SingleEntry>> data = new ArrayList<>();
-                                    for (Entry<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>> entry : answer
-                                            .getResult().entrySet()) {
-                                        for (SingleEntry value : entry.getValue()) {
-                                            data.add(new Pair<SimpleCompetitorWithIdDTO, SingleEntry>(entry.getKey(),
-                                                    value));
-                                        }
-                                    }
-                                    table.setData(data);
-                                }
-                            });
-                }
-            });
+                });
+            }
         }
+
+    }
+
+    private void updateStatistic(SailorProfileDTO entry, SailorProfileNumericStatisticType type,
+            SailorProfileStatisticTable table) {
+        presenter.getDataProvider().getStatisticFor(entry.getKey(), type,
+                new AsyncCallback<SailorProfileStatisticDTO>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Notification.notify(i18n.couldNotDetermineStatistic(), NotificationType.WARNING);
+                    }
+
+                    @Override
+                    public void onSuccess(SailorProfileStatisticDTO answer) {
+                        ArrayList<Pair<SimpleCompetitorWithIdDTO, SingleEntry>> data = new ArrayList<>();
+                        for (Entry<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>> entry : answer.getResult()
+                                .entrySet()) {
+                            for (SingleEntry value : entry.getValue()) {
+                                data.add(new Pair<SimpleCompetitorWithIdDTO, SingleEntry>(entry.getKey(), value));
+                            }
+                        }
+                        table.setData(data);
+                    }
+                });
     }
 }
