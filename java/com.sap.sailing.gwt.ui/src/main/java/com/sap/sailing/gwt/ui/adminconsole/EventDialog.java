@@ -169,7 +169,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
                         leaderboardGroupNames, stringMessages.selectALeaderboardGroup()));
         leaderboardGroupList.addValueChangeHandler(valueChangeHandler);
         imagesListComposite = new ImagesListComposite(sailingService, stringMessages, storageServiceAvailable);
-        videosListComposite = new VideosListComposite(sailingService,stringMessages, storageServiceAvailable);
+        videosListComposite = new VideosListComposite(stringMessages, storageServiceAvailable);
         externalLinksComposite = new ExternalLinksComposite(stringMessages);
         final List<String> suggestedWindFinderSpotCollections = AvailableWindFinderSpotCollections
                 .getAllAvailableWindFinderSpotCollectionsInAlphabeticalOrder() == null ? Collections.emptyList()

@@ -248,7 +248,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
 
     private void openEventCreateDialog() {
         EventCreateDialog dialog = new EventCreateDialog(existingEvents, Collections.<LeaderboardGroupDTO> emptyList(),
-                sailingService, stringMessages, errorReporter, new DialogCallback<EventDTO>() {
+                sailingService, stringMessages, new DialogCallback<EventDTO>() {
                     @Override
                     public void cancel() {
                     }

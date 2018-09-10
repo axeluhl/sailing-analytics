@@ -7899,7 +7899,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         ImageWithMetadata imageAndMetadata = converter.loadImage(HttpUrlConnectionHelper.redirectConnection(new URL(sourceRef)).getInputStream(), fileType);
         List<BufferedImage> resizedImages = converter.convertImage(imageAndMetadata.getImage(), resizingTask.getImage().getWidthInPx(), resizingTask.getImage().getHeightInPx(), resizingTask.getResizingTask());
         List<String> sourceRefs = storeImages(resizedImages, fileType, imageAndMetadata.getMetadata());
-        List<ImageDTO> resizedImagesAsDTOs = createImageDTOsFromURLsAndResizingTask(sourceRefs,resizingTask);
+        List<ImageDTO> resizedImagesAsDTOs = createImageDTOsFromURLsAndResizingTask(sourceRefs,resizingTask, resizedImages);
         for(String tag : resizingTask.getImage().getTags()) {
             MediaTagConstants predefinedTag = MediaTagConstants.fromName(tag);
             if(predefinedTag != null && !resizingTask.getResizingTask().contains(predefinedTag)) {
@@ -7914,17 +7914,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
     
     private List<ImageDTO> createImageDTOsFromURLsAndResizingTask(List<String> sourceRefs,
-            ImageResizingTaskDTO resizingTask) {
-        List<ImageDTO> images = new ArrayList<ImageDTO>();
+            ImageResizingTaskDTO resizingTask, List<BufferedImage> images) {
+        List<ImageDTO> imageDTOs = new ArrayList<ImageDTO>();
         for(int i= 0; i < sourceRefs.size(); i++) {
-            ImageDTO image = resizingTask.cloneImageDTO();
+            ImageDTO imageDTO = resizingTask.cloneImageDTO();
             for(MediaTagConstants tag : MediaTagConstants.values()) {
-                image.getTags().remove(tag.getName());
+                imageDTO.getTags().remove(tag.getName());
             }
-            image.getTags().add(resizingTask.getResizingTask().get(i).getName());
-            image.setSourceRef(sourceRefs.get(i));
+            imageDTO.getTags().add(resizingTask.getResizingTask().get(i).getName());
+            imageDTO.setSourceRef(sourceRefs.get(i));
+            imageDTO.setSizeInPx(images.get(i).getWidth(), images.get(i).getHeight());
+            imageDTOs.add(imageDTO);
         }
-        return images;
+        return imageDTOs;
     }
 
     private List<String> storeImages(List<BufferedImage> resizedImages, String fileType, IIOMetadata metadata) {

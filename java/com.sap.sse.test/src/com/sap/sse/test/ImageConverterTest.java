@@ -29,8 +29,8 @@ public class ImageConverterTest {
     @Before
     public void setUp() {
         converter = new ImageConverter();
-        pngImage = converter.loadImage(new ByteArrayInputStream(onePixelPngExample), "Png");
-        jpgImage = converter.loadImage(new ByteArrayInputStream(onePixelJpgExample), "Jpg");
+        pngImage = converter.loadImage(new ByteArrayInputStream(onePixelPngExample), "png");
+        jpgImage = converter.loadImage(new ByteArrayInputStream(onePixelJpgExample), "jpg");
     }
 
     @Test
@@ -53,10 +53,10 @@ public class ImageConverterTest {
     public void testConversions() {
         byte[] byteArray;
         byteArray = converter.inputStreamToByteArray(
-                converter.imageWithMetadataToInputStream(jpgImage.getImage(), "Jpg", jpgImage.getMetadata()));
-        assertArrayEquals(byteArray, onePixelJpgExample);
+                converter.imageWithMetadataToInputStream(jpgImage.getImage(), "jpg", jpgImage.getMetadata()));
+        assertArrayEquals(onePixelJpgExample, byteArray);
         byteArray = converter.inputStreamToByteArray(
-                converter.imageWithMetadataToInputStream(pngImage.getImage(), "Png", pngImage.getMetadata()));
-        assertArrayEquals(byteArray, onePixelPngExample);
+                converter.imageWithMetadataToInputStream(pngImage.getImage(), "png", pngImage.getMetadata()));
+        assertArrayEquals(onePixelPngExample, byteArray);
     }
 }

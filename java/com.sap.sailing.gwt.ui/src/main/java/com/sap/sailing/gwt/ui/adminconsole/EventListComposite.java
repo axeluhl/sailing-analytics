@@ -471,7 +471,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         final List<LeaderboardGroupDTO> existingLeaderboardGroups = new ArrayList<LeaderboardGroupDTO>();
         Util.addAll(availableLeaderboardGroups, existingLeaderboardGroups);
         EventCreateDialog dialog = new EventCreateDialog(Collections.unmodifiableCollection(existingEvents),
-                existingLeaderboardGroups, sailingService, stringMessages, errorReporter,
+                existingLeaderboardGroups, sailingService, stringMessages,
                 new DialogCallback<EventDTO>() {
                     @Override
                     public void cancel() {
@@ -595,7 +595,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         List<LeaderboardGroupDTO> existingLeaderboardGroups = new ArrayList<LeaderboardGroupDTO>();
         Util.addAll(availableLeaderboardGroups, existingLeaderboardGroups);
         EventEditDialog dialog = new EventEditDialog(selectedEvent, Collections.unmodifiableCollection(existingEvents),
-                existingLeaderboardGroups, sailingService, stringMessages, errorReporter,
+                existingLeaderboardGroups, sailingService, stringMessages,
                 new DialogCallback<EventDTO>() {
             @Override
             public void cancel() {

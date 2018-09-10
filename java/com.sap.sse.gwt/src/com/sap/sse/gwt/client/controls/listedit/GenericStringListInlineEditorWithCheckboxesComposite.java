@@ -6,6 +6,8 @@ import java.util.List;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.resources.client.ClientBundle;
+import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
@@ -35,13 +37,15 @@ public abstract class GenericStringListInlineEditorWithCheckboxesComposite<Value
             super(stringMessages, removeImage, suggestValues, placeholderTextForAddTextbox, textBoxSize);
             this.checkBoxes = checkBoxes;
             this.checkBoxText = checkBoxText;
+            ress.css().ensureInjected();
         }
 
-        interface ListEditorResources extends ListEditorComposite.ListEditorResources {
+        interface ListEditorResources extends ClientBundle {
+            @Source("ListEditor.gss")
             ListEditorCSS css();
         }
         
-        interface ListEditorCSS extends ListEditorComposite.ListEditorCSS {
+        interface ListEditorCSS extends CssResource {
             String checkBoxInvisible();
             String checkBoxNormal();
             String checkBoxError();
@@ -51,21 +55,33 @@ public abstract class GenericStringListInlineEditorWithCheckboxesComposite<Value
         protected void addRow(ValueType newValue) {
             super.addRow(newValue);
             CheckBox checkBox = new CheckBox(checkBoxText);
-            checkBoxes.add(checkBox);
-            expandedValuesGrid.setWidget(expandedValuesGrid.getRowCount() - 1, 2, checkBox);
-            checkBox.setStyleName(ress.css().checkBoxInvisible());
+            checkBox.setStylePrimaryName(getInvisibleStyle());
             checkBox.addClickHandler(new ClickHandler() {
                 @Override
                 public void onClick(ClickEvent event) {
                     CheckBox source = (CheckBox) event.getSource();
                     if (source.getValue()) {
-                        source.setStyleName(ress.css().checkBoxNormal());
+                        source.setStylePrimaryName(getNormalStyle());
                     } else {
-                        source.setStyleName(ress.css().checkBoxError());
+                        source.setStylePrimaryName(getErrorStyle());
                     }
                     notifyObserver();
                 }
             });
+            checkBoxes.add(checkBox);
+            expandedValuesGrid.setWidget(expandedValuesGrid.getRowCount() - 1, 2, checkBox);
+        }
+        
+        public static String getInvisibleStyle() {
+            return ress.css().checkBoxInvisible();
+        }
+        
+        public static String getErrorStyle() {
+            return ress.css().checkBoxError();
+        }
+        
+        public static String getNormalStyle() {
+            return ress.css().checkBoxNormal();
         }
 
         @Override

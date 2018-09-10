@@ -72,11 +72,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO> 
             ImageDTO imageToValidate = resizingTask.getImage();
             Integer imageWidth = imageToValidate.getWidthInPx();
             Integer imageHeight = imageToValidate.getHeightInPx();
-            
-            for (CheckBox checkBox : doResize) {//set all invisible, so they are updated for all errors that occure before a resizing error in following construct
-                checkBox.setVisible(false);
-            }
-            
+
             if (imageToValidate.getSourceRef() == null || imageToValidate.getSourceRef().isEmpty()) {
                 errorMessage = stringMessages.pleaseEnterNonEmptyUrlOrUploadImage();
             } else if (imageWidth == null || imageHeight == null) {
@@ -93,22 +89,23 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO> 
                     errorMessage = imageRatioFits(imageToValidate);
                 }
                 if (errorMessage.equals("")) {//check for ckeckboxes and resizing
-                    for(MediaTagConstants mediaTag : MediaTagConstants.values()) {
-                        if(imageToValidate.hasTag(mediaTag.getName()) && (imageWidth > mediaTag.getMaxWidth() || imageHeight > mediaTag.getMaxHeight()) && !resizingTask.getResizingTask().contains(mediaTag)) {
-                            errorMessage += getSizeErrorMessage(mediaTag, stringMessages) + "\n";
-                            if (storageServiceAvailable.getValue()) {
-                                getCheckBoxForTag(mediaTag.getName(), imageToValidate).setVisible(true);
+                    for (MediaTagConstants mediaTag : MediaTagConstants.values()) {
+                        if (imageToValidate.hasTag(mediaTag.getName()) && (imageWidth > mediaTag.getMaxWidth() || imageHeight > mediaTag.getMaxHeight())) {
+                            if (!resizingTask.getResizingTask().contains(mediaTag)) {
+                                errorMessage += getSizeErrorMessage(mediaTag, stringMessages) + "\n";
+                                getCheckBoxForTag(mediaTag.getName(), imageToValidate).setStyleName(GenericStringListInlineEditorWithCheckboxesComposite.ExpandedUi.getErrorStyle());
+                            } else {
+                                getCheckBoxForTag(mediaTag.getName(), imageToValidate).setStyleName(GenericStringListInlineEditorWithCheckboxesComposite.ExpandedUi.getNormalStyle());
                             }
+                        } else {
+                            CheckBox checkBox = getCheckBoxForTag(mediaTag.getName(), imageToValidate);
+                            checkBox.setStyleName(GenericStringListInlineEditorWithCheckboxesComposite.ExpandedUi.getInvisibleStyle());
+                            checkBox.setValue(false);
                         }
                     }
                 }
                 if(!errorMessage.equals("") && !storageServiceAvailable.getValue()) {
                     errorMessage += stringMessages.automaticResizeNeedsStorageService() + "\n";
-                }
-            }
-            for (CheckBox checkBox : doResize) {//all checkboxes that are set to invisible will now be set it's value to false
-                if (!checkBox.isVisible()) {
-                    checkBox.setValue(false);
                 }
             }
             if (errorMessage.equals("")) {

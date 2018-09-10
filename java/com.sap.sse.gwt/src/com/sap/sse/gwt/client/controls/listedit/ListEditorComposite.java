@@ -62,14 +62,6 @@ public class ListEditorComposite<ValueType> extends Composite implements HasValu
         initWidget(activeUi.initWidget());
         activeUi.refresh();
     }
-    
-    interface ListEditorResources extends ClientBundle {
-        @Source("ListEditor.css")
-        ListEditorCSS css();
-    }
-
-    interface ListEditorCSS extends CssResource {
-    }
 
     @Override
     public List<ValueType> getValue() {
