@@ -1,5 +1,6 @@
 package com.sap.sailing.windestimation.maneuverclustering;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -7,13 +8,19 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.common.ManeuverType;
+import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.confidence.impl.ScalableDouble;
+import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
 import com.sap.sailing.polars.windestimation.AbstractManeuverBasedWindEstimationTrackImpl;
 import com.sap.sailing.polars.windestimation.ManeuverClassification;
 import com.sap.sailing.polars.windestimation.ScalableBearingAndScalableDouble;
+import com.sap.sailing.windestimation.WindTrackEstimator;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
@@ -29,14 +36,15 @@ import com.sap.sse.util.kmeans.Cluster;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class ManeuverClusteringBasedWindEstimationTrackImpl extends AbstractManeuverBasedWindEstimationTrackImpl {
+public class ManeuverClusteringBasedWindEstimationTrackImpl extends AbstractManeuverBasedWindEstimationTrackImpl
+        implements WindTrackEstimator {
 
     private final RaceWithEstimationData<ManeuverForEstimation> raceWithManeuvers;
     private final ManeuverClassifiersCache maneuverClassifiersCache;
 
-    public ManeuverClusteringBasedWindEstimationTrackImpl(ManeuverClassifiersCache maneuverClassifiersCache,
+    public ManeuverClusteringBasedWindEstimationTrackImpl(
             RaceWithEstimationData<ManeuverForEstimation> raceWithManeuvers, BoatClass boatClass,
-            long millisecondsOverWhichToAverage) {
+            ManeuverClassifiersCache maneuverClassifiersCache, long millisecondsOverWhichToAverage) {
         super(maneuverClassifiersCache.getPolarDataService(), raceWithManeuvers.getRaceName(), boatClass,
                 millisecondsOverWhichToAverage);
         this.maneuverClassifiersCache = maneuverClassifiersCache;
@@ -51,8 +59,12 @@ public class ManeuverClusteringBasedWindEstimationTrackImpl extends AbstractMane
             Set<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>> clusters) {
         // start with the average of all of the cluster's maneuvers' likelihood to be a tack
         double averageTackLikelihood = getAverageLikelihoodOfBeingManeuver(ManeuverType.TACK, cluster.stream());
+        Bearing upwindCog = getWeightedAverageMiddleManeuverCOGDegAndManeuverAngleDeg(cluster, ManeuverType.TACK).getA();
+        if(upwindCog == null) {
+            return 0.1;
+        }
         final Bearing averageUpwindCOG = new ScalableBearing(
-                getWeightedAverageMiddleManeuverCOGDegAndManeuverAngleDeg(cluster, ManeuverType.TACK).getA())
+                upwindCog)
                         .divide(1.0);
 
         // under the assumption that cluster holds tacks, find the clusters that then most likely hold the jibes
@@ -151,6 +163,25 @@ public class ManeuverClusteringBasedWindEstimationTrackImpl extends AbstractMane
                 .map((maneuver) -> new ManeuverClassificationForClusteringImpl(maneuver,
                         competitorNamesPerManeuver.get(maneuver), polarService,
                         maneuverClassifiersCache.getBestClassifier(maneuver)));
+    }
+
+    @Override
+    public List<WindWithConfidence<Void>> estimateWindTrack() {
+        List<WindWithConfidence<Void>> result = new ArrayList<>();
+        getTackClusters().forEach((cluster) -> {
+            for (ManeuverClassification mc : cluster) {
+                final SpeedWithBearingWithConfidence<Void> estimatedWindSpeedAndBearing = mc
+                        .getEstimatedWindSpeedAndBearing(ManeuverType.TACK);
+                if (estimatedWindSpeedAndBearing != null) {
+                    Wind windFromTack = new WindImpl(mc.getPosition(), mc.getTimePoint(),
+                            estimatedWindSpeedAndBearing.getObject());
+                    WindWithConfidence<Void> windWithConfidence = new WindWithConfidenceImpl<>(windFromTack,
+                            estimatedWindSpeedAndBearing.getConfidence(), null, true);
+                    result.add(windWithConfidence);
+                }
+            }
+        });
+        return result;
     }
 
 }

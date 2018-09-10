@@ -42,7 +42,7 @@ public class ManeuverFeatures implements Serializable {
     }
 
     public boolean isSubset(ManeuverFeatures superSet) {
-        return equals(superSet) && (!polarsInformation || superSet.polarsInformation)
+        return (!polarsInformation || superSet.polarsInformation)
                 && (!scaledSpeed || superSet.scaledSpeed) && (!marksInformation || superSet.marksInformation);
     }
 

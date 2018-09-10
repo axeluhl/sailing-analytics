@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.maneuvergraph.maneuvernode;
+package com.sap.sailing.windestimation.maneuvergraph;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.LegType;
@@ -12,11 +12,11 @@ import com.sap.sailing.windestimation.polarsfitting.SailingStatistics;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class ManeuverNodeBestPathsCalculatorWithGeneralPolars extends ManeuverNodeBestPathsCalculator {
+public class BestPathsCalculatorWithGeneralPolars extends BestPathsCalculator {
 
     @Override
     protected double getLowestSpeedAndTurningRatePenaltyFactor(SailingStatistics averageStatistics,
-            ManeuverNodeGraphLevel currentLevel, ManeuverNode currentNode) {
+            GraphLevel currentLevel, GraphNode currentNode) {
         double tackProbabilityBonus = 0;
         ManeuverForEstimation maneuver = currentLevel.getManeuver();
         double absDirectionChangeInDegrees = Math.abs(maneuver.getCourseChangeWithinMainCurveInDegrees());

@@ -12,7 +12,6 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.windestimation.WindEstimator;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
-import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 import com.sap.sse.common.TimePoint;
@@ -62,10 +61,9 @@ public class WindEstimationEvaluatorImpl<T> implements WindEstimatorEvaluator<T>
                 targetWindPerTimePoint.put(wind.getTimePoint(), wind);
             }
         }
-        List<WindWithConfidence<ManeuverForEstimation>> windTrack = windEstimator
-                .estimateWind(raceWithEstimationData.getCompetitorTracks());
+        List<WindWithConfidence<Void>> windTrack = windEstimator.estimateWind(raceWithEstimationData);
         WindEstimatorEvaluationResult result = new WindEstimatorEvaluationResult();
-        for (WindWithConfidence<ManeuverForEstimation> windWithConfidence : windTrack) {
+        for (WindWithConfidence<Void> windWithConfidence : windTrack) {
             Wind estimatedWind = windWithConfidence.getObject();
             Wind targetWind = targetWindPerTimePoint.get(estimatedWind.getTimePoint());
             if (targetWind.getBearing().getDegrees() > 0.00001) {
@@ -88,7 +86,7 @@ public class WindEstimationEvaluatorImpl<T> implements WindEstimatorEvaluator<T>
         }
         LoggingUtil.logInfo("Evaluating on " + raceWithEstimationData.getRegattaName() + " Race "
                 + raceWithEstimationData.getRaceName() + " succeeded");
-        result.printEvaluationStatistics(false);
+        result.printEvaluationStatistics(true);
         return result.getAvgAsSingleResult(minAccuracyPerRaceForCorrectEstimation - 0.00001);
     }
 

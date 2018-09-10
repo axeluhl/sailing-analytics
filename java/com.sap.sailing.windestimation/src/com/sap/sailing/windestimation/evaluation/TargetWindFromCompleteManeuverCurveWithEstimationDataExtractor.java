@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.maneuvergraph.pointofsail;
+package com.sap.sailing.windestimation.evaluation;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
-import com.sap.sailing.windestimation.evaluation.TargetWindFixesExtractor;
 
 public class TargetWindFromCompleteManeuverCurveWithEstimationDataExtractor
         implements TargetWindFixesExtractor<CompleteManeuverCurveWithEstimationData> {

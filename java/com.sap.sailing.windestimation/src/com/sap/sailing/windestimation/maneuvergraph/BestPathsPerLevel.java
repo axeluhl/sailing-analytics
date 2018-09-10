@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.maneuvergraph.maneuvernode;
+package com.sap.sailing.windestimation.maneuvergraph;
 
 import java.util.HashMap;
 import java.util.List;
@@ -9,21 +9,21 @@ import com.sap.sailing.windestimation.data.FineGrainedPointOfSail;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.polarsfitting.SailingStatistics;
 
-class ManeuverNodeBestPathsPerLevel {
+class BestPathsPerLevel {
 
-    private Map<ManeuverNode, BestManeuverNodeInfo> bestPreviousNodeInfosPerManeuverNode = new HashMap<>();
+    private Map<GraphNode, BestManeuverNodeInfo> bestPreviousNodeInfosPerManeuverNode = new HashMap<>();
     private double probabilitiesFromStartSum = 0;
-    private final ManeuverNodeGraphLevel currentLevel;
+    private final GraphLevel currentLevel;
 
-    public ManeuverNodeBestPathsPerLevel(ManeuverNodeGraphLevel currentLevel) {
+    public BestPathsPerLevel(GraphLevel currentLevel) {
         this.currentLevel = currentLevel;
     }
 
-    public BestManeuverNodeInfo getBestPreviousNodeInfo(ManeuverNode currentNode) {
+    public BestManeuverNodeInfo getBestPreviousNodeInfo(GraphNode currentNode) {
         return bestPreviousNodeInfosPerManeuverNode.get(currentNode);
     }
 
-    public BestManeuverNodeInfo addBestPreviousNodeInfo(ManeuverNode currentNode, ManeuverNode bestPreviousNode,
+    public BestManeuverNodeInfo addBestPreviousNodeInfo(GraphNode currentNode, GraphNode bestPreviousNode,
             double probabilityFromStart, IntersectedWindRange windRange, SailingStatistics previousNodePathStats) {
         BestManeuverNodeInfo bestManeuverNodeInfo = new BestManeuverNodeInfo(bestPreviousNode, probabilityFromStart,
                 windRange);
@@ -62,7 +62,7 @@ class ManeuverNodeBestPathsPerLevel {
     /**
      * Avoid that probability product becomes zero due to precision of Double
      */
-    public double getNormalizedProbabilityToNodeFromStart(ManeuverNode currentNode) {
+    public double getNormalizedProbabilityToNodeFromStart(GraphNode currentNode) {
         return getBestPreviousNodeInfo(currentNode).getProbabilityFromStart() / probabilitiesFromStartSum;
     }
 

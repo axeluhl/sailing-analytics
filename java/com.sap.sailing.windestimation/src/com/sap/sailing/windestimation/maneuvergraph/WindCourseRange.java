@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.maneuvergraph.maneuvernode;
+package com.sap.sailing.windestimation.maneuvergraph;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,12 +17,12 @@ import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
-public class WindRangeForManeuverNode {
+public class WindCourseRange {
 
     private final double fromPortside;
     private final double angleTowardStarboard;
 
-    public WindRangeForManeuverNode(double fromPortside, double angleTowardStarboard) {
+    public WindCourseRange(double fromPortside, double angleTowardStarboard) {
         this.fromPortside = fromPortside;
         this.angleTowardStarboard = angleTowardStarboard;
     }
@@ -35,13 +35,13 @@ public class WindRangeForManeuverNode {
         return angleTowardStarboard;
     }
 
-    public WindRangeForManeuverNode invert() {
+    public WindCourseRange invert() {
         double newFromPortside = fromPortside + angleTowardStarboard;
         if (newFromPortside >= 360) {
             newFromPortside -= 360;
         }
         double newAngleTowardStarboard = 360 - angleTowardStarboard;
-        return new WindRangeForManeuverNode(newFromPortside, newAngleTowardStarboard);
+        return new WindCourseRange(newFromPortside, newAngleTowardStarboard);
     }
 
     public double getAvgWindCourse() {
@@ -56,7 +56,7 @@ public class WindRangeForManeuverNode {
         return new IntersectedWindRange(fromPortside, angleTowardStarboard, 0);
     }
 
-    public IntersectedWindRange intersect(WindRangeForManeuverNode nextWindRange) {
+    public IntersectedWindRange intersect(WindCourseRange nextWindRange) {
         double deviationFromPortsideBoundaryTowardStarboard = nextWindRange.fromPortside - fromPortside;
         if (deviationFromPortsideBoundaryTowardStarboard < 0) {
             deviationFromPortsideBoundaryTowardStarboard += 360;
@@ -143,7 +143,7 @@ public class WindRangeForManeuverNode {
         return result;
     }
 
-    public List<FineGrainedPointOfSail> getBestSuitablePointOfSails(ManeuverNode maneuverNode,
+    public List<FineGrainedPointOfSail> getBestSuitablePointOfSails(GraphNode maneuverNode,
             ManeuverForEstimation maneuver, Bearing course) {
         List<FineGrainedPointOfSail> pointOfSailsManeuver = getPossiblePointOfSails(course.getDegrees(),
                 maneuverNode.getTackAfter());
@@ -156,7 +156,7 @@ public class WindRangeForManeuverNode {
         }
     }
 
-    public List<FineGrainedManeuverType> getBestSuitableManeuverTypes(ManeuverNode maneuverNode,
+    public List<FineGrainedManeuverType> getBestSuitableManeuverTypes(GraphNode maneuverNode,
             ManeuverForEstimation maneuver) {
         List<FineGrainedPointOfSail> possiblePointOfSails = getPossiblePointOfSails(
                 maneuver.getSpeedWithBearingAfter().getBearing().getDegrees(), maneuverNode.getTackAfter());
@@ -257,7 +257,7 @@ public class WindRangeForManeuverNode {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        WindRangeForManeuverNode other = (WindRangeForManeuverNode) obj;
+        WindCourseRange other = (WindCourseRange) obj;
         if (Double.doubleToLongBits(angleTowardStarboard) != Double.doubleToLongBits(other.angleTowardStarboard))
             return false;
         if (Double.doubleToLongBits(fromPortside) != Double.doubleToLongBits(other.fromPortside))

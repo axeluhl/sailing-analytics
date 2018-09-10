@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.maneuvergraph.maneuvernode;
+package com.sap.sailing.windestimation.maneuvergraph;
 
 import java.util.Collections;
 import java.util.List;
@@ -19,16 +19,16 @@ import com.sap.sse.common.Util.Pair;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class ManeuverTypeSequenceGraph implements WindTrackEstimator {
+public class ManeuverSequenceGraph implements WindTrackEstimator {
 
-    private ManeuverNodeGraphLevel firstGraphLevel = null;
-    private ManeuverNodeGraphLevel lastGraphLevel = null;
+    private GraphLevel firstGraphLevel = null;
+    private GraphLevel lastGraphLevel = null;
     private final PolarDataService polarService;
-    private final ManeuverNodeBestPathsCalculator bestPathsCalculator;
+    private final BestPathsCalculator bestPathsCalculator;
     private ManeuverClassifiersCache maneuverClassifiersCache;
 
-    public ManeuverTypeSequenceGraph(List<CompetitorTrackWithEstimationData<ManeuverForEstimation>> competitorTracks,
-            ManeuverClassifiersCache maneuverClassifiersCache, ManeuverNodeBestPathsCalculator bestPathsCalculator) {
+    public ManeuverSequenceGraph(List<CompetitorTrackWithEstimationData<ManeuverForEstimation>> competitorTracks,
+            ManeuverClassifiersCache maneuverClassifiersCache, BestPathsCalculator bestPathsCalculator) {
         this.polarService = maneuverClassifiersCache.getPolarDataService();
         this.maneuverClassifiersCache = maneuverClassifiersCache;
         this.bestPathsCalculator = bestPathsCalculator;
@@ -42,7 +42,7 @@ public class ManeuverTypeSequenceGraph implements WindTrackEstimator {
     private void appendManeuverAsGraphLevel(ManeuverForEstimation maneuver) {
         ManeuverClassifier bestClassifier = maneuverClassifiersCache.getBestClassifier(maneuver);
         ManeuverEstimationResult maneuverEstimationResult = bestClassifier.classifyManeuver(maneuver);
-        ManeuverNodeGraphLevel newManeuverNodesLevel = new ManeuverNodeGraphLevel(maneuver, maneuverEstimationResult);
+        GraphLevel newManeuverNodesLevel = new GraphLevel(maneuver, maneuverEstimationResult);
         if (firstGraphLevel == null) {
             firstGraphLevel = newManeuverNodesLevel;
             lastGraphLevel = newManeuverNodesLevel;
@@ -54,11 +54,11 @@ public class ManeuverTypeSequenceGraph implements WindTrackEstimator {
         bestPathsCalculator.computeBestPathsToNextLevel(newManeuverNodesLevel);
     }
 
-    public ManeuverNodeGraphLevel getFirstGraphLevel() {
+    public GraphLevel getFirstGraphLevel() {
         return firstGraphLevel;
     }
 
-    public ManeuverNodeGraphLevel getLastGraphLevel() {
+    public GraphLevel getLastGraphLevel() {
         return lastGraphLevel;
     }
 
@@ -66,11 +66,11 @@ public class ManeuverTypeSequenceGraph implements WindTrackEstimator {
         return polarService;
     }
 
-    public List<WindWithConfidence<ManeuverForEstimation>> estimateWindTrack() {
-        List<WindWithConfidence<ManeuverForEstimation>> windTrack = Collections.emptyList();
-        ManeuverNodeGraphLevel lastGraphLevel = this.lastGraphLevel;
+    public List<WindWithConfidence<Void>> estimateWindTrack() {
+        List<WindWithConfidence<Void>> windTrack = Collections.emptyList();
+        GraphLevel lastGraphLevel = this.lastGraphLevel;
         if (lastGraphLevel != null) {
-            List<Pair<ManeuverNodeGraphLevel, ManeuverNode>> bestPath = bestPathsCalculator.getBestPath(lastGraphLevel);
+            List<Pair<GraphLevel, GraphNode>> bestPath = bestPathsCalculator.getBestPath(lastGraphLevel);
             windTrack = bestPathsCalculator.getWindTrack(bestPath);
         }
         return windTrack;

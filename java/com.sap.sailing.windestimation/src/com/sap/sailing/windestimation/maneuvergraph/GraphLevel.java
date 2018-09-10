@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.maneuvergraph.maneuvernode;
+package com.sap.sailing.windestimation.maneuvergraph;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,19 +16,19 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class ManeuverNodeGraphLevel {
+public class GraphLevel {
 
     private static final int MIN_UPWIND_ABS_TWA = 20;
     private final ManeuverForEstimation maneuver;
     private ManeuverEstimationResult maneuverEstimationResult;
 
-    private ManeuverNodeGraphLevel previousLevel = null;
-    private ManeuverNodeGraphLevel nextLevel = null;
+    private GraphLevel previousLevel = null;
+    private GraphLevel nextLevel = null;
 
-    private final List<ManeuverNode> levelNodes = new ArrayList<>();
+    private final List<GraphNode> levelNodes = new ArrayList<>();
     private double probabilitiesSum = 1.0;
 
-    public ManeuverNodeGraphLevel(ManeuverForEstimation maneuver, ManeuverEstimationResult maneuverEstimationResult) {
+    public GraphLevel(ManeuverForEstimation maneuver, ManeuverEstimationResult maneuverEstimationResult) {
         this.maneuver = maneuver;
         this.maneuverEstimationResult = maneuverEstimationResult;
         initNodes();
@@ -37,12 +37,12 @@ public class ManeuverNodeGraphLevel {
     private void initNodes() {
         switch (maneuver.getManeuverCategory()) {
         case _360:
-            initNodesAsPenaltyCircle();
+//            initNodesAsPenaltyCircle();
             break;
         case _180:
         case SMALL:
         case WIDE:
-            initNodeJustForSpeedAnalysis();
+//            initNodeJustForSpeedAnalysis();
             break;
         case MARK_PASSING:
         case REGULAR:
@@ -52,16 +52,16 @@ public class ManeuverNodeGraphLevel {
     }
 
     private void addManeuverNode(ManeuverTypeForClassification maneuverType, Tack tackAfter,
-            WindRangeForManeuverNode windRange, double confidence) {
-        ManeuverNode maneuverNode = new ManeuverNode(maneuverType, tackAfter, windRange, confidence / probabilitiesSum,
+            WindCourseRange windRange, double confidence) {
+        GraphNode maneuverNode = new GraphNode(maneuverType, tackAfter, windRange, confidence / probabilitiesSum,
                 levelNodes.size());
         levelNodes.add(maneuverNode);
     }
 
-    private void initNodeJustForSpeedAnalysis() {
-        WindRangeForManeuverNode windRange = new WindRangeForManeuverNode(0, 360);
-        addManeuverNode(ManeuverTypeForClassification.OTHER, null, windRange, 1.0);
-    }
+//    private void initNodeJustForSpeedAnalysis() {
+//        WindCourseRange windRange = new WindCourseRange(0, 360);
+//        addManeuverNode(ManeuverTypeForClassification.OTHER, null, windRange, 1.0);
+//    }
 
     private void initNodesAsRegular() {
         probabilitiesSum = 0;
@@ -100,7 +100,7 @@ public class ManeuverNodeGraphLevel {
             from = maneuver.getSpeedWithBearingAfter().getBearing();
             tackAfter = Tack.STARBOARD;
         }
-        WindRangeForManeuverNode windRange = new WindRangeForManeuverNode(from.getDegrees(), angleTowardStarboard);
+        WindCourseRange windRange = new WindCourseRange(from.getDegrees(), angleTowardStarboard);
         double confidence = maneuverEstimationResult.getManeuverTypeLikelihood(CoarseGrainedManeuverType.BEAR_AWAY);
         addManeuverNode(ManeuverTypeForClassification.OTHER, tackAfter, windRange, confidence);
     }
@@ -120,7 +120,7 @@ public class ManeuverNodeGraphLevel {
             from = invertedCourseAfter.add(new DegreeBearingImpl(MIN_UPWIND_ABS_TWA));
             tackAfter = Tack.PORT;
         }
-        WindRangeForManeuverNode windRange = new WindRangeForManeuverNode(from.getDegrees(), angleTowardStarboard);
+        WindCourseRange windRange = new WindCourseRange(from.getDegrees(), angleTowardStarboard);
         double confidence = maneuverEstimationResult.getManeuverTypeLikelihood(CoarseGrainedManeuverType.HEAD_UP);
         addManeuverNode(ManeuverTypeForClassification.OTHER, tackAfter, windRange, confidence);
     }
@@ -130,7 +130,7 @@ public class ManeuverNodeGraphLevel {
         double absCourseChangeDeg = Math.abs(maneuver.getCourseChangeInDegrees());
         double middleAngleRange = absCourseChangeDeg * 0.5;
         Bearing from = middleCourse.add(new DegreeBearingImpl(-middleAngleRange / 2.0));
-        WindRangeForManeuverNode windRange = new WindRangeForManeuverNode(from.getDegrees(), middleAngleRange);
+        WindCourseRange windRange = new WindCourseRange(from.getDegrees(), middleAngleRange);
         double confidence = maneuverEstimationResult.getManeuverTypeLikelihood(CoarseGrainedManeuverType.JIBE);
         Tack tackAfter = maneuver.getCourseChangeWithinMainCurveInDegrees() < 0 ? Tack.STARBOARD : Tack.PORT;
         addManeuverNode(ManeuverTypeForClassification.JIBE, tackAfter, windRange, confidence);
@@ -142,52 +142,46 @@ public class ManeuverNodeGraphLevel {
         double middleAngleRange = absCourseChangeDeg * 0.4;
         Bearing from = middleCourse.add(new DegreeBearingImpl(-middleAngleRange / 2.0));
         from = from.reverse();
-        WindRangeForManeuverNode windRange = new WindRangeForManeuverNode(from.getDegrees(), middleAngleRange);
+        WindCourseRange windRange = new WindCourseRange(from.getDegrees(), middleAngleRange);
         double confidence = maneuverEstimationResult.getManeuverTypeLikelihood(CoarseGrainedManeuverType.TACK);
         Tack tackAfter = maneuver.getCourseChangeWithinMainCurveInDegrees() < 0 ? Tack.PORT : Tack.STARBOARD;
         addManeuverNode(ManeuverTypeForClassification.TACK, tackAfter, windRange, confidence);
     }
 
-    private void initNodesAsPenaltyCircle() {
-        Bearing courseAtLowestSpeed = maneuver.getCourseAtLowestSpeed();
-        Bearing from;
-        if (maneuver.getCourseChangeInDegrees() < 0) {
-            from = courseAtLowestSpeed.add(new DegreeBearingImpl(-30.0));
-        } else {
-            from = courseAtLowestSpeed.add(new DegreeBearingImpl(-110.0));
-        }
-        from = from.reverse();
-        double angleTowardStarboard = 140;
-        WindRangeForManeuverNode windRange = new WindRangeForManeuverNode(from.getDegrees(), angleTowardStarboard);
-        addManeuverNode(ManeuverTypeForClassification.OTHER, null, windRange, 0.7);
-        addManeuverNode(ManeuverTypeForClassification.OTHER, null, windRange.invert(), 0.3);
-    }
+//    private void initNodesAsPenaltyCircle() {
+//        Bearing courseAtLowestSpeed = maneuver.getCourseAtLowestSpeed();
+//        Bearing from = courseAtLowestSpeed.add(new DegreeBearingImpl(90.0));
+//        double angleTowardStarboard = 180;
+//        WindCourseRange windRange = new WindCourseRange(from.getDegrees(), angleTowardStarboard);
+//        addManeuverNode(ManeuverTypeForClassification.OTHER, null, windRange, 0.7);
+//        addManeuverNode(ManeuverTypeForClassification.OTHER, null, windRange.invert(), 0.3);
+//    }
 
     public ManeuverForEstimation getManeuver() {
         return maneuver;
     }
 
-    public List<ManeuverNode> getLevelNodes() {
+    public List<GraphNode> getLevelNodes() {
         return levelNodes;
     }
 
-    protected void setNextLevel(ManeuverNodeGraphLevel nextLevel) {
+    protected void setNextLevel(GraphLevel nextLevel) {
         this.nextLevel = nextLevel;
     }
 
-    public ManeuverNodeGraphLevel getNextLevel() {
+    public GraphLevel getNextLevel() {
         return nextLevel;
     }
 
-    protected void setPreviousLevel(ManeuverNodeGraphLevel previousLevel) {
+    protected void setPreviousLevel(GraphLevel previousLevel) {
         this.previousLevel = previousLevel;
     }
 
-    public ManeuverNodeGraphLevel getPreviousLevel() {
+    public GraphLevel getPreviousLevel() {
         return previousLevel;
     }
 
-    public void appendNextManeuverNodesLevel(ManeuverNodeGraphLevel nextManeuverNodesLevel) {
+    public void appendNextManeuverNodesLevel(GraphLevel nextManeuverNodesLevel) {
         setNextLevel(nextManeuverNodesLevel);
         nextManeuverNodesLevel.setPreviousLevel(this);
     }

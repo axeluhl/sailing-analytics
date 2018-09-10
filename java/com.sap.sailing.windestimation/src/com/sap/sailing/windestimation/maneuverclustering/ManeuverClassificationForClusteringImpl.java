@@ -40,5 +40,9 @@ public class ManeuverClassificationForClusteringImpl extends ManeuverClassificat
         }
         return likelihoodPerManeuverType[maneuverType.ordinal()];
     }
+    
+    public ManeuverForEstimation getManeuver() {
+        return maneuver;
+    }
 
 }

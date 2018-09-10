@@ -249,17 +249,27 @@ public abstract class AbstractManeuverBasedWindEstimationTrackImpl extends WindT
                                 .signum(likelihoodOfBeingTackCluster.get(c1) - likelihoodOfBeingTackCluster.get(c2)))
                 .limit(2).collect(Collectors.toList());
         addWindFixes(tackClusters.stream(), ManeuverType.TACK);
-        Bearing estimatedJibeMiddleCOG = tackClusters.isEmpty() ? null
-                : (tackClusters.size() == 1
-                        ? getWeightedAverageMiddleManeuverCOGDegAndManeuverAngleDeg(tackClusters.get(0),
-                                ManeuverType.TACK).getA()
-                        : new ScalableBearing(getWeightedAverageMiddleManeuverCOGDegAndManeuverAngleDeg(
-                                tackClusters.get(0), ManeuverType.TACK).getA())
-                                        .add(
-                                                new ScalableBearing(
-                                                        getWeightedAverageMiddleManeuverCOGDegAndManeuverAngleDeg(
-                                                                tackClusters.get(1), ManeuverType.TACK).getA()))
-                                        .divide(2)).reverse();
+        Bearing estimatedJibeMiddleCOG = null;
+        if (!tackClusters.isEmpty()) {
+            if (tackClusters.size() > 1) {
+                Bearing avgTackCog = getWeightedAverageMiddleManeuverCOGDegAndManeuverAngleDeg(tackClusters.get(1),
+                        ManeuverType.TACK).getA();
+                if (avgTackCog != null) {
+                    estimatedJibeMiddleCOG = new ScalableBearing(
+                            getWeightedAverageMiddleManeuverCOGDegAndManeuverAngleDeg(tackClusters.get(0),
+                                    ManeuverType.TACK).getA()).add(new ScalableBearing(avgTackCog)).divide(2)
+                                            .reverse();
+                }
+            }
+            if(estimatedJibeMiddleCOG == null) {
+                Bearing avgTackCog = getWeightedAverageMiddleManeuverCOGDegAndManeuverAngleDeg(tackClusters.get(0),
+                        ManeuverType.TACK).getA();
+                if(avgTackCog != null) {
+                    estimatedJibeMiddleCOG = avgTackCog.reverse();
+                }
+            }
+        }
+
         final List<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>> jibeClusters = getJibeClusters(
                 estimatedJibeMiddleCOG, clusters).collect(Collectors.toList());
         addWindFixes(jibeClusters.stream(), ManeuverType.JIBE);
@@ -331,8 +341,8 @@ public abstract class AbstractManeuverBasedWindEstimationTrackImpl extends WindT
      */
     protected double getAverageLikelihoodOfBeingManeuver(ManeuverType maneuverType,
             Stream<ManeuverClassification> maneuverClassifications) {
-        return maneuverClassifications.mapToDouble((mc) -> mc.getLikelihoodForManeuverType(maneuverType))
-                .average().orElse(0.0);
+        return maneuverClassifications.mapToDouble((mc) -> mc.getLikelihoodForManeuverType(maneuverType)).average()
+                .orElse(0.0);
     }
 
     @Override
@@ -370,8 +380,8 @@ public abstract class AbstractManeuverBasedWindEstimationTrackImpl extends WindT
      * <p>
      * 
      * The weight of a maneuver for computing the weighted speed average is determined to be the
-     * {@link ManeuverClassification#getLikelihoodForManeuverType(ManeuverType) likelihood of the maneuver
-     * being what it is assumed to be}.
+     * {@link ManeuverClassification#getLikelihoodForManeuverType(ManeuverType) likelihood of the maneuver being what it
+     * is assumed to be}.
      */
     protected abstract double getLikelihoodOfBeingJibeCluster(Speed tackClusterWeightedAverageSpeed,
             Stream<ManeuverClassification> jibeClustersContent, BoatClass boatClass,

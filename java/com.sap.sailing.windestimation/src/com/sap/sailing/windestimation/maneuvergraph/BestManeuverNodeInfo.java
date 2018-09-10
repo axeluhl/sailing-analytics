@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.maneuvergraph.maneuvernode;
+package com.sap.sailing.windestimation.maneuvergraph;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,12 +8,12 @@ import com.sap.sailing.windestimation.polarsfitting.SailingStatistics;
 
 public class BestManeuverNodeInfo {
 
-    private final ManeuverNode bestPreviousNode;
+    private final GraphNode bestPreviousNode;
     private double probabilityFromStart;
     private final IntersectedWindRange windRange;
     private final Map<String, SailingStatistics> pathSailingStatisticsPerBoatClassName = new HashMap<>();
 
-    public BestManeuverNodeInfo(ManeuverNode bestPreviousNode, double probabilityFromStart,
+    public BestManeuverNodeInfo(GraphNode bestPreviousNode, double probabilityFromStart,
             IntersectedWindRange windRange) {
         this.bestPreviousNode = bestPreviousNode;
         this.probabilityFromStart = probabilityFromStart;
@@ -28,7 +28,7 @@ public class BestManeuverNodeInfo {
         pathSailingStatisticsPerBoatClassName.put(boatClass.getName(), sailingStatistics);
     }
     
-    public ManeuverNode getBestPreviousNode() {
+    public GraphNode getBestPreviousNode() {
         return bestPreviousNode;
     }
     

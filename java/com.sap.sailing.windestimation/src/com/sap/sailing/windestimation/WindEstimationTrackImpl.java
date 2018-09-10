@@ -7,7 +7,7 @@ import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindTrackImpl;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
-import com.sap.sailing.windestimation.data.ManeuverForEstimation;
+import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 
 /**
  * 
@@ -42,8 +42,11 @@ public class WindEstimationTrackImpl<T> extends WindTrackImpl {
     public void analyzeRace() {
         List<CompetitorTrackWithEstimationData<T>> competitorTracks = competitorTracksExtractor
                 .extractCompetitorTracks(trackedRace, polarDataService);
-        List<WindWithConfidence<ManeuverForEstimation>> windTrack = windEstimator.estimateWind(competitorTracks);
-        for (WindWithConfidence<ManeuverForEstimation> windWithConfidence : windTrack) {
+        RaceWithEstimationData<T> raceWithEstimationData = new RaceWithEstimationData<>(
+                trackedRace.getTrackedRegatta().getRegatta().getName(), trackedRace.getRace().getName(),
+                competitorTracks);
+        List<WindWithConfidence<Void>> windTrack = windEstimator.estimateWind(raceWithEstimationData);
+        for (WindWithConfidence<Void> windWithConfidence : windTrack) {
             // TODO how to set confidence for each wind fix individually?
             add(windWithConfidence.getObject());
         }

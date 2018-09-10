@@ -6,7 +6,6 @@ import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.persistence.PersistedElementsIterator;
 import com.sap.sailing.windestimation.data.persistence.PolarDataServiceAccessUtil;
 import com.sap.sailing.windestimation.data.persistence.RaceWithCompleteManeuverCurvePersistenceManager;
-import com.sap.sailing.windestimation.maneuvergraph.pointofsail.TargetWindFromCompleteManeuverCurveWithEstimationDataExtractor;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
 public class ManeuverSequenceGraphBasedWindEstimatorEvaluationRunner {
@@ -20,10 +19,11 @@ public class ManeuverSequenceGraphBasedWindEstimatorEvaluationRunner {
         PolarDataService polarService = PolarDataServiceAccessUtil.getPersistedPolarService();
         LoggingUtil.logInfo("Wind estimator evaluation started...");
         PersistedElementsIterator<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> racesIterator = persistenceManager
-                .getIterator().limit(20);
+                .getIterator().limit(40);
+        WindEstimatorFactories estimatorFactories = new WindEstimatorFactories(polarService);
 
         WindEstimatorEvaluationResult evaluationResult = evaluator.evaluateWindEstimator(
-                new ManeuverSequenceGraphBasedWindEstimatorFactory(polarService),
+                estimatorFactories.maneuverGraph(),
                 new TargetWindFromCompleteManeuverCurveWithEstimationDataExtractor(), racesIterator,
                 racesIterator.getNumberOfElements());
         LoggingUtil.logInfo("Wind estimator evaluation finished");

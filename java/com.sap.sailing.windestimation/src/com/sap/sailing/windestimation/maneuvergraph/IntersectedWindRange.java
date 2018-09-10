@@ -1,6 +1,6 @@
-package com.sap.sailing.windestimation.maneuvergraph.maneuvernode;
+package com.sap.sailing.windestimation.maneuvergraph;
 
-public class IntersectedWindRange extends WindRangeForManeuverNode {
+public class IntersectedWindRange extends WindCourseRange {
 
     private final double violationRange;
 

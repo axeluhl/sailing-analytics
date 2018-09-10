@@ -16,14 +16,18 @@ import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.windestimation.AverageWindEstimator;
 import com.sap.sailing.windestimation.data.CoarseGrainedPointOfSail;
+import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.FineGrainedPointOfSail;
+import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
-public class PolarsFittingWindEstimation {
+public class PolarsFittingWindEstimation implements AverageWindEstimator {
 
     private static final int COURSE_CLUSTER_SIZE = 5;
 
@@ -32,6 +36,23 @@ public class PolarsFittingWindEstimation {
 
     public PolarsFittingWindEstimation(PolarDataService polarService) {
         this.polarService = polarService;
+    }
+
+    public PolarsFittingWindEstimation(PolarDataService polarService,
+            List<CompetitorTrackWithEstimationData<ManeuverForEstimation>> competitorTracks) {
+        this(polarService);
+        for (CompetitorTrackWithEstimationData<ManeuverForEstimation> competitorTrack : competitorTracks) {
+            for (ManeuverForEstimation maneuver : competitorTrack.getElements()) {
+                if (maneuver.isCleanBefore()) {
+                    addSpeedWithCourseRecord(maneuver.getAverageSpeedWithBearingBefore(),
+                            competitorTrack.getBoatClass());
+                }
+                if (maneuver.isCleanAfter()) {
+                    addSpeedWithCourseRecord(maneuver.getAverageSpeedWithBearingAfter(),
+                            competitorTrack.getBoatClass());
+                }
+            }
+        }
     }
 
     public void addSpeedWithCourseRecord(SpeedWithBearing speedWithCourse, BoatClass boatClass) {
@@ -231,7 +252,16 @@ public class PolarsFittingWindEstimation {
                 }
             }
         }
+//        if(maxSpeed - minSpeed > 2) {
+//            maxSpeed = minSpeed + 2;
+//        }
         return minSpeed == 0 ? null : new WindSpeedRange(minSpeed, maxSpeed);
+    }
+
+    @Override
+    public WindWithConfidence<Void> estimateAverageWind() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

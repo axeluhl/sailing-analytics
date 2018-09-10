@@ -8,7 +8,7 @@ import com.sap.sailing.windestimation.maneuverclassifier.impl.ManeuverFeatures;
 
 public class ManeuverClassifiersCache {
 
-    public static final int MIN_FIXES_FOR_POLARS_INFORMATION = 1000;
+    public static final int MIN_FIXES_FOR_POLARS_INFORMATION = 0;
 
     private final ShortTimeAfterLastHitCache<ClassifierType, SingleManeuverClassifier> classifierCache;
     private final boolean liveRace;

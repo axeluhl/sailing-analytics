@@ -135,8 +135,6 @@ public class SpeedRegressionPerAngleClusterProcessor implements
     
     public Pair<List<Speed>, Double> estimateWindSpeeds(BoatClass boatClass, Speed boatSpeed, Bearing trueWindAngle)
             throws NotEnoughDataHasBeenAddedException {
-        long numberOfWindSpeeds = 0;
-        long allFixesCount = 0;
         List<Speed> windSpeeds = new ArrayList<>();
         for (int i = -2; i <= 2; i++) {
             GroupKey key = createGroupKey(boatClass, new DegreeBearingImpl(Math.abs(trueWindAngle.getDegrees()) + i));
@@ -145,28 +143,28 @@ public class SpeedRegressionPerAngleClusterProcessor implements
                 long fixesCount = incrementalLeastSquares.getNumberOfAddedPoints();
                 if (fixesCount > 10) {
                     double[] coefficiants = incrementalLeastSquares.getOrCreatePolynomialFunction().getCoefficients();
-                    CubicEquation equation = new CubicEquation(coefficiants[2], coefficiants[1], coefficiants[0],
+                    CubicEquation equation = new CubicEquation(coefficiants[3], coefficiants[2], coefficiants[1],
                             -boatSpeed.getKnots());
 
+                    double bestWindSpeedCandidateInKnots = Double.MAX_VALUE;
+                    double bestOptimalSpeedDifference = Double.MAX_VALUE;
                     double[] windSpeedCandidates = equation.solve();
                     for (double windSpeedCandidateInKnots : windSpeedCandidates) {
-                        windSpeeds.add(new KnotSpeedImpl(windSpeedCandidateInKnots));
+                        if (windSpeedCandidateInKnots > 2 && windSpeedCandidateInKnots < 20) {
+                            double optimalSpeedDifference = Math.abs(10 - windSpeedCandidateInKnots);
+                            if (optimalSpeedDifference < bestOptimalSpeedDifference) {
+                                bestOptimalSpeedDifference = optimalSpeedDifference;
+                                bestWindSpeedCandidateInKnots = windSpeedCandidateInKnots;
+                            }
+                        }
                     }
-                    allFixesCount += fixesCount;
-                    numberOfWindSpeeds++;
+                    if (bestWindSpeedCandidateInKnots != Double.MAX_VALUE) {
+                        windSpeeds.add(new KnotSpeedImpl(bestWindSpeedCandidateInKnots));
+                    }
                 }
             }
         }
-        long avgFixesCount = numberOfWindSpeeds == 0 ? 0 : allFixesCount / numberOfWindSpeeds;
-        long fixCountOverall = 0;
-        if (numberOfWindSpeeds < 2 || allFixesCount < 10) {
-            throw new NotEnoughDataHasBeenAddedException("Not enough data has been added to Per Course Regressions");
-        } else {
-            synchronized (fixCountPerBoatClass) {
-                fixCountOverall = fixCountPerBoatClass.get(boatClass);
-            }
-        }
-        return new Pair<>(windSpeeds, Math.min(1, 5.0 * avgFixesCount / fixCountOverall));
+        return new Pair<>(windSpeeds, Math.min(1, 0.5));
     }
 
     private GroupKey createGroupKey(final BoatClass boatClass, final Bearing angle) {

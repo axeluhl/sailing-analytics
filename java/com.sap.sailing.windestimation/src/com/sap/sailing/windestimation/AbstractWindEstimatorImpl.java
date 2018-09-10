@@ -3,10 +3,9 @@ package com.sap.sailing.windestimation;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
-import com.sap.sailing.windestimation.data.ManeuverForEstimation;
+import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 
 /**
  * 
@@ -15,28 +14,22 @@ import com.sap.sailing.windestimation.data.ManeuverForEstimation;
  */
 public abstract class AbstractWindEstimatorImpl<T> implements WindEstimator<T> {
 
-    private final PolarDataService polarService;
-
-    public AbstractWindEstimatorImpl(PolarDataService polarService) {
-        this.polarService = polarService;
-    }
-
     @Override
-    public List<WindWithConfidence<ManeuverForEstimation>> estimateWind(
-            Iterable<CompetitorTrackWithEstimationData<T>> competitorTracks) {
+    public List<WindWithConfidence<Void>> estimateWind(RaceWithEstimationData<T> raceWithEstimationData) {
         List<CompetitorTrackWithEstimationData<T>> filteredCompetitorTracks = filterOutImplausibleTracks(
-                competitorTracks);
-        filterOutIrrelevantElementsFromCompetitorTracks(filteredCompetitorTracks);
-        List<WindWithConfidence<ManeuverForEstimation>> windTrack = estimateWindByFilteredCompetitorTracks(
-                filteredCompetitorTracks);
+                raceWithEstimationData.getCompetitorTracks());
+        RaceWithEstimationData<T> newRace = new RaceWithEstimationData<>(raceWithEstimationData.getRegattaName(),
+                raceWithEstimationData.getRaceName(), filteredCompetitorTracks);
+        filterOutIrrelevantElementsFromCompetitorTracks(newRace);
+        List<WindWithConfidence<Void>> windTrack = estimateWindByFilteredCompetitorTracks(newRace);
         return windTrack;
     }
 
     protected abstract void filterOutIrrelevantElementsFromCompetitorTracks(
-            List<CompetitorTrackWithEstimationData<T>> filteredCompetitorTracks);
+            RaceWithEstimationData<T> raceWithEstimationData);
 
-    protected abstract List<WindWithConfidence<ManeuverForEstimation>> estimateWindByFilteredCompetitorTracks(
-            List<CompetitorTrackWithEstimationData<T>> filteredCompetitorTracks);
+    protected abstract List<WindWithConfidence<Void>> estimateWindByFilteredCompetitorTracks(
+            RaceWithEstimationData<T> raceWithEstimationData);
 
     public List<CompetitorTrackWithEstimationData<T>> filterOutImplausibleTracks(
             Iterable<CompetitorTrackWithEstimationData<T>> competitorTracks) {
@@ -47,10 +40,6 @@ public abstract class AbstractWindEstimatorImpl<T> implements WindEstimator<T> {
             }
         }
         return result;
-    }
-
-    public PolarDataService getPolarService() {
-        return polarService;
     }
 
 }
