@@ -112,7 +112,7 @@
           transform: rotate(0deg);
 }
 .sectionheader_item_adjust_title_left {
-  padding-left: 4em;
+  margin-left: 4em;
   position: absolute;
   top: 50%;
   -webkit-transform: translateY(-50%);

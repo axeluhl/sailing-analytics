@@ -8,6 +8,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
+import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata.RegattaState;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.communication.regatta.RegattaProgressSeriesDTO;
 import com.sap.sailing.gwt.home.communication.regatta.RegattaWithProgressDTO;
@@ -37,6 +38,8 @@ public class EventSteps extends Composite implements RefreshableWidget<RegattaWi
         sectionHeaderUi.setImageUrl(boatClassIcon.getSafeUri().asString());
         sectionHeaderUi.setSectionTitle(regatta.getDisplayName());
         regattaProgessUi.setEdgeToEdgeContent(true);
+        sectionHeaderUi.initCollapsibility(regattaProgessUi.getContentContainerElement(),
+                RegattaState.FINISHED != regatta.getState());
         sectionHeaderUi.initBoatClassPopup(regatta.getBoatClass());
         sectionHeaderUi.initAdditionalWidget(new SectionHeaderDataIndicators(regatta.getRaceDataInfo()));
     }
