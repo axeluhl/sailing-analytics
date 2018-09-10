@@ -68,7 +68,8 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
         this.presenter = presenter;
         this.flagImageResolver = flagImageResolver;
         presenter.getDataProvider().setView(this);
-        competitorSelectionUi = new EditableSuggestedMultiSelectionCompetitor(presenter, flagImageResolver);
+        competitorSelectionUi = new EditableSuggestedMultiSelectionCompetitor(presenter.getDataProvider(),
+                flagImageResolver);
         initWidget(uiBinder.createAndBindUi(this));
         SharedSailorProfileResources.INSTANCE.css().ensureInjected();
         SailorProfileDesktopResources.INSTANCE.css().ensureInjected();

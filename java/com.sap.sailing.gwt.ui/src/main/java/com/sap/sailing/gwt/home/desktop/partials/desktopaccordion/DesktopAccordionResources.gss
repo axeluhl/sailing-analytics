@@ -1,0 +1,59 @@
+.accordionTitle {
+    padding: 1.11111111111111em;
+    font-size: 1.2em;
+    font-weight: 700;
+    line-height: 1.333333333em;
+}
+
+.accordionHeader {
+    background-color: #f2f2f2;
+    cursor: pointer;
+    border-bottom: 1px solid #dedede;
+}
+
+.accordionHeaderRight {
+    top: 0;
+    bottom: 0;
+}
+
+.accordionHeaderRightArrow {
+    padding: 1.11111111em;
+    font-size: 1.2em;
+    font-weight: 700;
+    line-height: 1.333333333em;
+    right: 1.111111111111em;
+    position: absolute;
+}
+
+.accordionCollapsed .accordionArrowImage {
+    -webkit-transform: rotate(0deg);
+    -moz-transform: rotate(0deg);
+    -ms-transform: rotate(0deg);
+    transform: rotate(0deg);
+}
+
+.accordionArrowImage {
+    width: 1.3333333333em;
+    vertical-align: middle;
+    -webkit-transform: rotate(180deg);
+    -moz-transform: rotate(180deg);
+    -ms-transform: rotate(180deg);
+    transform: rotate(180deg);
+    -webkit-transition: -webkit-transform 0.4s;
+    -moz-transition: -moz-transform 0.4s;
+    transition: transform 0.4s;
+}
+
+.accordion {
+    border: 1px solid #dedede;
+    border-radius: .333333333333333em;
+    -webkit-transition: opacity 0.1s;
+    -moz-transition: opacity 0.1s;
+    transition: opacity 0.1s;
+}
+
+.accordionContentPanel {
+    float: none;
+    margin-left: 1em;
+    margin-right: 1em;
+}

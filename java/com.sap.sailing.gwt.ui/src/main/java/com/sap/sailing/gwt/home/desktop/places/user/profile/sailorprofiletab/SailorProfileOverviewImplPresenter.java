@@ -10,6 +10,7 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSai
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView.Presenter;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.HasLoginFormAndFactory;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sse.gwt.client.mvp.ClientFactory;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
@@ -23,9 +24,15 @@ public class SailorProfileOverviewImplPresenter implements SailingProfileOvervie
 
     public SailorProfileOverviewImplPresenter(final SailorProfileView view,
             final HasLoginFormAndFactory loginAndFactory, final FlagImageResolver flagImageResolver) {
+        this(view, loginAndFactory, flagImageResolver,
+                new EditSailorProfilePresenter(loginAndFactory.getClientFactory()));
+    }
+
+    public SailorProfileOverviewImplPresenter(final SailorProfileView view,
+            final HasLoginFormAndFactory loginAndFactory, final FlagImageResolver flagImageResolver, final EditSailorProfilePresenter presenter) {
         this.view = view;
         this.loginAndFactory = loginAndFactory;
-        this.sharedSailorProfilePresenter = new EditSailorProfilePresenter(loginAndFactory.getClientFactory());
+        this.sharedSailorProfilePresenter = presenter;
         this.flagImageResolver = flagImageResolver;
         view.setPresenter(this);
     }
@@ -75,7 +82,11 @@ public class SailorProfileOverviewImplPresenter implements SailingProfileOvervie
 
                             @Override
                             public void onSuccess(SailorProfilesDTO result) {
+                                if (view instanceof SailorProfileOverview) {
                                 ((SailorProfileOverview) view).setProfileList(result.getEntries());
+                                } else {
+                                    getClientFactory().getPlaceController().goTo(new SailorProfilePlace(null));
+                                }
                             }
 
                             @Override

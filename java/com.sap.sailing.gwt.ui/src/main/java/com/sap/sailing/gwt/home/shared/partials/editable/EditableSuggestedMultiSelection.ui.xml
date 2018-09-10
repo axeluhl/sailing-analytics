@@ -7,19 +7,18 @@
     <ui:with field="e_res" type="com.sap.sailing.gwt.home.shared.partials.editable.EditableResources" />
 
     <g:HTMLPanel>
-        <div ui:field="parentPanel">
-            <div ui:field="listContainerUi" class="{local_res.css.suggestions}">
-                <div class="{local_res.css.suggestionsHeader}">
+            <div class="{local_res.css.suggestions}">
+                <div class="{local_res.css.suggestionsHeader}" ui:field="headerElementUi">
                     <span class="{local_res.css.suggestionsHeaderTitle}" ui:field="headerTitleUi" />
+                    <sp:editable.InlineEditButton
+                        addStyleNames="{e_res.css.editableSuggestionEditButton}" ui:field="editButtonUi" />
                 </div>
-                <div class="{local_res.css.suggestionsContent}">
+                <div class="{local_res.css.suggestionsContent}" ui:field="parentPanelUi">
                     <g:FlowPanel addStyleNames="{local_res.css.suggestionsContentTable}"
                         ui:field="itemContainerUi" />
+                    <sp:multiselection.SuggestedMultiSelectionView
+                        ui:field="multiSelect" />
                 </div>
             </div>
-            <sp:multiselection.SuggestedMultiSelection ui:field="multiSelect" />
-        </div>
-        <sp:editable.InlineEditButton
-            addStyleNames="{e_res.css.editableSuggestionEditButton}" ui:field="editButtonUi" />
     </g:HTMLPanel>
 </ui:UiBinder> 

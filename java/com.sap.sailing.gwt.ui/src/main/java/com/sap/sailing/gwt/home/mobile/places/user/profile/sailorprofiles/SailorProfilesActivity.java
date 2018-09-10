@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles;
 
+import java.util.UUID;
+
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -17,6 +19,7 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSai
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.HasLoginFormAndFactory;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 
 public class SailorProfilesActivity extends AbstractUserProfileActivity
@@ -47,8 +50,7 @@ public class SailorProfilesActivity extends AbstractUserProfileActivity
             this.currentView = new SailorProfilesDetailsViewImpl(this);
         }
         sailorProfileOverviewPresenter = new SailorProfileOverviewImplPresenter(this.currentView, this,
-                FlagImageResolverImpl.get());
-        currentView.setPresenter(sailorProfileOverviewPresenter);
+                FlagImageResolverImpl.get(), editSailorProfilePresenter);
 
     }
 
@@ -86,7 +88,12 @@ public class SailorProfilesActivity extends AbstractUserProfileActivity
             } else if (cView instanceof EditSailorProfileView) {
                 EditSailorProfileView detailsView = (EditSailorProfileView) cView;
                 editSailorProfilePresenter.getDataProvider().setView(detailsView);
-                editSailorProfilePresenter.getDataProvider().loadSailorProfile(place.getSailorProfileUuid());
+                if (place.isCreateNew()) {
+                    editSailorProfilePresenter.getDataProvider().createNewEntry(UUID.randomUUID(),
+                            StringMessages.INSTANCE.newSailorProfileName());
+                } else {
+                    editSailorProfilePresenter.getDataProvider().loadSailorProfile(place.getSailorProfileUuid());
+                }
             }
         }
     }

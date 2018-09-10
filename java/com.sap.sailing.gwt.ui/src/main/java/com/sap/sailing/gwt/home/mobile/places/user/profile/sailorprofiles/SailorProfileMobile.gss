@@ -14,7 +14,7 @@
 
 .sumPoints {
     font-weight: bold;
-    background-color: #ebebeb;
+    background-color: #f2f2f2;
     border: 1px solid #cccccc;
     border-radius: 2px;
     padding: 0.5em;
@@ -126,6 +126,11 @@
     margin-right: -2em;
 }
 
+.detailsCompetitorsContainer {
+    margin-left: -1em;
+    margin-right: -1em;
+}
+
 .overviewTableFooterMobile {
     cursor: pointer;
     border-top: 2px solid #ccc;
@@ -138,4 +143,10 @@
     position: relative;
     margin-left: -1em;
     margin-right: -1em
+}
+
+.inlineTitleUi {
+    padding-left: 1em;
+    font-weight: bold;
+    background-color: #f2f2f2;
 }

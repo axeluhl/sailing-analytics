@@ -29,5 +29,6 @@ public interface SailorProfileDesktopResources extends ClientBundle {
         String overviewTablePanel();
 
         String overviewTableEmpty();
+
     }
 }

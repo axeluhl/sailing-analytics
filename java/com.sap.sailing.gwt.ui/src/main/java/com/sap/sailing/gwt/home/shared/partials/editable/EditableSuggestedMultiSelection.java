@@ -19,7 +19,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelection;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class EditableSuggestedMultiSelection<T> extends Composite implements HasText {
@@ -37,10 +37,13 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
     StringMessages i18n;
 
     @UiField
-    DivElement parentPanel;
+    DivElement parentPanelUi;
 
     @UiField(provided = true)
-    SuggestedMultiSelection<T> multiSelect;
+    SuggestedMultiSelectionView<T> multiSelect;
+
+    @UiField
+    DivElement headerElementUi;
 
     @UiField
     SpanElement headerTitleUi;
@@ -49,7 +52,7 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
     FlowPanel itemContainerUi;
 
     @UiField
-    DivElement listContainerUi;
+    InlineEditButton editButtonUi;
 
     private final Map<T, IsWidget> tableElements = new HashMap<>();
     private final Function<T, IsWidget> itemProducer;
@@ -57,11 +60,7 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
     private boolean editMode = false;
     private EditModeChangeHandler editModeChangeHandler;
 
-    public EditableSuggestedMultiSelection(Function<T, IsWidget> itemProducer, SuggestedMultiSelection<T> multis) {
-        this(itemProducer, multis, null);
-    }
-
-    public EditableSuggestedMultiSelection(Function<T, IsWidget> itemProducer, SuggestedMultiSelection<T> multis,
+    public EditableSuggestedMultiSelection(Function<T, IsWidget> itemProducer, SuggestedMultiSelectionView<T> multis,
             EditModeChangeHandler editModeChangeHandler) {
         this.itemProducer = itemProducer;
         multiSelect = multis;
@@ -73,19 +72,22 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
 
     public void setEditMode(boolean state) {
         this.editMode = state;
-        listContainerUi.removeFromParent();
-        multiSelect.getElement().removeFromParent();
+        parentPanelUi.removeAllChildren();
         editModeChangeHandler.onEditModeChanged(state);
         if (state) {
-            parentPanel.appendChild(multiSelect.getElement());
+            parentPanelUi.appendChild(multiSelect.getElement());
         } else {
-            parentPanel.appendChild(listContainerUi);
+            parentPanelUi.appendChild(itemContainerUi.getElement());
         }
     }
 
     @UiHandler("editButtonUi")
     void onEditButtonClicked(ClickEvent event) {
         setEditMode(!editMode);
+    }
+
+    public InlineEditButton getEditButton() {
+        return editButtonUi;
     }
 
     public void addListItem(T listItem) {

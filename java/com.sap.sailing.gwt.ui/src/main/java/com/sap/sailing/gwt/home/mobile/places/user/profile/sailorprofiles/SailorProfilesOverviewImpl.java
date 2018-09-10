@@ -14,12 +14,11 @@ import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.Sai
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileOverview;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileResources;
-import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserSettingsView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
 /**
- * Implementation of {@link UserSettingsView} where users can change their preferred selections and notifications.
+ * Implementation of {@link SailorProfileOverview} where users can see an overview over all his sailor profiles.
  */
 public class SailorProfilesOverviewImpl extends Composite implements SailorProfileOverview {
 

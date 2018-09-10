@@ -33,6 +33,7 @@ public class InlineEditButton extends Composite implements HasClickHandlers {
 
     public InlineEditButton() {
         initWidget(uiBinder.createAndBindUi(this));
+        res.css().ensureInjected();
         updateState(false);
     }
 
