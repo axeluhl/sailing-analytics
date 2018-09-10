@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.ui.client.media.popup;
 
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.user.client.Window;
@@ -30,14 +29,14 @@ public class VideoPopupWindow extends AbstractPopupWindow implements ContextMenu
             videoJSDelegate = new VideoJSPlayer(true, false);
             videoJSDelegate.setVideo(MimeType.valueOf(mimeType), videoUrl);
             mainPanel.add(videoJSDelegate);
-            initPlay(videoJSDelegate.getVideoElement());
+            initPlay();
         } else {
             mainPanel.add(new Label("Parameter 'url' not assigned."));
         }
 
     }
 
-    native void initPlay(Element videoElement) /*-{
+    native void initPlay() /*-{
         var that = this;
         var deferredPlayState = $wnd.deferredPlayState
         if (deferredPlayState && !$wnd.videoPlayer) {
