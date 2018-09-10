@@ -228,6 +228,7 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
         if (this.swarm != null) {
             this.swarm.stop();
             this.swarm.getColorMapper().removeListener(this);
+            swarm = null;
         }
     }
 
@@ -335,12 +336,10 @@ public class WindStreamletsRaceboardOverlay extends MovingCanvasOverlay implemen
         if (getCanvas() != null) {
             if (isVisible) {
                 this.startStreamlets();
-                this.visible = isVisible;
                 if (colored) {
                     this.streamletLegend.setVisible(true);
                 }
                 swarm.setColors(colored);
-                this.startStreamlets();
                 if (isAttached) {
                     Scheduler.get().scheduleDeferred(() -> addObserverIfNecessary());
                 } else {
