@@ -56,6 +56,7 @@ public interface TagPanelResources extends ClientBundle {
 
         // tag cells
         String tagCell();
+        String tagCellActive();
         String tagCellHeading();
         String tagCellHeadingButtons();
         String tagActionButton();

@@ -206,7 +206,11 @@ public class TagCell extends AbstractCell<TagDTO> {
             }
         }
 
-        SafeHtml cell = tagCellTemplate.cell(style.tagCell(), style.tagCellHeading(), style.tagCellCreated(), icon,
+        String cellStyle = style.tagCell();
+        if (tag.equals(taggingPanel.getSelectedTag())) {
+            cellStyle = style.tagCell() + " " + style.tagCellActive();
+        }
+        SafeHtml cell = tagCellTemplate.cell(cellStyle, style.tagCellHeading(), style.tagCellCreated(), icon,
                 headingButtons, safeTag, safeCreated, content);
         htmlBuilder.append(cell);
     }

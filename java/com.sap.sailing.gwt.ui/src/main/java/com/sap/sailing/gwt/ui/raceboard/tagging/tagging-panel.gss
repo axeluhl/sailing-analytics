@@ -381,6 +381,10 @@
 	cursor: context-menu;
 }
 
+.taggingPanelDisabled .tagCell.tagCellActive {
+	background-color: #e5f2f9;
+}
+
 .taggingPanelDisabled .tagCellHeadingButtons,
 .taggingPanelDisabled .tagCellHeadingButtons .tagEditButton,
 .taggingPanelDisabled .tagCellHeadingButtons .tagEditButton:hover,
