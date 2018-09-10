@@ -299,22 +299,27 @@ public class ImagesListComposite extends Composite {
     }
 
     protected void callResizingService(ImageResizingTaskDTO resizingTask, ImageDTO originalImage) {
-        sailingService.resizeImage(resizingTask, new AsyncCallback<ImageDTO[]>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                Notification.notify(stringMessages.resizeUnsuccessfull(), NotificationType.ERROR);
-            }
-
-            @Override
-            public void onSuccess(ImageDTO[] result) {
-                for (int i = 0; i < result.length; i++) {
-                    imageListDataProvider.getList().add(result[i]);
+        if (resizingTask.getResizingTask().size() != 0) {
+            sailingService.resizeImage(resizingTask, new AsyncCallback<ImageDTO[]>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    Notification.notify(stringMessages.resizeUnsuccessfull(), NotificationType.ERROR);
                 }
-                imageListDataProvider.getList().remove(originalImage);
-                updateTableVisisbilty();
-                Notification.notify(stringMessages.resizeSuccessfull(), NotificationType.SUCCESS);
-            }
-        });
+
+                @Override
+                public void onSuccess(ImageDTO[] result) {
+                    for (int i = 0; i < result.length; i++) {
+                        imageListDataProvider.getList().add(result[i]);
+                    }
+                    imageListDataProvider.getList().remove(originalImage);
+                    updateTableVisisbilty();
+                    Notification.notify(stringMessages.resizeSuccessfull(), NotificationType.SUCCESS);
+                }
+            });
+        } else {
+            imageListDataProvider.getList().remove(originalImage);
+            imageListDataProvider.getList().add(resizingTask.getImage());
+        }
     }
 
     private void updateTableVisisbilty() {
