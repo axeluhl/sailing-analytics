@@ -757,12 +757,15 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         }
                         if (autoZoomOut) {
                             // finalize zoom-out that was started with setZoom() in zoomMapToNewBounds()
-                            map.panTo(autoZoomLatLngBounds.getCenter());
+//                            map.panTo(autoZoomLatLngBounds.getCenter());
                             autoZoomOut = false;
                         }
 
                         if (streamletOverlay != null && settings.isShowWindStreamletOverlay()) {
                             streamletOverlay.setCanvasSettings();
+                        }
+                        if (!currentlyDragging) {
+                            refreshMapWithoutAnimation();
                         }
                     }
                 });
@@ -777,7 +780,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         currentMapBounds = map.getBounds();
                         currentZoomLevel = newZoomLevel;
                         headerPanel.getElement().getStyle().setWidth(map.getOffsetWidth(), Unit.PX);
-                        refreshMapWithoutAnimation();
+                        refreshMapWithoutAnimationButLeaveTransitionsAlive();
                     }
                 });
 
@@ -964,6 +967,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         return timer.getPlayMode() == PlayModes.Live;
     }
 
+    private void refreshMapWithoutAnimationButLeaveTransitionsAlive() {
+        remoteCallsToSkipInExecution.addAll(remoteCallsInExecution);
+    }
+
     private void refreshMapWithoutAnimation() {
         removeTransitions();
         remoteCallsToSkipInExecution.addAll(remoteCallsInExecution);
@@ -1041,7 +1048,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     });
         }
         else {
-            GWT.log("added identical call to skip");
             remoteCallsToSkipInExecution.add(newTime);
         }
     }
@@ -1277,7 +1283,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private void updateBoatPositions(final Date newTime, final long transitionTimeInMillis,
             final Map<CompetitorDTO, Boolean> hasTailOverlapForCompetitor,
             final Iterable<CompetitorDTO> competitorsToShow, Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatData, boolean updateTailsOnly) {
-        if (zoomingAnimationsInProgress == 0 && !currentlyDragging) {
+        if (zoomingAnimationsInProgress == 0) {
             fixesAndTails.updateFixes(boatData, hasTailOverlapForCompetitor, RaceMap.this, transitionTimeInMillis);
             showBoatsOnMap(newTime, transitionTimeInMillis,
                     /* re-calculate; it could have changed since the asynchronous request was made: */
