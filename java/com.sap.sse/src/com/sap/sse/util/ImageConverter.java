@@ -129,6 +129,8 @@ public class ImageConverter {
                 dimensions[0] = (int) width;
                 dimensions[1] = (int) height;
             }
+        } else {
+            dimensions = null;
         }
         return dimensions;
     }
