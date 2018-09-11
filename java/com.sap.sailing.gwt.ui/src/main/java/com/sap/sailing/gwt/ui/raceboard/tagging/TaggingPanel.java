@@ -6,9 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.shared.GWT;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -23,13 +20,13 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
+import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
-import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.Notification;
@@ -315,10 +312,11 @@ public class TaggingPanel extends ComponentWithoutSettings
                 loadedPrivateTags.add(newTag);
 
                 // store list of loaded private tags also containing the new tag
-                TagDTOJsonDeSerializer serializer = new TagDTOJsonDeSerializer();
-                JSONObject jsonObject = serializer.serialize(loadedPrivateTags);
-                userService.setPreference(serializer.createIdenticalKeyFromThreeStrings(fleet.getName(),
-                        leaderboardName, raceColumn.getName()), jsonObject.toString(), new AsyncCallback<Void>() {
+                TagDTODeSerializer serializer = new TagDTODeSerializer();
+                String jsonString = serializer.serializeTags(loadedPrivateTags);
+                userService.setPreference(
+                        serializer.generateUniqueKey(leaderboardName, raceColumn.getName(), fleet.getName()),
+                        jsonString, new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 Notification.notify(stringMessages.tagNotSaved(), NotificationType.WARNING);
@@ -326,9 +324,7 @@ public class TaggingPanel extends ComponentWithoutSettings
 
                             @Override
                             public void onSuccess(Void result) {
-
                                 Notification.notify(stringMessages.tagSavedSuccessfully(), NotificationType.INFO);
-
                                 tagListProvider.getAllTags().add(newTag);
                                 updateContent();
                             }
@@ -449,10 +445,11 @@ public class TaggingPanel extends ComponentWithoutSettings
                 addTagsToProvider(privateTags);
 
                 // store list in user storage
-                TagDTOJsonDeSerializer serializer = new TagDTOJsonDeSerializer();
-                JSONObject jsonObject = serializer.serialize(privateTags);
-                userService.setPreference(serializer.createIdenticalKeyFromThreeStrings(fleet.getName(),
-                        leaderboardName, raceColumn.getName()), jsonObject.toString(), new AsyncCallback<Void>() {
+                TagDTODeSerializer serializer = new TagDTODeSerializer();
+                String jsonString = serializer.serializeTags(privateTags);
+                userService.setPreference(
+                        serializer.generateUniqueKey(leaderboardName, raceColumn.getName(), fleet.getName()),
+                        jsonString, new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 Notification.notify(stringMessages.tagNotRemoved(), NotificationType.ERROR);
@@ -569,11 +566,12 @@ public class TaggingPanel extends ComponentWithoutSettings
     private void loadAllPrivateTags(AsyncCallback<List<TagDTO>> callback) {
         // only reload tags if user is logged in
         if (userService.getCurrentUser() != null) {
-            TagDTOJsonDeSerializer tagDTODeSerializer = new TagDTOJsonDeSerializer();
+            TagDTODeSerializer serializer = new TagDTODeSerializer();
 
-            // load all private tags from user storage
-            userService.getPreference(tagDTODeSerializer.createIdenticalKeyFromThreeStrings(fleet.getName(),
-                    leaderboardName, raceColumn.getName()), new AsyncCallback<String>() {
+            // load all private tags from user store
+            userService.getPreference(
+                    serializer.generateUniqueKey(leaderboardName, raceColumn.getName(), fleet.getName()),
+                    new AsyncCallback<String>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             callback.onFailure(caught);
@@ -583,12 +581,9 @@ public class TaggingPanel extends ComponentWithoutSettings
                         public void onSuccess(String result) {
                             if (result != null && !result.isEmpty()) {
                                 // parse and deserialize String result into List of private tags
-                                final JSONValue value = JSONParser.parseStrict(result);
-                                if (value.isObject() != null) {
-                                    callback.onSuccess(tagDTODeSerializer.deserialize((JSONObject) value));
-                                }
+                                callback.onSuccess(serializer.deserializeTags(result));
                             } else {
-                                // no rpivate tags received from server, send empty list as callback parameter.
+                                // no private tags received from server, send empty list as callback parameter.
                                 callback.onSuccess(new ArrayList<TagDTO>());
                             }
                         }
