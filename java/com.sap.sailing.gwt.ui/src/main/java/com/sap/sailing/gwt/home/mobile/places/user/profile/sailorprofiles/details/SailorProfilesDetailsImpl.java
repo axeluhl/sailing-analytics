@@ -11,15 +11,18 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
+import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedEventDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileEventsDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO;
+import com.sap.sailing.gwt.home.desktop.partials.desktopaccordion.DesktopAccordionResources;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailingProfileOverviewPresenter;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileView;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
@@ -33,6 +36,7 @@ import com.sap.sailing.gwt.home.shared.partials.editable.InlineEditLabel;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
 /**
@@ -73,6 +77,8 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
 
     @UiField
     HTMLPanel contentContainerStatisticsUi;
+
+    private Label boatclassesEmpty;
 
     private SailingProfileOverviewPresenter presenter;
 
@@ -167,13 +173,34 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
     }
 
     private void setBoatclasses(Iterable<BoatClassDTO> boatclasses) {
+        contentContainerBoatclassesUi.clear();
         contentContainerBoatclassesUi.getElement().removeAllChildren();
+        if (Util.isEmpty(boatclasses)) {
+            createBoatclassesEmptyLabelIfNecessary();
+            contentContainerBoatclassesUi.add(boatclassesEmpty);
+            contentContainerBoatclassesUi
+                    .removeStyleName(SailorProfileMobileResources.INSTANCE.css().detailsSectionPanel());
+            contentContainerBoatclassesUi
+                    .removeStyleName(SharedResources.INSTANCE.mainCss().spacermarginbottomsmall());
+        } else {
+            contentContainerBoatclassesUi
+                    .addStyleName(SailorProfileMobileResources.INSTANCE.css().detailsSectionPanel());
+            contentContainerBoatclassesUi.addStyleName(SharedResources.INSTANCE.mainCss().spacermarginbottomsmall());
+        }
+
         for (BoatClassDTO boatclass : boatclasses) {
             Element elem = DOM.createDiv();
             elem.setInnerSafeHtml(SharedSailorProfileResources.TEMPLATES.buildBoatclassIcon(
                     BoatClassImageResolver.getBoatClassIconResource(boatclass.getName()).getSafeUri().asString()));
             elem.getStyle().setDisplay(Display.INLINE_BLOCK);
             contentContainerBoatclassesUi.getElement().appendChild(elem);
+        }
+    }
+
+    private void createBoatclassesEmptyLabelIfNecessary() {
+        if (boatclassesEmpty == null) {
+            boatclassesEmpty = new Label(stringMessages.pleaseSelectCompetitorFirst());
+            boatclassesEmpty.addStyleName(DesktopAccordionResources.INSTANCE.css().accordionEmptyMessage());
         }
     }
 
@@ -199,8 +226,8 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
         // Get statistics
         clearStatistic();
         for (SailorProfileNumericStatisticType type : SailorProfileNumericStatisticType.values()) {
-            presenter.getSharedSailorProfilePresenter().getDataProvider().getStatisticFor(entry.getKey(),
-                    type, new AsyncCallback<SailorProfileStatisticDTO>() {
+            presenter.getSharedSailorProfilePresenter().getDataProvider().getStatisticFor(entry.getKey(), type,
+                    new AsyncCallback<SailorProfileStatisticDTO>() {
                         @Override
                         public void onFailure(Throwable caught) {
                             GWT.log(caught.getMessage(), caught);

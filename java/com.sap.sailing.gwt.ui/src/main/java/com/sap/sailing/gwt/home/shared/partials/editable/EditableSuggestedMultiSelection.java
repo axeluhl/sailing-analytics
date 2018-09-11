@@ -20,6 +20,7 @@ import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.desktop.partials.desktopaccordion.DesktopAccordionResources;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
@@ -71,6 +72,7 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
         this.itemProducer = itemProducer;
         multiSelect = multis;
         this.editModeChangeHandler = editModeChangeHandler;
+        DesktopAccordionResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
 
         multiSelect.getElement().removeFromParent();
