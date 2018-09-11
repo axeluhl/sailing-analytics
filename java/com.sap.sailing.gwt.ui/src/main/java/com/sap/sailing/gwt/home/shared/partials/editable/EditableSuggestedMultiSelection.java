@@ -18,9 +18,11 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
 
 public class EditableSuggestedMultiSelection<T> extends Composite implements HasText {
 
@@ -54,11 +56,15 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
     @UiField
     InlineEditButton editButtonUi;
 
+    @UiField
+    Label competitorsEmptyUi;
+
     private final Map<T, IsWidget> tableElements = new HashMap<>();
     private final Function<T, IsWidget> itemProducer;
 
     private boolean editMode = false;
     private EditModeChangeHandler editModeChangeHandler;
+    private boolean isEmpty = false;
 
     public EditableSuggestedMultiSelection(Function<T, IsWidget> itemProducer, SuggestedMultiSelectionView<T> multis,
             EditModeChangeHandler editModeChangeHandler, boolean isHeadless) {
@@ -79,8 +85,10 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
         editModeChangeHandler.onEditModeChanged(state);
         if (state) {
             parentPanelUi.appendChild(multiSelect.getElement());
+            competitorsEmptyUi.setVisible(false);
         } else {
             parentPanelUi.appendChild(itemContainerUi.getElement());
+            competitorsEmptyUi.setVisible(isEmpty);
         }
     }
 
@@ -115,6 +123,9 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
         itemContainerUi.clear();
         competitors.forEach(c -> addListItem(c));
         multiSelect.setSelectedItems(competitors);
+
+        isEmpty = Util.isEmpty(competitors);
+        competitorsEmptyUi.setVisible(isEmpty);
     }
 
     @Override
