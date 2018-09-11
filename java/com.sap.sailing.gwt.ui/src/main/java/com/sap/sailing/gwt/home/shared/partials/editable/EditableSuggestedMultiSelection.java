@@ -61,13 +61,16 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
     private EditModeChangeHandler editModeChangeHandler;
 
     public EditableSuggestedMultiSelection(Function<T, IsWidget> itemProducer, SuggestedMultiSelectionView<T> multis,
-            EditModeChangeHandler editModeChangeHandler) {
+            EditModeChangeHandler editModeChangeHandler, boolean isHeadless) {
         this.itemProducer = itemProducer;
         multiSelect = multis;
         this.editModeChangeHandler = editModeChangeHandler;
         initWidget(uiBinder.createAndBindUi(this));
 
         multiSelect.getElement().removeFromParent();
+        if (isHeadless) {
+            headerTitleUi.removeFromParent();
+        }
     }
 
     public void setEditMode(boolean state) {

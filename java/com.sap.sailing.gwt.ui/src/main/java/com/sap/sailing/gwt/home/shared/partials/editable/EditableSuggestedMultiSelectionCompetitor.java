@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.home.shared.partials.editable;
 
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.HeadlessSuggestedMultiSelection;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelection;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorItemDescription;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionPresenter;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionView;
@@ -15,13 +14,14 @@ public class EditableSuggestedMultiSelectionCompetitor
 
     public EditableSuggestedMultiSelectionCompetitor(final StatefulSailorProfileDataProvider dataProvider,
             final FlagImageResolver flagImageResolver) {
-        this(dataProvider, flagImageResolver, true);
+        this(dataProvider, flagImageResolver, false);
     }
 
     public EditableSuggestedMultiSelectionCompetitor(final StatefulSailorProfileDataProvider dataProvider,
             final FlagImageResolver flagImageResolver, final boolean headless) {
         super(competitor -> new SuggestedMultiSelectionCompetitorItemDescription(competitor, flagImageResolver),
-                new CompetitorDisplayImpl(dataProvider, flagImageResolver, headless).selectionUi, dataProvider);
+                new CompetitorDisplayImpl(dataProvider, flagImageResolver).selectionUi, dataProvider,
+                headless);
         super.setText(i18n.competitors());
     }
 
@@ -31,14 +31,9 @@ public class EditableSuggestedMultiSelectionCompetitor
 
         private CompetitorDisplayImpl(
                 final SuggestedMultiSelectionPresenter<SimpleCompetitorWithIdDTO, SuggestedMultiSelectionPresenter.Display<SimpleCompetitorWithIdDTO>> dataProvider,
-                FlagImageResolver flagImageResolver, boolean headless) {
-            if (headless) {
+                FlagImageResolver flagImageResolver) {
                 selectionUi = HeadlessSuggestedMultiSelection.forCompetitors(dataProvider,
                         StringMessages.INSTANCE.competitors(), flagImageResolver);
-            } else {
-                selectionUi = SuggestedMultiSelection.forCompetitors(dataProvider,
-                        StringMessages.INSTANCE.competitors(), flagImageResolver);
-            }
             dataProvider.addDisplay(this);
         }
 
