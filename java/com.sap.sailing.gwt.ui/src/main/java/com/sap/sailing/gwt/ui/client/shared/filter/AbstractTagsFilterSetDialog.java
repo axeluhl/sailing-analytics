@@ -23,6 +23,9 @@ import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
+/**
+ * Used to create or edit a {@link FilterSet} for {@link TagDTO}s
+ */
 public abstract class AbstractTagsFilterSetDialog extends DataEntryDialog<FilterSet<TagDTO, FilterWithUI<TagDTO>>> {
     private final FilterSet<TagDTO, FilterWithUI<TagDTO>> tagsFilterSet;
     private final StringMessages stringMessages;

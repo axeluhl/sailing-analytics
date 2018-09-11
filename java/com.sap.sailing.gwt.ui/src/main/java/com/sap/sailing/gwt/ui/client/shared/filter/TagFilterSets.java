@@ -7,6 +7,11 @@ import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 
+/**
+ * Contains a {@link List} of {@link FilterSet filterSet}.
+ * {@link activeFilterSet} holds current active {@link FilterSet filterSet} due to always only one {@link FilterSet filterSet} being applied
+ *
+ */
 public class TagFilterSets {
     private List<FilterSet<TagDTO, FilterWithUI<TagDTO>>> filterSets;
 

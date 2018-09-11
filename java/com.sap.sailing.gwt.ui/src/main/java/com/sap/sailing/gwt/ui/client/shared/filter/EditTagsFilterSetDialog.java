@@ -6,6 +6,9 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sse.common.filter.FilterSet;
 
+/**
+ * Used to edit a {@link FilterSet} for {@link TagDTO}s
+ */
 public class EditTagsFilterSetDialog extends AbstractTagsFilterSetDialog {
 
     public EditTagsFilterSetDialog(FilterSet<TagDTO, FilterWithUI<TagDTO>> tagsFilterSet, List<String> availableTagFilterNames, 

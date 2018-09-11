@@ -111,8 +111,8 @@ public class TagListProvider extends ListDataProvider<TagDTO> {
      */
     protected void setCurrentFilterSet(FilterSet<TagDTO, Filter<TagDTO>> tagFilterSet) {
         currentFilterSet = tagFilterSet;
-        updateOberservingLabels();
         updateFilteredTags();
+        updateOberservingLabels();
         refresh();
     }
 }

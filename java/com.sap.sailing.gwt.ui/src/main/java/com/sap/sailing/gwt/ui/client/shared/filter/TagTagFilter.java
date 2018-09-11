@@ -6,16 +6,13 @@ import com.sap.sse.common.filter.AbstractTextFilter;
 
 /**
  * A filter filtering tags by their tag attribute
- * 
- * @author Julian Rendl(D067890)
- * 
  */
 public class TagTagFilter extends AbstractTextFilter<TagDTO> implements FilterWithUI<TagDTO> {
-    public static final String FILTER_NAME = "Tag";
+    public static final String FILTER_NAME = "TagTagFilter";
 
-    public TagTagFilter() {
-    }
-
+    /**
+     * Checks if {@link TagDTO} matches filter criteria
+     */
     @Override
     public boolean matches(TagDTO tag) {
         boolean result = false;
@@ -68,10 +65,7 @@ public class TagTagFilter extends AbstractTextFilter<TagDTO> implements FilterWi
 
     @Override
     public String getName() {
-        if (this.getOperator() != null) {
-            return FILTER_NAME + " " + this.getOperator().getName() + " " + this.getValue();
-        }
-        return FILTER_NAME + " " + this.getValue();
+        return FILTER_NAME;
     }
 
     @Override
@@ -81,7 +75,7 @@ public class TagTagFilter extends AbstractTextFilter<TagDTO> implements FilterWi
 
     @Override
     public String getLocalizedDescription(StringMessages stringMessages) {
-        return "Top " + this.getValue() + " " + stringMessages.tag();
+        return stringMessages.tag();
     }
 
     @Override

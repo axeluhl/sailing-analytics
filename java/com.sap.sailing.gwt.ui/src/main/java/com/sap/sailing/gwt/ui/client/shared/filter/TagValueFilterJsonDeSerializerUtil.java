@@ -8,7 +8,9 @@ import com.sap.sse.common.filter.NumberFilter;
 import com.sap.sse.common.filter.TextFilter;
 import com.sap.sse.common.filter.TextOperator;
 import com.sap.sse.common.filter.ValueFilter;
-
+/**
+ * JSON serializer and deserializer for {@link FilterWithUI}
+ */
 public class TagValueFilterJsonDeSerializerUtil {
     public static final String FIELD_FILTER_NAME = "name";
     public static final String FIELD_FILTER_OPERATOR = "operator";
