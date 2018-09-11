@@ -5,6 +5,8 @@
     <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="local_res"
         type="com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionResources" />
+    <ui:with field="dar"
+        type="com.sap.sailing.gwt.home.desktop.partials.desktopaccordion.DesktopAccordionResources" />
 
     <ui:style>
 
@@ -17,6 +19,7 @@
             <div class="{local_res.css.suggestionsContent}">
                 <g:FlowPanel addStyleNames="{local_res.css.suggestionsContentTable}"
                     ui:field="itemContainerUi" />
+                <g:Label addStyleNames="{dar.css.accordionEmptyMessage}" ui:field="emptyMessageUi" />
             </div>
         </div>
     </g:HTMLPanel>

@@ -94,6 +94,7 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
     public void setEntry(SailorProfileDTO entry) {
         competitorSelectionUi.setSelectedItems(entry.getCompetitors());
         titleUi.setText(entry.getName());
+        boatClassesUi.setEmptyMessage(StringMessages.INSTANCE.pleaseSelectCompetitorFirst());
         boatClassesUi.setItems(entry.getBoatclasses());
         accordionEventsUi.clear();
 

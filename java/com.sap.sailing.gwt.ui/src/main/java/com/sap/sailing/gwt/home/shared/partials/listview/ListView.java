@@ -14,8 +14,11 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.IsWidget;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
+import com.sap.sailing.gwt.home.desktop.partials.desktopaccordion.DesktopAccordionResources;
+import com.sap.sse.common.Util;
 
 public class ListView<T> extends Composite implements HasText {
 
@@ -33,11 +36,17 @@ public class ListView<T> extends Composite implements HasText {
     @UiField
     DivElement listContainerUi;
 
+    @UiField
+    Label emptyMessageUi;
+
+    private String emptyMessage;
+    
     private final Function<T, IsWidget> itemProducer;
 
     public ListView(Function<T, IsWidget> itemProducer) {
         this.itemProducer = itemProducer;
         initWidget(uiBinder.createAndBindUi(this));
+        DesktopAccordionResources.INSTANCE.css().ensureInjected();
         headerTitleUi.setInnerText("Title");
     }
 
@@ -67,6 +76,12 @@ public class ListView<T> extends Composite implements HasText {
     public void setItems(Iterable<T> competitors) {
         itemContainerUi.clear();
         competitors.forEach(c -> addListItem(c));
+        emptyMessageUi.setVisible(emptyMessage != null && Util.isEmpty(competitors));
+    }
+
+    public void setEmptyMessage(String emptyMessage) {
+        this.emptyMessage = emptyMessage;
+        emptyMessageUi.setText(emptyMessage);
     }
 
     @Override
