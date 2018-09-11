@@ -29,5 +29,6 @@ Export-Package: com.sap.sailing.domain.common,
  com.sap.sailing.domain.common.windfinder
 Require-Bundle: com.sap.sse.common,
  com.sap.sse.security.common,
- com.sap.sse.datamining.annotations;bundle-version="1.0.0"
+ com.sap.sse.datamining.annotations;bundle-version="1.0.0",
+ org.json.simple;bundle-version="1.1.0"
 Automatic-Module-Name: com.sap.sailing.domain.common
