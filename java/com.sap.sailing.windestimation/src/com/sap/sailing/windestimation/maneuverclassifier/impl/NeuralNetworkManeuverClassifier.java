@@ -22,12 +22,15 @@ public class NeuralNetworkManeuverClassifier extends AbstractSmileManeuverClassi
         int k = getSupportedManeuverTypesCount();
         int numberOfInputFeatures = MLUtil.getNumberOfInputFeatures(getManeuverFeatures());
         NeuralNetwork net;
+        int outputUnits = k == 2 ? 1 : k;
+        int[] numUnits = getBoatClass() == null ? new int[] { numberOfInputFeatures, 100, 100, outputUnits }
+                : new int[] { numberOfInputFeatures, 100, 100, outputUnits };
         if (k == 2) {
             net = new NeuralNetwork(NeuralNetwork.ErrorFunction.CROSS_ENTROPY,
-                    NeuralNetwork.ActivationFunction.LOGISTIC_SIGMOID, numberOfInputFeatures, 100, 100, 1);
+                    NeuralNetwork.ActivationFunction.LOGISTIC_SIGMOID, numUnits);
         } else {
             net = new NeuralNetwork(NeuralNetwork.ErrorFunction.CROSS_ENTROPY, NeuralNetwork.ActivationFunction.SOFTMAX,
-                    numberOfInputFeatures, 100, 100, k);
+                    numUnits);
         }
 
         for (int i = 0; i < 20; i++) {

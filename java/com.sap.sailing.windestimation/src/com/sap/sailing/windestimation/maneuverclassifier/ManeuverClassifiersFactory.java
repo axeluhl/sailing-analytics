@@ -5,10 +5,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.windestimation.maneuverclassifier.impl.GradientBoostingManeuverClassifier;
 import com.sap.sailing.windestimation.maneuverclassifier.impl.NeuralNetworkManeuverClassifier;
 import com.sap.sailing.windestimation.maneuverclassifier.impl.RandomForestManeuverClassifier;
-import com.sap.sailing.windestimation.maneuverclassifier.impl.SVMManeuverClassifier;
 
 public class ManeuverClassifiersFactory {
 
@@ -20,7 +18,7 @@ public class ManeuverClassifiersFactory {
 
     public static TrainableSingleManeuverOfflineClassifier getNewClassifierInstance(ManeuverFeatures maneuverFeatures,
             BoatClass boatClass) {
-        return new NeuralNetworkManeuverClassifier(maneuverFeatures, null, supportedManeuverTypes);
+        return new NeuralNetworkManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes);
 //        if (boatClass == null) {
 //            return new RandomForestManeuverClassifier(maneuverFeatures, null, supportedManeuverTypes);
 //        } else {
@@ -31,14 +29,14 @@ public class ManeuverClassifiersFactory {
     public static List<TrainableSingleManeuverOfflineClassifier> getAllTrainableClassifierInstances(
             ManeuverFeatures maneuverFeatures, BoatClass boatClass) {
         List<TrainableSingleManeuverOfflineClassifier> classifiers = new ArrayList<>();
-        classifiers.add(new GradientBoostingManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes));
+//        classifiers.add(new GradientBoostingManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes));
 //        classifiers.add(new LDAManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes));
 //        classifiers.add(new LogisticRegressionManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes));
 //        classifiers.add(new NaiveBayesManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes));
         classifiers.add(new NeuralNetworkManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes));
 //        classifiers.add(new QDAManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes));
         classifiers.add(new RandomForestManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes));
-        classifiers.add(new SVMManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes));
+//        classifiers.add(new SVMManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes));
         List<TrainableSingleManeuverOfflineClassifier> suitableClassifiers = classifiers.stream()
                 .filter(classifier -> classifier.hasSupportForProvidedFeatures()).collect(Collectors.toList());
         return suitableClassifiers;

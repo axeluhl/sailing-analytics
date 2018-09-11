@@ -90,12 +90,16 @@ public class WindCourseRange {
                 }
             } else {
                 newFromPortside = nextWindRange.fromPortside;
-                newAngleTowardStarboard = nextWindRange.angleTowardStarboard;
+                newAngleTowardStarboard = 5;
                 if (deviationFromPortsideTowardStarboardInDegrees < deviationFromPortsideTowardPortsideInDegrees) {
                     // newFromPortside = nextWindRange.angleTowardStarboard -
                     // deviationFromPortsideTowardStarboardInDegrees;
                     // newAngleTowardStarboard = deviationFromPortsideTowardStarboardInDegrees;
                     violationRange = deviationFromPortsideTowardStarboardInDegrees;
+                    newFromPortside -= 5;
+                    if(newFromPortside < 0) {
+                        newFromPortside += 360;
+                    }
                 } else {
                     // newFromPortside = angleTowardStarboard - deviationFromPortsideTowardPortsideInDegrees;
                     // newAngleTowardStarboard = deviationFromPortsideTowardPortsideInDegrees;

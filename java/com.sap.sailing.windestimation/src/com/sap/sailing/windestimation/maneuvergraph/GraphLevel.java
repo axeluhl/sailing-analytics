@@ -18,7 +18,7 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
  */
 public class GraphLevel {
 
-    private static final int MIN_UPWIND_ABS_TWA = 20;
+    private static final int MIN_UPWIND_ABS_TWA = 30;
     private final ManeuverForEstimation maneuver;
     private ManeuverEstimationResult maneuverEstimationResult;
 

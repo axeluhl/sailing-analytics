@@ -1,6 +1,7 @@
 package com.sap.sailing.windestimation.maneuverclassifier.impl;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.windestimation.maneuverclassifier.MLUtil;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverFeatures;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.maneuverclassifier.PreprocessingConfig.PreprocessingConfigBuilder;
@@ -18,7 +19,7 @@ public class RandomForestManeuverClassifier extends AbstractSmileManeuverClassif
 
     @Override
     protected RandomForest createTrainedClassifier(double[][] x, int[] y) {
-        return new RandomForest(x, y, 50);
+        return new RandomForest(x, y, 50, MLUtil.getNumberOfInputFeatures(getManeuverFeatures()));
     }
 
 }

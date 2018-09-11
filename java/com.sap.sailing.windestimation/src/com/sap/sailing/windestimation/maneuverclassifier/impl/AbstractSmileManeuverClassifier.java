@@ -89,8 +89,13 @@ public abstract class AbstractSmileManeuverClassifier<T extends SoftClassifier<d
 
     private File getFileForClassifier() {
         String filename = "classifier_smile_" + getClass().getSimpleName() + "-" + getManeuverFeatures().toString()
-                + "-" + (getBoatClass() == null ? "All" : getBoatClass().getName());
+                + "-" + (getBoatClass() == null ? "All" : replaceSystemChars(getBoatClass().getName()));
         return new File(filename);
+    }
+
+    private String replaceSystemChars(String str) {
+        return str.replaceAll("[\\\\\\/\\\"\\:\\|\\<\\>\\*\\?]", "__");
+
     }
 
     @Override

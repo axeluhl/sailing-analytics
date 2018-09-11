@@ -3,6 +3,7 @@ package com.sap.sailing.windestimation.maneuverclassifier;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.json.simple.parser.ParseException;
@@ -68,9 +69,6 @@ public class ManeuverClassifierTrainer {
 
     private List<ManeuverForEstimation> getSuitableManeuvers(ManeuverFeatures maneuverFeatures, BoatClass boatClass)
             throws JsonDeserializationException, ParseException {
-        if (boatClass == null && allManeuvers != null) {
-            return allManeuvers;
-        }
         Pair<String, ManeuverFeatures> key = new Pair<>(boatClass == null ? null : boatClass.getName(),
                 maneuverFeatures);
         List<ManeuverForEstimation> maneuvers = maneuversPerBoatClass.get(key);
@@ -81,7 +79,8 @@ public class ManeuverClassifierTrainer {
                 LoggingUtil.logInfo("Querying dataset...");
                 allManeuvers = persistenceManager.getAllElements();
             }
-            LoggingUtil.logInfo("Filtering maneuvers for boat class: " + boatClass.getName());
+            LoggingUtil.logInfo(
+                    "Filtering maneuvers for boat class: " + (boatClass == null ? "All" : boatClass.getName()));
             maneuvers = allManeuvers.stream()
                     .filter(maneuver -> MLUtil.isManeuverContainsAllFeatures(maneuver, maneuverFeatures, boatClass))
                     .collect(Collectors.toList());
@@ -94,30 +93,30 @@ public class ManeuverClassifierTrainer {
         PolarDataService polarService = PolarDataServiceAccessUtil.getPersistedPolarService();
         ManeuverClassifierTrainer classifierTrainer = new ManeuverClassifierTrainer(
                 new RegularManeuversForEstimationPersistenceManager(), polarService);
-        for (ManeuverFeatures maneuverFeatures : ManeuverFeatures.values()) {
-            LoggingUtil.logInfo(
-                    "### Training classifier for all boat classes with maneuver features: " + maneuverFeatures);
-            List<TrainableSingleManeuverOfflineClassifier> allTrainableClassifierInstances = ManeuverClassifiersFactory
-                    .getAllTrainableClassifierInstances(maneuverFeatures, null);
-            for (TrainableSingleManeuverOfflineClassifier classifier : allTrainableClassifierInstances) {
-                LoggingUtil.logInfo("## Classifier: " + classifier.getClass().getName());
-                classifierTrainer.trainClassifier(classifier);
-            }
-        }
-//        Set<BoatClass> allBoatClasses = polarService.getAllBoatClassesWithPolarSheetsAvailable();
-
 //        for (ManeuverFeatures maneuverFeatures : ManeuverFeatures.values()) {
-//            for (BoatClass boatClass : allBoatClasses) {
-//                LoggingUtil.logInfo("### Training classifier for boat class " + boatClass + " with maneuver features: "
-//                        + maneuverFeatures);
-//                List<TrainableSingleManeuverOfflineClassifier> allTrainableClassifierInstances = ManeuverClassifiersFactory
-//                        .getAllTrainableClassifierInstances(maneuverFeatures, boatClass);
-//                for (TrainableSingleManeuverOfflineClassifier classifier : allTrainableClassifierInstances) {
-//                    LoggingUtil.logInfo("## Classifier: " + classifier.getClass().getName());
-//                    classifierTrainer.trainClassifier(classifier);
-//                }
+//            LoggingUtil.logInfo(
+//                    "### Training classifier for all boat classes with maneuver features: " + maneuverFeatures);
+//            List<TrainableSingleManeuverOfflineClassifier> allTrainableClassifierInstances = ManeuverClassifiersFactory
+//                    .getAllTrainableClassifierInstances(maneuverFeatures, null);
+//            for (TrainableSingleManeuverOfflineClassifier classifier : allTrainableClassifierInstances) {
+//                LoggingUtil.logInfo("## Classifier: " + classifier.getClass().getName());
+//                classifierTrainer.trainClassifier(classifier);
 //            }
 //        }
+        Set<BoatClass> allBoatClasses = polarService.getAllBoatClassesWithPolarSheetsAvailable();
+
+        for (ManeuverFeatures maneuverFeatures : ManeuverFeatures.values()) {
+            for (BoatClass boatClass : allBoatClasses) {
+                LoggingUtil.logInfo("### Training classifier for boat class " + boatClass + " with maneuver features: "
+                        + maneuverFeatures);
+                List<TrainableSingleManeuverOfflineClassifier> allTrainableClassifierInstances = ManeuverClassifiersFactory
+                        .getAllTrainableClassifierInstances(maneuverFeatures, boatClass);
+                for (TrainableSingleManeuverOfflineClassifier classifier : allTrainableClassifierInstances) {
+                    LoggingUtil.logInfo("## Classifier: " + classifier.getClass().getName());
+                    classifierTrainer.trainClassifier(classifier);
+                }
+            }
+        }
     }
 
 }
