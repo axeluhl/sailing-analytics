@@ -2148,4 +2148,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String confirm();
     String cancel();
     String close();
+    String username();
 }

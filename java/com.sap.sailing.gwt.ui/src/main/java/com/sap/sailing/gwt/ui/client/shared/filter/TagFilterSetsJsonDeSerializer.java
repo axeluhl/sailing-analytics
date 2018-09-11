@@ -11,6 +11,10 @@ import com.sap.sailing.gwt.ui.shared.TagDTO;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.common.filter.ValueFilter;
 
+/**
+ * Serializes and deserializes {@link TagFilterSets}.
+ */
+
 public class TagFilterSetsJsonDeSerializer implements GwtJsonDeSerializer<TagFilterSets> {
     public static final String FIELD_ACTIVE_FILTERSET = "activeFilterSet";
     public static final String FIELD_FILTERSETS = "filterSets";
@@ -18,16 +22,24 @@ public class TagFilterSetsJsonDeSerializer implements GwtJsonDeSerializer<TagFil
     public static final String FIELD_FILTERSET_ISEDITABLE = "isEditable";
     public static final String FIELD_FILTERS = "filters";
 
+    
+    /**
+     * Serializes {@link TagFilterSets tagFilterSets} to {@link JSONObject json}.
+     * 
+     * @param tagFilterSets
+     *           {@link TagFilterSets} to be serialized
+     * @return {@link JSONObject json object}
+     */
     @Override
-    public JSONObject serialize(TagFilterSets filterSets) {
+    public JSONObject serialize(TagFilterSets tagFilterSets) {
         JSONObject result = new JSONObject();
         result.put(FIELD_ACTIVE_FILTERSET,
-                filterSets.getActiveFilterSet() != null ? new JSONString(filterSets.getActiveFilterSet().getName())
+                tagFilterSets.getActiveFilterSet() != null ? new JSONString(tagFilterSets.getActiveFilterSet().getName())
                         : JSONNull.getInstance());
         JSONArray filterSetArray = new JSONArray();
         result.put(FIELD_FILTERSETS, filterSetArray);
         int i = 0;
-        for (FilterSet<TagDTO, FilterWithUI<TagDTO>> filterSet : filterSets.getFilterSets()) {
+        for (FilterSet<TagDTO, FilterWithUI<TagDTO>> filterSet : tagFilterSets.getFilterSets()) {
             // only editable filter sets are stored
             if (filterSet.isEditable()) {
                 JSONObject filterSetObject = new JSONObject();
@@ -50,6 +62,14 @@ public class TagFilterSetsJsonDeSerializer implements GwtJsonDeSerializer<TagFil
         return result;
     }
 
+    
+    /**
+     * Deserializes {@link JSONObject json} to {@link TagFilterSets tagFilterSets}.
+     * 
+     * @param rootObject
+     *           JSONObject to be deserialized
+     * @return {@link TagFilterSets tagFilterSets}
+     */
     @Override
     public TagFilterSets deserialize(JSONObject rootObject) {
         TagFilterSets result = null;

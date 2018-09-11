@@ -19,8 +19,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
- * A dialog to create, edit and delete filter sets for tags
- *
+ * A dialog to create, edit and delete {@link TagFilterSets}
  */
 public class TagFilterSetsDialog extends DataEntryDialog<TagFilterSets> {
     private final TagFilterSets tagFilterSets;
@@ -142,6 +141,12 @@ public class TagFilterSetsDialog extends DataEntryDialog<TagFilterSets> {
         return activeFilterSetRadioButton;
     }
 
+    /**
+     * Creates a Button, which if clicked creates and opens a {@link EditTagsFilterSetDialog}, 
+     * with which a user can edit a {@link FilterSet} 
+     * @param filterSetToEdit The {@link FilterSet} to edit
+     * @return This Button, which now can be placed into the UI
+     */
     private Button createEditFilterSetButton(final FilterSet<TagDTO, FilterWithUI<TagDTO>> filterSetToEdit) {
         final Button editFilterSetBtn = new Button(stringMessages.edit());
         final String filterSetToEditName = filterSetToEdit.getName();
@@ -196,6 +201,11 @@ public class TagFilterSetsDialog extends DataEntryDialog<TagFilterSets> {
         return editFilterSetBtn;
     }
 
+    /**
+     * Creates a Button, which if clicked  deletes a {@link FilterSet} can be deleted
+     * @param filterSet The regarding {@link FilterSet} which will get deleted if clicked
+     * @return The Button
+     */
     private Button createDeleteFilterSetButton(FilterSet<TagDTO, FilterWithUI<TagDTO>> filterSet) {
         final Button deleteFilterSetBtn = new Button(stringMessages.delete());
         deleteFilterSetBtn.addStyleName("inlineButton");
@@ -225,7 +235,10 @@ public class TagFilterSetsDialog extends DataEntryDialog<TagFilterSets> {
         });
         return deleteFilterSetBtn;
     }
-
+    
+    /**
+     * Returns the maintained {@link TagFilterSets}
+     */
     @Override
     protected TagFilterSets getResult() {
         TagFilterSets result = new TagFilterSets();

@@ -6,9 +6,6 @@ import com.sap.sse.common.filter.AbstractTextFilter;
 
 /**
  * A filter filtering tags by the name of their author
- * 
- * @author Julian Rendl (D067890)
- *
  */
 public class TagUsernameFilter extends AbstractTextFilter<TagDTO> implements FilterWithUI<TagDTO> {
     public static final String FILTER_NAME = "TagUsernameFilter";
@@ -65,16 +62,12 @@ public class TagUsernameFilter extends AbstractTextFilter<TagDTO> implements Fil
 
     @Override
     public String getLocalizedName(StringMessages stringMessages) {
-        // return stringMessages.username();
-        // TODO: Proper way to handle multiple instances of string messages?
-        return com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE.username();
+        return stringMessages.username();
     }
 
     @Override
     public String getLocalizedDescription(StringMessages stringMessages) {
-        // return stringMessages.username();
-        // TODO: Proper way to handle multiple instances of string messages?
-        return com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE.username();
+        return stringMessages.username();
     }
 
     @Override

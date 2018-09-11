@@ -10,9 +10,9 @@ import com.sap.sse.common.filter.AbstractTextFilter;
 public class TagTagFilter extends AbstractTextFilter<TagDTO> implements FilterWithUI<TagDTO> {
     public static final String FILTER_NAME = "TagTagFilter";
 
-    public TagTagFilter() {
-    }
-
+    /**
+     * Checks if {@link TagDTO} matches filter criteria
+     */
     @Override
     public boolean matches(TagDTO tag) {
         boolean result = false;
@@ -75,7 +75,7 @@ public class TagTagFilter extends AbstractTextFilter<TagDTO> implements FilterWi
 
     @Override
     public String getLocalizedDescription(StringMessages stringMessages) {
-        return "Top " + this.getValue() + " " + stringMessages.tag();
+        return stringMessages.tag();
     }
 
     @Override
