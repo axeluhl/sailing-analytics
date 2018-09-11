@@ -7,7 +7,7 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 import com.sap.sailing.gwt.ui.client.GwtJsonDeSerializer;
-import com.sap.sailing.gwt.ui.shared.TagDTO;
+import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.common.filter.ValueFilter;
 

@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.client.shared.filter;
 import java.util.List;
 
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.shared.TagDTO;
+import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sse.common.filter.FilterSet;
 
 /**

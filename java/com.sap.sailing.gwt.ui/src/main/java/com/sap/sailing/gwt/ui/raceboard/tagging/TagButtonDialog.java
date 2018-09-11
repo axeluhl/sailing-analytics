@@ -393,7 +393,7 @@ public class TagButtonDialog extends DialogBox {
                         inputPanel.getComment(), inputPanel.isVisibleForPublic());
                 inputPanel.clearAllValues();
                 tagPreviewPanel.renderPreview(inputPanel);
-                taggingPanel.getTagButtons().add(tagButton);
+                taggingPanel.addTagButton(tagButton);
                 footerPanel.storeAllTagButtons();
                 footerPanel.recalculateHeight();
                 setRowData(tagButtonTable, taggingPanel.getTagButtons());

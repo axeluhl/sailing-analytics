@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.client.shared.filter;
 
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
-import com.sap.sailing.gwt.ui.shared.TagDTO;
+import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sse.common.filter.BinaryOperator;
 import com.sap.sse.common.filter.NumberFilter;
 import com.sap.sse.common.filter.TextFilter;

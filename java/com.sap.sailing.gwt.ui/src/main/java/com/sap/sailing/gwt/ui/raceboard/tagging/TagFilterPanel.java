@@ -21,7 +21,7 @@ import com.sap.sailing.gwt.ui.client.shared.filter.TagFilterSets;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagFilterSetsDialog;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagFilterSetsJsonDeSerializer;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
-import com.sap.sailing.gwt.ui.shared.TagDTO;
+import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.AbstractListFilter;
 import com.sap.sse.common.filter.Filter;

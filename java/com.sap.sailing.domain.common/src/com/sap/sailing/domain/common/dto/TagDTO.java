@@ -1,14 +1,16 @@
-package com.sap.sailing.gwt.ui.shared;
+package com.sap.sailing.domain.common.dto;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanel;
+import java.io.Serializable;
+
 import com.sap.sse.common.TimePoint;
 
 /**
  * Used to send tags over network. Allows to create tags with all possible combinations of states (private/public and
  * valid/revoked).
  */
-public class TagDTO implements IsSerializable {
+public class TagDTO implements Serializable {
+
+    private static final long serialVersionUID = 3907411584518452300L;
 
     private String tag, comment, imageURL, username;
     private boolean visibleForPublic;
@@ -193,7 +195,7 @@ public class TagDTO implements IsSerializable {
     }
 
     /**
-     * Compares {@link TagDTO} with given attributes. Used by {@link TaggingPanel} to check if tag already exists.
+     * Compares {@link TagDTO} with given attributes.
      * 
      * @return <code>true</code> if all parameters match the attributes of {@link TagDTO}, otherwise <code>false</code>
      */

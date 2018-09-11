@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.client.shared.filter;
 
-import com.sap.sailing.gwt.ui.shared.TagDTO;
+import com.sap.sailing.domain.common.dto.TagDTO;
 
 /**
  * A factory for FilterWithUI<TagDTO> instances

@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sse.gwt.client.player.Timer;
 
 public class RaceTimesInfoDTO implements IsSerializable {
