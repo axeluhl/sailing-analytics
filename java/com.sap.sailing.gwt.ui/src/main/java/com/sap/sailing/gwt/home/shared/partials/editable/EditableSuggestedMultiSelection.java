@@ -107,13 +107,11 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
         Widget item = itemProducer.apply(listItem).asWidget();
         itemContainerUi.add(item);
 
-        // TODO: move to CSS file
         if (itemContainerUi.getElement().getChild(0) != item.getElement()) {
-            item.getElement().getStyle().setProperty("borderTop", "1px solid #ddd");
+            item.addStyleName(EditableResources.INSTANCE.css().listItemBorder());
         }
-        item.getElement().getStyle().setPaddingTop(0.333333333333333333, Unit.EM);
-        item.getElement().getStyle().setPaddingBottom(0.333333333333333333, Unit.EM);
-        item.getElement().getStyle().setPaddingLeft(0.333333333333333333, Unit.EM);
+        item.addStyleName(EditableResources.INSTANCE.css().listItem());
+        // TODO: move to CSS file
         DOM.getChild(item.getElement(), 1).getStyle().setPosition(Position.RELATIVE);
         DOM.getChild(item.getElement(), 1).getStyle().setTop(-0.333333333333333333, Unit.EM);
         DOM.getChild(item.getElement(), 2).getStyle().setPosition(Position.RELATIVE);

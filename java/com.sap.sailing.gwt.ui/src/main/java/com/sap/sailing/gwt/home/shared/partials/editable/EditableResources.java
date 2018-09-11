@@ -26,5 +26,9 @@ public interface EditableResources extends ClientBundle {
         String inlineElement();
 
         String editableSuggestionEditButton();
+
+        String listItem();
+
+        String listItemBorder();
     }
 }

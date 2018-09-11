@@ -28,3 +28,13 @@
     right: .6666666666em;
     top: 0.666666666em;
 }
+
+.listItem {
+    padding-top: 0.333333333333333333em;
+    padding-bottom: 0.333333333333333333em;
+    padding-left: 0.333333333333333333em;
+}
+
+.listItemBorder {
+    border-top: 1px solid #ddd;
+}
