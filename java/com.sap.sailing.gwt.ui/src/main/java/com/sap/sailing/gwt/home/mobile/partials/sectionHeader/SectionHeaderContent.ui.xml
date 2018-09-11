@@ -34,7 +34,7 @@
             </div>
         </a>
         <g:HTMLPanel
-            addStyleNames="{local_res.css.sectionheader_item} {local_res.css.sectionheader_itemright}"
+            addStyleNames="{local_res.css.sectionheader_itemright} {local_res.css.sectionheader_element}"
             ui:field="headerContentUi" />
     </g:HTMLPanel>
 </ui:UiBinder>
