@@ -352,10 +352,12 @@ public class Swarm implements TimeListener {
                 }
             }
         }
-        if (Math.abs(maxSpeedInKnots - minSpeedInKnots) <= WINDSPEED_DEFAULT_SPREAD_IN_KNOTS && minSpeedInKnots <= maxSpeedInKnots) {
-            valueRange.setMinMax(minSpeedInKnots - WINDSPEED_DEFAULT_SPREAD_IN_KNOTS, maxSpeedInKnots + WINDSPEED_DEFAULT_SPREAD_IN_KNOTS);
-        } else if (minSpeedInKnots <= maxSpeedInKnots) {
-            valueRange.setMinMax(minSpeedInKnots, maxSpeedInKnots);
+        if (minSpeedInKnots <= maxSpeedInKnots) {
+            if (Math.abs(maxSpeedInKnots - minSpeedInKnots) <= WINDSPEED_DEFAULT_SPREAD_IN_KNOTS) {
+                valueRange.setMinMax(minSpeedInKnots - WINDSPEED_DEFAULT_SPREAD_IN_KNOTS, maxSpeedInKnots + WINDSPEED_DEFAULT_SPREAD_IN_KNOTS);
+            } else {
+                valueRange.setMinMax(minSpeedInKnots, maxSpeedInKnots);
+            }
         }
         drawSwarm();
         return true;
