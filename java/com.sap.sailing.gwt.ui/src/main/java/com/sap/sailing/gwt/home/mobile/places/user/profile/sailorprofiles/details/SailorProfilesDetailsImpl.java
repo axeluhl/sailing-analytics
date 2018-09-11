@@ -3,7 +3,6 @@ package com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.detai
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style.Display;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.DOM;
@@ -158,8 +157,7 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
         contentContainerCompetitorsUi.add(editableSuggestedMultiselect);
         final InlineEditButton editButton = editableSuggestedMultiselect.getEditButton();
         editButton.setVisible(false);
-        editButton.getElement().getStyle().setTop(-0.5, Unit.EM);
-        editButton.getElement().getStyle().setRight(3.1, Unit.EM);
+        editButton.addStyleName(SailorProfileMobileResources.INSTANCE.css().editButton());
         competitorsUi.setHeaderElement(editButton);
 
         competitorsUi.addAccordionListener(new AccordionExpansionListener() {
