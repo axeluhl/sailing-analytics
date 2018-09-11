@@ -19,7 +19,7 @@ public class ManeuverSequenceGraphBasedWindEstimatorEvaluationRunner {
         PolarDataService polarService = PolarDataServiceAccessUtil.getPersistedPolarService();
         LoggingUtil.logInfo("Wind estimator evaluation started...");
         PersistedElementsIterator<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> racesIterator = persistenceManager
-                .getIterator();
+                .getIterator().limit(40);
         WindEstimatorFactories estimatorFactories = new WindEstimatorFactories(polarService);
 
         WindEstimatorEvaluationResult evaluationResult = evaluator.evaluateWindEstimator(

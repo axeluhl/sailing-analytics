@@ -25,13 +25,15 @@ public class WindEstimatorEvaluationResult {
     private final double sumAbsWindCourseErrorInDegreesOfIncorrectWindDirectionWithSpeedEstimations;
     private final double sumAbsWindSpeedErrorInKnotsOfCorrectWindDirectionWithSpeedEstimations;
     private final double sumAbsWindSpeedErrorInKnotsOfIncorrectWindDirectionWithSpeedEstimations;
+    private final double sumOfConfidencesOfCorrentWindDirectionEstimations;
+    private final double sumOfConfidencesOfIncorrentWindDirectionEstimations;
 
     public WindEstimatorEvaluationResult() {
-        this(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        this(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     public WindEstimatorEvaluationResult(double windCourseErrorInDegrees, boolean windCourseErrorWithinTolerance,
-            double windSpeedErrorInKnots, boolean windSpeedErrorWithinTolerance) {
+            double windSpeedErrorInKnots, boolean windSpeedErrorWithinTolerance, double confidence) {
         this(windCourseErrorWithinTolerance ? 1 : 0, windCourseErrorWithinTolerance ? 0 : 1,
                 windSpeedErrorWithinTolerance ? 1 : 0, windSpeedErrorWithinTolerance ? 0 : 1,
                 windCourseErrorWithinTolerance && windSpeedErrorWithinTolerance ? 1 : 0,
@@ -45,13 +47,16 @@ public class WindEstimatorEvaluationResult {
                 windCourseErrorWithinTolerance && windSpeedErrorWithinTolerance ? 0
                         : Math.abs(windCourseErrorInDegrees),
                 windCourseErrorWithinTolerance && windSpeedErrorWithinTolerance ? Math.abs(windSpeedErrorInKnots) : 0,
-                windCourseErrorWithinTolerance && windSpeedErrorWithinTolerance ? 0 : Math.abs(windSpeedErrorInKnots));
+                windCourseErrorWithinTolerance && windSpeedErrorWithinTolerance ? 0 : Math.abs(windSpeedErrorInKnots),
+                windCourseErrorWithinTolerance ? confidence : 0, windCourseErrorWithinTolerance ? 0 : confidence);
     }
 
-    public WindEstimatorEvaluationResult(double windCourseErrorInDegrees, boolean windCourseErrorWithinTolerance) {
+    public WindEstimatorEvaluationResult(double windCourseErrorInDegrees, boolean windCourseErrorWithinTolerance,
+            double confidence) {
         this(windCourseErrorWithinTolerance ? 1 : 0, windCourseErrorWithinTolerance ? 0 : 1, 0, 0, 0, 0,
                 windCourseErrorWithinTolerance ? Math.abs(windCourseErrorInDegrees) : 0,
-                windCourseErrorWithinTolerance ? 0 : Math.abs(windCourseErrorInDegrees), 0, 0, 0, 0, 0, 0);
+                windCourseErrorWithinTolerance ? 0 : Math.abs(windCourseErrorInDegrees), 0, 0, 0, 0, 0, 0,
+                windCourseErrorWithinTolerance ? confidence : 0, windCourseErrorWithinTolerance ? 0 : confidence);
     }
 
     public WindEstimatorEvaluationResult(int numberOfCorrectWindDirectionEstimations,
@@ -65,7 +70,9 @@ public class WindEstimatorEvaluationResult {
             double sumAbsWindCourseErrorInDegreesOfCorrectWindDirectionWithSpeedEstimations,
             double sumAbsWindCourseErrorInDegreesOfIncorrectWindDirectionWithSpeedEstimations,
             double sumAbsWindSpeedErrorInKnotsOfCorrectWindDirectionWithSpeedEstimations,
-            double sumAbsWindSpeedErrorInKnotsOfIncorrectWindDirectionWithSpeedEstimations) {
+            double sumAbsWindSpeedErrorInKnotsOfIncorrectWindDirectionWithSpeedEstimations,
+            double sumOfConfidencesOfCorrentWindDirectionEstimations,
+            double sumOfConfidencesOfIncorrentWindDirectionEstimations) {
         this.numberOfCorrectWindDirectionEstimations = numberOfCorrectWindDirectionEstimations;
         this.numberOfIncorrectWindDirectionEstimations = numberOfIncorrectWindDirectionEstimations;
         this.numberOfCorrectWindSpeedEstimations = numberOfCorrectWindSpeedEstimations;
@@ -80,6 +87,8 @@ public class WindEstimatorEvaluationResult {
         this.sumAbsWindCourseErrorInDegreesOfIncorrectWindDirectionWithSpeedEstimations = sumAbsWindCourseErrorInDegreesOfIncorrectWindDirectionWithSpeedEstimations;
         this.sumAbsWindSpeedErrorInKnotsOfCorrectWindDirectionWithSpeedEstimations = sumAbsWindSpeedErrorInKnotsOfCorrectWindDirectionWithSpeedEstimations;
         this.sumAbsWindSpeedErrorInKnotsOfIncorrectWindDirectionWithSpeedEstimations = sumAbsWindSpeedErrorInKnotsOfIncorrectWindDirectionWithSpeedEstimations;
+        this.sumOfConfidencesOfCorrentWindDirectionEstimations = sumOfConfidencesOfCorrentWindDirectionEstimations;
+        this.sumOfConfidencesOfIncorrentWindDirectionEstimations = sumOfConfidencesOfIncorrentWindDirectionEstimations;
     }
 
     public int getNumberOfCorrectWindDirectionEstimations() {
@@ -231,6 +240,22 @@ public class WindEstimatorEvaluationResult {
                 numberOfCorrectWindDirectionWithSpeedEstimations + numberOfIncorrectWindDirectionWithSpeedEstimations);
     }
 
+    public double getAvgConfidenceOfCorrectWindDirectionEstimations() {
+        return nullSafeDivision(sumOfConfidencesOfCorrentWindDirectionEstimations,
+                numberOfCorrectWindDirectionEstimations);
+    }
+
+    public double getAvgConfidenceOfIncorrectWindDirectionEstimations() {
+        return nullSafeDivision(sumOfConfidencesOfIncorrentWindDirectionEstimations,
+                numberOfIncorrectWindDirectionEstimations);
+    }
+
+    public double getAvgConfidenceOfCorrectAndIncorrectWindDirectionEstimations() {
+        return nullSafeDivision(
+                sumOfConfidencesOfCorrentWindDirectionEstimations + sumOfConfidencesOfIncorrentWindDirectionEstimations,
+                numberOfCorrectWindDirectionEstimations + numberOfIncorrectWindDirectionEstimations);
+    }
+
     public void printEvaluationStatistics(boolean detailed) {
         System.out.println("### Wind direction ###");
         System.out.println(" Accuracy: " + formatPercentage(getAccuracyOfWindDirectionEstimation()) + " ("
@@ -242,6 +267,12 @@ public class WindEstimatorEvaluationResult {
                 + formatDegrees(getAvgAbsWindCourseErrorInDegreesOfIncorrectWindDirectionEstimations()));
         System.out.println(" Avg. wind course error of all estimations : "
                 + formatDegrees(getAvgAbsWindCourseErrorInDegreesOfCorrectAndIncorrectWindDirectionEstimations()));
+        System.out.println(" Avg. confidence of correct estimations : "
+                + formatPercentage(getAvgConfidenceOfCorrectWindDirectionEstimations()));
+        System.out.println(" Avg. confidence of incorrect estimations : "
+                + formatPercentage(getAvgConfidenceOfIncorrectWindDirectionEstimations()));
+        System.out.println(" Avg. confidence of all estimations : "
+                + formatPercentage(getAvgConfidenceOfCorrectAndIncorrectWindDirectionEstimations()));
         if (detailed) {
             System.out.println();
             System.out.println("### Wind speed ###");
@@ -312,7 +343,11 @@ public class WindEstimatorEvaluationResult {
                 sumAbsWindSpeedErrorInKnotsOfCorrectWindDirectionWithSpeedEstimations
                         + other.sumAbsWindSpeedErrorInKnotsOfCorrectWindDirectionWithSpeedEstimations,
                 sumAbsWindSpeedErrorInKnotsOfIncorrectWindDirectionWithSpeedEstimations
-                        + other.sumAbsWindSpeedErrorInKnotsOfIncorrectWindDirectionWithSpeedEstimations);
+                        + other.sumAbsWindSpeedErrorInKnotsOfIncorrectWindDirectionWithSpeedEstimations,
+                sumOfConfidencesOfCorrentWindDirectionEstimations
+                        + other.sumOfConfidencesOfCorrentWindDirectionEstimations,
+                sumOfConfidencesOfIncorrentWindDirectionEstimations
+                        + other.sumOfConfidencesOfIncorrentWindDirectionEstimations);
     }
 
     public WindEstimatorEvaluationResult getAvgAsSingleResult(double minAccuracyForCorrectEstimation) {
@@ -338,13 +373,16 @@ public class WindEstimatorEvaluationResult {
                     windCourseAndSpeedCorrect
                             ? getAvgAbsWindSpeedErrorInKnotsOfCorrectWindDirectionWithSpeedEstimations() : 0,
                     windCourseAndSpeedCorrect ? 0
-                            : getAvgAbsWindSpeedErrorInKnotsOfIncorrectWindDirectionWithSpeedEstimations());
+                            : getAvgAbsWindSpeedErrorInKnotsOfIncorrectWindDirectionWithSpeedEstimations(),
+                    windCourseCorrect ? getAvgConfidenceOfCorrectWindDirectionEstimations() : 0,
+                    windCourseCorrect ? 0 : getAvgConfidenceOfIncorrectWindDirectionEstimations());
         }
         boolean estimationCorrect = getAccuracyOfWindDirectionEstimation() >= minAccuracyForCorrectEstimation;
         return new WindEstimatorEvaluationResult(estimationCorrect ? 1 : 0, estimationCorrect ? 0 : 1, 0, 0, 0, 0,
                 estimationCorrect ? getAvgAbsWindCourseErrorInDegreesOfCorrectWindDirectionEstimations() : 0,
                 estimationCorrect ? 0 : getAvgAbsWindCourseErrorInDegreesOfIncorrectWindDirectionEstimations(), 0, 0, 0,
-                0, 0, 0);
+                0, 0, 0, estimationCorrect ? getAvgConfidenceOfCorrectWindDirectionEstimations() : 0,
+                estimationCorrect ? 0 : getAvgConfidenceOfIncorrectWindDirectionEstimations());
     }
 
     private double nullSafeDivision(double dividend, double divisor) {

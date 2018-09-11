@@ -1,8 +1,6 @@
 package com.sap.sailing.windestimation.maneuvergraph;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.sap.sailing.windestimation.data.FineGrainedManeuverType;
 import com.sap.sailing.windestimation.data.FineGrainedPointOfSail;
@@ -11,16 +9,17 @@ import com.sap.sailing.windestimation.polarsfitting.SailingStatistics;
 
 class BestPathsPerLevel {
 
-    private Map<GraphNode, BestManeuverNodeInfo> bestPreviousNodeInfosPerManeuverNode = new HashMap<>();
+    private final BestManeuverNodeInfo[] bestPreviousNodeInfosPerManeuverNode;
     private double probabilitiesFromStartSum = 0;
     private final GraphLevel currentLevel;
 
     public BestPathsPerLevel(GraphLevel currentLevel) {
         this.currentLevel = currentLevel;
+        this.bestPreviousNodeInfosPerManeuverNode = new BestManeuverNodeInfo[currentLevel.getLevelNodes().size()];
     }
 
     public BestManeuverNodeInfo getBestPreviousNodeInfo(GraphNode currentNode) {
-        return bestPreviousNodeInfosPerManeuverNode.get(currentNode);
+        return bestPreviousNodeInfosPerManeuverNode[currentNode.getIndexInLevel()];
     }
 
     public BestManeuverNodeInfo addBestPreviousNodeInfo(GraphNode currentNode, GraphNode bestPreviousNode,
@@ -54,7 +53,7 @@ class BestPathsPerLevel {
             }
         }
         bestManeuverNodeInfo.setPathSailingStatistics(currentLevel.getManeuver().getBoatClass(), currentNodePathStats);
-        bestPreviousNodeInfosPerManeuverNode.put(currentNode, bestManeuverNodeInfo);
+        bestPreviousNodeInfosPerManeuverNode[currentNode.getIndexInLevel()] = bestManeuverNodeInfo;
         probabilitiesFromStartSum += probabilityFromStart;
         return bestManeuverNodeInfo;
     }
@@ -64,6 +63,26 @@ class BestPathsPerLevel {
      */
     public double getNormalizedProbabilityToNodeFromStart(GraphNode currentNode) {
         return getBestPreviousNodeInfo(currentNode).getProbabilityFromStart() / probabilitiesFromStartSum;
+    }
+
+    public boolean isBackwardProbabilitiesComputed() {
+        return getBackwardProbabilitiesSum() > 0;
+    }
+
+    public double getBackwardProbabilitiesSum() {
+        double sumBackwardProbabilities = 0;
+        for (BestManeuverNodeInfo nodeInfo : bestPreviousNodeInfosPerManeuverNode) {
+            sumBackwardProbabilities += nodeInfo.getBackwardProbability();
+        }
+        return sumBackwardProbabilities;
+    }
+
+    public double getForwardProbabilitiesSum() {
+        double sumForwardProbabilities = 0;
+        for (BestManeuverNodeInfo nodeInfo : bestPreviousNodeInfosPerManeuverNode) {
+            sumForwardProbabilities += nodeInfo.getForwardProbability();
+        }
+        return sumForwardProbabilities;
     }
 
 }

@@ -12,7 +12,7 @@ import com.sap.sailing.windestimation.data.transformer.EstimationDataUtil;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverClassifier;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverClassifiersCache;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverEstimationResult;
-import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 
 /**
  * 
@@ -70,7 +70,7 @@ public class ManeuverSequenceGraph implements WindTrackEstimator {
         List<WindWithConfidence<Void>> windTrack = Collections.emptyList();
         GraphLevel lastGraphLevel = this.lastGraphLevel;
         if (lastGraphLevel != null) {
-            List<Pair<GraphLevel, GraphNode>> bestPath = bestPathsCalculator.getBestPath(lastGraphLevel);
+            List<Triple<GraphLevel, GraphNode, Double>> bestPath = bestPathsCalculator.getBestPath(lastGraphLevel);
             windTrack = bestPathsCalculator.getWindTrack(bestPath);
         }
         return windTrack;

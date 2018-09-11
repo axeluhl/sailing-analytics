@@ -71,16 +71,17 @@ public class WindEstimationEvaluatorImpl<T> implements WindEstimatorEvaluator<T>
                         .getDifferenceTo(estimatedWind.getBearing()).getDegrees();
                 boolean windCourseDeviationWithinTolerance = Math
                         .abs(windCourseDeviationInDegrees) <= maxWindCourseDeviationInDegrees;
+                double confidence = windWithConfidence.getConfidence();
                 if (targetWind.getKnots() > 0.00001) {
                     double windSpeedDeviationInKnots = targetWind.getKnots() - estimatedWind.getKnots();
                     boolean windSpeedDeviationWithinTolerance = Math
                             .abs(windSpeedDeviationInKnots) <= maxWindSpeedDeviationInKnots;
                     result = result.mergeBySum(new WindEstimatorEvaluationResult(windCourseDeviationInDegrees,
                             windCourseDeviationWithinTolerance, windSpeedDeviationInKnots,
-                            windSpeedDeviationWithinTolerance));
+                            windSpeedDeviationWithinTolerance, confidence));
                 } else {
                     result = result.mergeBySum(new WindEstimatorEvaluationResult(windCourseDeviationInDegrees,
-                            windCourseDeviationWithinTolerance));
+                            windCourseDeviationWithinTolerance, confidence));
                 }
             }
         }

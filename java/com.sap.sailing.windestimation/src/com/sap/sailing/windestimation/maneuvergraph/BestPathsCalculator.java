@@ -24,7 +24,7 @@ import com.sap.sailing.windestimation.maneuverclassifier.ManeuverTypeForClassifi
 import com.sap.sailing.windestimation.polarsfitting.SailingStatistics;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Speed;
-import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
 import smile.sort.QuickSelect;
@@ -42,8 +42,14 @@ public class BestPathsCalculator {
     private GraphLevel lastLevel;
 
     private Map<GraphLevel, BestPathsPerLevel> bestPathsPerLevel;
+    private final boolean preciseConfidence;
 
     public BestPathsCalculator() {
+        this(true);
+    }
+
+    public BestPathsCalculator(boolean preciseConfidence) {
+        this.preciseConfidence = preciseConfidence;
     }
 
     public void computeBestPathsFromScratch() {
@@ -104,7 +110,9 @@ public class BestPathsCalculator {
             for (GraphNode currentNode : currentLevel.getLevelNodes()) {
                 double probability = currentNode.getConfidence();
                 IntersectedWindRange intersectedWindRange = currentNode.getValidWindRange().toIntersected();
-                bestPathsUntilLevel.addBestPreviousNodeInfo(currentNode, null, probability, intersectedWindRange, null);
+                BestManeuverNodeInfo currentNodeInfo = bestPathsUntilLevel.addBestPreviousNodeInfo(currentNode, null,
+                        probability, intersectedWindRange, null);
+                currentNodeInfo.setForwardProbability(probability);
             }
             bestPathsPerLevel.put(currentLevel, bestPathsUntilLevel);
         } else {
@@ -113,7 +121,8 @@ public class BestPathsCalculator {
                     .getManeuverTimePoint().until(currentLevel.getManeuver().getManeuverTimePoint()).asSeconds();
             BestPathsPerLevel bestPathsUntilLevel = new BestPathsPerLevel(currentLevel);
             for (GraphNode currentNode : currentLevel.getLevelNodes()) {
-                double maxProbability = 0;
+                double bestProbabilityFromStart = 0;
+                double forwardProbability = 0;
                 GraphNode bestPreviousNode = null;
                 IntersectedWindRange bestIntersectedWindRangeUntilCurrentNode = null;
                 SailingStatistics bestPreviousPathStats = null;
@@ -124,27 +133,38 @@ public class BestPathsCalculator {
                             .getPathSailingStatistics(previousLevel.getManeuver().getBoatClass());
                     IntersectedWindRange intersectedWindRangeUntilCurrentNode = bestPreviousNodeInfo.getWindRange()
                             .intersect(currentNode.getValidWindRange());
-                    double probability = bestPathsUntilPreviousLevel.getNormalizedProbabilityToNodeFromStart(
-                            previousNode) * getPenaltyFactorForTackTransition(currentLevel, previousNode, currentNode)
-                            * currentNode.getConfidence()
-                            * getPenaltyFactorForTransitionConsideringWindRangeWithinBestPath(
-                                    intersectedWindRangeUntilCurrentNode, secondsPassedSincePreviousManeuver)
-                            * getPenaltyFactorForTransitionConsideringPreviousPathStats(currentLevel, currentNode,
-                                    previousPathStats, intersectedWindRangeUntilCurrentNode);
-                    assert (probability > 0.0001);
-                    if (probability > maxProbability) {
-                        maxProbability = probability;
+                    double transitionObservationMultipliedProbability = getTransitionObservationMultipliedProbability(
+                            currentLevel, secondsPassedSincePreviousManeuver, currentNode, previousNode,
+                            previousPathStats, intersectedWindRangeUntilCurrentNode);
+                    double probabilityFromStart = bestPathsUntilPreviousLevel.getNormalizedProbabilityToNodeFromStart(
+                            previousNode) * transitionObservationMultipliedProbability;
+                    forwardProbability += transitionObservationMultipliedProbability;
+                    assert (probabilityFromStart > 0.0001);
+                    if (probabilityFromStart > bestProbabilityFromStart) {
+                        bestProbabilityFromStart = probabilityFromStart;
                         bestPreviousNode = previousNode;
                         bestIntersectedWindRangeUntilCurrentNode = intersectedWindRangeUntilCurrentNode;
                         bestPreviousPathStats = previousPathStats;
                     }
                 }
-                bestPathsUntilLevel.addBestPreviousNodeInfo(currentNode, bestPreviousNode, maxProbability,
-                        bestIntersectedWindRangeUntilCurrentNode, bestPreviousPathStats);
+                BestManeuverNodeInfo currentNodeInfo = bestPathsUntilLevel.addBestPreviousNodeInfo(currentNode,
+                        bestPreviousNode, bestProbabilityFromStart, bestIntersectedWindRangeUntilCurrentNode,
+                        bestPreviousPathStats);
+                currentNodeInfo.setForwardProbability(forwardProbability);
             }
             bestPathsPerLevel.put(currentLevel, bestPathsUntilLevel);
         }
         this.lastLevel = currentLevel;
+    }
+
+    private double getTransitionObservationMultipliedProbability(GraphLevel currentLevel,
+            double secondsPassedSincePreviousManeuver, GraphNode currentNode, GraphNode previousNode,
+            SailingStatistics previousPathStats, IntersectedWindRange intersectedWindRangeUntilCurrentNode) {
+        return getPenaltyFactorForTackTransition(currentLevel, previousNode, currentNode) * currentNode.getConfidence()
+                * getPenaltyFactorForTransitionConsideringWindRangeWithinBestPath(intersectedWindRangeUntilCurrentNode,
+                        secondsPassedSincePreviousManeuver)
+                * getPenaltyFactorForTransitionConsideringPreviousPathStats(currentLevel, currentNode,
+                        previousPathStats, intersectedWindRangeUntilCurrentNode);
     }
 
     protected double getPenaltyFactorForTackTransition(GraphLevel currentLevel, GraphNode previousNode,
@@ -252,21 +272,48 @@ public class BestPathsCalculator {
         return 1;
     }
 
-    public List<Pair<GraphLevel, GraphNode>> getBestPath(GraphLevel lastLevel, GraphNode lastNode) {
-        List<Pair<GraphLevel, GraphNode>> result = new LinkedList<>();
+    public List<Triple<GraphLevel, GraphNode, Double>> getBestPath(GraphLevel lastLevel, GraphNode lastNode) {
+        double probabilitiesSum = 0;
+        BestPathsPerLevel bestPathsUntilLastLevel = bestPathsPerLevel.get(lastLevel);
+        double lastNodeProbability = bestPathsUntilLastLevel.getNormalizedProbabilityToNodeFromStart(lastNode);
+        if (preciseConfidence) {
+            GraphLevel firstLevel = lastLevel;
+            while (firstLevel.getPreviousLevel() != null) {
+                firstLevel = firstLevel.getPreviousLevel();
+            }
+            BestPathsPerLevel bestPathsUntilFirstLevel = bestPathsPerLevel.get(firstLevel);
+            if (!bestPathsUntilFirstLevel.isBackwardProbabilitiesComputed()) {
+                computeBackwardProbabilities();
+            }
+        } else {
+            for (GraphNode node : lastLevel.getLevelNodes()) {
+                double probability = bestPathsUntilLastLevel.getNormalizedProbabilityToNodeFromStart(node);
+                probabilitiesSum += probability;
+            }
+        }
+        List<Triple<GraphLevel, GraphNode, Double>> result = new LinkedList<>();
         GraphNode currentNode = lastNode;
         GraphLevel currentLevel = lastLevel;
         while (currentLevel != null) {
-            Pair<GraphLevel, GraphNode> entry = new Pair<>(currentLevel, currentNode);
+            BestPathsPerLevel currentLevelInfo = bestPathsPerLevel.get(currentLevel);
+            BestManeuverNodeInfo currentNodeInfo = currentLevelInfo.getBestPreviousNodeInfo(currentNode);
+            double nodeConfidence;
+            if (preciseConfidence) {
+                nodeConfidence = 2 * currentNodeInfo.getForwardProbability() * currentNodeInfo.getBackwardProbability()
+                        / (currentLevelInfo.getForwardProbabilitiesSum()
+                                + currentLevelInfo.getBackwardProbabilitiesSum());
+            } else {
+                nodeConfidence = lastNodeProbability / probabilitiesSum;
+            }
+            Triple<GraphLevel, GraphNode, Double> entry = new Triple<>(currentLevel, currentNode, nodeConfidence);
             result.add(0, entry);
-            currentNode = bestPathsPerLevel.get(currentLevel).getBestPreviousNodeInfo(currentNode)
-                    .getBestPreviousNode();
+            currentNode = currentNodeInfo.getBestPreviousNode();
             currentLevel = currentLevel.getPreviousLevel();
         }
         return result;
     }
 
-    public List<Pair<GraphLevel, GraphNode>> getBestPath(GraphLevel lastLevel) {
+    public List<Triple<GraphLevel, GraphNode, Double>> getBestPath(GraphLevel lastLevel) {
         BestPathsPerLevel bestPathsUntilLevel = bestPathsPerLevel.get(lastLevel);
         double maxProbability = 0;
         GraphNode bestLastNode = null;
@@ -280,28 +327,13 @@ public class BestPathsCalculator {
         return getBestPath(lastLevel, bestLastNode);
     }
 
-    public double getConfidenceOfBestPath(List<Pair<GraphLevel, GraphNode>> bestPath) {
-        Pair<GraphLevel, GraphNode> lastLevelWithNode = bestPath.get(bestPath.size() - 1);
-        GraphNode lastNode = lastLevelWithNode.getB();
-        BestPathsPerLevel bestPathsUntilLastLevel = bestPathsPerLevel.get(lastLevelWithNode.getA());
-        double sumOfprobabilitiesOfBestPathToCoarseGrainedPointOfSail = 0;
-        for (GraphNode node : lastLevelWithNode.getA().getLevelNodes()) {
-            double probability = bestPathsUntilLastLevel.getNormalizedProbabilityToNodeFromStart(node);
-            sumOfprobabilitiesOfBestPathToCoarseGrainedPointOfSail += probability;
-        }
-        double lastNodeProbability = bestPathsUntilLastLevel.getNormalizedProbabilityToNodeFromStart(lastNode);
-        double bestPathConfidence = lastNodeProbability / sumOfprobabilitiesOfBestPathToCoarseGrainedPointOfSail;
-        return bestPathConfidence;
-    }
-
-    public List<WindWithConfidence<Void>> getWindTrack(List<Pair<GraphLevel, GraphNode>> bestPath) {
+    public List<WindWithConfidence<Void>> getWindTrack(List<Triple<GraphLevel, GraphNode, Double>> bestPath) {
         List<WindWithConfidence<Void>> windFixes = new ArrayList<>();
-        double baseConfidence = getConfidenceOfBestPath(bestPath);
         if (!bestPath.isEmpty()) {
             IntersectedWindRange globalWindRange = null;
-            for (ListIterator<Pair<GraphLevel, GraphNode>> iterator = bestPath.listIterator(bestPath.size()); iterator
-                    .hasPrevious();) {
-                Pair<GraphLevel, GraphNode> entry = iterator.previous();
+            for (ListIterator<Triple<GraphLevel, GraphNode, Double>> iterator = bestPath
+                    .listIterator(bestPath.size()); iterator.hasPrevious();) {
+                Triple<GraphLevel, GraphNode, Double> entry = iterator.previous();
                 GraphLevel currentLevel = entry.getA();
                 GraphNode currentNode = entry.getB();
                 BestPathsPerLevel bestPathsUntilCurrentLevel = bestPathsPerLevel.get(currentLevel);
@@ -317,7 +349,7 @@ public class BestPathsCalculator {
                             currentLevel.getManeuver().getManeuverTimePoint(),
                             new KnotSpeedWithBearingImpl(avgWindSpeed.getKnots(), windCourse));
                     windFixes.add(
-                            new WindWithConfidenceImpl<Void>(wind, baseConfidence, null, avgWindSpeed.getKnots() > 0));
+                            new WindWithConfidenceImpl<Void>(wind, entry.getC(), null, avgWindSpeed.getKnots() > 0));
                 }
             }
         }
@@ -362,6 +394,45 @@ public class BestPathsCalculator {
 
     public Speed getWindSpeed(ManeuverForEstimation maneuver, Bearing windCourse) {
         return new KnotSpeedImpl(0.0);
+    }
+
+    public boolean isPreciseConfidence() {
+        return preciseConfidence;
+    }
+
+    public void computeBackwardProbabilities() {
+        GraphLevel currentLevel = lastLevel;
+        BestPathsPerLevel bestPathsUntilLevel = bestPathsPerLevel.get(currentLevel);
+        for (GraphNode currentNode : currentLevel.getLevelNodes()) {
+            double probability = currentNode.getConfidence();
+            BestManeuverNodeInfo currentNodeNodeInfo = bestPathsUntilLevel.getBestPreviousNodeInfo(currentNode);
+            currentNodeNodeInfo.setBackwardProbability(probability);
+        }
+        GraphLevel nextLevel = currentLevel;
+        while ((currentLevel = currentLevel.getPreviousLevel()) != null) {
+            bestPathsUntilLevel = bestPathsPerLevel.get(currentLevel);
+            BestPathsPerLevel bestPathsUntilNextLevel = bestPathsPerLevel.get(nextLevel);
+            double secondsPassedSincePreviousManeuver = currentLevel.getManeuver().getManeuverTimePoint()
+                    .until(nextLevel.getManeuver().getManeuverTimePoint()).asSeconds();
+            for (GraphNode currentNode : currentLevel.getLevelNodes()) {
+                double backwardProbability = 0;
+                for (GraphNode nextNode : nextLevel.getLevelNodes()) {
+                    BestManeuverNodeInfo nextNodeInfo = bestPathsUntilNextLevel.getBestPreviousNodeInfo(nextNode);
+                    // TODO generate sailing statistics from backward? or throw sailings statistics away?
+                    SailingStatistics nextPathStats = nextNodeInfo
+                            .getPathSailingStatistics(nextLevel.getManeuver().getBoatClass());
+                    IntersectedWindRange intersectedWindRangeUntilCurrentNode = nextNodeInfo.getWindRange()
+                            .intersect(currentNode.getValidWindRange());
+                    double transitionObservationMultipliedProbability = getTransitionObservationMultipliedProbability(
+                            currentLevel, secondsPassedSincePreviousManeuver, currentNode, nextNode, nextPathStats,
+                            intersectedWindRangeUntilCurrentNode);
+                    backwardProbability += transitionObservationMultipliedProbability;
+                }
+                BestManeuverNodeInfo currentNodeInfo = bestPathsUntilLevel.getBestPreviousNodeInfo(currentNode);
+                currentNodeInfo.setBackwardProbability(backwardProbability);
+            }
+            nextLevel = currentLevel;
+        }
     }
 
 }
