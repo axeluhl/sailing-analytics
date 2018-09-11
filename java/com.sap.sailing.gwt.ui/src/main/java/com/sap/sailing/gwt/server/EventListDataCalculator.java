@@ -6,6 +6,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
@@ -19,8 +20,9 @@ import com.sap.sailing.server.util.EventUtil;
 
 public class EventListDataCalculator implements EventVisitor {
     
-    private final Map<LeaderboardGroupBase, EventListEventDTO> lastestEventPerSeries = new HashMap<>();
-    private final Map<LeaderboardGroupBase, Integer> numberOfEventsPerSeries = new HashMap<>();
+    private final Map<UUID, EventListEventDTO> lastestEventPerSeries = new HashMap<>();
+    private final Map<UUID, Integer> numberOfEventsPerSeries = new HashMap<>();
+    private final Map<UUID, String> seriesNames = new HashMap<>();
     private final EventListViewDTO result = new EventListViewDTO();
     private final RacingEventService service;
 
@@ -34,30 +36,34 @@ public class EventListDataCalculator implements EventVisitor {
             EventListEventDTO eventDTO = HomeServiceUtil.convertToEventListDTO(event, baseURL, onRemoteServer, service);
             if (HomeServiceUtil.calculateEventState(event) != EventState.UPCOMING && EventUtil.isFakeSeries(event)) {
                 final LeaderboardGroupBase seriesLeaderboardGroup = event.getLeaderboardGroups().iterator().next();
-                EventListEventDTO latestEvent = lastestEventPerSeries.get(seriesLeaderboardGroup);
-                if (latestEvent == null || latestEvent.getStartDate().before(eventDTO.getStartDate())) {
-                    lastestEventPerSeries.put(seriesLeaderboardGroup, eventDTO);
+                final UUID seriesLeaderboardGroupId = seriesLeaderboardGroup.getId();
+                if (!seriesNames.containsKey(seriesLeaderboardGroupId)) {
+                    seriesNames.put(seriesLeaderboardGroupId, HomeServiceUtil.getLeaderboardDisplayName(seriesLeaderboardGroup));
                 }
-                increaseNumberOfEvents(seriesLeaderboardGroup);
+                EventListEventDTO latestEvent = lastestEventPerSeries.get(seriesLeaderboardGroupId);
+                if (latestEvent == null || latestEvent.getStartDate().before(eventDTO.getStartDate())) {
+                    lastestEventPerSeries.put(seriesLeaderboardGroupId, eventDTO);
+                }
+                increaseNumberOfEvents(seriesLeaderboardGroupId);
             } else {
                 addEventToResults(eventDTO);
             }
         }
     }
     
-    private void increaseNumberOfEvents(final LeaderboardGroupBase seriesLeaderboardGroup) {
-        Integer currentValue = numberOfEventsPerSeries.get(seriesLeaderboardGroup);
+    private void increaseNumberOfEvents(final UUID seriesLeaderboardGroupId) {
+        Integer currentValue = numberOfEventsPerSeries.get(seriesLeaderboardGroupId);
         currentValue = currentValue == null ? 0 : currentValue;
-        numberOfEventsPerSeries.put(seriesLeaderboardGroup, ++currentValue);
+        numberOfEventsPerSeries.put(seriesLeaderboardGroupId, ++currentValue);
     }
     
     public EventListViewDTO getResult() {
-        for (Entry<LeaderboardGroupBase, EventListEventDTO> latestEventInSeries : lastestEventPerSeries.entrySet()) {
-            final LeaderboardGroupBase seriesLeaderboardGroup = latestEventInSeries.getKey();
+        for (Entry<UUID, EventListEventDTO> latestEventInSeries : lastestEventPerSeries.entrySet()) {
+            final UUID seriesLeaderboardGroupId = latestEventInSeries.getKey();
             EventListEventDTO latestEvent = latestEventInSeries.getValue();
             latestEvent.setEventSeries(new EventListEventSeriesDTO(
-                    HomeServiceUtil.getLeaderboardDisplayName(seriesLeaderboardGroup), seriesLeaderboardGroup.getId()));
-            latestEvent.getEventSeries().setEventsCount(numberOfEventsPerSeries.get(seriesLeaderboardGroup));
+                    seriesNames.get(seriesLeaderboardGroupId), seriesLeaderboardGroupId));
+            latestEvent.getEventSeries().setEventsCount(numberOfEventsPerSeries.get(seriesLeaderboardGroupId));
             addEventToResults(latestEvent);
         }
         result.addStatistics(service.getOverallStatisticsByYear());
