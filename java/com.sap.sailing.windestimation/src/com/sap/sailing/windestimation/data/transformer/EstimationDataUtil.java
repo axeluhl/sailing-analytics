@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.NavigableSet;
+import java.util.function.Predicate;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.base.Competitor;
@@ -148,26 +149,31 @@ public class EstimationDataUtil {
 
     public static List<ManeuverForEstimation> getUsefulManeuversSortedByTimePoint(
             List<CompetitorTrackWithEstimationData<ManeuverForEstimation>> competitorTracks) {
-        List<ManeuverForEstimation> usefulManeuversSortedByTimePoint = new ArrayList<>();
-        for (CompetitorTrackWithEstimationData<ManeuverForEstimation> competitorTrack : competitorTracks) {
-            for (ManeuverForEstimation maneuver : competitorTrack.getElements()) {
-                if (maneuver.isClean() && maneuver.getManeuverCategory() == ManeuverCategory.REGULAR
-                        || maneuver.getManeuverCategory() == ManeuverCategory.MARK_PASSING) {
-                    usefulManeuversSortedByTimePoint.add(maneuver);
-                }
-            }
-        }
-        Collections.sort(usefulManeuversSortedByTimePoint,
-                (o1, o2) -> o1.getManeuverTimePoint().compareTo(o2.getManeuverTimePoint()));
-        return usefulManeuversSortedByTimePoint;
+        return getManeuversSortedByTimePoint(competitorTracks,
+                maneuver -> maneuver.isClean() && (maneuver.getManeuverCategory() == ManeuverCategory.REGULAR
+                        || maneuver.getManeuverCategory() == ManeuverCategory.MARK_PASSING));
+    }
+
+    public static List<ManeuverForEstimation> getUsefulPenaltyCirclesSortedByTimePoint(
+            List<CompetitorTrackWithEstimationData<ManeuverForEstimation>> competitorTracks) {
+        return getManeuversSortedByTimePoint(competitorTracks,
+                maneuver -> maneuver.isClean() && maneuver.getManeuverCategory() == ManeuverCategory._360);
     }
 
     public static List<ManeuverForEstimation> getManeuversSortedByTimePoint(
             List<CompetitorTrackWithEstimationData<ManeuverForEstimation>> competitorTracks) {
+        return getManeuversSortedByTimePoint(competitorTracks, maneuver -> true);
+    }
+
+    public static List<ManeuverForEstimation> getManeuversSortedByTimePoint(
+            List<CompetitorTrackWithEstimationData<ManeuverForEstimation>> competitorTracks,
+            Predicate<ManeuverForEstimation> predicate) {
         List<ManeuverForEstimation> maneuversSortedByTimePoint = new ArrayList<>();
         for (CompetitorTrackWithEstimationData<ManeuverForEstimation> competitorTrack : competitorTracks) {
             for (ManeuverForEstimation maneuver : competitorTrack.getElements()) {
-                maneuversSortedByTimePoint.add(maneuver);
+                if (predicate.test(maneuver)) {
+                    maneuversSortedByTimePoint.add(maneuver);
+                }
             }
         }
         Collections.sort(maneuversSortedByTimePoint,

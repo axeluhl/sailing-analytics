@@ -1,6 +1,7 @@
 package com.sap.sailing.windestimation.maneuvergraph;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import com.sap.sailing.domain.polars.PolarDataService;
@@ -36,6 +37,43 @@ public class ManeuverSequenceGraph implements WindTrackEstimator {
                 .getUsefulManeuversSortedByTimePoint(competitorTracks);
         for (ManeuverForEstimation maneuver : usefulManeuvers) {
             appendManeuverAsGraphLevel(maneuver);
+        }
+        upgradeNodeConfidencesWithPenaltyCircleInfo(competitorTracks);
+    }
+
+    private void upgradeNodeConfidencesWithPenaltyCircleInfo(
+            List<CompetitorTrackWithEstimationData<ManeuverForEstimation>> competitorTracks) {
+        List<ManeuverForEstimation> penaltyCircles = EstimationDataUtil
+                .getUsefulPenaltyCirclesSortedByTimePoint(competitorTracks);
+        if (!penaltyCircles.isEmpty()) {
+            Iterator<ManeuverForEstimation> penaltyCirclesIterator = penaltyCircles.iterator();
+            ManeuverForEstimation currentPenaltyCircle = penaltyCirclesIterator.next();
+            GraphLevel previousLevel = null;
+            GraphLevel currentLevel = firstGraphLevel;
+            double closestSecondsToUsefulManeuver = Double.MAX_VALUE;
+            while (currentLevel != null) {
+                double secondsToNextUsefulManeuver = Math.abs(currentLevel.getManeuver().getManeuverTimePoint()
+                        .until(currentPenaltyCircle.getManeuverTimePoint()).asSeconds());
+                if (secondsToNextUsefulManeuver < closestSecondsToUsefulManeuver) {
+                    closestSecondsToUsefulManeuver = secondsToNextUsefulManeuver;
+                } else {
+                    GraphLevel levelToUpdate = previousLevel == null ? currentLevel : previousLevel;
+                    levelToUpdate.upgradeLevelNodesConsideringPenaltyCircle(currentPenaltyCircle);
+                    if (penaltyCirclesIterator.hasNext()) {
+                        currentPenaltyCircle = penaltyCirclesIterator.next();
+                        continue;
+                    } else {
+                        currentPenaltyCircle = null;
+                        break;
+                    }
+                }
+                previousLevel = currentLevel;
+                currentLevel = currentLevel.getNextLevel();
+            }
+            while (currentPenaltyCircle != null) {
+                lastGraphLevel.upgradeLevelNodesConsideringPenaltyCircle(currentPenaltyCircle);
+                currentPenaltyCircle = penaltyCirclesIterator.hasNext() ? penaltyCirclesIterator.next() : null;
+            }
         }
     }
 

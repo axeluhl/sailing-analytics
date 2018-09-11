@@ -18,6 +18,7 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
  */
 public class GraphLevel {
 
+    private static final double PENALTY_CIRCLE_PROBABILITY_BONUS = 0.3;
     private static final int MIN_UPWIND_ABS_TWA = 30;
     private final ManeuverForEstimation maneuver;
     private ManeuverEstimationResult maneuverEstimationResult;
@@ -26,7 +27,6 @@ public class GraphLevel {
     private GraphLevel nextLevel = null;
 
     private final List<GraphNode> levelNodes = new ArrayList<>();
-    private double probabilitiesSum = 1.0;
 
     public GraphLevel(ManeuverForEstimation maneuver, ManeuverEstimationResult maneuverEstimationResult) {
         this.maneuver = maneuver;
@@ -35,44 +35,14 @@ public class GraphLevel {
     }
 
     private void initNodes() {
-        switch (maneuver.getManeuverCategory()) {
-        case _360:
-//            initNodesAsPenaltyCircle();
-            break;
-        case _180:
-        case SMALL:
-        case WIDE:
-//            initNodeJustForSpeedAnalysis();
-            break;
-        case MARK_PASSING:
-        case REGULAR:
-            initNodesAsRegular();
-            break;
-        }
-    }
-
-    private void addManeuverNode(ManeuverTypeForClassification maneuverType, Tack tackAfter,
-            WindCourseRange windRange, double confidence) {
-        GraphNode maneuverNode = new GraphNode(maneuverType, tackAfter, windRange, confidence / probabilitiesSum,
-                levelNodes.size());
-        levelNodes.add(maneuverNode);
-    }
-
-//    private void initNodeJustForSpeedAnalysis() {
-//        WindCourseRange windRange = new WindCourseRange(0, 360);
-//        addManeuverNode(ManeuverTypeForClassification.OTHER, null, windRange, 1.0);
-//    }
-
-    private void initNodesAsRegular() {
-        probabilitiesSum = 0;
-        probabilitiesSum += maneuverEstimationResult.getManeuverTypeLikelihood(CoarseGrainedManeuverType.TACK);
-        probabilitiesSum += maneuverEstimationResult.getManeuverTypeLikelihood(CoarseGrainedManeuverType.JIBE);
-        probabilitiesSum += maneuverEstimationResult.getManeuverTypeLikelihood(CoarseGrainedManeuverType.BEAR_AWAY);
-        probabilitiesSum += maneuverEstimationResult.getManeuverTypeLikelihood(CoarseGrainedManeuverType.HEAD_UP);
+        maneuverEstimationResult.getManeuverTypeLikelihood(CoarseGrainedManeuverType.TACK);
+        maneuverEstimationResult.getManeuverTypeLikelihood(CoarseGrainedManeuverType.JIBE);
+        maneuverEstimationResult.getManeuverTypeLikelihood(CoarseGrainedManeuverType.BEAR_AWAY);
+        maneuverEstimationResult.getManeuverTypeLikelihood(CoarseGrainedManeuverType.HEAD_UP);
         for (ManeuverTypeForClassification maneuverType : ManeuverTypeForClassification.values()) {
             switch (maneuverType) {
             case TACK:
-                initTackNode(probabilitiesSum);
+                initTackNode();
                 break;
             case JIBE:
                 initJibeNode();
@@ -83,6 +53,13 @@ public class GraphLevel {
                 break;
             }
         }
+        normalizeNodeConfidences();
+    }
+
+    private void addManeuverNode(ManeuverTypeForClassification maneuverType, Tack tackAfter, WindCourseRange windRange,
+            double confidence) {
+        GraphNode maneuverNode = new GraphNode(maneuverType, tackAfter, windRange, confidence, levelNodes.size());
+        levelNodes.add(maneuverNode);
     }
 
     private void initBearAwayNode() {
@@ -136,7 +113,7 @@ public class GraphLevel {
         addManeuverNode(ManeuverTypeForClassification.JIBE, tackAfter, windRange, confidence);
     }
 
-    private void initTackNode(double probabilitiesSum) {
+    private void initTackNode() {
         Bearing middleCourse = maneuver.getMiddleCourse();
         double absCourseChangeDeg = Math.abs(maneuver.getCourseChangeInDegrees());
         double middleAngleRange = absCourseChangeDeg * 0.4;
@@ -147,15 +124,6 @@ public class GraphLevel {
         Tack tackAfter = maneuver.getCourseChangeWithinMainCurveInDegrees() < 0 ? Tack.PORT : Tack.STARBOARD;
         addManeuverNode(ManeuverTypeForClassification.TACK, tackAfter, windRange, confidence);
     }
-
-//    private void initNodesAsPenaltyCircle() {
-//        Bearing courseAtLowestSpeed = maneuver.getCourseAtLowestSpeed();
-//        Bearing from = courseAtLowestSpeed.add(new DegreeBearingImpl(90.0));
-//        double angleTowardStarboard = 180;
-//        WindCourseRange windRange = new WindCourseRange(from.getDegrees(), angleTowardStarboard);
-//        addManeuverNode(ManeuverTypeForClassification.OTHER, null, windRange, 0.7);
-//        addManeuverNode(ManeuverTypeForClassification.OTHER, null, windRange.invert(), 0.3);
-//    }
 
     public ManeuverForEstimation getManeuver() {
         return maneuver;
@@ -184,6 +152,30 @@ public class GraphLevel {
     public void appendNextManeuverNodesLevel(GraphLevel nextManeuverNodesLevel) {
         setNextLevel(nextManeuverNodesLevel);
         nextManeuverNodesLevel.setPreviousLevel(this);
+    }
+
+    public void upgradeLevelNodesConsideringPenaltyCircle(ManeuverForEstimation penaltyCircle) {
+        Bearing courseAtLowestSpeed = penaltyCircle.getCourseAtLowestSpeed();
+        Bearing from = courseAtLowestSpeed.add(new DegreeBearingImpl(90.0));
+        double angleTowardStarboard = 180;
+        WindCourseRange windRange = new WindCourseRange(from.getDegrees(), angleTowardStarboard);
+        for (GraphNode currentNode : levelNodes) {
+            IntersectedWindRange intersectedWindRange = currentNode.getValidWindRange().intersect(windRange);
+            if (intersectedWindRange.getViolationRange() == 0) {
+                currentNode.setConfidence(currentNode.getConfidence() + PENALTY_CIRCLE_PROBABILITY_BONUS);
+            }
+        }
+        normalizeNodeConfidences();
+    }
+
+    private void normalizeNodeConfidences() {
+        double probabilitiesSum = 0;
+        for (GraphNode currentNode : levelNodes) {
+            probabilitiesSum += currentNode.getConfidence();
+        }
+        for (GraphNode currentNode : levelNodes) {
+            currentNode.setConfidence(currentNode.getConfidence() / probabilitiesSum);
+        }
     }
 
 }
