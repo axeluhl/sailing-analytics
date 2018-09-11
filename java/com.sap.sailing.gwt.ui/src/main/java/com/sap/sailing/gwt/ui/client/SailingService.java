@@ -787,6 +787,9 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     /**
      * Resizes an ImageDTO that is part of an ImageResizingTaskDTO into an array of resized versions. This array contains only one entry in most real cases
+     * 
+     * @author Robin Fleige (D067799)
+     * 
      * @param imageResizingTask is an ImageResizingTaskDTO with the information on how the image saved in the ImageDTO should be resized
      * @return returns an array of ImageDTOs, that contain the resized variants of the ImageDTO in toResizeImage
      * @throws Exception can throw different type of exceptions

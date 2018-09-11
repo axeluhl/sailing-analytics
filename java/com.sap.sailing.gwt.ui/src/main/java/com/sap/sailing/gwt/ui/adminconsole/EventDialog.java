@@ -33,10 +33,8 @@ import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
-import com.sap.sse.common.observer.ObservableBoolean;
+import com.sap.sse.common.util.ObservableBoolean;
 import com.sap.sse.gwt.client.IconResources;
-import com.sap.sse.gwt.client.Notification;
-import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
 import com.sap.sse.gwt.client.controls.listedit.GenericStringListEditorComposite;
 import com.sap.sse.gwt.client.controls.listedit.GenericStringListInlineEditorComposite;
@@ -271,7 +269,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         return nameEntryField;
     }
 
-    // used for ImageListComposite and VideoListComposite to inform user that upload is not possible without needing to
+    // used for ImageDialog and VideoDialog to inform user that upload is not possible without needing to
     // try it first
     private void testFileStorageService(FileStorageManagementGwtServiceAsync sailingService) {
         // double callback to test if a fileStorageService is enabled and enable upload if it is
@@ -285,7 +283,6 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
 
                                 @Override
                                 public void onFailure(Throwable caught) {
-                                    Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
                                     storageServiceAvailable.setValue(false);
                                 }
 
@@ -294,21 +291,17 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
                                     if (result == null) {
                                         storageServiceAvailable.setValue(true);
                                     } else {
-                                        Notification.notify(stringMessages.setUpStorageService(),
-                                                NotificationType.ERROR);
                                         storageServiceAvailable.setValue(false);
                                     }
                                 }
                             });
                 } else {
-                    Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
                     storageServiceAvailable.setValue(false);
                 }
             }
 
             @Override
             public void onFailure(Throwable caught) {
-                Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
             }
         });
     }

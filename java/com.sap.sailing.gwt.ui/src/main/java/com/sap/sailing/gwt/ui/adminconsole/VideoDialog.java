@@ -18,8 +18,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.MimeType;
-import com.sap.sse.common.observer.GenericObserver;
-import com.sap.sse.common.observer.ObservableBoolean;
+import com.sap.sse.common.util.GenericObserver;
+import com.sap.sse.common.util.ObservableBoolean;
 import com.sap.sse.gwt.adminconsole.URLFieldWithFileUpload;
 import com.sap.sse.gwt.client.GWTLocaleUtil;
 import com.sap.sse.gwt.client.IconResources;
@@ -42,7 +42,6 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> implements G
     protected IntegerBox lengthIntegerBox;
     protected final URLFieldWithFileUpload thumbnailURLAndUploadComposite;
     protected StringListInlineEditorComposite tagsListEditor;
-    private final ObservableBoolean storageServiceAvailable;
     
     protected static class VideoParameterValidator implements Validator<VideoDTO> {
         private StringMessages stringMessages;
@@ -69,7 +68,6 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> implements G
                 callback);
         this.stringMessages = stringMessages;
         this.creationDate = createdAtDate;
-        this.storageServiceAvailable = storageServiceAvailable;
         storageServiceAvailable.registerObserver(this);
         getDialogBox().getWidget().setWidth("730px");
 
@@ -198,7 +196,7 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> implements G
     
     @Override
     public void getNotified(Boolean data) {
-        videoURLAndUploadComposite.setUploadEnabled(storageServiceAvailable.getValue());
-        thumbnailURLAndUploadComposite.setUploadEnabled(storageServiceAvailable.getValue());
+        videoURLAndUploadComposite.setUploadEnabled(data.booleanValue());
+        thumbnailURLAndUploadComposite.setUploadEnabled(data.booleanValue());
     }
 }

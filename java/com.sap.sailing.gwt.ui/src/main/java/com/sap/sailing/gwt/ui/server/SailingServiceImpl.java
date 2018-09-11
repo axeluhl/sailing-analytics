@@ -7890,21 +7890,27 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
     }
 
+    /**
+     * See {@link SailingService#resizeImage(ImageResizingTaskDTO)}
+     */
     @Override
-    public ImageDTO[] resizeImage(ImageResizingTaskDTO resizingTask) throws Exception {
-        ImageConverter converter = new ImageConverter();
+    public ImageDTO[] resizeImage(final ImageResizingTaskDTO resizingTask) throws Exception {
+        final ImageConverter converter = new ImageConverter();
         // calculating the fileType of the image by its uri
-        String sourceRef = resizingTask.getImage().getSourceRef();
-        String fileType = sourceRef.substring(sourceRef.lastIndexOf(".") + 1);
-        ImageWithMetadata imageAndMetadata = converter.loadImage(HttpUrlConnectionHelper.redirectConnection(new URL(sourceRef)).getInputStream(), fileType);
-        List<BufferedImage> resizedImages = converter.convertImage(imageAndMetadata.getImage(), resizingTask.getResizingTask());
-        List<String> sourceRefs = storeImages(resizedImages, fileType, imageAndMetadata.getMetadata());
-        List<ImageDTO> resizedImagesAsDTOs = createImageDTOsFromURLsAndResizingTask(sourceRefs,resizingTask, resizedImages);
-        for(String tag : resizingTask.getImage().getTags()) {
-            MediaTagConstants predefinedTag = MediaTagConstants.fromName(tag);
-            if(predefinedTag != null && !resizingTask.getResizingTask().contains(predefinedTag)) {
-                ImageDTO image = resizingTask.getImage();
-                for(MediaTagConstants tagConstant : resizingTask.getResizingTask()) {
+        final String sourceRef = resizingTask.getImage().getSourceRef();
+        final String fileType = sourceRef.substring(sourceRef.lastIndexOf(".") + 1);
+        final ImageWithMetadata imageAndMetadata = converter
+                .loadImage(HttpUrlConnectionHelper.redirectConnection(new URL(sourceRef)).getInputStream(), fileType);
+        final List<BufferedImage> resizedImages = converter.convertImage(imageAndMetadata.getImage(),
+                resizingTask.getResizingTask());
+        final List<String> sourceRefs = storeImages(resizedImages, fileType, imageAndMetadata.getMetadata());
+        final List<ImageDTO> resizedImagesAsDTOs = createImageDTOsFromURLsAndResizingTask(sourceRefs, resizingTask,
+                resizedImages);
+        for (String tag : resizingTask.getImage().getTags()) {
+            final MediaTagConstants predefinedTag = MediaTagConstants.fromName(tag);
+            if (predefinedTag != null && !resizingTask.getResizingTask().contains(predefinedTag)) {
+                final ImageDTO image = resizingTask.getImage();
+                for (MediaTagConstants tagConstant : resizingTask.getResizingTask()) {
                     image.getTags().remove(tagConstant.getName());
                 }
                 resizedImagesAsDTOs.add(image);
@@ -7912,13 +7918,27 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return resizedImagesAsDTOs.toArray(new ImageDTO[resizedImages.size()]);
     }
-    
-    private List<ImageDTO> createImageDTOsFromURLsAndResizingTask(List<String> sourceRefs,
-            ImageResizingTaskDTO resizingTask, List<BufferedImage> images) {
-        List<ImageDTO> imageDTOs = new ArrayList<ImageDTO>();
-        for(int i= 0; i < sourceRefs.size(); i++) {
-            ImageDTO imageDTO = resizingTask.cloneImageDTO();
-            for(MediaTagConstants tag : MediaTagConstants.values()) {
+
+    /**
+     * Takes a list of source URLs, the resizing task and the sizes of the resized images to create a ImageDTO for every
+     * resized image
+     * 
+     * @author Robin Fleige (D067799)
+     * 
+     * @param sourceRefs
+     *            list of source URLs
+     * @param resizingTask
+     *            the resizing task, with information about resizes and the original ImageDTO
+     * @param images
+     *            the BufferedImages, used to get their width and height
+     * @returns a List of ImageDTOs that contains an ImageDTO per resized image
+     */
+    private List<ImageDTO> createImageDTOsFromURLsAndResizingTask(final List<String> sourceRefs,
+            final ImageResizingTaskDTO resizingTask, final List<BufferedImage> images) {
+        final List<ImageDTO> imageDTOs = new ArrayList<ImageDTO>();
+        for (int i = 0; i < sourceRefs.size(); i++) {
+            final ImageDTO imageDTO = resizingTask.cloneImageDTO();
+            for (MediaTagConstants tag : MediaTagConstants.values()) {
                 imageDTO.getTags().remove(tag.getName());
             }
             imageDTO.getTags().add(resizingTask.getResizingTask().get(i).getName());
@@ -7929,13 +7949,29 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return imageDTOs;
     }
 
-    private List<String> storeImages(List<BufferedImage> resizedImages, String fileType, IIOMetadata metadata) {
-        List<String> sourceRefs = new ArrayList<>();
-        for(BufferedImage resizedImage : resizedImages) {
-            InputStream fileStorageStream = new ImageConverter().imageWithMetadataToInputStream(resizedImage, metadata, fileType);
+    /**
+     * Stores a list of BufferedImages and returns a list of URLs as Strings under which the BufferedImages are stored
+     * 
+     * @author Robin Fleige (D067799)
+     * 
+     * @param resizedImages
+     *            the BufferedImages that will be stored
+     * @param fileType
+     *            the format of the image, for example "png", "jpeg" or "jpg"
+     * @param metadata
+     *            the metadata of the original image
+     * @returns a list of URLs as Strings under which the BufferedImages are stored
+     */
+    private List<String> storeImages(final List<BufferedImage> resizedImages, final String fileType,
+            final IIOMetadata metadata) {
+        final List<String> sourceRefs = new ArrayList<>();
+        for (final BufferedImage resizedImage : resizedImages) {
+            final InputStream fileStorageStream = new ImageConverter().imageWithMetadataToInputStream(resizedImage,
+                    metadata, fileType);
             try {
-                sourceRefs.add(getService().getFileStorageManagementService().getActiveFileStorageService().storeFile(
-                    fileStorageStream, "." + fileType, new Long(fileStorageStream.available())).toString());
+                sourceRefs.add(getService().getFileStorageManagementService().getActiveFileStorageService()
+                        .storeFile(fileStorageStream, "." + fileType, new Long(fileStorageStream.available()))
+                        .toString());
             } catch (NoCorrespondingServiceRegisteredException | IOException | OperationFailedException
                     | InvalidPropertiesException e) {
                 logger.log(Level.SEVERE, "Could not store file. Cause: " + e.getMessage());

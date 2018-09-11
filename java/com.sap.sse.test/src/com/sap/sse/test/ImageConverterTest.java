@@ -13,6 +13,11 @@ import org.junit.Test;
 import com.sap.sse.util.ImageConverter;
 import com.sap.sse.util.ImageConverter.ImageWithMetadata;
 
+/**
+ * 
+ * @author Robin Fleige(D067799)
+ *
+ */
 public class ImageConverterTest {
     private ImageConverter converter;
     private ImageWithMetadata pngImage;
@@ -26,6 +31,9 @@ public class ImageConverterTest {
     private final int doubleSize = baseSize * 2;
     private final int minSize = 0;
 
+    /**
+     * Setting up the testing environment
+     */
     @Before
     public void setUp() {
         converter = new ImageConverter();
@@ -33,6 +41,9 @@ public class ImageConverterTest {
         jpgImage = converter.loadImage(new ByteArrayInputStream(onePixelJpgExample), "jpg");
     }
 
+    /**
+     * Tests the calculation of the dimensions, which is used for resizing the image to a fitting size
+     */
     @Test
     public void testCalculateDimensions() {
         int[] dimensions;
@@ -49,6 +60,9 @@ public class ImageConverterTest {
         assertNull(dimensions);
     }
 
+    /**
+     * Tests the conversions that are done while resizing an image
+     */
     @Test
     public void testConversions() {
         byte[] byteArray;

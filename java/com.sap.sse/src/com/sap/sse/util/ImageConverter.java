@@ -34,19 +34,23 @@ public class ImageConverter {
     private static final Logger logger = Logger.getLogger(ImageConverter.class.getName());
 
     /**
-     * Empty constructor
+     * Writes a BufferedImage to an InputStream. This should only be used as a backup, if
+     * {@link ImageConverter#imageWithMetadataToInputStream(BufferedImage, IIOMetadata, String)} fails
+     * 
+     * @param image
+     *            The BufferedImage that should be converted
+     * @param imageFormat
+     *            the format of the image, for example "png", "jpeg" or "jpg"
+     * @returns an InputStream with the Information of the Image
      */
-    public ImageConverter() {
-    }
-
-    private InputStream imageToInputStream(BufferedImage image, String imageFormat) {
+    private InputStream imageToInputStream(final BufferedImage image, final String imageFormat) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
             ImageIO.write(image, imageFormat, bos);
         } catch (IOException e) {
             logger.log(Level.SEVERE, e.getMessage());
         }
-        byte[] arr = bos.toByteArray();
+        final byte[] arr = bos.toByteArray();
         return new ByteArrayInputStream(arr);
     }
 
@@ -67,13 +71,17 @@ public class ImageConverter {
      * @returns the resized BufferedImage. Returns null, if BufferedImage is null, or if the defined bounds do not fit
      *          the image
      */
-    public BufferedImage resize(BufferedImage image, int minWidth, int maxWidth, int minHeight, int maxHeight) {
-        int[] dimensions = calculateDimensions(image.getWidth(), image.getHeight(), minWidth, maxWidth, minHeight,
+    public BufferedImage resize(final BufferedImage image, final int minWidth, final int maxWidth, final int minHeight,
+            final int maxHeight) {
+        final int[] dimensions = calculateDimensions(image.getWidth(), image.getHeight(), minWidth, maxWidth, minHeight,
                 maxHeight);
+        final BufferedImage resizedImage;
         if (dimensions != null) {
-            return resize(image, dimensions[0], dimensions[1]);
+            resizedImage = resize(image, dimensions[0], dimensions[1]);
+        } else {
+            resizedImage = null;
         }
-        return null;
+        return resizedImage;
     }
 
     /**
@@ -95,32 +103,51 @@ public class ImageConverter {
      * @returns an array of two integers, where the first entry is the fitting width and the second is the fitting
      *          height. returns null, if the defined bounds do not fit the current size
      */
-    public int[] calculateDimensions(double width, double height, double minWidth, double maxWidth, double minHeight,
-            double maxHeight) {
+    public int[] calculateDimensions(final double width, final double height, final double minWidth,
+            final double maxWidth, final double minHeight, final double maxHeight) {
+        int[] dimensions = new int[2];
         if (maxWidth >= 0 && maxHeight >= 0 && maxHeight > minHeight && maxWidth > minWidth && width > minWidth
                 && height > minHeight) {
             if (maxWidth <= width || maxHeight <= height) {
                 if (width / maxWidth > height / maxHeight) {
-                    maxHeight = height / width * maxWidth;
-                    if (maxHeight >= minHeight) {
-                        return new int[] { (int) maxWidth, (int) maxHeight };
+                    dimensions[1] = (int) maxWidth;
+                    dimensions[1] = (int) (height / width * maxWidth);
+                    if (dimensions[1] >= minHeight) {
+                        dimensions[0] = (int) maxWidth;
+                    } else {
+                        dimensions = null;
                     }
                 } else {
-                    maxWidth = width / height * maxHeight;
-                    if (maxWidth >= minWidth) {
-                        return new int[] { (int) maxWidth, (int) maxHeight };
+                    dimensions[0] = (int) (width / height * maxHeight);
+                    if (dimensions[0] >= minWidth) {
+                        dimensions[1] = (int) maxHeight;
+                    } else {
+                        dimensions = null;
                     }
                 }
             } else {
-                return new int[] { (int) width, (int) height };
+                dimensions[0] = (int) width;
+                dimensions[1] = (int) height;
             }
         }
-        return null;
+        return dimensions;
     }
 
-    private BufferedImage resize(BufferedImage image, int demandedWidth, int demandedHeight) {
-        BufferedImage resizedImage = new BufferedImage((int) demandedWidth, (int) demandedHeight, image.getType());
-        Graphics2D g = resizedImage.createGraphics();
+    /**
+     * Resizes an BufferedImage, to the width and height.
+     * 
+     * @param image
+     *            The BufferedImage that should be resized
+     * @param demandWidth
+     *            the width the image should have after resizing
+     * @param demandHeight
+     *            the height the image should have after resizing
+     * @returns the resized BufferedImage. Returns null, if BufferedImage is null
+     */
+    private BufferedImage resize(final BufferedImage image, final int demandedWidth, final int demandedHeight) {
+        final BufferedImage resizedImage = new BufferedImage((int) demandedWidth, (int) demandedHeight,
+                image.getType());
+        final Graphics2D g = resizedImage.createGraphics();
         g.drawImage(image, 0, 0, (int) demandedWidth, (int) demandedHeight, null);
         g.dispose();
         return resizedImage;
@@ -138,22 +165,22 @@ public class ImageConverter {
      * @returns an InputStream (ByteArrayInputStream) with the data of the BufferedImage and if possible with the
      *          IIOMetadata. Returnds null if the image is null or the imageFormat is incorrect
      */
-    public InputStream imageWithMetadataToInputStream(BufferedImage bufferdImage, IIOMetadata metadata,
-            String imageFormat) {
+    public InputStream imageWithMetadataToInputStream(final BufferedImage bufferdImage, final IIOMetadata metadata,
+            final String imageFormat) {
         byte[] bytes = null;
         if (metadata != null) {
             // trying to obtain OutputStream of the image with EXIF data
             try (ImageOutputStream ios = ImageIO.createImageOutputStream(new ByteArrayOutputStream())) {
                 // the following should write the exif data of the image to all copies of the image, it should already
                 // work, but due to a bug the data array stays empty
-                Iterator<ImageWriter> writers = ImageIO.getImageWritersBySuffix(imageFormat);
+                final Iterator<ImageWriter> writers = ImageIO.getImageWritersBySuffix(imageFormat);
                 while (writers.hasNext() && bytes == null) {
-                    ImageWriter writer = writers.next();
+                    final ImageWriter writer = writers.next();
                     if (writer != null) {
                         writer.setOutput(ios);
-                        IIOImage iioImage = new IIOImage(bufferdImage, null, metadata);
-                        ImageWriteParam param = writer.getDefaultWriteParam();
-                        IIOMetadata streamMetadata = writer.getDefaultStreamMetadata(param);
+                        final IIOImage iioImage = new IIOImage(bufferdImage, null, metadata);
+                        final ImageWriteParam param = writer.getDefaultWriteParam();
+                        final IIOMetadata streamMetadata = writer.getDefaultStreamMetadata(param);
                         writer.write(streamMetadata, iioImage, param);
                         writer.dispose();
                         bytes = new byte[toIntExact(ios.length())];
@@ -172,7 +199,7 @@ public class ImageConverter {
                 logger.log(Level.INFO, e.getMessage());
             } // if obtaining an OutputStream if the image with EXIF data did not work, then write it without
         }
-        InputStream toReturn;
+        final InputStream toReturn;
         if (bytes == null) {
             toReturn = imageToInputStream(bufferdImage, imageFormat);
         } else {// if it did work, then write the OutputStream to the FileStorageService
@@ -188,7 +215,7 @@ public class ImageConverter {
      *            the inputstream that should be stored in the ByteArray
      * @returns an Array of Bytes with the data of the inputstream
      */
-    public byte[] inputStreamToByteArray(InputStream inputStream) {
+    public byte[] inputStreamToByteArray(final InputStream inputStream) {
         byte[] byteArray = null;
         try {
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -205,18 +232,27 @@ public class ImageConverter {
         return byteArray;
     }
 
-    private boolean isZeroByteArray(byte[] bytes) {
+    /**
+     * Checks if a byte array only contains zeros
+     * 
+     * @param bytes
+     *            an byte array
+     * @returns true if the byte array is null, empty or only contains zeros, otherwise false
+     */
+    private boolean isZeroByteArray(final byte[] bytes) {
         boolean toReturn = true;
-        for (int i = 0; i < bytes.length; i++) {
-            if (bytes[i] != 0) {
-                toReturn = false;
+        if (bytes != null) {
+            for (int i = 0; i < bytes.length; i++) {
+                if (bytes[i] != 0) {
+                    toReturn = false;
+                }
             }
         }
         return toReturn;
     }
 
     /**
-     * Converts an inputstream that contains an image to a Base64 String
+     * Converts an InputStream that contains an image to a Base64 String
      * 
      * @param inputStream
      *            the InputStream that should be converted
@@ -225,7 +261,7 @@ public class ImageConverter {
      * @returns the Base64 representation of the InputStream
      * @throws IOException
      */
-    public String convertToBase64(InputStream inputStream, String imageFormat) throws IOException {
+    public String convertToBase64(final InputStream inputStream, final String imageFormat) throws IOException {
         return convertToBase64(bufferedImageToByteArray(loadBufferedImageFromInputStream(inputStream), imageFormat));
     }
 
@@ -239,21 +275,36 @@ public class ImageConverter {
      * @returns the Base64 representation of the image
      * @throws IOException
      */
-    public String convertToBase64(BufferedImage image, String imageFormat) throws IOException {
+    public String convertToBase64(final BufferedImage image, final String imageFormat) throws IOException {
         return convertToBase64(bufferedImageToByteArray(image, imageFormat));
     }
 
-    private String convertToBase64(byte[] bytes) {
+    /**
+     * Converts an array of bytes to a Base64 String
+     * 
+     * @param bytes
+     *            an array of bytes
+     * @returns the Base64 representation of the byte array
+     */
+    private String convertToBase64(final byte[] bytes) {
         return Base64Utils.toBase64(bytes);
     }
 
-    private BufferedImage loadBufferedImageFromInputStream(InputStream is) {
+    /**
+     * Converts an InputStream to a BufferedImage. This should only be used as a backup, if
+     * {@link ImageConverter#loadImage(InputStream, String)} fails
+     * 
+     * @param inputStream
+     * @return
+     */
+    private BufferedImage loadBufferedImageFromInputStream(final InputStream inputStream) {
+        BufferedImage image = null;
         try {
-            return ImageIO.read(is);
+            image = ImageIO.read(inputStream);
         } catch (IOException e) {
             logger.log(Level.SEVERE, e.getMessage());
         }
-        return null;
+        return image;
     }
 
     // looses metadata, so should not be used for storing an image, but only for showing an image
@@ -270,7 +321,7 @@ public class ImageConverter {
      *            the format of the image, for example "png", "jpeg" or "jpg"
      * @returns an ByteArray with all the information of the image
      */
-    public byte[] bufferedImageToByteArray(BufferedImage image, String imageFormat) {
+    public byte[] bufferedImageToByteArray(final BufferedImage image, final String imageFormat) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             ImageIO.write(image, imageFormat, baos);
@@ -291,8 +342,8 @@ public class ImageConverter {
      * @returns a list of BufferedImages, that contains as many BufferedImages as resizingTask contains
      *          {@link MediaTagConstants}
      */
-    public List<BufferedImage> convertImage(BufferedImage image, List<MediaTagConstants> resizingTasks) {
-        List<BufferedImage> resizedImages = new ArrayList<>();
+    public List<BufferedImage> convertImage(final BufferedImage image, final List<MediaTagConstants> resizingTasks) {
+        final List<BufferedImage> resizedImages = new ArrayList<>();
         for (MediaTagConstants tag : resizingTasks) {
             resizedImages
                     .add(resize(image, tag.getMinWidth(), tag.getMaxWidth(), tag.getMinHeight(), tag.getMaxHeight()));
@@ -310,17 +361,17 @@ public class ImageConverter {
      * @returns an {@link ImageWithMetadata} that contains the BufferedImage and the IIOMetadata of the image If the
      *          loading of the IIOMetadata does not work, returns an {@link ImageWithMetadata} where metadata is null
      */
-    public ImageWithMetadata loadImage(InputStream inputStream, String imageFormat) {
+    public ImageWithMetadata loadImage(final InputStream inputStream, final String imageFormat) {
         // trying to receive the EXIF data and loading the image. If this does not work only the image is loaded
-        ImageConverter converter = new ImageConverter();
+        final ImageConverter converter = new ImageConverter();
         BufferedImage image = null;
         IIOMetadata metadata = null;
         boolean loaded = false;
         byte[] bytes = converter.inputStreamToByteArray(inputStream);
         try {
-            Iterator<ImageReader> readerIterator = ImageIO.getImageReadersBySuffix(imageFormat);
+            final Iterator<ImageReader> readerIterator = ImageIO.getImageReadersBySuffix(imageFormat);
             while (readerIterator.hasNext() && !loaded) {
-                ImageReader reader = readerIterator.next();
+                final ImageReader reader = readerIterator.next();
                 reader.setInput(ImageIO.createImageInputStream(new ByteArrayInputStream(bytes)));
                 metadata = reader.getImageMetadata(0);
                 image = reader.read(0);

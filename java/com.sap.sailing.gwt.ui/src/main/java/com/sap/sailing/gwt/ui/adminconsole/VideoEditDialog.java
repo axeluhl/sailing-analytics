@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.common.observer.ObservableBoolean;
+import com.sap.sse.common.util.ObservableBoolean;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
 public class VideoEditDialog extends VideoDialog {

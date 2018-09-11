@@ -46,7 +46,10 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
     private final Button removeButton;
 
     private boolean valueChangeHandlerInitialized = false;
+    
     private final SubmitButton submitButton;
+    
+    private boolean uploadEnabled;
     
     public URLFieldWithFileUpload(final StringMessages stringMessages) {
         final VerticalPanel mainPanel = new VerticalPanel();
@@ -104,8 +107,13 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         fileUploadField.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                if(fileUploadField.getFilename() != null && !fileUploadField.getFilename().isEmpty()) {
-                    submitButton.setEnabled(true);
+                if(fileUploadFieldSet()) {
+                    if (uploadEnabled) {
+                        submitButton.setEnabled(true);
+                    } else {
+                        submitButton.setEnabled(false);
+                        Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
+                    }
                 }
             }
         });
@@ -201,6 +209,13 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
     }
     
     public void setUploadEnabled(boolean value) {
-        submitButton.setEnabled(value);
+        uploadEnabled = value;
+        if (fileUploadFieldSet()) { 
+            submitButton.setEnabled(value);
+        }
+    }
+    
+    private boolean fileUploadFieldSet() {
+        return fileUploadField.getFilename() != null && !fileUploadField.getFilename().isEmpty();
     }
 }
