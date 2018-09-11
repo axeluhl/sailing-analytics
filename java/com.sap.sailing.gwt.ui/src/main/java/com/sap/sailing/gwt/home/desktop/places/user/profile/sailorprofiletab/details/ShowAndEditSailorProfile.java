@@ -8,6 +8,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedEventDTO;
@@ -18,6 +19,7 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileS
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO.SingleEntry;
 import com.sap.sailing.gwt.home.desktop.partials.desktopaccordion.DesktopAccordion;
 import com.sap.sailing.gwt.home.desktop.partials.desktopaccordion.DesktopAccordion.AccordionExpansionListener;
+import com.sap.sailing.gwt.home.desktop.partials.desktopaccordion.DesktopAccordionResources;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileDesktopResources;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.events.SailorProfileEventsTable;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.statistic.SailorProfileStatisticTable;
@@ -28,6 +30,7 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSai
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileResources;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -58,6 +61,8 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
     DesktopAccordion accordionStatisticsUi;
     @UiField
     DesktopAccordion accordionPolarDiagramUi;
+
+    Label eventsEmptyUi;
 
     private final EditSailorProfileView.Presenter presenter;
 
@@ -101,10 +106,30 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
 
             @Override
             public void onSuccess(SailorProfileEventsDTO result) {
+                appendEmptyMessageIfNecessary(result);
                 for (ParticipatedEventDTO dto : result.getParticipatedEvents()) {
                     SailorProfileEventsTable table = new SailorProfileEventsTable(flagImageResolver,
                             presenter.getPlaceController(), dto);
                     accordionEventsUi.addWidget(table);
+                }
+            }
+
+            private void appendEmptyMessageIfNecessary(SailorProfileEventsDTO result) {
+
+                if (Util.isEmpty(result.getParticipatedEvents())) {
+                    createEventsEmptyUiIfNecessary();
+                    accordionEventsUi.addWidget(eventsEmptyUi);
+                }
+                else if (eventsEmptyUi != null && eventsEmptyUi.isAttached()) {
+                    eventsEmptyUi.removeFromParent();
+                }
+            }
+
+            private void createEventsEmptyUiIfNecessary() {
+                if (eventsEmptyUi == null) {
+                    eventsEmptyUi = new Label(StringMessages.INSTANCE.noEventsFoundForCompetitors());
+                    DesktopAccordionResources.INSTANCE.css().ensureInjected();
+                    eventsEmptyUi.addStyleName(DesktopAccordionResources.INSTANCE.css().accordionEmptyMessage());
                 }
             }
         });

@@ -28,5 +28,7 @@ public interface DesktopAccordionResources extends ClientBundle {
         String accordion();
 
         String accordionContentPanel();
+
+        String accordionEmptyMessage();
     }
 }

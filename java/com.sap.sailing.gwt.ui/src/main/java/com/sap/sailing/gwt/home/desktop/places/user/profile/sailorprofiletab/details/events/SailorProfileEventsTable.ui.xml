@@ -16,7 +16,7 @@
             </div>
             <c:CellTable ui:field="sailorProfilesTable" addStyleNames="{spr.css.eventsTable}">
                 <c:emptyTableWidget>
-                    <g:Label text="{i18n.noDataFound}" addStyleNames="{spr.css.eventsTableEmpty}" />
+                    <g:Label text="{i18n.noEventsFoundForCompetitors}" addStyleNames="{spr.css.eventsTableEmpty}" />
                 </c:emptyTableWidget>
             </c:CellTable>
         </div>
