@@ -79,6 +79,8 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
     HTMLPanel contentContainerStatisticsUi;
 
     private Label boatclassesEmpty;
+    private Label eventsEmpty;
+    private Label statisticsEmpty;
 
     private SailingProfileOverviewPresenter presenter;
 
@@ -180,8 +182,7 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
             contentContainerBoatclassesUi.add(boatclassesEmpty);
             contentContainerBoatclassesUi
                     .removeStyleName(SailorProfileMobileResources.INSTANCE.css().detailsSectionPanel());
-            contentContainerBoatclassesUi
-                    .removeStyleName(SharedResources.INSTANCE.mainCss().spacermarginbottomsmall());
+            contentContainerBoatclassesUi.removeStyleName(SharedResources.INSTANCE.mainCss().spacermarginbottomsmall());
         } else {
             contentContainerBoatclassesUi
                     .addStyleName(SailorProfileMobileResources.INSTANCE.css().detailsSectionPanel());
@@ -206,6 +207,16 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
 
     private void setEvents(Iterable<ParticipatedEventDTO> participatedEvents) {
         contentContainerEventsUi.clear();
+        if (Util.isEmpty(participatedEvents)) {
+            createEventsLabelIfNecessary();
+            contentContainerEventsUi.add(eventsEmpty);
+            contentContainerEventsUi.removeStyleName(SailorProfileMobileResources.INSTANCE.css().detailsSectionPanel());
+            contentContainerEventsUi.removeStyleName(SharedResources.INSTANCE.mainCss().spacermarginbottomsmall());
+        } else {
+            contentContainerEventsUi.addStyleName(SailorProfileMobileResources.INSTANCE.css().detailsSectionPanel());
+            contentContainerEventsUi.addStyleName(SharedResources.INSTANCE.mainCss().spacermarginbottomsmall());
+
+        }
         for (ParticipatedEventDTO event : participatedEvents) {
             contentContainerEventsUi.add(
                     new SailorProfileEventEntry(event, presenter.getSharedSailorProfilePresenter().getPlaceController(),
@@ -213,13 +224,28 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
         }
     }
 
+    private void createEventsLabelIfNecessary() {
+        if (eventsEmpty == null) {
+            eventsEmpty = new Label(stringMessages.noEventsFoundForCompetitors());
+            eventsEmpty.addStyleName(DesktopAccordionResources.INSTANCE.css().accordionEmptyMessage());
+        }
+    }
+
     private void clearStatistic() {
         contentContainerStatisticsUi.clear();
+        if (statisticsEmpty == null) {
+            statisticsEmpty = new Label(stringMessages.noStatisticsFoundForCompetitors());
+            statisticsEmpty.addStyleName(DesktopAccordionResources.INSTANCE.css().accordionEmptyMessage());
+        }
+        contentContainerStatisticsUi.add(statisticsEmpty);
     }
 
     private void addStatistic(SailorProfileNumericStatisticType type, SailorProfileStatisticDTO statistic) {
         contentContainerStatisticsUi.add(
                 new SailorProfileStatisticTable(type, statistic, presenter.getFlagImageResolver(), stringMessages));
+        if (statisticsEmpty != null) {
+            contentContainerStatisticsUi.remove(statisticsEmpty);
+        }
     }
 
     private void updateStatistics(SailorProfileDTO entry) {
@@ -235,7 +261,9 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
 
                         @Override
                         public void onSuccess(SailorProfileStatisticDTO result) {
-                            addStatistic(type, result);
+                            if (!result.getResult().isEmpty()) {
+                                addStatistic(type, result);
+                            }
                         }
                     });
         }

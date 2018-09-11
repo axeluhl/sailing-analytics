@@ -2118,4 +2118,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String couldNotDetermineStatistic();
     String noEventsFoundForCompetitors();
     String pleaseSelectCompetitorFirst();
+    String noStatisticsFoundForCompetitors();
 }
