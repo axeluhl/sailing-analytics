@@ -36,7 +36,7 @@ public class ManeuverSequenceGraphBasedWindEstimatorEvaluationRunner {
                 new ManeuverFeatures(ENABLE_POLARS, ENABLE_SCALED_SPEED, ENABLE_MARKS_INFORMATION));
 
         WindEstimatorEvaluationResult evaluationResult = evaluator.evaluateWindEstimator(
-                estimatorFactories.maneuverGraph(),
+                estimatorFactories.polarsFitting(),
                 new TargetWindFromCompleteManeuverCurveWithEstimationDataExtractor(), racesIterator,
                 racesIterator.getNumberOfElements());
         LoggingUtil.logInfo("Wind estimator evaluation finished");

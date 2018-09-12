@@ -188,7 +188,9 @@ public class PolarsFittingWindEstimation implements AverageWindEstimator {
                 bestChallengingConfidence = windCandidate.getConfidence();
             }
         }
-
+        if (bestWindCandidate == null) {
+            return null;
+        }
         double realConfidence = (1
                 - (bestWindCandidate.getConfidence() - bestChallengingConfidence) / bestWindCandidate.getConfidence())
                 * bestWindCandidate.getConfidence();
