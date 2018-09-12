@@ -2,6 +2,7 @@ package com.sap.sailing.server.gateway.jaxrs.api;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -152,6 +153,8 @@ public class TagsResource extends AbstractSailingServerResource {
         }
     }
 
+    private static final Logger logger = Logger.getLogger(TagsResource.class.getName());
+
     private final TagDTODeSerializer serializer;
     // private final boolean enforceSecurityChecks;
 
@@ -172,8 +175,14 @@ public class TagsResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("/{leaderboardName}/{raceColumnName}/{fleetName}")
-    public Response getTags(@PathParam("leaderboardName") String leaderboardName,
-            @PathParam("raceColumnName") String raceColumnName, @PathParam("fleetName") String fleetName) {
+    public Response getTags(@PathParam("leaderboardName") String leaderboardNameParameter,
+            @PathParam("raceColumnName") String raceColumnNameParameter,
+            @PathParam("fleetName") String fleetNameParameter) {
+        // restore escaped parameters
+        String leaderboardName = restoreEscapedParameter(leaderboardNameParameter);
+        String raceColumnName = restoreEscapedParameter(raceColumnNameParameter);
+        String fleetName = restoreEscapedParameter(fleetNameParameter);
+
         // default response
         Response response = Response.noContent().build();
         List<TagDTO> tags = new ArrayList<TagDTO>();
@@ -209,7 +218,7 @@ public class TagsResource extends AbstractSailingServerResource {
                         List<TagDTO> privateTags = serializer.deserialize(jsonArray);
                         tags.addAll(privateTags);
                     } catch (ParseException e) {
-                        // TODO: add error handling, could not read private tags
+                        logger.warning("Could not parse private tags received from JSON in UserStore!");
                     }
                 }
             }
