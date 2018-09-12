@@ -79,29 +79,21 @@ public class TagDTO implements Serializable {
          * 
          * @param timepoint
          *            {@link TimePoint} to be serialized
-         * @return serialized string
+         * @return serialized timepoint as long, <code>0</code> if <code>timepoint</code> is <code>null</code>
          */
-        public String serializeTimePoint(TimePoint timepoint) {
-            if (timepoint != null) {
-                return Long.toString(timepoint.asMillis());
-            } else {
-                return "";
-            }
+        public long serializeTimePoint(TimePoint timepoint) {
+            return timepoint == null ? 0 : timepoint.asMillis();
         }
 
         /**
-         * Deserializes string to {@link TimePoint}.
+         * Deserializes long to {@link MillisecondsTimePoint}.
          * 
          * @param timepoint
          *            timepoint to be deserialized
          * @return {@link TimePoint}
          */
-        public TimePoint deserilizeTimePoint(String timepoint) {
-            if (!timepoint.isEmpty()) {
-                return new MillisecondsTimePoint(Long.parseLong(timepoint));
-            } else {
-                return null;
-            }
+        public TimePoint deserilizeTimePoint(long timepoint) {
+            return new MillisecondsTimePoint(timepoint);
         }
 
         /**

@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONBoolean;
+import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
@@ -33,9 +34,9 @@ public class TagDTODeSerializer extends TagDTO.TagDeSerializer {
         result.put(FIELD_IMAGE_URL, new JSONString(tag.getImageURL()));
         result.put(FIELD_USERNAME, new JSONString(tag.getUsername()));
         result.put(FIELD_VISIBLE_FOR_PUBLIC, JSONBoolean.getInstance(tag.isVisibleForPublic()));
-        result.put(FIELD_RACE_TIMEPOINT, new JSONString(serializeTimePoint(tag.getRaceTimepoint())));
-        result.put(FIELD_CREATED_AT, new JSONString(serializeTimePoint(tag.getCreatedAt())));
-        result.put(FIELD_REVOKED_AT, new JSONString(serializeTimePoint(tag.getRevokedAt())));
+        result.put(FIELD_RACE_TIMEPOINT, new JSONNumber(serializeTimePoint(tag.getRaceTimepoint())));
+        result.put(FIELD_CREATED_AT, new JSONNumber(serializeTimePoint(tag.getCreatedAt())));
+        result.put(FIELD_REVOKED_AT, new JSONNumber(serializeTimePoint(tag.getRevokedAt())));
         return result;
     }
 
@@ -47,17 +48,29 @@ public class TagDTODeSerializer extends TagDTO.TagDeSerializer {
      * @return {@link TagDTO tag}
      */
     private TagDTO deserialize(JSONObject jsonObject) {
-        JSONString tag = (JSONString) jsonObject.get(FIELD_TAG);
-        JSONString comment = (JSONString) jsonObject.get(FIELD_COMMENT);
-        JSONString imageURL = (JSONString) jsonObject.get(FIELD_IMAGE_URL);
-        JSONString username = (JSONString) jsonObject.get(FIELD_USERNAME);
-        boolean visibleForPublic = Boolean.valueOf(jsonObject.get(FIELD_VISIBLE_FOR_PUBLIC).toString());
-        TimePoint raceTimePoint = deserilizeTimePoint(
-                ((JSONString) (jsonObject.get(FIELD_RACE_TIMEPOINT))).stringValue());
-        TimePoint createdAt = deserilizeTimePoint(((JSONString) (jsonObject.get(FIELD_CREATED_AT))).stringValue());
-        TimePoint revokedAt = deserilizeTimePoint(((JSONString) (jsonObject.get(FIELD_REVOKED_AT))).stringValue());
-        return new TagDTO(tag.stringValue(), comment.stringValue(), imageURL.stringValue(), username.stringValue(),
-                visibleForPublic, raceTimePoint, createdAt, revokedAt);
+        // if deserializing throws an error, return null
+        try {
+            JSONString tag = (JSONString) jsonObject.get(FIELD_TAG);
+            JSONString comment = (JSONString) jsonObject.get(FIELD_COMMENT);
+            JSONString imageURL = (JSONString) jsonObject.get(FIELD_IMAGE_URL);
+            JSONString username = (JSONString) jsonObject.get(FIELD_USERNAME);
+            boolean visibleForPublic = Boolean.valueOf(jsonObject.get(FIELD_VISIBLE_FOR_PUBLIC).toString());
+            // GWT-JSON-Library only supports its own types such as JSONNumber, which is saved as double caused by
+            // JavaScript not supporting 64-bit long numbers. TimePoints are saved as long values in Java, therefor
+            // conversion from JSONObject -> JSONValue -> JSONNumber -> Double -> Long is needed.
+            // TODO: Find better way of type conversion
+            TimePoint raceTimePoint = deserilizeTimePoint(
+                    Double.valueOf(((JSONNumber) (jsonObject.get(FIELD_RACE_TIMEPOINT))).doubleValue()).longValue());
+            TimePoint createdAt = deserilizeTimePoint(
+                    Double.valueOf(((JSONNumber) (jsonObject.get(FIELD_CREATED_AT))).doubleValue()).longValue());
+            TimePoint revokedAt = deserilizeTimePoint(
+                    Double.valueOf(((JSONNumber) (jsonObject.get(FIELD_REVOKED_AT))).doubleValue()).longValue());
+            return new TagDTO(tag.stringValue(), comment.stringValue(), imageURL.stringValue(), username.stringValue(),
+                    visibleForPublic, raceTimePoint, createdAt, revokedAt);
+        } catch (Exception e) {
+            return null;
+        }
+
     }
 
     @Override

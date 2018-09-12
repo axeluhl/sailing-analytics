@@ -79,18 +79,24 @@ public class TagsResource extends AbstractSailingServerResource {
          * 
          * @param jsonObject
          *            {@link JSONObject jsonObject} to be deserialized
-         * @return {@link TagDTO tag}
+         * @return <code>null</code> if <code>jsonObject</code> is no valid json for a tag, otherwise {@link TagDTO tag}
          */
         private TagDTO deserialize(JSONObject jsonObject) {
-            String tag = (String) jsonObject.get(FIELD_TAG);
-            String comment = (String) jsonObject.get(FIELD_COMMENT);
-            String imageURL = (String) jsonObject.get(FIELD_IMAGE_URL);
-            String username = (String) jsonObject.get(FIELD_USERNAME);
-            boolean visibleForPublic = (Boolean) jsonObject.get(FIELD_VISIBLE_FOR_PUBLIC);
-            TimePoint raceTimePoint = deserilizeTimePoint((String) (jsonObject.get(FIELD_RACE_TIMEPOINT)));
-            TimePoint createdAt = deserilizeTimePoint((String) (jsonObject.get(FIELD_CREATED_AT)));
-            TimePoint revokedAt = deserilizeTimePoint((String) (jsonObject.get(FIELD_REVOKED_AT)));
-            return new TagDTO(tag, comment, imageURL, username, visibleForPublic, raceTimePoint, createdAt, revokedAt);
+            // if deserializing throws an error, return null
+            try {
+                String tag = (String) jsonObject.get(FIELD_TAG);
+                String comment = (String) jsonObject.get(FIELD_COMMENT);
+                String imageURL = (String) jsonObject.get(FIELD_IMAGE_URL);
+                String username = (String) jsonObject.get(FIELD_USERNAME);
+                boolean visibleForPublic = (Boolean) jsonObject.get(FIELD_VISIBLE_FOR_PUBLIC);
+                TimePoint raceTimePoint = deserilizeTimePoint((Long) (jsonObject.get(FIELD_RACE_TIMEPOINT)));
+                TimePoint createdAt = deserilizeTimePoint((Long) (jsonObject.get(FIELD_CREATED_AT)));
+                TimePoint revokedAt = deserilizeTimePoint((Long) (jsonObject.get(FIELD_REVOKED_AT)));
+                return new TagDTO(tag, comment, imageURL, username, visibleForPublic, raceTimePoint, createdAt,
+                        revokedAt);
+            } catch (Exception e) {
+                return null;
+            }
         }
 
         /**
