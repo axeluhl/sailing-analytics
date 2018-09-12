@@ -10,6 +10,7 @@ import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverClassifiersCache;
+import com.sap.sailing.windestimation.maneuverclassifier.ManeuverFeatures;
 import com.sap.sailing.windestimation.maneuverclustering.ManeuverClusteringBasedWindEstimationTrackImpl;
 
 /**
@@ -20,9 +21,11 @@ import com.sap.sailing.windestimation.maneuverclustering.ManeuverClusteringBased
 public class ManeuverClusteringBasedWindEstimatorImpl extends AbstractManeuverForEstimationBasedWindEstimatorImpl {
 
     private final PolarDataService polarService;
+    private final ManeuverFeatures maneuverFeatures;
 
-    public ManeuverClusteringBasedWindEstimatorImpl(PolarDataService polarService) {
+    public ManeuverClusteringBasedWindEstimatorImpl(PolarDataService polarService, ManeuverFeatures maneuverFeatures) {
         this.polarService = polarService;
+        this.maneuverFeatures = maneuverFeatures;
     }
 
     @Override
@@ -31,7 +34,7 @@ public class ManeuverClusteringBasedWindEstimatorImpl extends AbstractManeuverFo
         BoatClass boatClass = race.getCompetitorTracks().isEmpty() ? null
                 : race.getCompetitorTracks().get(0).getBoatClass();
         ManeuverClusteringBasedWindEstimationTrackImpl windEstimator = new ManeuverClusteringBasedWindEstimationTrackImpl(
-                race, boatClass, new ManeuverClassifiersCache(60000, false, true, polarService), 30000);
+                race, boatClass, new ManeuverClassifiersCache(60000, maneuverFeatures, polarService), 30000);
         try {
             windEstimator.initialize();
             return windEstimator.estimateWindTrack();

@@ -6,21 +6,34 @@ import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.persistence.PersistedElementsIterator;
 import com.sap.sailing.windestimation.data.persistence.PolarDataServiceAccessUtil;
 import com.sap.sailing.windestimation.data.persistence.RaceWithCompleteManeuverCurvePersistenceManager;
+import com.sap.sailing.windestimation.maneuverclassifier.ManeuverFeatures;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
 public class ManeuverSequenceGraphBasedWindEstimatorEvaluationRunner {
 
+    private static final Integer MAX_RACES = null;
+    private static final boolean ENABLE_MARKS_INFORMATION = true;
+    private static final boolean ENABLE_SCALED_SPEED = true;
+    private static final boolean ENABLE_POLARS = true;
+    private static final double MIN_CORRECT_ESTIMATIONS_RATIO_FOR_CORRECT_RACE = 0.8;
+    private static final int MAX_TWS_DEVIATION_KNOTS = 2;
+    private static final int MAX_TWD_DEVIATION_DEG = 30;
+
     public static void main(String[] args) throws Exception {
         WindEstimatorEvaluator<CompleteManeuverCurveWithEstimationData> evaluator = new WindEstimationEvaluatorImpl<>(
-                30, 2, 0.8);
+                MAX_TWD_DEVIATION_DEG, MAX_TWS_DEVIATION_KNOTS, MIN_CORRECT_ESTIMATIONS_RATIO_FOR_CORRECT_RACE);
         LoggingUtil.logInfo("Connecting to MongoDB");
         RaceWithCompleteManeuverCurvePersistenceManager persistenceManager = new RaceWithCompleteManeuverCurvePersistenceManager();
         LoggingUtil.logInfo("Loading polar data");
         PolarDataService polarService = PolarDataServiceAccessUtil.getPersistedPolarService();
         LoggingUtil.logInfo("Wind estimator evaluation started...");
         PersistedElementsIterator<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> racesIterator = persistenceManager
-                .getIterator().limit(40);
-        WindEstimatorFactories estimatorFactories = new WindEstimatorFactories(polarService);
+                .getIterator();
+        if (MAX_RACES != null) {
+            racesIterator = racesIterator.limit(MAX_RACES);
+        }
+        WindEstimatorFactories estimatorFactories = new WindEstimatorFactories(polarService,
+                new ManeuverFeatures(ENABLE_POLARS, ENABLE_SCALED_SPEED, ENABLE_MARKS_INFORMATION));
 
         WindEstimatorEvaluationResult evaluationResult = evaluator.evaluateWindEstimator(
                 estimatorFactories.maneuverGraph(),

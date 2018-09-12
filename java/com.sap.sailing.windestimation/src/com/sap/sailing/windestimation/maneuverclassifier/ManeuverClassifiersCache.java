@@ -9,42 +9,42 @@ public class ManeuverClassifiersCache {
 
     public static final int MIN_FIXES_FOR_POLARS_INFORMATION = 10000;
 
-    private final ShortTimeAfterLastHitCache<ClassifierType, SingleManeuverClassifier> classifierCache;
-    private final boolean liveRace;
+    private final ShortTimeAfterLastHitCache<ClassifierType, ProbabilisticManeuverClassifier> classifierCache;
     private final PolarDataService polarDataService;
-    private final boolean marksAvailable;
+    private final ManeuverFeatures maneuverFeatures;
 
-    public ManeuverClassifiersCache(long preserveLoadedClassifiersMillis, boolean liveRace, boolean marksAvailable,
+    public ManeuverClassifiersCache(long preserveLoadedClassifiersMillis, ManeuverFeatures maneuverFeatures,
             PolarDataService polarDataService) {
-        this.liveRace = liveRace;
-        this.marksAvailable = marksAvailable;
+        this.maneuverFeatures = maneuverFeatures;
         this.polarDataService = polarDataService;
-        this.classifierCache = new ShortTimeAfterLastHitCache<ClassifierType, SingleManeuverClassifier>(
+        this.classifierCache = new ShortTimeAfterLastHitCache<ClassifierType, ProbabilisticManeuverClassifier>(
                 preserveLoadedClassifiersMillis, classifierType -> ManeuverClassifierLoader
                         .loadBestClassifier(classifierType.maneuverFeatures, classifierType.boatClass));
     }
 
-    public SingleManeuverClassifier getBestClassifier(ManeuverForEstimation maneuver) {
-        ManeuverFeatures maneuverFeatures = determineManeuverFeatures(maneuver);
-        return classifierCache.getValue(new ClassifierType(maneuverFeatures, maneuver.getBoatClass()));
+    public ProbabilisticManeuverClassifier getBestClassifier(ManeuverForEstimation maneuver) {
+        ManeuverFeatures maneuverFeatures = determineFinalManeuverFeatures(maneuver);
+        return classifierCache.getValue(new ClassifierType(maneuverFeatures,
+                maneuverFeatures.isPolarsInformation() ? maneuver.getBoatClass() : null));
     }
 
-    private ManeuverFeatures determineManeuverFeatures(ManeuverForEstimation maneuver) {
+    private ManeuverFeatures determineFinalManeuverFeatures(ManeuverForEstimation maneuver) {
         Long fixesCountForBoatClass = polarDataService.getFixCountPerBoatClass().get(maneuver.getBoatClass());
-        boolean polars = fixesCountForBoatClass != null && fixesCountForBoatClass >= MIN_FIXES_FOR_POLARS_INFORMATION
+        boolean polars = maneuverFeatures.isPolarsInformation() && fixesCountForBoatClass != null
+                && fixesCountForBoatClass >= MIN_FIXES_FOR_POLARS_INFORMATION
                 && maneuver.getDeviationFromOptimalJibeAngleInDegrees() != null
                 && maneuver.getDeviationFromOptimalTackAngleInDegrees() != null;
-        boolean marks = marksAvailable && maneuver.getRelativeBearingToNextMarkAfter() != null
+        boolean marks = maneuverFeatures.isMarksInformation() && maneuver.getRelativeBearingToNextMarkAfter() != null
                 && maneuver.getRelativeBearingToNextMarkBefore() != null;
-        return new ManeuverFeatures(polars, !liveRace, marks);
+        return new ManeuverFeatures(polars, maneuverFeatures.isScaledSpeed(), marks);
     }
 
     public PolarDataService getPolarDataService() {
         return polarDataService;
     }
 
-    public boolean isLiveRace() {
-        return liveRace;
+    public ManeuverFeatures getManeuverFeatures() {
+        return maneuverFeatures;
     }
 
     private static class ClassifierType {

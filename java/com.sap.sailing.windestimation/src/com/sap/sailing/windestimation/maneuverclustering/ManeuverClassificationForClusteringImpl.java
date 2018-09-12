@@ -6,15 +6,15 @@ import com.sap.sailing.polars.windestimation.ManeuverClassificationImpl;
 import com.sap.sailing.windestimation.data.CoarseGrainedManeuverType;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverEstimationResult;
-import com.sap.sailing.windestimation.maneuverclassifier.SingleManeuverClassifier;
+import com.sap.sailing.windestimation.maneuverclassifier.ProbabilisticManeuverClassifier;
 
 public class ManeuverClassificationForClusteringImpl extends ManeuverClassificationImpl {
 
-    private final SingleManeuverClassifier maneuverClassifier;
+    private final ProbabilisticManeuverClassifier maneuverClassifier;
     private final ManeuverForEstimation maneuver;
 
     public ManeuverClassificationForClusteringImpl(ManeuverForEstimation maneuver, String competitorName,
-            PolarDataService polarService, SingleManeuverClassifier maneuverClassifier) {
+            PolarDataService polarService, ProbabilisticManeuverClassifier maneuverClassifier) {
         super(competitorName, maneuver.getBoatClass(), maneuver.getManeuverTimePoint(), maneuver.getManeuverPosition(),
                 maneuver.getCourseChangeInDegrees(), maneuver.getSpeedWithBearingBefore(), maneuver.getMiddleCourse(),
                 null, polarService);

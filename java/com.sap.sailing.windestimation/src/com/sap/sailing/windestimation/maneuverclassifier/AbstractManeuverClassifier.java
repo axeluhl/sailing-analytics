@@ -9,7 +9,7 @@ import com.sap.sailing.windestimation.data.CoarseGrainedManeuverType;
 import com.sap.sailing.windestimation.data.ManeuverCategory;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 
-public abstract class AbstractManeuverClassifier implements SingleManeuverClassifier, Serializable {
+public abstract class AbstractManeuverClassifier implements ProbabilisticManeuverClassifier, Serializable {
 
     private static final long serialVersionUID = 908308394572292148L;
     private final ManeuverFeatures maneuverFeatures;

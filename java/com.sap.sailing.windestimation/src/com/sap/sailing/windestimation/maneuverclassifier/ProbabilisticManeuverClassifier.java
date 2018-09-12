@@ -10,7 +10,7 @@ import com.sap.sailing.windestimation.data.ManeuverForEstimation;
  * @author Vladislav Chumak (D069712)
  *
  */
-public interface SingleManeuverClassifier extends ManeuverClassifier {
+public interface ProbabilisticManeuverClassifier extends ManeuverClassifier {
 
     double[] classifyManeuverWithProbabilities(ManeuverForEstimation maneuver);
 

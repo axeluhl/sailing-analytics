@@ -8,7 +8,7 @@ import com.sap.sailing.domain.base.BoatClass;
 
 public class ManeuverClassifierLoader {
 
-    public static SingleManeuverClassifier loadBestClassifier(ManeuverFeatures maneuverFeatures, BoatClass boatClass) {
+    public static ProbabilisticManeuverClassifier loadBestClassifier(ManeuverFeatures maneuverFeatures, BoatClass boatClass) {
         List<TrainableSingleManeuverOfflineClassifier> classifiers = new ArrayList<>();
         for (ManeuverFeatures possibleFeatures : ManeuverFeatures.values()) {
             if (possibleFeatures.isSubset(maneuverFeatures)) {

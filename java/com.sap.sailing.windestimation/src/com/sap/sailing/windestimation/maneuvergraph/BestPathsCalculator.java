@@ -337,10 +337,10 @@ public class BestPathsCalculator {
                 GraphLevel currentLevel = entry.getA();
                 GraphNode currentNode = entry.getB();
                 BestPathsPerLevel bestPathsUntilCurrentLevel = bestPathsPerLevel.get(currentLevel);
-                BestManeuverNodeInfo bestPreviousNodeInfo = bestPathsUntilCurrentLevel
+                BestManeuverNodeInfo currentNodeInfo = bestPathsUntilCurrentLevel
                         .getBestPreviousNodeInfo(currentNode);
-                globalWindRange = globalWindRange == null ? bestPreviousNodeInfo.getWindRange()
-                        : globalWindRange.intersect(bestPreviousNodeInfo.getWindRange());
+                globalWindRange = globalWindRange == null ? currentNodeInfo.getWindRange()
+                        : globalWindRange.intersect(currentNodeInfo.getWindRange());
                 if (!globalWindRange.isViolation() && globalWindRange.getAngleTowardStarboard() <= 20
                         && currentNode.getManeuverType() != ManeuverTypeForClassification.OTHER) {
                     DegreeBearingImpl windCourse = new DegreeBearingImpl(globalWindRange.getAvgWindCourse());

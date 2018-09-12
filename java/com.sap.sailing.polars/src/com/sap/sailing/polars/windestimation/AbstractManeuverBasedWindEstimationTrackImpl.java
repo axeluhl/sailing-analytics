@@ -1,5 +1,6 @@
 package com.sap.sailing.polars.windestimation;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -257,21 +258,21 @@ public abstract class AbstractManeuverBasedWindEstimationTrackImpl extends WindT
                 if (avgTackCog != null) {
                     estimatedJibeMiddleCOG = new ScalableBearing(
                             getWeightedAverageMiddleManeuverCOGDegAndManeuverAngleDeg(tackClusters.get(0),
-                                    ManeuverType.TACK).getA()).add(new ScalableBearing(avgTackCog)).divide(2)
-                                            .reverse();
+                                    ManeuverType.TACK).getA()).add(new ScalableBearing(avgTackCog)).divide(2).reverse();
                 }
             }
-            if(estimatedJibeMiddleCOG == null) {
+            if (estimatedJibeMiddleCOG == null) {
                 Bearing avgTackCog = getWeightedAverageMiddleManeuverCOGDegAndManeuverAngleDeg(tackClusters.get(0),
                         ManeuverType.TACK).getA();
-                if(avgTackCog != null) {
+                if (avgTackCog != null) {
                     estimatedJibeMiddleCOG = avgTackCog.reverse();
                 }
             }
         }
 
-        final List<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>> jibeClusters = getJibeClusters(
-                estimatedJibeMiddleCOG, clusters).collect(Collectors.toList());
+        final List<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>> jibeClusters = estimatedJibeMiddleCOG == null
+                ? Collections.emptyList()
+                : getJibeClusters(estimatedJibeMiddleCOG, clusters).collect(Collectors.toList());
         addWindFixes(jibeClusters.stream(), ManeuverType.JIBE);
         return new Triple<>(clusters, tackClusters, jibeClusters);
     }
@@ -364,11 +365,13 @@ public abstract class AbstractManeuverBasedWindEstimationTrackImpl extends WindT
                 .sorted((a,
                         b) -> (int) -Math.signum(getAverageLikelihoodOfBeingManeuver(ManeuverType.JIBE, a.stream())
                                 - getAverageLikelihoodOfBeingManeuver(ManeuverType.JIBE, b.stream())))
-                .filter((jibeClusterCandidate) -> Math
-                        .abs(getWeightedAverageMiddleManeuverCOGDegAndManeuverAngleDeg(jibeClusterCandidate,
-                                ManeuverType.JIBE).getA().getDifferenceTo(approximateMiddleCOGForJibes)
-                                        .getDegrees()) < THRESHOLD_JIBE_CLUSTER_DIFFERENCE_DEGREES)
-                .limit(2);
+                .filter((jibeClusterCandidate) -> {
+                    Bearing middleCog = getWeightedAverageMiddleManeuverCOGDegAndManeuverAngleDeg(jibeClusterCandidate,
+                            ManeuverType.JIBE).getA();
+                    return middleCog == null ? false
+                            : Math.abs(middleCog.getDifferenceTo(approximateMiddleCOGForJibes)
+                                    .getDegrees()) < THRESHOLD_JIBE_CLUSTER_DIFFERENCE_DEGREES;
+                }).limit(2);
     }
 
     /**

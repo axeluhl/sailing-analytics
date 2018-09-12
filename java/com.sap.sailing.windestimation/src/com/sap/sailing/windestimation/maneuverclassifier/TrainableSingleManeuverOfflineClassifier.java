@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 
-public interface TrainableSingleManeuverOfflineClassifier extends SingleManeuverClassifier, PersistableModel {
+public interface TrainableSingleManeuverOfflineClassifier extends ProbabilisticManeuverClassifier, PersistableModel {
 
     void trainWithManeuvers(List<ManeuverForEstimation> maneuvers);
 

@@ -59,13 +59,12 @@ public class ManeuverClusteringBasedWindEstimationTrackImpl extends AbstractMane
             Set<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>> clusters) {
         // start with the average of all of the cluster's maneuvers' likelihood to be a tack
         double averageTackLikelihood = getAverageLikelihoodOfBeingManeuver(ManeuverType.TACK, cluster.stream());
-        Bearing upwindCog = getWeightedAverageMiddleManeuverCOGDegAndManeuverAngleDeg(cluster, ManeuverType.TACK).getA();
-        if(upwindCog == null) {
+        Bearing upwindCog = getWeightedAverageMiddleManeuverCOGDegAndManeuverAngleDeg(cluster, ManeuverType.TACK)
+                .getA();
+        if (upwindCog == null) {
             return 0.1;
         }
-        final Bearing averageUpwindCOG = new ScalableBearing(
-                upwindCog)
-                        .divide(1.0);
+        final Bearing averageUpwindCOG = new ScalableBearing(upwindCog).divide(1.0);
 
         // under the assumption that cluster holds tacks, find the clusters that then most likely hold the jibes
         final Bearing approximateMiddleCOGForJibes = averageUpwindCOG.reverse();
