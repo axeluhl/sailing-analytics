@@ -82,9 +82,12 @@ public class CompetitorJsonDeserializer implements JsonDeserializer<DynamicCompe
                         CompetitorJsonConstants.FIELD_TEAM));
             }
             final DynamicBoat boat = getBoat(object, /* default ID */ competitorId);
-            final Double timeOnTimeFactor = (Double) object.get(CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR);
-            final Double timeOnDistanceAllowanceInSecondsPerNauticalMile = (Double) object
+            final Number timeOnTimeFactorAsNumber = (Number) object.get(CompetitorJsonConstants.FIELD_TIME_ON_TIME_FACTOR);
+            final Double timeOnTimeFactor = timeOnTimeFactorAsNumber != null ? timeOnTimeFactorAsNumber.doubleValue() : 0.0;
+            final Number timeOnDistanceAllowanceInSecondsPerNauticalMileAsNumber = (Number) object
                     .get(CompetitorJsonConstants.FIELD_TIME_ON_DISTANCE_ALLOWANCE_IN_SECONDS_PER_NAUTICAL_MILE);
+            final Double timeOnDistanceAllowanceInSecondsPerNauticalMile = timeOnDistanceAllowanceInSecondsPerNauticalMileAsNumber != null ? 
+            		timeOnDistanceAllowanceInSecondsPerNauticalMileAsNumber.doubleValue() : 0.0;
             final DynamicCompetitor result;
             if (boat == null) {
                 result = competitorWithBoatFactory.getOrCreateCompetitor(competitorId, name, shortName, displayColor, email,
