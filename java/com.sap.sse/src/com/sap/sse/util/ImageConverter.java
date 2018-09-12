@@ -3,11 +3,16 @@ package com.sap.sse.util;
 import static java.lang.Math.toIntExact;
 
 import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.awt.image.BufferedImageOp;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -34,6 +39,7 @@ public class ImageConverter {
     private static final Logger logger = Logger.getLogger(ImageConverter.class.getName());
 
     /**
+     * @throws IOException 
      * Writes a BufferedImage to an InputStream. This should only be used as a backup, if
      * {@link ImageConverter#imageWithMetadataToInputStream(BufferedImage, IIOMetadata, String)} fails
      * 
@@ -43,15 +49,10 @@ public class ImageConverter {
      *            the format of the image, for example "png", "jpeg" or "jpg"
      * @returns an InputStream with the Information of the Image
      */
-    private InputStream imageToInputStream(final BufferedImage image, final String imageFormat) {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        try {
-            ImageIO.write(image, imageFormat, bos);
-        } catch (IOException e) {
-            logger.log(Level.SEVERE, e.getMessage());
-        }
-        final byte[] arr = bos.toByteArray();
-        return new ByteArrayInputStream(arr);
+    private InputStream imageToInputStream(final BufferedImage image, final String imageFormat) throws IOException {
+        PipedOutputStream outputStream = new PipedOutputStream();
+        ImageIO.write(image, imageFormat, outputStream);
+        return new PipedInputStream(outputStream);
     }
 
     /**
@@ -150,7 +151,10 @@ public class ImageConverter {
         final BufferedImage resizedImage = new BufferedImage((int) demandedWidth, (int) demandedHeight,
                 image.getType());
         final Graphics2D g = resizedImage.createGraphics();
-        g.drawImage(image, 0, 0, (int) demandedWidth, (int) demandedHeight, null);
+        final AffineTransform transform = new AffineTransform();
+        transform.scale((double)demandedWidth/image.getWidth(), (double)demandedHeight/image.getHeight());
+        final BufferedImageOp op = new AffineTransformOp(transform, AffineTransformOp.TYPE_BILINEAR);
+        g.drawImage(image, op, 0, 0);
         g.dispose();
         return resizedImage;
     }
@@ -164,11 +168,12 @@ public class ImageConverter {
      *            the IIOMetadata that should be stored in the InputStream with the BufferedImage
      * @param imageFormat
      *            the format of the image, for example "png", "jpeg" or "jpg"
-     * @returns an InputStream (ByteArrayInputStream) with the data of the BufferedImage and if possible with the
-     *          IIOMetadata. Returnds null if the image is null or the imageFormat is incorrect
+     * @throws IOException 
+     * @returns an InputStream with the data of the BufferedImage and if possible with the
+     *          IIOMetadata. Returns null if the image is null or the imageFormat is incorrect
      */
     public InputStream imageWithMetadataToInputStream(final BufferedImage bufferdImage, final IIOMetadata metadata,
-            final String imageFormat) {
+            final String imageFormat) throws IOException {
         byte[] bytes = null;
         if (metadata != null) {
             // trying to obtain OutputStream of the image with EXIF data

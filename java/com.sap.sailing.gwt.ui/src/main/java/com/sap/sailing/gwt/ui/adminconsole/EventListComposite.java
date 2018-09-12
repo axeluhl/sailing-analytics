@@ -470,18 +470,17 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         List<EventDTO> existingEvents = new ArrayList<EventDTO>(eventListDataProvider.getList());
         final List<LeaderboardGroupDTO> existingLeaderboardGroups = new ArrayList<LeaderboardGroupDTO>();
         Util.addAll(availableLeaderboardGroups, existingLeaderboardGroups);
-        EventCreateDialog dialog = new EventCreateDialog(Collections.unmodifiableCollection(existingEvents),
-                existingLeaderboardGroups, sailingService, stringMessages,
-                new DialogCallback<EventDTO>() {
-                    @Override
-                    public void cancel() {
-                    }
+        EventCreateDialog dialog = new EventCreateDialog(Collections.unmodifiableCollection(existingEvents), existingLeaderboardGroups,
+                sailingService, stringMessages, new DialogCallback<EventDTO>() {
+            @Override
+            public void cancel() {
+            }
 
-                    @Override
-                    public void ok(final EventDTO newEvent) {
-                        createNewEvent(newEvent, existingLeaderboardGroups);
-                    }
-                });
+            @Override
+            public void ok(final EventDTO newEvent) {
+                createNewEvent(newEvent, existingLeaderboardGroups);
+            }
+        });
         dialog.ensureDebugId("EventCreateDialog");
         dialog.show();
     }
@@ -594,7 +593,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         existingEvents.remove(selectedEvent);
         List<LeaderboardGroupDTO> existingLeaderboardGroups = new ArrayList<LeaderboardGroupDTO>();
         Util.addAll(availableLeaderboardGroups, existingLeaderboardGroups);
-        EventEditDialog dialog = new EventEditDialog(selectedEvent, Collections.unmodifiableCollection(existingEvents),
+        EventEditDialog dialog = new EventEditDialog(selectedEvent, Collections.unmodifiableCollection(existingEvents),  
                 existingLeaderboardGroups, sailingService, stringMessages,
                 new DialogCallback<EventDTO>() {
             @Override

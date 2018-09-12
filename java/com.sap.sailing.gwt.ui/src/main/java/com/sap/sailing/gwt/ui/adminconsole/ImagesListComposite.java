@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -28,12 +29,12 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.gwt.ui.adminconsole.EventDialog.FileStorageServiceConnectionTestObservable;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.util.NaturalComparator;
-import com.sap.sse.common.util.ObservableBoolean;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
@@ -42,7 +43,7 @@ import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
 
 /**
- * /** A composite showing the list of media images
+ * A composite showing the list of media images
  * 
  * @author Frank Mittag (C5163974)
  */
@@ -54,7 +55,7 @@ public class ImagesListComposite extends Composite {
     private SingleSelectionModel<ImageDTO> imageSelectionModel;
     private ListDataProvider<ImageDTO> imageListDataProvider;
     private final Label noImagesLabel;
-    private final ObservableBoolean storageServiceAvailable;
+    private final FileStorageServiceConnectionTestObservable storageServiceAvailable;
 
     private final SimplePanel mainPanel;
     private final VerticalPanel panel;
@@ -76,7 +77,7 @@ public class ImagesListComposite extends Composite {
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
     public ImagesListComposite(final SailingServiceAsync sailingService, final StringMessages stringMessages,
-            final ObservableBoolean storageServiceAvailable) {
+            final FileStorageServiceConnectionTestObservable storageServiceAvailable) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.storageServiceAvailable = storageServiceAvailable;
@@ -280,7 +281,11 @@ public class ImagesListComposite extends Composite {
 
                     @Override
                     public void ok(ImageResizingTaskDTO resizingTask) {
-                        callResizingService(resizingTask, null);
+                        if (resizingTask.getResizingTask().size() != 0) {
+                            callResizingServiceAndUpdateTable(resizingTask, null);
+                        } else {
+                            imageListDataProvider.getList().add(resizingTask.getImage());
+                        }
                     }
                 });
         dialog.show();
@@ -295,34 +300,35 @@ public class ImagesListComposite extends Composite {
 
                     @Override
                     public void ok(ImageResizingTaskDTO resizingTask) {
-                        callResizingService(resizingTask, selectedImage);
+                        if (resizingTask.getResizingTask().size() != 0) {
+                            callResizingServiceAndUpdateTable(resizingTask, selectedImage);
+                        } else {
+                            imageListDataProvider.getList().remove(selectedImage);
+                            imageListDataProvider.getList().add(resizingTask.getImage());
+                        }
                     }
                 });
         dialog.show();
     }
 
-    protected void callResizingService(ImageResizingTaskDTO resizingTask, ImageDTO originalImage) {
-        if (resizingTask.getResizingTask().size() != 0) {
-            sailingService.resizeImage(resizingTask, new AsyncCallback<ImageDTO[]>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    Notification.notify(stringMessages.resizeUnsuccessfull(), NotificationType.ERROR);
-                }
+    protected void callResizingServiceAndUpdateTable(ImageResizingTaskDTO resizingTask, ImageDTO originalImage) {
+        sailingService.resizeImage(resizingTask, new AsyncCallback<Set<ImageDTO>>(){
+            @Override
+            public void onFailure(Throwable caught) {
+                Notification.notify(stringMessages.resizeUnsuccessfull(), NotificationType.ERROR);
+            }
 
-                @Override
-                public void onSuccess(ImageDTO[] result) {
-                    for (int i = 0; i < result.length; i++) {
-                        imageListDataProvider.getList().add(result[i]);
-                    }
-                    imageListDataProvider.getList().remove(originalImage);
-                    updateTableVisisbilty();
-                    Notification.notify(stringMessages.resizeSuccessfull(), NotificationType.SUCCESS);
+            @Override
+            public void onSuccess(Set<ImageDTO> result) {
+                for(ImageDTO image : result) {
+                    imageListDataProvider.getList().add(image);
                 }
-            });
-        } else {
-            imageListDataProvider.getList().remove(originalImage);
-            imageListDataProvider.getList().add(resizingTask.getImage());
-        }
+                imageListDataProvider.getList().remove(originalImage);
+                updateTableVisisbilty();
+                Notification.notify(stringMessages.resizeSuccessfull(), NotificationType.SUCCESS);
+            }
+        });
+
     }
 
     private void updateTableVisisbilty() {

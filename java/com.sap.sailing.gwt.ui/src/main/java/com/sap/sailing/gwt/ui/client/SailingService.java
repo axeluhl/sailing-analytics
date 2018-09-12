@@ -794,5 +794,5 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      * @return returns an array of ImageDTOs, that contain the resized variants of the ImageDTO in toResizeImage
      * @throws Exception can throw different type of exceptions
      */
-    ImageDTO[] resizeImage(ImageResizingTaskDTO imageResizingTask) throws Exception;
+    Set<ImageDTO> resizeImage(ImageResizingTaskDTO imageResizingTask) throws Exception;
 }

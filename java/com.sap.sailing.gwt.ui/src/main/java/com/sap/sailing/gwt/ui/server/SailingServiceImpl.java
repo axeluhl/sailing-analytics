@@ -54,6 +54,7 @@ import java.util.stream.StreamSupport;
 import java.util.zip.GZIPInputStream;
 
 import javax.imageio.metadata.IIOMetadata;
+import javax.management.InvalidAttributeValueException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -6671,6 +6672,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public FileStorageServicePropertyErrorsDTO testFileStorageServiceProperties(String serviceName, String localeInfoName) throws IOException {
         try {
+            if (serviceName == null) {
+                serviceName = getActiveFileStorageServiceName();
+            }
             FileStorageService service = getFileStorageService(serviceName);
             if (service != null) {
                 service.testProperties();
@@ -7890,11 +7894,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
     }
 
-    /**
-     * See {@link SailingService#resizeImage(ImageResizingTaskDTO)}
-     */
     @Override
-    public ImageDTO[] resizeImage(final ImageResizingTaskDTO resizingTask) throws Exception {
+    public Set<ImageDTO> resizeImage(final ImageResizingTaskDTO resizingTask) throws Exception{
+        if(resizingTask.getResizingTask() == null || resizingTask.getResizingTask().size() == 0) {
+            throw new InvalidAttributeValueException("Resizing Task can not be null or empty");
+        }
         final ImageConverter converter = new ImageConverter();
         // calculating the fileType of the image by its uri
         final String sourceRef = resizingTask.getImage().getSourceRef();
@@ -7904,7 +7908,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final List<BufferedImage> resizedImages = converter.convertImage(imageAndMetadata.getImage(),
                 resizingTask.getResizingTask());
         final List<String> sourceRefs = storeImages(resizedImages, fileType, imageAndMetadata.getMetadata());
-        final List<ImageDTO> resizedImagesAsDTOs = createImageDTOsFromURLsAndResizingTask(sourceRefs, resizingTask,
+        //if an error occures while storing the files, all already stored files are removed before throwing an exception
+        if(sourceRefs == null || sourceRefs.size() < resizingTask.getResizingTask().size()) {
+            for(String alreadyStoredFileRef : sourceRefs) {
+                try {
+                    getService().getFileStorageManagementService().getActiveFileStorageService().removeFile(new URI(alreadyStoredFileRef));
+                }catch(Exception e) {}
+                // Exception occured while trying to revert changes after exception
+                // This only keeps some trash on the FileStorage
+            }
+            throw new Exception("Error occured while storing images on the FileStorage");
+        }
+        final Set<ImageDTO> resizedImagesAsDTOs = createImageDTOsFromURLsAndResizingTask(sourceRefs, resizingTask,
                 resizedImages);
         for (String tag : resizingTask.getImage().getTags()) {
             final MediaTagConstants predefinedTag = MediaTagConstants.fromName(tag);
@@ -7916,7 +7931,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 resizedImagesAsDTOs.add(image);
             }
         }
-        return resizedImagesAsDTOs.toArray(new ImageDTO[resizedImages.size()]);
+        return resizedImagesAsDTOs;
     }
 
     /**
@@ -7933,9 +7948,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      *            the BufferedImages, used to get their width and height
      * @returns a List of ImageDTOs that contains an ImageDTO per resized image
      */
-    private List<ImageDTO> createImageDTOsFromURLsAndResizingTask(final List<String> sourceRefs,
+    private Set<ImageDTO> createImageDTOsFromURLsAndResizingTask(final List<String> sourceRefs,
             final ImageResizingTaskDTO resizingTask, final List<BufferedImage> images) {
-        final List<ImageDTO> imageDTOs = new ArrayList<ImageDTO>();
+        final Set<ImageDTO> imageDTOs = new HashSet<ImageDTO>();
         for (int i = 0; i < sourceRefs.size(); i++) {
             final ImageDTO imageDTO = resizingTask.cloneImageDTO();
             for (MediaTagConstants tag : MediaTagConstants.values()) {
@@ -7965,17 +7980,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private List<String> storeImages(final List<BufferedImage> resizedImages, final String fileType,
             final IIOMetadata metadata) {
         final List<String> sourceRefs = new ArrayList<>();
-        for (final BufferedImage resizedImage : resizedImages) {
-            final InputStream fileStorageStream = new ImageConverter().imageWithMetadataToInputStream(resizedImage,
-                    metadata, fileType);
-            try {
+
+        try {
+            for (final BufferedImage resizedImage : resizedImages) {
+                final InputStream fileStorageStream = new ImageConverter().imageWithMetadataToInputStream(resizedImage,
+                        metadata, fileType);
                 sourceRefs.add(getService().getFileStorageManagementService().getActiveFileStorageService()
                         .storeFile(fileStorageStream, "." + fileType, new Long(fileStorageStream.available()))
                         .toString());
-            } catch (NoCorrespondingServiceRegisteredException | IOException | OperationFailedException
-                    | InvalidPropertiesException e) {
-                logger.log(Level.SEVERE, "Could not store file. Cause: " + e.getMessage());
             }
+        } catch (NoCorrespondingServiceRegisteredException | IOException | OperationFailedException
+                | InvalidPropertiesException e) {
+            logger.log(Level.SEVERE, "Could not store file. Cause: " + e.getMessage());
         }
         return sourceRefs;
     }

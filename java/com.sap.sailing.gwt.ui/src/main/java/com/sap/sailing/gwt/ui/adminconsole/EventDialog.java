@@ -33,7 +33,6 @@ import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.VenueDTO;
-import com.sap.sse.common.util.ObservableBoolean;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
 import com.sap.sse.gwt.client.controls.listedit.GenericStringListEditorComposite;
@@ -62,7 +61,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
     protected ImagesListComposite imagesListComposite;
     protected VideosListComposite videosListComposite;
     protected ExternalLinksComposite externalLinksComposite;
-    private ObservableBoolean storageServiceAvailable = new ObservableBoolean(false);
+    private final FileStorageServiceConnectionTestObservable storageServiceAvailable = new FileStorageServiceConnectionTestObservable();
     
     protected static class EventParameterValidator implements Validator<EventDTO> {
 
@@ -269,40 +268,68 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         return nameEntryField;
     }
 
-    // used for ImageDialog and VideoDialog to inform user that upload is not possible without needing to
-    // try it first
+    // used for ImageDialog and VideoDialog to inform user that upload is not possible 
+    // without needing to try it first
     private void testFileStorageService(FileStorageManagementGwtServiceAsync sailingService) {
-        // double callback to test if a fileStorageService is enabled and enable upload if it is
-        sailingService.getActiveFileStorageServiceName(new AsyncCallback<String>() {
-            @Override
-            public void onSuccess(String result) {
-                if (result != null) {
-                    sailingService.testFileStorageServiceProperties(result,
-                            LocaleInfo.getCurrentLocale().getLocaleName(),
-                            new AsyncCallback<FileStorageServicePropertyErrorsDTO>() {
+        sailingService.testFileStorageServiceProperties(null, LocaleInfo.getCurrentLocale().getLocaleName(),
+                new AsyncCallback<FileStorageServicePropertyErrorsDTO>() {
 
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    storageServiceAvailable.setValue(false);
-                                }
+                    @Override
+                    public void onFailure(Throwable caught) {
+                    }
 
-                                @Override
-                                public void onSuccess(FileStorageServicePropertyErrorsDTO result) {
-                                    if (result == null) {
-                                        storageServiceAvailable.setValue(true);
-                                    } else {
-                                        storageServiceAvailable.setValue(false);
-                                    }
-                                }
-                            });
-                } else {
-                    storageServiceAvailable.setValue(false);
-                }
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-            }
-        });
+                    @Override
+                    public void onSuccess(FileStorageServicePropertyErrorsDTO result) {
+                        if (result == null) {
+                            storageServiceAvailable.testPassed();
+                        }
+                    }
+                });
     }
+    
+    /**
+     * 
+     * 
+     * @author Robin Fleige (D067799)
+     */
+    public class FileStorageServiceConnectionTestObservable {
+        private List<FileStorageServiceConnectionTestObserver> observer = new ArrayList<>();
+        private boolean value;
+        
+        public FileStorageServiceConnectionTestObservable() {
+            value = false;
+        }
+        
+        public void testPassed() {
+            value = true;
+            for(FileStorageServiceConnectionTestObserver observer : this.observer) {
+                observer.onFileStorageServiceTestPassed();
+            }
+        }
+        
+        public boolean getValue() {
+            return value;
+        }
+        
+        public void registerObserver(FileStorageServiceConnectionTestObserver observer) {
+            this.observer.add(observer);
+            if(value) {
+                observer.onFileStorageServiceTestPassed();
+            }
+        }
+
+        public void unregisterObserver(FileStorageServiceConnectionTestObserver observer) {
+            this.observer.remove(observer);
+        }
+    }
+    
+    /**
+     * 
+     * 
+     * @author Robin Fleige (D067799)
+     */
+    public interface FileStorageServiceConnectionTestObserver {
+        void onFileStorageServiceTestPassed();
+    }
+
 }

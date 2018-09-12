@@ -14,12 +14,12 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.ui.adminconsole.EventDialog.FileStorageServiceConnectionTestObservable;
+import com.sap.sailing.gwt.ui.adminconsole.EventDialog.FileStorageServiceConnectionTestObserver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.MimeType;
-import com.sap.sse.common.util.GenericObserver;
-import com.sap.sse.common.util.ObservableBoolean;
 import com.sap.sse.gwt.adminconsole.URLFieldWithFileUpload;
 import com.sap.sse.gwt.client.GWTLocaleUtil;
 import com.sap.sse.gwt.client.IconResources;
@@ -29,7 +29,7 @@ import com.sap.sse.gwt.client.controls.listedit.StringListInlineEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.media.VideoDTO;
 
-public abstract class VideoDialog extends DataEntryDialog<VideoDTO> implements GenericObserver<Boolean> {
+public abstract class VideoDialog extends DataEntryDialog<VideoDTO> implements FileStorageServiceConnectionTestObserver {
     protected final StringMessages stringMessages;
     protected final URLFieldWithFileUpload videoURLAndUploadComposite;
     protected final Date creationDate;
@@ -63,7 +63,7 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> implements G
         }
     }
 
-    public VideoDialog(Date createdAtDate, VideoParameterValidator validator, StringMessages stringMessages, ObservableBoolean storageServiceAvailable, DialogCallback<VideoDTO> callback) {
+    public VideoDialog(Date createdAtDate, VideoParameterValidator validator, StringMessages stringMessages, FileStorageServiceConnectionTestObservable storageServiceAvailable, DialogCallback<VideoDTO> callback) {
         super(stringMessages.video(), null, stringMessages.ok(), stringMessages.cancel(), validator,
                 callback);
         this.stringMessages = stringMessages;
@@ -86,20 +86,17 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> implements G
         for (String locale : GWTLocaleUtil.getAvailableLocalesAndDefault()) {
             localeListBox.addItem(GWTLocaleUtil.getDecoratedLanguageDisplayNameWithDefaultLocaleSupport(locale), locale == null ? "" : locale);
         }
-        videoURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
+        videoURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, false);
         videoURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
                 validateAndUpdate();
             }
         });
-        videoURLAndUploadComposite.setUploadEnabled(storageServiceAvailable.getValue());
-        thumbnailURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
+        thumbnailURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, false);
         tagsListEditor = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new GenericStringListInlineEditorComposite.ExpandedUi<String>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
                         MediaTagConstants.videoTagSuggestions, stringMessages.enterTagsForTheVideo(), 50));
-
-        thumbnailURLAndUploadComposite.setUploadEnabled(storageServiceAvailable.getValue());
     }
 
     @Override
@@ -195,8 +192,8 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> implements G
     }
     
     @Override
-    public void getNotified(Boolean data) {
-        videoURLAndUploadComposite.setUploadEnabled(data.booleanValue());
-        thumbnailURLAndUploadComposite.setUploadEnabled(data.booleanValue());
+    public void onFileStorageServiceTestPassed() {
+        videoURLAndUploadComposite.setUploadEnabled(true);
+        thumbnailURLAndUploadComposite.setUploadEnabled(true);
     }
 }

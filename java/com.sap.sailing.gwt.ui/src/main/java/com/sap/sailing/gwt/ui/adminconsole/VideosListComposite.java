@@ -27,11 +27,11 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.gwt.ui.adminconsole.EventDialog.FileStorageServiceConnectionTestObservable;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.util.NaturalComparator;
-import com.sap.sse.common.util.ObservableBoolean;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.media.VideoDTO;
@@ -48,7 +48,7 @@ public class VideosListComposite extends Composite {
     private SingleSelectionModel<VideoDTO> videoSelectionModel;
     private ListDataProvider<VideoDTO> videoListDataProvider;
     private final Label noVideosLabel;
-    private final ObservableBoolean storageServiceAvailable;
+    private final FileStorageServiceConnectionTestObservable storageServiceAvailable;
 
     private final SimplePanel mainPanel;
     private final VerticalPanel panel;
@@ -69,7 +69,7 @@ public class VideosListComposite extends Composite {
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
-    public VideosListComposite(final StringMessages stringMessages, ObservableBoolean storageServiceAvailable) {
+    public VideosListComposite(final StringMessages stringMessages, FileStorageServiceConnectionTestObservable storageServiceAvailable) {
         this.stringMessages = stringMessages;
         this.storageServiceAvailable = storageServiceAvailable;
         mainPanel = new SimplePanel();

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.core.shared.GWT;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.resources.client.ClientBundle;
@@ -13,9 +14,6 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.common.util.GenericObservable;
-import com.sap.sse.common.util.Observable;
-import com.sap.sse.common.util.Observer;
 import com.sap.sse.gwt.client.StringMessages;
 
 /**
@@ -26,12 +24,11 @@ import com.sap.sse.gwt.client.StringMessages;
  * @param <ValueType>
  *            The type of the items in the list
  */
-public class ExpandedUiWithCheckboxes<ValueType> extends GenericStringListInlineEditorComposite.ExpandedUi<ValueType>
-        implements Observable {
+public class ExpandedUiWithCheckboxes<ValueType> extends GenericStringListInlineEditorComposite.ExpandedUi<ValueType> {
 
     private final List<CheckBox> checkBoxes;
     private final String checkBoxText;
-    private final List<Observer> observer;
+    private final List<ChangeHandler> changeHandler = new ArrayList<>();
     static final ListEditorResources ress = GWT.create(ListEditorResources.class);
 
     /**
@@ -53,7 +50,6 @@ public class ExpandedUiWithCheckboxes<ValueType> extends GenericStringListInline
             List<String> suggestValues, String placeholderTextForAddTextbox, int textBoxSize, String checkBoxText) {
         super(stringMessages, removeImage, suggestValues, placeholderTextForAddTextbox, textBoxSize);
         this.checkBoxes = new ArrayList<CheckBox>();
-        observer = new ArrayList<Observer>();
         this.checkBoxText = checkBoxText;
         ress.css().ensureInjected();
     }
@@ -117,7 +113,9 @@ public class ExpandedUiWithCheckboxes<ValueType> extends GenericStringListInline
                 } else {
                     source.setStylePrimaryName(getErrorStyle());
                 }
-                notifyObserver();
+                for(ChangeHandler changeHandler : ExpandedUiWithCheckboxes.this.changeHandler) {
+                    changeHandler.onChange(null);
+                }
             }
         });
         checkBoxes.add(checkBox);
@@ -147,29 +145,7 @@ public class ExpandedUiWithCheckboxes<ValueType> extends GenericStringListInline
         checkBoxes.remove(rowIndex);
     }
 
-    /**
-     * See {@link GenericObservable#notifyObserver()}
-     */
-    @Override
-    public void notifyObserver() {
-        for (Observer observer : this.observer) {
-            observer.getNotified();
-        }
-    }
-
-    /**
-     * See {@link GenericObservable#registerObserver(com.sap.sse.common.util.GenericObserver))}
-     */
-    @Override
-    public void registerObserver(Observer observer) {
-        this.observer.add(observer);
-    }
-
-    /**
-     * See {@link GenericObservable#unregisterObserver(com.sap.sse.common.util.GenericObserver)()}
-     */
-    @Override
-    public void unregisterObserver(Observer observer) {
-        this.observer.remove(observer);
+    public void addChangeHandler(ChangeHandler handler) {
+        changeHandler.add(handler);
     }
 }

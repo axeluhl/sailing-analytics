@@ -128,6 +128,7 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
             throw new InvalidPropertiesException("empty bucketname is not allowed");
         }
         // test if credentials are valid
+        // TODO seems to even work if credentials are not valid if bucket is publicly visible
         try {
             s3.doesBucketExist(bucketName.getValue());
         } catch (Exception e) {

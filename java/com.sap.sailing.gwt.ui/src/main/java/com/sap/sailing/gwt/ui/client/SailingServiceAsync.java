@@ -996,5 +996,5 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      * @param imageResizingTask the information on how the contained ImageDTO should be resized
      * @param asyncCallback The callback called after finishing resizing, storing the returned ImageDTOs somewhere is proposed
      */
-    void resizeImage(ImageResizingTaskDTO imageResizingTask, AsyncCallback<ImageDTO[]> asyncCallback);
+    void resizeImage(ImageResizingTaskDTO imageResizingTask, AsyncCallback<Set<ImageDTO>> asyncCallback);
 }

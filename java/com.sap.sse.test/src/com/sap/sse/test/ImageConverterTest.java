@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -62,9 +63,10 @@ public class ImageConverterTest {
 
     /**
      * Tests the conversions that are done while resizing an image
+     * @throws IOException 
      */
     @Test
-    public void testConversions() {
+    public void testConversions() throws IOException {
         byte[] byteArray;
         byteArray = converter.inputStreamToByteArray(
                 converter.imageWithMetadataToInputStream(jpgImage.getImage(), jpgImage.getMetadata(), "jpg"));

@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -18,14 +20,13 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.ui.adminconsole.EventDialog.FileStorageServiceConnectionTestObservable;
+import com.sap.sailing.gwt.ui.adminconsole.EventDialog.FileStorageServiceConnectionTestObserver;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.media.MediaTagConstants;
-import com.sap.sse.common.util.GenericObserver;
-import com.sap.sse.common.util.ObservableBoolean;
-import com.sap.sse.common.util.Observer;
 import com.sap.sse.gwt.adminconsole.URLFieldWithFileUpload;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.IntegerBox;
@@ -38,7 +39,7 @@ import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
 
 public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
-        implements Observer, GenericObserver<Boolean> {
+        implements FileStorageServiceConnectionTestObserver {
     private final SailingServiceAsync sailingService;
     
     protected final StringMessages stringMessages;
@@ -58,9 +59,9 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
     protected static class ImageParameterValidator implements Validator<ImageResizingTaskDTO> {
         private final StringMessages stringMessages;
         private List<CheckBox> doResize;
-        private final ObservableBoolean storageServiceAvailable;
+        private final FileStorageServiceConnectionTestObservable storageServiceAvailable;
 
-        public ImageParameterValidator(StringMessages stringMessages, ObservableBoolean storageServiceAvailable) {
+        public ImageParameterValidator(StringMessages stringMessages, FileStorageServiceConnectionTestObservable storageServiceAvailable) {
             this.stringMessages = stringMessages;
             this.storageServiceAvailable = storageServiceAvailable;
             this.doResize = new ArrayList<CheckBox>();
@@ -93,7 +94,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
                 if (errorMessage.equals("")) {// Check if image ratio fits for resizing
                     errorMessage = imageRatioFits(imageToValidate);
                 }
-                if (errorMessage.equals("")) {// check for ckeckboxes and resizing
+                if (errorMessage.equals("")) {// check for checkboxes and resizing
                     for (MediaTagConstants mediaTag : MediaTagConstants.values()) {
                         final CheckBox checkBox = getCheckBoxForTag(mediaTag.getName(), imageToValidate);
                         if (imageToValidate.hasTag(mediaTag.getName())
@@ -165,13 +166,13 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
     }
 
     public ImageDialog(Date creationDate, SailingServiceAsync sailingService, StringMessages stringMessages,
-            ObservableBoolean storageServiceAvailable, DialogCallback<ImageResizingTaskDTO> callback) {
+            FileStorageServiceConnectionTestObservable storageServiceAvailable, DialogCallback<ImageResizingTaskDTO> callback) {
         this(creationDate, sailingService, stringMessages, storageServiceAvailable,
                 new ImageParameterValidator(stringMessages, storageServiceAvailable), callback);
     }
 
     private ImageDialog(Date creationDate, SailingServiceAsync sailingService, StringMessages stringMessages,
-            ObservableBoolean storageServiceAvailable, ImageParameterValidator validator,
+            FileStorageServiceConnectionTestObservable storageServiceAvailable, ImageParameterValidator validator,
             DialogCallback<ImageResizingTaskDTO> callback) {
         super(stringMessages.image(), null, stringMessages.ok(), stringMessages.cancel(), validator, callback);
         this.stringMessages = stringMessages;
@@ -180,7 +181,7 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
         storageServiceAvailable.registerObserver(this);
         getDialogBox().getWidget().setWidth("730px");
         busyIndicator = new SimpleBusyIndicator();
-        imageURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages);
+        imageURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, false);
         imageURLAndUploadComposite.addValueChangeHandler(new ValueChangeHandler<String>() {
             @Override
             public void onValueChange(ValueChangeEvent<String> event) {
@@ -211,10 +212,15 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
                 validateAndUpdate();
             }
         });
-        imageURLAndUploadComposite.setUploadEnabled(storageServiceAvailable.getValue());
-        expandedUi = new ExpandedUiWithCheckboxes<String>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
-                MediaTagConstants.imageTagSuggestions, stringMessages.enterTagsForTheImage(), 30, stringMessages.allowResizing());
-        expandedUi.registerObserver(this);
+        expandedUi = new ExpandedUiWithCheckboxes<String>(stringMessages, IconResources.INSTANCE.removeIcon(),
+                /* suggestValues*/ MediaTagConstants.imageTagSuggestions, stringMessages.enterTagsForTheImage(), 30,
+                stringMessages.allowResizing());
+        expandedUi.addChangeHandler(new ChangeHandler() {
+            @Override
+            public void onChange(ChangeEvent event) {
+                validateAndUpdate();
+            }
+        });
         validator.setCheckBoxes(expandedUi.getCheckBoxes());
         tagsListEditor = new StringListInlineEditorComposite(Collections.<String> emptyList(), expandedUi);
         tagsListEditor.addValueChangeHandler(new ValueChangeHandler<Iterable<String>>() {
@@ -293,16 +299,8 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
         return imageURLAndUploadComposite.getInitialFocusWidget();
     }
     
-    /**
-     * See {@link Observer#getNotified()}
-     */
     @Override
-    public void getNotified() {
-        validateAndUpdate();
-    }
-    
-    @Override
-    public void getNotified(Boolean data) {
-        imageURLAndUploadComposite.setUploadEnabled(data.booleanValue());
+    public void onFileStorageServiceTestPassed() {
+        imageURLAndUploadComposite.setUploadEnabled(true);
     }
 }

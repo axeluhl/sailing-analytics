@@ -47,11 +47,15 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
 
     private boolean valueChangeHandlerInitialized = false;
     
-    private final SubmitButton submitButton;
+    private final FormPanel uploadFormPanel;
     
-    private boolean uploadEnabled;
+    private final HorizontalPanel uploadPanel;
     
     public URLFieldWithFileUpload(final StringMessages stringMessages) {
+        this(stringMessages, true);
+    }
+   
+    public URLFieldWithFileUpload(final StringMessages stringMessages, boolean initiallyEnableUpload) {
         final VerticalPanel mainPanel = new VerticalPanel();
         final HorizontalPanel imageUrlPanel = new HorizontalPanel();
         mainPanel.add(new Label(stringMessages.pleaseOnlyUploadContentYouHaveAllUsageRightsFor()));
@@ -87,11 +91,13 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         imageUrlPanel.add(removePanel);
         
         // the upload panel
-        FormPanel uploadFormPanel = new FormPanel();
+        uploadFormPanel = new FormPanel();
         mainPanel.add(uploadFormPanel);
-        HorizontalPanel uploadPanel = new HorizontalPanel();
+        uploadPanel = new HorizontalPanel();
         uploadPanel.setSpacing(3);
-        uploadFormPanel.add(uploadPanel);
+        if(initiallyEnableUpload) {
+            uploadFormPanel.add(uploadPanel);
+        }
         uploadFormPanel.setAction("/sailingserver/fileupload");
         uploadFormPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
         uploadFormPanel.setMethod(FormPanel.METHOD_POST);
@@ -102,18 +108,13 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         uploadPanel.add(fileUploadField);
         final InputElement inputElement = fileUploadField.getElement().cast();
         inputElement.setName("file");
-        submitButton = new SubmitButton(stringMessages.send());
+        final SubmitButton submitButton = new SubmitButton(stringMessages.send());
         submitButton.setEnabled(false);
         fileUploadField.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
-                if(fileUploadFieldSet()) {
-                    if (uploadEnabled) {
-                        submitButton.setEnabled(true);
-                    } else {
-                        submitButton.setEnabled(false);
-                        Notification.notify(stringMessages.setUpStorageService(), NotificationType.ERROR);
-                    }
+                if(fileUploadField.getFilename() != null && !fileUploadField.getFilename().isEmpty()) {
+                    submitButton.setEnabled(true);
                 }
             }
         });
@@ -208,14 +209,11 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         return JSONParser.parseStrict(jsonString.replaceFirst("<pre[^>]*>(.*)</pre>", "$1"));
     }
     
-    public void setUploadEnabled(boolean value) {
-        uploadEnabled = value;
-        if (fileUploadFieldSet()) { 
-            submitButton.setEnabled(value);
+    public void setUploadEnabled(boolean uploadEnabled) {
+        if (uploadEnabled) {
+            uploadFormPanel.add(uploadPanel);
+        } else {
+            uploadFormPanel.remove(uploadPanel);
         }
-    }
-    
-    private boolean fileUploadFieldSet() {
-        return fileUploadField.getFilename() != null && !fileUploadField.getFilename().isEmpty();
     }
 }

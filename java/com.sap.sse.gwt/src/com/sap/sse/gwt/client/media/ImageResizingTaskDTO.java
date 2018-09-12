@@ -11,12 +11,14 @@ import com.sap.sse.common.media.MimeType;
 /**
  * Used to transfer an ImageDTO and a list of MediaTagConstants which store information on how to resize the image
  * 
- * @author Robin Fleige(D067799)
+ * 
+ * @author Robin Fleige (D067799)
  *
  */
 public class ImageResizingTaskDTO implements IsSerializable {
 
     private ImageDTO image;
+    //contains the list of resizing tasks, can not be null, if this is empty the ImageResizingTaskDTO is only an upload task
     private List<MediaTagConstants> resizingTask;
 
     /** for GWT */
