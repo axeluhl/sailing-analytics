@@ -1,5 +1,6 @@
 package com.sap.sse.pairinglist;
 
+import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.common.Util.Pair;
 
 /**
@@ -14,5 +15,5 @@ public interface PairingList<Flight, Group, Competitor, CompetitorAllocation> {
      * 
      * @return {@link Pair}s of {@link Competitor}s and {@link CompetitorAllocation}
      */
-    Iterable<Pair<Competitor, CompetitorAllocation>> getCompetitors(Flight flight, Group group);
+    Iterable<Pair<Competitor, CompetitorAllocation>> getCompetitors(Flight flight, Group group) throws PairingListCreationException;
 }
