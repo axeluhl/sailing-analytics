@@ -128,7 +128,7 @@ public class TaggingServiceImpl implements TaggingService {
                         Subject subject = SecurityUtils.getSubject();
                         subject.checkPermission(
                                 Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
-                        if ((subject.getPrincipals() != null && subject.getPrincipal().equals(tag.getUsername()))
+                        if ((subject.getPrincipal() != null && subject.getPrincipal().equals(tag.getUsername()))
                                 || subject.hasRole("admin")) {
                             raceLog.revokeEvent(tagEvent.getAuthor(), tagEvent, "Revoked");
                         } else {
