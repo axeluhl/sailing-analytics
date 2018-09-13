@@ -45,7 +45,14 @@ import com.sap.sse.security.ui.shared.UserDTO;
  * shown at the {@link com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel RaceBoard}. Tags consist of a heading and
  * optional a comment and/or image. Tag-Buttons allow to preset tags which are used more frequently by an user. Public
  * tags will be stored as an {@link com.sap.sailing.domain.abstractlog.race.RaceLogEvent RaceLogEvent}, private tags
- * will be stored in the {@link com.sap.sse.security.UserStore UserStore}.
+ * will be stored in the {@link com.sap.sse.security.UserStore UserStore}.<br/>
+ * <br/>
+ * The TaggingPanel is also used as a data provider for all of its subcomponents like header, footer and content
+ * section. Therefor the TaggingPanel provides references to important services, string messages, its current state ando
+ * so on.
+ * Best practise: The constructor of subcomponents of the TaggingPanel contains only the TaggingPanel as a parameter.
+ * Every other required shared resource (string messages, service references, ...) can be requested from the
+ * TaggingPanel itself.
  */
 public class TaggingPanel extends ComponentWithoutSettings
         implements RaceTimesInfoProviderListener, UserStatusEventHandler {
