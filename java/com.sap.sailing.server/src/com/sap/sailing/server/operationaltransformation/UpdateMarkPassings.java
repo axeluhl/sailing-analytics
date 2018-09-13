@@ -1,5 +1,6 @@
 package com.sap.sailing.server.operationaltransformation;
 
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
@@ -8,6 +9,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
+import com.sap.sse.common.Util;
 
 public class UpdateMarkPassings extends AbstractRaceOperation<Void> {
     private static final long serialVersionUID = 8462323149468755367L;
@@ -19,7 +21,11 @@ public class UpdateMarkPassings extends AbstractRaceOperation<Void> {
             Iterable<MarkPassing> markPassings) {
         super(raceIdentifier);
         this.competitor = competitor;
-        this.markPassings = markPassings;
+        // ensure that markPassings is a serializable collection; Iterable could, e.g., also
+        // be a TreeMap.Values collection or similar. See also bug 4746.
+        final ArrayList<MarkPassing> markPassingsList = new ArrayList<>();
+        Util.addAll(markPassings, markPassingsList);
+        this.markPassings = markPassingsList;
     }
 
     @Override

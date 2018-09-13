@@ -241,6 +241,7 @@ public abstract class CanvasOverlayV3 {
             public void onAdd(OverlayViewMethods methods) {
                 methods.getPanes().getMapPane().appendChild(canvas.getElement());
                 CanvasOverlayV3.this.onAttach();
+                methods.getPanes().getOverlayMouseTarget().appendChild(canvas.getElement());
             }
         };
         return result;

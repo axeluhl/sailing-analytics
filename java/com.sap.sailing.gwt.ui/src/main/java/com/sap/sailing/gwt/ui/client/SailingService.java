@@ -122,6 +122,7 @@ import com.sap.sse.common.mail.MailException;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtService;
 import com.sap.sse.gwt.client.media.ImageDTO;
+import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.gwt.client.replication.RemoteReplicationService;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -796,4 +797,18 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      * Checks if the given race is currently in state tracking or loading.
      */
     Boolean checkIfRaceIsTracking(RegattaAndRaceIdentifier race);
+
+    /**
+     * Resizes an {@Link ImageDTO} that is part of an {@link ImageResizingTaskDTO} into a set of resized versions. This set only contains one image in most cases, because most {@Link ImageDTO} only hold one predefined {@link MediaTagConstants}.
+     * All {@link MediaTagConstants} stored in the resizingTask of the {@link ImageResizingTaskDTO} create a resize. Since no {@link MediaTagConstants} have the same defined bounds, there will  be no merge of these {@Link ImageDTO}.
+     * Uses the {@link FileStorageService} to store the resized images.
+     * If an error occurs during resize or storing process, it will be tried to restore the previous state.
+     * 
+     * @author Robin Fleige (D067799)
+     * 
+     * @param imageResizingTask is an {@link ImageResizingTaskDTO} with the information on how the image saved in the {@Link ImageDTO} should be resized. The resizingTask attribute should not be null or empty at this point
+     * @return returns a set of {@Link ImageDTO}, that contain the resized variants of the {@Link ImageDTO} in toResizeImage
+     * @throws Exception can throw different type of exceptions
+     */
+    Set<ImageDTO> resizeImage(ImageResizingTaskDTO imageResizingTask) throws Exception;
 }
