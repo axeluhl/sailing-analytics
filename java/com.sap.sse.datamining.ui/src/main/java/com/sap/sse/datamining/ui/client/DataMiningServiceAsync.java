@@ -24,10 +24,15 @@ public interface DataMiningServiceAsync {
 
     public void getComponentsChangedTimepoint(AsyncCallback<Date> asyncCallback);
 
+    void getIdentityFunction(String localeInfoName, AsyncCallback<FunctionDTO> callback);
+    
     void getAllStatistics(String localeInfoName, AsyncCallback<HashSet<FunctionDTO>> callback);
 
     void getStatisticsFor(DataRetrieverChainDefinitionDTO currentRetrieverChainDefinition, String localeName,
             AsyncCallback<HashSet<FunctionDTO>> asyncCallback);
+    
+    void getAggregatorDefinitions(String localeInfoName,
+            AsyncCallback<HashSet<AggregationProcessorDefinitionDTO>> callback);
 
     void getAggregatorDefinitionsFor(FunctionDTO extractionFunction, String localeInfoName,
             AsyncCallback<HashSet<AggregationProcessorDefinitionDTO>> asyncCallback);
@@ -54,10 +59,16 @@ public interface DataMiningServiceAsync {
             StatisticQueryDefinitionDTO queryDefinition, AsyncCallback<QueryResultDTO<ResultType>> callback);
 
     void getPredefinedQueryIdentifiers(AsyncCallback<HashSet<PredefinedQueryIdentifier>> callback);
+    
+    void getPredefinedQueryDefinition(PredefinedQueryIdentifier identifier, String localeInfoName,
+            AsyncCallback<StatisticQueryDefinitionDTO> callback);
 
     <ResultType extends Serializable> void runPredefinedQuery(DataMiningSession session,
             PredefinedQueryIdentifier identifier, String localeInfoName,
             AsyncCallback<QueryResultDTO<ResultType>> callback);
+    
+    void localize(StatisticQueryDefinitionDTO queryDefinition, String localeInfoName,
+            AsyncCallback<StatisticQueryDefinitionDTO> callback);
 
     /**
      * This method does nothing, but is needed to ensure, that some classes for the data mining (like

@@ -188,8 +188,9 @@ DynamicTrackedRace, GPSTrackListener<Competitor, GPSFixMoving> {
             public void onStartTimeChanged(ReadonlyRaceState state) {
                 final TimePoint oldStartTime = getStartOfRace();
                 invalidateStartTime();
-                if (!Util.equalsWithNull(oldStartTime, getStartOfRace())) {
-                    onStartTimeChangedByRaceCommittee(getStartOfRace());
+                final TimePoint startTimeFromRaceLog = state.getStartTime();
+                if (!Util.equalsWithNull(oldStartTime, startTimeFromRaceLog)) {
+                    onStartTimeChangedByRaceCommittee(startTimeFromRaceLog);
                 }
             }
         };

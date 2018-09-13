@@ -14,8 +14,10 @@ import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 public class RaceOfCompetitorRetrievalProcessor extends AbstractRetrievalProcessor<HasTrackedRaceContext, HasRaceOfCompetitorContext> {
 
     public RaceOfCompetitorRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<HasRaceOfCompetitorContext, ?>> resultReceivers, int retrievalLevel) {
-        super(HasTrackedRaceContext.class, HasRaceOfCompetitorContext.class, executor, resultReceivers, retrievalLevel);
+            Collection<Processor<HasRaceOfCompetitorContext, ?>> resultReceivers, int retrievalLevel,
+            String retrievedDataTypeMessageKey) {
+        super(HasTrackedRaceContext.class, HasRaceOfCompetitorContext.class, executor, resultReceivers, retrievalLevel,
+                retrievedDataTypeMessageKey);
     }
 
     @Override

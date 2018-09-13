@@ -21,13 +21,25 @@ public class AggregationProcessorDefinitionManager implements AggregationProcess
         definitionsMappedByExtractedTypeAndMessageKey = new HashMap<>();
     }
     
+    @Override
+    public Iterable<AggregationProcessorDefinition<?, ?>> getAll() {
+        Collection<AggregationProcessorDefinition<?, ?>> allDefinitions = new HashSet<>();
+        for (Map<String, AggregationProcessorDefinition<?, ?>> definitionsForType : definitionsMappedByExtractedTypeAndMessageKey.values()) {
+            allDefinitions.addAll(definitionsForType.values());
+        }
+        return allDefinitions;
+    }
+    
     @SuppressWarnings("unchecked")
     @Override
     public <ExtractedType> AggregationProcessorDefinition<ExtractedType, ?> get(Class<ExtractedType> extractedType, String aggregationNameMessageKey) {
-        if (definitionsMappedByExtractedTypeAndMessageKey.containsKey(extractedType)) {
-            return (AggregationProcessorDefinition<ExtractedType, ?>) definitionsMappedByExtractedTypeAndMessageKey.get(extractedType).get(aggregationNameMessageKey);
+        AggregationProcessorDefinition<ExtractedType, ?> definition = null;
+        Map<String, AggregationProcessorDefinition<?, ?>> definitionsForType = definitionsMappedByExtractedTypeAndMessageKey.get(extractedType);
+        if (definitionsForType != null) {
+            definition = (AggregationProcessorDefinition<ExtractedType, ?>) definitionsForType
+                    .get(aggregationNameMessageKey);
         }
-        return null;
+        return definition;
     }
 
     @Override

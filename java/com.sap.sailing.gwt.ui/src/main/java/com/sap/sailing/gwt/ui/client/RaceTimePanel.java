@@ -249,9 +249,9 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
                 endTimeOfLivePeriod = latestOfNewestTrackingEventAndEndOfRace == null ? null :
                     new Date(latestOfNewestTrackingEventAndEndOfRace.getTime() + RaceTimesCalculationUtil.TIME_AFTER_LIVE);
             } else {
-                endTimeOfLivePeriod = lastRaceTimesInfo.endOfTracking == null ? null : lastRaceTimesInfo.endOfTracking;
+                endTimeOfLivePeriod = lastRaceTimesInfo.endOfTracking;
                 if (lastRaceTimesInfo.endOfRace != null) {
-                    // this is a failsafe, if the tracking was never finsihed, the race was always assumed to be live.
+                    // this is a failsafe, if the tracking was never finished, the race was always assumed to be live.
                     Date latestAllowedTime = new Date(
                             lastRaceTimesInfo.endOfRace.getTime() + RaceTimesCalculationUtil.MAX_TIME_AFTER_RACE_END);
                     if (endTimeOfLivePeriod == null || endTimeOfLivePeriod.after(latestAllowedTime)) {

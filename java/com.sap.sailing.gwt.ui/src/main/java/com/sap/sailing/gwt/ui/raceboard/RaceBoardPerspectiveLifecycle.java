@@ -28,13 +28,6 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
     
     public static final String ID = "rb";
     
-    //constructor used by Standalone RaceBoard
-    public RaceBoardPerspectiveLifecycle(StringMessages stringMessages,
-            Iterable<DetailType> competitorChartAllowedDetailTypes, UserService userService,
-            Iterable<DetailType> availableDetailTypes) {
-        this(null, stringMessages, competitorChartAllowedDetailTypes, userService, availableDetailTypes);
-    }
-
     public RaceBoardPerspectiveLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages,
             Iterable<DetailType> competitorChartAllowedDetailTypes, UserService userService,
             Iterable<DetailType> availableDetailTypes) {
@@ -42,7 +35,8 @@ public class RaceBoardPerspectiveLifecycle extends AbstractPerspectiveLifecycle<
         raceMapLifecycle = new RaceMapLifecycle(stringMessages);
         windChartLifecycle = new WindChartLifecycle(stringMessages);
         maneuverTableLifecycle = new ManeuverTableLifecycle(stringMessages);
-        leaderboardPanelLifecycle = new SingleRaceLeaderboardPanelLifecycle(stringMessages, availableDetailTypes);
+        leaderboardPanelLifecycle = new SingleRaceLeaderboardPanelLifecycle(stringMessages, availableDetailTypes,
+                leaderboard.canBoatsOfCompetitorsChangePerRace);
         multiCompetitorRaceChartLifecycle = new MultiCompetitorRaceChartLifecycle(stringMessages, competitorChartAllowedDetailTypes);
         mediaPlayerLifecycle = new MediaPlayerLifecycle(stringMessages);
         raceTimePanelLifecycle = new RaceTimePanelLifecycle(stringMessages, userService);
