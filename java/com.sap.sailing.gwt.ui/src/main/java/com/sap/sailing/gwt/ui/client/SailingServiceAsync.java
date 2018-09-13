@@ -109,6 +109,7 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ServerInfoRetriever;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtServiceAsync;
 import com.sap.sse.gwt.client.media.ImageDTO;
+import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.gwt.client.replication.RemoteReplicationServiceAsync;
 import com.sap.sse.pairinglist.PairingList;
@@ -1017,4 +1018,11 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      * @see SailingService#checkIfRaceIsTracking(RegattaAndRaceIdentifier)
      */
     void checkIfRaceIsTracking(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Boolean> asyncCallback);
+
+    /**
+     * @see SailingService#resizeImage(ImageResizingTaskDTO)
+     * @param imageResizingTask the information on how the contained ImageDTO should be resized
+     * @param asyncCallback The callback called after finishing resizing, storing the returned ImageDTOs somewhere is proposed
+     */
+    void resizeImage(ImageResizingTaskDTO imageResizingTask, AsyncCallback<Set<ImageDTO>> asyncCallback);
 }
