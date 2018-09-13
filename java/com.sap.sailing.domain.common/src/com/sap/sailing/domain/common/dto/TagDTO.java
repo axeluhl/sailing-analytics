@@ -1,131 +1,14 @@
 package com.sap.sailing.domain.common.dto;
 
 import java.io.Serializable;
-import java.util.List;
 
 import com.sap.sse.common.TimePoint;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
  * Used to send tags over network. Allows to create tags with all possible combinations of states (private/public and
  * valid/revoked).
  */
 public class TagDTO implements Serializable {
-
-    /**
-     * Serializes and deserializes {@link TagDTO}.
-     * <p>
-     * <b>Notice:</b> There is no way to provide one single JSON-DeSerializer for server and client as GWT does not
-     * support org.json.simple package and server does not support the gwt json serializer. Therefor there is one
-     * DeSerializer for the server and one DeSerializer for the client side. <b>Changes in any of these DeSerializers
-     * require these changes also at the other DeSerializers!</b>
-     * <p>
-     * All DeSerializers, which need to be adapted at changes, are:
-     * <ul>
-     * <li>com.sap.sailing.gwt.ui.raceboard.tagging.TagDTODeSerializer</li>
-     * <li>com.sap.sailing.server.gateway.jaxrs.api.TagsResource.TagDTODeSerializer</li>
-     * </ul>
-     */
-    // TODO: Find a better way of serilaizing TagDTOs which is avvailable at client- & server-side!
-    public static abstract class TagDeSerializer {
-
-        public static final String FIELD_TAG = "tag";
-        public static final String FIELD_COMMENT = "comment";
-        public static final String FIELD_IMAGE_URL = "image";
-        public static final String FIELD_USERNAME = "username";
-        public static final String FIELD_VISIBLE_FOR_PUBLIC = "public";
-        public static final String FIELD_RACE_TIMEPOINT = "raceTimepoint";
-        public static final String FIELD_CREATED_AT = "createdAt";
-        public static final String FIELD_REVOKED_AT = "revokedAt";
-
-        /**
-         * Serializes single {@link TagDTO tag} to json object.
-         * 
-         * @param tag
-         *            tag to be seriaized
-         * @return json object
-         */
-        public abstract String serializeTag(TagDTO tag);
-
-        /**
-         * Serializes list of {@link TagDTO tags} to json array.
-         * 
-         * @param tags
-         *            tags to be seriaized
-         * @return json array
-         */
-        public abstract String serializeTags(List<TagDTO> tags);
-
-        /**
-         * Deserializes json object to {@link TagDTO tag}.
-         * 
-         * @param jsonObject
-         *            json object to be deseriaized
-         * @return {@link TagDTO tag}
-         */
-        public abstract TagDTO deserializeTag(String jsonObject);
-
-        /**
-         * Deserializes json array to list of {@link TagDTO tags}.
-         * 
-         * @param jsonArray
-         *            json array to be deseriaized
-         * @return list of {@link TagDTO tags}
-         */
-        public abstract List<TagDTO> deserializeTags(String jsonArray);
-
-        /**
-         * Serializes given {@link TimePoint}.
-         * 
-         * @param timepoint
-         *            {@link TimePoint} to be serialized
-         * @return serialized timepoint as long, <code>0</code> if <code>timepoint</code> is <code>null</code>
-         */
-        public long serializeTimePoint(TimePoint timepoint) {
-            return timepoint == null ? 0 : timepoint.asMillis();
-        }
-
-        /**
-         * Deserializes long to {@link MillisecondsTimePoint}.
-         * 
-         * @param timepoint
-         *            timepoint to be deserialized
-         * @return {@link TimePoint}
-         */
-        public TimePoint deserilizeTimePoint(long timepoint) {
-            return new MillisecondsTimePoint(timepoint);
-        }
-
-        /**
-         * Combines <code>leaderboardName</code>, <code>raceColumnName</code> and <code>fleetName</code> to a unique
-         * key. Used to store private tags in {@link com.sap.sse.security.UserStore UserStore}.
-         * 
-         * @param leaderboardName
-         *            leaderboard name
-         * @param raceColumnName
-         *            race column name
-         * @param fleetName
-         *            fleet name
-         * @return unique key for given race
-         */
-        public String generateUniqueKey(String leaderboardName, String raceColumnName, String fleetName) {
-            return "Tags:" + escape(leaderboardName) + "+" + escape(raceColumnName) + "+" + escape(fleetName);
-        }
-
-        /**
-         * Escapes given string by replacing every occurence of '/' by '//' and '+' by '/p'.
-         * 
-         * @param string
-         *            string to be escaped
-         * @return escaped string
-         */
-        private String escape(String string) {
-            // '+' needs to be escaped as method replaceAll() expects the first parameter to be a regular expression and
-            // not a simple string. As '+' has a different meaning in context of a regex it needs to be escaped by '\+'
-            // which again needs to be escaped by '\\+'.
-            return string.replaceAll("/", "//").replaceAll("\\+", "/p");
-        }
-    }
 
     private static final long serialVersionUID = 3907411584518452300L;
 

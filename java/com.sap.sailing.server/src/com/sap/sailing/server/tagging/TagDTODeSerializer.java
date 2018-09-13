@@ -9,14 +9,21 @@ import org.json.simple.parser.JSONParser;
 
 import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 /**
- * Serializes and deserializes {@link TagDTO tags}. <b>Before changing this class, have a look at
- * {@link TagDTO.TagDeSerializer}.</b>
- * 
- * @see TagDTO.TagDeSerializer
+ * Serializes and deserializes {@link TagDTO tags}.
  */
-public class TagDTODeSerializer extends TagDTO.TagDeSerializer {
+public class TagDTODeSerializer {
+
+    public static final String FIELD_TAG = "tag";
+    public static final String FIELD_COMMENT = "comment";
+    public static final String FIELD_IMAGE_URL = "image";
+    public static final String FIELD_USERNAME = "username";
+    public static final String FIELD_VISIBLE_FOR_PUBLIC = "public";
+    public static final String FIELD_RACE_TIMEPOINT = "raceTimepoint";
+    public static final String FIELD_CREATED_AT = "createdAt";
+    public static final String FIELD_REVOKED_AT = "revokedAt";
 
     private final JSONParser parser = new JSONParser();
 
@@ -90,12 +97,24 @@ public class TagDTODeSerializer extends TagDTO.TagDeSerializer {
         return deserializeTags(jsonArray.toJSONString());
     }
 
-    @Override
+    /**
+     * Serializes single {@link TagDTO tag} to json object.
+     * 
+     * @param tag
+     *            tag to be seriaized
+     * @return json object
+     */
     public String serializeTag(TagDTO tag) {
         return serialize(tag).toString();
     }
 
-    @Override
+    /**
+     * Serializes list of {@link TagDTO tags} to json array.
+     * 
+     * @param tags
+     *            tags to be seriaized
+     * @return json array
+     */
     public String serializeTags(List<TagDTO> tags) {
         JSONArray jsonTags = new JSONArray();
         for (TagDTO tag : tags) {
@@ -104,7 +123,13 @@ public class TagDTODeSerializer extends TagDTO.TagDeSerializer {
         return jsonTags.toString();
     }
 
-    @Override
+    /**
+     * Deserializes json object to {@link TagDTO tag}.
+     * 
+     * @param jsonObject
+     *            json object to be deseriaized
+     * @return {@link TagDTO tag}
+     */
     public TagDTO deserializeTag(String jsonObject) {
         TagDTO result = null;
         if (jsonObject != null && !jsonObject.isEmpty()) {
@@ -119,7 +144,13 @@ public class TagDTODeSerializer extends TagDTO.TagDeSerializer {
 
     }
 
-    @Override
+    /**
+     * Deserializes json array to list of {@link TagDTO tags}.
+     * 
+     * @param jsonArray
+     *            json array to be deseriaized
+     * @return list of {@link TagDTO tags}
+     */
     public List<TagDTO> deserializeTags(String jsonArray) {
         JSONArray jsonTags;
         List<TagDTO> result = new ArrayList<TagDTO>();
@@ -134,5 +165,57 @@ public class TagDTODeSerializer extends TagDTO.TagDeSerializer {
             }
         }
         return result;
+    }
+
+    /**
+     * Serializes given {@link TimePoint}.
+     * 
+     * @param timepoint
+     *            {@link TimePoint} to be serialized
+     * @return serialized timepoint as long, <code>0</code> if <code>timepoint</code> is <code>null</code>
+     */
+    public long serializeTimePoint(TimePoint timepoint) {
+        return timepoint == null ? 0 : timepoint.asMillis();
+    }
+
+    /**
+     * Deserializes long to {@link MillisecondsTimePoint}.
+     * 
+     * @param timepoint
+     *            timepoint to be deserialized
+     * @return {@link TimePoint}
+     */
+    public TimePoint deserilizeTimePoint(long timepoint) {
+        return new MillisecondsTimePoint(timepoint);
+    }
+
+    /**
+     * Combines <code>leaderboardName</code>, <code>raceColumnName</code> and <code>fleetName</code> to a unique key.
+     * Used to store private tags in {@link com.sap.sse.security.UserStore UserStore}.
+     * 
+     * @param leaderboardName
+     *            leaderboard name
+     * @param raceColumnName
+     *            race column name
+     * @param fleetName
+     *            fleet name
+     * @return unique key for given race
+     */
+    public String generateUniqueKey(String leaderboardName, String raceColumnName, String fleetName) {
+        return "Tags:" + escape(leaderboardName) + "+" + escape(raceColumnName) + "+" + escape(fleetName);
+    }
+
+    /**
+     * Escapes given string by replacing every occurence of '/' by '//' and '+' by '/p'.
+     * 
+     * @param string
+     *            string to be escaped
+     * @return escaped string
+     */
+    private String escape(String string) {
+        // '+' needs to be escaped as method replaceAll() expects the first parameter to be a regular expression and
+        // not a simple string. As '+' has a different meaning in context of a regex it needs to be escaped by '\+'
+        // which again needs to be escaped by '\\+'.
+        return string.replaceAll("/", "//").replaceAll("\\+", "/p");
     }
 }
