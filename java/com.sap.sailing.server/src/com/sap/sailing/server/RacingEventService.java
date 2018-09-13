@@ -91,6 +91,7 @@ import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.server.anniversary.AnniversaryRaceDeterminator;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sailing.server.simulation.SimulationService;
+import com.sap.sailing.server.tagging.TaggingService;
 import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
@@ -605,6 +606,8 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     PolarDataService getPolarDataService();
 
     SimulationService getSimulationService();
+    
+    TaggingService getTaggingService();
     
     RaceTracker getRaceTrackerById(Object id);
     

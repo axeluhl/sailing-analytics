@@ -177,18 +177,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         if (raceColumn != null && !raceColumn.equals(this.raceColumn)) {
             this.raceColumn = raceColumn;
         }
-        loadAllPrivateTags(new AsyncCallback<List<TagDTO>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-            }
-
-            @Override
-            public void onSuccess(List<TagDTO> result) {
-                if (result != null) {
-                    result.forEach(privateTag -> tagListProvider.getAllTags().add(privateTag));
-                }
-            }
-        });
+        reloadPrivateTags();
     }
 
     /**
@@ -207,8 +196,8 @@ public class TaggingPanel extends ComponentWithoutSettings
      * 
      * @see #saveTag(String, Sting, String, boolean, TimePoint, boolean)
      */
-    protected void saveTag(String tag, String comment, String imageURL, boolean isVisibleForPublic) {
-        saveTag(tag, comment, imageURL, isVisibleForPublic, null);
+    protected void saveTag(String tag, String comment, String imageURL, boolean visibleForPublic) {
+        saveTag(tag, comment, imageURL, visibleForPublic, null);
     }
 
     /**
@@ -220,12 +209,12 @@ public class TaggingPanel extends ComponentWithoutSettings
      * values: <code>comment</code> and <code>imageURL</code> will be replaced by an empty string,
      * <code>raceTimePoint</code> by current {@link #getTimerTime() timer position}.
      */
-    protected void saveTag(String tag, String comment, String imageURL, boolean isVisibleForPublic,
+    protected void saveTag(String tag, String comment, String imageURL, boolean visibleForPublic,
             TimePoint raceTimePoint) {
         boolean tagIsNewTag = true;
         // check if tag already exists
         for (TagDTO tagDTO : tagListProvider.getAllTags()) {
-            if (tagDTO.equals(tag, comment, imageURL, userService.getCurrentUser().getName(), isVisibleForPublic,
+            if (tagDTO.equals(tag, comment, imageURL, userService.getCurrentUser().getName(), visibleForPublic,
                     new MillisecondsTimePoint(getTimerTime()))) {
                 tagIsNewTag = false;
                 break;
@@ -251,91 +240,33 @@ public class TaggingPanel extends ComponentWithoutSettings
             final TimePoint saveRaceTimePoint = (raceTimePoint == null ? new MillisecondsTimePoint(getTimerTime())
                     : raceTimePoint);
 
-            // parameters are valid and tag is ready to be saved
-            if (isVisibleForPublic) {
-                savePublicTag(tag, saveComment, saveImageURL, saveRaceTimePoint);
-            } else {
-                savePrivateTag(tag, saveComment, saveImageURL, saveRaceTimePoint);
-            }
+            sailingService.addTag(leaderboardName, raceColumn.getName(), fleet.getName(), tag, saveComment,
+                    saveImageURL, visibleForPublic, saveRaceTimePoint, new AsyncCallback<SuccessInfo>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            Notification.notify(stringMessages.tagNotSavedReason(caught.toString()),
+                                    NotificationType.ERROR);
+                        }
+
+                        @Override
+                        public void onSuccess(SuccessInfo result) {
+                            if (result.isSuccessful()) {
+                                Notification.notify(stringMessages.tagSavedSuccessfully(), NotificationType.INFO);
+                                // reload private tags if added tag is private
+                                if (!visibleForPublic) {
+                                    reloadPrivateTags();
+                                }
+                            } else {
+                                Notification.notify(stringMessages.tagNotSavedReason(result.getMessage()),
+                                        NotificationType.ERROR);
+                            }
+                        }
+                    });
         }
     }
 
     /**
-     * Saves public tag to {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog}. Must <b>NOT</b> be called
-     * directly, instead use {@link #saveTag(String, Sting, String, boolean, TimePoint, boolean)}!
-     * 
-     * @see #saveTag(String, Sting, String, boolean, TimePoint, boolean)
-     */
-    private void savePublicTag(String tag, String comment, String imageURL, TimePoint raceTimePoint) {
-        sailingService.addTagToRaceLog(leaderboardName, raceColumn.getName(), fleet.getName(), tag, comment, imageURL,
-                raceTimePoint, new AsyncCallback<SuccessInfo>() {
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        Notification.notify(stringMessages.tagNotSavedReason(caught.toString()),
-                                NotificationType.ERROR);
-                    }
-
-                    @Override
-                    public void onSuccess(SuccessInfo result) {
-                        if (result.isSuccessful()) {
-
-                            Notification.notify(stringMessages.tagSavedSuccessfully(), NotificationType.INFO);
-
-                        } else {
-                            Notification.notify(stringMessages.tagNotSavedReason(result.getMessage()),
-                                    NotificationType.ERROR);
-                        }
-                    }
-                });
-    }
-
-    /**
-     * Saves private tag to {@link com.sap.sse.security.UserStore UserStore}. Must <b>NOT</b> be called directly,
-     * instead use {@link #saveTag(String, Sting, String, boolean, TimePoint, boolean)}!
-     * 
-     * @see #saveTag(String, Sting, String, boolean, TimePoint, boolean)
-     */
-    private void savePrivateTag(String tag, String comment, String imageURL, TimePoint raceTimePoint) {
-        loadAllPrivateTags(new AsyncCallback<List<TagDTO>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                Notification.notify(stringMessages.tagNotSaved(), NotificationType.WARNING);
-            }
-
-            @Override
-            public void onSuccess(List<TagDTO> loadedPrivateTags) {
-                removePrivateTagsFromProvider();
-                addTagsToProvider(loadedPrivateTags);
-
-                TagDTO newTag = new TagDTO(tag, comment, imageURL, userService.getCurrentUser().getName(), false,
-                        raceTimePoint, MillisecondsTimePoint.now());
-                loadedPrivateTags.add(newTag);
-
-                // store list of loaded private tags also containing the new tag
-                TagDTODeSerializer serializer = new TagDTODeSerializer();
-                String jsonString = serializer.serializeTags(loadedPrivateTags);
-                userService.setPreference(
-                        serializer.generateUniqueKey(leaderboardName, raceColumn.getName(), fleet.getName()),
-                        jsonString, new AsyncCallback<Void>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                Notification.notify(stringMessages.tagNotSaved(), NotificationType.WARNING);
-                            }
-
-                            @Override
-                            public void onSuccess(Void result) {
-                                Notification.notify(stringMessages.tagSavedSuccessfully(), NotificationType.INFO);
-                                tagListProvider.getAllTags().add(newTag);
-                                updateContent();
-                            }
-                        });
-            }
-        });
-    }
-
-    /**
-     * Removes tag in non-<code>silent</code> mode ignoring async callbacks. Error handling is part of
-     * {@link #removeTag(TagDTO, boolean, AsyncCallback)}.
+     * Removes tag in non-<code>silent</code> mode.
      * 
      * @param tag
      *            tag to remove
@@ -347,64 +278,20 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     /**
-     * Removes tag ignoring callbacks. Error handling is part of {@link #removeTag(TagDTO, boolean, AsyncCallback)}.
+     * Sends request to {@link SailingServiceAsync SailingService} to remove the given <code>tag</code>.
      * 
      * @param tag
      *            tag to remove
      * @param silent
      *            when set to <code>true</code>, only error messages will get displayed to user
-     * 
-     * @see #removeTag(TagDTO, boolean, AsyncCallback)
      */
     protected void removeTag(TagDTO tag, boolean silent) {
-        removeTag(tag, silent, new AsyncCallback<Boolean>() {
-            // ignore callbacks
-            @Override
-            public void onFailure(Throwable caught) {
-            }
-
-            @Override
-            public void onSuccess(Boolean result) {
-            }
-        });
-    }
-
-    /**
-     * Removes tag waiting for async operations to finish. When all operations finished, callback will be resolved.
-     * <br/>
-     * If attribute <code>isVisibleForPublic</code> of given tag is set to <code>true</code>, a request to the
-     * {@link SailingServiceAsync SailingService} is sent to revoke the given
-     * {@link com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent RaceLogTagEvent} in
-     * {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog}. Otherwise the given tag is private and must be
-     * removed from the {@link com.sap.sse.security.UserStore UserStore}.
-     * 
-     * @param tag
-     *            tag to be removed
-     * @param silent
-     *            when set to <code>true</code>, only error messages will get displayed to user
-     */
-    private void removeTag(TagDTO tag, boolean silent, AsyncCallback<Boolean> callback) {
-        if (tag.isVisibleForPublic()) {
-            removePublicTag(tag, silent, callback);
-        } else {
-            removePrivateTag(tag, silent, callback);
-        }
-    }
-
-    /**
-     * Removes public tag from {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog}. Must <b>NOT</b> be
-     * called directly, instead use {@link #removeTag(TagDTO, boolean, AsyncCallback)}!
-     * 
-     * @see #removeTag(TagDTO, boolean, AsyncCallback)
-     */
-    private void removePublicTag(TagDTO tag, boolean silent, AsyncCallback<Boolean> callback) {
-        sailingService.removeTagFromRaceLog(leaderboardName, raceColumn.getName(), fleet.getName(), tag,
+        sailingService.removeTag(leaderboardName, raceColumn.getName(), fleet.getName(), tag,
                 new AsyncCallback<SuccessInfo>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         Notification.notify(stringMessages.tagNotRemoved(), NotificationType.ERROR);
                         GWT.log(caught.getMessage());
-                        callback.onFailure(caught);
                     }
 
                     @Override
@@ -415,62 +302,12 @@ public class TaggingPanel extends ComponentWithoutSettings
                             if (!silent) {
                                 Notification.notify(stringMessages.tagRemovedSuccessfully(), NotificationType.SUCCESS);
                             }
-                            callback.onSuccess(true);
                         } else {
                             Notification.notify(stringMessages.tagNotRemoved() + " " + result.getMessage(),
                                     NotificationType.ERROR);
-                            callback.onSuccess(false);
                         }
                     }
                 });
-    }
-
-    /**
-     * Removes private tag from {@link com.sap.sse.security.UserStore UserStore}. Must <b>NOT</b> be called directly,
-     * instead use {@link #removeTag(TagDTO, boolean, AsyncCallback)}!
-     * 
-     * @see #removeTag(TagDTO, boolean, AsyncCallback)
-     */
-    private void removePrivateTag(TagDTO tag, boolean silent, AsyncCallback<Boolean> callback) {
-        loadAllPrivateTags(new AsyncCallback<List<TagDTO>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                callback.onFailure(caught);
-            }
-
-            @Override
-            public void onSuccess(List<TagDTO> privateTags) {
-                removePrivateTagsFromProvider();
-                privateTags.remove(tag);
-                addTagsToProvider(privateTags);
-
-                // store list in user storage
-                TagDTODeSerializer serializer = new TagDTODeSerializer();
-                String jsonString = serializer.serializeTags(privateTags);
-                userService.setPreference(
-                        serializer.generateUniqueKey(leaderboardName, raceColumn.getName(), fleet.getName()),
-                        jsonString, new AsyncCallback<Void>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                Notification.notify(stringMessages.tagNotRemoved(), NotificationType.ERROR);
-                                GWT.log(caught.getMessage());
-                                callback.onFailure(caught);
-                            }
-
-                            @Override
-                            public void onSuccess(Void result) {
-                                removePrivateTagsFromProvider();
-                                addTagsToProvider(privateTags);
-                                updateContent();
-                                if (!silent) {
-                                    Notification.notify(stringMessages.tagRemovedSuccessfully(),
-                                            NotificationType.SUCCESS);
-                                }
-                                callback.onSuccess(true);
-                            }
-                        });
-            }
-        });
     }
 
     /**
@@ -479,39 +316,57 @@ public class TaggingPanel extends ComponentWithoutSettings
      * 
      * @see TagDTO
      */
-    protected void updateTag(TagDTO tagToUpdate, String tag, String comment, String imageURL, boolean isPublic) {
-        if (tagToUpdate.getUsername().equals(userService.getCurrentUser().getName())) {
-            removeTag(tagToUpdate, true, new AsyncCallback<Boolean>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    // errors are handled in removeTag(TagDTO, boolean, AsyncCallback<Boolen>), can be ignored here
-                }
-
-                @Override
-                public void onSuccess(Boolean successful) {
-                    // only save tag when deletion of old tag was successful.
-                    if (successful) {
-                        saveTag(tag, comment, imageURL, isPublic, tagToUpdate.getRaceTimepoint());
+    protected void updateTag(TagDTO tagToUpdate, String tag, String comment, String imageURL,
+            boolean visibleForPublic) {
+        sailingService.updateTag(leaderboardName, raceColumn.getName(), fleet.getName(), tagToUpdate, tag, comment,
+                imageURL, visibleForPublic, new AsyncCallback<SuccessInfo>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        Notification.notify(stringMessages.tagNotSavedReason(caught.getMessage()),
+                                NotificationType.ERROR);
+                        GWT.log(caught.getMessage());
                     }
-                }
-            });
-        } else {
-            Notification.notify(stringMessages.tagNotEditable(), NotificationType.WARNING);
-        }
+
+                    @Override
+                    public void onSuccess(SuccessInfo result) {
+                        if (result.isSuccessful()) {
+                            tagListProvider.getAllTags().remove(tagToUpdate);
+                            // If old tag was or new tag is private, reload all private tags. Otherwise just refresh UI.
+                            if (!tagToUpdate.isVisibleForPublic() || !visibleForPublic) {
+                                reloadPrivateTags();
+                            } else {
+                                updateContent();
+                            }
+                            Notification.notify(stringMessages.tagSavedSuccessfully(), NotificationType.SUCCESS);
+                        } else {
+                            Notification.notify(stringMessages.tagNotSavedReason(result.getMessage()),
+                                    NotificationType.ERROR);
+                        }
+                    }
+                });
     }
 
     /**
-     * Adds a list of {@link TagDTO tags} to the {@link TagListProvider}.
+     * Removes all private tags from {@link TagListProvider}, loads all private tags from {@link SailingServiceAsync
+     * SailingService}, adds them to the {@link TagListProvider} and updates the UI via {@link #updateContent()}.
      */
-    private void addTagsToProvider(List<TagDTO> tags) {
-        tags.forEach(tag -> tagListProvider.getAllTags().add(tag));
-    }
+    private void reloadPrivateTags() {
+        sailingService.getPrivateTags(leaderboardName, raceColumn.getName(), fleet.getName(),
+                new AsyncCallback<List<TagDTO>>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log(caught.getMessage());
+                    }
 
-    /**
-     * Removes all private tags from {@link TagListProvider}.
-     */
-    private void removePrivateTagsFromProvider() {
-        tagListProvider.getAllTags().removeIf(tag -> !tag.isVisibleForPublic());
+                    @Override
+                    public void onSuccess(List<TagDTO> result) {
+                        tagListProvider.getAllTags().removeIf(tag -> !tag.isVisibleForPublic());
+                        if (result != null && !result.isEmpty()) {
+                            tagListProvider.getAllTags().addAll(result);
+                        }
+                        updateContent();
+                    }
+                });
     }
 
     /**
@@ -557,41 +412,6 @@ public class TaggingPanel extends ComponentWithoutSettings
                     tagButton.isVisibleForPublic());
         });
         tagButtons.add(tagButton);
-    }
-
-    /**
-     * Loads private tags of {@link UserService#getCurrentUser() current user} from
-     * {@link com.sap.sse.security.UserStore UserStore}. Callback will be triggered if receiving of tags was successful.
-     */
-    private void loadAllPrivateTags(AsyncCallback<List<TagDTO>> callback) {
-        // only reload tags if user is logged in
-        if (userService.getCurrentUser() != null) {
-            TagDTODeSerializer serializer = new TagDTODeSerializer();
-
-            // load all private tags from user store
-            userService.getPreference(
-                    serializer.generateUniqueKey(leaderboardName, raceColumn.getName(), fleet.getName()),
-                    new AsyncCallback<String>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            callback.onFailure(caught);
-                        }
-
-                        @Override
-                        public void onSuccess(String result) {
-                            if (result != null && !result.isEmpty()) {
-                                // parse and deserialize String result into List of private tags
-                                callback.onSuccess(serializer.deserializeTags(result));
-                            } else {
-                                // no private tags received from server, send empty list as callback parameter.
-                                callback.onSuccess(new ArrayList<TagDTO>());
-                            }
-                        }
-                    });
-        } else {
-            // should not happen
-            callback.onFailure(null);
-        }
     }
 
     /**
@@ -759,17 +579,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         });
 
         // load content for new user
-        loadAllPrivateTags(new AsyncCallback<List<TagDTO>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                // no private tags available, e.g. when user is not logged in or does not have private tags
-            }
-
-            @Override
-            public void onSuccess(List<TagDTO> result) {
-                addTagsToProvider(result);
-            }
-        });
+        reloadPrivateTags();
         filterbarPanel.loadTagFilterSets();
         footerPanel.loadAllTagButtons();
 

@@ -60,8 +60,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.AuthorizationException;
-import org.apache.shiro.subject.Subject;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -263,6 +261,7 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RaceLogTrackingInfoDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
+import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
@@ -444,7 +443,6 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
-import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
@@ -2237,30 +2235,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
     public RaceTimesInfoDTO getRaceTimesInfoIncludingTags(RegattaAndRaceIdentifier raceIdentifier,
             TimePoint latestReceivedTagTime) {
         RaceTimesInfoDTO raceTimesInfo = getRaceTimesInfo(raceIdentifier);
-        List<TagDTO> tags = new ArrayList<TagDTO>();
-        raceTimesInfo.setTags(tags);
-        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
-        Iterable<RaceLog> raceLogs = trackedRace.getAttachedRaceLogs();
-
-        for (RaceLog raceLog : raceLogs) {
-            ReadonlyRaceState raceState = ReadonlyRaceStateImpl.getOrCreate(getService(), raceLog);
-            Iterable<RaceLogTagEvent> foundTagEvents = raceState.getTagEvents();
-            for (RaceLogTagEvent tagEvent : foundTagEvents) {
-                // TODO: As soon as permission-vertical branch got merged into master, apply
-                // new permission system at this if-statement and remove this old way of
-                // checking for permissions. (see bug 4104, comment 9)
-                // functionality: Check if user has the permission to see this tag.
-                if ((latestReceivedTagTime == null && tagEvent.getRevokedAt() == null)
-                        || (latestReceivedTagTime != null && tagEvent.getRevokedAt() == null
-                                && tagEvent.getCreatedAt().after(latestReceivedTagTime))
-                        || (latestReceivedTagTime != null && tagEvent.getRevokedAt() != null
-                                && tagEvent.getRevokedAt().after(latestReceivedTagTime))) {
-                    tags.add(new TagDTO(tagEvent.getTag(), tagEvent.getComment(), tagEvent.getImageURL(),
-                            tagEvent.getUsername(), true, tagEvent.getLogicalTimePoint(), tagEvent.getCreatedAt(),
-                            tagEvent.getRevokedAt()));
-                }
-            }
-        }
+        raceTimesInfo.setTags(getService().getTaggingService().getPublicTags(raceIdentifier, latestReceivedTagTime));
         return raceTimesInfo;
     }
 
@@ -6488,97 +6463,63 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
         raceLog.add(event);
     }
 
-    /**
-     * Adds tag as {@link RaceLogTagEvent} to {@link RaceLog}. Checks following aspects:
-     * <ul>
-     * <li>tag title does not exceed max length</li>
-     * <li>comment does not exceed max length</li>
-     * <li>user has required permissions to write {@link RaceLogEvent RaceLogEvents}</li>
-     * </ul>
-     * 
-     * @param leaderboardName
-     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
-     * @param raceColumnName
-     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
-     * @param fleetName
-     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
-     * @param tag
-     *            title of tag, must <b>NOT</b> be <code>null</code>
-     * @param comment
-     *            optional comment of tag, must <b>NOT</b> be <code>null</code> (use empty string if no comment was
-     *            provided)
-     * @param imageURL
-     *            optional image URL of tag, must <b>NOT</b> be <code>null</code> (use empty string if no image was
-     *            provided)
-     * @param raceTimepoint
-     *            timepoint in race where user created tag, must <b>NOT</b> be <code>null</code>
-     * @return <code>successful</code> {@link SuccessInfo} if tag was added to {@link RaceLog}, otherwise
-     *         <code>non-successful</code> {@link SuccessInfo}
-     */
     @Override
-    public SuccessInfo addTagToRaceLog(String leaderboardName, String raceColumnName, String fleetName, String tag,
-            String comment, String imageURL, TimePoint raceTimepoint) {
+    public SuccessInfo addTag(String leaderboardName, String raceColumnName, String fleetName, String tag,
+            String comment, String imageURL, boolean visibleForPublic, TimePoint raceTimepoint) {
         SuccessInfo successInfo = new SuccessInfo(true, null, null, null);
-        try {
-            if (tag.length() > TagDTO.MAX_TAG_LENGTH) {
-                throw new Exception("tagTagIsToLong");
-            }
-            if (comment.length() > TagDTO.MAX_COMMENT_LENGTH) {
-                throw new Exception("tagCommentIsToLong");
-            }
-            
-            // TODO: As soon as permission-vertical branch got merged into master, apply
-            // new permission system at this permission check (see bug 4104, comment 9)
-            // functionality: Check if user has the permission to add RaceLogEvents to RaceLog.
-            SecurityUtils.getSubject().checkPermission(
-                    Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
-            RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
-            raceLog.add(new RaceLogTagEventImpl(tag, comment, imageURL, raceTimepoint, getService().getServerAuthor(),
-                    raceLog.getCurrentPassId()));
-        } catch (AuthorizationException e) {
-            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "tagMissingPermissions"),
+        boolean successful = getService().getTaggingService().addTag(leaderboardName, raceColumnName, fleetName, tag,
+                comment, imageURL, visibleForPublic, raceTimepoint);
+        if (!successful) {
+            successInfo = new SuccessInfo(false,
+                    serverStringMessages.get(getClientLocale(), getService().getTaggingService().getLastErrorCode()),
                     null, null);
-        } catch (Exception e) {
-            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), e.getMessage()), null,
-                    null);
         }
         return successInfo;
     }
 
     @Override
-    public SuccessInfo removeTagFromRaceLog(String leaderboardName, String raceColumnName, String fleetName,
-            TagDTO tag) {
+    public SuccessInfo removeTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag) {
         SuccessInfo successInfo = new SuccessInfo(true, null, null, null);
-        RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
-        ReadonlyRaceState raceState = ReadonlyRaceStateImpl.getOrCreate(getService(), raceLog);
-        Iterable<RaceLogTagEvent> foundTagEvents = raceState.getTagEvents();
-        for (RaceLogTagEvent tagEvent : foundTagEvents) {
-            if (tagEvent.getTag().equals(tag.getTag()) && tagEvent.getComment().equals(tag.getComment())
-                    && tagEvent.getImageURL().equals(tag.getImageURL())
-                    && tagEvent.getUsername().equals(tag.getUsername())
-                    && tagEvent.getLogicalTimePoint().equals(tag.getRaceTimepoint())) {
-                try {
-                    // check if logged in user is the same user as the creator or logged in user is Administrator
-                    Subject subject = SecurityUtils.getSubject();
-                    subject.checkPermission(
-                            Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
-                    if ((subject.getPrincipals() != null
-                            && subject.getPrincipals().getPrimaryPrincipal().equals(tag.getUsername()))
-                            || subject.hasRole("admin")) {
-                        raceLog.revokeEvent(tagEvent.getAuthor(), tagEvent, "Revoked");
-                    } else {
-                        successInfo = new SuccessInfo(false,
-                                serverStringMessages.get(getClientLocale(), "tagMissingPermissions"), null, null);
-                    }
-                } catch (AuthorizationException e) {
-                    successInfo = new SuccessInfo(false,
-                            serverStringMessages.get(getClientLocale(), "tagMissingPermissions"), null, null);
-                } catch (Exception e) {
-                    successInfo = new SuccessInfo(false, e.toString(), null, null);
-                }
-            }
+        boolean successful = getService().getTaggingService().removeTag(leaderboardName, raceColumnName, fleetName,
+                tag);
+        if (!successful) {
+            successInfo = new SuccessInfo(false,
+                    serverStringMessages.get(getClientLocale(), getService().getTaggingService().getLastErrorCode()),
+                    null, null);
         }
         return successInfo;
+    }
+
+    @Override
+    public SuccessInfo updateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tagToUpdate,
+            String tag, String comment, String imageURL, boolean visibleForPublic) {
+        SuccessInfo successInfo = new SuccessInfo(true, null, null, null);
+        boolean successful = getService().getTaggingService().updateTag(leaderboardName, raceColumnName, fleetName,
+                tagToUpdate, tag, comment, imageURL, visibleForPublic);
+        if (!successful) {
+            successInfo = new SuccessInfo(false,
+                    serverStringMessages.get(getClientLocale(), getService().getTaggingService().getLastErrorCode()),
+                    null, null);
+        }
+        return successInfo;
+    }
+
+    @Override
+    public List<TagDTO> getAllTags(String leaderboardName, String raceColumnName, String fleetName) {
+        List<TagDTO> result = new ArrayList<TagDTO>();
+        result.addAll(getService().getTaggingService().getPrivateTags(leaderboardName, raceColumnName, fleetName));
+        result.addAll(getService().getTaggingService().getPublicTags(leaderboardName, raceColumnName, fleetName));
+        return result;
+    }
+
+    @Override
+    public List<TagDTO> getPublicTags(String leaderboardName, String raceColumnName, String fleetName) {
+        return getService().getTaggingService().getPublicTags(leaderboardName, raceColumnName, fleetName);
+    }
+
+    @Override
+    public List<TagDTO> getPrivateTags(String leaderboardName, String raceColumnName, String fleetName) {
+        return getService().getTaggingService().getPrivateTags(leaderboardName, raceColumnName, fleetName);
     }
 
     /**
