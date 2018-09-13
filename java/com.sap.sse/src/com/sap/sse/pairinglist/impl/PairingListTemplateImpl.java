@@ -574,13 +574,9 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                                     if (prevFlight >= 0) {
                                         for (int i = prevFlight * groups; i <prevFlight * groups + groups; i++) {
                                             for (int j = 0; j < (competitors / groups); j++) {
-                                            	try{
                                                 if (pairingList[i][j] == pairingList[zGroup][position[0]]) {
                                                     prevPosition = j;
-                                                }
-                                            	} catch (Exception e){
-                                            		System.out.println("lkajsl");
-                                            	}
+                                                }	
                                             }
                                         }
                                     }
