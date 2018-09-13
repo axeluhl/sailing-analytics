@@ -72,6 +72,12 @@ public class Swarm implements TimeListener {
     private final ColorMapper colorMapper;
 
     private boolean clearNextFrame = false;
+    
+    /**
+     * For a windfield that has no wind speed spread, e.g. only one wind speed source, this value will be used to define
+     * a {@link ValueRangeFlexibleBoundaries} for this swarm.
+     */
+    private static double WINDSPEED_DEFAULT_SPREAD_IN_KNOTS = 0.1;
 
     public Swarm(FullCanvasOverlay fullcanvas, MapWidget map, com.sap.sse.gwt.client.player.Timer timer,
             VectorField vectorField, StreamletParameters streamletPars) {
@@ -346,10 +352,12 @@ public class Swarm implements TimeListener {
                 }
             }
         }
-        if (Math.abs(maxSpeedInKnots - minSpeedInKnots) <= 0.01 && minSpeedInKnots < maxSpeedInKnots) {
-            valueRange.setMinMax(minSpeedInKnots - 0.1, maxSpeedInKnots + 0.1);
-        } else if (minSpeedInKnots <= maxSpeedInKnots) {
-            valueRange.setMinMax(minSpeedInKnots, maxSpeedInKnots);
+        if (minSpeedInKnots <= maxSpeedInKnots) {
+            if (Math.abs(maxSpeedInKnots - minSpeedInKnots) <= WINDSPEED_DEFAULT_SPREAD_IN_KNOTS) {
+                valueRange.setMinMax(minSpeedInKnots - WINDSPEED_DEFAULT_SPREAD_IN_KNOTS, maxSpeedInKnots + WINDSPEED_DEFAULT_SPREAD_IN_KNOTS);
+            } else {
+                valueRange.setMinMax(minSpeedInKnots, maxSpeedInKnots);
+            }
         }
         drawSwarm();
         return true;

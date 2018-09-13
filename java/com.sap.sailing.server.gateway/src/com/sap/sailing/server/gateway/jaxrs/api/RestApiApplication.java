@@ -30,6 +30,7 @@ public class RestApiApplication extends Application {
         classes.add(StatisticsResource.class);
         classes.add(WindResource.class);
         classes.add(MarkRessource.class);
+        classes.add(TagsResource.class);
         
         // Exception Mappers
         classes.add(ShiroAuthorizationExceptionTo401ResponseMapper.class);

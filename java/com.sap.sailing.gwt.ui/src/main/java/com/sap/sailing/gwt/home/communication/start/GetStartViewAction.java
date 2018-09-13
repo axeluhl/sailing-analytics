@@ -19,9 +19,9 @@ import com.sap.sailing.gwt.server.EventHolder;
 import com.sap.sailing.gwt.server.EventStageCandidateCalculator;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
 import com.sap.sailing.gwt.server.RecentEventsCalculator;
-import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.gwt.dispatch.shared.caching.IsClientCacheable;
 import com.sap.sse.shared.media.ImageDescriptor;
@@ -63,7 +63,7 @@ public class GetStartViewAction implements SailingAction<StartViewDTO>, IsClient
             if (!Util.isEmpty(videosOfEvent) && result.getVideos().size() < MAX_VIDEO_COUNT) {
                 VideoDescriptor youTubeRandomUrl = HomeServiceUtil.getRandomVideo(videosOfEvent);
                 MimeType type = youTubeRandomUrl.getMimeType();
-                if (MediaConstants.SUPPORTED_VIDEO_TYPES.contains(type)) {
+                if (MediaTagConstants.SUPPORTED_VIDEO_TYPES.contains(type)) {
                     SailingVideoDTO candidate = new SailingVideoDTO(eventRef, youTubeRandomUrl.getURL().toString(), type,
                             youTubeRandomUrl.getCreatedAtDate().asDate());
                     candidate.setTitle(holder.event.getName());
@@ -91,7 +91,7 @@ public class GetStartViewAction implements SailingAction<StartViewDTO>, IsClient
             }
             for (VideoDescriptor videoUrl : event.getVideos()) {
                 MimeType type = videoUrl.getMimeType();
-                if (MediaConstants.SUPPORTED_VIDEO_TYPES.contains(type)) {
+                if (MediaTagConstants.SUPPORTED_VIDEO_TYPES.contains(type)) {
                     SailingVideoDTO candidate = new SailingVideoDTO(eventRef, videoUrl.getURL().toString(), type, //
                             videoUrl.getCreatedAtDate().asDate()
                     );

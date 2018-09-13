@@ -64,7 +64,7 @@ public class TagInputPanel extends FlowPanel {
         checkboxWrapper = new SimplePanel();
         checkboxWrapper.setStyleName(style.tagInputPanelIsVisibleForPublic());        
         visibleForPublicCheckBox = new CheckBox(stringMessages.tagVisibleForPublicCheckBox());
-        visibleForPublicCheckBox.setValue(DEFAULT_VISIBLE_FOR_PUBLIC);       
+        visibleForPublicCheckBox.setValue(DEFAULT_VISIBLE_FOR_PUBLIC);    
         checkboxWrapper.setWidget(visibleForPublicCheckBox);
         add(checkboxWrapper);
         
@@ -184,11 +184,9 @@ public class TagInputPanel extends FlowPanel {
     }
 
     protected void setCurrentStatus() {
-        checkboxWrapper.clear();
         if (taggingPanel.hasPermissionToModifyPublicTags()) {
             checkboxWrapper.setVisible(true);
             noPermissionForPublicTagsLabel.setVisible(false);
-            setVisibleForPublic(DEFAULT_VISIBLE_FOR_PUBLIC);
         } else {;
             checkboxWrapper.setVisible(false);
             noPermissionForPublicTagsLabel.setVisible(true);

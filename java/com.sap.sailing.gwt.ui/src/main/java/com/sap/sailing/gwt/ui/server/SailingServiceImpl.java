@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.server;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilterInputStream;
@@ -52,6 +53,8 @@ import java.util.regex.Pattern;
 import java.util.stream.StreamSupport;
 import java.util.zip.GZIPInputStream;
 
+import javax.imageio.metadata.IIOMetadata;
+import javax.management.InvalidAttributeValueException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -60,8 +63,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.AuthorizationException;
-import org.apache.shiro.subject.Subject;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -263,6 +264,7 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RaceLogTrackingInfoDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
+import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
@@ -444,7 +446,6 @@ import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingReplayRaceDTO;
-import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.TracTracRaceRecordDTO;
 import com.sap.sailing.gwt.ui.shared.TrackFileImportDeviceIdentifierDTO;
@@ -549,12 +550,15 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.filestorage.FileStorageManagementService;
 import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.InvalidPropertiesException;
+import com.sap.sse.filestorage.OperationFailedException;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.media.ImageDTO;
+import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.gwt.dispatch.servlets.ProxiedRemoteServiceServlet;
 import com.sap.sse.gwt.server.filestorage.FileStorageServiceDTOUtils;
@@ -583,6 +587,8 @@ import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.shared.media.impl.ImageDescriptorImpl;
 import com.sap.sse.shared.media.impl.VideoDescriptorImpl;
 import com.sap.sse.util.HttpUrlConnectionHelper;
+import com.sap.sse.util.ImageConverter;
+import com.sap.sse.util.ImageConverter.ImageWithMetadata;
 import com.sap.sse.util.ServiceTrackerFactory;
 import com.sap.sse.util.ThreadPoolUtil;
 import com.sapsailing.xrr.structureimport.eventimport.RegattaJSON;
@@ -2237,30 +2243,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
     public RaceTimesInfoDTO getRaceTimesInfoIncludingTags(RegattaAndRaceIdentifier raceIdentifier,
             TimePoint latestReceivedTagTime) {
         RaceTimesInfoDTO raceTimesInfo = getRaceTimesInfo(raceIdentifier);
-        List<TagDTO> tags = new ArrayList<TagDTO>();
-        raceTimesInfo.setTags(tags);
-        TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
-        Iterable<RaceLog> raceLogs = trackedRace.getAttachedRaceLogs();
-
-        for (RaceLog raceLog : raceLogs) {
-            ReadonlyRaceState raceState = ReadonlyRaceStateImpl.getOrCreate(getService(), raceLog);
-            Iterable<RaceLogTagEvent> foundTagEvents = raceState.getTagEvents();
-            for (RaceLogTagEvent tagEvent : foundTagEvents) {
-                // TODO: As soon as permission-vertical branch got merged into master, apply
-                // new permission system at this if-statement and remove this old way of
-                // checking for permissions. (see bug 4104, comment 9)
-                // functionality: Check if user has the permission to see this tag.
-                if ((latestReceivedTagTime == null && tagEvent.getRevokedAt() == null)
-                        || (latestReceivedTagTime != null && tagEvent.getRevokedAt() == null
-                                && tagEvent.getCreatedAt().after(latestReceivedTagTime))
-                        || (latestReceivedTagTime != null && tagEvent.getRevokedAt() != null
-                                && tagEvent.getRevokedAt().after(latestReceivedTagTime))) {
-                    tags.add(new TagDTO(tagEvent.getTag(), tagEvent.getComment(), tagEvent.getImageURL(),
-                            tagEvent.getUsername(), true, tagEvent.getLogicalTimePoint(), tagEvent.getCreatedAt(),
-                            tagEvent.getRevokedAt()));
-                }
-            }
-        }
+        raceTimesInfo.setTags(getService().getTaggingService().getPublicTags(raceIdentifier, latestReceivedTagTime));
         return raceTimesInfo;
     }
 
@@ -6488,97 +6471,63 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
         raceLog.add(event);
     }
 
-    /**
-     * Adds tag as {@link RaceLogTagEvent} to {@link RaceLog}. Checks following aspects:
-     * <ul>
-     * <li>tag title does not exceed max length</li>
-     * <li>comment does not exceed max length</li>
-     * <li>user has required permissions to write {@link RaceLogEvent RaceLogEvents}</li>
-     * </ul>
-     * 
-     * @param leaderboardName
-     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
-     * @param raceColumnName
-     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
-     * @param fleetName
-     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
-     * @param tag
-     *            title of tag, must <b>NOT</b> be <code>null</code>
-     * @param comment
-     *            optional comment of tag, must <b>NOT</b> be <code>null</code> (use empty string if no comment was
-     *            provided)
-     * @param imageURL
-     *            optional image URL of tag, must <b>NOT</b> be <code>null</code> (use empty string if no image was
-     *            provided)
-     * @param raceTimepoint
-     *            timepoint in race where user created tag, must <b>NOT</b> be <code>null</code>
-     * @return <code>successful</code> {@link SuccessInfo} if tag was added to {@link RaceLog}, otherwise
-     *         <code>non-successful</code> {@link SuccessInfo}
-     */
     @Override
-    public SuccessInfo addTagToRaceLog(String leaderboardName, String raceColumnName, String fleetName, String tag,
-            String comment, String imageURL, TimePoint raceTimepoint) {
+    public SuccessInfo addTag(String leaderboardName, String raceColumnName, String fleetName, String tag,
+            String comment, String imageURL, boolean visibleForPublic, TimePoint raceTimepoint) {
         SuccessInfo successInfo = new SuccessInfo(true, null, null, null);
-        try {
-            if (tag.length() > TagDTO.MAX_TAG_LENGTH) {
-                throw new Exception("tagTagIsToLong");
-            }
-            if (comment.length() > TagDTO.MAX_COMMENT_LENGTH) {
-                throw new Exception("tagCommentIsToLong");
-            }
-            
-            // TODO: As soon as permission-vertical branch got merged into master, apply
-            // new permission system at this permission check (see bug 4104, comment 9)
-            // functionality: Check if user has the permission to add RaceLogEvents to RaceLog.
-            SecurityUtils.getSubject().checkPermission(
-                    Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
-            RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
-            raceLog.add(new RaceLogTagEventImpl(tag, comment, imageURL, raceTimepoint, getService().getServerAuthor(),
-                    raceLog.getCurrentPassId()));
-        } catch (AuthorizationException e) {
-            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "tagMissingPermissions"),
+        boolean successful = getService().getTaggingService().addTag(leaderboardName, raceColumnName, fleetName, tag,
+                comment, imageURL, visibleForPublic, raceTimepoint);
+        if (!successful) {
+            successInfo = new SuccessInfo(false,
+                    serverStringMessages.get(getClientLocale(), getService().getTaggingService().getLastErrorCode()),
                     null, null);
-        } catch (Exception e) {
-            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), e.getMessage()), null,
-                    null);
         }
         return successInfo;
     }
 
     @Override
-    public SuccessInfo removeTagFromRaceLog(String leaderboardName, String raceColumnName, String fleetName,
-            TagDTO tag) {
+    public SuccessInfo removeTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag) {
         SuccessInfo successInfo = new SuccessInfo(true, null, null, null);
-        RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
-        ReadonlyRaceState raceState = ReadonlyRaceStateImpl.getOrCreate(getService(), raceLog);
-        Iterable<RaceLogTagEvent> foundTagEvents = raceState.getTagEvents();
-        for (RaceLogTagEvent tagEvent : foundTagEvents) {
-            if (tagEvent.getTag().equals(tag.getTag()) && tagEvent.getComment().equals(tag.getComment())
-                    && tagEvent.getImageURL().equals(tag.getImageURL())
-                    && tagEvent.getUsername().equals(tag.getUsername())
-                    && tagEvent.getLogicalTimePoint().equals(tag.getRaceTimepoint())) {
-                try {
-                    // check if logged in user is the same user as the creator or logged in user is Administrator
-                    Subject subject = SecurityUtils.getSubject();
-                    subject.checkPermission(
-                            Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
-                    if ((subject.getPrincipals() != null
-                            && subject.getPrincipals().getPrimaryPrincipal().equals(tag.getUsername()))
-                            || subject.hasRole("admin")) {
-                        raceLog.revokeEvent(tagEvent.getAuthor(), tagEvent, "Revoked");
-                    } else {
-                        successInfo = new SuccessInfo(false,
-                                serverStringMessages.get(getClientLocale(), "tagMissingPermissions"), null, null);
-                    }
-                } catch (AuthorizationException e) {
-                    successInfo = new SuccessInfo(false,
-                            serverStringMessages.get(getClientLocale(), "tagMissingPermissions"), null, null);
-                } catch (Exception e) {
-                    successInfo = new SuccessInfo(false, e.toString(), null, null);
-                }
-            }
+        boolean successful = getService().getTaggingService().removeTag(leaderboardName, raceColumnName, fleetName,
+                tag);
+        if (!successful) {
+            successInfo = new SuccessInfo(false,
+                    serverStringMessages.get(getClientLocale(), getService().getTaggingService().getLastErrorCode()),
+                    null, null);
         }
         return successInfo;
+    }
+
+    @Override
+    public SuccessInfo updateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tagToUpdate,
+            String tag, String comment, String imageURL, boolean visibleForPublic) {
+        SuccessInfo successInfo = new SuccessInfo(true, null, null, null);
+        boolean successful = getService().getTaggingService().updateTag(leaderboardName, raceColumnName, fleetName,
+                tagToUpdate, tag, comment, imageURL, visibleForPublic);
+        if (!successful) {
+            successInfo = new SuccessInfo(false,
+                    serverStringMessages.get(getClientLocale(), getService().getTaggingService().getLastErrorCode()),
+                    null, null);
+        }
+        return successInfo;
+    }
+
+    @Override
+    public List<TagDTO> getAllTags(String leaderboardName, String raceColumnName, String fleetName) {
+        List<TagDTO> result = new ArrayList<TagDTO>();
+        result.addAll(getService().getTaggingService().getPrivateTags(leaderboardName, raceColumnName, fleetName));
+        result.addAll(getService().getTaggingService().getPublicTags(leaderboardName, raceColumnName, fleetName));
+        return result;
+    }
+
+    @Override
+    public List<TagDTO> getPublicTags(String leaderboardName, String raceColumnName, String fleetName) {
+        return getService().getTaggingService().getPublicTags(leaderboardName, raceColumnName, fleetName);
+    }
+
+    @Override
+    public List<TagDTO> getPrivateTags(String leaderboardName, String raceColumnName, String fleetName) {
+        return getService().getTaggingService().getPrivateTags(leaderboardName, raceColumnName, fleetName);
     }
 
     /**
@@ -7235,6 +7184,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
     public FileStorageServicePropertyErrorsDTO testFileStorageServiceProperties(String serviceName,
             String localeInfoName) throws IOException {
         try {
+            if (serviceName == null) {
+                serviceName = getActiveFileStorageServiceName();
+            }
             FileStorageService service = getFileStorageService(serviceName);
             if (service != null) {
                 service.testProperties();
@@ -8503,5 +8455,110 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
                 ShardingContext.clearShardingConstraint(identifiedShardingType);
             }
         }
+    }
+
+    @Override
+    public Set<ImageDTO> resizeImage(final ImageResizingTaskDTO resizingTask) throws Exception {
+        if (resizingTask.getResizingTask() == null || resizingTask.getResizingTask().size() == 0) {
+            throw new InvalidAttributeValueException("Resizing Task can not be null or empty");
+        }
+        final ImageConverter converter = new ImageConverter();
+        // calculating the fileType of the image by its uri
+        final String sourceRef = resizingTask.getImage().getSourceRef();
+        final String fileType = sourceRef.substring(sourceRef.lastIndexOf(".") + 1);
+        final ImageWithMetadata imageAndMetadata = converter
+                .loadImage(HttpUrlConnectionHelper.redirectConnection(new URL(sourceRef)).getInputStream(), fileType);
+        final List<BufferedImage> resizedImages = converter.convertImage(imageAndMetadata.getImage(),
+                resizingTask.getResizingTask());
+        final List<String> sourceRefs = storeImages(resizedImages, fileType, imageAndMetadata.getMetadata());
+        // if an error occures while storing the files, all already stored files are removed before throwing an
+        // exception
+        if (sourceRefs == null || sourceRefs.size() < resizingTask.getResizingTask().size()) {
+            for (String alreadyStoredFileRef : sourceRefs) {
+                try {
+                    getService().getFileStorageManagementService().getActiveFileStorageService()
+                            .removeFile(new URI(alreadyStoredFileRef));
+                } catch (Exception e) {
+                }
+                // Exception occured while trying to revert changes after exception
+                // This only keeps some trash on the FileStorage
+            }
+            throw new Exception("Error occured while storing images on the FileStorage");
+        }
+        final Set<ImageDTO> resizedImagesAsDTOs = createImageDTOsFromURLsAndResizingTask(sourceRefs, resizingTask,
+                resizedImages);
+        for (String tag : resizingTask.getImage().getTags()) {
+            final MediaTagConstants predefinedTag = MediaTagConstants.fromName(tag);
+            if (predefinedTag != null && !resizingTask.getResizingTask().contains(predefinedTag)) {
+                final ImageDTO image = resizingTask.getImage();
+                for (MediaTagConstants tagConstant : resizingTask.getResizingTask()) {
+                    image.getTags().remove(tagConstant.getName());
+                }
+                resizedImagesAsDTOs.add(image);
+            }
+        }
+        return resizedImagesAsDTOs;
+    }
+
+    /**
+     * Takes a list of source URLs, the resizing task and the sizes of the resized images to create a ImageDTO for every
+     * resized image
+     * 
+     * @author Robin Fleige (D067799)
+     * 
+     * @param sourceRefs
+     *            list of source URLs
+     * @param resizingTask
+     *            the resizing task, with information about resizes and the original ImageDTO
+     * @param images
+     *            the BufferedImages, used to get their width and height
+     * @returns a List of ImageDTOs that contains an ImageDTO per resized image
+     */
+    private Set<ImageDTO> createImageDTOsFromURLsAndResizingTask(final List<String> sourceRefs,
+            final ImageResizingTaskDTO resizingTask, final List<BufferedImage> images) {
+        final Set<ImageDTO> imageDTOs = new HashSet<ImageDTO>();
+        for (int i = 0; i < sourceRefs.size(); i++) {
+            final ImageDTO imageDTO = resizingTask.cloneImageDTO();
+            for (MediaTagConstants tag : MediaTagConstants.values()) {
+                imageDTO.getTags().remove(tag.getName());
+            }
+            imageDTO.getTags().add(resizingTask.getResizingTask().get(i).getName());
+            imageDTO.setSourceRef(sourceRefs.get(i));
+            imageDTO.setSizeInPx(images.get(i).getWidth(), images.get(i).getHeight());
+            imageDTOs.add(imageDTO);
+        }
+        return imageDTOs;
+    }
+
+    /**
+     * Stores a list of BufferedImages and returns a list of URLs as Strings under which the BufferedImages are stored
+     * 
+     * @author Robin Fleige (D067799)
+     * 
+     * @param resizedImages
+     *            the BufferedImages that will be stored
+     * @param fileType
+     *            the format of the image, for example "png", "jpeg" or "jpg"
+     * @param metadata
+     *            the metadata of the original image
+     * @returns a list of URLs as Strings under which the BufferedImages are stored
+     */
+    private List<String> storeImages(final List<BufferedImage> resizedImages, final String fileType,
+            final IIOMetadata metadata) {
+        final List<String> sourceRefs = new ArrayList<>();
+
+        try {
+            for (final BufferedImage resizedImage : resizedImages) {
+                final InputStream fileStorageStream = new ImageConverter().imageWithMetadataToInputStream(resizedImage,
+                        metadata, fileType);
+                sourceRefs.add(getService().getFileStorageManagementService().getActiveFileStorageService()
+                        .storeFile(fileStorageStream, "." + fileType, new Long(fileStorageStream.available()))
+                        .toString());
+            }
+        } catch (NoCorrespondingServiceRegisteredException | IOException | OperationFailedException
+                | InvalidPropertiesException e) {
+            logger.log(Level.SEVERE, "Could not store file. Cause: " + e.getMessage());
+        }
+        return sourceRefs;
     }
 }

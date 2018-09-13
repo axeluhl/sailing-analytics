@@ -96,4 +96,14 @@ public abstract class AbstractSailingServerResource {
         bigDecimal = bigDecimal.setScale(places, RoundingMode.HALF_UP);
         return bigDecimal.doubleValue();
     }
+    
+    /**
+     * Restores original URL parameter which uses the escape "__" for "/"
+     * 
+     * @param toRestore url parameter as string containing "__" instead of "/"
+     * @return restored url parameter containing "/" instead of "__"
+     */
+    protected String restoreEscapedParameter(String toRestore) {
+        return toRestore != null && toRestore.contains(SLASH_ENCODING) ? toRestore.replace(SLASH_ENCODING, "/") : toRestore;
+    }
 }
