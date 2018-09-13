@@ -311,8 +311,20 @@ public class ImagesListComposite extends Composite {
         dialog.show();
     }
 
+    /**
+     * Calls the resizing service and updates the imageListDataProvider with the returned ImageDTOs
+     * 
+     * @author Robin Fleige (D067799)
+     * 
+     * @param resizingTask
+     *            The {@link ImageResizingTaskDTO} that contains the information about resizing. The resizingTask
+     *            attribute should not be null or empty at this point.
+     * @param originalImage
+     *            if called from {@link ImageEditDialog} contains the selected image, that will be replaced by the
+     *            returned ImageDTOs
+     */
     protected void callResizingServiceAndUpdateTable(ImageResizingTaskDTO resizingTask, ImageDTO originalImage) {
-        sailingService.resizeImage(resizingTask, new AsyncCallback<Set<ImageDTO>>(){
+        sailingService.resizeImage(resizingTask, new AsyncCallback<Set<ImageDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 Notification.notify(stringMessages.resizeUnsuccessfull(), NotificationType.ERROR);
@@ -320,7 +332,7 @@ public class ImagesListComposite extends Composite {
 
             @Override
             public void onSuccess(Set<ImageDTO> result) {
-                for(ImageDTO image : result) {
+                for (ImageDTO image : result) {
                     imageListDataProvider.getList().add(image);
                 }
                 imageListDataProvider.getList().remove(originalImage);

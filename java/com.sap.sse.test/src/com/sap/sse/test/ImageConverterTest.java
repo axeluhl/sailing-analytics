@@ -63,7 +63,8 @@ public class ImageConverterTest {
 
     /**
      * Tests the conversions that are done while resizing an image
-     * @throws IOException 
+     * 
+     * @throws IOException
      */
     @Test
     public void testConversions() throws IOException {

@@ -22,6 +22,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.adminconsole.EventDialog.FileStorageServiceConnectionTestObservable;
 import com.sap.sailing.gwt.ui.adminconsole.EventDialog.FileStorageServiceConnectionTestObserver;
+import com.sap.sailing.gwt.ui.client.SailingService;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
@@ -61,7 +62,8 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
         private List<CheckBox> doResize;
         private final FileStorageServiceConnectionTestObservable storageServiceAvailable;
 
-        public ImageParameterValidator(StringMessages stringMessages, FileStorageServiceConnectionTestObservable storageServiceAvailable) {
+        public ImageParameterValidator(StringMessages stringMessages,
+                FileStorageServiceConnectionTestObservable storageServiceAvailable) {
             this.stringMessages = stringMessages;
             this.storageServiceAvailable = storageServiceAvailable;
             this.doResize = new ArrayList<CheckBox>();
@@ -71,6 +73,13 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
             this.doResize = doResize;
         }
 
+        /*
+         * author Robin Fleige (D067799)
+         * will return an error message if the image is too small
+         * will return an error message if the width-height-ratio is not fitting for a resize
+         * will return an error message and show a checkbox to allow resizing if the image is too big
+         * will disable the checkbox if there is no working FileStorageService
+         */
         @Override
         public String getErrorMessage(final ImageResizingTaskDTO resizingTask) {
             String errorMessage = null;
@@ -124,6 +133,17 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
             return errorMessage;
         }
 
+        /**
+         * Searches for the checkbox for the given tag and returns it
+         * 
+         * @author Robin Fleige (D067799)
+         * 
+         * @param tag
+         *            the tag, the checkbox for is needed
+         * @param imageToValidate
+         *            the image with a list of all tags
+         * @returns the fitting checkbox for the tag
+         */
         private CheckBox getCheckBoxForTag(final String tag, final ImageDTO imageToValidate) {
             final List<String> tags = imageToValidate.getTags();
             CheckBox toReturn = null;
@@ -137,6 +157,15 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
             // collector anyway
         }
         
+        /**
+         * Calculates if
+         * 
+         * @author Robin Fleige (D067799)
+         * 
+         * @param imageToValidate
+         *            the image which has to be validated
+         * @returns true if the imageRatio fits into the bounds of all its {@link MediaTagConstants}
+         */
         private String imageRatioFits(ImageDTO imageToValidate) {
             String errorMessage = "";
             final double ratio = ((double) imageToValidate.getWidthInPx()) / imageToValidate.getHeightInPx();
@@ -166,7 +195,8 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
     }
 
     public ImageDialog(Date creationDate, SailingServiceAsync sailingService, StringMessages stringMessages,
-            FileStorageServiceConnectionTestObservable storageServiceAvailable, DialogCallback<ImageResizingTaskDTO> callback) {
+            FileStorageServiceConnectionTestObservable storageServiceAvailable,
+            DialogCallback<ImageResizingTaskDTO> callback) {
         this(creationDate, sailingService, stringMessages, storageServiceAvailable,
                 new ImageParameterValidator(stringMessages, storageServiceAvailable), callback);
     }
@@ -178,7 +208,6 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
         this.creationDate = creationDate;
-        storageServiceAvailable.registerObserver(this);
         getDialogBox().getWidget().setWidth("730px");
         busyIndicator = new SimpleBusyIndicator();
         imageURLAndUploadComposite = new URLFieldWithFileUpload(stringMessages, false);
@@ -212,8 +241,10 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
                 validateAndUpdate();
             }
         });
+        //the observer has to be registered after creating the URLFieldWithFileUpload
+        storageServiceAvailable.registerObserver(this);
         expandedUi = new ExpandedUiWithCheckboxes<String>(stringMessages, IconResources.INSTANCE.removeIcon(),
-                /* suggestValues*/ MediaTagConstants.imageTagSuggestions, stringMessages.enterTagsForTheImage(), 30,
+                /* suggestValues */ MediaTagConstants.imageTagSuggestions, stringMessages.enterTagsForTheImage(), 30,
                 stringMessages.allowResizing());
         expandedUi.addChangeHandler(new ChangeHandler() {
             @Override
@@ -231,6 +262,12 @@ public abstract class ImageDialog extends DataEntryDialog<ImageResizingTaskDTO>
         });
     }
 
+    /**
+     * Creates a {@link ImageResizingTaskDTO} which contains an {@link MediaTagConstants} for every tag that does not fit to the boundaries of the image.
+     * All tags that do not imply a resize will stay together on a single {@link ImageDTO} and are not stored in the {@link ImageResizingTaskDTO}.
+     * There will be a {@link ImageDTO} for each of the other {@link MediaTagConstants}.
+     * For a lookout to further progressing see {@link SailingService#resizeImage(ImageResizingTaskDTO)}
+     */
     @Override
     protected ImageResizingTaskDTO getResult() {
         final List<String> tags = new ArrayList<String>();

@@ -268,7 +268,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         return nameEntryField;
     }
 
-    // used for ImageDialog and VideoDialog to inform user that upload is not possible 
+    // used for ImageDialog and VideoDialog to inform user that upload is not possible
     // without needing to try it first
     private void testFileStorageService(FileStorageManagementGwtServiceAsync sailingService) {
         sailingService.testFileStorageServiceProperties(null, LocaleInfo.getCurrentLocale().getLocaleName(),
@@ -288,7 +288,10 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
     }
     
     /**
-     * 
+     * The only purpose of this class is to hold the value of the response of the {@link EventDialog#testFileStorageService(FileStorageManagementGwtServiceAsync)} method
+     * It will notify all registered observers on a change and directly after the registration, if the value is already true
+     * The value of this will only change from false to true, so the value can also be seen as an alreadyChanged value
+     * If the test fails, the value will not change due its lifetime
      * 
      * @author Robin Fleige (D067799)
      */
@@ -302,7 +305,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         
         public void testPassed() {
             value = true;
-            for(FileStorageServiceConnectionTestObserver observer : this.observer) {
+            for (FileStorageServiceConnectionTestObserver observer : this.observer) {
                 observer.onFileStorageServiceTestPassed();
             }
         }
@@ -313,7 +316,7 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
         
         public void registerObserver(FileStorageServiceConnectionTestObserver observer) {
             this.observer.add(observer);
-            if(value) {
+            if (value) {
                 observer.onFileStorageServiceTestPassed();
             }
         }
@@ -324,7 +327,8 @@ public abstract class EventDialog extends DataEntryDialogWithDateTimeBox<EventDT
     }
     
     /**
-     * 
+     * The only use of this interface is to get notified if the response of the {@link EventDialog#testFileStorageService(FileStorageManagementGwtServiceAsync)} method arrives
+     * Also see {@link EventDialog.FileStorageServiceConnectionTestObservable}
      * 
      * @author Robin Fleige (D067799)
      */

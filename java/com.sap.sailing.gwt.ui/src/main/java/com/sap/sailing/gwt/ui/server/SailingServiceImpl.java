@@ -7895,8 +7895,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Set<ImageDTO> resizeImage(final ImageResizingTaskDTO resizingTask) throws Exception{
-        if(resizingTask.getResizingTask() == null || resizingTask.getResizingTask().size() == 0) {
+    public Set<ImageDTO> resizeImage(final ImageResizingTaskDTO resizingTask) throws Exception {
+        if (resizingTask.getResizingTask() == null || resizingTask.getResizingTask().size() == 0) {
             throw new InvalidAttributeValueException("Resizing Task can not be null or empty");
         }
         final ImageConverter converter = new ImageConverter();
@@ -7908,12 +7908,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final List<BufferedImage> resizedImages = converter.convertImage(imageAndMetadata.getImage(),
                 resizingTask.getResizingTask());
         final List<String> sourceRefs = storeImages(resizedImages, fileType, imageAndMetadata.getMetadata());
-        //if an error occures while storing the files, all already stored files are removed before throwing an exception
-        if(sourceRefs == null || sourceRefs.size() < resizingTask.getResizingTask().size()) {
-            for(String alreadyStoredFileRef : sourceRefs) {
+        // if an error occures while storing the files, all already stored files are removed before throwing an
+        // exception
+        if (sourceRefs == null || sourceRefs.size() < resizingTask.getResizingTask().size()) {
+            for (String alreadyStoredFileRef : sourceRefs) {
                 try {
-                    getService().getFileStorageManagementService().getActiveFileStorageService().removeFile(new URI(alreadyStoredFileRef));
-                }catch(Exception e) {}
+                    getService().getFileStorageManagementService().getActiveFileStorageService()
+                            .removeFile(new URI(alreadyStoredFileRef));
+                } catch (Exception e) {
+                }
                 // Exception occured while trying to revert changes after exception
                 // This only keeps some trash on the FileStorage
             }

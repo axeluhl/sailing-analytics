@@ -9,8 +9,11 @@ import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.MimeType;
 
 /**
- * Used to transfer an ImageDTO and a list of MediaTagConstants which store information on how to resize the image
- * 
+ * Used to transfer an {@link ImageDTO} and a list of {@link MediaTagConstants} which store information on how to resize the image
+ * This class is used to validate an ImageDTO in the ImageDialog.ImageParameterValidator.
+ * After the validation passed, if the resizingTask is empty, it will be only used to transfer the ImageDTO.
+ * If the resizingTask is not empty it will be transfered to the SailingService#resizeImage, 
+ * where it will be used to create multiple {@link ImageDTO} with sizes fitting to the {@link MediaTagConstants}  
  * 
  * @author Robin Fleige (D067799)
  *
@@ -18,7 +21,8 @@ import com.sap.sse.common.media.MimeType;
 public class ImageResizingTaskDTO implements IsSerializable {
 
     private ImageDTO image;
-    //contains the list of resizing tasks, can not be null, if this is empty the ImageResizingTaskDTO is only an upload task
+    // contains the list of resizing tasks, can not be null, if this is empty the ImageResizingTaskDTO is only an upload
+    // task
     private List<MediaTagConstants> resizingTask;
 
     /** for GWT */
@@ -27,7 +31,7 @@ public class ImageResizingTaskDTO implements IsSerializable {
     }
 
     /**
-     * Creates an ImageDTO from the parameters
+     * Creates an {@link ImageDTO} from the parameters
      * 
      * @param imageRef
      *            needed for creating ImageDTO

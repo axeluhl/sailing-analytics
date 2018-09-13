@@ -113,7 +113,7 @@ public class ExpandedUiWithCheckboxes<ValueType> extends GenericStringListInline
                 } else {
                     source.setStylePrimaryName(getErrorStyle());
                 }
-                for(ChangeHandler changeHandler : ExpandedUiWithCheckboxes.this.changeHandler) {
+                for (ChangeHandler changeHandler : ExpandedUiWithCheckboxes.this.changeHandler) {
                     changeHandler.onChange(null);
                 }
             }

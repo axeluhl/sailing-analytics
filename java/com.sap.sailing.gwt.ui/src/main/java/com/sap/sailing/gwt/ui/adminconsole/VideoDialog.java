@@ -68,7 +68,6 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> implements F
                 callback);
         this.stringMessages = stringMessages;
         this.creationDate = createdAtDate;
-        storageServiceAvailable.registerObserver(this);
         getDialogBox().getWidget().setWidth("730px");
 
         mimeTypeListBox = createListBox(false);
@@ -97,6 +96,8 @@ public abstract class VideoDialog extends DataEntryDialog<VideoDTO> implements F
         tagsListEditor = new StringListInlineEditorComposite(Collections.<String> emptyList(),
                 new GenericStringListInlineEditorComposite.ExpandedUi<String>(stringMessages, IconResources.INSTANCE.removeIcon(), /* suggestValues */
                         MediaTagConstants.videoTagSuggestions, stringMessages.enterTagsForTheVideo(), 50));
+        //the observer has to be registered after creating the URLFieldWithFileUpload
+        storageServiceAvailable.registerObserver(this);
     }
 
     @Override
