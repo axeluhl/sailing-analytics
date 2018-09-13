@@ -30,6 +30,9 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sailing.domain.common.dto.TagDTO;
+import com.sap.sailing.domain.common.security.Permission;
+import com.sap.sailing.domain.common.security.Permission.Mode;
+import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.Notification;
@@ -192,6 +195,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                 }
             }
         });
+        setCurrentState(getCurrentState());
     }
 
     /**
@@ -747,6 +751,16 @@ public class TaggingPanel extends ComponentWithoutSettings
             });
         }
     }
+    
+    protected boolean hasPermissionToModifyPublicTags() {
+        boolean hasPermission = false;
+        if (leaderboardName != null && userService.getCurrentUser().hasPermission(
+                Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName),
+                SailingPermissionsForRoleProvider.INSTANCE)) {
+            hasPermission = true;
+        }
+        return hasPermission;
+    }
 
     /**
      * When the {@link UserService#getCurrentUser() current user} logs in or out the {@link #contentPanel content} needs
@@ -775,6 +789,8 @@ public class TaggingPanel extends ComponentWithoutSettings
                 addTagsToProvider(result);
             }
         });
+        
+        //reload filter and tag buttons for new user
         filterbarPanel.loadTagFilterSets();
         footerPanel.loadAllTagButtons();
 

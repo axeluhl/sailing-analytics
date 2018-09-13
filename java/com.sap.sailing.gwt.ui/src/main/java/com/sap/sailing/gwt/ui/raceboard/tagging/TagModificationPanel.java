@@ -37,7 +37,7 @@ public class TagModificationPanel extends FlowPanel {
 
         setStyleName(style.tagModificationPanel());
 
-        inputPanel = new TagInputPanel(stringMessages);
+        inputPanel = new TagInputPanel(taggingPanel);
 
         Button createTagFromInputFields = new Button(stringMessages.tagAddTag());
         createTagFromInputFields.setStyleName(style.tagDialogButton());
@@ -145,6 +145,7 @@ public class TagModificationPanel extends FlowPanel {
             createButtonsPanel.setVisible(true);
             editButtonsPanel.setVisible(false);
         }
+        inputPanel.setCurrentStatus();
     }
 
     /**

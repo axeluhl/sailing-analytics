@@ -87,6 +87,7 @@ public interface TagPanelResources extends ClientBundle {
         String tagInputPanelComment();
         String tagInputPanelImageURL();
         String tagInputPanelIsVisibleForPublic();
+        String tagInputPanelNoPermissionLabel();
 
         // tag filtering
         String tagFilterButton();

@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.raceboard.tagging;
 
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
@@ -24,13 +25,20 @@ public class TagInputPanel extends FlowPanel {
 
     private final TextBox tagTextBox, imageURLTextBox;
     private final TextArea commentTextArea;
+    private final SimplePanel checkboxWrapper;
     private final CheckBox visibleForPublicCheckBox;
+    private final Label noPermissionForPublicTagsLabel;
+    
+    private final TaggingPanel taggingPanel;
+    private final StringMessages stringMessages;  
 
     /**
      * Creates view allowing users to input values for tags and {@link TagButton tag-buttons}.
      */
-    protected TagInputPanel(StringMessages stringMessages) {
+    protected TagInputPanel(TaggingPanel taggingPanel) {
         setStyleName(style.tagInputPanel());
+        this.taggingPanel = taggingPanel;
+        this.stringMessages = taggingPanel.getStringMessages();
 
         tagTextBox = new TextBox();
         tagTextBox.setStyleName(style.tagInputPanelTag());
@@ -53,12 +61,17 @@ public class TagInputPanel extends FlowPanel {
         commentTextArea.getElement().setPropertyString("placeholder", stringMessages.tagLabelComment());
         add(commentTextArea);
 
-        SimplePanel checkboxWrapper = new SimplePanel();
+        checkboxWrapper = new SimplePanel();
+        checkboxWrapper.setStyleName(style.tagInputPanelIsVisibleForPublic());        
         visibleForPublicCheckBox = new CheckBox(stringMessages.tagVisibleForPublicCheckBox());
-        visibleForPublicCheckBox.setValue(DEFAULT_VISIBLE_FOR_PUBLIC);
-        checkboxWrapper.setStyleName(style.tagInputPanelIsVisibleForPublic());
+        visibleForPublicCheckBox.setValue(DEFAULT_VISIBLE_FOR_PUBLIC);       
         checkboxWrapper.setWidget(visibleForPublicCheckBox);
         add(checkboxWrapper);
+        
+        noPermissionForPublicTagsLabel = new Label(stringMessages.tagPublicModificationPermissionMissing());   
+        noPermissionForPublicTagsLabel.setStyleName(style.tagInputPanelNoPermissionLabel());     
+        add(noPermissionForPublicTagsLabel);
+        clearAllValues();
     }
 
     /**
@@ -68,7 +81,7 @@ public class TagInputPanel extends FlowPanel {
         tagTextBox.setText(DEFAULT_TAG);
         imageURLTextBox.setText(DEFAULT_COMMENT);
         commentTextArea.setText(DEFAULT_IMAGE_URL);
-        setVisibleForPublic(DEFAULT_VISIBLE_FOR_PUBLIC);
+        setCurrentStatus();
     }
 
     /**
@@ -135,6 +148,7 @@ public class TagInputPanel extends FlowPanel {
         setComment(tag.getComment());
         setImageURL(tag.getImageURL());
         setVisibleForPublic(tag.isVisibleForPublic());
+        setCurrentStatus();
     }
 
     protected void setTag(String tag) {
@@ -167,5 +181,18 @@ public class TagInputPanel extends FlowPanel {
 
     protected CheckBox getVisibleForPublicCheckBox() {
         return visibleForPublicCheckBox;
+    }
+
+    protected void setCurrentStatus() {
+        checkboxWrapper.clear();
+        if (taggingPanel.hasPermissionToModifyPublicTags()) {
+            checkboxWrapper.setVisible(true);
+            noPermissionForPublicTagsLabel.setVisible(false);
+            setVisibleForPublic(DEFAULT_VISIBLE_FOR_PUBLIC);
+        } else {;
+            checkboxWrapper.setVisible(false);
+            noPermissionForPublicTagsLabel.setVisible(true);
+            setVisibleForPublic(false);
+        }
     }
 }

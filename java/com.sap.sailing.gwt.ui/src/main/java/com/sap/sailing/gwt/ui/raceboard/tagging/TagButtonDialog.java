@@ -106,7 +106,7 @@ public class TagButtonDialog extends DialogBox {
         setText(stringMessages.tagEditCustomTagButtons());
         addStyleName(style.tagButtonDialog());
 
-        TagInputPanel inputPanel = new TagInputPanel(stringMessages);
+        TagInputPanel inputPanel = new TagInputPanel(taggingPanel);
         TagPreviewPanel tagPreviewPanel = new TagPreviewPanel(taggingPanel, inputPanel);
         CellTable<TagButton> tagButtonsTable = createTable(footerPanel, inputPanel, tagPreviewPanel);
         tagButtonsTable.addRedrawHandler(new Handler() {

@@ -292,10 +292,15 @@
 	width: auto;
 	margin: -2px 0 5px;
 	padding: 2px 5px 2px 2px;
-	border: 1px solid #cecece;
-	border-radius: 0px 0px 4px 4px;
 	resize: none;
 	font-size: 80%;
+}
+
+.tagInputPanelNoPermissionLabel{
+    color: red;
+    border: none;
+    font-size: 80%; 
+    margin: 3px 0px 3px 0px;
 }
 
 /**************************** Tag filtering ****************************/
