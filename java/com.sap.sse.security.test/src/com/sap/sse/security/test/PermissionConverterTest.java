@@ -49,7 +49,7 @@ public class PermissionConverterTest {
     @Test
     public void testGetWildcardPermission() {
         com.sap.sse.security.shared.WildcardPermission wp = new PermissionConverter().getWildcardPermission(new org.apache.shiro.authz.permission.WildcardPermission("LEADERBOARD:EDIT:KW2017 Laser Int.", /* case sensitive */ true));
-        assertEquals("LEADERBOARD:EDIT:KW2017 Laser Int.".toLowerCase(), wp.toString());
+        assertEquals("LEADERBOARD:EDIT:KW2017 Laser Int.", wp.toString());
     }
     
     @Test

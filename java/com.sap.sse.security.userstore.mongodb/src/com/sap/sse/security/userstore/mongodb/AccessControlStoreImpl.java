@@ -92,8 +92,8 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
 
     @Override
-    public void addAclPermission(QualifiedObjectIdentifier idOfAccessControlledObjectAsString, UserGroup userGroup, String action) {
-        AccessControlListAnnotation acl = getOrCreateAcl(idOfAccessControlledObjectAsString);
+    public void addAclPermission(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup, String action) {
+        AccessControlListAnnotation acl = getOrCreateAcl(idOfAccessControlledObject);
         acl.getAnnotation().addPermission(userGroup, action);
         mongoObjectFactory.storeAccessControlList(acl);
     }

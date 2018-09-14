@@ -39,6 +39,11 @@ public class QualifiedObjectIdentifierImpl implements QualifiedObjectIdentifier 
     }
 
     @Override
+    public String toString() {
+        return getTypeIdentifier() + QUALIFIER_SEPARATOR + getTypeRelativeObjectIdentifier();
+    }
+
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;

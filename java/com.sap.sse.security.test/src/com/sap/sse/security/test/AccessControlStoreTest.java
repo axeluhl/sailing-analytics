@@ -37,7 +37,7 @@ import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
  */
 public class AccessControlStoreTest {
     private static final String DEFAULT_TENANT_NAME = "TestDefaultTenant";
-    private final QualifiedObjectIdentifier testIdAsString = new QualifiedObjectIdentifierImpl("Test", "test");
+    private final QualifiedObjectIdentifier testId = new QualifiedObjectIdentifierImpl("Test", "test");
     private final String testDisplayName = "testDN";
     private final User testOwner = new UserImpl("admin", "admin@sapsailing.com", new UserGroupImpl(UUID.randomUUID(), "admin-tenant"),
             /* userGroupProvider */ null);
@@ -69,38 +69,38 @@ public class AccessControlStoreTest {
 
     @Test
     public void testCreateAccessControlList() throws UserGroupManagementException {
-        accessControlStore.createAccessControlList(testIdAsString, testDisplayName);
-        assertNotNull(accessControlStore.getAccessControlList(testIdAsString));
+        accessControlStore.createAccessControlList(testId, testDisplayName);
+        assertNotNull(accessControlStore.getAccessControlList(testId));
         newStores();
-        assertNotNull(accessControlStore.getAccessControlList(testIdAsString));
+        assertNotNull(accessControlStore.getAccessControlList(testId));
     }
     
     @Test
     public void testDeleteAccessControlList() throws UserGroupManagementException {
-        accessControlStore.createAccessControlList(testIdAsString, testDisplayName);
-        accessControlStore.removeAccessControlList(testIdAsString);
-        assertNull(accessControlStore.getAccessControlList(testIdAsString));
+        accessControlStore.createAccessControlList(testId, testDisplayName);
+        accessControlStore.removeAccessControlList(testId);
+        assertNull(accessControlStore.getAccessControlList(testId));
         newStores();
-        assertNull(accessControlStore.getAccessControlList(testIdAsString));
+        assertNull(accessControlStore.getAccessControlList(testId));
     }
     
     @Test
     public void testCreateOwnership() throws UserGroupManagementException {
-        accessControlStore.createOwnership(testIdAsString, testOwner, testTenantOwner, testDisplayName);
-        assertNotNull(accessControlStore.getOwnership(testIdAsString));
+        accessControlStore.createOwnership(testId, testOwner, testTenantOwner, testDisplayName);
+        assertNotNull(accessControlStore.getOwnership(testId));
         newStores();
-        assertNotNull(accessControlStore.getOwnership(testIdAsString));
+        assertNotNull(accessControlStore.getOwnership(testId));
     }
     
     @Test
     public void testDeleteOwnership() throws UserGroupManagementException {
-        accessControlStore.createOwnership(testIdAsString, testOwner, testTenantOwner, testDisplayName);
-        accessControlStore.removeOwnership(testIdAsString);
+        accessControlStore.createOwnership(testId, testOwner, testTenantOwner, testDisplayName);
+        accessControlStore.removeOwnership(testId);
         // expecting to fall back to default tenant ownership
-        final OwnershipAnnotation defaultOwnership = accessControlStore.getOwnership(testIdAsString);
+        final OwnershipAnnotation defaultOwnership = accessControlStore.getOwnership(testId);
         assertDefaultOwnership(defaultOwnership);
         newStores();
-        assertDefaultOwnership(accessControlStore.getOwnership(testIdAsString));
+        assertDefaultOwnership(accessControlStore.getOwnership(testId));
     }
 
     private void assertDefaultOwnership(final OwnershipAnnotation defaultOwnershipToCheck) {
