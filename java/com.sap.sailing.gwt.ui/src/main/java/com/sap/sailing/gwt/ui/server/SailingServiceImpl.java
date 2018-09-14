@@ -577,11 +577,9 @@ import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.impl.ReplicaDescriptor;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
-import com.sap.sse.security.ShiroPermissionBuilderImpl;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.Permission.DefaultModes;
-import com.sap.sse.security.shared.PermissionBuilder.DefaultActions;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.ui.server.SecurityDTOFactory;
@@ -3929,8 +3927,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             VenueDTO venue, boolean isPublic, Iterable<UUID> leaderboardGroupIds, String officialWebsiteURLString, String baseURLAsString,
             Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images, Iterable<VideoDTO> videos,
             Iterable<String> windFinderReviewedSpotCollectionIds) throws MalformedURLException, UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted(
-                ShiroPermissionBuilderImpl.getInstance().getPermission(Event.class, DefaultActions.EDIT, eventId.toString()))) {
+        if (SecurityUtils.getSubject().isPermitted(Permission.EVENT.getStringPermissionForObjects(DefaultModes.UPDATE, eventId.toString()))) {
             TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
             TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
             URL officialWebsiteURL = officialWebsiteURLString != null ? new URL(officialWebsiteURLString) : null;
@@ -3953,8 +3950,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images, Iterable<VideoDTO> videos, 
             Iterable<UUID> leaderboardGroupIds, String tenantOwnerName)
             throws MalformedURLException, UnauthorizedException {
-        SecurityUtils.getSubject().checkPermission(
-                ShiroPermissionBuilderImpl.getInstance().getPermission(Event.class, DefaultActions.CREATE));
+        SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermission(DefaultModes.CREATE));
         UUID eventUuid = UUID.randomUUID();
         TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
@@ -4011,8 +4007,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void removeEvent(UUID eventId) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted(
-                ShiroPermissionBuilderImpl.getInstance().getPermission(Event.class, DefaultActions.REMOVE, eventId.toString()))) {
+        if (SecurityUtils.getSubject().isPermitted(Permission.EVENT.getStringPermissionForObjects(DefaultModes.DELETE, eventId.toString()))) {
             getService().apply(new RemoveEvent(eventId));
             getSecurityService().deleteACL(Permission.EVENT.getQualifiedObjectIdentifier(eventId.toString()));
             getSecurityService().deleteOwnership(Permission.EVENT.getQualifiedObjectIdentifier(eventId.toString()));
@@ -4023,8 +4018,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void renameEvent(UUID eventId, String newName) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted(
-                ShiroPermissionBuilderImpl.getInstance().getPermission(Event.class, DefaultActions.EDIT, eventId.toString()))) {
+        if (SecurityUtils.getSubject().isPermitted(Permission.EVENT.getStringPermissionForObjects(DefaultModes.UPDATE, eventId.toString()))) {
             getService().apply(new RenameEvent(eventId, newName));
         } else {
             throw new UnauthorizedException("You are not permitted to edit event " + eventId);
@@ -4033,8 +4027,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public EventDTO getEventById(UUID id, boolean withStatisticalData) throws MalformedURLException, UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted(
-                ShiroPermissionBuilderImpl.getInstance().getPermission(Event.class, DefaultActions.VIEW, id.toString()))) {
+        if (SecurityUtils.getSubject().isPermitted(Permission.EVENT.getStringPermissionForObjects(DefaultModes.READ, id.toString()))) {
             EventDTO result = null;
             Event event = getService().getEvent(id);
             if (event != null) {

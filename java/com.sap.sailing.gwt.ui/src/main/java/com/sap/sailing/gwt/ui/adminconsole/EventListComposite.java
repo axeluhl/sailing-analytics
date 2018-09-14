@@ -38,6 +38,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
+import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupDialog.LeaderboardGroupDescriptor;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.EventsRefresher;
@@ -66,9 +67,7 @@ import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
-import com.sap.sse.security.shared.PermissionBuilderImpl;
-import com.sap.sse.security.shared.PermissionBuilder.Action;
-import com.sap.sse.security.shared.PermissionBuilder.DefaultActions;
+import com.sap.sse.security.shared.Permission.DefaultModes;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.shared.UserDTO;
 
@@ -155,8 +154,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             }
         });
         eventControlsPanel.add(createEventBtn);
-        if (!userService.getCurrentUser().hasPermission(
-                PermissionBuilderImpl.getInstance().getPermission("com.sap.sailing.domain.base.Event", DefaultActions.CREATE))) {
+        if (!userService.getCurrentUser().hasPermission(Permission.EVENT.getStringPermission(DefaultModes.CREATE))) {
             createEventBtn.setVisible(false);
         }
 
@@ -349,15 +347,13 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         AccessControlledActionsColumn<EventDTO, EventConfigImagesBarCell> eventActionColumn =
                 new AccessControlledActionsColumn<EventDTO, EventConfigImagesBarCell>(new EventConfigImagesBarCell(stringMessages)) {
             @Override
-            public Iterable<Action> getAllowedActions(EventDTO event) {
-                ArrayList<Action> allowedActions = new ArrayList<>();
-                for (Action action : Arrays.asList(DefaultActions.EDIT, DefaultActions.REMOVE)) {
-                            if (user.hasPermission(
-                                    PermissionBuilderImpl.getInstance().getPermission(
-                                            "com.sap.sailing.domain.base.Event", action, event.id.toString()),
-                                    event.getOwnership(), event.getAccessControlList())) {
-                                allowedActions.add(action);
-                            }
+            public Iterable<DefaultModes> getAllowedActions(EventDTO event) {
+                ArrayList<DefaultModes> allowedActions = new ArrayList<>();
+                for (DefaultModes action : Arrays.asList(DefaultModes.UPDATE, DefaultModes.DELETE)) {
+                    if (user.hasPermission(Permission.EVENT.getPermissionForObjects(action, event.id.toString()),
+                            event.getOwnership(), event.getAccessControlList())) {
+                        allowedActions.add(action);
+                    }
                 }
                 return allowedActions;
             }
@@ -365,11 +361,11 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         eventActionColumn.setFieldUpdater(new FieldUpdater<EventDTO, String>() {
             @Override
             public void update(int index, EventDTO event, String value) {
-                if (DefaultActions.REMOVE.name().equals(value)) {
+                if (DefaultModes.DELETE.name().equals(value)) {
                     if (Window.confirm(stringMessages.doYouReallyWantToRemoveEvent(event.getName()))) {
                         removeEvent(event);
                     }
-                } else if (DefaultActions.EDIT.name().equals(value)) {
+                } else if (DefaultModes.UPDATE.name().equals(value)) {
                     openEditEventDialog(event);
                 }
             }
