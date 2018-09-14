@@ -4,106 +4,177 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.subject.Subject;
 import org.json.simple.JSONArray;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
-import com.sap.sailing.domain.abstractlog.race.RaceLog;
-import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
-import com.sap.sailing.domain.abstractlog.race.analyzing.impl.TagFinder;
 import com.sap.sailing.domain.common.dto.TagDTO;
+import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.tagging.TagDTODeSerializer;
-import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.UserStore;
+import com.sap.sailing.server.tagging.TaggingService;
+import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 @Path("/v1/tags")
 public class TagsResource extends AbstractSailingServerResource {
 
     private static final Logger logger = Logger.getLogger(TagsResource.class.getName());
+    private static final String APPLICATION_JSON_UTF8 = MediaType.APPLICATION_JSON + ";charset=UTF-8";
+    private static final String TEXT_PLAIN_UTF8 = MediaType.TEXT_PLAIN + ";charset=UTF-8";
 
     private final TagDTODeSerializer serializer;
-    // private final boolean enforceSecurityChecks;
 
     public TagsResource() {
-        this(true);
-    }
-
-    public TagsResource(boolean enforceSecurityChecks) {
-        // this.enforceSecurityChecks = enforceSecurityChecks;
         serializer = new TagDTODeSerializer();
     }
 
     /**
-     * Loads public tags from {@link RaceLog} and private tags from {@link UserStore} in case current user is logged in.
-     * Only loads private tags when parameters <code>leaderboardName</code>, <code>raceColumnName</code> and
-     * <code>fleetName</code> can identify {@link RaceLog}.
+     * Loads public tags from {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog} and private tags from
+     * {@link com.sap.sse.security.UserStore UserStore} in case current user is logged in. Only loads tags when
+     * parameters <code>leaderboardName</code>, <code>raceColumnName</code> and <code>fleetName</code> can identify
+     * {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog}.
+     * 
+     * @return status 200 (including tags) if request was successful, otherwise 400 (bad request) or 500 (internal
+     *         server error)
      */
     @GET
-    @Produces("application/json;charset=UTF-8")
-    @Path("/{leaderboardName}/{raceColumnName}/{fleetName}")
-    public Response getTags(@PathParam("leaderboardName") String leaderboardNameParameter,
-            @PathParam("raceColumnName") String raceColumnNameParameter,
-            @PathParam("fleetName") String fleetNameParameter) {
-        // restore escaped parameters
-        String leaderboardName = restoreEscapedParameter(leaderboardNameParameter);
-        String raceColumnName = restoreEscapedParameter(raceColumnNameParameter);
-        String fleetName = restoreEscapedParameter(fleetNameParameter);
+    @Produces({ APPLICATION_JSON_UTF8, TEXT_PLAIN_UTF8 })
+    public Response getTags(@QueryParam(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME) String leaderboardName,
+            @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
+            @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName) {
+        // TODO: Allow to get only public, only private tags or both of them
+        // TODO: Allow to get only unrevoked tags
+        Response response;
+        TaggingService taggingService = getService().getTaggingService();
+        if (taggingService != null) {
+            List<TagDTO> tags = new ArrayList<TagDTO>();
 
-        // default response
-        Response response = Response.noContent().build();
-        List<TagDTO> tags = new ArrayList<TagDTO>();
+            List<TagDTO> publicTags = taggingService.getPublicTags(leaderboardName, raceColumnName, fleetName);
+            Util.addAll(publicTags, tags);
 
-        // check if RaceLog is available and all parameters are set
-        RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnName, fleetName);
-        if (raceLog == null) {
-            response = Response.status(Status.PRECONDITION_FAILED)
-                    .entity("RaceLog not found! Check parameters leaderboardName, raceColumnName and fleetName")
-                    .build();
-        } else {
-            // load public tags
-            TagFinder finder = new TagFinder(raceLog, true);
-            List<RaceLogTagEvent> publicTags = finder.analyze();
-            for (RaceLogTagEvent tagEvent : publicTags) {
-                tags.add(new TagDTO(tagEvent.getTag(), tagEvent.getComment(), tagEvent.getImageURL(),
-                        tagEvent.getUsername(), true, tagEvent.getLogicalTimePoint(), tagEvent.getCreatedAt()));
-            }
+            List<TagDTO> privateTags = taggingService.getPrivateTags(leaderboardName, raceColumnName, fleetName);
+            Util.addAll(privateTags, tags);
 
-            // load private tags
-            Subject subject = SecurityUtils.getSubject();
-            if (subject.getPrincipal() != null) {
-                String username = subject.getPrincipal().toString();
-                SecurityService securityService = getService(SecurityService.class);
-
-                // TODO: check preferences key in home and set private tag
-                String preference = securityService.getPreference(username,
-                        serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName));
-                if (preference != null) {
-                    try {
-                        JSONParser jsonParser = new JSONParser();
-                        JSONArray jsonArray = (JSONArray) jsonParser.parse(preference);
-                        List<TagDTO> privateTags = serializer.deserialize(jsonArray);
-                        tags.addAll(privateTags);
-                    } catch (ParseException e) {
-                        logger.warning("Could not parse private tags received from JSON in UserStore!");
-                    }
-                }
-            }
-
-            // convert tags to JSON
             JSONArray jsonTags = serializer.serialize(tags);
-            response = Response.ok(jsonTags.toJSONString()).build();
+            response = Response.ok(jsonTags.toJSONString()).type(APPLICATION_JSON_UTF8).build();
+        } else {
+            response = Response.status(Status.INTERNAL_SERVER_ERROR).type(TEXT_PLAIN_UTF8)
+                    .entity("Tagging Service not found!").build();
+            logger.warning("Tagging Service not found!");
         }
-
         return response;
+    }
+
+    /**
+     * Saves new tag.
+     * 
+     * @param tag
+     *            may not be empty
+     * @param visible
+     *            default is <code>false</code>
+     * 
+     * @return status 201 (created) if creation was successful, otherwise 400 (bad request)
+     * @see TaggingService#addTag(String, String, String, String, String, String, boolean, TimePoint)
+     */
+    @POST
+    @Produces({ APPLICATION_JSON_UTF8, TEXT_PLAIN_UTF8 })
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public Response createTag(@Context UriInfo uriInfo,
+            @QueryParam(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME) String leaderboardName,
+            @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
+            @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName, @FormParam("tag") String tag,
+            @FormParam("comment") String comment, @FormParam("image") String imageURL,
+            @FormParam("public") boolean visibleForPublic, @FormParam("raceTimepoint") long raceTimepoint) {
+        Response response;
+        TaggingService taggingService = getService().getTaggingService();
+        boolean successful = taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL,
+                visibleForPublic, new MillisecondsTimePoint(raceTimepoint));
+        if (successful) {
+            response = Response.created(uriInfo.getRequestUri()).build();
+        } else {
+            String errorMessage = taggingService.getLastErrorCode().getMessage();
+            response = Response.status(Status.BAD_REQUEST).type(TEXT_PLAIN_UTF8).entity(errorMessage).build();
+            logger.warning("Could not save tag! " + errorMessage);
+        }
+        return response;
+    }
+
+    /**
+     * Removes tag given as json string.
+     * 
+     * @return status 204 (no content) if deletion was successful, otherwise 400 (bad request)
+     * @see TagDTO
+     * @see TaggingService#removeTag(String, String, String, TagDTO)
+     */
+    @DELETE
+    @Produces({ APPLICATION_JSON_UTF8, TEXT_PLAIN_UTF8 })
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public Response deleteTag(@QueryParam(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME) String leaderboardName,
+            @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
+            @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName,
+            @FormParam("tag_json") String tagJson) {
+        Response response;
+        TagDTO tagToRemove = serializer.deserializeTag(tagJson);
+        TaggingService taggingService = getService().getTaggingService();
+        boolean successful = taggingService.removeTag(leaderboardName, raceColumnName, fleetName, tagToRemove);
+        if (successful) {
+            response = Response.noContent().build();
+        } else {
+            String errorMessage = taggingService.getLastErrorCode().getMessage();
+            response = Response.status(Status.BAD_REQUEST).type(TEXT_PLAIN_UTF8).entity(errorMessage).build();
+            logger.warning("Could not remove tag! " + errorMessage);
+        }
+        return response;
+    }
+
+    /**
+     * Updates tag.
+     * 
+     * @param tag
+     *            may not be empty
+     * @param visible
+     *            default is <code>false</code>
+     * 
+     * @return status 204 (no content) if update was successful, otherwise 400 (bad request)
+     * @see TagDTO
+     * @see TaggingService#updateTag(String, String, String, TagDTO, String, String, String, boolean)
+     */
+    @PUT
+    @Produces({ APPLICATION_JSON_UTF8, TEXT_PLAIN_UTF8 })
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public Response updateTag(@QueryParam(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME) String leaderboardName,
+            @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
+            @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName,
+            @FormParam("tag_json") String tagJson, @FormParam("tag") String tag, @FormParam("comment") String comment,
+            @FormParam("image") String imageURL, @FormParam("public") boolean visibleForPublic) {
+        Response response;
+        TagDTO tagToUpdate = serializer.deserializeTag(tagJson);
+        TaggingService taggingService = getService().getTaggingService();
+        boolean successful = taggingService.updateTag(leaderboardName, raceColumnName, fleetName, tagToUpdate, tag,
+                comment, imageURL, visibleForPublic);
+        if (successful) {
+            response = Response.noContent().build();
+        } else {
+            String errorMessage = taggingService.getLastErrorCode().getMessage();
+            response = Response.status(Status.BAD_REQUEST).type(TEXT_PLAIN_UTF8).entity(errorMessage).build();
+            logger.warning("Could not update tag! " + errorMessage);
+        }
+        return response;
+
     }
 }

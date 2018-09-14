@@ -48,7 +48,7 @@ public class TaggingServiceImpl implements TaggingService {
         if (principal != null) {
             result = principal.toString();
         } else {
-            setLastErrorCode(ErrorCode.USER_NOT_FOUND);
+            setLastErrorCode(ErrorCode.NOT_LOGGED_IN);
         }
         return result;
     }
@@ -75,8 +75,23 @@ public class TaggingServiceImpl implements TaggingService {
                 setLastErrorCode(ErrorCode.RACELOG_NOT_FOUND);
                 successful = false;
             } else {
-                raceLog.add(new RaceLogTagEventImpl(tag, comment, imageURL, raceTimepoint,
-                        racingService.getServerAuthor(), raceLog.getCurrentPassId()));
+                // check if tag already exists
+                boolean alreadyExists = false;
+                List<TagDTO> publicTags = getPublicTags(leaderboardName, raceColumnName, fleetName);
+                for (TagDTO publicTag : publicTags) {
+                    if (publicTag.equals(tag, comment, imageURL, racingService.getServerAuthor().getName(), true,
+                            raceTimepoint)) {
+                        alreadyExists = true;
+                        break;
+                    }
+                }
+                if (alreadyExists) {
+                    setLastErrorCode(ErrorCode.TAG_ALREADY_EXISTS);
+                    successful = false;
+                } else {
+                    raceLog.add(new RaceLogTagEventImpl(tag, comment, imageURL, raceTimepoint,
+                            racingService.getServerAuthor(), raceLog.getCurrentPassId()));
+                }
             }
         } catch (AuthorizationException e) {
             setLastErrorCode(ErrorCode.MISSING_PERMISSIONS);
@@ -101,11 +116,17 @@ public class TaggingServiceImpl implements TaggingService {
                 String key = serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName);
                 String privateTagsJson = securityService.getPreference(username, key);
                 List<TagDTO> privateTags = serializer.deserializeTags(privateTagsJson);
-                privateTags.add(new TagDTO(tag, comment, imageURL, username, false, raceTimepoint,
-                        MillisecondsTimePoint.now()));
-                securityService.setPreference(username, key, serializer.serializeTags(privateTags));
+                TagDTO tagToAdd = new TagDTO(tag, comment, imageURL, username, false, raceTimepoint,
+                        MillisecondsTimePoint.now());
+                if (privateTags.contains(tagToAdd)) {
+                    setLastErrorCode(ErrorCode.TAG_ALREADY_EXISTS);
+                    successful = false;
+                } else {
+                    privateTags.add(tagToAdd);
+                    securityService.setPreference(username, key, serializer.serializeTags(privateTags));
+                }
             } else {
-                setLastErrorCode(ErrorCode.USER_NOT_FOUND);
+                setLastErrorCode(ErrorCode.NOT_LOGGED_IN);
                 successful = false;
             }
         }
@@ -159,19 +180,21 @@ public class TaggingServiceImpl implements TaggingService {
     private boolean removePrivateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag) {
         boolean successful = true;
 
-        List<TagDTO> privateTags = getPrivateTags(leaderboardName, raceColumnName, fleetName);
-        if (privateTags != null) {
+        String username = getCurrentUsername();
+        if (username == null) {
+            setLastErrorCode(ErrorCode.NOT_LOGGED_IN);
+            successful = false;
+        } else {
+            List<TagDTO> privateTags = getPrivateTags(leaderboardName, raceColumnName, fleetName);
             privateTags.remove(tag);
-            String username = getCurrentUsername();
             SecurityService securityService = getSecurityService();
             String key = serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName);
             // error code will be set during collection of required data
             if (username != null && securityService != null && key != null) {
                 securityService.setPreference(username, key, serializer.serializeTags(privateTags));
             }
-        } else {
-            successful = false;
         }
+
         return successful;
     }
 

@@ -13,21 +13,28 @@ public interface TaggingService {
      * Enum used to identify issues.
      */
     public enum ErrorCode {
-        UNKNOWN_ERROR("Unknown error"),
-        USER_NOT_FOUND("User not found"),
-        MISSING_PERMISSIONS("Missing permissions"),
-        SECURITY_SERIVCE_NOT_FOUND("Security service not found"),
-        RACELOG_NOT_FOUND("Racelog not found"),
-        TAG_NOT_REVOKABLE("This tag cannot be revoked"),
-        TAG_NOT_EMPTY("Tag may not be empty"),
-        TIMEPOINT_NOT_EMPTY("Timepoint may not be empty"),
-        TAG_TOO_LONG("Tag is too long"),
-        COMMENT_TOO_LONG("Comment is too long");
+        UNKNOWN_ERROR("unknownError", "Unknown error"),
+        NOT_LOGGED_IN("notLoggedin", "You are not logged in"),
+        MISSING_PERMISSIONS("missingPermissions", "Missing permissions"),
+        SECURITY_SERIVCE_NOT_FOUND("securityServiceNotFound", "Security service not found"),
+        RACELOG_NOT_FOUND("racelogNotFound", "Racelog not found"),
+        TAG_NOT_REVOKABLE("tagNotRevokable", "This tag cannot be revoked"),
+        TAG_ALREADY_EXISTS("tagAlreadyExists", "Tag does already exist, duplicated tags are not allowed"),
+        TAG_NOT_EMPTY("tagNotEmpty", "Tag may not be empty"),
+        TIMEPOINT_NOT_EMPTY("timepointNotEmpty", "Timepoint may not be empty"),
+        TAG_TOO_LONG("tagTooLong", "Tag is too long"),
+        COMMENT_TOO_LONG("commentToLong", "Comment is too long");
 
+        private final String code;
         private final String message;
 
-        ErrorCode(String message) {
+        ErrorCode(String code, String message) {
+            this.code = code;
             this.message = message;
+        }
+
+        public String getCode() {
+            return code;
         }
 
         public String getMessage() {
