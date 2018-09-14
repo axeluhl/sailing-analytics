@@ -37,6 +37,8 @@ public interface UserManagementService extends RemoteService {
 
     Collection<UserGroup> getUserGroups() throws UnauthorizedException;
 
+    UserGroup getUserGroupByName(String userGroupName) throws UnauthorizedException;
+
     UserGroup createUserGroup(String name, String tenantOwner) throws UserGroupManagementException, UnauthorizedException;
 
     SuccessInfo deleteUserGroup(String userGroupIdAsString) throws UserGroupManagementException, UnauthorizedException;
@@ -46,6 +48,8 @@ public interface UserManagementService extends RemoteService {
     void removeUserFromUserGroup(String userGroupIdAsString, String user) throws UnauthorizedException;
 
     Collection<UserDTO> getUserList() throws UnauthorizedException;
+
+    UserDTO getUserByName(String username) throws UnauthorizedException;
 
     RoleDefinition createRoleDefinition(String roleDefinitionIdAsString, String name);
     

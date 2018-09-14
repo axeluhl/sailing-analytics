@@ -31,6 +31,8 @@ public interface UserManagementServiceAsync {
     void removeFromACL(QualifiedObjectIdentifier idOfAccessControlledObject, String permission, String name, AsyncCallback<AccessControlList> callback);
 
     void getUserGroups(AsyncCallback<Collection<UserGroup>> callback);
+    
+    void getUserGroupByName(String userGroupName, AsyncCallback<UserGroup> callback);
 
     void createUserGroup(String name, String nameOfTenantOwner, AsyncCallback<UserGroup> callback);
     
@@ -41,6 +43,8 @@ public interface UserManagementServiceAsync {
     void removeUserFromUserGroup(String tenantIdAsString, String username, AsyncCallback<Void> asyncCallback);
 
     void getUserList(AsyncCallback<Collection<UserDTO>> callback);
+    
+    void getUserByName(String username, AsyncCallback<UserDTO> callback);
 
     void getCurrentUser(AsyncCallback<UserDTO> callback);
 

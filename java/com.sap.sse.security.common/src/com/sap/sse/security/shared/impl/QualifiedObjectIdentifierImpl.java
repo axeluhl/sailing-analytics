@@ -3,6 +3,8 @@ package com.sap.sse.security.shared.impl;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 
 public class QualifiedObjectIdentifierImpl implements QualifiedObjectIdentifier {
+    private static final long serialVersionUID = -1749648443005614962L;
+    
     private final String typeIdentifier;
     private final String typeRelativeObjectIdentifier;
     

@@ -68,8 +68,10 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions.DefaultModes;
+import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.shared.UserDTO;
 
@@ -329,7 +331,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 String result = "";
                 int imageCount = Util.size(event.getImages());
                 if(imageCount > 0) {
-                    result = imageCount + " image(s)";
+                    result = imageCount + " image(s)"; // TODO i18n
                 }
                 return result;
             }
@@ -341,7 +343,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 String result = "";
                 int videoCount = Util.size(event.getVideos());
                 if(videoCount > 0) {
-                    result = videoCount + " video(s)";
+                    result = videoCount + " video(s)"; // TODO i18n
                 }
                 return result;
             }
@@ -384,6 +386,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                     }
                 } else if (DefaultModes.UPDATE.name().equals(value)) {
                     openEditEventDialog(event);
+                } else if (EventConfigImagesBarCell.CHANGE_OWNERSHIP.equals(value)) {
+                    openOwnershipDialog(userService.getUserManagementService(), event);
                 }
             }
         });
@@ -419,6 +423,19 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         return table;
     }
 
+    private void openOwnershipDialog(UserManagementServiceAsync userManagementService, EventDTO event) {
+        new EditOwnershipDialog(userManagementService, event.getOwnership(), securityStringMessages, new DialogCallback<Ownership>() {
+            @Override
+            public void ok(Ownership editedObject) {
+//                userManagementService.setOwnership... TODO continue here...
+            }
+
+            @Override
+            public void cancel() {
+            }
+        }).show();
+    }
+    
     private ListHandler<EventDTO> getEventTableColumnSortHandler(List<EventDTO> eventRecords,
             SelectionCheckboxColumn<EventDTO> eventSelectionCheckboxColumn, Column<EventDTO, SafeHtml> eventNameColumn,
             TextColumn<EventDTO> venueNameColumn, TextColumn<EventDTO> startEndDateColumn,

@@ -51,6 +51,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     OwnershipAnnotation getOwnership(QualifiedObjectIdentifier idOfOwnedObject);
     
     OwnershipAnnotation createDefaultOwnershipForNewObject(QualifiedObjectIdentifier idOfNewObject);
+    
+    void setOwnership(QualifiedObjectIdentifier idOfOwnedObject, SecurityUser userOwner, UserGroup tenantOwner, String displayNameOfOwnedObject);
 
     void deleteAllDataForRemovedObject(QualifiedObjectIdentifier idOfRemovedObject);
 

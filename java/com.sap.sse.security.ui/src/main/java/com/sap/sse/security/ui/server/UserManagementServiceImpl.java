@@ -38,6 +38,7 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
+import com.sap.sse.security.shared.HasPermissions.DefaultModes;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
@@ -178,7 +179,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public Collection<UserGroup> getUserGroups() throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted("tenants:manage")) {
+        if (SecurityUtils.getSubject().isPermitted(DefaultPermissions.USER_GROUP.getStringPermission(DefaultModes.READ))) {
             List<UserGroup> userGroups = new ArrayList<>();
             final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser = new HashMap<>();
             final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup = new HashMap<>();
@@ -188,13 +189,35 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             }
             return userGroups;
         } else {
-            throw new UnauthorizedException("Not permitted to manage tenants");
+            throw new UnauthorizedException("Not permitted to read user groups");
+        }
+    }
+
+    @Override
+    public UserGroup getUserGroupByName(String userGroupName) throws UnauthorizedException {
+        if (SecurityUtils.getSubject().isPermitted(DefaultPermissions.USER_GROUP.getStringPermission(DefaultModes.READ))) {
+            final UserGroup userGroup = getSecurityService().getUserGroupByName(userGroupName);
+            final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser = new HashMap<>();
+            final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup = new HashMap<>();
+            return securityDTOFactory.createUserGroupDTOFromUserGroup(userGroup, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
+        } else {
+            throw new UnauthorizedException("Not permitted to read user groups");
+        }
+    }
+
+    @Override
+    public UserDTO getUserByName(String username) throws UnauthorizedException {
+        if (SecurityUtils.getSubject().isPermitted(DefaultPermissions.USER.getStringPermission(DefaultModes.READ))) {
+            final User user = getSecurityService().getUserByName(username);
+            return securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
+        } else {
+            throw new UnauthorizedException("Not permitted to read users");
         }
     }
 
     @Override
     public UserGroup createUserGroup(String name, String nameOfTenantOwner) throws UnauthorizedException, UserGroupManagementException {
-        if (SecurityUtils.getSubject().isPermitted("tenant:create")) {
+        if (SecurityUtils.getSubject().isPermitted(DefaultPermissions.USER_GROUP.getStringPermission(DefaultModes.CREATE))) {
             UUID newTenantId = UUID.randomUUID();
             UserGroup userGroup;
             try {
@@ -208,13 +231,13 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup = new HashMap<>();
             return securityDTOFactory.createUserGroupDTOFromUserGroup(userGroup, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
         } else {
-            throw new UnauthorizedException("Not permitted to create tenants");
+            throw new UnauthorizedException("Not permitted to create user groups");
         }
     }
 
     @Override
     public SuccessInfo deleteUserGroup(String userGroupIdAsString) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted("tenant:delete:" + userGroupIdAsString)) {
+        if (SecurityUtils.getSubject().isPermitted(DefaultPermissions.USER_GROUP.getStringPermissionForObjects(DefaultModes.DELETE, userGroupIdAsString))) {
             try {
                 UUID userGroupId = UUID.fromString(userGroupIdAsString);
                 final UserGroup userGroup = getSecurityService().getUserGroup(userGroupId);
@@ -232,27 +255,27 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public void addUserToUserGroup(String userGroupIdAsString, String username) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted("tenant:add_user:" + userGroupIdAsString)) {
+        if (SecurityUtils.getSubject().isPermitted(DefaultPermissions.USER_GROUP.getStringPermissionForObjects(DefaultModes.UPDATE, userGroupIdAsString))) {
             final UserGroup tenant = getSecurityService().getUserGroup(UUID.fromString(userGroupIdAsString));
             getSecurityService().addUserToUserGroup(tenant, getSecurityService().getUserByName(username));
         } else {
-            throw new UnauthorizedException("Not permitted to add user to tenant");
+            throw new UnauthorizedException("Not permitted to add user to group");
         }
     }
 
     @Override
     public void removeUserFromUserGroup(String userGroupIdAsString, String username) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted("tenant:remove_user:" + userGroupIdAsString)) {
+        if (SecurityUtils.getSubject().isPermitted(DefaultPermissions.USER_GROUP.getStringPermissionForObjects(DefaultModes.DELETE, userGroupIdAsString))) {
             final UserGroup userGroup = getSecurityService().getUserGroup(UUID.fromString(userGroupIdAsString));
             getSecurityService().removeUserFromUserGroup(userGroup, getSecurityService().getUserByName(username));
         } else {
-            throw new UnauthorizedException("Not permitted to remove user from tenant");
+            throw new UnauthorizedException("Not permitted to remove user from group");
         }
     }
 
     @Override
     public Collection<UserDTO> getUserList() throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted("users:manage")) {
+        if (SecurityUtils.getSubject().isPermitted(DefaultPermissions.USER.getStringPermission(DefaultModes.READ))) {
             List<UserDTO> users = new ArrayList<>();
             for (User u : getSecurityService().getUserList()) {
                 UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(u, getSecurityService());

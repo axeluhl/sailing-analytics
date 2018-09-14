@@ -1,5 +1,7 @@
 package com.sap.sse.security.shared;
 
+import java.io.Serializable;
+
 /**
  * In permission strings, object identifiers used in the third part of the permission need to be unique only within the
  * scope defined by the type to which the object belongs. The type is assumed to be encoded as the first part of a
@@ -17,7 +19,7 @@ package com.sap.sse.security.shared;
  * @author Axel Uhl (d043530)
  *
  */
-public interface QualifiedObjectIdentifier {
+public interface QualifiedObjectIdentifier extends Serializable {
     /**
      * The separator character used to separate the permission type {@link #name()} from the object identifier
      * when providing a {@link #getQualifiedObjectIdentifier(String) qualified object identifier}.
