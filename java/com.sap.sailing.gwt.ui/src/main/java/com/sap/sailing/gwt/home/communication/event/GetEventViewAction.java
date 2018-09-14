@@ -58,7 +58,7 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
         final EventViewDTO dto = new EventViewDTO();
         HomeServiceUtil.mapToMetadataDTO(event, dto, context.getRacingEventService());
         
-        ImageDescriptor logoImage = event.findImageWithTag(MediaTagConstants.LOGO);
+        ImageDescriptor logoImage = event.findImageWithTag(MediaTagConstants.LOGO.getName());
         dto.setLogoImage(logoImage != null ? HomeServiceUtil.convertToImageDTO(logoImage) : null);
         dto.setOfficialWebsiteURL(event.getOfficialWebsiteURL() == null ? null : event.getOfficialWebsiteURL().toString());
         URL sailorsInfoWebsiteURL = event.getSailorsInfoWebsiteURLOrFallback(context.getClientLocale());

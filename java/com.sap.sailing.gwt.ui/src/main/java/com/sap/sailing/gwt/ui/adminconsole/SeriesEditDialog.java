@@ -442,7 +442,7 @@ public class SeriesEditDialog extends DataEntryDialog<SeriesDescriptor> {
         }
 
         @Override
-        public void onRowRemoved() {
+        public void onRowRemoved(int rowIndex) {
             updateFromToListboxesSelection();
             updateHintLabel();
         }

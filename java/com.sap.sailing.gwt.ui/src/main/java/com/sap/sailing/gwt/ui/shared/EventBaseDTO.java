@@ -75,7 +75,7 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable, SecuredObj
     public ImageDTO getLogoImage() {
         ImageDTO result = null;
         for (ImageDTO image : images) {
-            if (image.hasTag(MediaTagConstants.LOGO)) {
+            if (image.hasTag(MediaTagConstants.LOGO.getName())) {
                 result = image;
                 break;
             }
