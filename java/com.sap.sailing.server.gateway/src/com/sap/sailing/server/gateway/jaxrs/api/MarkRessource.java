@@ -65,7 +65,7 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJson
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.security.shared.Permission.DefaultModes;
+import com.sap.sse.security.shared.HasPermissions.DefaultModes;
 
 @Path("/v1/mark")
 public class MarkRessource extends AbstractSailingServerResource {

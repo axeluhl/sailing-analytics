@@ -38,7 +38,7 @@ import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSer
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.impl.PlaceHolderDeviceIdentifierJsonHandler;
 import com.sap.sse.common.TypeBasedServiceFinder;
-import com.sap.sse.security.shared.Permission.DefaultModes;
+import com.sap.sse.security.shared.HasPermissions.DefaultModes;
 
 public class AddEntryToRaceLogJsonPostServlet extends AbstractJsonHttpServlet {
     private static final long serialVersionUID = 7704668926551060433L;

@@ -296,7 +296,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
                 getStringMessages().localServer(), Permission.MANAGE_LOCAL_SERVER_INSTANCE);
 
         final UserManagementPanel<AdminConsoleTableResources> userManagementPanel = new UserManagementPanel<>(getUserService(), StringMessages.INSTANCE,
-                Arrays.<com.sap.sse.security.shared.Permission>asList(Permission.values()), this, tableResources);
+                Arrays.<com.sap.sse.security.shared.HasPermissions>asList(Permission.values()), this, tableResources);
         panel.addToTabPanel(advancedTabPanel,
                 new DefaultRefreshableAdminConsolePanel<UserManagementPanel<AdminConsoleTableResources>>(userManagementPanel) {
                     @Override

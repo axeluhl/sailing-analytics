@@ -24,7 +24,7 @@ import com.sap.sse.security.UsernamePasswordRealm;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.Ownership;
-import com.sap.sse.security.shared.Permission.DefaultModes;
+import com.sap.sse.security.shared.HasPermissions.DefaultModes;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;

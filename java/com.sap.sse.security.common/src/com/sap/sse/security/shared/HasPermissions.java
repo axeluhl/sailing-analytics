@@ -11,7 +11,7 @@ package com.sap.sse.security.shared;
  * @author Axel Uhl (d043530)
  *
  */
-public interface Permission {
+public interface HasPermissions {
     String name();
 
     /**
@@ -30,7 +30,7 @@ public interface Permission {
     /**
      * Produces a string permission for this permission, the <code>mode</code> specified as the second wildcard
      * permission segment, and the <code>objectIdentifier</code> as the third wildcard permission segment. The object
-     * identifiers must be unique within the scope defined by this {@link Permission} which represents an object
+     * identifiers must be unique within the scope defined by this {@link HasPermissions} which represents an object
      * category or type, such as, e.g., "LEADERBOARD."
      * 
      * @param objectIdentifiers

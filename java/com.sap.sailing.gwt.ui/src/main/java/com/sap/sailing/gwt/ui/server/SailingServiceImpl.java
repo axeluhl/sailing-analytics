@@ -579,7 +579,7 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.OwnershipAnnotation;
-import com.sap.sse.security.shared.Permission.DefaultModes;
+import com.sap.sse.security.shared.HasPermissions.DefaultModes;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.ui.server.SecurityDTOFactory;

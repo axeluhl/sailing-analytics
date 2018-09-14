@@ -13,14 +13,14 @@ public abstract class RolePrototype implements RoleDefinition {
     private final String name;
     private final Set<WildcardPermission> permissions;
     
-    protected RolePrototype(String name, String uuidAsString, Iterable<? extends Permission> permissions) {
+    protected RolePrototype(String name, String uuidAsString, Iterable<? extends HasPermissions> permissions) {
         this(name, uuidAsString, getWildcardPermissions(permissions));
     }
     
-    private static WildcardPermission[] getWildcardPermissions(Iterable<? extends Permission> permissions) {
+    private static WildcardPermission[] getWildcardPermissions(Iterable<? extends HasPermissions> permissions) {
         final WildcardPermission[] result = new WildcardPermission[Util.size(permissions)];
         int i=0;
-        for (final Permission p : permissions) {
+        for (final HasPermissions p : permissions) {
             result[i++] = p.getPermission();
         }
         return result;

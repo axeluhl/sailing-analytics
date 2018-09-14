@@ -8,7 +8,7 @@ import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.security.shared.Permission;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -127,7 +127,7 @@ public class AuthorizedContentDecorator extends Composite implements RequiresRes
      * 
      * @param permissionToCheck the permission to check
      */
-    public void setPermissionToCheck(Permission permissionToCheck) {
+    public void setPermissionToCheck(HasPermissions permissionToCheck) {
         setPermissionToCheck(permissionToCheck.getStringPermission());
     }
 }

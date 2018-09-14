@@ -1,10 +1,10 @@
 package com.sap.sse.security.shared.impl;
 
-import com.sap.sse.security.shared.Permission;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
 
-public class PermissionImpl implements Permission {
+public class PermissionImpl implements HasPermissions {
     private final String permissionTypeName;
     
     private PermissionImpl(String permissionTypeName) {

@@ -27,7 +27,7 @@ import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
-import com.sap.sse.security.shared.Permission;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlListListDataProvider;
@@ -51,11 +51,11 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
 
     public UserManagementPanel(final UserService userService, final StringMessages stringMessages,
             ErrorReporter errorReporter, TR tableResources) {
-        this(userService, stringMessages, Collections.<Permission>emptySet(), errorReporter, tableResources);
+        this(userService, stringMessages, Collections.<HasPermissions>emptySet(), errorReporter, tableResources);
     }
     
     public UserManagementPanel(final UserService userService, final StringMessages stringMessages,
-            Iterable<Permission> additionalPermissions, ErrorReporter errorReporter, TR tableResources) {
+            Iterable<HasPermissions> additionalPermissions, ErrorReporter errorReporter, TR tableResources) {
         final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
         VerticalPanel west = new VerticalPanel();
         HorizontalPanel buttonPanel = new HorizontalPanel();

@@ -32,7 +32,7 @@ import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.celltable.TableWrapper;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
-import com.sap.sse.security.shared.Permission;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
@@ -59,7 +59,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
     private final UserService userService;
     
     public UserTableWrapper(UserService userService,
-            Iterable<Permission> additionalPermissions, StringMessages stringMessages,
+            Iterable<HasPermissions> additionalPermissions, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean multiSelection, boolean enablePager, TR tableResources) {
         super(stringMessages, errorReporter, multiSelection, enablePager,
                 new EntityIdentityComparator<UserDTO>() {
@@ -243,7 +243,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
         filterField.updateAll(result);
     }
     
-    private void editUser(final UserDTO originalUser, Iterable<Permission> additionalPermissions) {
+    private void editUser(final UserDTO originalUser, Iterable<HasPermissions> additionalPermissions) {
         final UserEditDialog dialog = new UserEditDialog(originalUser, new DialogCallback<Pair<UserDTO, Iterable<Triple<UUID, String, String>>>>() {
             @Override
             public void ok(final Pair<UserDTO, Iterable<Triple<UUID, String, String>>> userAndRoles) {

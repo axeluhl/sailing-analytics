@@ -10,7 +10,7 @@ import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.QualifiedObjectIdentifierImpl;
 import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 
-public enum Permission implements com.sap.sse.security.shared.Permission {
+public enum Permission implements com.sap.sse.security.shared.HasPermissions {
     // AdminConsole permissions
     MANAGE_EVENTS,
     MANAGE_PAIRING_LISTS,
@@ -72,14 +72,14 @@ public enum Permission implements com.sap.sse.security.shared.Permission {
 
     // TODO once we can use Java8 here, move this up into a "default" method on the Permission interface
     @Override
-    public String getStringPermission(com.sap.sse.security.shared.Permission.Mode... modes) {
+    public String getStringPermission(com.sap.sse.security.shared.HasPermissions.Mode... modes) {
         final String result;
         if (modes==null || modes.length==0) {
             result = name();
         } else {
             final StringBuilder modesString = new StringBuilder();
             boolean first = true;
-            for (com.sap.sse.security.shared.Permission.Mode mode : modes) {
+            for (com.sap.sse.security.shared.HasPermissions.Mode mode : modes) {
                 if (first) {
                     first = false;
                 } else {
@@ -93,13 +93,13 @@ public enum Permission implements com.sap.sse.security.shared.Permission {
     }
 
     @Override
-    public WildcardPermission getPermission(com.sap.sse.security.shared.Permission.Mode... modes) {
+    public WildcardPermission getPermission(com.sap.sse.security.shared.HasPermissions.Mode... modes) {
         return new WildcardPermission(getStringPermission(modes));
     }
 
     // TODO once we can use Java8 here, move this up into a "default" method on the Permission interface
     @Override
-    public String getStringPermissionForObjects(com.sap.sse.security.shared.Permission.Mode mode, String... objectIdentifiers) {
+    public String getStringPermissionForObjects(com.sap.sse.security.shared.HasPermissions.Mode mode, String... objectIdentifiers) {
         final WildcardPermissionEncoder permissionEncoder = new WildcardPermissionEncoder();
         final StringBuilder result = new StringBuilder(getStringPermission(mode));
         if (objectIdentifiers!=null && objectIdentifiers.length>0) {
@@ -123,7 +123,7 @@ public enum Permission implements com.sap.sse.security.shared.Permission {
     }
 
     @Override
-    public WildcardPermission getPermissionForObjects(com.sap.sse.security.shared.Permission.Mode mode, String... objectIdentifiers) {
+    public WildcardPermission getPermissionForObjects(com.sap.sse.security.shared.HasPermissions.Mode mode, String... objectIdentifiers) {
         return new WildcardPermission(getStringPermissionForObjects(mode, objectIdentifiers));
     }
 }

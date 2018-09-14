@@ -31,7 +31,7 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
-import com.sap.sse.security.shared.Permission;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleImpl;
@@ -84,7 +84,7 @@ public class UserEditDialog extends DataEntryDialog<Pair<UserDTO, Iterable<Tripl
      *            The 'userToEdit' parameter contains the user which should be changed or initialized.
      */
     public UserEditDialog(UserDTO userToEdit, DialogCallback<Pair<UserDTO, Iterable<Triple<UUID, String, String>>>> callback,
-            UserService userService, Iterable<Permission> additionalPermissions, ErrorReporter errorReporter) {
+            UserService userService, Iterable<HasPermissions> additionalPermissions, ErrorReporter errorReporter) {
         super(stringMessages.editUser(), null, stringMessages.ok(), stringMessages
                 .cancel(), /* validator */ null, /* animationEnabled */true, callback);
         this.ensureDebugId("UserEditDialog");
@@ -99,7 +99,7 @@ public class UserEditDialog extends DataEntryDialog<Pair<UserDTO, Iterable<Tripl
         this.fullName = createTextBox(userToEdit.getFullName());
         this.company = createTextBox(userToEdit.getCompany());
         List<String> defaultPermissionNames = new ArrayList<>();
-        for (Permission permission : additionalPermissions) {
+        for (HasPermissions permission : additionalPermissions) {
             defaultPermissionNames.add(permission.getStringPermission());
         }
         permissionsEditor = new StringListEditorComposite(userToEdit==null?Collections.<String>emptySet():userToEdit.getStringPermissions(), stringMessages,

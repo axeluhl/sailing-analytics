@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import com.sap.sse.security.shared.Permission;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.WildcardPermission;
 
 /**
- * Can convert Shiro {@link Permission} objects into {@link WildcardPermission} objects and can extract an object ID as
+ * Can convert Shiro {@link HasPermissions} objects into {@link WildcardPermission} objects and can extract an object ID as
  * {@link String} from either such permission which can then be used to parameterize the {@link AccessControlStore},
  * e.g., to look up ownership and ACL information for an object for which permissions are requested.
  * <p>
