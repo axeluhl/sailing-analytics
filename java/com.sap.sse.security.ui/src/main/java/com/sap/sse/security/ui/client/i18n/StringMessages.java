@@ -135,6 +135,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String editUser();
     String validated();
     String groups();
+    String group();
     String errorDeletingUser(String username, String message);
     String doYouReallyWantToRemoveUser(String name);
     String errorTryingToUpdateUser(String username, String message);
