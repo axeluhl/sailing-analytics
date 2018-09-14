@@ -18,6 +18,7 @@ import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
@@ -46,8 +47,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBCollection aclCollection = db.getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name());
         aclCollection.createIndex(new BasicDBObject(FieldNames.AccessControlList.OBJECT_ID.name(), 1));
         DBObject dbACL = new BasicDBObject();
-        DBObject query = new BasicDBObject(FieldNames.AccessControlList.OBJECT_ID.name(), acl.getIdOfAnnotatedObjectAsString());
-        dbACL.put(FieldNames.AccessControlList.OBJECT_ID.name(), acl.getIdOfAnnotatedObjectAsString());
+        DBObject query = new BasicDBObject(FieldNames.AccessControlList.OBJECT_ID.name(), acl.getIdOfAnnotatedObject().toString());
+        dbACL.put(FieldNames.AccessControlList.OBJECT_ID.name(), acl.getIdOfAnnotatedObject().toString());
         dbACL.put(FieldNames.AccessControlList.OBJECT_DISPLAY_NAME.name(), acl.getDisplayNameOfAnnotatedObject());
         BasicDBList permissionMap = new BasicDBList();
         for (Entry<UserGroup, Set<String>> entry : acl.getAnnotation().getActionsByUserGroup().entrySet()) {
@@ -63,10 +64,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
     
     @Override
-    public void deleteAccessControlList(String idOfAccessControlledObjectAsString, AccessControlList acl) {
+    public void deleteAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, AccessControlList acl) {
         DBCollection aclCollection = db.getCollection(CollectionNames.ACCESS_CONTROL_LISTS.name());
         DBObject dbACL = new BasicDBObject();
-        dbACL.put(FieldNames.AccessControlList.OBJECT_ID.name(), idOfAccessControlledObjectAsString);
+        dbACL.put(FieldNames.AccessControlList.OBJECT_ID.name(), idOfAccessControlledObject.toString());
         aclCollection.remove(dbACL);
     }
     
@@ -75,8 +76,8 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         DBCollection ownershipCollection = db.getCollection(CollectionNames.OWNERSHIPS.name());
         ownershipCollection.createIndex(new BasicDBObject(FieldNames.Ownership.OBJECT_ID.name(), 1));
         DBObject dbOwnership = new BasicDBObject();
-        DBObject query = new BasicDBObject(FieldNames.Ownership.OBJECT_ID.name(), owner.getIdOfAnnotatedObjectAsString());
-        dbOwnership.put(FieldNames.Ownership.OBJECT_ID.name(), owner.getIdOfAnnotatedObjectAsString());
+        DBObject query = new BasicDBObject(FieldNames.Ownership.OBJECT_ID.name(), owner.getIdOfAnnotatedObject().toString());
+        dbOwnership.put(FieldNames.Ownership.OBJECT_ID.name(), owner.getIdOfAnnotatedObject().toString());
         dbOwnership.put(FieldNames.Ownership.OWNER_USERNAME.name(), owner.getAnnotation().getUserOwner()==null?null:owner.getAnnotation().getUserOwner().getName());
         dbOwnership.put(FieldNames.Ownership.TENANT_OWNER_ID.name(), owner.getAnnotation().getTenantOwner()==null?null:owner.getAnnotation().getTenantOwner().getId());
         dbOwnership.put(FieldNames.Ownership.OBJECT_DISPLAY_NAME.name(), owner.getDisplayNameOfAnnotatedObject());
@@ -84,10 +85,10 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
 
     @Override
-    public void deleteOwnership(String ownedObjectIdAsString, Ownership ownership) {
+    public void deleteOwnership(QualifiedObjectIdentifier ownedObjectId, Ownership ownership) {
         DBCollection ownershipCollection = db.getCollection(CollectionNames.OWNERSHIPS.name());
         DBObject dbOwnership = new BasicDBObject();
-        dbOwnership.put(FieldNames.Ownership.OBJECT_ID.name(), ownedObjectIdAsString);
+        dbOwnership.put(FieldNames.Ownership.OBJECT_ID.name(), ownedObjectId.toString());
         ownershipCollection.remove(dbOwnership);
     }
 

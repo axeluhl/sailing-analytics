@@ -39,6 +39,7 @@ import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 // GWT has similar class. 
+import com.sap.sse.security.shared.impl.DefaultPermissions;
 
 public class OAuthRealm extends AbstractCompositeAuthorizingRealm {
     private static final Logger logger = Logger.getLogger(OAuthRealm.class.getName());
@@ -184,7 +185,7 @@ public class OAuthRealm extends AbstractCompositeAuthorizingRealm {
         if (user == null) {
             try {
                 UserGroup tenant = getUserStore().createUserGroup(UUID.randomUUID(), socialname + "-tenant");
-                getAccessControlStore().createOwnership(tenant.getId().toString(), user, tenant, tenant.getName());
+                getAccessControlStore().createOwnership(DefaultPermissions.USER_GROUP.getQualifiedObjectIdentifier(tenant.getId().toString()), user, tenant, tenant.getName());
                 user = getUserStore().createUser(socialname, socialUser.getProperty(Social.EMAIL.name()), tenant, socialUser);
                 tenant.add(user);
                 getUserStore().updateUserGroup(tenant);

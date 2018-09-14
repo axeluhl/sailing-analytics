@@ -12,6 +12,7 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.UnauthorizedException;
 import com.sap.sse.security.shared.UserGroup;
@@ -26,13 +27,13 @@ import com.sap.sse.security.ui.shared.UserDTO;
 public interface UserManagementService extends RemoteService {
     Collection<AccessControlListAnnotation> getAccessControlLists() throws UnauthorizedException;
 
-    AccessControlListAnnotation getAccessControlList(String idOfAccessControlledObjectAsString);
+    AccessControlListAnnotation getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject);
 
-    AccessControlList updateACL(String idOfAccessControlledObjectAsString, Map<String, Set<String>> permissionStrings) throws UnauthorizedException;
+    AccessControlList updateACL(QualifiedObjectIdentifier idOfAccessControlledObject, Map<String, Set<String>> permissionStrings) throws UnauthorizedException;
 
-    AccessControlList addToACL(String idOfAccessControlledObjectAsString, String groupOrTenantIdAsString, String action) throws UnauthorizedException;
+    AccessControlList addToACL(QualifiedObjectIdentifier idOfAccessControlledObject, String groupOrTenantIdAsString, String action) throws UnauthorizedException;
 
-    AccessControlList removeFromACL(String idOfAccessControlledObjectAsString, String groupOrTenantIdAsString, String action) throws UnauthorizedException;
+    AccessControlList removeFromACL(QualifiedObjectIdentifier idOfAccessControlledObject, String groupOrTenantIdAsString, String action) throws UnauthorizedException;
 
     Collection<UserGroup> getUserGroups() throws UnauthorizedException;
 

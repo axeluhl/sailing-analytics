@@ -11,6 +11,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
@@ -21,13 +22,13 @@ import com.sap.sse.security.ui.shared.UserDTO;
 public interface UserManagementServiceAsync {
     void getAccessControlLists(AsyncCallback<Collection<AccessControlListAnnotation>> callback);
 
-    void getAccessControlList(String id, AsyncCallback<AccessControlListAnnotation> callback);
+    void getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, AsyncCallback<AccessControlListAnnotation> callback);
 
-    void updateACL(String id, Map<String, Set<String>> permissionStrings, AsyncCallback<AccessControlList> callback);
+    void updateACL(QualifiedObjectIdentifier idOfAccessControlledObject, Map<String, Set<String>> permissionStrings, AsyncCallback<AccessControlList> callback);
 
-    void addToACL(String acl, String permission, String name, AsyncCallback<AccessControlList> callback);
+    void addToACL(QualifiedObjectIdentifier idOfAccessControlledObject, String permission, String name, AsyncCallback<AccessControlList> callback);
 
-    void removeFromACL(String acl, String permission, String name, AsyncCallback<AccessControlList> callback);
+    void removeFromACL(QualifiedObjectIdentifier idOfAccessControlledObject, String permission, String name, AsyncCallback<AccessControlList> callback);
 
     void getUserGroups(AsyncCallback<Collection<UserGroup>> callback);
 

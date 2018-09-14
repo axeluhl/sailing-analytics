@@ -9,8 +9,8 @@ public class UserRole extends RolePrototype {
     
     UserRole() {
         super("user", "ad1d5148-b13d-4464-90c4-7c396e4d4e2e",
-                new WildcardPermission(DefaultPermissions.USER.getStringPermission(Permission.DefaultModes.UPDATE), /* case sensitive */ true),
-                new WildcardPermission(DefaultPermissions.USER.getStringPermission(Permission.DefaultModes.READ), /* case sensitive */ true));
+                new WildcardPermission(DefaultPermissions.USER.getStringPermission(Permission.DefaultModes.UPDATE)),
+                new WildcardPermission(DefaultPermissions.USER.getStringPermission(Permission.DefaultModes.READ)));
     }
     
     public static UserRole getInstance() {

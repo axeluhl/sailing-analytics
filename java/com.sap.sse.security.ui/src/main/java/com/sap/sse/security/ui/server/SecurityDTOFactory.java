@@ -152,7 +152,7 @@ public class SecurityDTOFactory {
 
     public OwnershipAnnotation createOwnershipAnnotationDTO(OwnershipAnnotation ownershipAnnotation) {
         return new OwnershipAnnotation(createOwnershipDTO(ownershipAnnotation.getAnnotation()),
-                ownershipAnnotation.getIdOfAnnotatedObjectAsString(),
+                ownershipAnnotation.getIdOfAnnotatedObject(),
                 ownershipAnnotation.getDisplayNameOfAnnotatedObject());
     }
     
@@ -162,7 +162,7 @@ public class SecurityDTOFactory {
             Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup) {
         return new OwnershipAnnotation(createOwnershipDTO(ownershipAnnotation.getAnnotation(), fromOriginalToStrippedDownUser,
                 fromOriginalToStrippedDownUserGroup),
-                ownershipAnnotation.getIdOfAnnotatedObjectAsString(),
+                ownershipAnnotation.getIdOfAnnotatedObject(),
                 ownershipAnnotation.getDisplayNameOfAnnotatedObject());
     }
     
@@ -187,7 +187,7 @@ public class SecurityDTOFactory {
     
     public AccessControlListAnnotation createAccessControlListAnnotationDTO(AccessControlListAnnotation aclAnnotation) {
         return new AccessControlListAnnotation(createAccessControlListDTO(aclAnnotation.getAnnotation()),
-                aclAnnotation.getIdOfAnnotatedObjectAsString(), aclAnnotation.getDisplayNameOfAnnotatedObject());
+                aclAnnotation.getIdOfAnnotatedObject(), aclAnnotation.getDisplayNameOfAnnotatedObject());
     }
     
     public AccessControlListAnnotation createAccessControlListAnnotationDTO(AccessControlListAnnotation aclAnnotation,
@@ -196,7 +196,7 @@ public class SecurityDTOFactory {
             Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup) {
         return new AccessControlListAnnotation(createAccessControlListDTO(aclAnnotation.getAnnotation(),
                 fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup),
-                aclAnnotation.getIdOfAnnotatedObjectAsString(), aclAnnotation.getDisplayNameOfAnnotatedObject());
+                aclAnnotation.getIdOfAnnotatedObject(), aclAnnotation.getDisplayNameOfAnnotatedObject());
     }
         
     public AccessControlList createAccessControlListDTO(AccessControlList acl) {

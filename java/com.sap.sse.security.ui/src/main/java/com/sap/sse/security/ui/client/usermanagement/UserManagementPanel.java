@@ -112,7 +112,7 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         TextColumn<AccessControlListAnnotation> idColumn = new TextColumn<AccessControlListAnnotation>() {
             @Override
             public String getValue(AccessControlListAnnotation acl) {
-                return acl.getIdOfAnnotatedObjectAsString();
+                return acl.getIdOfAnnotatedObject().toString();
             }
         };
         TextColumn<AccessControlListAnnotation> displayNameColumn = new TextColumn<AccessControlListAnnotation>() {

@@ -6,6 +6,7 @@ import com.google.gwt.user.client.rpc.SerializationStreamReader;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 
 public class OwnershipAnnotation_CustomFieldSerializer extends CustomFieldSerializer<OwnershipAnnotation> {
 
@@ -18,7 +19,7 @@ public class OwnershipAnnotation_CustomFieldSerializer extends CustomFieldSerial
     public static void serialize(SerializationStreamWriter streamWriter, OwnershipAnnotation instance)
             throws SerializationException {
         streamWriter.writeObject(instance.getAnnotation());
-        streamWriter.writeString(instance.getIdOfAnnotatedObjectAsString());
+        streamWriter.writeObject(instance.getIdOfAnnotatedObject());
         streamWriter.writeString(instance.getDisplayNameOfAnnotatedObject());
     }
 
@@ -33,7 +34,7 @@ public class OwnershipAnnotation_CustomFieldSerializer extends CustomFieldSerial
     }
 
     public static OwnershipAnnotation instantiate(SerializationStreamReader streamReader) throws SerializationException {
-        return new OwnershipAnnotation((Ownership) streamReader.readObject(), streamReader.readString(), streamReader.readString());
+        return new OwnershipAnnotation((Ownership) streamReader.readObject(), (QualifiedObjectIdentifier) streamReader.readObject(), streamReader.readString());
     }
 
     @Override

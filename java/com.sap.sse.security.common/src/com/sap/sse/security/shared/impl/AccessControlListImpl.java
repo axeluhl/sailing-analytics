@@ -56,7 +56,7 @@ public class AccessControlListImpl implements AccessControlList {
 
     @Override
     public PermissionChecker.PermissionState hasPermission(SecurityUser user, String action, Iterable<? extends UserGroup> groupsOfWhichUserIsMember) {
-        WildcardPermission requestedAction = new WildcardPermission(action, /* case sensitive */ true);
+        WildcardPermission requestedAction = new WildcardPermission(action);
         for (final UserGroup userGroupOfWhichUserIsMember : groupsOfWhichUserIsMember) {
             final Set<WildcardPermission> allowedActions = allowedActionsByUserGroup.get(userGroupOfWhichUserIsMember);
             if (allowedActions != null) {
@@ -100,7 +100,7 @@ public class AccessControlListImpl implements AccessControlList {
         if (action.startsWith("!")) {
             result = addPermission(userGroup, action.substring(1));
         } else {
-            result = Util.addToValueSet(deniedActionsByUserGroup, userGroup, new WildcardPermission(action, /* case sensitive */ true));
+            result = Util.addToValueSet(deniedActionsByUserGroup, userGroup, new WildcardPermission(action));
         }
         return result;
     }
@@ -111,7 +111,7 @@ public class AccessControlListImpl implements AccessControlList {
         if (action.startsWith("!")) {
             result = denyPermission(userGroup, action.substring(1));
         } else {
-            result = Util.addToValueSet(allowedActionsByUserGroup, userGroup, new WildcardPermission(action, /* case sensitive */ true));
+            result = Util.addToValueSet(allowedActionsByUserGroup, userGroup, new WildcardPermission(action));
         }
         return result;
     }
@@ -122,7 +122,7 @@ public class AccessControlListImpl implements AccessControlList {
         if (action.startsWith("!")) {
             result = removeDenial(userGroup, action.substring(1));
         } else {
-            result = Util.removeFromValueSet(allowedActionsByUserGroup, userGroup, new WildcardPermission(action, /* case sensitive */ true));
+            result = Util.removeFromValueSet(allowedActionsByUserGroup, userGroup, new WildcardPermission(action));
         }
         return result;
     }
@@ -133,7 +133,7 @@ public class AccessControlListImpl implements AccessControlList {
         if (action.startsWith("!")) {
             result = removeDenial(userGroup, action.substring(1));
         } else {
-            result = Util.removeFromValueSet(deniedActionsByUserGroup, userGroup, new WildcardPermission(action, /* case sensitive */ true));
+            result = Util.removeFromValueSet(deniedActionsByUserGroup, userGroup, new WildcardPermission(action));
         }
         return result;
     }

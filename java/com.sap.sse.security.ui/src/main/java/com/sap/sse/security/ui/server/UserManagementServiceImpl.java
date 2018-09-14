@@ -38,6 +38,7 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleImpl;
@@ -48,6 +49,7 @@ import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.DefaultPermissions;
 import com.sap.sse.security.ui.client.UserManagementService;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
@@ -131,28 +133,28 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public AccessControlListAnnotation getAccessControlList(String idOfAccessControlledObjectAsString) {
-        return securityDTOFactory.createAccessControlListAnnotationDTO(getSecurityService().getAccessControlList(idOfAccessControlledObjectAsString));
+    public AccessControlListAnnotation getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject) {
+        return securityDTOFactory.createAccessControlListAnnotationDTO(getSecurityService().getAccessControlList(idOfAccessControlledObject));
     }
 
     @Override
-    public AccessControlList updateACL(String idOfAccessControlledObjectAsString, Map<String, Set<String>> permissionStrings) throws UnauthorizedException {
+    public AccessControlList updateACL(QualifiedObjectIdentifier idOfAccessControlledObject, Map<String, Set<String>> permissionStrings) throws UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted("tenant:grant_permission,revoke_permission")) {
             Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
             for (String group : permissionStrings.keySet()) {
                 permissionMap.put(getSecurityService().getUserGroupByName(group), permissionStrings.get(group));
             }
-            return securityDTOFactory.createAccessControlListDTO(getSecurityService().updateACL(idOfAccessControlledObjectAsString, permissionMap));
+            return securityDTOFactory.createAccessControlListDTO(getSecurityService().updateACL(idOfAccessControlledObject, permissionMap));
         } else {
             throw new UnauthorizedException("Not permitted to grant and revoke permissions for user");
         }
     }
 
     @Override
-    public AccessControlList addToACL(String idAsString, String groupIdAsString, String action) throws UnauthorizedException {
+    public AccessControlList addToACL(QualifiedObjectIdentifier idOfAccessControlledObject, String groupIdAsString, String action) throws UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted("tenant:grant_permission:" + groupIdAsString)) {
             UserGroup userGroup = getUserGroup(groupIdAsString);
-            return securityDTOFactory.createAccessControlListDTO(getSecurityService().addToACL(idAsString, userGroup, action));
+            return securityDTOFactory.createAccessControlListDTO(getSecurityService().addToACL(idOfAccessControlledObject, userGroup, action));
         } else {
             throw new UnauthorizedException("Not permitted to grant permission for user");
         }
@@ -165,10 +167,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public AccessControlList removeFromACL(String idAsString, String groupOrTenantIdAsString, String permission) throws UnauthorizedException {
+    public AccessControlList removeFromACL(QualifiedObjectIdentifier idOfAccessControlledObject, String groupOrTenantIdAsString, String permission) throws UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted("tenant:revoke_permission:" + groupOrTenantIdAsString)) {
             UserGroup userGroup = getUserGroup(groupOrTenantIdAsString);
-            return securityDTOFactory.createAccessControlListDTO(getSecurityService().removeFromACL(idAsString, userGroup, permission));
+            return securityDTOFactory.createAccessControlListDTO(getSecurityService().removeFromACL(idOfAccessControlledObject, userGroup, permission));
         } else {
             throw new UnauthorizedException("Not permitted to revoke permission for user");
         }
@@ -200,7 +202,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             } catch (UserGroupManagementException e) {
                 throw new UserGroupManagementException(e.getMessage());
             }
-            getSecurityService().createOwnership(newTenantId.toString(),
+            getSecurityService().createOwnership(DefaultPermissions.USER_GROUP.getQualifiedObjectIdentifier(newTenantId.toString()),
                     getSecurityService().getCurrentUser(), getSecurityService().getUserGroupByName(nameOfTenantOwner), name);
             final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser = new HashMap<>();
             final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup = new HashMap<>();
@@ -217,8 +219,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 UUID userGroupId = UUID.fromString(userGroupIdAsString);
                 final UserGroup userGroup = getSecurityService().getUserGroup(userGroupId);
                 getSecurityService().deleteUserGroup(userGroup);
-                getSecurityService().deleteACL(userGroupIdAsString);
-                getSecurityService().deleteOwnership(userGroupIdAsString);
+                getSecurityService().deleteACL(DefaultPermissions.USER_GROUP.getQualifiedObjectIdentifier(userGroupIdAsString));
+                getSecurityService().deleteOwnership(DefaultPermissions.USER_GROUP.getQualifiedObjectIdentifier(userGroupIdAsString));
                 return new SuccessInfo(true, "Deleted user group: " + userGroup.getName() + ".", /* redirectURL */ null, null);
             } catch (UserGroupManagementException e) {
                 return new SuccessInfo(false, "Could not delete user group.", /* redirectURL */ null, null);
@@ -307,7 +309,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             UserImpl u = null;
             try {
                 u = getSecurityService().createSimpleUser(username, email, password, fullName, company, getLocaleFromLocaleName(localeName), validationBaseURL);
-                getSecurityService().createOwnership(username, currentUser, getSecurityService().getUserGroupByName(tenantOwnerName));
+                getSecurityService().createOwnership(DefaultPermissions.USER.getQualifiedObjectIdentifier(username), currentUser, getSecurityService().getUserGroupByName(tenantOwnerName));
             } catch (UserManagementException | UserGroupManagementException e) {
                 logger.log(Level.SEVERE, "Error creating user "+username, e);
                 throw new UserManagementException(e.getMessage());
@@ -501,8 +503,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         if (SecurityUtils.getSubject().isPermitted("user:delete:" + username)) {
         try {
             getSecurityService().deleteUser(username);
-            getSecurityService().deleteACL(username);
-            getSecurityService().deleteOwnership(username);
+            getSecurityService().deleteACL(DefaultPermissions.USER.getQualifiedObjectIdentifier(username));
+            getSecurityService().deleteOwnership(DefaultPermissions.USER.getQualifiedObjectIdentifier(username));
             return new SuccessInfo(true, "Deleted user: " + username + ".", /* redirectURL */ null, null);
         } catch (UserManagementException e) {
             return new SuccessInfo(false, "Could not delete user.", /* redirectURL */ null, null);

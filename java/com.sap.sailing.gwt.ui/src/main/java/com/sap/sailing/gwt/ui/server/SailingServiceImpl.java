@@ -3844,8 +3844,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public List<EventDTO> getEvents() throws MalformedURLException {
         List<EventDTO> result = new ArrayList<EventDTO>();
         for (Event event : getService().getAllEvents()) {
-            if (SecurityUtils.getSubject().isPermitted(
-                    ShiroPermissionBuilderImpl.getInstance().getPermission(event, DefaultActions.VIEW))) {
+            if (SecurityUtils.getSubject().isPermitted(Permission.EVENT.getStringPermissionForObjects(DefaultModes.READ, event.getId().toString()))) {
                 EventDTO eventDTO = convertToEventDTO(event, false);
                 eventDTO.setBaseURL(getEventBaseURLFromEventOrRequest(event));
                 eventDTO.setIsOnRemoteServer(false);
@@ -3969,8 +3968,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint, venue, isPublic, eventUuid,
                         officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, eventImages, eventVideos, leaderboardGroupIds));
         createCourseAreas(eventUuid, courseAreaNames.toArray(new String[courseAreaNames.size()]));
-        getSecurityService().createAccessControlList(eventUuid.toString(), eventName);
-        getSecurityService().createOwnership(eventUuid.toString(),
+        getSecurityService().createAccessControlList(Permission.EVENT.getQualifiedObjectIdentifier(eventUuid.toString()), eventName);
+        getSecurityService().createOwnership(Permission.EVENT.getQualifiedObjectIdentifier(eventUuid.toString()),
                 getSecurityService().getUserByName((String) SecurityUtils.getSubject().getPrincipal()),
                 getSecurityService().getUserGroupByName(tenantOwnerName), eventName);
         EventDTO result = getEventById(eventUuid, false);
@@ -4015,8 +4014,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (SecurityUtils.getSubject().isPermitted(
                 ShiroPermissionBuilderImpl.getInstance().getPermission(Event.class, DefaultActions.REMOVE, eventId.toString()))) {
             getService().apply(new RemoveEvent(eventId));
-            getSecurityService().deleteACL(eventId.toString());
-            getSecurityService().deleteOwnership(eventId.toString());
+            getSecurityService().deleteACL(Permission.EVENT.getQualifiedObjectIdentifier(eventId.toString()));
+            getSecurityService().deleteOwnership(Permission.EVENT.getQualifiedObjectIdentifier(eventId.toString()));
         } else {
             throw new UnauthorizedException("You are not permitted to remove event " + eventId);
         }
@@ -4236,10 +4235,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final SecurityDTOFactory securityDTOFactory = new SecurityDTOFactory();
         final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser = new HashMap<>();
         final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup = new HashMap<>();
-        final AccessControlListAnnotation accessControlList = getSecurityService().getAccessControlList(event.getId().toString());
+        final AccessControlListAnnotation accessControlList = getSecurityService().getAccessControlList(Permission.EVENT.getQualifiedObjectIdentifier(event.getId().toString()));
         eventDTO.setAccessControlList(securityDTOFactory.createAccessControlListDTO(accessControlList==null?null:accessControlList.getAnnotation(),
                 fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
-        final OwnershipAnnotation ownership = getSecurityService().getOwnership(event.getId().toString());
+        final OwnershipAnnotation ownership = getSecurityService().getOwnership(Permission.EVENT.getQualifiedObjectIdentifier(event.getId().toString()));
         eventDTO.setOwnership(securityDTOFactory.createOwnershipDTO(ownership==null?null:ownership.getAnnotation(),
                 fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
         return eventDTO;

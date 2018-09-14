@@ -17,9 +17,9 @@ import com.sap.sse.security.impl.ReplicableSecurityService;
 import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
-import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
@@ -42,69 +42,69 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     SecurityManager getSecurityManager();
 
     /**
-     * Return the ownership information for the object identified by {@code idOfOwnedObjectAsString}. If there is no
+     * Return the ownership information for the object identified by {@code idOfOwnedObject}. If there is no
      * ownership information for that object and there is a default tenant available, create a default {@link Ownership}
      * information that lists the default tenant as the tenant owner for the object in question; no user owner is
      * specified. If no default tenant is available and no ownership information for the object with the ID specified
      * is found, {@code null} is returned.
      */
-    OwnershipAnnotation getOwnership(String idOfOwnedObjectAsString);
+    OwnershipAnnotation getOwnership(QualifiedObjectIdentifier idOfOwnedObject);
     
-    OwnershipAnnotation createDefaultOwnershipForNewObject(HasPermissions newObject);
+    OwnershipAnnotation createDefaultOwnershipForNewObject(QualifiedObjectIdentifier idOfNewObject);
 
-    void deleteAllDataForRemovedObject(HasPermissions removedObject);
+    void deleteAllDataForRemovedObject(QualifiedObjectIdentifier idOfRemovedObject);
 
     Iterable<AccessControlListAnnotation> getAccessControlLists();
 
-    AccessControlListAnnotation getAccessControlList(String idOfAccessControlledObjectAsString);
+    AccessControlListAnnotation getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject);
 
     /**
-     * @param idOfAccessControlledObjectAsString Has to be globally unique
+     * @param idOfAccessControlledObject Has to be globally unique
      */
-    SecurityService createAccessControlList(String idOfAccessControlledObjectAsString);
+    SecurityService createAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject);
 
     /**
      * @param id Has to be globally unique
      */
-    SecurityService createAccessControlList(String idOfAccessControlledObjectAsString, String displayNameOfAccessControlledObject);
+    SecurityService createAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String displayNameOfAccessControlledObject);
 
-    AccessControlList updateACL(String idOfAccessControlledObjectAsString, Map<UserGroup, Set<String>> permissionMap);
+    AccessControlList updateACL(QualifiedObjectIdentifier idOfAccessControlledObject, Map<UserGroup, Set<String>> permissionMap);
 
     /**
      * @param name The name of the user group to add
      */
-    AccessControlList addToACL(String idOfAccessControlledObjectAsString, UserGroup userGroup, String action);
+    AccessControlList addToACL(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup, String action);
 
     /**
      * @param name The name of the user group to remove
      */
-    AccessControlList removeFromACL(String idOfAccessControlledObjectAsString, UserGroup group, String action);
+    AccessControlList removeFromACL(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup group, String action);
 
-    void deleteACL(String idOfAccessControlledObjectAsString);
+    void deleteACL(QualifiedObjectIdentifier idOfAccessControlledObject);
 
     /**
      * Same as {@link #createOwnership(String, UserImpl, Tenant, String)}, leaving the display name
      * of the object owned undefined.
      */
-    void createOwnership(String idOfOwnedObjectAsString, SecurityUser userOwner, UserGroup tenantOwner);
+    void createOwnership(QualifiedObjectIdentifier idOfOwnedObject, SecurityUser userOwner, UserGroup tenantOwner);
 
     /**
-     * @param idOfOwnedObjectAsString
+     * @param idOfOwnedObject
      *            the ID of the object for which ownership is declared
      * @param userOwner
      *            the user to become the owning user of the object with ID
-     *            {@code idOfOwnedObjectAsString}
+     *            {@code idOfOwnedObject}
      * @param tenantOwner
-     *            the tenant to become owning tenant of the object with ID {@code idOfOwnedObjectAsString}
+     *            the tenant to become owning tenant of the object with ID {@code idOfOwnedObject}
      * @param displayNameOfOwnedObject
      *            a display name that this store can use to produce a user-readable hint regarding the ownership
      *            definition that this call creates; there is no guarantee that the display name will remain up to date
-     *            as the object identified by {@link idOfOwnedObjectAsString} may change its name without notifying this
+     *            as the object identified by {@link idOfOwnedObject} may change its name without notifying this
      *            store
      */
-    void createOwnership(String idOfOwnedObjectAsString, SecurityUser userOwner, UserGroup tenantOwner, String displayNameOfOwnedObject);
+    void createOwnership(QualifiedObjectIdentifier idOfOwnedObject, SecurityUser userOwner, UserGroup tenantOwner, String displayNameOfOwnedObject);
 
-    void deleteOwnership(String idOfOwnedObjectAsString);
+    void deleteOwnership(QualifiedObjectIdentifier idOfOwnedObject);
 
     Iterable<UserGroup> getUserGroupList();
 

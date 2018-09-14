@@ -26,6 +26,7 @@ import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
@@ -40,6 +41,7 @@ import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.AccessControlListImpl;
 import com.sap.sse.security.shared.impl.OwnershipImpl;
+import com.sap.sse.security.shared.impl.QualifiedObjectIdentifierImpl;
 import com.sap.sse.security.shared.impl.SecurityUserImpl;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.security.userstore.mongodb.DomainObjectFactory;
@@ -70,7 +72,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     private AccessControlListAnnotation loadAccessControlList(DBObject aclDBObject, UserStore userStore) {
-        final String id = (String) aclDBObject.get(FieldNames.AccessControlList.OBJECT_ID.name());
+        final QualifiedObjectIdentifier id = new QualifiedObjectIdentifierImpl((String) aclDBObject.get(FieldNames.AccessControlList.OBJECT_ID.name()));
         final String displayName = (String) aclDBObject.get(FieldNames.AccessControlList.OBJECT_DISPLAY_NAME.name());
         Iterable<?> dbPermissionMap = ((BasicDBList) aclDBObject.get(FieldNames.AccessControlList.PERMISSION_MAP.name()));
         Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
@@ -104,7 +106,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     }
     
     private OwnershipAnnotation loadOwnership(DBObject ownershipDBObject, UserStore userStore) {
-        final String idOfOwnedObject = (String) ownershipDBObject.get(FieldNames.Ownership.OBJECT_ID.name());
+        final QualifiedObjectIdentifier idOfOwnedObject = new QualifiedObjectIdentifierImpl((String) ownershipDBObject.get(FieldNames.Ownership.OBJECT_ID.name()));
         final String displayNameOfOwnedObject = (String) ownershipDBObject.get(FieldNames.Ownership.OBJECT_DISPLAY_NAME.name());
         final String userOwnerName = (String) ownershipDBObject.get(FieldNames.Ownership.OWNER_USERNAME.name());
         final UUID tenantOwnerId = (UUID) ownershipDBObject.get(FieldNames.Ownership.TENANT_OWNER_ID.name());
@@ -134,7 +136,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final String displayName = (String) roleDefinitionDBObject.get(FieldNames.Role.NAME.name());
         final Set<WildcardPermission> permissions = new HashSet<>();
         for (Object o : (BasicDBList) roleDefinitionDBObject.get(FieldNames.Role.PERMISSIONS.name())) {
-            permissions.add(new WildcardPermission(o.toString(), true));
+            permissions.add(new WildcardPermission(o.toString()));
         }
         if (Util.equalsWithNull(id, AdminRole.getInstance().getId().toString())) {
             result = AdminRole.getInstance();
@@ -310,7 +312,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             result.addRole(role);
         }
         for (String permission : permissions) {
-            result.addPermission(new WildcardPermission(permission, /* case sensitive */ true));
+            result.addPermission(new WildcardPermission(permission));
         }
         if (rolesMigrated) {
             // update the user object after roles have been migrated;

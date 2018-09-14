@@ -12,12 +12,6 @@ package com.sap.sse.security.shared;
  *
  */
 public interface Permission {
-    /**
-     * The separator character used to separate the permission type {@link #name()} from the object identifier
-     * when providing a {@link #getQualifiedObjectIdentifier(String) qualified object identifier}.
-     */
-    char QUALIFIER_SEPARATOR = '/';
-    
     String name();
 
     /**
@@ -51,7 +45,7 @@ public interface Permission {
      * type, and the {@code objectIdentifier} is {@code "abc"} then the resulting qualified identifier will be
      * "LEADERBOARD/abc". This assumes that the {@link #name()} method returns only values that do not contain a "/".
      */
-    String getQualifiedObjectIdentifier(String objectIdentifier);
+    QualifiedObjectIdentifier getQualifiedObjectIdentifier(String typeRelativeObjectIdentifier);
 
     /**
      * Same as {@link #getStringPermissionForObjects(Mode, String...)}, only that the result is a

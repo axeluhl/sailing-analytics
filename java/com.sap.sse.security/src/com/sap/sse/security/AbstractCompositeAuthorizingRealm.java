@@ -23,11 +23,11 @@ import com.sap.sse.security.impl.Activator;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.PermissionChecker;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 
 /**
  * This class implements a realm that combines Access Control Lists, Role Based Permission Modeling and
@@ -167,19 +167,16 @@ public abstract class AbstractCompositeAuthorizingRealm extends AuthorizingRealm
     public boolean isPermitted(PrincipalCollection principals, Permission perm) {
         String username = (String) principals.getPrimaryPrincipal();
         final User user = getUserStore().getUserByName(username);
-        final WildcardPermission wildcardPermission = new WildcardPermission(perm.toString().replaceAll("\\[|\\]", ""), /* case sensitive */ true);
+        final WildcardPermission wildcardPermission = new WildcardPermission(perm.toString().replaceAll("\\[|\\]", ""));
         List<Set<String>> parts = wildcardPermission.getParts();
         final boolean result;
-        // TODO the object "identifier" provided in the third part of the Permission object has to be aligned with which identifier to use with the AccessControlStore
-        final Set<String> encodedIdsOfOwnedObjectAsString;
-        if (parts.size() > 2 && !(encodedIdsOfOwnedObjectAsString = parts.get(2)).isEmpty()) {
+        if (parts.size() > 2 && !parts.get(2).isEmpty()) {
             boolean allChecksPassed = true;
-            for (final String encodedIdOfOwnedObjectAsString : encodedIdsOfOwnedObjectAsString) {
-                // if multiple object IDs are provided as several sub-parts, permission is checked for each of them, and the total
-                // permission will be considered granted if the check has succeeded for all objects
-                final String idOfOwnedObjectAsString = new WildcardPermissionEncoder().decodePermissionPart(encodedIdOfOwnedObjectAsString);
-                final OwnershipAnnotation ownership = getAccessControlStore().getOwnership(idOfOwnedObjectAsString);
-                final AccessControlListAnnotation acl = getAccessControlStore().getAccessControlList(idOfOwnedObjectAsString);
+            // if multiple object IDs are provided as several sub-parts, permission is checked for each of them, and the total
+            // permission will be considered granted if the check has succeeded for all objects
+            for (final QualifiedObjectIdentifier objectIdentifier : wildcardPermission.getQualifiedObjectIdentifiers()) {
+                final OwnershipAnnotation ownership = getAccessControlStore().getOwnership(objectIdentifier);
+                final AccessControlListAnnotation acl = getAccessControlStore().getAccessControlList(objectIdentifier);
                 allChecksPassed = isPermitted(wildcardPermission, user, ownership, acl);
                 if (!allChecksPassed) {
                     break;

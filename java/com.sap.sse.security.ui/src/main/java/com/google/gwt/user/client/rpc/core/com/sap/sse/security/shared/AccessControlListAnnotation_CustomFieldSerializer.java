@@ -6,6 +6,7 @@ import com.google.gwt.user.client.rpc.SerializationStreamReader;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 
 public class AccessControlListAnnotation_CustomFieldSerializer extends CustomFieldSerializer<AccessControlListAnnotation> {
 
@@ -18,7 +19,7 @@ public class AccessControlListAnnotation_CustomFieldSerializer extends CustomFie
     public static void serialize(SerializationStreamWriter streamWriter, AccessControlListAnnotation instance)
             throws SerializationException {
         streamWriter.writeObject(instance.getAnnotation());
-        streamWriter.writeString(instance.getIdOfAnnotatedObjectAsString());
+        streamWriter.writeObject(instance.getIdOfAnnotatedObject());
         streamWriter.writeString(instance.getDisplayNameOfAnnotatedObject());
     }
 
@@ -33,7 +34,7 @@ public class AccessControlListAnnotation_CustomFieldSerializer extends CustomFie
     }
 
     public static AccessControlListAnnotation instantiate(SerializationStreamReader streamReader) throws SerializationException {
-        return new AccessControlListAnnotation((AccessControlList) streamReader.readObject(), streamReader.readString(), streamReader.readString());
+        return new AccessControlListAnnotation((AccessControlList) streamReader.readObject(), (QualifiedObjectIdentifier) streamReader.readObject(), streamReader.readString());
     }
 
     @Override

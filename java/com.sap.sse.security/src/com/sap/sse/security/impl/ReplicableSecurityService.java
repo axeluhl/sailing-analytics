@@ -4,6 +4,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroupManagementException;
@@ -20,19 +21,19 @@ import com.sap.sse.security.shared.WildcardPermission;
  *
  */
 public interface ReplicableSecurityService extends SecurityService {
-    Void internalCreateAcl(String idOfAccessControlledObjectAsString, String displayName);
+    Void internalCreateAcl(QualifiedObjectIdentifier idOfAccessControlledObject, String displayName);
     
-    Void internalAclPutPermissions(String idOfAccessControlledObjectAsString, UUID groupId, Set<String> actions);
+    Void internalAclPutPermissions(QualifiedObjectIdentifier idOfAccessControlledObject, UUID groupId, Set<String> actions);
     
-    Void internalAclAddPermission(String idOfAccessControlledObjectAsString, UUID groupId, String action);
+    Void internalAclAddPermission(QualifiedObjectIdentifier idOfAccessControlledObject, UUID groupId, String action);
     
-    Void internalAclRemovePermission(String idOfAccessControlledObjectAsString, UUID groupId, String action);
+    Void internalAclRemovePermission(QualifiedObjectIdentifier idOfAccessControlledObject, UUID groupId, String action);
     
-    Void internalDeleteAcl(String idOfAccessControlledObjectAsString);
+    Void internalDeleteAcl(QualifiedObjectIdentifier idOfAccessControlledObject);
     
-    Void internalCreateOwnership(String idOfOwnedObjectAsString, String owningUsername, UUID tenantOwnerId, String displayNameOfOwnedObject);
+    Void internalCreateOwnership(QualifiedObjectIdentifier idOfOwnedObject, String owningUsername, UUID tenantOwnerId, String displayNameOfOwnedObject);
     
-    Void internalDeleteOwnership(String idOfOwnedObjectAsString);
+    Void internalDeleteOwnership(QualifiedObjectIdentifier idOfOwnedObject);
     
     Void internalCreateUserGroup(UUID groupId, String name) throws UserGroupManagementException;
     

@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.component.EditAccessControlListDialog.AccessControlListData;
@@ -30,23 +31,23 @@ public class EditAccessControlListDialog extends DataEntryDialog<AccessControlLi
     // private final StringMessages stringMessages;
     
     private final Grid grid;
-    private final String accessControlledObjectIdAsString;
+    private final QualifiedObjectIdentifier accessControlledObjectId;
     private final List<Label> labels;
     private final List<TextBox> newGroups;
     private final List<TextBox> textBoxes;
     private final Button addGroupButton;
     
     public static class AccessControlListData {
-        private final String accessControlledObjectIdAsString;
+        private final QualifiedObjectIdentifier accessControlledObjectId;
         private final Map<String, Set<String>> permissionStrings;
         
-        protected AccessControlListData(String accessControlledObjectIdAsString, Map<String, Set<String>> permissionStrings) {
+        protected AccessControlListData(QualifiedObjectIdentifier accessControlledObjectId, Map<String, Set<String>> permissionStrings) {
             super();
-            this.accessControlledObjectIdAsString = accessControlledObjectIdAsString;
+            this.accessControlledObjectId = accessControlledObjectId;
             this.permissionStrings = permissionStrings;
         }
-        public String getAccessControlledObjectIdAsString() {
-            return accessControlledObjectIdAsString;
+        public QualifiedObjectIdentifier getAccessControlledObjectId() {
+            return accessControlledObjectId;
         }
         public Map<String, Set<String>> getActionStrings() {
             return permissionStrings;
@@ -55,10 +56,10 @@ public class EditAccessControlListDialog extends DataEntryDialog<AccessControlLi
     
     public EditAccessControlListDialog(final StringMessages stringMessages, final UserManagementServiceAsync userManagementService, 
             final AccessControlListListDataProvider aclListDataProvider, AccessControlListAnnotation acl) {
-        this(stringMessages, stringMessages.editAnACL(), acl.getIdOfAnnotatedObjectAsString(), userManagementService, acl, new DialogCallback<AccessControlListData>() {
+        this(stringMessages, stringMessages.editAnACL(), acl.getDisplayNameOfAnnotatedObject(), userManagementService, acl, new DialogCallback<AccessControlListData>() {
             @Override
             public void ok(AccessControlListData aclData) {
-                userManagementService.updateACL(aclData.getAccessControlledObjectIdAsString(), aclData.getActionStrings(), new AsyncCallback<AccessControlList>() {
+                userManagementService.updateACL(aclData.getAccessControlledObjectId(), aclData.getActionStrings(), new AsyncCallback<AccessControlList>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         Window.alert(stringMessages.errorEditingACL());
@@ -99,7 +100,7 @@ public class EditAccessControlListDialog extends DataEntryDialog<AccessControlLi
                 updateGrid();                
             }
         });
-        accessControlledObjectIdAsString = acl.getIdOfAnnotatedObjectAsString();
+        accessControlledObjectId = acl.getIdOfAnnotatedObject();
         for (Map.Entry<UserGroup, Set<String>> entry : acl.getAnnotation().getActionsByUserGroup().entrySet()) {
             Label label = new Label(entry.getKey().getName());
             labels.add(label);
@@ -155,6 +156,6 @@ public class EditAccessControlListDialog extends DataEntryDialog<AccessControlLi
                 permissionMap.put(newGroups.get(i - labelCount).getText(), permissionList);
             }
         }
-        return new AccessControlListData(accessControlledObjectIdAsString, permissionMap);
+        return new AccessControlListData(accessControlledObjectId, permissionMap);
     }
 }

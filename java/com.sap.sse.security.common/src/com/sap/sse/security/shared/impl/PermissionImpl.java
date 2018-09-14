@@ -1,6 +1,7 @@
 package com.sap.sse.security.shared.impl;
 
 import com.sap.sse.security.shared.Permission;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
 
 public class PermissionImpl implements Permission {
@@ -32,7 +33,7 @@ public class PermissionImpl implements Permission {
     
     @Override
     public WildcardPermission getPermission(Mode... modes) {
-        return new WildcardPermission(getStringPermission(modes), /* case sensitive */ true);
+        return new WildcardPermission(getStringPermission(modes));
     }
 
     public String getStringPermissionForObjects(Mode mode, String... objectIdentifiers) {
@@ -47,7 +48,7 @@ public class PermissionImpl implements Permission {
                 } else {
                     result.append(',');
                 }
-                result.append(permissionEncoder.encodeAsPermissionPart(getQualifiedObjectIdentifier(objectIdentifier)));
+                result.append(permissionEncoder.encodeAsPermissionPart(objectIdentifier));
             }
         }
         return result.toString();
@@ -55,12 +56,12 @@ public class PermissionImpl implements Permission {
     
     @Override
     public WildcardPermission getPermissionForObjects(Mode mode, String... objectIdentifiers) {
-        return new WildcardPermission(getStringPermissionForObjects(mode, objectIdentifiers), /* case sensitive */ true);
+        return new WildcardPermission(getStringPermissionForObjects(mode, objectIdentifiers));
     }
 
     @Override
-    public String getQualifiedObjectIdentifier(String objectIdentifier) {
-        return name()+QUALIFIER_SEPARATOR+objectIdentifier;
+    public QualifiedObjectIdentifier getQualifiedObjectIdentifier(String typeRelativeObjectIdentifier) {
+        return new QualifiedObjectIdentifierImpl(name(), typeRelativeObjectIdentifier);
     }
 
     @Override

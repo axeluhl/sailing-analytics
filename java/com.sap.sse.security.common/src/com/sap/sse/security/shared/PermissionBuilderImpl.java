@@ -14,7 +14,7 @@ public class PermissionBuilderImpl implements PermissionBuilder<WildcardPermissi
     
     @Override
     public WildcardPermission getPermission(String objectType, Action action) {
-        return new WildcardPermission(objectType + ":" + action.name(), true);
+        return new WildcardPermission(objectType + ":" + action.name());
     }
     
     @Override
@@ -24,7 +24,7 @@ public class PermissionBuilderImpl implements PermissionBuilder<WildcardPermissi
     
     @Override
     public WildcardPermission getPermission(String objectType, Action action, String objectId) {
-        return new WildcardPermission(objectType + ":" + action.name() + ":" + objectId, true);
+        return new WildcardPermission(objectType + ":" + action.name() + ":" + objectId);
     }
     
     @Override

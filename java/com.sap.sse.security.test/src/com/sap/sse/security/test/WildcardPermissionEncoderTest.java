@@ -13,7 +13,7 @@ public class WildcardPermissionEncoderTest {
     private void test(String s) {
         final String encoded = encoder.encodeAsPermissionPart(s);
         assertEquals(s, encoder.decodePermissionPart(encoded));
-        final WildcardPermission permission = new WildcardPermission("TYPE:MODE:"+encoded, /* caseSensitive */ true);
+        final WildcardPermission permission = new WildcardPermission("TYPE:MODE:"+encoded);
         assertEquals(s, encoder.decodePermissionPart(permission.getParts().get(2).iterator().next()));
     }
     

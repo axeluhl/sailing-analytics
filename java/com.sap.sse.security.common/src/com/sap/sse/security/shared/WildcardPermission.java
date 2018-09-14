@@ -22,9 +22,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
+import com.sap.sse.security.shared.impl.QualifiedObjectIdentifierImpl;
+import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 
 /**
  * A <code>WildcardPermission</code> is a very flexible permission construct supporting multiple levels of
@@ -104,12 +106,6 @@ import java.util.Set;
  * permission can also be used by a GWT client and an Android implementation.
  */
 public class WildcardPermission implements Serializable {
-
-    //TODO - JavaDoc methods
-
-    /**
-     * 
-     */
     private static final long serialVersionUID = -7136806951296823464L;
     /*--------------------------------------------
     |             C O N S T A N T S             |
@@ -117,7 +113,6 @@ public class WildcardPermission implements Serializable {
     public static final String WILDCARD_TOKEN = "*";
     public static final String PART_DIVIDER_TOKEN = ":";
     public static final String SUBPART_DIVIDER_TOKEN = ",";
-    protected static final boolean DEFAULT_CASE_SENSITIVE = false;
 
     /*--------------------------------------------
     |    I N S T A N C E   V A R I A B L E S    |
@@ -127,31 +122,11 @@ public class WildcardPermission implements Serializable {
     /*--------------------------------------------
     |         C O N S T R U C T O R S           |
     ============================================*/
-    /**
-     * Default no-arg constructor for subclasses only - end-user developers instantiating Permission instances must
-     * provide a wildcard string at a minimum, since Permission instances are immutable once instantiated.
-     * <p/>
-     * Note that the WildcardPermission class is very robust and typically subclasses are not necessary unless you
-     * wish to create type-safe Permission objects that would be used in your application, such as perhaps a
-     * {@code UserPermission}, {@code SystemPermission}, {@code PrinterPermission}, etc.  If you want such type-safe
-     * permission usage, consider subclassing the {@link DomainPermission DomainPermission} class for your needs.
-     */
-    protected WildcardPermission() {
-    }
-
     public WildcardPermission(String wildcardString) {
-        this(wildcardString, DEFAULT_CASE_SENSITIVE);
-    }
-
-    public WildcardPermission(String wildcardString, boolean caseSensitive) {
-        setParts(wildcardString, caseSensitive);
+        setParts(wildcardString);
     }
 
     protected void setParts(String wildcardString) {
-        setParts(wildcardString, DEFAULT_CASE_SENSITIVE);
-    }
-
-    protected void setParts(String wildcardString, boolean caseSensitive) {
         if (wildcardString == null || wildcardString.trim().length() == 0) {
             throw new IllegalArgumentException("Wildcard string cannot be null or empty. Make sure permission strings are properly formatted.");
         }
@@ -160,9 +135,6 @@ public class WildcardPermission implements Serializable {
         this.parts = new ArrayList<Set<String>>();
         for (String part : parts) {
             Set<String> subparts = new HashSet<>(Arrays.asList(part.split(SUBPART_DIVIDER_TOKEN)));
-            if (!caseSensitive) {
-                subparts = lowercase(subparts);
-            }
             if (subparts.isEmpty()) {
                 throw new IllegalArgumentException("Wildcard string cannot contain parts with only dividers. Make sure permission strings are properly formatted.");
             }
@@ -171,14 +143,6 @@ public class WildcardPermission implements Serializable {
         if (this.parts.isEmpty()) {
             throw new IllegalArgumentException("Wildcard string cannot contain only dividers. Make sure permission strings are properly formatted.");
         }
-    }
-
-    private Set<String> lowercase(Set<String> subparts) {
-        Set<String> lowerCasedSubparts = new LinkedHashSet<String>(subparts.size());
-        for (String subpart : subparts) {
-            lowerCasedSubparts.add(subpart.toLowerCase());
-        }
-        return lowerCasedSubparts;
     }
 
     /*--------------------------------------------
@@ -224,7 +188,7 @@ public class WildcardPermission implements Serializable {
 
     /**
      * Returns a string representation that can again equivalently be parsed by
-     * {@link WildcardPermission#WildcardPermission(String, boolean)}.
+     * {@link WildcardPermission#WildcardPermission(String)}.
      */
     public String toString() {
         StringBuilder buffer = new StringBuilder();
@@ -255,6 +219,24 @@ public class WildcardPermission implements Serializable {
 
     public int hashCode() {
         return parts.hashCode();
+    }
+    
+    /**
+     * For all combinations of first and third part produces a {@link QualifiedObjectIdentifier}. The result is never
+     * {@code null} but may be empty. The third parts of this permission are
+     * {@link PermissionStringEncoder#decodePermissionPart(String) decoded} before combined into the result objects.
+     */
+    public Iterable<QualifiedObjectIdentifier> getQualifiedObjectIdentifiers() {
+        final List<QualifiedObjectIdentifier> result = new ArrayList<>();
+        final WildcardPermissionEncoder encoder = new WildcardPermissionEncoder();
+        if (getParts().size() >= 3) {
+            for (final String typeName : getParts().get(0)) {
+                for (final String encodedRelativeObjectId : getParts().get(2)) {
+                    result.add(new QualifiedObjectIdentifierImpl(typeName, encoder.decodePermissionPart(encodedRelativeObjectId)));
+                }
+            }
+        }
+        return result;
     }
 
 }
