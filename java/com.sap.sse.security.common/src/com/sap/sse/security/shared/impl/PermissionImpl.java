@@ -32,10 +32,11 @@ public class PermissionImpl implements Permission {
     
     @Override
     public WildcardPermission getPermission(Mode... modes) {
-        return new WildcardPermission(getStringPermission(modes));
+        return new WildcardPermission(getStringPermission(modes), /* case sensitive */ true);
     }
 
     public String getStringPermissionForObjects(Mode mode, String... objectIdentifiers) {
+        final WildcardPermissionEncoder permissionEncoder = new WildcardPermissionEncoder();
         final StringBuilder result = new StringBuilder(getStringPermission(mode));
         if (objectIdentifiers!=null && objectIdentifiers.length>0) {
             result.append(':');
@@ -46,7 +47,7 @@ public class PermissionImpl implements Permission {
                 } else {
                     result.append(',');
                 }
-                result.append(objectIdentifier);
+                result.append(permissionEncoder.encodeAsPermissionPart(getQualifiedObjectIdentifier(objectIdentifier)));
             }
         }
         return result.toString();
@@ -54,7 +55,12 @@ public class PermissionImpl implements Permission {
     
     @Override
     public WildcardPermission getPermissionForObjects(Mode mode, String... objectIdentifiers) {
-        return new WildcardPermission(getStringPermissionForObjects(mode, objectIdentifiers));
+        return new WildcardPermission(getStringPermissionForObjects(mode, objectIdentifiers), /* case sensitive */ true);
+    }
+
+    @Override
+    public String getQualifiedObjectIdentifier(String objectIdentifier) {
+        return name()+QUALIFIER_SEPARATOR+objectIdentifier;
     }
 
     @Override

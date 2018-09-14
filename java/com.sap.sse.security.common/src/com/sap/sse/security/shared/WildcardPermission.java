@@ -224,7 +224,7 @@ public class WildcardPermission implements Serializable {
 
     /**
      * Returns a string representation that can again equivalently be parsed by
-     * {@link WildcardPermission#WildcardPermission(String)}.
+     * {@link WildcardPermission#WildcardPermission(String, boolean)}.
      */
     public String toString() {
         StringBuilder buffer = new StringBuilder();

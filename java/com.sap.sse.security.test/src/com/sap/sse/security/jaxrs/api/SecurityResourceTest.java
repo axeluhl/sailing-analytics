@@ -65,9 +65,9 @@ public class SecurityResourceTest {
                     return service;
                 }
             };
-            store.addPermissionForUser(USERNAME, new WildcardPermission("can do")); // equivalent to "can do:*:*"
-            store.addPermissionForUser(USERNAME, new WildcardPermission("event:view:*"));
-            store.addPermissionForUser(USERNAME, new WildcardPermission("event:edit:123"));
+            store.addPermissionForUser(USERNAME, new WildcardPermission("can do", /* case sensitive */ true)); // equivalent to "can do:*:*"
+            store.addPermissionForUser(USERNAME, new WildcardPermission("event:view:*", /* case sensitive */ true));
+            store.addPermissionForUser(USERNAME, new WildcardPermission("event:edit:123", /* case sensitive */ true));
         } finally {
             Thread.currentThread().setContextClassLoader(oldContextClassLoader);
         }
@@ -108,7 +108,7 @@ public class SecurityResourceTest {
         assertEquals(USERNAME, subject.getPrincipal());
         assertTrue(subject.isPermitted("can do"));
         assertFalse(subject.isPermitted("can't do"));
-        service.addPermissionForUser(USERNAME, new WildcardPermission("can't do"));
+        service.addPermissionForUser(USERNAME, new WildcardPermission("can't do", /* case sensitive */ true));
         assertTrue(subject.isPermitted("can't do"));
 
         assertTrue(subject.isPermitted("event:view:999"));

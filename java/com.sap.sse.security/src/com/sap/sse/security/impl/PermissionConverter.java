@@ -27,7 +27,7 @@ public class PermissionConverter {
     private final PermissionToObjectIdConverter poc = new PermissionToObjectIdConverter();
     
     public WildcardPermission getWildcardPermission(Permission permission) {
-        return new WildcardPermission(getAsString(permission));
+        return new WildcardPermission(getAsString(permission), /* case sensitive */ true);
     }
 
     private String getAsString(Permission permission) {

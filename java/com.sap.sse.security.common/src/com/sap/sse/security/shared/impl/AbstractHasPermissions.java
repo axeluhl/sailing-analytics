@@ -21,7 +21,7 @@ public abstract class AbstractHasPermissions implements HasPermissions {
 
     @Override
     public WildcardPermission getPermission(Mode... operationModes) {
-        return new WildcardPermission(getStringPermission(operationModes));
+        return new WildcardPermission(getStringPermission(operationModes), /* case sensitive */ true);
     }
 
     @Override

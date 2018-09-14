@@ -63,7 +63,7 @@ public abstract class AbstractRoleDefinitionDialog extends DataEntryDialog<RoleD
                 /* text box size */ 20) {
                     @Override
                     protected WildcardPermission parse(String s) {
-                        return s==null || s.isEmpty() ? null : new WildcardPermission(s);
+                        return s==null || s.isEmpty() ? null : new WildcardPermission(s, /* case sensitive */ true);
                     }
 
                     @Override

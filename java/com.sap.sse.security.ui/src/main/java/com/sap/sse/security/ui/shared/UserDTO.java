@@ -83,7 +83,7 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable {
     }
     
     public boolean hasPermission(String permission) {
-        return hasPermission(new WildcardPermission(permission));
+        return hasPermission(new WildcardPermission(permission, /* case sensitive */ true));
     }
 
     @Override

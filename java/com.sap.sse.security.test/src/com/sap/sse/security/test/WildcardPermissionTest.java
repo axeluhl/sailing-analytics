@@ -9,7 +9,7 @@ import com.sap.sse.security.shared.WildcardPermission;
 public class WildcardPermissionTest {
     @Test
     public void simpleToStringParseTest() {
-        WildcardPermission p = new WildcardPermission("a:b,c:*");
-        assertEquals(p, new WildcardPermission(p.toString()));
+        WildcardPermission p = new WildcardPermission("a:b,c:*", /* case sensitive */ true);
+        assertEquals(p, new WildcardPermission(p.toString(), /* case sensitive */ true));
     }
 }

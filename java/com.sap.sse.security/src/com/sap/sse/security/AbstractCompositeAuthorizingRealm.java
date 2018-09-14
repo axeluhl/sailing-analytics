@@ -167,7 +167,7 @@ public abstract class AbstractCompositeAuthorizingRealm extends AuthorizingRealm
     public boolean isPermitted(PrincipalCollection principals, Permission perm) {
         String username = (String) principals.getPrimaryPrincipal();
         final User user = getUserStore().getUserByName(username);
-        final WildcardPermission wildcardPermission = new WildcardPermission(perm.toString().replaceAll("\\[|\\]", ""));
+        final WildcardPermission wildcardPermission = new WildcardPermission(perm.toString().replaceAll("\\[|\\]", ""), /* case sensitive */ true);
         List<Set<String>> parts = wildcardPermission.getParts();
         final boolean result;
         // TODO the object "identifier" provided in the third part of the Permission object has to be aligned with which identifier to use with the AccessControlStore

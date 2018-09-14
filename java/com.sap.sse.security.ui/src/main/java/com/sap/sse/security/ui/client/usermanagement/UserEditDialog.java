@@ -234,7 +234,7 @@ public class UserEditDialog extends DataEntryDialog<Pair<UserDTO, Iterable<Tripl
         } else {
             roles = Collections.emptyList();
         }
-        final Iterable<WildcardPermission> newPermissionList = Util.map(permissionsEditor.getValue(), p->new WildcardPermission(p));
+        final Iterable<WildcardPermission> newPermissionList = Util.map(permissionsEditor.getValue(), p->new WildcardPermission(p, /* case sensitive */ true));
         UserDTO user = new UserDTO(userToEdit.getName(), email.getText(), fullName.getText(), company.getText(), userToEdit.getLocale(), userToEdit.isEmailValidated(),
                 userToEdit.getAccounts(), /* roles */ Collections.emptyList(), userToEdit.getDefaultTenant(), newPermissionList, userToEdit.getUserGroups());
         return new Pair<>(user, roles);

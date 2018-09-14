@@ -105,9 +105,9 @@ public class LoginTest {
     @Test
     public void permissionsTest() throws UserManagementException, UserGroupManagementException {
         userStore.createUser("me", "me@sap.com", new UserGroupImpl(UUID.randomUUID(), "me-tenant"));
-        userStore.addPermissionForUser("me", new WildcardPermission("a:b:c"));
+        userStore.addPermissionForUser("me", new WildcardPermission("a:b:c", /* case sensitive */ true));
         UserStoreImpl store2 = new UserStoreImpl(DEFAULT_TENANT_NAME);
-        assertTrue(store2.getUserByName("me").hasPermission(new WildcardPermission("a:b:c")));
+        assertTrue(store2.getUserByName("me").hasPermission(new WildcardPermission("a:b:c", /* case sensitive */ true)));
     }
 
 }

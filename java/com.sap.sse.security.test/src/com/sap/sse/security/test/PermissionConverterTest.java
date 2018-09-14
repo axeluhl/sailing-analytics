@@ -17,38 +17,38 @@ import com.sap.sse.security.shared.WildcardPermission;
 public class PermissionConverterTest {
     @Test
     public void testPermissionParts() {
-        List<Set<String>> parts = new PermissionConverter().getPermissionParts(new WildcardPermission("LEADERBOARD:EDIT:KW2017 Laser Int."));
-        assertTrue(parts.get(0).contains("leaderboard"));
-        assertTrue(parts.get(1).contains("edit"));
-        assertTrue(parts.get(2).contains("kw2017 laser int."));
+        List<Set<String>> parts = new PermissionConverter().getPermissionParts(new WildcardPermission("LEADERBOARD:EDIT:KW2017 Laser Int.", /* case sensitive */ true));
+        assertTrue(parts.get(0).contains("LEADERBOARD"));
+        assertTrue(parts.get(1).contains("EDIT"));
+        assertTrue(parts.get(2).contains("KW2017 Laser Int."));
     }
 
     @Test
     public void testSimpleObjectId() {
-        Iterable<String> parts = new PermissionConverter().getObjectIdsAsString(new WildcardPermission("LEADERBOARD:EDIT:KW2017 Laser Int."));
+        Iterable<String> parts = new PermissionConverter().getObjectIdsAsString(new WildcardPermission("LEADERBOARD:EDIT:KW2017 Laser Int.", /* case sensitive */ true));
         assertEquals(1, Util.size(parts));
-        assertEquals("leaderboard/kw2017 laser int.", parts.iterator().next());
+        assertEquals("LEADERBOARD/KW2017 Laser Int.", parts.iterator().next());
     }
 
     @Test
     public void testTwoObjectIds() {
-        Iterable<String> parts = new PermissionConverter().getObjectIdsAsString(new WildcardPermission("LEADERBOARD:EDIT:KW2017 Laser Int.,SWC 2017 Miami N/17"));
+        Iterable<String> parts = new PermissionConverter().getObjectIdsAsString(new WildcardPermission("LEADERBOARD:EDIT:KW2017 Laser Int.,SWC 2017 Miami N/17", /* case sensitive */ true));
         assertEquals(2, Util.size(parts));
-        assertEquals("leaderboard/kw2017 laser int.", Util.get(parts, 0));
-        assertEquals("leaderboard/swc 2017 miami n\\/17", Util.get(parts, 1));
+        assertEquals("LEADERBOARD/KW2017 Laser Int.", Util.get(parts, 0));
+        assertEquals("LEADERBOARD/SWC 2017 Miami N\\/17", Util.get(parts, 1));
     }
 
     @Test
     public void testTwoObjectIdsOneWithLeadingBlank() {
-        Iterable<String> parts = new PermissionConverter().getObjectIdsAsString(new WildcardPermission("LEADERBOARD:EDIT:KW2017 Laser Int., SWC 2017 Miami N/17"));
+        Iterable<String> parts = new PermissionConverter().getObjectIdsAsString(new WildcardPermission("LEADERBOARD:EDIT:KW2017 Laser Int., SWC 2017 Miami N/17", /* case sensitive */ true));
         assertEquals(2, Util.size(parts));
-        assertEquals("leaderboard/kw2017 laser int.", Util.get(parts, 0));
-        assertEquals("leaderboard/ swc 2017 miami n\\/17", Util.get(parts, 1));
+        assertEquals("LEADERBOARD/KW2017 Laser Int.", Util.get(parts, 0));
+        assertEquals("LEADERBOARD/ SWC 2017 Miami N\\/17", Util.get(parts, 1));
     }
     
     @Test
     public void testGetWildcardPermission() {
-        com.sap.sse.security.shared.WildcardPermission wp = new PermissionConverter().getWildcardPermission(new org.apache.shiro.authz.permission.WildcardPermission("LEADERBOARD:EDIT:KW2017 Laser Int."));
+        com.sap.sse.security.shared.WildcardPermission wp = new PermissionConverter().getWildcardPermission(new org.apache.shiro.authz.permission.WildcardPermission("LEADERBOARD:EDIT:KW2017 Laser Int.", /* case sensitive */ true));
         assertEquals("LEADERBOARD:EDIT:KW2017 Laser Int.".toLowerCase(), wp.toString());
     }
     

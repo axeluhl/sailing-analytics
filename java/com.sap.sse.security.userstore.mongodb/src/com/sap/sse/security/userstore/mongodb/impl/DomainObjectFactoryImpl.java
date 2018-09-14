@@ -310,7 +310,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             result.addRole(role);
         }
         for (String permission : permissions) {
-            result.addPermission(new WildcardPermission(permission));
+            result.addPermission(new WildcardPermission(permission, /* case sensitive */ true));
         }
         if (rolesMigrated) {
             // update the user object after roles have been migrated;

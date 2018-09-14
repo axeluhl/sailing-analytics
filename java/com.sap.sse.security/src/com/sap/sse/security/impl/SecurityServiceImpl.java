@@ -240,7 +240,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 logger.info("Predefined role definition "+otherPredefinedRole+" not found; creating");
                 final Set<WildcardPermission> permissions = new HashSet<>();
                 for (final String stringPermission : otherPredefinedRole.getPermissions()) {
-                    permissions.add(new WildcardPermission(stringPermission));
+                    permissions.add(new WildcardPermission(stringPermission, /* case sensitive */ true));
                 }
                 userStore.createRoleDefinition(otherPredefinedRole.getId(), otherPredefinedRole.name(), permissions);
             }
