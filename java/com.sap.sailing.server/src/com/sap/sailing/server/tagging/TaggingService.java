@@ -10,6 +10,32 @@ import com.sap.sse.common.TimePoint;
 public interface TaggingService {
 
     /**
+     * Enum used to identify issues.
+     */
+    public enum ErrorCode {
+        UNKNOWN_ERROR("Unknown error"),
+        USER_NOT_FOUND("User not found"),
+        MISSING_PERMISSIONS("Missing permissions"),
+        SECURITY_SERIVCE_NOT_FOUND("Security service not found"),
+        RACELOG_NOT_FOUND("Racelog not found"),
+        TAG_NOT_REVOKABLE("This tag cannot be revoked"),
+        TAG_NOT_EMPTY("Tag may not be empty"),
+        TIMEPOINT_NOT_EMPTY("Timepoint may not be empty"),
+        TAG_TOO_LONG("Tag is too long"),
+        COMMENT_TOO_LONG("Comment is too long");
+
+        private final String message;
+
+        ErrorCode(String message) {
+            this.message = message;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+    }
+
+    /**
      * Saves given properties as tag for given race. Checks if all parameters are valid and all required parameters are
      * set.
      * 
@@ -86,7 +112,8 @@ public interface TaggingService {
      *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
      * @param fleetName
      *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
-     * @return list of {@link TagDTO tags}
+     * @return list of {@link TagDTO tags}, empty list in case an error occurs or there are no tags available but
+     *         <b>never null</b>!
      */
     public List<TagDTO> getPublicTags(String leaderboardName, String raceColumnName, String fleetName);
 
@@ -95,7 +122,8 @@ public interface TaggingService {
      * 
      * @param raceIdentifier
      *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
-     * @return list of {@link TagDTO tags}
+     * @return list of {@link TagDTO tags}, empty list in case an error occurs or there are no tags available but
+     *         <b>never null</b>!
      */
     public List<TagDTO> getPublicTags(RegattaAndRaceIdentifier raceIdentifier, TimePoint latestReceivedTagTime);
 
@@ -108,17 +136,17 @@ public interface TaggingService {
      *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
      * @param fleetName
      *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
-     * @return list of {@link TagDTO tags}
+     * @return list of {@link TagDTO tags}, empty list in case an error occurs or there are no tags available but
+     *         <b>never null</b>!
      */
     public List<TagDTO> getPrivateTags(String leaderboardName, String raceColumnName, String fleetName);
 
     /**
-     * Returns the last error code as string. Need to be converted into error message to display this message to the
-     * user. Codes are basically string messages maintained in
-     * com.sap.sailing.gwt.ui/src/main/resources/stringmessages_*
+     * Returns the last error code of the current user. Needs to be converted into error message to display this message
+     * to the user.
      * 
-     * @return last error code which occured
+     * @return last {@link ErrorCode error code} which occured if error is known, otherwise
+     *         {@link ErrorCode#UNKNOWN_ERROR unknown error}
      */
-    public String getLastErrorCode();
-
+    public ErrorCode getLastErrorCode();
 }

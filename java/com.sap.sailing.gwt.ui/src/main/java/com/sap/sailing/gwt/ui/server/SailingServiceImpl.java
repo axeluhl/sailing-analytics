@@ -6478,9 +6478,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
         boolean successful = getService().getTaggingService().addTag(leaderboardName, raceColumnName, fleetName, tag,
                 comment, imageURL, visibleForPublic, raceTimepoint);
         if (!successful) {
-            successInfo = new SuccessInfo(false,
-                    serverStringMessages.get(getClientLocale(), getService().getTaggingService().getLastErrorCode()),
-                    null, null);
+            successInfo = new SuccessInfo(false, getService().getTaggingService().getLastErrorCode().getMessage(), null,
+                    null);
         }
         return successInfo;
     }
@@ -6491,9 +6490,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
         boolean successful = getService().getTaggingService().removeTag(leaderboardName, raceColumnName, fleetName,
                 tag);
         if (!successful) {
-            successInfo = new SuccessInfo(false,
-                    serverStringMessages.get(getClientLocale(), getService().getTaggingService().getLastErrorCode()),
-                    null, null);
+            successInfo = new SuccessInfo(false, getService().getTaggingService().getLastErrorCode().getMessage(), null,
+                    null);
         }
         return successInfo;
     }
@@ -6505,9 +6503,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
         boolean successful = getService().getTaggingService().updateTag(leaderboardName, raceColumnName, fleetName,
                 tagToUpdate, tag, comment, imageURL, visibleForPublic);
         if (!successful) {
-            successInfo = new SuccessInfo(false,
-                    serverStringMessages.get(getClientLocale(), getService().getTaggingService().getLastErrorCode()),
-                    null, null);
+            successInfo = new SuccessInfo(false, getService().getTaggingService().getLastErrorCode().getMessage(), null,
+                    null);
         }
         return successInfo;
     }
