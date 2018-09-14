@@ -51,7 +51,13 @@ public class WildcardPermissionEncoder implements PermissionStringEncoder<Wildca
     }
 
     private String encodeWhitespace(char c) {
-        return ESCAPE_CHARACTER+String.format("%02x", (int) c);
+        return ESCAPE_CHARACTER+asTwoHexDigits(c);
+    }
+
+    private final static String hexDigits = "0123456789abcdef";
+    private String asTwoHexDigits(char c) {
+        int cAsInt = (int) c;
+        return ""+hexDigits.charAt(cAsInt/16)+hexDigits.charAt(cAsInt%16);
     }
 
     @Override
