@@ -10,7 +10,7 @@ import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 
-public class UsernamePasswordRealm extends AbstractCompositeAuthrizingRealm {
+public class UsernamePasswordRealm extends AbstractCompositeAuthorizingRealm {
     
     public UsernamePasswordRealm() {
         super();

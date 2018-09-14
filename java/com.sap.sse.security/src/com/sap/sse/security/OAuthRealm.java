@@ -40,7 +40,7 @@ import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 // GWT has similar class. 
 
-public class OAuthRealm extends AbstractCompositeAuthrizingRealm {
+public class OAuthRealm extends AbstractCompositeAuthorizingRealm {
     private static final Logger logger = Logger.getLogger(OAuthRealm.class.getName());
     
     public OAuthRealm() {

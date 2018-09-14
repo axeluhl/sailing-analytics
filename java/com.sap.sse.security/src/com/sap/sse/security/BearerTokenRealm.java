@@ -14,7 +14,7 @@ import com.sap.sse.security.shared.SecurityUser;
  * @author Axel Uhl (D043530)
  *
  */
-public class BearerTokenRealm extends AbstractCompositeAuthrizingRealm {
+public class BearerTokenRealm extends AbstractCompositeAuthorizingRealm {
     
     public BearerTokenRealm() {
         super();

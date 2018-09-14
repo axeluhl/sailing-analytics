@@ -2,6 +2,7 @@ package com.sap.sse.security;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -26,6 +27,7 @@ import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 
 /**
  * This class implements a realm that combines Access Control Lists, Role Based Permission Modeling and
@@ -37,8 +39,8 @@ import com.sap.sse.security.shared.WildcardPermission;
  * @author Jonas Dann
  * @author Axel Uhl (D043530)
  */
-public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm {
-    private static final Logger logger = Logger.getLogger(AbstractCompositeAuthrizingRealm.class.getName());
+public abstract class AbstractCompositeAuthorizingRealm extends AuthorizingRealm {
+    private static final Logger logger = Logger.getLogger(AbstractCompositeAuthorizingRealm.class.getName());
     private final Future<UserStore> userStore;
     private final Future<AccessControlStore> accessControlStore;
 
@@ -56,9 +58,11 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
         testAccessControlStore = theTestAccessControlStore;
     }
 
-    public AbstractCompositeAuthrizingRealm() {
+    public AbstractCompositeAuthorizingRealm() {
         super();
         setCachingEnabled(false); // always grab fresh authorization info from the user store
+        // we want case-sensitive permission strings:
+        setPermissionResolver(wildcardString->new org.apache.shiro.authz.permission.WildcardPermission(wildcardString, /* caseSensitive */ true));
         BundleContext context = Activator.getContext();
         if (context != null) {
             userStore = createUserStoreFuture(context);
@@ -161,21 +165,39 @@ public abstract class AbstractCompositeAuthrizingRealm extends AuthorizingRealm 
 
     @Override
     public boolean isPermitted(PrincipalCollection principals, Permission perm) {
-        // TODO check whether WildcardPermission functionality can be used here (perm instanceof)
-        String[] parts = perm.toString().replaceAll("\\[|\\]", "").split(":");
         String username = (String) principals.getPrimaryPrincipal();
-        OwnershipAnnotation ownership = null;
-        AccessControlListAnnotation acl = null;
-        if (parts.length > 2) {
-            ownership = getAccessControlStore().getOwnership(parts[2]);
-            acl = getAccessControlStore().getAccessControlList(parts[2]);
-        }
         final User user = getUserStore().getUserByName(username);
-        return PermissionChecker.isPermitted(new WildcardPermission(perm.toString().replaceAll("\\[|\\]", "")), 
+        final WildcardPermission wildcardPermission = new WildcardPermission(perm.toString().replaceAll("\\[|\\]", ""));
+        List<Set<String>> parts = wildcardPermission.getParts();
+        final boolean result;
+        // TODO the object "identifier" provided in the third part of the Permission object has to be aligned with which identifier to use with the AccessControlStore
+        final Set<String> encodedIdsOfOwnedObjectAsString;
+        if (parts.size() > 2 && !(encodedIdsOfOwnedObjectAsString = parts.get(2)).isEmpty()) {
+            boolean allChecksPassed = true;
+            for (final String encodedIdOfOwnedObjectAsString : encodedIdsOfOwnedObjectAsString) {
+                // if multiple object IDs are provided as several sub-parts, permission is checked for each of them, and the total
+                // permission will be considered granted if the check has succeeded for all objects
+                final String idOfOwnedObjectAsString = new WildcardPermissionEncoder().decodePermissionPart(encodedIdOfOwnedObjectAsString);
+                final OwnershipAnnotation ownership = getAccessControlStore().getOwnership(idOfOwnedObjectAsString);
+                final AccessControlListAnnotation acl = getAccessControlStore().getAccessControlList(idOfOwnedObjectAsString);
+                allChecksPassed = isPermitted(wildcardPermission, user, ownership, acl);
+                if (!allChecksPassed) {
+                    break;
+                }
+            }
+            result = allChecksPassed;
+        } else {
+            result = isPermitted(wildcardPermission, user, /* ownership */ null, /* acl */ null);
+        }
+        return result;
+    }
+
+    private boolean isPermitted(WildcardPermission wildcardPermission, User user, OwnershipAnnotation ownership, AccessControlListAnnotation acl) {
+        return PermissionChecker.isPermitted(wildcardPermission, 
                 user, getUserStore().getUserGroupsOfUser(user), ownership==null?null:ownership.getAnnotation(), 
                 acl==null?null:acl.getAnnotation());
     }
-
+    
     @Override
     public boolean[] isPermitted(PrincipalCollection principals, List<Permission> permissions) {
         boolean[] result = new boolean[permissions.size()];

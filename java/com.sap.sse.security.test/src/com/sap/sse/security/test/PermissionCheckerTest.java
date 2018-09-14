@@ -13,7 +13,11 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sse.security.AbstractCompositeAuthorizingRealm;
+import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.UserImpl;
+import com.sap.sse.security.UserStore;
+import com.sap.sse.security.UsernamePasswordRealm;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.PermissionBuilder.DefaultActions;
@@ -25,11 +29,15 @@ import com.sap.sse.security.shared.RoleImpl;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.UserGroupManagementException;
+import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.AccessControlListImpl;
 import com.sap.sse.security.shared.impl.OwnershipImpl;
 import com.sap.sse.security.shared.impl.SecurityUserImpl;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
+import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
+import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public class PermissionCheckerTest {
     private final String eventDataObjectType = "event";
@@ -49,15 +57,22 @@ public class PermissionCheckerTest {
     private AccessControlList acl;
     private final UUID globalRoleId = UUID.randomUUID();
     private RoleDefinition globalRoleDefinition;
+    private AbstractCompositeAuthorizingRealm realm;
+    private UserStore userStore;
+    private AccessControlStore accessControlStore;
     
     @Before
-    public void setUp() {
+    public void setUp() throws UserGroupManagementException, UserManagementException {
+        adminTenant = new UserGroupImpl(adminTenantId, "admin-tenant");
+        userStore = new UserStoreImpl(adminTenant.getName());
+        accessControlStore = new AccessControlStoreImpl(userStore);
+        AbstractCompositeAuthorizingRealm.setTestStores(userStore, accessControlStore);
+        realm = new UsernamePasswordRealm();
         adminUser = new SecurityUserImpl("admin", adminTenant);
         user = new UserImpl("jonas", "jonas@dann.io", userTenant, /* userGroupProvider */ null);
         userTenant = new UserGroupImpl(userTenantId, "jonas-tenant");
         userTenant.add(user);
         ownership = new OwnershipImpl(user, userTenant);
-        adminTenant = new UserGroupImpl(adminTenantId, "admin-tenant");
         adminTenant.add(adminUser);
         adminOwnership = new OwnershipImpl(adminUser, adminTenant);
         tenants = new ArrayList<>();
@@ -74,6 +89,11 @@ public class PermissionCheckerTest {
         assertFalse(PermissionChecker.isPermitted(permission, user, tenants, null, acl));
         assertFalse(PermissionChecker.isPermitted(permission, user, tenants, adminOwnership, acl));
         assertTrue(PermissionChecker.isPermitted(permission, user, tenants, ownership, acl));
+    }
+    
+    @Test
+    public void testPermissionsImpliedByOwnershipConstrainedRole() {
+//        realm.checkPermission(principals, permission);
     }
     
     @Test

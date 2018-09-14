@@ -10,7 +10,9 @@ Require-Bundle: org.junit;bundle-version="4.8.2",
  com.sap.sse.security.userstore.mongodb,
  org.mongodb.mongo-java-driver;bundle-version="2.13.0",
  com.sap.sse.mongodb,
- com.sap.sse.mail
+ com.sap.sse.mail,
+ slf4j.api;bundle-version="1.6.4",
+ jcl.over.slf4j;bundle-version="1.6.4"
 Import-Package: com.sap.sse.security.shared,
  org.apache.shiro.session.mgt
 Automatic-Module-Name: com.sap.sse.security.test
