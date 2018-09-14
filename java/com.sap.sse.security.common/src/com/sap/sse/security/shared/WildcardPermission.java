@@ -122,6 +122,9 @@ public class WildcardPermission implements Serializable {
     /*--------------------------------------------
     |         C O N S T R U C T O R S           |
     ============================================*/
+    @Deprecated // for GWT serialization only
+    WildcardPermission() {}
+    
     public WildcardPermission(String wildcardString) {
         setParts(wildcardString);
     }
