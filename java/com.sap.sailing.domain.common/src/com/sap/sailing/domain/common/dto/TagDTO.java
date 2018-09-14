@@ -153,6 +153,11 @@ public class TagDTO implements Serializable {
         return revokedAt;
     }
 
+    /**
+     * Compares attributes {@link #tag}, {@link #comment}, {@link #imageURL}, {@link #visibleForPublic},
+     * {@link #username} and {@link #raceTimepoint}, but <b>NOT</b> attributes {@link #createdAt} and
+     * {@link #revokedAt}.
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
