@@ -22,6 +22,7 @@ import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.UsernamePasswordRealm;
 import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Permission.DefaultModes;
 import com.sap.sse.security.shared.PermissionChecker;
@@ -41,7 +42,7 @@ import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public class PermissionCheckerTest {
     private final UUID eventId = UUID.randomUUID();
-    private final WildcardPermission permission = Permission.EVENT.getPermissionForObjects(DefaultModes.READ, eventId.toString());
+    private final WildcardPermission eventReadPermission = Permission.EVENT.getPermissionForObjects(DefaultModes.READ, eventId.toString());
     private final UUID userTenantId = UUID.randomUUID();
     private UserGroup adminTenant;
     private SecurityUser adminUser;
@@ -81,7 +82,7 @@ public class PermissionCheckerTest {
         tenants.add(adminTenant);
         acl = new AccessControlListImpl();
         Set<WildcardPermission> permissionSet = new HashSet<>();
-        permissionSet.add(permission);
+        permissionSet.add(eventReadPermission);
         globalRoleDefinition = new RoleDefinitionImpl(globalRoleId, "event", permissionSet);
         principalCollection = mock(PrincipalCollection.class);
         when(principalCollection.getPrimaryPrincipal()).thenReturn(user.getName());
@@ -89,9 +90,9 @@ public class PermissionCheckerTest {
     
     @Test
     public void testOwnership() {
-        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, null, acl));
-        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, adminOwnership, acl));
-        assertTrue(PermissionChecker.isPermitted(permission, user, tenants, ownership, acl));
+        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, acl));
+        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, adminOwnership, acl));
+        assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, ownership, acl));
     }
     
     /**
@@ -105,7 +106,7 @@ public class PermissionCheckerTest {
      * on a successful ownership lookup with the object ID provided by the permission.
      */
     @Test
-    public void testPermissionsImpliedByOwnershipConstrainedRole() {
+    public void testPermissionsImpliedByOwnershipConstrainedRole() throws UserManagementException {
         final String leaderboardName = "My:Leaderboard, the only one ";
         final String regattaName = " My:Regatta, the only one ";
         WildcardPermission leaderboardPermission = Permission.LEADERBOARD.getPermissionForObjects(DefaultModes.READ, leaderboardName);
@@ -116,51 +117,57 @@ public class PermissionCheckerTest {
                 /* tenantOwner */ null, leaderboardName);
         assertTrue(realm.isPermitted(principalCollection, leaderboardPermission.toString()));
         assertFalse(realm.isPermitted(principalCollection, regattaPermission.toString()));
-        accessControlStore.createOwnership(Permission.REGATTA.getQualifiedObjectIdentifier(regattaName), user,
-                /* tenantOwner */ null, leaderboardName);
+        accessControlStore.createOwnership(Permission.REGATTA.getQualifiedObjectIdentifier(regattaName), /* userOwner */ null,
+                /* groupOwner */ userTenant, leaderboardName);
         assertTrue(realm.isPermitted(principalCollection, leaderboardPermission.toString()));
+        // only adding the group owner doesn't grant permission yet:
+        assertFalse(realm.isPermitted(principalCollection, regattaPermission.toString()));
+        // but now we assign the admin role to the user, qualified for objects owned by the group owner:
+        userStore.addRoleForUser(user.getName(), new RoleImpl(AdminRole.getInstance(), /* qualifiedForTenant */ userTenant, /* qualifiedForUser */ null));
+        assertTrue(realm.isPermitted(principalCollection, leaderboardPermission.toString()));
+        // now the user should be granted permission because admin gets *, and the user gets admin on all objects owned by userTenant
         assertTrue(realm.isPermitted(principalCollection, regattaPermission.toString()));
     }
     
     @Test
     public void testAccessControlList() {
-        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, adminOwnership, null));
-        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, adminOwnership, acl));
+        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, adminOwnership, null));
+        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, adminOwnership, acl));
         Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
         Set<String> permissionSet = new HashSet<>();
         permissionSet.add(DefaultModes.READ.name());
         permissionMap.put(userTenant, permissionSet);
         acl = new AccessControlListImpl(permissionMap);
-        assertTrue(PermissionChecker.isPermitted(permission, user, tenants, adminOwnership, acl));
-        user.addPermission(permission);
-        assertTrue(PermissionChecker.isPermitted(permission, user, tenants, adminOwnership, acl));
+        assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, adminOwnership, acl));
+        user.addPermission(eventReadPermission);
+        assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, adminOwnership, acl));
         permissionMap = new HashMap<>();
         permissionSet = new HashSet<>();
         permissionSet.add("!" + DefaultModes.READ.name());
         permissionMap.put(userTenant, permissionSet);
         acl = new AccessControlListImpl(permissionMap);
-        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, adminOwnership, acl));
-        assertTrue(PermissionChecker.isPermitted(permission, user, tenants, ownership, acl));
+        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, adminOwnership, acl));
+        assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, ownership, acl));
     }
     
     @Test
     public void testDirectPermission() {
-        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, adminOwnership, acl));
-        user.addPermission(permission);
-        assertTrue(PermissionChecker.isPermitted(permission, user, tenants, adminOwnership, acl));
+        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, adminOwnership, acl));
+        user.addPermission(eventReadPermission);
+        assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, adminOwnership, acl));
     }
     
     @Test
     public void testRole() {
-        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, adminOwnership, acl));
+        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, adminOwnership, acl));
         final RoleImpl globalRole = new RoleImpl(globalRoleDefinition);
         user.addRole(globalRole);
-        assertTrue(PermissionChecker.isPermitted(permission, user, tenants, adminOwnership, acl));
+        assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, adminOwnership, acl));
         user.removeRole(globalRole);
         user.addRole(new RoleImpl(globalRoleDefinition, this.userTenant, /* user qualifier */ null));
-        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, adminOwnership, acl));
+        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, adminOwnership, acl));
         Ownership testOwnership = new OwnershipImpl(adminUser, userTenant);
-        assertTrue(PermissionChecker.isPermitted(permission, user, tenants, testOwnership, acl));
-        assertFalse(PermissionChecker.isPermitted(permission, user, tenants, null, acl));
+        assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, testOwnership, acl));
+        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, acl));
     }
 }
