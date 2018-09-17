@@ -20,6 +20,7 @@
 
 .eventsTable td {
     vertical-align: middle;
+    padding-top: 0.73333335em;
 }
 
 .eventsTableTitle {
@@ -51,6 +52,7 @@
 
 .overviewTable td {
     vertical-align: middle;
+    padding-top: 0.73333335em;
 }
 
 .overviewTableFooter {
