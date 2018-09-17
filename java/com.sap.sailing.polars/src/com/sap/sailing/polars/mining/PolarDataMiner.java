@@ -259,7 +259,31 @@ public class PolarDataMiner {
     
     public Pair<List<Speed>, Double> estimateWindSpeeds(BoatClass boatClass, Speed boatSpeed, Bearing trueWindAngle)
             throws NotEnoughDataHasBeenAddedException {
-        return speedRegressionPerAngleClusterProcessor.estimateWindSpeeds(boatClass, boatSpeed, trueWindAngle);
+        LegType legType;
+        if (trueWindAngle.getDegrees() < 70) {
+            legType = LegType.UPWIND;
+        } else if (trueWindAngle.getDegrees() < 120) {
+            legType = LegType.REACHING;
+        } else {
+            legType = LegType.DOWNWIND;
+        }
+        Set<SpeedWithBearingWithConfidence<Void>> resultSet = cubicRegressionPerCourseProcessor
+                .estimateTrueWindSpeedAndAngleCandidates(boatClass, boatSpeed, legType, Tack.STARBOARD);
+        double referenceTwsKnots = 10;
+        if (!resultSet.isEmpty()) {
+            double bestTwsKnots = Double.MAX_VALUE;
+            for (SpeedWithBearingWithConfidence<Void> speedWithBearingWithConfidence : resultSet) {
+                double twsKnots = speedWithBearingWithConfidence.getObject().getKnots();
+                if (twsKnots > 2 && twsKnots < 20 && Math.abs(10 - twsKnots) < Math.abs(10 - bestTwsKnots)) {
+                    bestTwsKnots = twsKnots;
+                }
+            }
+            if (bestTwsKnots > 2 && bestTwsKnots < 20) {
+                referenceTwsKnots = bestTwsKnots;
+            }
+        }
+        return speedRegressionPerAngleClusterProcessor.estimateWindSpeeds(boatClass, boatSpeed, trueWindAngle,
+                referenceTwsKnots);
     }
 
     public Set<SpeedWithBearingWithConfidence<Void>> estimateTrueWindSpeedAndAngleCandidates(BoatClass boatClass,

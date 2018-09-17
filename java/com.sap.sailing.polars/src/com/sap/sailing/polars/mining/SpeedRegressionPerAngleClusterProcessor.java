@@ -133,10 +133,11 @@ public class SpeedRegressionPerAngleClusterProcessor implements
         return new SpeedWithConfidenceImpl<Void>(speed, Math.min(1, 5.0 * ((double) fixCount / fixCountOverall)), null);
     }
     
-    public Pair<List<Speed>, Double> estimateWindSpeeds(BoatClass boatClass, Speed boatSpeed, Bearing trueWindAngle)
+    public Pair<List<Speed>, Double> estimateWindSpeeds(BoatClass boatClass, Speed boatSpeed, Bearing trueWindAngle, double referenceTwsKnots)
             throws NotEnoughDataHasBeenAddedException {
         List<Speed> windSpeeds = new ArrayList<>();
         for (int i = -2; i <= 2; i++) {
+            
             GroupKey key = createGroupKey(boatClass, new DegreeBearingImpl(Math.abs(trueWindAngle.getDegrees()) + i));
             if (regressions.containsKey(key)) {
                 IncrementalLeastSquares incrementalLeastSquares = regressions.get(key);
@@ -151,7 +152,7 @@ public class SpeedRegressionPerAngleClusterProcessor implements
                     double[] windSpeedCandidates = equation.solve();
                     for (double windSpeedCandidateInKnots : windSpeedCandidates) {
                         if (windSpeedCandidateInKnots > 2 && windSpeedCandidateInKnots < 20) {
-                            double optimalSpeedDifference = Math.abs(10 - windSpeedCandidateInKnots);
+                            double optimalSpeedDifference = Math.abs(referenceTwsKnots - windSpeedCandidateInKnots);
                             if (optimalSpeedDifference < bestOptimalSpeedDifference) {
                                 bestOptimalSpeedDifference = optimalSpeedDifference;
                                 bestWindSpeedCandidateInKnots = windSpeedCandidateInKnots;
