@@ -208,10 +208,11 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
         if (Util.isEmpty(participatedEvents)) {
             createEventsLabelIfNecessary();
             contentContainerEventsUi.add(eventsEmpty);
-            contentContainerEventsUi.removeStyleName(SailorProfileMobileResources.INSTANCE.css().detailsSectionPanel());
+            contentContainerEventsUi
+                    .removeStyleName(SailorProfileMobileResources.INSTANCE.css().detailsEventsContainer());
             contentContainerEventsUi.removeStyleName(SharedResources.INSTANCE.mainCss().spacermarginbottomsmall());
         } else {
-            contentContainerEventsUi.addStyleName(SailorProfileMobileResources.INSTANCE.css().detailsSectionPanel());
+            contentContainerEventsUi.addStyleName(SailorProfileMobileResources.INSTANCE.css().detailsEventsContainer());
             contentContainerEventsUi.addStyleName(SharedResources.INSTANCE.mainCss().spacermarginbottomsmall());
 
         }
