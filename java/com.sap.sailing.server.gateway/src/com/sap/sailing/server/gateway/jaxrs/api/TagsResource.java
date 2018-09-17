@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -13,6 +14,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -51,6 +53,12 @@ public class TagsResource extends AbstractSailingServerResource {
      * parameters <code>leaderboardName</code>, <code>raceColumnName</code> and <code>fleetName</code> can identify
      * {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog}.
      * 
+     * @param visibility
+     *            <code>public</code> will load only public tags, <code>private</code> will load only private tags,
+     *            <code>both</code> (default) will load public and private tags
+     * @param revoked
+     *            <code>true</code> will also return already deleted public tags, <code>false</code> (default) will only
+     *            return non-revoked tags
      * @return status 200 (including tags) if request was successful, otherwise 400 (bad request) or 500 (internal
      *         server error)
      */
@@ -58,19 +66,27 @@ public class TagsResource extends AbstractSailingServerResource {
     @Produces({ APPLICATION_JSON_UTF8, TEXT_PLAIN_UTF8 })
     public Response getTags(@PathParam(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME) String leaderboardName,
             @PathParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
-            @PathParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName) {
-        // TODO: Allow to get only public, only private tags or both of them
-        // TODO: Allow to get only unrevoked tags
+            @PathParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName,
+            @DefaultValue("both") @QueryParam("visibility") String visibility) {
+
+        boolean lookForPublic = visibility.equalsIgnoreCase("both") || visibility.equalsIgnoreCase("public");
+        boolean lookForPrivate = visibility.equalsIgnoreCase("both") || visibility.equalsIgnoreCase("private");
+
         Response response;
         TaggingService taggingService = getService().getTaggingService();
         if (taggingService != null) {
             List<TagDTO> tags = new ArrayList<TagDTO>();
 
-            List<TagDTO> publicTags = taggingService.getPublicTags(leaderboardName, raceColumnName, fleetName);
-            Util.addAll(publicTags, tags);
+            if (lookForPublic) {
+                Util.addAll(taggingService.getPublicTags(leaderboardName, raceColumnName, fleetName), tags);
+            }
 
-            List<TagDTO> privateTags = taggingService.getPrivateTags(leaderboardName, raceColumnName, fleetName);
-            Util.addAll(privateTags, tags);
+            if (lookForPrivate) {
+                Util.addAll(taggingService.getPrivateTags(leaderboardName, raceColumnName, fleetName), tags);
+            }
+
+            // remove revoked tags from result
+            tags.removeIf(tag -> tag.getRevokedAt() != null && tag.getRevokedAt().asMillis() != 0);
 
             JSONArray jsonTags = serializer.serialize(tags);
             response = Response.ok(jsonTags.toJSONString()).type(APPLICATION_JSON_UTF8).build();
