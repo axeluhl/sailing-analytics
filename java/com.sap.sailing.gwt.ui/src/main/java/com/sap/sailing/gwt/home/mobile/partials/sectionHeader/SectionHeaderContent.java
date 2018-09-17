@@ -74,7 +74,7 @@ public class SectionHeaderContent extends Composite {
     public SectionHeaderContent() {
         SectionHeaderResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-        headerRightUi.getElement().getStyle().setDisplay(Display.NONE);
+        headerRightUi.setVisible(false);
         filterSelectContainerUi.setVisible(false);
     }
 
@@ -105,7 +105,7 @@ public class SectionHeaderContent extends Composite {
     }
 
     public void setInfoText(String infoText) {
-        headerRightUi.getElement().getStyle().clearDisplay();
+        headerRightUi.setVisible(true);
         infoTextUi.getStyle().clearDisplay();
         infoTextUi.setInnerText(infoText);
     }
@@ -127,7 +127,7 @@ public class SectionHeaderContent extends Composite {
         titleAndLabelContainerUi
                 .addClassName(SectionHeaderResources.INSTANCE.css().sectionheader_item_adjust_title_right());
         actionArrowUi.getStyle().clearDisplay();
-        headerRightUi.getElement().getStyle().clearDisplay();
+        headerRightUi.setVisible(true);
     }
 
     public void setClickAction(final PlaceNavigation<?> placeNavigation) {
@@ -135,7 +135,7 @@ public class SectionHeaderContent extends Composite {
         this.adjustedActionStyles();
         titleAndLabelContainerUi
                 .addClassName(SectionHeaderResources.INSTANCE.css().sectionheader_item_adjust_title_right());
-        headerRightUi.getElement().getStyle().clearDisplay();
+        headerRightUi.setVisible(true);
         actionArrowUi.getStyle().clearDisplay();
     }
 
@@ -149,13 +149,13 @@ public class SectionHeaderContent extends Composite {
     private void adjustedActionStyles() {
         titleAndLabelContainerUi
                 .addClassName(SectionHeaderResources.INSTANCE.css().sectionheader_item_adjust_title_right());
-        headerRightUi.getElement().getStyle().clearDisplay();
+        headerRightUi.setVisible(true);
         actionArrowUi.getStyle().clearDisplay();
     }
 
     public void setClickAction(final Runnable commandToExecute) {
         headerMainUi.setHref(Window.Location.getHref());
-        headerRightUi.getElement().getStyle().clearDisplay();
+        headerRightUi.setVisible(true);
         actionArrowUi.getStyle().clearDisplay();
         LinkUtil.configureForAction(headerMainUi, commandToExecute);
     }
@@ -175,7 +175,7 @@ public class SectionHeaderContent extends Composite {
     }
 
     public void initFilterSelectUi(AbstractSelectionFilter<?, ?> selectionFilter) {
-        headerRightUi.getElement().getStyle().clearDisplay();
+        headerRightUi.setVisible(true);
         filterSelectContainerUi.setVisible(true);
         filterSelectContainerUi.setWidget(selectionFilter);
         selectionFilter.addStyleName(local_res.css().sectionheader_item_select());
