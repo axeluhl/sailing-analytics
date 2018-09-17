@@ -7386,18 +7386,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 List<Pair<CompetitorDTO, BoatDTO>> fleetList = new ArrayList<>();
                 for (Pair<Competitor, Boat> competitorAndBoatPair : pairingList.getCompetitors(raceColumn, fleet)) {
                     final Boat boat = competitorAndBoatPair.getB();
+                    final CompetitorDTO competitorDTO;
                     if (competitorAndBoatPair.getA() != null) {
-                        fleetList.add(new Pair<>(
-                                baseDomainFactory.convertToCompetitorDTO(competitorAndBoatPair.getA()),
-                                new BoatDTO(boat.getId().toString(), boat.getName(), convertToBoatClassDTO(boat.getBoatClass()),
-                                        boat.getSailID(),
-                                        boat.getColor())));
+                        competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitorAndBoatPair.getA());
                     } else {
-                        fleetList.add(new Pair<>(/* no competitor */ null,
-                                new BoatDTO(boat.getId().toString(), boat.getName(), convertToBoatClassDTO(boat.getBoatClass()),
-                                        boat.getSailID(),
-                                        boat.getColor())));
+                        competitorDTO = null;
                     }
+                    final BoatDTO boatDTO;
+                    if (boat != null) {
+                        boatDTO = new BoatDTO(boat.getId().toString(), boat.getName(), convertToBoatClassDTO(boat.getBoatClass()),
+                                boat.getSailID(), boat.getColor());
+                    } else {
+                        boatDTO = null;
+                    }
+                    fleetList.add(new Pair<>(competitorDTO, boatDTO));
                 }
                 raceColumnList.add(fleetList);
             }

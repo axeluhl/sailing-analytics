@@ -339,8 +339,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public void setOwnership(QualifiedObjectIdentifier idOfOwnedObject, SecurityUser userOwner, UserGroup tenantOwner, String displayNameOfOwnedObject) {
-        accessControlStore.createOwnership(idOfOwnedObject, userOwner, tenantOwner, displayNameOfOwnedObject);
+    public void setOwnership(OwnershipAnnotation ownershipAnnotation) {
+        accessControlStore.createOwnership(ownershipAnnotation.getIdOfAnnotatedObject(), ownershipAnnotation.getAnnotation().getUserOwner(),
+                ownershipAnnotation.getAnnotation().getTenantOwner(), ownershipAnnotation.getDisplayNameOfAnnotatedObject());
     }
 
     @Override

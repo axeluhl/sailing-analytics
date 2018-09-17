@@ -68,7 +68,7 @@ public interface HasPermissions {
      *
      */
     public enum DefaultModes implements Mode {
-        CREATE, READ, UPDATE, DELETE;
+        CREATE, READ, UPDATE, DELETE, CHANGE_OWNERSHIP;
 
         @Override
         public String getStringPermission() {

@@ -143,4 +143,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String editObjectOwnership();
     String errorObtainingUser(String message);
     String errorObtainingUserGroup(String message);
+    String pleaseWaitUntilUsernameIsResolved();
+    String pleaseWaitUntilUserGroupNameIsResolved();
+    String userNotFound(String username);
+    String usergroupNotFound(String userGroupName);
 }

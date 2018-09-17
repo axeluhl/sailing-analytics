@@ -44,13 +44,19 @@ public class PairingListImpl<Flight, Group, Competitor,CompetitorAllocation> imp
         final List<Pair<Competitor, CompetitorAllocation>> result = new ArrayList<>();
         for (int slot = 0; slot < competitorIndicesInRace.size(); slot++) {
             final Integer index = competitorIndicesInRace.get(slot);
-            if (index >= 0) {
-                result.add(new Pair<Competitor, CompetitorAllocation>(competitors.get(index),
-                        Util.get(competitionFormat.getCompetitorAllocation(), slot)));
+            final Competitor competitor;
+            if (index >= 0 && competitors.size() > index) {
+                competitor = competitors.get(index);
             } else {
-                result.add(new Pair<Competitor, CompetitorAllocation>(null, 
-                        Util.get(competitionFormat.getCompetitorAllocation(), slot)));
+                competitor = null;
             }
+            final CompetitorAllocation allocation;
+            if (Util.size(competitionFormat.getCompetitorAllocation()) > slot) {
+                allocation = Util.get(competitionFormat.getCompetitorAllocation(), slot);
+            } else {
+                allocation = null;
+            }
+            result.add(new Pair<Competitor, CompetitorAllocation>(competitor, allocation));
         }
         return result;
     }

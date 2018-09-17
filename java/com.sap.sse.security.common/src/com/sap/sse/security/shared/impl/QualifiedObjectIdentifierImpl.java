@@ -1,9 +1,14 @@
 package com.sap.sse.security.shared.impl;
 
+import com.sap.sse.security.shared.HasPermissions.Mode;
+import com.sap.sse.security.shared.PermissionStringEncoder;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.WildcardPermission;
 
 public class QualifiedObjectIdentifierImpl implements QualifiedObjectIdentifier {
     private static final long serialVersionUID = -1749648443005614962L;
+    private static final PermissionStringEncoder<WildcardPermission> permissionStringEncoder = new WildcardPermissionEncoder();
+
     
     private final String typeIdentifier;
     private final String typeRelativeObjectIdentifier;
@@ -38,6 +43,17 @@ public class QualifiedObjectIdentifierImpl implements QualifiedObjectIdentifier 
     @Override
     public String getTypeRelativeObjectIdentifier() {
         return typeRelativeObjectIdentifier;
+    }
+
+    @Override
+    public String getStringPermission(Mode action) {
+        return getPermission(action).toString();
+    }
+
+    @Override
+    public WildcardPermission getPermission(Mode action) {
+        return new WildcardPermission(getTypeIdentifier()+WildcardPermission.PART_DIVIDER_TOKEN+action.name()+WildcardPermission.PART_DIVIDER_TOKEN+
+                permissionStringEncoder.encodeAsPermissionPart(getTypeRelativeObjectIdentifier()));
     }
 
     @Override

@@ -39,6 +39,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.security.Permission;
+import com.sap.sailing.gwt.ui.adminconsole.EditOwnershipDialog.OwnershipDialogResult;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupDialog.LeaderboardGroupDescriptor;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.EventsRefresher;
@@ -68,7 +69,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions.DefaultModes;
-import com.sap.sse.security.shared.Ownership;
+import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
@@ -367,8 +368,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 new AccessControlledActionsColumn<EventDTO, EventConfigImagesBarCell>(new EventConfigImagesBarCell(stringMessages)) {
             @Override
             public Iterable<DefaultModes> getAllowedActions(EventDTO event) {
-                ArrayList<DefaultModes> allowedActions = new ArrayList<>();
-                for (DefaultModes action : Arrays.asList(DefaultModes.UPDATE, DefaultModes.DELETE)) {
+                final ArrayList<DefaultModes> allowedActions = new ArrayList<>();
+                for (DefaultModes action : Arrays.asList(DefaultModes.UPDATE, DefaultModes.DELETE, DefaultModes.CHANGE_OWNERSHIP)) {
                     if (user.hasPermission(Permission.EVENT.getPermissionForObjects(action, event.id.toString()),
                             event.getOwnership(), event.getAccessControlList())) {
                         allowedActions.add(action);
@@ -386,7 +387,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                     }
                 } else if (DefaultModes.UPDATE.name().equals(value)) {
                     openEditEventDialog(event);
-                } else if (EventConfigImagesBarCell.CHANGE_OWNERSHIP.equals(value)) {
+                } else if (DefaultModes.CHANGE_OWNERSHIP.name().equals(value)) {
                     openOwnershipDialog(userService.getUserManagementService(), event);
                 }
             }
@@ -424,10 +425,23 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
     }
 
     private void openOwnershipDialog(UserManagementServiceAsync userManagementService, EventDTO event) {
-        new EditOwnershipDialog(userManagementService, event.getOwnership(), securityStringMessages, new DialogCallback<Ownership>() {
+        new EditOwnershipDialog(userManagementService, event.getOwnership(), securityStringMessages, new DialogCallback<OwnershipDialogResult>() {
             @Override
-            public void ok(Ownership editedObject) {
-//                userManagementService.setOwnership... TODO continue here...
+            public void ok(OwnershipDialogResult editedObject) {
+                userManagementService.setOwnership(new OwnershipAnnotation(editedObject.getOwnership(), Permission.EVENT.getQualifiedObjectIdentifier(event.id.toString()), event.getName()),
+                        new AsyncCallback<Void>() {
+                            @Override
+                            public void onFailure(Throwable caught) {
+                                errorReporter.reportError(stringMessages.errorUpdatingOwnership(event.getName()));
+                            }
+
+                            @Override
+                            public void onSuccess(Void result) {
+                                event.setOwnership(editedObject.getOwnership());
+                                updateEvent(event, event);
+                            }
+                    
+                });
             }
 
             @Override

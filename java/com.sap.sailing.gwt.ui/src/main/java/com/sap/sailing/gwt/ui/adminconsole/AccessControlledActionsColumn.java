@@ -16,8 +16,8 @@ public abstract class AccessControlledActionsColumn<T, S extends ImagesBarCell> 
     @Override
     public String getValue(T object) {
         ArrayList<String> allowedActions = new ArrayList<>();
-        for (DefaultModes action : getAllowedActions(object)) {
-            String actionName = action.name();
+        for (final DefaultModes action : getAllowedActions(object)) {
+            final String actionName = action.name();
             actionName.replace("\\", "\\\\");
             actionName.replace(",", "\\,");
             allowedActions.add(actionName);

@@ -52,7 +52,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     
     OwnershipAnnotation createDefaultOwnershipForNewObject(QualifiedObjectIdentifier idOfNewObject);
     
-    void setOwnership(QualifiedObjectIdentifier idOfOwnedObject, SecurityUser userOwner, UserGroup tenantOwner, String displayNameOfOwnedObject);
+    void setOwnership(OwnershipAnnotation ownership);
 
     void deleteAllDataForRemovedObject(QualifiedObjectIdentifier idOfRemovedObject);
 

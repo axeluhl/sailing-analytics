@@ -11,6 +11,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
+import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.UserGroup;
@@ -20,6 +21,8 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 public interface UserManagementServiceAsync {
+    void setOwnership(OwnershipAnnotation ownership, AsyncCallback<Void> callback);
+
     void getAccessControlLists(AsyncCallback<Collection<AccessControlListAnnotation>> callback);
 
     void getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, AsyncCallback<AccessControlListAnnotation> callback);
@@ -120,4 +123,5 @@ public interface UserManagementServiceAsync {
     void getAuthorizationUrl(CredentialDTO credential, AsyncCallback<String> callback);
 
     void verifySocialUser(CredentialDTO credential, AsyncCallback<UserDTO> callback);
+
 }

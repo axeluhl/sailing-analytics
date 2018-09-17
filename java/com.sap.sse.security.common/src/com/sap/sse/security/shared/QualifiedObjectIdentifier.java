@@ -2,6 +2,8 @@ package com.sap.sse.security.shared;
 
 import java.io.Serializable;
 
+import com.sap.sse.security.shared.HasPermissions.Mode;
+
 /**
  * In permission strings, object identifiers used in the third part of the permission need to be unique only within the
  * scope defined by the type to which the object belongs. The type is assumed to be encoded as the first part of a
@@ -35,6 +37,17 @@ public interface QualifiedObjectIdentifier extends Serializable {
      * An object identifier that has to be unique only within the scope of the type identified by {@link #getTypeIdentifier()}
      */
     String getTypeRelativeObjectIdentifier();
+    
+    /**
+     * Constructs a permission in {@link String} form that can be parsed into a {@link WildcardPermission} and which
+     * describes the {@code action} on the object identified by this object.
+     */
+    String getStringPermission(Mode action);
+    
+    /**
+     * Constructs a permission which describes the {@code action} on the object identified by this object.
+     */
+    WildcardPermission getPermission(Mode action);
     
     /**
      * @return the concatenation of {@link #getTypeIdentifier()}, {@link #QUALIFIER_SEPARATOR} and

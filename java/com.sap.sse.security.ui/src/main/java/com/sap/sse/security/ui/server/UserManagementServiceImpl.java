@@ -39,6 +39,7 @@ import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.HasPermissions.DefaultModes;
+import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
@@ -121,6 +122,13 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
+    public void setOwnership(OwnershipAnnotation ownershipAnnotation) {
+        if (SecurityUtils.getSubject().isPermitted(ownershipAnnotation.getIdOfAnnotatedObject().getStringPermission(DefaultModes.CHANGE_OWNERSHIP))) {
+            getSecurityService().setOwnership(ownershipAnnotation);
+        }
+    }
+
+    @Override
     public Collection<AccessControlListAnnotation> getAccessControlLists() throws UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted("access_control:manage")) {
             List<AccessControlListAnnotation> acls = new ArrayList<>();
@@ -199,7 +207,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             final UserGroup userGroup = getSecurityService().getUserGroupByName(userGroupName);
             final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser = new HashMap<>();
             final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup = new HashMap<>();
-            return securityDTOFactory.createUserGroupDTOFromUserGroup(userGroup, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
+            return userGroup==null?null:securityDTOFactory.createUserGroupDTOFromUserGroup(userGroup, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
         } else {
             throw new UnauthorizedException("Not permitted to read user groups");
         }
@@ -209,7 +217,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public UserDTO getUserByName(String username) throws UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted(DefaultPermissions.USER.getStringPermission(DefaultModes.READ))) {
             final User user = getSecurityService().getUserByName(username);
-            return securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
+            return user==null?null:securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
         } else {
             throw new UnauthorizedException("Not permitted to read users");
         }

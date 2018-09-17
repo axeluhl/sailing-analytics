@@ -10,7 +10,6 @@ import com.sap.sse.gwt.client.celltable.ImagesBarCell;
 import com.sap.sse.security.shared.HasPermissions.DefaultModes;
 
 public class EventConfigImagesBarCell extends ImagesBarCell {
-    public static final String CHANGE_OWNERSHIP = "change ownership";
     private final StringMessages stringMessages;
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
@@ -29,7 +28,7 @@ public class EventConfigImagesBarCell extends ImagesBarCell {
         return Arrays.asList(
                 new ImageSpec(DefaultModes.UPDATE.name(), stringMessages.actionEdit(), makeImagePrototype(IconResources.INSTANCE.editIcon())),
                 new ImageSpec(DefaultModes.DELETE.name(), stringMessages.actionRemove(), makeImagePrototype(IconResources.INSTANCE.removeIcon())),
-                new ImageSpec(CHANGE_OWNERSHIP, stringMessages.changeOwnership(), makeImagePrototype(resources.competitorsIcon()))
+                new ImageSpec(DefaultModes.CHANGE_OWNERSHIP.name(), stringMessages.changeOwnership(), makeImagePrototype(resources.competitorsIcon()))
                 );
     }
 }
