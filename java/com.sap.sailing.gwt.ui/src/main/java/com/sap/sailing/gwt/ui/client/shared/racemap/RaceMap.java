@@ -487,6 +487,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         public void clear() {
             map.clear();
         }
+
+        public void removeAll(T t) {
+            map.remove(t);
+        }
     }
 
     private class AdvantageLineUpdater implements QuickRanksListener {
@@ -930,6 +934,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     public void redraw() {
+        remoteCallsToSkipInExecution.removeAll(timer.getTime());
         timeChanged(timer.getTime(), null);
     }
     
