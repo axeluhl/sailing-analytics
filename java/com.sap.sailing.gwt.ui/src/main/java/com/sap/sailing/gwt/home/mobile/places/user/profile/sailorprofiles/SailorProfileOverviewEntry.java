@@ -78,7 +78,6 @@ public class SailorProfileOverviewEntry extends Composite {
         Button removeButton = new Button("X");
         removeButton.addClickHandler(
                 e -> presenter.removeSailorProfile(uuidRef));
-        removeButton.addStyleName(SailorProfileMobileResources.INSTANCE.css().removeButton());
         sectionTitleUi.setHeaderElement(removeButton);
     }
 

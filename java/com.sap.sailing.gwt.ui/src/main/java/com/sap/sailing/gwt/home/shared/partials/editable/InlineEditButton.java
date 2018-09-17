@@ -40,6 +40,8 @@ public class InlineEditButton extends Composite implements HasClickHandlers {
     @UiHandler("editButton")
     void onClick(ClickEvent e) {
         updateState(!state);
+        e.getNativeEvent().stopPropagation();
+        e.getNativeEvent().preventDefault();
     }
 
     public void updateState(boolean newState) {

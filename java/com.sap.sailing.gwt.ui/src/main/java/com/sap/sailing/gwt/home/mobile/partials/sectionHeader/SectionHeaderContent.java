@@ -9,6 +9,7 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.HeadingElement;
 import com.google.gwt.dom.client.Style.Display;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.DOM;
@@ -52,7 +53,7 @@ public class SectionHeaderContent extends Composite {
     @UiField
     DivElement subtitleUi;
     @UiField
-    DivElement headerRightUi;
+    HTMLPanel headerRightUi;
     @UiField
     DivElement infoTextUi;
     @UiField
@@ -73,6 +74,7 @@ public class SectionHeaderContent extends Composite {
     public SectionHeaderContent() {
         SectionHeaderResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
+        headerRightUi.getElement().getStyle().setDisplay(Display.NONE);
         filterSelectContainerUi.setVisible(false);
     }
 
@@ -103,7 +105,7 @@ public class SectionHeaderContent extends Composite {
     }
 
     public void setInfoText(String infoText) {
-        headerRightUi.getStyle().clearDisplay();
+        headerRightUi.getElement().getStyle().clearDisplay();
         infoTextUi.getStyle().clearDisplay();
         infoTextUi.setInnerText(infoText);
     }
@@ -125,7 +127,7 @@ public class SectionHeaderContent extends Composite {
         titleAndLabelContainerUi
                 .addClassName(SectionHeaderResources.INSTANCE.css().sectionheader_item_adjust_title_right());
         actionArrowUi.getStyle().clearDisplay();
-        headerRightUi.getStyle().clearDisplay();
+        headerRightUi.getElement().getStyle().clearDisplay();
     }
 
     public void setClickAction(final PlaceNavigation<?> placeNavigation) {
@@ -133,7 +135,7 @@ public class SectionHeaderContent extends Composite {
         this.adjustedActionStyles();
         titleAndLabelContainerUi
                 .addClassName(SectionHeaderResources.INSTANCE.css().sectionheader_item_adjust_title_right());
-        headerRightUi.getStyle().clearDisplay();
+        headerRightUi.getElement().getStyle().clearDisplay();
         actionArrowUi.getStyle().clearDisplay();
     }
 
@@ -147,13 +149,13 @@ public class SectionHeaderContent extends Composite {
     private void adjustedActionStyles() {
         titleAndLabelContainerUi
                 .addClassName(SectionHeaderResources.INSTANCE.css().sectionheader_item_adjust_title_right());
-        headerRightUi.getStyle().clearDisplay();
+        headerRightUi.getElement().getStyle().clearDisplay();
         actionArrowUi.getStyle().clearDisplay();
     }
 
     public void setClickAction(final Runnable commandToExecute) {
         headerMainUi.setHref(Window.Location.getHref());
-        headerRightUi.getStyle().clearDisplay();
+        headerRightUi.getElement().getStyle().clearDisplay();
         actionArrowUi.getStyle().clearDisplay();
         LinkUtil.configureForAction(headerMainUi, commandToExecute);
     }
@@ -166,12 +168,14 @@ public class SectionHeaderContent extends Composite {
     }
 
     public void setHeaderElement(Widget widget) {
-        headerContentUi.getElement().getStyle().setDisplay(Display.INLINE_BLOCK);
-        headerContentUi.add(widget);
+        actionArrowUi.removeFromParent();
+        headerRightUi.add(widget);
+        headerRightUi.getElement().appendChild(actionArrowUi);
+        titleAndLabelContainerUi.getStyle().setPaddingRight(4.1, Unit.EM);
     }
 
     public void initFilterSelectUi(AbstractSelectionFilter<?, ?> selectionFilter) {
-        headerRightUi.getStyle().clearDisplay();
+        headerRightUi.getElement().getStyle().clearDisplay();
         filterSelectContainerUi.setVisible(true);
         filterSelectContainerUi.setWidget(selectionFilter);
         selectionFilter.addStyleName(local_res.css().sectionheader_item_select());

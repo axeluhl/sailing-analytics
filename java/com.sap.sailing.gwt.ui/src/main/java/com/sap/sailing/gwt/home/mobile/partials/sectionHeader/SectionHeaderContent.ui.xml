@@ -26,12 +26,12 @@
                 </div>
                 <div class="{local_res.css.sectionheader_item_subtitle}" style="display:none;" ui:field="subtitleUi"></div>
             </div>
-            <div class="{local_res.css.sectionheader_item} {local_res.css.sectionheader_itemright}"
-                style="display:none;" ui:field="headerRightUi">
+            <g:HTMLPanel addStyleNames="{local_res.css.sectionheader_item} {local_res.css.sectionheader_itemright}"
+                ui:field="headerRightUi">
                 <div class="{local_res.css.sectionheader_item_infotext}" style="display:none;" ui:field="infoTextUi"></div>
                 <div class="{local_res.css.sectionheader_item_arrow}" style="display:none;" ui:field="actionArrowUi"></div>
                 <g:SimplePanel ui:field="filterSelectContainerUi"></g:SimplePanel>
-            </div>
+            </g:HTMLPanel>
         </a>
         <g:HTMLPanel
             addStyleNames="{local_res.css.sectionheader_itemright} {local_res.css.sectionheader_element}"
