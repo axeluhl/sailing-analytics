@@ -1,0 +1,250 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <link href='../../../../sailing-fontface-1.0.cache.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link href='../../../main.css' media='screen' rel='stylesheet' title='Default stylesheet' type='text/css' />
+    <link rel='icon' href='../../../../sap.ico' type='image/x-icon'>
+    <title>SAP Sailing Analytics Webservices API Version 1.0</title>
+    <style type="text/css">
+        i {
+            font-style: italic;
+        }
+        
+        b {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<h1>SAP Sailing Analytics Webservices API Version 1.0</h1>
+<h2>URL: /api/v1/tags</h2>
+
+<b>Description:</b> Gets all public and private tags of specified race and current user.
+<table>
+    <tr>
+        <td>Webservice Type:</td>
+        <td>REST</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>HTTP 200 + Json or HTTP 400/500</td>
+    </tr>
+    <tr>
+        <td>Mandatory query parameters:</td>
+        <td>
+            leaderboard: leaderboard name<br/>
+            race_column: race column name<br/>
+            fleet: fleet name<br/>
+        </td>
+    </tr>
+    <tr>
+        <td>Optional parameters:</td>
+        <td>None</td>
+    </tr>
+    <tr>
+        <td>Request method:</td>
+        <td>GET</td>
+    </tr>
+    <tr>
+        <td>Example:</td>
+        <td>GET <a href="https://sapsailing.com/sailingserver/api/v1/tags?leaderboard={leaderboard name}&race_column={race column name}&fleet={fleet name}">https://sapsailing.com/sailingserver/api/v1/tags?leaderboard={leaderboard name}&race_column={race column name}&fleet={fleet name}</a></td>
+    </tr>
+    <tr>
+        <td>Example response:</td>
+        <td>
+            <pre><code>[
+    {
+        "tag": "Public tag",
+        "comment": "This is a comment!",
+        "image": "",
+        "username": "admin",
+        "public": true,
+        "raceTimepoint": 1347452185000,
+        "createdAt": 1536742983448,
+        "revokedAt": 0
+    }, {
+        "tag": "Private tag",
+        "comment": "",
+        "image": "",
+        "username": "user",
+        "public": false,
+        "raceTimepoint": 1347452185000,
+        "createdAt": 1536742983448,
+        "revokedAt": 1536742994448
+    }
+]
+            </code></pre>
+        </td>
+    </tr>
+</table>
+<br/>
+
+<b>Description:</b> Adds new tag to specified race.
+<table>
+    <tr>
+        <td>Webservice Type:</td>
+        <td>REST</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>HTTP 201 or HTTP 400</td>
+    </tr>
+    <tr>
+        <td>Mandatory URL parameters:</td>
+        <td>
+            leaderboard: leaderboard name<br/>
+            race_column: race column name<br/>
+            fleet: fleet name
+        </td>
+    </tr>
+    <tr>
+        <td>Mandatory body parameters:</td>
+        <td>
+            tag: title of new tag<br/>
+            raceTimepoint: timepoint in race where tag will be added, format: unix timestamp * 1000 (milliseconds timepoint)
+        </td>
+    </tr>
+    <tr>
+        <td>Optional body parameters:</td>
+        <td>
+            comment: content of comment<br/>
+            image: image URL to corresponding image<br/>
+            public: <i>true</i> => tag is visible for every user (requires specific permission), <i>false</i> (default) => tag is only visible for current user
+        </td>
+    </tr>
+    <tr>
+        <td>Request method:</td>
+        <td>POST</td>
+    </tr>
+    <tr>
+        <td>Example request:</td>
+        <td>
+            POST <a href="https://sapsailing.com/sailingserver/api/v1/tags?leaderboard={leaderboard name}&race_column={race column name}&fleet={fleet name}">https://sapsailing.com/sailingserver/api/v1/tags?leaderboard={leaderboard name}&race_column={race column name}&fleet={fleet name}</a><br/>
+            <br/>
+            tag = "New tag!",<br/>
+            comment = "Optional comment",<br/>
+            image = "localhost:1234/image.jpg",<br/>
+            public = true,<br/>
+            raceTimepoint = 1347452185000<br/>
+        </td>
+    </tr>
+</table>
+<br/>
+
+<b>Description:</b> Deletes specified tag.
+<table>
+    <tr>
+        <td>Webservice Type:</td>
+        <td>REST</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>HTTP 204 or HTTP 400</td>
+    </tr>
+    <tr>
+        <td>Mandatory query parameters:</td>
+        <td>
+            leaderboard: leaderboard name<br/>
+            race_column: race column name<br/>
+            fleet: fleet name
+        </td>
+    </tr>
+    <tr>
+        <td>Mandatory body parameters:</td>
+        <td>
+            tag_json: tag to delete as json
+        </td>
+    </tr>
+    <tr>
+        <td>Optional parameters:</td>
+        <td>None</td>
+    </tr>
+    <tr>
+        <td>Request method:</td>
+        <td>DELETE</td>
+    </tr>
+    <tr>
+        <td>Example request:</td>
+        <td>
+            DELETE <a href="https://sapsailing.com/sailingserver/api/v1/tags?leaderboard={leaderboard name}&race_column={race column name}&fleet={fleet name}">https://sapsailing.com/sailingserver/api/v1/tags?leaderboard={leaderboard name}&race_column={race column name}&fleet={fleet name}</a><br/>
+            <br/>
+            <pre><code>tag_json = {
+    "tag": "Tag to delete",
+    "comment": "This comment will get deleted!",
+    "image": "",
+    "username": "admin",
+    "public": true,
+    "raceTimepoint": 1347452185000,
+    "createdAt": 1536742983448,
+    "revokedAt": 0
+}
+            </code></pre>
+        </td>
+    </tr>
+</table>
+<br/>
+
+<b>Description:</b> Updates given tag with new values.
+<table>
+    <tr>
+        <td>Webservice Type:</td>
+        <td>REST</td>
+    </tr>
+    <tr>
+        <td>Output format:</td>
+        <td>Json</td>
+    </tr>
+    <tr>
+        <td>Mandatory URL parameters:</td>
+        <td>
+            leaderboard: leaderboard name<br/>
+            race_column: race column name<br/>
+            fleet: fleet name
+        </td>
+    </tr>
+    <tr>
+        <td>Mandatory body parameters:</td>
+        <td>
+            tag_json: tag to update as json
+        </td>
+    </tr>
+    <tr>
+        <td>Optional parameters:</td>
+        <td>
+            tag: new title of tag<br/>
+            comment: new comment<br/>
+            image: new image URL<br/>
+            public: new visibility<br/>
+        </td>
+    </tr>
+    <tr>
+        <td>Request method:</td>
+        <td>PUT</td>
+    </tr>
+    <tr>
+        <td>Example request:</td>
+        <td>
+            PUT <a href="https://sapsailing.com/sailingserver/api/v1/tags?leaderboard={leaderboard name}&race_column={race column name}&fleet={fleet name}">https://sapsailing.com/sailingserver/api/v1/tags?leaderboard={leaderboard name}&race_column={race column name}&fleet={fleet name}</a><br/>
+            <br/>
+            <pre><code>tag_json = {
+    "tag": "Tag to update",
+    "comment": "This comment will get deleted!",
+    "image": "",
+    "username": "admin",
+    "public": true,
+    "raceTimepoint": 1347452185000
+},
+tag = "Tag is now private",
+comment = "Private comment",
+image = "",
+public = false
+            </code></pre>
+        </td>
+    </tr>
+</table>
+
+<div style="height: 1em;"></div>
+<a href="index.html">Back to Web Service Overview</a> 
+</body>
+</html>
