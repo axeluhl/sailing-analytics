@@ -148,26 +148,31 @@ public class TaggingServiceImpl implements TaggingService {
                         && tagEvent.getImageURL().equals(tag.getImageURL())
                         && tagEvent.getUsername().equals(tag.getUsername())
                         && tagEvent.getLogicalTimePoint().equals(tag.getRaceTimepoint())) {
-                    try {
-                        // TODO: As soon as permission-vertical branch got merged into master, apply
-                        // new permission system at this permission check (see bug 4104, comment 9)
-                        // functionality: Check if user has the permission to delete tag from RaceLog (same user or
-                        // admin).
-                        Subject subject = SecurityUtils.getSubject();
-                        subject.checkPermission(
-                                Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
-                        if ((subject.getPrincipal() != null && subject.getPrincipal().equals(tag.getUsername()))
-                                || subject.hasRole("admin")) {
-                            raceLog.revokeEvent(tagEvent.getAuthor(), tagEvent, "Revoked");
-                        } else {
+                    if (tag.getRevokedAt() == null || tag.getRevokedAt().asMillis() == 0) {
+                        try {
+                            // TODO: As soon as permission-vertical branch got merged into master, apply
+                            // new permission system at this permission check (see bug 4104, comment 9)
+                            // functionality: Check if user has the permission to delete tag from RaceLog (same user or
+                            // admin).
+                            Subject subject = SecurityUtils.getSubject();
+                            subject.checkPermission(
+                                    Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
+                            if ((subject.getPrincipal() != null && subject.getPrincipal().equals(tag.getUsername()))
+                                    || subject.hasRole("admin")) {
+                                raceLog.revokeEvent(tagEvent.getAuthor(), tagEvent, "Revoked");
+                            } else {
+                                setLastErrorCode(ErrorCode.MISSING_PERMISSIONS);
+                                successful = false;
+                            }
+                        } catch (AuthorizationException e) {
                             setLastErrorCode(ErrorCode.MISSING_PERMISSIONS);
                             successful = false;
+                        } catch (NotRevokableException e) {
+                            setLastErrorCode(ErrorCode.TAG_NOT_REVOKABLE);
+                            successful = false;
                         }
-                    } catch (AuthorizationException e) {
-                        setLastErrorCode(ErrorCode.MISSING_PERMISSIONS);
-                        successful = false;
-                    } catch (NotRevokableException e) {
-                        setLastErrorCode(ErrorCode.TAG_NOT_REVOKABLE);
+                    } else {
+                        setLastErrorCode(ErrorCode.TAG_ALREADY_REMOVED);
                         successful = false;
                     }
                     break;

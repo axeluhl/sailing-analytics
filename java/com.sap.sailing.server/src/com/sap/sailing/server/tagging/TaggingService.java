@@ -20,6 +20,7 @@ public interface TaggingService {
         RACELOG_NOT_FOUND("racelogNotFound", "Racelog not found"),
         TAG_NOT_REVOKABLE("tagNotRevokable", "This tag cannot be revoked"),
         TAG_ALREADY_EXISTS("tagAlreadyExists", "Tag does already exist, duplicated tags are not allowed"),
+        TAG_ALREADY_REMOVED("tagAlreadyRemoved", "Tag cannot be removed twice!"),
         TAG_NOT_EMPTY("tagNotEmpty", "Tag may not be empty"),
         TIMEPOINT_NOT_EMPTY("timepointNotEmpty", "Timepoint may not be empty"),
         TAG_TOO_LONG("tagTooLong", "Tag is too long"),

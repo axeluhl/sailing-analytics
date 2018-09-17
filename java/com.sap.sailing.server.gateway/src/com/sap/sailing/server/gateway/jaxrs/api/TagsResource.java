@@ -30,8 +30,9 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-@Path("/v1/{" + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "}/{" + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME
-        + "}/{" + RaceLogServletConstants.PARAMS_RACE_FLEET_NAME + "}/tags")
+@Path("/v1/{" + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "}/{"
+        + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME + "}/{" + RaceLogServletConstants.PARAMS_RACE_FLEET_NAME
+        + "}/tags")
 public class TagsResource extends AbstractSailingServerResource {
 
     private static final Logger logger = Logger.getLogger(TagsResource.class.getName());
@@ -144,12 +145,12 @@ public class TagsResource extends AbstractSailingServerResource {
     }
 
     /**
-     * Updates tag.
+     * Updates tag. When optional parameters <code>tag</code>, <code>comment</code>, <code>image</code> or
+     * <code>public</code> are missing, old values of <code>tagJson</code> will be used for the missing attributes
+     * instead.
      * 
      * @param tag
      *            may not be empty
-     * @param visible
-     *            default is <code>false</code>
      * 
      * @return status 204 (no content) if update was successful, otherwise 400 (bad request)
      * @see TagDTO
@@ -161,14 +162,26 @@ public class TagsResource extends AbstractSailingServerResource {
     public Response updateTag(@PathParam(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME) String leaderboardName,
             @PathParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
             @PathParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName,
-            @FormParam("tag_json") String tagJson, @FormParam("tag") String tag, @FormParam("comment") String comment,
-            @FormParam("image") String imageURL, @FormParam("public") boolean visibleForPublic) {
-        // TODO: What happens if parameters are missing? Old values should stay the same.
+            @FormParam("tag_json") String tagJson, @FormParam("tag") String tagParam,
+            @FormParam("comment") String commentParam, @FormParam("image") String imageURLParam,
+            @FormParam("public") String visibleForPublicParam) {
         Response response;
+        boolean successful = true;
         TagDTO tagToUpdate = serializer.deserializeTag(tagJson);
         TaggingService taggingService = getService().getTaggingService();
-        boolean successful = taggingService.updateTag(leaderboardName, raceColumnName, fleetName, tagToUpdate, tag,
-                comment, imageURL, visibleForPublic);
+
+        // only call update method when any of the parameters needs to be changed
+        if (tagParam != null || commentParam != null || imageURLParam != null || visibleForPublicParam != null) {
+            // keep old values when no new values are provided
+            String tag = tagParam == null ? tagToUpdate.getTag() : tagParam;
+            String comment = commentParam == null ? tagToUpdate.getComment() : commentParam;
+            String imageURL = imageURLParam == null ? tagToUpdate.getImageURL() : imageURLParam;
+            boolean visibleForPublic = visibleForPublicParam == null ? tagToUpdate.isVisibleForPublic()
+                    : visibleForPublicParam.equalsIgnoreCase("true") ? true : false;
+
+            successful = taggingService.updateTag(leaderboardName, raceColumnName, fleetName, tagToUpdate, tag, comment,
+                    imageURL, visibleForPublic);
+        }
         if (successful) {
             response = Response.noContent().build();
         } else {
