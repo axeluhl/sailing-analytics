@@ -122,10 +122,20 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public void setOwnership(OwnershipAnnotation ownershipAnnotation) {
+    public QualifiedObjectIdentifier setOwnership(OwnershipAnnotation ownershipAnnotation) {
+        final QualifiedObjectIdentifier result;
         if (SecurityUtils.getSubject().isPermitted(ownershipAnnotation.getIdOfAnnotatedObject().getStringPermission(DefaultModes.CHANGE_OWNERSHIP))) {
             getSecurityService().setOwnership(ownershipAnnotation);
+            result = ownershipAnnotation.getIdOfAnnotatedObject();
+        } else {
+            result = null;
         }
+        return result;
+    }
+
+    @Override
+    public OwnershipAnnotation getOwnership(QualifiedObjectIdentifier idOfOwnedObject) {
+        return getSecurityService().getOwnership(idOfOwnedObject);
     }
 
     @Override

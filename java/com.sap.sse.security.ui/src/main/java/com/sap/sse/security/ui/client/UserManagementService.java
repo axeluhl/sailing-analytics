@@ -26,7 +26,12 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 public interface UserManagementService extends RemoteService {
-    void setOwnership(OwnershipAnnotation ownership);
+    /**
+     * @return the {@link QualifiedObjectIdentifier} that was passed in the
+     *         {@link OwnershipAnnotation#getIdOfAnnotatedObject()}, largely to force this type to become part of the
+     *         serialization whitelist
+     */
+    QualifiedObjectIdentifier setOwnership(OwnershipAnnotation ownership);
     
     Collection<AccessControlListAnnotation> getAccessControlLists() throws UnauthorizedException;
 
@@ -138,4 +143,6 @@ public interface UserManagementService extends RemoteService {
     public String getAuthorizationUrl(CredentialDTO credential) throws OAuthException;
 
     public UserDTO verifySocialUser(CredentialDTO credential) throws OAuthException;
+
+    OwnershipAnnotation getOwnership(QualifiedObjectIdentifier idOfOwnedObject);
 }

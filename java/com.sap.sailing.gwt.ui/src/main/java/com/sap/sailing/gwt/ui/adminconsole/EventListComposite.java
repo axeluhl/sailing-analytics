@@ -70,6 +70,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions.DefaultModes;
 import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
@@ -429,14 +430,14 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             @Override
             public void ok(OwnershipDialogResult editedObject) {
                 userManagementService.setOwnership(new OwnershipAnnotation(editedObject.getOwnership(), Permission.EVENT.getQualifiedObjectIdentifier(event.id.toString()), event.getName()),
-                        new AsyncCallback<Void>() {
+                        new AsyncCallback<QualifiedObjectIdentifier>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 errorReporter.reportError(stringMessages.errorUpdatingOwnership(event.getName()));
                             }
 
                             @Override
-                            public void onSuccess(Void result) {
+                            public void onSuccess(QualifiedObjectIdentifier result) {
                                 event.setOwnership(editedObject.getOwnership());
                                 updateEvent(event, event);
                             }

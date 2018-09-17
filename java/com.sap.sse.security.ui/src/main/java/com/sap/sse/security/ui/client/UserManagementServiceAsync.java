@@ -21,7 +21,9 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 public interface UserManagementServiceAsync {
-    void setOwnership(OwnershipAnnotation ownership, AsyncCallback<Void> callback);
+    void setOwnership(OwnershipAnnotation ownership, AsyncCallback<QualifiedObjectIdentifier> callback);
+    
+    void getOwnership(QualifiedObjectIdentifier idOfOwnedObject, AsyncCallback<OwnershipAnnotation> callback);
 
     void getAccessControlLists(AsyncCallback<Collection<AccessControlListAnnotation>> callback);
 
