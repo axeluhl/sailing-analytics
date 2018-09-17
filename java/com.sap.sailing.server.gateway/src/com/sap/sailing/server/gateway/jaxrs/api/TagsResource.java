@@ -11,8 +11,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -30,7 +30,8 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
-@Path("/v1/tags")
+@Path("/v1/{" + RaceLogServletConstants.PARAMS_LEADERBOARD_NAME + "}/{" + RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME
+        + "}/{" + RaceLogServletConstants.PARAMS_RACE_FLEET_NAME + "}/tags")
 public class TagsResource extends AbstractSailingServerResource {
 
     private static final Logger logger = Logger.getLogger(TagsResource.class.getName());
@@ -54,9 +55,9 @@ public class TagsResource extends AbstractSailingServerResource {
      */
     @GET
     @Produces({ APPLICATION_JSON_UTF8, TEXT_PLAIN_UTF8 })
-    public Response getTags(@QueryParam(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME) String leaderboardName,
-            @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
-            @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName) {
+    public Response getTags(@PathParam(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME) String leaderboardName,
+            @PathParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
+            @PathParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName) {
         // TODO: Allow to get only public, only private tags or both of them
         // TODO: Allow to get only unrevoked tags
         Response response;
@@ -95,9 +96,9 @@ public class TagsResource extends AbstractSailingServerResource {
     @Produces({ APPLICATION_JSON_UTF8, TEXT_PLAIN_UTF8 })
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response createTag(@Context UriInfo uriInfo,
-            @QueryParam(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME) String leaderboardName,
-            @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
-            @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName, @FormParam("tag") String tag,
+            @PathParam(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME) String leaderboardName,
+            @PathParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
+            @PathParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName, @FormParam("tag") String tag,
             @FormParam("comment") String comment, @FormParam("image") String imageURL,
             @FormParam("public") boolean visibleForPublic, @FormParam("raceTimepoint") long raceTimepoint) {
         Response response;
@@ -124,9 +125,9 @@ public class TagsResource extends AbstractSailingServerResource {
     @DELETE
     @Produces({ APPLICATION_JSON_UTF8, TEXT_PLAIN_UTF8 })
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Response deleteTag(@QueryParam(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME) String leaderboardName,
-            @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
-            @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName,
+    public Response deleteTag(@PathParam(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME) String leaderboardName,
+            @PathParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
+            @PathParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName,
             @FormParam("tag_json") String tagJson) {
         Response response;
         TagDTO tagToRemove = serializer.deserializeTag(tagJson);
@@ -157,11 +158,12 @@ public class TagsResource extends AbstractSailingServerResource {
     @PUT
     @Produces({ APPLICATION_JSON_UTF8, TEXT_PLAIN_UTF8 })
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public Response updateTag(@QueryParam(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME) String leaderboardName,
-            @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
-            @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName,
+    public Response updateTag(@PathParam(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME) String leaderboardName,
+            @PathParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
+            @PathParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName,
             @FormParam("tag_json") String tagJson, @FormParam("tag") String tag, @FormParam("comment") String comment,
             @FormParam("image") String imageURL, @FormParam("public") boolean visibleForPublic) {
+        // TODO: What happens if parameters are missing? Old values should stay the same.
         Response response;
         TagDTO tagToUpdate = serializer.deserializeTag(tagJson);
         TaggingService taggingService = getService().getTaggingService();
@@ -175,6 +177,5 @@ public class TagsResource extends AbstractSailingServerResource {
             logger.warning("Could not update tag! " + errorMessage);
         }
         return response;
-
     }
 }

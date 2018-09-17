@@ -31,10 +31,10 @@
         <td>HTTP 200 + Json or HTTP 400/500</td>
     </tr>
     <tr>
-        <td>Mandatory query parameters:</td>
+        <td>Mandatory parameters:</td>
         <td>
             leaderboard: leaderboard name<br/>
-            race_column: race column name<br/>
+            racecolumn: race column name<br/>
             fleet: fleet name<br/>
         </td>
     </tr>
@@ -47,8 +47,8 @@
         <td>GET</td>
     </tr>
     <tr>
-        <td>Example:</td>
-        <td>GET <a href="https://sapsailing.com/sailingserver/api/v1/tags?leaderboard={leaderboard name}&race_column={race column name}&fleet={fleet name}">https://sapsailing.com/sailingserver/api/v1/tags?leaderboard={leaderboard name}&race_column={race column name}&fleet={fleet name}</a></td>
+        <td>Example request:</td>
+        <td>GET <a href="https://sapsailing.com/sailingserver/api/v1/{leaderboard}/{racecolumn}/{fleet}/tags">https://sapsailing.com/sailingserver/api/v1/{leaderboard}/{racecolumn}/{fleet}/tags</a></td>
     </tr>
     <tr>
         <td>Example response:</td>
@@ -91,10 +91,10 @@
         <td>HTTP 201 or HTTP 400</td>
     </tr>
     <tr>
-        <td>Mandatory URL parameters:</td>
+        <td>Mandatory parameters:</td>
         <td>
             leaderboard: leaderboard name<br/>
-            race_column: race column name<br/>
+            racecolumn: race column name<br/>
             fleet: fleet name
         </td>
     </tr>
@@ -120,7 +120,7 @@
     <tr>
         <td>Example request:</td>
         <td>
-            POST <a href="https://sapsailing.com/sailingserver/api/v1/tags?leaderboard={leaderboard name}&race_column={race column name}&fleet={fleet name}">https://sapsailing.com/sailingserver/api/v1/tags?leaderboard={leaderboard name}&race_column={race column name}&fleet={fleet name}</a><br/>
+            POST <a href="https://sapsailing.com/sailingserver/api/v1/{leaderboard}/{racecolumn}/{fleet}/tags">https://sapsailing.com/sailingserver/api/v1/{leaderboard}/{racecolumn}/{fleet}/tags</a><br/>
             <br/>
             tag = "New tag!",<br/>
             comment = "Optional comment",<br/>
@@ -146,14 +146,14 @@
         <td>Mandatory query parameters:</td>
         <td>
             leaderboard: leaderboard name<br/>
-            race_column: race column name<br/>
+            racecolumn: race column name<br/>
             fleet: fleet name
         </td>
     </tr>
     <tr>
         <td>Mandatory body parameters:</td>
         <td>
-            tag_json: tag to delete as json
+            tag_json: tag to delete as json (may be missing attributes <i>createdAt</i> and <i>revokedAt</i> as they are not required to identify a tag)
         </td>
     </tr>
     <tr>
@@ -167,7 +167,7 @@
     <tr>
         <td>Example request:</td>
         <td>
-            DELETE <a href="https://sapsailing.com/sailingserver/api/v1/tags?leaderboard={leaderboard name}&race_column={race column name}&fleet={fleet name}">https://sapsailing.com/sailingserver/api/v1/tags?leaderboard={leaderboard name}&race_column={race column name}&fleet={fleet name}</a><br/>
+            DELETE <a href="https://sapsailing.com/sailingserver/api/v1/{leaderboard}/{racecolumn}/{fleet}/tags">https://sapsailing.com/sailingserver/api/v1/{leaderboard}/{racecolumn}/{fleet}/tags</a><br/>
             <br/>
             <pre><code>tag_json = {
     "tag": "Tag to delete",
@@ -175,9 +175,7 @@
     "image": "",
     "username": "admin",
     "public": true,
-    "raceTimepoint": 1347452185000,
-    "createdAt": 1536742983448,
-    "revokedAt": 0
+    "raceTimepoint": 1347452185000
 }
             </code></pre>
         </td>
@@ -199,14 +197,14 @@
         <td>Mandatory URL parameters:</td>
         <td>
             leaderboard: leaderboard name<br/>
-            race_column: race column name<br/>
+            racecolumn: race column name<br/>
             fleet: fleet name
         </td>
     </tr>
     <tr>
         <td>Mandatory body parameters:</td>
         <td>
-            tag_json: tag to update as json
+            tag_json: tag to update as json (may be missing attributes <i>createdAt</i> and <i>revokedAt</i> as they are not required to identify a tag)
         </td>
     </tr>
     <tr>
@@ -225,7 +223,7 @@
     <tr>
         <td>Example request:</td>
         <td>
-            PUT <a href="https://sapsailing.com/sailingserver/api/v1/tags?leaderboard={leaderboard name}&race_column={race column name}&fleet={fleet name}">https://sapsailing.com/sailingserver/api/v1/tags?leaderboard={leaderboard name}&race_column={race column name}&fleet={fleet name}</a><br/>
+            PUT <a href="https://sapsailing.com/sailingserver/api/v1/{leaderboard}/{racecolumn}/{fleet}/tags">https://sapsailing.com/sailingserver/api/v1/{leaderboard}/{racecolumn}/{fleet}/tags</a><br/>
             <br/>
             <pre><code>tag_json = {
     "tag": "Tag to update",
