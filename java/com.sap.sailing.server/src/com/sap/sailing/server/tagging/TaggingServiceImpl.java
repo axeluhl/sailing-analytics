@@ -217,7 +217,8 @@ public class TaggingServiceImpl implements TaggingService {
         } else if (comment.length() > TagDTO.MAX_COMMENT_LENGTH) {
             setLastErrorCode(ErrorCode.COMMENT_TOO_LONG);
             successful = false;
-        } else if (raceTimepoint == null) {
+        } else if (raceTimepoint == null || raceTimepoint.asMillis() == 0) {
+            // TODO: Check if timepoint is near start/end of race (+/- x%)
             setLastErrorCode(ErrorCode.TIMEPOINT_NOT_EMPTY);
             successful = false;
         } else {
