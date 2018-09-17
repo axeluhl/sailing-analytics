@@ -32,11 +32,11 @@ public abstract class GenericStringListInlineEditorComposite<ValueType> extends 
     public static class ExpandedUi<ValueType> extends GenericStringListEditorComposite.ExpandedUi<ValueType> {
         private final int textBoxSize;
 
-        public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, List<String> suggestValues, int textBoxSize) {
+        public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, Iterable<String> suggestValues, int textBoxSize) {
             this(stringMessages, removeImage, suggestValues, /* placeholderTextForAddTextbox */ null, textBoxSize);
         }
         
-        public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, List<String> suggestValues,
+        public ExpandedUi(StringMessages stringMessages, ImageResource removeImage, Iterable<String> suggestValues,
                 String placeholderTextForAddTextbox, int textBoxSize) {
             super(stringMessages, removeImage, suggestValues, placeholderTextForAddTextbox);
             this.textBoxSize = textBoxSize;

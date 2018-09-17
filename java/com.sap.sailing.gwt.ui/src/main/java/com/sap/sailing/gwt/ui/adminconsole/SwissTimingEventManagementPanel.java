@@ -322,6 +322,8 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         raceIdColumn.setSortable(true);
         genderColumn.setSortable(true);
         raceStatusColumn.setSortable(true);
+        regattaNameColumn.setSortable(true);
+        seriesNameColumn.setSortable(true);
         
 
         raceTable.addColumn(selectionColumn, selectionColumn.getHeader());
