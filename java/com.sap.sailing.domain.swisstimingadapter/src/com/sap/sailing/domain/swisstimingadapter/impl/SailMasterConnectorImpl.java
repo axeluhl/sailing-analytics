@@ -361,16 +361,16 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         assert message.getType() == MessageType.RPD;
         String[] sections = message.getSections();
         String raceID = sections[1];
-        final RaceStatus raceStatus;
-        final RacingStatus racingStatus;
         final String[] raceStatusIntAndRacingStatusInt = sections[2].split(",");
+        final String raceStatusAsString = raceStatusIntAndRacingStatusInt.length > 0 ? raceStatusIntAndRacingStatusInt[0] : null;
+        final RaceStatus raceStatus = raceStatusAsString == null || raceStatusAsString.trim().isEmpty() ? null : RaceStatus.values()[Integer.valueOf(raceStatusAsString)];
+        final String racingStatusAsString;
         if (raceStatusIntAndRacingStatusInt.length > 1) {
-            raceStatus = RaceStatus.values()[Integer.valueOf(raceStatusIntAndRacingStatusInt[0])];
-            racingStatus = RacingStatus.values()[Integer.valueOf(raceStatusIntAndRacingStatusInt[1])];
+            racingStatusAsString = raceStatusIntAndRacingStatusInt[1];
         } else {
-            raceStatus = RaceStatus.values()[Integer.valueOf(raceStatusIntAndRacingStatusInt[0])];
-            racingStatus = null;
+            racingStatusAsString = null;
         }
+        final RacingStatus racingStatus = racingStatusAsString == null || racingStatusAsString.trim().isEmpty() ? null : RacingStatus.values()[Integer.valueOf(racingStatusAsString)];
         TimePoint timePoint = new MillisecondsTimePoint(parseTimeAndDateISO(sections[3], raceID));
         lastRPDMessageTimePoint = timePoint;
         String dateISO = sections[3].substring(0, sections[3].indexOf('T'));
@@ -392,7 +392,8 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
             if (fixSections.length > 2) {
                 final String trackedObjectIdAsString = fixSections[fixDetailIndex++].trim();
                 if (trackedObjectIdAsString != null && !trackedObjectIdAsString.trim().isEmpty()) {
-                    final TrackerType trackerType = TrackerType.values()[Integer.valueOf(fixSections[fixDetailIndex++])];
+                    final String trackerTypeAsString = fixSections[fixDetailIndex++];
+                    final TrackerType trackerType = trackerTypeAsString == null || trackerTypeAsString.trim().isEmpty() ? null : TrackerType.values()[Integer.valueOf(trackerTypeAsString)];
                     final String ageOfDataInMillisAsString = fixSections[fixDetailIndex++];
                     final Long ageOfDataInMilliseconds = ageOfDataInMillisAsString==null || ageOfDataInMillisAsString.trim().isEmpty() ? null : (1000l * Long.valueOf(ageOfDataInMillisAsString));
                     final String latDegAsString = fixSections[fixDetailIndex++];
