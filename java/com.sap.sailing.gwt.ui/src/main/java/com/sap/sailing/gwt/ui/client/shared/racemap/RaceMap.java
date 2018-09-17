@@ -483,6 +483,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         public boolean contains(T t) {
             return (map.containsKey(t));
         }
+
+        public void clear() {
+            map.clear();
+        }
     }
 
     private class AdvantageLineUpdater implements QuickRanksListener {
@@ -769,6 +773,18 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         if (!currentlyDragging) {
                             refreshMapWithoutAnimation();
                         }
+                        if (!isMapInitialized) {
+                            // ensure at least one redraw after starting the map
+                            RaceMap.this.isMapInitialized = true;
+                            redraw();
+                        } else if (!mapFirstZoomDone) {
+                            // ensure the zoom is correct in cases, were a redraw will not finish due to already running
+                            // remote requests and ensure the next redraw will not be cancelled in paused state, due to
+                            // identical time
+                            zoomMapToNewBounds(settings.getZoomSettings().getNewBounds(RaceMap.this));
+                            remoteCallsToSkipInExecution.clear();
+                            redraw();
+                        }
                     }
                 });
                 map.addBoundsChangeHandler(new BoundsChangeMapHandler() {
@@ -817,7 +833,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     createSettingsButton(map);
                 }
                 // Data has been initialized
-                RaceMap.this.isMapInitialized = true;
                 RaceMap.this.redraw();
                 trueNorthIndicatorPanel.redraw();
                 showAdditionalControls(map);
@@ -1057,8 +1072,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     @Override
     public void timeChanged(final Date newTime, final Date oldTime) {
         boolean isRedraw = oldTime == null;
-        if (newTime != null && isMapInitialized) {
-            if (raceIdentifier != null) {
+        if (isMapInitialized) {
+            if (newTime != null) {
                 if (raceIdentifier != null) {
                     final long transitionTimeInMillis = calculateTimeForPositionTransitionInMillis(newTime, oldTime);
                     refreshMap(newTime, transitionTimeInMillis, isRedraw);
@@ -1226,7 +1241,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                                     zoomToBounds = getDefaultZoomBounds();
                                 }
                             }
-                        } else if (!mapFirstZoomDone) {
+                        }
+                        if (!mapFirstZoomDone) {
                             // Zoom once to the marks if marks exist
                             zoomToBounds = new CourseMarksBoundsCalculator().calculateNewBounds(RaceMap.this);
                             if (zoomToBounds == null) {
@@ -1240,7 +1256,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                              */
                         }
                         zoomMapToNewBounds(zoomToBounds);
-                        mapFirstZoomDone = true;
                         updateEstimatedDuration(raceMapDataDTO.estimatedDuration);
                     }
                 } else {
@@ -2124,6 +2139,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 RaceMapZoomSettings restoredZoomSettings = new RaceMapZoomSettings(oldZoomTypesToConsiderSettings, settings.getZoomSettings().isZoomToSelectedCompetitors());
                 settings = new RaceMapSettings(settings, restoredZoomSettings);
                 setAutoZoomInProgress(false);
+                mapFirstZoomDone = true;
             }
         }
     }
