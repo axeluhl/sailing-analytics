@@ -14,7 +14,7 @@ public interface TaggingService {
      */
     public enum ErrorCode {
         UNKNOWN_ERROR("unknownError", "Unknown error"),
-        NOT_LOGGED_IN("notLoggedin", "You are not logged in"),
+        NOT_LOGGED_IN("notLoggedIn", "You are not logged in"),
         MISSING_PERMISSIONS("missingPermissions", "Missing permissions"),
         SECURITY_SERIVCE_NOT_FOUND("securityServiceNotFound", "Security service not found"),
         RACELOG_NOT_FOUND("racelogNotFound", "Racelog not found"),
