@@ -11,6 +11,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
+import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
@@ -21,7 +22,7 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 public interface UserManagementServiceAsync {
-    void setOwnership(OwnershipAnnotation ownership, AsyncCallback<QualifiedObjectIdentifier> callback);
+    void setOwnership(Ownership ownership, QualifiedObjectIdentifier idOfOwnedObject, String displayNameOfOwnedObject, AsyncCallback<QualifiedObjectIdentifier> callback);
     
     void getOwnership(QualifiedObjectIdentifier idOfOwnedObject, AsyncCallback<OwnershipAnnotation> callback);
 

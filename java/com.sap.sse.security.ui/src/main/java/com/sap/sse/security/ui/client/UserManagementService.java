@@ -12,6 +12,7 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
+import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
@@ -26,12 +27,8 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 public interface UserManagementService extends RemoteService {
-    /**
-     * @return the {@link QualifiedObjectIdentifier} that was passed in the
-     *         {@link OwnershipAnnotation#getIdOfAnnotatedObject()}, largely to force this type to become part of the
-     *         serialization whitelist
-     */
-    QualifiedObjectIdentifier setOwnership(OwnershipAnnotation ownership);
+    QualifiedObjectIdentifier setOwnership(Ownership ownership, QualifiedObjectIdentifier idOfOwnedObject,
+            String displayNameOfOwnedObject);
     
     Collection<AccessControlListAnnotation> getAccessControlLists() throws UnauthorizedException;
 

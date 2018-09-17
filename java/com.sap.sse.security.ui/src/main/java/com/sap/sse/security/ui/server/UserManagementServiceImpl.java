@@ -39,6 +39,7 @@ import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.HasPermissions.DefaultModes;
+import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.Role;
@@ -122,11 +123,12 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public QualifiedObjectIdentifier setOwnership(OwnershipAnnotation ownershipAnnotation) {
+    public QualifiedObjectIdentifier setOwnership(Ownership ownership, QualifiedObjectIdentifier idOfOwnedObject,
+            String displayNameOfOwnedObject) {
         final QualifiedObjectIdentifier result;
-        if (SecurityUtils.getSubject().isPermitted(ownershipAnnotation.getIdOfAnnotatedObject().getStringPermission(DefaultModes.CHANGE_OWNERSHIP))) {
-            getSecurityService().setOwnership(ownershipAnnotation);
-            result = ownershipAnnotation.getIdOfAnnotatedObject();
+        if (SecurityUtils.getSubject().isPermitted(idOfOwnedObject.getStringPermission(DefaultModes.CHANGE_OWNERSHIP))) {
+            getSecurityService().setOwnership(new OwnershipAnnotation(ownership, idOfOwnedObject, displayNameOfOwnedObject));
+            result = idOfOwnedObject;
         } else {
             result = null;
         }
