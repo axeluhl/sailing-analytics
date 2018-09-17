@@ -297,7 +297,6 @@
 }
 
 .tagInputPanelNoPermissionLabel{
-    color: red;
     border: none;
     font-size: 80%; 
     margin: 3px 0px 3px 0px;
