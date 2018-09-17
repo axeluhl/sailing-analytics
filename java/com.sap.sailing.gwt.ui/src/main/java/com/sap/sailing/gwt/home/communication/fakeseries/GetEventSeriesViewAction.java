@@ -87,7 +87,7 @@ public class GetEventSeriesViewAction implements SailingAction<EventSeriesViewDT
 
         EventSeriesViewDTO dto = new EventSeriesViewDTO();
         dto.setLeaderboardGroupUUID(leaderBoardGroup.getId());
-        ImageDescriptor logoImage = o.findImageWithTag(MediaTagConstants.LOGO);
+        ImageDescriptor logoImage = o.findImageWithTag(MediaTagConstants.LOGO.getName());
         dto.setLogoImage(logoImage != null ? HomeServiceUtil.convertToImageDTO(logoImage) : null);
         // TODO implement correctly. We currently do not show media for series.
         dto.setHasMedia(false);

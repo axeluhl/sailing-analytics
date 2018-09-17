@@ -41,7 +41,6 @@ import com.sap.sailing.gwt.home.communication.eventlist.EventListEventDTO;
 import com.sap.sailing.gwt.home.communication.media.SailingVideoDTO;
 import com.sap.sailing.gwt.home.communication.start.EventStageDTO;
 import com.sap.sailing.gwt.home.communication.start.StageEventType;
-import com.sap.sailing.gwt.ui.shared.media.MediaConstants;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.util.EventUtil;
 import com.sap.sse.common.TimePoint;
@@ -126,11 +125,11 @@ public final class HomeServiceUtil {
     }
     
     private static ImageDescriptor findEventThumbnailImage(EventBase event) {
-        return event.findImageWithTag(MediaTagConstants.TEASER);
+        return event.findImageWithTag(MediaTagConstants.TEASER.getName());
     }
     
     public static ImageDescriptor getFeaturedImage(EventBase event) {
-        return event.findImageWithTag(MediaTagConstants.FEATURED);
+        return event.findImageWithTag(MediaTagConstants.FEATURED.getName());
     }
     
     public static String getFeaturedImageUrlAsString(EventBase event) {
@@ -144,7 +143,7 @@ public final class HomeServiceUtil {
     }
     
     public static ImageDescriptor getStageImage(final EventBase event) {
-        return event.findImageWithTag(MediaTagConstants.STAGE);
+        return event.findImageWithTag(MediaTagConstants.STAGE.getName());
     }
 
     public static List<String> getPhotoGalleryImageURLsAsString(EventBase event) {
@@ -157,14 +156,14 @@ public final class HomeServiceUtil {
     }
 
     public static List<ImageDescriptor> getPhotoGalleryImages(EventBase event) {
-        return event.findImagesWithTag(MediaTagConstants.GALLERY);
+        return event.findImagesWithTag(MediaTagConstants.GALLERY.getName());
     }
     
     public static List<ImageDescriptor> getSailingLovesPhotographyImages(EventBase event) {
         final List<ImageDescriptor> acceptedImages = new LinkedList<>();
         for (ImageDescriptor candidateImageUrl : event.getImages()) {
             if (candidateImageUrl.hasSize() && candidateImageUrl.getHeightInPx() > MINIMUM_IMAGE_HEIGHT_FOR_SAILING_PHOTOGRAPHY_IN_PIXELS) {
-                if (candidateImageUrl.hasTag(MediaTagConstants.STAGE) || candidateImageUrl.hasTag(MediaTagConstants.GALLERY)) {
+                if (candidateImageUrl.hasTag(MediaTagConstants.STAGE.getName()) || candidateImageUrl.hasTag(MediaTagConstants.GALLERY.getName())) {
                     acceptedImages.add(candidateImageUrl);
                 }
             }
@@ -204,7 +203,7 @@ public final class HomeServiceUtil {
     }
     
     public static boolean hasPhotos(Event event) {
-        return event.hasImageWithTag(MediaTagConstants.GALLERY);
+        return event.hasImageWithTag(MediaTagConstants.GALLERY.getName());
     }
     
     public static boolean hasVideos(Event event) {
@@ -232,7 +231,7 @@ public final class HomeServiceUtil {
         VideoDescriptor bestMatch = null;
         
         for (VideoDescriptor videoCandidate : event.getVideos()) {
-            if(!MediaConstants.SUPPORTED_VIDEO_TYPES.contains(videoCandidate.getMimeType())) {
+            if(!MediaTagConstants.SUPPORTED_VIDEO_TYPES.contains(videoCandidate.getMimeType())) {
                 continue;
             }
             

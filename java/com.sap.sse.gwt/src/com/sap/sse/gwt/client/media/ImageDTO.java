@@ -7,6 +7,7 @@ import com.sap.sse.common.media.MimeType;
 public class ImageDTO extends AbstractMediaDTO {
 
     /** for GWT */
+    @Deprecated
     protected ImageDTO() {
     }
     
