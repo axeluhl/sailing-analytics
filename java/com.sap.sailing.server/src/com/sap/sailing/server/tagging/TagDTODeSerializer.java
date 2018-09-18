@@ -24,6 +24,8 @@ public class TagDTODeSerializer {
     public static final String FIELD_RACE_TIMEPOINT = "raceTimepoint";
     public static final String FIELD_CREATED_AT = "createdAt";
     public static final String FIELD_REVOKED_AT = "revokedAt";
+    
+    private static final String UNIQUE_KEY_PREFIX = "Tags:";
 
     private final JSONParser parser = new JSONParser();
 
@@ -202,11 +204,11 @@ public class TagDTODeSerializer {
      * @return unique key for given race
      */
     public String generateUniqueKey(String leaderboardName, String raceColumnName, String fleetName) {
-        return "Tags:" + escape(leaderboardName) + "+" + escape(raceColumnName) + "+" + escape(fleetName);
+        return UNIQUE_KEY_PREFIX + escape(leaderboardName) + "+" + escape(raceColumnName) + "+" + escape(fleetName);
     }
 
     /**
-     * Escapes given string by replacing every occurence of '/' by '//' and '+' by '/p'.
+     * Escapes given string by replacing every occurrence of '/' by '//' and '+' by '/p'.
      * 
      * @param string
      *            string to be escaped
