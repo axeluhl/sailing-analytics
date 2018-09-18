@@ -367,12 +367,12 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         Event event = new EventImpl(eventName, eventStartDate, eventEndDate, venue, /*isPublic*/ true, UUID.randomUUID());
         
         ImageDescriptor image1 = new ImageDescriptorImpl(imageURL, createdAt);
-        image1.addTag(MediaTagConstants.GALLERY);
+        image1.addTag(MediaTagConstants.GALLERY.getName());
         event.addImage(image1);
 
         ImageDescriptor image2 = new ImageDescriptorImpl(sponsorImageURL, createdAt);
         event.addImage(image2);
-        image2.addTag(MediaTagConstants.SPONSOR);
+        image2.addTag(MediaTagConstants.SPONSOR.getName());
 
         VideoDescriptor video1 = new VideoDescriptorImpl(videoURL, MimeType.mp4, createdAt);
         event.addVideo(video1);
@@ -383,8 +383,8 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
         final Event loadedEvent = dof.loadEvent(eventName);
         assertEquals(2, Util.size(loadedEvent.getImages()));
         assertEquals(1, Util.size(loadedEvent.getVideos()));
-        assertEquals(1, Util.size(loadedEvent.findImagesWithTag(MediaTagConstants.GALLERY)));
-        assertEquals(1, Util.size(loadedEvent.findImagesWithTag(MediaTagConstants.SPONSOR)));
+        assertEquals(1, Util.size(loadedEvent.findImagesWithTag(MediaTagConstants.GALLERY.getName())));
+        assertEquals(1, Util.size(loadedEvent.findImagesWithTag(MediaTagConstants.SPONSOR.getName())));
         assertEquals(1, Util.size(loadedEvent.getVideos()));
     }
     

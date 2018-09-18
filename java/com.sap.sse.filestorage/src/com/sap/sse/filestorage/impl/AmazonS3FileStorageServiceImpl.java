@@ -109,7 +109,7 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
 
     @Override
     public void removeFile(URI uri) throws InvalidPropertiesException, OperationFailedException {
-        String key = uri.getPath().substring(1); // remove initial slash
+        String key = uri.getPath().substring(uri.getPath().lastIndexOf("/")+1);
         AmazonS3Client s3Client = createS3Client();
         try {
             s3Client.deleteObject(new DeleteObjectRequest(bucketName.getValue(), key));
@@ -123,12 +123,16 @@ public class AmazonS3FileStorageServiceImpl extends BaseFileStorageServiceImpl i
     public void testProperties() throws InvalidPropertiesException {
         AmazonS3Client s3 = createS3Client();
 
+        
+        if (bucketName.getValue().equals("")) {
+            throw new InvalidPropertiesException("empty bucketname is not allowed");
+        }
         // test if credentials are valid
         // TODO seems to even work if credentials are not valid if bucket is publicly visible
         try {
             s3.doesBucketExist(bucketName.getValue());
         } catch (Exception e) {
-            throw new InvalidPropertiesException("invalid credentials or not enough access rights for the bucket", e,
+            throw new InvalidPropertiesException("invalid credentials or not enough access rights for the bucket" + e.getCause(), e,
                     new Pair<FileStorageServiceProperty, String>(accessId, "seems to be invalid"),
                     new Pair<FileStorageServiceProperty, String>(accessKey, "seems to be invalid"));
         }
