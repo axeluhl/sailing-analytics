@@ -11,6 +11,9 @@ import com.google.gwt.resources.client.ImageResource;
 public interface TagPanelResources extends ClientBundle {
     public static final TagPanelResources INSTANCE = GWT.create(TagPanelResources.class);
 
+    @Source("com/sap/sailing/gwt/ui/client/images/share.png")
+    ImageResource shareIcon();
+    
     @Source("com/sap/sailing/gwt/ui/client/images/edit.png")
     ImageResource editIcon();
 
@@ -62,6 +65,7 @@ public interface TagPanelResources extends ClientBundle {
         String tagActionButton();
         String tagEditButton();
         String tagDeleteButton();
+        String tagShareButton();
         String tagCellCreated();
         String tagCellComment();
         String tagCellImage();
@@ -100,6 +104,11 @@ public interface TagPanelResources extends ClientBundle {
         String tagFilterSearchBox();
         String tagFilterSearchInput();
         String tagFilterCurrentSelection();
+        
+        //shared tag dialog
+        String tagSharedURLLabel();
+        String tagSharedURLTextBox();
+        String tagSharedURLDialog();
 
         // images
         String imageActiveFilter();
@@ -108,6 +117,7 @@ public interface TagPanelResources extends ClientBundle {
         String imageClearSearch();
         String imageSettings();
         String imagePusTransparent();
+        String imageShare();
         String imageEdit();
         String imageDelete();
     }

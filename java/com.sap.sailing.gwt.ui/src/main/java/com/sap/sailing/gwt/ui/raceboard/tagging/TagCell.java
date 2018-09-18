@@ -14,10 +14,13 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
+import com.google.gwt.user.client.Window;
 import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanel.State;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
@@ -29,7 +32,7 @@ public class TagCell extends AbstractCell<TagDTO> {
      * Contains different configurations for {@link TagCell}s. Used as {@link SafeHtmlTemplates template} for
      * {@link TagCell}s. <br/>
      * <br/>
-     * <b>Notice:</b> CSS classes need to be provied as parameters as CSS classnames are context sensitive and can't be
+     * <b>Notice:</b> CSS classes need to be provided as parameters as CSS classnames are context sensitive and can't be
      * hardcoded.
      */
     protected interface TagCellTemplate extends SafeHtmlTemplates {
@@ -49,11 +52,13 @@ public class TagCell extends AbstractCell<TagDTO> {
          * @param content
          *            available configurations are {@link #contentWithCommentWithImage},
          *            {@link #contentWithCommentWithoutImage} and {@link #contentWithoutCommentWithImage}.
+         * @param shareButton
+         * @param content2
          * @return {@link SafeHtml HTML template}
          */
-        @Template("<div class='{0}'><div class='{1}'>{3}{4}{5}</div><div class='{2}'>{6}</div>{7}</div>")
+        @Template("<div class='{0}'><div class='{1}'>{3}{4}{5}{8}</div><div class='{2}'>{6}</div>{7}</div>")
         SafeHtml cell(String classTag, String classTagHeading, String classTagCreated, SafeHtml icon, SafeHtml buttons,
-                SafeHtml tag, SafeHtml created, SafeHtml content);
+                SafeHtml tag, SafeHtml created, SafeHtml content, SafeHtml shareButtonHeader);
 
         /**
          * Renders content with maximal configuration (comment and image).
@@ -104,6 +109,14 @@ public class TagCell extends AbstractCell<TagDTO> {
         @Template("<div class='{0}'>{1}{2}</div>")
         SafeHtml headerButtonsDeletableAndModifyable(String classTagHeadingButtons, SafeHtml editButton,
                 SafeHtml deleteButton);
+
+        /**
+         * Renders part of heading holding a button to share a tag.
+         * 
+         * @return {@link SafeHtml HTML template}
+         */
+        @Template("<div class='{0}'>{1}</div>")
+        SafeHtml shareButtonHeader(String classTagHeadingButtons, SafeHtml shareButton);
 
         /**
          * Renders icon with given source.
@@ -185,6 +198,10 @@ public class TagCell extends AbstractCell<TagDTO> {
             icon = tagCellTemplate.icon(safeIsPrivateImageUri);
         }
 
+        SafeHtml shareButton = tagCellTemplate.button(style.tagActionButton() + " " + style.tagShareButton(),
+                stringMessages.tagShareTag(), tagCellTemplate.icon(resources.shareIcon().getSafeUri()));
+        SafeHtml shareButtonHeader = tagCellTemplate.shareButtonHeader(style.tagCellHeadingButtons(), shareButton);
+
         SafeHtml headingButtons = SafeHtmlUtils.EMPTY_SAFE_HTML;
         // preview cells do not show buttons
         if (!isPreviewCell) {
@@ -213,7 +230,7 @@ public class TagCell extends AbstractCell<TagDTO> {
             cellStyle = style.tagCell() + " " + style.tagCellActive();
         }
         SafeHtml cell = tagCellTemplate.cell(cellStyle, style.tagCellHeading(), style.tagCellCreated(), icon,
-                headingButtons, safeTag, safeCreated, content);
+                headingButtons, safeTag, safeCreated, content, shareButtonHeader);
         htmlBuilder.append(cell);
     }
 
@@ -251,6 +268,11 @@ public class TagCell extends AbstractCell<TagDTO> {
                                 });
                     } else if (button.hasClassName(style.tagEditButton())) {
                         taggingPanel.setCurrentState(State.EDIT_TAG);
+                    } else if (button.hasClassName(style.tagShareButton())) {
+                        String currentURL = Window.Location.getHref();
+                        String urlWithTagParam = currentURL
+                                .concat("&tag=" + tag.getRaceTimepoint().asMillis() + tag.getTag());
+                        new TagSharedURLDialog(taggingPanel, urlWithTagParam).show();
                     }
                 }
             }

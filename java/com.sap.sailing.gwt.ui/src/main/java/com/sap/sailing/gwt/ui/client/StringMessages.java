@@ -2113,6 +2113,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String tagAddTag();
     String tagEditTag();
     String tagDeleteTag();
+    String tagShareTag();
     String tagAddTags();
     String tagSavedSuccessfully();
     String tagNotSaved();
@@ -2157,4 +2158,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String close();
     String username();
     String tagPublicModificationPermissionMissing();
+    String tagNotFound();
+    String tagInvalidURL();
+    String tagSharedDialog();
+    String tagSharedURL();
 }

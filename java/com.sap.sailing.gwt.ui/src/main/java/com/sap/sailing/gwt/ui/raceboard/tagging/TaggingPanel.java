@@ -8,6 +8,7 @@ import java.util.Map;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -51,9 +52,9 @@ import com.sap.sse.security.ui.shared.UserDTO;
  * will be stored in the {@link com.sap.sse.security.UserStore UserStore}.<br/>
  * <br/>
  * The TaggingPanel is also used as a data provider for all of its subcomponents like header, footer and content
- * section. Therefor the TaggingPanel provides references to important services, string messages, its current state ando
+ * section. Therefore the TaggingPanel provides references to important services, string messages, its current state ando
  * so on.
- * Best practise: The constructor of subcomponents of the TaggingPanel contains only the TaggingPanel as a parameter.
+ * Best practice: The constructor of subcomponents of the TaggingPanel contains only the TaggingPanel as a parameter.
  * Every other required shared resource (string messages, service references, ...) can be requested from the
  * TaggingPanel itself.
  */
@@ -100,6 +101,11 @@ public class TaggingPanel extends ComponentWithoutSettings
 
     // current state of the Tagging-Panel
     private State currentState;
+    
+    //Needed for sharing Tags 
+    private boolean firstTimePublicTagsLoaded = true;
+    private final TimePoint sharedTimePoint;
+    private final String sharedTag;
 
     public TaggingPanel(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages,
             SailingServiceAsync sailingService, UserService userService, Timer timer,
@@ -132,6 +138,26 @@ public class TaggingPanel extends ComponentWithoutSettings
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(this);
 
         setCurrentState(State.VIEW);
+        
+        //Get the url parameter "tag" and divide it into the logical timepoint and the tag title
+        String urlParameter = Window.Location.getParameter("tag");
+        if(urlParameter != null) {
+            if(urlParameter.length() > 13) {
+                String timeMillisString = urlParameter.substring(0, 13);//Works till "Nov 20 2286", afterwards timeMillis length increases from 13 to 14 chars
+                String tagString = urlParameter.substring(13, urlParameter.length()); 
+                sharedTimePoint = new MillisecondsTimePoint(Long.parseLong(timeMillisString));
+                sharedTag = tagString; 
+            }
+            else {
+                Notification.notify(stringMessages.tagInvalidURL(), NotificationType.WARNING);
+                sharedTimePoint = null;
+                sharedTag = null; 
+            }  
+        }
+        else {
+            sharedTimePoint = null;
+            sharedTag = null; 
+        }
 
         initializePanel();
     }
@@ -236,7 +262,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                     NotificationType.WARNING);
 
         } else if (!isLoggedInAndRaceLogAvailable()) {
-            // User is not logged in or race can not be identifed because regatta, race column or fleet are missing.
+            // User is not logged in or race can not be identified because regatta, race column or fleet are missing.
             Notification.notify(stringMessages.tagNotSaved(), NotificationType.ERROR);
 
         } else if (tag.isEmpty()) {
@@ -540,7 +566,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                     for (TagDTO tag : raceInfo.getTags()) {
                         if (tag.getRevokedAt() != null) {
                             // received tag is revoked => latestReceivedTagTime will be revokedAt if revoke event
-                            // occured before latestReceivedTagTime
+                            // occurred before latestReceivedTagTime
                             currentTags.remove(tag);
                             modifiedTags = true;
                             if (latestReceivedTagTime == null || (latestReceivedTagTime != null
@@ -550,7 +576,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                             }
                         } else if (!currentTags.contains(tag)) {
                             // received tag is NOT revoked => latestReceivedTagTime will be createdAt if tag event
-                            // occured before latestReceivedTagTime
+                            // occurred before latestReceivedTagTime
                             currentTags.add(tag);
                             modifiedTags = true;
                             if (latestReceivedTagTime == null || (latestReceivedTagTime != null
@@ -568,6 +594,30 @@ public class TaggingPanel extends ComponentWithoutSettings
                 // refresh UI if tags did change
                 if (modifiedTags) {
                     updateContent();
+                }
+                //After tags were added for the first time, find tag which matches the URL Parameter "tag", hightlight it and jump to its logical timepoint
+                if(firstTimePublicTagsLoaded && raceInfo.getTags() != null) {
+                    firstTimePublicTagsLoaded = false;
+                    if(sharedTimePoint != null) {
+                        timer.setTime(sharedTimePoint.asMillis());
+                        if(sharedTag != null) {
+                            TagDTO matchingTag = null;
+                            for(TagDTO tag: tagListProvider.getAllTags()) {
+                                if(tag.getRaceTimepoint().equals(sharedTimePoint) && tag.getTag().equals(sharedTag)) {
+                                    matchingTag = tag;
+                                    break;
+                                }
+                            }
+                            if(matchingTag != null) {
+                                tagSelectionModel.clear();
+                                tagSelectionModel.setSelected(matchingTag, true);
+                            }
+                            else {
+                                Notification.notify(stringMessages.tagNotFound(), NotificationType.WARNING);
+                            }
+                        }
+                        
+                    }
                 }
             });
         }

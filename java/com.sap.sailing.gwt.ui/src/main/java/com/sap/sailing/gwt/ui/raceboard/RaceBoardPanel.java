@@ -302,10 +302,16 @@ public class RaceBoardPanel
         raceMap.getRightHeaderPanel().add(userManagementMenuView);
         addChildComponent(raceMap);
         
-        // add panel for tagging functionality, hidden by default
+        // add panel for tagging functionality, hidden if no url parameter "tags" is passed default
         taggingPanel = new TaggingPanel(parent, componentContext, stringMessages, sailingService, userService, timer, raceTimesInfoProvider);
         addChildComponent(taggingPanel);
-        taggingPanel.setVisible(false);
+
+        if(Window.Location.getParameter("tag") != null) {
+            taggingPanel.setVisible(true);
+        }
+        else {
+            taggingPanel.setVisible(false);
+        }
         
         // Determine if the screen is large enough to initially display the leaderboard panel on the left side of the
         // map based on the initial screen width. Afterwards, the leaderboard panel visibility can be toggled as usual.
