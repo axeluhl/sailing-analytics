@@ -89,9 +89,13 @@ public class PermissionCheckerTest {
     }
     
     @Test
-    public void testOwnership() {
+    public void testOwnership() throws UserManagementException {
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, acl));
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, adminOwnership, acl));
+        // being the owning user does not imply any permissions per se
+        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, ownership, acl));
+        userStore.addRoleForUser(user.getName(), new RoleImpl(AdminRole.getInstance(), /* qualified for userTenant */ null, /* qualified for user */ user));
+        // having the admin role qualified for objects owned by user should help
         assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, ownership, acl));
     }
     
@@ -113,8 +117,14 @@ public class PermissionCheckerTest {
         WildcardPermission regattaPermission = Permission.REGATTA.getPermissionForObjects(DefaultModes.READ, regattaName);
         assertFalse(realm.isPermitted(principalCollection, leaderboardPermission.toString()));
         assertFalse(realm.isPermitted(principalCollection, regattaPermission.toString()));
+        // let leaderboard be owned by user
         accessControlStore.createOwnership(Permission.LEADERBOARD.getQualifiedObjectIdentifier(leaderboardName), user,
                 /* tenantOwner */ null, leaderboardName);
+        // let regatta be owned by admin
+        accessControlStore.createOwnership(Permission.REGATTA.getQualifiedObjectIdentifier(regattaName), adminUser,
+                /* tenantOwner */ null, regattaName);
+        // grant user the admin role, but only for objects owned by the user (leaderboard, but not regatta)
+        userStore.addRoleForUser(user.getName(), new RoleImpl(AdminRole.getInstance(), /* qualifiedForTenant */ null, /* qualifiedForUser */ user));
         assertTrue(realm.isPermitted(principalCollection, leaderboardPermission.toString()));
         assertFalse(realm.isPermitted(principalCollection, regattaPermission.toString()));
         accessControlStore.createOwnership(Permission.REGATTA.getQualifiedObjectIdentifier(regattaName), /* userOwner */ null,
@@ -147,7 +157,8 @@ public class PermissionCheckerTest {
         permissionMap.put(userTenant, permissionSet);
         acl = new AccessControlListImpl(permissionMap);
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, adminOwnership, acl));
-        assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, ownership, acl));
+        // User ownership shall NOT imply permissions; the revoking ACL still takes precedence
+        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, ownership, acl));
     }
     
     @Test
