@@ -190,13 +190,11 @@ It is always assumed that the ID of the user is “user” and the ID of its ten
 
 The above describes the data model that is relevant to the composite realm that implements the `isPermitted` function. The “permission” parameter should be of the pattern “type:action:instance”. It is assumed that the user (with associated permissions and roles), tenant, ownership associations and ACL entries are available. The following describes in which order the different sources for permissions are checked and how they depend on each other.
 
-1. Check if the user is the owning user or belongs to a tenant that is owning tenant of the data object for which the permission is requested
-  * If this is true return true
-2. Check if the ACL entries grant or explicitly revoke the permission to the user under consideration of the user’s roles
+1. Check if the ACL entries grant or explicitly revoke the permission to the user under consideration of the user’s roles
   * If there is an entry, return true if granted and false if revoked, but take the most explicit entry and in doubt return false
-3. Check if the permission is directly assigned to the user
+2. Check if the permission is directly assigned to the user
   * If this is true return true
-4. Check if a role grants the permission to the user, which for instances of parameterized roles requires the tenant/user parameter values to match the object's tenant / user.
+3. Check if a role grants the permission to the user, which for instances of qualified roles requires the tenant/user parameter values to match the object's tenant / user.
   * If this is true return true.
 
 ## Migration
