@@ -101,7 +101,8 @@ public class StructureImporter {
             RegattaImpl regatta = new RegattaImpl(RegattaImpl.getDefaultName(event.getTitle(), ((Division) event
                     .getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle()),
                     baseDomainFactory.getOrCreateBoatClass(result.getA().getBoatClass()), 
-                    /* canBoatsOfCompetitorsChangePerRace */ true, startDate, endDate, getSeries(buildStructure), false,
+                    /* canBoatsOfCompetitorsChangePerRace */ true, /* canCompetitorsRegisterToOpenRegatta */ false,
+                    startDate, endDate, getSeries(buildStructure), false,
                     this.baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), event.getEventID(), null, OneDesignRankingMetric::new);
             addSpecificRegattas.add(regatta);
         }

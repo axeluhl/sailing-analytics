@@ -49,7 +49,7 @@ public class RaceLogConnectivityParamsLoadAndStoreTest extends AbstractConnectiv
         final SeriesImpl theSeries = new SeriesImpl("Default", /* isMedal */ false, /* isFleetsCanRunInParallel */ true,
                 Arrays.<Fleet>asList(fleet), Collections.emptyList(), racingEventService);
         final Iterable<? extends Series> series = Arrays.<Series>asList(theSeries);
-        final Regatta regatta = racingEventService.createRegatta("My Regatta", "12mR", true, MillisecondsTimePoint.now(), MillisecondsTimePoint.now().plus(Duration.ONE_DAY),
+        final Regatta regatta = racingEventService.createRegatta("My Regatta", "12mR", true, false, MillisecondsTimePoint.now(), MillisecondsTimePoint.now().plus(Duration.ONE_DAY),
                 UUID.randomUUID(), series, /* persistent */ true, new LowPoint(), new CourseAreaImpl("Default", UUID.randomUUID()),
                 /* buoyZoneRadiusInHullLengths */ 2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false,
                 OneDesignRankingMetric::new);

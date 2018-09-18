@@ -345,6 +345,11 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
+                    public boolean canCompetitorsRegisterToOpenRegatta() {
+                        return false;
+                    }
+
+                    @Override
                     public void addRace(RaceDefinition race) {
                     }
 

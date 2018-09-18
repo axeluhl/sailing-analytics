@@ -78,7 +78,7 @@ public class CompetitorProviderCacheInvalidationTest extends AbstractLeaderboard
         competitorProviderFlexibleLeaderboard = new CompetitorProviderFromRaceColumnsAndRegattaLike(flexibleLeaderboard);
         regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE,
                 EmptyRegattaLogStore.INSTANCE, "Test Regatta", new BoatClassImpl("49er", BoatClassMasterdata._49ER),
-                /* canBoatsOfCompetitorsChangePerRace */ true,  /* startDate */ null, /* endDate */null,
+                /* canBoatsOfCompetitorsChangePerRace */ true, /* canCompetitorsRegisterToOpenRegatta*/ false, /* startDate */ null, /* endDate */null,
                 /* trackedRegattaRegistry */null, new LowPoint(), UUID.randomUUID(),
                 courseArea);
         regattaLeaderboard = new RegattaLeaderboardImpl(regatta, new ThresholdBasedResultDiscardingRuleImpl(new int[0]));

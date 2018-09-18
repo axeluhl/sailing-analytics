@@ -1280,10 +1280,15 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 canBoatsOfCompetitorsChangePerRace = false;
                 createMigratableRegatta = true;
             }
+            Boolean canCompetitorsRegisterToOpenRegatta = (Boolean) dbRegatta
+                    .get(FieldNames.REGATTA_CAN_COMPETITORS_REGISTER_TO_OPEN_REGATTA.name());
+            if (canCompetitorsRegisterToOpenRegatta == null) {
+                canCompetitorsRegisterToOpenRegatta = Boolean.FALSE;
+            }
             final RankingMetricConstructor rankingMetricConstructor = loadRankingMetricConstructor(dbRegatta);
             if (createMigratableRegatta) {
                 result = new MigratableRegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, boatClass,
-                        canBoatsOfCompetitorsChangePerRace, startDate, endDate, series, /* persistent */true,
+                        canBoatsOfCompetitorsChangePerRace, canCompetitorsRegisterToOpenRegatta, startDate, endDate, series, /* persistent */true,
                         loadScoringScheme(dbRegatta), id, courseArea,
                         buoyZoneRadiusInHullLengths == null ? Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS
                                 : buoyZoneRadiusInHullLengths,
@@ -1292,7 +1297,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         rankingMetricConstructor, new MongoObjectFactoryImpl(database));
             } else {
                 result = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, boatClass,
-                        canBoatsOfCompetitorsChangePerRace, startDate, endDate, series, /* persistent */true,
+                        canBoatsOfCompetitorsChangePerRace, canCompetitorsRegisterToOpenRegatta, startDate, endDate, series, /* persistent */true,
                         loadScoringScheme(dbRegatta), id, courseArea,
                         buoyZoneRadiusInHullLengths == null ? Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS
                                 : buoyZoneRadiusInHullLengths,

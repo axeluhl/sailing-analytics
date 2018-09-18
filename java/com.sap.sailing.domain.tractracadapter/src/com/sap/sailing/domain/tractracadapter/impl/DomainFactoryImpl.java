@@ -456,7 +456,8 @@ public class DomainFactoryImpl implements DomainFactory {
                 if (result == null) {
                     result = new RegattaImpl(raceLogStore, regattaLogStore, RegattaImpl.getDefaultName(
                             defaultRegattaNameAndBoatClass.getA(), boatClass.getName()), boatClass, 
-                            /* canBoatsOfCompetitorsChangePerRace */ false, /*startDate*/ null, /*endDate*/ null,
+                            /* canBoatsOfCompetitorsChangePerRace */ false, /* canCompetitorsRegisterToOpenRegatta*/ false,
+                            /*startDate*/ null, /*endDate*/ null,
                             trackedRegattaRegistry,
                             // use the low-point system as the default scoring scheme
                             getBaseDomainFactory().createScoringScheme(ScoringSchemeType.LOW_POINT), race.getId(), null);

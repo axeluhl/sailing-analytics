@@ -97,6 +97,7 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
     private void startTrackingOnMaster() throws Exception {
         final Regatta regatta = master.createRegatta("Test regatta", "J/70",
                 /* canBoatsOfCompetitorsChangePerRace==true because it's a league race we're using for this test */ true,
+                /* canCompetitorsRegisterToOpenRegatta */ false, 
                 /* startDate */ null, /* endDate */ null, UUID.randomUUID(),
                 /* start with no series */ Collections.emptySet(),
                 /* persistent */ true, new LowPoint(), /* defaultCourseAreaId */ UUID.randomUUID(),

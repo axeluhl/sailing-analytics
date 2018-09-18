@@ -65,7 +65,7 @@ public class LeaderboardScoringAndRankingTestForLowPoints extends LeaderboardSco
     private Regatta setupRegatta(boolean useFirstTwoWins) {
         final BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("470", /* typicallyStartsUpwind */ true);
         Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass,
-                false, /* startDate */ null, /* endDate */ null, series, /* persistent */false,
+                false, /* canCompetitorsRegisterToOpenRegatta */ false, /* startDate */ null, /* endDate */ null, series, /* persistent */false,
                 DomainFactory.INSTANCE
                         .createScoringScheme(useFirstTwoWins ? ScoringSchemeType.LOW_POINT_FIRST_TO_WIN_TWO_RACES
                                 : ScoringSchemeType.LOW_POINT),

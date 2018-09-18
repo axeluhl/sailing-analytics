@@ -97,7 +97,7 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
         Series series = new SeriesImpl("series", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, Collections.singletonList(fleet), Collections.emptySet(),
                 service);
         regatta = service.createRegatta(RegattaImpl.getDefaultName("regatta", "Laser"), "Laser",
-                /* canBoatsOfCompetitorsChangePerRace */ true, /* startDate */null, /* endDate */null,
+                /* canBoatsOfCompetitorsChangePerRace */ true, /* canCompetitorsRegisterToOpenRegatta*/ false, /* startDate */null, /* endDate */null,
                 UUID.randomUUID(), Collections.<Series> singletonList(series), /* persistent */ true,
                 new HighPoint(), UUID.randomUUID(), /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */true, /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
         series.addRaceColumn(columnName, /* trackedRegattaRegistry */null);

@@ -304,7 +304,8 @@ public class WindTest {
         DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(new DynamicTrackedRegattaImpl(
                 new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
                 RegattaImpl.getDefaultName("Test Regatta", boatClass.getName()), boatClass, 
-                        /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null,
+                        /* canBoatsOfCompetitorsChangePerRace */ true, /* canCompetitorsRegisterToOpenRegatta*/ false,
+                        /*startDate*/ null, /*endDate*/ null,
                 	/* trackedRegattaRegistry */ null, domainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), "123", null)),
                 new RaceDefinitionImpl("Test Race",
                         new CourseImpl("Test Course", Arrays.asList(new Waypoint[] { w1, w2, w3 })),

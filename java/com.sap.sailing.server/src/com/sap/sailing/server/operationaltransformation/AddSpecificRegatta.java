@@ -33,14 +33,17 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
     private final boolean useStartTimeInference;
     private final boolean controlTrackingFromStartAndFinishTimes;
     private final boolean canBoatsOfCompetitorsChangePerRace;
+    private final boolean canCompetitorsRegisterToOpenRegatta;
     private final RankingMetrics rankingMetricType;
     
-    public AddSpecificRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace, TimePoint startDate, TimePoint endDate, Serializable id,
+    public AddSpecificRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace,
+            boolean canCompetitorsRegisterToOpenRegatta, TimePoint startDate, TimePoint endDate, Serializable id,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndDiscardingThresholds,
             boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType) {
         super(regattaName, boatClassName, startDate, endDate, id);
         this.canBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRace;
+        this.canCompetitorsRegisterToOpenRegatta = canCompetitorsRegisterToOpenRegatta;
         this.seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndStartsWithZeroScoreAndDiscardingThresholds = seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndDiscardingThresholds;
         this.persistent = persistent;
         this.scoringScheme = scoringScheme;
@@ -53,7 +56,8 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
 
     @Override
     public Regatta internalApplyTo(RacingEventService toState) throws Exception {
-        Regatta regatta = toState.createRegatta(getRegattaName(), getBoatClassName(), canBoatsOfCompetitorsChangePerRace, getStartDate(), getEndDate(), getId(), createSeries(toState),
+        Regatta regatta = toState.createRegatta(getRegattaName(), getBoatClassName(), canBoatsOfCompetitorsChangePerRace, 
+                canCompetitorsRegisterToOpenRegatta, getStartDate(), getEndDate(), getId(), createSeries(toState),
                 persistent, scoringScheme, defaultCourseAreaId, buoyZoneRadiusInHullLengths, useStartTimeInference, controlTrackingFromStartAndFinishTimes, RankingMetricsFactory.getRankingMetricConstructor(rankingMetricType));
         return regatta;
     }

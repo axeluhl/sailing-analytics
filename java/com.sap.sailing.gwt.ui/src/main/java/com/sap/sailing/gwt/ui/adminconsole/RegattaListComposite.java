@@ -172,6 +172,16 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         regattaCanBoatsOfCompetitorsChangePerRaceColumn.setSortable(true);
         columnSortHandler.setComparator(regattaCanBoatsOfCompetitorsChangePerRaceColumn,
                 (r1, r2)->Boolean.valueOf(r1.canBoatsOfCompetitorsChangePerRace).compareTo(Boolean.valueOf(r2.canBoatsOfCompetitorsChangePerRace)));
+        
+        TextColumn<RegattaDTO> regattaCanCompetitorsRegisterToOpenRegatta = new TextColumn<RegattaDTO>() {
+            @Override
+            public String getValue(RegattaDTO regatta) {
+                return regatta.canCompetitorsRegisterToOpenRegatta ? stringMessages.yes() : stringMessages.no();
+            }
+        };
+        regattaCanCompetitorsRegisterToOpenRegatta.setSortable(true);
+        columnSortHandler.setComparator(regattaCanCompetitorsRegisterToOpenRegatta,
+                (r1, r2)->Boolean.valueOf(r1.canCompetitorsRegisterToOpenRegatta).compareTo(Boolean.valueOf(r2.canCompetitorsRegisterToOpenRegatta)));
 
         TextColumn<RegattaDTO> startEndDateColumn = new TextColumn<RegattaDTO>() {
             @Override
@@ -244,6 +254,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         table.addColumn(regattaSelectionCheckboxColumn, regattaSelectionCheckboxColumn.getHeader());
         table.addColumn(regattaNameColumn, stringMessages.regattaName());
         table.addColumn(regattaCanBoatsOfCompetitorsChangePerRaceColumn, stringMessages.canBoatsChange());
+        table.addColumn(regattaCanCompetitorsRegisterToOpenRegatta, stringMessages.canRegisterIfOpen());
         table.addColumn(startEndDateColumn, stringMessages.from() + "/" + stringMessages.to());
         table.addColumn(regattaBoatClassColumn, stringMessages.boatClass());
         table.addColumn(rankingMetricColumn, stringMessages.rankingMetric());

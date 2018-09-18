@@ -61,6 +61,7 @@ public class RegattaDetailsComposite extends Composite {
     private final Label useStartTimeInference;
     private final Label controlTrackingFromStartAndFinishTimes;
     private final Label canBoatsOfCompetitorsChangePerRace;
+    private final Label canCompetitorsRegisterToOpenRegatta;
     private final Label configuration;
     private final Label buoyZoneRadiusInHullLengths;
     
@@ -81,7 +82,7 @@ public class RegattaDetailsComposite extends Composite {
         VerticalPanel vPanel = new VerticalPanel();
         mainPanel.add(vPanel);
 
-        int rows = 13;
+        int rows = 14;
         Grid grid = new Grid(rows, 2);
         vPanel.add(grid);
         
@@ -95,6 +96,7 @@ public class RegattaDetailsComposite extends Composite {
         useStartTimeInference = createLabelAndValueWidget(grid, currentRow++, stringMessages.useStartTimeInference(), "UseStartTimeInferenceLabel");
         controlTrackingFromStartAndFinishTimes = createLabelAndValueWidget(grid, currentRow++, stringMessages.controlTrackingFromStartAndFinishTimes(), "UseStartTimeInferenceLabel");
         canBoatsOfCompetitorsChangePerRace = createLabelAndValueWidget(grid, currentRow++, stringMessages.canBoatsOfCompetitorsChangePerRace(), "CanBoatsOfCompetitorsChangePerRaceLabel");
+        canCompetitorsRegisterToOpenRegatta = createLabelAndValueWidget(grid, currentRow++, stringMessages.canCompetitorsRegisterToOpenRegatta(), "CanCompetitorsRegisterToOpenRegatta");
         buoyZoneRadiusInHullLengths = createLabelAndValueWidget(grid, currentRow++, stringMessages.buoyZoneRadiusInHullLengths(), "BuoyZoneRadiusInHullLengthsLabel");
         configuration = createLabelAndValueWidget(grid, currentRow++, stringMessages.racingProcedureConfiguration(), "RacingProcedureLabel");
         scoringSystem = createLabelAndValueWidget(grid, currentRow++, stringMessages.scoringSystem(), "ScoringSystemLabel");
@@ -403,6 +405,7 @@ public class RegattaDetailsComposite extends Composite {
             useStartTimeInference.setText(regatta.useStartTimeInference ? stringMessages.yes() : stringMessages.no());
             controlTrackingFromStartAndFinishTimes.setText(regatta.controlTrackingFromStartAndFinishTimes ? stringMessages.yes() : stringMessages.no());
             canBoatsOfCompetitorsChangePerRace.setText(regatta.canBoatsOfCompetitorsChangePerRace ? stringMessages.yes() : stringMessages.no());
+            canCompetitorsRegisterToOpenRegatta.setText(regatta.canCompetitorsRegisterToOpenRegatta ? stringMessages.yes() : stringMessages.no());
             buoyZoneRadiusInHullLengths.setText(String.valueOf(regatta.buoyZoneRadiusInHullLengths)); 
 
             if (regatta.configuration != null) {

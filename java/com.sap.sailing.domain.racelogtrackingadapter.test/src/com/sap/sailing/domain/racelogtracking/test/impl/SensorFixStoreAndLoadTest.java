@@ -167,7 +167,8 @@ public class SensorFixStoreAndLoadTest {
         RaceDefinition race = new RaceDefinitionImpl("race", course, boatClass, competitorsAndBoats);
         DynamicTrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass,
-                /* canBoatsOfCompetitorsChangePerRace */ true, /* startDate */ null, /* endDate */null, null, null, "a", null));
+                /* canBoatsOfCompetitorsChangePerRace */ true, /* canCompetitorsRegisterToOpenRegatta*/ false,
+                /* startDate */ null, /* endDate */null, null, null, "a", null));
         trackedRace = new DynamicTrackedRaceImpl(regatta, race, Collections.<Sideline> emptyList(),
                 EmptyWindStore.INSTANCE, 0, 0, 0, /* useMarkPassingCalculator */ false, OneDesignRankingMetric::new,
                 mock(RaceLogResolver.class));

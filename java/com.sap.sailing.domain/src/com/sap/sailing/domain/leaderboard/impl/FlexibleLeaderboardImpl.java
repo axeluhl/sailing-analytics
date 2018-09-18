@@ -377,6 +377,11 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         return false;
     }
     
+    @Override
+    public boolean canCompetitorsRegisterToOpenRegatta() {
+        return false;
+    }
+
     /**
      * In addition to invoking the superclass implementation, a flexible leaderboard also
      * detaches all race logs from any tracked race currently linked to any of the race columns

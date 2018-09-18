@@ -48,7 +48,8 @@ public class TrackedRegattaTest {
     public void setUp() {
         regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass,
-                /* canBoatsOfCompetitorsChangePerRace */ false, /* startDate */ null, /* endDate */null, null, null, "a", null));
+                /* canBoatsOfCompetitorsChangePerRace */ false, /* canCompetitorsRegisterToOpenRegatta*/ false,
+                /* startDate */ null, /* endDate */null, null, null, "a", null));
     }
     
     @Test(expected = TimeoutException.class)

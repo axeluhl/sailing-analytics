@@ -91,7 +91,7 @@ public class LeaderboardCourseChangeTest {
         RaceColumn raceColumn = series.addRaceColumn(raceColumnName, trackedRegattaRegistry);
         ScoringScheme scoringScheme = new LowPoint();
         Regatta mockedRegatta = new RegattaImpl(RegattaImpl.getDefaultName("TestRegatta", boatClass.getName()), boatClass, 
-                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null, seriesSet, false, scoringScheme,
+                /* canBoatsOfCompetitorsChangePerRace */ true, /* canCompetitorsRegisterToOpenRegatta */ false, /*startDate*/ null, /*endDate*/ null, seriesSet, false, scoringScheme,
                 UUID.randomUUID(), mock(CourseArea.class), OneDesignRankingMetric::new);
         ControlPoint start = new MarkImpl("Start");
         ControlPoint m1 = new MarkImpl("M1");

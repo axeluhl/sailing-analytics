@@ -308,7 +308,7 @@ public class CourseTest {
         final Map<Competitor,Boat> competitorsAndBoats = new HashMap<>();
         competitorsAndBoats.put(hasso, hasso.getBoat());
         DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(/* trackedRegatta */new DynamicTrackedRegattaImpl(
-                new RegattaImpl("test", null, true, null, null, new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new)),
+                new RegattaImpl("test", null, true, false, null, null, new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new)),
                 new RaceDefinitionImpl("Test Race", course, boatClass, competitorsAndBoats),
                 Collections.<Sideline> emptyList(), EmptyWindStore.INSTANCE, /* delayToLiveInMillis */3000,
                 /* millisecondsOverWhichToAverageWind */30000,
@@ -342,7 +342,7 @@ public class CourseTest {
         final Map<Competitor,Boat> competitorsAndBoats = new HashMap<>();
         competitorsAndBoats.put(hasso, hasso.getBoat());
         DynamicTrackedRace trackedRace = new DynamicTrackedRaceImpl(/* trackedRegatta */ new DynamicTrackedRegattaImpl(
-                new RegattaImpl("test", null, true, null, null, new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new)),
+                new RegattaImpl("test", null, true, false, null, null, new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new)),
                 new RaceDefinitionImpl("Test Race", course, boatClass, competitorsAndBoats), Collections.<Sideline> emptyList(),
                 EmptyWindStore.INSTANCE, /* delayToLiveInMillis */ 3000,
                         /* millisecondsOverWhichToAverageWind */ 30000,

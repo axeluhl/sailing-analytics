@@ -625,7 +625,7 @@ public class ExpeditionAllInOneImporter {
                         /*hasSplitFleetContiguousScoring*/ false, /*maximumNumberOfDiscards*/ null));
         final RegattaCreationParametersDTO regattaCreationParameters = new RegattaCreationParametersDTO(seriesCreationParameters);
         regatta = service.apply(new AddSpecificRegatta(regattaNameAndleaderboardName, boatClassName,
-            /* can boats of competitors change */ false,
+            /* can boats of competitors change */ false, /* canCompetitorsRegisterToOpenRegatta */ false,
             /* start date */ null, /* end date */ null, UUID.randomUUID(),
                 regattaCreationParameters, true, scoringScheme, courseAreaId, buoyZoneRadiusInHullLengths, true,
                 false, rankingMetric));

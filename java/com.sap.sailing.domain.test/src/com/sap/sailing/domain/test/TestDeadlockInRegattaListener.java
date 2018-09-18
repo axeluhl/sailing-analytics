@@ -50,7 +50,8 @@ public class TestDeadlockInRegattaListener {
         final String regattaName = "Test Regatta";
         final RegattaImpl regatta = new RegattaImpl(
                 /* raceLogStore */ null, EmptyRegattaLogStore.INSTANCE, regattaName,
-                new BoatClassImpl("49er", true), /* can boats change */ false, /* startDate */ null, /* endDate */ null,
+                new BoatClassImpl("49er", true), /* can boats change */ false,  /* canCompetitorsRegisterToOpenRegatta*/ false,
+                /* startDate */ null, /* endDate */ null,
                 /* trackedRegattaRegistry */ null, new LowPoint(), UUID.randomUUID(),
                 /* courseArea */ null, /* controlTrackingFromStartAndFinishTimes */ true,
                 OneDesignRankingMetric::new);

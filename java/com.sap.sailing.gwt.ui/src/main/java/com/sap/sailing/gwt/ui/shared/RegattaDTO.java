@@ -37,6 +37,7 @@ public class RegattaDTO extends NamedDTO {
     public boolean useStartTimeInference = true;
     public boolean controlTrackingFromStartAndFinishTimes = false;
     public boolean canBoatsOfCompetitorsChangePerRace = false;
+    public boolean canCompetitorsRegisterToOpenRegatta = false;
     public RankingMetrics rankingMetricType;
     public Double buoyZoneRadiusInHullLengths;
     
@@ -70,6 +71,7 @@ public class RegattaDTO extends NamedDTO {
         this.useStartTimeInference = other.useStartTimeInference;
         this.controlTrackingFromStartAndFinishTimes = other.controlTrackingFromStartAndFinishTimes;
         this.canBoatsOfCompetitorsChangePerRace = other.canBoatsOfCompetitorsChangePerRace;
+        this.canCompetitorsRegisterToOpenRegatta = other.canCompetitorsRegisterToOpenRegatta;
         this.buoyZoneRadiusInHullLengths = other.buoyZoneRadiusInHullLengths;
     }
     

@@ -66,6 +66,11 @@ public abstract class BaseRegattaLikeImpl implements IsRegattaLike {
         return false;
     }
 
+    @Override
+    public boolean canCompetitorsRegisterToOpenRegatta() {
+        return false;
+    }
+
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         listeners = new HashSet<>();

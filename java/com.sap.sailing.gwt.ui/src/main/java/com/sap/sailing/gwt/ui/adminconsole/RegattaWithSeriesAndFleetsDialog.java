@@ -22,6 +22,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
     protected TextBox nameEntryField;
     protected SuggestBox boatClassEntryField;
     protected CheckBox canBoatsOfCompetitorsChangePerRaceCheckBox;
+    protected CheckBox canCompetitorsRegisterToOpenRegattaCheckBox;
 
     public RegattaWithSeriesAndFleetsDialog(RegattaDTO regatta, Iterable<SeriesDTO> series, List<EventDTO> existingEvents, EventDTO defaultEvent,
             String title, String okButton, StringMessages stringMessages,
@@ -40,6 +41,10 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
         canBoatsOfCompetitorsChangePerRaceCheckBox = createCheckbox("");
         canBoatsOfCompetitorsChangePerRaceCheckBox.ensureDebugId("CanBoatsOfCompetitorsChangePerRaceCheckBox");
         canBoatsOfCompetitorsChangePerRaceCheckBox.setValue(regatta.canBoatsOfCompetitorsChangePerRace);
+        
+        canCompetitorsRegisterToOpenRegattaCheckBox = createCheckbox("");
+        canCompetitorsRegisterToOpenRegattaCheckBox.ensureDebugId("CanCompetitorsRegisterToOpenRegattaCheckBox");
+        canCompetitorsRegisterToOpenRegattaCheckBox.setValue(regatta.canCompetitorsRegisterToOpenRegatta);
     }
 
     @Override
@@ -55,6 +60,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
         result.setName(nameEntryField.getText().trim()); // trim to particularly avoid trailing blanks
         result.boatClass = new BoatClassDTO(boatClassEntryField.getText(), Distance.NULL, Distance.NULL);
         result.canBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRaceCheckBox.getValue();
+        result.canCompetitorsRegisterToOpenRegatta = canCompetitorsRegisterToOpenRegattaCheckBox.getValue();
         return result;
     }
     
@@ -69,5 +75,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
         formGrid.setWidget(1, 1, boatClassEntryField);
         formGrid.setWidget(2, 0, new Label(stringMessages.canBoatsOfCompetitorsChangePerRace() + ":"));
         formGrid.setWidget(2, 1, canBoatsOfCompetitorsChangePerRaceCheckBox);
+        formGrid.setWidget(3, 0, new Label(stringMessages.canCompetitorsRegisterToOpenRegatta() + ":"));
+        formGrid.setWidget(3, 1, canCompetitorsRegisterToOpenRegattaCheckBox);
     }
 }

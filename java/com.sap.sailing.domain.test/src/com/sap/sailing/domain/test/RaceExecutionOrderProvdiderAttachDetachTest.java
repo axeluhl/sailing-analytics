@@ -229,7 +229,7 @@ public class RaceExecutionOrderProvdiderAttachDetachTest extends TrackBasedTest 
         raceColumnInSeries = series.addRaceColumn(RACECOLUMN_SERIES, null);
         ScoringScheme scoringScheme = new LowPoint();
         regatta = new RegattaImpl(RegattaImpl.getDefaultName(REGATTA, boatClass.getName()), boatClass,
-                /* canBoatsOfCompetitorsChangePerRace */ true, /* startDate */null, /* endDate */null, 
+                /* canBoatsOfCompetitorsChangePerRace */ true, /* canCompetitorsRegisterToOpenRegatta */ false, /* startDate */null, /* endDate */null, 
                 seriesSet, false, scoringScheme, UUID.randomUUID(), null, OneDesignRankingMetric::new);
     }
     

@@ -70,8 +70,8 @@ public class StatisticsTest {
     @Before
     public void setUp() {
         regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
-                EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, false,
-                /* startDate */ null, /* endDate */null, null, null, "a", null));
+                EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, false, 
+                /* canCompetitorsRegisterToOpenRegatta*/ false, /* startDate */ null, /* endDate */null, null, null, "a", null));
 
         final Course course = new CourseImpl("course",
                 Arrays.asList(new Waypoint[] { waypoint1, waypoint2, waypoint3 }));

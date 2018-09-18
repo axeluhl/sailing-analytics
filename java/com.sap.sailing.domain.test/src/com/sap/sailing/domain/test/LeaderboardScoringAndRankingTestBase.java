@@ -126,7 +126,7 @@ public class LeaderboardScoringAndRankingTestBase extends AbstractLeaderboardTes
         series.add(defaultSeries);
 
         Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName(regattaName, boatClass.getName()), boatClass,
-                /* canBoatsOfCompetitorsChangePerRace */ true, /* startDate */null, /* endDate */null, series, 
+                /* canBoatsOfCompetitorsChangePerRace */ true, /* canCompetitorsRegisterToOpenRegatta */ false, /* startDate */null, /* endDate */null, series, 
                 /* persistent */false, scoringScheme, "123", null, OneDesignRankingMetric::new);
         return regatta;
     }
@@ -182,7 +182,7 @@ public class LeaderboardScoringAndRankingTestBase extends AbstractLeaderboardTes
         }
 
         Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName(regattaBaseName, boatClass.getName()), boatClass, 
-                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null, series, 
+                /* canBoatsOfCompetitorsChangePerRace */ true, /* canCompetitorsRegisterToOpenRegatta */ false, /*startDate*/ null, /*endDate*/ null, series, 
                 /* persistent */ false, scoringScheme, "123", null, OneDesignRankingMetric::new);
         return regatta;
     }
@@ -228,7 +228,7 @@ public class LeaderboardScoringAndRankingTestBase extends AbstractLeaderboardTes
             }
         }
         Regatta regatta = new RegattaImpl(RegattaImpl.getDefaultName(regattaBaseName, boatClass.getName()), boatClass, 
-                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null, series,
+                /* canBoatsOfCompetitorsChangePerRace */ true, /* canCompetitorsRegisterToOpenRegatta */ false, /*startDate*/ null, /*endDate*/ null, series,
                 /* persistent */ false, scoringScheme, /* ID */ "123", /* course area */ null, OneDesignRankingMetric::new);
         return regatta;
     }

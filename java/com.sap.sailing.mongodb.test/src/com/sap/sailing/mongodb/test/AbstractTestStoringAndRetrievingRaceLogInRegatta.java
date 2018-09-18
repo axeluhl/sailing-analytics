@@ -62,7 +62,8 @@ public abstract class AbstractTestStoringAndRetrievingRaceLogInRegatta extends R
         List<Series> series = createSeriesForTestRegatta();
         Regatta regatta = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), RegattaImpl.getDefaultName(regattaBaseName,
                 boatClass == null ? null : boatClass.getName()), boatClass, 
-                /* canBoatsOfCompetitorsChangePerRace */ true, /*startDate*/ null, /*endDate*/ null, series, persistent, scoringScheme, "123",
+                /* canBoatsOfCompetitorsChangePerRace */ true, /* canCompetitorsRegisterToOpenRegatta*/ false,
+                /*startDate*/ null, /*endDate*/ null, series, persistent, scoringScheme, "123",
                 courseArea, /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
         return regatta;
     }

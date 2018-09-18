@@ -89,7 +89,7 @@ public class RemoveLeaderboardTest {
         
         boatClass = new BoatClassImpl(BOATCLASSNAME, /* typicallyStartsUpwind */ true);
         regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE,
-                RegattaImpl.getDefaultName(EVENTNAME, boatClass.getName()), boatClass, /* canBoatsOfCompetitorsChangePerRace*/ true,
+                RegattaImpl.getDefaultName(EVENTNAME, boatClass.getName()), boatClass, /* canBoatsOfCompetitorsChangePerRace*/ true,  /* canCompetitorsRegisterToOpenRegatta*/ false,
                 /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */
                 null, DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), UUID.randomUUID(), null);
         TrackedRegatta trackedRegatta1 = server.getOrCreateTrackedRegatta(regatta);

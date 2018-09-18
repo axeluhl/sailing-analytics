@@ -34,7 +34,8 @@ public class SerializeRankingMetricTest extends AbstractSerializationTest {
         final BoatClass _49er = DomainFactory.INSTANCE.getOrCreateBoatClass("49er");
         final TrackedRace trackedRace = new DynamicTrackedRaceImpl(new DynamicTrackedRegattaImpl(
                 new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, "Regatta", /* boatClass */ _49er,
-                        /* canBoatsOfCompetitorsChangePerRace */ true, /* startDate */ null, /* endDate */ null,
+                        /* canBoatsOfCompetitorsChangePerRace */ true,  /* canCompetitorsRegisterToOpenRegatta*/ false,
+                        /* startDate */ null, /* endDate */ null,
                         /* trackedRegattaRegistry */ null, new LowPoint(), UUID.randomUUID(), /* courseArea */ null)),
                 new RaceDefinitionImpl("Race", new CourseImpl("Course", Collections.<Waypoint>emptyList()) , 
                         /* boatClass */ _49er, Collections.<Competitor,Boat>emptyMap()),
