@@ -26,6 +26,7 @@ import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.AdminRole;
+import com.sap.sse.security.shared.PredefinedRoles;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
@@ -34,6 +35,7 @@ import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.UserRole;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.security.userstore.mongodb.impl.FieldNames.Tenant;
@@ -173,6 +175,10 @@ public class UserStoreImpl implements UserStore {
             for (RoleDefinition roleDefinition : domainObjectFactory.loadAllRoleDefinitions()) {
                 roleDefinitions.put(UUID.fromString(roleDefinition.getId().toString()), roleDefinition);
             }
+            if (roleDefinitions.isEmpty()) {
+                logger.info("Empty set of role definitions suggests we are under migration. Creating default roles.");
+                
+            }
             final Iterable<UserGroup> userGroups = domainObjectFactory.loadAllUserGroupsAndTenantsWithProxyUsers();
             for (UserGroup group : userGroups) {
                 this.userGroups.put(group.getId(), group);
@@ -216,6 +222,32 @@ public class UserStoreImpl implements UserStore {
             }
         } else {
             defaultTenant = null;
+        }
+    }
+    
+    @Override
+    public void createPredefinedRoles() {
+        final AdminRole adminRolePrototype = AdminRole.getInstance();
+        if (getRoleDefinition(adminRolePrototype.getId()) == null) {
+            logger.info("No admin role found. Creating default role \""+adminRolePrototype.getName()+"\" with permission \""+
+                    AdminRole.getInstance().getPermissions()+"\"");
+            createRoleDefinition((UUID) adminRolePrototype.getId(), adminRolePrototype.getName(), adminRolePrototype.getPermissions());
+        }
+        final UserRole userRolePrototype = UserRole.getInstance();
+        if (getRoleDefinition(userRolePrototype.getId()) == null) {
+            logger.info("No user role found. Creating default role \""+userRolePrototype.getName()+"\" with permission \""+
+                    userRolePrototype.getPermissions()+"\"");
+            createRoleDefinition((UUID) userRolePrototype.getId(), userRolePrototype.getName(), userRolePrototype.getPermissions());
+        }
+        for (final PredefinedRoles otherPredefinedRole : PredefinedRoles.values()) {
+            if (getRoleDefinition(otherPredefinedRole.getId()) == null) {
+                logger.info("Predefined role definition "+otherPredefinedRole+" not found; creating");
+                final Set<WildcardPermission> permissions = new HashSet<>();
+                for (final String stringPermission : otherPredefinedRole.getPermissions()) {
+                    permissions.add(new WildcardPermission(stringPermission));
+                }
+                createRoleDefinition(otherPredefinedRole.getId(), otherPredefinedRole.name(), permissions);
+            }
         }
     }
     

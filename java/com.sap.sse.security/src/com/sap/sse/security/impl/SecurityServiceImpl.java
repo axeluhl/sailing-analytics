@@ -88,7 +88,6 @@ import com.sap.sse.security.Social;
 import com.sap.sse.security.SocialSettingsKeys;
 import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
-import com.sap.sse.security.shared.AbstractRoles;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Account.AccountType;
@@ -221,30 +220,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      * is empty.
      */
     private void initEmptyStore() {
-        final RoleDefinition adminRoleDefinition;
         final AdminRole adminRolePrototype = AdminRole.getInstance();
-        if (getRoleDefinition(adminRolePrototype.getId()) == null) {
-            logger.info("No admin role found. Creating default role \""+adminRolePrototype.getName()+"\" with permission \""+
-                    AdminRole.getInstance().getPermissions()+"\"");
-            adminRoleDefinition = userStore.createRoleDefinition((UUID) adminRolePrototype.getId(), adminRolePrototype.getName(), adminRolePrototype.getPermissions());
-        } else {
-            adminRoleDefinition = userStore.getRoleDefinition(adminRolePrototype.getId());
-        }
-        final UserRole userRolePrototype = UserRole.getInstance();
-        if (getRoleDefinition(userRolePrototype.getId()) == null) {
-            logger.info("No user role found. Creating default role \""+userRolePrototype.getName()+"\" with permission \""+
-                    userRolePrototype.getPermissions()+"\"");
-            userStore.createRoleDefinition((UUID) userRolePrototype.getId(), userRolePrototype.getName(), userRolePrototype.getPermissions());
-        }
-        for (final AbstractRoles otherPredefinedRole : AbstractRoles.values()) {
-            if (getRoleDefinition(otherPredefinedRole.getId()) == null) {
-                logger.info("Predefined role definition "+otherPredefinedRole+" not found; creating");
-                final Set<WildcardPermission> permissions = new HashSet<>();
-                for (final String stringPermission : otherPredefinedRole.getPermissions()) {
-                    permissions.add(new WildcardPermission(stringPermission));
-                }
-                userStore.createRoleDefinition(otherPredefinedRole.getId(), otherPredefinedRole.name(), permissions);
-            }
+        RoleDefinition adminRoleDefinition = getRoleDefinition(adminRolePrototype.getId());
+        if (adminRoleDefinition == null) {
+            userStore.createPredefinedRoles();
+            adminRoleDefinition = getRoleDefinition(adminRolePrototype.getId());
+            assert adminRoleDefinition != null;
         }
         try {
             final SecurityUser adminUser;

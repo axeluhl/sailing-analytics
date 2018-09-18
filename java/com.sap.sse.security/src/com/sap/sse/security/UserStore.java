@@ -225,4 +225,9 @@ public interface UserStore extends UserGroupProvider, Named {
      * tenant as the {@link Role#getQualifiedForTenant() tenant qualifier}.
      */
     UserGroup getDefaultTenant();
+
+    /**
+     * Ensures that the predefined role definitions, particularly the "admin" and the "user" role, exist.
+     */
+    void createPredefinedRoles();
 }
