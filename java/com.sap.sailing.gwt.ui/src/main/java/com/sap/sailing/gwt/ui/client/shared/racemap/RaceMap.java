@@ -2599,9 +2599,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     }
                 }
                 showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedFilteredCompetitors());
-            } else {
-                // adding a single competitor; may need to re-load data, so refresh:
-                redraw();
             }
         } else {
             // only change highlighting
@@ -2610,11 +2607,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 boatCanvas.setDisplayMode(displayHighlighted(competitor));
                 boatCanvas.draw();
                 showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedFilteredCompetitors());
-            } else {
-                // seems like an internal error not to find the lowlighted marker; but maybe the
-                // competitor was added late to the race;
-                // data for newly selected competitor supposedly missing; refresh
-                redraw();
             }
         }
         // Now update tails for all competitors because selection change may also affect all unselected competitors
@@ -2630,6 +2622,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         if (!zoomSettings.containsZoomType(ZoomTypes.NONE) && zoomSettings.isZoomToSelectedCompetitors()) {
             zoomMapToNewBounds(zoomSettings.getNewBounds(this));
         }
+        redraw();
     }
     
     @Override
