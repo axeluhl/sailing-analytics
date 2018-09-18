@@ -33,11 +33,11 @@ public interface HasPermissions {
      * identifiers must be unique within the scope defined by this {@link HasPermissions} which represents an object
      * category or type, such as, e.g., "LEADERBOARD."
      * 
-     * @param objectIdentifiers
+     * @param typeRelativeObjectIdentifier
      *            can be any string; this method will take care of encoding the identifiers such that they are legal in
      *            the context of a permission part; see also {@link PermissionStringEncoder}
      */
-    String getStringPermissionForObjects(Mode mode, String... objectIdentifiers);
+    String getStringPermissionForObjects(Mode mode, String... typeRelativeObjectIdentifier);
     
     /**
      * Qualifies the {@code objectIdentifier} which only has to be unique within the scope of the type identified
