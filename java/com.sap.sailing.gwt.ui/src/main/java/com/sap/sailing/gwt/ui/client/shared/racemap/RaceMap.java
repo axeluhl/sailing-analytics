@@ -70,7 +70,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -441,8 +440,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private boolean currentlyDragging = false;
 
     private int zoomingAnimationsInProgress = 0;
-    private int droppedZooms = -1;
-    private static final int ZOOMS_TO_DROP_IN_AUTOZOOM = 15;
 
     static class MultiHashSet<T> {
         private HashMap<T, List<T>> map = new HashMap<>();
@@ -1231,20 +1228,16 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         showCourseSidelinesOnMap(raceMapDataDTO.courseSidelines);
                         showStartAndFinishAndCourseMiddleLines(raceMapDataDTO.coursePositions);
                         showStartLineToFirstMarkTriangle(raceMapDataDTO.coursePositions);
-                            
+
                         // Rezoom the map
                         LatLngBounds zoomToBounds = null;
                         if (!settings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) {
                             // Auto zoom if setting is not manual
-                            if (droppedZooms < ZOOMS_TO_DROP_IN_AUTOZOOM && droppedZooms > -1) {
-                                droppedZooms++;
-                            } else {
-                                droppedZooms = 0;
-                                zoomToBounds = settings.getZoomSettings().getNewBounds(RaceMap.this);
-                                if (zoomToBounds == null && !mapFirstZoomDone) {
-                                    // the user-specified zoom couldn't find what it was looking for; try defaults once
-                                    zoomToBounds = getDefaultZoomBounds();
-                                }
+
+                            zoomToBounds = settings.getZoomSettings().getNewBounds(RaceMap.this);
+                            if (zoomToBounds == null && !mapFirstZoomDone) {
+                                // the user-specified zoom couldn't find what it was looking for; try defaults once
+                                zoomToBounds = getDefaultZoomBounds();
                             }
                         }
                         if (!mapFirstZoomDone) {
@@ -2115,15 +2108,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
 
     private void zoomMapToNewBounds(LatLngBounds newBounds) {
         if (newBounds != null) {
-            LatLngBounds currentMapBounds;
-            if (map.getBounds() == null
-                    || !BoundsUtil.contains((currentMapBounds = map.getBounds()), newBounds)
-                    || graticuleAreaRatio(currentMapBounds, newBounds) > 10) {
-                // only change bounds if the new bounds don't fit into the current map zoom
+            int newZoomLevel = getZoomLevel(newBounds);
+            if (mapNeedsToPanOrZoom(newBounds, newZoomLevel)) {
                 Iterable<ZoomTypes> oldZoomTypesToConsiderSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
                 setAutoZoomInProgress(true);
-                autoZoomLatLngBounds = newBounds;
-                int newZoomLevel = getZoomLevel(autoZoomLatLngBounds); 
                 if (newZoomLevel != map.getZoom()) {
                     // distinguish between zoom-in and zoom-out, because the sequence of panTo() and setZoom()
                     // appears different on the screen due to map-animations
@@ -2134,13 +2122,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     autoZoomOut = !autoZoomIn;
                     autoZoomLevel = newZoomLevel;
                     if (autoZoomIn) {
-                        map.panTo(autoZoomLatLngBounds.getCenter());
+                        map.panTo(newBounds.getCenter());
                     } else {
                         map.setZoom(autoZoomLevel);
                     }
                 } else {
-                    map.panTo(autoZoomLatLngBounds.getCenter());
+                    map.panTo(newBounds.getCenter());
                 }
+                autoZoomLatLngBounds = newBounds;
                 RaceMapZoomSettings restoredZoomSettings = new RaceMapZoomSettings(oldZoomTypesToConsiderSettings, settings.getZoomSettings().isZoomToSelectedCompetitors());
                 settings = new RaceMapSettings(settings, restoredZoomSettings);
                 setAutoZoomInProgress(false);
@@ -2148,22 +2137,23 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
             }
         }
     }
+
+    private boolean mapNeedsToPanOrZoom(LatLngBounds newBounds, int newZoomLevel) {
+        // we never updated, update now
+        if (currentMapBounds == null) {
+            return true;
+        }
+        // we do not fit the required bounds, update now
+        if (!BoundsUtil.contains(currentMapBounds, newBounds)) {
+            return true;
+        }
+        // we do fit the required bounds, however we might be to far zoomed out, check if we can zoom to a better level
+        if (newZoomLevel != map.getZoom()) {
+            return true;
+        }
+        return false;
+    }
     
-    private double graticuleAreaRatio(LatLngBounds containing, LatLngBounds contained) {
-        assert BoundsUtil.contains(containing, contained);
-        double containingAreaRatio = getGraticuleArea(containing) / getGraticuleArea(contained);
-        return containingAreaRatio;
-    }
-
-    /**
-     * A much simplified "area" calculation for a {@link Bounds} object, multiplying the differences in latitude and longitude degrees.
-     * The result therefore is in the order of magnitude of 60*60 square nautical miles.
-     */
-    private double getGraticuleArea(LatLngBounds bounds) {
-        return ((BoundsUtil.isCrossesDateLine(bounds) ? bounds.getNorthEast().getLongitude()+360 : bounds.getNorthEast().getLongitude())-bounds.getSouthWest().getLongitude()) *
-                (bounds.getNorthEast().getLatitude() - bounds.getSouthWest().getLatitude());
-    }
-
     private void setAutoZoomInProgress(boolean autoZoomInProgress) {
         this.autoZoomInProgress = autoZoomInProgress;
     }
