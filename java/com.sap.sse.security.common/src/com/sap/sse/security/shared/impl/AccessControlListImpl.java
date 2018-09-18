@@ -57,18 +57,20 @@ public class AccessControlListImpl implements AccessControlList {
     @Override
     public PermissionChecker.PermissionState hasPermission(SecurityUser user, String action,
             Iterable<? extends UserGroup> groupsOfWhichUserIsMember) {
+        PermissionState result = PermissionState.NONE;
         final WildcardPermission requestedAction = new WildcardPermission(action);
         for (final UserGroup userGroupOfWhichUserIsMember : groupsOfWhichUserIsMember) {
-            if (doesAnyPermissionImplyRequestedAction(allowedActionsByUserGroup.get(userGroupOfWhichUserIsMember),
-                    requestedAction)) {
-                return PermissionState.GRANTED;
+            if (result == PermissionState.NONE && doesAnyPermissionImplyRequestedAction(
+                    allowedActionsByUserGroup.get(userGroupOfWhichUserIsMember), requestedAction)) {
+                result = PermissionState.GRANTED;
             }
             if (doesAnyPermissionImplyRequestedAction(deniedActionsByUserGroup.get(userGroupOfWhichUserIsMember),
                     requestedAction)) {
-                return PermissionState.REVOKED;
+                result = PermissionState.REVOKED;
+                break;
             }
         }
-        return PermissionState.NONE;
+        return result;
     }
     
     private boolean doesAnyPermissionImplyRequestedAction(Set<WildcardPermission> permissions, WildcardPermission requestedAction) {
