@@ -92,6 +92,7 @@ import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.AdminRole;
+import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.Role;
@@ -442,12 +443,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void createOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString, SecurityUser userOwner, UserGroup tenantOwner) {
-        createOwnership(idOfOwnedObjectAsString, userOwner, tenantOwner, /* displayNameOfOwnedObject */ null);
+    public Ownership createOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString, SecurityUser userOwner, UserGroup tenantOwner) {
+        return createOwnership(idOfOwnedObjectAsString, userOwner, tenantOwner, /* displayNameOfOwnedObject */ null);
     }
 
     @Override
-    public void createOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString, SecurityUser userOwner, UserGroup tenantOwner, String displayNameOfOwnedObject) {
+    public Ownership createOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString, SecurityUser userOwner, UserGroup tenantOwner, String displayNameOfOwnedObject) {
         final UUID tenantId;
         if (tenantOwner == null || !tenantOwner.contains(userOwner)) {
             tenantId = userOwner == null || userOwner.getDefaultTenant() == null ? null : userOwner.getDefaultTenant().getId();
@@ -455,13 +456,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             tenantId = tenantOwner.getId();
         }
         final String userOwnerName = userOwner == null ? null : userOwner.getName();
-        apply(s->s.internalCreateOwnership(idOfOwnedObjectAsString, userOwnerName, tenantId, displayNameOfOwnedObject));
+        return apply(s->s.internalCreateOwnership(idOfOwnedObjectAsString, userOwnerName, tenantId, displayNameOfOwnedObject));
     }
 
     @Override
-    public Void internalCreateOwnership(QualifiedObjectIdentifier idAsString, String userOwnerName, UUID tenantOwnerId, String displayName) {
-        accessControlStore.createOwnership(idAsString, getUserByName(userOwnerName), getUserGroup(tenantOwnerId), displayName);
-        return null;
+    public Ownership internalCreateOwnership(QualifiedObjectIdentifier idAsString, String userOwnerName, UUID tenantOwnerId, String displayName) {
+        return accessControlStore.createOwnership(idAsString, getUserByName(userOwnerName), getUserGroup(tenantOwnerId), displayName).getAnnotation();
     }
 
     @Override

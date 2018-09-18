@@ -4,6 +4,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.User;
@@ -31,7 +32,7 @@ public interface ReplicableSecurityService extends SecurityService {
     
     Void internalDeleteAcl(QualifiedObjectIdentifier idOfAccessControlledObject);
     
-    Void internalCreateOwnership(QualifiedObjectIdentifier idOfOwnedObject, String owningUsername, UUID tenantOwnerId, String displayNameOfOwnedObject);
+    Ownership internalCreateOwnership(QualifiedObjectIdentifier idOfOwnedObject, String owningUsername, UUID tenantOwnerId, String displayNameOfOwnedObject);
     
     Void internalDeleteOwnership(QualifiedObjectIdentifier idOfOwnedObject);
     

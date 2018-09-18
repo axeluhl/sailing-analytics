@@ -88,7 +88,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * Same as {@link #createOwnership(String, UserImpl, Tenant, String)}, leaving the display name
      * of the object owned undefined.
      */
-    void createOwnership(QualifiedObjectIdentifier idOfOwnedObject, SecurityUser userOwner, UserGroup tenantOwner);
+    Ownership createOwnership(QualifiedObjectIdentifier idOfOwnedObject, SecurityUser userOwner, UserGroup tenantOwner);
 
     /**
      * @param idOfOwnedObject
@@ -104,7 +104,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      *            as the object identified by {@link idOfOwnedObject} may change its name without notifying this
      *            store
      */
-    void createOwnership(QualifiedObjectIdentifier idOfOwnedObject, SecurityUser userOwner, UserGroup tenantOwner, String displayNameOfOwnedObject);
+    Ownership createOwnership(QualifiedObjectIdentifier idOfOwnedObject, SecurityUser userOwner, UserGroup tenantOwner, String displayNameOfOwnedObject);
 
     void deleteOwnership(QualifiedObjectIdentifier idOfOwnedObject);
 

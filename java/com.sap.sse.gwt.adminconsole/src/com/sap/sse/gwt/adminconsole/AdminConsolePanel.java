@@ -351,10 +351,9 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
      * that panel
      * 
      * @param requiresAnyOfThesePermissions
-     *            zero or more permissions; if no permissions are provided, the user will never be able to see the
+     *            zero or more permissions; if no permissions are provided, the user will always be able to see the
      *            widget. Otherwise, if any of these permissions implies any of the permissions the user has, the user
-     *            will be shown the widget. In particular, a "*" wildcard permission will show the widget to all users,
-     *            regardless their actual permissions.
+     *            will be shown the widget.
      */
     private void remeberWidgetLocationAndPermissions(VerticalOrHorizontalTabLayoutPanel tabPanel, Widget widgetToAdd,
             String tabTitle, HasPermissions... requiresAnyOfThesePermissions) {
@@ -469,12 +468,20 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
      * is also implied.
      */
     private boolean userHasPermissionsToSeeWidget(UserDTO user, Widget widget) {
-        for (HasPermissions requiredStringPermission : permissionsAnyOfWhichIsRequiredToSeeWidget.get(widget)) {
-            WildcardPermission requiredPermission = requiredStringPermission.getPermission();
-            if (PermissionChecker.isPermitted(requiredPermission, user, user.getUserGroups(), /* ownership */ null, /* acl */ null)) {
-                return true;
+        final Set<HasPermissions> permissionsRequired = permissionsAnyOfWhichIsRequiredToSeeWidget.get(widget);
+        boolean hasPermission;
+        if (permissionsRequired.isEmpty()) {
+            hasPermission = true;
+        } else {
+            hasPermission = false;
+            for (HasPermissions requiredStringPermission : permissionsRequired) {
+                WildcardPermission requiredPermission = requiredStringPermission.getPermission();
+                if (PermissionChecker.isPermitted(requiredPermission, user, user.getUserGroups(), /* ownership */ null, /* acl */ null)) {
+                    hasPermission = true;
+                    break;
+                }
             }
         }
-        return false;
+        return hasPermission;
     }
 }
