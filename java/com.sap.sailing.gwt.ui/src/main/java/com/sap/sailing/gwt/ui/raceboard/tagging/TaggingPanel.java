@@ -22,15 +22,15 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.TagDTO;
+import com.sap.sailing.domain.common.security.Permission;
+import com.sap.sailing.domain.common.security.Permission.Mode;
+import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
-import com.sap.sailing.domain.common.security.Permission;
-import com.sap.sailing.domain.common.security.Permission.Mode;
-import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.Notification;
@@ -52,7 +52,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
  * will be stored in the {@link com.sap.sse.security.UserStore UserStore}.<br/>
  * <br/>
  * The TaggingPanel is also used as a data provider for all of its subcomponents like header, footer and content
- * section. Therefore the TaggingPanel provides references to important services, string messages, its current state ando
+ * section. Therefore the TaggingPanel provides references to important services, string messages, its current state and
  * so on.
  * Best practice: The constructor of subcomponents of the TaggingPanel contains only the TaggingPanel as a parameter.
  * Every other required shared resource (string messages, service references, ...) can be requested from the
@@ -66,7 +66,8 @@ public class TaggingPanel extends ComponentWithoutSettings
      */
     protected enum State {
         VIEW, // default
-        CREATE_TAG, EDIT_TAG
+        CREATE_TAG,
+        EDIT_TAG
     }
 
     // styling
@@ -622,7 +623,7 @@ public class TaggingPanel extends ComponentWithoutSettings
             });
         }
     }
-    
+
     protected boolean hasPermissionToModifyPublicTags() {
         boolean hasPermission = false;
         if (leaderboardName != null && userService.getCurrentUser().hasPermission(

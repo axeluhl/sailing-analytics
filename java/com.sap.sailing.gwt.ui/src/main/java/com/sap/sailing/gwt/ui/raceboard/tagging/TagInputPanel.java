@@ -28,9 +28,9 @@ public class TagInputPanel extends FlowPanel {
     private final SimplePanel checkboxWrapper;
     private final CheckBox visibleForPublicCheckBox;
     private final Label noPermissionForPublicTagsLabel;
-    
+
     private final TaggingPanel taggingPanel;
-    private final StringMessages stringMessages;  
+    private final StringMessages stringMessages;
 
     /**
      * Creates view allowing users to input values for tags and {@link TagButton tag-buttons}.
@@ -62,14 +62,14 @@ public class TagInputPanel extends FlowPanel {
         add(commentTextArea);
 
         checkboxWrapper = new SimplePanel();
-        checkboxWrapper.setStyleName(style.tagInputPanelIsVisibleForPublic());        
+        checkboxWrapper.setStyleName(style.tagInputPanelIsVisibleForPublic());
         visibleForPublicCheckBox = new CheckBox(stringMessages.tagVisibleForPublicCheckBox());
-        visibleForPublicCheckBox.setValue(DEFAULT_VISIBLE_FOR_PUBLIC);    
+        visibleForPublicCheckBox.setValue(DEFAULT_VISIBLE_FOR_PUBLIC);
         checkboxWrapper.setWidget(visibleForPublicCheckBox);
         add(checkboxWrapper);
-        
-        noPermissionForPublicTagsLabel = new Label(stringMessages.tagPublicModificationPermissionMissing());   
-        noPermissionForPublicTagsLabel.setStyleName(style.tagInputPanelNoPermissionLabel());     
+
+        noPermissionForPublicTagsLabel = new Label(stringMessages.tagPublicModificationPermissionMissing());
+        noPermissionForPublicTagsLabel.setStyleName(style.tagInputPanelNoPermissionLabel());
         add(noPermissionForPublicTagsLabel);
         clearAllValues();
     }
@@ -78,9 +78,10 @@ public class TagInputPanel extends FlowPanel {
      * Clears all input fields.
      */
     protected void clearAllValues() {
-        tagTextBox.setText(DEFAULT_TAG);
-        imageURLTextBox.setText(DEFAULT_COMMENT);
-        commentTextArea.setText(DEFAULT_IMAGE_URL);
+        setTag(DEFAULT_TAG);
+        setComment(DEFAULT_COMMENT);
+        setImageURL(DEFAULT_IMAGE_URL);
+        setVisibleForPublic(DEFAULT_VISIBLE_FOR_PUBLIC);
         setCurrentStatus();
     }
 
@@ -187,7 +188,8 @@ public class TagInputPanel extends FlowPanel {
         if (taggingPanel.hasPermissionToModifyPublicTags()) {
             checkboxWrapper.setVisible(true);
             noPermissionForPublicTagsLabel.setVisible(false);
-        } else {;
+            setVisibleForPublic(true);
+        } else {
             checkboxWrapper.setVisible(false);
             noPermissionForPublicTagsLabel.setVisible(true);
             setVisibleForPublic(false);

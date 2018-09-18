@@ -1,7 +1,9 @@
 package com.sap.sailing.server.tagging;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.AuthorizationException;
@@ -26,13 +28,18 @@ import com.sap.sse.security.impl.Activator;
 
 public class TaggingServiceImpl implements TaggingService {
 
-    private String lastErrorCode = "";
     private final RacingEventService racingService;
     private final TagDTODeSerializer serializer;
+    private final Map<Subject, ErrorCode> lastErrorCodes;
 
     public TaggingServiceImpl(RacingEventService racingService) {
         this.racingService = racingService;
         serializer = new TagDTODeSerializer();
+        lastErrorCodes = new HashMap<Subject, ErrorCode>();
+    }
+
+    private void setLastErrorCode(ErrorCode errorCode) {
+        lastErrorCodes.put(SecurityUtils.getSubject(), errorCode);
     }
 
     private String getCurrentUsername() {
@@ -41,7 +48,7 @@ public class TaggingServiceImpl implements TaggingService {
         if (principal != null) {
             result = principal.toString();
         } else {
-            lastErrorCode = "userNotFound";
+            setLastErrorCode(ErrorCode.NOT_LOGGED_IN);
         }
         return result;
     }
@@ -49,7 +56,7 @@ public class TaggingServiceImpl implements TaggingService {
     private SecurityService getSecurityService() {
         SecurityService securityService = Activator.getSecurityService();
         if (securityService == null) {
-            lastErrorCode = "securityServiceNotFound";
+            setLastErrorCode(ErrorCode.SECURITY_SERIVCE_NOT_FOUND);
         }
         return securityService;
     }
@@ -65,14 +72,29 @@ public class TaggingServiceImpl implements TaggingService {
                     Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
             RaceLog raceLog = racingService.getRaceLog(leaderboardName, raceColumnName, fleetName);
             if (raceLog == null) {
-                lastErrorCode = "raceLogNotFound";
+                setLastErrorCode(ErrorCode.RACELOG_NOT_FOUND);
                 successful = false;
             } else {
-                raceLog.add(new RaceLogTagEventImpl(tag, comment, imageURL, raceTimepoint,
-                        racingService.getServerAuthor(), raceLog.getCurrentPassId()));
+                // check if tag already exists
+                boolean alreadyExists = false;
+                List<TagDTO> publicTags = getPublicTags(leaderboardName, raceColumnName, fleetName);
+                for (TagDTO publicTag : publicTags) {
+                    if (publicTag.equals(tag, comment, imageURL, racingService.getServerAuthor().getName(), true,
+                            raceTimepoint)) {
+                        alreadyExists = true;
+                        break;
+                    }
+                }
+                if (alreadyExists) {
+                    setLastErrorCode(ErrorCode.TAG_ALREADY_EXISTS);
+                    successful = false;
+                } else {
+                    raceLog.add(new RaceLogTagEventImpl(tag, comment, imageURL, raceTimepoint,
+                            racingService.getServerAuthor(), raceLog.getCurrentPassId()));
+                }
             }
         } catch (AuthorizationException e) {
-            lastErrorCode = "tagMissingPermissions";
+            setLastErrorCode(ErrorCode.MISSING_PERMISSIONS);
             successful = false;
         }
         return successful;
@@ -84,7 +106,7 @@ public class TaggingServiceImpl implements TaggingService {
 
         SecurityService securityService = Activator.getSecurityService();
         if (securityService == null) {
-            lastErrorCode = "securityServiceNotFound";
+            setLastErrorCode(ErrorCode.SECURITY_SERIVCE_NOT_FOUND);
             successful = false;
         } else {
             Subject subject = SecurityUtils.getSubject();
@@ -94,11 +116,17 @@ public class TaggingServiceImpl implements TaggingService {
                 String key = serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName);
                 String privateTagsJson = securityService.getPreference(username, key);
                 List<TagDTO> privateTags = serializer.deserializeTags(privateTagsJson);
-                privateTags.add(new TagDTO(tag, comment, imageURL, username, false, raceTimepoint,
-                        MillisecondsTimePoint.now()));
-                securityService.setPreference(username, key, serializer.serializeTags(privateTags));
+                TagDTO tagToAdd = new TagDTO(tag, comment, imageURL, username, false, raceTimepoint,
+                        MillisecondsTimePoint.now());
+                if (privateTags.contains(tagToAdd)) {
+                    setLastErrorCode(ErrorCode.TAG_ALREADY_EXISTS);
+                    successful = false;
+                } else {
+                    privateTags.add(tagToAdd);
+                    securityService.setPreference(username, key, serializer.serializeTags(privateTags));
+                }
             } else {
-                lastErrorCode = "userNotFound";
+                setLastErrorCode(ErrorCode.NOT_LOGGED_IN);
                 successful = false;
             }
         }
@@ -110,7 +138,7 @@ public class TaggingServiceImpl implements TaggingService {
 
         RaceLog raceLog = racingService.getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog == null) {
-            lastErrorCode = "raceLogNotFound";
+            setLastErrorCode(ErrorCode.RACELOG_NOT_FOUND);
             successful = false;
         } else {
             ReadonlyRaceState raceState = ReadonlyRaceStateImpl.getOrCreate(racingService, raceLog);
@@ -120,26 +148,31 @@ public class TaggingServiceImpl implements TaggingService {
                         && tagEvent.getImageURL().equals(tag.getImageURL())
                         && tagEvent.getUsername().equals(tag.getUsername())
                         && tagEvent.getLogicalTimePoint().equals(tag.getRaceTimepoint())) {
-                    try {
-                        // TODO: As soon as permission-vertical branch got merged into master, apply
-                        // new permission system at this permission check (see bug 4104, comment 9)
-                        // functionality: Check if user has the permission to delete tag from RaceLog (same user or
-                        // admin).
-                        Subject subject = SecurityUtils.getSubject();
-                        subject.checkPermission(
-                                Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
-                        if ((subject.getPrincipal() != null && subject.getPrincipal().equals(tag.getUsername()))
-                                || subject.hasRole("admin")) {
-                            raceLog.revokeEvent(tagEvent.getAuthor(), tagEvent, "Revoked");
-                        } else {
-                            lastErrorCode = "tagMissingPermissions";
+                    if (tag.getRevokedAt() == null || tag.getRevokedAt().asMillis() == 0) {
+                        try {
+                            // TODO: As soon as permission-vertical branch got merged into master, apply
+                            // new permission system at this permission check (see bug 4104, comment 9)
+                            // functionality: Check if user has the permission to delete tag from RaceLog (same user or
+                            // admin).
+                            Subject subject = SecurityUtils.getSubject();
+                            subject.checkPermission(
+                                    Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
+                            if ((subject.getPrincipal() != null && subject.getPrincipal().equals(tag.getUsername()))
+                                    || subject.hasRole("admin")) {
+                                raceLog.revokeEvent(tagEvent.getAuthor(), tagEvent, "Revoked");
+                            } else {
+                                setLastErrorCode(ErrorCode.MISSING_PERMISSIONS);
+                                successful = false;
+                            }
+                        } catch (AuthorizationException e) {
+                            setLastErrorCode(ErrorCode.MISSING_PERMISSIONS);
+                            successful = false;
+                        } catch (NotRevokableException e) {
+                            setLastErrorCode(ErrorCode.TAG_NOT_REVOKABLE);
                             successful = false;
                         }
-                    } catch (AuthorizationException e) {
-                        lastErrorCode = "tagMissingPermissions";
-                        successful = false;
-                    } catch (NotRevokableException e) {
-                        lastErrorCode = "tagNotRemoved";
+                    } else {
+                        setLastErrorCode(ErrorCode.TAG_ALREADY_REMOVED);
                         successful = false;
                     }
                     break;
@@ -152,19 +185,21 @@ public class TaggingServiceImpl implements TaggingService {
     private boolean removePrivateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag) {
         boolean successful = true;
 
-        List<TagDTO> privateTags = getPrivateTags(leaderboardName, raceColumnName, fleetName);
-        if (privateTags != null) {
+        String username = getCurrentUsername();
+        if (username == null) {
+            setLastErrorCode(ErrorCode.NOT_LOGGED_IN);
+            successful = false;
+        } else {
+            List<TagDTO> privateTags = getPrivateTags(leaderboardName, raceColumnName, fleetName);
             privateTags.remove(tag);
-            String username = getCurrentUsername();
             SecurityService securityService = getSecurityService();
             String key = serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName);
             // error code will be set during collection of required data
             if (username != null && securityService != null && key != null) {
                 securityService.setPreference(username, key, serializer.serializeTags(privateTags));
             }
-        } else {
-            successful = false;
         }
+
         return successful;
     }
 
@@ -179,16 +214,17 @@ public class TaggingServiceImpl implements TaggingService {
 
         // check all parameters for validity
         if (tag == null || tag.isEmpty()) {
-            lastErrorCode = "tagTagNotEmpty";
+            setLastErrorCode(ErrorCode.TAG_NOT_EMPTY);
             successful = false;
         } else if (tag.length() > TagDTO.MAX_TAG_LENGTH) {
-            lastErrorCode = "tagTagIsTooLong";
+            setLastErrorCode(ErrorCode.TAG_TOO_LONG);
             successful = false;
         } else if (comment.length() > TagDTO.MAX_COMMENT_LENGTH) {
-            lastErrorCode = "tagCommentIsTooLong";
+            setLastErrorCode(ErrorCode.COMMENT_TOO_LONG);
             successful = false;
-        } else if (raceTimepoint == null) {
-            lastErrorCode = "tagTimePointNotEmpty";
+        } else if (raceTimepoint == null || raceTimepoint.asMillis() == 0) {
+            // TODO: Check if timepoint is near start/end of race (+/- x%)
+            setLastErrorCode(ErrorCode.TIMEPOINT_NOT_EMPTY);
             successful = false;
         } else {
             // all parameters are valid => save tag
@@ -209,7 +245,7 @@ public class TaggingServiceImpl implements TaggingService {
 
         // check all parameters for validity
         if (tag == null) {
-            lastErrorCode = "tagTagNotEmpty";
+            setLastErrorCode(ErrorCode.TAG_NOT_EMPTY);
             successful = false;
         } else {
             // all parameters are valid => remove tag
@@ -240,10 +276,10 @@ public class TaggingServiceImpl implements TaggingService {
 
     @Override
     public List<TagDTO> getPublicTags(String leaderboardName, String raceColumnName, String fleetName) {
-        List<TagDTO> result = new ArrayList<TagDTO>();
+        final List<TagDTO> result = new ArrayList<TagDTO>();
         RaceLog raceLog = racingService.getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog == null) {
-            lastErrorCode = "raceLogNotFound";
+            setLastErrorCode(ErrorCode.RACELOG_NOT_FOUND);
         } else {
             ReadonlyRaceState raceState = ReadonlyRaceStateImpl.getOrCreate(racingService, raceLog);
             Iterable<RaceLogTagEvent> foundTagEvents = raceState.getTagEvents();
@@ -258,7 +294,7 @@ public class TaggingServiceImpl implements TaggingService {
 
     @Override
     public List<TagDTO> getPublicTags(RegattaAndRaceIdentifier raceIdentifier, TimePoint latestReceivedTagTime) {
-        List<TagDTO> result = new ArrayList<TagDTO>();
+        final List<TagDTO> result = new ArrayList<TagDTO>();
 
         TrackedRace trackedRace = racingService.getExistingTrackedRace(raceIdentifier);
         Iterable<RaceLog> raceLogs = trackedRace.getAttachedRaceLogs();
@@ -288,16 +324,12 @@ public class TaggingServiceImpl implements TaggingService {
 
     @Override
     public List<TagDTO> getPrivateTags(String leaderboardName, String raceColumnName, String fleetName) {
-        List<TagDTO> result = new ArrayList<TagDTO>();
+        final List<TagDTO> result = new ArrayList<TagDTO>();
 
         SecurityService securityService = getSecurityService();
-        if (securityService == null) {
-            result = null;
-        } else {
+        if (securityService != null) {
             String username = getCurrentUsername();
-            if (username == null) {
-                result = null;
-            } else {
+            if (username != null) {
                 String key = serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName);
                 String privateTagsJson = securityService.getPreference(username, key);
                 List<TagDTO> privateTags = serializer.deserializeTags(privateTagsJson);
@@ -309,7 +341,11 @@ public class TaggingServiceImpl implements TaggingService {
     }
 
     @Override
-    public String getLastErrorCode() {
+    public ErrorCode getLastErrorCode() {
+        ErrorCode lastErrorCode = lastErrorCodes.get(SecurityUtils.getSubject());
+        if (lastErrorCode == null) {
+            lastErrorCode = ErrorCode.UNKNOWN_ERROR;
+        }
         return lastErrorCode;
     }
 }

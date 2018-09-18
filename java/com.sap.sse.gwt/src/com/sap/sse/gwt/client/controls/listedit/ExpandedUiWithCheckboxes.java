@@ -47,7 +47,7 @@ public class ExpandedUiWithCheckboxes<ValueType> extends GenericStringListInline
      *            the text shown next to the checkboxes
      */
     public ExpandedUiWithCheckboxes(StringMessages stringMessages, ImageResource removeImage,
-            List<String> suggestValues, String placeholderTextForAddTextbox, int textBoxSize, String checkBoxText) {
+            Iterable<String> suggestValues, String placeholderTextForAddTextbox, int textBoxSize, String checkBoxText) {
         super(stringMessages, removeImage, suggestValues, placeholderTextForAddTextbox, textBoxSize);
         this.checkBoxes = new ArrayList<CheckBox>();
         this.checkBoxText = checkBoxText;

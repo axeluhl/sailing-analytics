@@ -2,7 +2,6 @@ package com.sap.sse.common.media;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public enum MediaTagConstants {
@@ -22,9 +21,9 @@ public enum MediaTagConstants {
     private final int minHeight;
     private final int maxHeight;
 
-    public static final List<String> imageTagSuggestions = Arrays.asList(new String[] { BIGSCREEN.getName(),
+    public static final Iterable<String> imageTagSuggestions = Arrays.asList(new String[] { BIGSCREEN.getName(),
             STAGE.getName(), TEASER.getName(), SPONSOR.getName(), LOGO.getName(), GALLERY.getName() });
-    public static final List<String> videoTagSuggestions = Arrays.asList(new String[] { BIGSCREEN.getName(),
+    public static final Iterable<String> videoTagSuggestions = Arrays.asList(new String[] { BIGSCREEN.getName(),
             LIVESTREAM.getName(), HIGHLIGHT.getName(), FEATURED.getName(), STAGE.getName() });
     public static final Set<MimeType> SUPPORTED_VIDEO_TYPES = new HashSet<>(Arrays.asList(MimeType.youtube,
             MimeType.vimeo, MimeType.mp4, MimeType.mp4panorama, MimeType.mp4panoramaflip));
