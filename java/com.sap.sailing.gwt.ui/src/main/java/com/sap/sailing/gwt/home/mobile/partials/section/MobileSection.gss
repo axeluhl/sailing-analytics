@@ -18,9 +18,12 @@
 .sectionContent {
   padding: 0;
 }
-.sectionContent:empty {
-  border-bottom: 2px solid #ccc;
-}
+/* .sectionContent:empty { */
+/*   border-bottom: 2px solid #ccc; */
+/* } */
+/* .sectionContent .sectionContent:empty { */
+/*   border-bottom: 0 none; */
+/* } */
 .edgeToEdgeSectionContentHolder {
   padding: 0;
 }
