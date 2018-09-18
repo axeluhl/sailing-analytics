@@ -55,27 +55,33 @@ public class AccessControlListImpl implements AccessControlList {
     }
 
     @Override
-    public PermissionChecker.PermissionState hasPermission(SecurityUser user, String action, Iterable<? extends UserGroup> groupsOfWhichUserIsMember) {
-        WildcardPermission requestedAction = new WildcardPermission(action);
+    public PermissionChecker.PermissionState hasPermission(SecurityUser user, String action,
+            Iterable<? extends UserGroup> groupsOfWhichUserIsMember) {
+        PermissionState result = PermissionState.NONE;
+        final WildcardPermission requestedAction = new WildcardPermission(action);
         for (final UserGroup userGroupOfWhichUserIsMember : groupsOfWhichUserIsMember) {
-            final Set<WildcardPermission> allowedActions = allowedActionsByUserGroup.get(userGroupOfWhichUserIsMember);
-            if (allowedActions != null) {
-                for (final WildcardPermission allowedAction : allowedActions) {
-                    if (allowedAction.implies(requestedAction)) {
-                        return PermissionState.GRANTED;
-                    }
-                }
+            if (result == PermissionState.NONE && doesAnyPermissionImplyRequestedAction(
+                    allowedActionsByUserGroup.get(userGroupOfWhichUserIsMember), requestedAction)) {
+                result = PermissionState.GRANTED;
             }
-            final Set<WildcardPermission> deniedActions = deniedActionsByUserGroup.get(userGroupOfWhichUserIsMember);
-            if (deniedActions != null) {
-                for (final WildcardPermission deniedAction : deniedActions) {
-                    if (deniedAction.implies(requestedAction)) {
-                        return PermissionState.REVOKED;
-                    }
+            if (doesAnyPermissionImplyRequestedAction(deniedActionsByUserGroup.get(userGroupOfWhichUserIsMember),
+                    requestedAction)) {
+                result = PermissionState.REVOKED;
+                break;
+            }
+        }
+        return result;
+    }
+    
+    private boolean doesAnyPermissionImplyRequestedAction(Set<WildcardPermission> permissions, WildcardPermission requestedAction) {
+        if (permissions != null) {
+            for (final WildcardPermission allowedAction : permissions) {
+                if (allowedAction.implies(requestedAction)) {
+                    return true;
                 }
             }
         }
-        return PermissionState.NONE;
+        return false;
     }
     
     @Override
