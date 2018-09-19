@@ -406,13 +406,6 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     /**
-     * Forces {@link #footerPanel} to rerender.
-     */
-    protected void refreshFooterPanel() {
-        taggingPanel.setFooterWidget(footerPanel);
-    }
-
-    /**
      * Adds {@link TagButton} to {@link #tagButtons list} of all {@link TagButton tag-buttons} and applies
      * {@link com.google.gwt.event.dom.client.ClickHandler ClickHandler} on it which allows saving of tags.
      */
