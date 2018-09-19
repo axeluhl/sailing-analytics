@@ -5,6 +5,7 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.windestimation.ManeuverClusteringBasedWindEstimatorImpl;
 import com.sap.sailing.windestimation.ManeuverGraphBasedWindEstimatorImpl;
 import com.sap.sailing.windestimation.PolarsFittingBasedWindEstimatorImpl;
+import com.sap.sailing.windestimation.TackOutlierRemovalBasedWindEstimatorImpl;
 import com.sap.sailing.windestimation.WindEstimator;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverFeatures;
 
@@ -49,6 +50,16 @@ public class WindEstimatorFactories {
             @Override
             public WindEstimator<CompleteManeuverCurveWithEstimationData> createNewEstimatorInstance() {
                 return new PolarsFittingBasedWindEstimatorImpl(polarService);
+            }
+        };
+    }
+
+    public WindEstimatorFactory<CompleteManeuverCurveWithEstimationData> tackOutlierRemoval() {
+        return new WindEstimatorFactory<CompleteManeuverCurveWithEstimationData>() {
+
+            @Override
+            public WindEstimator<CompleteManeuverCurveWithEstimationData> createNewEstimatorInstance() {
+                return new TackOutlierRemovalBasedWindEstimatorImpl(polarService, maneuverFeatures);
             }
         };
     }

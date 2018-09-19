@@ -10,6 +10,7 @@ import com.sap.sailing.windestimation.maneuverclassifier.ManeuverClassifiersCach
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverFeatures;
 import com.sap.sailing.windestimation.maneuvergraph.BestPathCalculatorWithPolars;
 import com.sap.sailing.windestimation.maneuvergraph.BestPathsCalculator;
+import com.sap.sailing.windestimation.maneuvergraph.IntersectedWindRangeBasedTransitionProbabilitiesCalculator;
 import com.sap.sailing.windestimation.maneuvergraph.ManeuverSequenceGraph;
 import com.sap.sailing.windestimation.polarsfitting.PolarsFittingWindEstimation;
 
@@ -32,8 +33,9 @@ public class ManeuverGraphBasedWindEstimatorImpl extends AbstractManeuverForEsti
     public List<WindWithConfidence<Void>> estimateWindTrackWithManeuvers(
             RaceWithEstimationData<ManeuverForEstimation> race) {
         BestPathsCalculator bestPathsCalculator = maneuverFeatures.isPolarsInformation()
-                ? new BestPathCalculatorWithPolars(new PolarsFittingWindEstimation(polarService), false)
-                : new BestPathsCalculator();
+                ? new BestPathCalculatorWithPolars(new PolarsFittingWindEstimation(polarService),
+                        new IntersectedWindRangeBasedTransitionProbabilitiesCalculator())
+                : new BestPathsCalculator(new IntersectedWindRangeBasedTransitionProbabilitiesCalculator());
         ManeuverSequenceGraph maneuverGraph = new ManeuverSequenceGraph(race.getCompetitorTracks(),
                 new ManeuverClassifiersCache(60000, maneuverFeatures, polarService), bestPathsCalculator);
         return maneuverGraph.estimateWindTrack();

@@ -29,8 +29,8 @@ public class MLUtil {
         }
         if (maneuverFeatures.isMarksInformation()) {
             inputVector[i++] = maneuver.isMarkPassing() ? 1.0 : 0.0;
-            inputVector[i++] = maneuver.getRelativeBearingToNextMarkBefore();
-            inputVector[i++] = maneuver.getRelativeBearingToNextMarkAfter();
+//            inputVector[i++] = maneuver.getRelativeBearingToNextMarkBefore();
+//            inputVector[i++] = maneuver.getRelativeBearingToNextMarkAfter();
         }
         return inputVector;
     }
@@ -86,7 +86,7 @@ public class MLUtil {
             numberOfFeatures += 2;
         }
         if (maneuverFeatures.isMarksInformation()) {
-            numberOfFeatures += 3;
+            numberOfFeatures += 1;
         }
         return numberOfFeatures;
     }

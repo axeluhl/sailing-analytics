@@ -109,24 +109,14 @@ public class ManeuverClusteringBasedWindEstimationTrackImpl extends AbstractMane
             Set<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>> clusters) {
         final int[] count = new int[1];
         final double[] likelihoodSum = new double[1];
-        final ScalableBearing[] scaledAverageDownwindCOG = new ScalableBearing[1];
-        final double[] scaledAbsJibingAngleSum = new double[1];
         Stream<ManeuverClassification> jibeClustersContentPeeker = jibeClustersContent.peek((mc) -> {
             count[0]++;
             final double likelihood = mc.getLikelihoodForManeuverType(ManeuverType.JIBE);
             likelihoodSum[0] += likelihood;
-            final ScalableBearing scaledCOG = new ScalableBearing(mc.getMiddleManeuverCourse()).multiply(likelihood);
-            if (scaledAverageDownwindCOG[0] == null) {
-                scaledAverageDownwindCOG[0] = scaledCOG;
-            } else {
-                scaledAverageDownwindCOG[0] = scaledAverageDownwindCOG[0].add(scaledCOG);
-            }
-            scaledAbsJibingAngleSum[0] += likelihood * Math.abs(mc.getManeuverAngleDeg());
         });
         Speed jibeClusterWeightedAverageSpeed = getWeightedAverageSpeed(jibeClustersContentPeeker, ManeuverType.JIBE);
         final double result;
         if (jibeClusterWeightedAverageSpeed != null) {
-            // FIXME speed ratio based classification
             double tackJibeSpeedRatioLikelihood = polarService.getConfidenceForTackJibeSpeedRatio(
                     tackClusterWeightedAverageSpeed, jibeClusterWeightedAverageSpeed, boatClass);
             if (count[0] > 0) {

@@ -17,7 +17,7 @@ import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
-public class WindCourseRange {
+public class WindCourseRange implements AssumedWindCourse {
 
     private final double fromPortside;
     private final double angleTowardStarboard;
@@ -56,6 +56,65 @@ public class WindCourseRange {
         return new IntersectedWindRange(fromPortside, angleTowardStarboard, 0);
     }
 
+//    public IntersectedWindRange intersect(WindCourseRange nextWindRange) {
+//        double deviationFromPortsideBoundaryTowardStarboard = nextWindRange.fromPortside - fromPortside;
+//        if (deviationFromPortsideBoundaryTowardStarboard < 0) {
+//            deviationFromPortsideBoundaryTowardStarboard += 360;
+//        }
+//        double deviationFromPortsideTowardStarboardInDegrees = deviationFromPortsideBoundaryTowardStarboard
+//                - angleTowardStarboard;
+//        double newFromPortside;
+//        double newAngleTowardStarboard;
+//        double violationRange;
+//        if (deviationFromPortsideTowardStarboardInDegrees <= 0) {
+//            // other.fromPortside is within the range
+//            newFromPortside = nextWindRange.fromPortside;
+//            violationRange = 0;
+//            if (deviationFromPortsideTowardStarboardInDegrees + nextWindRange.angleTowardStarboard < 0) {
+//                newAngleTowardStarboard = nextWindRange.angleTowardStarboard;
+//            } else {
+//                newAngleTowardStarboard = Math.abs(deviationFromPortsideTowardStarboardInDegrees);
+//            }
+//        } else {
+//            double deviationFromPortsideBoundaryTowardPortside = 360 - deviationFromPortsideBoundaryTowardStarboard;
+//            double deviationFromPortsideTowardPortsideInDegrees = deviationFromPortsideBoundaryTowardPortside
+//                    - nextWindRange.angleTowardStarboard;
+//            if (deviationFromPortsideTowardPortsideInDegrees <= 0) {
+//                // fromPortside is within the other range
+//                newFromPortside = fromPortside;
+//                violationRange = 0;
+//                if (deviationFromPortsideTowardPortsideInDegrees + angleTowardStarboard < 0) {
+//                    newAngleTowardStarboard = angleTowardStarboard;
+//                } else {
+//                    newAngleTowardStarboard = Math.abs(deviationFromPortsideTowardPortsideInDegrees);
+//                }
+//            } else {
+//                newFromPortside = nextWindRange.fromPortside;
+//                newAngleTowardStarboard = 5;
+//                if (deviationFromPortsideTowardStarboardInDegrees < deviationFromPortsideTowardPortsideInDegrees) {
+//                    // newFromPortside = nextWindRange.angleTowardStarboard -
+//                    // deviationFromPortsideTowardStarboardInDegrees;
+//                    // newAngleTowardStarboard = deviationFromPortsideTowardStarboardInDegrees;
+//                    violationRange = deviationFromPortsideTowardStarboardInDegrees;
+//                    newFromPortside -= 5;
+//                    if(newFromPortside < 0) {
+//                        newFromPortside += 360;
+//                    }
+//                } else {
+//                    // newFromPortside = angleTowardStarboard - deviationFromPortsideTowardPortsideInDegrees;
+//                    // newAngleTowardStarboard = deviationFromPortsideTowardPortsideInDegrees;
+//                    violationRange = deviationFromPortsideTowardPortsideInDegrees;
+//                }
+//            }
+//        }
+//        if(newAngleTowardStarboard < 10) {
+//            double extension = 10 - newAngleTowardStarboard;
+//            newAngleTowardStarboard = 10;
+//            newFromPortside -= extension / 2.0;
+//        }
+//        return new IntersectedWindRange(newFromPortside, newAngleTowardStarboard, violationRange);
+//    }
+    
     public IntersectedWindRange intersect(WindCourseRange nextWindRange) {
         double deviationFromPortsideBoundaryTowardStarboard = nextWindRange.fromPortside - fromPortside;
         if (deviationFromPortsideBoundaryTowardStarboard < 0) {
@@ -67,46 +126,23 @@ public class WindCourseRange {
         double newAngleTowardStarboard;
         double violationRange;
         if (deviationFromPortsideTowardStarboardInDegrees <= 0) {
-            // other.fromPortside is within the range
-            newFromPortside = nextWindRange.fromPortside;
             violationRange = 0;
-            if (deviationFromPortsideTowardStarboardInDegrees + nextWindRange.angleTowardStarboard < 0) {
-                newAngleTowardStarboard = nextWindRange.angleTowardStarboard;
-            } else {
-                newAngleTowardStarboard = Math.abs(deviationFromPortsideTowardStarboardInDegrees);
-            }
         } else {
             double deviationFromPortsideBoundaryTowardPortside = 360 - deviationFromPortsideBoundaryTowardStarboard;
             double deviationFromPortsideTowardPortsideInDegrees = deviationFromPortsideBoundaryTowardPortside
                     - nextWindRange.angleTowardStarboard;
             if (deviationFromPortsideTowardPortsideInDegrees <= 0) {
-                // fromPortside is within the other range
-                newFromPortside = fromPortside;
                 violationRange = 0;
-                if (deviationFromPortsideTowardPortsideInDegrees + angleTowardStarboard < 0) {
-                    newAngleTowardStarboard = angleTowardStarboard;
-                } else {
-                    newAngleTowardStarboard = Math.abs(deviationFromPortsideTowardPortsideInDegrees);
-                }
             } else {
-                newFromPortside = nextWindRange.fromPortside;
-                newAngleTowardStarboard = 5;
                 if (deviationFromPortsideTowardStarboardInDegrees < deviationFromPortsideTowardPortsideInDegrees) {
-                    // newFromPortside = nextWindRange.angleTowardStarboard -
-                    // deviationFromPortsideTowardStarboardInDegrees;
-                    // newAngleTowardStarboard = deviationFromPortsideTowardStarboardInDegrees;
                     violationRange = deviationFromPortsideTowardStarboardInDegrees;
-                    newFromPortside -= 5;
-                    if(newFromPortside < 0) {
-                        newFromPortside += 360;
-                    }
                 } else {
-                    // newFromPortside = angleTowardStarboard - deviationFromPortsideTowardPortsideInDegrees;
-                    // newAngleTowardStarboard = deviationFromPortsideTowardPortsideInDegrees;
                     violationRange = deviationFromPortsideTowardPortsideInDegrees;
                 }
             }
         }
+        newFromPortside = nextWindRange.fromPortside;
+        newAngleTowardStarboard = nextWindRange.angleTowardStarboard;
         return new IntersectedWindRange(newFromPortside, newAngleTowardStarboard, violationRange);
     }
 

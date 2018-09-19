@@ -19,7 +19,6 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 public class GraphLevel {
 
     private static final double PENALTY_CIRCLE_PROBABILITY_BONUS = 0.3;
-    private static final int MIN_UPWIND_ABS_TWA = 30;
     private final ManeuverForEstimation maneuver;
     private ManeuverEstimationResult maneuverEstimationResult;
 
@@ -27,10 +26,13 @@ public class GraphLevel {
     private GraphLevel nextLevel = null;
 
     private final List<GraphNode> levelNodes = new ArrayList<>();
+    private final GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator;
 
-    public GraphLevel(ManeuverForEstimation maneuver, ManeuverEstimationResult maneuverEstimationResult) {
+    public GraphLevel(ManeuverForEstimation maneuver, ManeuverEstimationResult maneuverEstimationResult,
+            GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
         this.maneuver = maneuver;
         this.maneuverEstimationResult = maneuverEstimationResult;
+        this.transitionProbabilitiesCalculator = transitionProbabilitiesCalculator;
         initNodes();
     }
 
@@ -63,63 +65,42 @@ public class GraphLevel {
     }
 
     private void initBearAwayNode() {
-        Bearing invertedCourseBefore = maneuver.getSpeedWithBearingBefore().getBearing().reverse();
-        double angleTowardStarboard = invertedCourseBefore
-                .getDifferenceTo(maneuver.getSpeedWithBearingAfter().getBearing()).abs().getDegrees();
-        angleTowardStarboard -= MIN_UPWIND_ABS_TWA;
-        assert (angleTowardStarboard > 0);
-        Bearing from;
         Tack tackAfter;
         if (maneuver.getCourseChangeInDegrees() < 0) {
-            from = invertedCourseBefore.add(new DegreeBearingImpl(MIN_UPWIND_ABS_TWA));
             tackAfter = Tack.PORT;
         } else {
-            from = maneuver.getSpeedWithBearingAfter().getBearing();
             tackAfter = Tack.STARBOARD;
         }
-        WindCourseRange windRange = new WindCourseRange(from.getDegrees(), angleTowardStarboard);
+        WindCourseRange windRange = transitionProbabilitiesCalculator.getWindCourseRangeForManeuverType(maneuver,
+                CoarseGrainedManeuverType.BEAR_AWAY);
         double confidence = maneuverEstimationResult.getManeuverTypeLikelihood(CoarseGrainedManeuverType.BEAR_AWAY);
         addManeuverNode(ManeuverTypeForClassification.OTHER, tackAfter, windRange, confidence);
     }
 
     private void initHeadUpNode() {
-        Bearing invertedCourseAfter = maneuver.getSpeedWithBearingAfter().getBearing().reverse();
-        double angleTowardStarboard = invertedCourseAfter
-                .getDifferenceTo(maneuver.getSpeedWithBearingBefore().getBearing()).abs().getDegrees();
-        angleTowardStarboard -= MIN_UPWIND_ABS_TWA;
-        assert (angleTowardStarboard > 0);
-        Bearing from;
         Tack tackAfter;
         if (maneuver.getCourseChangeInDegrees() < 0) {
-            from = maneuver.getSpeedWithBearingBefore().getBearing();
             tackAfter = Tack.STARBOARD;
         } else {
-            from = invertedCourseAfter.add(new DegreeBearingImpl(MIN_UPWIND_ABS_TWA));
             tackAfter = Tack.PORT;
         }
-        WindCourseRange windRange = new WindCourseRange(from.getDegrees(), angleTowardStarboard);
+        WindCourseRange windRange = transitionProbabilitiesCalculator.getWindCourseRangeForManeuverType(maneuver,
+                CoarseGrainedManeuverType.HEAD_UP);
         double confidence = maneuverEstimationResult.getManeuverTypeLikelihood(CoarseGrainedManeuverType.HEAD_UP);
         addManeuverNode(ManeuverTypeForClassification.OTHER, tackAfter, windRange, confidence);
     }
 
     private void initJibeNode() {
-        Bearing middleCourse = maneuver.getMiddleCourse();
-        double absCourseChangeDeg = Math.abs(maneuver.getCourseChangeInDegrees());
-        double middleAngleRange = absCourseChangeDeg * 0.5;
-        Bearing from = middleCourse.add(new DegreeBearingImpl(-middleAngleRange / 2.0));
-        WindCourseRange windRange = new WindCourseRange(from.getDegrees(), middleAngleRange);
+        WindCourseRange windRange = transitionProbabilitiesCalculator.getWindCourseRangeForManeuverType(maneuver,
+                CoarseGrainedManeuverType.JIBE);
         double confidence = maneuverEstimationResult.getManeuverTypeLikelihood(CoarseGrainedManeuverType.JIBE);
         Tack tackAfter = maneuver.getCourseChangeWithinMainCurveInDegrees() < 0 ? Tack.STARBOARD : Tack.PORT;
         addManeuverNode(ManeuverTypeForClassification.JIBE, tackAfter, windRange, confidence);
     }
 
     private void initTackNode() {
-        Bearing middleCourse = maneuver.getMiddleCourse();
-        double absCourseChangeDeg = Math.abs(maneuver.getCourseChangeInDegrees());
-        double middleAngleRange = absCourseChangeDeg * 0.4;
-        Bearing from = middleCourse.add(new DegreeBearingImpl(-middleAngleRange / 2.0));
-        from = from.reverse();
-        WindCourseRange windRange = new WindCourseRange(from.getDegrees(), middleAngleRange);
+        WindCourseRange windRange = transitionProbabilitiesCalculator.getWindCourseRangeForManeuverType(maneuver,
+                CoarseGrainedManeuverType.TACK);
         double confidence = maneuverEstimationResult.getManeuverTypeLikelihood(CoarseGrainedManeuverType.TACK);
         Tack tackAfter = maneuver.getCourseChangeWithinMainCurveInDegrees() < 0 ? Tack.PORT : Tack.STARBOARD;
         addManeuverNode(ManeuverTypeForClassification.TACK, tackAfter, windRange, confidence);

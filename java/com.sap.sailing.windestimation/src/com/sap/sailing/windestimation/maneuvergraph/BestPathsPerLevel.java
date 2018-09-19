@@ -85,4 +85,29 @@ class BestPathsPerLevel {
         return sumForwardProbabilities;
     }
 
+    public double getNormalizedForwardProbability(GraphNode currentNode) {
+        return getBestPreviousNodeInfo(currentNode).getForwardProbability() / getForwardProbabilitiesSum();
+    }
+
+    public double getNormalizedBackwardProbability(GraphNode currentNode) {
+        return getBestPreviousNodeInfo(currentNode).getBackwardProbability() / getBackwardProbabilitiesSum();
+    }
+
+    public double getNormalizedForwardBackwardProbability(GraphNode currentNode) {
+        double sumForwardBackwardProbabilities = 0;
+        double currentNodeForwardBackwardProbability = -1;
+        for (GraphNode node : currentLevel.getLevelNodes()) {
+            double forwardBackwardProbability = getNormalizedForwardProbability(node)
+                    * getNormalizedBackwardProbability(node);
+            sumForwardBackwardProbabilities += forwardBackwardProbability;
+            if (node == currentNode) {
+                currentNodeForwardBackwardProbability = forwardBackwardProbability;
+            }
+        }
+        if (currentNodeForwardBackwardProbability < 0) {
+            throw new IllegalArgumentException();
+        }
+        return currentNodeForwardBackwardProbability / sumForwardBackwardProbabilities;
+    }
+
 }

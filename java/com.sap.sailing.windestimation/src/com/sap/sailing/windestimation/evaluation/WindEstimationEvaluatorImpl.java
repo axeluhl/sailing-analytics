@@ -66,13 +66,13 @@ public class WindEstimationEvaluatorImpl<T> implements WindEstimatorEvaluator<T>
         for (WindWithConfidence<Void> windWithConfidence : windTrack) {
             Wind estimatedWind = windWithConfidence.getObject();
             Wind targetWind = targetWindPerTimePoint.get(estimatedWind.getTimePoint());
-            if (targetWind.getBearing().getDegrees() > 0.00001) {
+            if (targetWind.getBearing().getDegrees() > 0.001) {
                 double windCourseDeviationInDegrees = targetWind.getBearing()
                         .getDifferenceTo(estimatedWind.getBearing()).getDegrees();
                 boolean windCourseDeviationWithinTolerance = Math
                         .abs(windCourseDeviationInDegrees) <= maxWindCourseDeviationInDegrees;
                 double confidence = windWithConfidence.getConfidence();
-                if (targetWind.getKnots() > 0.00001) {
+                if (targetWind.getKnots() > 2) {
                     double windSpeedDeviationInKnots = targetWind.getKnots() - estimatedWind.getKnots();
                     boolean windSpeedDeviationWithinTolerance = Math
                             .abs(windSpeedDeviationInKnots) <= maxWindSpeedDeviationInKnots;

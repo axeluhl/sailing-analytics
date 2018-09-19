@@ -15,7 +15,7 @@ public class ManeuverSequenceGraphBasedWindEstimatorEvaluationRunner {
     private static final boolean ENABLE_MARKS_INFORMATION = true;
     private static final boolean ENABLE_SCALED_SPEED = true;
     private static final boolean ENABLE_POLARS = true;
-    private static final double MIN_CORRECT_ESTIMATIONS_RATIO_FOR_CORRECT_RACE = 0.8;
+    private static final double MIN_CORRECT_ESTIMATIONS_RATIO_FOR_CORRECT_RACE = 0.51;
     private static final int MAX_TWS_DEVIATION_KNOTS = 2;
     private static final int MAX_TWD_DEVIATION_DEG = 30;
 
@@ -36,7 +36,7 @@ public class ManeuverSequenceGraphBasedWindEstimatorEvaluationRunner {
                 new ManeuverFeatures(ENABLE_POLARS, ENABLE_SCALED_SPEED, ENABLE_MARKS_INFORMATION));
 
         WindEstimatorEvaluationResult evaluationResult = evaluator.evaluateWindEstimator(
-                estimatorFactories.polarsFitting(),
+                estimatorFactories.tackOutlierRemoval(),
                 new TargetWindFromCompleteManeuverCurveWithEstimationDataExtractor(), racesIterator,
                 racesIterator.getNumberOfElements());
         LoggingUtil.logInfo("Wind estimator evaluation finished");

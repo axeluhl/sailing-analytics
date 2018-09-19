@@ -273,4 +273,29 @@ public class PolarsFittingWindEstimation implements AverageWindEstimator {
         return windWithConfidence;
     }
 
+    public Speed getWindSpeed(ManeuverForEstimation maneuver, Bearing windCourse) {
+        WindSpeedRange windSpeedRange = null;
+        BoatClass boatClass = maneuver.getBoatClass();
+        if (maneuver.isCleanBefore()) {
+            double absTwaInDegrees = Math.abs(windCourse.reverse()
+                    .getDifferenceTo(maneuver.getAverageSpeedWithBearingBefore().getBearing()).getDegrees());
+            double avgSpeedInKnots = maneuver.getAverageSpeedWithBearingBefore().getKnots();
+            windSpeedRange = getWindSpeedRange(boatClass, avgSpeedInKnots, absTwaInDegrees);
+        }
+        if (maneuver.isCleanAfter()) {
+            double absTwaInDegrees = Math.abs(windCourse.reverse()
+                    .getDifferenceTo(maneuver.getAverageSpeedWithBearingAfter().getBearing()).getDegrees());
+            double avgSpeedInKnots = maneuver.getAverageSpeedWithBearingAfter().getKnots();
+            WindSpeedRange currentTwaWindSpeedRange = getWindSpeedRange(boatClass, avgSpeedInKnots, absTwaInDegrees);
+            if (currentTwaWindSpeedRange != null) {
+                windSpeedRange = windSpeedRange == null ? currentTwaWindSpeedRange
+                        : windSpeedRange.extend(currentTwaWindSpeedRange);
+            }
+        }
+        if (windSpeedRange != null) {
+            return new KnotSpeedImpl(windSpeedRange.getMiddleSpeed());
+        }
+        return new KnotSpeedImpl(0.0);
+    }
+
 }

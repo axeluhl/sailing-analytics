@@ -80,7 +80,8 @@ public class ManeuverSequenceGraph implements WindTrackEstimator {
     private void appendManeuverAsGraphLevel(ManeuverForEstimation maneuver) {
         ManeuverClassifier bestClassifier = maneuverClassifiersCache.getBestClassifier(maneuver);
         ManeuverEstimationResult maneuverEstimationResult = bestClassifier.classifyManeuver(maneuver);
-        GraphLevel newManeuverNodesLevel = new GraphLevel(maneuver, maneuverEstimationResult);
+        GraphLevel newManeuverNodesLevel = new GraphLevel(maneuver, maneuverEstimationResult,
+                bestPathsCalculator.getTransitionProbabilitiesCalculator());
         if (firstGraphLevel == null) {
             firstGraphLevel = newManeuverNodesLevel;
             lastGraphLevel = newManeuverNodesLevel;
