@@ -6,20 +6,15 @@ import java.util.Set;
 import com.sap.sse.common.Util;
 
 /**
- * The {@link PermissionChecker} is an implementation of the permission 
- * checking algorithm proposed in PermissionConcept.docx section 10. It 
- * checks permissions in four stages where earlier stages overwrite later.
+ * The {@link PermissionChecker} is an implementation of the permission checking algorithm also described in <a href=
+ * "https://wiki.sapsailing.com/wiki/info/security/permission-concept#algorithm-boolean-ispermitted-principalcollection-principals-wildcardpermission-permission-for-composite-realm">Permission
+ * Concept Wiki article</a>. It checks permissions in four stages where earlier stages overwrite later.
  * 
- * 1.   Firstly,  the ownership of the data object is tested. If the 
- *      requesting user is the owner of the data object he is automatically
- *      granted every possible permission for that data object.
- * 2.   Secondly, the data object's ACL is checked if it grants or explicitly
- *      revokes the permission.
- * 3.   Thereafter, the permissions directly assigned to the user are checked.
- * 4.   Finally the permissions implied by roles the user has are checked.
- *      This includes dynamic and parametrized roles.
- *      
- * @author Jonas Dann
+ * 1. Firstly, the data object's ACL is checked if it grants or explicitly revokes the permission. 2. Thereafter, the
+ * permissions directly assigned to the user are checked. 3. Finally the permissions implied by roles the user has are
+ * checked. This includes roles qualified by the group/user ownerships of the objetcs to which they are applied.
+ * 
+ * @author Jonas Dann, Axel Uhl (d043530)
  */
 public class PermissionChecker {
     public enum PermissionState {
@@ -48,17 +43,13 @@ public class PermissionChecker {
         }
         PermissionState result = PermissionState.NONE;
         
-        // 1. check user ownership
-        if (ownership != null && Util.equalsWithNull(user, ownership.getUserOwner())) {
-            result = PermissionState.GRANTED;
-        }
-        // 2. check ACL
-        else if (acl != null) {
+        // 1. check ACL
+        if (acl != null) {
             // if no specific action is requested then this translates to a request for all permissions ("*")
             String action = parts.size() < 2 ? WildcardPermission.WILDCARD_TOKEN : (String) parts.get(1).toArray()[0];
             result = acl.hasPermission(user, action, groupsOfWhichUserIsMember);
         }
-        // 3. check direct permissions
+        // 2. check direct permissions
         if (result == PermissionState.NONE) {
             for (WildcardPermission directPermission : user.getPermissions()) {
                 if (directPermission.implies(permission)) {
@@ -67,7 +58,7 @@ public class PermissionChecker {
                 }
             }
         }
-        // 4. check role permissions
+        // 3. check role permissions
         if (result == PermissionState.NONE) {
             for (Role role : user.getRoles()) {
                 if (implies(role, permission, ownership)) {

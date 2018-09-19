@@ -239,7 +239,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      *            parameter is {@code null}, role migration will throw an exception.
      * @param tenants
      *            the tenants to resolve tenant IDs against for users' default tenants as well as role tenant qualifiers
-     * @param userGroupProvider TODO
      * @return the user objects returned have dummy objects for their {@link UserImpl#getRoles() roles'}
      *         {@link Role#getQualifiedForUser() user qualifier} where only the username is set properly to identify the
      *         user in the calling method where ultimately all users will be known.
@@ -273,19 +272,27 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             // try to find an equal-named role in the set of role definitions and create a role
             // that is qualified by the default tenant; for this a default tenant must exist because
             // otherwise a user would obtain global rights by means of migration which must not happen.
+            logger.info("Migrating roles of user "+name);
             BasicDBList roleNames = (BasicDBList) userDBObject.get("ROLES");
             if (roleNames != null) {
+                logger.info("Found old roles "+roleNames+" for user "+name);
                 if (defaultTenantForRoleMigration == null) {
                     throw new IllegalStateException(
                             "For role migration a valid default tenant is required. Set system property "
                                     + UserStore.DEFAULT_TENANT_NAME_PROPERTY_NAME+" or provide a server name");
                 }
                 for (Object o : roleNames) {
+                    boolean found = false;
                     for (final RoleDefinition roleDefinition : roleDefinitionsById.values()) {
                         if (roleDefinition.getName().equals(o.toString())) {
+                            logger.info("Found role "+roleDefinition+" for old role "+o.toString()+" for user "+name);
                             roles.add(new RoleImpl(roleDefinition, defaultTenantForRoleMigration, /* user qualification */ null));
                             rolesMigrated = true;
+                            break;
                         }
+                    }
+                    if (!found) {
+                        logger.warning("Role "+o.toString()+" for user "+name+" not found during migration. User will no longer be in this role.");
                     }
                 }
             }

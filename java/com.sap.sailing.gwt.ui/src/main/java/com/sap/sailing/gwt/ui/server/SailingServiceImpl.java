@@ -63,6 +63,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
@@ -3955,26 +3956,31 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images, Iterable<VideoDTO> videos, 
             Iterable<UUID> leaderboardGroupIds, String tenantOwnerName)
             throws MalformedURLException, UnauthorizedException {
-        SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermission(DefaultModes.CREATE));
+        final EventDTO result;
         UUID eventUuid = UUID.randomUUID();
-        TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
-        TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
-        URL officialWebsiteURL = officialWebsiteURLAsString != null ? new URL(officialWebsiteURLAsString) : null;
-        URL baseURL = baseURLAsString != null ? new URL(baseURLAsString) : null;
-        Map<Locale, URL> sailorsInfoWebsiteURLs = convertToLocalesAndUrls(sailorsInfoWebsiteURLsByLocaleName);
-        
-        List<ImageDescriptor> eventImages = convertToImages(images);
-        List<VideoDescriptor> eventVideos = convertToVideos(videos);
-        getService().apply(
-                new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint, venue, isPublic, eventUuid,
-                        officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, eventImages, eventVideos, leaderboardGroupIds));
-        createCourseAreas(eventUuid, courseAreaNames.toArray(new String[courseAreaNames.size()]));
-        getSecurityService().createAccessControlList(Permission.EVENT.getQualifiedObjectIdentifier(eventUuid.toString()), eventName);
         getSecurityService().createOwnership(Permission.EVENT.getQualifiedObjectIdentifier(eventUuid.toString()),
                 getSecurityService().getUserByName((String) SecurityUtils.getSubject().getPrincipal()),
                 getSecurityService().getUserGroupByName(tenantOwnerName), eventName);
-        EventDTO result = getEventById(eventUuid, false);
-        return result;
+        try {
+            SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermissionForObjects(DefaultModes.CREATE, eventUuid.toString()));
+            TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
+            TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
+            URL officialWebsiteURL = officialWebsiteURLAsString != null ? new URL(officialWebsiteURLAsString) : null;
+            URL baseURL = baseURLAsString != null ? new URL(baseURLAsString) : null;
+            Map<Locale, URL> sailorsInfoWebsiteURLs = convertToLocalesAndUrls(sailorsInfoWebsiteURLsByLocaleName);
+            List<ImageDescriptor> eventImages = convertToImages(images);
+            List<VideoDescriptor> eventVideos = convertToVideos(videos);
+            getService().apply(
+                    new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint, venue, isPublic, eventUuid,
+                            officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, eventImages, eventVideos, leaderboardGroupIds));
+            createCourseAreas(eventUuid, courseAreaNames.toArray(new String[courseAreaNames.size()]));
+            result = getEventById(eventUuid, false);
+            return result;
+        } catch (AuthorizationException e) {
+            // revert ownership creation, then re-throw
+            getSecurityService().deleteOwnership(Permission.EVENT.getQualifiedObjectIdentifier(eventUuid.toString()));
+            throw e;
+        }
     }
 
     @Override

@@ -88,11 +88,11 @@ import com.sap.sse.security.Social;
 import com.sap.sse.security.SocialSettingsKeys;
 import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
-import com.sap.sse.security.shared.AbstractRoles;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.AdminRole;
+import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.Role;
@@ -221,30 +221,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      * is empty.
      */
     private void initEmptyStore() {
-        final RoleDefinition adminRoleDefinition;
         final AdminRole adminRolePrototype = AdminRole.getInstance();
-        if (getRoleDefinition(adminRolePrototype.getId()) == null) {
-            logger.info("No admin role found. Creating default role \""+adminRolePrototype.getName()+"\" with permission \""+
-                    AdminRole.getInstance().getPermissions()+"\"");
-            adminRoleDefinition = userStore.createRoleDefinition((UUID) adminRolePrototype.getId(), adminRolePrototype.getName(), adminRolePrototype.getPermissions());
-        } else {
-            adminRoleDefinition = userStore.getRoleDefinition(adminRolePrototype.getId());
-        }
-        final UserRole userRolePrototype = UserRole.getInstance();
-        if (getRoleDefinition(userRolePrototype.getId()) == null) {
-            logger.info("No user role found. Creating default role \""+userRolePrototype.getName()+"\" with permission \""+
-                    userRolePrototype.getPermissions()+"\"");
-            userStore.createRoleDefinition((UUID) userRolePrototype.getId(), userRolePrototype.getName(), userRolePrototype.getPermissions());
-        }
-        for (final AbstractRoles otherPredefinedRole : AbstractRoles.values()) {
-            if (getRoleDefinition(otherPredefinedRole.getId()) == null) {
-                logger.info("Predefined role definition "+otherPredefinedRole+" not found; creating");
-                final Set<WildcardPermission> permissions = new HashSet<>();
-                for (final String stringPermission : otherPredefinedRole.getPermissions()) {
-                    permissions.add(new WildcardPermission(stringPermission));
-                }
-                userStore.createRoleDefinition(otherPredefinedRole.getId(), otherPredefinedRole.name(), permissions);
-            }
+        RoleDefinition adminRoleDefinition = getRoleDefinition(adminRolePrototype.getId());
+        if (adminRoleDefinition == null) {
+            userStore.createPredefinedRoles();
+            adminRoleDefinition = getRoleDefinition(adminRolePrototype.getId());
+            assert adminRoleDefinition != null;
         }
         try {
             final SecurityUser adminUser;
@@ -461,12 +443,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void createOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString, SecurityUser userOwner, UserGroup tenantOwner) {
-        createOwnership(idOfOwnedObjectAsString, userOwner, tenantOwner, /* displayNameOfOwnedObject */ null);
+    public Ownership createOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString, SecurityUser userOwner, UserGroup tenantOwner) {
+        return createOwnership(idOfOwnedObjectAsString, userOwner, tenantOwner, /* displayNameOfOwnedObject */ null);
     }
 
     @Override
-    public void createOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString, SecurityUser userOwner, UserGroup tenantOwner, String displayNameOfOwnedObject) {
+    public Ownership createOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString, SecurityUser userOwner, UserGroup tenantOwner, String displayNameOfOwnedObject) {
         final UUID tenantId;
         if (tenantOwner == null || !tenantOwner.contains(userOwner)) {
             tenantId = userOwner == null || userOwner.getDefaultTenant() == null ? null : userOwner.getDefaultTenant().getId();
@@ -474,13 +456,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             tenantId = tenantOwner.getId();
         }
         final String userOwnerName = userOwner == null ? null : userOwner.getName();
-        apply(s->s.internalCreateOwnership(idOfOwnedObjectAsString, userOwnerName, tenantId, displayNameOfOwnedObject));
+        return apply(s->s.internalCreateOwnership(idOfOwnedObjectAsString, userOwnerName, tenantId, displayNameOfOwnedObject));
     }
 
     @Override
-    public Void internalCreateOwnership(QualifiedObjectIdentifier idAsString, String userOwnerName, UUID tenantOwnerId, String displayName) {
-        accessControlStore.createOwnership(idAsString, getUserByName(userOwnerName), getUserGroup(tenantOwnerId), displayName);
-        return null;
+    public Ownership internalCreateOwnership(QualifiedObjectIdentifier idAsString, String userOwnerName, UUID tenantOwnerId, String displayName) {
+        return accessControlStore.createOwnership(idAsString, getUserByName(userOwnerName), getUserGroup(tenantOwnerId), displayName).getAnnotation();
     }
 
     @Override

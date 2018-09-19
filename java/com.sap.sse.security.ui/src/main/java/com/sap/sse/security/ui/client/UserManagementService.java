@@ -40,7 +40,7 @@ public interface UserManagementService extends RemoteService {
 
     AccessControlList removeFromACL(QualifiedObjectIdentifier idOfAccessControlledObject, String groupOrTenantIdAsString, String action) throws UnauthorizedException;
 
-    Collection<UserGroup> getUserGroups() throws UnauthorizedException;
+    Collection<UserGroup> getUserGroups();
 
     UserGroup getUserGroupByName(String userGroupName) throws UnauthorizedException;
 
