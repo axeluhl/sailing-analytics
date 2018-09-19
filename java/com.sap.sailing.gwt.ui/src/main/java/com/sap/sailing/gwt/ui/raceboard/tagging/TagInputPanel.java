@@ -21,7 +21,7 @@ public class TagInputPanel extends FlowPanel {
     private static final String DEFAULT_TAG = "";
     private static final String DEFAULT_COMMENT = "";
     private static final String DEFAULT_IMAGE_URL = "";
-    private static final boolean DEFAULT_VISIBLE_FOR_PUBLIC = true;
+    private static final boolean DEFAULT_VISIBLE_FOR_PUBLIC = false;
 
     private final TextBox tagTextBox, imageURLTextBox;
     private final TextArea commentTextArea;
@@ -188,11 +188,9 @@ public class TagInputPanel extends FlowPanel {
         if (taggingPanel.hasPermissionToModifyPublicTags()) {
             checkboxWrapper.setVisible(true);
             noPermissionForPublicTagsLabel.setVisible(false);
-            setVisibleForPublic(true);
         } else {
             checkboxWrapper.setVisible(false);
             noPermissionForPublicTagsLabel.setVisible(true);
-            setVisibleForPublic(false);
         }
     }
 }
