@@ -15,6 +15,9 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
+import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.shared.UserDTO;
 
 public class StructureImportListComposite extends RegattaListComposite implements RegattasDisplayer {
 
@@ -25,16 +28,17 @@ public class StructureImportListComposite extends RegattaListComposite implement
         RegattaStructure getRegattaStructure(RegattaDTO regatta);
     }
 
-    public StructureImportListComposite(final SailingServiceAsync sailingService, RegattaRefresher regattaRefresher,
-            RegattaStructureProvider regattaStructureProvider, final ErrorReporter errorReporter,
-            final StringMessages stringMessages) {
-        super(sailingService, regattaRefresher, errorReporter, stringMessages);
+    public StructureImportListComposite(final SailingServiceAsync sailingService, final UserService userService,
+            RegattaRefresher regattaRefresher, RegattaStructureProvider regattaStructureProvider,
+            final ErrorReporter errorReporter, final StringMessages stringMessages) {
+        super(sailingService, userService, regattaRefresher, errorReporter, stringMessages);
         this.regattaStructureProvider = regattaStructureProvider;
     }
 
     // create Regatta Table in StructureImportManagementPanel
     @Override
-    protected CellTable<RegattaDTO> createRegattaTable() {
+    protected CellTable<RegattaDTO> createRegattaTable(final UserDTO user,
+            final UserManagementServiceAsync userManagementService) {
         FlushableCellTable<RegattaDTO> table = new FlushableCellTable<RegattaDTO>(/* pageSize */10000, tableRes);
         regattaListDataProvider.addDataDisplay(table);
         table.setWidth("100%");

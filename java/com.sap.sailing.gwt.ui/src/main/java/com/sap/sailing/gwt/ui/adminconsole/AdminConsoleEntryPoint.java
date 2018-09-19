@@ -107,7 +107,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         /* REGATTAS */
 
         RegattaManagementPanel regattaManagementPanel = new RegattaManagementPanel(
-                getSailingService(), this, getStringMessages(), this, eventManagementPanel);
+                getSailingService(), getUserService(), this, getStringMessages(), this, eventManagementPanel);
         regattaManagementPanel.ensureDebugId("RegattaStructureManagement");
         panel.addToVerticalTabPanel(new DefaultRefreshableAdminConsolePanel<RegattaManagementPanel>(regattaManagementPanel) {
             @Override
@@ -265,7 +265,8 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<ResultImportUrlsManagementPanel>(resultImportUrlsManagementPanel),
                 getStringMessages().resultImportUrls(), Permission.MANAGE_RESULT_IMPORT_URLS);
         
-        StructureImportManagementPanel structureImportUrlsManagementPanel = new StructureImportManagementPanel(getSailingService(), this, getStringMessages(), this, eventManagementPanel);
+        StructureImportManagementPanel structureImportUrlsManagementPanel = new StructureImportManagementPanel(
+                getSailingService(), getUserService(), this, getStringMessages(), this, eventManagementPanel);
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<StructureImportManagementPanel>(structureImportUrlsManagementPanel),
                 getStringMessages().manage2Sail() + " " + getStringMessages().regattaStructureImport(), Permission.MANAGE_STRUCTURE_IMPORT_URLS);
 
