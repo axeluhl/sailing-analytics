@@ -174,6 +174,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private AbsolutePanel rootPanel = new AbsolutePanel();
     
     private MapWidget map;
+    private Collection<Runnable> mapInitializedListener;
     
     /**
      * Always valid, non-<code>null</code>. Must be used to map all coordinates, headings, bearings, and directions
@@ -553,6 +554,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         updateCoordinateSystemFromSettings();
         lastTimeChangeBeforeInitialization = null;
         isMapInitialized = false;
+        mapInitializedListener = new ArrayList<>();
         this.hasPolar = false;
         headerPanel = new FlowPanel();
         headerPanel.setStyleName("RaceMap-HeaderPanel");
@@ -774,16 +776,16 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         if (!currentlyDragging) {
                             refreshMapWithoutAnimation();
                         }
-                        if (!isMapInitialized) {
-                            // ensure at least one redraw after starting the map
-                            RaceMap.this.isMapInitialized = true;
-                            redraw();
-                        } else if (!mapFirstZoomDone) {
-                            // ensure the zoom is correct in cases, were a redraw will not finish due to already running
-                            // remote requests and ensure the next redraw will not be cancelled in paused state, due to
-                            // identical time
+                        if (!mapFirstZoomDone) {
                             zoomMapToNewBounds(settings.getZoomSettings().getNewBounds(RaceMap.this));
-                            remoteCallsToSkipInExecution.clear();
+                            redraw();
+                        }
+                        if (!isMapInitialized) {
+                            RaceMap.this.isMapInitialized = true;
+                            mapInitializedListener.forEach(c -> c.run());
+                            mapInitializedListener.clear();
+                            // ensure at least one redraw after starting the map, but not before other things like modes
+                            // initialize, as they might change the timer or other settings
                             redraw();
                         }
                     }
@@ -2884,7 +2886,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     public void onResize() {
         if (map != null) {
             map.triggerResize();
-            zoomMapToNewBounds(settings.getZoomSettings().getNewBounds(RaceMap.this));
+            if (isMapInitialized) {
+                zoomMapToNewBounds(settings.getZoomSettings().getNewBounds(RaceMap.this));
+            }
         }
         // Adjust RaceMap headers to avoid overlapping based on the RaceMap width  
         boolean isCompactHeader = this.getOffsetWidth() <= 600;
@@ -3140,4 +3144,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     public RaceMapLifecycle getLifecycle() {
         return raceMapLifecycle;
     }
+
+    public void addMapInitializedListener(Runnable runnable) {
+        if (isMapInitialized) {
+            runnable.run();
+        } else {
+            this.mapInitializedListener.add(runnable);
+        }
+    }
 }
+
