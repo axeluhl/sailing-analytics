@@ -766,7 +766,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         }
                         if (autoZoomOut) {
                             // finalize zoom-out that was started with setZoom() in zoomMapToNewBounds()
-//                            map.panTo(autoZoomLatLngBounds.getCenter());
+                            map.panTo(autoZoomLatLngBounds.getCenter());
                             autoZoomOut = false;
                         }
 
