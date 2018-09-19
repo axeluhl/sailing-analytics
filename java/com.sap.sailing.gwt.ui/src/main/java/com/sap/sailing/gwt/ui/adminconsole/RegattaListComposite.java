@@ -285,7 +285,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                                 @Override
                                 public void ok(OwnershipDialogResult editedObject) {
                                     userManagementService.setOwnership(editedObject.getOwnership(),
-                                            Permission.EVENT.getQualifiedObjectIdentifier(regatta.getName()),
+                                            Permission.REGATTA.getQualifiedObjectIdentifier(regatta.getName()),
                                             regatta.getName(), new AsyncCallback<QualifiedObjectIdentifier>() {
                                                 @Override
                                                 public void onFailure(Throwable caught) {
