@@ -23,6 +23,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 
+// TODO: add Javadoc
 public class RaceTimesInfoProvider {
     
     private final SailingServiceAsync sailingService;

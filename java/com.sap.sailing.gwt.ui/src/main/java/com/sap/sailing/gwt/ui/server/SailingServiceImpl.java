@@ -2239,6 +2239,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
      * {@link RaceLogTagEvent tag events} since received timestamp (<code>latestReceivedTagTime</code>). Loads tags from
      * {@link ReadonlyRaceState cache} instead of scanning the whole {@link RaceLog} every request.
      */
+    // TODO: rename latestReceivedTagTime to match role
     @Override
     public RaceTimesInfoDTO getRaceTimesInfoIncludingTags(RegattaAndRaceIdentifier raceIdentifier,
             TimePoint latestReceivedTagTime) {

@@ -54,11 +54,17 @@ import com.sap.sse.security.ui.shared.UserDTO;
  * <br/>
  * The TaggingPanel is also used as a data provider for all of its subcomponents like header, footer and content
  * section. Therefore the TaggingPanel provides references to important services, string messages, its current state and
- * so on.
- * Best practice: The constructor of subcomponents of the TaggingPanel contains only the TaggingPanel as a parameter.
- * Every other required shared resource (string messages, service references, ...) can be requested from the
+ * so on. Best practice: The constructor of subcomponents of the TaggingPanel contains only the TaggingPanel as a
+ * parameter. Every other required shared resource (string messages, service references, ...) can be requested from the
  * TaggingPanel itself.
  */
+// TODO: Add refresh button which resets lastReceivedTagTime
+// TODO: resize plus of "add tags" button
+// TODO: get URL params as constructor parameter and not from Window object
+// TODO: Goal: Show tags in time slider (add bugzilla bug)
+// TODO: Unit Tests (incl. concatenation)
+// TODO: use HTML storage as event provider to update other tabs when user modifies private tags (new bugzilla bug)
+// TODO: cache user settings and use observer pattern for cache
 public class TaggingPanel extends ComponentWithoutSettings
         implements RaceTimesInfoProviderListener, UserStatusEventHandler, TimeListener {
 
@@ -103,8 +109,8 @@ public class TaggingPanel extends ComponentWithoutSettings
 
     // current state of the Tagging-Panel
     private State currentState;
-    
-    //Needed for sharing Tags 
+
+    // Needed for sharing Tags
     private boolean firstTimePublicTagsLoaded = true;
     private final TimePoint sharedTimePoint;
     private final String sharedTag;
@@ -140,25 +146,25 @@ public class TaggingPanel extends ComponentWithoutSettings
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(this);
 
         setCurrentState(State.VIEW);
-        
-        //Get the url parameter "tag" and divide it into the logical timepoint and the tag title
-        String urlParameter = Window.Location.getParameter("tag");
-        if(urlParameter != null) {
-            if(urlParameter.length() > 13) {
-                String timeMillisString = urlParameter.substring(0, 13);//Works till "Nov 20 2286", afterwards timeMillis length increases from 13 to 14 chars
-                String tagString = urlParameter.substring(13, urlParameter.length()); 
+
+        // Get the url parameter "tag" and divide it into the logical timepoint and the tag title
+        final String urlParameter = Window.Location.getParameter("tag");
+        if (urlParameter != null) {
+            if (urlParameter.length() > 13) {
+                String timeMillisString = urlParameter.substring(0, 13);// Works till "Nov 20 2286", afterwards
+                                                                        // timeMillis length increases from 13 to 14
+                                                                        // chars
+                String tagString = urlParameter.substring(13, urlParameter.length());
                 sharedTimePoint = new MillisecondsTimePoint(Long.parseLong(timeMillisString));
-                sharedTag = tagString; 
-            }
-            else {
+                sharedTag = tagString;
+            } else {
                 Notification.notify(stringMessages.tagInvalidURL(), NotificationType.WARNING);
                 sharedTimePoint = null;
-                sharedTag = null; 
-            }  
-        }
-        else {
+                sharedTag = null;
+            }
+        } else {
             sharedTimePoint = null;
-            sharedTag = null; 
+            sharedTag = null;
         }
 
         initializePanel();
@@ -180,7 +186,6 @@ public class TaggingPanel extends ComponentWithoutSettings
         contentPanel.addStyleName(style.tagCellListPanel());
         contentPanel.add(tagCellList);
         contentPanel.add(createTagsButton);
-
         tagListProvider.addDataDisplay(tagCellList);
         tagCellList.setEmptyListWidget(new Label(stringMessages.tagNoTagsFound()));
         tagCellList.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.DISABLED);
@@ -197,7 +202,6 @@ public class TaggingPanel extends ComponentWithoutSettings
                 timer.addTimeListener(this);
             }
         });
-
         createTagsButton.setTitle(stringMessages.tagAddTags());
         createTagsButton.setStyleName(style.toggleEditState());
         createTagsButton.addStyleName(style.imagePusTransparent());
@@ -270,22 +274,18 @@ public class TaggingPanel extends ComponentWithoutSettings
             // tag does already exist
             Notification.notify(stringMessages.tagNotSavedReason(" " + stringMessages.tagAlreadyExists()),
                     NotificationType.WARNING);
-
         } else if (!isLoggedInAndRaceLogAvailable()) {
             // User is not logged in or race can not be identified because regatta, race column or fleet are missing.
             Notification.notify(stringMessages.tagNotSaved(), NotificationType.ERROR);
-
         } else if (tag.isEmpty()) {
             // Tag heading is empty. Empty tags are not allowed.
             Notification.notify(stringMessages.tagNotSpecified(), NotificationType.WARNING);
-
         } else {
             // replace null values with default values
             final String saveComment = (comment == null ? "" : comment);
             final String saveImageURL = (imageURL == null ? "" : imageURL);
             final TimePoint saveRaceTimePoint = (raceTimePoint == null ? new MillisecondsTimePoint(getTimerTime())
                     : raceTimePoint);
-
             sailingService.addTag(leaderboardName, raceColumn.getName(), fleet.getName(), tag, saveComment,
                     saveImageURL, visibleForPublic, saveRaceTimePoint, new AsyncCallback<SuccessInfo>() {
                         @Override
@@ -597,28 +597,28 @@ public class TaggingPanel extends ComponentWithoutSettings
                 if (modifiedTags) {
                     updateContent();
                 }
-                //After tags were added for the first time, find tag which matches the URL Parameter "tag", hightlight it and jump to its logical timepoint
-                if(firstTimePublicTagsLoaded && raceInfo.getTags() != null) {
+                // After tags were added for the first time, find tag which matches the URL Parameter "tag", hightlight
+                // it and jump to its logical timepoint
+                if (firstTimePublicTagsLoaded && raceInfo.getTags() != null) {
                     firstTimePublicTagsLoaded = false;
-                    if(sharedTimePoint != null) {
+                    if (sharedTimePoint != null) {
                         timer.setTime(sharedTimePoint.asMillis());
-                        if(sharedTag != null) {
+                        if (sharedTag != null) {
                             TagDTO matchingTag = null;
-                            for(TagDTO tag: tagListProvider.getAllTags()) {
-                                if(tag.getRaceTimepoint().equals(sharedTimePoint) && tag.getTag().equals(sharedTag)) {
+                            for (TagDTO tag : tagListProvider.getAllTags()) {
+                                if (tag.getRaceTimepoint().equals(sharedTimePoint) && tag.getTag().equals(sharedTag)) {
                                     matchingTag = tag;
                                     break;
                                 }
                             }
-                            if(matchingTag != null) {
+                            if (matchingTag != null) {
                                 tagSelectionModel.clear();
                                 tagSelectionModel.setSelected(matchingTag, true);
-                            }
-                            else {
+                            } else {
                                 Notification.notify(stringMessages.tagNotFound(), NotificationType.WARNING);
                             }
                         }
-                        
+
                     }
                 }
             });
@@ -649,12 +649,10 @@ public class TaggingPanel extends ComponentWithoutSettings
         raceTimesInfoProvider.getRaceIdentifiers().forEach((raceIdentifier) -> {
             raceTimesInfoProvider.setLatestReceivedTagTime(raceIdentifier, null);
         });
-
         // load content for new user
         reloadPrivateTags();
         filterbarPanel.loadTagFilterSets();
         footerPanel.loadAllTagButtons();
-
         // update UI
         setCurrentState(State.VIEW);
     }

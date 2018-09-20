@@ -8,6 +8,9 @@ import com.sap.sse.common.TimePoint;
  * Used to send tags over network. Allows to create tags with all possible combinations of states (private/public and
  * valid/revoked).
  */
+// TODO: Remove max length
+// TODO: add Javadoc, which parameter has which meaning? what can be guessed from parameters (revokedAt = null)? what is
+// the key to identify a tag?
 public class TagDTO implements Serializable {
 
     private static final long serialVersionUID = 3907411584518452300L;

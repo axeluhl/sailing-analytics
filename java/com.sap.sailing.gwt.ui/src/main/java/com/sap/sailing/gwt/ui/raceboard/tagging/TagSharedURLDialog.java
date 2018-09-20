@@ -12,6 +12,10 @@ import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
 /**
  * A Dialog to show the URL of shared tags
  */
+// TODO: adapt message instead of "URL:"
+// TODO: preselect link
+// TODO: add copy button for clipboard
+// TODO: texfield should not be editable
 public class TagSharedURLDialog extends DialogBox {
 
     private final TagPanelResources resources = TagPanelResources.INSTANCE;

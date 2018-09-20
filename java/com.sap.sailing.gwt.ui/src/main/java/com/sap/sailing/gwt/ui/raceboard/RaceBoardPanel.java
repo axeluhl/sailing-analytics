@@ -305,11 +305,10 @@ public class RaceBoardPanel
         // add panel for tagging functionality, hidden if no url parameter "tags" is passed default
         taggingPanel = new TaggingPanel(parent, componentContext, stringMessages, sailingService, userService, timer, raceTimesInfoProvider);
         addChildComponent(taggingPanel);
-
-        if(Window.Location.getParameter("tag") != null) {
+        // TODO: Handle parameters as constructor parameters of TaggingPanel, URL params should be parsed in EntryPoint, not in Panel
+        if (Window.Location.getParameter("tag") != null) {
             taggingPanel.setVisible(true);
-        }
-        else {
+        } else {
             taggingPanel.setVisible(false);
         }
         

@@ -7,6 +7,15 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sse.common.TimePoint;
 
+// TODO: Add Javadoc, what does TaggingService do?
+// TODO: Replace error handling by throwing exceptions, see "topleveltranslations.json"
+// TODO: Remove public at interfaces
+// TODO: CommentTooLong
+// TODO: Remove max length
+// TODO: rename latestReceivedTagTime to match role
+// TODO: remove entry in settings if there are no private tags for this race anymore
+// TODO: rename keys to naming pattern (ssailing.tags....)
+// TODO: use document settings id for tags/tag-buttons/... as race identifier
 public interface TaggingService {
 
     /**
