@@ -70,7 +70,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.Bounds;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -175,6 +174,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private AbsolutePanel rootPanel = new AbsolutePanel();
     
     private MapWidget map;
+    private Collection<Runnable> mapInitializedListener;
     
     /**
      * Always valid, non-<code>null</code>. Must be used to map all coordinates, headings, bearings, and directions
@@ -481,6 +481,14 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         public boolean contains(T t) {
             return (map.containsKey(t));
         }
+
+        public void clear() {
+            map.clear();
+        }
+
+        public void removeAll(T t) {
+            map.remove(t);
+        }
     }
 
     private class AdvantageLineUpdater implements QuickRanksListener {
@@ -546,6 +554,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         updateCoordinateSystemFromSettings();
         lastTimeChangeBeforeInitialization = null;
         isMapInitialized = false;
+        mapInitializedListener = new ArrayList<>();
         this.hasPolar = false;
         headerPanel = new FlowPanel();
         headerPanel.setStyleName("RaceMap-HeaderPanel");
@@ -764,6 +773,21 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         if (streamletOverlay != null && settings.isShowWindStreamletOverlay()) {
                             streamletOverlay.setCanvasSettings();
                         }
+                        if (!currentlyDragging) {
+                            refreshMapWithoutAnimation();
+                        }
+                        if (!mapFirstZoomDone) {
+                            zoomMapToNewBounds(settings.getZoomSettings().getNewBounds(RaceMap.this));
+                            redraw();
+                        }
+                        if (!isMapInitialized) {
+                            RaceMap.this.isMapInitialized = true;
+                            mapInitializedListener.forEach(c -> c.run());
+                            mapInitializedListener.clear();
+                            // ensure at least one redraw after starting the map, but not before other things like modes
+                            // initialize, as they might change the timer or other settings
+                            redraw();
+                        }
                     }
                 });
                 map.addBoundsChangeHandler(new BoundsChangeMapHandler() {
@@ -777,7 +801,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         currentMapBounds = map.getBounds();
                         currentZoomLevel = newZoomLevel;
                         headerPanel.getElement().getStyle().setWidth(map.getOffsetWidth(), Unit.PX);
-                        refreshMapWithoutAnimation();
+                        refreshMapWithoutAnimationButLeaveTransitionsAlive();
                     }
                 });
 
@@ -812,7 +836,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     createSettingsButton(map);
                 }
                 // Data has been initialized
-                RaceMap.this.isMapInitialized = true;
                 RaceMap.this.redraw();
                 trueNorthIndicatorPanel.redraw();
                 showAdditionalControls(map);
@@ -910,6 +933,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     }
 
     public void redraw() {
+        remoteCallsToSkipInExecution.removeAll(timer.getTime());
         timeChanged(timer.getTime(), null);
     }
     
@@ -962,6 +986,10 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
      */
     private boolean useNullAsTimePoint() {
         return timer.getPlayMode() == PlayModes.Live;
+    }
+
+    private void refreshMapWithoutAnimationButLeaveTransitionsAlive() {
+        remoteCallsToSkipInExecution.addAll(remoteCallsInExecution);
     }
 
     private void refreshMapWithoutAnimation() {
@@ -1041,7 +1069,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     });
         }
         else {
-            GWT.log("added identical call to skip");
             remoteCallsToSkipInExecution.add(newTime);
         }
     }
@@ -1049,8 +1076,8 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     @Override
     public void timeChanged(final Date newTime, final Date oldTime) {
         boolean isRedraw = oldTime == null;
-        if (newTime != null && isMapInitialized) {
-            if (raceIdentifier != null) {
+        if (isMapInitialized) {
+            if (newTime != null) {
                 if (raceIdentifier != null) {
                     final long transitionTimeInMillis = calculateTimeForPositionTransitionInMillis(newTime, oldTime);
                     refreshMap(newTime, transitionTimeInMillis, isRedraw);
@@ -1203,28 +1230,32 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                         showCourseSidelinesOnMap(raceMapDataDTO.courseSidelines);
                         showStartAndFinishAndCourseMiddleLines(raceMapDataDTO.coursePositions);
                         showStartLineToFirstMarkTriangle(raceMapDataDTO.coursePositions);
-                            
+
                         // Rezoom the map
                         LatLngBounds zoomToBounds = null;
-                        if (!settings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) { // Auto zoom if setting is not manual
+                        if (!settings.getZoomSettings().containsZoomType(ZoomTypes.NONE)) {
+                            // Auto zoom if setting is not manual
+
                             zoomToBounds = settings.getZoomSettings().getNewBounds(RaceMap.this);
                             if (zoomToBounds == null && !mapFirstZoomDone) {
-                                zoomToBounds = getDefaultZoomBounds(); // the user-specified zoom couldn't find what it was looking for; try defaults once
+                                // the user-specified zoom couldn't find what it was looking for; try defaults once
+                                zoomToBounds = getDefaultZoomBounds();
                             }
-                        } else if (!mapFirstZoomDone) { // Zoom once to the marks if marks exist
+                        }
+                        if (!mapFirstZoomDone) {
+                            // Zoom once to the marks if marks exist
                             zoomToBounds = new CourseMarksBoundsCalculator().calculateNewBounds(RaceMap.this);
                             if (zoomToBounds == null) {
-                                zoomToBounds = getDefaultZoomBounds(); // use default zoom, e.g., 
+                                // use default zoom, e.g.,
+                                zoomToBounds = getDefaultZoomBounds();
                             }
                             /*
-                             * Reset the mapZoomedOrPannedSinceLastRaceSelection: In spite of the fact that
-                             * the map was just zoomed to the bounds of the marks, it was not a zoom or pan
-                             * triggered by the user. As a consequence the
-                             * mapZoomedOrPannedSinceLastRaceSelection option has to reset again.
+                             * Reset the mapZoomedOrPannedSinceLastRaceSelection: In spite of the fact that the map was
+                             * just zoomed to the bounds of the marks, it was not a zoom or pan triggered by the user.
+                             * As a consequence the mapZoomedOrPannedSinceLastRaceSelection option has to reset again.
                              */
                         }
                         zoomMapToNewBounds(zoomToBounds);
-                        mapFirstZoomDone = true;
                         updateEstimatedDuration(raceMapDataDTO.estimatedDuration);
                     }
                 } else {
@@ -1277,7 +1308,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     private void updateBoatPositions(final Date newTime, final long transitionTimeInMillis,
             final Map<CompetitorDTO, Boolean> hasTailOverlapForCompetitor,
             final Iterable<CompetitorDTO> competitorsToShow, Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> boatData, boolean updateTailsOnly) {
-        if (zoomingAnimationsInProgress == 0 && !currentlyDragging) {
+        if (zoomingAnimationsInProgress == 0) {
             fixesAndTails.updateFixes(boatData, hasTailOverlapForCompetitor, RaceMap.this, transitionTimeInMillis);
             showBoatsOnMap(newTime, transitionTimeInMillis,
                     /* re-calculate; it could have changed since the asynchronous request was made: */
@@ -2076,18 +2107,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         int zoomLat = (int) Math.floor(Math.log(map.getDiv().getClientHeight() * 2 * Math.PI / deltaLat / GLOBE_PXSIZE) / LOG2);
         return Math.min(Math.min(zoomLat, zoomLng), MAX_ZOOM);
     }
-   
+
     private void zoomMapToNewBounds(LatLngBounds newBounds) {
         if (newBounds != null) {
-            LatLngBounds currentMapBounds;
-            if (map.getBounds() == null
-                    || !BoundsUtil.contains((currentMapBounds = map.getBounds()), newBounds)
-                    || graticuleAreaRatio(currentMapBounds, newBounds) > 10) {
-                // only change bounds if the new bounds don't fit into the current map zoom
+            int newZoomLevel = getZoomLevel(newBounds);
+            if (mapNeedsToPanOrZoom(newBounds, newZoomLevel)) {
                 Iterable<ZoomTypes> oldZoomTypesToConsiderSettings = settings.getZoomSettings().getTypesToConsiderOnZoom();
                 setAutoZoomInProgress(true);
-                autoZoomLatLngBounds = newBounds;
-                int newZoomLevel = getZoomLevel(autoZoomLatLngBounds); 
                 if (newZoomLevel != map.getZoom()) {
                     // distinguish between zoom-in and zoom-out, because the sequence of panTo() and setZoom()
                     // appears different on the screen due to map-animations
@@ -2097,37 +2123,39 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     autoZoomIn = newZoomLevel > map.getZoom();
                     autoZoomOut = !autoZoomIn;
                     autoZoomLevel = newZoomLevel;
-                    removeTransitions();
                     if (autoZoomIn) {
-                        map.panTo(autoZoomLatLngBounds.getCenter());
+                        map.panTo(newBounds.getCenter());
                     } else {
                         map.setZoom(autoZoomLevel);
                     }
                 } else {
-                    map.panTo(autoZoomLatLngBounds.getCenter());
+                    map.panTo(newBounds.getCenter());
                 }
+                autoZoomLatLngBounds = newBounds;
                 RaceMapZoomSettings restoredZoomSettings = new RaceMapZoomSettings(oldZoomTypesToConsiderSettings, settings.getZoomSettings().isZoomToSelectedCompetitors());
                 settings = new RaceMapSettings(settings, restoredZoomSettings);
                 setAutoZoomInProgress(false);
+                mapFirstZoomDone = true;
             }
         }
     }
+
+    private boolean mapNeedsToPanOrZoom(LatLngBounds newBounds, int newZoomLevel) {
+        // we never updated, update now
+        if (currentMapBounds == null) {
+            return true;
+        }
+        // we do not fit the required bounds, update now
+        if (!BoundsUtil.contains(currentMapBounds, newBounds)) {
+            return true;
+        }
+        // we do fit the required bounds, however we might be to far zoomed out, check if we can zoom to a better level
+        if (newZoomLevel != map.getZoom()) {
+            return true;
+        }
+        return false;
+    }
     
-    private double graticuleAreaRatio(LatLngBounds containing, LatLngBounds contained) {
-        assert BoundsUtil.contains(containing, contained);
-        double containingAreaRatio = getGraticuleArea(containing) / getGraticuleArea(contained);
-        return containingAreaRatio;
-    }
-
-    /**
-     * A much simplified "area" calculation for a {@link Bounds} object, multiplying the differences in latitude and longitude degrees.
-     * The result therefore is in the order of magnitude of 60*60 square nautical miles.
-     */
-    private double getGraticuleArea(LatLngBounds bounds) {
-        return ((BoundsUtil.isCrossesDateLine(bounds) ? bounds.getNorthEast().getLongitude()+360 : bounds.getNorthEast().getLongitude())-bounds.getSouthWest().getLongitude()) *
-                (bounds.getNorthEast().getLatitude() - bounds.getSouthWest().getLatitude());
-    }
-
     private void setAutoZoomInProgress(boolean autoZoomInProgress) {
         this.autoZoomInProgress = autoZoomInProgress;
     }
@@ -2563,9 +2591,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                     }
                 }
                 showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedFilteredCompetitors());
-            } else {
-                // adding a single competitor; may need to re-load data, so refresh:
-                redraw();
             }
         } else {
             // only change highlighting
@@ -2574,11 +2599,6 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
                 boatCanvas.setDisplayMode(displayHighlighted(competitor));
                 boatCanvas.draw();
                 showCompetitorInfoOnMap(timer.getTime(), -1, competitorSelection.getSelectedFilteredCompetitors());
-            } else {
-                // seems like an internal error not to find the lowlighted marker; but maybe the
-                // competitor was added late to the race;
-                // data for newly selected competitor supposedly missing; refresh
-                redraw();
             }
         }
         // Now update tails for all competitors because selection change may also affect all unselected competitors
@@ -2594,6 +2614,7 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
         if (!zoomSettings.containsZoomType(ZoomTypes.NONE) && zoomSettings.isZoomToSelectedCompetitors()) {
             zoomMapToNewBounds(zoomSettings.getNewBounds(this));
         }
+        redraw();
     }
     
     @Override
@@ -2865,7 +2886,9 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     public void onResize() {
         if (map != null) {
             map.triggerResize();
-            zoomMapToNewBounds(settings.getZoomSettings().getNewBounds(RaceMap.this));
+            if (isMapInitialized) {
+                zoomMapToNewBounds(settings.getZoomSettings().getNewBounds(RaceMap.this));
+            }
         }
         // Adjust RaceMap headers to avoid overlapping based on the RaceMap width  
         boolean isCompactHeader = this.getOffsetWidth() <= 600;
@@ -3121,4 +3144,13 @@ public class RaceMap extends AbstractCompositeComponent<RaceMapSettings> impleme
     public RaceMapLifecycle getLifecycle() {
         return raceMapLifecycle;
     }
+
+    public void addMapInitializedListener(Runnable runnable) {
+        if (isMapInitialized) {
+            runnable.run();
+        } else {
+            this.mapInitializedListener.add(runnable);
+        }
+    }
 }
+
