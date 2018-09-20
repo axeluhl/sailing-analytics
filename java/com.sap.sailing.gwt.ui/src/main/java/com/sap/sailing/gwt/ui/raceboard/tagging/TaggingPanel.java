@@ -106,8 +106,8 @@ public class TaggingPanel extends ComponentWithoutSettings
     
     //Needed for sharing Tags 
     private boolean firstTimePublicTagsLoaded = true;
-    private final TimePoint sharedTimePoint;
-    private final String sharedTag;
+    private final TimePoint urlParameterTimePoint;
+    private final String urlParameterTag;
 
     public TaggingPanel(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages,
             SailingServiceAsync sailingService, UserService userService, Timer timer,
@@ -147,18 +147,18 @@ public class TaggingPanel extends ComponentWithoutSettings
             if(urlParameter.length() > 13) {
                 String timeMillisString = urlParameter.substring(0, 13);//Works till "Nov 20 2286", afterwards timeMillis length increases from 13 to 14 chars
                 String tagString = urlParameter.substring(13, urlParameter.length()); 
-                sharedTimePoint = new MillisecondsTimePoint(Long.parseLong(timeMillisString));
-                sharedTag = tagString; 
+                urlParameterTimePoint = new MillisecondsTimePoint(Long.parseLong(timeMillisString));
+                urlParameterTag = tagString; 
             }
             else {
                 Notification.notify(stringMessages.tagInvalidURL(), NotificationType.WARNING);
-                sharedTimePoint = null;
-                sharedTag = null; 
+                urlParameterTimePoint = null;
+                urlParameterTag = null; 
             }  
         }
         else {
-            sharedTimePoint = null;
-            sharedTag = null; 
+            urlParameterTimePoint = null;
+            urlParameterTag = null; 
         }
 
         initializePanel();
@@ -597,28 +597,31 @@ public class TaggingPanel extends ComponentWithoutSettings
                 if (modifiedTags) {
                     updateContent();
                 }
-                //After tags were added for the first time, find tag which matches the URL Parameter "tag", hightlight it and jump to its logical timepoint
-                if(firstTimePublicTagsLoaded && raceInfo.getTags() != null) {
+                // After tags were added for the first time, find tag which matches the URL Parameter "tag", highlight
+                // it and jump to its logical timepoint
+                // Loading of tags has to be enabled first, that is why raceInfo.getTags() might be null
+                // and so the highlighting of tags must wait till raceInfo.getTags() is not null
+                if (firstTimePublicTagsLoaded && raceInfo.getTags() != null) {
                     firstTimePublicTagsLoaded = false;
-                    if(sharedTimePoint != null) {
-                        timer.setTime(sharedTimePoint.asMillis());
-                        if(sharedTag != null) {
+                    if (urlParameterTimePoint != null) {
+                        timer.setTime(urlParameterTimePoint.asMillis());
+                        if (urlParameterTag != null) {
                             TagDTO matchingTag = null;
-                            for(TagDTO tag: tagListProvider.getAllTags()) {
-                                if(tag.getRaceTimepoint().equals(sharedTimePoint) && tag.getTag().equals(sharedTag)) {
+                            for (TagDTO tag : tagListProvider.getAllTags()) {
+                                if (tag.getRaceTimepoint().equals(urlParameterTimePoint)
+                                        && tag.getTag().equals(urlParameterTag)) {
                                     matchingTag = tag;
                                     break;
                                 }
                             }
-                            if(matchingTag != null) {
+                            if (matchingTag != null) {
                                 tagSelectionModel.clear();
                                 tagSelectionModel.setSelected(matchingTag, true);
-                            }
-                            else {
+                            } else {
                                 Notification.notify(stringMessages.tagNotFound(), NotificationType.WARNING);
                             }
                         }
-                        
+
                     }
                 }
             });
