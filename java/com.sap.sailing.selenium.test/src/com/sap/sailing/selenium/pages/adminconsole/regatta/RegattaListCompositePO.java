@@ -128,7 +128,7 @@ public class RegattaListCompositePO extends PageArea {
     public void removeRegatta(RegattaDescriptor regatta) {
         DataEntryPO entry = findRegatta(regatta);
         if (entry != null) {
-            WebElement action = ActionsHelper.findRemoveAction(entry.getWebElement());
+            WebElement action = ActionsHelper.findDeleteAction(entry.getWebElement());
             action.click();
             waitForAjaxRequests();
             ActionsHelper.acceptAlert(this.driver);
@@ -138,7 +138,7 @@ public class RegattaListCompositePO extends PageArea {
     public RegattaEditDialogPO editRegatta(RegattaDescriptor regatta) {
         DataEntryPO entry = findRegatta(regatta);
         if (entry != null) {
-            WebElement action = ActionsHelper.findEditAction(entry.getWebElement());
+            WebElement action = ActionsHelper.findUpdateAction(entry.getWebElement());
             action.click();
             WebElement dialog = findElementBySeleniumId(this.driver, "RegattaWithSeriesAndFleetsEditDialog");
             return new RegattaEditDialogPO(this.driver, dialog);
