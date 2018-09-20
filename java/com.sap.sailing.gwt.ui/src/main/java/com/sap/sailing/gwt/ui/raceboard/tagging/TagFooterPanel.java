@@ -4,8 +4,8 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanel.State;
 
 /**
- * Panel containg {@link TagModificationPanel} and {@link TagButtonPanel} which is used as {@link TaggingPanel#footerPanel
- * footer} in {@link TaggingPanel}.
+ * Panel containg {@link TagModificationPanel} and {@link TagButtonPanel} which is used as
+ * {@link TaggingPanel#footerPanel footer} in {@link TaggingPanel}.
  */
 public class TagFooterPanel extends FlowPanel {
 
@@ -38,8 +38,8 @@ public class TagFooterPanel extends FlowPanel {
 
     /**
      * Sets visibility of {@link TagModificationPanel input fields} for new tag and {@link TaggingPanel#createTagsButton
-     * "Edit Tag-Buttons"-button}. {@link TagModificationPanel Input fields} will not be hidden but removed completly from
-     * DOM in case <code>visible</code> is set to <code>false</code>!
+     * "Edit Tag-Buttons"-button}. {@link TagModificationPanel Input fields} will not be hidden but removed completly
+     * from DOM in case <code>visible</code> is set to <code>false</code>!
      * 
      * @param visible
      *            should be <code>true</code> when user is logged in and {@link TaggingPanel} is in
@@ -48,10 +48,8 @@ public class TagFooterPanel extends FlowPanel {
     protected void setInputFieldsVisibility(boolean visible) {
         if (visible) {
             add(tagModificationPanel);
-            taggingPanel.refreshFooterPanel();
         } else {
             remove(tagModificationPanel);
-            taggingPanel.refreshFooterPanel();
         }
     }
 
@@ -65,10 +63,8 @@ public class TagFooterPanel extends FlowPanel {
     protected void setTagButtonsVisibility(boolean visible) {
         if (visible && taggingPanel.getTagButtons().size() > 0) {
             add(tagButtonPanel);
-            taggingPanel.refreshFooterPanel();
         } else {
             remove(tagButtonPanel);
-            taggingPanel.refreshFooterPanel();
         }
     }
 
@@ -87,7 +83,7 @@ public class TagFooterPanel extends FlowPanel {
             tagModificationPanel.setCurrentStatus(state);
         }
     }
-    
+
     /**
      * If height of the {@link TagButtonPanel tagButtonPanel} has changed after deleting (delta height does not equal
      * 0), the {@link TaggingPanel#footerPanel footer widget} of the {@link TaggingPanel} has a different height, which

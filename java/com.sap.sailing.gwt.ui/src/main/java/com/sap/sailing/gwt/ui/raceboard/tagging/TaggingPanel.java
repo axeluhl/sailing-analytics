@@ -35,6 +35,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.player.TimeListener;
 import com.sap.sse.gwt.client.player.Timer;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.ComponentWithoutSettings;
@@ -59,7 +60,7 @@ import com.sap.sse.security.ui.shared.UserDTO;
  * TaggingPanel itself.
  */
 public class TaggingPanel extends ComponentWithoutSettings
-        implements RaceTimesInfoProviderListener, UserStatusEventHandler {
+        implements RaceTimesInfoProviderListener, UserStatusEventHandler, TimeListener {
 
     /**
      * Describes the {@link TaggingPanel#currentState current state} of the {@link TaggingPanel}.
@@ -186,7 +187,15 @@ public class TaggingPanel extends ComponentWithoutSettings
         tagCellList.setSelectionModel(tagSelectionModel);
         tagSelectionModel.addSelectionChangeHandler(event -> {
             // set time slider to corresponding position
-            timer.setTime(tagSelectionModel.getSelectedObject().getRaceTimepoint().asMillis());
+            TagDTO selectedTag = tagSelectionModel.getSelectedObject();
+            if (selectedTag != null) {
+                // remove time change listener when manual selecting tag cells as this could end in an infinite loop of
+                // timer change -> automatic selection change -> timer change -> ...
+                timer.removeTimeListener(this);
+                timer.setTime(selectedTag.getRaceTimepoint().asMillis());
+                // adding time change listener again
+                timer.addTimeListener(this);
+            }
         });
 
         createTagsButton.setTitle(stringMessages.tagAddTags());
@@ -334,7 +343,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                     @Override
                     public void onSuccess(SuccessInfo result) {
                         if (result.isSuccessful()) {
-                            tagListProvider.getAllTags().remove(tag);
+                            tagListProvider.remove(tag);
                             updateContent();
                             if (!silent) {
                                 Notification.notify(stringMessages.tagRemovedSuccessfully(), NotificationType.SUCCESS);
@@ -367,7 +376,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                     @Override
                     public void onSuccess(SuccessInfo result) {
                         if (result.isSuccessful()) {
-                            tagListProvider.getAllTags().remove(tagToUpdate);
+                            tagListProvider.remove(tagToUpdate);
                             // If old tag was or new tag is private, reload all private tags. Otherwise just refresh UI.
                             if (!tagToUpdate.isVisibleForPublic() || !visibleForPublic) {
                                 reloadPrivateTags();
@@ -397,9 +406,9 @@ public class TaggingPanel extends ComponentWithoutSettings
 
                     @Override
                     public void onSuccess(List<TagDTO> result) {
-                        tagListProvider.getAllTags().removeIf(tag -> !tag.isVisibleForPublic());
+                        tagListProvider.removePrivateTags();
                         if (result != null && !result.isEmpty()) {
-                            tagListProvider.getAllTags().addAll(result);
+                            tagListProvider.addAll(result);
                         }
                         updateContent();
                     }
@@ -430,13 +439,6 @@ public class TaggingPanel extends ComponentWithoutSettings
      */
     protected void refreshContentPanel() {
         taggingPanel.setContentWidget(contentPanel);
-    }
-
-    /**
-     * Forces {@link #footerPanel} to rerender.
-     */
-    protected void refreshFooterPanel() {
-        taggingPanel.setFooterWidget(footerPanel);
     }
 
     /**
@@ -526,7 +528,8 @@ public class TaggingPanel extends ComponentWithoutSettings
         // Setting footerPanel.setVisible(false) is not sufficient as panel would still be
         // rendered as 20px high white space instead of being hidden.
         // Fix: remove panel completely from footer.
-        if (!currentState.equals(State.VIEW) || (currentState.equals(State.VIEW) && !getTagButtons().isEmpty())) {
+        if (currentState != null && (!currentState.equals(State.VIEW)
+                || (currentState.equals(State.VIEW) && !getTagButtons().isEmpty()))) {
             taggingPanel.setFooterWidget(footerPanel);
             footerPanel.setCurrentState(currentState);
         } else {
@@ -558,8 +561,6 @@ public class TaggingPanel extends ComponentWithoutSettings
                 boolean modifiedTags = false;
                 // Will be true if latestReceivedTagTime needs to be updated in raceTimesInfoprovider, otherwise false.
                 boolean updatedLatestTag = false;
-                // local list of already received tags
-                List<TagDTO> currentTags = tagListProvider.getAllTags();
                 // createdAt or revokedAt timepoint of latest received tag
                 TimePoint latestReceivedTagTime = raceTimesInfoProvider.getLatestReceivedTagTime(raceIdentifier);
                 // get difference in tags since latestReceivedTagTime
@@ -567,18 +568,18 @@ public class TaggingPanel extends ComponentWithoutSettings
                     for (TagDTO tag : raceInfo.getTags()) {
                         if (tag.getRevokedAt() != null) {
                             // received tag is revoked => latestReceivedTagTime will be revokedAt if revoke event
-                            // occurred before latestReceivedTagTime
-                            currentTags.remove(tag);
+                            // occured before latestReceivedTagTime
+                            tagListProvider.remove(tag);
                             modifiedTags = true;
                             if (latestReceivedTagTime == null || (latestReceivedTagTime != null
                                     && latestReceivedTagTime.before(tag.getRevokedAt()))) {
                                 latestReceivedTagTime = tag.getRevokedAt();
                                 updatedLatestTag = true;
                             }
-                        } else if (!currentTags.contains(tag)) {
+                        } else if (!tagListProvider.getAllTags().contains(tag)) {
                             // received tag is NOT revoked => latestReceivedTagTime will be createdAt if tag event
-                            // occurred before latestReceivedTagTime
-                            currentTags.add(tag);
+                            // occured before latestReceivedTagTime
+                            tagListProvider.add(tag);
                             modifiedTags = true;
                             if (latestReceivedTagTime == null || (latestReceivedTagTime != null
                                     && latestReceivedTagTime.before(tag.getCreatedAt()))) {
@@ -644,7 +645,7 @@ public class TaggingPanel extends ComponentWithoutSettings
     @Override
     public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
         // clear list of local tags to hide private tags of previous user and reset cache
-        tagListProvider.getAllTags().clear();
+        tagListProvider.clear();
         raceTimesInfoProvider.getRaceIdentifiers().forEach((raceIdentifier) -> {
             raceTimesInfoProvider.setLatestReceivedTagTime(raceIdentifier, null);
         });
@@ -656,7 +657,33 @@ public class TaggingPanel extends ComponentWithoutSettings
 
         // update UI
         setCurrentState(State.VIEW);
-        updateContent();
+    }
+
+    /**
+     * Highlights most current tag when timer changes.
+     */
+    @Override
+    public void timeChanged(Date newTime, Date oldTime) {
+        // When reopening Tagging-Panel after it was opened and closed by the user, the TouchSplitLayoutPanel will
+        // set the timer to the current time and not the race time, oldTime will be null in this case. This would cause
+        // a jump in time as TaggingPanel selects most current tag when time changes. When time continues while timer is
+        // in "play"-mode, oldValue won't be null. This can be used as a workaround to discover this "false" time
+        // change.
+        // => workaround: Check if oldValue is not null to avoid jumps in time
+        if (oldTime != null) {
+            TagDTO toHighlight = null;
+            for (TagDTO tag : tagListProvider.getAllTags()) {
+                if (tag.getRaceTimepoint().asDate().getTime() <= newTime.getTime()) {
+                    toHighlight = tag;
+                } else if (tag.getRaceTimepoint().asDate().getTime() > newTime.getTime()) {
+                    break;
+                }
+            }
+            tagSelectionModel.clear();
+            if (toHighlight != null) {
+                tagSelectionModel.setSelected(toHighlight, true);
+            }
+        }
     }
 
     @Override
@@ -687,8 +714,10 @@ public class TaggingPanel extends ComponentWithoutSettings
         if (raceTimesInfoProvider != null) {
             if (visible) {
                 raceTimesInfoProvider.enableTagRequests();
+                timer.addTimeListener(this);
             } else {
                 raceTimesInfoProvider.disableTagRequests();
+                timer.removeTimeListener(this);
             }
         }
         taggingPanel.setVisible(visible);
@@ -698,4 +727,5 @@ public class TaggingPanel extends ComponentWithoutSettings
     public String getDependentCssClassName() {
         return "tags";
     }
+
 }
