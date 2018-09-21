@@ -15,9 +15,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
-import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 public class StructureImportListComposite extends RegattaListComposite implements RegattasDisplayer {
 
@@ -37,8 +35,7 @@ public class StructureImportListComposite extends RegattaListComposite implement
 
     // create Regatta Table in StructureImportManagementPanel
     @Override
-    protected CellTable<RegattaDTO> createRegattaTable(final UserDTO user,
-            final UserManagementServiceAsync userManagementService) {
+    protected CellTable<RegattaDTO> createRegattaTable(final UserService userService) {
         FlushableCellTable<RegattaDTO> table = new FlushableCellTable<RegattaDTO>(/* pageSize */10000, tableRes);
         regattaListDataProvider.addDataDisplay(table);
         table.setWidth("100%");

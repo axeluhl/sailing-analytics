@@ -1,7 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -9,7 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.google.gwt.cell.client.AbstractCell;
-import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -28,7 +26,6 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.security.Permission;
-import com.sap.sailing.gwt.ui.adminconsole.EditOwnershipDialog.OwnershipDialogResult;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -50,12 +47,7 @@ import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions.DefaultModes;
-import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.SecurityUser;
-import com.sap.sse.security.shared.UserGroup;
-import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * A composite showing the list of all regattas 
@@ -76,8 +68,6 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
     private final ErrorReporter errorReporter;
     private final RegattaRefresher regattaRefresher;
     protected final StringMessages stringMessages;
-    private final com.sap.sse.security.ui.client.i18n.StringMessages securityStringMessages = GWT
-            .create(com.sap.sse.security.ui.client.i18n.StringMessages.class);
 
     private final LabeledAbstractFilterablePanel<RegattaDTO> filterablePanelRegattas;
 
@@ -124,7 +114,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
             }
         };
         filterablePanelRegattas.getTextBox().ensureDebugId("RegattasFilterTextBox");
-        regattaTable = createRegattaTable(userService.getCurrentUser(), userService.getUserManagementService());
+        regattaTable = createRegattaTable(userService);
         regattaTable.ensureDebugId("RegattasCellTable");
         filterablePanelRegattas.setTable(regattaTable);
         refreshableRegattaMultiSelectionModel = (RefreshableMultiSelectionModel<RegattaDTO>) regattaTable.getSelectionModel();
@@ -139,8 +129,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         return refreshableRegattaMultiSelectionModel.addSelectionChangeHandler(handler);
     }
 
-    protected CellTable<RegattaDTO> createRegattaTable(final UserDTO user,
-            final UserManagementServiceAsync userManagementService) {
+    protected CellTable<RegattaDTO> createRegattaTable(final UserService userService) {
         FlushableCellTable<RegattaDTO> table = new FlushableCellTable<RegattaDTO>(/* pageSize */10000, tableRes);
         regattaListDataProvider.addDataDisplay(table);
         table.setWidth("100%");
@@ -239,76 +228,16 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
             }
         });
 
-        final TextColumn<RegattaDTO> groupOwnerColumn = new TextColumn<RegattaDTO>() {
-            @Override
-            public String getValue(RegattaDTO event) {
-                final UserGroup groupOwner = event.getOwnership().getTenantOwner();
-                return groupOwner == null ? "" : groupOwner.getName();
-            }
-        };
-        groupOwnerColumn.setSortable(true);
-        final TextColumn<RegattaDTO> userOwnerColumn = new TextColumn<RegattaDTO>() {
-            @Override
-            public String getValue(RegattaDTO event) {
-                final SecurityUser userOwner = event.getOwnership().getUserOwner();
-                return userOwner == null ? "" : userOwner.getName();
-            }
-        };
-        userOwnerColumn.setSortable(true);
-        AccessControlledActionsColumn<RegattaDTO, RegattaConfigImagesBarCell> regattaActionColumn = new AccessControlledActionsColumn<RegattaDTO, RegattaConfigImagesBarCell>(
-                new RegattaConfigImagesBarCell(stringMessages)) {
-            public Iterable<DefaultModes> getAllowedActions(RegattaDTO object) {
-                final ArrayList<DefaultModes> allowedActions = new ArrayList<>();
-                for (DefaultModes action : Arrays.asList(DefaultModes.UPDATE, DefaultModes.DELETE,
-                        DefaultModes.CHANGE_OWNERSHIP)) {
-                    if (user.hasPermission(
-                            Permission.EVENT.getPermissionForObjects(action, object.getRegattaIdentifier().toString()),
-                            object.getOwnership(), object.getAccessControlList())) {
-                        allowedActions.add(action);
-                    }
-                }
-                return allowedActions;
-            };
-        };
-        regattaActionColumn.setFieldUpdater(new FieldUpdater<RegattaDTO, String>() {
-            @Override
-            public void update(int index, RegattaDTO regatta, String value) {
-                if (DefaultModes.UPDATE.name().equals(value)) {
-                    editRegatta(regatta);
-                } else if (DefaultModes.DELETE.name().equals(value)) {
-                    if (Window.confirm(stringMessages.doYouReallyWantToRemoveRegatta(regatta.getName()))) {
-                        removeRegatta(regatta);
-                    }
-                } else if (DefaultModes.CHANGE_OWNERSHIP.name().equals(value)) {
-                    new EditOwnershipDialog(userManagementService, regatta.getOwnership(), securityStringMessages,
-                            new DialogCallback<OwnershipDialogResult>() {
-                                @Override
-                                public void ok(OwnershipDialogResult editedObject) {
-                                    userManagementService.setOwnership(editedObject.getOwnership(),
-                                            Permission.REGATTA.getQualifiedObjectIdentifier(regatta.getName()),
-                                            regatta.getName(), new AsyncCallback<QualifiedObjectIdentifier>() {
-                                                @Override
-                                                public void onFailure(Throwable caught) {
-                                                    errorReporter.reportError(
-                                                            stringMessages.errorUpdatingOwnership(regatta.getName()));
-                                                }
-
-                                                @Override
-                                                public void onSuccess(QualifiedObjectIdentifier result) {
-                                                    regatta.setOwnership(editedObject.getOwnership());
-                                                    commitEditedRegatta(regatta);
-                                                }
-
-                                            });
-                                }
-
-                                @Override
-                                public void cancel() {
-                                }
-                            }).show();
-                }
+        final SecuredObjectCompositeConfig<RegattaDTO> securedObjectConfig = new SecuredObjectCompositeConfig<>(
+                userService, errorReporter, stringMessages, Permission.REGATTA, RegattaDTO::getName);
+        securedObjectConfig.addAction(DefaultModes.UPDATE, this::editRegatta);
+        securedObjectConfig.addAction(DefaultModes.DELETE, regatta -> {
+            if (Window.confirm(stringMessages.doYouReallyWantToRemoveRegatta(regatta.getName()))) {
+                removeRegatta(regatta);
             }
         });
+        securedObjectConfig.addAction(DefaultModes.CHANGE_OWNERSHIP,
+                regatta -> securedObjectConfig.openOwnershipDialog(regatta, this::commitEditedRegatta));
 
         table.addColumn(regattaSelectionCheckboxColumn, regattaSelectionCheckboxColumn.getHeader());
         table.addColumn(regattaNameColumn, stringMessages.regattaName());
@@ -316,9 +245,8 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         table.addColumn(startEndDateColumn, stringMessages.from() + "/" + stringMessages.to());
         table.addColumn(regattaBoatClassColumn, stringMessages.boatClass());
         table.addColumn(rankingMetricColumn, stringMessages.rankingMetric());
-        table.addColumn(groupOwnerColumn, securityStringMessages.group());
-        table.addColumn(userOwnerColumn, securityStringMessages.user());
-        table.addColumn(regattaActionColumn, stringMessages.actions());
+        securedObjectConfig.addOwnerColumns(table, columnSortHandler);
+        securedObjectConfig.addActionColumn(table, new RegattaConfigImagesBarCell(stringMessages));
         table.setSelectionModel(regattaSelectionCheckboxColumn.getSelectionModel(), regattaSelectionCheckboxColumn.getSelectionManager());
         return table;
     }
