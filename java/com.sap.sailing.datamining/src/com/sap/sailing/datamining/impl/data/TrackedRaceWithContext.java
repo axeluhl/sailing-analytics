@@ -1,21 +1,23 @@
 package com.sap.sailing.datamining.impl.data;
 
 import java.util.Calendar;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import com.sap.sailing.datamining.data.HasLeaderboardContext;
 import com.sap.sailing.datamining.data.HasTrackedRaceContext;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Fleet;
-import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.NauticalSide;
-import com.sap.sailing.domain.common.tracking.GPSFix;
-import com.sap.sailing.domain.common.tracking.GPSFixMoving;
-import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.tracking.LineDetails;
+import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
@@ -136,26 +138,10 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
         return duration;
     }
 
-    @Override
-    public int getNumberOfCompetitorFixes() {
+    private <T> int getNumberOfRawFixes(Iterable<T> tracksFor, BiFunction<T, TrackedRace, Track<?>> trackProvider) {
         int number = 0;
-        for (Competitor competitor : getRace().getCompetitors()) {
-            GPSFixTrack<Competitor, GPSFixMoving> track = getTrackedRace().getTrack(competitor);
-            track.lockForRead();
-            try {
-                number += Util.size(track.getRawFixes());
-            } finally {
-                track.unlockAfterRead();
-            }
-        }
-        return number;
-    }
-
-    @Override
-    public int getNumberOfMarkFixes() {
-        int number = 0;
-        for (Mark mark : getTrackedRace().getMarks()) {
-            GPSFixTrack<Mark, GPSFix> track = getTrackedRace().getTrack(mark);
+        for (T trackedObject : tracksFor) {
+            Track<?> track = trackProvider.apply(trackedObject, getTrackedRace());
             track.lockForRead();
             try {
                 number += Util.size(track.getRawFixes());
@@ -166,6 +152,25 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
         return number;
     }
     
+    @Override
+    public int getNumberOfCompetitorFixes() {
+        return getNumberOfRawFixes(getRace().getCompetitors(), (competitor, trackedRace)->trackedRace.getTrack(competitor));
+    }
+
+    @Override
+    public int getNumberOfMarkFixes() {
+        return getNumberOfRawFixes(getTrackedRace().getMarks(), (mark, trackedRace)->trackedRace.getTrack(mark));
+    }
+    
+    @Override
+    public int getNumberOfWindFixes() {
+        final Iterable<WindSource> windSources = getTrackedRace().getWindSources();
+        final Iterable<WindSource> windSourcesToExclude = getTrackedRace().getWindSourcesToExclude();
+        final Iterable<WindSource> windSourcesToUse = StreamSupport.stream(windSources.spliterator(), /* parallel */ false).filter(ws->!Util.contains(windSourcesToExclude, ws)).
+                filter(ws->ws.getType()!=WindSourceType.TRACK_BASED_ESTIMATION).collect(Collectors.toList());
+        return getNumberOfRawFixes(windSourcesToUse, (windSource, trackedRace)->trackedRace.getOrCreateWindTrack(windSource));
+    }
+
     // Convenience methods for race dependent calculation to avoid code duplication
     public Double getRelativeScoreForCompetitor(Competitor competitor) {
         final TimePoint now = MillisecondsTimePoint.now();
