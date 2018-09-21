@@ -184,6 +184,7 @@ public class Swarm implements TimeListener {
 
     public void stop() {
         removeBoundsChangeHandler();
+        projection.clearCanvas();
         loopTimer.cancel();
     }
 
