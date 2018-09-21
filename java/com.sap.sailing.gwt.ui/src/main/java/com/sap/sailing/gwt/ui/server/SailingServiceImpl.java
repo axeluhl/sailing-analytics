@@ -6233,13 +6233,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RegattaLogEvent event = null;
         TimePoint from = mapping.getTimeRange().hasOpenBeginning() ? null : mapping.getTimeRange().from();
         TimePoint to = mapping.getTimeRange().hasOpenEnd() ? null : mapping.getTimeRange().to();
-        if (dto.mappedTo instanceof MarkDTO) {
-            Mark mark = convertToMark(((MarkDTO) dto.mappedTo), true); 
+        if (mapping.getMappedTo() instanceof Mark) {
+            Mark mark = (Mark) mapping.getMappedTo();
             event = new RegattaLogDeviceMarkMappingEventImpl(now, now, getService().getServerAuthor(), UUID.randomUUID(), 
                     mark, mapping.getDevice(), from, to);
-        } else if (dto.mappedTo instanceof CompetitorDTO) {
-            Competitor competitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(
-                    ((CompetitorDTO) dto.mappedTo).getIdAsString());
+        } else if (mapping.getMappedTo() instanceof Competitor) {
+            Competitor competitor = (Competitor) mapping.getMappedTo();
             if (mapping.getDevice().getIdentifierType().equals(ExpeditionSensorDeviceIdentifier.TYPE)) {
                 event = new RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl(
                         now, now, getService().getServerAuthor(), UUID.randomUUID(), 
@@ -6248,9 +6247,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 event = new RegattaLogDeviceCompetitorMappingEventImpl(now, now, getService().getServerAuthor(), UUID.randomUUID(), 
                         competitor, mapping.getDevice(), from, to);
             }
-        } else if (dto.mappedTo instanceof BoatDTO) {
-            final Boat boat = getService().getCompetitorAndBoatStore()
-                    .getExistingBoatByIdAsString(((BoatDTO) dto.mappedTo).getIdAsString());
+        } else if (mapping.getMappedTo() instanceof Boat) {
+            final Boat boat = (Boat) mapping.getMappedTo();
             event = new RegattaLogDeviceBoatMappingEventImpl(now, now, getService().getServerAuthor(), UUID.randomUUID(), 
                     boat, mapping.getDevice(), from, to);
         } else {
