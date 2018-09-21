@@ -34,11 +34,11 @@ public interface UserManagementService extends RemoteService {
 
     AccessControlListAnnotation getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject);
 
-    AccessControlList updateACL(QualifiedObjectIdentifier idOfAccessControlledObject, Map<String, Set<String>> permissionStrings) throws UnauthorizedException;
+    AccessControlList updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, Map<String, Set<String>> permissionStrings) throws UnauthorizedException;
 
-    AccessControlList addToACL(QualifiedObjectIdentifier idOfAccessControlledObject, String groupOrTenantIdAsString, String action) throws UnauthorizedException;
+    AccessControlList addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String groupOrTenantIdAsString, String action) throws UnauthorizedException;
 
-    AccessControlList removeFromACL(QualifiedObjectIdentifier idOfAccessControlledObject, String groupOrTenantIdAsString, String action) throws UnauthorizedException;
+    AccessControlList removeFromAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String groupOrTenantIdAsString, String action) throws UnauthorizedException;
 
     Collection<UserGroup> getUserGroups();
 

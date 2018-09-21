@@ -22,7 +22,7 @@ import com.sap.sse.security.shared.WildcardPermission;
  *
  */
 public interface ReplicableSecurityService extends SecurityService {
-    Void internalCreateAcl(QualifiedObjectIdentifier idOfAccessControlledObject, String displayName);
+    Void internalSetEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String displayName);
     
     Void internalAclPutPermissions(QualifiedObjectIdentifier idOfAccessControlledObject, UUID groupId, Set<String> actions);
     
@@ -32,7 +32,7 @@ public interface ReplicableSecurityService extends SecurityService {
     
     Void internalDeleteAcl(QualifiedObjectIdentifier idOfAccessControlledObject);
     
-    Ownership internalCreateOwnership(QualifiedObjectIdentifier idOfOwnedObject, String owningUsername, UUID tenantOwnerId, String displayNameOfOwnedObject);
+    Ownership internalSetOwnership(QualifiedObjectIdentifier idOfOwnedObject, String owningUsername, UUID tenantOwnerId, String displayNameOfOwnedObject);
     
     Void internalDeleteOwnership(QualifiedObjectIdentifier idOfOwnedObject);
     

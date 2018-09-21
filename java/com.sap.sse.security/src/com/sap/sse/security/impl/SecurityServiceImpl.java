@@ -237,7 +237,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             } else {
                 adminUser = userStore.getUserByName(ADMIN_USERNAME);
             }
-            createOwnership(DefaultPermissions.USER.getQualifiedObjectIdentifier(ADMIN_USERNAME), adminUser, /* no admin tenant */ null, ADMIN_USERNAME);
+            setOwnership(DefaultPermissions.USER.getQualifiedObjectIdentifier(ADMIN_USERNAME), adminUser, /* no admin tenant */ null, ADMIN_USERNAME);
             addRoleForUser(adminUser, new RoleImpl(adminRoleDefinition));
         } catch (UserManagementException | MailException | UserGroupManagementException e) {
             logger.log(Level.SEVERE, "Exception while creating default admin user", e);
@@ -322,13 +322,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public void setOwnership(OwnershipAnnotation ownershipAnnotation) {
-        accessControlStore.createOwnership(ownershipAnnotation.getIdOfAnnotatedObject(), ownershipAnnotation.getAnnotation().getUserOwner(),
+        accessControlStore.setOwnership(ownershipAnnotation.getIdOfAnnotatedObject(), ownershipAnnotation.getAnnotation().getUserOwner(),
                 ownershipAnnotation.getAnnotation().getTenantOwner(), ownershipAnnotation.getDisplayNameOfAnnotatedObject());
     }
 
     @Override
     public void deleteAllDataForRemovedObject(QualifiedObjectIdentifier idOfRemovedObject) {
-        deleteACL(idOfRemovedObject);
+        deleteAccessControlList(idOfRemovedObject);
         deleteOwnership(idOfRemovedObject);
     }
 
@@ -352,26 +352,26 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public SecurityService createAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
-        return createAccessControlList(idOfAccessControlledObjectAsString, /* display name of access-controlled object */ null);
+    public SecurityService setAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
+        return setEmptyAccessControlList(idOfAccessControlledObjectAsString, /* display name of access-controlled object */ null);
     }
 
     @Override
-    public SecurityService createAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString, String displayNameOfAccessControlledObject) {
-        apply(s->s.internalCreateAcl(idOfAccessControlledObjectAsString, displayNameOfAccessControlledObject));
+    public SecurityService setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString, String displayNameOfAccessControlledObject) {
+        apply(s->s.internalSetEmptyAccessControlList(idOfAccessControlledObjectAsString, displayNameOfAccessControlledObject));
         return this;
     }
 
     @Override
-    public Void internalCreateAcl(QualifiedObjectIdentifier idOfAccessControlledObject, String displayNameOfAccessControlledObject) {
-        accessControlStore.createAccessControlList(idOfAccessControlledObject, displayNameOfAccessControlledObject);
+    public Void internalSetEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String displayNameOfAccessControlledObject) {
+        accessControlStore.setEmptyAccessControlList(idOfAccessControlledObject, displayNameOfAccessControlledObject);
         return null;
     }
 
     @Override
-    public AccessControlList updateACL(QualifiedObjectIdentifier idOfAccessControlledObject, Map<UserGroup, Set<String>> permissionMap) {
+    public AccessControlList updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, Map<UserGroup, Set<String>> permissionMap) {
         if (getAccessControlList(idOfAccessControlledObject) == null) {
-            createAccessControlList(idOfAccessControlledObject);
+            setAccessControlList(idOfAccessControlledObject);
         }
         for (Map.Entry<UserGroup, Set<String>> entry : permissionMap.entrySet()) {
             final UUID userGroupId = entry.getKey().getId();
@@ -392,9 +392,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      * @param name The name of the user group to add
      */
     @Override
-    public AccessControlList addToACL(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup group, String action) {
+    public AccessControlList addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup group, String action) {
         if (getAccessControlList(idOfAccessControlledObject) == null) {
-            createAccessControlList(idOfAccessControlledObject);
+            setAccessControlList(idOfAccessControlledObject);
         }
         final UUID groupId = group.getId();
         apply(s->s.internalAclAddPermission(idOfAccessControlledObject, groupId, action));
@@ -411,7 +411,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      * @param name The name of the user group to remove
      */
     @Override
-    public AccessControlList removeFromACL(QualifiedObjectIdentifier idOfAccessControlledObjectAsString, UserGroup group, String permission) {
+    public AccessControlList removeFromAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString, UserGroup group, String permission) {
         final AccessControlList result;
         if (getAccessControlList(idOfAccessControlledObjectAsString) != null) {
             final UUID groupId = group.getId();
@@ -430,7 +430,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void deleteACL(QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
+    public void deleteAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
         if (getAccessControlList(idOfAccessControlledObjectAsString) != null) {
             apply(s->s.internalDeleteAcl(idOfAccessControlledObjectAsString));
         }
@@ -443,12 +443,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public Ownership createOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString, SecurityUser userOwner, UserGroup tenantOwner) {
-        return createOwnership(idOfOwnedObjectAsString, userOwner, tenantOwner, /* displayNameOfOwnedObject */ null);
+    public Ownership setOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString, SecurityUser userOwner, UserGroup tenantOwner) {
+        return setOwnership(idOfOwnedObjectAsString, userOwner, tenantOwner, /* displayNameOfOwnedObject */ null);
     }
 
     @Override
-    public Ownership createOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString, SecurityUser userOwner, UserGroup tenantOwner, String displayNameOfOwnedObject) {
+    public Ownership setOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString, SecurityUser userOwner, UserGroup tenantOwner, String displayNameOfOwnedObject) {
         final UUID tenantId;
         if (tenantOwner == null || !tenantOwner.contains(userOwner)) {
             tenantId = userOwner == null || userOwner.getDefaultTenant() == null ? null : userOwner.getDefaultTenant().getId();
@@ -456,12 +456,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             tenantId = tenantOwner.getId();
         }
         final String userOwnerName = userOwner == null ? null : userOwner.getName();
-        return apply(s->s.internalCreateOwnership(idOfOwnedObjectAsString, userOwnerName, tenantId, displayNameOfOwnedObject));
+        return apply(s->s.internalSetOwnership(idOfOwnedObjectAsString, userOwnerName, tenantId, displayNameOfOwnedObject));
     }
 
     @Override
-    public Ownership internalCreateOwnership(QualifiedObjectIdentifier idAsString, String userOwnerName, UUID tenantOwnerId, String displayName) {
-        return accessControlStore.createOwnership(idAsString, getUserByName(userOwnerName), getUserGroup(tenantOwnerId), displayName).getAnnotation();
+    public Ownership internalSetOwnership(QualifiedObjectIdentifier idAsString, String userOwnerName, UUID tenantOwnerId, String displayName) {
+        return accessControlStore.setOwnership(idAsString, getUserByName(userOwnerName), getUserGroup(tenantOwnerId), displayName).getAnnotation();
     }
 
     @Override
@@ -661,7 +661,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         addRoleForUser(result, new RoleImpl(UserRole.getInstance(), /* tenant qualifier */ null, /* user qualifier */ result));
         addUserToUserGroup(tenant, result);
         // the new user becomes the owning user of its own specific tenant which initially only contains the new user
-        accessControlStore.createOwnership(DefaultPermissions.USER_GROUP.getQualifiedObjectIdentifier(tenant.getId().toString()), result, tenant, tenant.getName());
+        accessControlStore.setOwnership(DefaultPermissions.USER_GROUP.getQualifiedObjectIdentifier(tenant.getId().toString()), result, tenant, tenant.getName());
         result.setFullName(fullName);
         result.setCompany(company);
         result.setLocale(locale);
@@ -990,7 +990,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         UserGroup tenant = createUserGroup(UUID.randomUUID(), getDefaultTenantNameForUsername(name));
         SecurityUser result = userStore.createUser(name, socialUserAccount.getProperty(Social.EMAIL.name()), tenant, socialUserAccount);
-        accessControlStore.createOwnership(DefaultPermissions.USER_GROUP.getQualifiedObjectIdentifier(tenant.getId().toString()), result, tenant, tenant.getName());
+        accessControlStore.setOwnership(DefaultPermissions.USER_GROUP.getQualifiedObjectIdentifier(tenant.getId().toString()), result, tenant, tenant.getName());
         addUserToUserGroup(tenant, result);
         return result;
     }

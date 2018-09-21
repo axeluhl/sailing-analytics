@@ -3958,7 +3958,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             throws MalformedURLException, UnauthorizedException {
         final EventDTO result;
         UUID eventUuid = UUID.randomUUID();
-        getSecurityService().createOwnership(Permission.EVENT.getQualifiedObjectIdentifier(eventUuid.toString()),
+        getSecurityService().setOwnership(Permission.EVENT.getQualifiedObjectIdentifier(eventUuid.toString()),
                 getSecurityService().getUserByName((String) SecurityUtils.getSubject().getPrincipal()),
                 getSecurityService().getUserGroupByName(tenantOwnerName), eventName);
         try {
@@ -4020,7 +4020,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void removeEvent(UUID eventId) throws UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted(Permission.EVENT.getStringPermissionForObjects(DefaultModes.DELETE, eventId.toString()))) {
             getService().apply(new RemoveEvent(eventId));
-            getSecurityService().deleteACL(Permission.EVENT.getQualifiedObjectIdentifier(eventId.toString()));
+            getSecurityService().deleteAccessControlList(Permission.EVENT.getQualifiedObjectIdentifier(eventId.toString()));
             getSecurityService().deleteOwnership(Permission.EVENT.getQualifiedObjectIdentifier(eventId.toString()));
         } else {
             throw new UnauthorizedException("You are not permitted to remove event " + eventId);
@@ -7641,7 +7641,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public RegattaAndRaceIdentifier sliceRace(RegattaAndRaceIdentifier raceIdentifier, String newRaceColumnName,
             TimePoint sliceFrom, TimePoint sliceTo) throws ServiceException {
-        SecurityUtils.getSubject().checkPermission(Permission.MANAGE_TRACKED_RACES.getStringPermissionForObjects(DefaultModes.UPDATE)); // TODO no object identifier here?
+        SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(DefaultModes.UPDATE, raceIdentifier.getRegattaName()));
+        SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(DefaultModes.UPDATE, raceIdentifier.getRegattaName()));
         final Locale locale = getClientLocale();
         if (!canSliceRace(raceIdentifier)) {
             throw new ServiceException(serverStringMessages.get(locale, "slicingCannotSliceRace"));
@@ -7649,6 +7650,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final String trackedRaceName = newRaceColumnName;
         final RegattaIdentifier regattaIdentifier = new RegattaName(raceIdentifier.getRegattaName());
         final Regatta regatta = getService().getRegatta(regattaIdentifier);
+        final Leaderboard regattaLeaderboard = getService().getLeaderboardByName(regatta.getName());
+        if (regattaLeaderboard == null) {
+            throw new IllegalArgumentException("Cannot slice a race for which no regatta leaderboard exists");
+        }
         if (regatta.getRaceColumnByName(newRaceColumnName) != null) {
             throw new ServiceException(serverStringMessages.get(locale, "slicingRaceColumnAlreadyUsedThe"));
         }
@@ -7659,15 +7664,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 || (endOfTrackingOfRaceToSlice != null && endOfTrackingOfRaceToSlice.before(sliceTo))) {
             throw new ServiceException(serverStringMessages.get(locale, "slicingTimeRangeOutOfBounds"));
         }
-        final RegattaLeaderboard regattaLeaderboard = (RegattaLeaderboard) getService().getLeaderboardByName(raceIdentifier.getRegattaName());
-        final Pair<RaceColumn, Fleet> raceColumnAndFleetOfRaceToSlice = regattaLeaderboard.getRaceColumnAndFleet(trackedRaceToSlice);
+        final Pair<RaceColumn, Fleet> raceColumnAndFleetOfRaceToSlice = regatta.getRaceColumnAndFleet(trackedRaceToSlice);
         // RaceColumns in a RegattaLeaderboard are always RaceColumnInSeries instances
         final RaceColumnInSeries raceColumnOfRaceToSlice = (RaceColumnInSeries) raceColumnAndFleetOfRaceToSlice.getA();
         final Fleet fleet = raceColumnAndFleetOfRaceToSlice.getB();
         final Series series = raceColumnOfRaceToSlice.getSeries();
         final RaceLog raceLogOfRaceToSlice = raceColumnOfRaceToSlice.getRaceLog(fleet);
-        getService().apply(new AddColumnToSeries(regattaIdentifier, series.getName(), newRaceColumnName));
-        final RaceColumn raceColumn = regattaLeaderboard.getRaceColumnByName(newRaceColumnName);
+        final RaceColumn raceColumn = getService().apply(new AddColumnToSeries(regattaIdentifier, series.getName(), newRaceColumnName));
         final RaceLog raceLog = raceColumn.getRaceLog(fleet);
         final AbstractLogEventAuthor author = getService().getServerAuthor();
         final TimePoint startOfTracking = sliceFrom;

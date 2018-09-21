@@ -13,10 +13,6 @@ import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 
 public enum Permission implements HasPermissions {
     // AdminConsole permissions
-    MANAGE_EVENTS,
-    MANAGE_PAIRING_LISTS,
-    MANAGE_REGATTAS,
-    MANAGE_TRACKED_RACES,
     MANAGE_RACELOG_TRACKING,
     MANAGE_ALL_COMPETITORS,
     MANAGE_ALL_BOATS,
@@ -53,8 +49,8 @@ public enum Permission implements HasPermissions {
     ;
     
     private static Set<Permission> adminConsolePermissions = new HashSet<>(Arrays.asList(
-            MANAGE_EVENTS, MANAGE_ALL_COMPETITORS, MANAGE_ALL_BOATS, MANAGE_REGATTAS, MANAGE_LEADERBOARDS, MANAGE_LEADERBOARD_GROUPS,
-            MANAGE_COURSE_LAYOUT, MANAGE_WIND, MANAGE_MEDIA, MANAGE_DEVICE_CONFIGURATION, MANAGE_TRACKED_RACES,
+            MANAGE_ALL_COMPETITORS, MANAGE_ALL_BOATS, MANAGE_LEADERBOARDS, MANAGE_LEADERBOARD_GROUPS,
+            MANAGE_COURSE_LAYOUT, MANAGE_WIND, MANAGE_MEDIA, MANAGE_DEVICE_CONFIGURATION,
             MANAGE_IGTIMI_ACCOUNTS, MANAGE_EXPEDITION_DEVICE_CONFIGURATIONS, MANAGE_RESULT_IMPORT_URLS,
             MANAGE_STRUCTURE_IMPORT_URLS, MANAGE_REPLICATION, MANAGE_MASTERDATA_IMPORT, MANAGE_SAILING_SERVER_INSTANCES,
             MANAGE_LOCAL_SERVER_INSTANCE, MANAGE_USERS, MANAGE_ROLES, MANAGE_FILE_STORAGE));
@@ -100,19 +96,19 @@ public enum Permission implements HasPermissions {
 
     // TODO once we can use Java8 here, move this up into a "default" method on the Permission interface
     @Override
-    public String getStringPermissionForObjects(HasPermissions.Mode mode, String... objectIdentifiers) {
+    public String getStringPermissionForObjects(HasPermissions.Mode mode, String... typeRelativeObjectIdentifiers) {
         final WildcardPermissionEncoder permissionEncoder = new WildcardPermissionEncoder();
         final StringBuilder result = new StringBuilder(getStringPermission(mode));
-        if (objectIdentifiers!=null && objectIdentifiers.length>0) {
+        if (typeRelativeObjectIdentifiers!=null && typeRelativeObjectIdentifiers.length>0) {
             result.append(':');
             boolean first = true;
-            for (String objectIdentifier : objectIdentifiers) {
+            for (String typeRelativeObjectIdentifier : typeRelativeObjectIdentifiers) {
                 if (first) {
                     first = false;
                 } else {
                     result.append(',');
                 }
-                result.append(permissionEncoder.encodeAsPermissionPart(objectIdentifier));
+                result.append(permissionEncoder.encodeAsPermissionPart(typeRelativeObjectIdentifier));
             }
         }
         return result.toString();

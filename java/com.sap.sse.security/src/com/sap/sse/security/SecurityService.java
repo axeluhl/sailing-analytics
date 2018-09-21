@@ -63,32 +63,32 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     /**
      * @param idOfAccessControlledObject Has to be globally unique
      */
-    SecurityService createAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject);
+    SecurityService setAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject);
 
     /**
      * @param id Has to be globally unique
      */
-    SecurityService createAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String displayNameOfAccessControlledObject);
+    SecurityService setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String displayNameOfAccessControlledObject);
 
-    AccessControlList updateACL(QualifiedObjectIdentifier idOfAccessControlledObject, Map<UserGroup, Set<String>> permissionMap);
+    AccessControlList updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, Map<UserGroup, Set<String>> permissionMap);
 
     /**
      * @param name The name of the user group to add
      */
-    AccessControlList addToACL(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup, String action);
+    AccessControlList addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup, String action);
 
     /**
      * @param name The name of the user group to remove
      */
-    AccessControlList removeFromACL(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup group, String action);
+    AccessControlList removeFromAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup group, String action);
 
-    void deleteACL(QualifiedObjectIdentifier idOfAccessControlledObject);
+    void deleteAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject);
 
     /**
-     * Same as {@link #createOwnership(String, UserImpl, Tenant, String)}, leaving the display name
+     * Same as {@link #setOwnership(String, UserImpl, Tenant, String)}, leaving the display name
      * of the object owned undefined.
      */
-    Ownership createOwnership(QualifiedObjectIdentifier idOfOwnedObject, SecurityUser userOwner, UserGroup tenantOwner);
+    Ownership setOwnership(QualifiedObjectIdentifier idOfOwnedObject, SecurityUser userOwner, UserGroup tenantOwner);
 
     /**
      * @param idOfOwnedObject
@@ -104,7 +104,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      *            as the object identified by {@link idOfOwnedObject} may change its name without notifying this
      *            store
      */
-    Ownership createOwnership(QualifiedObjectIdentifier idOfOwnedObject, SecurityUser userOwner, UserGroup tenantOwner, String displayNameOfOwnedObject);
+    Ownership setOwnership(QualifiedObjectIdentifier idOfOwnedObject, SecurityUser userOwner, UserGroup tenantOwner, String displayNameOfOwnedObject);
 
     void deleteOwnership(QualifiedObjectIdentifier idOfOwnedObject);
 

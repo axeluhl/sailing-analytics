@@ -30,11 +30,11 @@ public interface UserManagementServiceAsync {
 
     void getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, AsyncCallback<AccessControlListAnnotation> callback);
 
-    void updateACL(QualifiedObjectIdentifier idOfAccessControlledObject, Map<String, Set<String>> permissionStrings, AsyncCallback<AccessControlList> callback);
+    void updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, Map<String, Set<String>> permissionStrings, AsyncCallback<AccessControlList> callback);
 
-    void addToACL(QualifiedObjectIdentifier idOfAccessControlledObject, String permission, String name, AsyncCallback<AccessControlList> callback);
+    void addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String permission, String name, AsyncCallback<AccessControlList> callback);
 
-    void removeFromACL(QualifiedObjectIdentifier idOfAccessControlledObject, String permission, String name, AsyncCallback<AccessControlList> callback);
+    void removeFromAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String permission, String name, AsyncCallback<AccessControlList> callback);
 
     /**
      * Returns those user groups the requesting user can read

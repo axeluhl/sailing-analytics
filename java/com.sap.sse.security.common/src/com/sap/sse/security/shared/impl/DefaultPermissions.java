@@ -38,19 +38,19 @@ public enum DefaultPermissions implements com.sap.sse.security.shared.HasPermiss
 
     // TODO once we can use Java8 here, move this up into a "default" method on the Permission interface
     @Override
-    public String getStringPermissionForObjects(com.sap.sse.security.shared.HasPermissions.Mode mode, String... objectIdentifiers) {
+    public String getStringPermissionForObjects(com.sap.sse.security.shared.HasPermissions.Mode mode, String... typeRelativeObjectIdentifiers) {
         final WildcardPermissionEncoder permissionEncoder = new WildcardPermissionEncoder();
         final StringBuilder result = new StringBuilder(getStringPermission(mode));
-        if (objectIdentifiers!=null && objectIdentifiers.length>0) {
+        if (typeRelativeObjectIdentifiers!=null && typeRelativeObjectIdentifiers.length>0) {
             result.append(':');
             boolean first = true;
-            for (String objectIdentifier : objectIdentifiers) {
+            for (String typeRelativeObjectIdentifier : typeRelativeObjectIdentifiers) {
                 if (first) {
                     first = false;
                 } else {
                     result.append(',');
                 }
-                result.append(permissionEncoder.encodeAsPermissionPart(objectIdentifier));
+                result.append(permissionEncoder.encodeAsPermissionPart(typeRelativeObjectIdentifier));
             }
         }
         return result.toString();

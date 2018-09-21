@@ -69,7 +69,7 @@ public class AccessControlStoreTest {
 
     @Test
     public void testCreateAccessControlList() throws UserGroupManagementException {
-        accessControlStore.createAccessControlList(testId, testDisplayName);
+        accessControlStore.setEmptyAccessControlList(testId, testDisplayName);
         assertNotNull(accessControlStore.getAccessControlList(testId));
         newStores();
         assertNotNull(accessControlStore.getAccessControlList(testId));
@@ -77,7 +77,7 @@ public class AccessControlStoreTest {
     
     @Test
     public void testDeleteAccessControlList() throws UserGroupManagementException {
-        accessControlStore.createAccessControlList(testId, testDisplayName);
+        accessControlStore.setEmptyAccessControlList(testId, testDisplayName);
         accessControlStore.removeAccessControlList(testId);
         assertNull(accessControlStore.getAccessControlList(testId));
         newStores();
@@ -85,8 +85,8 @@ public class AccessControlStoreTest {
     }
     
     @Test
-    public void testCreateOwnership() throws UserGroupManagementException {
-        accessControlStore.createOwnership(testId, testOwner, testTenantOwner, testDisplayName);
+    public void testSetOwnership() throws UserGroupManagementException {
+        accessControlStore.setOwnership(testId, testOwner, testTenantOwner, testDisplayName);
         assertNotNull(accessControlStore.getOwnership(testId));
         newStores();
         assertNotNull(accessControlStore.getOwnership(testId));
@@ -94,7 +94,7 @@ public class AccessControlStoreTest {
     
     @Test
     public void testDeleteOwnership() throws UserGroupManagementException {
-        accessControlStore.createOwnership(testId, testOwner, testTenantOwner, testDisplayName);
+        accessControlStore.setOwnership(testId, testOwner, testTenantOwner, testDisplayName);
         accessControlStore.removeOwnership(testId);
         // expecting to fall back to default tenant ownership
         final OwnershipAnnotation defaultOwnership = accessControlStore.getOwnership(testId);

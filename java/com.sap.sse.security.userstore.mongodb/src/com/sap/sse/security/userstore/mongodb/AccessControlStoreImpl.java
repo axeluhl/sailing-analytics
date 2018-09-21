@@ -69,7 +69,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
 
     @Override
-    public AccessControlListAnnotation createAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String displayNameOfAccessControlledObject) {
+    public AccessControlListAnnotation setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String displayNameOfAccessControlledObject) {
         AccessControlListAnnotation acl = new AccessControlListAnnotation(new AccessControlListImpl(), idOfAccessControlledObject, displayNameOfAccessControlledObject);
         accessControlLists.put(idOfAccessControlledObject, acl);
         mongoObjectFactory.storeAccessControlList(acl);
@@ -134,7 +134,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
     
     @Override
-    public OwnershipAnnotation createOwnership(QualifiedObjectIdentifier id, SecurityUser userOwnerName, UserGroup tenantOwner, String displayNameOfOwnedObject) {
+    public OwnershipAnnotation setOwnership(QualifiedObjectIdentifier id, SecurityUser userOwnerName, UserGroup tenantOwner, String displayNameOfOwnedObject) {
         OwnershipAnnotation ownership = new OwnershipAnnotation(new OwnershipImpl(userOwnerName, tenantOwner), id, displayNameOfOwnedObject);
         ownerships.put(id, ownership);
         mongoObjectFactory.storeOwnership(ownership);

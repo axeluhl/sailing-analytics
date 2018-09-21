@@ -45,7 +45,6 @@ import com.sap.sse.common.ObscuringIterable;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
@@ -935,18 +934,6 @@ public abstract class AbstractSimpleLeaderboardImpl extends AbstractLeaderboardW
     @Override
     public NumberOfCompetitorsInLeaderboardFetcher getNumberOfCompetitorsInLeaderboardFetcher() {
         return new NumberOfCompetitorsFetcherImpl();
-    }
-
-    @Override
-    public Pair<RaceColumn, Fleet> getRaceColumnAndFleet(TrackedRace trackedRace) {
-        for (final RaceColumn raceColumn : getRaceColumns()) {
-            for (final Fleet fleet : raceColumn.getFleets()) {
-                if (raceColumn.getTrackedRace(fleet) == trackedRace) {
-                    return new Pair<>(raceColumn, fleet);
-                }
-            }
-        }
-        return null;
     }
 
     @Override

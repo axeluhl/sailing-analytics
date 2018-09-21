@@ -23,7 +23,7 @@ public interface AccessControlStore extends Named {
      * @param idOfAccessControlledObject ID of the object the ACL is attached to
      * @param displayNameOfAccessControlledObject the display name of the object the ACL is attached to
      */
-    AccessControlListAnnotation createAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String displayNameOfAccessControlledObject);
+    AccessControlListAnnotation setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String displayNameOfAccessControlledObject);
     void setAclPermissions(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup, Set<String> actions);
     void addAclPermission(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup, String action);
     void removeAclPermission(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup, String action);
@@ -42,7 +42,7 @@ public interface AccessControlStore extends Named {
      */
     OwnershipAnnotation getOwnership(QualifiedObjectIdentifier idOfOwnedObject);
     
-    OwnershipAnnotation createOwnership(QualifiedObjectIdentifier idOfOwnedObject, SecurityUser userOwner, UserGroup tenantOwner, String displayNameOfOwnedObject);
+    OwnershipAnnotation setOwnership(QualifiedObjectIdentifier idOfOwnedObject, SecurityUser userOwner, UserGroup tenantOwner, String displayNameOfOwnedObject);
     void removeOwnership(QualifiedObjectIdentifier idOfOwnedObject);
     
     void clear();

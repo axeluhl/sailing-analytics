@@ -59,7 +59,7 @@ public class EditAccessControlListDialog extends DataEntryDialog<AccessControlLi
         this(stringMessages, stringMessages.editAnACL(), acl.getDisplayNameOfAnnotatedObject(), userManagementService, acl, new DialogCallback<AccessControlListData>() {
             @Override
             public void ok(AccessControlListData aclData) {
-                userManagementService.updateACL(aclData.getAccessControlledObjectId(), aclData.getActionStrings(), new AsyncCallback<AccessControlList>() {
+                userManagementService.updateAccessControlList(aclData.getAccessControlledObjectId(), aclData.getActionStrings(), new AsyncCallback<AccessControlList>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         Window.alert(stringMessages.errorEditingACL());

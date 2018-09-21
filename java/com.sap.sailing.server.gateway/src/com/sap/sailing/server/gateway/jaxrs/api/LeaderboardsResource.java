@@ -1253,7 +1253,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             @QueryParam("raceColumnName") String raceColumnName, @QueryParam("fleetName") String fleetName,
             @QueryParam("raceName") String raceName) throws NotFoundException, NotDenotableForRaceLogTrackingException {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        SecurityUtils.getSubject().checkPermission(Permission.MANAGE_TRACKED_RACES.getStringPermission(DefaultModes.UPDATE));
+        SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(DefaultModes.UPDATE, leaderboardName));
         if (leaderboard == null) {
             throw new NotFoundException("leaderboard with name " + leaderboardName + " not found");
         }

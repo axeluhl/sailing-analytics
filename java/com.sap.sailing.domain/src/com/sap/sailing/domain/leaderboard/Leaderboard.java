@@ -583,14 +583,6 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     NumberOfCompetitorsInLeaderboardFetcher getNumberOfCompetitorsInLeaderboardFetcher();
 
     /**
-     * Looks through all {@link #getRaceColumns() race columns} and their {@link RaceColumn#getFleets() fleets} and checks
-     * if {@code trackedRace} is {@link RaceColumn#getTrackedRace(Fleet) linked} to that combination. If such a slot is found
-     * that "slot" is returned by a pair specifying the non-{@code null} {@link RaceColumn} and {@code Fleet} pair. Otherwise,
-     * {@code null} is returned.
-     */
-    Pair<RaceColumn, Fleet> getRaceColumnAndFleet(TrackedRace trackedRace);
-
-    /**
      * Gets the ("dominant") boat class for this leaderboard. For a {@link RegattaLeaderboard} this is the {@link Regatta}'s boat class.
      * For a {@link FlexibleLeaderboard} the implementation is more complex because no fixed boat class is set for the leaderboard. There,
      * the boat class will be determined based on the most frequently occurring boat class when iterating across the competitors.
