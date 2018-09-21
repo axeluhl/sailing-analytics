@@ -280,7 +280,7 @@ public class TaggingServiceImpl implements TaggingService {
     }
 
     @Override
-    public List<TagDTO> getPublicTags(RegattaAndRaceIdentifier raceIdentifier, TimePoint latestReceivedTagTime) {
+    public List<TagDTO> getPublicTags(RegattaAndRaceIdentifier raceIdentifier, TimePoint searchSince) {
         final List<TagDTO> result = new ArrayList<TagDTO>();
         TrackedRace trackedRace = racingService.getExistingTrackedRace(raceIdentifier);
         Iterable<RaceLog> raceLogs = trackedRace.getAttachedRaceLogs();
@@ -288,11 +288,11 @@ public class TaggingServiceImpl implements TaggingService {
             ReadonlyRaceState raceState = ReadonlyRaceStateImpl.getOrCreate(racingService, raceLog);
             Iterable<RaceLogTagEvent> foundTagEvents = raceState.getTagEvents();
             for (RaceLogTagEvent tagEvent : foundTagEvents) {
-                if ((latestReceivedTagTime == null && tagEvent.getRevokedAt() == null)
-                        || (latestReceivedTagTime != null && tagEvent.getRevokedAt() == null
-                                && tagEvent.getCreatedAt().after(latestReceivedTagTime))
-                        || (latestReceivedTagTime != null && tagEvent.getRevokedAt() != null
-                                && tagEvent.getRevokedAt().after(latestReceivedTagTime))) {
+                if ((searchSince == null && tagEvent.getRevokedAt() == null)
+                        || (searchSince != null && tagEvent.getRevokedAt() == null
+                                && tagEvent.getCreatedAt().after(searchSince))
+                        || (searchSince != null && tagEvent.getRevokedAt() != null
+                                && tagEvent.getRevokedAt().after(searchSince))) {
                     result.add(new TagDTO(tagEvent.getTag(), tagEvent.getComment(), tagEvent.getImageURL(),
                             true, tagEvent.getUsername(), tagEvent.getLogicalTimePoint(), tagEvent.getCreatedAt(),
                             tagEvent.getRevokedAt()));

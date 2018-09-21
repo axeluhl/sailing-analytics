@@ -12,6 +12,7 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.domain.abstractlog.Revokable;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
@@ -64,6 +65,7 @@ import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTracksDTO;
+import com.sap.sailing.gwt.ui.server.RaceLogTagEvents;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
@@ -197,13 +199,23 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     RaceTimesInfoDTO getRaceTimesInfo(RegattaAndRaceIdentifier raceIdentifier);
 
-    RaceTimesInfoDTO getRaceTimesInfoIncludingTags(RegattaAndRaceIdentifier raceIdentifier,
-            TimePoint latestReceivedTagTime);
+    /**
+     * Returns {@link RaceTimesInfoDTO race times info} for specified race (<code>raceIdentifier</code>) including
+     * {@link RaceLogTagEvent tag events} since received timestamp (<code>searchSince</code>). Loads tags from
+     * {@link ReadonlyRaceState cache} instead of scanning the whole {@link RaceLog} every request.
+     */
+    RaceTimesInfoDTO getRaceTimesInfoIncludingTags(RegattaAndRaceIdentifier raceIdentifier, TimePoint searchSince);
 
     List<RaceTimesInfoDTO> getRaceTimesInfos(Collection<RegattaAndRaceIdentifier> raceIdentifiers);
 
+    /**
+     * Collects besides {@link RaceTimesInfoDTO race times infos} public {@link RaceLogTagEvent tag events} from
+     * {@link ReadonlyRaceState cache} and compares the <code>createdAt</code> timepoint to the received
+     * <code>searchSince</code> timepoint. Returns {@link RaceTimesInfoDTO race times infos} including
+     * {@link RaceLogTagEvents public tag events} since the latest client-side received tag.
+     */
     List<RaceTimesInfoDTO> getRaceTimesInfosIncludingTags(Collection<RegattaAndRaceIdentifier> raceIdentifiers,
-            Map<RegattaAndRaceIdentifier, TimePoint> latestReceivedTagTimes);
+            Map<RegattaAndRaceIdentifier, TimePoint> searchSinceMap);
 
     CoursePositionsDTO getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date);
 

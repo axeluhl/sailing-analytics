@@ -2234,17 +2234,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
         return raceTimesInfo;
     }
 
-    /**
-     * Returns {@link RaceTimesInfoDTO race times info} for specified race (<code>raceIdentifier</code>) including
-     * {@link RaceLogTagEvent tag events} since received timestamp (<code>latestReceivedTagTime</code>). Loads tags from
-     * {@link ReadonlyRaceState cache} instead of scanning the whole {@link RaceLog} every request.
-     */
-    // TODO: rename latestReceivedTagTime to match role
     @Override
     public RaceTimesInfoDTO getRaceTimesInfoIncludingTags(RegattaAndRaceIdentifier raceIdentifier,
-            TimePoint latestReceivedTagTime) {
+            TimePoint searchSince) {
         RaceTimesInfoDTO raceTimesInfo = getRaceTimesInfo(raceIdentifier);
-        raceTimesInfo.setTags(getService().getTaggingService().getPublicTags(raceIdentifier, latestReceivedTagTime));
+        raceTimesInfo.setTags(getService().getTaggingService().getPublicTags(raceIdentifier, searchSince));
         return raceTimesInfo;
     }
 
@@ -2260,19 +2254,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
         return raceTimesInfos;
     }
 
-    /**
-     * Collects besides {@link RaceTimesInfoDTO race times infos} public {@link RaceLogTagEvent tag events} from
-     * {@link ReadonlyRaceState cache} and compares the <code>createdAt</code> timepoint to the received latest tag
-     * creation timepoint. Returns {@link RaceTimesInfoDTO race times infos} including {@link RaceLogTagEvents public
-     * tag events} since the latest client-side received tag.
-     */
     @Override
     public List<RaceTimesInfoDTO> getRaceTimesInfosIncludingTags(Collection<RegattaAndRaceIdentifier> raceIdentifiers,
-            Map<RegattaAndRaceIdentifier, TimePoint> latestReceivedTagTimes) {
+            Map<RegattaAndRaceIdentifier, TimePoint> searchSinceMap) {
         List<RaceTimesInfoDTO> raceTimesInfos = new ArrayList<RaceTimesInfoDTO>();
         for (RegattaAndRaceIdentifier raceIdentifier : raceIdentifiers) {
             RaceTimesInfoDTO raceTimesInfo = getRaceTimesInfoIncludingTags(raceIdentifier,
-                    latestReceivedTagTimes.get(raceIdentifier));
+                    searchSinceMap.get(raceIdentifier));
             if (raceTimesInfo != null) {
                 raceTimesInfos.add(raceTimesInfo);
             }

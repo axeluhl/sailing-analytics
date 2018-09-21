@@ -240,15 +240,14 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getRaceTimesInfo(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<RaceTimesInfoDTO> callback);
 
-    void getRaceTimesInfoIncludingTags(RegattaAndRaceIdentifier raceIdentifier, TimePoint latestReceivedTagTime,
+    void getRaceTimesInfoIncludingTags(RegattaAndRaceIdentifier raceIdentifier, TimePoint searchSince,
             AsyncCallback<RaceTimesInfoDTO> callback);
 
     void getRaceTimesInfos(Collection<RegattaAndRaceIdentifier> raceIdentifiers,
             AsyncCallback<List<RaceTimesInfoDTO>> callback);
 
     void getRaceTimesInfosIncludingTags(Collection<RegattaAndRaceIdentifier> raceIdentifiers,
-            Map<RegattaAndRaceIdentifier, TimePoint> latestReceivedTagTimes,
-            AsyncCallback<List<RaceTimesInfoDTO>> callback);
+            Map<RegattaAndRaceIdentifier, TimePoint> searchSinceMap, AsyncCallback<List<RaceTimesInfoDTO>> callback);
 
     void getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date,
             AsyncCallback<CoursePositionsDTO> asyncCallback);

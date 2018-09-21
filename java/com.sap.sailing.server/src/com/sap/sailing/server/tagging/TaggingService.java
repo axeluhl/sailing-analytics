@@ -9,7 +9,6 @@ import com.sap.sse.common.TimePoint;
 
 // TODO: Replace error handling by throwing exceptions, see "topleveltranslations.json"
 // TODO: CommentTooLong
-// TODO: rename latestReceivedTagTime to match role
 // TODO: remove entry in settings if there are no private tags for this race anymore
 // TODO: rename keys to naming pattern (ssailing.tags....)
 // TODO: use document settings id for tags/tag-buttons/... as race identifier
@@ -119,8 +118,8 @@ public interface TaggingService {
      *            new privacy status
      * @return <code>true</code> if tag was updated successfully, otherwise <code>false</code>
      */
-    boolean updateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tagToUpdate,
-            String tag, String comment, String imageURL, boolean visibleForPublic);
+    boolean updateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tagToUpdate, String tag,
+            String comment, String imageURL, boolean visibleForPublic);
 
     /**
      * Returns all public tags for the specified race.
@@ -137,14 +136,16 @@ public interface TaggingService {
     List<TagDTO> getPublicTags(String leaderboardName, String raceColumnName, String fleetName);
 
     /**
-     * Returns all public tags since the given <code>latestReceivedTagTime</code> for the specified race.
+     * Returns all public tags since the given <code>searchSinceTimePoint</code> for the specified race.
      * 
      * @param raceIdentifier
      *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
+     * @param searchSince
+     *            tags will only be returned if they got created after this time point
      * @return list of {@link TagDTO tags}, empty list in case an error occurs or there are no tags available but
      *         <b>never null</b>!
      */
-    List<TagDTO> getPublicTags(RegattaAndRaceIdentifier raceIdentifier, TimePoint latestReceivedTagTime);
+    List<TagDTO> getPublicTags(RegattaAndRaceIdentifier raceIdentifier, TimePoint searchSince);
 
     /**
      * Returns all private tags of current user for the specified race.
