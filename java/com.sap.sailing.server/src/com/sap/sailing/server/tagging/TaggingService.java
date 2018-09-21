@@ -9,7 +9,6 @@ import com.sap.sse.common.TimePoint;
 
 // TODO: Replace error handling by throwing exceptions, see "topleveltranslations.json"
 // TODO: CommentTooLong
-// TODO: remove entry in settings if there are no private tags for this race anymore
 // TODO: rename keys to naming pattern (ssailing.tags....)
 // TODO: use document settings id for tags/tag-buttons/... as race identifier
 /**

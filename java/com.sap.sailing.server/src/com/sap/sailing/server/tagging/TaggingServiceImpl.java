@@ -192,7 +192,11 @@ public class TaggingServiceImpl implements TaggingService {
             String key = serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName);
             // error code will be set during collection of required data
             if (username != null && securityService != null && key != null) {
-                securityService.setPreference(username, key, serializer.serializeTags(privateTags));
+                if (privateTags.isEmpty()) {
+                    securityService.unsetPreference(username, key);
+                } else {                    
+                    securityService.setPreference(username, key, serializer.serializeTags(privateTags));
+                }
             }
         }
         return successful;

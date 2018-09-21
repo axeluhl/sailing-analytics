@@ -65,7 +65,6 @@ import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.gwt.ui.adminconsole.RaceLogSetTrackingTimesDTO;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTrackDTO;
 import com.sap.sailing.gwt.ui.client.shared.charts.MarkPositionService.MarkTracksDTO;
-import com.sap.sailing.gwt.ui.server.RaceLogTagEvents;
 import com.sap.sailing.gwt.ui.shared.BulkScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.CompactBoatPositionsDTO;
 import com.sap.sailing.gwt.ui.shared.CompactRaceMapDataDTO;
@@ -123,6 +122,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.common.media.MediaTagConstants;
+import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtService;
 import com.sap.sse.gwt.client.media.ImageDTO;
@@ -212,7 +213,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      * Collects besides {@link RaceTimesInfoDTO race times infos} public {@link RaceLogTagEvent tag events} from
      * {@link ReadonlyRaceState cache} and compares the <code>createdAt</code> timepoint to the received
      * <code>searchSince</code> timepoint. Returns {@link RaceTimesInfoDTO race times infos} including
-     * {@link RaceLogTagEvents public tag events} since the latest client-side received tag.
+     * {@link RaceLogTagEvent public tag events} since the latest client-side received tag.
      */
     List<RaceTimesInfoDTO> getRaceTimesInfosIncludingTags(Collection<RegattaAndRaceIdentifier> raceIdentifiers,
             Map<RegattaAndRaceIdentifier, TimePoint> searchSinceMap);
