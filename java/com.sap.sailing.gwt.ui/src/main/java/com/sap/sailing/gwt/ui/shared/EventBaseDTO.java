@@ -8,16 +8,14 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.dto.NamedDTO;
+import com.sap.sailing.domain.common.dto.NamedSecuredObjectDTO;
 import com.sap.sse.common.media.ImageSize;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
-import com.sap.sse.security.shared.AccessControlList;
-import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.SecuredObject;
 
-public class EventBaseDTO extends NamedDTO implements IsSerializable, SecuredObject {
+public class EventBaseDTO extends NamedSecuredObjectDTO implements IsSerializable, SecuredObject {
     private static final long serialVersionUID = 818666323178097939L;
 
     public VenueDTO venue;
@@ -32,9 +30,6 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable, SecuredObj
     private Map<String, String> sailorsInfoWebsiteURLs;
     private List<ImageDTO> images = new ArrayList<>();
     private List<VideoDTO> videos = new ArrayList<>();
-    
-    private AccessControlList accessControlList;
-    private Ownership ownership;
 
     /**
      * For the image URL keys holds the sizes of these images if known. An image size is "known" by this object if it
@@ -187,20 +182,5 @@ public class EventBaseDTO extends NamedDTO implements IsSerializable, SecuredObj
     public ImageSize getImageSize(String imageURL) {
         return imageSizes.get(imageURL);
     }
-    
-    public void setAccessControlList(AccessControlList acl) {
-        this.accessControlList = acl;
-    }
-    
-    public AccessControlList getAccessControlList() {
-        return this.accessControlList;
-    }
-    
-    public void setOwnership(Ownership ownership) {
-        this.ownership = ownership;
-    }
-    
-    public Ownership getOwnership() {
-        return this.ownership;
-    }
+
 }

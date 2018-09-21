@@ -66,7 +66,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     private final BundleContext context;
     private final FutureTask<SecurityService> securityService;
-    final SecurityDTOFactory securityDTOFactory;
+    private final SecurityDTOFactory securityDTOFactory;
 
     public UserManagementServiceImpl() {
         context = Activator.getContext();

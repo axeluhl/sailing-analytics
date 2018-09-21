@@ -28,6 +28,7 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Allows administrators to manage the structure of a regatta. Each regatta consists of several substructures like
@@ -51,8 +52,9 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
 
     private final CaptionPanel regattasPanel;
     
-    public RegattaManagementPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            StringMessages stringMessages, RegattaRefresher regattaRefresher, EventsRefresher eventsRefresher) {
+    public RegattaManagementPanel(SailingServiceAsync sailingService, UserService userService,
+            ErrorReporter errorReporter, StringMessages stringMessages, RegattaRefresher regattaRefresher,
+            EventsRefresher eventsRefresher) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
@@ -105,7 +107,8 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
         
         regattaManagementControlsPanel.add(removeRegattaButton);
         regattasContentPanel.add(regattaManagementControlsPanel);
-        regattaListComposite = new RegattaListComposite(sailingService, regattaRefresher, errorReporter, stringMessages);
+        regattaListComposite = new RegattaListComposite(sailingService, userService, regattaRefresher, errorReporter,
+                stringMessages);
         regattaListComposite.ensureDebugId("RegattaListComposite");
         refreshableRegattaMultiSelectionModel = regattaListComposite.getRefreshableMultiSelectionModel();
         refreshableRegattaMultiSelectionModel.addSelectionChangeHandler(new Handler() {

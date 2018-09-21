@@ -254,6 +254,7 @@ import com.sap.sailing.domain.common.dto.FullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.IncrementalLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
+import com.sap.sailing.domain.common.dto.NamedSecuredObjectDTO;
 import com.sap.sailing.domain.common.dto.PairingListDTO;
 import com.sap.sailing.domain.common.dto.PairingListTemplateDTO;
 import com.sap.sailing.domain.common.dto.PersonDTO;
@@ -578,9 +579,12 @@ import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.impl.ReplicaDescriptor;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
+import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.HasPermissions.DefaultModes;
+import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.ui.server.SecurityDTOFactory;
@@ -1009,6 +1013,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         regattaDTO.canBoatsOfCompetitorsChangePerRace = regatta.canBoatsOfCompetitorsChangePerRace();
         regattaDTO.configuration = convertToRegattaConfigurationDTO(regatta.getRegattaConfiguration());
         regattaDTO.rankingMetricType = regatta.getRankingMetricType();
+        this.addSecurityInformation(regattaDTO, Permission.REGATTA.getQualifiedObjectIdentifier(regatta.getName()));
         return regattaDTO;
     }
 
@@ -4231,18 +4236,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             eventDTO.setAllWindFinderSpotsUsedByEvent(new EventWindFinderUtil().getWindFinderSpotsToConsider(event,
                     windFinderTrackerFactory, /* useCachedSpotsForTrackedRaces */ false));
         }
-        final SecurityDTOFactory securityDTOFactory = new SecurityDTOFactory();
-        final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser = new HashMap<>();
-        final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup = new HashMap<>();
-        final AccessControlListAnnotation accessControlList = getSecurityService().getAccessControlList(Permission.EVENT.getQualifiedObjectIdentifier(event.getId().toString()));
-        eventDTO.setAccessControlList(securityDTOFactory.createAccessControlListDTO(accessControlList==null?null:accessControlList.getAnnotation(),
-                fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
-        final OwnershipAnnotation ownership = getSecurityService().getOwnership(Permission.EVENT.getQualifiedObjectIdentifier(event.getId().toString()));
-        eventDTO.setOwnership(securityDTOFactory.createOwnershipDTO(ownership==null?null:ownership.getAnnotation(),
-                fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
+
+        this.addSecurityInformation(eventDTO, Permission.EVENT.getQualifiedObjectIdentifier(event.getId().toString()));
         return eventDTO;
     }
-    
+
     private CourseAreaDTO convertToCourseAreaDTO(CourseArea courseArea) {
         CourseAreaDTO courseAreaDTO = new CourseAreaDTO(courseArea.getName());
         courseAreaDTO.id = courseArea.getId();
@@ -8051,4 +8049,28 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return sourceRefs;
     }
+
+    /**
+     * Adds {@link AccessControlList access control list} and {@link Ownership ownership} information for the given
+     * {@link QualifiedObjectIdentifier qualified object identifier} to the provided {@link NamedSecuredObjectDTO
+     * secured object DTO}.
+     * 
+     * @param dto
+     *            the {@link NamedSecuredObjectDTO} to add security information to
+     * @param objectId
+     *            the {@link QualifiedObjectIdentifier} to get security information for
+     */
+    private void addSecurityInformation(final NamedSecuredObjectDTO dto, final QualifiedObjectIdentifier objectId) {
+        final SecurityDTOFactory securityDTOFactory = new SecurityDTOFactory();
+        final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser = new HashMap<>();
+        final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup = new HashMap<>();
+        final AccessControlListAnnotation accessControlList = getSecurityService().getAccessControlList(objectId);
+        dto.setAccessControlList(securityDTOFactory.createAccessControlListDTO(
+                accessControlList == null ? null : accessControlList.getAnnotation(), fromOriginalToStrippedDownUser,
+                fromOriginalToStrippedDownUserGroup));
+        final OwnershipAnnotation ownership = getSecurityService().getOwnership(objectId);
+        dto.setOwnership(securityDTOFactory.createOwnershipDTO(ownership == null ? null : ownership.getAnnotation(),
+                fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
+    }
+
 }
