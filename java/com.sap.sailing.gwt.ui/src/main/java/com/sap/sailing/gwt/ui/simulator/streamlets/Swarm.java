@@ -109,22 +109,23 @@ public class Swarm implements TimeListener {
         // the map already exists, ensure swam is started
         if (map.getBounds() != null) {
             startSwarmIfNecessaryAndUpdateProjection();
+            loopTimer.schedule(0);
         }
         // add handler, so the swarm updates itself without calls from the map required
         BoundsChangeMapHandler handler = new BoundsChangeMapHandler() {
             @Override
             public void onEvent(BoundsChangeMapEvent event) {
                 startSwarmIfNecessaryAndUpdateProjection();
+                loopTimer.schedule(0);
             }
         };
         boundsChangeHandlers.put(handler, map.addBoundsChangeHandler(handler));
-        // run timer as soon as possible for the first frame
-        loopTimer.schedule(0);
     }
 
     private void startSwarmIfNecessaryAndUpdateProjection() {
         if (projection == null) {
             projection = new Mercator(fullcanvas, map);
+
         }
         // ensure projection fits the map
         projection.calibrate();
@@ -137,8 +138,6 @@ public class Swarm implements TimeListener {
             // clear all tails, as else there will be long smears over the map
             clearNextFrame = true;
         }
-
-        // start the timer that will update the swarm if not running
     }
 
     private void updateSwarmOneTick(int animationIntervalMillis) {
