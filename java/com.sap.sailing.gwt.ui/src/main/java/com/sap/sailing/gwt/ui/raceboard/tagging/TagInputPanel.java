@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
 /**
  * Panel containing input fields for tag/tag button creation and modification.
  */
+// TODO: use DataEntryDialog
 public class TagInputPanel extends FlowPanel {
 
     private final TagPanelStyle style = TagPanelResources.INSTANCE.style();

@@ -24,6 +24,8 @@ import com.sap.sse.security.ui.client.UserService;
 /**
  * Used to display tags in various locations.
  */
+// TODO: Remove share button from private tags
+// TODO: change text of "created at" ...
 public class TagCell extends AbstractCell<TagDTO> {
 
     /**

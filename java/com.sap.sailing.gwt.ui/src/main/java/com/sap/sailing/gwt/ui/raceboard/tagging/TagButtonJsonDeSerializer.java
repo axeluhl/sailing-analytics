@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.ui.client.GwtJsonDeSerializer;
  * Serializes and deserializes {@link TagButton tag-buttons} to save them in the {@link com.sap.sse.security.UserStore
  * UserStore}.
  */
+// TODO: Don't use key for tag-buttons, save array directly instead.
 public class TagButtonJsonDeSerializer implements GwtJsonDeSerializer<List<TagButton>> {
 
     private static final String FIELD_TAG_BUTTONS = "tagButtons";

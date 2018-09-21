@@ -305,6 +305,7 @@ public class RaceBoardPanel
         addChildComponent(raceMap);
         
         // add panel for tagging functionality, hidden if no url parameter "tag" is passed 
+        // TODO: URL params should be parsed in EntryPoint, not in Panel
         final String sharedTagURLParameter = Window.Location.getParameter(TagDTO.TAG_URL_PARAMETER);
         String sharedTagTitel = null;
         TimePoint sharedTagTimePoint = null;

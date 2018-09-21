@@ -57,6 +57,13 @@ import com.sap.sse.security.ui.shared.UserDTO;
  * parameter. Every other required shared resource (string messages, service references, ...) can be requested from the
  * TaggingPanel itself.
  */
+// TODO: Add refresh button which resets lastReceivedTagTime
+// TODO: resize plus of "add tags" button
+// TODO: get URL params as constructor parameter and not from Window object
+// TODO: Goal: Show tags in time slider (add bugzilla bug)
+// TODO: Unit Tests (incl. concatenation)
+// TODO: use HTML storage as event provider to update other tabs when user modifies private tags (new bugzilla bug)
+// TODO: cache user settings and use observer pattern for cache
 public class TaggingPanel extends ComponentWithoutSettings
         implements RaceTimesInfoProviderListener, UserStatusEventHandler, TimeListener {
 
@@ -158,7 +165,6 @@ public class TaggingPanel extends ComponentWithoutSettings
         contentPanel.addStyleName(style.tagCellListPanel());
         contentPanel.add(tagCellList);
         contentPanel.add(createTagsButton);
-
         tagListProvider.addDataDisplay(tagCellList);
         tagCellList.setEmptyListWidget(new Label(stringMessages.tagNoTagsFound()));
         tagCellList.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.DISABLED);
@@ -175,7 +181,6 @@ public class TaggingPanel extends ComponentWithoutSettings
                 timer.addTimeListener(this);
             }
         });
-
         createTagsButton.setTitle(stringMessages.tagAddTags());
         createTagsButton.setStyleName(style.toggleEditState());
         createTagsButton.addStyleName(style.imagePusTransparent());
@@ -248,22 +253,18 @@ public class TaggingPanel extends ComponentWithoutSettings
             // tag does already exist
             Notification.notify(stringMessages.tagNotSavedReason(" " + stringMessages.tagAlreadyExists()),
                     NotificationType.WARNING);
-
         } else if (!isLoggedInAndRaceLogAvailable()) {
             // User is not logged in or race can not be identified because regatta, race column or fleet are missing.
             Notification.notify(stringMessages.tagNotSaved(), NotificationType.ERROR);
-
         } else if (tag.isEmpty()) {
             // Tag heading is empty. Empty tags are not allowed.
             Notification.notify(stringMessages.tagNotSpecified(), NotificationType.WARNING);
-
         } else {
             // replace null values with default values
             final String saveComment = (comment == null ? "" : comment);
             final String saveImageURL = (imageURL == null ? "" : imageURL);
             final TimePoint saveRaceTimePoint = (raceTimePoint == null ? new MillisecondsTimePoint(getTimerTime())
                     : raceTimePoint);
-
             sailingService.addTag(leaderboardName, raceColumn.getName(), fleet.getName(), tag, saveComment,
                     saveImageURL, visibleForPublic, saveRaceTimePoint, new AsyncCallback<SuccessInfo>() {
                         @Override
@@ -630,12 +631,10 @@ public class TaggingPanel extends ComponentWithoutSettings
         raceTimesInfoProvider.getRaceIdentifiers().forEach((raceIdentifier) -> {
             raceTimesInfoProvider.setLatestReceivedTagTime(raceIdentifier, null);
         });
-
         // load content for new user
         reloadPrivateTags();
         filterbarPanel.loadTagFilterSets();
         footerPanel.loadAllTagButtons();
-
         // update UI
         setCurrentState(State.VIEW);
     }

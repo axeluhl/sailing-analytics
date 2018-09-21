@@ -104,7 +104,6 @@ public class TaggingServiceImpl implements TaggingService {
     private boolean addPrivateTag(String leaderboardName, String raceColumnName, String fleetName, String tag,
             String comment, String imageURL, TimePoint raceTimepoint) {
         boolean successful = true;
-
         SecurityService securityService = Activator.getSecurityService();
         if (securityService == null) {
             setLastErrorCode(ErrorCode.SECURITY_SERIVCE_NOT_FOUND);
@@ -136,7 +135,6 @@ public class TaggingServiceImpl implements TaggingService {
 
     private boolean removePublicTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag) {
         boolean successful = true;
-
         RaceLog raceLog = racingService.getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog == null) {
             setLastErrorCode(ErrorCode.RACELOG_NOT_FOUND);
@@ -183,7 +181,6 @@ public class TaggingServiceImpl implements TaggingService {
 
     private boolean removePrivateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag) {
         boolean successful = true;
-
         String username = getCurrentUsername();
         if (username == null) {
             setLastErrorCode(ErrorCode.NOT_LOGGED_IN);
@@ -198,7 +195,6 @@ public class TaggingServiceImpl implements TaggingService {
                 securityService.setPreference(username, key, serializer.serializeTags(privateTags));
             }
         }
-
         return successful;
     }
 
@@ -206,7 +202,6 @@ public class TaggingServiceImpl implements TaggingService {
     public boolean addTag(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment,
             String imageURL, boolean visibleForPublic, TimePoint raceTimepoint) {
         boolean successful;
-
         // prefill optional parameters
         comment = comment == null ? "" : comment;
         imageURL = imageURL == null ? "" : imageURL;
@@ -241,7 +236,6 @@ public class TaggingServiceImpl implements TaggingService {
     @Override
     public boolean removeTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag) {
         boolean successful = true;
-
         // check all parameters for validity
         if (tag == null) {
             setLastErrorCode(ErrorCode.TAG_NOT_EMPTY);
@@ -294,18 +288,12 @@ public class TaggingServiceImpl implements TaggingService {
     @Override
     public List<TagDTO> getPublicTags(RegattaAndRaceIdentifier raceIdentifier, TimePoint latestReceivedTagTime) {
         final List<TagDTO> result = new ArrayList<TagDTO>();
-
         TrackedRace trackedRace = racingService.getExistingTrackedRace(raceIdentifier);
         Iterable<RaceLog> raceLogs = trackedRace.getAttachedRaceLogs();
-
         for (RaceLog raceLog : raceLogs) {
             ReadonlyRaceState raceState = ReadonlyRaceStateImpl.getOrCreate(racingService, raceLog);
             Iterable<RaceLogTagEvent> foundTagEvents = raceState.getTagEvents();
             for (RaceLogTagEvent tagEvent : foundTagEvents) {
-                // TODO: As soon as permission-vertical branch got merged into master, apply
-                // new permission system at this if-statement and remove this old way of
-                // checking for permissions. (see bug 4104, comment 9)
-                // functionality: Check if user has the permission to see this tag.
                 if ((latestReceivedTagTime == null && tagEvent.getRevokedAt() == null)
                         || (latestReceivedTagTime != null && tagEvent.getRevokedAt() == null
                                 && tagEvent.getCreatedAt().after(latestReceivedTagTime))
@@ -317,14 +305,12 @@ public class TaggingServiceImpl implements TaggingService {
                 }
             }
         }
-
         return result;
     }
 
     @Override
     public List<TagDTO> getPrivateTags(String leaderboardName, String raceColumnName, String fleetName) {
         final List<TagDTO> result = new ArrayList<TagDTO>();
-
         SecurityService securityService = getSecurityService();
         if (securityService != null) {
             String username = getCurrentUsername();
@@ -335,7 +321,6 @@ public class TaggingServiceImpl implements TaggingService {
                 result.addAll(privateTags);
             }
         }
-
         return result;
     }
 
