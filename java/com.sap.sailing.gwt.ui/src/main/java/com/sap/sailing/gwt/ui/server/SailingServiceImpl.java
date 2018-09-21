@@ -6237,9 +6237,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Mark mark = convertToMark(((MarkDTO) dto.mappedTo), true); 
             event = new RegattaLogDeviceMarkMappingEventImpl(now, now, getService().getServerAuthor(), UUID.randomUUID(), 
                     mark, mapping.getDevice(), from, to);
-        } else if (dto.mappedTo instanceof CompetitorWithBoatDTO) {
+        } else if (dto.mappedTo instanceof CompetitorDTO) {
             Competitor competitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(
-                    ((CompetitorWithBoatDTO) dto.mappedTo).getIdAsString());
+                    ((CompetitorDTO) dto.mappedTo).getIdAsString());
             if (mapping.getDevice().getIdentifierType().equals(ExpeditionSensorDeviceIdentifier.TYPE)) {
                 event = new RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl(
                         now, now, getService().getServerAuthor(), UUID.randomUUID(), 
