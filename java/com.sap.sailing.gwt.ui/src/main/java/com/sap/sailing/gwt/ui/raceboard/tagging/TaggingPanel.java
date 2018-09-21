@@ -57,13 +57,13 @@ import com.sap.sse.security.ui.shared.UserDTO;
  * so on. Best practice: The constructor of subcomponents of the TaggingPanel contains only the TaggingPanel as a
  * parameter. Every other required shared resource (string messages, service references, ...) can be requested from the
  * TaggingPanel itself.
+ * 
+ * @author Julian Rendl, Henri Kohlberg
  */
 // TODO: Add refresh button which resets lastReceivedTagTime
 // TODO: resize plus of "add tags" button
 // TODO: get URL params as constructor parameter and not from Window object
-// TODO: Goal: Show tags in time slider (add bugzilla bug)
 // TODO: Unit Tests (incl. concatenation)
-// TODO: use HTML storage as event provider to update other tabs when user modifies private tags (new bugzilla bug)
 // TODO: cache user settings and use observer pattern for cache
 public class TaggingPanel extends ComponentWithoutSettings
         implements RaceTimesInfoProviderListener, UserStatusEventHandler, TimeListener {
@@ -264,7 +264,7 @@ public class TaggingPanel extends ComponentWithoutSettings
         boolean tagIsNewTag = true;
         // check if tag already exists
         for (TagDTO tagDTO : tagListProvider.getAllTags()) {
-            if (tagDTO.equals(tag, comment, imageURL, userService.getCurrentUser().getName(), visibleForPublic,
+            if (tagDTO.equals(tag, comment, imageURL, visibleForPublic, userService.getCurrentUser().getName(),
                     new MillisecondsTimePoint(getTimerTime()))) {
                 tagIsNewTag = false;
                 break;

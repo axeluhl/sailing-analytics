@@ -606,9 +606,16 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     PolarDataService getPolarDataService();
 
     SimulationService getSimulationService();
-    
+
+    /**
+     * {@link TaggingService} can be used to perform all CRUD operations on private and pulic
+     * {@link com.sap.sailing.domain.common.dto.TagDTO tags}. This service is used by the REST API and GWT client and
+     * needs to perform independant of the requesting resource.
+     * 
+     * @return instance of TaggingService
+     */
     TaggingService getTaggingService();
-    
+
     RaceTracker getRaceTrackerById(Object id);
     
     /**

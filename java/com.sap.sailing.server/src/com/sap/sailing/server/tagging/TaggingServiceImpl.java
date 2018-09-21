@@ -81,7 +81,7 @@ public class TaggingServiceImpl implements TaggingService {
                 for (TagDTO publicTag : publicTags) {
                     // ignore revoked tags as TagDTO.equals() does ignore revokedAt timepoint
                     if (publicTag.getRevokedAt() == null && publicTag.equals(tag, comment, imageURL,
-                            racingService.getServerAuthor().getName(), true, raceTimepoint)) {
+                            true, racingService.getServerAuthor().getName(), raceTimepoint)) {
                         alreadyExists = true;
                         break;
                     }
@@ -116,7 +116,7 @@ public class TaggingServiceImpl implements TaggingService {
                 String key = serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName);
                 String privateTagsJson = securityService.getPreference(username, key);
                 List<TagDTO> privateTags = serializer.deserializeTags(privateTagsJson);
-                TagDTO tagToAdd = new TagDTO(tag, comment, imageURL, username, false, raceTimepoint,
+                TagDTO tagToAdd = new TagDTO(tag, comment, imageURL, false, username, raceTimepoint,
                         MillisecondsTimePoint.now());
                 if (privateTags.contains(tagToAdd)) {
                     setLastErrorCode(ErrorCode.TAG_ALREADY_EXISTS);
@@ -210,12 +210,6 @@ public class TaggingServiceImpl implements TaggingService {
         if (tag == null || tag.isEmpty()) {
             setLastErrorCode(ErrorCode.TAG_NOT_EMPTY);
             successful = false;
-        } else if (tag.length() > TagDTO.MAX_TAG_LENGTH) {
-            setLastErrorCode(ErrorCode.TAG_TOO_LONG);
-            successful = false;
-        } else if (comment.length() > TagDTO.MAX_COMMENT_LENGTH) {
-            setLastErrorCode(ErrorCode.COMMENT_TOO_LONG);
-            successful = false;
         } else if (raceTimepoint == null || raceTimepoint.asMillis() == 0) {
             // TODO: Check if timepoint is near start/end of race (+/- x%)
             setLastErrorCode(ErrorCode.TIMEPOINT_NOT_EMPTY);
@@ -278,7 +272,7 @@ public class TaggingServiceImpl implements TaggingService {
             Iterable<RaceLogTagEvent> foundTagEvents = raceState.getTagEvents();
             for (RaceLogTagEvent tagEvent : foundTagEvents) {
                 result.add(new TagDTO(tagEvent.getTag(), tagEvent.getComment(), tagEvent.getImageURL(),
-                        tagEvent.getUsername(), true, tagEvent.getLogicalTimePoint(), tagEvent.getCreatedAt(),
+                        true, tagEvent.getUsername(), tagEvent.getLogicalTimePoint(), tagEvent.getCreatedAt(),
                         tagEvent.getRevokedAt()));
             }
         }
@@ -300,7 +294,7 @@ public class TaggingServiceImpl implements TaggingService {
                         || (latestReceivedTagTime != null && tagEvent.getRevokedAt() != null
                                 && tagEvent.getRevokedAt().after(latestReceivedTagTime))) {
                     result.add(new TagDTO(tagEvent.getTag(), tagEvent.getComment(), tagEvent.getImageURL(),
-                            tagEvent.getUsername(), true, tagEvent.getLogicalTimePoint(), tagEvent.getCreatedAt(),
+                            true, tagEvent.getUsername(), tagEvent.getLogicalTimePoint(), tagEvent.getCreatedAt(),
                             tagEvent.getRevokedAt()));
                 }
             }

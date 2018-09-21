@@ -7,15 +7,19 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sse.common.TimePoint;
 
-// TODO: Add Javadoc, what does TaggingService do?
 // TODO: Replace error handling by throwing exceptions, see "topleveltranslations.json"
-// TODO: Remove public at interfaces
 // TODO: CommentTooLong
-// TODO: Remove max length
 // TODO: rename latestReceivedTagTime to match role
 // TODO: remove entry in settings if there are no private tags for this race anymore
 // TODO: rename keys to naming pattern (ssailing.tags....)
 // TODO: use document settings id for tags/tag-buttons/... as race identifier
+/**
+ * This service is used to perform all CRUD operations on {@link TagDTO tags} and is used by the
+ * {@link com.sap.sailing.server.gateway.jaxrs.api.TagsResource REST API} for mobile apps as well as the GWT client via
+ * the {@link com.sap.sailing.gwt.ui.server.SailingServiceImpl SailingService}.
+ * 
+ * @author Henri Kohlberg
+ */
 public interface TaggingService {
 
     /**
@@ -31,9 +35,7 @@ public interface TaggingService {
         TAG_ALREADY_EXISTS("tagAlreadyExists", "Tag does already exist, duplicated tags are not allowed"),
         TAG_ALREADY_REMOVED("tagAlreadyRemoved", "Tag cannot be removed twice!"),
         TAG_NOT_EMPTY("tagNotEmpty", "Tag may not be empty"),
-        TIMEPOINT_NOT_EMPTY("timepointNotEmpty", "Timepoint may not be empty"),
-        TAG_TOO_LONG("tagTooLong", "Tag is too long"),
-        COMMENT_TOO_LONG("commentToLong", "Comment is too long");
+        TIMEPOINT_NOT_EMPTY("timepointNotEmpty", "Timepoint may not be empty");
 
         private final String code;
         private final String message;
@@ -76,7 +78,7 @@ public interface TaggingService {
      *            timepoint in race when user created tag, must <b>NOT</b> be <code>null</code>
      * @return <code>true</code> if tag was saved successfully, otherwise <code>false</code>
      */
-    public boolean addTag(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment,
+    boolean addTag(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment,
             String imageURL, boolean visibleForPublic, TimePoint raceTimepoint);
 
     /**
@@ -93,7 +95,7 @@ public interface TaggingService {
      *            tag to remove
      * @return <code>true</code> if tag was removed successfully, otherwise <code>false</code>
      */
-    public boolean removeTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag);
+    boolean removeTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag);
 
     /**
      * Updates given <code>tagToUpdate</code> with the given parameters <code>tag</code>, <code>comment</code>,
@@ -117,7 +119,7 @@ public interface TaggingService {
      *            new privacy status
      * @return <code>true</code> if tag was updated successfully, otherwise <code>false</code>
      */
-    public boolean updateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tagToUpdate,
+    boolean updateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tagToUpdate,
             String tag, String comment, String imageURL, boolean visibleForPublic);
 
     /**
@@ -132,7 +134,7 @@ public interface TaggingService {
      * @return list of {@link TagDTO tags}, empty list in case an error occurs or there are no tags available but
      *         <b>never null</b>!
      */
-    public List<TagDTO> getPublicTags(String leaderboardName, String raceColumnName, String fleetName);
+    List<TagDTO> getPublicTags(String leaderboardName, String raceColumnName, String fleetName);
 
     /**
      * Returns all public tags since the given <code>latestReceivedTagTime</code> for the specified race.
@@ -142,7 +144,7 @@ public interface TaggingService {
      * @return list of {@link TagDTO tags}, empty list in case an error occurs or there are no tags available but
      *         <b>never null</b>!
      */
-    public List<TagDTO> getPublicTags(RegattaAndRaceIdentifier raceIdentifier, TimePoint latestReceivedTagTime);
+    List<TagDTO> getPublicTags(RegattaAndRaceIdentifier raceIdentifier, TimePoint latestReceivedTagTime);
 
     /**
      * Returns all private tags of current user for the specified race.
@@ -156,7 +158,7 @@ public interface TaggingService {
      * @return list of {@link TagDTO tags}, empty list in case an error occurs or there are no tags available but
      *         <b>never null</b>!
      */
-    public List<TagDTO> getPrivateTags(String leaderboardName, String raceColumnName, String fleetName);
+    List<TagDTO> getPrivateTags(String leaderboardName, String raceColumnName, String fleetName);
 
     /**
      * Returns the last error code of the current user. Needs to be converted into error message to display this message
@@ -165,5 +167,5 @@ public interface TaggingService {
      * @return last {@link ErrorCode error code} which occured if error is known, otherwise
      *         {@link ErrorCode#UNKNOWN_ERROR unknown error}
      */
-    public ErrorCode getLastErrorCode();
+    ErrorCode getLastErrorCode();
 }
