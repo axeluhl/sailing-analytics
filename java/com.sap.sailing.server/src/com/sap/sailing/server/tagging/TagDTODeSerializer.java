@@ -25,7 +25,7 @@ public class TagDTODeSerializer {
     public static final String FIELD_CREATED_AT = "createdAt";
     public static final String FIELD_REVOKED_AT = "revokedAt";
     
-    private static final String UNIQUE_KEY_PREFIX = "Tags:";
+    private static final String UNIQUE_KEY_PREFIX = "sailing.tags.";
 
     private final JSONParser parser = new JSONParser();
 

@@ -18,7 +18,7 @@ import com.sap.sse.security.ui.client.UserService;
  */
 public class TagButtonPanel extends FlowPanel {
 
-    private static final String USER_STORAGE_TAG_BUTTONS_KEY = "sailingAnalytics.raceBoard.tagButtons";
+    private static final String USER_STORAGE_TAG_BUTTONS_KEY = "sailing.tags.buttons";
 
     private final TagPanelStyle style = TagPanelResources.INSTANCE.style();
 
