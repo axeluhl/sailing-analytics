@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
+import com.google.gwt.core.client.Duration;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
@@ -141,7 +142,7 @@ public class Swarm implements TimeListener {
     }
 
     private void updateSwarmOneTick(int animationIntervalMillis) {
-        Date time0 = new Date();
+        double time0 = Duration.currentTimeMillis();
         // upon zooming the swarm is shortly paused, to ensure no strange rendering during the css zoom
         // animations
         if (swarmPause > 1) {
@@ -165,10 +166,10 @@ public class Swarm implements TimeListener {
             execute(diffPx);
             diffPx = new Vector(0, 0);
         }
-        Date time1 = new Date();
+        double time1 = Duration.currentTimeMillis();
         // wait at least 10ms for the next iteration; try to get one iteration done every
         // animationIntervalMillis if possible
-        long timeDelta = time1.getTime() - time0.getTime();
+        double timeDelta = time1 - time0;
         // log("fps: "+(1000.0/timeDelta));
         loopTimer.schedule((int) Math.max(10, animationIntervalMillis - timeDelta));
     }
@@ -183,6 +184,7 @@ public class Swarm implements TimeListener {
 
     public void stop() {
         removeBoundsChangeHandler();
+        loopTimer.cancel();
     }
 
     private Particle recycleOrCreateParticle(Particle particle) {
@@ -277,7 +279,7 @@ public class Swarm implements TimeListener {
         // clearing neds to be done with a little over zero, thanks IE
         ctxt.setGlobalAlpha(0.06);
         if (clearNextFrame) {
-            //skip this frame, as it will contain an extreme delta due to the map movement
+            // skip this frame, as it will contain an extreme delta due to the map movement
             clearNextFrame = false;
         } else {
             ctxt.setGlobalCompositeOperation("destination-out");
