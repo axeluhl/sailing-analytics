@@ -7,50 +7,40 @@ import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
-import com.sap.sailing.gwt.ui.client.GwtJsonDeSerializer;
 
 /**
  * Serializes and deserializes {@link TagButton tag-buttons} to save them in the {@link com.sap.sse.security.UserStore
  * UserStore}.
  */
-// TODO: Don't use key for tag-buttons, save array directly instead.
-public class TagButtonJsonDeSerializer implements GwtJsonDeSerializer<List<TagButton>> {
+public class TagButtonJsonDeSerializer {
 
-    private static final String FIELD_TAG_BUTTONS = "tagButtons";
     private static final String FIELD_BUTTON_NAME = "buttonName";
     private static final String FIELD_TAG = "tag";
     private static final String FIELD_COMMENT = "comment";
     private static final String FIELD_IMAGE_URL = "imageURL";
     private static final String FIELD_VISIBLE_FOR_PUBLIC = "public";
 
-    @Override
-    public JSONObject serialize(List<TagButton> tagButtons) {
-        JSONObject result = new JSONObject();
-
-        JSONArray tagButtonsArray = new JSONArray();
-        result.put(FIELD_TAG_BUTTONS, tagButtonsArray);
-
+    public JSONArray serialize(List<TagButton> tagButtons) {
+        JSONArray result = new JSONArray();
         int i = 0;
         for (TagButton button : tagButtons) {
             JSONObject tagButtonObject = new JSONObject();
-            tagButtonsArray.set(i++, tagButtonObject);
             tagButtonObject.put(FIELD_BUTTON_NAME, new JSONString(button.getText()));
             tagButtonObject.put(FIELD_TAG, new JSONString(button.getTag()));
             tagButtonObject.put(FIELD_COMMENT, new JSONString(button.getComment()));
             tagButtonObject.put(FIELD_IMAGE_URL, new JSONString(button.getImageURL()));
             tagButtonObject.put(FIELD_VISIBLE_FOR_PUBLIC, JSONBoolean.getInstance(button.isVisibleForPublic()));
+            result.set(i++, tagButtonObject);
         }
         return result;
     }
 
-    @Override
-    public List<TagButton> deserialize(JSONObject rootObject) {
-        List<TagButton> result = null;
+    public List<TagButton> deserialize(JSONArray rootObject) {
+        List<TagButton> result = new ArrayList<TagButton>();
         if (rootObject != null) {
             result = new ArrayList<TagButton>();
-            JSONArray tagButtonsArray = (JSONArray) rootObject.get(FIELD_TAG_BUTTONS);
-            for (int i = 0; i < tagButtonsArray.size(); i++) {
-                JSONObject tagButtonValue = (JSONObject) tagButtonsArray.get(i);
+            for (int i = 0; i < rootObject.size(); i++) {
+                JSONObject tagButtonValue = (JSONObject) rootObject.get(i);
                 JSONString tagButtonName = (JSONString) tagButtonValue.get(FIELD_BUTTON_NAME);
                 JSONString tagButtonTag = (JSONString) tagButtonValue.get(FIELD_TAG);
                 JSONString tagButtonComment = (JSONString) tagButtonValue.get(FIELD_COMMENT);
@@ -63,5 +53,4 @@ public class TagButtonJsonDeSerializer implements GwtJsonDeSerializer<List<TagBu
         }
         return result;
     }
-
 }

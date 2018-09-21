@@ -1,6 +1,6 @@
 package com.sap.sailing.gwt.ui.raceboard.tagging;
 
-import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -71,8 +71,8 @@ public class TagButtonPanel extends FlowPanel {
                     if (result != null && !result.isEmpty()) {
                         final TagButtonJsonDeSerializer deserializer = new TagButtonJsonDeSerializer();
                         final JSONValue value = JSONParser.parseStrict(result);
-                        if (value.isObject() != null) {
-                            for (TagButton tagButton : deserializer.deserialize((JSONObject) value)) {
+                        if (value.isArray() != null) {
+                            for (TagButton tagButton : deserializer.deserialize((JSONArray) value)) {
                                 taggingPanel.addTagButton(tagButton);
                             }
                         }
@@ -92,8 +92,8 @@ public class TagButtonPanel extends FlowPanel {
      */
     protected void storeAllTagButtons() {
         TagButtonJsonDeSerializer serializer = new TagButtonJsonDeSerializer();
-        JSONObject jsonObject = serializer.serialize(taggingPanel.getTagButtons());
-        userService.setPreference(USER_STORAGE_TAG_BUTTONS_KEY, jsonObject.toString(), new AsyncCallback<Void>() {
+        JSONArray jsonArray = serializer.serialize(taggingPanel.getTagButtons());
+        userService.setPreference(USER_STORAGE_TAG_BUTTONS_KEY, jsonArray.toString(), new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 Notification.notify(stringMessages.tagButtonNotSavable(), NotificationType.WARNING);
