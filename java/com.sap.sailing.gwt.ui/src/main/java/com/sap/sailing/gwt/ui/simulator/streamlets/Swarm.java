@@ -98,21 +98,31 @@ public class Swarm implements TimeListener {
     public void start(final int animationIntervalMillis) {
         removeBoundsChangeHandler();
         fullcanvas.setCanvasSettings();
+        if (loopTimer == null) {
+            loopTimer = new com.google.gwt.user.client.Timer() {
+                public void run() {
+                    updateSwarmOneTick(animationIntervalMillis);
+                }
+            };
+        }
+
         // the map already exists, ensure swam is started
         if (map.getBounds() != null) {
-            startSwarmIfNecessaryAndUpdateProjection(animationIntervalMillis);
+            startSwarmIfNecessaryAndUpdateProjection();
         }
         // add handler, so the swarm updates itself without calls from the map required
         BoundsChangeMapHandler handler = new BoundsChangeMapHandler() {
             @Override
             public void onEvent(BoundsChangeMapEvent event) {
-                startSwarmIfNecessaryAndUpdateProjection(animationIntervalMillis);
+                startSwarmIfNecessaryAndUpdateProjection();
             }
         };
         boundsChangeHandlers.put(handler, map.addBoundsChangeHandler(handler));
+        // run timer as soon as possible for the first frame
+        loopTimer.schedule(0);
     }
 
-    private void startSwarmIfNecessaryAndUpdateProjection(int animationIntervalMillis) {
+    private void startSwarmIfNecessaryAndUpdateProjection() {
         if (projection == null) {
             projection = new Mercator(fullcanvas, map);
         }
@@ -129,16 +139,6 @@ public class Swarm implements TimeListener {
         }
 
         // start the timer that will update the swarm if not running
-        if (loopTimer == null) {
-            // Create animation-loop based on timer timeout
-            loopTimer = new com.google.gwt.user.client.Timer() {
-                public void run() {
-                    updateSwarmOneTick(animationIntervalMillis);
-                }
-            };
-            // run timer as soon as possible for the first frame
-            loopTimer.schedule(0);
-        }
     }
 
     private void updateSwarmOneTick(int animationIntervalMillis) {
@@ -149,7 +149,7 @@ public class Swarm implements TimeListener {
             swarmPause--;
         } else if (swarmPause == 1) {
             // ensure bounds and projections are up to date
-            startSwarmIfNecessaryAndUpdateProjection(0);
+            startSwarmIfNecessaryAndUpdateProjection();
             if (zoomChanged) {
                 // ensure amount of particles is updated
                 diffPx = new Vector(0, 0);
