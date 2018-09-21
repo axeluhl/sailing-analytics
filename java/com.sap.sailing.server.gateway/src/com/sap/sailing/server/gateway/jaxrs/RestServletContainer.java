@@ -9,6 +9,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.datamining.DataMiningServer;
+import com.sap.sse.security.SecurityService;
 import com.sun.jersey.spi.container.servlet.ServletContainer;
 
 public class RestServletContainer extends ServletContainer {
@@ -20,9 +21,13 @@ public class RestServletContainer extends ServletContainer {
 
     public static final String DATA_MINING_SERVER_TRACKER_NAME = "dataMiningServerTracker";
 
+    public static final String SECURITY_SERVICE_TRACKER_NAME = "securityServiceTracker";
+
     private ServiceTracker<RacingEventService, RacingEventService> racingEventServiceTracker;
 
     private ServiceTracker<DataMiningServer, DataMiningServer> dataMiningServerTracker;
+    
+    private ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
     
     public RestServletContainer() {
         super();
@@ -44,8 +49,11 @@ public class RestServletContainer extends ServletContainer {
        racingEventServiceTracker.open();
        dataMiningServerTracker = new ServiceTracker<DataMiningServer, DataMiningServer>(context, DataMiningServer.class, null);
        dataMiningServerTracker.open();
+       securityServiceTracker = new ServiceTracker<SecurityService, SecurityService>(context, SecurityService.class, null);
+       securityServiceTracker.open();
        config.getServletContext().setAttribute(RACING_EVENT_SERVICE_TRACKER_NAME, racingEventServiceTracker);
        config.getServletContext().setAttribute(DATA_MINING_SERVER_TRACKER_NAME, dataMiningServerTracker);
+       config.getServletContext().setAttribute(SECURITY_SERVICE_TRACKER_NAME, securityServiceTracker);
    }
 
     @Override
@@ -57,9 +65,8 @@ public class RestServletContainer extends ServletContainer {
         if (dataMiningServerTracker != null) {
             dataMiningServerTracker.close();
         }
-    }
-    
-    public RacingEventService getService() {
-        return racingEventServiceTracker.getService();
+        if (securityServiceTracker != null) {
+            securityServiceTracker.close();
+        }
     }
 }

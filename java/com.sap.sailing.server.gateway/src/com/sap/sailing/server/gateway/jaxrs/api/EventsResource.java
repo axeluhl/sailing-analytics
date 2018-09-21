@@ -41,8 +41,6 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.shiro.SecurityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
 
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
@@ -88,12 +86,10 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultModes;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
-import com.sap.sse.util.ServiceTrackerFactory;
 
 @Path("/v1/events")
 public class EventsResource extends AbstractSailingServerResource {
@@ -465,11 +461,6 @@ public class EventsResource extends AbstractSailingServerResource {
         return user;
     }
 
-    private SecurityService getSecurityService() {
-        BundleContext context = FrameworkUtil.getBundle(EventsResource.class).getBundleContext();
-        return ServiceTrackerFactory.createAndOpen(context, SecurityService.class).getService();
-    }
-    
     private String getDefaultVenueName(String lat, String lng) throws NumberFormatException, IOException, org.json.simple.parser.ParseException {
         return ReverseGeocoder.INSTANCE.getPlacemarkNearest(new DegreePosition(Double.valueOf(lat), Double.valueOf(lng))).getName();
     }

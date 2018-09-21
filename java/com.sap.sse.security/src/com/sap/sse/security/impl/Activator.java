@@ -72,8 +72,7 @@ public class Activator implements BundleActivator {
 
     private void createAndRegisterSecurityService(BundleContext bundleContext, UserStore userStore, AccessControlStore accessControlStore) {
         securityService = new SecurityServiceImpl(ServiceTrackerFactory.createAndOpen(context, MailService.class), userStore, accessControlStore, /* setAsActivatorSecurityService */ true);
-        registration = context.registerService(SecurityService.class.getName(),
-                securityService, null);
+        registration = context.registerService(SecurityService.class.getName(), securityService, null);
         final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
         replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name, securityService.getId().toString());
         context.registerService(Replicable.class.getName(), securityService, replicableServiceProperties);
