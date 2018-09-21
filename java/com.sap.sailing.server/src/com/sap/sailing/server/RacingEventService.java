@@ -48,6 +48,7 @@ import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.base.impl.DynamicCompetitorWithBoat;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.DataImportProgress;
 import com.sap.sailing.domain.common.DataImportSubProgress;
 import com.sap.sailing.domain.common.MasterDataImportObjectCreationCount;
@@ -335,7 +336,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            cannot be {@code true} if {@link useStartTimeInference} is also {@code true}
      */
     Regatta createRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace,
-            boolean canCompetitorsRegisterToOpenRegatta, TimePoint startDate, TimePoint endDate, Serializable id, Iterable<? extends Series> series,
+            CompetitorRegistrationType competitorRegistrationType, TimePoint startDate, TimePoint endDate, Serializable id, Iterable<? extends Series> series,
             boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths,
             boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor);
     
@@ -495,7 +496,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *         the call
      */
     Util.Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String fullRegattaName, String boatClassName, 
-            boolean canBoatsOfCompetitorsChangePerRace, boolean canCompetitorsRegisterToOpenRegatta,
+            boolean canBoatsOfCompetitorsChangePerRace, CompetitorRegistrationType competitorRegistrationType,
             TimePoint startDate, TimePoint endDate, Serializable id, 
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
             Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,

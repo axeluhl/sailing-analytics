@@ -11,6 +11,7 @@ import com.sap.sailing.domain.abstractlog.regatta.impl.CompetitorTimeOnDistanceA
 import com.sap.sailing.domain.abstractlog.regatta.impl.CompetitorTimeOnTimeFactorFinder;
 import com.sap.sailing.domain.abstractlog.regatta.impl.RegattaLogEventListener;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sse.common.Duration;
 
@@ -67,8 +68,8 @@ public abstract class BaseRegattaLikeImpl implements IsRegattaLike {
     }
 
     @Override
-    public boolean canCompetitorsRegisterToOpenRegatta() {
-        return false;
+    public CompetitorRegistrationType getCompetitorRegistrationType() {
+        return CompetitorRegistrationType.CLOSED;
     }
 
     private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {

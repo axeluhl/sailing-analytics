@@ -1,13 +1,16 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.EnumSet;
 import java.util.List;
 
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.common.client.suggestion.BoatClassMasterdataSuggestOracle;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -22,7 +25,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
     protected TextBox nameEntryField;
     protected SuggestBox boatClassEntryField;
     protected CheckBox canBoatsOfCompetitorsChangePerRaceCheckBox;
-    protected CheckBox canCompetitorsRegisterToOpenRegattaCheckBox;
+    protected ListBox competitorRegistrationTypeListBox = createListBox(false);
 
     public RegattaWithSeriesAndFleetsDialog(RegattaDTO regatta, Iterable<SeriesDTO> series, List<EventDTO> existingEvents, EventDTO defaultEvent,
             String title, String okButton, StringMessages stringMessages,
@@ -42,9 +45,8 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
         canBoatsOfCompetitorsChangePerRaceCheckBox.ensureDebugId("CanBoatsOfCompetitorsChangePerRaceCheckBox");
         canBoatsOfCompetitorsChangePerRaceCheckBox.setValue(regatta.canBoatsOfCompetitorsChangePerRace);
         
-        canCompetitorsRegisterToOpenRegattaCheckBox = createCheckbox("");
-        canCompetitorsRegisterToOpenRegattaCheckBox.ensureDebugId("CanCompetitorsRegisterToOpenRegattaCheckBox");
-        canCompetitorsRegisterToOpenRegattaCheckBox.setValue(regatta.canCompetitorsRegisterToOpenRegatta);
+        EnumSet.allOf(CompetitorRegistrationType.class).forEach(t->competitorRegistrationTypeListBox.addItem(t.getLabel(), t.name()));
+        competitorRegistrationTypeListBox.setSelectedIndex(regatta.competitorRegistrationType.ordinal());
     }
 
     @Override
@@ -60,7 +62,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
         result.setName(nameEntryField.getText().trim()); // trim to particularly avoid trailing blanks
         result.boatClass = new BoatClassDTO(boatClassEntryField.getText(), Distance.NULL, Distance.NULL);
         result.canBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRaceCheckBox.getValue();
-        result.canCompetitorsRegisterToOpenRegatta = canCompetitorsRegisterToOpenRegattaCheckBox.getValue();
+        result.competitorRegistrationType = CompetitorRegistrationType.valueOf(competitorRegistrationTypeListBox.getSelectedValue());
         return result;
     }
     
@@ -75,7 +77,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
         formGrid.setWidget(1, 1, boatClassEntryField);
         formGrid.setWidget(2, 0, new Label(stringMessages.canBoatsOfCompetitorsChangePerRace() + ":"));
         formGrid.setWidget(2, 1, canBoatsOfCompetitorsChangePerRaceCheckBox);
-        formGrid.setWidget(3, 0, new Label(stringMessages.canCompetitorsRegisterToOpenRegatta() + ":"));
-        formGrid.setWidget(3, 1, canCompetitorsRegisterToOpenRegattaCheckBox);
+        formGrid.setWidget(3, 0, new Label(stringMessages.competitorRegistrationType() + ":"));
+        formGrid.setWidget(3, 1, competitorRegistrationTypeListBox);
     }
 }

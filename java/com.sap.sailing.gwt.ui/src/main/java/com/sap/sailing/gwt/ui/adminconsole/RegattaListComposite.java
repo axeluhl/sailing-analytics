@@ -173,15 +173,14 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         columnSortHandler.setComparator(regattaCanBoatsOfCompetitorsChangePerRaceColumn,
                 (r1, r2)->Boolean.valueOf(r1.canBoatsOfCompetitorsChangePerRace).compareTo(Boolean.valueOf(r2.canBoatsOfCompetitorsChangePerRace)));
         
-        TextColumn<RegattaDTO> regattaCanCompetitorsRegisterToOpenRegatta = new TextColumn<RegattaDTO>() {
+        TextColumn<RegattaDTO> competitorRegistrationTypeColumn = new TextColumn<RegattaDTO>() {
             @Override
             public String getValue(RegattaDTO regatta) {
-                return regatta.canCompetitorsRegisterToOpenRegatta ? stringMessages.yes() : stringMessages.no();
+                return regatta.competitorRegistrationType.getLabel();
             }
         };
-        regattaCanCompetitorsRegisterToOpenRegatta.setSortable(true);
-        columnSortHandler.setComparator(regattaCanCompetitorsRegisterToOpenRegatta,
-                (r1, r2)->Boolean.valueOf(r1.canCompetitorsRegisterToOpenRegatta).compareTo(Boolean.valueOf(r2.canCompetitorsRegisterToOpenRegatta)));
+        competitorRegistrationTypeColumn.setSortable(true);
+        columnSortHandler.setComparator(competitorRegistrationTypeColumn, (r1, r2)->r1.competitorRegistrationType.ordinal() - r2.competitorRegistrationType.ordinal());
 
         TextColumn<RegattaDTO> startEndDateColumn = new TextColumn<RegattaDTO>() {
             @Override
@@ -254,7 +253,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         table.addColumn(regattaSelectionCheckboxColumn, regattaSelectionCheckboxColumn.getHeader());
         table.addColumn(regattaNameColumn, stringMessages.regattaName());
         table.addColumn(regattaCanBoatsOfCompetitorsChangePerRaceColumn, stringMessages.canBoatsChange());
-        table.addColumn(regattaCanCompetitorsRegisterToOpenRegatta, stringMessages.canRegisterIfOpen());
+        table.addColumn(competitorRegistrationTypeColumn, stringMessages.competitorRegistrationTypeShort());
         table.addColumn(startEndDateColumn, stringMessages.from() + "/" + stringMessages.to());
         table.addColumn(regattaBoatClassColumn, stringMessages.boatClass());
         table.addColumn(rankingMetricColumn, stringMessages.rankingMetric());

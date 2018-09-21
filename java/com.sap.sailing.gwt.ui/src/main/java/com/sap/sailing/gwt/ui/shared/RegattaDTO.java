@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -37,7 +38,7 @@ public class RegattaDTO extends NamedDTO {
     public boolean useStartTimeInference = true;
     public boolean controlTrackingFromStartAndFinishTimes = false;
     public boolean canBoatsOfCompetitorsChangePerRace = false;
-    public boolean canCompetitorsRegisterToOpenRegatta = false;
+    public CompetitorRegistrationType competitorRegistrationType = CompetitorRegistrationType.CLOSED;
     public RankingMetrics rankingMetricType;
     public Double buoyZoneRadiusInHullLengths;
     
@@ -71,7 +72,7 @@ public class RegattaDTO extends NamedDTO {
         this.useStartTimeInference = other.useStartTimeInference;
         this.controlTrackingFromStartAndFinishTimes = other.controlTrackingFromStartAndFinishTimes;
         this.canBoatsOfCompetitorsChangePerRace = other.canBoatsOfCompetitorsChangePerRace;
-        this.canCompetitorsRegisterToOpenRegatta = other.canCompetitorsRegisterToOpenRegatta;
+        this.competitorRegistrationType = other.competitorRegistrationType;
         this.buoyZoneRadiusInHullLengths = other.buoyZoneRadiusInHullLengths;
     }
     

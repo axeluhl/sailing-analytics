@@ -22,6 +22,7 @@ import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
@@ -60,7 +61,7 @@ public class LeaderboardsResourcePingMarkTest extends AbstractJaxRsApiTest {
     public void setUp() throws Exception {
         super.setUp();
         mark = racingEventService.getBaseDomainFactory().getOrCreateMark("id", "name");
-        Regatta regatta = new RegattaImpl("regatta", new BoatClassImpl("49er", false), /* canBoatsOfCompetitorsChangePerRace */ true, /* canCompetitorsRegisterToOpenRegatta */ false,
+        Regatta regatta = new RegattaImpl("regatta", new BoatClassImpl("49er", false), /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 MillisecondsTimePoint.now(), MillisecondsTimePoint.now(), Collections.singleton(new SeriesImpl("series", false, /* isFleetsCanRunInParallel */ true, Collections
                         .singleton(new FleetImpl("fleet")), Arrays.asList("column"), racingEventService)), false,
                 new HighPoint(), 0, null, OneDesignRankingMetric::new);

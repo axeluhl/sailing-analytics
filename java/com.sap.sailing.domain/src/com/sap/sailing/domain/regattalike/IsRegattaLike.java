@@ -6,6 +6,7 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sse.common.Duration;
@@ -33,10 +34,10 @@ public interface IsRegattaLike extends Serializable {
     boolean canBoatsOfCompetitorsChangePerRace(); 
     
     /**
-     * Can a user register himself to this regatta. 
-     * @return true if user can register to regatta
+     * Get type of comeptitor registration.  
+     * @return type of competitor registration
      */
-    boolean canCompetitorsRegisterToOpenRegatta();
+    CompetitorRegistrationType getCompetitorRegistrationType();
     
     RaceColumn getRaceColumnByName(String raceColumnName);
     

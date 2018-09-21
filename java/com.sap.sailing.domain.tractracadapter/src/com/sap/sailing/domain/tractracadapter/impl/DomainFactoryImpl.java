@@ -51,6 +51,7 @@ import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SidelineImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.ScoringSchemeType;
@@ -456,7 +457,7 @@ public class DomainFactoryImpl implements DomainFactory {
                 if (result == null) {
                     result = new RegattaImpl(raceLogStore, regattaLogStore, RegattaImpl.getDefaultName(
                             defaultRegattaNameAndBoatClass.getA(), boatClass.getName()), boatClass, 
-                            /* canBoatsOfCompetitorsChangePerRace */ false, /* canCompetitorsRegisterToOpenRegatta*/ false,
+                            /* canBoatsOfCompetitorsChangePerRace */ false, CompetitorRegistrationType.CLOSED,
                             /*startDate*/ null, /*endDate*/ null,
                             trackedRegattaRegistry,
                             // use the low-point system as the default scoring scheme

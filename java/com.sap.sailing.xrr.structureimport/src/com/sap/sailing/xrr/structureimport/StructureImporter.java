@@ -30,6 +30,7 @@ import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.FleetColors;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.ScoringSchemeType;
@@ -101,7 +102,7 @@ public class StructureImporter {
             RegattaImpl regatta = new RegattaImpl(RegattaImpl.getDefaultName(event.getTitle(), ((Division) event
                     .getRaceOrDivisionOrRegattaSeriesResult().get(0)).getTitle()),
                     baseDomainFactory.getOrCreateBoatClass(result.getA().getBoatClass()), 
-                    /* canBoatsOfCompetitorsChangePerRace */ true, /* canCompetitorsRegisterToOpenRegatta */ false,
+                    /* canBoatsOfCompetitorsChangePerRace */ true,  CompetitorRegistrationType.CLOSED,
                     startDate, endDate, getSeries(buildStructure), false,
                     this.baseDomainFactory.createScoringScheme(ScoringSchemeType.LOW_POINT), event.getEventID(), null, OneDesignRankingMetric::new);
             addSpecificRegattas.add(regatta);

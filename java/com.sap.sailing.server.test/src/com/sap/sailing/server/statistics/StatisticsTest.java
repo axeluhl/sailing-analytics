@@ -33,6 +33,7 @@ import com.sap.sailing.domain.base.impl.KilometersPerHourSpeedWithBearingImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
@@ -71,7 +72,7 @@ public class StatisticsTest {
     public void setUp() {
         regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass, false, 
-                /* canCompetitorsRegisterToOpenRegatta*/ false, /* startDate */ null, /* endDate */null, null, null, "a", null));
+                CompetitorRegistrationType.CLOSED, /* startDate */ null, /* endDate */null, null, null, "a", null));
 
         final Course course = new CourseImpl("course",
                 Arrays.asList(new Waypoint[] { waypoint1, waypoint2, waypoint3 }));

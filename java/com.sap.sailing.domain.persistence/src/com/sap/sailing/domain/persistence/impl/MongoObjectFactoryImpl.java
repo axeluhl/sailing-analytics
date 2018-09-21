@@ -716,7 +716,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbRegatta.put(FieldNames.REGATTA_USE_START_TIME_INFERENCE.name(), regatta.useStartTimeInference());
         dbRegatta.put(FieldNames.REGATTA_CONTROL_TRACKING_FROM_START_AND_FINISH_TIMES.name(), regatta.isControlTrackingFromStartAndFinishTimes());
         dbRegatta.put(FieldNames.REGATTA_CAN_BOATS_OF_COMPETITORS_CHANGE_PER_RACE.name(), regatta.canBoatsOfCompetitorsChangePerRace());
-        dbRegatta.put(FieldNames.REGATTA_CAN_COMPETITORS_REGISTER_TO_OPEN_REGATTA.name(), regatta.canCompetitorsRegisterToOpenRegatta());
+        dbRegatta.put(FieldNames.REGATTA_COMPETITOR_REGISTRATION_TYPE.name(), regatta.getCompetitorRegistrationType().name());
         dbRegatta.put(FieldNames.REGATTA_RANKING_METRIC.name(), storeRankingMetric(regatta));
         boolean success = false;
         final int MAX_TRIES = 3;

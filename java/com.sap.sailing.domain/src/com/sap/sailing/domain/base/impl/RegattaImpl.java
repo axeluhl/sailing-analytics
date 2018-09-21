@@ -45,6 +45,7 @@ import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.RegattaListener;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
@@ -152,7 +153,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
 
     private boolean canBoatsOfCompetitorsChangePerRace;
 
-    private boolean canCompetitorsRegisterToOpenRegatta;
+    private CompetitorRegistrationType competitorRegistrationType;
 
     /**
      * Defaults to <code>true</code>. See {@link Regatta#useStartTimeInference()}.
@@ -168,11 +169,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      * Constructs a regatta with an empty {@link RaceLogStore} and with
      * {@link Regatta#isControlTrackingFromStartAndFinishTimes()} set to {@code false}.
      */
-    public RegattaImpl(String name, BoatClass boatClass, boolean canBoatsOfCompetitorsChangePerRace, boolean canCompetitorsRegisterToOpenRegatta,
+    public RegattaImpl(String name, BoatClass boatClass, boolean canBoatsOfCompetitorsChangePerRace, CompetitorRegistrationType competitorRegistrationType,
             TimePoint startDate, TimePoint endDate,
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme, Serializable id,
             CourseArea courseArea, RankingMetricConstructor rankingMetricConstructor) {
-        this(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, name, boatClass, canBoatsOfCompetitorsChangePerRace, canCompetitorsRegisterToOpenRegatta,
+        this(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, name, boatClass, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType,
                 startDate, endDate, series,
                 persistent, scoringScheme, id, courseArea, 0.0, /* useStartTimeInference */true, /* controlTrackingFromStartAndFinishTimes */ false,
                 rankingMetricConstructor);
@@ -191,10 +192,10 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      *            carried out.
      */
     public RegattaImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, String name, BoatClass boatClass,
-            boolean canBoatsOfCompetitorsChangePerRace, boolean canCompetitorsRegisterToOpenRegatta, 
+            boolean canBoatsOfCompetitorsChangePerRace, CompetitorRegistrationType competitorRegistrationType, 
             TimePoint startDate, TimePoint endDate, TrackedRegattaRegistry trackedRegattaRegistry,
             ScoringScheme scoringScheme, Serializable id, CourseArea courseArea) {
-        this(raceLogStore, regattaLogStore, name, boatClass, canBoatsOfCompetitorsChangePerRace, canCompetitorsRegisterToOpenRegatta,
+        this(raceLogStore, regattaLogStore, name, boatClass, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType,
                 startDate, endDate, trackedRegattaRegistry, scoringScheme,
                 id, courseArea, /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
     }
@@ -210,11 +211,11 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      *            carried out.
      */
     public RegattaImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, String name, BoatClass boatClass,
-            boolean canBoatsOfCompetitorsChangePerRace, boolean canCompetitorsRegisterToOpenRegatta,
+            boolean canBoatsOfCompetitorsChangePerRace, CompetitorRegistrationType competitorRegistrationType,
             TimePoint startDate, TimePoint endDate, TrackedRegattaRegistry trackedRegattaRegistry,
             ScoringScheme scoringScheme, Serializable id, CourseArea courseArea,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor) {
-        this(raceLogStore, regattaLogStore, name, boatClass, canBoatsOfCompetitorsChangePerRace, canCompetitorsRegisterToOpenRegatta,
+        this(raceLogStore, regattaLogStore, name, boatClass, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType,
                 startDate, endDate, Collections.singletonList(new SeriesImpl(LeaderboardNameConstants.DEFAULT_SERIES_NAME,
                 /* isMedal */false, /* isFleetsCanRunInParallel */ true, Collections
                         .singletonList(new FleetImpl(LeaderboardNameConstants.DEFAULT_FLEET_NAME)),
@@ -229,7 +230,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
      *            this new regatta.
      */
     public <S extends Series> RegattaImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, String name,
-            BoatClass boatClass, boolean canBoatsOfCompetitorsChangePerRace, boolean canCompetitorsRegisterToOpenRegatta,
+            BoatClass boatClass, boolean canBoatsOfCompetitorsChangePerRace, CompetitorRegistrationType competitorRegistrationType,
             TimePoint startDate, TimePoint endDate, Iterable<S> series, boolean persistent,
             ScoringScheme scoringScheme, Serializable id, CourseArea courseArea, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor) {
@@ -244,7 +245,6 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         raceColumnListeners = new RaceColumnListeners();
         this.boatClass = boatClass;
         this.canBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRace;
-        this.canCompetitorsRegisterToOpenRegatta = canCompetitorsRegisterToOpenRegatta;
         this.startDate = startDate;
         this.endDate = endDate;
         final List<S> seriesList = new ArrayList<S>();
@@ -282,6 +282,7 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         };
         this.regattaLikeHelper.addListener(new RegattaLogEventAdditionForwarder(raceColumnListeners));
         this.raceExecutionOrderCache = new RaceExecutionOrderCache();
+        this.competitorRegistrationType = competitorRegistrationType;
     }
 
     @Override
@@ -768,12 +769,8 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     }
 
     @Override
-    public boolean canCompetitorsRegisterToOpenRegatta() {
-        return this.canCompetitorsRegisterToOpenRegatta;
-    }
-
-    public void setCanCompetitorsRegisterToOpenRegatta(boolean canCompetitorsRegisterToOpenRegatta) {
-        this.canCompetitorsRegisterToOpenRegatta = canCompetitorsRegisterToOpenRegatta;
+    public CompetitorRegistrationType getCompetitorRegistrationType() {
+           return this.competitorRegistrationType == null ? CompetitorRegistrationType.CLOSED : this.competitorRegistrationType;
     }
 
     @Override

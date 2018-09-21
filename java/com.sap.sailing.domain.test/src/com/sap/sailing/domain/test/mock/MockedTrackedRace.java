@@ -30,6 +30,7 @@ import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.SpeedWithConfidence;
 import com.sap.sailing.domain.base.Waypoint;
 import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -345,8 +346,8 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     }
 
                     @Override
-                    public boolean canCompetitorsRegisterToOpenRegatta() {
-                        return false;
+                    public CompetitorRegistrationType getCompetitorRegistrationType() {
+                        return CompetitorRegistrationType.CLOSED;
                     }
 
                     @Override

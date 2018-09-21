@@ -19,6 +19,7 @@ import org.junit.Test;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.dto.FleetDTO;
@@ -97,7 +98,7 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
     private void startTrackingOnMaster() throws Exception {
         final Regatta regatta = master.createRegatta("Test regatta", "J/70",
                 /* canBoatsOfCompetitorsChangePerRace==true because it's a league race we're using for this test */ true,
-                /* canCompetitorsRegisterToOpenRegatta */ false, 
+                CompetitorRegistrationType.CLOSED, 
                 /* startDate */ null, /* endDate */ null, UUID.randomUUID(),
                 /* start with no series */ Collections.emptySet(),
                 /* persistent */ true, new LowPoint(), /* defaultCourseAreaId */ UUID.randomUUID(),

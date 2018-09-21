@@ -36,6 +36,7 @@ import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
 import com.sap.sailing.domain.racelog.impl.EmptyRaceLogStore;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
@@ -77,7 +78,7 @@ public class CourseUpdateDuringNonAtomicSerializationTest implements Serializabl
         course = new CourseImpl("Test Course", waypoints);
         Regatta regatta = new RegattaImpl(EmptyRaceLogStore.INSTANCE, EmptyRegattaLogStore.INSTANCE, "Test Regatta",
                 new BoatClassImpl("505", BoatClassMasterdata._5O5), 
-                /* canBoatsOfCompetitorsChangePerRace */ true, /* canCompetitorsRegisterToOpenRegatta*/ false,
+                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
                 /*startDate*/ null, /*endDate*/ null, /* trackedRegattaRegistry */ null,
                 new LowPoint(), UUID.randomUUID(), new CourseAreaImpl("Alpha", UUID.randomUUID()));
         TrackedRegatta trackedRegatta = new TrackedRegattaImpl(regatta);

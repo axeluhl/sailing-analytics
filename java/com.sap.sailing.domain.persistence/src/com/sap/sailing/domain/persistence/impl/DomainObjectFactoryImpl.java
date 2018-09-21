@@ -169,6 +169,7 @@ import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.VenueImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.MarkType;
@@ -1280,15 +1281,27 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 canBoatsOfCompetitorsChangePerRace = false;
                 createMigratableRegatta = true;
             }
-            Boolean canCompetitorsRegisterToOpenRegatta = (Boolean) dbRegatta
-                    .get(FieldNames.REGATTA_CAN_COMPETITORS_REGISTER_TO_OPEN_REGATTA.name());
-            if (canCompetitorsRegisterToOpenRegatta == null) {
-                canCompetitorsRegisterToOpenRegatta = Boolean.FALSE;
+            
+            CompetitorRegistrationType competitorRegistrationType;
+            if (dbRegatta.containsField(FieldNames.REGATTA_COMPETITOR_REGISTRATION_TYPE.name())) {
+                String competitorRegistrationTypeName = (String) dbRegatta
+                        .get(FieldNames.REGATTA_COMPETITOR_REGISTRATION_TYPE.name());
+                try {
+                    competitorRegistrationType = competitorRegistrationTypeName == null
+                            ? CompetitorRegistrationType.CLOSED
+                            : CompetitorRegistrationType.valueOf(competitorRegistrationTypeName);
+                } catch (IllegalArgumentException iae) {
+                    logger.log(Level.WARNING, "Unknown CompetitorRegistrationType {0} for regatta.", competitorRegistrationTypeName);
+                    competitorRegistrationType = CompetitorRegistrationType.CLOSED;
+                }
+            } else {
+                competitorRegistrationType = CompetitorRegistrationType.CLOSED;
             }
+            
             final RankingMetricConstructor rankingMetricConstructor = loadRankingMetricConstructor(dbRegatta);
             if (createMigratableRegatta) {
                 result = new MigratableRegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, boatClass,
-                        canBoatsOfCompetitorsChangePerRace, canCompetitorsRegisterToOpenRegatta, startDate, endDate, series, /* persistent */true,
+                        canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, startDate, endDate, series, /* persistent */true,
                         loadScoringScheme(dbRegatta), id, courseArea,
                         buoyZoneRadiusInHullLengths == null ? Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS
                                 : buoyZoneRadiusInHullLengths,
@@ -1297,7 +1310,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         rankingMetricConstructor, new MongoObjectFactoryImpl(database));
             } else {
                 result = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, boatClass,
-                        canBoatsOfCompetitorsChangePerRace, canCompetitorsRegisterToOpenRegatta, startDate, endDate, series, /* persistent */true,
+                        canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, startDate, endDate, series, /* persistent */true,
                         loadScoringScheme(dbRegatta), id, courseArea,
                         buoyZoneRadiusInHullLengths == null ? Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS
                                 : buoyZoneRadiusInHullLengths,

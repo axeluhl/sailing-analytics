@@ -25,6 +25,7 @@ import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
@@ -124,7 +125,7 @@ public class AbstractGPSFixStoreTest extends RaceLogTrackingTestHelper {
     protected DynamicTrackedRaceImpl createDynamicTrackedRace(BoatClass boatClass, RaceDefinition raceDefinition) {
         DynamicTrackedRegatta regatta = new DynamicTrackedRegattaImpl(new RegattaImpl(EmptyRaceLogStore.INSTANCE,
                 EmptyRegattaLogStore.INSTANCE, RegattaImpl.getDefaultName("regatta", boatClass.getName()), boatClass,
-                /* canBoatsOfCompetitorsChangePerRace */ true,  /* canCompetitorsRegisterToOpenRegatta*/ false, /* startDate */ null, /* endDate */null, null, null, "a", null));
+                /* canBoatsOfCompetitorsChangePerRace */ true,  CompetitorRegistrationType.CLOSED, /* startDate */ null, /* endDate */null, null, null, "a", null));
         return new DynamicTrackedRaceImpl(regatta, raceDefinition, Collections.<Sideline> emptyList(),
                 EmptyWindStore.INSTANCE, 0, 0, 0, /* useMarkPassingCalculator */ false, OneDesignRankingMetric::new,
                 mock(RaceLogResolver.class));

@@ -26,6 +26,7 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
@@ -58,7 +59,7 @@ public class LeaderboardsResourceTest extends AbstractJaxRsApiTest {
                 raceColumnNames, /* trackedRegattaRegistry */null);
         series.add(testSeries);
         regatta = racingEventService.createRegatta(RegattaImpl.getDefaultName(regattaBaseName, boatClassName), boatClassName, 
-                /* canBoatsOfCompetitorsChangePerRace */ true, /* canCompetitorsRegisterToOpenRegatta */ false, /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(), series, /*persistent*/ true,
+                /* canBoatsOfCompetitorsChangePerRace */ true,  CompetitorRegistrationType.CLOSED, /*startDate*/ null, /*endDate*/ null, UUID.randomUUID(), series, /*persistent*/ true,
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null,
                 /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
         testSeries.addRaceColumn("R1", /* trackedRegattaRegistry */ null);

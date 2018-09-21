@@ -23,6 +23,7 @@ import com.sap.sailing.domain.base.RaceColumnListener;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.impl.AbstractRaceExecutionOrderProvider;
 import com.sap.sailing.domain.base.impl.RegattaLogEventAdditionForwarder;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.LeaderboardType;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.FlexibleRaceColumn;
@@ -377,9 +378,10 @@ public class FlexibleLeaderboardImpl extends AbstractLeaderboardImpl implements 
         return false;
     }
     
+
     @Override
-    public boolean canCompetitorsRegisterToOpenRegatta() {
-        return false;
+    public CompetitorRegistrationType getCompetitorRegistrationType() {
+        return CompetitorRegistrationType.CLOSED;
     }
 
     /**

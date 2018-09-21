@@ -61,7 +61,7 @@ public class RegattaDetailsComposite extends Composite {
     private final Label useStartTimeInference;
     private final Label controlTrackingFromStartAndFinishTimes;
     private final Label canBoatsOfCompetitorsChangePerRace;
-    private final Label canCompetitorsRegisterToOpenRegatta;
+    private final Label competitorRegistrationType;
     private final Label configuration;
     private final Label buoyZoneRadiusInHullLengths;
     
@@ -96,7 +96,7 @@ public class RegattaDetailsComposite extends Composite {
         useStartTimeInference = createLabelAndValueWidget(grid, currentRow++, stringMessages.useStartTimeInference(), "UseStartTimeInferenceLabel");
         controlTrackingFromStartAndFinishTimes = createLabelAndValueWidget(grid, currentRow++, stringMessages.controlTrackingFromStartAndFinishTimes(), "UseStartTimeInferenceLabel");
         canBoatsOfCompetitorsChangePerRace = createLabelAndValueWidget(grid, currentRow++, stringMessages.canBoatsOfCompetitorsChangePerRace(), "CanBoatsOfCompetitorsChangePerRaceLabel");
-        canCompetitorsRegisterToOpenRegatta = createLabelAndValueWidget(grid, currentRow++, stringMessages.canCompetitorsRegisterToOpenRegatta(), "CanCompetitorsRegisterToOpenRegatta");
+        competitorRegistrationType = createLabelAndValueWidget(grid, currentRow++, stringMessages.competitorRegistrationType(), "GetcompetitorRegistrationType");
         buoyZoneRadiusInHullLengths = createLabelAndValueWidget(grid, currentRow++, stringMessages.buoyZoneRadiusInHullLengths(), "BuoyZoneRadiusInHullLengthsLabel");
         configuration = createLabelAndValueWidget(grid, currentRow++, stringMessages.racingProcedureConfiguration(), "RacingProcedureLabel");
         scoringSystem = createLabelAndValueWidget(grid, currentRow++, stringMessages.scoringSystem(), "ScoringSystemLabel");
@@ -405,7 +405,7 @@ public class RegattaDetailsComposite extends Composite {
             useStartTimeInference.setText(regatta.useStartTimeInference ? stringMessages.yes() : stringMessages.no());
             controlTrackingFromStartAndFinishTimes.setText(regatta.controlTrackingFromStartAndFinishTimes ? stringMessages.yes() : stringMessages.no());
             canBoatsOfCompetitorsChangePerRace.setText(regatta.canBoatsOfCompetitorsChangePerRace ? stringMessages.yes() : stringMessages.no());
-            canCompetitorsRegisterToOpenRegatta.setText(regatta.canCompetitorsRegisterToOpenRegatta ? stringMessages.yes() : stringMessages.no());
+            competitorRegistrationType.setText(regatta.competitorRegistrationType.getLabel());
             buoyZoneRadiusInHullLengths.setText(String.valueOf(regatta.buoyZoneRadiusInHullLengths)); 
 
             if (regatta.configuration != null) {
