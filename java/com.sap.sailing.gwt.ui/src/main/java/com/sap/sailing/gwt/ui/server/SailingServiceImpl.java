@@ -63,6 +63,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.AuthorizationException;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -289,6 +290,9 @@ import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.Permission.Mode;
 import com.sap.sailing.domain.common.sharding.ShardingType;
+import com.sap.sailing.domain.common.tagging.RaceLogNotFoundException;
+import com.sap.sailing.domain.common.tagging.ServiceNotFoundException;
+import com.sap.sailing.domain.common.tagging.TagAlreadyExistsException;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -6464,12 +6468,27 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
     public SuccessInfo addTag(String leaderboardName, String raceColumnName, String fleetName, String tag,
             String comment, String imageURL, boolean visibleForPublic, TimePoint raceTimepoint) {
         SuccessInfo successInfo = new SuccessInfo(true, null, null, null);
-        boolean successful = getService().getTaggingService().addTag(leaderboardName, raceColumnName, fleetName, tag,
-                comment, imageURL, visibleForPublic, raceTimepoint);
-        if (!successful) {
-            String message = serverStringMessages.get(getClientLocale(),
-                    getService().getTaggingService().getLastErrorCode().getCode());
-            successInfo = new SuccessInfo(false, message, null, null);
+        try {
+            getService().getTaggingService().addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL,
+                    visibleForPublic, raceTimepoint);
+        } catch (AuthorizationException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "missingAuthorization"),
+                    null, null);
+        } catch (IllegalArgumentException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "invalidParameters"), null,
+                    null);
+        } catch (RaceLogNotFoundException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "raceLogNotFound"), null,
+                    null);
+        } catch (ServiceNotFoundException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "securityServiceNotFound"),
+                    null, null);
+        } catch (TagAlreadyExistsException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "tagAlreadyExists"), null,
+                    null);
+        } catch (Exception e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "unknownError"), null,
+                    null);
         }
         return successInfo;
     }
@@ -6477,12 +6496,26 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
     @Override
     public SuccessInfo removeTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag) {
         SuccessInfo successInfo = new SuccessInfo(true, null, null, null);
-        boolean successful = getService().getTaggingService().removeTag(leaderboardName, raceColumnName, fleetName,
-                tag);
-        if (!successful) {
-            String message = serverStringMessages.get(getClientLocale(),
-                    getService().getTaggingService().getLastErrorCode().getCode());
-            successInfo = new SuccessInfo(false, message, null, null);
+        try {
+            getService().getTaggingService().removeTag(leaderboardName, raceColumnName, fleetName, tag);
+        } catch (AuthorizationException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "missingAuthorization"),
+                    null, null);
+        } catch (IllegalArgumentException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "invalidParameters"), null,
+                    null);
+        } catch (NotRevokableException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "tagNotRevokable"), null,
+                    null);
+        } catch (RaceLogNotFoundException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "raceLogNotFound"), null,
+                    null);
+        } catch (ServiceNotFoundException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "securityServiceNotFound"),
+                    null, null);
+        } catch (Exception e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "unknownError"), null,
+                    null);
         }
         return successInfo;
     }
@@ -6491,12 +6524,30 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
     public SuccessInfo updateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tagToUpdate,
             String tag, String comment, String imageURL, boolean visibleForPublic) {
         SuccessInfo successInfo = new SuccessInfo(true, null, null, null);
-        boolean successful = getService().getTaggingService().updateTag(leaderboardName, raceColumnName, fleetName,
-                tagToUpdate, tag, comment, imageURL, visibleForPublic);
-        if (!successful) {
-            String message = serverStringMessages.get(getClientLocale(),
-                    getService().getTaggingService().getLastErrorCode().getCode());
-            successInfo = new SuccessInfo(false, message, null, null);
+        try {
+            getService().getTaggingService().updateTag(leaderboardName, raceColumnName, fleetName, tagToUpdate, tag,
+                    comment, imageURL, visibleForPublic);
+        } catch (AuthorizationException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "missingAuthorization"),
+                    null, null);
+        } catch (IllegalArgumentException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "invalidParameters"), null,
+                    null);
+        } catch (NotRevokableException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "tagNotRevokable"), null,
+                    null);
+        } catch (RaceLogNotFoundException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "raceLogNotFound"), null,
+                    null);
+        } catch (ServiceNotFoundException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "securityServiceNotFound"),
+                    null, null);
+        } catch (TagAlreadyExistsException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "tagAlreadyExists"), null,
+                    null);
+        } catch (Exception e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "unknownError"), null,
+                    null);
         }
         return successInfo;
     }
@@ -6504,19 +6555,39 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
     @Override
     public List<TagDTO> getAllTags(String leaderboardName, String raceColumnName, String fleetName) {
         List<TagDTO> result = new ArrayList<TagDTO>();
-        result.addAll(getService().getTaggingService().getPrivateTags(leaderboardName, raceColumnName, fleetName));
-        result.addAll(getService().getTaggingService().getPublicTags(leaderboardName, raceColumnName, fleetName));
+        try {
+            result.addAll(getService().getTaggingService().getPublicTags(leaderboardName, raceColumnName, fleetName));
+        } catch (RaceLogNotFoundException e) {
+            // do nothing and try to return as much tags as possible (private tags)
+        }
+        try {
+            result.addAll(getService().getTaggingService().getPrivateTags(leaderboardName, raceColumnName, fleetName));
+        } catch (ServiceNotFoundException e) {
+            // do nothing and try to return as much tags as possible (public tags)
+        }
         return result;
     }
 
     @Override
     public List<TagDTO> getPublicTags(String leaderboardName, String raceColumnName, String fleetName) {
-        return getService().getTaggingService().getPublicTags(leaderboardName, raceColumnName, fleetName);
+        List<TagDTO> result = new ArrayList<TagDTO>();
+        try {
+            result.addAll(getService().getTaggingService().getPublicTags(leaderboardName, raceColumnName, fleetName));
+        } catch (RaceLogNotFoundException e) {
+            // do nothing as method will always return at least an empty list
+        }
+        return result;
     }
 
     @Override
     public List<TagDTO> getPrivateTags(String leaderboardName, String raceColumnName, String fleetName) {
-        return getService().getTaggingService().getPrivateTags(leaderboardName, raceColumnName, fleetName);
+        List<TagDTO> result = new ArrayList<TagDTO>();
+        try {
+            result.addAll(getService().getTaggingService().getPrivateTags(leaderboardName, raceColumnName, fleetName));
+        } catch (ServiceNotFoundException e) {
+            // do nothing as method will always return at least an empty list
+        }
+        return result;
     }
 
     /**

@@ -2,13 +2,18 @@ package com.sap.sailing.server.tagging;
 
 import java.util.List;
 
+import org.apache.shiro.authz.AuthorizationException;
+
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.dto.TagDTO;
+import com.sap.sailing.domain.common.tagging.RaceLogNotFoundException;
+import com.sap.sailing.domain.common.tagging.ServiceNotFoundException;
+import com.sap.sailing.domain.common.tagging.TagAlreadyExistsException;
 import com.sap.sse.common.TimePoint;
 
-// TODO: Replace error handling by throwing exceptions, see "topleveltranslations.json"
-// TODO: CommentTooLong
+// TODO: see "translation_v2.json" for new translation files
 // TODO: use document settings id for tags/tag-buttons/... as race identifier
 /**
  * This service is used to perform all CRUD operations on {@link TagDTO tags} and is used by the
@@ -18,38 +23,6 @@ import com.sap.sse.common.TimePoint;
  * @author Henri Kohlberg
  */
 public interface TaggingService {
-
-    /**
-     * Enum used to identify issues.
-     */
-    public enum ErrorCode {
-        UNKNOWN_ERROR("unknownError", "Unknown error"),
-        NOT_LOGGED_IN("notLoggedIn", "You are not logged in"),
-        MISSING_PERMISSIONS("missingPermissions", "Missing permissions"),
-        SECURITY_SERIVCE_NOT_FOUND("securityServiceNotFound", "Security service not found"),
-        RACELOG_NOT_FOUND("racelogNotFound", "Racelog not found"),
-        TAG_NOT_REVOKABLE("tagNotRevokable", "This tag cannot be revoked"),
-        TAG_ALREADY_EXISTS("tagAlreadyExists", "Tag does already exist, duplicated tags are not allowed"),
-        TAG_ALREADY_REMOVED("tagAlreadyRemoved", "Tag cannot be removed twice!"),
-        TAG_NOT_EMPTY("tagNotEmpty", "Tag may not be empty"),
-        TIMEPOINT_NOT_EMPTY("timepointNotEmpty", "Timepoint may not be empty");
-
-        private final String code;
-        private final String message;
-
-        ErrorCode(String code, String message) {
-            this.code = code;
-            this.message = message;
-        }
-
-        public String getCode() {
-            return code;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-    }
 
     /**
      * Saves given properties as tag for given race. Checks if all parameters are valid and all required parameters are
@@ -73,10 +46,21 @@ public interface TaggingService {
      *            tag will be saved in {@link com.sap.sse.security.UserStore UserStore} (only visible for the creator)
      * @param raceTimepoint
      *            timepoint in race when user created tag, must <b>NOT</b> be <code>null</code>
-     * @return <code>true</code> if tag was saved successfully, otherwise <code>false</code>
+     * @throws AuthorizationException
+     *             thrown if user is not logged in or is missing permissions
+     * @throws IllegalArgumentException
+     *             thrown if one of the required parameters has an invalid value
+     * @throws RaceLogNotFoundException
+     *             thrown if racelog cannot be found (e.g. when <code>leaderboardName</code>,
+     *             <code>raceColumnName</code> or <code>fleetName</code> are missing)
+     * @throws ServiceNotFoundException
+     *             thrown if security service cannot be found
+     * @throws TagAlreadyExistsException
+     *             thrown if tag already exists
      */
-    boolean addTag(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment,
-            String imageURL, boolean visibleForPublic, TimePoint raceTimepoint);
+    void addTag(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment,
+            String imageURL, boolean visibleForPublic, TimePoint raceTimepoint) throws AuthorizationException,
+            IllegalArgumentException, RaceLogNotFoundException, ServiceNotFoundException, TagAlreadyExistsException;
 
     /**
      * Removes public {@link TagDTO tag} from {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog} and
@@ -90,9 +74,21 @@ public interface TaggingService {
      *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
      * @param tag
      *            tag to remove
-     * @return <code>true</code> if tag was removed successfully, otherwise <code>false</code>
+     * @throws AuthorizationException
+     *             thrown if user is not logged in or is missing permissions
+     * @throws IllegalArgumentException
+     *             thrown if one of the required parameters has an invalid value
+     * @throws NotRevokableException
+     *             thrown if tag is public and not revokable from racelog
+     * @throws RaceLogNotFoundException
+     *             thrown if racelog cannot be found (e.g. when <code>leaderboardName</code>,
+     *             <code>raceColumnName</code> or <code>fleetName</code> are missing)
+     * @throws ServiceNotFoundException
+     *             thrown if security service cannot be found
      */
-    boolean removeTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag);
+    void removeTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag)
+            throws AuthorizationException, IllegalArgumentException, NotRevokableException, RaceLogNotFoundException,
+            ServiceNotFoundException;
 
     /**
      * Updates given <code>tagToUpdate</code> with the given parameters <code>tag</code>, <code>comment</code>,
@@ -114,10 +110,24 @@ public interface TaggingService {
      *            new iamge URL
      * @param visibleForPublic
      *            new privacy status
-     * @return <code>true</code> if tag was updated successfully, otherwise <code>false</code>
+     * @throws AuthorizationException
+     *             thrown if user is not logged in or is missing permissions
+     * @throws IllegalArgumentException
+     *             thrown if one of the required parameters has an invalid value
+     * @throws NotRevokableException
+     *             thrown if tag is public and not revokable from racelog
+     * @throws TagAlreadyExistsException
+     *             thrown if tag already exists
+     * @throws RaceLogNotFoundException
+     *             thrown if racelog cannot be found (e.g. when <code>leaderboardName</code>,
+     *             <code>raceColumnName</code> or <code>fleetName</code> are missing)
+     * @throws ServiceNotFoundException
+     *             thrown if security service cannot be found
      */
-    boolean updateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tagToUpdate, String tag,
-            String comment, String imageURL, boolean visibleForPublic);
+    void updateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tagToUpdate, String tag,
+            String comment, String imageURL, boolean visibleForPublic)
+            throws AuthorizationException, IllegalArgumentException, NotRevokableException, RaceLogNotFoundException,
+            ServiceNotFoundException, TagAlreadyExistsException;
 
     /**
      * Returns all public tags for the specified race.
@@ -130,8 +140,12 @@ public interface TaggingService {
      *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
      * @return list of {@link TagDTO tags}, empty list in case an error occurs or there are no tags available but
      *         <b>never null</b>!
+     * @throws RaceLogNotFoundException
+     *             thrown if racelog cannot be found (e.g. when <code>leaderboardName</code>,
+     *             <code>raceColumnName</code> or <code>fleetName</code> are missing)
      */
-    List<TagDTO> getPublicTags(String leaderboardName, String raceColumnName, String fleetName);
+    List<TagDTO> getPublicTags(String leaderboardName, String raceColumnName, String fleetName)
+            throws RaceLogNotFoundException;
 
     /**
      * Returns all public tags since the given <code>searchSinceTimePoint</code> for the specified race.
@@ -156,15 +170,9 @@ public interface TaggingService {
      *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
      * @return list of {@link TagDTO tags}, empty list in case an error occurs or there are no tags available but
      *         <b>never null</b>!
+     * @throws ServiceNotFoundException
+     *             thrown if security service cannot be found
      */
-    List<TagDTO> getPrivateTags(String leaderboardName, String raceColumnName, String fleetName);
-
-    /**
-     * Returns the last error code of the current user. Needs to be converted into error message to display this message
-     * to the user.
-     * 
-     * @return last {@link ErrorCode error code} which occured if error is known, otherwise
-     *         {@link ErrorCode#UNKNOWN_ERROR unknown error}
-     */
-    ErrorCode getLastErrorCode();
+    List<TagDTO> getPrivateTags(String leaderboardName, String raceColumnName, String fleetName)
+            throws ServiceNotFoundException;
 }
