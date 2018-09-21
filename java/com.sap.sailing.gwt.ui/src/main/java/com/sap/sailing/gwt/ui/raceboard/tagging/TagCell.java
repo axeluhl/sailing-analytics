@@ -54,9 +54,9 @@ public class TagCell extends AbstractCell<TagDTO> {
          * @param content2
          * @return {@link SafeHtml HTML template}
          */
-        @Template("<div class='{0}'><div class='{1}'>{3}{4}{5}{8}</div><div class='{2}'>{6}</div>{7}</div>")
+        @Template("<div class='{0}'><div class='{1}'>{3}{4}{5}</div><div class='{2}'>{6}</div>{7}</div>")
         SafeHtml cell(String classTag, String classTagHeading, String classTagCreated, SafeHtml icon, SafeHtml buttons,
-                SafeHtml tag, SafeHtml created, SafeHtml content, SafeHtml shareButtonHeader);
+                SafeHtml tag, SafeHtml created, SafeHtml content);
 
         /**
          * Renders content with maximal configuration (comment and image).
@@ -92,29 +92,13 @@ public class TagCell extends AbstractCell<TagDTO> {
         SafeHtml contentWithoutCommentWithImage(String classTagImage, SafeUri imageURL);
 
         /**
-         * Renders heading button to delete a tag.
+         * Renders heading buttons to share, edit or delete a tag.
          * 
          * @return {@link SafeHtml HTML template}
          */
-        @Template("<div class='{0}'>{1}</div>")
-        SafeHtml headerButtonsDeletable(String classTagHeadingButtons, SafeHtml deleteButton);
-
-        /**
-         * Renders heading button to edit and delete a tag.
-         * 
-         * @return {@link SafeHtml HTML template}
-         */
-        @Template("<div class='{0}'>{1}{2}</div>")
-        SafeHtml headerButtonsDeletableAndModifyable(String classTagHeadingButtons, SafeHtml editButton,
+        @Template("<div class='{0}'>{1}{2}{3}</div>")
+        SafeHtml headerButtons(String classTagHeadingButtons, SafeHtml shareButton, SafeHtml editButton,
                 SafeHtml deleteButton);
-
-        /**
-         * Renders part of heading holding a button to share a tag.
-         * 
-         * @return {@link SafeHtml HTML template}
-         */
-        @Template("<div class='{0}'>{1}</div>")
-        SafeHtml shareButtonHeader(String classTagHeadingButtons, SafeHtml shareButton);
 
         /**
          * Renders icon with given source.
@@ -196,39 +180,41 @@ public class TagCell extends AbstractCell<TagDTO> {
             icon = tagCellTemplate.icon(safeIsPrivateImageUri);
         }
 
-        SafeHtml shareButton = tagCellTemplate.button(style.tagActionButton() + " " + style.tagShareButton(),
-                stringMessages.tagShareTag(), tagCellTemplate.icon(resources.shareIcon().getSafeUri()));
-        SafeHtml shareButtonHeader = tagCellTemplate.shareButtonHeader(style.tagCellHeadingButtons(), shareButton);
-
-        SafeHtml headingButtons = SafeHtmlUtils.EMPTY_SAFE_HTML;
+        SafeHtml shareButton = SafeHtmlUtils.EMPTY_SAFE_HTML;
+        SafeHtml editButton = SafeHtmlUtils.EMPTY_SAFE_HTML;
+        SafeHtml deleteButton = SafeHtmlUtils.EMPTY_SAFE_HTML;
         // preview cells do not show buttons
         if (!isPreviewCell) {
+            if (tag.isVisibleForPublic()) {
+                // create share button if tag is public and no preview tag
+                shareButton = tagCellTemplate.button(style.tagActionButton() + " " + style.tagShareButton(),
+                        stringMessages.tagShareTag(), tagCellTemplate.icon(resources.shareIcon().getSafeUri()));
+            }
             if (userService.getCurrentUser() != null) {
-                // create buttons with icons
-                SafeHtml deleteButton = tagCellTemplate.button(style.tagActionButton() + " " + style.tagDeleteButton(),
-                        stringMessages.tagDeleteTag(), tagCellTemplate.icon(resources.deleteIcon().getSafeUri()));
-                SafeHtml editButton = tagCellTemplate.button(style.tagActionButton() + " " + style.tagEditButton(),
-                        stringMessages.tagEditTag(), tagCellTemplate.icon(resources.editIcon().getSafeUri()));
                 // TODO: As soon as permission-vertical branch got merged into master, apply
                 // new permission system at this if-statement and remove this old way of
                 // checking for permissions. (see bug 4104, comment 9)
                 // functionality: Check if user has the permission to delete or edit this tag.
                 if (tag.getUsername().equals(userService.getCurrentUser().getName())) {
-                    headingButtons = tagCellTemplate.headerButtonsDeletableAndModifyable(style.tagCellHeadingButtons(),
-                            editButton, deleteButton);
-                } else if (userService.getCurrentUser().hasRole("admin")) {
-                    headingButtons = tagCellTemplate.headerButtonsDeletable(style.tagCellHeadingButtons(),
-                            deleteButton);
+                    editButton = tagCellTemplate.button(style.tagActionButton() + " " + style.tagEditButton(),
+                            stringMessages.tagEditTag(), tagCellTemplate.icon(resources.editIcon().getSafeUri()));
+                }
+                if (tag.getUsername().equals(userService.getCurrentUser().getName())
+                        || userService.getCurrentUser().hasRole("admin")) {
+                    deleteButton = tagCellTemplate.button(style.tagActionButton() + " " + style.tagDeleteButton(),
+                            stringMessages.tagDeleteTag(), tagCellTemplate.icon(resources.deleteIcon().getSafeUri()));
                 }
             }
         }
+        SafeHtml headingButtons = tagCellTemplate.headerButtons(style.tagCellHeadingButtons(), shareButton, editButton,
+                deleteButton);
 
         String cellStyle = style.tagCell();
         if (tag.equals(taggingPanel.getSelectedTag())) {
             cellStyle = style.tagCell() + " " + style.tagCellActive();
         }
         SafeHtml cell = tagCellTemplate.cell(cellStyle, style.tagCellHeading(), style.tagCellCreated(), icon,
-                headingButtons, safeTag, safeCreated, content, shareButtonHeader);
+                headingButtons, safeTag, safeCreated, content);
         htmlBuilder.append(cell);
     }
 
@@ -268,12 +254,25 @@ public class TagCell extends AbstractCell<TagDTO> {
                         taggingPanel.setCurrentState(State.EDIT_TAG);
                     } else if (button.hasClassName(style.tagShareButton())) {
                         String currentURL = Window.Location.getHref();
-                        String urlWithTagParam = currentURL
-                                .concat("&tag=" + tag.getRaceTimepoint().asMillis() + tag.getTag());
-                        new TagSharedURLDialog(taggingPanel, urlWithTagParam).show();
+                        String currentTagURLParameterValue = Window.Location.getParameter(TagDTO.TAG_URL_PARAMETER);
+                        String newURL;
+                        String newTagURLParameter = constructTagURLParameter(
+                                tag.getRaceTimepoint().asMillis() + "," + tag.getTag());
+                        // if url parameter already exists replace it with the new url parameter
+                        if (currentTagURLParameterValue != null) {
+                            newURL = currentURL.replace(constructTagURLParameter(currentTagURLParameterValue),
+                                    newTagURLParameter);
+                        } else {
+                            newURL = currentURL.concat(newTagURLParameter);
+                        }
+                        new TagSharedURLDialog(taggingPanel, newURL).show();
                     }
                 }
             }
         }
+    }
+
+    private String constructTagURLParameter(String value) {
+        return "&" + TagDTO.TAG_URL_PARAMETER + "=" + value;
     }
 }

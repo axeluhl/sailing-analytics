@@ -8,7 +8,6 @@ import java.util.Map;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -54,9 +53,8 @@ import com.sap.sse.security.ui.shared.UserDTO;
  * <br/>
  * The TaggingPanel is also used as a data provider for all of its subcomponents like header, footer and content
  * section. Therefore the TaggingPanel provides references to important services, string messages, its current state and
- * so on.
- * Best practice: The constructor of subcomponents of the TaggingPanel contains only the TaggingPanel as a parameter.
- * Every other required shared resource (string messages, service references, ...) can be requested from the
+ * so on. Best practice: The constructor of subcomponents of the TaggingPanel contains only the TaggingPanel as a
+ * parameter. Every other required shared resource (string messages, service references, ...) can be requested from the
  * TaggingPanel itself.
  */
 public class TaggingPanel extends ComponentWithoutSettings
@@ -67,8 +65,7 @@ public class TaggingPanel extends ComponentWithoutSettings
      */
     protected enum State {
         VIEW, // default
-        CREATE_TAG,
-        EDIT_TAG
+        CREATE_TAG, EDIT_TAG
     }
 
     // styling
@@ -103,15 +100,15 @@ public class TaggingPanel extends ComponentWithoutSettings
 
     // current state of the Tagging-Panel
     private State currentState;
-    
-    //Needed for sharing Tags 
-    private boolean firstTimePublicTagsLoaded = true;
-    private final TimePoint urlParameterTimePoint;
-    private final String urlParameterTag;
+
+    // Needed for sharing Tags
+    private boolean tagHasNotBeenHighlightedYet = true;
+    protected final TimePoint timePointToHighlight;
+    protected final String tagToHighlight;
 
     public TaggingPanel(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages,
             SailingServiceAsync sailingService, UserService userService, Timer timer,
-            RaceTimesInfoProvider raceTimesInfoProvider) {
+            RaceTimesInfoProvider raceTimesInfoProvider, TimePoint timePointToHighlight, String tagToHighlight) {
         super(parent, context);
 
         this.stringMessages = stringMessages;
@@ -119,6 +116,8 @@ public class TaggingPanel extends ComponentWithoutSettings
         this.userService = userService;
         this.timer = timer;
         this.raceTimesInfoProvider = raceTimesInfoProvider;
+        this.timePointToHighlight = timePointToHighlight;
+        this.tagToHighlight = tagToHighlight;
 
         style = TagPanelResources.INSTANCE.style();
         style.ensureInjected();
@@ -140,27 +139,6 @@ public class TaggingPanel extends ComponentWithoutSettings
         raceTimesInfoProvider.addRaceTimesInfoProviderListener(this);
 
         setCurrentState(State.VIEW);
-        
-        //Get the url parameter "tag" and divide it into the logical timepoint and the tag title
-        String urlParameter = Window.Location.getParameter("tag");
-        if(urlParameter != null) {
-            if(urlParameter.length() > 13) {
-                String timeMillisString = urlParameter.substring(0, 13);//Works till "Nov 20 2286", afterwards timeMillis length increases from 13 to 14 chars
-                String tagString = urlParameter.substring(13, urlParameter.length()); 
-                urlParameterTimePoint = new MillisecondsTimePoint(Long.parseLong(timeMillisString));
-                urlParameterTag = tagString; 
-            }
-            else {
-                Notification.notify(stringMessages.tagInvalidURL(), NotificationType.WARNING);
-                urlParameterTimePoint = null;
-                urlParameterTag = null; 
-            }  
-        }
-        else {
-            urlParameterTimePoint = null;
-            urlParameterTag = null; 
-        }
-
         initializePanel();
     }
 
@@ -601,15 +579,15 @@ public class TaggingPanel extends ComponentWithoutSettings
                 // it and jump to its logical timepoint
                 // Loading of tags has to be enabled first, that is why raceInfo.getTags() might be null
                 // and so the highlighting of tags must wait till raceInfo.getTags() is not null
-                if (firstTimePublicTagsLoaded && raceInfo.getTags() != null) {
-                    firstTimePublicTagsLoaded = false;
-                    if (urlParameterTimePoint != null) {
-                        timer.setTime(urlParameterTimePoint.asMillis());
-                        if (urlParameterTag != null) {
+                if (tagHasNotBeenHighlightedYet && raceInfo.getTags() != null) {
+                    tagHasNotBeenHighlightedYet = false;
+                    if (timePointToHighlight != null) {
+                        timer.setTime(timePointToHighlight.asMillis());
+                        if (tagToHighlight != null) {
                             TagDTO matchingTag = null;
                             for (TagDTO tag : tagListProvider.getAllTags()) {
-                                if (tag.getRaceTimepoint().equals(urlParameterTimePoint)
-                                        && tag.getTag().equals(urlParameterTag)) {
+                                if (tag.getRaceTimepoint().equals(timePointToHighlight)
+                                        && tag.getTag().equals(tagToHighlight)) {
                                     matchingTag = tag;
                                     break;
                                 }

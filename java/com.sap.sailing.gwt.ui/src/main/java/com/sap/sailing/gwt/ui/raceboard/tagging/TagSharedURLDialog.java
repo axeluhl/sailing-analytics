@@ -39,9 +39,20 @@ public class TagSharedURLDialog extends DialogBox {
         urlTextBox.setText(url);
         urlTextBox.setStyleName(style.tagSharedURLTextBox());
         urlTextBox.addStyleName("gwt-TextBox");
+        urlTextBox.setReadOnly(true);
 
         Panel buttonPanel = new FlowPanel();
         buttonPanel.setStyleName(style.buttonsPanel());
+
+        Button copyToClipBoardButton = new Button(stringMessages.tagCopyToClipBoard());
+        copyToClipBoardButton.setStyleName(style.tagDialogButton());
+        copyToClipBoardButton.addStyleName("gwt-Button");
+        copyToClipBoardButton.addClickHandler(event -> {
+            // select text to copy
+            urlTextBox.setFocus(true);
+            urlTextBox.selectAll();
+            copyToClipboard();
+        });
 
         Button closeButton = new Button(stringMessages.close());
         closeButton.setStyleName(style.tagDialogButton());
@@ -49,6 +60,7 @@ public class TagSharedURLDialog extends DialogBox {
         closeButton.addClickHandler(event -> {
             hide();
         });
+        buttonPanel.add(copyToClipBoardButton);
         buttonPanel.add(closeButton);
 
         mainPanel.add(descriptionLabel);
@@ -62,4 +74,10 @@ public class TagSharedURLDialog extends DialogBox {
         center();
     }
 
+    /**
+     * GWT does not support copying text to clipboard so native java script was added
+     */
+    private static native void copyToClipboard() /*-{
+		return $doc.execCommand('copy');
+    }-*/;
 }

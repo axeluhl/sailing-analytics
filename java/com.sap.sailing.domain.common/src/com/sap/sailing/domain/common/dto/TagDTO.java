@@ -11,6 +11,8 @@ import com.sap.sse.common.TimePoint;
 public class TagDTO implements Serializable {
 
     private static final long serialVersionUID = 3907411584518452300L;
+    
+    public final static String TAG_URL_PARAMETER = "tag";
 
     private String tag, comment, imageURL, username;
     private boolean visibleForPublic;

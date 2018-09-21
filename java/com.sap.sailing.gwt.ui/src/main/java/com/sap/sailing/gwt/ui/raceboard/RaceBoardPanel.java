@@ -40,6 +40,7 @@ import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.common.authentication.SailingAuthenticationEntryPointLinkFactory;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
@@ -92,6 +93,7 @@ import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.FilterSet;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.settings.AbstractSettings;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -302,16 +304,26 @@ public class RaceBoardPanel
         raceMap.getRightHeaderPanel().add(userManagementMenuView);
         addChildComponent(raceMap);
         
-        // add panel for tagging functionality, hidden if no url parameter "tags" is passed default
-        taggingPanel = new TaggingPanel(parent, componentContext, stringMessages, sailingService, userService, timer, raceTimesInfoProvider);
+        // add panel for tagging functionality, hidden if no url parameter "tag" is passed 
+        final String sharedTagURLParameter = Window.Location.getParameter(TagDTO.TAG_URL_PARAMETER);
+        String sharedTagTitel = null;
+        TimePoint sharedTagTimePoint = null;
+        boolean showTaggingPanel = false;
+        if (sharedTagURLParameter != null) {
+            showTaggingPanel = true;
+            int indexOfSeperator = sharedTagURLParameter.indexOf(",");
+            if (indexOfSeperator != -1) {
+                try {
+                    sharedTagTimePoint = new MillisecondsTimePoint(Long.parseLong(sharedTagURLParameter.substring(0, indexOfSeperator)));
+                    sharedTagTitel = sharedTagURLParameter.substring(indexOfSeperator + 1, sharedTagURLParameter.length());
+                }
+                catch(NumberFormatException nfe) {};
+            }
+        }
+        taggingPanel = new TaggingPanel(parent, componentContext, stringMessages, sailingService, userService, timer,
+                raceTimesInfoProvider, sharedTagTimePoint, sharedTagTitel);
         addChildComponent(taggingPanel);
-
-        if(Window.Location.getParameter("tag") != null) {
-            taggingPanel.setVisible(true);
-        }
-        else {
-            taggingPanel.setVisible(false);
-        }
+        taggingPanel.setVisible(showTaggingPanel);
         
         // Determine if the screen is large enough to initially display the leaderboard panel on the left side of the
         // map based on the initial screen width. Afterwards, the leaderboard panel visibility can be toggled as usual.
