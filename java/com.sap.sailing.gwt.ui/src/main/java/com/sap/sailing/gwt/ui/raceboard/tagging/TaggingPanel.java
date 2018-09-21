@@ -61,7 +61,6 @@ import com.sap.sse.security.ui.shared.UserDTO;
  * @author Julian Rendl, Henri Kohlberg
  */
 // TODO: Add refresh button which resets lastReceivedTagTime
-// TODO: resize plus of "add tags" button
 // TODO: get URL params as constructor parameter and not from Window object
 // TODO: Unit Tests (incl. concatenation)
 // TODO: cache user settings and use observer pattern for cache

@@ -52,7 +52,7 @@
 	background-color: #efaa00;
     background-position: center;
     background-repeat: no-repeat;
-    background-size: 60%;
+    background-size: 40%;
 }
 
 .taggingPanel button.toggleEditState:hover {
