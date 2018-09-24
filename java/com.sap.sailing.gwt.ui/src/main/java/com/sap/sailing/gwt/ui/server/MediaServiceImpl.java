@@ -52,7 +52,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.VideoMetadataDTO;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.domain.common.security.Permission;
+import com.sap.sailing.domain.common.security.SecuredDomainTypes;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Duration;
@@ -101,7 +101,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     }
     
     private void ensureUserCanManageMedia() {
-        SecurityUtils.getSubject().checkPermission(Permission.MANAGE_MEDIA.getStringPermissionForObjects(DefaultActions.UPDATE));
+        SecurityUtils.getSubject().checkPermission(SecuredDomainTypes.MANAGE_MEDIA.getStringPermissionForObjects(DefaultActions.UPDATE));
     }
 
     @Override

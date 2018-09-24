@@ -9,7 +9,7 @@ import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.SplitLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.security.Permission;
+import com.sap.sailing.domain.common.security.SecuredDomainTypes;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
@@ -58,7 +58,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                 header.getAuthenticationMenuView());
         AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(
                 genericSailingAuthentication);
-        authorizedContentDecorator.setPermissionToCheck(Permission.DATA_MINING);
+        authorizedContentDecorator.setPermissionToCheck(SecuredDomainTypes.DATA_MINING);
         authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
             
             private QueryDefinitionProviderWithControls queryDefinitionProvider;

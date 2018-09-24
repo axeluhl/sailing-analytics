@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
-import com.sap.sailing.domain.common.security.Permission;
+import com.sap.sailing.domain.common.security.SecuredDomainTypes;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.shared.MarkPassingTimesDTO;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
@@ -60,7 +60,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
         @Override
         public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
             RaceTimePanel.this.hasCanReplayDuringLiveRacesPermission = user != null && user.hasPermission(
-                    Permission.CAN_REPLAY_DURING_LIVE_RACES.getPermission(), /* TODO race ownership */ null, /* TODO race acl */ null);
+                    SecuredDomainTypes.CAN_REPLAY_DURING_LIVE_RACES.getPermission(), /* TODO race ownership */ null, /* TODO race acl */ null);
         }
     };
 

@@ -25,7 +25,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
-import com.sap.sailing.domain.common.security.Permission;
+import com.sap.sailing.domain.common.security.SecuredDomainTypes;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -229,7 +229,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         });
 
         final SecuredObjectCompositeConfig<RegattaDTO> securedObjectConfig = new SecuredObjectCompositeConfig<>(
-                userService, errorReporter, stringMessages, Permission.REGATTA, RegattaDTO::getName);
+                userService, errorReporter, stringMessages, SecuredDomainTypes.REGATTA, RegattaDTO::getName);
         securedObjectConfig.addAction(DefaultActions.UPDATE, this::editRegatta);
         securedObjectConfig.addAction(DefaultActions.DELETE, regatta -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveRegatta(regatta.getName()))) {

@@ -36,7 +36,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import com.sap.sailing.domain.common.security.Permission;
+import com.sap.sailing.domain.common.security.SecuredDomainTypes;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupDialog.LeaderboardGroupDescriptor;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.EventsRefresher;
@@ -152,7 +152,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             }
         });
         eventControlsPanel.add(createEventBtn);
-        if (!userService.getCurrentUser().hasPermission(Permission.EVENT.getStringPermission(DefaultActions.CREATE))) {
+        if (!userService.getCurrentUser().hasPermission(SecuredDomainTypes.EVENT.getStringPermission(DefaultActions.CREATE))) {
             createEventBtn.setVisible(false);
         }
 
@@ -343,7 +343,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         };
         
         final SecuredObjectCompositeConfig<EventDTO> securedObjectConfig = new SecuredObjectCompositeConfig<>(
-                userService, errorReporter, stringMessages, Permission.EVENT, event -> event.id.toString());
+                userService, errorReporter, stringMessages, SecuredDomainTypes.EVENT, event -> event.id.toString());
         securedObjectConfig.addAction(DefaultActions.UPDATE, this::openEditEventDialog);
         securedObjectConfig.addAction(DefaultActions.DELETE, event -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveEvent(event.getName()))) {

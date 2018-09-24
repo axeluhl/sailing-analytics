@@ -56,7 +56,7 @@ import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TargetTimeInfo;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.dto.FleetDTO;
-import com.sap.sailing.domain.common.security.Permission;
+import com.sap.sailing.domain.common.security.SecuredDomainTypes;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -294,7 +294,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     public Response addCompetitor(@PathParam("regattaname") String regattaName,
             @PathParam("competitorid") String competitorIdAsString) {
         final Subject subject = SecurityUtils.getSubject();
-        subject.checkPermission(Permission.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regattaName));
+        subject.checkPermission(SecuredDomainTypes.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regattaName));
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
@@ -329,7 +329,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             @QueryParam("searchtag") String searchTag, @QueryParam("competitorName") String competitorName,
             @QueryParam("competitorEmail") String competitorEmail) {
         final Subject subject = SecurityUtils.getSubject();
-        subject.checkPermission(Permission.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regattaName));
+        subject.checkPermission(SecuredDomainTypes.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regattaName));
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
@@ -384,7 +384,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     public Response removeCompetitor(@PathParam("regattaname") String regattaName,
             @PathParam("competitorid") String competitorIdAsString) {
         final Subject subject = SecurityUtils.getSubject();
-        subject.checkPermission(Permission.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regattaName));
+        subject.checkPermission(SecuredDomainTypes.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regattaName));
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
@@ -1672,7 +1672,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Path("{regattaname}/removeracecolumn")
     public Response addRaceColumns(@PathParam("regattaname") String regattaName,
             @QueryParam("racecolumn") String raceColumnName) {
-        SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regattaName));
+        SecurityUtils.getSubject().checkPermission(SecuredDomainTypes.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regattaName));
         final Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
@@ -1717,7 +1717,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     }
 
     private RaceColumnInSeries addRaceColumn(String regattaName, String seriesName, String columnName) {
-        SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regattaName));
+        SecurityUtils.getSubject().checkPermission(SecuredDomainTypes.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regattaName));
         return getService().apply(new AddColumnToSeries(new RegattaName(regattaName), seriesName, columnName));
     }
 
@@ -1748,7 +1748,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         Regatta regatta = getService().getRegattaByName(regattaName);
         if (regatta != null) {
             SecurityUtils.getSubject()
-                    .checkPermission(Permission.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regatta.getName()));
+                    .checkPermission(SecuredDomainTypes.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regatta.getName()));
             String seriesName = (String) requestObject.get("seriesName");
             String seriesNameNew = (String) requestObject.get("seriesNameNew");
             boolean isMedal = (boolean) requestObject.get("isMedal");

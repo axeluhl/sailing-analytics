@@ -1,14 +1,9 @@
 package com.sap.sailing.gwt.ui.server;
 
-import java.util.logging.Logger;
-
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
-import com.sap.sse.security.SecurityService;
-
 public class Activator implements BundleActivator {
-    private static final Logger logger = Logger.getLogger(Activator.class.getName());
     private static BundleContext context;
     private SailingServiceImpl sailingServiceToStopWhenStopping;
     private static Activator INSTANCE;
@@ -20,17 +15,6 @@ public class Activator implements BundleActivator {
     @Override
     public void start(BundleContext context) throws Exception {
         Activator.context = context;
-    }
-
-    private void ensureAdminConsoleRoles(SailingServiceImpl sailingServiceImpl) {
-        final SecurityService securityService = sailingServiceImpl.getSecurityService();
-        final AdminConsoleRole adminConsoleRolePrototype = AdminConsoleRole.getInstance();
-        if (securityService.getRoleDefinition(adminConsoleRolePrototype.getId()) == null) {
-            logger.info("No adminconsole role found. Creating default role \""+adminConsoleRolePrototype.getName()+"\" with permission \""+
-                    adminConsoleRolePrototype.getPermissions()+"\"");
-            securityService.createRoleDefinition(adminConsoleRolePrototype.getId(), adminConsoleRolePrototype.getName());
-            securityService.updateRoleDefinition(adminConsoleRolePrototype);
-        }
     }
 
     @Override
@@ -53,7 +37,6 @@ public class Activator implements BundleActivator {
 
     public void setSailingService(SailingServiceImpl sailingServiceImpl) {
         sailingServiceToStopWhenStopping = sailingServiceImpl;
-        ensureAdminConsoleRoles(sailingServiceImpl);
     }
 
 }

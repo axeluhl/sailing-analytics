@@ -16,13 +16,13 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.common.dto.NamedSecuredObjectDTO;
-import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.gwt.ui.adminconsole.EditOwnershipDialog.OwnershipDialogResult;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Named;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.ImagesBarCell;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
@@ -58,12 +58,12 @@ public class SecuredObjectCompositeConfig<T extends NamedSecuredObjectDTO> {
      * @param stringMessages
      *            {@link StringMessages} instance to use
      * @param permission
-     *            {@link Permission} specifying the scope of required permissions to modify the secured object
+     *            {@link SecuredDomainTypes} specifying the scope of required permissions to modify the secured object
      * @param idFactory
      *            {@link Function factory} to get a {@link String type relative identifier} for the secured object
      */
     public SecuredObjectCompositeConfig(final UserService userService, final ErrorReporter errorReporter,
-            final StringMessages stringMessages, final Permission permission, final Function<T, String> idFactory) {
+            final StringMessages stringMessages, final HasPermissions permission, final Function<T, String> idFactory) {
         this.userService = userService;
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;

@@ -31,7 +31,7 @@ import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
-import com.sap.sailing.domain.common.security.Permission;
+import com.sap.sailing.domain.common.security.SecuredDomainTypes;
 import com.sap.sailing.gwt.ui.actions.GetManeuversForCompetitorsAction;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.ManeuverTypeFormatter;
@@ -99,7 +99,7 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
             @Override
             public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
                 hasCanReplayDuringLiveRacesPermission = user != null
-                        && user.hasPermission(Permission.CAN_REPLAY_DURING_LIVE_RACES.getStringPermission());
+                        && user.hasPermission(SecuredDomainTypes.CAN_REPLAY_DURING_LIVE_RACES.getStringPermission());
             }
         };
         userService.addUserStatusEventHandler(userStatusChangeHandler);

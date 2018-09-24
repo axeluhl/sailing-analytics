@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.domain.common.security.Permission;
+import com.sap.sailing.domain.common.security.SecuredDomainTypes;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.media.MediaSynchAdapter.EditFlag;
 import com.sap.sse.gwt.client.ErrorReporter;
@@ -257,7 +257,7 @@ public class MediaSynchControl implements EditFlag {
     private boolean hasRightToEdit() {
         UserDTO currentUser = userservice.getCurrentUser(); // TODO should there be userservice.getGroups(SecurityUser)?
         return currentUser != null
-                && currentUser.hasPermission(Permission.MANAGE_MEDIA.getPermission(),
+                && currentUser.hasPermission(SecuredDomainTypes.MANAGE_MEDIA.getPermission(),
                         /* TODO ownership */ null);
     }
 

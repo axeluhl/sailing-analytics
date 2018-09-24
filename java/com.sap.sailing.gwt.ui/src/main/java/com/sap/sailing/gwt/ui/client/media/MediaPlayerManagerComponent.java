@@ -25,7 +25,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.domain.common.security.Permission;
+import com.sap.sailing.domain.common.security.SecuredDomainTypes;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -567,7 +567,7 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     public boolean allowsEditing() {
         UserDTO currentUser = userService.getCurrentUser();
         return currentUser != null
-                && currentUser.hasPermission(Permission.MANAGE_MEDIA.getPermission(), /* TODO race ownership */ null, /* TODO race ACL */ null);
+                && currentUser.hasPermission(SecuredDomainTypes.MANAGE_MEDIA.getPermission(), /* TODO race ownership */ null, /* TODO race ACL */ null);
     }
 
     @Override

@@ -107,7 +107,7 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UserRole;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.shared.impl.DefaultPermissions;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.OwnershipImpl;
 import com.sap.sse.util.ClearStateTestSupport;
 
@@ -237,7 +237,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             } else {
                 adminUser = userStore.getUserByName(ADMIN_USERNAME);
             }
-            setOwnership(DefaultPermissions.USER.getQualifiedObjectIdentifier(ADMIN_USERNAME), adminUser, /* no admin tenant */ null, ADMIN_USERNAME);
+            setOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(ADMIN_USERNAME), adminUser, /* no admin tenant */ null, ADMIN_USERNAME);
             addRoleForUser(adminUser, new RoleImpl(adminRoleDefinition));
         } catch (UserManagementException | MailException | UserGroupManagementException e) {
             logger.log(Level.SEVERE, "Exception while creating default admin user", e);
@@ -661,7 +661,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         addRoleForUser(result, new RoleImpl(UserRole.getInstance(), /* tenant qualifier */ null, /* user qualifier */ result));
         addUserToUserGroup(tenant, result);
         // the new user becomes the owning user of its own specific tenant which initially only contains the new user
-        accessControlStore.setOwnership(DefaultPermissions.USER_GROUP.getQualifiedObjectIdentifier(tenant.getId().toString()), result, tenant, tenant.getName());
+        accessControlStore.setOwnership(SecuredSecurityTypes.USER_GROUP.getQualifiedObjectIdentifier(tenant.getId().toString()), result, tenant, tenant.getName());
         result.setFullName(fullName);
         result.setCompany(company);
         result.setLocale(locale);
@@ -990,7 +990,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         UserGroup tenant = createUserGroup(UUID.randomUUID(), getDefaultTenantNameForUsername(name));
         SecurityUser result = userStore.createUser(name, socialUserAccount.getProperty(Social.EMAIL.name()), tenant, socialUserAccount);
-        accessControlStore.setOwnership(DefaultPermissions.USER_GROUP.getQualifiedObjectIdentifier(tenant.getId().toString()), result, tenant, tenant.getName());
+        accessControlStore.setOwnership(SecuredSecurityTypes.USER_GROUP.getQualifiedObjectIdentifier(tenant.getId().toString()), result, tenant, tenant.getName());
         addUserToUserGroup(tenant, result);
         return result;
     }

@@ -17,17 +17,31 @@ public interface HasPermissions {
     String name();
 
     /**
+     * @return the actions for which permissions can be defined on the logical, securable type represented by this
+     *         object. Only those actions need to be accepted by methods such as {@link #getStringPermission(Action...)},
+     *         and it is acceptable for those methods to throw an {@link IllegalArgumentException} if an action is
+     *         passed that is not contained in the array returned by this method.
+     */
+    Action[] getAvailableActions();
+
+    /**
+     * @return {@code true} if and only if objects of this logical type support the {@code action} as one of their
+     *         {@link #getAvailableActions() available actions}
+     */
+    boolean supports(Action action);
+
+    /**
      * If one or more modes are specified, a string permission is rendered that has the
      * {@link Action#getStringPermission() permission strings} of those modes listed in the second wildcard permission
      * component. Otherwise, only the primary permission (representing the object type) with one segment is returned.
      */
-    String getStringPermission(Action... modes);
+    String getStringPermission(Action... actions);
 
     /**
      * Same as {@link #getStringPermission(Action...)}, only that the result is a {@link WildcardPermission} instead of a
      * {@link String}
      */
-    WildcardPermission getPermission(Action... modes);
+    WildcardPermission getPermission(Action... actions);
 
     /**
      * Produces a string permission for this permission, the <code>mode</code> specified as the second wildcard
@@ -39,7 +53,7 @@ public interface HasPermissions {
      *            can be any string; this method will take care of encoding the identifiers such that they are legal in
      *            the context of a permission part; see also {@link PermissionStringEncoder}
      */
-    String getStringPermissionForObjects(Action mode, String... typeRelativeObjectIdentifier);
+    String getStringPermissionForObjects(Action action, String... typeRelativeObjectIdentifier);
     
     /**
      * Qualifies the {@code objectIdentifier} which only has to be unique within the scope of the type identified
@@ -53,7 +67,7 @@ public interface HasPermissions {
      * Same as {@link #getStringPermissionForObjects(Action, String...)}, only that the result is a
      * {@link WildcardPermission} instead of a {@link String}
      */
-    WildcardPermission getPermissionForObjects(Action mode, String... objectIdentifiers);
+    WildcardPermission getPermissionForObjects(Action action, String... objectIdentifiers);
 
     public static interface Action {
         String name();

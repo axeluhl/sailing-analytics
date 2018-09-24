@@ -52,7 +52,7 @@ import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.shared.impl.DefaultPermissions;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.client.UserManagementService;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
@@ -203,7 +203,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser = new HashMap<>();
         final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup = new HashMap<>();
         for (UserGroup g : getSecurityService().getUserGroupList()) {
-            if (SecurityUtils.getSubject().isPermitted(DefaultPermissions.USER_GROUP.getStringPermissionForObjects(DefaultActions.READ, g.getId().toString()))) {
+            if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER_GROUP.getStringPermissionForObjects(DefaultActions.READ, g.getId().toString()))) {
                 UserGroup userGroupDTO = securityDTOFactory.createUserGroupDTOFromUserGroup(g, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
                 userGroups.add(userGroupDTO);
             }
@@ -214,7 +214,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public UserGroup getUserGroupByName(String userGroupName) throws UnauthorizedException {
         final UserGroup userGroup = getSecurityService().getUserGroupByName(userGroupName);
-        if (userGroup == null || SecurityUtils.getSubject().isPermitted(DefaultPermissions.USER_GROUP.getStringPermissionForObjects(DefaultActions.READ, userGroup.getId().toString()))) {
+        if (userGroup == null || SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER_GROUP.getStringPermissionForObjects(DefaultActions.READ, userGroup.getId().toString()))) {
             final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser = new HashMap<>();
             final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup = new HashMap<>();
             return userGroup==null?null:securityDTOFactory.createUserGroupDTOFromUserGroup(userGroup, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
@@ -226,7 +226,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public UserDTO getUserByName(String username) throws UnauthorizedException {
         final User user = getSecurityService().getUserByName(username);
-        if (user == null || SecurityUtils.getSubject().isPermitted(DefaultPermissions.USER.getStringPermissionForObjects(DefaultActions.READ, user.getName()))) {
+        if (user == null || SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER.getStringPermissionForObjects(DefaultActions.READ, user.getName()))) {
             return user==null?null:securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
         } else {
             throw new UnauthorizedException("Not permitted to read user "+username);
@@ -235,7 +235,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public UserGroup createUserGroup(String name, String nameOfTenantOwner) throws UnauthorizedException, UserGroupManagementException {
-        if (SecurityUtils.getSubject().isPermitted(DefaultPermissions.USER_GROUP.getStringPermission(DefaultActions.CREATE))) {
+        if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER_GROUP.getStringPermission(DefaultActions.CREATE))) {
             UUID newTenantId = UUID.randomUUID();
             UserGroup userGroup;
             try {
@@ -243,7 +243,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             } catch (UserGroupManagementException e) {
                 throw new UserGroupManagementException(e.getMessage());
             }
-            getSecurityService().setOwnership(DefaultPermissions.USER_GROUP.getQualifiedObjectIdentifier(newTenantId.toString()),
+            getSecurityService().setOwnership(SecuredSecurityTypes.USER_GROUP.getQualifiedObjectIdentifier(newTenantId.toString()),
                     getSecurityService().getCurrentUser(), getSecurityService().getUserGroupByName(nameOfTenantOwner), name);
             final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser = new HashMap<>();
             final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup = new HashMap<>();
@@ -255,13 +255,13 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public SuccessInfo deleteUserGroup(String userGroupIdAsString) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted(DefaultPermissions.USER_GROUP.getStringPermissionForObjects(DefaultActions.DELETE, userGroupIdAsString))) {
+        if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER_GROUP.getStringPermissionForObjects(DefaultActions.DELETE, userGroupIdAsString))) {
             try {
                 UUID userGroupId = UUID.fromString(userGroupIdAsString);
                 final UserGroup userGroup = getSecurityService().getUserGroup(userGroupId);
                 getSecurityService().deleteUserGroup(userGroup);
-                getSecurityService().deleteAccessControlList(DefaultPermissions.USER_GROUP.getQualifiedObjectIdentifier(userGroupIdAsString));
-                getSecurityService().deleteOwnership(DefaultPermissions.USER_GROUP.getQualifiedObjectIdentifier(userGroupIdAsString));
+                getSecurityService().deleteAccessControlList(SecuredSecurityTypes.USER_GROUP.getQualifiedObjectIdentifier(userGroupIdAsString));
+                getSecurityService().deleteOwnership(SecuredSecurityTypes.USER_GROUP.getQualifiedObjectIdentifier(userGroupIdAsString));
                 return new SuccessInfo(true, "Deleted user group: " + userGroup.getName() + ".", /* redirectURL */ null, null);
             } catch (UserGroupManagementException e) {
                 return new SuccessInfo(false, "Could not delete user group.", /* redirectURL */ null, null);
@@ -273,7 +273,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public void addUserToUserGroup(String userGroupIdAsString, String username) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted(DefaultPermissions.USER_GROUP.getStringPermissionForObjects(DefaultActions.UPDATE, userGroupIdAsString))) {
+        if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER_GROUP.getStringPermissionForObjects(DefaultActions.UPDATE, userGroupIdAsString))) {
             final UserGroup tenant = getSecurityService().getUserGroup(UUID.fromString(userGroupIdAsString));
             getSecurityService().addUserToUserGroup(tenant, getSecurityService().getUserByName(username));
         } else {
@@ -283,7 +283,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public void removeUserFromUserGroup(String userGroupIdAsString, String username) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted(DefaultPermissions.USER_GROUP.getStringPermissionForObjects(DefaultActions.DELETE, userGroupIdAsString))) {
+        if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER_GROUP.getStringPermissionForObjects(DefaultActions.DELETE, userGroupIdAsString))) {
             final UserGroup userGroup = getSecurityService().getUserGroup(UUID.fromString(userGroupIdAsString));
             getSecurityService().removeUserFromUserGroup(userGroup, getSecurityService().getUserByName(username));
         } else {
@@ -295,7 +295,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public Collection<UserDTO> getUserList() throws UnauthorizedException {
         List<UserDTO> users = new ArrayList<>();
         for (User u : getSecurityService().getUserList()) {
-            if (SecurityUtils.getSubject().isPermitted(DefaultPermissions.USER.getStringPermissionForObjects(DefaultActions.READ, u.getName()))) {
+            if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER.getStringPermissionForObjects(DefaultActions.READ, u.getName()))) {
                 UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(u, getSecurityService());
                 users.add(userDTO);
             }
@@ -348,7 +348,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             UserImpl u = null;
             try {
                 u = getSecurityService().createSimpleUser(username, email, password, fullName, company, getLocaleFromLocaleName(localeName), validationBaseURL);
-                getSecurityService().setOwnership(DefaultPermissions.USER.getQualifiedObjectIdentifier(username), currentUser, getSecurityService().getUserGroupByName(tenantOwnerName));
+                getSecurityService().setOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(username), currentUser, getSecurityService().getUserGroupByName(tenantOwnerName));
             } catch (UserManagementException | UserGroupManagementException e) {
                 logger.log(Level.SEVERE, "Error creating user "+username, e);
                 throw new UserManagementException(e.getMessage());
@@ -542,8 +542,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         if (SecurityUtils.getSubject().isPermitted("user:delete:" + username)) {
         try {
             getSecurityService().deleteUser(username);
-            getSecurityService().deleteAccessControlList(DefaultPermissions.USER.getQualifiedObjectIdentifier(username));
-            getSecurityService().deleteOwnership(DefaultPermissions.USER.getQualifiedObjectIdentifier(username));
+            getSecurityService().deleteAccessControlList(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(username));
+            getSecurityService().deleteOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(username));
             return new SuccessInfo(true, "Deleted user: " + username + ".", /* redirectURL */ null, null);
         } catch (UserManagementException e) {
             return new SuccessInfo(false, "Could not delete user.", /* redirectURL */ null, null);

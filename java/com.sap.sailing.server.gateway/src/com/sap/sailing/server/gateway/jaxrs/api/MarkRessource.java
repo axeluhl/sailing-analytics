@@ -46,7 +46,7 @@ import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
-import com.sap.sailing.domain.common.security.Permission;
+import com.sap.sailing.domain.common.security.SecuredDomainTypes;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
@@ -80,7 +80,7 @@ public class MarkRessource extends AbstractSailingServerResource {
         UUID markId = UUID.randomUUID();
         Mark mark = getService().getBaseDomainFactory().getOrCreateMark(markId, markName);
         String regattaName = (String) requestObject.get("regattaName");
-        SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regattaName));
+        SecurityUtils.getSubject().checkPermission(SecuredDomainTypes.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regattaName));
         RegattaLog regattaLog = getRegattaLogInternal(regattaName);
         RegattaLogDefineMarkEventImpl event = new RegattaLogDefineMarkEventImpl(MillisecondsTimePoint.now(),
                 getService().getServerAuthor(), MillisecondsTimePoint.now(), UUID.randomUUID(), mark);
@@ -97,7 +97,7 @@ public class MarkRessource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     public Response addMarkFix(String json)
             throws DoesNotHaveRegattaLogException, ParseException, JsonDeserializationException {
-        SecurityUtils.getSubject().checkPermission(Permission.MANAGE_MARK_POSITIONS.getStringPermission(DefaultActions.CREATE));
+        SecurityUtils.getSubject().checkPermission(SecuredDomainTypes.MANAGE_MARK_POSITIONS.getStringPermission(DefaultActions.CREATE));
 
         Object requestBody = JSONValue.parseWithException(json);
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
@@ -143,7 +143,7 @@ public class MarkRessource extends AbstractSailingServerResource {
         Object requestBody = JSONValue.parseWithException(json);
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
         String leaderboardName = (String) requestObject.get("leaderboardName");
-        SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+        SecurityUtils.getSubject().checkPermission(SecuredDomainTypes.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
         String raceColumnName = (String) requestObject.get("raceColumnName");
         String fleetName = (String) requestObject.get("fleetName");
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
@@ -216,7 +216,7 @@ public class MarkRessource extends AbstractSailingServerResource {
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
 
         String leaderboardName = (String) requestObject.get("leaderboardName");
-        SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+        SecurityUtils.getSubject().checkPermission(SecuredDomainTypes.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
         String raceColumnName = (String) requestObject.get("raceColumnName");
         String fleetName = (String) requestObject.get("fleetName");
 
