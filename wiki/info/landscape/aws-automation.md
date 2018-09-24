@@ -45,7 +45,7 @@ SERVER_STARTUP_NOTIFY=leon.radeck@sap.com
 
 ### 2. SAP instance configuration
 
-<img style="float: right" src="https://photos-1.dropbox.com/t/2/AABX17gY1wPcAmgxTjIUQju9wMnxgRFUa4OgOfUcpQPvkA/12/379951689/png/32x32/1/_/1/2/image1.PNG/EJmPwIIDGL0ZIAcoBw/vkl8xdvmZzFhJzi9lV_d78jD6jKNURBkF7C-XX2xVUk?preserve_transparency=1&size=1600x1200&size_mode=3" />
+<img style="float: right" src="https://wiki.sapsailing.com/wiki/images/aws_automation/activity_diagram.png" />
 
 Necessary configuration steps:
 
