@@ -22,7 +22,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.AbstractEntryPoint;
 import com.sap.sse.gwt.client.ErrorReporter;
-import com.sap.sse.gwt.client.ServerInfoRetriever;
+import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.panels.AbstractTabLayoutPanel;
 import com.sap.sse.gwt.client.panels.HorizontalTabLayoutPanel;
 import com.sap.sse.gwt.client.panels.VerticalTabLayoutPanel;
@@ -159,15 +159,16 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
         }
         return target;
     }
+    
     public AdminConsolePanel(UserService userService,
-            ServerInfoRetriever buildVersionRetriever, String releaseNotesAnchorLabel,
+            ServerInfoDTO serverInfo, String releaseNotesAnchorLabel,
             String releaseNotesURL, ErrorReporter errorReporter, LoginPanelCss loginPanelCss, StringMessages stringMessages) {
-        this(userService, buildVersionRetriever, releaseNotesAnchorLabel, releaseNotesURL, errorReporter, loginPanelCss,
+        this(userService, serverInfo, releaseNotesAnchorLabel, releaseNotesURL, errorReporter, loginPanelCss,
                 stringMessages, /* acceptablePermissionsRequiredToSeeWidgets==null means accept any permission */ null);
     }
 
     public AdminConsolePanel(UserService userService,
-            ServerInfoRetriever buildVersionRetriever, String releaseNotesAnchorLabel,
+            ServerInfoDTO serverInfo, String releaseNotesAnchorLabel,
             String releaseNotesURL, ErrorReporter errorReporter, LoginPanelCss loginPanelCss, StringMessages stringMessages,
             Iterable<? extends WildcardPermission> acceptablePermissionsRequiredToSeeWidgets) {
         this.acceptablePermissionsRequiredToSeeWidgets = acceptablePermissionsRequiredToSeeWidgets;
@@ -222,7 +223,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
         informationPanel.setWidth("100%");
         informationPanel.setSpacing(10);
         informationPanel.add(errorReporter.getPersistentInformationWidget(), DockPanel.CENTER);
-        SystemInformationPanel sysinfoPanel = new SystemInformationPanel(buildVersionRetriever, errorReporter, stringMessages);
+        SystemInformationPanel sysinfoPanel = new SystemInformationPanel(serverInfo, errorReporter, stringMessages);
         sysinfoPanel.ensureDebugId("SystemInformation");
         final Anchor releaseNotesLink = new Anchor(new SafeHtmlBuilder().appendEscaped(releaseNotesAnchorLabel).toSafeHtml(), releaseNotesURL);
         sysinfoPanel.add(releaseNotesLink);

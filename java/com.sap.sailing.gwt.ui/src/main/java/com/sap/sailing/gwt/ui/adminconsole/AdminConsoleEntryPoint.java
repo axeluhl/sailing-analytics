@@ -90,7 +90,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
     
     private Widget createAdminConsolePanel(ServerInfoDTO serverInfo) {
         AdminConsolePanel panel = new AdminConsolePanel(getUserService(), 
-                getSailingService(), getStringMessages().releaseNotes(), "/release_notes_admin.html", /* error reporter */ this,
+                serverInfo, getStringMessages().releaseNotes(), "/release_notes_admin.html", /* error reporter */ this,
                 SecurityStylesheetResources.INSTANCE.css(), getStringMessages());
         panel.addStyleName("adminConsolePanel");
         
