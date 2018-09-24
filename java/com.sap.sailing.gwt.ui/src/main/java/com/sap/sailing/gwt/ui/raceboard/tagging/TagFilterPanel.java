@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.json.client.JSONObject;
@@ -47,7 +48,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, Filter<Ta
 
     private TagFilterSets tagFilterSets;
     private final TextBox searchTextBox;
-    private final Button clearTextBoxButton, filterSettingsButton;
+    private final Button clearTextBoxButton, filterSettingsButton, refreshTagsButton;
     private final AbstractListFilter<TagDTO> filter;
 
     private FilterSet<TagDTO, FilterWithUI<TagDTO>> lastActiveTagFilterSet;
@@ -71,6 +72,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, Filter<Ta
         searchTextBox = new TextBox();
         clearTextBoxButton = new Button();
         filterSettingsButton = new Button();
+        refreshTagsButton = new Button();
         currentFilter = new TagFilterLabel(taggingPanel);
 
         loadTagFilterSets();
@@ -111,7 +113,6 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, Filter<Ta
         });
 
         filterSettingsButton.setStyleName(style.tagFilterButton());
-        filterSettingsButton.addStyleName(style.tagFilterFilterButton());
         filterSettingsButton.addStyleName(style.imageInactiveFilter());
         filterSettingsButton.addStyleName("gwt-Button");
         filterSettingsButton.setTitle(stringMessages.tagsFilter());
@@ -119,6 +120,13 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, Filter<Ta
             showFilterDialog();
         });
 
+        refreshTagsButton.setStyleName(style.tagReloadButton());
+        refreshTagsButton.addStyleName(style.imageReload());
+        refreshTagsButton.addStyleName("gwt-Button");
+        refreshTagsButton.addClickHandler(event -> {
+            taggingPanel.clearCache();
+        });
+        
         Panel searchBoxPanel = new FlowPanel();
         searchBoxPanel.setStyleName(style.tagFilterSearchBox());
         searchBoxPanel.add(submitButton);
@@ -127,6 +135,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, Filter<Ta
 
         add(searchBoxPanel);
         add(filterSettingsButton);
+        add(refreshTagsButton);
         add(currentFilter);
     }
 

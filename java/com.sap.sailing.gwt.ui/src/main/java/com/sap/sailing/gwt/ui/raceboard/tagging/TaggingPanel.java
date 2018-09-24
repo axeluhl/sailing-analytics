@@ -59,8 +59,6 @@ import com.sap.sse.security.ui.shared.UserDTO;
  * 
  * @author Julian Rendl, Henri Kohlberg
  */
-// TODO: Add refresh button which resets lastReceivedTagTime
-// TODO: get URL params as constructor parameter and not from Window object
 // TODO: Unit Tests (incl. concatenation)
 // TODO: cache user settings and use observer pattern for cache
 public class TaggingPanel extends ComponentWithoutSettings
@@ -526,6 +524,35 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     /**
+     * Checks whether current user has permission to modify public tags.
+     * 
+     * @return <code>true</code> if user has {@link Mode#UPDATE update permissions} on {@link #leaderboardName current
+     *         leaderboard}, otherwise <code>false</code>
+     */
+    protected boolean hasPermissionToModifyPublicTags() {
+        boolean hasPermission = false;
+        if (leaderboardName != null && userService.getCurrentUser().hasPermission(
+                Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName),
+                SailingPermissionsForRoleProvider.INSTANCE)) {
+            hasPermission = true;
+        }
+        return hasPermission;
+    }
+
+    /**
+     * Clears local list of tags and reloads settings for the current user (private tags, tag buttons and filter).
+     */
+    protected void clearCache() {
+        tagListProvider.clear();
+        raceTimesInfoProvider.getRaceIdentifiers().forEach((raceIdentifier) -> {
+            raceTimesInfoProvider.setLatestReceivedTagTime(raceIdentifier, null);
+        });
+        reloadPrivateTags();
+        filterbarPanel.loadTagFilterSets();
+        footerPanel.loadAllTagButtons();
+    }
+
+    /**
      * Updates {@link TagListProvider#getAllTags() local list of tags} when response of {@link SailingServiceAsync
      * SailingService} gets dispatched to all listeners by {@link RaceTimesInfoProvider}. {@link SailingServiceAsync
      * SailingService} sends only difference of tags in comparison based on the <code>createdAt</code>-timestamp of the
@@ -607,16 +634,6 @@ public class TaggingPanel extends ComponentWithoutSettings
         }
     }
 
-    protected boolean hasPermissionToModifyPublicTags() {
-        boolean hasPermission = false;
-        if (leaderboardName != null && userService.getCurrentUser().hasPermission(
-                Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName),
-                SailingPermissionsForRoleProvider.INSTANCE)) {
-            hasPermission = true;
-        }
-        return hasPermission;
-    }
-
     /**
      * When the {@link UserService#getCurrentUser() current user} logs in or out the {@link #contentPanel content} needs
      * to be reset to hide private tags of the previous {@link UserService#getCurrentUser() current user}. This gets
@@ -626,16 +643,7 @@ public class TaggingPanel extends ComponentWithoutSettings
      */
     @Override
     public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
-        // clear list of local tags to hide private tags of previous user and reset cache
-        tagListProvider.clear();
-        raceTimesInfoProvider.getRaceIdentifiers().forEach((raceIdentifier) -> {
-            raceTimesInfoProvider.setLatestReceivedTagTime(raceIdentifier, null);
-        });
-        // load content for new user
-        reloadPrivateTags();
-        filterbarPanel.loadTagFilterSets();
-        footerPanel.loadAllTagButtons();
-        // update UI
+        clearCache();
         setCurrentState(State.VIEW);
     }
 

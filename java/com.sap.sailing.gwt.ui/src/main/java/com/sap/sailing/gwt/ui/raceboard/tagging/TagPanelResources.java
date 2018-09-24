@@ -20,6 +20,9 @@ public interface TagPanelResources extends ClientBundle {
     @Source("com/sap/sse/gwt/client/images/remove.png")
     ImageResource deleteIcon();
 
+    @Source("com/sap/sailing/gwt/ui/client/images/timeslider-playstate-replay-active.png")
+    ImageResource reloadIcon();
+
     @Source("com/sap/sailing/gwt/ui/client/images/lock.png")
     ImageResource privateIcon();
 
@@ -99,7 +102,7 @@ public interface TagPanelResources extends ClientBundle {
         String tagFilterClearButton();
         String tagFilterSearchButton();
         String tagFilterSettingsButton();
-        String tagFilterFilterButton();
+        String tagReloadButton();
         String tagFilterPanel();
         String tagFilterSearchBox();
         String tagFilterSearchInput();
@@ -120,5 +123,6 @@ public interface TagPanelResources extends ClientBundle {
         String imageShare();
         String imageEdit();
         String imageDelete();
+        String imageReload();
     }
 }
