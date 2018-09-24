@@ -71,7 +71,8 @@ public class TaggingPanel extends ComponentWithoutSettings
      */
     protected enum State {
         VIEW, // default
-        CREATE_TAG, EDIT_TAG
+        CREATE_TAG,
+        EDIT_TAG
     }
 
     // styling

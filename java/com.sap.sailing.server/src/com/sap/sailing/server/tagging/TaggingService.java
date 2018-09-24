@@ -13,7 +13,6 @@ import com.sap.sailing.domain.common.tagging.ServiceNotFoundException;
 import com.sap.sailing.domain.common.tagging.TagAlreadyExistsException;
 import com.sap.sse.common.TimePoint;
 
-// TODO: see "translation_v2.json" for new translation files
 // TODO: use document settings id for tags/tag-buttons/... as race identifier
 /**
  * This service is used to perform all CRUD operations on {@link TagDTO tags} and is used by the
