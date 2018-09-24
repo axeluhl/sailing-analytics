@@ -35,7 +35,6 @@ public class SecuredDomainType extends HasPermissionsImpl {
     }
     
     // AdminConsole permissions
-    public static final HasPermissions MANAGE_STRUCTURE_IMPORT_URLS = new SecuredDomainType("MANAGE_STRUCTURE_IMPORT_URLS");
     public static final HasPermissions MANAGE_MARK_PASSINGS = new SecuredDomainType("MANAGE_MARK_PASSINGS");
     public static final HasPermissions MANAGE_MARK_POSITIONS = new SecuredDomainType("MANAGE_MARK_POSITIONS");
     public static final HasPermissions CAN_REPLAY_DURING_LIVE_RACES = new SecuredDomainType("CAN_REPLAY_DURING_LIVE_RACES");
