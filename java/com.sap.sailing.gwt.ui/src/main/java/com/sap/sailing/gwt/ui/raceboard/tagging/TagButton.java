@@ -8,7 +8,7 @@ import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
  * as buttons for quick and easy access. Clicking on tag-buttons does not have any effect until click listener gets
  * added manually! See example at {@link TaggingPanel#addTagButton(TagButton) addTagButton()}.
  */
-public class TagButton extends Button{
+public class TagButton extends Button {
 
     private final TagPanelStyle style = TagPanelResources.INSTANCE.style();
 

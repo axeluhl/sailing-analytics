@@ -46,16 +46,10 @@ import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * A view showing tags which are connected to a specific race and allowing users to add own tags to a race. This view is
- * shown at the {@link com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel RaceBoard}. Tags consist of a heading and
- * optional a comment and/or image. Tag-Buttons allow to preset tags which are used more frequently by an user. Public
- * tags will be stored as an {@link com.sap.sailing.domain.abstractlog.race.RaceLogEvent RaceLogEvent}, private tags
- * will be stored in the {@link com.sap.sse.security.UserStore UserStore}.<br/>
- * <br/>
- * The TaggingPanel is also used as a data provider for all of its subcomponents like header, footer and content
- * section. Therefore the TaggingPanel provides references to important services, string messages, its current state and
- * so on. Best practice: The constructor of subcomponents of the TaggingPanel contains only the TaggingPanel as a
- * parameter. Every other required shared resource (string messages, service references, ...) can be requested from the
- * TaggingPanel itself.
+ * shown at the {@link com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel RaceBoard}. Tags consist of a title and optional
+ * a comment and/or image. Tag-Buttons allow users to preset tags which are used more frequently. Public tags will be
+ * stored as an {@link com.sap.sailing.domain.abstractlog.race.RaceLogEvent RaceLogEvent}, private tags will be stored
+ * in the {@link com.sap.sse.security.UserStore UserStore}.
  * 
  * @author Julian Rendl, Henri Kohlberg
  */
@@ -128,15 +122,16 @@ public class TaggingPanel extends ComponentWithoutSettings
         style.ensureInjected();
         TagCellListResources.INSTANCE.cellListStyle().ensureInjected();
 
-        tagCellList = new CellList<TagDTO>(new TagCell(this, false), TagCellListResources.INSTANCE);
+        tagCellList = new CellList<TagDTO>(new TagCell(this, stringMessages, userService, false),
+                TagCellListResources.INSTANCE);
         tagSelectionModel = new SingleSelectionModel<TagDTO>();
         tagListProvider = new TagListProvider();
 
         tagButtons = new ArrayList<TagButton>();
 
         taggingPanel = new HeaderPanel();
-        footerPanel = new TagFooterPanel(this);
-        filterbarPanel = new TagFilterPanel(this);
+        footerPanel = new TagFooterPanel(this, stringMessages, userService);
+        filterbarPanel = new TagFilterPanel(this, stringMessages, userService);
         contentPanel = new FlowPanel();
         createTagsButton = new Button();
 
@@ -397,7 +392,7 @@ public class TaggingPanel extends ComponentWithoutSettings
      */
     protected void updateContent() {
         ensureFooterPanelVisibility();
-        setCreateTagsButtonVisibility(currentState.equals(State.VIEW));
+        createTagsButton.setVisible(userService.getCurrentUser() != null && currentState.equals(State.VIEW));
         if (currentState.equals(State.EDIT_TAG)) {
             taggingPanel.addStyleName(style.taggingPanelDisabled());
             // disable selection of tags when another tags gets edited (currentState == EDIT_TAG)
@@ -461,19 +456,14 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     /**
-     * Returns instance of {@link UserService} so it does not have to be a constructor parameter of every sub component
-     * of the {@link TaggingPanel}.
+     * Sets the {@link #currentState} to the given {@link State state} and updates the UI.
+     * 
+     * @param state
+     *            new state
      */
-    protected UserService getUserSerivce() {
-        return userService;
-    }
-
-    /**
-     * Returns instance of {@link StringMessages} so it does not have to be a constructor parameter of every sub
-     * component of the {@link TaggingPanel}.
-     */
-    protected StringMessages getStringMessages() {
-        return stringMessages;
+    protected void setCurrentState(State state) {
+        currentState = state;
+        updateContent();
     }
 
     /**
@@ -483,17 +473,6 @@ public class TaggingPanel extends ComponentWithoutSettings
      */
     protected State getCurrentState() {
         return currentState;
-    }
-
-    /**
-     * Sets the {@link #currentState} to the given {@link State state} and updates the UI.
-     * 
-     * @param state
-     *            new state
-     */
-    protected void setCurrentState(State state) {
-        currentState = state;
-        updateContent();
     }
 
     /**
@@ -512,15 +491,6 @@ public class TaggingPanel extends ComponentWithoutSettings
         } else {
             taggingPanel.setFooterWidget(null);
         }
-    }
-
-    /**
-     * Updates the visibility of the {@link #createTagsButton "Add Tags"-button}. {@link #createTagsButton Button} will
-     * NOT get displayed if {@link UserService#getCurrentUser() current user} is not logged in, even if
-     * <code>showButton</code> is set to <code>true</code>!
-     */
-    private void setCreateTagsButtonVisibility(boolean showButton) {
-        createTagsButton.setVisible(userService.getCurrentUser() != null && showButton);
     }
 
     /**

@@ -28,6 +28,7 @@ import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Dialog which allows users to modify their personal {@link TagButton tag-buttons}.
@@ -98,16 +99,16 @@ public class TagButtonDialog extends DialogBox {
      * @param footerPanel
      *            footer panel of {@link TaggingPanel}
      */
-    public TagButtonDialog(TaggingPanel taggingPanel, TagFooterPanel footerPanel) {
+    public TagButtonDialog(TaggingPanel taggingPanel, TagFooterPanel footerPanel, StringMessages stringMessages, UserService userService) {
         this.taggingPanel = taggingPanel;
-        this.stringMessages = taggingPanel.getStringMessages();
+        this.stringMessages = stringMessages;
 
         setGlassEnabled(true);
         setText(stringMessages.tagEditCustomTagButtons());
         addStyleName(style.tagButtonDialog());
 
-        TagInputPanel inputPanel = new TagInputPanel(taggingPanel);
-        TagPreviewPanel tagPreviewPanel = new TagPreviewPanel(taggingPanel, inputPanel);
+        TagInputPanel inputPanel = new TagInputPanel(taggingPanel, stringMessages);
+        TagPreviewPanel tagPreviewPanel = new TagPreviewPanel(taggingPanel, inputPanel, stringMessages, userService);
         CellTable<TagButton> tagButtonsTable = createTable(footerPanel, inputPanel, tagPreviewPanel);
         tagButtonsTable.addRedrawHandler(new Handler() {
             @Override

@@ -1,9 +1,9 @@
 package com.sap.sailing.gwt.ui.raceboard.tagging;
 
 import com.google.gwt.user.client.ui.Label;
+import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
-import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 
@@ -24,9 +24,9 @@ public class TagFilterLabel extends Label {
      * @param taggingPanel
      *            provides reference to {@link TagListProvider} and {@link StringMessages}.
      */
-    public TagFilterLabel(TaggingPanel taggingPanel) {
+    public TagFilterLabel(TaggingPanel taggingPanel, StringMessages stringMessages) {
         this.taggingPanel = taggingPanel;
-        this.stringMessages = taggingPanel.getStringMessages();
+        this.stringMessages = stringMessages;
 
         addStyleName(style.tagFilterCurrentSelection());
         update(taggingPanel.getTagListProvider().getTagFilterSet());

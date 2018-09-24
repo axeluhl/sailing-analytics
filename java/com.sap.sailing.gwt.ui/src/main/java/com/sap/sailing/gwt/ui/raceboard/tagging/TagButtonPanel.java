@@ -34,11 +34,12 @@ public class TagButtonPanel extends FlowPanel {
      * Displays {@link TagButton tag-buttons} of {@link UserService#getCurrentUser() current user} at the footer of the
      * {@link TaggingPanel}.
      */
-    protected TagButtonPanel(TaggingPanel taggingPanel, TagFooterPanel footerPanel) {
+    protected TagButtonPanel(TaggingPanel taggingPanel, TagFooterPanel footerPanel, StringMessages stringMessages,
+            UserService userService) {
         this.footerPanel = footerPanel;
         this.taggingPanel = taggingPanel;
-        this.stringMessages = taggingPanel.getStringMessages();
-        this.userService = taggingPanel.getUserSerivce();
+        this.stringMessages = stringMessages;
+        this.userService = userService;
 
         heading = new Label(stringMessages.tagButtons());
         heading.setStyleName(style.tagButtonPanelHeader());

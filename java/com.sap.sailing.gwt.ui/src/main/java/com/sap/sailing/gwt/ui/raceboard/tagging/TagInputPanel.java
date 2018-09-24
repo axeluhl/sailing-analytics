@@ -31,15 +31,13 @@ public class TagInputPanel extends FlowPanel {
     private final Label noPermissionForPublicTagsLabel;
 
     private final TaggingPanel taggingPanel;
-    private final StringMessages stringMessages;
 
     /**
      * Creates view allowing users to input values for tags and {@link TagButton tag-buttons}.
      */
-    protected TagInputPanel(TaggingPanel taggingPanel) {
+    protected TagInputPanel(TaggingPanel taggingPanel, StringMessages stringMessages) {
         setStyleName(style.tagInputPanel());
         this.taggingPanel = taggingPanel;
-        this.stringMessages = taggingPanel.getStringMessages();
 
         tagTextBox = new TextBox();
         tagTextBox.setStyleName(style.tagInputPanelTag());

@@ -24,8 +24,6 @@ import com.sap.sse.security.ui.client.UserService;
 /**
  * Used to display tags in various locations.
  */
-// TODO: Remove share button from private tags
-// TODO: change text of "created at" ...
 public class TagCell extends AbstractCell<TagDTO> {
 
     /**
@@ -141,11 +139,12 @@ public class TagCell extends AbstractCell<TagDTO> {
      *            should be <code>true</code> if {@link TagCell cell} is used as {@link TagPreviewPanel preview cell},
      *            otherwise <code>false</code>
      */
-    public TagCell(TaggingPanel taggingPanel, boolean isPreviewCell) {
+    public TagCell(TaggingPanel taggingPanel, StringMessages stringMessages, UserService userService,
+            boolean isPreviewCell) {
         super("click");
         this.taggingPanel = taggingPanel;
-        this.stringMessages = taggingPanel.getStringMessages();
-        this.userService = taggingPanel.getUserSerivce();
+        this.stringMessages = stringMessages;
+        this.userService = userService;
         this.isPreviewCell = isPreviewCell;
     }
 
@@ -267,7 +266,7 @@ public class TagCell extends AbstractCell<TagDTO> {
                         } else {
                             newURL = currentURL.concat(newTagURLParameter);
                         }
-                        new TagSharedURLDialog(taggingPanel, newURL).show();
+                        new TagSharedURLDialog(stringMessages, newURL).show();
                     }
                 }
             }

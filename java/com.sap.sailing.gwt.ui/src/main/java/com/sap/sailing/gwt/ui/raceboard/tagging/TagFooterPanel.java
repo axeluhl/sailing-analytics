@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.ui.raceboard.tagging;
 
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanel.State;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Panel containg {@link TagModificationPanel} and {@link TagButtonPanel} which is used as
@@ -21,11 +23,11 @@ public class TagFooterPanel extends FlowPanel {
      * @param taggingPanel
      *            required to instantiate {@link TagModificationPanel} and {@link TagButtonPanel}
      */
-    protected TagFooterPanel(TaggingPanel taggingPanel) {
+    protected TagFooterPanel(TaggingPanel taggingPanel, StringMessages stringMessages, UserService userService) {
         this.taggingPanel = taggingPanel;
 
-        tagModificationPanel = new TagModificationPanel(taggingPanel, this);
-        tagButtonPanel = new TagButtonPanel(taggingPanel, this);
+        tagModificationPanel = new TagModificationPanel(taggingPanel, this, stringMessages, userService);
+        tagButtonPanel = new TagButtonPanel(taggingPanel, this, stringMessages, userService);
 
         // Tag-buttons are only shown if amount of tag-buttons is greater then 0!
         setTagButtonsVisibility(true);
