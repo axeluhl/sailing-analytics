@@ -6555,16 +6555,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
     @Override
     public List<TagDTO> getAllTags(String leaderboardName, String raceColumnName, String fleetName) {
         List<TagDTO> result = new ArrayList<TagDTO>();
-        try {
-            result.addAll(getService().getTaggingService().getPublicTags(leaderboardName, raceColumnName, fleetName));
-        } catch (RaceLogNotFoundException e) {
-            // do nothing and try to return as much tags as possible (private tags)
-        }
-        try {
-            result.addAll(getService().getTaggingService().getPrivateTags(leaderboardName, raceColumnName, fleetName));
-        } catch (ServiceNotFoundException e) {
-            // do nothing and try to return as much tags as possible (public tags)
-        }
+        result.addAll(getPublicTags(leaderboardName, raceColumnName, fleetName));
+        result.addAll(getPrivateTags(leaderboardName, raceColumnName, fleetName));
         return result;
     }
 
@@ -6573,7 +6565,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
         List<TagDTO> result = new ArrayList<TagDTO>();
         try {
             result.addAll(getService().getTaggingService().getPublicTags(leaderboardName, raceColumnName, fleetName));
-        } catch (RaceLogNotFoundException e) {
+        } catch (Exception e) {
             // do nothing as method will always return at least an empty list
         }
         return result;
@@ -6584,7 +6576,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
         List<TagDTO> result = new ArrayList<TagDTO>();
         try {
             result.addAll(getService().getTaggingService().getPrivateTags(leaderboardName, raceColumnName, fleetName));
-        } catch (ServiceNotFoundException e) {
+        } catch (Exception e) {
             // do nothing as method will always return at least an empty list
         }
         return result;
