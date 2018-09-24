@@ -1,5 +1,6 @@
 package com.sap.sse.security.test;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
@@ -15,6 +16,37 @@ public class WildcardPermissionEncoderTest {
         assertEquals(s, encoder.decodePermissionPart(encoded));
         final WildcardPermission permission = new WildcardPermission("TYPE:MODE:"+encoded);
         assertEquals(s, encoder.decodePermissionPart(permission.getParts().get(2).iterator().next()));
+    }
+    
+    private void testPartList(String... s) {
+        final String encoded = encoder.encodeStringList(s);
+        assertArrayEquals(s, encoder.decodeStrings(encoded));
+        final WildcardPermission permission = new WildcardPermission("TYPE:MODE:"+encoded);
+        assertArrayEquals(s, encoder.decodeStrings(permission.getParts().get(2).iterator().next()));
+    }
+    
+    @Test
+    public void testSimpleList() {
+        testPartList("a", "b", "c");
+    }
+    
+    @Test
+    public void testListWithBlanks() {
+        testPartList("a ", " b", " c ");
+    }
+    
+    @Test
+    public void testListWithPartSeparator() {
+        testPartList("a"+WildcardPermission.PART_DIVIDER_TOKEN, WildcardPermission.PART_DIVIDER_TOKEN+"b",
+                WildcardPermission.PART_DIVIDER_TOKEN+"c"+WildcardPermission.PART_DIVIDER_TOKEN);
+    }
+    
+    @Test
+    public void testListWithPartAndSubpartSeparators() {
+        testPartList("a"+WildcardPermission.PART_DIVIDER_TOKEN,
+                WildcardPermission.PART_DIVIDER_TOKEN+"b"+WildcardPermission.SUBPART_DIVIDER_TOKEN,
+                WildcardPermission.SUBPART_DIVIDER_TOKEN+WildcardPermission.PART_DIVIDER_TOKEN+"c"+
+                        WildcardPermission.PART_DIVIDER_TOKEN+WildcardPermission.SUBPART_DIVIDER_TOKEN);
     }
     
     @Test

@@ -58,7 +58,7 @@ public class SecuredObjectCompositeConfig<T extends NamedSecuredObjectDTO> {
      * @param stringMessages
      *            {@link StringMessages} instance to use
      * @param permission
-     *            {@link SecuredDomainTypes} specifying the scope of required permissions to modify the secured object
+     *            {@link SecuredDomainType} specifying the scope of required permissions to modify the secured object
      * @param idFactory
      *            {@link Function factory} to get a {@link String type relative identifier} for the secured object
      */

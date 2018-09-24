@@ -25,7 +25,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.domain.common.security.SecuredDomainTypes;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -51,6 +51,7 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.shared.UserDTO;
 
@@ -564,10 +565,18 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
     }
 
     @Override
-    public boolean allowsEditing() {
+    public boolean allowsEditing(String mediaTrackDbId) {
         UserDTO currentUser = userService.getCurrentUser();
         return currentUser != null
-                && currentUser.hasPermission(SecuredDomainTypes.MANAGE_MEDIA.getPermission(), /* TODO race ownership */ null, /* TODO race ACL */ null);
+                && currentUser.hasPermission(SecuredDomainType.MEDIA_TRACK.getPermissionForObjects(DefaultActions.UPDATE, mediaTrackDbId),
+                        /* TODO media track ownership */ null, /* TODO media track ACL */ null);
+    }
+
+    @Override
+    public boolean allowsCreating() {
+        UserDTO currentUser = userService.getCurrentUser();
+        return currentUser != null
+                && currentUser.hasCreatePermission(SecuredDomainType.MEDIA_TRACK);
     }
 
     @Override

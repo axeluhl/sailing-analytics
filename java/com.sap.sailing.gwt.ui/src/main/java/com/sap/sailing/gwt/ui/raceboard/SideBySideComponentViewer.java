@@ -17,7 +17,7 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.WidgetCollection;
-import com.sap.sailing.domain.common.security.SecuredDomainTypes;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.media.MediaManagementControl;
 import com.sap.sailing.gwt.ui.client.media.MediaPlayerManager;
@@ -123,7 +123,9 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
                 }
                 mediaSelectionButton.setText(caption);
                 mediaSelectionButton.setTitle(tooltip);
-                mediaManagementButton.setVisible(mediaPlayerManagerComponent.allowsEditing());
+                mediaManagementButton.setVisible(
+                        mediaPlayerManagerComponent.getAssignedMediaTracks().stream().anyMatch(
+                                track->mediaPlayerManagerComponent.allowsEditing(track.dbId)));
             }
         });
         this.leftScrollPanel = new ScrollPanel();
@@ -280,7 +282,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         final Splitter markPassingsSplitter = splitLayoutPanel.getAssociatedSplitter(markPassingsPanel);
         final Splitter markPositionSplitter = splitLayoutPanel.getAssociatedSplitter(markPositionPanel);
         boolean forceLayout = false;
-        if (user != null && user.hasPermission(SecuredDomainTypes.MANAGE_MARK_PASSINGS.getPermission(), /* TODO race ownership */ null, /* TODO race acl */ null)) {
+        if (user != null && user.hasPermission(SecuredDomainType.MANAGE_MARK_PASSINGS.getPermission(), /* TODO race ownership */ null, /* TODO race acl */ null)) {
             if (markPassingsSplitter != null) { // if the panel is not present, the splitter may not be found
                 markPassingsSplitter.getToggleButton().setVisible(true);
             }
@@ -291,7 +293,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
                 markPassingsSplitter.getToggleButton().setVisible(false);
             }
         }
-        if (user != null && user.hasPermission(SecuredDomainTypes.MANAGE_MARK_POSITIONS.getPermission(), /* TODO race ownership */ null, /* TODO race acl */ null)) {
+        if (user != null && user.hasPermission(SecuredDomainType.MANAGE_MARK_POSITIONS.getPermission(), /* TODO race ownership */ null, /* TODO race acl */ null)) {
             if (markPositionSplitter != null) { // if the panel is not present, the splitter may not be found
                 markPositionSplitter.getToggleButton().setVisible(true);
             }
@@ -306,7 +308,8 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         if (forceLayout) {
             forceLayout();
         }
-        mediaManagementButton.setVisible(mediaPlayerManagerComponent.allowsEditing());
+        mediaManagementButton.setVisible(mediaPlayerManagerComponent.getAssignedMediaTracks().stream().anyMatch(
+                track->mediaPlayerManagerComponent.allowsEditing(track.dbId)));
     }
     
     /**

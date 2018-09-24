@@ -80,7 +80,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
      */
     private final LinkedHashSet<Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String>> roleSpecificTabs;
     
-    private final Map<Widget, Set<HasPermissions>> permissionsAnyOfWhichIsRequiredToSeeWidget;
+    private final Map<Widget, Set<WildcardPermission>> permissionsAnyOfWhichIsRequiredToSeeWidget;
     
     private final SelectionHandler<Integer> tabSelectionHandler;
     
@@ -106,7 +106,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
      * automatically create a role that implies all those permissions for users to have full access to the
      * admin console and its panels.
      */
-    private final Iterable<? extends HasPermissions> acceptablePermissionsRequiredToSeeWidgets;
+    private final Iterable<? extends WildcardPermission> acceptablePermissionsRequiredToSeeWidgets;
     
     /**
      * Generic selection handler that forwards selected tabs to a refresher that ensures that data gets reloaded. If
@@ -169,7 +169,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
     public AdminConsolePanel(UserService userService,
             ServerInfoRetriever buildVersionRetriever, String releaseNotesAnchorLabel,
             String releaseNotesURL, ErrorReporter errorReporter, LoginPanelCss loginPanelCss, StringMessages stringMessages,
-            Iterable<? extends HasPermissions> acceptablePermissionsRequiredToSeeWidgets) {
+            Iterable<? extends WildcardPermission> acceptablePermissionsRequiredToSeeWidgets) {
         this.acceptablePermissionsRequiredToSeeWidgets = acceptablePermissionsRequiredToSeeWidgets;
         this.permissionsAnyOfWhichIsRequiredToSeeWidget = new HashMap<>();
         this.userService = userService;
@@ -272,7 +272,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
      * @return the horizontal tab panel that was created and added to the top-level vertical tab panel; the panel returned can be specified
      * as argument to {@link #addToTabPanel(TabLayoutPanel, Widget, String, AdminConsoleFeatures)}.
      */
-    public HorizontalTabLayoutPanel addVerticalTab(String tabTitle, String tabDebugId, HasPermissions... requiresAnyOfThesePermissions) {
+    public HorizontalTabLayoutPanel addVerticalTab(String tabTitle, String tabDebugId, WildcardPermission... requiresAnyOfThesePermissions) {
         final HorizontalTabLayoutPanel newTabPanel = new HorizontalTabLayoutPanel(2.5, Unit.EM);
         AbstractEntryPoint.setTabPanelSize(newTabPanel, "100%", "100%");
         newTabPanel.addSelectionHandler(tabSelectionHandler);
@@ -286,7 +286,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
      * This is useful for panels that form a top-level category of its own but don't require multiple panels to represent this
      * top-level category.
      */
-    public void addToVerticalTabPanel(final RefreshableAdminConsolePanel panelToAdd, String tabTitle, HasPermissions... requiresAnyOfThesePermissions) {
+    public void addToVerticalTabPanel(final RefreshableAdminConsolePanel panelToAdd, String tabTitle, WildcardPermission... requiresAnyOfThesePermissions) {
         addToTabPanel(topLevelTabPanelWrapper, panelToAdd, tabTitle, requiresAnyOfThesePermissions);
     }
 
@@ -297,7 +297,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
         return scrollPanel;
     }
 
-    public void addToTabPanel(final HorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel panelToAdd, String tabTitle, HasPermissions... requiresAnyOfThesePermissions) {
+    public void addToTabPanel(final HorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel panelToAdd, String tabTitle, WildcardPermission... requiresAnyOfThesePermissions) {
         VerticalOrHorizontalTabLayoutPanel wrapper = new VerticalOrHorizontalTabLayoutPanel() {
             @Override
             public void add(Widget child, String text, boolean asHtml) {
@@ -339,7 +339,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
      * a hook so that when the <code>panelToAdd</code>'s widget is selected then the {@link RefreshableAdminConsolePanel#refreshAfterBecomingVisible()}
      * method can be called.
      */
-    private void addToTabPanel(VerticalOrHorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel panelToAdd, String tabTitle, HasPermissions... requiresAnyOfThesePermissions) {
+    private void addToTabPanel(VerticalOrHorizontalTabLayoutPanel tabPanel, RefreshableAdminConsolePanel panelToAdd, String tabTitle, WildcardPermission... requiresAnyOfThesePermissions) {
         remeberWidgetLocationAndPermissions(tabPanel, wrapInScrollPanel(panelToAdd.getWidget()), tabTitle, requiresAnyOfThesePermissions);
         panelsByWidget.put(panelToAdd.getWidget(), panelToAdd);
     }
@@ -356,9 +356,9 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
      *            will be shown the widget.
      */
     private void remeberWidgetLocationAndPermissions(VerticalOrHorizontalTabLayoutPanel tabPanel, Widget widgetToAdd,
-            String tabTitle, HasPermissions... requiresAnyOfThesePermissions) {
+            String tabTitle, WildcardPermission... requiresAnyOfThesePermissions) {
         if (acceptablePermissionsRequiredToSeeWidgets != null) {
-            for (final HasPermissions requiredPermission : requiresAnyOfThesePermissions) {
+            for (final WildcardPermission requiredPermission : requiresAnyOfThesePermissions) {
                 if (!Util.contains(acceptablePermissionsRequiredToSeeWidgets, requiredPermission)) {
                     throw new RuntimeException("Internal error: permission "+requiredPermission+
                             " missing from the set of acceptable admin console permissions "+acceptablePermissionsRequiredToSeeWidgets);
@@ -366,9 +366,9 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
             }
         }
         roleSpecificTabs.add(new Triple<VerticalOrHorizontalTabLayoutPanel, Widget, String>(tabPanel, widgetToAdd, tabTitle));
-        final HashSet<HasPermissions> permissionsAsSet = new HashSet<>(Arrays.asList(requiresAnyOfThesePermissions));
+        final Set<WildcardPermission> permissionsAsSet = new HashSet<>(Arrays.asList(requiresAnyOfThesePermissions));
         permissionsAnyOfWhichIsRequiredToSeeWidget.put(widgetToAdd, permissionsAsSet);
-        Set<HasPermissions> permissionsForTabPanel = permissionsAnyOfWhichIsRequiredToSeeWidget.get(tabPanel.getPanel());
+        Set<WildcardPermission> permissionsForTabPanel = permissionsAnyOfWhichIsRequiredToSeeWidget.get(tabPanel.getPanel());
         if (permissionsForTabPanel == null) {
             permissionsForTabPanel = new HashSet<>();
             permissionsAnyOfWhichIsRequiredToSeeWidget.put(tabPanel.getPanel(), permissionsForTabPanel);
@@ -468,14 +468,14 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
      * is also implied.
      */
     private boolean userHasPermissionsToSeeWidget(UserDTO user, Widget widget) {
-        final Set<HasPermissions> permissionsRequired = permissionsAnyOfWhichIsRequiredToSeeWidget.get(widget);
+        final Set<WildcardPermission> permissionsRequired = permissionsAnyOfWhichIsRequiredToSeeWidget.get(widget);
         boolean hasPermission;
         if (permissionsRequired.isEmpty()) {
             hasPermission = true;
         } else {
             hasPermission = false;
-            for (HasPermissions requiredStringPermission : permissionsRequired) {
-                WildcardPermission requiredPermission = requiredStringPermission.getPermission();
+            for (WildcardPermission requiredPermission : permissionsRequired) {
+                // TODO bug4763: obtain ownership and ACL through a provider pattern; providers may be passed to this panel's constructor
                 if (PermissionChecker.isPermitted(requiredPermission, user, user.getUserGroups(), /* ownership */ null, /* acl */ null)) {
                     hasPermission = true;
                     break;

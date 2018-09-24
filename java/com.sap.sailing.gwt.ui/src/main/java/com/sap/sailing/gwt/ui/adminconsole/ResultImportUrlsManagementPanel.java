@@ -126,7 +126,7 @@ public class ResultImportUrlsManagementPanel extends FlowPanel {
     
     private void refreshUrlList() {
         String selectedProviderName = getSelectedProviderName();
-        if(selectedProviderName != null) {
+        if (selectedProviderName != null) {
             sailingService.getResultImportUrls(selectedProviderName, new AsyncCallback<List<String>>() {
                 @Override
                 public void onFailure(Throwable caught) {

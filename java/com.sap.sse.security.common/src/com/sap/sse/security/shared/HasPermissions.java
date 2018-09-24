@@ -70,14 +70,12 @@ public interface HasPermissions {
     WildcardPermission getPermissionForObjects(Action action, String... objectIdentifiers);
 
     public static interface Action {
-        String name();
-
         /**
          * Returns the action as represented in the second part of a {@link WildcardPermission}. This shall be a string
          * that will not need further encoding such as by a {@link WildcardPermissionEncoder} so that it can be used
          * in a {@link WildcardPermission} immediately and without change.
          */
-        String getStringPermission();
+        String name();
     }
 
     /**
@@ -88,11 +86,6 @@ public interface HasPermissions {
      */
     public enum DefaultActions implements Action {
         CREATE, READ, UPDATE, DELETE, CHANGE_OWNERSHIP;
-
-        @Override
-        public String getStringPermission() {
-            return name();
-        }
     }
 
 }

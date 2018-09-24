@@ -25,4 +25,22 @@ public interface PermissionStringEncoder<PermissionType> {
      * Put formally, {@code this.decodePermissionPart(this.encodeAsPermissionPart(s)).equals(s)}
      */
     String decodePermissionPart(String permissionPart);
+    
+    /**
+     * Encodes a list of {@link String}s using {@link #encodeAsPermissionPart(String)} and concatenates them using
+     * a separator character that is not legal in any permission string of the {@code PermissionType}. Then, the concatenated
+     * result is again encoded using {@link #encodeAsPermissionPart(String)}.
+     * 
+     * @param strings must not be {@code null}
+     * 
+     * @see #decodeStrings(String)
+     */
+    String encodeStringList(String... strings);
+
+    /**
+     * Decodes a list of {@link String}s that were previously encoded using {@link #encodeStringList(String...)}.
+     * 
+     * @return a non-{@code null} array which is empty if and only if {@code stringEncodedWithEncodeStringList} is empty
+     */
+    String[] decodeStrings(String stringEncodedWithEncodeStringList);
 }

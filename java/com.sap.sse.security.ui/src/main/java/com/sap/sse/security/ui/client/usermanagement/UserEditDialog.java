@@ -32,6 +32,7 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleImpl;
@@ -99,8 +100,10 @@ public class UserEditDialog extends DataEntryDialog<Pair<UserDTO, Iterable<Tripl
         this.fullName = createTextBox(userToEdit.getFullName());
         this.company = createTextBox(userToEdit.getCompany());
         List<String> defaultPermissionNames = new ArrayList<>();
-        for (HasPermissions permission : additionalPermissions) {
-            defaultPermissionNames.add(permission.getStringPermission());
+        for (final HasPermissions permission : additionalPermissions) {
+            for (final Action action : permission.getAvailableActions()) {
+                defaultPermissionNames.add(permission.getStringPermission(action));
+            }
         }
         permissionsEditor = new StringListEditorComposite(userToEdit==null?Collections.<String>emptySet():userToEdit.getStringPermissions(), stringMessages,
                 com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), defaultPermissionNames,

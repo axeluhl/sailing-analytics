@@ -1,5 +1,6 @@
 package com.sap.sse.security.shared.impl;
 
+import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.PermissionStringEncoder;
 import com.sap.sse.security.shared.WildcardPermission;
 
@@ -89,4 +90,26 @@ public class WildcardPermissionEncoder implements PermissionStringEncoder<Wildca
         }
         return result.toString();
     }
+
+    @Override
+    public String encodeStringList(String... strings) {
+        final String[] firstPassResult = new String[strings.length];
+        for (int i=0; i<strings.length; i++) {
+            firstPassResult[i] = encodeAsPermissionPart(strings[i]);
+        }
+        final String concatenatedFirstPassResult = Util.join(WildcardPermission.PART_DIVIDER_TOKEN, firstPassResult);
+        return encodeAsPermissionPart(concatenatedFirstPassResult);
+    }
+
+    @Override
+    public String[] decodeStrings(String stringEncodedWithEncodeStringList) {
+        final String decodedPartList = decodePermissionPart(stringEncodedWithEncodeStringList);
+        final String[] parts = decodedPartList.split(WildcardPermission.PART_DIVIDER_TOKEN);
+        final String[] result = new String[parts.length];
+        for (int i=0; i<result.length; i++) {
+            result[i] = decodePermissionPart(parts[i]);
+        }
+        return result;
+    }
+
 }

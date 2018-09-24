@@ -5,7 +5,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.security.SecuredDomainTypes;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.Validator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
@@ -62,7 +62,7 @@ public class TimePanelSettingsDialogComponent<T extends TimePanelSettings> imple
             public String getErrorMessage(TimePanelSettings valueToValidate) {
                 String errorMessage = null;
                 if (userService.getCurrentUser() != null
-                        && userService.getCurrentUser().hasPermission(SecuredDomainTypes.DETAIL_TIMER.name())) {
+                        && userService.getCurrentUser().hasPermission(SecuredDomainType.DETAIL_TIMER.name())) {
                     if (valueToValidate.getRefreshInterval() < 50) {
                         errorMessage = stringMessages.refreshIntervalMustBeGreaterThanXSeconds("0.05");
                     }

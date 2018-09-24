@@ -59,7 +59,7 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
         }
         return false;
     }
-
+    
     @Override
     public String getStringPermission(com.sap.sse.security.shared.HasPermissions.Action... actions) {
         final String result;
@@ -75,7 +75,7 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
                 } else {
                     modesString.append(',');
                 }
-                modesString.append(action.getStringPermission());
+                modesString.append(action.name());
             }
             result = name()+":"+modesString.toString();
         }

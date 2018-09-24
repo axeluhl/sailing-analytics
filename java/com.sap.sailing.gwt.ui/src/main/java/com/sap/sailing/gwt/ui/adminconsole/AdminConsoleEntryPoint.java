@@ -11,7 +11,8 @@ import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.security.SecuredDomainTypes;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.domain.common.security.SecuredDomainType.ReplicatorActions;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
@@ -41,6 +42,7 @@ import com.sap.sse.gwt.client.controls.filestorage.FileStoragePanel;
 import com.sap.sse.gwt.client.panels.HorizontalTabLayoutPanel;
 import com.sap.sse.gwt.resources.Highcharts;
 import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
 import com.sap.sse.security.ui.authentication.decorator.WidgetFactory;
@@ -130,7 +132,8 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
             public void refreshAfterBecomingVisible() {
                 fillLeaderboards();
             }
-        }, getStringMessages().leaderboards()); // no permissions required; we show those leaderboard the user may read
+        }, getStringMessages().leaderboards(), SecuredDomainType.LEADERBOARD.getPermission(DefaultActions.UPDATE),
+                SecuredDomainType.LEADERBOARD.getPermission(DefaultActions.CREATE));
         regattasDisplayers.add(leaderboardConfigPanel);
         leaderboardsDisplayers.add(leaderboardConfigPanel);
 
@@ -251,7 +254,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         IgtimiAccountsPanel igtimiAccountsPanel = new IgtimiAccountsPanel(getSailingService(), this, getStringMessages());
         igtimiAccountsPanel.ensureDebugId("IgtimiAccounts");
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<IgtimiAccountsPanel>(igtimiAccountsPanel),
-                getStringMessages().igtimiAccounts(), SecuredDomainTypes.MANAGE_IGTIMI_ACCOUNTS);
+                getStringMessages().igtimiAccounts()); // Igtimi accounts are displayed based on permissions
         
         ExpeditionDeviceConfigurationsPanel expeditionDeviceConfigurationsPanel = new ExpeditionDeviceConfigurationsPanel(getSailingService(), this, getStringMessages());
         expeditionDeviceConfigurationsPanel.ensureDebugId("ExpeditionDeviceConfigurations");
@@ -260,16 +263,17 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
             public void refreshAfterBecomingVisible() {
                 expeditionDeviceConfigurationsPanel.refresh();
             }
-        }, getStringMessages().expeditionDeviceConfigurations(), SecuredDomainTypes.MANAGE_EXPEDITION_DEVICE_CONFIGURATIONS); // TODO bug4754 use server name as type-relative object identifier
+        }, getStringMessages().expeditionDeviceConfigurations()); // Expedition device configurations are displayed based on individual user permissions
 
         ResultImportUrlsManagementPanel resultImportUrlsManagementPanel = new ResultImportUrlsManagementPanel(getSailingService(), this, getStringMessages());
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<ResultImportUrlsManagementPanel>(resultImportUrlsManagementPanel),
-                getStringMessages().resultImportUrls(), SecuredDomainTypes.MANAGE_RESULT_IMPORT_URLS);
+                getStringMessages().resultImportUrls()); // result import URLs have ownerships and are displayed as the user can see / update / delete them
         
         StructureImportManagementPanel structureImportUrlsManagementPanel = new StructureImportManagementPanel(
                 getSailingService(), getUserService(), this, getStringMessages(), this, eventManagementPanel);
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<StructureImportManagementPanel>(structureImportUrlsManagementPanel),
-                getStringMessages().manage2Sail() + " " + getStringMessages().regattaStructureImport(), SecuredDomainTypes.MANAGE_STRUCTURE_IMPORT_URLS); // TODO bug4754 use server name as type-relative object identifier
+                getStringMessages().manage2Sail() + " " + getStringMessages().regattaStructureImport(),
+                SecuredDomainType.REGATTA.getPermission(DefaultActions.CREATE)); // TODO bug4763 provide the default CREATE ownership for REGATTA / EVENT
 
         /* ADVANCED */
         
@@ -281,27 +285,32 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
             public void refreshAfterBecomingVisible() {
                 replicationPanel.updateReplicaList();
             }
-        }, getStringMessages().replication(), SecuredDomainTypes.MANAGE_REPLICATION); // TODO bug4754 use server name as type-relative object identifier
+        }, getStringMessages().replication(), SecuredDomainType.REPLICATOR.getPermission(ReplicatorActions.START),
+                SecuredDomainType.REPLICATOR.getPermission(ReplicatorActions.STOP),
+                SecuredDomainType.REPLICATOR.getPermission(ReplicatorActions.DROP_CONNECTION)); // TODO bug4754 use server name as type-relative object identifier
 
         final MasterDataImportPanel masterDataImportPanel = new MasterDataImportPanel(getStringMessages(), getSailingService(),
                 this, eventManagementPanel, this, this, mediaPanel);
         masterDataImportPanel.ensureDebugId("MasterDataImport");
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<MasterDataImportPanel>(masterDataImportPanel),
-                getStringMessages().masterDataImportPanel(), SecuredDomainTypes.MANAGE_MASTERDATA_IMPORT); // TODO bug4754 use server name as type-relative object identifier
+                getStringMessages().masterDataImportPanel(), SecuredDomainType.SERVER.getPermissionForObjects(
+                        SecuredDomainType.ServerActions.IMPORT_MASTER_DATA, getServerName()));
 
         RemoteServerInstancesManagementPanel remoteServerInstancesManagementPanel = new RemoteServerInstancesManagementPanel(getSailingService(), this, getStringMessages());
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<RemoteServerInstancesManagementPanel>(remoteServerInstancesManagementPanel),
-                getStringMessages().remoteServerInstances(), SecuredDomainTypes.MANAGE_SAILING_SERVER_INSTANCES); // TODO bug4754 use server name as type-relative object identifier
+                getStringMessages().remoteServerInstances(),
+                SecuredDomainType.SERVER.getPermissionForObjects(SecuredDomainType.ServerActions.CONFIGURE_LOCAL_SERVER, getServerName()));
 
         LocalServerManagementPanel localServerInstancesManagementPanel = new LocalServerManagementPanel(getSailingService(), this, getStringMessages());
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<LocalServerManagementPanel>(localServerInstancesManagementPanel),
-                getStringMessages().localServer(), SecuredDomainTypes.MANAGE_LOCAL_SERVER_INSTANCE); // TODO bug4754 use server name as type-relative object identifier
+                getStringMessages().localServer(),
+                SecuredDomainType.SERVER.getPermissionForObjects(SecuredDomainType.ServerActions.CONFIGURE_LOCAL_SERVER, getServerName()));
 
         final Set<HasPermissions> allSecuredTypes = new HashSet<>();
-        Util.addAll(SecuredDomainTypes.getAllInstances(), allSecuredTypes);
+        Util.addAll(SecuredDomainType.getAllInstances(), allSecuredTypes);
         Util.addAll(SecuredSecurityTypes.getAllInstances(), allSecuredTypes);
         final UserManagementPanel<AdminConsoleTableResources> userManagementPanel = new UserManagementPanel<>(getUserService(), StringMessages.INSTANCE,
-                SecuredDomainTypes.getAllInstances(), this, tableResources);
+                SecuredDomainType.getAllInstances(), this, tableResources);
         panel.addToTabPanel(advancedTabPanel,
                 new DefaultRefreshableAdminConsolePanel<UserManagementPanel<AdminConsoleTableResources>>(userManagementPanel) {
                     @Override
@@ -331,7 +340,8 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
 
         final FileStoragePanel fileStoragePanel = new FileStoragePanel(getSailingService(), this);
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<FileStoragePanel>(fileStoragePanel),
-                getStringMessages().fileStorage(), SecuredDomainTypes.MANAGE_FILE_STORAGE); // TODO bug4754 use server name as type-relative object identifier
+                getStringMessages().fileStorage(), SecuredDomainType.SERVER.getPermissionForObjects(
+                        SecuredDomainType.ServerActions.CONFIGURE_FILE_STORAGE, getServerName()));
         panel.initUI();
         fillRegattas();
         fillLeaderboardGroups();

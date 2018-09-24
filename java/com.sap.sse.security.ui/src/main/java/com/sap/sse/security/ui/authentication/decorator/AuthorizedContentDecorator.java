@@ -8,7 +8,7 @@ import com.google.gwt.user.client.ui.ProvidesResize;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -23,14 +23,12 @@ public class AuthorizedContentDecorator extends Composite implements RequiresRes
     private Widget content;
     private WidgetFactory contentWidgetFactory;
     private final NotLoggedInView notLoggedInView;
-    private String permissionToCheck;
+    private WildcardPermission permissionToCheck;
 
     public AuthorizedContentDecorator(NotLoggedInPresenter presenter, NotLoggedInView notLoggedInView) {
         this.notLoggedInView = notLoggedInView;
-
         notLoggedInView.setPresenter(presenter);
         notLoggedInView.setSignInText(StringMessages.INSTANCE.signIn());
-
         initWidget(contentHolder);
     }
 
@@ -89,15 +87,12 @@ public class AuthorizedContentDecorator extends Composite implements RequiresRes
         boolean isAuthenticated = authenticationContext.isLoggedIn();
         boolean isPermitted = isPermitted(authenticationContext);
         boolean maySeeRealContent = isAuthenticated && isPermitted;
-
         IsWidget isWidget = maySeeRealContent ? getContentWidget() : notLoggedInView;
-
         if (!maySeeRealContent) {
             String message = !isAuthenticated ? StringMessages.INSTANCE.youAreNotSignedIn() : StringMessages.INSTANCE
                     .youDontHaveRequiredPermission();
             notLoggedInView.setMessage(message);
         }
-
         Widget widget = isWidget.asWidget();
         if (widget instanceof RequiresResize) {
             widget.setSize("100%", "100%");
@@ -118,16 +113,7 @@ public class AuthorizedContentDecorator extends Composite implements RequiresRes
      * 
      * @param permissionToCheck the permission to check
      */
-    public void setPermissionToCheck(String permissionToCheck) {
+    public void setPermissionToCheck(WildcardPermission permissionToCheck) {
         this.permissionToCheck = permissionToCheck;
-    }
-
-    /**
-     * Setting a permission causes that the user not only needs to be logged in but also needs to have the given permission.
-     * 
-     * @param permissionToCheck the permission to check
-     */
-    public void setPermissionToCheck(HasPermissions permissionToCheck) {
-        setPermissionToCheck(permissionToCheck.getStringPermission());
     }
 }

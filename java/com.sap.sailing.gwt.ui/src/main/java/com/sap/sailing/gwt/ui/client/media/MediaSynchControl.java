@@ -14,10 +14,11 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.media.MediaTrack;
-import com.sap.sailing.domain.common.security.SecuredDomainTypes;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.media.MediaSynchAdapter.EditFlag;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.shared.UserDTO;
@@ -42,6 +43,7 @@ public class MediaSynchControl implements EditFlag {
     private final Button previewButton;
     private final Button saveButton;
     private final Button discardButton;
+    private final String mediaTrackDbId;
 
     private boolean isEditing = false;
     private UserService userservice;
@@ -63,6 +65,7 @@ public class MediaSynchControl implements EditFlag {
         this.mediaSynchAdapter = mediaSynchAdapter;
         this.errorReporter = errorReporter;
         MediaTrack videoTrack = this.mediaSynchAdapter.getMediaTrack();
+        mediaTrackDbId = videoTrack.dbId;
         backupVideoTrack = new MediaTrack(videoTrack.title, videoTrack.url, videoTrack.startTime, videoTrack.duration,
                 videoTrack.mimeType, videoTrack.assignedRaces);
         this.userservice = userservice;
@@ -255,9 +258,9 @@ public class MediaSynchControl implements EditFlag {
     }
 
     private boolean hasRightToEdit() {
-        UserDTO currentUser = userservice.getCurrentUser(); // TODO should there be userservice.getGroups(SecurityUser)?
+        UserDTO currentUser = userservice.getCurrentUser();
         return currentUser != null
-                && currentUser.hasPermission(SecuredDomainTypes.MANAGE_MEDIA.getPermission(),
+                && currentUser.hasPermission(SecuredDomainType.MEDIA_TRACK.getPermissionForObjects(DefaultActions.UPDATE, mediaTrackDbId),
                         /* TODO ownership */ null);
     }
 
