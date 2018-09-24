@@ -11,14 +11,14 @@ public class PermissionImpl implements HasPermissions {
         this.permissionTypeName = permissionTypeName;
     }
     
-    public String getStringPermission(Mode... modes) {
+    public String getStringPermission(Action... modes) {
         final String result;
         if (modes==null || modes.length==0) {
             result = permissionTypeName;
         } else {
             final StringBuilder modesString = new StringBuilder();
             boolean first = true;
-            for (Mode mode : modes) {
+            for (Action mode : modes) {
                 if (first) {
                     first = false;
                 } else {
@@ -32,11 +32,11 @@ public class PermissionImpl implements HasPermissions {
     }
     
     @Override
-    public WildcardPermission getPermission(Mode... modes) {
+    public WildcardPermission getPermission(Action... modes) {
         return new WildcardPermission(getStringPermission(modes));
     }
 
-    public String getStringPermissionForObjects(Mode mode, String... objectIdentifiers) {
+    public String getStringPermissionForObjects(Action mode, String... objectIdentifiers) {
         final WildcardPermissionEncoder permissionEncoder = new WildcardPermissionEncoder();
         final StringBuilder result = new StringBuilder(getStringPermission(mode));
         if (objectIdentifiers!=null && objectIdentifiers.length>0) {
@@ -55,7 +55,7 @@ public class PermissionImpl implements HasPermissions {
     }
     
     @Override
-    public WildcardPermission getPermissionForObjects(Mode mode, String... objectIdentifiers) {
+    public WildcardPermission getPermissionForObjects(Action mode, String... objectIdentifiers) {
         return new WildcardPermission(getStringPermissionForObjects(mode, objectIdentifiers));
     }
 

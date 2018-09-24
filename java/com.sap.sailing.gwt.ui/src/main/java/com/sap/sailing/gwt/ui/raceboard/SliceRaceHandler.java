@@ -25,7 +25,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
-import com.sap.sse.security.shared.HasPermissions.DefaultModes;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.shared.UserDTO;
@@ -126,8 +126,8 @@ public class SliceRaceHandler {
     private boolean allowsEditing() {
         final UserDTO currentUser = userService.getCurrentUser();
         return currentUser != null
-                && currentUser.hasPermission(Permission.REGATTA.getStringPermissionForObjects(DefaultModes.UPDATE, selectedRaceIdentifier.getRegattaName()))
-                && currentUser.hasPermission(Permission.LEADERBOARD.getStringPermissionForObjects(DefaultModes.UPDATE, leaderboardName));
+                && currentUser.hasPermission(Permission.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, selectedRaceIdentifier.getRegattaName()))
+                && currentUser.hasPermission(Permission.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
     }
 
     private void doSlice() {

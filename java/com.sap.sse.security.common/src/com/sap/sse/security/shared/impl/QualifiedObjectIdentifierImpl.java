@@ -1,6 +1,6 @@
 package com.sap.sse.security.shared.impl;
 
-import com.sap.sse.security.shared.HasPermissions.Mode;
+import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.PermissionStringEncoder;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
@@ -46,12 +46,12 @@ public class QualifiedObjectIdentifierImpl implements QualifiedObjectIdentifier 
     }
 
     @Override
-    public String getStringPermission(Mode action) {
+    public String getStringPermission(Action action) {
         return getPermission(action).toString();
     }
 
     @Override
-    public WildcardPermission getPermission(Mode action) {
+    public WildcardPermission getPermission(Action action) {
         return new WildcardPermission(getTypeIdentifier()+WildcardPermission.PART_DIVIDER_TOKEN+action.name()+WildcardPermission.PART_DIVIDER_TOKEN+
                 permissionStringEncoder.encodeAsPermissionPart(getTypeRelativeObjectIdentifier()));
     }

@@ -57,7 +57,7 @@ import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
-import com.sap.sse.security.shared.HasPermissions.DefaultModes;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 
 public class MediaServiceImpl extends RemoteServiceServlet implements MediaService {
     private String YOUTUBE_V3_API_KEY = "AIzaSyBzCJ9cxb9_PPzuYfrHIEdSRtR631b64Xs";
@@ -101,7 +101,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     }
     
     private void ensureUserCanManageMedia() {
-        SecurityUtils.getSubject().checkPermission(Permission.MANAGE_MEDIA.getStringPermissionForObjects(DefaultModes.UPDATE));
+        SecurityUtils.getSubject().checkPermission(Permission.MANAGE_MEDIA.getStringPermissionForObjects(DefaultActions.UPDATE));
     }
 
     @Override

@@ -9,14 +9,14 @@ import java.util.Set;
  * should usually be at most one instance of this type defined for one object to which access is controlled. The sets of
  * actions are keyed by the {@link UserGroup} to which they are granted/revoked. An action would, e.g., be something
  * like "UPDATE" in the permission EVENT:UPDATE:84730-74837-47384-ab987f9. Note that nothing but the action is required
- * because the ACL pertains to a single object such that the type (e.g., "EVENT") as well as the object ID are known and
- * don't need to and make no sense to be specified.
+ * for each group because the ACL pertains to a single object such that the type (e.g., "EVENT") as well as the object
+ * ID are known and don't need to and make no sense to be specified.
  * <p>
  * 
  * It is allowed to use the {@code "*"} wildcard as an action string, granting access to all actions on the object
  * concerned. The same logic for permission implication as on {@link WildcardPermission} is applied when matching a
  * particular action passed to the {@link #hasPermission(SecurityUser, String, Iterable)} method against the actions
- * allowed by this ACL.
+ * allowed by this access control list (ACL).
  * <p>
  * 
  * The actions to be permitted or forbidden are provided as strings. To forbid a action, the action string is prefixed

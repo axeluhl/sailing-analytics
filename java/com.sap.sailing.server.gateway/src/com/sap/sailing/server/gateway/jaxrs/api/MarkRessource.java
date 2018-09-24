@@ -65,7 +65,7 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJson
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.security.shared.HasPermissions.DefaultModes;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 
 @Path("/v1/mark")
 public class MarkRessource extends AbstractSailingServerResource {
@@ -74,21 +74,17 @@ public class MarkRessource extends AbstractSailingServerResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces("application/json;charset=UTF-8")
     public Response addMarkToRegatta(String json) throws Exception {
-        SecurityUtils.getSubject().checkPermission(Permission.MANAGE_COURSE_LAYOUT.getStringPermission(DefaultModes.CREATE));
-
         Object requestBody = JSONValue.parseWithException(json);
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
-
         String markName = (String) requestObject.get("markName");
-
         UUID markId = UUID.randomUUID();
         Mark mark = getService().getBaseDomainFactory().getOrCreateMark(markId, markName);
         String regattaName = (String) requestObject.get("regattaName");
+        SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regattaName));
         RegattaLog regattaLog = getRegattaLogInternal(regattaName);
         RegattaLogDefineMarkEventImpl event = new RegattaLogDefineMarkEventImpl(MillisecondsTimePoint.now(),
                 getService().getServerAuthor(), MillisecondsTimePoint.now(), UUID.randomUUID(), mark);
         regattaLog.add(event);
-
         JSONObject answer = new JSONObject();
         answer.put("markId", markId.toString());
         return Response.ok(answer.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")
@@ -101,7 +97,7 @@ public class MarkRessource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     public Response addMarkFix(String json)
             throws DoesNotHaveRegattaLogException, ParseException, JsonDeserializationException {
-        SecurityUtils.getSubject().checkPermission(Permission.MANAGE_MARK_POSITIONS.getStringPermission(DefaultModes.CREATE));
+        SecurityUtils.getSubject().checkPermission(Permission.MANAGE_MARK_POSITIONS.getStringPermission(DefaultActions.CREATE));
 
         Object requestBody = JSONValue.parseWithException(json);
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
@@ -144,15 +140,12 @@ public class MarkRessource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     public Response addCourseDefinitionToRaceLog(String json)
             throws DoesNotHaveRegattaLogException, NotFoundException, ParseException, JsonDeserializationException {
-        SecurityUtils.getSubject().checkPermission(Permission.MANAGE_COURSE_LAYOUT.getStringPermission(DefaultModes.CREATE));
-
         Object requestBody = JSONValue.parseWithException(json);
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
-
         String leaderboardName = (String) requestObject.get("leaderboardName");
+        SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
         String raceColumnName = (String) requestObject.get("raceColumnName");
         String fleetName = (String) requestObject.get("fleetName");
-
         RaceLog raceLog = getRaceLog(leaderboardName, raceColumnName, fleetName);
         String courseName = "Course of " + raceColumnName;
         if (!LeaderboardNameConstants.DEFAULT_FLEET_NAME.equals(fleetName)) {
@@ -163,15 +156,12 @@ public class MarkRessource extends AbstractSailingServerResource {
         if (lastPublishedCourse == null) {
             lastPublishedCourse = new CourseDataImpl(courseName);
         }
-
         JSONArray controlPointsRaw = (JSONArray) requestObject.get("controlPoints");
         List<Pair<ControlPoint, PassingInstruction>> controlPoints = new ArrayList<>();
         for (Object controlPointUnsafe : controlPointsRaw) {
             JSONObject controlPointRaw = Helpers.toJSONObjectSafe(controlPointUnsafe);
-
             final String passingInstructionString = (String) controlPointRaw.get("passingInstruction");
             PassingInstruction passing = PassingInstruction.valueOfIgnoringCase(passingInstructionString);
-
             JSONArray marksRaw = (JSONArray) controlPointRaw.get("marks");
             if (marksRaw.size() == 1) {
                 String markName = (String) marksRaw.get(0);
@@ -196,9 +186,7 @@ public class MarkRessource extends AbstractSailingServerResource {
                         passing));
             }
         }
-
         Course course = new CourseImpl(courseName, lastPublishedCourse.getWaypoints());
-
         try {
             course.update(controlPoints, getService().getBaseDomainFactory());
         } catch (Exception e) {
@@ -207,16 +195,13 @@ public class MarkRessource extends AbstractSailingServerResource {
         RaceLogEvent event = new RaceLogCourseDesignChangedEventImpl(MillisecondsTimePoint.now(),
                 getService().getServerAuthor(), raceLog.getCurrentPassId(), course, CourseDesignerMode.ADMIN_CONSOLE);
         raceLog.add(event);
-
         CourseBase updatedPublishedCourse = new LastPublishedCourseDesignFinder(raceLog,
                 /* onlyCoursesWithValidWaypointList */ false).analyze();
-
         JSONObject jsonResult = new JSONObject();
         jsonResult.put("course",
                 new CourseJsonSerializer(new CourseBaseJsonSerializer(
                         new WaypointJsonSerializer(new ControlPointJsonSerializer(new MarkJsonSerializer(),
                                 new GateJsonSerializer(new MarkJsonSerializer()))))).serialize(updatedPublishedCourse));
-
         return Response.ok(jsonResult.toJSONString())
                 .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
     }
@@ -227,11 +212,11 @@ public class MarkRessource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     public Response addCompetitorToRace(String json) throws DoesNotHaveRegattaLogException, NotFoundException,
             ParseException, JsonDeserializationException, CompetitorRegistrationOnRaceLogDisabledException {
-        SecurityUtils.getSubject().checkPermission(Permission.MANAGE_COURSE_LAYOUT.getStringPermission(DefaultModes.CREATE));
         Object requestBody = JSONValue.parseWithException(json);
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
 
         String leaderboardName = (String) requestObject.get("leaderboardName");
+        SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
         String raceColumnName = (String) requestObject.get("raceColumnName");
         String fleetName = (String) requestObject.get("fleetName");
 

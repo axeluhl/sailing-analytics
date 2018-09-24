@@ -23,7 +23,7 @@ import com.sap.sse.common.Named;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.ImagesBarCell;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
-import com.sap.sse.security.shared.HasPermissions.DefaultModes;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.WildcardPermission;
@@ -41,12 +41,12 @@ public class SecuredObjectCompositeConfig<T extends NamedSecuredObjectDTO> {
 
     private final com.sap.sse.security.ui.client.i18n.StringMessages securityStringMessages = GWT
             .create(com.sap.sse.security.ui.client.i18n.StringMessages.class);
-    private final Map<DefaultModes, Consumer<T>> actionCallbacks = new HashMap<>();
+    private final Map<DefaultActions, Consumer<T>> actionCallbacks = new HashMap<>();
     private final UserService userService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final Function<T, QualifiedObjectIdentifier> identifierFactory;
-    private final BiFunction<DefaultModes, T, WildcardPermission> permissionFactory;
+    private final BiFunction<DefaultActions, T, WildcardPermission> permissionFactory;
 
     /**
      * Creates a new {@link SecuredObjectCompositeConfig} instance with the given parameters.
@@ -72,23 +72,23 @@ public class SecuredObjectCompositeConfig<T extends NamedSecuredObjectDTO> {
     }
 
     /**
-     * Adds an {@link DefaultModes action} for the secured object which will be contained in the
+     * Adds an {@link DefaultActions action} for the secured object which will be contained in the
      * {@link #addActionColumn(AbstractCellTable, ImagesBarCell) action column} if the current user has the respectively
      * required permissions.
      * 
      * @param action
-     *            {@link DefaultModes action} to add to the {@link AccessControlledActionsColumn action column}
+     *            {@link DefaultActions action} to add to the {@link AccessControlledActionsColumn action column}
      * @param actionCallback
      *            {@link Consumer callback} to execute when the action is triggered
      */
-    public void addAction(final DefaultModes action, final Consumer<T> actionCallback) {
+    public void addAction(final DefaultActions action, final Consumer<T> actionCallback) {
         this.actionCallbacks.put(action, actionCallback);
     }
 
     /**
      * Adds the an {@link AccessControlledActionsColumn action column} using the given {@link ImagesBarCell image bar
      * cell} to the provided {@link AbstractCellTable cell table} which contains previously
-     * {@link #addAction(DefaultModes, Consumer) added actions} where the current user has permissions for.
+     * {@link #addAction(DefaultActions, Consumer) added actions} where the current user has permissions for.
      * 
      * @param table
      *            {@link AbstractCellTable table} to add the action column to
@@ -98,7 +98,7 @@ public class SecuredObjectCompositeConfig<T extends NamedSecuredObjectDTO> {
     public <C extends ImagesBarCell> void addActionColumn(final AbstractCellTable<T> table, final C imageBarCell) {
         final AccessControlledActionsColumn<T, C> actionColumn = new AccessControlledActionsColumn<T, C>(imageBarCell) {
             @Override
-            public Iterable<DefaultModes> getAllowedActions(T object) {
+            public Iterable<DefaultActions> getAllowedActions(T object) {
                 final UserDTO user = userService.getCurrentUser();
                 return actionCallbacks.keySet().stream()
                         .filter(action -> user.hasPermission(permissionFactory.apply(action, object),
@@ -107,7 +107,7 @@ public class SecuredObjectCompositeConfig<T extends NamedSecuredObjectDTO> {
             }
         };
         actionColumn.setFieldUpdater((index, securedObject, value) -> {
-            final DefaultModes action = DefaultModes.valueOf(value);
+            final DefaultActions action = DefaultActions.valueOf(value);
             actionCallbacks.get(action).accept(securedObject);
         });
         table.addColumn(actionColumn, stringMessages.actions());

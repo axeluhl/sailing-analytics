@@ -13,11 +13,6 @@ import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 
 public enum Permission implements HasPermissions {
     // AdminConsole permissions
-    MANAGE_RACELOG_TRACKING,
-    MANAGE_ALL_COMPETITORS,
-    MANAGE_ALL_BOATS,
-    MANAGE_COURSE_LAYOUT,
-    MANAGE_WIND,
     MANAGE_IGTIMI_ACCOUNTS,
     MANAGE_EXPEDITION_DEVICE_CONFIGURATIONS,
     MANAGE_LEADERBOARDS,
@@ -37,7 +32,7 @@ public enum Permission implements HasPermissions {
     MANAGE_MARK_PASSINGS,
     MANAGE_MARK_POSITIONS,
     CAN_REPLAY_DURING_LIVE_RACES,
-    DETAIL_TIMER,
+    DETAIL_TIMER, // TODO this is not a valid "HasPermission" instance; it's more an operation the user may be granted on objects of the TimePanel type
     
     // back-end permissions
     EVENT,
@@ -46,11 +41,12 @@ public enum Permission implements HasPermissions {
     LEADERBOARD_GROUP,
     TRACKED_RACE,
     DATA_MINING,
+    SERVER, // represents the logical server which may consist of a master and multiple replicas and has a unique server name 
     ;
     
     private static Set<Permission> adminConsolePermissions = new HashSet<>(Arrays.asList(
-            MANAGE_ALL_COMPETITORS, MANAGE_ALL_BOATS, MANAGE_LEADERBOARDS, MANAGE_LEADERBOARD_GROUPS,
-            MANAGE_COURSE_LAYOUT, MANAGE_WIND, MANAGE_MEDIA, MANAGE_DEVICE_CONFIGURATION,
+            MANAGE_LEADERBOARDS, MANAGE_LEADERBOARD_GROUPS,
+            MANAGE_MEDIA, MANAGE_DEVICE_CONFIGURATION,
             MANAGE_IGTIMI_ACCOUNTS, MANAGE_EXPEDITION_DEVICE_CONFIGURATIONS, MANAGE_RESULT_IMPORT_URLS,
             MANAGE_STRUCTURE_IMPORT_URLS, MANAGE_REPLICATION, MANAGE_MASTERDATA_IMPORT, MANAGE_SAILING_SERVER_INSTANCES,
             MANAGE_LOCAL_SERVER_INSTANCE, MANAGE_USERS, MANAGE_ROLES, MANAGE_FILE_STORAGE));
@@ -69,14 +65,14 @@ public enum Permission implements HasPermissions {
 
     // TODO once we can use Java8 here, move this up into a "default" method on the Permission interface
     @Override
-    public String getStringPermission(HasPermissions.Mode... modes) {
+    public String getStringPermission(HasPermissions.Action... modes) {
         final String result;
         if (modes==null || modes.length==0) {
             result = name();
         } else {
             final StringBuilder modesString = new StringBuilder();
             boolean first = true;
-            for (HasPermissions.Mode mode : modes) {
+            for (HasPermissions.Action mode : modes) {
                 if (first) {
                     first = false;
                 } else {
@@ -90,13 +86,13 @@ public enum Permission implements HasPermissions {
     }
 
     @Override
-    public WildcardPermission getPermission(HasPermissions.Mode... modes) {
+    public WildcardPermission getPermission(HasPermissions.Action... modes) {
         return new WildcardPermission(getStringPermission(modes));
     }
 
     // TODO once we can use Java8 here, move this up into a "default" method on the Permission interface
     @Override
-    public String getStringPermissionForObjects(HasPermissions.Mode mode, String... typeRelativeObjectIdentifiers) {
+    public String getStringPermissionForObjects(HasPermissions.Action mode, String... typeRelativeObjectIdentifiers) {
         final WildcardPermissionEncoder permissionEncoder = new WildcardPermissionEncoder();
         final StringBuilder result = new StringBuilder(getStringPermission(mode));
         if (typeRelativeObjectIdentifiers!=null && typeRelativeObjectIdentifiers.length>0) {
@@ -120,7 +116,7 @@ public enum Permission implements HasPermissions {
     }
 
     @Override
-    public WildcardPermission getPermissionForObjects(HasPermissions.Mode mode, String... objectIdentifiers) {
+    public WildcardPermission getPermissionForObjects(HasPermissions.Action mode, String... objectIdentifiers) {
         return new WildcardPermission(getStringPermissionForObjects(mode, objectIdentifiers));
     }
 }

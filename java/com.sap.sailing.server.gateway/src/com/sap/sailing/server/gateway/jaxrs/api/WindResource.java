@@ -25,7 +25,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.deserialization.impl.PositionJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.WindJsonDeserializer;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
-import com.sap.sse.security.shared.HasPermissions.DefaultModes;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 
 @Path("/v1/wind")
 public class WindResource extends AbstractSailingServerResource {
@@ -35,7 +35,7 @@ public class WindResource extends AbstractSailingServerResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("putWind")
     public Response putWind(String json) throws ParseException, JsonDeserializationException {
-        SecurityUtils.getSubject().checkPermission(Permission.TRACKED_RACE.getStringPermission(DefaultModes.UPDATE));
+        SecurityUtils.getSubject().checkPermission(Permission.TRACKED_RACE.getStringPermission(DefaultActions.UPDATE));
 
         Object requestBody = JSONValue.parseWithException(json);
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);

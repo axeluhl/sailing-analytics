@@ -1,10 +1,12 @@
 package com.sap.sse.security.shared;
 
+import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
+
 /**
  * Represents the "type" of object on which a permission can be granted. In a typical wildcard permission
  * of the form "A:B:C" this represents the first part. For example, if we may want to describe a permission
  * for updating a leaderboard then this may look like this: <code>LEADERBOARD:UPDATE:KW2017 Laser Int.</code> where
- * <code>LEADERBOARD</code> then is the {@link #name()} of this permission, {@link DefaultModes#UPDATE UPDATE} is
+ * <code>LEADERBOARD</code> then is the {@link #name()} of this permission, {@link DefaultActions#UPDATE UPDATE} is
  * the operation mode, and <code>"KW2017 Laser Int."</code> is the object identifier that may not be unique outside
  * of the type qualifier represented by this permission ("LEADERBOARD" in the example).
  *
@@ -16,16 +18,16 @@ public interface HasPermissions {
 
     /**
      * If one or more modes are specified, a string permission is rendered that has the
-     * {@link Mode#getStringPermission() permission strings} of those modes listed in the second wildcard permission
+     * {@link Action#getStringPermission() permission strings} of those modes listed in the second wildcard permission
      * component. Otherwise, only the primary permission (representing the object type) with one segment is returned.
      */
-    String getStringPermission(Mode... modes);
+    String getStringPermission(Action... modes);
 
     /**
-     * Same as {@link #getStringPermission(Mode...)}, only that the result is a {@link WildcardPermission} instead of a
+     * Same as {@link #getStringPermission(Action...)}, only that the result is a {@link WildcardPermission} instead of a
      * {@link String}
      */
-    WildcardPermission getPermission(Mode... modes);
+    WildcardPermission getPermission(Action... modes);
 
     /**
      * Produces a string permission for this permission, the <code>mode</code> specified as the second wildcard
@@ -37,7 +39,7 @@ public interface HasPermissions {
      *            can be any string; this method will take care of encoding the identifiers such that they are legal in
      *            the context of a permission part; see also {@link PermissionStringEncoder}
      */
-    String getStringPermissionForObjects(Mode mode, String... typeRelativeObjectIdentifier);
+    String getStringPermissionForObjects(Action mode, String... typeRelativeObjectIdentifier);
     
     /**
      * Qualifies the {@code objectIdentifier} which only has to be unique within the scope of the type identified
@@ -46,18 +48,21 @@ public interface HasPermissions {
      * "LEADERBOARD/abc". This assumes that the {@link #name()} method returns only values that do not contain a "/".
      */
     QualifiedObjectIdentifier getQualifiedObjectIdentifier(String typeRelativeObjectIdentifier);
-
+    
     /**
-     * Same as {@link #getStringPermissionForObjects(Mode, String...)}, only that the result is a
+     * Same as {@link #getStringPermissionForObjects(Action, String...)}, only that the result is a
      * {@link WildcardPermission} instead of a {@link String}
      */
-    WildcardPermission getPermissionForObjects(Mode mode, String... objectIdentifiers);
+    WildcardPermission getPermissionForObjects(Action mode, String... objectIdentifiers);
 
-    public static interface Mode {
+    public static interface Action {
         String name();
 
-        int ordinal();
-
+        /**
+         * Returns the action as represented in the second part of a {@link WildcardPermission}. This shall be a string
+         * that will not need further encoding such as by a {@link WildcardPermissionEncoder} so that it can be used
+         * in a {@link WildcardPermission} immediately and without change.
+         */
         String getStringPermission();
     }
 
@@ -67,7 +72,7 @@ public interface HasPermissions {
      * @author Axel Uhl (d043530)
      *
      */
-    public enum DefaultModes implements Mode {
+    public enum DefaultActions implements Action {
         CREATE, READ, UPDATE, DELETE, CHANGE_OWNERSHIP;
 
         @Override

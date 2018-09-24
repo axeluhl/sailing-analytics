@@ -65,7 +65,7 @@ import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
-import com.sap.sse.security.shared.HasPermissions.DefaultModes;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.shared.UserDTO;
 
@@ -152,7 +152,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             }
         });
         eventControlsPanel.add(createEventBtn);
-        if (!userService.getCurrentUser().hasPermission(Permission.EVENT.getStringPermission(DefaultModes.CREATE))) {
+        if (!userService.getCurrentUser().hasPermission(Permission.EVENT.getStringPermission(DefaultActions.CREATE))) {
             createEventBtn.setVisible(false);
         }
 
@@ -344,13 +344,13 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         
         final SecuredObjectCompositeConfig<EventDTO> securedObjectConfig = new SecuredObjectCompositeConfig<>(
                 userService, errorReporter, stringMessages, Permission.EVENT, event -> event.id.toString());
-        securedObjectConfig.addAction(DefaultModes.UPDATE, this::openEditEventDialog);
-        securedObjectConfig.addAction(DefaultModes.DELETE, event -> {
+        securedObjectConfig.addAction(DefaultActions.UPDATE, this::openEditEventDialog);
+        securedObjectConfig.addAction(DefaultActions.DELETE, event -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveEvent(event.getName()))) {
                 removeEvent(event);
             }
         });
-        securedObjectConfig.addAction(DefaultModes.CHANGE_OWNERSHIP,
+        securedObjectConfig.addAction(DefaultActions.CHANGE_OWNERSHIP,
                 oldEvent -> securedObjectConfig.openOwnershipDialog(oldEvent, event -> updateEvent(event, event)));
 
         eventNameColumn.setSortable(true);

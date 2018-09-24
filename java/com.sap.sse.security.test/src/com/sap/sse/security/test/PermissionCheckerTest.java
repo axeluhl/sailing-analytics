@@ -24,7 +24,7 @@ import com.sap.sse.security.UsernamePasswordRealm;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.Ownership;
-import com.sap.sse.security.shared.HasPermissions.DefaultModes;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
@@ -42,7 +42,7 @@ import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public class PermissionCheckerTest {
     private final UUID eventId = UUID.randomUUID();
-    private final WildcardPermission eventReadPermission = Permission.EVENT.getPermissionForObjects(DefaultModes.READ, eventId.toString());
+    private final WildcardPermission eventReadPermission = Permission.EVENT.getPermissionForObjects(DefaultActions.READ, eventId.toString());
     private final UUID userTenantId = UUID.randomUUID();
     private UserGroup adminTenant;
     private SecurityUser adminUser;
@@ -113,8 +113,8 @@ public class PermissionCheckerTest {
     public void testPermissionsImpliedByOwnershipConstrainedRole() throws UserManagementException {
         final String leaderboardName = "My:Leaderboard, the only one ";
         final String regattaName = " My:Regatta, the only one ";
-        WildcardPermission leaderboardPermission = Permission.LEADERBOARD.getPermissionForObjects(DefaultModes.READ, leaderboardName);
-        WildcardPermission regattaPermission = Permission.REGATTA.getPermissionForObjects(DefaultModes.READ, regattaName);
+        WildcardPermission leaderboardPermission = Permission.LEADERBOARD.getPermissionForObjects(DefaultActions.READ, leaderboardName);
+        WildcardPermission regattaPermission = Permission.REGATTA.getPermissionForObjects(DefaultActions.READ, regattaName);
         assertFalse(realm.isPermitted(principalCollection, leaderboardPermission.toString()));
         assertFalse(realm.isPermitted(principalCollection, regattaPermission.toString()));
         // let leaderboard be owned by user
@@ -145,7 +145,7 @@ public class PermissionCheckerTest {
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, adminOwnership, acl));
         Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
         Set<String> permissionSet = new HashSet<>();
-        permissionSet.add(DefaultModes.READ.name());
+        permissionSet.add(DefaultActions.READ.name());
         permissionMap.put(userTenant, permissionSet);
         acl = new AccessControlListImpl(permissionMap);
         assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, adminOwnership, acl));
@@ -153,7 +153,7 @@ public class PermissionCheckerTest {
         assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, adminOwnership, acl));
         permissionMap = new HashMap<>();
         permissionSet = new HashSet<>();
-        permissionSet.add("!" + DefaultModes.READ.name());
+        permissionSet.add("!" + DefaultActions.READ.name());
         permissionMap.put(userTenant, permissionSet);
         acl = new AccessControlListImpl(permissionMap);
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, adminOwnership, acl));

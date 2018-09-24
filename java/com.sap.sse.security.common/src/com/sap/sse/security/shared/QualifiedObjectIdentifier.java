@@ -2,7 +2,7 @@ package com.sap.sse.security.shared;
 
 import java.io.Serializable;
 
-import com.sap.sse.security.shared.HasPermissions.Mode;
+import com.sap.sse.security.shared.HasPermissions.Action;
 
 /**
  * In permission strings, object identifiers used in the third part of the permission need to be unique only within the
@@ -42,12 +42,12 @@ public interface QualifiedObjectIdentifier extends Serializable {
      * Constructs a permission in {@link String} form that can be parsed into a {@link WildcardPermission} and which
      * describes the {@code action} on the object identified by this object.
      */
-    String getStringPermission(Mode action);
+    String getStringPermission(Action action);
     
     /**
      * Constructs a permission which describes the {@code action} on the object identified by this object.
      */
-    WildcardPermission getPermission(Mode action);
+    WildcardPermission getPermission(Action action);
     
     /**
      * @return the concatenation of {@link #getTypeIdentifier()}, {@link #QUALIFIER_SEPARATOR} and

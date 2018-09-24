@@ -46,7 +46,7 @@ import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
-import com.sap.sse.security.shared.HasPermissions.DefaultModes;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
@@ -230,13 +230,13 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
 
         final SecuredObjectCompositeConfig<RegattaDTO> securedObjectConfig = new SecuredObjectCompositeConfig<>(
                 userService, errorReporter, stringMessages, Permission.REGATTA, RegattaDTO::getName);
-        securedObjectConfig.addAction(DefaultModes.UPDATE, this::editRegatta);
-        securedObjectConfig.addAction(DefaultModes.DELETE, regatta -> {
+        securedObjectConfig.addAction(DefaultActions.UPDATE, this::editRegatta);
+        securedObjectConfig.addAction(DefaultActions.DELETE, regatta -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveRegatta(regatta.getName()))) {
                 removeRegatta(regatta);
             }
         });
-        securedObjectConfig.addAction(DefaultModes.CHANGE_OWNERSHIP,
+        securedObjectConfig.addAction(DefaultActions.CHANGE_OWNERSHIP,
                 regatta -> securedObjectConfig.openOwnershipDialog(regatta, this::commitEditedRegatta));
 
         table.addColumn(regattaSelectionCheckboxColumn, regattaSelectionCheckboxColumn.getHeader());

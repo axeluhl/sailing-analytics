@@ -63,7 +63,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     /**
      * @param idOfAccessControlledObject Has to be globally unique
      */
-    SecurityService setAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject);
+    SecurityService setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject);
 
     /**
      * @param id Has to be globally unique

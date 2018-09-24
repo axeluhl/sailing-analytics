@@ -352,7 +352,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public SecurityService setAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
+    public SecurityService setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
         return setEmptyAccessControlList(idOfAccessControlledObjectAsString, /* display name of access-controlled object */ null);
     }
 
@@ -371,7 +371,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public AccessControlList updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, Map<UserGroup, Set<String>> permissionMap) {
         if (getAccessControlList(idOfAccessControlledObject) == null) {
-            setAccessControlList(idOfAccessControlledObject);
+            setEmptyAccessControlList(idOfAccessControlledObject);
         }
         for (Map.Entry<UserGroup, Set<String>> entry : permissionMap.entrySet()) {
             final UUID userGroupId = entry.getKey().getId();
@@ -394,7 +394,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public AccessControlList addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup group, String action) {
         if (getAccessControlList(idOfAccessControlledObject) == null) {
-            setAccessControlList(idOfAccessControlledObject);
+            setEmptyAccessControlList(idOfAccessControlledObject);
         }
         final UUID groupId = group.getId();
         apply(s->s.internalAclAddPermission(idOfAccessControlledObject, groupId, action));
