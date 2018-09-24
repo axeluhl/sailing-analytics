@@ -249,7 +249,7 @@ The script is built for the processing of parameters but the functionality is cu
 
 User input flow example: 
 
-<img style="float: right" src="https://photos-4.dropbox.com/t/2/AAA8lXNig-MSsQhRmhyIYOD1sgi59kfQr8NDqs5bPRenQA/12/379951689/png/32x32/1/_/1/2/image3.PNG/EJmPwIIDGL0ZIAcoBw/fF8VkVypSPKmR_NttUndnjGFJKkEk_ILuOF19hHAVbg?preserve_transparency=1&size=1600x1200&size_mode=3" />
+<img style="float: right" src="https://wiki.sapsailing.com/wiki/images/aws_automation/sequence_diagram_1.png" />
 
 Translation comment (1): 
 
@@ -262,7 +262,7 @@ The user input is assigned to the global variable region.
 
 If the input variable is not a text but a type of resource from AWS (e.g. load balancer) the following mechanism will take effect:
 
-<img style="float: right" src="https://photos-6.dropbox.com/t/2/AADRrPHFrAKtSKzuWZTPrcZbfuW_vB0tUp8nan8iJ0Zzcg/12/379951689/png/32x32/1/_/1/2/image4.PNG/EJmPwIIDGL0ZIAcoBw/LMRyG1oabKBs0d_vv7rPwDpTEY4lzGIHqBfV2rNU5hY?preserve_transparency=1&size=1600x1200&size_mode=3" />
+<img style="float: right" src="https://wiki.sapsailing.com/wiki/images/aws_automation/sequence_diagram_2.png" />
 
 Translation comment (1): 
 
