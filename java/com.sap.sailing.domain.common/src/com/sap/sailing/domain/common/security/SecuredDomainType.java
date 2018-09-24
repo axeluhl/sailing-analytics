@@ -62,7 +62,8 @@ public class SecuredDomainType extends HasPermissionsImpl {
     public static final HasPermissions LEADERBOARD_GROUP = new SecuredDomainType("LEADERBOARD_GROUP");
 
     /**
-     * type-relative identifier is the regatta name followed by a "/" as the separator and then the race definition name
+     * type-relative identifier is the regatta name and the race definition name, encoded using the
+     * {@link WildcardPermissionEncoder#encodeStringList(String...)} method
      */
     public static final HasPermissions TRACKED_RACE = new SecuredDomainType("TRACKED_RACE");
     

@@ -133,6 +133,7 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.util.impl.UUIDHelper;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 
 @Path("/v1/leaderboards")
 public class LeaderboardsResource extends AbstractLeaderboardsResource {
@@ -855,7 +856,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName)
             throws MalformedURLException, IOException, InterruptedException {
         SecurityUtils.getSubject()
-                .checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
+                .checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
         return stopOrRemoveTrackedRace(leaderboardName, raceColumnName, fleetName, true);
     }
 
@@ -879,6 +880,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
             JSONArray jsonResultArray = new JSONArray();
+            final WildcardPermissionEncoder wildcardPermissionEncoder = new WildcardPermissionEncoder();
             for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                 if (raceColumnName == null || raceColumn.getName().equals(raceColumnName)) {
                     for (final Fleet fleet : raceColumn.getFleets()) {
@@ -888,7 +890,10 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                             if (trackedRace != null) {
                                 final Regatta regatta = trackedRace.getTrackedRegatta().getRegatta();
                                 final RaceDefinition race = trackedRace.getRace();
-                                if(remove) {
+                                SecurityUtils.getSubject().checkPermission(
+                                        SecuredDomainType.TRACKED_RACE.getStringPermissionForObjects(DefaultActions.UPDATE,
+                                                wildcardPermissionEncoder.encodeStringList(regatta.getName(), race.getName())));
+                                if (remove) {
                                     getService().apply(new RemoveAndUntrackRace(trackedRace.getRaceIdentifier()));
                                 } else {
                                     getService().apply(new StopTrackingRace(trackedRace.getRaceIdentifier()));

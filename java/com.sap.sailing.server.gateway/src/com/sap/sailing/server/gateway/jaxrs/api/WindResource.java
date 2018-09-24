@@ -26,6 +26,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.PositionJsonDeseriali
 import com.sap.sailing.server.gateway.deserialization.impl.WindJsonDeserializer;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 
 @Path("/v1/wind")
 public class WindResource extends AbstractSailingServerResource {
@@ -35,44 +36,45 @@ public class WindResource extends AbstractSailingServerResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("putWind")
     public Response putWind(String json) throws ParseException, JsonDeserializationException {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.TRACKED_RACE.getStringPermission(DefaultActions.UPDATE));
-
         Object requestBody = JSONValue.parseWithException(json);
         JSONObject requestObject = Helpers.toJSONObjectSafe(requestBody);
         JSONArray windDatas = (JSONArray) requestObject.get("windData");
-
         JSONArray regattaNamesAndRaceNames = (JSONArray) requestObject.get("regattaNamesAndRaceNames");
-
         WindSourceType windSourceType = WindSourceType.valueOf((String) requestObject.get("windSourceType"));
         JSONArray answer = new JSONArray();
         String windSourceId = (String) requestObject.get("windSourceId");
+        final WildcardPermissionEncoder wildcardPermissionEncoder = new WildcardPermissionEncoder();
         for (Object regattaNameAndRaceName : regattaNamesAndRaceNames) {
             final JSONObject regattaNameAndRaceNameObject = Helpers.toJSONObjectSafe(regattaNameAndRaceName);
             String regattaName = (String) regattaNameAndRaceNameObject.get("regattaName");
             String raceName = (String) regattaNameAndRaceNameObject.get("raceName");
-            RegattaNameAndRaceName identifier = new RegattaNameAndRaceName(regattaName, raceName);
-            JSONObject answerForRace = new JSONObject();
-            answerForRace.put("regattaNameAndRaceName", regattaNameAndRaceName);
-            if (windSourceType == WindSourceType.EXPEDITION || windSourceType == WindSourceType.WEB) {
-                DynamicTrackedRace trackedRace = getService().getTrackedRace(identifier);
-                WindSource windsource = new WindSourceWithAdditionalID(windSourceType, windSourceId);
-
-                if (trackedRace != null) {
-                    JSONArray subAnswer = new JSONArray();
-                    for (int i = 0; i < windDatas.size(); i++) {
-                        JSONObject windData = Helpers.toJSONObjectSafe(windDatas.get(i));
-                        Wind data = deserializer.deserialize(windData);
-                        boolean success = trackedRace.recordWind(data, windsource);
-                        subAnswer.add(i, success);
+            // add wind only to those races the subject is permitted to update
+            if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.TRACKED_RACE.getStringPermissionForObjects(DefaultActions.UPDATE,
+                    wildcardPermissionEncoder.encodeStringList(regattaName, raceName)))) {
+                RegattaNameAndRaceName identifier = new RegattaNameAndRaceName(regattaName, raceName);
+                JSONObject answerForRace = new JSONObject();
+                answerForRace.put("regattaNameAndRaceName", regattaNameAndRaceName);
+                if (windSourceType == WindSourceType.EXPEDITION || windSourceType == WindSourceType.WEB) {
+                    DynamicTrackedRace trackedRace = getService().getTrackedRace(identifier);
+                    WindSource windsource = new WindSourceWithAdditionalID(windSourceType, windSourceId);
+    
+                    if (trackedRace != null) {
+                        JSONArray subAnswer = new JSONArray();
+                        for (int i = 0; i < windDatas.size(); i++) {
+                            JSONObject windData = Helpers.toJSONObjectSafe(windDatas.get(i));
+                            Wind data = deserializer.deserialize(windData);
+                            boolean success = trackedRace.recordWind(data, windsource);
+                            subAnswer.add(i, success);
+                        }
+                        answerForRace.put("answer", subAnswer);
+                    } else {
+                        answerForRace.put("answer", "Could not resolve traced race");
                     }
-                    answerForRace.put("answer", subAnswer);
                 } else {
-                    answerForRace.put("answer", "Could not resolve traced race");
+                    answerForRace.put("answer", "Only Windsourcetypes expedition or web are allowed");
                 }
-            } else {
-                answerForRace.put("answer", "Only Windsourcetypes expedition or web are allowed");
+                answer.add(answerForRace);
             }
-            answer.add(answerForRace);
         }
         return Response.ok(answer.toJSONString()).build();
     }

@@ -33,7 +33,7 @@ public interface PermissionStringEncoder<PermissionType> {
      * 
      * @param strings must not be {@code null}
      * 
-     * @see #decodeStrings(String)
+     * @see #decodeStringList(String)
      */
     String encodeStringList(String... strings);
 
@@ -42,5 +42,5 @@ public interface PermissionStringEncoder<PermissionType> {
      * 
      * @return a non-{@code null} array which is empty if and only if {@code stringEncodedWithEncodeStringList} is empty
      */
-    String[] decodeStrings(String stringEncodedWithEncodeStringList);
+    String[] decodeStringList(String stringEncodedWithEncodeStringList);
 }

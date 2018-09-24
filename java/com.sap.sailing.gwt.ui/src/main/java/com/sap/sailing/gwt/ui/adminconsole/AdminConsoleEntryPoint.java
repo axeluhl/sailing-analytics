@@ -36,6 +36,7 @@ import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.adminconsole.DefaultRefreshableAdminConsolePanel;
 import com.sap.sse.gwt.adminconsole.ReplicationPanel;
 import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.controls.filestorage.FileStoragePanel;
@@ -67,10 +68,10 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         Highcharts.ensureInjectedWithMore();
         super.doOnModuleLoad();
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService, RemoteServiceMappingConstants.mediaServiceRemotePath);
-        createUI();
+        runWithServerInfo(serverInfo->createUI(serverInfo));
     }
      
-    private void createUI() {
+    private void createUI(final ServerInfoDTO serverInfo) {
         HeaderPanel headerPanel = new HeaderPanel();
         SAPSailingHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(getStringMessages().administration());
         GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(), header.getAuthenticationMenuView());
@@ -78,7 +79,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
             @Override
             public Widget get() {
-                return createAdminConsolePanel();
+                return createAdminConsolePanel(serverInfo);
             }
         });
         headerPanel.setHeaderWidget(header);
@@ -87,7 +88,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         rootPanel.add(headerPanel);
     }
     
-    private Widget createAdminConsolePanel() {
+    private Widget createAdminConsolePanel(ServerInfoDTO serverInfo) {
         AdminConsolePanel panel = new AdminConsolePanel(getUserService(), 
                 getSailingService(), getStringMessages().releaseNotes(), "/release_notes_admin.html", /* error reporter */ this,
                 SecurityStylesheetResources.INSTANCE.css(), getStringMessages());
@@ -294,17 +295,17 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         masterDataImportPanel.ensureDebugId("MasterDataImport");
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<MasterDataImportPanel>(masterDataImportPanel),
                 getStringMessages().masterDataImportPanel(), SecuredDomainType.SERVER.getPermissionForObjects(
-                        SecuredDomainType.ServerActions.IMPORT_MASTER_DATA, getServerName()));
+                        SecuredDomainType.ServerActions.IMPORT_MASTER_DATA, serverInfo.getServerName()));
 
         RemoteServerInstancesManagementPanel remoteServerInstancesManagementPanel = new RemoteServerInstancesManagementPanel(getSailingService(), this, getStringMessages());
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<RemoteServerInstancesManagementPanel>(remoteServerInstancesManagementPanel),
                 getStringMessages().remoteServerInstances(),
-                SecuredDomainType.SERVER.getPermissionForObjects(SecuredDomainType.ServerActions.CONFIGURE_LOCAL_SERVER, getServerName()));
+                SecuredDomainType.SERVER.getPermissionForObjects(SecuredDomainType.ServerActions.CONFIGURE_LOCAL_SERVER, serverInfo.getServerName()));
 
         LocalServerManagementPanel localServerInstancesManagementPanel = new LocalServerManagementPanel(getSailingService(), this, getStringMessages());
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<LocalServerManagementPanel>(localServerInstancesManagementPanel),
                 getStringMessages().localServer(),
-                SecuredDomainType.SERVER.getPermissionForObjects(SecuredDomainType.ServerActions.CONFIGURE_LOCAL_SERVER, getServerName()));
+                SecuredDomainType.SERVER.getPermissionForObjects(SecuredDomainType.ServerActions.CONFIGURE_LOCAL_SERVER, serverInfo.getServerName()));
 
         final Set<HasPermissions> allSecuredTypes = new HashSet<>();
         Util.addAll(SecuredDomainType.getAllInstances(), allSecuredTypes);
@@ -341,7 +342,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         final FileStoragePanel fileStoragePanel = new FileStoragePanel(getSailingService(), this);
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<FileStoragePanel>(fileStoragePanel),
                 getStringMessages().fileStorage(), SecuredDomainType.SERVER.getPermissionForObjects(
-                        SecuredDomainType.ServerActions.CONFIGURE_FILE_STORAGE, getServerName()));
+                        SecuredDomainType.ServerActions.CONFIGURE_FILE_STORAGE, serverInfo.getServerName()));
         panel.initUI();
         fillRegattas();
         fillLeaderboardGroups();

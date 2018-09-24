@@ -20,9 +20,9 @@ public class WildcardPermissionEncoderTest {
     
     private void testPartList(String... s) {
         final String encoded = encoder.encodeStringList(s);
-        assertArrayEquals(s, encoder.decodeStrings(encoded));
+        assertArrayEquals(s, encoder.decodeStringList(encoded));
         final WildcardPermission permission = new WildcardPermission("TYPE:MODE:"+encoded);
-        assertArrayEquals(s, encoder.decodeStrings(permission.getParts().get(2).iterator().next()));
+        assertArrayEquals(s, encoder.decodeStringList(permission.getParts().get(2).iterator().next()));
     }
     
     @Test

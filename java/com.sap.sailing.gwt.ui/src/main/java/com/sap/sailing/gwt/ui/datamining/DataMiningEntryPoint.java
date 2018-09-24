@@ -27,6 +27,7 @@ import com.sap.sse.datamining.ui.client.DataMiningSettingsInfoManager;
 import com.sap.sse.datamining.ui.client.execution.SimpleQueryRunner;
 import com.sap.sse.datamining.ui.client.selection.QueryDefinitionProviderWithControls;
 import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.resources.Highcharts;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
@@ -50,16 +51,16 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         session = new UUIDDataMiningSession(UUID.randomUUID());
         EntryPointHelper.registerASyncService((ServiceDefTarget) dataMiningService,
                 RemoteServiceMappingConstants.dataMiningServiceRemotePath);
-        createDataminingPanel();
+        runWithServerInfo(serverInfo->createDataminingPanel(serverInfo));
     }
 
-    private void createDataminingPanel() {
+    private void createDataminingPanel(ServerInfoDTO serverInfo) {
         SAPHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(getStringMessages().dataMining());
         GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(),
                 header.getAuthenticationMenuView());
         AuthorizedContentDecorator authorizedContentDecorator = new GenericAuthorizedContentDecorator(
                 genericSailingAuthentication);
-        authorizedContentDecorator.setPermissionToCheck(SecuredDomainType.DATA_MINING.getPermissionForObjects(DefaultActions.READ, getServerName()));
+        authorizedContentDecorator.setPermissionToCheck(SecuredDomainType.DATA_MINING.getPermissionForObjects(DefaultActions.READ, serverInfo.getServerName()));
         authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
             private QueryDefinitionProviderWithControls queryDefinitionProvider;
             private SimpleQueryRunner queryRunner;

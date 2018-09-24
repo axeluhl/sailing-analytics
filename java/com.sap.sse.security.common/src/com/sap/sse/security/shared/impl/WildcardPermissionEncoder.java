@@ -102,7 +102,7 @@ public class WildcardPermissionEncoder implements PermissionStringEncoder<Wildca
     }
 
     @Override
-    public String[] decodeStrings(String stringEncodedWithEncodeStringList) {
+    public String[] decodeStringList(String stringEncodedWithEncodeStringList) {
         final String decodedPartList = decodePermissionPart(stringEncodedWithEncodeStringList);
         final String[] parts = decodedPartList.split(WildcardPermission.PART_DIVIDER_TOKEN);
         final String[] result = new String[parts.length];
