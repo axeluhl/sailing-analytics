@@ -78,7 +78,7 @@ To reach the SAP instance by a specific URL (e.g. wcsantander2017.sapsailing.com
 - Configure the health check of the target group
 - Register instance within the target group
 
-<img style="float: right" src="https://photos-4.dropbox.com/t/2/AAAYdNOq2vlgkb-kUcQjkKOAxeJI2HoYvvl1El8_gUwHbA/12/379951689/png/32x32/1/_/1/2/image2.PNG/EJmPwIIDGL0ZIAcoBw/qm7Nd0NMACr7EJ67c_7xK6seOn-4raimfvpE_07Pkys?preserve_transparency=1&size=1600x1200&size_mode=3" />
+<img style="float: right" src="https://wiki.sapsailing.com/wiki/images/aws_automation/alb_overview.png" />
 
 Translation: Way of a HTTP/HTTPS request from the load balancer to the sap instance (simplified)
 
