@@ -119,6 +119,8 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJson
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorAndBoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
+import com.sap.sailing.server.operationaltransformation.RemoveAndUntrackRace;
+import com.sap.sailing.server.operationaltransformation.StopTrackingRace;
 import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
@@ -847,11 +849,28 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("{leaderboardName}/removeTrackedRace")
+    public Response removeTrackedRace(@PathParam("leaderboardName") String leaderboardName,
+            @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
+            @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName)
+            throws MalformedURLException, IOException, InterruptedException {
+        SecurityUtils.getSubject()
+                .checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
+        return stopOrRemoveTrackedRace(leaderboardName, raceColumnName, fleetName, true);
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{leaderboardName}/stoptracking")
     public Response stopTracking(@PathParam("leaderboardName") String leaderboardName,
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName) throws MalformedURLException, IOException, InterruptedException {
         SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
+        return stopOrRemoveTrackedRace(leaderboardName, raceColumnName, fleetName, false);
+    }
+
+    private Response stopOrRemoveTrackedRace(String leaderboardName, String raceColumnName, String fleetName, boolean remove)
+            throws MalformedURLException, IOException, InterruptedException {
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         final Response result;
         if (leaderboard == null) {
@@ -869,7 +888,11 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                             if (trackedRace != null) {
                                 final Regatta regatta = trackedRace.getTrackedRegatta().getRegatta();
                                 final RaceDefinition race = trackedRace.getRace();
-                                getService().stopTracking(regatta, race);
+                                if(remove) {
+                                    getService().apply(new RemoveAndUntrackRace(trackedRace.getRaceIdentifier()));
+                                } else {
+                                    getService().apply(new StopTrackingRace(trackedRace.getRaceIdentifier()));
+                                }
                                 jsonResult.put("regatta", regatta.getName());
                                 jsonResult.put("race", race.getName());
                                 jsonResultArray.add(jsonResult);
