@@ -44,7 +44,6 @@ public class TagInputPanel extends FlowPanel {
         tagTextBox = new TextBox();
         tagTextBox.setStyleName(style.tagInputPanelTag());
         tagTextBox.setTitle(stringMessages.tagLabelTag());
-        tagTextBox.getElement().setAttribute("maxlength", Integer.toString(TagDTO.MAX_TAG_LENGTH));
         tagTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelTag());
         add(tagTextBox);
 
@@ -57,7 +56,6 @@ public class TagInputPanel extends FlowPanel {
         commentTextArea = new TextArea();
         commentTextArea.setStyleName(style.tagInputPanelComment());
         commentTextArea.setVisibleLines(4);
-        commentTextArea.getElement().setAttribute("maxlength", Integer.toString(TagDTO.MAX_COMMENT_LENGTH));
         commentTextArea.setTitle(stringMessages.tagLabelComment());
         commentTextArea.getElement().setPropertyString("placeholder", stringMessages.tagLabelComment());
         add(commentTextArea);

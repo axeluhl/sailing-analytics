@@ -21,10 +21,14 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.shiro.authz.AuthorizationException;
 import org.json.simple.JSONArray;
 
+import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
+import com.sap.sailing.domain.common.tagging.RaceLogNotFoundException;
+import com.sap.sailing.domain.common.tagging.TagAlreadyExistsException;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.tagging.TagDTODeSerializer;
 import com.sap.sailing.server.tagging.TaggingService;
@@ -68,32 +72,31 @@ public class TagsResource extends AbstractSailingServerResource {
             @PathParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
             @PathParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName,
             @DefaultValue("both") @QueryParam("visibility") String visibility) {
-
-        boolean lookForPublic = visibility.equalsIgnoreCase("both") || visibility.equalsIgnoreCase("public");
-        boolean lookForPrivate = visibility.equalsIgnoreCase("both") || visibility.equalsIgnoreCase("private");
-
         Response response;
-        TaggingService taggingService = getService().getTaggingService();
-        if (taggingService != null) {
-            List<TagDTO> tags = new ArrayList<TagDTO>();
-
+        final TaggingService taggingService = getService().getTaggingService();
+        final List<TagDTO> tags = new ArrayList<TagDTO>();
+        final boolean lookForPublic = visibility.equalsIgnoreCase("both") || visibility.equalsIgnoreCase("public");
+        final boolean lookForPrivate = visibility.equalsIgnoreCase("both") || visibility.equalsIgnoreCase("private");
+        try {
             if (lookForPublic) {
                 Util.addAll(taggingService.getPublicTags(leaderboardName, raceColumnName, fleetName), tags);
             }
-
             if (lookForPrivate) {
-                Util.addAll(taggingService.getPrivateTags(leaderboardName, raceColumnName, fleetName), tags);
+                try {
+                    Util.addAll(taggingService.getPrivateTags(leaderboardName, raceColumnName, fleetName), tags);                    
+                } catch (AuthorizationException e) {
+                    // do nothing when user is not logged in
+                }
             }
-
             // remove revoked tags from result
             tags.removeIf(tag -> tag.getRevokedAt() != null && tag.getRevokedAt().asMillis() != 0);
-
             JSONArray jsonTags = serializer.serialize(tags);
             response = Response.ok(jsonTags.toJSONString()).type(APPLICATION_JSON_UTF8).build();
-        } else {
-            response = Response.status(Status.INTERNAL_SERVER_ERROR).type(TEXT_PLAIN_UTF8)
-                    .entity("Tagging Service not found!").build();
-            logger.warning("Tagging Service not found!");
+        } catch (RaceLogNotFoundException e) {
+            response = Response.status(Status.BAD_REQUEST).type(TEXT_PLAIN_UTF8).build();
+        } catch (Exception e) {
+            logger.warning("Could not load tags! " + e.getMessage());
+            response = Response.status(Status.INTERNAL_SERVER_ERROR).type(TEXT_PLAIN_UTF8).build();
         }
         return response;
     }
@@ -106,11 +109,12 @@ public class TagsResource extends AbstractSailingServerResource {
      * @param visible
      *            default is <code>false</code>
      * 
-     * @return status 201 (created) if creation was successful, otherwise 400 (bad request)
+     * @return status 201 (created) if creation was successful, otherwise 400 (bad request) 401 (unauthorized) or 500
+     *         (internal server error)
      * @see TaggingService#addTag(String, String, String, String, String, String, boolean, TimePoint)
      */
     @POST
-    @Produces({ APPLICATION_JSON_UTF8, TEXT_PLAIN_UTF8 })
+    @Produces({ TEXT_PLAIN_UTF8 })
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response createTag(@Context UriInfo uriInfo,
             @PathParam(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME) String leaderboardName,
@@ -119,15 +123,18 @@ public class TagsResource extends AbstractSailingServerResource {
             @FormParam("comment") String comment, @FormParam("image") String imageURL,
             @FormParam("public") boolean visibleForPublic, @FormParam("raceTimepoint") long raceTimepoint) {
         Response response;
-        TaggingService taggingService = getService().getTaggingService();
-        boolean successful = taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL,
-                visibleForPublic, new MillisecondsTimePoint(raceTimepoint));
-        if (successful) {
+        final TaggingService taggingService = getService().getTaggingService();
+        try {
+            taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL, visibleForPublic,
+                    new MillisecondsTimePoint(raceTimepoint));
             response = Response.created(uriInfo.getRequestUri()).build();
-        } else {
-            String errorMessage = taggingService.getLastErrorCode().getMessage();
-            response = Response.status(Status.BAD_REQUEST).type(TEXT_PLAIN_UTF8).entity(errorMessage).build();
-            logger.warning("Could not save tag! " + errorMessage);
+        } catch (IllegalArgumentException | RaceLogNotFoundException | TagAlreadyExistsException e) {
+            response = Response.status(Status.BAD_REQUEST).type(TEXT_PLAIN_UTF8).build();
+        } catch (AuthorizationException e) {
+            response = Response.status(Status.UNAUTHORIZED).type(TEXT_PLAIN_UTF8).build();
+        } catch (Exception e) {
+            logger.warning("Could not save tag! " + e.getMessage());
+            response = Response.status(Status.INTERNAL_SERVER_ERROR).type(TEXT_PLAIN_UTF8).build();
         }
         return response;
     }
@@ -135,12 +142,13 @@ public class TagsResource extends AbstractSailingServerResource {
     /**
      * Removes tag given as json string.
      * 
-     * @return status 204 (no content) if deletion was successful, otherwise 400 (bad request)
+     * @return status 204 (no content) if deletion was successful, otherwise 400 (bad request), 401 (unauthorized) or
+     *         500 (internal server error)
      * @see TagDTO
      * @see TaggingService#removeTag(String, String, String, TagDTO)
      */
     @DELETE
-    @Produces({ APPLICATION_JSON_UTF8, TEXT_PLAIN_UTF8 })
+    @Produces({ TEXT_PLAIN_UTF8 })
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response deleteTag(@PathParam(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME) String leaderboardName,
             @PathParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
@@ -149,13 +157,16 @@ public class TagsResource extends AbstractSailingServerResource {
         Response response;
         TagDTO tagToRemove = serializer.deserializeTag(tagJson);
         TaggingService taggingService = getService().getTaggingService();
-        boolean successful = taggingService.removeTag(leaderboardName, raceColumnName, fleetName, tagToRemove);
-        if (successful) {
+        try {
+            taggingService.removeTag(leaderboardName, raceColumnName, fleetName, tagToRemove);
             response = Response.noContent().build();
-        } else {
-            String errorMessage = taggingService.getLastErrorCode().getMessage();
-            response = Response.status(Status.BAD_REQUEST).type(TEXT_PLAIN_UTF8).entity(errorMessage).build();
-            logger.warning("Could not remove tag! " + errorMessage);
+        } catch (IllegalArgumentException | NotRevokableException | RaceLogNotFoundException e) {
+            response = Response.status(Status.BAD_REQUEST).type(TEXT_PLAIN_UTF8).build();
+        } catch (AuthorizationException e) {
+            response = Response.status(Status.UNAUTHORIZED).type(TEXT_PLAIN_UTF8).build();
+        } catch (Exception e) {
+            logger.warning("Could not remove tag! " + e.getMessage());
+            response = Response.status(Status.INTERNAL_SERVER_ERROR).type(TEXT_PLAIN_UTF8).build();
         }
         return response;
     }
@@ -168,12 +179,13 @@ public class TagsResource extends AbstractSailingServerResource {
      * @param tag
      *            may not be empty
      * 
-     * @return status 204 (no content) if update was successful, otherwise 400 (bad request)
+     * @return status 204 (no content) if update was successful, otherwise 400 (bad request), 401 (unauthorized) or 500
+     *         (internal server error)
      * @see TagDTO
      * @see TaggingService#updateTag(String, String, String, TagDTO, String, String, String, boolean)
      */
     @PUT
-    @Produces({ APPLICATION_JSON_UTF8, TEXT_PLAIN_UTF8 })
+    @Produces({ TEXT_PLAIN_UTF8 })
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response updateTag(@PathParam(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME) String leaderboardName,
             @PathParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
@@ -182,28 +194,32 @@ public class TagsResource extends AbstractSailingServerResource {
             @FormParam("comment") String commentParam, @FormParam("image") String imageURLParam,
             @FormParam("public") String visibleForPublicParam) {
         Response response;
-        boolean successful = true;
-        TagDTO tagToUpdate = serializer.deserializeTag(tagJson);
-        TaggingService taggingService = getService().getTaggingService();
+        final TagDTO tagToUpdate = serializer.deserializeTag(tagJson);
+        final TaggingService taggingService = getService().getTaggingService();
 
         // only call update method when any of the parameters needs to be changed
         if (tagParam != null || commentParam != null || imageURLParam != null || visibleForPublicParam != null) {
             // keep old values when no new values are provided
-            String tag = tagParam == null ? tagToUpdate.getTag() : tagParam;
-            String comment = commentParam == null ? tagToUpdate.getComment() : commentParam;
-            String imageURL = imageURLParam == null ? tagToUpdate.getImageURL() : imageURLParam;
-            boolean visibleForPublic = visibleForPublicParam == null ? tagToUpdate.isVisibleForPublic()
-                    : visibleForPublicParam.equalsIgnoreCase("true") ? true : false;
-
-            successful = taggingService.updateTag(leaderboardName, raceColumnName, fleetName, tagToUpdate, tag, comment,
-                    imageURL, visibleForPublic);
-        }
-        if (successful) {
-            response = Response.noContent().build();
+            String tag = (tagParam == null ? tagToUpdate.getTag() : tagParam);
+            String comment = (commentParam == null ? tagToUpdate.getComment() : commentParam);
+            String imageURL = (imageURLParam == null ? tagToUpdate.getImageURL() : imageURLParam);
+            boolean visibleForPublic = (visibleForPublicParam == null ? tagToUpdate.isVisibleForPublic()
+                    : visibleForPublicParam.equalsIgnoreCase("true") ? true : false);
+            try {
+                taggingService.updateTag(leaderboardName, raceColumnName, fleetName, tagToUpdate, tag, comment,
+                        imageURL, visibleForPublic);
+                response = Response.noContent().build();
+            } catch (IllegalArgumentException | NotRevokableException | RaceLogNotFoundException
+                    | TagAlreadyExistsException e) {
+                response = Response.status(Status.BAD_REQUEST).type(TEXT_PLAIN_UTF8).build();
+            } catch (AuthorizationException e) {
+                response = Response.status(Status.UNAUTHORIZED).type(TEXT_PLAIN_UTF8).build();
+            } catch (Exception e) {
+                logger.warning("Could not update tag! " + e.getMessage());
+                response = Response.status(Status.INTERNAL_SERVER_ERROR).type(TEXT_PLAIN_UTF8).build();
+            }
         } else {
-            String errorMessage = taggingService.getLastErrorCode().getMessage();
-            response = Response.status(Status.BAD_REQUEST).type(TEXT_PLAIN_UTF8).entity(errorMessage).build();
-            logger.warning("Could not update tag! " + errorMessage);
+            response = Response.noContent().build();
         }
         return response;
     }

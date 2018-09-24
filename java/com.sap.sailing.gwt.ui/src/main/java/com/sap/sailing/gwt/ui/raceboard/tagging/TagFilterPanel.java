@@ -36,7 +36,7 @@ import com.sap.sse.security.ui.client.UserService;
  */
 public class TagFilterPanel extends FlowPanel implements KeyUpHandler, Filter<TagDTO> {
 
-    private final static String LOCAL_STORAGE_TAGS_FILTER_SETS_KEY = "sailingAnalytics.raceBoard.tagsFilterSets";
+    private final static String LOCAL_STORAGE_TAGS_FILTER_SETS_KEY = "sailing.tags.filtersets";
 
     private final TagPanelStyle style = TagPanelResources.INSTANCE.style();
 

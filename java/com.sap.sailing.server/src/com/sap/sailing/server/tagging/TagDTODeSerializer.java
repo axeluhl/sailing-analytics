@@ -25,7 +25,7 @@ public class TagDTODeSerializer {
     public static final String FIELD_CREATED_AT = "createdAt";
     public static final String FIELD_REVOKED_AT = "revokedAt";
     
-    private static final String UNIQUE_KEY_PREFIX = "Tags:";
+    private static final String UNIQUE_KEY_PREFIX = "sailing.tags.";
 
     private final JSONParser parser = new JSONParser();
 
@@ -82,7 +82,7 @@ public class TagDTODeSerializer {
             TimePoint raceTimePoint = deserilizeTimePoint((Long) (jsonObject.get(FIELD_RACE_TIMEPOINT)));
             TimePoint createdAt = deserilizeTimePoint((Long) (jsonObject.get(FIELD_CREATED_AT)));
             TimePoint revokedAt = deserilizeTimePoint((Long) (jsonObject.get(FIELD_REVOKED_AT)));
-            return new TagDTO(tag, comment, imageURL, username, visibleForPublic, raceTimePoint, createdAt, revokedAt);
+            return new TagDTO(tag, comment, imageURL, visibleForPublic, username, raceTimePoint, createdAt, revokedAt);
         } catch (Exception e) {
             return null;
         }

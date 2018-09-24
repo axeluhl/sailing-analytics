@@ -12,6 +12,7 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.domain.abstractlog.Revokable;
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
@@ -121,6 +122,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.common.media.MediaTagConstants;
+import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtService;
 import com.sap.sse.gwt.client.media.ImageDTO;
@@ -197,13 +200,23 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     RaceTimesInfoDTO getRaceTimesInfo(RegattaAndRaceIdentifier raceIdentifier);
 
-    RaceTimesInfoDTO getRaceTimesInfoIncludingTags(RegattaAndRaceIdentifier raceIdentifier,
-            TimePoint latestReceivedTagTime);
+    /**
+     * Returns {@link RaceTimesInfoDTO race times info} for specified race (<code>raceIdentifier</code>) including
+     * {@link RaceLogTagEvent tag events} since received timestamp (<code>searchSince</code>). Loads tags from
+     * {@link ReadonlyRaceState cache} instead of scanning the whole {@link RaceLog} every request.
+     */
+    RaceTimesInfoDTO getRaceTimesInfoIncludingTags(RegattaAndRaceIdentifier raceIdentifier, TimePoint searchSince);
 
     List<RaceTimesInfoDTO> getRaceTimesInfos(Collection<RegattaAndRaceIdentifier> raceIdentifiers);
 
+    /**
+     * Collects besides {@link RaceTimesInfoDTO race times infos} public {@link RaceLogTagEvent tag events} from
+     * {@link ReadonlyRaceState cache} and compares the <code>createdAt</code> timepoint to the received
+     * <code>searchSince</code> timepoint. Returns {@link RaceTimesInfoDTO race times infos} including
+     * {@link RaceLogTagEvent public tag events} since the latest client-side received tag.
+     */
     List<RaceTimesInfoDTO> getRaceTimesInfosIncludingTags(Collection<RegattaAndRaceIdentifier> raceIdentifiers,
-            Map<RegattaAndRaceIdentifier, TimePoint> latestReceivedTagTimes);
+            Map<RegattaAndRaceIdentifier, TimePoint> searchSinceMap);
 
     CoursePositionsDTO getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date);
 
