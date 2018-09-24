@@ -8,14 +8,12 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 
 /**
- * A Dialog to show the URL of shared tags
+ * A dialog which is used to show the link to share a tag.
  */
-// TODO: adapt message instead of "URL:"
-// TODO: preselect link
-// TODO: add copy button for clipboard
-// TODO: texfield should not be editable
 public class TagSharedURLDialog extends DialogBox {
 
     private final TagPanelResources resources = TagPanelResources.INSTANCE;
@@ -29,9 +27,7 @@ public class TagSharedURLDialog extends DialogBox {
      * @param url
      *            A URL which if called opens the {@link TaggingPanel} and selects the shared tag.
      */
-    public TagSharedURLDialog(TaggingPanel taggingPanel, String url) {
-        StringMessages stringMessages = taggingPanel.getStringMessages();
-
+    public TagSharedURLDialog(StringMessages stringMessages, String url) {
         Panel mainPanel = new FlowPanel();
 
         Label descriptionLabel = new Label();
@@ -55,7 +51,11 @@ public class TagSharedURLDialog extends DialogBox {
             // select text to copy
             urlTextBox.setFocus(true);
             urlTextBox.selectAll();
-            copyToClipboard();
+            if (copyToClipboard()) {
+                Notification.notify(stringMessages.tagCopiedLinkSuccessfully(), NotificationType.SUCCESS);
+            } else {
+                Notification.notify(stringMessages.tagCopiedLinkNotSuccessfully(), NotificationType.WARNING);
+            }
         });
 
         Button closeButton = new Button(stringMessages.close());
@@ -76,12 +76,14 @@ public class TagSharedURLDialog extends DialogBox {
         addStyleName(style.tagSharedURLDialog());
         setWidget(mainPanel);
         center();
+        urlTextBox.selectAll();
+        urlTextBox.setFocus(true);
     }
 
     /**
      * GWT does not support copying text to clipboard so native java script was added
      */
-    private static native void copyToClipboard() /*-{
-		return $doc.execCommand('copy');
+    private static native boolean copyToClipboard() /*-{
+        return $doc.execCommand('copy');
     }-*/;
 }
