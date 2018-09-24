@@ -356,7 +356,7 @@ The user can assign values to that variable that are then used as default propos
 
 1. Start EC2 instance 
 2. Query for its dns name for later ssh connection 
-3. WWait until ssh connection is established
+3. Wait until ssh connection is established
 4. Create event and change admin password if necessary
 5. Create launch template for replica with user data variable "REPLICATION_CHANNEL" matching to its master
 
