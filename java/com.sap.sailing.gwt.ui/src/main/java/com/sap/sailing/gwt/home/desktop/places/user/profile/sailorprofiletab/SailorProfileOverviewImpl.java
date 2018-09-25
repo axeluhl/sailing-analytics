@@ -8,18 +8,17 @@ import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style.Cursor;
-import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
+import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableResources;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.BadgeDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
@@ -59,6 +58,7 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
         this.presenter = presenter;
         SharedSailorProfileResources.INSTANCE.css().ensureInjected();
         SailorProfileDesktopResources.INSTANCE.css().ensureInjected();
+        SharedResources.INSTANCE.mainCss().ensureInjected();
         decoratorUi = new AuthorizedContentDecoratorDesktop(presenter);
         initWidget(uiBinder.createAndBindUi(this));
         setupTable();
@@ -101,11 +101,11 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
     }
 
     private void createFooter() {
-        Label lab = new Label("+ " + i18n.addSailorProfileMessage());
-        lab.getElement().getStyle().setCursor(Cursor.POINTER);
-        lab.getElement().getStyle().setDisplay(Display.INLINE);
-        footerUi.add(lab);
-        lab.addClickHandler((event) -> {
+        Button addButton = new Button("+ " + i18n.addSailorProfileMessage());
+        addButton.addStyleName(SharedResources.INSTANCE.mainCss().buttonprimary());
+        addButton.addStyleName(SharedResources.INSTANCE.mainCss().button());
+        footerUi.add(addButton);
+        addButton.addClickHandler((event) -> {
             presenter.getClientFactory().getPlaceController().goTo(new SailorProfilePlace(true));
         });
     }
