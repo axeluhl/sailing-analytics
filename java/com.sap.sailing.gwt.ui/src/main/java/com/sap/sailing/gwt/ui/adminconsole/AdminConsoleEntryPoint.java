@@ -138,8 +138,8 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         regattasDisplayers.add(leaderboardConfigPanel);
         leaderboardsDisplayers.add(leaderboardConfigPanel);
 
-        final LeaderboardGroupConfigPanel leaderboardGroupConfigPanel = new LeaderboardGroupConfigPanel(getSailingService(),
-                this, this, this, this, getStringMessages());
+        final LeaderboardGroupConfigPanel leaderboardGroupConfigPanel = new LeaderboardGroupConfigPanel(
+                getSailingService(), getUserService(), this, this, this, this, getStringMessages());
         leaderboardGroupConfigPanel.ensureDebugId("LeaderboardGroupConfiguration");
         panel.addToTabPanel(leaderboardTabPanel, new DefaultRefreshableAdminConsolePanel<LeaderboardGroupConfigPanel>(leaderboardGroupConfigPanel) {
             @Override
