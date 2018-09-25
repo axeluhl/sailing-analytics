@@ -3741,19 +3741,19 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return convertToLeaderboardGroupDTO(getService().getLeaderboardGroupByName(groupName), withGeoLocationData, false);
     }
 
-    public LeaderboardGroupDTO convertToLeaderboardGroupDTO(LeaderboardGroup leaderboardGroup, boolean withGeoLocationData, boolean withStatisticalData) {
-        LeaderboardGroupDTO groupDTO = new LeaderboardGroupDTO(leaderboardGroup.getId(), leaderboardGroup.getName(),
-                leaderboardGroup.getDisplayName(), leaderboardGroup.getDescription());
+    private LeaderboardGroupDTO convertToLeaderboardGroupDTO(final LeaderboardGroup leaderboardGroup,
+            final boolean withGeoLocationData, final boolean withStatisticalData) {
+        final LeaderboardGroupDTO groupDTO = new LeaderboardGroupDTO(leaderboardGroup.getId(),
+                leaderboardGroup.getName(), leaderboardGroup.getDisplayName(), leaderboardGroup.getDescription());
         groupDTO.displayLeaderboardsInReverseOrder = leaderboardGroup.isDisplayGroupsInReverseOrder();
-        for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+        for (final Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
             try {
-                StrippedLeaderboardDTO leaderboardDTO = createStrippedLeaderboardDTO(leaderboard, withGeoLocationData, withStatisticalData);
-                groupDTO.leaderboards.add(leaderboardDTO);
+                groupDTO.leaderboards.add(createStrippedLeaderboardDTO(leaderboard, withGeoLocationData, withStatisticalData));
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Caught exception while reading data for leaderboard " + leaderboard.getName(), e);
             }
         }
-        Leaderboard overallLeaderboard = leaderboardGroup.getOverallLeaderboard();
+        final Leaderboard overallLeaderboard = leaderboardGroup.getOverallLeaderboard();
         if (overallLeaderboard != null) {
             if (overallLeaderboard.getResultDiscardingRule() instanceof ThresholdBasedResultDiscardingRule) {
                 groupDTO.setOverallLeaderboardDiscardThresholds(((ThresholdBasedResultDiscardingRule) overallLeaderboard
@@ -3761,6 +3761,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
             groupDTO.setOverallLeaderboardScoringSchemeType(overallLeaderboard.getScoringScheme().getType());
         }
+        this.addSecurityInformation(groupDTO,
+                SecuredDomainType.LEADERBOARD_GROUP.getQualifiedObjectIdentifier(leaderboardGroup.getId().toString()));
         return groupDTO;
     }
 

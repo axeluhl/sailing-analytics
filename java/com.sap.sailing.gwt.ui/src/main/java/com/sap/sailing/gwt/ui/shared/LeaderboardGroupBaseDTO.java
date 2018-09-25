@@ -3,16 +3,17 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.dto.NamedDTO;
+import com.sap.sailing.domain.common.dto.NamedSecuredObjectDTO;
 
-public class LeaderboardGroupBaseDTO extends NamedDTO implements IsSerializable {
-    private static final long serialVersionUID = -9023865026348923430L;
+public class LeaderboardGroupBaseDTO extends NamedSecuredObjectDTO implements IsSerializable {
+    
+    private static final long serialVersionUID = -4276452763988957L;
     private UUID id;
     public String description;
     private String displayName;
     private boolean hasOverallLeaderboard;
 
-    LeaderboardGroupBaseDTO() {} // for deserialization
+    protected LeaderboardGroupBaseDTO() {} // for deserialization
     
     public LeaderboardGroupBaseDTO(UUID id, String name, String displayName) {
         super(name);
