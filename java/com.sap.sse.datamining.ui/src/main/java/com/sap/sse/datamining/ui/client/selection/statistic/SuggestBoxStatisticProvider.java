@@ -13,8 +13,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -40,6 +38,8 @@ import com.sap.sse.datamining.ui.client.ExtractionFunctionChangedListener;
 import com.sap.sse.datamining.ui.client.StatisticChangedListener;
 import com.sap.sse.datamining.ui.client.StatisticProvider;
 import com.sap.sse.datamining.ui.client.selection.RetrieverLevelSettingsComponent;
+import com.sap.sse.datamining.ui.client.selection.statistic.ExtractionFunctionWithContext.IdentityFunctionWithContext;
+import com.sap.sse.datamining.ui.client.selection.statistic.ExtractionFunctionWithContext.StatisticWithContext;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.CompositeSettings;
@@ -80,7 +80,6 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
     private final Label labelBetweenAggregatorAndStatistic;
     
     private final Map<String, Set<AggregationProcessorDefinitionDTO>> collectedAggregators;
-    private AggregatorGroup currentAggregator;
     private final List<AggregatorGroup> availableAggregators;
     private final AggregatorListBox aggregatorListBox;
 
@@ -105,9 +104,20 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         settingsMap = new HashMap<>();
         retrieverLevelSettingsComponents = new ArrayList<>();
 
+        collectedAggregators = new HashMap<>();
+        availableAggregators = new ArrayList<>();
+        aggregatorListBox = new AggregatorListBox("<" + getDataMiningStringMessages().any() + ">");
+        aggregatorListBox.setValueChangeHandler(this::aggregatorSelectionChanged);
+        aggregatorListBox.addStyleName(StatisticProviderElementStyle);
+        aggregatorListBox.addStyleName("dataMiningListBox");
+        aggregatorListBox.setEnabled(false);
+
         availableIdentityFunctions = new ArrayList<>();
         availableStatistics = new ArrayList<>();
-        extractionFunctionSuggestBox = new ExtractionFunctionSuggestBox();
+        extractionFunctionSuggestBox = new ExtractionFunctionSuggestBox(extractionFunction -> {
+            AggregatorGroup aggregator = aggregatorListBox.getValue();
+            return aggregator == null || aggregator.supportsFunction(extractionFunction);
+        });
         extractionFunctionSuggestBox.setValueChangeHandler(this::extractionFunctionSelectionChanged);
         extractionFunctionSuggestBox.getValueBox().addFocusHandler(e -> {
             extractionFunctionSuggestBox.getValueBox().selectAll();
@@ -128,19 +138,6 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         SimplePanel suggestBoxContainer = new SimplePanel(extractionFunctionSuggestBox);
         suggestBoxContainer.addStyleName(StatisticProviderElementStyle);
         suggestBoxContainer.addStyleName(SuggestBoxContainerStyle);
-
-        collectedAggregators = new HashMap<>();
-        availableAggregators = new ArrayList<>();
-        aggregatorListBox = new AggregatorListBox("<" + getDataMiningStringMessages().any() + ">");
-        aggregatorListBox.addValueChangeHandler(new ValueChangeHandler<AggregatorGroup>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<AggregatorGroup> event) {
-                aggregatorSelectionChanged(event.getValue());
-            }
-        });
-        aggregatorListBox.addStyleName(StatisticProviderElementStyle);
-        aggregatorListBox.addStyleName("dataMiningListBox");
-        aggregatorListBox.setEnabled(false);
 
         mainPanel = new FlowPanel();
         mainPanel.addStyleName(StatisticProviderStyle);
@@ -266,8 +263,8 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         awaitingRetrieverChainStatistics--;
         if (awaitingRetrieverChainStatistics <= 0) {
             extractionFunctionSuggestBox.setExtractionFunction(null);
-            Collections.sort(availableStatistics);
             extractionFunctionSuggestBox.setSelectableValues(availableStatistics);
+            extractionFunctionSuggestBox.setGroupingSuggestionsByRetrieverChain(true);
             if (awaitingAggregators <= 0) {
                 collectAggregators(null, null);
             }
@@ -316,59 +313,51 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
         }
     }
 
-    private void aggregatorSelectionChanged(AggregatorGroup newAggregator) {
-        if (!Objects.equals(currentAggregator, newAggregator)) {
-            boolean currentAggregatorSupportsIdentityFunction = currentAggregator != null
-                    && currentAggregator.supportsType(identityFunction.getReturnTypeName());
-            boolean newAggregatorSupportsIdentityFunction = newAggregator != null
-                    && newAggregator.supportsType(identityFunction.getReturnTypeName());
-            
-            List<ExtractionFunctionWithContext> selectableExtractionFunctions = new ArrayList<>();
-            String labelBetweenAggregatorAndStatisticText = null;
-            if (newAggregator == null) {
-                selectableExtractionFunctions.addAll(availableStatistics);
-                labelBetweenAggregatorAndStatisticText = getDataMiningStringMessages().of();
-            } else {
-                if (newAggregatorSupportsIdentityFunction) {
-                    selectableExtractionFunctions.addAll(availableIdentityFunctions);
-                    labelBetweenAggregatorAndStatisticText = getDataMiningStringMessages().the();
-                } else {
-                    for (StatisticWithContext statistic : availableStatistics) {
-                        if (newAggregator.supportsType(statistic.getExtractionFunction().getReturnTypeName())) {
-                            selectableExtractionFunctions.add(statistic);
-                        }
-                    }
-                    labelBetweenAggregatorAndStatisticText = getDataMiningStringMessages().of();
-                }
-            }
-            
-            ExtractionFunctionWithContext currentExtractionFunction = extractionFunctionSuggestBox.getExtractionFunction();
-            if (currentExtractionFunction != null && !selectableExtractionFunctions.contains(currentExtractionFunction)) {
-                ExtractionFunctionWithContext extractionFunctionToSelect = null;
-                if (newAggregatorSupportsIdentityFunction && !currentAggregatorSupportsIdentityFunction) {
-                    for (IdentityFunctionWithContext identityFunction : availableIdentityFunctions) {
-                        if (identityFunction.getRetrieverChain().equals(currentExtractionFunction.getRetrieverChain())) {
-                            extractionFunctionToSelect = identityFunction;
-                            break;
-                        }
-                    }
-                }
-                extractionFunctionSuggestBox.setExtractionFunction(extractionFunctionToSelect);
-            }
-            Collections.sort(selectableExtractionFunctions);
-            extractionFunctionSuggestBox.setSelectableValues(selectableExtractionFunctions);
-            labelBetweenAggregatorAndStatistic.setText(labelBetweenAggregatorAndStatisticText);
-            currentAggregator = newAggregator;
-            
-            notifyAggregatorDefinitionListeners();
+    private void aggregatorSelectionChanged(AggregatorGroup oldAggregator, AggregatorGroup newAggregator) {
+        boolean currentAggregatorSupportsIdentityFunction = oldAggregator != null
+                && oldAggregator.supportsFunction(identityFunction);
+        boolean newAggregatorSupportsIdentityFunction = newAggregator != null
+                && newAggregator.supportsFunction(identityFunction);
+        
+        List<? extends ExtractionFunctionWithContext> selectableExtractionFunctions;
+        String labelBetweenAggregatorAndStatisticText = null;
+        if (newAggregatorSupportsIdentityFunction) {
+            selectableExtractionFunctions = availableIdentityFunctions;
+            labelBetweenAggregatorAndStatisticText = getDataMiningStringMessages().the();
+        } else {
+            selectableExtractionFunctions = availableStatistics;
+            labelBetweenAggregatorAndStatisticText = getDataMiningStringMessages().of();
         }
+        
+        ExtractionFunctionWithContext currentExtractionFunction = extractionFunctionSuggestBox.getExtractionFunction();
+        if (currentExtractionFunction != null && newAggregator != null && !newAggregator.supportsFunction(currentExtractionFunction)) {
+            // Current extraction function isn't supported by the new aggregator
+            if (newAggregatorSupportsIdentityFunction && !currentAggregatorSupportsIdentityFunction) {
+                // Switch to the corresponding identity function, if the identity functions aren't already the selectable functions
+                for (IdentityFunctionWithContext identityFunction : availableIdentityFunctions) {
+                    if (identityFunction.getRetrieverChain().equals(currentExtractionFunction.getRetrieverChain())) {
+                        extractionFunctionSuggestBox.setExtractionFunction(identityFunction);
+                        break;
+                    }
+                }
+            } else {
+                extractionFunctionSuggestBox.setExtractionFunction(null);
+            }
+        }
+        extractionFunctionSuggestBox.setSelectableValues(selectableExtractionFunctions);
+        extractionFunctionSuggestBox.setGroupingSuggestionsByRetrieverChain(!newAggregatorSupportsIdentityFunction);
+        labelBetweenAggregatorAndStatistic.setText(labelBetweenAggregatorAndStatisticText);
+        
+        notifyAggregatorDefinitionListeners();
     }
     
     private void extractionFunctionSelectionChanged(ExtractionFunctionWithContext oldExtractionFunction,
             ExtractionFunctionWithContext newExtractionFunction) {
-        String returnTypeName = newExtractionFunction == null ? null
-                : newExtractionFunction.getExtractionFunction().getReturnTypeName();
-        aggregatorListBox.updateItemStyles(returnTypeName);
+        aggregatorListBox.updateItemStyles(newExtractionFunction);
+        AggregatorGroup aggregator = aggregatorListBox.getValue();
+        if (aggregator != null && newExtractionFunction != null && !aggregator.supportsFunction(newExtractionFunction)) {
+            aggregatorListBox.setValue(null, true);
+        }
         
         DataRetrieverChainDefinitionDTO oldRetrieverChain = oldExtractionFunction == null ? null
                 : oldExtractionFunction.getRetrieverChain();

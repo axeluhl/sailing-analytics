@@ -37,8 +37,9 @@ public class RaceBoardPage extends HostPageWithAuthentication {
      *         generic cases, a more specialized goTo Version is recommended, to reduce hardcoded strings
      */
     public static RaceBoardPage goToRaceboardUrl(WebDriver driver, String url) {
+        String urlWithCodeServerAndLocale = url + "&" + getGWTCodeServerAndLocale();
         // workaround for hostpage removing query from url, required for evenntid in this case
-        driver.get(url);
+        driver.get(urlWithCodeServerAndLocale);
         return new RaceBoardPage(driver);
     }
     

@@ -29,8 +29,6 @@ abstract class ExtractionFunctionWithContext implements Comparable<ExtractionFun
     
     public abstract String getDisplayString();
     
-    public abstract String getAdditionalDisplayString();
-
     public Iterable<String> getMatchingStrings() {
         return matchingStrings;
     }
@@ -78,6 +76,36 @@ abstract class ExtractionFunctionWithContext implements Comparable<ExtractionFun
         } else if (!retrieverChain.equals(other.retrieverChain))
             return false;
         return true;
+    }
+    
+    static class StatisticWithContext extends ExtractionFunctionWithContext {
+
+        public StatisticWithContext(DataRetrieverChainDefinitionDTO retrieverChain, FunctionDTO extractionFunction) {
+            super(retrieverChain, extractionFunction);
+            addMatchingString(retrieverChain.getName());
+            addMatchingString(extractionFunction.getDisplayName());
+        }
+
+        @Override
+        public String getDisplayString() {
+            return getExtractionFunction().getDisplayName();
+        }
+        
+    }
+
+    static class IdentityFunctionWithContext extends ExtractionFunctionWithContext {
+
+        public IdentityFunctionWithContext(DataRetrieverChainDefinitionDTO retrieverChain,
+                FunctionDTO identityFunction) {
+            super(retrieverChain, identityFunction);
+            addMatchingString(retrieverChain.getName());
+        }
+
+        @Override
+        public String getDisplayString() {
+            return getRetrieverChain().getName();
+        }
+
     }
 
 }

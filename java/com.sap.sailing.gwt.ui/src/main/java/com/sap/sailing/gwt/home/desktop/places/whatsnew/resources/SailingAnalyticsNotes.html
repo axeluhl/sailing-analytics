@@ -9,7 +9,6 @@
             <li>The windstreamlets are now colored dynamically according to the wind fields maximum and minimum wind speed.</li>  
             <li>Changes of <tt>DataMining.html</tt>
                <ul class="bulletList">
-                  <li>The data type used by a statistic is now displayed by default.</li>
                   <li>The currently selected result tab will be remembered when a query is run. It is now possible
                      to change tabs while a long query is executed, without overwriting the result of another tab when
                      the query finishes. The result will be displayed in the tab that was selected when the execution
@@ -19,13 +18,16 @@
                   <li>A setting has been added to prevent that changes are lost, when a different query should be
                      displayed. The default setting is to ask, if the changes should be discarded or kept (preventing
                      that the query is displayed).</li>
-                  <li>The available statistics are now filtered by the selected aggregator. Aggregators become
-                     grayed out, if they aren't supported by the selected statistic. You can select &lt;Any&gt;
-                     as aggregator to show all available statistics, select the desired one and select a specific
-                     supported aggregator afterwards.</li>
+                  <li>The suggested statistics are now grouped by their retriever chain</li>
+                  <li>The aggregator and statistic control switched places and are now linked together. This means that
+                     all aggregators/statistics can always be selected, but are grayed out if one component isn't supported
+                     by the other (e.g. an aggreagtor doesn't exist for the currently selected statistic). The other
+                     component will be reset when an unsupported component is selected.</li>
                   <li>Counting aggregators now work directly on the retrieved data elements and don't require the
                      selection of a specific statistic. Changing to a counting aggregator when a statistic is selected
                      automatically changes it to the corresponding data type.</li>
+                  <li>The filter selection and dimensions to group by are now retained (where possible), if the statistic
+                     is changed to one that is based on a different data type.</li>
                </ul>
             </li>
          </ul>

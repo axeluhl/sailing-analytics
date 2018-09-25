@@ -175,6 +175,7 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         headerPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         
         Label headerLabel = new Label(dimension.getDisplayName());
+        headerLabel.addStyleName("emphasizedLabel");
         headerPanel.add(headerLabel);
         headerPanel.setCellWidth(headerLabel, "100%");
         headerPanel.setCellHorizontalAlignment(headerLabel, HasHorizontalAlignment.ALIGN_CENTER);
