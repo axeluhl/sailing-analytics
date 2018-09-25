@@ -735,11 +735,11 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             List<Util.Pair<ControlPointDTO, PassingInstruction>> course, AsyncCallback<Void> callback);
 
     void addTag(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment,
-            String imageURL, boolean visibleForPublic, TimePoint raceTimepoint,
+            String imageURL, String resizedImageURL, boolean visibleForPublic, TimePoint raceTimepoint,
             AsyncCallback<SuccessInfo> asyncCallback);
 
     void updateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tagToUpdate, String tag,
-            String comment, String imageURL, boolean visibleForPublic, AsyncCallback<SuccessInfo> asyncCallback);
+            String comment, String imageURL, String resizedImageURL, boolean visibleForPublic, AsyncCallback<SuccessInfo> asyncCallback);
 
     void removeTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag,
             AsyncCallback<SuccessInfo> asyncCallback);

@@ -24,8 +24,6 @@ import com.sap.sse.security.ui.client.UserService;
 /**
  * Used to display tags in various locations.
  */
-// TODO: Remove share button from private tags
-// TODO: change text of "created at" ...
 public class TagCell extends AbstractCell<TagDTO> {
 
     /**
@@ -163,16 +161,22 @@ public class TagCell extends AbstractCell<TagDTO> {
         SafeHtml safeCreated = SafeHtmlUtils.fromString(stringMessages.tagCreated(tag.getUsername(),
                 DateTimeFormat.getFormat("E d/M/y, HH:mm").format(tag.getRaceTimepoint().asDate())));
         SafeHtml safeComment = SafeHtmlUtils.fromString(tag.getComment());
-        SafeUri trustedImageURL = UriUtils.fromTrustedString(tag.getImageURL());
+        //resized image gets prefered
+        SafeUri trustedImageURL = null;
+        if(tag.getResizedImageURL() != null && !tag.getResizedImageURL().isEmpty()) {
+            trustedImageURL = UriUtils.fromTrustedString(tag.getResizedImageURL());
+        } else if(tag.getImageURL() != null && !tag.getImageURL().isEmpty()){
+            trustedImageURL = UriUtils.fromTrustedString(tag.getImageURL());
+        }
 
         SafeUri safeIsPrivateImageUri = resources.privateIcon().getSafeUri();
 
         SafeHtml content = SafeHtmlUtils.EMPTY_SAFE_HTML;
-        if (!tag.getComment().isEmpty() && tag.getImageURL().isEmpty()) {
+        if (!tag.getComment().isEmpty() && trustedImageURL == null) {
             content = tagCellTemplate.contentWithCommentWithoutImage(style.tagCellComment(), safeComment);
-        } else if (tag.getComment().isEmpty() && !tag.getImageURL().isEmpty()) {
+        } else if (tag.getComment().isEmpty() && trustedImageURL != null) {
             content = tagCellTemplate.contentWithoutCommentWithImage(style.tagCellImage(), trustedImageURL);
-        } else if (!tag.getComment().isEmpty() && !tag.getImageURL().isEmpty()) {
+        } else if (!tag.getComment().isEmpty() && trustedImageURL != null) {
             content = tagCellTemplate.contentWithCommentWithImage(style.tagCellImage(), style.tagCellComment(),
                     trustedImageURL, safeComment);
         }

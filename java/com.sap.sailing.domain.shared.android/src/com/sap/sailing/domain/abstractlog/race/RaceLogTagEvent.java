@@ -36,6 +36,13 @@ public interface RaceLogTagEvent extends RaceLogEvent, Revokable {
      * @return image URL of tag, may be <code>null</code> as images are optional
      */
     String getImageURL();
+    
+    /**
+     * Returns optional resized image URL.
+     * 
+     * @return resized image URL of tag, may be <code>null</code> as images are optional and images might not be resized
+     */
+    String getResizedImageURL();
 
     /**
      * Marks this {@link RaceLogTagEvent} as revoked. Used to differentiate between revoked and non-revoked

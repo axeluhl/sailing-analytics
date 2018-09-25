@@ -83,7 +83,7 @@ public class TagsResource extends AbstractSailingServerResource {
             }
             if (lookForPrivate) {
                 try {
-                    Util.addAll(taggingService.getPrivateTags(leaderboardName, raceColumnName, fleetName), tags);                    
+                    Util.addAll(taggingService.getPrivateTags(leaderboardName, raceColumnName, fleetName), tags);
                 } catch (AuthorizationException e) {
                     // do nothing when user is not logged in
                 }
@@ -121,12 +121,13 @@ public class TagsResource extends AbstractSailingServerResource {
             @PathParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
             @PathParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName, @FormParam("tag") String tag,
             @FormParam("comment") String comment, @FormParam("image") String imageURL,
-            @FormParam("public") boolean visibleForPublic, @FormParam("raceTimepoint") long raceTimepoint) {
+            @FormParam("resizedImage") String resizedImageURL, @FormParam("public") boolean visibleForPublic,
+            @FormParam("raceTimepoint") long raceTimepoint) {
         Response response;
         final TaggingService taggingService = getService().getTaggingService();
         try {
-            taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL, visibleForPublic,
-                    new MillisecondsTimePoint(raceTimepoint));
+            taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL, resizedImageURL,
+                    visibleForPublic, new MillisecondsTimePoint(raceTimepoint));
             response = Response.created(uriInfo.getRequestUri()).build();
         } catch (IllegalArgumentException | RaceLogNotFoundException | TagAlreadyExistsException e) {
             response = Response.status(Status.BAD_REQUEST).type(TEXT_PLAIN_UTF8).build();
@@ -192,7 +193,7 @@ public class TagsResource extends AbstractSailingServerResource {
             @PathParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName,
             @FormParam("tag_json") String tagJson, @FormParam("tag") String tagParam,
             @FormParam("comment") String commentParam, @FormParam("image") String imageURLParam,
-            @FormParam("public") String visibleForPublicParam) {
+            @FormParam("resizedImage") String resizedImageURLParam, @FormParam("public") String visibleForPublicParam) {
         Response response;
         final TagDTO tagToUpdate = serializer.deserializeTag(tagJson);
         final TaggingService taggingService = getService().getTaggingService();
@@ -203,11 +204,14 @@ public class TagsResource extends AbstractSailingServerResource {
             String tag = (tagParam == null ? tagToUpdate.getTag() : tagParam);
             String comment = (commentParam == null ? tagToUpdate.getComment() : commentParam);
             String imageURL = (imageURLParam == null ? tagToUpdate.getImageURL() : imageURLParam);
+            String resizedImageURL = (resizedImageURLParam == null ? tagToUpdate.getResizedImageURL()
+                    : resizedImageURLParam);
+
             boolean visibleForPublic = (visibleForPublicParam == null ? tagToUpdate.isVisibleForPublic()
                     : visibleForPublicParam.equalsIgnoreCase("true") ? true : false);
             try {
                 taggingService.updateTag(leaderboardName, raceColumnName, fleetName, tagToUpdate, tag, comment,
-                        imageURL, visibleForPublic);
+                        imageURL, resizedImageURL, visibleForPublic);
                 response = Response.noContent().build();
             } catch (IllegalArgumentException | NotRevokableException | RaceLogNotFoundException
                     | TagAlreadyExistsException e) {

@@ -19,10 +19,10 @@ import com.sap.sse.common.TimePoint;
 public class TagDTO implements Serializable {
 
     private static final long serialVersionUID = 3907411584518452300L;
-    
+
     public final static String TAG_URL_PARAMETER = "tag";
 
-    private String tag, comment, imageURL, username;
+    private String tag, comment, username, imageURL, resizedImageURL;
     private boolean visibleForPublic;
     /**
      * By default every tag should have set the attributes {@link #raceTimepoint} and {@link #createdAt}.<br/>
@@ -53,8 +53,10 @@ public class TagDTO implements Serializable {
      *            comment of tag, may be <code>null</code> as comment is optional
      * @param imageURL
      *            image URL of tag, may be <code>null</code> as image is optional
+     * @param resizedImageURL
+     *            resized image URL of tag, may be <code>null</code> as image is optional
      * @param visibleForPublic
-     *            should be <code>true</code> if everbidy should see this tag, otherwise <code>false</code>
+     *            should be <code>true</code> if everybody should see this tag, otherwise <code>false</code>
      * @param username
      *            name of user who created the tag
      * @param raceTimepoint
@@ -62,9 +64,9 @@ public class TagDTO implements Serializable {
      * @param createdAt
      *            timepoint where <code>username</code> created the tag
      */
-    public TagDTO(String tag, String comment, String imageURL, boolean visibleForPublic, String username,
-            TimePoint raceTimepoint, TimePoint createdAt) {
-        this(tag, comment, imageURL, visibleForPublic, username, raceTimepoint, createdAt, null);
+    public TagDTO(String tag, String comment, String imageURL, String resizedImageURL, boolean visibleForPublic,
+            String username, TimePoint raceTimepoint, TimePoint createdAt) {
+        this(tag, comment, imageURL, resizedImageURL, visibleForPublic, username, raceTimepoint, createdAt, null);
     }
 
     /**
@@ -76,6 +78,8 @@ public class TagDTO implements Serializable {
      *            comment of tag, may be <code>null</code> as comment is optional
      * @param imageURL
      *            image URL of tag, may be <code>null</code> as image is optional
+     * @param resizedImageURL
+     *            resized image URL of tag, may be <code>null</code> as image is optional
      * @param visibleForPublic
      *            should be <code>true</code> if everbidy should see this tag, otherwise <code>false</code>
      * @param username
@@ -87,11 +91,12 @@ public class TagDTO implements Serializable {
      * @param revokedAt
      *            timepoint where tag got revoked, may be <code>null</code> if tag is not revoked
      */
-    public TagDTO(String tag, String comment, String imageURL, boolean visibleForPublic, String username,
-            TimePoint raceTimepoint, TimePoint createdAt, TimePoint revokedAt) {
+    public TagDTO(String tag, String comment, String imageURL, String resizedImageURL, boolean visibleForPublic,
+            String username, TimePoint raceTimepoint, TimePoint createdAt, TimePoint revokedAt) {
         this.tag = tag;
         this.comment = comment;
         this.imageURL = imageURL;
+        this.resizedImageURL = resizedImageURL;
         this.visibleForPublic = visibleForPublic;
         this.username = username;
         this.raceTimepoint = raceTimepoint;
@@ -120,10 +125,19 @@ public class TagDTO implements Serializable {
     /**
      * Returns optional image URL of tag.
      * 
-     * @return image URL of tag, may be <code>null</code>
+     * @return image URLs of tag, may be <code>null</code>
      */
     public String getImageURL() {
         return imageURL;
+    }
+
+    /**
+     * Returns optional image URL of tag.
+     * 
+     * @return resized image URL of tag, may be <code>null</code>
+     */
+    public String getResizedImageURL() {
+        return resizedImageURL;
     }
 
     /**
@@ -172,9 +186,9 @@ public class TagDTO implements Serializable {
     }
 
     /**
-     * Compares attributes {@link #tag}, {@link #comment}, {@link #imageURL}, {@link #visibleForPublic},
-     * {@link #username} and {@link #raceTimepoint}, but <b>NOT</b> attributes {@link #createdAt} and
-     * {@link #revokedAt}.
+     * Compares attributes {@link #tag}, {@link #comment}, {@link #imageURL}, {@link #resizedImageURL},
+     * {@link #visibleForPublic}, {@link #username} and {@link #raceTimepoint}, but <b>NOT</b> attributes
+     * {@link #createdAt} and {@link #revokedAt}.
      */
     @Override
     public boolean equals(Object obj) {
@@ -200,6 +214,11 @@ public class TagDTO implements Serializable {
                 return false;
         } else if (!imageURL.equals(other.imageURL))
             return false;
+        if (resizedImageURL == null) {
+            if (other.resizedImageURL != null)
+                return false;
+        } else if (!resizedImageURL.equals(other.resizedImageURL))
+            return false;
         if (isVisibleForPublic() != other.isVisibleForPublic()) {
             return false;
         }
@@ -223,8 +242,8 @@ public class TagDTO implements Serializable {
      * @return <code>true</code> if all parameters match the key attributes of {@link TagDTO}, otherwise
      *         <code>false</code>
      */
-    public boolean equals(String tag, String comment, String imageURL, boolean visibleForPublic, String username,
-            TimePoint raceTimepoint) {
+    public boolean equals(String tag, String comment, String imageURL, String resizedImageURL, boolean visibleForPublic,
+            String username, TimePoint raceTimepoint) {
         if (this.comment == null) {
             if (comment != null)
                 return false;
@@ -234,6 +253,11 @@ public class TagDTO implements Serializable {
             if (imageURL != null)
                 return false;
         } else if (!this.imageURL.equals(imageURL))
+            return false;
+        if (this.resizedImageURL == null) {
+            if (resizedImageURL != null)
+                return false;
+        } else if (!this.resizedImageURL.equals(resizedImageURL))
             return false;
         if (this.raceTimepoint == null) {
             if (raceTimepoint != null)
@@ -265,8 +289,8 @@ public class TagDTO implements Serializable {
 
     @Override
     public String toString() {
-        return "TagDTO [tag=" + tag + ", comment=" + comment + ", imageURL=" + imageURL + ", visibleForPublic="
-                + visibleForPublic + ", username=" + username + ", raceTimepoint=" + raceTimepoint + ", createdAt="
-                + createdAt + ", revokedAt=" + revokedAt + "]";
+        return "TagDTO [tag=" + tag + ", comment=" + comment + ", imageURL=" + imageURL + ", resizedImageURL="
+                + resizedImageURL + ", visibleForPublic=" + visibleForPublic + ", username=" + username
+                + ", raceTimepoint=" + raceTimepoint + ", createdAt=" + createdAt + ", revokedAt=" + revokedAt + "]";
     }
 }

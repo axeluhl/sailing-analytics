@@ -22,6 +22,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.sap.sailing.gwt.ui.adminconsole.ImagesBarColumn;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigImagesBarCell;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
@@ -98,7 +99,7 @@ public class TagButtonDialog extends DialogBox {
      * @param footerPanel
      *            footer panel of {@link TaggingPanel}
      */
-    public TagButtonDialog(TaggingPanel taggingPanel, TagFooterPanel footerPanel) {
+    public TagButtonDialog(TaggingPanel taggingPanel, TagFooterPanel footerPanel, SailingServiceAsync sailingService) {
         this.taggingPanel = taggingPanel;
         this.stringMessages = taggingPanel.getStringMessages();
 
@@ -106,7 +107,7 @@ public class TagButtonDialog extends DialogBox {
         setText(stringMessages.tagEditCustomTagButtons());
         addStyleName(style.tagButtonDialog());
 
-        TagInputPanel inputPanel = new TagInputPanel(taggingPanel);
+        TagInputPanel inputPanel = new TagInputPanel(taggingPanel, sailingService);
         TagPreviewPanel tagPreviewPanel = new TagPreviewPanel(taggingPanel, inputPanel);
         CellTable<TagButton> tagButtonsTable = createTable(footerPanel, inputPanel, tagPreviewPanel);
         tagButtonsTable.addRedrawHandler(new Handler() {

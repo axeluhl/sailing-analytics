@@ -4,6 +4,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanel.State;
@@ -31,13 +32,14 @@ public class TagModificationPanel extends FlowPanel {
      * @param tagFooterPanel
      *            required for creation of {@link TagButton tag-buttons}
      */
-    protected TagModificationPanel(TaggingPanel taggingPanel, TagFooterPanel tagFooterPanel) {
+    protected TagModificationPanel(TaggingPanel taggingPanel, TagFooterPanel tagFooterPanel,
+            SailingServiceAsync sailingService) {
         this.taggingPanel = taggingPanel;
         this.stringMessages = taggingPanel.getStringMessages();
 
         setStyleName(style.tagModificationPanel());
 
-        inputPanel = new TagInputPanel(taggingPanel);
+        inputPanel = new TagInputPanel(taggingPanel, sailingService);
 
         Button createTagFromInputFields = new Button(stringMessages.tagAddTag());
         createTagFromInputFields.setStyleName(style.tagDialogButton());
@@ -45,7 +47,7 @@ public class TagModificationPanel extends FlowPanel {
         createTagFromInputFields.addClickHandler(event -> {
             if (taggingPanel.isLoggedInAndRaceLogAvailable()) {
                 taggingPanel.saveTag(inputPanel.getTag(), inputPanel.getComment(), inputPanel.getImageURL(),
-                        inputPanel.isVisibleForPublic());
+                        inputPanel.getImageWidth(), inputPanel.getImageHeight(), inputPanel.isVisibleForPublic());
                 inputPanel.clearAllValues();
             }
         });
@@ -55,7 +57,7 @@ public class TagModificationPanel extends FlowPanel {
         editCustomTagButtons.addStyleName("gwt-Button");
         editCustomTagButtons.addClickHandler(event -> {
             if (taggingPanel.isLoggedInAndRaceLogAvailable()) {
-                new TagButtonDialog(taggingPanel, tagFooterPanel);
+                new TagButtonDialog(taggingPanel, tagFooterPanel, sailingService);
             }
         });
 
@@ -70,7 +72,8 @@ public class TagModificationPanel extends FlowPanel {
         saveTagChanges.addStyleName("gwt-Button");
         saveTagChanges.addClickHandler(event -> {
             taggingPanel.updateTag(taggingPanel.getSelectedTag(), inputPanel.getTag(), inputPanel.getComment(),
-                    inputPanel.getImageURL(), inputPanel.isVisibleForPublic());
+                    inputPanel.getImageURL(), inputPanel.getImageWidth(), inputPanel.getImageHeight(),
+                    inputPanel.isVisibleForPublic());
             resetState();
         });
 

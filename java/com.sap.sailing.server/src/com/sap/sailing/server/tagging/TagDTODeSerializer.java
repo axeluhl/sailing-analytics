@@ -18,7 +18,8 @@ public class TagDTODeSerializer {
 
     public static final String FIELD_TAG = "tag";
     public static final String FIELD_COMMENT = "comment";
-    public static final String FIELD_IMAGE_URL = "image";
+    public static final String FIELD_ORIGINAL_IMAGE_URL = "image";
+    public static final String FIELD_RESIZED_IMAGE_URL = "resized_image";
     public static final String FIELD_USERNAME = "username";
     public static final String FIELD_VISIBLE_FOR_PUBLIC = "public";
     public static final String FIELD_RACE_TIMEPOINT = "raceTimepoint";
@@ -40,7 +41,8 @@ public class TagDTODeSerializer {
         JSONObject result = new JSONObject();
         result.put(FIELD_TAG, tag.getTag());
         result.put(FIELD_COMMENT, tag.getComment());
-        result.put(FIELD_IMAGE_URL, tag.getImageURL());
+        result.put(FIELD_ORIGINAL_IMAGE_URL, tag.getImageURL());
+        result.put(FIELD_RESIZED_IMAGE_URL, tag.getResizedImageURL());
         result.put(FIELD_USERNAME, tag.getUsername());
         result.put(FIELD_VISIBLE_FOR_PUBLIC, tag.isVisibleForPublic());
         result.put(FIELD_RACE_TIMEPOINT, serializeTimePoint(tag.getRaceTimepoint()));
@@ -75,14 +77,15 @@ public class TagDTODeSerializer {
         // if deserializing throws an error, return null
         try {
             String tag = (String) jsonObject.get(FIELD_TAG);
-            String comment = (String) jsonObject.get(FIELD_COMMENT);
-            String imageURL = (String) jsonObject.get(FIELD_IMAGE_URL);
+            String comment = (String) jsonObject.get(FIELD_COMMENT);           
+            String imageURL = (String) jsonObject.get(FIELD_ORIGINAL_IMAGE_URL);
+            String resizedImageURL = (String) jsonObject.get(FIELD_RESIZED_IMAGE_URL);
             String username = (String) jsonObject.get(FIELD_USERNAME);
             boolean visibleForPublic = (Boolean) jsonObject.get(FIELD_VISIBLE_FOR_PUBLIC);
             TimePoint raceTimePoint = deserilizeTimePoint((Long) (jsonObject.get(FIELD_RACE_TIMEPOINT)));
             TimePoint createdAt = deserilizeTimePoint((Long) (jsonObject.get(FIELD_CREATED_AT)));
             TimePoint revokedAt = deserilizeTimePoint((Long) (jsonObject.get(FIELD_REVOKED_AT)));
-            return new TagDTO(tag, comment, imageURL, visibleForPublic, username, raceTimePoint, createdAt, revokedAt);
+            return new TagDTO(tag, comment, imageURL, resizedImageURL, visibleForPublic, username, raceTimePoint, createdAt, revokedAt);
         } catch (Exception e) {
             return null;
         }

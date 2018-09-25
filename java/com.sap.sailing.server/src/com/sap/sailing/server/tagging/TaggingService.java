@@ -40,6 +40,8 @@ public interface TaggingService {
      *            optional comment of tag
      * @param imageURL
      *            optional image URL of tag
+     * @param resizedImageURL
+     *            optional resized image URL of tag image
      * @param visibleForPublic
      *            when set to <code>true</code>, tag will be saved in
      *            {@link com.sap.sailing.domain.abstractlog.race.RaceLog RaceLog} (visible for every user), otherwise
@@ -59,7 +61,7 @@ public interface TaggingService {
      *             thrown if tag already exists
      */
     void addTag(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment,
-            String imageURL, boolean visibleForPublic, TimePoint raceTimepoint) throws AuthorizationException,
+            String imageURL, String resizedImageURL, boolean visibleForPublic, TimePoint raceTimepoint) throws AuthorizationException,
             IllegalArgumentException, RaceLogNotFoundException, ServiceNotFoundException, TagAlreadyExistsException;
 
     /**
@@ -107,7 +109,9 @@ public interface TaggingService {
      * @param comment
      *            new comment
      * @param imageURL
-     *            new iamge URL
+     *            optional image URL of tag
+     * @param resizedImageURL
+     *            optional resized image URL of tag image
      * @param visibleForPublic
      *            new privacy status
      * @throws AuthorizationException
@@ -125,7 +129,7 @@ public interface TaggingService {
      *             thrown if security service cannot be found
      */
     void updateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tagToUpdate, String tag,
-            String comment, String imageURL, boolean visibleForPublic)
+            String comment, String imageURL, String resizedImageURL, boolean visibleForPublic)
             throws AuthorizationException, IllegalArgumentException, NotRevokableException, RaceLogNotFoundException,
             ServiceNotFoundException, TagAlreadyExistsException;
 

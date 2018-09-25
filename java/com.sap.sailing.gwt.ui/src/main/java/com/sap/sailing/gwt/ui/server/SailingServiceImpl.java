@@ -6466,11 +6466,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
 
     @Override
     public SuccessInfo addTag(String leaderboardName, String raceColumnName, String fleetName, String tag,
-            String comment, String imageURL, boolean visibleForPublic, TimePoint raceTimepoint) {
+            String comment, String imageURL, String resizedImageURL, boolean visibleForPublic,
+            TimePoint raceTimepoint) {
         SuccessInfo successInfo = new SuccessInfo(true, null, null, null);
         try {
             getService().getTaggingService().addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL,
-                    visibleForPublic, raceTimepoint);
+                    resizedImageURL, visibleForPublic, raceTimepoint);
         } catch (AuthorizationException e) {
             successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "missingAuthorization"),
                     null, null);
@@ -6522,11 +6523,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
 
     @Override
     public SuccessInfo updateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tagToUpdate,
-            String tag, String comment, String imageURL, boolean visibleForPublic) {
+            String tag, String comment, String imageURL, String resizedImageURL, boolean visibleForPublic) {
         SuccessInfo successInfo = new SuccessInfo(true, null, null, null);
         try {
             getService().getTaggingService().updateTag(leaderboardName, raceColumnName, fleetName, tagToUpdate, tag,
-                    comment, imageURL, visibleForPublic);
+                    comment, imageURL, resizedImageURL, visibleForPublic);
         } catch (AuthorizationException e) {
             successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "missingAuthorization"),
                     null, null);
@@ -8415,11 +8416,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
 
                     @Override
                     public void visit(RaceLogTagEvent event) {
-                        // TODO check if if condition is correct D067890
                         if (hasStartTime && isLatestPass(event)) {
                             raceLog.add(new RaceLogTagEventImpl(event.getTag(), event.getComment(), event.getImageURL(),
-                                    event.getCreatedAt(), event.getLogicalTimePoint(), event.getAuthor(),
-                                    raceLog.getCurrentPassId()));
+                                    event.getResizedImageURL(), event.getCreatedAt(), event.getLogicalTimePoint(),
+                                    event.getAuthor(), raceLog.getCurrentPassId()));
                         }
                     }
 

@@ -14,18 +14,19 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
 
     private static final long serialVersionUID = 7213518902555323432L;
 
-    private final String tag, comment, imageURL, username;
+    private final String tag, comment, username, imageURL, resizedImageURL;
     private TimePoint revokedAt;
 
     /**
      * Creates {@link RaceLogTagEvent} with all required information.
      */
-    public RaceLogTagEventImpl(String tag, String comment, String imageURL, TimePoint createdAt,
+    public RaceLogTagEventImpl(String tag, String comment, String imageURL, String resizedImageURL, TimePoint createdAt,
             TimePoint logicalTimePoint, AbstractLogEventAuthor author, Serializable id, int passId) {
         super(createdAt, logicalTimePoint, author, id, passId);
         this.tag = tag;
         this.comment = comment;
         this.imageURL = imageURL;
+        this.resizedImageURL = resizedImageURL;
         username = author.getName();
         revokedAt = null;
     }
@@ -33,17 +34,17 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
     /**
      * Creates {@link RaceLogTagEvent} without required serializable id by generating it.
      */
-    public RaceLogTagEventImpl(String tag, String comment, String imageURL, TimePoint createdAt,
+    public RaceLogTagEventImpl(String tag, String comment, String imageURL, String resizedImageURL, TimePoint createdAt,
             TimePoint logicalTimePoint, AbstractLogEventAuthor author, int passId) {
-        this(tag, comment, imageURL, createdAt, logicalTimePoint, author, randId(), passId);
+        this(tag, comment, imageURL, resizedImageURL, createdAt, logicalTimePoint, author, randId(), passId);
     }
 
     /**
      * Creates {@link RaceLogTagEvent} with minimal required information.
      */
-    public RaceLogTagEventImpl(String tag, String comment, String imageURL, TimePoint logicalTimePoint,
+    public RaceLogTagEventImpl(String tag, String comment, String imageURL, String resizedImageURL, TimePoint logicalTimePoint,
             AbstractLogEventAuthor author, int passId) {
-        this(tag, comment, imageURL, now(), logicalTimePoint, author, randId(), passId);
+        this(tag, comment, imageURL, resizedImageURL, now(), logicalTimePoint, author, randId(), passId);
     }
 
     @Override
@@ -54,11 +55,6 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
     @Override
     public String getComment() {
         return comment;
-    }
-
-    @Override
-    public String getImageURL() {
-        return imageURL;
     }
 
     @Override
@@ -110,6 +106,11 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
                 return false;
         } else if (!imageURL.equals(other.imageURL))
             return false;
+        if (resizedImageURL == null) {
+            if (other.resizedImageURL != null)
+                return false;
+        } else if (!resizedImageURL.equals(other.resizedImageURL))
+            return false;
         if (tag == null) {
             if (other.tag != null)
                 return false;
@@ -135,7 +136,17 @@ public class RaceLogTagEventImpl extends RaceLogEventImpl implements RaceLogTagE
 
     @Override
     public String toString() {
-        return "RaceLogTagEvent [tag=" + tag + ", comment=" + comment + ", imageURL=" + imageURL + ", username="
+        return "RaceLogTagEvent [tag=" + tag + ", comment=" + comment + ", imageURL=" + imageURL + ", resizedImageURL=" + resizedImageURL + ", username="
                 + username + ", revokedAt=" + revokedAt + "]";
+    }
+
+    @Override
+    public String getImageURL() {
+        return imageURL;
+    }
+
+    @Override
+    public String getResizedImageURL() {
+        return resizedImageURL;
     }
 }

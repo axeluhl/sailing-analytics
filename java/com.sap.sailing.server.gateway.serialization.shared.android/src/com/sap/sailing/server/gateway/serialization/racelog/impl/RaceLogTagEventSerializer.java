@@ -16,6 +16,7 @@ public class RaceLogTagEventSerializer extends BaseRaceLogEventSerializer {
     public static final String FIELD_TAG = "tag";
     public static final String FIELD_COMMENT = "comment";
     public static final String FIELD_URL = "url";
+    public static final String FIELD_RESIZED_URL = "resized_url";
 
     public RaceLogTagEventSerializer(JsonSerializer<Competitor> competitorSerializer) {
         super(competitorSerializer);
@@ -33,6 +34,7 @@ public class RaceLogTagEventSerializer extends BaseRaceLogEventSerializer {
         result.put(FIELD_TAG, tagEvent.getTag());
         result.put(FIELD_COMMENT, tagEvent.getComment());
         result.put(FIELD_URL, tagEvent.getImageURL());
+        result.put(FIELD_RESIZED_URL, tagEvent.getResizedImageURL());
         return result;
     }
 }

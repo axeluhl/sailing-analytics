@@ -1774,8 +1774,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             DBObject dbObject) {
         String tag = (String) dbObject.get(FieldNames.RACE_LOG_TAG.name());
         String comment = (String) dbObject.get(FieldNames.RACE_LOG_COMMENT.name());
-        String imageURL = (String) dbObject.get(FieldNames.RACE_LOG_IMAGE_URL.name());
-        return new RaceLogTagEventImpl(tag, comment, imageURL, createdAt, logicalTimePoint, author, id, passId);
+        String imageUrl = (String) dbObject.get(FieldNames.RACE_LOG_IMAGE_URL.name());
+        String resizedImageURL = (String) dbObject.get(FieldNames.RACE_LOG_RESIZED_IMAGE_URL.name());
+        return new RaceLogTagEventImpl(tag, comment, imageUrl, resizedImageURL, createdAt, logicalTimePoint, author, id, passId);
     }
 
     private RaceLogEvent loadRaceLogGateLineOpeningTimeEvent(TimePoint createdAt, AbstractLogEventAuthor author,

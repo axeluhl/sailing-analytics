@@ -69,7 +69,7 @@ public class TagPreviewPanel extends FlowPanel {
      */
     protected void renderPreview(TagInputPanel inputPanel) {
         listContainingPreviewTag.removeAll(listContainingPreviewTag);
-        listContainingPreviewTag.add(new TagDTO(inputPanel.getTag(), inputPanel.getComment(), inputPanel.getImageURL(),
+        listContainingPreviewTag.add(new TagDTO(inputPanel.getTag(), inputPanel.getComment(), inputPanel.getImageURL(), "",
                 inputPanel.isVisibleForPublic(), userService.getCurrentUser().getName(),
                 new MillisecondsTimePoint(taggingPanel.getTimerTime()), MillisecondsTimePoint.now()));
         tagPreviewCellList.setRowData(listContainingPreviewTag);

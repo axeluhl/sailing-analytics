@@ -576,8 +576,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      *            title of tag, must <b>NOT</b> be <code>null</code>
      * @param comment
      *            optional comment of tag
-     * @param imageURL
-     *            optional image URL of tag
+     * @param imageURLs
+     *            optional image URLs of tag
      * @param visibleForPublic
      *            when set to <code>true</code> tag will be saved as public tag (visible for every user), when set to
      *            <code>false</code> tag will be saved as private tag (visible only for creator)
@@ -587,7 +587,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      *         <code>non-successful</code> {@link SuccessInfo}
      */
     SuccessInfo addTag(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment,
-            String imageURL, boolean visibleForPublic, TimePoint raceTimepoint);
+            String imageURL, String resizedImageURL, boolean visibleForPublic, TimePoint raceTimepoint);
 
     /**
      * Removes public {@link TagDTO tag} from {@link RaceLog} and private {@link TagDTO tag} from {@link UserStore}.
@@ -631,7 +631,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      *         <code>non-successful</code> {@link SuccessInfo}
      */
     SuccessInfo updateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tagToUpdate,
-            String tag, String comment, String imageURL, boolean visibleForPublic);
+            String tag, String comment, String imageURL, String resizedImageURL, boolean visibleForPublic);
 
     /**
      * Returns all public and private tags of specified race and current user.

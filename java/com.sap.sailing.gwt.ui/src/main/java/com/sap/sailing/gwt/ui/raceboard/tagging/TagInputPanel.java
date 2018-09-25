@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.ui.raceboard.tagging;
 
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -7,8 +10,12 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sailing.domain.common.dto.TagDTO;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.gwt.adminconsole.URLFieldWithFileUpload;
 
 /**
  * Panel containing input fields for tag/tag button creation and modification.
@@ -24,7 +31,10 @@ public class TagInputPanel extends FlowPanel {
     private static final String DEFAULT_IMAGE_URL = "";
     private static final boolean DEFAULT_VISIBLE_FOR_PUBLIC = false;
 
-    private final TextBox tagTextBox, imageURLTextBox;
+    private final TextBox tagTextBox;
+    private final URLFieldWithFileUpload imageURLTextBox;
+    private int imageWidth = -1;
+    private int imageHeight = -1;
     private final TextArea commentTextArea;
     private final SimplePanel checkboxWrapper;
     private final CheckBox visibleForPublicCheckBox;
@@ -32,14 +42,16 @@ public class TagInputPanel extends FlowPanel {
 
     private final TaggingPanel taggingPanel;
     private final StringMessages stringMessages;
+    private final SailingServiceAsync sailingService;
 
     /**
      * Creates view allowing users to input values for tags and {@link TagButton tag-buttons}.
      */
-    protected TagInputPanel(TaggingPanel taggingPanel) {
+    protected TagInputPanel(TaggingPanel taggingPanel, SailingServiceAsync sailingService) {
         setStyleName(style.tagInputPanel());
         this.taggingPanel = taggingPanel;
         this.stringMessages = taggingPanel.getStringMessages();
+        this.sailingService = sailingService;
 
         tagTextBox = new TextBox();
         tagTextBox.setStyleName(style.tagInputPanelTag());
@@ -47,10 +59,34 @@ public class TagInputPanel extends FlowPanel {
         tagTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelTag());
         add(tagTextBox);
 
-        imageURLTextBox = new TextBox();
-        imageURLTextBox.setStyleName(style.tagInputPanelImageURL());
+        imageURLTextBox = new URLFieldWithFileUpload(stringMessages);
         imageURLTextBox.setTitle(stringMessages.tagLabelImageURL());
         imageURLTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelImageURL());
+        imageURLTextBox.addValueChangeHandler(new ValueChangeHandler<String>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<String> event) {
+                String imageUrlAsString = event.getValue();
+                if (imageUrlAsString == null || imageUrlAsString.isEmpty()) {
+                    imageWidth = -1;
+                    imageHeight = -1;
+                } else {
+                    sailingService.resolveImageDimensions(imageUrlAsString,
+                            new AsyncCallback<Util.Pair<Integer, Integer>>() {
+                                @Override
+                                public void onSuccess(Pair<Integer, Integer> imageSize) {
+                                    if (imageSize != null) {
+                                        imageWidth = imageSize.getA();
+                                        imageHeight = imageSize.getB();
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                }
+                            });
+                }
+            }
+        });
         add(imageURLTextBox);
 
         commentTextArea = new TextArea();
@@ -71,6 +107,14 @@ public class TagInputPanel extends FlowPanel {
         noPermissionForPublicTagsLabel.setStyleName(style.tagInputPanelNoPermissionLabel());
         add(noPermissionForPublicTagsLabel);
         clearAllValues();
+    }
+
+    public int getImageWidth() {
+        return imageWidth;
+    }
+
+    public int getImageHeight() {
+        return imageHeight;
     }
 
     /**
@@ -128,9 +172,9 @@ public class TagInputPanel extends FlowPanel {
     protected String getComment() {
         return commentTextArea.getValue();
     }
-
+   
     protected String getImageURL() {
-        return imageURLTextBox.getValue();
+        return imageURLTextBox.getURL();
     }
 
     protected boolean isVisibleForPublic() {
@@ -171,7 +215,7 @@ public class TagInputPanel extends FlowPanel {
         return tagTextBox;
     }
 
-    protected TextBox getImageURLTextBox() {
+    protected URLFieldWithFileUpload getImageURLTextBox() {
         return imageURLTextBox;
     }
 

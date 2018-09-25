@@ -13,7 +13,8 @@ public enum MediaTagConstants {
     HIGHLIGHT("Highlight", 0, Integer.MAX_VALUE, 0, Integer.MAX_VALUE), 
     LIVESTREAM("Livestream", 0, Integer.MAX_VALUE, 0, Integer.MAX_VALUE), 
     FEATURED("Featured", 0, Integer.MAX_VALUE, 0, Integer.MAX_VALUE), 
-    BIGSCREEN("BigScreen", 0, Integer.MAX_VALUE, 0, Integer.MAX_VALUE);
+    BIGSCREEN("BigScreen", 0, Integer.MAX_VALUE, 0, Integer.MAX_VALUE),
+    TAGGING_IMAGE("Tagging Image", 100, 100, 500, 500);
 
     private final String name;
     private final int minWidth;
