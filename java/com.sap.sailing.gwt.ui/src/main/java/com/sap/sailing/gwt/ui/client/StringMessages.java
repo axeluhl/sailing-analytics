@@ -411,6 +411,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String successfullyUpdatedResultImportUrls();
     String errorRemovingResultImportUrls(String message);
     String pleaseEnterNonEmptyUrl();
+    String pleaseEnterNonEmptyUrlOrUploadImage();
     String addResultImportUrl();
     String errorAddingResultImportUrl(String message);
     String remoteServerInstances();
@@ -1479,6 +1480,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String addEventLogo();
     String noImagesDefinedYet();
     String imageSizeError(String imageType, int minWidth, int maxWidth, int minHeight, int maxHeight);
+    String imageToSmallError(String imageType, int minWidth, int minHeight);
+    String imageResizeError(String imageType, double minRatio, double maxRatio, double ratio);
     String couldNotRetrieveImageSizeYet();
     @Override
     String pleaseOnlyUploadContentYouHaveAllUsageRightsFor();
@@ -2098,21 +2101,22 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String swissTimingUpdateURL();
     String swissTimingUpdateUsername();
     String swissTimingUpdatePassword();
+    String allowResizing();
+    String resizeSuccessfull();
+    String resizeUnsuccessfull();
+    String automaticResizeNeedsStorageService();
 
     String boatClasses();
     String sailorProfiles();
-
     String unknownSailorProfile(String message);
     String profileName();
     String addSailorProfileMessage();
     String badges();
     String newSailorProfileName();
-
     String maxSpeedTitle();
     String maxStartLineSpeed();
     String shortestDistanceToStartline();
     String averageDistanceToStartLine();
-
     String metersValue(Double value);
     String showInRaceboard();
     String couldNotDetermineStatistic();

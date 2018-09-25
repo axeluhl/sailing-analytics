@@ -682,7 +682,7 @@ body ::-webkit-scrollbar-track {
 }
 
 .gwt-Button, .gwt-Button:visited {
-	font-size: 0, 9rem;
+	font-size: 0.9rem;
 	display: inline-block;
 	color: #fff;
 	border: none;
