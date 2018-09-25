@@ -15,18 +15,25 @@ public class RaceboardContextDefinition extends AbstractGenericSerializableSetti
     private StringSetting leaderboardGroupName;
     private UUIDSetting eventId;
     private StringSetting mode;
+    private StringSetting selectedCompetitor;
 
     public RaceboardContextDefinition() {
     }
 
     public RaceboardContextDefinition(String regattaName, String raceName, String leaderboardName,
             String leaderboardGroupName, UUID eventId, String mode) {
+        this(regattaName, raceName, leaderboardName, leaderboardGroupName, eventId, mode, null);
+    }
+
+    public RaceboardContextDefinition(String regattaName, String raceName, String leaderboardName,
+            String leaderboardGroupName, UUID eventId, String mode, String selectedCompetitorId) {
         this.regattaName.setValue(regattaName);
         this.raceName.setValue(raceName);
         this.leaderboardName.setValue(leaderboardName);
         this.leaderboardGroupName.setValue(leaderboardGroupName);
         this.eventId.setValue(eventId);
         this.mode.setValue(mode);
+        this.selectedCompetitor.setValue(selectedCompetitorId);
     }
 
     @Override
@@ -37,6 +44,7 @@ public class RaceboardContextDefinition extends AbstractGenericSerializableSetti
         leaderboardGroupName = new StringSetting("leaderboardGroupName", this);
         eventId = new UUIDSetting("eventId", this);
         mode = new StringSetting("mode", this);
+        selectedCompetitor = new StringSetting("c", this);
     }
 
     public String getRegattaName() {
@@ -61,5 +69,9 @@ public class RaceboardContextDefinition extends AbstractGenericSerializableSetti
 
     public String getMode() {
         return mode.getValue();
+    }
+
+    public String getSelectedCompetitor() {
+        return selectedCompetitor.getValue();
     }
 }

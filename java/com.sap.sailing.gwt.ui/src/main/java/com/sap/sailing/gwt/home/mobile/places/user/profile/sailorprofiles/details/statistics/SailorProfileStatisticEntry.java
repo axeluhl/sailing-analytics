@@ -73,7 +73,7 @@ public class SailorProfileStatisticEntry extends Composite {
             timeUi.setInnerText(SailorProfileNumericStatisticTypeFormater.format(entry.getRelatedTimePointOrNull()));
             timeLabelUi.setInnerText(stringMessages.time() + ": ");
             eventNameUi.setInnerText(entry.getLeaderboardNameOrNull() + " - " + entry.getRaceNameOrNull());
-            showPointInTimeButtonUi.addClickHandler(e -> showInRaceboard(entry, type));
+            showPointInTimeButtonUi.addClickHandler(e -> showInRaceboard(entry, type, competitor.getIdAsString()));
         } else {
             timeDivUi.removeFromParent();
             eventNameUi.removeFromParent();
@@ -88,13 +88,14 @@ public class SailorProfileStatisticEntry extends Composite {
 
     }
 
-    private void showInRaceboard(SingleEntry entry, SailorProfileNumericStatisticType type) {
+    private void showInRaceboard(final SingleEntry entry, final SailorProfileNumericStatisticType type,
+            final String competitorId) {
         final RegattaAndRaceIdentifier raceIdentifier = entry.getRelatedRaceOrNull();
 
         // create raceboard context
         RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(raceIdentifier.getRegattaName(),
                 raceIdentifier.getRaceName(), entry.getLeaderboardNameOrNull(), entry.getLeaderboardGroupNameOrNull(),
-                entry.getEventIdOrNull(), type.getPlayerMode().name());
+                entry.getEventIdOrNull(), type.getPlayerMode().name(), competitorId);
         RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = new RaceBoardPerspectiveOwnSettings(
                 new MillisecondsDurationImpl(entry.getRelatedTimePointOrNull().asMillis()
                         - entry.getRelatedRaceStartTimePointOrNull().asMillis()));
