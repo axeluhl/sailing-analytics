@@ -9,6 +9,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType;
@@ -35,6 +36,9 @@ public class SailorProfileStatisticTable extends Composite {
     @UiField
     HTMLPanel contentContainerStatistic;
 
+    @UiField
+    DivElement sectionTitleIconUi;
+
     public SailorProfileStatisticTable(SailorProfileNumericStatisticType type, SailorProfileStatisticDTO statistic,
             FlagImageResolver flagImageResolver, StringMessages stringMessages) {
         initWidget(uiBinder.createAndBindUi(this));
@@ -42,6 +46,11 @@ public class SailorProfileStatisticTable extends Composite {
         this.sectionTitleUi
                 .setInnerText(SailorProfileNumericStatisticTypeFormater.getDisplayName(type, stringMessages));
 
+        Image icon = new Image();
+        icon.setUrl(SailorProfileNumericStatisticTypeFormater.getIcon(type));
+        icon.setSize("auto", "2em");
+
+        this.sectionTitleIconUi.appendChild(icon.getElement());
         for (Entry<SimpleCompetitorWithIdDTO, ArrayList<SailorProfileStatisticDTO.SingleEntry>> entry : statistic
                 .getResult().entrySet()) {
             for (SingleEntry singleEntry : entry.getValue()) {

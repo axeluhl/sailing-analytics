@@ -8,7 +8,8 @@
         type="com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfileMobileResources" />
     <g:HTMLPanel>
         <g:HTMLPanel ui:field="sectionTitleContainerUi" addStyleNames="{spmr.css.eventTableHeader}">
-            <div ui:field="sectionTitleUi" class="{spmr.css.eventTableHeaderText}" />
+            <div class="{spmr.css.statisticsHeaderLeft}" ui:field="sectionTitleIconUi" />
+            <div class="{spmr.css.eventTableHeaderText} {spmr.css.statisticsHeaderRight" ui:field="sectionTitleUi" />
         </g:HTMLPanel>
         <g:HTMLPanel ui:field="contentContainerStatistic"
             addStyleNames="{spmr.css.eventEntryPanel} {res.mediaCss.column}">

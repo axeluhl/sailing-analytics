@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.de
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType;
+import com.sap.sailing.gwt.home.shared.partials.statistics.StatisticsBoxResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.TimePoint;
 
@@ -21,6 +22,21 @@ public class SailorProfileNumericStatisticTypeFormater {
             return stringMessages.maxSpeedTitle();
         default:
             return type.name();
+        }
+    }
+
+    public static String getIcon(SailorProfileNumericStatisticType type) {
+        switch (type) {
+        case AVERAGE_STARTLINE_DISTANCE:
+            return StatisticsBoxResources.INSTANCE.fastestSailorWhite().getSafeUri().asString();
+        case BEST_DISTANCE_TO_START:
+            return StatisticsBoxResources.INSTANCE.fastestSailorWhite().getSafeUri().asString();
+        case BEST_STARTLINE_SPEED:
+            return StatisticsBoxResources.INSTANCE.maxSpeedWhite().getSafeUri().asString();
+        case MAX_SPEED:
+            return StatisticsBoxResources.INSTANCE.maxSpeedWhite().getSafeUri().asString();
+        default:
+            return "";
         }
     }
 
