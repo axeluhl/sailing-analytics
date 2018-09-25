@@ -155,3 +155,7 @@
     position: initial !important;
     display: inline-block;
 }
+.footerAddButton{
+    width: 100%;
+    height: 100%;
+}

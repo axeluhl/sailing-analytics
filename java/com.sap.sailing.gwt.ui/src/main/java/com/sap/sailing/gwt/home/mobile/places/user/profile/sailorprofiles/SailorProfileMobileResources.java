@@ -56,5 +56,7 @@ public interface SailorProfileMobileResources extends ClientBundle {
         String inlineTitleUi();
 
         String editButton();
+
+        String footerAddButton();
     }
 }
