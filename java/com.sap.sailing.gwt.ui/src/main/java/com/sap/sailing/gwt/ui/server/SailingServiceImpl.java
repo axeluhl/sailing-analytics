@@ -5759,7 +5759,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public boolean authorizeAccessToIgtimiUser(String eMailAddress, String password) throws Exception {
         final Account existingAccount = getIgtimiConnectionFactory().getExistingAccountByEmail(eMailAddress);
         final Account account;
-        if (existingAccount != null) {
+        if (existingAccount == null) {
             final QualifiedObjectIdentifier igtimiAccountId = SecuredDomainType.IGTIMI_ACCOUNT.getQualifiedObjectIdentifier(eMailAddress);
             getSecurityService().setOwnership(getSecurityService().createDefaultOwnershipForNewObject(igtimiAccountId));
             try {

@@ -67,14 +67,12 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
     @Test
     public void testSimulatorOverlayIsAvailableFor49erAtKW2015() throws InterruptedException, UnsupportedEncodingException {
         final RegattaDescriptor regattaDescriptor = new RegattaDescriptor(REGATTA_49ER, BOAT_CLASS_49ER);
-        
         {
             final AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
             final EventConfigurationPanelPO events = adminConsole.goToEvents();
             events.createEventWithDefaultLeaderboardGroupRegattaAndDefaultLeaderboard(EVENT, EVENT_DESC,
                     VENUE, EVENT_START_TIME, EVENT_END_TIME, true, REGATTA_49ER_WITH_SUFFIX, BOAT_CLASS_49ER,
                     EVENT_START_TIME, EVENT_END_TIME, false);
-            
             final RegattaStructureManagementPanelPO regattaStructurePanel = adminConsole.goToRegattaStructure();
             final RegattaDetailsCompositePO regattaDetails = regattaStructurePanel.getRegattaDetails(regattaDescriptor);
             regattaDetails.deleteSeries(SERIES_DEFAULT);
@@ -102,7 +100,6 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
             }
             details.linkRace(new RaceDescriptor("M", DEFAULT_FLEET, true, false, 0), new TrackedRaceDescriptor(REGATTA_49ER_WITH_SUFFIX, BOAT_CLASS_49ER, MEDAL_RACE_49ER));
         }
-
         {
             RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), REGATTA_49ER_WITH_SUFFIX,
                     REGATTA_49ER_WITH_SUFFIX, String.format(RACE_N_49ER, 1));
@@ -110,16 +107,13 @@ public class SimulatorOverlayTest extends AbstractSeleniumTest {
             // Simulator overlay option must not be available without wind data
             Assert.assertFalse(mapSettings.isShowSimulationOverlayCheckBoxVisible());
         }
-        
         {
             final AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
             IgtimiAccountsManagementPanelPO igtimiAccountsManagementPanel = adminConsole.goToIgtimi();
             igtimiAccountsManagementPanel.addAccount(getIgtimiAccountUser(), getIgtimiAccountPassword());
-            
             WindPanelPO windPanel = adminConsole.goToWind();
             windPanel.importWindFromIgtimi(/* waiting up to 10 min */ 10 * 60);
         }
-        
         {
             RaceBoardPage raceboard = RaceBoardPage.goToRaceboardUrl(getWebDriver(), getContextRoot(), REGATTA_49ER_WITH_SUFFIX,
                     REGATTA_49ER_WITH_SUFFIX, String.format(RACE_N_49ER, 1));
