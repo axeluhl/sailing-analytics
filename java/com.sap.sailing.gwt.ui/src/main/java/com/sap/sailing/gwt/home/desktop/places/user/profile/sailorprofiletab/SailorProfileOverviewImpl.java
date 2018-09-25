@@ -79,18 +79,19 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
         sailorProfilesTable.addColumn(navigatorColumn);
         sailorProfilesTable.addColumn(removeColumn);
 
-        profileNameColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().textCellWordWrap());
-        badgeColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().textCellWordWrap());
-        competitorColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().textCellWordWrap());
-        boatClassColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().textCellWordWrap());
+        addWordwrapStyle(profileNameColumn);
+        addWordwrapStyle(badgeColumn);
+        addWordwrapStyle(competitorColumn);
+        addWordwrapStyle(boatClassColumn);
 
-        navigatorColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
+        addButtonStyle(navigatorColumn);
         navigatorColumn.setFieldUpdater(new FieldUpdater<SailorProfileDTO, String>() {
             @Override
             public void update(int index, SailorProfileDTO entry, String value) {
                 presenter.getClientFactory().getPlaceController().goTo(getTargetPlace(entry));
             }
         });
+
         removeColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
         removeColumn.setFieldUpdater(new FieldUpdater<SailorProfileDTO, String>() {
             @Override
@@ -98,6 +99,24 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
                 presenter.removeSailorProfile(dto.getKey());
             }
         });
+
+        sailorProfilesTable.addCellPreviewHandler(e -> {
+            /* no navigation for remove column */
+            if ("click".equals(e.getNativeEvent().getType()) && e.getColumn() != 5) {
+                presenter.getClientFactory().getPlaceController().goTo(new SailorProfilePlace(e.getValue().getKey()));
+            }
+        });
+    }
+
+    private void addWordwrapStyle(Column<SailorProfileDTO, ?> col) {
+        col.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().textCellWordWrap() + " "
+                + SailorProfileDesktopResources.INSTANCE.css().clickableColumn());
+    }
+
+    private void addButtonStyle(Column<SailorProfileDTO, ?> col) {
+        col.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell() + " "
+                + SailorProfileDesktopResources.INSTANCE.css().clickableColumn());
+
     }
 
     private void createFooter() {

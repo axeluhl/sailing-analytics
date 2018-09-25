@@ -30,5 +30,6 @@ public interface SailorProfileDesktopResources extends ClientBundle {
 
         String overviewTableEmpty();
 
+        String clickableColumn();
     }
 }

@@ -68,3 +68,7 @@
     border-radius: .333333333333333em;
     overflow: hidden;
 }
+
+.clickableColumn {
+    cursor: pointer;
+}
