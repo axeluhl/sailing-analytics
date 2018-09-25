@@ -72,16 +72,19 @@ public class StatefulSailorProfileDataProvider implements
     @Override
     public void addSelection(SimpleCompetitorWithIdDTO item) {
         competitors.add(item);
+        sailorProfileDataProvider.updateCompetitors(uuid, competitors, createRefreshCallback(uuid));
     }
 
     @Override
     public void removeSelection(SimpleCompetitorWithIdDTO item) {
         competitors.remove(item);
+        sailorProfileDataProvider.updateCompetitors(uuid, competitors, createRefreshCallback(uuid));
     }
 
     @Override
     public void clearSelection() {
         competitors.clear();
+        sailorProfileDataProvider.updateCompetitors(uuid, competitors, createRefreshCallback(uuid));
     }
 
     @Override
