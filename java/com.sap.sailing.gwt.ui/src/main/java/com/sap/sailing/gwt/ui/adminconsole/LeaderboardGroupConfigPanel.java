@@ -1,5 +1,9 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.DELETE;
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -8,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.google.gwt.core.client.GWT;
@@ -35,6 +40,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
+import com.sap.sailing.gwt.ui.adminconsole.EditOwnershipDialog.DialogConfig;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupDialog.LeaderboardGroupDescriptor;
 import com.sap.sailing.gwt.ui.client.AbstractRegattaPanel;
@@ -63,7 +69,7 @@ import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
-import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.ui.client.UserService;
 
 public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements LeaderboardGroupsDisplayer, LeaderboardsDisplayer {
@@ -582,22 +588,34 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
             }
         });
 
-        final SecuredObjectCompositeConfig<LeaderboardGroupDTO> securedObjectConfig = new SecuredObjectCompositeConfig<>(
-                userService, errorReporter, stringMessages, SecuredDomainType.LEADERBOARD_GROUP,
-                lbg -> lbg.getId().toString());
-        securedObjectConfig.addAction(DefaultActions.UPDATE, this::openEditLeaderboardGroupDialog);
-        securedObjectConfig.addAction(DefaultActions.DELETE, group -> {
+        final SecuredObjectOwnerColumn<LeaderboardGroupDTO> groupColumn = SecuredObjectOwnerColumn
+                .getGroupOwnerColumn();
+        groupColumn.setSortable(true);
+        leaderboardGroupsListHandler.setComparator(groupColumn, groupColumn.getComparator());
+        final SecuredObjectOwnerColumn<LeaderboardGroupDTO> userColumn = SecuredObjectOwnerColumn.getUserOwnerColumn();
+        userColumn.setSortable(true);
+        leaderboardGroupsListHandler.setComparator(userColumn, userColumn.getComparator());
+
+        final HasPermissions type = SecuredDomainType.LEADERBOARD_GROUP;
+        final Function<LeaderboardGroupDTO, String> idFactory = SecuredObjectUtils::getTypeRelativeObjectIdentifier;
+        final AccessControlledActionsColumn<LeaderboardGroupDTO, LeaderboardGroupConfigImagesBarCell> actionsColumn = new AccessControlledActionsColumn<>(
+                new LeaderboardGroupConfigImagesBarCell(stringMessages), userService, type, idFactory);
+        actionsColumn.addAction(UPDATE.name(), UPDATE, this::openEditLeaderboardGroupDialog);
+        actionsColumn.addAction(DELETE.name(), DELETE, group -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveLeaderboardGroup(group.getName()))) {
                 removeLeaderboardGroup(group);
             }
         });
-        securedObjectConfig.addAction(DefaultActions.CHANGE_OWNERSHIP, group -> {
-            final LeaderboardGroupDescriptor descriptor = new LeaderboardGroupDescriptor(group.getName(),
-                    group.description, group.getDisplayName(), group.displayLeaderboardsInReverseOrder,
-                    group.isHasOverallLeaderboard(), group.getOverallLeaderboardDiscardThresholds(),
-                    group.getOverallLeaderboardScoringSchemeType());
-            securedObjectConfig.openOwnershipDialog(group, g -> updateGroup(group.getName(), g, descriptor));
-        });
+        final DialogConfig<LeaderboardGroupDTO> config = EditOwnershipDialog
+                .create(userService.getUserManagementService(), type, idFactory, group -> {
+                    final LeaderboardGroupDescriptor descriptor = new LeaderboardGroupDescriptor(group.getName(),
+                            group.description, group.getDisplayName(), group.displayLeaderboardsInReverseOrder,
+                            group.isHasOverallLeaderboard(), group.getOverallLeaderboardDiscardThresholds(),
+                            group.getOverallLeaderboardScoringSchemeType());
+                    updateGroup(group.getName(), group, descriptor);
+                }, group -> errorReporter.reportError(stringMessages.errorUpdatingOwnership(group.getName())));
+        actionsColumn.addAction(CHANGE_OWNERSHIP.name(), CHANGE_OWNERSHIP, config::openDialog);
+
 
         SelectionCheckboxColumn<LeaderboardGroupDTO> leaderboardTableSelectionColumn =
                 new SelectionCheckboxColumn<LeaderboardGroupDTO>(
@@ -621,8 +639,9 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         groupsTable.addColumn(groupDescriptionColumn, stringMessages.description());
         groupsTable.addColumn(groupDisplayNameColumn, stringMessages.displayName());
         groupsTable.addColumn(hasOverallLeaderboardColumn, stringMessages.useOverallLeaderboard());
-        securedObjectConfig.addOwnerColumns(groupsTable, leaderboardGroupsListHandler);
-        securedObjectConfig.addActionColumn(groupsTable, new LeaderboardGroupConfigImagesBarCell(stringMessages));
+        groupsTable.addColumn(groupColumn, SecuredObjectUtils.SECURITY_MESSAGES.group());
+        groupsTable.addColumn(userColumn, SecuredObjectUtils.SECURITY_MESSAGES.user());
+        groupsTable.addColumn(actionsColumn, stringMessages.actions());
         groupsTable.addColumnSortHandler(leaderboardGroupsListHandler);
 
         refreshableGroupsSelectionModel = leaderboardTableSelectionColumn.getSelectionModel();

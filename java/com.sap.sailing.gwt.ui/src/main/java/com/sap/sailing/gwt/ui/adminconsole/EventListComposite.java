@@ -1,5 +1,9 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.DELETE;
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -9,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.AbstractCell;
@@ -37,6 +42,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.gwt.ui.adminconsole.EditOwnershipDialog.DialogConfig;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupDialog.LeaderboardGroupDescriptor;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.EventsRefresher;
@@ -65,6 +71,7 @@ import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.shared.UserDTO;
@@ -342,16 +349,23 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             }
         };
         
-        final SecuredObjectCompositeConfig<EventDTO> securedObjectConfig = new SecuredObjectCompositeConfig<>(
-                userService, errorReporter, stringMessages, SecuredDomainType.EVENT, event -> event.id.toString());
-        securedObjectConfig.addAction(DefaultActions.UPDATE, this::openEditEventDialog);
-        securedObjectConfig.addAction(DefaultActions.DELETE, event -> {
+        final SecuredObjectOwnerColumn<EventDTO> groupColumn = SecuredObjectOwnerColumn.getGroupOwnerColumn();
+        final SecuredObjectOwnerColumn<EventDTO> userColumn = SecuredObjectOwnerColumn.getUserOwnerColumn();
+
+        final HasPermissions type = SecuredDomainType.EVENT;
+        final Function<EventDTO, String> idFactory = SecuredObjectUtils::getTypeRelativeObjectIdentifier;
+        final AccessControlledActionsColumn<EventDTO, EventConfigImagesBarCell> actionsColumn = new AccessControlledActionsColumn<>(
+                new EventConfigImagesBarCell(stringMessages), userService, type, idFactory);
+        actionsColumn.addAction(UPDATE.name(), UPDATE, this::openEditEventDialog);
+        actionsColumn.addAction(DELETE.name(), DELETE, event -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveEvent(event.getName()))) {
                 removeEvent(event);
             }
         });
-        securedObjectConfig.addAction(DefaultActions.CHANGE_OWNERSHIP,
-                oldEvent -> securedObjectConfig.openOwnershipDialog(oldEvent, event -> updateEvent(event, event)));
+        final DialogConfig<EventDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
+                idFactory, event -> updateEvent(event, event),
+                event -> errorReporter.reportError(stringMessages.errorUpdatingOwnership(event.getName())));
+        actionsColumn.addAction(CHANGE_OWNERSHIP.name(), CHANGE_OWNERSHIP, config::openDialog);
 
         eventNameColumn.setSortable(true);
         venueNameColumn.setSortable(true);
@@ -359,10 +373,12 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         startEndDateColumn.setSortable(true);
         courseAreasColumn.setSortable(true);
         leaderboardGroupsColumn.setSortable(true);
+        groupColumn.setSortable(true);
+        userColumn.setSortable(true);
 
         final ListHandler<EventDTO> columnSortHandler = getEventTableColumnSortHandler(eventListDataProvider.getList(),
                 eventSelectionCheckboxColumn, eventNameColumn, venueNameColumn, startEndDateColumn, isPublicColumn,
-                courseAreasColumn, leaderboardGroupsColumn);
+                courseAreasColumn, leaderboardGroupsColumn, groupColumn, userColumn);
 
         table.addColumn(eventSelectionCheckboxColumn, eventSelectionCheckboxColumn.getHeader());
         table.addColumn(eventNameColumn, stringMessages.event());
@@ -373,8 +389,9 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         table.addColumn(leaderboardGroupsColumn, stringMessages.leaderboardGroups());
         table.addColumn(imagesColumn, stringMessages.images());
         table.addColumn(videosColumn, stringMessages.videos());
-        securedObjectConfig.addOwnerColumns(table, columnSortHandler);
-        securedObjectConfig.addActionColumn(table, new EventConfigImagesBarCell(stringMessages));
+        table.addColumn(groupColumn, SecuredObjectUtils.SECURITY_MESSAGES.group());
+        table.addColumn(userColumn, SecuredObjectUtils.SECURITY_MESSAGES.user());
+        table.addColumn(actionsColumn, stringMessages.actions());
         table.setSelectionModel(eventSelectionCheckboxColumn.getSelectionModel(), eventSelectionCheckboxColumn.getSelectionManager());
 
         table.addColumnSortHandler(columnSortHandler);
@@ -387,7 +404,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             SelectionCheckboxColumn<EventDTO> eventSelectionCheckboxColumn, Column<EventDTO, SafeHtml> eventNameColumn,
             TextColumn<EventDTO> venueNameColumn, TextColumn<EventDTO> startEndDateColumn,
             TextColumn<EventDTO> isPublicColumn, Column<EventDTO, SafeHtml> courseAreasColumn,
-            Column<EventDTO, List<MultipleLinkCell.CellLink>> leaderboardGroupsColumn) {
+            Column<EventDTO, List<MultipleLinkCell.CellLink>> leaderboardGroupsColumn,
+            SecuredObjectOwnerColumn<EventDTO> groupColumn, SecuredObjectOwnerColumn<EventDTO> userColumn) {
         ListHandler<EventDTO> result = new ListHandler<EventDTO>(eventRecords);
         result.setComparator(eventSelectionCheckboxColumn, eventSelectionCheckboxColumn.getComparator());
         result.setComparator(eventNameColumn, new Comparator<EventDTO>() {
@@ -436,6 +454,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                 return e1.getLeaderboardGroups().toString().compareTo(e2.getLeaderboardGroups().toString());
             }
         });
+        result.setComparator(groupColumn, groupColumn.getComparator());
+        result.setComparator(userColumn, userColumn.getComparator());
         return result;
     }
 
