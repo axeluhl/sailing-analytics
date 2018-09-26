@@ -14,7 +14,7 @@ import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
  *
  */
 public interface HasPermissions {
-    String name();
+    String getName();
 
     /**
      * @return the actions for which permissions can be defined on the logical, securable type represented by this

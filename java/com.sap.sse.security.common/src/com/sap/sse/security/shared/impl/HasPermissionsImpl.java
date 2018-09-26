@@ -20,20 +20,20 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
     public HasPermissionsImpl(String logicalTypeName) {
         this(logicalTypeName, DefaultActions.values());
     }
-    
+
     /**
-     * No default actions from {@link DefaultActions} are added implicitly to the set of actions available for the logical
-     * secured type constructed here. All actions available need to be passed explicitly as part of the {@code availableActions}
-     * parameter.
+     * No default actions from {@link DefaultActions} are added implicitly to the set of actions available for the
+     * logical secured type constructed here. All actions available need to be passed explicitly as part of the
+     * {@code availableActions} parameter.
      * 
      * @param logicalTypeName
      *            a type name that can be represented in a {@link WildcardPermission}'s first part without further need
      *            for encoding
      */
-    public HasPermissionsImpl(String logicalTypeName, Action... availableActions) {
+    public HasPermissionsImpl(final String logicalTypeName, final Action... availableActions) {
         super(logicalTypeName);
         assert logicalTypeName.equals(new WildcardPermissionEncoder().encodeAsPermissionPart(logicalTypeName));
-        final int numberOfActionsAvailable = availableActions==null?0:availableActions.length;
+        final int numberOfActionsAvailable = availableActions == null ? 0 : availableActions.length;
         this.availableActions = new Action[numberOfActionsAvailable];
         if (availableActions != null) {
             System.arraycopy(availableActions, 0, this.availableActions, 0, numberOfActionsAvailable);
@@ -41,34 +41,29 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
     }
 
     @Override
-    public String name() {
-        return getName();
-    }
-    
-    @Override
     public Action[] getAvailableActions() {
         return availableActions;
     }
-    
+
     @Override
-    public boolean supports(Action action) {
+    public boolean supports(final Action action) {
         for (final Action supportedAction : availableActions) {
-            if (action == supportedAction) {
+            if (action.equals(supportedAction)) {
                 return true;
             }
         }
         return false;
     }
-    
+
     @Override
-    public String getStringPermission(com.sap.sse.security.shared.HasPermissions.Action... actions) {
+    public String getStringPermission(final Action... actions) {
         final String result;
-        if (actions==null || actions.length==0) {
-            result = name();
+        if (actions == null || actions.length == 0) {
+            result = getName();
         } else {
             final StringBuilder modesString = new StringBuilder();
             boolean first = true;
-            for (com.sap.sse.security.shared.HasPermissions.Action action : actions) {
+            for (final Action action : actions) {
                 assert supports(action);
                 if (first) {
                     first = false;
@@ -77,22 +72,22 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
                 }
                 modesString.append(action.name());
             }
-            result = name()+":"+modesString.toString();
+            result = getName() + ":" + modesString.toString();
         }
         return result;
     }
 
     @Override
-    public WildcardPermission getPermission(com.sap.sse.security.shared.HasPermissions.Action... actions) {
+    public WildcardPermission getPermission(final Action... actions) {
         return new WildcardPermission(getStringPermission(actions));
     }
 
     @Override
-    public String getStringPermissionForObjects(com.sap.sse.security.shared.HasPermissions.Action action, String... typeRelativeObjectIdentifiers) {
+    public String getStringPermissionForObjects(final Action action, final String... typeRelativeObjectIdentifiers) {
         assert supports(action);
         final WildcardPermissionEncoder permissionEncoder = new WildcardPermissionEncoder();
         final StringBuilder result = new StringBuilder(getStringPermission(action));
-        if (typeRelativeObjectIdentifiers!=null && typeRelativeObjectIdentifiers.length>0) {
+        if (typeRelativeObjectIdentifiers != null && typeRelativeObjectIdentifiers.length > 0) {
             result.append(':');
             boolean first = true;
             for (String typeRelativeObjectIdentifier : typeRelativeObjectIdentifiers) {
@@ -106,14 +101,14 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
         }
         return result.toString();
     }
-    
+
     @Override
-    public QualifiedObjectIdentifier getQualifiedObjectIdentifier(String typeRelativeObjectIdentifier) {
-        return new QualifiedObjectIdentifierImpl(name(), typeRelativeObjectIdentifier);
+    public QualifiedObjectIdentifier getQualifiedObjectIdentifier(final String typeRelativeObjectIdentifier) {
+        return new QualifiedObjectIdentifierImpl(getName(), typeRelativeObjectIdentifier);
     }
 
     @Override
-    public WildcardPermission getPermissionForObjects(com.sap.sse.security.shared.HasPermissions.Action action, String... objectIdentifiers) {
+    public WildcardPermission getPermissionForObjects(final Action action, final String... objectIdentifiers) {
         assert supports(action);
         return new WildcardPermission(getStringPermissionForObjects(action, objectIdentifiers));
     }
