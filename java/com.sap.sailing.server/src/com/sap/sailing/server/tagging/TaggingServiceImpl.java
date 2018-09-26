@@ -23,6 +23,7 @@ import com.sap.sailing.domain.common.tagging.TagAlreadyExistsException;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.impl.Activator;
@@ -78,11 +79,10 @@ public class TaggingServiceImpl implements TaggingService {
             throw new RaceLogNotFoundException();
         }
         // check if tag already exists
-        List<TagDTO> publicTags = getPublicTags(leaderboardName, raceColumnName, fleetName);
+        List<TagDTO> publicTags = getPublicTags(leaderboardName, raceColumnName, fleetName, null, false);
         for (TagDTO publicTag : publicTags) {
-            // ignore revoked tags as TagDTO.equals() does ignore revokedAt timepoint
-            if (publicTag.getRevokedAt() == null && publicTag.equals(tag, comment, imageURL, true,
-                    racingService.getServerAuthor().getName(), raceTimepoint)) {
+            if (publicTag.equals(tag, comment, imageURL, true, racingService.getServerAuthor().getName(),
+                    raceTimepoint)) {
                 throw new TagAlreadyExistsException();
             }
         }
@@ -155,7 +155,6 @@ public class TaggingServiceImpl implements TaggingService {
         privateTags.remove(tag);
         SecurityService securityService = getSecurityService();
         String key = serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName);
-        // error code will be set during collection of required data
         if (username != null && securityService != null && key != null) {
             if (privateTags.isEmpty()) {
                 securityService.unsetPreference(username, key);
@@ -215,8 +214,17 @@ public class TaggingServiceImpl implements TaggingService {
     }
 
     @Override
-    public List<TagDTO> getPublicTags(String leaderboardName, String raceColumnName, String fleetName)
-            throws RaceLogNotFoundException {
+    public List<TagDTO> getTags(String leaderboardName, String raceColumnName, String fleetName, TimePoint searchSince,
+            boolean returnRevokedTags) throws RaceLogNotFoundException, ServiceNotFoundException {
+        final List<TagDTO> result = new ArrayList<TagDTO>();
+        Util.addAll(getPublicTags(leaderboardName, raceColumnName, fleetName, searchSince, returnRevokedTags), result);
+        Util.addAll(getPrivateTags(leaderboardName, raceColumnName, fleetName), result);
+        return result;
+    }
+
+    @Override
+    public List<TagDTO> getPublicTags(String leaderboardName, String raceColumnName, String fleetName,
+            TimePoint searchSince, boolean returnRevokedTags) throws RaceLogNotFoundException {
         final List<TagDTO> result = new ArrayList<TagDTO>();
         RaceLog raceLog = racingService.getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog == null) {
@@ -225,9 +233,17 @@ public class TaggingServiceImpl implements TaggingService {
         ReadonlyRaceState raceState = ReadonlyRaceStateImpl.getOrCreate(racingService, raceLog);
         Iterable<RaceLogTagEvent> foundTagEvents = raceState.getTagEvents();
         for (RaceLogTagEvent tagEvent : foundTagEvents) {
-            result.add(new TagDTO(tagEvent.getTag(), tagEvent.getComment(), tagEvent.getImageURL(), true,
-                    tagEvent.getUsername(), tagEvent.getLogicalTimePoint(), tagEvent.getCreatedAt(),
-                    tagEvent.getRevokedAt()));
+            // check if revoked tags should be returned or tag is not revoked
+            if (returnRevokedTags || (!returnRevokedTags && tagEvent.getRevokedAt() == null)) {
+                // check if tag got created/revoked after searchSince or searchSince is null
+                if (searchSince == null || (searchSince != null && tagEvent.getCreatedAt().after(searchSince)
+                        && (tagEvent.getRevokedAt() == null
+                                || (tagEvent.getRevokedAt() != null && tagEvent.getRevokedAt().after(searchSince))))) {
+                    result.add(new TagDTO(tagEvent.getTag(), tagEvent.getComment(), tagEvent.getImageURL(), true,
+                            tagEvent.getUsername(), tagEvent.getLogicalTimePoint(), tagEvent.getCreatedAt(),
+                            tagEvent.getRevokedAt()));
+                }
+            }
         }
         return result;
     }

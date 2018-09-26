@@ -6564,7 +6564,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
     public List<TagDTO> getPublicTags(String leaderboardName, String raceColumnName, String fleetName) {
         List<TagDTO> result = new ArrayList<TagDTO>();
         try {
-            result.addAll(getService().getTaggingService().getPublicTags(leaderboardName, raceColumnName, fleetName));
+            result.addAll(getService().getTaggingService().getPublicTags(leaderboardName, raceColumnName, fleetName, null, false));
         } catch (Exception e) {
             // do nothing as method will always return at least an empty list
         }
