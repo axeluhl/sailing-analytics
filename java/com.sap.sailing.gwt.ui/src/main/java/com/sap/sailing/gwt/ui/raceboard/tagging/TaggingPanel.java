@@ -120,10 +120,11 @@ public class TaggingPanel extends ComponentWithoutSettings
 
         style = TagPanelResources.INSTANCE.style();
         style.ensureInjected();
-        TagCellListResources.INSTANCE.cellListStyle().ensureInjected();
+        TagPanelResources.INSTANCE.cellListStyle().ensureInjected();
+        TagPanelResources.INSTANCE.cellTableStyle().ensureInjected();
 
         tagCellList = new CellList<TagDTO>(new TagCell(this, stringMessages, userService, false),
-                TagCellListResources.INSTANCE);
+                TagPanelResources.INSTANCE);
         tagSelectionModel = new SingleSelectionModel<TagDTO>();
         tagListProvider = new TagListProvider();
 

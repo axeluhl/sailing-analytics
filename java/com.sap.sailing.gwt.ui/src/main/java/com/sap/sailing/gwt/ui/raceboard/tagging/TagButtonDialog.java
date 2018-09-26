@@ -83,7 +83,6 @@ public class TagButtonDialog extends DialogBox {
 
     private final TagPanelResources resources = TagPanelResources.INSTANCE;
     private final TagPanelStyle style = resources.style();
-    private final TagButtonCellTableResources buttonTableResources = GWT.create(TagButtonCellTableResources.class);
 
     private final TaggingPanel taggingPanel;
     private final StringMessages stringMessages;
@@ -99,7 +98,8 @@ public class TagButtonDialog extends DialogBox {
      * @param footerPanel
      *            footer panel of {@link TaggingPanel}
      */
-    public TagButtonDialog(TaggingPanel taggingPanel, TagFooterPanel footerPanel, StringMessages stringMessages, UserService userService) {
+    public TagButtonDialog(TaggingPanel taggingPanel, TagFooterPanel footerPanel, StringMessages stringMessages,
+            UserService userService) {
         this.taggingPanel = taggingPanel;
         this.stringMessages = stringMessages;
 
@@ -149,7 +149,7 @@ public class TagButtonDialog extends DialogBox {
      */
     private CellTable<TagButton> createTable(TagFooterPanel footerPanel, TagInputPanel inputPanel,
             TagPreviewPanel tagPreviewPanel) {
-        CellTable<TagButton> tagButtonTable = new CellTable<TagButton>(15, buttonTableResources);
+        CellTable<TagButton> tagButtonTable = new CellTable<TagButton>(15, resources);
         tagButtonTable.setStyleName(style.tagButtonTable());
 
         // columns

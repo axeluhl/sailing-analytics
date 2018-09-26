@@ -17,8 +17,8 @@ import com.sap.sse.security.ui.client.UserService;
  */
 public class TagPreviewPanel extends FlowPanel {
 
-    private final TagCellListResources cellResources = TagCellListResources.INSTANCE;
-    private final TagPanelStyle style = TagPanelResources.INSTANCE.style();
+    private final TagPanelResources resources = TagPanelResources.INSTANCE;
+    private final TagPanelStyle style = resources.style();
 
     private final TaggingPanel taggingPanel;
     private final UserService userService;
@@ -42,7 +42,7 @@ public class TagPreviewPanel extends FlowPanel {
 
         setStyleName(style.tagPreviewPanel());
         tagPreviewCellList = new CellList<TagDTO>(new TagCell(taggingPanel, stringMessages, userService, true),
-                cellResources);
+                resources);
         listContainingPreviewTag = new ArrayList<TagDTO>();
         add(new Label(stringMessages.tagPreview()));
         add(tagPreviewCellList);

@@ -1,14 +1,15 @@
 package com.sap.sailing.gwt.ui.raceboard.tagging;
 
 import com.google.gwt.core.shared.GWT;
-import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.user.cellview.client.CellList;
+import com.google.gwt.user.cellview.client.CellTable;
 
 /**
  * Interface for styling {@link TaggingPanel} and its content.
  */
-public interface TagPanelResources extends ClientBundle {
+public interface TagPanelResources extends CellList.Resources, CellTable.Resources {
     public static final TagPanelResources INSTANCE = GWT.create(TagPanelResources.class);
 
     @Source("com/sap/sailing/gwt/ui/client/images/share.png")
@@ -46,6 +47,14 @@ public interface TagPanelResources extends ClientBundle {
 
     @Source("com/sap/sailing/gwt/ui/client/images/plus_transparent.png")
     ImageResource plusTransparent();
+
+    @Override
+    @Source("tag-button-celltable.gss")
+    public CellTable.Style cellTableStyle();
+
+    @Override
+    @Source("tag-celllist.gss")
+    public CellList.Style cellListStyle();
 
     @Source("tagging-panel.gss")
     public TagPanelStyle style();
