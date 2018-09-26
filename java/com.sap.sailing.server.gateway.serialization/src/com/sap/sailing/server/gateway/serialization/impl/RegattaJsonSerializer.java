@@ -7,7 +7,6 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 
 public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
