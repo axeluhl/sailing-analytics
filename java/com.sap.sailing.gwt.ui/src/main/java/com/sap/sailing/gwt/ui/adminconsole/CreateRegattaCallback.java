@@ -176,15 +176,15 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
                     public void ok(final LeaderboardGroupDTO selectedLeaderboardGroup) {
                         final List<String> leaderboardNames = new ArrayList<>();
                         for (StrippedLeaderboardDTO leaderboard : selectedLeaderboardGroup.getLeaderboards()) {
-                            leaderboardNames.add(leaderboard.name);
+                            leaderboardNames.add(leaderboard.getName());
                         }
-                        leaderboardNames.add(newRegattaLeaderboard.name);
+                        leaderboardNames.add(newRegattaLeaderboard.getName());
                         sailingService.updateLeaderboardGroup(selectedLeaderboardGroup.getName(), selectedLeaderboardGroup.getName(), selectedLeaderboardGroup.description,
                                 selectedLeaderboardGroup.getDisplayName(), leaderboardNames, selectedLeaderboardGroup.getOverallLeaderboardDiscardThresholds(),
                                 selectedLeaderboardGroup.getOverallLeaderboardScoringSchemeType(), new MarkedAsyncCallback<Void>(new AsyncCallback<Void>() {
                                     @Override
                                     public void onFailure(Throwable caught) {
-                                        errorReporter.reportError(stringMessages.failedToLinkLeaderboardToLeaderboardGroup(newRegattaLeaderboard.name, selectedLeaderboardGroup.getName()));
+                                        errorReporter.reportError(stringMessages.failedToLinkLeaderboardToLeaderboardGroup(newRegattaLeaderboard.getName(), selectedLeaderboardGroup.getName()));
                                     }
 
                                     @Override

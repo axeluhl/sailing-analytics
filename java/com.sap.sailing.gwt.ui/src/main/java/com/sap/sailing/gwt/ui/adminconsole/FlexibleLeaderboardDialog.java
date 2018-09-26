@@ -38,7 +38,7 @@ public abstract class FlexibleLeaderboardDialog extends AbstractLeaderboardDialo
             boolean nonEmpty = leaderboardToValidate.getName() != null && leaderboardToValidate.getName().length() > 0;
             boolean unique = true;
             for (StrippedLeaderboardDTO dao : existingLeaderboards) {
-                if(dao.name.equals(leaderboardToValidate.getName())){
+                if(dao.getName().equals(leaderboardToValidate.getName())){
                     unique = false;
                 }
             }

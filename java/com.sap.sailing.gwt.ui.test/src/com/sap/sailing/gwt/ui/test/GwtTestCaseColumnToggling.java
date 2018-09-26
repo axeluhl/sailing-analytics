@@ -124,7 +124,7 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
                         new AsyncCallback<StrippedLeaderboardDTO>() {
                             @Override
                             public void onSuccess(StrippedLeaderboardDTO result) {
-                                System.out.println("Created Leaderboard "+result.name);
+                                System.out.println("Created Leaderboard "+result.getName());
                                 addColumnToLeaderboard();
                             }
 

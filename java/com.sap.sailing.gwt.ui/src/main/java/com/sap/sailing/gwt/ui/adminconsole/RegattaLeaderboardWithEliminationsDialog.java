@@ -56,7 +56,7 @@ public abstract class RegattaLeaderboardWithEliminationsDialog extends AbstractL
             String errorMessage;
             boolean unique = true;
             for (StrippedLeaderboardDTO dao : existingLeaderboards) {
-                if (dao.name.equals(leaderboardToValidate.getName())) {
+                if (dao.getName().equals(leaderboardToValidate.getName())) {
                     unique = false;
                 }
             }
@@ -148,7 +148,7 @@ public abstract class RegattaLeaderboardWithEliminationsDialog extends AbstractL
     protected StrippedLeaderboardDTO getSelectedLeaderboard() {
         final String selectedRegattaLeaderboardName = regattaLeaderboardsListBox.getSelectedValue();
         for (final StrippedLeaderboardDTO l : existingLeaderboards) {
-            if (l.name.equals(selectedRegattaLeaderboardName)) {
+            if (l.getName().equals(selectedRegattaLeaderboardName)) {
                 return l;
             }
         }
@@ -162,13 +162,13 @@ public abstract class RegattaLeaderboardWithEliminationsDialog extends AbstractL
         for (StrippedLeaderboardDTO leaderboard : existingLeaderboards) {
             sortedRegattaLeaderboards.add(leaderboard);
         }
-        Collections.sort(sortedRegattaLeaderboards, (rl1, rl2) -> rl1.name.compareTo(rl2.name));
+        Collections.sort(sortedRegattaLeaderboards, (rl1, rl2) -> rl1.getName().compareTo(rl2.getName()));
         result.addItem(stringMessages.pleaseSelectARegatta());
         int i=1;
         for (StrippedLeaderboardDTO leaderboard : sortedRegattaLeaderboards) {
             if (leaderboard.type.isRegattaLeaderboard()) {
-                result.addItem(leaderboard.name, leaderboard.name);
-                if (preSelectedRegattaName != null && leaderboard.name.equals(preSelectedRegattaName)) {
+                result.addItem(leaderboard.getName(), leaderboard.getName());
+                if (preSelectedRegattaName != null && leaderboard.getName().equals(preSelectedRegattaName)) {
                     result.setSelectedIndex(i);
                 }
                 i++;

@@ -81,7 +81,7 @@ public class EventDTO extends EventBaseDTO {
     public AbstractLeaderboardDTO getLeaderboardByName(String leaderboardName) {
         for (LeaderboardGroupDTO leaderboardGroup : this.getLeaderboardGroups()) {
             for (StrippedLeaderboardDTO leaderboardDTO : leaderboardGroup.getLeaderboards()) {
-                if(leaderboardName.equals(leaderboardDTO.name)) {
+                if(leaderboardName.equals(leaderboardDTO.getName())) {
                     return leaderboardDTO;
                 }
             }

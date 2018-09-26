@@ -14,10 +14,8 @@ import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sse.common.Util;
 
-public abstract class AbstractLeaderboardDTO implements Serializable {
+public abstract class AbstractLeaderboardDTO extends NamedSecuredObjectDTO implements Serializable {
     private static final long serialVersionUID = -205106531931903527L;
-
-    public String name;
 
     private List<RaceColumnDTO> races;
     public Map<CompetitorDTO, String> competitorDisplayNames;
@@ -350,7 +348,7 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
         result = prime * result + Arrays.hashCode(discardThresholds);
         result = prime * result + (hasCarriedPoints ? 1231 : 1237);
         result = prime * result + ((type == null) ? 0 : type.hashCode());
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((getName() == null) ? 0 : getName().hashCode());
         result = prime * result + ((scoringScheme == null) ? 0 : scoringScheme.hashCode());
         if (races == null) {
             result = prime * result;
@@ -387,10 +385,10 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
             return false;
         if (scoringScheme != other.scoringScheme)
             return false;
-        if (name == null) {
-            if (other.name != null)
+        if (getName() == null) {
+            if (other.getName() != null)
                 return false;
-        } else if (!name.equals(other.name))
+        } else if (!getName().equals(other.getName()))
             return false;
         if (races == null) {
             if (other.races != null)
@@ -440,9 +438,4 @@ public abstract class AbstractLeaderboardDTO implements Serializable {
         }
         return result;
     }
-
-    public String getName() {
-        return name;
-    }
-
 }

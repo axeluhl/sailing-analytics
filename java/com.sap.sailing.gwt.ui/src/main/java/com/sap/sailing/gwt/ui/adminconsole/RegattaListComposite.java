@@ -1,11 +1,16 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.DELETE;
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Function;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.core.client.GWT;
@@ -26,6 +31,7 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.gwt.ui.adminconsole.EditOwnershipDialog.DialogConfig;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -46,7 +52,7 @@ import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
-import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
@@ -228,16 +234,27 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
             }
         });
 
-        final SecuredObjectCompositeConfig<RegattaDTO> securedObjectConfig = new SecuredObjectCompositeConfig<>(
-                userService, errorReporter, stringMessages, SecuredDomainType.REGATTA, RegattaDTO::getName);
-        securedObjectConfig.addAction(DefaultActions.UPDATE, this::editRegatta);
-        securedObjectConfig.addAction(DefaultActions.DELETE, regatta -> {
+        final SecuredObjectOwnerColumn<RegattaDTO> groupColumn = SecuredObjectOwnerColumn.getGroupOwnerColumn();
+        groupColumn.setSortable(true);
+        columnSortHandler.setComparator(groupColumn, groupColumn.getComparator());
+        final SecuredObjectOwnerColumn<RegattaDTO> userColumn = SecuredObjectOwnerColumn.getUserOwnerColumn();
+        userColumn.setSortable(true);
+        columnSortHandler.setComparator(userColumn, userColumn.getComparator());
+
+        final HasPermissions type = SecuredDomainType.REGATTA;
+        final Function<RegattaDTO, String> idFactory = SecuredObjectUtils::getTypeRelativeObjectIdentifier;
+        final AccessControlledActionsColumn<RegattaDTO, RegattaConfigImagesBarCell> actionsColumn = new AccessControlledActionsColumn<>(
+                new RegattaConfigImagesBarCell(stringMessages), userService, type, idFactory);
+        actionsColumn.addAction(UPDATE.name(), UPDATE, this::editRegatta);
+        actionsColumn.addAction(DELETE.name(), DELETE, regatta -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveRegatta(regatta.getName()))) {
                 removeRegatta(regatta);
             }
         });
-        securedObjectConfig.addAction(DefaultActions.CHANGE_OWNERSHIP,
-                regatta -> securedObjectConfig.openOwnershipDialog(regatta, this::commitEditedRegatta));
+        final DialogConfig<RegattaDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
+                idFactory, this::commitEditedRegatta,
+                regatta -> errorReporter.reportError(stringMessages.errorUpdatingOwnership(regatta.getName())));
+        actionsColumn.addAction(CHANGE_OWNERSHIP.name(), CHANGE_OWNERSHIP, config::openDialog);
 
         table.addColumn(regattaSelectionCheckboxColumn, regattaSelectionCheckboxColumn.getHeader());
         table.addColumn(regattaNameColumn, stringMessages.regattaName());
@@ -245,8 +262,9 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         table.addColumn(startEndDateColumn, stringMessages.from() + "/" + stringMessages.to());
         table.addColumn(regattaBoatClassColumn, stringMessages.boatClass());
         table.addColumn(rankingMetricColumn, stringMessages.rankingMetric());
-        securedObjectConfig.addOwnerColumns(table, columnSortHandler);
-        securedObjectConfig.addActionColumn(table, new RegattaConfigImagesBarCell(stringMessages));
+        table.addColumn(groupColumn, SecuredObjectUtils.SECURITY_MESSAGES.group());
+        table.addColumn(userColumn, SecuredObjectUtils.SECURITY_MESSAGES.user());
+        table.addColumn(actionsColumn, stringMessages.actions());
         table.setSelectionModel(regattaSelectionCheckboxColumn.getSelectionModel(), regattaSelectionCheckboxColumn.getSelectionManager());
         return table;
     }
