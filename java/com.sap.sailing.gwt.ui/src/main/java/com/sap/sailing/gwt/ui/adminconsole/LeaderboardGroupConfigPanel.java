@@ -209,7 +209,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
             @Override
             public Iterable<String> getSearchableStrings(StrippedLeaderboardDTO t) {
                 List<String> strings = new ArrayList<String>();
-                strings.add(t.name);
+                strings.add(t.getName());
                 strings.add(t.displayName);
                 return strings;
             }
@@ -222,11 +222,11 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                 new EntityIdentityComparator<StrippedLeaderboardDTO>() {
                     @Override
                     public boolean representSameEntity(StrippedLeaderboardDTO dto1, StrippedLeaderboardDTO dto2) {
-                        return dto1.name.equals(dto2.name);
+                        return dto1.getName().equals(dto2.getName());
                     }
                     @Override
                     public int hashCode(StrippedLeaderboardDTO t) {
-                        return t.name.hashCode();
+                        return t.getName().hashCode();
                     }
                 }, leaderboardsFilterablePanel.getAllListDataProvider(), leaderboardsTable);
         refreshableLeaderboardsSelectionModel = leaderboardTableSelectionColumn.getSelectionModel();
@@ -247,14 +247,14 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         TextColumn<StrippedLeaderboardDTO> leaderboardsNameColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
             public String getValue(StrippedLeaderboardDTO leaderboard) {
-                return leaderboard.name;
+                return leaderboard.getName();
             }
         };
         leaderboardsNameColumn.setSortable(true);
         leaderboardsListHandler.setComparator(leaderboardsNameColumn, new Comparator<StrippedLeaderboardDTO>() {
             @Override
             public int compare(StrippedLeaderboardDTO l1, StrippedLeaderboardDTO l2) {
-                return new NaturalComparator(false).compare(l1.name, l2.name);
+                return new NaturalComparator(false).compare(l1.getName(), l2.getName());
             }
         });
 
@@ -361,7 +361,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         TextColumn<StrippedLeaderboardDTO> groupDetailsNameColumn = new TextColumn<StrippedLeaderboardDTO>() {
             @Override
             public String getValue(StrippedLeaderboardDTO leaderboard) {
-                return leaderboard.name;
+                return leaderboard.getName();
             }
         };
 
@@ -392,11 +392,11 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                             @Override
                             public boolean representSameEntity(StrippedLeaderboardDTO dto1,
                                     StrippedLeaderboardDTO dto2) {
-                                return dto1.name.equals(dto2.name);
+                                return dto1.getName().equals(dto2.getName());
                             }
                             @Override
                             public int hashCode(StrippedLeaderboardDTO t) {
-                                return t.name.hashCode();
+                                return t.getName().hashCode();
                             }
                         }, groupDetailsProvider, groupDetailsTable);
 
@@ -768,7 +768,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
     private void updateGroup(final String oldGroupName, final LeaderboardGroupDTO groupToUpdate, final LeaderboardGroupDescriptor updateDescriptor) {
         List<String> leaderboardNames = new ArrayList<String>();
         for (StrippedLeaderboardDTO leaderboardDTO : groupToUpdate.leaderboards) {
-            leaderboardNames.add(leaderboardDTO.name);
+            leaderboardNames.add(leaderboardDTO.getName());
         }
         sailingService.updateLeaderboardGroup(oldGroupName, updateDescriptor.getName(), updateDescriptor.getDescription(),
                 updateDescriptor.getDisplayName(),
@@ -820,7 +820,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
     private void updateGroup(final LeaderboardGroupDTO group) {
         List<String> leaderboardNames = new ArrayList<String>();
         for (StrippedLeaderboardDTO leaderboardDTO : group.leaderboards) {
-            leaderboardNames.add(leaderboardDTO.name);
+            leaderboardNames.add(leaderboardDTO.getName());
         }
         sailingService.updateLeaderboardGroup(group.getName(), group.getName(), group.description,
                 group.getDisplayName(),

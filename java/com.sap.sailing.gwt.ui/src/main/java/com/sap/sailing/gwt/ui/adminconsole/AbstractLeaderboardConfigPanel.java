@@ -172,7 +172,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
             @Override
             public List<String> getSearchableStrings(StrippedLeaderboardDTO t) {
                 List<String> strings = new ArrayList<String>();
-                strings.add(t.name);
+                strings.add(t.getName());
                 strings.add(t.displayName);
                 return strings;
             }
@@ -334,11 +334,11 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                 tableResources.cellTableStyle().cellTableCheckboxColumnCell(), new EntityIdentityComparator<StrippedLeaderboardDTO>() {
                     @Override
                     public boolean representSameEntity(StrippedLeaderboardDTO dto1, StrippedLeaderboardDTO dto2) {
-                        return dto1.name.equals(dto2.name);
+                        return dto1.getName().equals(dto2.getName());
                     }
                     @Override
                     public int hashCode(StrippedLeaderboardDTO t) {
-                        return t.name.hashCode();
+                        return t.getName().hashCode();
                     }
                 }, listDataProvider, leaderboardTable);
         selectionCheckboxColumn.setSortable(true);
@@ -368,7 +368,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
                         @Override
                         public void onSuccess(StrippedLeaderboardDTO leaderboard) {
                             for (StrippedLeaderboardDTO leaderboardDTO : leaderboardSelectionModel.getSelectedSet()) {
-                                if (leaderboardDTO.name.equals(leaderboardName)) {
+                                if (leaderboardDTO.getName().equals(leaderboardName)) {
                                     leaderboardSelectionModel.setSelected(leaderboardDTO, false);
                                     break;
                                 }
@@ -392,7 +392,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         int index = -1;
         for (StrippedLeaderboardDTO existingLeaderboard : leaderboardList) {
             index++;
-            if (existingLeaderboard.name.equals(leaderboardToReplace)) {
+            if (existingLeaderboard.getName().equals(leaderboardToReplace)) {
                 break;
             }
         }
@@ -500,7 +500,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
     }
 
     protected String getSelectedLeaderboardName() {
-        return getSelectedLeaderboard() != null ? getSelectedLeaderboard().name : null;
+        return getSelectedLeaderboard() != null ? getSelectedLeaderboard().getName() : null;
     }
 
     protected boolean canBoatsOfCompetitorsChangePerRace() {

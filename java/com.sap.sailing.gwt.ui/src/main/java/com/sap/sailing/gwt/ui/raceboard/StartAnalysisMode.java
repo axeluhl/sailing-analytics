@@ -166,7 +166,7 @@ public class StartAnalysisMode extends RaceBoardModeWithPerRaceCompetitors {
         if (getLeaderboardForSpecificTimePoint() == null &&
                 getRaceColumn() != null && getLeaderboard() != null
                 && timerAdjusted) {
-            loadLeaderboardForSpecificTimePoint(getLeaderboard().name, getRaceColumn().getName(), getTimer().getTime());
+            loadLeaderboardForSpecificTimePoint(getLeaderboard().getName(), getRaceColumn().getName(), getTimer().getTime());
         }
         if (!competitorSelectionUpdated && getLeaderboardForSpecificTimePoint() != null && getCompetitorsInRace() != null) {
             competitorSelectionUpdated = true;

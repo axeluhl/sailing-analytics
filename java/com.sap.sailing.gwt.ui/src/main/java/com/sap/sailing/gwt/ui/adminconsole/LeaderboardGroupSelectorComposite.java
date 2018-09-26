@@ -116,7 +116,7 @@ public class LeaderboardGroupSelectorComposite extends Composite implements HasV
                     } else {
                         builder.appendHtmlConstant("<br>");
                     }
-                    builder.appendEscaped(leaderboard.name);
+                    builder.appendEscaped(leaderboard.getName());
                 }
                 return builder.toSafeHtml();
             }
@@ -195,7 +195,7 @@ public class LeaderboardGroupSelectorComposite extends Composite implements HasV
                     } else {
                         builder.appendHtmlConstant("<br>");
                     }
-                    builder.appendEscaped(leaderboard.name);
+                    builder.appendEscaped(leaderboard.getName());
                 }
                 return builder.toSafeHtml();
             }

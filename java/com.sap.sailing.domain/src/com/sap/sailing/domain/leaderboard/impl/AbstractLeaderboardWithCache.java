@@ -157,13 +157,6 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
         }
     }
 
-    private static class UUIDGenerator implements LeaderboardDTO.UUIDGenerator {
-        @Override
-        public String generateRandomUUID() {
-            return UUID.randomUUID().toString();
-        }
-    }
-
     /**
      * Handles the invalidation of the {@link SailingServiceImpl#raceDetailsAtEndOfTrackingCache} entries if the tracked
      * race changes in any way. In particular, for {@link #statusChanged}, when the status changes away from LOADING,
@@ -365,11 +358,11 @@ public abstract class AbstractLeaderboardWithCache implements Leaderboard {
                 : this.getScoreCorrection().getTimePointOfLastCorrectionsValidity().asDate(), 
                 this.getScoreCorrection() == null ? null : this.getScoreCorrection().getComment(),
                 this.getScoringScheme() == null ? null : this.getScoringScheme().getType(), this
-                        .getScoringScheme().isHigherBetter(), new UUIDGenerator(), addOverallDetails,
+                        .getScoringScheme().isHigherBetter(), () -> UUID.randomUUID().toString(), addOverallDetails,
                         boatClass==null?null:new BoatClassDTO(boatClass.getName(), boatClass.getDisplayName(), boatClass.getHullLength(), boatClass.getHullBeam()));
         result.type = getLeaderboardType();
         result.competitors = new ArrayList<>();
-        result.name = this.getName();
+        result.setName(this.getName());
         result.displayName = this.getDisplayName();
         result.competitorDisplayNames = new HashMap<>();
         boolean isLeaderboardThatHasRegattaLike = this instanceof LeaderboardThatHasRegattaLike;

@@ -176,7 +176,7 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
             raceColumnNameAsList.add(getRaceColumn().getName());
         }
         final GetLeaderboardByNameAction getLeaderboardByNameAction = new GetLeaderboardByNameAction(
-                getLeaderboardPanel().getSailingService(), getLeaderboardPanel().getLeaderboard().name,
+                getLeaderboardPanel().getSailingService(), getLeaderboardPanel().getLeaderboard().getName(),
                 getTimer().getTime(), raceColumnNameAsList, /* addOverallDetails */ false,
                 getLeaderboard(), /* fillTotalPointsUncorrected */ false,
                 /* timerToAdjustOffsetIn */ getTimer(), /* errorReporter */ null, StringMessages.INSTANCE);

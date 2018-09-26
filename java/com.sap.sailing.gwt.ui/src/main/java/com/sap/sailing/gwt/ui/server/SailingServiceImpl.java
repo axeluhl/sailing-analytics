@@ -2588,7 +2588,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         StrippedLeaderboardDTO leaderboardDTO = new StrippedLeaderboardDTO(convertToBoatClassDTO(leaderboard.getBoatClass()));
         TimePoint startOfLatestRace = null;
         Long delayToLiveInMillisForLatestRace = null;
-        leaderboardDTO.name = leaderboard.getName();
+        leaderboardDTO.setName(leaderboard.getName());
         leaderboardDTO.displayName = leaderboard.getDisplayName();
         leaderboardDTO.competitorDisplayNames = new HashMap<>();
         leaderboardDTO.competitorsCount = Util.size(leaderboard.getCompetitors());

@@ -239,7 +239,7 @@ public class ExpeditionAllInOneAfterImportHandler {
             String raceColumnName = race.getB();
             String fleetName= race.getC();
             racesToStopAndStartTrackingFor.add(new RegattaNameAndRaceName(regattaName, raceName));
-            leaderboardRaceColumnFleetNames.add(new Triple<>(leaderboard.name, raceColumnName, fleetName));
+            leaderboardRaceColumnFleetNames.add(new Triple<>(leaderboard.getName(), raceColumnName, fleetName));
             raceNames.add(new Pair<String, String>(raceName, raceColumnName));
         }
         
