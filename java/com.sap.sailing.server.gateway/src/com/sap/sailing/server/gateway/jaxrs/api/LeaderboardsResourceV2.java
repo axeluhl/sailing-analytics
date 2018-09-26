@@ -296,7 +296,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 break;
             case RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS:
                 name = "currentSpeedOverGround-kts";
-                if (currentLegEntry != null) {
+                if (currentLegEntry != null && currentLegEntry.currentSpeedOverGroundInKnots != null) {
                     value = roundDouble(currentLegEntry.currentSpeedOverGroundInKnots, 2);
                 }
                 break;

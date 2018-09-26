@@ -56,6 +56,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
     private Integer lastHeight;
     private Size lastScale;
     private Color lastColor;
+    private DisplayMode lastDisplayMode;
     
     public static enum DisplayMode { DEFAULT, SELECTED, NOT_SELECTED };
     private DisplayMode displayMode;
@@ -93,7 +94,8 @@ public class BoatOverlay extends CanvasOverlayV3 {
             if (lastWidth == null || canvasWidth != lastWidth || lastHeight == null || canvasHeight != lastHeight) {
                 setCanvasSize(canvasWidth, canvasHeight);
             }
-            if (needToDraw(boatFix.legType, boatFix.tack, isSelected(), canvasWidth, canvasHeight, boatSizeScaleFactor, color)) {
+            if (needToDraw(boatFix.legType, boatFix.tack, isSelected(), canvasWidth, canvasHeight, boatSizeScaleFactor,
+                    color, displayMode)) {
                 boatVectorGraphics.drawBoatToCanvas(getCanvas().getContext2d(), boatFix.legType, boatFix.tack, getDisplayMode(), 
                         canvasWidth, canvasHeight, boatSizeScaleFactor, color);
                 lastLegType = boatFix.legType;
@@ -103,6 +105,7 @@ public class BoatOverlay extends CanvasOverlayV3 {
                 lastHeight = canvasHeight;
                 lastScale = boatSizeScaleFactor;
                 lastColor = color;
+                lastDisplayMode = displayMode;
             }
             LatLng latLngPosition = coordinateSystem.toLatLng(boatFix.position);
             Point boatPositionInPx = mapProjection.fromLatLngToDivPixel(latLngPosition);
@@ -123,11 +126,12 @@ public class BoatOverlay extends CanvasOverlayV3 {
      * changed, the result is <code>true</code>.
      */
     private boolean needToDraw(LegType legType, Tack tack, boolean isSelected, double width, double height,
-            Size scaleFactor, Color color) {
+            Size scaleFactor, Color color, DisplayMode displayMode) {
         return lastLegType == null || lastLegType != legType || lastTack == null || lastTack != tack
                 || lastSelected == null || lastSelected != isSelected || lastWidth == null || lastWidth != width
                 || lastHeight == null || lastHeight != height || lastScale == null || !lastScale.equals(scaleFactor)
-                || lastColor == null || !lastColor.equals(color);
+                || lastColor == null || !lastColor.equals(color) || lastDisplayMode == null
+                || !lastDisplayMode.equals(displayMode);
     }
 
     /**

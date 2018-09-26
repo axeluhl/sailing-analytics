@@ -6784,13 +6784,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
         RegattaLogEvent event = null;
         TimePoint from = mapping.getTimeRange().hasOpenBeginning() ? null : mapping.getTimeRange().from();
         TimePoint to = mapping.getTimeRange().hasOpenEnd() ? null : mapping.getTimeRange().to();
-        if (dto.mappedTo instanceof MarkDTO) {
-            Mark mark = convertToMark(((MarkDTO) dto.mappedTo), true);
-            event = new RegattaLogDeviceMarkMappingEventImpl(now, now, getService().getServerAuthor(),
-                    UUID.randomUUID(), mark, mapping.getDevice(), from, to);
-        } else if (dto.mappedTo instanceof CompetitorWithBoatDTO) {
-            Competitor competitor = getService().getCompetitorAndBoatStore()
-                    .getExistingCompetitorByIdAsString(((CompetitorWithBoatDTO) dto.mappedTo).getIdAsString());
+        if (mapping.getMappedTo() instanceof Mark) {
+            Mark mark = (Mark) mapping.getMappedTo();
+            event = new RegattaLogDeviceMarkMappingEventImpl(now, now, getService().getServerAuthor(), UUID.randomUUID(), 
+                    mark, mapping.getDevice(), from, to);
+        } else if (mapping.getMappedTo() instanceof Competitor) {
+            Competitor competitor = (Competitor) mapping.getMappedTo();
             if (mapping.getDevice().getIdentifierType().equals(ExpeditionSensorDeviceIdentifier.TYPE)) {
                 event = new RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl(now, now,
                         getService().getServerAuthor(), UUID.randomUUID(), competitor, mapping.getDevice(), from, to);
@@ -6798,11 +6797,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
                 event = new RegattaLogDeviceCompetitorMappingEventImpl(now, now, getService().getServerAuthor(),
                         UUID.randomUUID(), competitor, mapping.getDevice(), from, to);
             }
-        } else if (dto.mappedTo instanceof BoatDTO) {
-            final Boat boat = getService().getCompetitorAndBoatStore()
-                    .getExistingBoatByIdAsString(((BoatDTO) dto.mappedTo).getIdAsString());
-            event = new RegattaLogDeviceBoatMappingEventImpl(now, now, getService().getServerAuthor(),
-                    UUID.randomUUID(), boat, mapping.getDevice(), from, to);
+        } else if (mapping.getMappedTo() instanceof Boat) {
+            final Boat boat = (Boat) mapping.getMappedTo();
+            event = new RegattaLogDeviceBoatMappingEventImpl(now, now, getService().getServerAuthor(), UUID.randomUUID(), 
+                    boat, mapping.getDevice(), from, to);
         } else {
             throw new RuntimeException("Can only map devices to competitors, boats or marks");
         }
@@ -6851,14 +6849,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet
         TimeRange timeRange = new TimeRangeImpl(from, to);
         if (dto.mappedTo instanceof MarkDTO) {
             Mark mark = convertToMark(((MarkDTO) dto.mappedTo), true);
-            // expect UUIDs
-            return new DeviceMappingImpl<Mark>(mark, device, timeRange, dto.originalRaceLogEventIds,
-                    RegattaLogDeviceMarkMappingEventImpl.class);
-        } else if (dto.mappedTo instanceof CompetitorWithBoatDTO) {
-            Competitor competitor = getService().getCompetitorAndBoatStore()
-                    .getExistingCompetitorByIdAsString(((CompetitorWithBoatDTO) dto.mappedTo).getIdAsString());
-            return new DeviceMappingImpl<Competitor>(competitor, device, timeRange, dto.originalRaceLogEventIds,
-                    RegattaLogDeviceCompetitorMappingEventImpl.class);
+            //expect UUIDs
+            return new DeviceMappingImpl<Mark>(mark, device, timeRange, dto.originalRaceLogEventIds, RegattaLogDeviceMarkMappingEventImpl.class);
+        } else if (dto.mappedTo instanceof CompetitorDTO) {
+            Competitor competitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(
+                    ((CompetitorDTO) dto.mappedTo).getIdAsString());
+            return new DeviceMappingImpl<Competitor>(competitor, device, timeRange, dto.originalRaceLogEventIds, RegattaLogDeviceCompetitorMappingEventImpl.class);
         } else if (dto.mappedTo instanceof BoatDTO) {
             final Boat boat = getService().getCompetitorAndBoatStore()
                     .getExistingBoatByIdAsString(dto.mappedTo.getIdAsString());
