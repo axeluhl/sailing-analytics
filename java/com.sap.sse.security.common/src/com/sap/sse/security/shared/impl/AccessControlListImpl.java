@@ -8,7 +8,6 @@ import java.util.Set;
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.PermissionChecker;
-import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.PermissionChecker.PermissionState;
@@ -18,12 +17,17 @@ public class AccessControlListImpl implements AccessControlList {
 
     /**
      * Maps from {@link UserGroup} to the actions allowed for this group on the
-     * {@link #idOfAccessControlledObjectAsString object to which this ACL belongs}.
-     * The {@link WildcardPermission} objects stored in the value sets represent only the
-     * action part, not the type or instance part. The {@link WildcardPermission} abstraction
-     * is used for its wildcard implication logic. The {@link #hasPermission(SecurityUser, String, Iterable)}
-     * method will construct a {@link WildcardPermission} from the action requested, and this
-     * permission will then be matched against the permissions in this map's value sets.<p>
+     * {@link #idOfAccessControlledObjectAsString object to which this ACL belongs}. The {@link WildcardPermission}
+     * objects stored in the value sets represent only the action part, not the type or instance part. The
+     * {@link WildcardPermission} abstraction is used for its wildcard implication logic. The
+     * {@link #hasPermission(String, Iterable)} method will construct a {@link WildcardPermission} from
+     * the action requested, and this permission will then be matched against the permissions in this map's value sets.
+     * <p>
+     * 
+     * Actions allowed for the {@code null} key are considered applicable regardless of the group(s) the user is part
+     * of. Those permissions therefore apply even if the user is not part of any group, in particular if it's the
+     * "anonymous" user.
+     * <p>
      * 
      * Note that no negated actions are part of this map. See also {@link #deniedActionsByUserGroup}.
      */
@@ -31,12 +35,17 @@ public class AccessControlListImpl implements AccessControlList {
     
     /**
      * Maps from {@link UserGroup} to the actions denied for this group on the
-     * {@link #idOfAccessControlledObjectAsString object to which this ACL belongs}.
-     * The {@link WildcardPermission} objects stored in the value sets represent only the
-     * action part, not the type or instance part. The {@link WildcardPermission} abstraction
-     * is used for its wildcard implication logic. The {@link #hasPermission(SecurityUser, String, Iterable)}
-     * method will construct a {@link WildcardPermission} from the action requested, and this
-     * permission will then be matched against the permissions in this map's value sets.<p>
+     * {@link #idOfAccessControlledObjectAsString object to which this ACL belongs}. The {@link WildcardPermission}
+     * objects stored in the value sets represent only the action part, not the type or instance part. The
+     * {@link WildcardPermission} abstraction is used for its wildcard implication logic. The
+     * {@link #hasPermission(String, Iterable)} method will construct a {@link WildcardPermission} from
+     * the action requested, and this permission will then be matched against the permissions in this map's value sets.
+     * <p>
+     * 
+     * Actions denied for the {@code null} key are considered denied regardless of the group(s) the user is part of.
+     * Those permissions therefore are denied even if the user is not part of any group, in particular if it's the
+     * "anonymous" user.
+     * <p>
      * 
      * Note that no negated actions are part of this map. See also {@link #allowedActionsByUserGroup}.
      */
@@ -55,19 +64,25 @@ public class AccessControlListImpl implements AccessControlList {
     }
 
     @Override
-    public PermissionChecker.PermissionState hasPermission(SecurityUser user, String action,
-            Iterable<? extends UserGroup> groupsOfWhichUserIsMember) {
+    public PermissionChecker.PermissionState hasPermission(String action, Iterable<? extends UserGroup> groupsOfWhichUserIsMember) {
         PermissionState result = PermissionState.NONE;
         final WildcardPermission requestedAction = new WildcardPermission(action);
-        for (final UserGroup userGroupOfWhichUserIsMember : groupsOfWhichUserIsMember) {
-            if (result == PermissionState.NONE && doesAnyPermissionImplyRequestedAction(
-                    allowedActionsByUserGroup.get(userGroupOfWhichUserIsMember), requestedAction)) {
-                result = PermissionState.GRANTED;
-            }
-            if (doesAnyPermissionImplyRequestedAction(deniedActionsByUserGroup.get(userGroupOfWhichUserIsMember),
-                    requestedAction)) {
-                result = PermissionState.REVOKED;
-                break;
+        // special handling for the "null" group key which implies the permissions granted/denied to all users regardless their group memberships:
+        if (allowedActionsByUserGroup.containsKey(null) && doesAnyPermissionImplyRequestedAction(allowedActionsByUserGroup.get(null), requestedAction)) {
+            result = PermissionState.GRANTED;
+        }
+        if (deniedActionsByUserGroup.containsKey(null) && doesAnyPermissionImplyRequestedAction(deniedActionsByUserGroup.get(null), requestedAction)) {
+            result = PermissionState.REVOKED;
+        } else { // no need for further checks if already revoked
+            for (final UserGroup userGroupOfWhichUserIsMember : groupsOfWhichUserIsMember) {
+                if (result == PermissionState.NONE && doesAnyPermissionImplyRequestedAction(
+                        allowedActionsByUserGroup.get(userGroupOfWhichUserIsMember), requestedAction)) {
+                    result = PermissionState.GRANTED;
+                }
+                if (doesAnyPermissionImplyRequestedAction(deniedActionsByUserGroup.get(userGroupOfWhichUserIsMember), requestedAction)) {
+                    result = PermissionState.REVOKED;
+                    break;
+                }
             }
         }
         return result;
@@ -75,8 +90,8 @@ public class AccessControlListImpl implements AccessControlList {
     
     private boolean doesAnyPermissionImplyRequestedAction(Set<WildcardPermission> permissions, WildcardPermission requestedAction) {
         if (permissions != null) {
-            for (final WildcardPermission allowedAction : permissions) {
-                if (allowedAction.implies(requestedAction)) {
+            for (final WildcardPermission allowedOrDeniedAction : permissions) {
+                if (allowedOrDeniedAction.implies(requestedAction)) {
                     return true;
                 }
             }

@@ -15,7 +15,7 @@ import java.util.Set;
  * 
  * It is allowed to use the {@code "*"} wildcard as an action string, granting access to all actions on the object
  * concerned. The same logic for permission implication as on {@link WildcardPermission} is applied when matching a
- * particular action passed to the {@link #hasPermission(SecurityUser, String, Iterable)} method against the actions
+ * particular action passed to the {@link #hasPermission(String, Iterable)} method against the actions
  * allowed by this access control list (ACL).
  * <p>
  * 
@@ -30,7 +30,15 @@ import java.util.Set;
  *
  */
 public interface AccessControlList extends Serializable {
-    PermissionChecker.PermissionState hasPermission(SecurityUser user, String action, Iterable<? extends UserGroup> groupsOfWhichUserIsMember);
+    /**
+     * Checks whether this access control list grants the {@code user} the permission to execute {@code action} on the
+     * object to which this ACL pertains.
+     * @param action
+     *            the action to check permission for
+     * @param groupsOfWhichUserIsMember
+     *            must not be {@code null} but may be empty
+     */
+    PermissionChecker.PermissionState hasPermission(String action, Iterable<? extends UserGroup> groupsOfWhichUserIsMember);
 
     /**
      * @return allowed actions are represented simply as strings and may contain the wildcard string {@code "*"} to

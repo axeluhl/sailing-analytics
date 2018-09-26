@@ -6,9 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -23,8 +21,8 @@ import com.sap.sse.security.UserStore;
 import com.sap.sse.security.UsernamePasswordRealm;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AdminRole;
-import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
@@ -143,22 +141,24 @@ public class PermissionCheckerTest {
     public void testAccessControlList() {
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, adminOwnership, null));
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, adminOwnership, acl));
-        Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
-        Set<String> permissionSet = new HashSet<>();
-        permissionSet.add(DefaultActions.READ.name());
-        permissionMap.put(userTenant, permissionSet);
-        acl = new AccessControlListImpl(permissionMap);
+        acl.addPermission(userTenant, DefaultActions.READ.name());
         assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, adminOwnership, acl));
+        // ensure that anonymous users don't have access because they don't belong to any group
+        assertFalse(PermissionChecker.isPermitted(eventReadPermission, /* user */ null, /* groups */ new HashSet<>(), adminOwnership, acl));
         user.addPermission(eventReadPermission);
         assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, adminOwnership, acl));
-        permissionMap = new HashMap<>();
-        permissionSet = new HashSet<>();
+        final Set<String> permissionSet = new HashSet<>();
         permissionSet.add("!" + DefaultActions.READ.name());
-        permissionMap.put(userTenant, permissionSet);
-        acl = new AccessControlListImpl(permissionMap);
+        acl.setPermissions(userTenant, permissionSet);
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, adminOwnership, acl));
         // User ownership shall NOT imply permissions; the revoking ACL still takes precedence
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, ownership, acl));
+        // now add "public read" permission to ACL:
+        acl.addPermission(null, DefaultActions.READ.name());
+        assertTrue(PermissionChecker.isPermitted(eventReadPermission, /* user */ null, /* groups */ new HashSet<>(), adminOwnership, acl));
+        // now deny "public read" permission in ACL which is expected to supersede the granting from above:
+        acl.denyPermission(null, DefaultActions.READ.name());
+        assertFalse(PermissionChecker.isPermitted(eventReadPermission, /* user */ null, /* groups */ new HashSet<>(), adminOwnership, acl));
     }
     
     @Test

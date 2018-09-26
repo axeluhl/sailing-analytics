@@ -26,7 +26,9 @@ public class PermissionChecker {
     /**
      * @param permission
      *            Permission of the form "data_object_type:action:instance_id". The instance id can be omitted when a
-     *            general permission for the data object type is asked after (e.g. "event:create").
+     *            general permission for the data object type is asked after (e.g. "event:create"). If the action
+     *            contains more than one sub-part (divided by {@link WildcardPermission#SUBPART_DIVIDER_TOKEN}) then
+     *            this is considered an error, and an {@link IllegalArgumentException} will be thrown.
      * @param ownership
      *            may be {@code null}, causing user- or tenant-parameterized roles and no user ownership override to be
      *            applied
@@ -46,11 +48,19 @@ public class PermissionChecker {
         // 1. check ACL
         if (acl != null) {
             // if no specific action is requested then this translates to a request for all permissions ("*")
-            String action = parts.size() < 2 ? WildcardPermission.WILDCARD_TOKEN : (String) parts.get(1).toArray()[0];
-            result = acl.hasPermission(user, action, groupsOfWhichUserIsMember);
+            final String action;
+            if (parts.size() < 2) {
+                action = WildcardPermission.WILDCARD_TOKEN;
+            } else {
+                if (parts.get(1).size() > 1) {
+                    throw new IllegalArgumentException("Permission to check must not have more than one sub-part: "+parts.get(1));
+                }
+                action = (String) parts.get(1).toArray()[0];
+            }
+            result = acl.hasPermission(action, groupsOfWhichUserIsMember);
         }
         // 2. check direct permissions
-        if (result == PermissionState.NONE) {
+        if (result == PermissionState.NONE && user != null) { // no direct permissions for anonymous users
             for (WildcardPermission directPermission : user.getPermissions()) {
                 if (directPermission.implies(permission)) {
                     result = PermissionState.GRANTED;
@@ -59,7 +69,7 @@ public class PermissionChecker {
             }
         }
         // 3. check role permissions
-        if (result == PermissionState.NONE) {
+        if (result == PermissionState.NONE && user != null) { // an anonymous user does not have any roles
             for (Role role : user.getRoles()) {
                 if (implies(role, permission, ownership)) {
                     result = PermissionState.GRANTED;
