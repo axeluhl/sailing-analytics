@@ -7,7 +7,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
+import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 
@@ -16,7 +16,7 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
  */
 public class TagSharedURLDialog extends DialogBox {
 
-    private final TagPanelResources resources = TagPanelResources.INSTANCE;
+    private final TaggingPanelResources resources = TaggingPanelResources.INSTANCE;
     private final TagPanelStyle style = resources.style();
 
     /**

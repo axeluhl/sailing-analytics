@@ -21,7 +21,7 @@ import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagFilterSets;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagFilterSetsDialog;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagFilterSetsJsonDeSerializer;
-import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
+import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.AbstractListFilter;
 import com.sap.sse.common.filter.Filter;
@@ -38,7 +38,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, Filter<Ta
 
     private final static String LOCAL_STORAGE_TAGS_FILTER_SETS_KEY = "sailing.tags.filtersets";
 
-    private final TagPanelStyle style = TagPanelResources.INSTANCE.style();
+    private final TagPanelStyle style = TaggingPanelResources.INSTANCE.style();
 
     private final TaggingPanel taggingPanel;
     private final StringMessages stringMessages;

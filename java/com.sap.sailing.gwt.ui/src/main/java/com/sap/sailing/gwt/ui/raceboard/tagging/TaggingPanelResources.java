@@ -9,8 +9,8 @@ import com.google.gwt.user.cellview.client.CellTable;
 /**
  * Interface for styling {@link TaggingPanel} and its content.
  */
-public interface TagPanelResources extends CellList.Resources, CellTable.Resources {
-    public static final TagPanelResources INSTANCE = GWT.create(TagPanelResources.class);
+public interface TaggingPanelResources extends CellList.Resources, CellTable.Resources {
+    static final TaggingPanelResources INSTANCE = GWT.create(TaggingPanelResources.class);
 
     @Source("com/sap/sailing/gwt/ui/client/images/share.png")
     ImageResource shareIcon();
@@ -50,14 +50,14 @@ public interface TagPanelResources extends CellList.Resources, CellTable.Resourc
 
     @Override
     @Source("tag-button-celltable.gss")
-    public CellTable.Style cellTableStyle();
+    CellTable.Style cellTableStyle();
 
     @Override
     @Source("tag-celllist.gss")
-    public CellList.Style cellListStyle();
+    CellList.Style cellListStyle();
 
     @Source("tagging-panel.gss")
-    public TagPanelStyle style();
+    TagPanelStyle style();
 
     public interface TagPanelStyle extends CssResource {
         // general

@@ -17,7 +17,7 @@ import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Window;
 import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
+import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanel.State;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -122,7 +122,7 @@ public class TagCell extends AbstractCell<TagDTO> {
     }
 
     private final TagCellTemplate tagCellTemplate = GWT.create(TagCellTemplate.class);
-    private final TagPanelResources resources = TagPanelResources.INSTANCE;
+    private final TaggingPanelResources resources = TaggingPanelResources.INSTANCE;
     private final TagPanelStyle style = resources.style();
 
     private final TaggingPanel taggingPanel;
@@ -139,7 +139,7 @@ public class TagCell extends AbstractCell<TagDTO> {
      *            should be <code>true</code> if {@link TagCell cell} is used as {@link TagPreviewPanel preview cell},
      *            otherwise <code>false</code>
      */
-    public TagCell(TaggingPanel taggingPanel, StringMessages stringMessages, UserService userService,
+    TagCell(TaggingPanel taggingPanel, StringMessages stringMessages, UserService userService,
             boolean isPreviewCell) {
         super("click");
         this.taggingPanel = taggingPanel;

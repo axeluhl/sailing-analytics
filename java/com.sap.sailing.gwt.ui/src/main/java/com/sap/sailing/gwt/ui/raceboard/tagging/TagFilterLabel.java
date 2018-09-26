@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.raceboard.tagging;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
+import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 
@@ -13,7 +13,7 @@ import com.sap.sse.common.filter.FilterSet;
  */
 public class TagFilterLabel extends Label {
 
-    private final TagPanelStyle style = TagPanelResources.INSTANCE.style();
+    private final TagPanelStyle style = TaggingPanelResources.INSTANCE.style();
 
     private final TaggingPanel taggingPanel;
     private final StringMessages stringMessages;

@@ -8,7 +8,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
+import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.ui.client.UserService;
@@ -20,7 +20,7 @@ public class TagButtonPanel extends FlowPanel {
 
     private static final String USER_STORAGE_TAG_BUTTONS_KEY = "sailing.tags.buttons";
 
-    private final TagPanelStyle style = TagPanelResources.INSTANCE.style();
+    private final TagPanelStyle style = TaggingPanelResources.INSTANCE.style();
 
     private final TagFooterPanel footerPanel;
     private final TaggingPanel taggingPanel;

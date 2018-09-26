@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.raceboard.tagging;
 
 import com.google.gwt.user.client.ui.Button;
-import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
+import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 
 /**
  * Used to store preset {@link com.sap.sailing.gwt.ui.shared.TagDTO tags} which will be rendered in {@link TaggingPanel}
@@ -10,7 +10,7 @@ import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
  */
 public class TagButton extends Button {
 
-    private final TagPanelStyle style = TagPanelResources.INSTANCE.style();
+    private final TagPanelStyle style = TaggingPanelResources.INSTANCE.style();
 
     private String tag, imageURL, comment;
     private boolean visibleForPublic;

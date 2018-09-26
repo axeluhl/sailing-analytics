@@ -8,7 +8,7 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
+import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 
 /**
  * Panel containing input fields for tag/tag button creation and modification.
@@ -16,7 +16,7 @@ import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
 // TODO: use DataEntryDialog
 public class TagInputPanel extends FlowPanel {
 
-    private final TagPanelStyle style = TagPanelResources.INSTANCE.style();
+    private final TagPanelStyle style = TaggingPanelResources.INSTANCE.style();
 
     // default value for "Visible for public" checkbox
     private static final String DEFAULT_TAG = "";

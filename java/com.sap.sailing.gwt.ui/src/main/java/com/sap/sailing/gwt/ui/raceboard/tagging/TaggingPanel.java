@@ -28,7 +28,7 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
+import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -132,13 +132,13 @@ public class TaggingPanel extends ComponentWithoutSettings
         this.timePointToHighlight = timePointToHighlight;
         this.tagToHighlight = tagToHighlight;
 
-        style = TagPanelResources.INSTANCE.style();
+        style = TaggingPanelResources.INSTANCE.style();
         style.ensureInjected();
-        TagPanelResources.INSTANCE.cellListStyle().ensureInjected();
-        TagPanelResources.INSTANCE.cellTableStyle().ensureInjected();
+        TaggingPanelResources.INSTANCE.cellListStyle().ensureInjected();
+        TaggingPanelResources.INSTANCE.cellTableStyle().ensureInjected();
 
         tagCellList = new CellList<TagDTO>(new TagCell(this, stringMessages, userService, false),
-                TagPanelResources.INSTANCE);
+                TaggingPanelResources.INSTANCE);
         tagSelectionModel = new SingleSelectionModel<TagDTO>();
         tagListProvider = new TagListProvider();
 

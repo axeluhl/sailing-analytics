@@ -24,7 +24,7 @@ import com.sap.sailing.gwt.ui.adminconsole.ImagesBarColumn;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigImagesBarCell;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
-import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
+import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -81,7 +81,7 @@ public class TagButtonDialog extends DialogBox {
         }
     }
 
-    private final TagPanelResources resources = TagPanelResources.INSTANCE;
+    private final TaggingPanelResources resources = TaggingPanelResources.INSTANCE;
     private final TagPanelStyle style = resources.style();
 
     private final TaggingPanel taggingPanel;
