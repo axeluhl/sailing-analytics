@@ -44,6 +44,7 @@ public class RegattaWithSeriesAndFleetsEditDialog extends RegattaWithSeriesAndFl
         scoringSchemeListBox.setEnabled(false);
         sailingEventsListBox.setEnabled(true);
         courseAreaListBox.setEnabled(true);
+        competitorRegistrationTypeListBox.setEnabled(false);
 
         regattaConfigurationCheckbox = createCheckbox(stringMessages.setRacingProcedureConfiguration());
         regattaConfigurationCheckbox.ensureDebugId("RacingProcedureConfigurationCheckBox");
