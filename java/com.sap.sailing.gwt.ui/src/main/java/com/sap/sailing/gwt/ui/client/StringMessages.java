@@ -1137,6 +1137,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String leaderboardsExceptFromSelectedGroup();
     String availableLeaderboardGroups();
     String leaderboardGroupsOfSelectedEvent();
+    String doYouReallyWantToRemoveLeaderboardGroup(String leaderboardGroupName);
     String doYouReallyWantToRemoveLeaderboardGroups();
     String doYouReallyWantToRemoveNonVisibleLeaderboardGroups(String leaderboardGroupNames);
     String addRaces();

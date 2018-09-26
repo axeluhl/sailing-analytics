@@ -587,7 +587,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                 lbg -> lbg.getId().toString());
         securedObjectConfig.addAction(DefaultActions.UPDATE, this::openEditLeaderboardGroupDialog);
         securedObjectConfig.addAction(DefaultActions.DELETE, group -> {
-            if (Window.confirm("Do you really want to remove the leaderboard group: '" + group.getName() + "' ?")) {
+            if (Window.confirm(stringMessages.doYouReallyWantToRemoveLeaderboardGroup(group.getName()))) {
                 removeLeaderboardGroup(group);
             }
         });
