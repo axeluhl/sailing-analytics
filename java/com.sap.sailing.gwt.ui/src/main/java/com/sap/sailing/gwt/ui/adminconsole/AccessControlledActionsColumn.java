@@ -63,19 +63,6 @@ public class AccessControlledActionsColumn<T extends NamedSecuredObjectDTO, S ex
         this.addAction(name, callback);
     }
 
-    public final Iterable<String> getAllowedActions1(final T object) {
-        final ArrayList<String> allowedActions = new ArrayList<>();
-        final UserDTO user = userService.getCurrentUser();
-        for (final String name : nameToCallbackMap.keySet()) {
-            final Action action = nameToActionMap.get(name);
-            if (action == null || user.hasPermission(permissionFactory.apply(action, object),
-                    object.getOwnership(), object.getAccessControlList())) {
-                allowedActions.add(name);
-            }
-        }
-        return allowedActions;
-    }
-
     @Override
     public final String getValue(final T object) {
         final ArrayList<String> allowedActions = new ArrayList<>();
@@ -83,9 +70,8 @@ public class AccessControlledActionsColumn<T extends NamedSecuredObjectDTO, S ex
         for (final String name : nameToCallbackMap.keySet()) {
             final Action action = nameToActionMap.get(name);
             if (isNotRestrictedOrHasPermission(user, action, object)) {
-                name.replace("\\", "\\\\");
-                name.replace(",", "\\,");
-                allowedActions.add(name);
+                final String escapedName = name.replace("\\", "\\\\").replace(",", "\\,");
+                allowedActions.add(escapedName);
             }
         }
         return String.join(",", allowedActions);
