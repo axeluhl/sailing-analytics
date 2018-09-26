@@ -24,13 +24,13 @@ public class TagDTODeSerializer {
     public static final String FIELD_RACE_TIMEPOINT = "raceTimepoint";
     public static final String FIELD_CREATED_AT = "createdAt";
     public static final String FIELD_REVOKED_AT = "revokedAt";
-    
+
     private static final String UNIQUE_KEY_PREFIX = "sailing.tags.";
 
     private final JSONParser parser = new JSONParser();
 
     /**
-     * Serializes {@link TagDTO tag} as {@link JSONObject}.
+     * Serializes {@link TagDTO tag} as {@link JSONObject}. Missing, optional parameters will not be put into result.
      * 
      * @param tag
      *            {@link TagDTO tag} to be serialized
@@ -39,13 +39,19 @@ public class TagDTODeSerializer {
     public JSONObject serialize(TagDTO tag) {
         JSONObject result = new JSONObject();
         result.put(FIELD_TAG, tag.getTag());
-        result.put(FIELD_COMMENT, tag.getComment());
-        result.put(FIELD_IMAGE_URL, tag.getImageURL());
+        if (tag.getComment() != null) {
+            result.put(FIELD_COMMENT, tag.getComment());
+        }
+        if (tag.getImageURL() != null) {
+            result.put(FIELD_IMAGE_URL, tag.getImageURL());
+        }
         result.put(FIELD_USERNAME, tag.getUsername());
         result.put(FIELD_VISIBLE_FOR_PUBLIC, tag.isVisibleForPublic());
         result.put(FIELD_RACE_TIMEPOINT, serializeTimePoint(tag.getRaceTimepoint()));
         result.put(FIELD_CREATED_AT, serializeTimePoint(tag.getCreatedAt()));
-        result.put(FIELD_REVOKED_AT, serializeTimePoint(tag.getRevokedAt()));
+        if (tag.getRevokedAt() != null) {
+            result.put(FIELD_REVOKED_AT, serializeTimePoint(tag.getRevokedAt()));
+        }
         return result;
     }
 
@@ -72,16 +78,16 @@ public class TagDTODeSerializer {
      * @return <code>null</code> if <code>jsonObject</code> is no valid json for a tag, otherwise {@link TagDTO tag}
      */
     public TagDTO deserialize(JSONObject jsonObject) {
-        // if deserializing throws an error, return null
         try {
             String tag = (String) jsonObject.get(FIELD_TAG);
-            String comment = (String) jsonObject.get(FIELD_COMMENT);
-            String imageURL = (String) jsonObject.get(FIELD_IMAGE_URL);
+            String comment = jsonObject.get(FIELD_COMMENT) == null ? "" : (String) jsonObject.get(FIELD_COMMENT);
+            String imageURL = jsonObject.get(FIELD_IMAGE_URL) == null ? "" : (String) jsonObject.get(FIELD_IMAGE_URL);
             String username = (String) jsonObject.get(FIELD_USERNAME);
             boolean visibleForPublic = (Boolean) jsonObject.get(FIELD_VISIBLE_FOR_PUBLIC);
             TimePoint raceTimePoint = deserilizeTimePoint((Long) (jsonObject.get(FIELD_RACE_TIMEPOINT)));
             TimePoint createdAt = deserilizeTimePoint((Long) (jsonObject.get(FIELD_CREATED_AT)));
-            TimePoint revokedAt = deserilizeTimePoint((Long) (jsonObject.get(FIELD_REVOKED_AT)));
+            TimePoint revokedAt = jsonObject.get(FIELD_REVOKED_AT) == null ? null
+                    : deserilizeTimePoint((Long) jsonObject.get(FIELD_REVOKED_AT));
             return new TagDTO(tag, comment, imageURL, visibleForPublic, username, raceTimePoint, createdAt, revokedAt);
         } catch (Exception e) {
             return null;
@@ -174,10 +180,11 @@ public class TagDTODeSerializer {
      * 
      * @param timepoint
      *            {@link TimePoint} to be serialized
-     * @return serialized timepoint as long, <code>0</code> if <code>timepoint</code> is <code>null</code>
+     * @return serialized timepoint milliseconds as long, <code>null</code> if <code>timepoint</code> is
+     *         <code>null</code>
      */
     public long serializeTimePoint(TimePoint timepoint) {
-        return timepoint == null ? 0 : timepoint.asMillis();
+        return timepoint == null ? null : timepoint.asMillis();
     }
 
     /**
