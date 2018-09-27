@@ -85,6 +85,7 @@ public class TaggingServiceTest {
         Activator.setTestUserStore(store);
         UsernamePasswordRealm.setTestUserStore(store);
         securityService = new SecurityServiceImpl(null, store, true);
+        Activator.setSecurityService(securityService);
         SecurityUtils.setSecurityManager(securityService.getSecurityManager());
         // create & login user
         securityService.createSimpleUser(username, email, password, fullName, company, null);
