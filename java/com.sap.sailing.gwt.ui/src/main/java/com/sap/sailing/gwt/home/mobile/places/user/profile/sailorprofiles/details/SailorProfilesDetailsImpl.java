@@ -155,7 +155,7 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
         final InlineEditButton editButton = editableSuggestedMultiselect.getEditButton();
         editButton.setVisible(false);
         editButton.addStyleName(SailorProfileMobileResources.INSTANCE.css().editButton());
-        competitorsUi.setHeaderElement(editButton);
+        competitorsUi.setFirstHeaderElement(editButton);
 
         competitorsUi.addAccordionListener(new AccordionExpansionListener() {
             @Override

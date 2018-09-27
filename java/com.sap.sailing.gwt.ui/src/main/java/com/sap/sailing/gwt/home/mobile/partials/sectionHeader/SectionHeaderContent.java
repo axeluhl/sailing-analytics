@@ -167,7 +167,13 @@ public class SectionHeaderContent extends Composite {
             element.removeClassName(className);
     }
 
-    public void setHeaderElement(Widget widget) {
+    public void appendHeaderElement(Widget widget) {
+        headerRightUi.add(widget);
+        actionArrowUi.getStyle().setMarginRight(.5, Unit.EM);
+        titleAndLabelContainerUi.getStyle().setPaddingRight(4.1, Unit.EM);
+    }
+
+    public void setFirstHeaderElement(Widget widget) {
         actionArrowUi.removeFromParent();
         headerRightUi.add(widget);
         headerRightUi.getElement().appendChild(actionArrowUi);

@@ -2123,4 +2123,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String noEventsFoundForCompetitors();
     String pleaseSelectCompetitorFirst();
     String noStatisticsFoundForCompetitors();
+    String sailorProfileRemoveMessage();
 }

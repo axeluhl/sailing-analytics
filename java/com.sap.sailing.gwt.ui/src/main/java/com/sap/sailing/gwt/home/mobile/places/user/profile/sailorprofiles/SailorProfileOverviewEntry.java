@@ -17,13 +17,17 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
+import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.BadgeDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailingProfileOverviewPresenter;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
+import com.sap.sailing.gwt.home.shared.partials.dialog.ConfirmDialogFactory;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileResources;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 public class SailorProfileOverviewEntry extends Composite {
 
@@ -76,9 +80,26 @@ public class SailorProfileOverviewEntry extends Composite {
         sectionTitleUi.initCollapsibility(contentContainerCompetitorsUi.getElement(), false);
 
         Button removeButton = new Button("X");
-        removeButton.addClickHandler(
-                e -> presenter.removeSailorProfile(uuidRef));
-        sectionTitleUi.setHeaderElement(removeButton);
+        removeButton.addClickHandler(e -> {
+            e.preventDefault();
+            e.getNativeEvent().preventDefault();
+            e.getNativeEvent().stopPropagation();
+            ConfirmDialogFactory.showConfirmDialog(StringMessages.INSTANCE.sailorProfileRemoveMessage(),
+                    new DialogCallback<Void>() {
+
+                @Override
+                public void ok(Void v) {
+                    presenter.removeSailorProfile(uuidRef);
+                }
+
+                @Override
+                public void cancel() {
+                }
+            });
+        });
+
+        removeButton.addStyleName(SharedResources.INSTANCE.mainCss().buttonred());
+        sectionTitleUi.appendHeaderElement(removeButton);
     }
 
     @UiHandler("detailsButtonUi")
