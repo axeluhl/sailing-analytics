@@ -62,5 +62,9 @@ public interface SailorProfileMobileResources extends ClientBundle {
         String statisticsHeaderLeft();
 
         String statisticsHeaderRight();
+
+        String boatclassWithNameEntry();
+
+        String detailsBoatclassesSelectionPanel();
     }
 }

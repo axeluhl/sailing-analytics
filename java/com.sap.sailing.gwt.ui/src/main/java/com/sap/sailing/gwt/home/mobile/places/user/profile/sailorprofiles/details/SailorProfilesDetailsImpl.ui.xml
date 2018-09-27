@@ -34,7 +34,7 @@
                 </ms:header>
                 <ms:content>
                     <g:HTMLPanel ui:field="contentContainerBoatclassesUi"
-                        addStyleNames="{spmr.css.detailsSectionPanel} {res.mainCss.spacermarginbottomsmall}">
+                        addStyleNames="{spmr.css.detailsBoatclassesSelectionPanel}">
                     </g:HTMLPanel>
                 </ms:content>
             </ms:MobileSection>

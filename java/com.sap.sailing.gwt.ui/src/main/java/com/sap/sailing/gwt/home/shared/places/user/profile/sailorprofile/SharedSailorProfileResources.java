@@ -18,6 +18,9 @@ public interface SharedSailorProfileResources extends ClientBundle {
     public interface SailorProfileTemplates extends SafeHtmlTemplates {
         @Template("<div style=\"height: 40px; width: 40px; margin-left: 5px; display: inline-block; background-size: cover; background-repeat: no-repeat; background-position: center;background-image: url('{0}');\"></div>")
         SafeHtml buildBoatclassIcon(String boatClassUrl);
+
+        @Template("<div style=\"height: 30px; width: 30px; display: inline-block; background-size: cover; background-repeat: no-repeat; background-position: center;background-image: url('{0}'); vertical-align:middle;\"></div><span style=\"vertical-align: middle;font-size: 0.75em;margin-left: 5px;\">{1}</span>")
+        SafeHtml buildBoatclassIconWithName(String boatClassUrl, String boatClassName);
     }
 
     public interface SailorProfilesCss extends CssResource {

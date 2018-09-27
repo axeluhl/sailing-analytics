@@ -1,11 +1,8 @@
 package com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.details;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Style.Display;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -13,7 +10,6 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
-import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
 import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedEventDTO;
@@ -26,6 +22,7 @@ import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.Sai
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileView;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent.AccordionExpansionListener;
+import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.BoatclassElementBuilder;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfileMobileResources;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.details.events.SailorProfileEventEntry;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.details.statistics.SailorProfileStatisticTable;
@@ -188,11 +185,9 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
         }
 
         for (BoatClassDTO boatclass : boatclasses) {
-            Element elem = DOM.createDiv();
-            elem.setInnerSafeHtml(SharedSailorProfileResources.TEMPLATES.buildBoatclassIcon(
-                    BoatClassImageResolver.getBoatClassIconResource(boatclass.getName()).getSafeUri().asString()));
-            elem.getStyle().setDisplay(Display.INLINE_BLOCK);
-            contentContainerBoatclassesUi.getElement().appendChild(elem);
+            contentContainerBoatclassesUi.getElement().getStyle().clearOverflow();
+            contentContainerBoatclassesUi.getElement()
+                    .appendChild(BoatclassElementBuilder.generateBoatclassElementForMobile(boatclass));
         }
     }
 
