@@ -19,11 +19,27 @@
 }
 
 .yesButton {
-    background-color: green;
+    background-color: #e94a1b;
+}
+
+.yesButton:hover {
+    background-color: #cd3e14;
+}
+
+.yesButton:active {
+    background-color: #a73210;
 }
 
 .noButton {
-    background-color: #e94a1b;
+    background-color: #287223;
+}
+
+.noButton:hover {
+    background-color: #256820;
+}
+
+.noButton:active {
+    background-color: #215b1c;
 }
 
 .button {
@@ -34,14 +50,6 @@
     border: none;
     font-weight: 700;
     color: #fff;
-}
-
-.button :hover {
-    background-color: rgba(0, 0, 0, .1);
-}
-
-.button :active {
-    background-color: rgba(0, 0, 0, .2);
 }
 
 .buttonPanel {
