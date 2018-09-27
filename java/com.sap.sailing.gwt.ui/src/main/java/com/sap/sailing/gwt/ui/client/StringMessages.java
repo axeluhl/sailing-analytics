@@ -2153,10 +2153,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String tagCreateFilterHint();
     String tagButtonNotSavable();
     String tagNotEditable();
-    String confirm();
-    String cancel();
-    String close();
-    String username();
     String tagPublicModificationPermissionMissing();
     String tagNotFound();
     String tagInvalidURL();
@@ -2166,4 +2162,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String tagSendImage();
     String tagBrowseImage();
     String tagRemoveUploadedImage();
+    String tagCopiedLinkSuccessfully();
+    String tagCopiedLinkNotSuccessfully();
+    String confirm();
+    String cancel();
+    String close();
+    String username();
 }

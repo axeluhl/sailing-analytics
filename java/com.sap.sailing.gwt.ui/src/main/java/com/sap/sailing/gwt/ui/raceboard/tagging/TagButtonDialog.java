@@ -25,10 +25,11 @@ import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigImagesBarCell;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.controls.ImagesBarCell;
-import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
+import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Dialog which allows users to modify their personal {@link TagButton tag-buttons}.
@@ -81,9 +82,8 @@ public class TagButtonDialog extends DialogBox {
         }
     }
 
-    private final TagPanelResources resources = TagPanelResources.INSTANCE;
+    private final TaggingPanelResources resources = TaggingPanelResources.INSTANCE;
     private final TagPanelStyle style = resources.style();
-    private final TagButtonCellTableResources buttonTableResources = GWT.create(TagButtonCellTableResources.class);
 
     private final TaggingPanel taggingPanel;
     private final StringMessages stringMessages;
@@ -92,23 +92,28 @@ public class TagButtonDialog extends DialogBox {
     private TagButton selectedTagButton;
 
     /**
-     * Centered dialog wich allows users to edit their personal {@link TagButton tag-buttons}.
+     * Centered dialog which allows users to edit their personal {@link TagButton tag-buttons}.
      * 
      * @param taggingPanel
      *            {@link TaggingPanel} which creates this {@link TagButtonDialog}.
      * @param footerPanel
      *            footer panel of {@link TaggingPanel}
+     * @param sailingService
+     *            Sailing Service of {@link TaggingPanel}
+     * @param stringMessages
+     *            string messages of {@link TaggingPanel}
      */
-    public TagButtonDialog(TaggingPanel taggingPanel, TagFooterPanel footerPanel, SailingServiceAsync sailingService) {
+    public TagButtonDialog(TaggingPanel taggingPanel, TagFooterPanel footerPanel, SailingServiceAsync sailingService, StringMessages stringMessages,
+            UserService userService) {
         this.taggingPanel = taggingPanel;
-        this.stringMessages = taggingPanel.getStringMessages();
+        this.stringMessages = stringMessages;
 
         setGlassEnabled(true);
         setText(stringMessages.tagEditCustomTagButtons());
         addStyleName(style.tagButtonDialog());
 
-        TagInputPanel inputPanel = new TagInputPanel(taggingPanel, sailingService);
-        TagPreviewPanel tagPreviewPanel = new TagPreviewPanel(taggingPanel, inputPanel);
+        TagInputPanel inputPanel = new TagInputPanel(taggingPanel, sailingService, stringMessages);
+        TagPreviewPanel tagPreviewPanel = new TagPreviewPanel(taggingPanel, inputPanel, stringMessages, userService);
         CellTable<TagButton> tagButtonsTable = createTable(footerPanel, inputPanel, tagPreviewPanel);
         tagButtonsTable.addRedrawHandler(new Handler() {
             @Override
@@ -149,7 +154,7 @@ public class TagButtonDialog extends DialogBox {
      */
     private CellTable<TagButton> createTable(TagFooterPanel footerPanel, TagInputPanel inputPanel,
             TagPreviewPanel tagPreviewPanel) {
-        CellTable<TagButton> tagButtonTable = new CellTable<TagButton>(15, buttonTableResources);
+        CellTable<TagButton> tagButtonTable = new CellTable<TagButton>(15, resources);
         tagButtonTable.setStyleName(style.tagButtonTable());
 
         // columns

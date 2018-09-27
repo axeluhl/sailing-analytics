@@ -19,7 +19,7 @@ import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
 import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
+import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.Notification;
@@ -32,7 +32,7 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
  */
 public class TagImageUploaderPanel extends FlowPanel {
 
-    private final TagPanelStyle style = TagPanelResources.INSTANCE.style();
+    private final TagPanelStyle style = TaggingPanelResources.INSTANCE.style();
     private final SailingServiceAsync sailingService;
 
     private final TextBox imagePathTextBox;
@@ -46,8 +46,7 @@ public class TagImageUploaderPanel extends FlowPanel {
     private int imageWidth = -1;
     private int imageHeight = -1;
 
-    public TagImageUploaderPanel(TaggingPanel taggingPanel, SailingServiceAsync sailingService) {
-        final StringMessages stringMessages = taggingPanel.getStringMessages();
+    public TagImageUploaderPanel(TaggingPanel taggingPanel, SailingServiceAsync sailingService, StringMessages stringMessages) {
         this.sailingService = sailingService;
 
         imagePathTextBox = new TextBox();

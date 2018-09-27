@@ -6,8 +6,9 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
+import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanel.State;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Panel used to create and edit tags and {@link TagButton tag-buttons} at the {@link TaggingPanel#footerPanel footer}
@@ -15,7 +16,7 @@ import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanel.State;
  */
 public class TagModificationPanel extends FlowPanel {
 
-    private final TagPanelStyle style = TagPanelResources.INSTANCE.style();
+    private final TagPanelStyle style = TaggingPanelResources.INSTANCE.style();
 
     private final TaggingPanel taggingPanel;
     private final StringMessages stringMessages;
@@ -33,13 +34,13 @@ public class TagModificationPanel extends FlowPanel {
      *            required for creation of {@link TagButton tag-buttons}
      */
     protected TagModificationPanel(TaggingPanel taggingPanel, TagFooterPanel tagFooterPanel,
-            SailingServiceAsync sailingService) {
+            SailingServiceAsync sailingService, StringMessages stringMessages, UserService userService) {
         this.taggingPanel = taggingPanel;
-        this.stringMessages = taggingPanel.getStringMessages();
+        this.stringMessages = stringMessages;
 
         setStyleName(style.tagModificationPanel());
 
-        inputPanel = new TagInputPanel(taggingPanel, sailingService);
+        inputPanel = new TagInputPanel(taggingPanel, sailingService, stringMessages);
 
         Button createTagFromInputFields = new Button(stringMessages.tagAddTag());
         createTagFromInputFields.setStyleName(style.tagDialogButton());
@@ -57,7 +58,7 @@ public class TagModificationPanel extends FlowPanel {
         editCustomTagButtons.addStyleName("gwt-Button");
         editCustomTagButtons.addClickHandler(event -> {
             if (taggingPanel.isLoggedInAndRaceLogAvailable()) {
-                new TagButtonDialog(taggingPanel, tagFooterPanel, sailingService);
+                new TagButtonDialog(taggingPanel, tagFooterPanel, sailingService, stringMessages, userService);
             }
         });
 

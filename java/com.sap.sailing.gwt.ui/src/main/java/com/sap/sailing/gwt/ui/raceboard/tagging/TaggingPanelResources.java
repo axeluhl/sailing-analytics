@@ -1,15 +1,16 @@
 package com.sap.sailing.gwt.ui.raceboard.tagging;
 
 import com.google.gwt.core.shared.GWT;
-import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.CssResource;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.user.cellview.client.CellList;
+import com.google.gwt.user.cellview.client.CellTable;
 
 /**
  * Interface for styling {@link TaggingPanel} and its content.
  */
-public interface TagPanelResources extends ClientBundle {
-    public static final TagPanelResources INSTANCE = GWT.create(TagPanelResources.class);
+public interface TaggingPanelResources extends CellList.Resources, CellTable.Resources {
+    static final TaggingPanelResources INSTANCE = GWT.create(TaggingPanelResources.class);
 
     @Source("com/sap/sailing/gwt/ui/client/images/share.png")
     ImageResource shareIcon();
@@ -19,6 +20,9 @@ public interface TagPanelResources extends ClientBundle {
 
     @Source("com/sap/sse/gwt/client/images/remove.png")
     ImageResource deleteIcon();
+
+    @Source("com/sap/sailing/gwt/ui/client/images/timeslider-playstate-replay-active.png")
+    ImageResource reloadIcon();
 
     @Source("com/sap/sailing/gwt/ui/client/images/lock.png")
     ImageResource privateIcon();
@@ -44,8 +48,16 @@ public interface TagPanelResources extends ClientBundle {
     @Source("com/sap/sailing/gwt/ui/client/images/plus_transparent.png")
     ImageResource plusTransparent();
 
+    @Override
+    @Source("tag-button-celltable.gss")
+    CellTable.Style cellTableStyle();
+
+    @Override
+    @Source("tag-celllist.gss")
+    CellList.Style cellListStyle();
+
     @Source("tagging-panel.gss")
-    public TagPanelStyle style();
+    TagPanelStyle style();
 
     public interface TagPanelStyle extends CssResource {
         // general
@@ -102,7 +114,7 @@ public interface TagPanelResources extends ClientBundle {
         String tagFilterClearButton();
         String tagFilterSearchButton();
         String tagFilterSettingsButton();
-        String tagFilterFilterButton();
+        String tagReloadButton();
         String tagFilterPanel();
         String tagFilterSearchBox();
         String tagFilterSearchInput();
@@ -123,5 +135,6 @@ public interface TagPanelResources extends ClientBundle {
         String imageShare();
         String imageEdit();
         String imageDelete();
+        String imageReload();
     }
 }

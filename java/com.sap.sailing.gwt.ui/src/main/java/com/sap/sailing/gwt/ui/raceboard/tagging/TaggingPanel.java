@@ -29,7 +29,7 @@ import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
+import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
@@ -50,22 +50,13 @@ import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * A view showing tags which are connected to a specific race and allowing users to add own tags to a race. This view is
- * shown at the {@link com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel RaceBoard}. Tags consist of a heading and
- * optional a comment and/or image. Tag-Buttons allow to preset tags which are used more frequently by an user. Public
- * tags will be stored as an {@link com.sap.sailing.domain.abstractlog.race.RaceLogEvent RaceLogEvent}, private tags
- * will be stored in the {@link com.sap.sse.security.UserStore UserStore}.<br/>
- * <br/>
- * The TaggingPanel is also used as a data provider for all of its subcomponents like header, footer and content
- * section. Therefore the TaggingPanel provides references to important services, string messages, its current state and
- * so on. Best practice: The constructor of subcomponents of the TaggingPanel contains only the TaggingPanel as a
- * parameter. Every other required shared resource (string messages, service references, ...) can be requested from the
- * TaggingPanel itself.
+ * shown at the {@link com.sap.sailing.gwt.ui.raceboard.RaceBoardPanel RaceBoard}. Tags consist of a title and optional
+ * a comment and/or image. Tag-Buttons allow users to preset tags which are used more frequently. Public tags will be
+ * stored as an {@link com.sap.sailing.domain.abstractlog.race.RaceLogEvent RaceLogEvent}, private tags will be stored
+ * in the {@link com.sap.sse.security.UserStore UserStore}.
  * 
  * @author Julian Rendl, Henri Kohlberg
  */
-// TODO: Add refresh button which resets lastReceivedTagTime
-// TODO: get URL params as constructor parameter and not from Window object
-// TODO: Unit Tests (incl. concatenation)
 // TODO: cache user settings and use observer pattern for cache
 public class TaggingPanel extends ComponentWithoutSettings
         implements RaceTimesInfoProviderListener, UserStatusEventHandler, TimeListener {
@@ -75,7 +66,8 @@ public class TaggingPanel extends ComponentWithoutSettings
      */
     protected enum State {
         VIEW, // default
-        CREATE_TAG, EDIT_TAG
+        CREATE_TAG,
+        EDIT_TAG
     }
 
     // styling
@@ -116,6 +108,21 @@ public class TaggingPanel extends ComponentWithoutSettings
     protected final TimePoint timePointToHighlight;
     protected final String tagToHighlight;
 
+    /**
+     * This boolean prevents the timer from jumping when other users create or delete tags. The timer change event is
+     * called by the selection change event and the other way around. When:<br/>
+     * 1) the timer is in <i>PLAY</i> mode and<br/>
+     * 2) the current timer position is set after the last received tag and<br/>
+     * 3) another user adds/deletes/changes any tag between the latest received tag and the current timer position<br/>
+     * consecutively, the timer would jump to this new tag as the selection would change automatically as the latest tag
+     * changed. This selection change would also trigger the timer to jump to the latest tag, which is not intended in
+     * this case. Therefor any received changes on any tags will set this boolen to true which will ignore the time jump
+     * at the selection change event and prevent this wrong behaviour.
+     * 
+     * @see #raceTimesInfosReceived(Map, long, Date, long)
+     */
+    private boolean preventTimeJumpAtSelectionChangeForOnce = false;
+
     public TaggingPanel(Component<?> parent, ComponentContext<?> context, StringMessages stringMessages,
             SailingServiceAsync sailingService, UserService userService, Timer timer,
             RaceTimesInfoProvider raceTimesInfoProvider, TimePoint timePointToHighlight, String tagToHighlight) {
@@ -129,19 +136,21 @@ public class TaggingPanel extends ComponentWithoutSettings
         this.timePointToHighlight = timePointToHighlight;
         this.tagToHighlight = tagToHighlight;
 
-        style = TagPanelResources.INSTANCE.style();
+        style = TaggingPanelResources.INSTANCE.style();
         style.ensureInjected();
-        TagCellListResources.INSTANCE.cellListStyle().ensureInjected();
+        TaggingPanelResources.INSTANCE.cellListStyle().ensureInjected();
+        TaggingPanelResources.INSTANCE.cellTableStyle().ensureInjected();
 
-        tagCellList = new CellList<TagDTO>(new TagCell(this, false), TagCellListResources.INSTANCE);
+        tagCellList = new CellList<TagDTO>(new TagCell(this, stringMessages, userService, false),
+                TaggingPanelResources.INSTANCE);
         tagSelectionModel = new SingleSelectionModel<TagDTO>();
         tagListProvider = new TagListProvider();
 
         tagButtons = new ArrayList<TagButton>();
 
         taggingPanel = new HeaderPanel();
-        footerPanel = new TagFooterPanel(this, sailingService);
-        filterbarPanel = new TagFilterPanel(this);
+        footerPanel = new TagFooterPanel(this, sailingService, stringMessages, userService);
+        filterbarPanel = new TagFilterPanel(this, stringMessages, userService);
         contentPanel = new FlowPanel();
         createTagsButton = new Button();
 
@@ -176,12 +185,23 @@ public class TaggingPanel extends ComponentWithoutSettings
             // set time slider to corresponding position
             TagDTO selectedTag = tagSelectionModel.getSelectedObject();
             if (selectedTag != null) {
-                // remove time change listener when manual selecting tag cells as this could end in an infinite loop of
-                // timer change -> automatic selection change -> timer change -> ...
-                timer.removeTimeListener(this);
-                timer.setTime(selectedTag.getRaceTimepoint().asMillis());
-                // adding time change listener again
-                timer.addTimeListener(this);
+                /**
+                 * Do not set time of timer when {@link #preventTimeJumpAtSelectionChangeForOnce} is set to
+                 * <code>true</code>. In this case set {@link #preventTimeJumpAtSelectionChangeForOnce} to
+                 * <code>false</code> as selection change is ignored once.
+                 * 
+                 * @see #preventTimeJumpAtSelectionChangeForOnce
+                 */
+                if (preventTimeJumpAtSelectionChangeForOnce) {
+                    preventTimeJumpAtSelectionChangeForOnce = false;
+                } else {
+                    // remove time change listener when manual selecting tag cells as this could end in an infinite loop
+                    // of timer change -> automatic selection change -> timer change -> ...
+                    timer.removeTimeListener(this);
+                    timer.setTime(selectedTag.getRaceTimepoint().asMillis());
+                    // adding time change listener again
+                    timer.addTimeListener(this);
+                }
             }
         });
         createTagsButton.setTitle(stringMessages.tagAddTags());
@@ -454,7 +474,7 @@ public class TaggingPanel extends ComponentWithoutSettings
      */
     protected void updateContent() {
         ensureFooterPanelVisibility();
-        setCreateTagsButtonVisibility(currentState.equals(State.VIEW));
+        createTagsButton.setVisible(userService.getCurrentUser() != null && currentState.equals(State.VIEW));
         if (currentState.equals(State.EDIT_TAG)) {
             taggingPanel.addStyleName(style.taggingPanelDisabled());
             // disable selection of tags when another tags gets edited (currentState == EDIT_TAG)
@@ -518,19 +538,14 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     /**
-     * Returns instance of {@link UserService} so it does not have to be a constructor parameter of every sub component
-     * of the {@link TaggingPanel}.
+     * Sets the {@link #currentState} to the given {@link State state} and updates the UI.
+     * 
+     * @param state
+     *            new state
      */
-    protected UserService getUserSerivce() {
-        return userService;
-    }
-
-    /**
-     * Returns instance of {@link StringMessages} so it does not have to be a constructor parameter of every sub
-     * component of the {@link TaggingPanel}.
-     */
-    protected StringMessages getStringMessages() {
-        return stringMessages;
+    protected void setCurrentState(State state) {
+        currentState = state;
+        updateContent();
     }
 
     /**
@@ -540,17 +555,6 @@ public class TaggingPanel extends ComponentWithoutSettings
      */
     protected State getCurrentState() {
         return currentState;
-    }
-
-    /**
-     * Sets the {@link #currentState} to the given {@link State state} and updates the UI.
-     * 
-     * @param state
-     *            new state
-     */
-    protected void setCurrentState(State state) {
-        currentState = state;
-        updateContent();
     }
 
     /**
@@ -572,12 +576,32 @@ public class TaggingPanel extends ComponentWithoutSettings
     }
 
     /**
-     * Updates the visibility of the {@link #createTagsButton "Add Tags"-button}. {@link #createTagsButton Button} will
-     * NOT get displayed if {@link UserService#getCurrentUser() current user} is not logged in, even if
-     * <code>showButton</code> is set to <code>true</code>!
+     * Checks whether current user has permission to modify public tags.
+     * 
+     * @return <code>true</code> if user has {@link Mode#UPDATE update permissions} on {@link #leaderboardName current
+     *         leaderboard}, otherwise <code>false</code>
      */
-    private void setCreateTagsButtonVisibility(boolean showButton) {
-        createTagsButton.setVisible(userService.getCurrentUser() != null && showButton);
+    protected boolean hasPermissionToModifyPublicTags() {
+        boolean hasPermission = false;
+        if (leaderboardName != null && userService.getCurrentUser().hasPermission(
+                Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName),
+                SailingPermissionsForRoleProvider.INSTANCE)) {
+            hasPermission = true;
+        }
+        return hasPermission;
+    }
+
+    /**
+     * Clears local list of tags and reloads settings for the current user (private tags, tag buttons and filter).
+     */
+    protected void clearCache() {
+        tagListProvider.clear();
+        raceTimesInfoProvider.getRaceIdentifiers().forEach((raceIdentifier) -> {
+            raceTimesInfoProvider.setLatestReceivedTagTime(raceIdentifier, null);
+        });
+        reloadPrivateTags();
+        filterbarPanel.loadTagFilterSets();
+        footerPanel.loadAllTagButtons();
     }
 
     /**
@@ -629,6 +653,7 @@ public class TaggingPanel extends ComponentWithoutSettings
                 }
                 // refresh UI if tags did change
                 if (modifiedTags) {
+                    preventTimeJumpAtSelectionChangeForOnce = true;
                     updateContent();
                 }
                 // After tags were added for the first time, find tag which matches the URL Parameter "tag", highlight
@@ -662,16 +687,6 @@ public class TaggingPanel extends ComponentWithoutSettings
         }
     }
 
-    protected boolean hasPermissionToModifyPublicTags() {
-        boolean hasPermission = false;
-        if (leaderboardName != null && userService.getCurrentUser().hasPermission(
-                Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName),
-                SailingPermissionsForRoleProvider.INSTANCE)) {
-            hasPermission = true;
-        }
-        return hasPermission;
-    }
-
     /**
      * When the {@link UserService#getCurrentUser() current user} logs in or out the {@link #contentPanel content} needs
      * to be reset to hide private tags of the previous {@link UserService#getCurrentUser() current user}. This gets
@@ -681,16 +696,7 @@ public class TaggingPanel extends ComponentWithoutSettings
      */
     @Override
     public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
-        // clear list of local tags to hide private tags of previous user and reset cache
-        tagListProvider.clear();
-        raceTimesInfoProvider.getRaceIdentifiers().forEach((raceIdentifier) -> {
-            raceTimesInfoProvider.setLatestReceivedTagTime(raceIdentifier, null);
-        });
-        // load content for new user
-        reloadPrivateTags();
-        filterbarPanel.loadTagFilterSets();
-        footerPanel.loadAllTagButtons();
-        // update UI
+        clearCache();
         setCurrentState(State.VIEW);
     }
 

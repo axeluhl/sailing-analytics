@@ -66,6 +66,7 @@ public class TagsResource extends AbstractSailingServerResource {
      * @return status 200 (including tags) if request was successful, otherwise 400 (bad request) or 500 (internal
      *         server error)
      */
+    // TODO: Add searchSince
     @GET
     @Produces({ APPLICATION_JSON_UTF8, TEXT_PLAIN_UTF8 })
     public Response getTags(@PathParam(RaceLogServletConstants.PARAMS_LEADERBOARD_NAME) String leaderboardName,
@@ -79,7 +80,7 @@ public class TagsResource extends AbstractSailingServerResource {
         final boolean lookForPrivate = visibility.equalsIgnoreCase("both") || visibility.equalsIgnoreCase("private");
         try {
             if (lookForPublic) {
-                Util.addAll(taggingService.getPublicTags(leaderboardName, raceColumnName, fleetName), tags);
+                Util.addAll(taggingService.getPublicTags(leaderboardName, raceColumnName, fleetName, null, false), tags);
             }
             if (lookForPrivate) {
                 try {
@@ -88,8 +89,6 @@ public class TagsResource extends AbstractSailingServerResource {
                     // do nothing when user is not logged in
                 }
             }
-            // remove revoked tags from result
-            tags.removeIf(tag -> tag.getRevokedAt() != null && tag.getRevokedAt().asMillis() != 0);
             JSONArray jsonTags = serializer.serialize(tags);
             response = Response.ok(jsonTags.toJSONString()).type(APPLICATION_JSON_UTF8).build();
         } catch (RaceLogNotFoundException e) {

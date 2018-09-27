@@ -147,7 +147,9 @@ public interface ReadonlyRaceState extends RaceStateEventProcessor {
      * If wind has been entered, returns the most recent one. Otherwise <code>null</code>.
      */
     Wind getWindFix();
-    
-    Iterable<RaceLogTagEvent> getTagEvents();
 
+    /**
+     * Returns an iterable of tag events which may be empty but never <code>null</code>.
+     */
+    Iterable<RaceLogTagEvent> getTagEvents();
 }

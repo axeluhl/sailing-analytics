@@ -6,8 +6,9 @@ import java.util.List;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
 import com.sap.sailing.domain.common.dto.TagDTO;
+import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.ui.client.UserService;
 
@@ -16,8 +17,8 @@ import com.sap.sse.security.ui.client.UserService;
  */
 public class TagPreviewPanel extends FlowPanel {
 
-    private final TagCellListResources cellResources = TagCellListResources.INSTANCE;
-    private final TagPanelStyle style = TagPanelResources.INSTANCE.style();
+    private final TaggingPanelResources resources = TaggingPanelResources.INSTANCE;
+    private final TagPanelStyle style = resources.style();
 
     private final TaggingPanel taggingPanel;
     private final UserService userService;
@@ -34,16 +35,16 @@ public class TagPreviewPanel extends FlowPanel {
      * @param inputPanel
      *            references input fields used to get current user input
      */
-    protected TagPreviewPanel(TaggingPanel taggingPanel, TagInputPanel inputPanel) {
+    protected TagPreviewPanel(TaggingPanel taggingPanel, TagInputPanel inputPanel, StringMessages stringMessages,
+            UserService userService) {
         this.taggingPanel = taggingPanel;
-        this.userService = taggingPanel.getUserSerivce();
+        this.userService = userService;
 
         setStyleName(style.tagPreviewPanel());
-
-        tagPreviewCellList = new CellList<TagDTO>(new TagCell(taggingPanel, true), cellResources);
+        tagPreviewCellList = new CellList<TagDTO>(new TagCell(taggingPanel, stringMessages, userService, true),
+                resources);
         listContainingPreviewTag = new ArrayList<TagDTO>();
-
-        add(new Label(taggingPanel.getStringMessages().tagPreview()));
+        add(new Label(stringMessages.tagPreview()));
         add(tagPreviewCellList);
 
         inputPanel.getTagTextBox().addValueChangeHandler(event -> {
@@ -73,7 +74,6 @@ public class TagPreviewPanel extends FlowPanel {
                 inputPanel.isVisibleForPublic(), userService.getCurrentUser().getName(),
                 new MillisecondsTimePoint(taggingPanel.getTimerTime()), MillisecondsTimePoint.now()));
         tagPreviewCellList.setRowData(listContainingPreviewTag);
-
         setVisible(!inputPanel.getTag().isEmpty());
     }
 }

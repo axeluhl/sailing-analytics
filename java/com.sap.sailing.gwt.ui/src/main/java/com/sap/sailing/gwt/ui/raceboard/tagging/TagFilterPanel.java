@@ -15,13 +15,13 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextBox;
+import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.filter.FilterWithUI;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagFilterSets;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagFilterSetsDialog;
 import com.sap.sailing.gwt.ui.client.shared.filter.TagFilterSetsJsonDeSerializer;
-import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
-import com.sap.sailing.domain.common.dto.TagDTO;
+import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.AbstractListFilter;
 import com.sap.sse.common.filter.Filter;
@@ -38,7 +38,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, Filter<Ta
 
     private final static String LOCAL_STORAGE_TAGS_FILTER_SETS_KEY = "sailing.tags.filtersets";
 
-    private final TagPanelStyle style = TagPanelResources.INSTANCE.style();
+    private final TagPanelStyle style = TaggingPanelResources.INSTANCE.style();
 
     private final TaggingPanel taggingPanel;
     private final StringMessages stringMessages;
@@ -47,7 +47,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, Filter<Ta
 
     private TagFilterSets tagFilterSets;
     private final TextBox searchTextBox;
-    private final Button clearTextBoxButton, filterSettingsButton;
+    private final Button clearTextBoxButton, filterSettingsButton, refreshTagsButton;
     private final AbstractListFilter<TagDTO> filter;
 
     private FilterSet<TagDTO, FilterWithUI<TagDTO>> lastActiveTagFilterSet;
@@ -57,12 +57,12 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, Filter<Ta
      * Creates panel which allows filtering of tags and shows current selected filter.
      * 
      * @param taggingPanel
-     *            provides reference to {@link StringMessages}, {@link UserService} and {@link TagListProvider}.
+     *            provides reference {@link TagListProvider}.
      */
-    protected TagFilterPanel(TaggingPanel taggingPanel) {
+    protected TagFilterPanel(TaggingPanel taggingPanel, StringMessages stringMessages, UserService userService) {
         this.taggingPanel = taggingPanel;
-        this.stringMessages = taggingPanel.getStringMessages();
-        this.userService = taggingPanel.getUserSerivce();
+        this.stringMessages = stringMessages;
+        this.userService = userService;
         this.tagListProvider = taggingPanel.getTagListProvider();
 
         tagFilterSets = new TagFilterSets();
@@ -71,7 +71,8 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, Filter<Ta
         searchTextBox = new TextBox();
         clearTextBoxButton = new Button();
         filterSettingsButton = new Button();
-        currentFilter = new TagFilterLabel(taggingPanel);
+        refreshTagsButton = new Button();
+        currentFilter = new TagFilterLabel(taggingPanel, stringMessages);
 
         loadTagFilterSets();
         filter = new AbstractListFilter<TagDTO>() {
@@ -107,16 +108,22 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, Filter<Ta
         clearTextBoxButton.addStyleName(style.tagFilterHiddenButton());
         clearTextBoxButton.addStyleName("gwt-Button");
         clearTextBoxButton.addClickHandler(event -> {
-            clearSelection();
+            clearSearchbox();
         });
 
         filterSettingsButton.setStyleName(style.tagFilterButton());
-        filterSettingsButton.addStyleName(style.tagFilterFilterButton());
         filterSettingsButton.addStyleName(style.imageInactiveFilter());
         filterSettingsButton.addStyleName("gwt-Button");
         filterSettingsButton.setTitle(stringMessages.tagsFilter());
         filterSettingsButton.addClickHandler(event -> {
             showFilterDialog();
+        });
+
+        refreshTagsButton.setStyleName(style.tagReloadButton());
+        refreshTagsButton.addStyleName(style.imageReload());
+        refreshTagsButton.addStyleName("gwt-Button");
+        refreshTagsButton.addClickHandler(event -> {
+            taggingPanel.clearCache();
         });
 
         Panel searchBoxPanel = new FlowPanel();
@@ -127,6 +134,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, Filter<Ta
 
         add(searchBoxPanel);
         add(filterSettingsButton);
+        add(refreshTagsButton);
         add(currentFilter);
     }
 
@@ -137,7 +145,8 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, Filter<Ta
         TagFilterSetsDialog tagsFilterSetsDialog = new TagFilterSetsDialog(tagFilterSets, stringMessages,
                 new DialogCallback<TagFilterSets>() {
                     @Override
-                    public void cancel() {}
+                    public void cancel() {
+                    }
 
                     @Override
                     public void ok(final TagFilterSets newTagFilterSets) {
@@ -193,7 +202,8 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, Filter<Ta
         if (userService.getCurrentUser() != null) {
             userService.getPreference(LOCAL_STORAGE_TAGS_FILTER_SETS_KEY, new AsyncCallback<String>() {
                 @Override
-                public void onFailure(Throwable caught) {}
+                public void onFailure(Throwable caught) {
+                }
 
                 @Override
                 public void onSuccess(String result) {
@@ -205,10 +215,9 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, Filter<Ta
                             tagFilterSets = deserializer.deserialize((JSONObject) value);
                             tagListProvider.setCurrentFilterSet(tagFilterSets.getActiveFilterSetWithGeneralizedType());
                         }
-                    }
-                    else {
+                    } else {
                         tagFilterSets = new TagFilterSets();
-                        tagListProvider.setCurrentFilterSet(null);                       
+                        tagListProvider.setCurrentFilterSet(null);
                     }
                     tagFilterSets.toString();
                 }
@@ -243,7 +252,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, Filter<Ta
     /**
      * Clears searchbox and removes key-up-listener.
      */
-    private void clearSelection() {
+    private void clearSearchbox() {
         searchTextBox.setText("");
         clearTextBoxButton.addStyleName(style.tagFilterHiddenButton());
         onKeyUp(null);
@@ -261,8 +270,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, Filter<Ta
                 for (Filter<TagDTO> oldFilter : tagProviderFilterSet.getFilters()) {
                     newFilterSetWithThis.addFilter(oldFilter);
                 }
-            }
-            else {
+            } else {
                 newFilterSetWithThis = new FilterSet<>(null);
             }
             newFilterSetWithThis.addFilter(this);
@@ -305,7 +313,6 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, Filter<Ta
     public String getName() {
         return null;
     }
-
 
     /**
      * Applies filter entered by using search textbox to filterset.

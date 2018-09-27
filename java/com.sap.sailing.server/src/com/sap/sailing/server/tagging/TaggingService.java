@@ -13,7 +13,6 @@ import com.sap.sailing.domain.common.tagging.ServiceNotFoundException;
 import com.sap.sailing.domain.common.tagging.TagAlreadyExistsException;
 import com.sap.sse.common.TimePoint;
 
-// TODO: see "translation_v2.json" for new translation files
 // TODO: use document settings id for tags/tag-buttons/... as race identifier
 /**
  * This service is used to perform all CRUD operations on {@link TagDTO tags} and is used by the
@@ -134,6 +133,27 @@ public interface TaggingService {
             ServiceNotFoundException, TagAlreadyExistsException;
 
     /**
+     * Returns all private and public tags of specified race since timepoint <code>searchSince</code>.
+     * 
+     * @param leaderboardName
+     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
+     * @param raceColumnName
+     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
+     * @param fleetName
+     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
+     * @param searchSince
+     *            tags will only be returned if they got created after this {@link Timepoint time point}. Set this value
+     *            to <code>null</code> to return all found tags independant of their creation date.
+     * @param returnRevokedTags
+     *            if set to <code>true</code> only valid tags will be returned, if set to <code>false</code> revoked
+     *            tags will be returned too
+     * @return list of {@link TagDTO tags}, empty list in case an error occurs or there are no tags available but
+     *         <b>never null</b>!
+     */
+    List<TagDTO> getTags(String leaderboardName, String raceColumnName, String fleetName, TimePoint searchSince,
+            boolean returnRevokedTags) throws RaceLogNotFoundException, ServiceNotFoundException;
+
+    /**
      * Returns all public tags for the specified race.
      * 
      * @param leaderboardName
@@ -144,15 +164,21 @@ public interface TaggingService {
      *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
      * @return list of {@link TagDTO tags}, empty list in case an error occurs or there are no tags available but
      *         <b>never null</b>!
+     * @param searchSince
+     *            tags will only be returned if they got created after this {@link Timepoint time point}. Set this value
+     *            to <code>null</code> to return all found tags independant of their creation date.
+     * @param returnRevokedTags
+     *            if set to <code>true</code> only valid tags will be returned, if set to <code>false</code> revoked
+     *            tags will be returned also
      * @throws RaceLogNotFoundException
      *             thrown if racelog cannot be found (e.g. when <code>leaderboardName</code>,
      *             <code>raceColumnName</code> or <code>fleetName</code> are missing)
      */
-    List<TagDTO> getPublicTags(String leaderboardName, String raceColumnName, String fleetName)
-            throws RaceLogNotFoundException;
+    List<TagDTO> getPublicTags(String leaderboardName, String raceColumnName, String fleetName, TimePoint searchSince,
+            boolean returnRevokedTags) throws RaceLogNotFoundException;
 
     /**
-     * Returns all public tags since the given <code>searchSinceTimePoint</code> for the specified race.
+     * Returns all public tags since the given <code>searchSince</code> for the specified race.
      * 
      * @param raceIdentifier
      *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
