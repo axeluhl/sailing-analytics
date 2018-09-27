@@ -8,6 +8,7 @@ import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -24,11 +25,13 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.BadgeDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.events.NavigatorColumn;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
+import com.sap.sailing.gwt.home.shared.partials.dialog.ConfirmDialogFactory;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileResources;
 import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorDesktop;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
 public class SailorProfileOverviewImpl extends Composite implements SailorProfileOverview {
@@ -96,7 +99,17 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
         removeColumn.setFieldUpdater(new FieldUpdater<SailorProfileDTO, String>() {
             @Override
             public void update(int index, SailorProfileDTO dto, String value) {
-                presenter.removeSailorProfile(dto.getKey());
+                ConfirmDialogFactory.showConfirmDialog(StringMessages.INSTANCE.sailorProfileRemoveMessage(),
+                        new DialogCallback<Void>() {
+                            @Override
+                            public void ok(Void editedObject) {
+                                presenter.removeSailorProfile(dto.getKey());
+                            }
+
+                            @Override
+                            public void cancel() {
+                            }
+                        });
             }
         });
 
@@ -181,7 +194,7 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
     };
 
     private final Column<SailorProfileDTO, String> removeColumn = new Column<SailorProfileDTO, String>(
-            new ButtonCell()) {
+            new RemoveButtonCell()) {
         @Override
         public String getValue(SailorProfileDTO entry) {
             return "X";
@@ -195,5 +208,17 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
 
     private SailorProfilePlace getTargetPlace(SailorProfileDTO entry) {
         return new SailorProfilePlace(entry.getKey());
+    }
+
+    private class RemoveButtonCell extends ButtonCell {
+        @Override
+        public void render(Context context, SafeHtml data, SafeHtmlBuilder sb) {
+            sb.appendHtmlConstant("<button type=\"button\" tabindex=\"-1\" style=\"background-color: #e94a1b\">");
+            if (data != null) {
+                sb.append(data);
+            }
+            sb.appendHtmlConstant("</button>");
+        }
+
     }
 }
