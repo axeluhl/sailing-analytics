@@ -14,6 +14,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableResources;
@@ -21,6 +22,7 @@ import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType.StatisticType;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO.SingleEntry;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileDesktopResources;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.events.CompetitorWithoutClubnameItemDescription;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.events.NavigatorColumn;
 import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
@@ -50,6 +52,9 @@ public class SailorProfileStatisticTable extends Composite {
     @UiField
     SpanElement titleUi;
 
+    @UiField
+    Image titleIconUi;
+
     private FlagImageResolver flagImageResolver;
 
     private SailorProfileNumericStatisticType type;
@@ -61,9 +66,11 @@ public class SailorProfileStatisticTable extends Composite {
         this.flagImageResolver = flagImageResolver;
         this.type = type;
         this.stringMessages = stringMessages;
+        SailorProfileDesktopResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         setupTable();
         titleUi.setInnerText(SailorProfileNumericStatisticTypeFormater.getDisplayName(type, stringMessages));
+        titleIconUi.setUrl(SailorProfileNumericStatisticTypeFormater.getIcon(type));
     }
 
     public void setData(List<Pair<SimpleCompetitorWithIdDTO, SingleEntry>> data) {

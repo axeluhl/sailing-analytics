@@ -72,3 +72,16 @@
 .clickableColumn {
     cursor: pointer;
 }
+
+.statisticsTableHeaderIcon {
+    width: 2em;
+    height: auto;
+    margin-right: 1em;
+    vertical-align: middle;
+}
+
+.statisticsTableHeader {
+    padding-left: 1em;
+    padding-bottom: 1em;
+    padding-top: 1em;
+}
