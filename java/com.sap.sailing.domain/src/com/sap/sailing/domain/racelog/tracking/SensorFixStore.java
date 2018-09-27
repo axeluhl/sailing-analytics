@@ -5,6 +5,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
@@ -73,7 +74,7 @@ public interface SensorFixStore {
      * @param fix
      *            The fix to store. Must not be <code>null</code>.
      */
-    <FixT extends Timed> void storeFixes(DeviceIdentifier device, Iterable<FixT> fixes);
+    <FixT extends Timed> RegattaAndRaceIdentifier storeFixes(DeviceIdentifier device, Iterable<FixT> fixes);
 
     /**
      * Listeners are notified, whenever a {@link GPSFix} submitted by the {@code device}

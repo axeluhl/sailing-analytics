@@ -21,6 +21,7 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.QueryBuilder;
 import com.sap.sailing.domain.common.DeviceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.persistence.MongoObjectFactory;
@@ -184,7 +185,8 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
      * Store fixes in batches, reducing metadata storage update.
      */
     @Override
-    public <FixT extends Timed> void storeFixes(DeviceIdentifier device, Iterable<FixT> fixes) {
+    public <FixT extends Timed> RegattaAndRaceIdentifier storeFixes(DeviceIdentifier device, Iterable<FixT> fixes) {
+        RegattaAndRaceIdentifier maneuverChanged = null;
         if (!Util.isEmpty(fixes)) {
             try {
                 final Object dbDeviceId = storeDeviceId(deviceServiceFinder, device);
@@ -230,8 +232,9 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
                 logger.log(Level.WARNING, "Could not store fix in MongoDB");
                 e.printStackTrace();
             }
-            notifyListeners(device, fixes);
+            maneuverChanged = notifyListeners(device, fixes);
         }
+        return maneuverChanged;
     }
 
     @Override
@@ -239,7 +242,9 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
         storeFixes(device, Collections.singletonList(fix));
     }
 
-    private <FixT extends Timed> void notifyListeners(DeviceIdentifier device, Iterable<FixT> fixes) {
+    private <FixT extends Timed> RegattaAndRaceIdentifier notifyListeners(DeviceIdentifier device,
+            Iterable<FixT> fixes) {
+        RegattaAndRaceIdentifier raceWithChangedManeuver = null;
         @SuppressWarnings({ "unchecked", "rawtypes" })
         final Set<FixReceivedListener<FixT>> listenersToInform = LockUtil.executeWithReadLockAndResult(listenersLock, () -> {
             return new HashSet<>(Util.<DeviceIdentifier, Set<FixReceivedListener<FixT>>> get(
@@ -247,9 +252,13 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
         });
         for (FixT fix : fixes) {
             for (FixReceivedListener<FixT> listener : listenersToInform) {
-                listener.fixReceived(device, fix);
+                final RegattaAndRaceIdentifier didManeuverChangeOrNull = listener.fixReceived(device, fix);
+                if (didManeuverChangeOrNull != null) {
+                    raceWithChangedManeuver = didManeuverChangeOrNull;
+                }
             }
         }
+        return raceWithChangedManeuver;
     }
 
     @Override

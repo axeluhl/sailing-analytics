@@ -5,6 +5,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 import com.sap.sailing.domain.common.DeviceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.TimePoint;
@@ -54,7 +55,8 @@ public enum EmptySensorFixStore implements SensorFixStore {
     }
 
     @Override
-    public <FixT extends Timed> void storeFixes(DeviceIdentifier device, Iterable<FixT> fixes) {
+    public <FixT extends Timed> RegattaAndRaceIdentifier storeFixes(DeviceIdentifier device, Iterable<FixT> fixes) {
+        return null;
     }
 
     @Override

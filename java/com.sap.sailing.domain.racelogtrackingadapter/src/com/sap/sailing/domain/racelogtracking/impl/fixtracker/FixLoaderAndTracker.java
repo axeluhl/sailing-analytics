@@ -5,9 +5,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -27,6 +29,7 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Mark;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.DeviceIdentifier;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.tracking.DoubleVectorFix;
@@ -42,6 +45,7 @@ import com.sap.sailing.domain.tracking.DynamicGPSFixTrack;
 import com.sap.sailing.domain.tracking.DynamicSensorFixTrack;
 import com.sap.sailing.domain.tracking.DynamicTrack;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
+import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.RaceChangeListener;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -124,6 +128,8 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
      * one more {@link TrackingDataLoader} that ensures the loading state of the associated {@link TrackedRace}.
      */
     private final Set<AbstractLoadingJob> loadingJobs = ConcurrentHashMap.newKeySet();
+    private final ConcurrentHashMap<UUID, Maneuver> lastNotifiedManeuverCache = new ConcurrentHashMap<>();
+
     private final SensorFixMapperFactory sensorFixMapperFactory;
     
     /**
@@ -170,12 +176,15 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     };
     private final FixReceivedListener<Timed> listener = new FixReceivedListener<Timed>() {
         @Override
-        public void fixReceived(DeviceIdentifier device, Timed fix) {
+        public RegattaAndRaceIdentifier fixReceived(DeviceIdentifier device, Timed fix) {
+            AtomicReference<RegattaAndRaceIdentifier> maneuverChanged = new AtomicReference<>();
+
             if (!preemptiveStopRequested.get() && trackedRace.getStartOfTracking() != null) {
                 final TimePoint timePoint = fix.getTimePoint();
-                deviceMappings.forEachMappingOfDeviceIncludingTimePoint(device, fix.getTimePoint(), new Consumer<DeviceMappingWithRegattaLogEvent<WithID>>() {
+                deviceMappings.forEachMappingOfDeviceIncludingTimePoint(device, fix.getTimePoint(),
+                        new Consumer<DeviceMappingWithRegattaLogEvent<WithID>>() {
                     @Override
-                    public void accept(DeviceMappingWithRegattaLogEvent<WithID> mapping) {
+                            public void accept(DeviceMappingWithRegattaLogEvent<WithID> mapping) {
                         mapping.getRegattaLogEvent().accept(new MappingEventVisitor() {
                             @Override
                             public void visit(RegattaLogDeviceCompetitorSensorDataMappingEvent event) {
@@ -233,6 +242,11 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                                 }
                                 if (fix instanceof GPSFixMoving) {
                                     trackedRace.recordFix(comp, (GPSFixMoving) fix);
+                                            RegattaAndRaceIdentifier maneuverChangedAnswer = detectIfManeuverChanged(
+                                        comp);
+                                            if (maneuverChangedAnswer != null) {
+                                        maneuverChanged.set(maneuverChangedAnswer);
+                                    }
                                 } else {
                                     logger.log(Level.WARNING,
                                             String.format(
@@ -308,8 +322,25 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                     }
                 });
             }
+            return maneuverChanged.get();
         }
     };
+
+    private RegattaAndRaceIdentifier detectIfManeuverChanged(Competitor comp) {
+        boolean changed = false;
+        if (comp.getId() instanceof UUID) {
+            Maneuver lastDetectedManeuver = Util.last(trackedRace.getManeuvers(comp, false));
+            if (lastDetectedManeuver != null) {
+                Maneuver lastNotifiedManeuverOrNull = lastNotifiedManeuverCache.get(comp.getId());
+                if (!lastDetectedManeuver.equals(lastNotifiedManeuverOrNull)) {
+                    lastNotifiedManeuverCache.put((UUID) comp.getId(), lastNotifiedManeuverOrNull);
+                    changed = true;
+                    logger.info(comp.getName() + " new maneuver is " + lastDetectedManeuver);
+                }
+            }
+        }
+        return changed ? trackedRace.getRaceIdentifier() : null;
+    }
 
     public FixLoaderAndTracker(DynamicTrackedRace trackedRace, SensorFixStore sensorFixStore,
             SensorFixMapperFactory sensorFixMapperFactory) {
