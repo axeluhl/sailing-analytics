@@ -115,6 +115,7 @@ public class TaggingServiceTest {
 
     @Before
     public void resetEnvironment() {
+        MongoDBService.INSTANCE.getDB().getCollection(CollectionNames.RACE_LOGS.name()).drop();
         securityService.addPermissionForUser(username, editLeaderboardPermission);
         securityService.unsetPreference(username,
                 serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName));
@@ -129,7 +130,12 @@ public class TaggingServiceTest {
                 }
             }
         }
-        MongoDBService.INSTANCE.getDB().getCollection(CollectionNames.RACE_LOGS.name()).drop();
+        try {
+            List<TagDTO> tags = taggingService.getTags(leaderboardName, raceColumnName, fleetName, null, false);
+            logger.info("Tags after environment reset: " + tags.toString());
+        } catch (Exception e) {
+            logger.severe("Could not reset test environment");
+        }
     }
 
     @Test
@@ -139,8 +145,8 @@ public class TaggingServiceTest {
         final String comment = "Comment To Create";
         final String imageURL = "";
         final TimePoint raceTimepoint = new MillisecondsTimePoint(1);
-        // add tag (missing tag => catch exception)
         try {
+            logger.info("Trying to add public tag with missing title which should be catched by this test.");
             taggingService.addTag(leaderboardName, raceColumnName, fleetName, null, comment, imageURL, true,
                     raceTimepoint);
             fail("Tag should not be added because the tag title is missing!");
@@ -150,8 +156,8 @@ public class TaggingServiceTest {
             fail("Caught unexpected exception while adding public tag! " + e.getClass().getName() + ", message: "
                     + e.getMessage());
         }
-        // add private tag (should succeed)
         try {
+            logger.info("Trying to add private tag, should succeed");
             taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL, false,
                     raceTimepoint);
             String preference = securityService.getPreference(username,
@@ -163,8 +169,8 @@ public class TaggingServiceTest {
             fail("Caught unexpected exception while adding private tag! " + e.getClass().getName() + ", message: "
                     + e.getMessage());
         }
-        // add public tag (missing permissions => catch exception)
         try {
+            logger.info("Trying to add public tag with missing permissions which should be catched by this test.");
             securityService.removePermissionFromUser(username, editLeaderboardPermission);
             taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL, true,
                     raceTimepoint);
@@ -177,8 +183,9 @@ public class TaggingServiceTest {
         } finally {
             securityService.addPermissionForUser(username, editLeaderboardPermission);
         }
-        // add public tag (racelog not found => catch exception)
         try {
+            logger.info(
+                    "Trying to add public tag with wrong racelog identifiers which should be catched by this test.");
             taggingService.addTag(leaderboardName, "bla", fleetName, tag, comment, imageURL, true, raceTimepoint);
             fail("Tag should not be added because racelog does not exist!");
         } catch (RaceLogNotFoundException e) {
@@ -187,8 +194,8 @@ public class TaggingServiceTest {
             fail("Caught unexpected exception while adding public tag! " + e.getClass().getName() + ", message: "
                     + e.getMessage());
         }
-        // add public tag (should succeed)
         try {
+            logger.info("Trying to add public tag, should succeed");
             taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL, true,
                     raceTimepoint);
             List<TagDTO> publicTags = taggingService.getPublicTags(leaderboardName, raceColumnName, fleetName, null,
@@ -199,8 +206,8 @@ public class TaggingServiceTest {
             fail("Caught unexpected exception while adding public tag which should succeed! " + e.getClass().getName()
                     + ", message: " + e.getMessage());
         }
-        // add public tag (tag already exists => catch exception)
         try {
+            logger.info("Trying to add already existing public tag which should be catched by this test.");
             taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL, true,
                     raceTimepoint);
             fail("Tag should not be added because it already exists!");
@@ -221,20 +228,22 @@ public class TaggingServiceTest {
         final String imageURL = "localhost";
         final TimePoint raceTimepoint = new MillisecondsTimePoint(1000);
         try {
+            logger.info("Adding tags which should be loaded via getTags() afterwards.");
             taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL, false,
                     raceTimepoint);
             taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL, true,
                     raceTimepoint);
-            assertTrue("Get private tag", taggingService.getPrivateTags(leaderboardName, raceColumnName, fleetName)
-                    .get(0).equals(tag, comment, imageURL, false, subject.getPrincipal().toString(), raceTimepoint));
-            assertTrue("Get public tag",
+            assertTrue("Private tags contain added tag",
+                    taggingService.getPrivateTags(leaderboardName, raceColumnName, fleetName).get(0).equals(tag,
+                            comment, imageURL, false, subject.getPrincipal().toString(), raceTimepoint));
+            assertTrue("Public tags contain added tag",
                     taggingService.getPublicTags(leaderboardName, raceColumnName, fleetName, null, false).get(0)
                             .equals(tag, comment, imageURL, true, subject.getPrincipal().toString(), raceTimepoint));
-            assertEquals("Get public tag with creation date filter", 1, taggingService
+            assertEquals("Public tags contain added tag with matching creation date filter", 1, taggingService
                     .getPublicTags(leaderboardName, raceColumnName, fleetName, raceTimepoint, false).size());
-            assertEquals("Get public tag with creation date filter which does not match any tags", 0, taggingService
-                    .getPublicTags(leaderboardName, raceColumnName, fleetName, MillisecondsTimePoint.now(), false)
-                    .size());
+            assertEquals("Public tags do not contain added tag with non-matching creation date filter", 0,
+                    taggingService.getPublicTags(leaderboardName, raceColumnName, fleetName,
+                            MillisecondsTimePoint.now(), false).size());
         } catch (Exception e) {
             fail("Caught unexpected exception while loading tags which were previously added! " + e.getClass().getName()
                     + ", message: " + e.getMessage());
@@ -245,8 +254,8 @@ public class TaggingServiceTest {
     @Test
     public void testUpdateTag() {
         logger.entering(getClass().getName(), "testUpdateTag");
-        final String tag = "TagToLoad";
-        final String comment = "Comment To Load";
+        final String tag = "TagToUpdate";
+        final String comment = "Comment To Update";
         final String imageURL = "localhost";
         final TimePoint raceTimepoint = new MillisecondsTimePoint(1000);
         final String updatedTag = "Upd/ated %Ta!g!הצü";
@@ -261,28 +270,27 @@ public class TaggingServiceTest {
             taggingService.updateTag(leaderboardName, raceColumnName, fleetName, tagObject, updatedTag, comment,
                     imageURL, false);
             tagObject = taggingService.getTags(leaderboardName, raceColumnName, fleetName, null, false).get(0);
-            assertEquals("Update tag title", updatedTag, tagObject.getTag());
+            assertEquals("Updated tag title", updatedTag, tagObject.getTag());
             // update comment
             taggingService.updateTag(leaderboardName, raceColumnName, fleetName, tagObject, tag, updatedComment,
                     imageURL, false);
             tagObject = taggingService.getTags(leaderboardName, raceColumnName, fleetName, null, false).get(0);
-            assertEquals("Update comment", updatedComment, tagObject.getComment());
+            assertEquals("Updated comment", updatedComment, tagObject.getComment());
             // update image URL
             taggingService.updateTag(leaderboardName, raceColumnName, fleetName, tagObject, tag, comment,
                     updatedImageURL, false);
             tagObject = taggingService.getTags(leaderboardName, raceColumnName, fleetName, null, false).get(0);
-            assertEquals("Update image URL", updatedImageURL, tagObject.getImageURL());
+            assertEquals("Updated image URL", updatedImageURL, tagObject.getImageURL());
             // update visibility (private -> public)
             taggingService.updateTag(leaderboardName, raceColumnName, fleetName, tagObject, tag, comment, imageURL,
                     true);
             tagObject = taggingService.getTags(leaderboardName, raceColumnName, fleetName, null, false).get(0);
-            assertEquals("Update visibility (private -> public)", true, taggingService
-                    .getTags(leaderboardName, raceColumnName, fleetName, null, false).get(0).isVisibleForPublic());
+            assertEquals("Updated visibility (private -> public)", true, tagObject.isVisibleForPublic());
             // update visibility (public -> private)
             taggingService.updateTag(leaderboardName, raceColumnName, fleetName, tagObject, tag, comment, imageURL,
                     false);
             tagObject = taggingService.getTags(leaderboardName, raceColumnName, fleetName, null, false).get(0);
-            assertEquals("Update visibility (public -> private)", false, tagObject.isVisibleForPublic());
+            assertEquals("Updated visibility (public -> private)", false, tagObject.isVisibleForPublic());
         } catch (Exception e) {
             fail("Caught unexpected exception while updating tags! " + e.getClass().getName() + ", message: "
                     + e.getMessage());
@@ -298,6 +306,7 @@ public class TaggingServiceTest {
         final String imageURL = "localhost";
         final TimePoint raceTimepoint = new MillisecondsTimePoint(1);
         try {
+            logger.info("Adding tags which should be removed via removeTag() afterwards.");
             taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL, false,
                     raceTimepoint);
             taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL, true,
