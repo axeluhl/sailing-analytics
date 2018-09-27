@@ -1,8 +1,5 @@
 package com.sap.sailing.gwt.ui.raceboard.tagging;
 
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -13,9 +10,6 @@ import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TagPanelResources.TagPanelStyle;
-import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
-import com.sap.sse.gwt.adminconsole.URLFieldWithFileUpload;
 
 /**
  * Panel containing input fields for tag/tag button creation and modification.
@@ -32,9 +26,7 @@ public class TagInputPanel extends FlowPanel {
     private static final boolean DEFAULT_VISIBLE_FOR_PUBLIC = false;
 
     private final TextBox tagTextBox;
-    private final URLFieldWithFileUpload imageURLTextBox;
-    private int imageWidth = -1;
-    private int imageHeight = -1;
+    private final TagImageUploaderPanel imageUploadPanel;
     private final TextArea commentTextArea;
     private final SimplePanel checkboxWrapper;
     private final CheckBox visibleForPublicCheckBox;
@@ -59,35 +51,8 @@ public class TagInputPanel extends FlowPanel {
         tagTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelTag());
         add(tagTextBox);
 
-        imageURLTextBox = new URLFieldWithFileUpload(stringMessages);
-        imageURLTextBox.setTitle(stringMessages.tagLabelImageURL());
-        imageURLTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelImageURL());
-        imageURLTextBox.addValueChangeHandler(new ValueChangeHandler<String>() {
-            @Override
-            public void onValueChange(ValueChangeEvent<String> event) {
-                String imageUrlAsString = event.getValue();
-                if (imageUrlAsString == null || imageUrlAsString.isEmpty()) {
-                    imageWidth = -1;
-                    imageHeight = -1;
-                } else {
-                    sailingService.resolveImageDimensions(imageUrlAsString,
-                            new AsyncCallback<Util.Pair<Integer, Integer>>() {
-                                @Override
-                                public void onSuccess(Pair<Integer, Integer> imageSize) {
-                                    if (imageSize != null) {
-                                        imageWidth = imageSize.getA();
-                                        imageHeight = imageSize.getB();
-                                    }
-                                }
-
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                }
-                            });
-                }
-            }
-        });
-        add(imageURLTextBox);
+        imageUploadPanel = new TagImageUploaderPanel(taggingPanel, sailingService);
+        add(imageUploadPanel);
 
         commentTextArea = new TextArea();
         commentTextArea.setStyleName(style.tagInputPanelComment());
@@ -109,12 +74,16 @@ public class TagInputPanel extends FlowPanel {
         clearAllValues();
     }
 
+    public String getImageURL() {
+        return imageUploadPanel.getImageURL();
+    }
+
     public int getImageWidth() {
-        return imageWidth;
+        return imageUploadPanel.getImageWidth();
     }
 
     public int getImageHeight() {
-        return imageHeight;
+        return imageUploadPanel.getImageHeight();
     }
 
     /**
@@ -172,10 +141,6 @@ public class TagInputPanel extends FlowPanel {
     protected String getComment() {
         return commentTextArea.getValue();
     }
-   
-    protected String getImageURL() {
-        return imageURLTextBox.getURL();
-    }
 
     protected boolean isVisibleForPublic() {
         return visibleForPublicCheckBox.getValue();
@@ -204,7 +169,7 @@ public class TagInputPanel extends FlowPanel {
     }
 
     protected void setImageURL(String imageURL) {
-        imageURLTextBox.setValue(imageURL);
+        imageUploadPanel.setValue(imageURL);
     }
 
     protected void setVisibleForPublic(boolean visibleForPublic) {
@@ -215,8 +180,8 @@ public class TagInputPanel extends FlowPanel {
         return tagTextBox;
     }
 
-    protected URLFieldWithFileUpload getImageURLTextBox() {
-        return imageURLTextBox;
+    protected TagImageUploaderPanel getImageURLTextBox() {
+        return imageUploadPanel;
     }
 
     protected TextArea getCommentTextArea() {

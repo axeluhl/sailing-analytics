@@ -2163,4 +2163,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String tagSharedDialog();
     String tagSharedURL();
     String tagCopyToClipBoard();
+    String tagSendImage();
+    String tagBrowseImage();
+    String tagRemoveUploadedImage();
 }

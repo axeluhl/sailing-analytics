@@ -89,7 +89,10 @@ public interface TagPanelResources extends ClientBundle {
         String tagInputPanel();
         String tagInputPanelTag();
         String tagInputPanelComment();
-        String tagInputPanelImageURL();
+        String tagInputPanelImage();
+        String tagInputPanelImageTextBox();
+        String tagInputPanelImageButton();
+        String tagInputPanelImageFormPanel();
         String tagInputPanelIsVisibleForPublic();
         String tagInputPanelNoPermissionLabel();
 

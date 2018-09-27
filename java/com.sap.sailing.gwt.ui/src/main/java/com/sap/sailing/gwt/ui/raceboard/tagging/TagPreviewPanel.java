@@ -49,9 +49,9 @@ public class TagPreviewPanel extends FlowPanel {
         inputPanel.getTagTextBox().addValueChangeHandler(event -> {
             renderPreview(inputPanel);
         });
-        inputPanel.getImageURLTextBox().addValueChangeHandler(event -> {
+        /*inputPanel.getImageURLTextBox().addValueChangeHandler(event -> {
             renderPreview(inputPanel);
-        });
+        });*/
         inputPanel.getCommentTextArea().addValueChangeHandler(event -> {
             renderPreview(inputPanel);
         });

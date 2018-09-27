@@ -283,7 +283,7 @@ public class TagButtonDialog extends DialogBox {
                 selectedTagButton.setText(inputPanel.getTag());
                 selectedTagButton.setTag(inputPanel.getTag());
                 selectedTagButton.setComment(inputPanel.getComment());
-                selectedTagButton.setImageURL(inputPanel.getImageURL());
+                selectedTagButton.setImage(inputPanel.getImageURL(), inputPanel.getImageWidth(), inputPanel.getImageHeight());
                 selectedTagButton.setVisibleForPublic(inputPanel.isVisibleForPublic());
                 footerPanel.storeAllTagButtons();
                 inputPanel.clearAllValues();
@@ -390,7 +390,7 @@ public class TagButtonDialog extends DialogBox {
         addTagButtonButton.addStyleName("gwt-Button");
         addTagButtonButton.addClickHandler(event -> {
             if (!inputPanel.getTag().isEmpty()) {
-                TagButton tagButton = new TagButton(inputPanel.getTag(), inputPanel.getTag(), inputPanel.getImageURL(),
+                TagButton tagButton = new TagButton(inputPanel.getTag(), inputPanel.getTag(), inputPanel.getImageURL(), inputPanel.getImageWidth(), inputPanel.getImageHeight(),
                         inputPanel.getComment(), inputPanel.isVisibleForPublic());
                 inputPanel.clearAllValues();
                 tagPreviewPanel.renderPreview(inputPanel);

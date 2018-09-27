@@ -481,9 +481,8 @@ public class TaggingPanel extends ComponentWithoutSettings
      */
     protected void addTagButton(TagButton tagButton) {
         tagButton.addClickHandler(event -> {
-            //TODO update savetag call
-            /*saveTag(tagButton.getTag(), tagButton.getComment(), tagButton.getImageURL(),
-                    tagButton.isVisibleForPublic());*/
+            saveTag(tagButton.getTag(), tagButton.getComment(), tagButton.getImageURL(),
+                    tagButton.getImageWidth(), tagButton.getImageHeight(), tagButton.isVisibleForPublic());
         });
         tagButtons.add(tagButton);
     }

@@ -279,8 +279,21 @@
 	border-radius: 4px 4px 0px 0px;
 }
 
-.tagInputPanelImageURL {
+.tagInputPanelImage {
 	
+}
+
+.tagInputPanelImageTextBox {
+    border-style: 1px solid #cecece;
+}
+
+.tagInputPanelImageButton {
+    float: right;    
+}
+
+.tagInputPanelImageFormPanel {
+    display: inline-block;
+    float: right;
 }
 
 .tagInputPanelComment {
