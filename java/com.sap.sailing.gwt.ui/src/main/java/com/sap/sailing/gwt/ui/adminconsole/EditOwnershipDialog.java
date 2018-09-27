@@ -98,8 +98,12 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
         super(stringMessages.ownership(), stringMessages.editObjectOwnership(), stringMessages.ok(),
                 stringMessages.cancel(), new Validator(stringMessages), callback);
         this.userManagementService = userManagementService;
-        this.usernameBox = createTextBox(ownership.getUserOwner()==null?"":ownership.getUserOwner().getName(), /* visibleLength */ 20);
-        this.groupnameBox = createTextBox(ownership.getTenantOwner()==null?"":ownership.getTenantOwner().getName(), /* visibileLength */ 20);
+        this.usernameBox = createTextBox(
+                ownership == null || ownership.getUserOwner() == null ? "" : ownership.getUserOwner().getName(),
+                /* visibleLength */ 20);
+        this.groupnameBox = createTextBox(
+                ownership == null || ownership.getTenantOwner() == null ? "" : ownership.getTenantOwner().getName(),
+                /* visibileLength */ 20);
         this.usernameBox.addChangeHandler(e->resolveUser());
         this.groupnameBox.addChangeHandler(e->resolveUserGroup());
         this.stringMessages = stringMessages;
