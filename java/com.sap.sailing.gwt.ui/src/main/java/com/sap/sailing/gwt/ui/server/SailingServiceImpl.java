@@ -2648,6 +2648,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 raceColumnDTO.setRaceLogTrackingInfo(fleetDTO, raceLogTrackingInfo);
             }
         }
+        this.addSecurityInformation(leaderboardDTO,
+                SecuredDomainType.LEADERBOARD.getQualifiedObjectIdentifier(leaderboard.getName()));
         return leaderboardDTO;
     }
 
