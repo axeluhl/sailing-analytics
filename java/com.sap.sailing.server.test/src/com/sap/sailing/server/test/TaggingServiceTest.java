@@ -116,6 +116,8 @@ public class TaggingServiceTest {
     @Before
     public void resetEnvironment() {
         MongoDBService.INSTANCE.getDB().getCollection(CollectionNames.RACE_LOGS.name()).drop();
+        // TODO: Receive name for preferences collection programatically
+        MongoDBService.INSTANCE.getDB().getCollection("PREFERENCES").drop();
         securityService.addPermissionForUser(username, editLeaderboardPermission);
         securityService.unsetPreference(username,
                 serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName));
