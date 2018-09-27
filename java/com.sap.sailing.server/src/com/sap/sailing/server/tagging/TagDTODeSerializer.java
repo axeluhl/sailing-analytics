@@ -84,10 +84,10 @@ public class TagDTODeSerializer {
             String imageURL = jsonObject.get(FIELD_IMAGE_URL) == null ? "" : (String) jsonObject.get(FIELD_IMAGE_URL);
             String username = (String) jsonObject.get(FIELD_USERNAME);
             boolean visibleForPublic = (Boolean) jsonObject.get(FIELD_VISIBLE_FOR_PUBLIC);
-            TimePoint raceTimePoint = deserilizeTimePoint((Long) (jsonObject.get(FIELD_RACE_TIMEPOINT)));
-            TimePoint createdAt = deserilizeTimePoint((Long) (jsonObject.get(FIELD_CREATED_AT)));
+            TimePoint raceTimePoint = deserializeTimePoint((Long) (jsonObject.get(FIELD_RACE_TIMEPOINT)));
+            TimePoint createdAt = deserializeTimePoint((Long) (jsonObject.get(FIELD_CREATED_AT)));
             TimePoint revokedAt = jsonObject.get(FIELD_REVOKED_AT) == null ? null
-                    : deserilizeTimePoint((Long) jsonObject.get(FIELD_REVOKED_AT));
+                    : deserializeTimePoint((Long) jsonObject.get(FIELD_REVOKED_AT));
             return new TagDTO(tag, comment, imageURL, visibleForPublic, username, raceTimePoint, createdAt, revokedAt);
         } catch (Exception e) {
             return null;
@@ -113,7 +113,7 @@ public class TagDTODeSerializer {
      * @return json object
      */
     public String serializeTag(TagDTO tag) {
-        return serialize(tag).toString();
+        return serialize(tag).toJSONString();
     }
 
     /**
@@ -128,7 +128,7 @@ public class TagDTODeSerializer {
         for (TagDTO tag : tags) {
             jsonTags.add(serialize(tag));
         }
-        return jsonTags.toString();
+        return jsonTags.toJSONString();
     }
 
     /**
@@ -180,11 +180,11 @@ public class TagDTODeSerializer {
      * 
      * @param timepoint
      *            {@link TimePoint} to be serialized
-     * @return serialized timepoint milliseconds as long, <code>null</code> if <code>timepoint</code> is
+     * @return serialized timepoint milliseconds as long, <code>0</code> if <code>timepoint</code> is
      *         <code>null</code>
      */
     public long serializeTimePoint(TimePoint timepoint) {
-        return timepoint == null ? null : timepoint.asMillis();
+        return timepoint == null ? 0 : timepoint.asMillis();
     }
 
     /**
@@ -194,7 +194,7 @@ public class TagDTODeSerializer {
      *            timepoint to be deserialized
      * @return {@link TimePoint}
      */
-    public TimePoint deserilizeTimePoint(long timepoint) {
+    public TimePoint deserializeTimePoint(long timepoint) {
         return new MillisecondsTimePoint(timepoint);
     }
 
