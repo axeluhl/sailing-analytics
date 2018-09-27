@@ -13,6 +13,7 @@ import com.sap.sailing.domain.common.dto.NamedSecuredObjectDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Named;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -31,6 +32,10 @@ public class SecuredObjectUtils {
 
     public static String getTypeRelativeObjectIdentifier(final LeaderboardGroupDTO securedObject) {
         return securedObject.getId().toString();
+    }
+    
+    public static String getTypeRelativeObjectIdentifier(final StrippedLeaderboardDTO securedObject) {
+        return securedObject.getName();
     }
 
     /**

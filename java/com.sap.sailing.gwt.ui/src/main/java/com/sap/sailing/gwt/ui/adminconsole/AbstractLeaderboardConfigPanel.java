@@ -60,6 +60,7 @@ import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
+import com.sap.sse.security.ui.client.UserService;
 
 public abstract class AbstractLeaderboardConfigPanel extends FormPanel implements SelectedLeaderboardProvider,
         RegattasDisplayer, TrackedRaceChangedListener, LeaderboardsDisplayer {
@@ -137,9 +138,9 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         }
     }
 
-    public AbstractLeaderboardConfigPanel(final SailingServiceAsync sailingService, RegattaRefresher regattaRefresher,
-            LeaderboardsRefresher leaderboardsRefresher, final ErrorReporter errorReporter,
-            StringMessages theStringConstants, boolean multiSelection) {
+    public AbstractLeaderboardConfigPanel(final SailingServiceAsync sailingService, final UserService userService,
+            RegattaRefresher regattaRefresher, LeaderboardsRefresher leaderboardsRefresher,
+            final ErrorReporter errorReporter, StringMessages theStringConstants, boolean multiSelection) {
         this.stringMessages = theStringConstants;
         this.sailingService = sailingService;
         filteredLeaderboardList = new ListDataProvider<StrippedLeaderboardDTO>();
@@ -181,7 +182,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
 
         leaderboardsPanel.add(filterLeaderboardPanel);
         leaderboardTable.ensureDebugId("AvailableLeaderboardsTable");
-        addColumnsToLeaderboardTableAndSetSelectionModel(leaderboardTable, tableRes,
+        addColumnsToLeaderboardTableAndSetSelectionModel(userService, leaderboardTable, tableRes,
                 filterLeaderboardPanel.getAllListDataProvider());
         @SuppressWarnings("unchecked")
         RefreshableMultiSelectionModel<StrippedLeaderboardDTO> multiSelectionModel = (RefreshableMultiSelectionModel<StrippedLeaderboardDTO>) leaderboardTable
@@ -321,7 +322,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
     
     protected abstract void addLeaderboardControls(Panel controlsPanel);
     protected abstract void addSelectedLeaderboardRacesControls(Panel racesPanel);
-    protected abstract void addColumnsToLeaderboardTableAndSetSelectionModel(FlushableCellTable<StrippedLeaderboardDTO> leaderboardTable, 
+    protected abstract void addColumnsToLeaderboardTableAndSetSelectionModel(UserService userService, FlushableCellTable<StrippedLeaderboardDTO> leaderboardTable, 
             AdminConsoleTableResources tableRes, ListDataProvider<StrippedLeaderboardDTO> listDataProvider);
     protected abstract void addColumnsToRacesTable(CellTable<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesTable);
 
