@@ -29,7 +29,6 @@ import com.sap.sailing.domain.common.tagging.RaceLogNotFoundException;
 import com.sap.sailing.domain.common.tagging.TagAlreadyExistsException;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.LowPoint;
-import com.sap.sailing.domain.persistence.impl.CollectionNames;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceOperation;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
@@ -43,7 +42,6 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.UsernamePasswordRealm;
 import com.sap.sse.security.impl.Activator;
 import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.shared.UserManagementException;
@@ -80,17 +78,6 @@ public class TaggingServiceTest {
     public static void setUpClass()
             throws MalformedURLException, IOException, InterruptedException, UserManagementException, MailException {
         MongoDBService.INSTANCE.getDB().dropDatabase();
-        // setup security service
-        final UserStoreImpl store = new UserStoreImpl();
-        Activator.setTestUserStore(store);
-        UsernamePasswordRealm.setTestUserStore(store);
-        securityService = new SecurityServiceImpl(null, store, true);
-        Activator.setSecurityService(securityService);
-        SecurityUtils.setSecurityManager(securityService.getSecurityManager());
-        // create & login user
-        securityService.createSimpleUser(username, email, password, fullName, company, null);
-        subject = SecurityUtils.getSubject();
-        subject.login(new UsernamePasswordToken(username, password));
         // setup racing service and racelog
         racingService = new RacingEventServiceImpl();
         RacingEventServiceOperation<FlexibleLeaderboard> addLeaderboardOp = new CreateFlexibleLeaderboard(
@@ -99,6 +86,22 @@ public class TaggingServiceTest {
         RacingEventServiceOperation<RaceColumn> addLeaderboardColumn = new AddColumnToLeaderboard(raceColumnName,
                 leaderboardName, true);
         racingService.apply(addLeaderboardColumn);
+        // setup security service
+        if (Activator.getContext() == null) {
+            logger.info("Setup for TaggingServiceTest in a non-OSGi environment");
+            final UserStoreImpl store = new UserStoreImpl();
+            Activator.setTestUserStore(store);
+            securityService = new SecurityServiceImpl(store);
+            SecurityUtils.setSecurityManager(securityService.getSecurityManager());
+            Activator.setSecurityService(securityService);
+        } else {
+            logger.info("Setup for TaggingServiceTest in an OSGi environment");
+            securityService = Activator.getSecurityService();
+        }
+        // create & login user
+        securityService.createSimpleUser(username, email, password, fullName, company, null);
+        subject = SecurityUtils.getSubject();
+        subject.login(new UsernamePasswordToken(username, password));
         // setup tagging service
         taggingService = new TaggingServiceImpl(racingService);
     }
@@ -116,9 +119,6 @@ public class TaggingServiceTest {
 
     @Before
     public void resetEnvironment() {
-        MongoDBService.INSTANCE.getDB().getCollection(CollectionNames.RACE_LOGS.name()).drop();
-        // TODO: Receive name for preferences collection programatically
-        MongoDBService.INSTANCE.getDB().getCollection("PREFERENCES").drop();
         securityService.addPermissionForUser(username, editLeaderboardPermission);
         securityService.unsetPreference(username,
                 serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName));
