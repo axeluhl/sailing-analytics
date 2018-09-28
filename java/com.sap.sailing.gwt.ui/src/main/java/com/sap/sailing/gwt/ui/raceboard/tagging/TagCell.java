@@ -1,5 +1,12 @@
 package com.sap.sailing.gwt.ui.raceboard.tagging;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.shared.GWT;
@@ -17,8 +24,8 @@ import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Window;
 import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanel.State;
+import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
@@ -139,8 +146,7 @@ public class TagCell extends AbstractCell<TagDTO> {
      *            should be <code>true</code> if {@link TagCell cell} is used as {@link TagPreviewPanel preview cell},
      *            otherwise <code>false</code>
      */
-    TagCell(TaggingPanel taggingPanel, StringMessages stringMessages, UserService userService,
-            boolean isPreviewCell) {
+    TagCell(TaggingPanel taggingPanel, StringMessages stringMessages, UserService userService, boolean isPreviewCell) {
         super("click");
         this.taggingPanel = taggingPanel;
         this.stringMessages = stringMessages;
@@ -254,26 +260,77 @@ public class TagCell extends AbstractCell<TagDTO> {
                     } else if (button.hasClassName(style.tagEditButton())) {
                         taggingPanel.setCurrentState(State.EDIT_TAG);
                     } else if (button.hasClassName(style.tagShareButton())) {
-                        String currentURL = Window.Location.getHref();
-                        String currentTagURLParameterValue = Window.Location.getParameter(TagDTO.TAG_URL_PARAMETER);
-                        String newURL;
-                        String newTagURLParameter = constructTagURLParameter(
-                                tag.getRaceTimepoint().asMillis() + "," + tag.getTag());
-                        // if url parameter already exists replace it with the new url parameter
-                        if (currentTagURLParameterValue != null) {
-                            newURL = currentURL.replace(constructTagURLParameter(currentTagURLParameterValue),
-                                    newTagURLParameter);
-                        } else {
-                            newURL = currentURL.concat(newTagURLParameter);
-                        }
-                        new TagSharedURLDialog(stringMessages, newURL).show();
+                        StringBuilder builder = new StringBuilder();
+                        builder.append(Window.Location.getHref().split("\\?")[0]);
+                        appendURLParams(builder, Window.Location.getParameterMap(),
+                                new HashSet<>(Arrays.asList(TagDTO.TAG_URL_PARAMETER, "mode")));
+                        appendTagParam(builder, tag);
+                        new TagSharedURLDialog(stringMessages, builder.toString()).show();
                     }
                 }
             }
         }
     }
 
-    private String constructTagURLParameter(String value) {
-        return "&" + TagDTO.TAG_URL_PARAMETER + "=" + value;
+    /**
+     * Appends given url parameters (<code>urlParamsMap</code>) to given string builder (<code>urlBuilder</code>).
+     * Parameters with multiple values will be added multiple times to the string builder.
+     * 
+     * @param urlBuilder
+     *            string builder which the parameters will be appended to
+     * @param urlParamsMap
+     *            url parameters
+     * @param ignoreParams
+     *            don't append parameters to the builder which are part of this set
+     */
+    private void appendURLParams(StringBuilder urlBuilder, Map<String, List<String>> urlParamsMap,
+            Set<String> ignoreParams) {
+        Set<Entry<String, List<String>>> params = urlParamsMap.entrySet();
+        urlBuilder.append('?');
+        boolean addedParam = false;
+        for (Map.Entry<String, List<String>> entry : params) {
+            String param = entry.getKey();
+            List<String> values = entry.getValue();
+            if (!ignoreParams.contains(param)) {
+                // parameters without values will be added also without values
+                if (values.size() > 0) {
+                    for (int j = 0; j < values.size(); j++) {
+                        if (addedParam) {
+                            urlBuilder.append('&');
+                        } else {
+                            addedParam = true;
+                        }
+                        urlBuilder.append(param);
+                        urlBuilder.append('=');
+                        urlBuilder.append(values.get(j));
+                    }
+                } else {
+                    if (addedParam) {
+                        urlBuilder.append('&');
+                    } else {
+                        addedParam = true;
+                    }
+                    urlBuilder.append(param);
+                }
+            }
+        }
+    }
+
+    /**
+     * Appends given <code>tag</code> to <code>urlBuilder</code> by separating the {@link TagDTO#raceTimePoint} and
+     * {@link TagDTO#tag} with a single commata.
+     * 
+     * @param urlBuilder
+     *            string builder which the tag parameter will be appended to
+     * @param tag
+     *            tag to append
+     */
+    private void appendTagParam(StringBuilder urlBuilder, TagDTO tag) {
+        urlBuilder.append('&');
+        urlBuilder.append(TagDTO.TAG_URL_PARAMETER);
+        urlBuilder.append('=');
+        urlBuilder.append(tag.getRaceTimepoint().asMillis());
+        urlBuilder.append(',');
+        urlBuilder.append(tag.getTag());
     }
 }
