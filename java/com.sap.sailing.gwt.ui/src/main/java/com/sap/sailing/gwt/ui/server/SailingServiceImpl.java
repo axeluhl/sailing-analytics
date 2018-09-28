@@ -2670,6 +2670,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void removeLeaderboard(String leaderboardName) {
         SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.DELETE, leaderboardName));
         getService().apply(new RemoveLeaderboard(leaderboardName));
+        getSecurityService().deleteAllDataForRemovedObject(SecuredDomainType.LEADERBOARD.getQualifiedObjectIdentifier(leaderboardName));
     }
 
     @Override
@@ -4024,8 +4025,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void removeEvent(UUID eventId) throws UnauthorizedException {
         if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.EVENT.getStringPermissionForObjects(DefaultActions.DELETE, eventId.toString()))) {
             getService().apply(new RemoveEvent(eventId));
-            getSecurityService().deleteAccessControlList(SecuredDomainType.EVENT.getQualifiedObjectIdentifier(eventId.toString()));
-            getSecurityService().deleteOwnership(SecuredDomainType.EVENT.getQualifiedObjectIdentifier(eventId.toString()));
+            getSecurityService().deleteAllDataForRemovedObject(SecuredDomainType.EVENT.getQualifiedObjectIdentifier(eventId.toString()));
         } else {
             throw new UnauthorizedException("You are not permitted to remove event " + eventId);
         }

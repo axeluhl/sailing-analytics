@@ -86,6 +86,16 @@ public interface HasPermissions {
      */
     public enum DefaultActions implements Action {
         CREATE, READ, UPDATE, DELETE, CHANGE_OWNERSHIP;
+        
+        /**
+         * Returns all {@link DefaultActions} plus the {@code actions} passed, combined in one new array
+         */
+        public static Action[] plus(Action... actions) {
+            final Action[] result = new Action[values().length+actions.length];
+            System.arraycopy(values(), 0, result, 0, values().length);
+            System.arraycopy(actions, 0, result, values().length, actions.length);
+            return result;
+        }
     }
 
 }
