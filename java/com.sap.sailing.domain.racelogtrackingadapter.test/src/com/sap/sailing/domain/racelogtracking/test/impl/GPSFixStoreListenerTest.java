@@ -72,7 +72,7 @@ public class GPSFixStoreListenerTest extends AbstractGPSFixStoreTest {
         }
 
         @Override
-        public RegattaAndRaceIdentifier fixReceived(DeviceIdentifier device, GPSFixMoving fix) {
+        public Iterable<RegattaAndRaceIdentifier> fixReceived(DeviceIdentifier device, GPSFixMoving fix) {
             try {
                 barrier.await(100, TimeUnit.MILLISECONDS);
             } catch (TimeoutException e) {

@@ -74,7 +74,7 @@ public interface SensorFixStore {
      * @param fix
      *            The fix to store. Must not be <code>null</code>.
      */
-    <FixT extends Timed> RegattaAndRaceIdentifier storeFixes(DeviceIdentifier device, Iterable<FixT> fixes);
+    <FixT extends Timed> Iterable<RegattaAndRaceIdentifier> storeFixes(DeviceIdentifier device, Iterable<FixT> fixes);
 
     /**
      * Listeners are notified, whenever a {@link GPSFix} submitted by the {@code device}

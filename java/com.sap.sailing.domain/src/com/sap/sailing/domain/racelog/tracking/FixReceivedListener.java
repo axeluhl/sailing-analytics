@@ -10,5 +10,5 @@ import com.sap.sse.common.Timed;
  * @param <FixT> the type of fixes this listener can consume.
  */
 public interface FixReceivedListener<FixT extends Timed> {
-    RegattaAndRaceIdentifier fixReceived(DeviceIdentifier device, FixT fix);
+    Iterable<RegattaAndRaceIdentifier> fixReceived(DeviceIdentifier device, FixT fix);
 }

@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.racelogtracking.impl.fixtracker;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -9,7 +10,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -176,8 +176,8 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     };
     private final FixReceivedListener<Timed> listener = new FixReceivedListener<Timed>() {
         @Override
-        public RegattaAndRaceIdentifier fixReceived(DeviceIdentifier device, Timed fix) {
-            AtomicReference<RegattaAndRaceIdentifier> maneuverChanged = new AtomicReference<>();
+        public Iterable<RegattaAndRaceIdentifier> fixReceived(DeviceIdentifier device, Timed fix) {
+            Set<RegattaAndRaceIdentifier> maneuverChanged = new HashSet<>();
 
             if (!preemptiveStopRequested.get() && trackedRace.getStartOfTracking() != null) {
                 final TimePoint timePoint = fix.getTimePoint();
@@ -245,7 +245,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                                             RegattaAndRaceIdentifier maneuverChangedAnswer = detectIfManeuverChanged(
                                         comp);
                                             if (maneuverChangedAnswer != null) {
-                                        maneuverChanged.set(maneuverChangedAnswer);
+                                                maneuverChanged.add(maneuverChangedAnswer);
                                     }
                                 } else {
                                     logger.log(Level.WARNING,
@@ -322,7 +322,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                     }
                 });
             }
-            return maneuverChanged.get();
+            return maneuverChanged;
         }
     };
 

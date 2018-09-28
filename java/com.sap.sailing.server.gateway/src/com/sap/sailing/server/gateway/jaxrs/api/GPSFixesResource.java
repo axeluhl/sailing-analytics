@@ -12,6 +12,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
@@ -26,6 +27,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.FlatSmartphoneUuidAnd
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 
 @Path("/v1/gps_fixes")
@@ -54,10 +56,18 @@ public class GPSFixesResource extends AbstractSailingServerResource {
 
         JSONObject answer = new JSONObject();
         try {
-            RegattaAndRaceIdentifier raceWithManeuverChanged = getService().getSensorFixStore().storeFixes(device,
+            Iterable<RegattaAndRaceIdentifier> racesWithManeuverChanged = getService().getSensorFixStore()
+                    .storeFixes(device,
                     fixes);
-            if (raceWithManeuverChanged != null) {
-                answer.put("maneuverchanged", raceWithManeuverChanged);
+            if(!Util.isEmpty(racesWithManeuverChanged)) {
+                JSONArray changed = new JSONArray();
+                answer.put("maneuverchanged", changed);
+                for (RegattaAndRaceIdentifier raceWithManeuverChanged:racesWithManeuverChanged) {
+                    JSONObject singleRaceRegatta = new JSONObject();
+                    singleRaceRegatta.put("regattaName", raceWithManeuverChanged.getRegattaName());
+                    singleRaceRegatta.put("raceName", raceWithManeuverChanged.getRaceName());
+                    changed.add(singleRaceRegatta);
+                }
             }
             logger.log(Level.INFO, "Added " + fixes.size() + " fixes for device " + device.toString()  + " to store");
         } catch (NoCorrespondingServiceRegisteredException e) {

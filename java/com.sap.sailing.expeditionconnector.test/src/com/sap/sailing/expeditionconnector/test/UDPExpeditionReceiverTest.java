@@ -153,11 +153,12 @@ public class UDPExpeditionReceiverTest {
         }
 
         @Override
-        public <FixT extends Timed> RegattaAndRaceIdentifier storeFixes(DeviceIdentifier device, Iterable<FixT> fixes) {
+        public <FixT extends Timed> Iterable<RegattaAndRaceIdentifier> storeFixes(DeviceIdentifier device,
+                Iterable<FixT> fixes) {
             for (final FixT fix : fixes) {
                 storeFix(device, fix);
             }
-            return null;
+            return Collections.emptySet();
         }
 
         @Override
