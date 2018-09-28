@@ -46,6 +46,7 @@ import com.sap.sse.security.impl.Activator;
 import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
+import com.sap.sse.util.ServiceTrackerFactory;
 
 /**
  * Tests {@link TaggingService} which is used for all CRUD operations regarding {@link TagDTO tags}.
@@ -96,7 +97,8 @@ public class TaggingServiceTest {
             Activator.setSecurityService(securityService);
         } else {
             logger.info("Setup for TaggingServiceTest in an OSGi environment");
-            securityService = Activator.getSecurityService();
+            securityService = ServiceTrackerFactory.createAndOpen(Activator.getContext(), SecurityService.class)
+                    .getService();
         }
         // create & login user
         securityService.createSimpleUser(username, email, password, fullName, company, null);
