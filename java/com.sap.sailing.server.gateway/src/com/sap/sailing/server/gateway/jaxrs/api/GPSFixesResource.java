@@ -50,16 +50,12 @@ public class GPSFixesResource extends AbstractSailingServerResource {
             logger.warning(String.format("Exception while parsing post request:\n%s", e.toString()));
             return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request").type(MediaType.TEXT_PLAIN).build();
         }
-        
         DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(data.getA());
         List<GPSFixMoving> fixes = data.getB();
-
         JSONObject answer = new JSONObject();
         try {
-            Iterable<RegattaAndRaceIdentifier> racesWithManeuverChanged = getService().getSensorFixStore()
-                    .storeFixes(device,
-                    fixes);
-            if(!Util.isEmpty(racesWithManeuverChanged)) {
+            Iterable<RegattaAndRaceIdentifier> racesWithManeuverChanged = getService().getSensorFixStore().storeFixes(device, fixes);
+            if (!Util.isEmpty(racesWithManeuverChanged)) {
                 JSONArray changed = new JSONArray();
                 answer.put("maneuverchanged", changed);
                 for (RegattaAndRaceIdentifier raceWithManeuverChanged:racesWithManeuverChanged) {
