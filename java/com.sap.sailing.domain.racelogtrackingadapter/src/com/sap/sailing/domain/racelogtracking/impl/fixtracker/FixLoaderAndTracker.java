@@ -242,10 +242,9 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                                 }
                                 if (fix instanceof GPSFixMoving) {
                                     trackedRace.recordFix(comp, (GPSFixMoving) fix);
-                                            RegattaAndRaceIdentifier maneuverChangedAnswer = detectIfManeuverChanged(
-                                        comp);
-                                            if (maneuverChangedAnswer != null) {
-                                                maneuverChanged.add(maneuverChangedAnswer);
+                                    RegattaAndRaceIdentifier maneuverChangedAnswer = detectIfManeuverChanged(comp);
+                                    if (maneuverChangedAnswer != null) {
+                                        maneuverChanged.add(maneuverChangedAnswer);
                                     }
                                 } else {
                                     logger.log(Level.WARNING,
