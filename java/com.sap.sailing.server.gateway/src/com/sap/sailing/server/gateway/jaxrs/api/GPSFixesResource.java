@@ -58,7 +58,7 @@ public class GPSFixesResource extends AbstractSailingServerResource {
             if (!Util.isEmpty(racesWithManeuverChanged)) {
                 JSONArray changed = new JSONArray();
                 answer.put("maneuverchanged", changed);
-                for (RegattaAndRaceIdentifier raceWithManeuverChanged:racesWithManeuverChanged) {
+                for (RegattaAndRaceIdentifier raceWithManeuverChanged : racesWithManeuverChanged) {
                     JSONObject singleRaceRegatta = new JSONObject();
                     singleRaceRegatta.put("regattaName", raceWithManeuverChanged.getRegattaName());
                     singleRaceRegatta.put("raceName", raceWithManeuverChanged.getRaceName());
