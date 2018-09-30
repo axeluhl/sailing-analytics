@@ -6,17 +6,14 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.SubmitButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteEvent;
 import com.google.gwt.user.client.ui.FormPanel.SubmitCompleteHandler;
-import com.google.gwt.user.client.ui.FormPanel.SubmitEvent;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
@@ -26,7 +23,12 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 
 /**
- * Used to upload images of a {@link TagDTO tag}
+ * Used to upload images of a {@link TagDTO tag}. Contains a hidden {@link FileUpload} inside a {@link FormPanel} which
+ * gets triggered by the {@code browseAndUploadImageButton} and opens the browser specific file chooser. After a file
+ * was chosen, the form gets submitted and so the the selected image gets uploaded. Submitting the form returns the new
+ * URL of the file which is now placed inside the {@link TextBox imagePathTextBox}. If a User wants to use an image
+ * already uploaded, he can just put this URL inside of the TextBox. Each time the value of this TextBox is changed the
+ * image width and height are calculated which will be needed later for adding a resized image.
  * 
  * @author D067890
  */
@@ -36,67 +38,41 @@ public class TagImageUploaderPanel extends FlowPanel {
     private final SailingServiceAsync sailingService;
 
     private final TextBox imagePathTextBox;
-    private final FormPanel uploadFormPanel;
-    private final FlowPanel uploadPanel;
-    private final FileUpload fileUploadField;
-    private final Button browseImageButton;
-    private final Button removeImageButton;
 
-    private String imageURL;
     private int imageWidth = -1;
     private int imageHeight = -1;
 
-    public TagImageUploaderPanel(TaggingPanel taggingPanel, SailingServiceAsync sailingService, StringMessages stringMessages) {
+    public TagImageUploaderPanel(TaggingPanel taggingPanel, SailingServiceAsync sailingService,
+            StringMessages stringMessages) {
         this.sailingService = sailingService;
 
         imagePathTextBox = new TextBox();
         imagePathTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelImageURL());
         imagePathTextBox.setStyleName(style.tagInputPanelImageTextBox());
         imagePathTextBox.addStyleName("gwt-TextBox");
-        imagePathTextBox.addChangeHandler(new ChangeHandler() {
-            @Override
-            public void onChange(ChangeEvent event) {
-                if (imagePathTextBox.getText().length() > 0) {
-                    // submitButton.setVisible(true);
-                } else {
-                    // submitButton.setVisible(false);
-                }
-            }
+        imagePathTextBox.addValueChangeHandler(event -> {
+            calculateImageWidthAndHeight(imagePathTextBox.getText());
         });
 
         // the upload panel
-        uploadFormPanel = new FormPanel();
+        FormPanel uploadFormPanel = new FormPanel();
         uploadFormPanel.setStyleName(style.tagInputPanelImageFormPanel());
         add(uploadFormPanel);
-        uploadPanel = new FlowPanel();
 
-        uploadFormPanel.add(uploadPanel);
         uploadFormPanel.setAction("/sailingserver/fileupload");
         uploadFormPanel.setEncoding(FormPanel.ENCODING_MULTIPART);
         uploadFormPanel.setMethod(FormPanel.METHOD_POST);
-        fileUploadField = new FileUpload();
+        FileUpload fileUploadField = new FileUpload();
+        uploadFormPanel.add(fileUploadField);
         fileUploadField.setVisible(false);
-        final InputElement inputElement = fileUploadField.getElement().cast();
+        InputElement inputElement = fileUploadField.getElement().cast();
         inputElement.setName("file");
-        final SubmitButton submitButton = new SubmitButton(stringMessages.tagSendImage());
-        submitButton.setStyleName(style.tagInputPanelImageButton());
-        submitButton.addStyleName("gwt-Button");
-        submitButton.setEnabled(false);
         fileUploadField.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {
                 if (fileUploadField.getFilename() != null && !fileUploadField.getFilename().isEmpty()) {
-                    submitButton.setEnabled(true);
-                    imagePathTextBox.setText(fileUploadField.getFilename());
+                    uploadFormPanel.submit();
                 }
-            }
-        });
-        uploadPanel.add(submitButton);
-        uploadFormPanel.addSubmitHandler(new FormPanel.SubmitHandler() {
-            public void onSubmit(SubmitEvent event) {
-                // This event is fired just before the form is submitted. We can take
-                // this opportunity to perform validation.
-                Window.alert(event.toString());
             }
         });
         uploadFormPanel.addSubmitCompleteHandler(new SubmitCompleteHandler() {
@@ -107,6 +83,8 @@ public class TagImageUploaderPanel extends FlowPanel {
                 if (resultJson != null) {
                     if (resultJson.get(0).isObject().get("file_uri") != null) {
                         setImageURL(resultJson.get(0).isObject().get("file_uri").isString().stringValue());
+                        calculateImageWidthAndHeight(
+                                resultJson.get(0).isObject().get("file_uri").isString().stringValue());
                         Notification.notify(stringMessages.uploadSuccessful(), NotificationType.SUCCESS);
                     } else {
                         Notification.notify(
@@ -119,49 +97,36 @@ public class TagImageUploaderPanel extends FlowPanel {
             }
         });
 
-        browseImageButton = new Button(stringMessages.tagBrowseImage());
-        browseImageButton.setStyleName(style.tagInputPanelImageButton());
-        browseImageButton.addStyleName("gwt-Button");
-        browseImageButton.addClickHandler(event -> {
+        Button browseAndUploadImageButton = new Button(stringMessages.tagBrowseAndUploadImage());
+        browseAndUploadImageButton.setStyleName(style.tagInputPanelImageButton());
+        browseAndUploadImageButton.addStyleName("gwt-Button");
+        browseAndUploadImageButton.addClickHandler(event -> {
             fileUploadField.click();
-        });
-
-        removeImageButton = new Button(stringMessages.tagRemoveUploadedImage());
-        removeImageButton.setStyleName(style.tagInputPanelImageButton());
-        removeImageButton.addStyleName("gwt-Button");
-        removeImageButton.addClickHandler(event -> {
-            clearImageURL();
         });
 
         add(imagePathTextBox);
         add(uploadFormPanel);
-        add(browseImageButton);
-        add(removeImageButton);
-        removeImageButton.setVisible(false);
+        add(browseAndUploadImageButton);
     }
 
     private JSONValue parseAfterReplacingSurroundingPreElement(String jsonString) {
         return JSONParser.parseStrict(jsonString.replaceFirst("<pre[^>]*>(.*)</pre>", "$1"));
     }
 
-    private void setImageURL(String url) {
-        imageURL = url;
+    private void calculateImageWidthAndHeight(String imageURL) {
         if (imageURL == null || imageURL.isEmpty()) {
             imageWidth = -1;
             imageHeight = -1;
-            clearImageURL();
         } else {
-            imagePathTextBox.setText(url);
-            imagePathTextBox.setEnabled(false);
-            browseImageButton.setVisible(false);
-            uploadFormPanel.setVisible(false);
-            removeImageButton.setVisible(true);
             sailingService.resolveImageDimensions(imageURL, new AsyncCallback<Util.Pair<Integer, Integer>>() {
                 @Override
                 public void onSuccess(Pair<Integer, Integer> imageSize) {
                     if (imageSize != null) {
                         imageWidth = imageSize.getA();
                         imageHeight = imageSize.getB();
+                    } else {
+                        setImageURL("");
+                        // no valid image?
                     }
                 }
 
@@ -172,19 +137,8 @@ public class TagImageUploaderPanel extends FlowPanel {
         }
     }
 
-    private void clearImageURL() {
-        imageURL = "";
-        imageWidth = -1;
-        imageHeight = -1;
-        imagePathTextBox.setText(imageURL);
-        imagePathTextBox.setEnabled(true);
-        browseImageButton.setVisible(true);
-        uploadFormPanel.setVisible(true);
-        removeImageButton.setVisible(false);
-    }
-
     public String getImageURL() {
-        return imageURL;
+        return imagePathTextBox.getText();
     }
 
     public int getImageWidth() {
@@ -197,5 +151,9 @@ public class TagImageUploaderPanel extends FlowPanel {
 
     public void setValue(String imageURL) {
         setImageURL(imageURL);
+    }
+
+    private void setImageURL(String imageURL) {
+        imagePathTextBox.setText(imageURL);
     }
 }

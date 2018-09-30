@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.raceboard.tagging;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -10,6 +11,9 @@ import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
+import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
+import com.sap.sse.gwt.adminconsole.URLFieldWithFileUpload;
 
 /**
  * Panel containing input fields for tag/tag button creation and modification.
@@ -26,7 +30,7 @@ public class TagInputPanel extends FlowPanel {
     private static final boolean DEFAULT_VISIBLE_FOR_PUBLIC = false;
 
     private final TextBox tagTextBox;
-    private final TagImageUploaderPanel imageUploadPanel;
+    private final URLFieldWithFileUpload imageUrlUploaderPanel;
     private final TextArea commentTextArea;
     private final SimplePanel checkboxWrapper;
     private final CheckBox visibleForPublicCheckBox;
@@ -34,6 +38,9 @@ public class TagInputPanel extends FlowPanel {
 
     private final TaggingPanel taggingPanel;
     private final SailingServiceAsync sailingService;
+    
+    private int imageWidth = -1;
+    private int imageHeight = -1;
 
     /**
      * Creates view allowing users to input values for tags and {@link TagButton tag-buttons}.
@@ -50,8 +57,29 @@ public class TagInputPanel extends FlowPanel {
         tagTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelTag());
         add(tagTextBox);
 
-        imageUploadPanel = new TagImageUploaderPanel(taggingPanel, sailingService, stringMessages);
-        add(imageUploadPanel);
+        imageUrlUploaderPanel = new URLFieldWithFileUpload(stringMessages);
+        imageUrlUploaderPanel.addValueChangeHandler(event -> {
+            if (imageUrlUploaderPanel.getURL() == null || imageUrlUploaderPanel.getURL().isEmpty()) {
+                imageWidth = -1;
+                imageHeight = -1;
+            } else {
+                sailingService.resolveImageDimensions(imageUrlUploaderPanel.getURL(), new AsyncCallback<Util.Pair<Integer, Integer>>() {
+                    @Override
+                    public void onSuccess(Pair<Integer, Integer> imageSize) {
+                        if (imageSize != null) {
+                            imageWidth = imageSize.getA();
+                            imageHeight = imageSize.getB();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        imageUrlUploaderPanel.setURL("");
+                    }
+                });
+            }
+        });
+        add(imageUrlUploaderPanel);
 
         commentTextArea = new TextArea();
         commentTextArea.setStyleName(style.tagInputPanelComment());
@@ -74,15 +102,15 @@ public class TagInputPanel extends FlowPanel {
     }
 
     public String getImageURL() {
-        return imageUploadPanel.getImageURL();
+        return imageUrlUploaderPanel.getURL();
     }
 
     public int getImageWidth() {
-        return imageUploadPanel.getImageWidth();
+        return imageWidth;
     }
 
     public int getImageHeight() {
-        return imageUploadPanel.getImageHeight();
+        return imageHeight;
     }
 
     /**
@@ -168,7 +196,7 @@ public class TagInputPanel extends FlowPanel {
     }
 
     protected void setImageURL(String imageURL) {
-        imageUploadPanel.setValue(imageURL);
+        imageUrlUploaderPanel.setValue(imageURL);
     }
 
     protected void setVisibleForPublic(boolean visibleForPublic) {
@@ -179,8 +207,8 @@ public class TagInputPanel extends FlowPanel {
         return tagTextBox;
     }
 
-    protected TagImageUploaderPanel getImageURLTextBox() {
-        return imageUploadPanel;
+    protected URLFieldWithFileUpload getImageURLTextBox() {
+        return imageUrlUploaderPanel;
     }
 
     protected TextArea getCommentTextArea() {
