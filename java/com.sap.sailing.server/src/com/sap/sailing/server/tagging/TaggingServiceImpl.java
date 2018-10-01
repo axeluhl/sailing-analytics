@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.subject.Subject;
+import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
@@ -22,20 +23,23 @@ import com.sap.sailing.domain.common.tagging.ServiceNotFoundException;
 import com.sap.sailing.domain.common.tagging.TagAlreadyExistsException;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.impl.Activator;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.impl.Activator;
+import com.sap.sse.util.ServiceTrackerFactory;
 
 public class TaggingServiceImpl implements TaggingService {
 
+    private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
     private final RacingEventService racingService;
     private final TagDTODeSerializer serializer;
 
     public TaggingServiceImpl(RacingEventService racingService) {
         this.racingService = racingService;
         serializer = new TagDTODeSerializer();
+        securityServiceTracker = ServiceTrackerFactory.createAndOpen(Activator.getContext(), SecurityService.class);
     }
 
     /**
@@ -59,7 +63,14 @@ public class TaggingServiceImpl implements TaggingService {
      * @throws ServiceNotFoundException
      */
     private SecurityService getSecurityService() throws ServiceNotFoundException {
-        SecurityService securityService = Activator.getSecurityService();
+        SecurityService securityService;
+        // securityServiceTracker is null in non-OSGi environment (local JUnit tests) => use static reference of
+        // security service, otherwise use OSGi service tracker
+        if (securityServiceTracker != null) {
+            securityService = securityServiceTracker.getService();
+        } else {
+            securityService = com.sap.sse.security.impl.Activator.getSecurityService();
+        }
         if (securityService == null) {
             throw new ServiceNotFoundException("Security service not found!");
         }
@@ -93,15 +104,8 @@ public class TaggingServiceImpl implements TaggingService {
     private void addPrivateTag(String leaderboardName, String raceColumnName, String fleetName, String tag,
             String comment, String imageURL, String resizedImageURL, TimePoint raceTimepoint)
             throws AuthorizationException, ServiceNotFoundException, TagAlreadyExistsException {
-        SecurityService securityService = Activator.getSecurityService();
-        if (securityService == null) {
-            throw new ServiceNotFoundException("Security service not found!");
-        }
-        Subject subject = SecurityUtils.getSubject();
-        if (subject.getPrincipal() == null) {
-            throw new AuthorizationException();
-        }
-        String username = subject.getPrincipal().toString();
+        SecurityService securityService = getSecurityService();
+        String username = getCurrentUsername();
         TagDTODeSerializer serializer = new TagDTODeSerializer();
         String key = serializer.generateUniqueKey(leaderboardName, raceColumnName, fleetName);
         String privateTagsJson = securityService.getPreference(username, key);
