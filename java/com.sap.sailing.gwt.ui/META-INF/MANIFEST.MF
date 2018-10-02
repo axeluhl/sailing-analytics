@@ -57,7 +57,7 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.competitorimport,
  com.sap.sailing.expeditionconnector,
  com.sap.sailing.expeditionconnector.common,
- org.mp4parser.isoparser;bundle-version="1.9.31",
+ org.mp4parser.isoparser;bundle-version="1.9.37",
  com.sap.sse.datamining.ui
 Bundle-Activator: com.sap.sailing.gwt.ui.server.Activator
 Bundle-ActivationPolicy: lazy
