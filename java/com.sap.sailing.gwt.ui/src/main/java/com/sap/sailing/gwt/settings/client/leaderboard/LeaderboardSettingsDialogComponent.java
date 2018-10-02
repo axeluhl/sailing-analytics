@@ -111,10 +111,16 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
                 raceDetailDialogContent.addStyleName("dialogInnerContent");
                 raceDetailDialog.add(raceDetailDialogContent);
             }
-            CheckBox checkbox = createAndRegisterCheckbox(dialog, type, currentRaceDetailSelection.contains(type),
-                    raceDetailCheckboxes);
-            raceDetailDialogContent.add(checkbox);
-            detailCountInCurrentFlowPanel++;
+
+            // type == RACE_DISPLAY_BOATS -> !canBoatInfoBeShown [logical implication]
+            // if the type is equal to RACE_DISPLAY_BOATS, then canBoatInfoBeShown must be false to create a checkbox
+            // show 'Boats' checkbox in RaceDetailPanel only, if the competitors use different boats in each race
+            if (type != DetailType.RACE_DISPLAY_BOATS || !canBoatInfoBeShown) {
+                CheckBox checkbox = createAndRegisterCheckbox(dialog, type, currentRaceDetailSelection.contains(type),
+                        raceDetailCheckboxes);
+                raceDetailDialogContent.add(checkbox);
+                detailCountInCurrentFlowPanel++;
+            }
         }
         // Make it possible to configure added points
         FlowPanel addedScoresFlowPanel = new FlowPanel();
