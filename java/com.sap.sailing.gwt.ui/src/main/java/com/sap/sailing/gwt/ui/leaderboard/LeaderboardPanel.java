@@ -1158,6 +1158,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          */
         private final List<LegColumn> legColumns;
 
+        private BoatInfoColumn<LeaderboardRowDTO> boatInfoColumn;
+
         public TextRaceColumn(RaceColumnDTO race, boolean expandable, SortingOrder preferredSortingOrder,
                 String headerStyle, String columnStyle) {
             super(race, expandable, new TextCell(), preferredSortingOrder, headerStyle, columnStyle);
@@ -1493,11 +1495,12 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                 result.add(column);
             }
 
-            if (isExpanded() && getLeaderboard().canBoatsOfCompetitorsChangePerRace) {
-                BoatFetcher<LeaderboardRowDTO> boatFetcher = (LeaderboardRowDTO row) -> getLeaderboard()
-                        .getBoatOfCompetitor(getRaceColumnName(), row.competitor);
-                BoatInfoColumn<LeaderboardRowDTO> boatInfoColumn = new BoatInfoColumn<LeaderboardRowDTO>(boatFetcher,
-                        style);
+            if (isExpanded() && getLeaderboard().canBoatsOfCompetitorsChangePerRace && selectedRaceDetails.contains(DetailType.RACE_DISPLAY_BOATS)) {
+                if (boatInfoColumn == null) {
+                    BoatFetcher<LeaderboardRowDTO> boatFetcher = (LeaderboardRowDTO row) -> getLeaderboard()
+                            .getBoatOfCompetitor(getRaceColumnName(), row.competitor);
+                    boatInfoColumn = new BoatInfoColumn<LeaderboardRowDTO>(boatFetcher, style);
+                }
                 result.add(boatInfoColumn);
             }
 
