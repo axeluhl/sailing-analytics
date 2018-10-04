@@ -128,6 +128,13 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
      * one more {@link TrackingDataLoader} that ensures the loading state of the associated {@link TrackedRace}.
      */
     private final Set<AbstractLoadingJob> loadingJobs = ConcurrentHashMap.newKeySet();
+    /**
+     * This map contains the last maneuver for each deviceId that was send back. It is used to efficiently piggyback a
+     * notification about new possible maneuvers into the response to adding a gpsfix for smartphone tracking. This
+     * allows the client to not require any additional polling for maneuver retrieval. The map is never cleared, as it
+     * will not take a lot of memory itself, and will not grow further after each smartphone device pushed at least one
+     * gpsfix
+     */
     private final ConcurrentHashMap<UUID, Maneuver> lastNotifiedManeuverCache = new ConcurrentHashMap<>();
 
     private final SensorFixMapperFactory sensorFixMapperFactory;
@@ -325,10 +332,17 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
         }
     };
 
+    /**
+     * 
+     * @param comp
+     *            The resolved competitor for wich a gpsfix was just recorded.
+     * @return Will return null or an RegattaAndRaceIdentifier, if the last maneuver for the given competitor changed
+     *         since the last call to this method
+     */
     private RegattaAndRaceIdentifier detectIfManeuverChanged(Competitor comp) {
         boolean changed = false;
         if (comp.getId() instanceof UUID) {
-            Maneuver lastDetectedManeuver = Util.last(trackedRace.getManeuvers(comp, false));
+            Maneuver lastDetectedManeuver = Util.latest(trackedRace.getManeuvers(comp, false));
             if (lastDetectedManeuver != null) {
                 Maneuver lastNotifiedManeuverOrNull = lastNotifiedManeuverCache.get(comp.getId());
                 if (!lastDetectedManeuver.equals(lastNotifiedManeuverOrNull)) {
