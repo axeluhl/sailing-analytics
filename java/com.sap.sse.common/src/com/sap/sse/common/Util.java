@@ -858,4 +858,20 @@ public class Util {
         returnValue.retainAll(Util.asList(toRetain));
         return returnValue;
     }
+
+    /**
+     * This method will determine the latest entry in the given Iterable
+     * 
+     * @param timedObjects
+     * @return The object with the latest timestamp in the input or null if input was empty
+     */
+    public static <T extends Timed> T latest(Iterable<T> timedObjects) {
+        T latest = null;
+        for (T timedObject : timedObjects) {
+            if (latest == null || timedObject.getTimePoint().before(latest.getTimePoint())) {
+                latest = timedObject;
+            }
+        }
+        return latest;
+    }
 }
