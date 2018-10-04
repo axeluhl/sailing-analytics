@@ -11,6 +11,7 @@ import com.sap.sailing.domain.abstractlog.regatta.impl.CompetitorTimeOnDistanceA
 import com.sap.sailing.domain.abstractlog.regatta.impl.CompetitorTimeOnTimeFactorFinder;
 import com.sap.sailing.domain.abstractlog.regatta.impl.RegattaLogEventListener;
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sse.common.Duration;
 

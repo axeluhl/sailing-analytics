@@ -21,10 +21,10 @@ import org.json.simple.JSONValue;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.domain.regattalike.CompetitorRegistrationType;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.jaxrs.api.AbstractLeaderboardsResource;
 import com.sap.sailing.server.gateway.jaxrs.api.EventsResource;
