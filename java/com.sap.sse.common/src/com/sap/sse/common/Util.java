@@ -868,7 +868,7 @@ public class Util {
     public static <T extends Timed> T latest(Iterable<T> timedObjects) {
         T latest = null;
         for (T timedObject : timedObjects) {
-            if (latest == null || timedObject.getTimePoint().before(latest.getTimePoint())) {
+            if (latest == null || timedObject.getTimePoint().after(latest.getTimePoint())) {
                 latest = timedObject;
             }
         }
