@@ -215,7 +215,7 @@ public class TagButtonDialog extends DialogBox {
         });
 
         tagButtonTable.addColumn(tagColumn, stringMessages.tagLabelTag());
-        tagButtonTable.addColumn(imageURLColumn, stringMessages.tagLabelImageURL());
+        tagButtonTable.addColumn(imageURLColumn, stringMessages.tagLabelImage());
         tagButtonTable.addColumn(commentColumn, stringMessages.tagLabelComment());
         tagButtonTable.addColumn(actionsColumn, stringMessages.tagLabelAction());
 

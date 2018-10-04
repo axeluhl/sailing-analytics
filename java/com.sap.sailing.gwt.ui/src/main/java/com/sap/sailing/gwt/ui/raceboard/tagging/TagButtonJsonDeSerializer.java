@@ -25,17 +25,23 @@ public class TagButtonJsonDeSerializer {
 
     public JSONArray serialize(List<TagButton> tagButtons) {
         JSONArray result = new JSONArray();
-        int i = 0;
-        for (TagButton button : tagButtons) {
-            JSONObject tagButtonObject = new JSONObject();
-            tagButtonObject.put(FIELD_BUTTON_NAME, new JSONString(button.getText()));
-            tagButtonObject.put(FIELD_TAG, new JSONString(button.getTag()));
-            tagButtonObject.put(FIELD_COMMENT, new JSONString(button.getComment()));
-            tagButtonObject.put(FIELD_IMAGE_URL, new JSONString(button.getImageURL()));
-            tagButtonObject.put(FIELD_IMAGE_WIDTH, new JSONNumber(button.getImageWidth()));
-            tagButtonObject.put(FIELD_IMAGE_HEIGHT, new JSONNumber(button.getImageHeight()));
-            tagButtonObject.put(FIELD_VISIBLE_FOR_PUBLIC, JSONBoolean.getInstance(button.isVisibleForPublic()));
-            result.set(i++, tagButtonObject);
+        if (tagButtons != null) {
+            int i = 0;
+            for (TagButton button : tagButtons) {
+                JSONObject tagButtonObject = new JSONObject();
+                tagButtonObject.put(FIELD_BUTTON_NAME, new JSONString(button.getText()));
+                tagButtonObject.put(FIELD_TAG, new JSONString(button.getTag()));
+                if (button.getComment() != null) {
+                    tagButtonObject.put(FIELD_COMMENT, new JSONString(button.getComment()));
+                }
+                if (button.getImageURL() != null) {
+                    tagButtonObject.put(FIELD_IMAGE_URL, new JSONString(button.getImageURL()));
+                    tagButtonObject.put(FIELD_IMAGE_WIDTH, new JSONNumber(button.getImageWidth()));
+                    tagButtonObject.put(FIELD_IMAGE_HEIGHT, new JSONNumber(button.getImageHeight()));
+                }
+                tagButtonObject.put(FIELD_VISIBLE_FOR_PUBLIC, JSONBoolean.getInstance(button.isVisibleForPublic()));
+                result.set(i++, tagButtonObject);
+            }
         }
         return result;
     }
@@ -54,8 +60,10 @@ public class TagButtonJsonDeSerializer {
                 JSONNumber tagButtonImageHeight = (JSONNumber) tagButtonValue.get(FIELD_IMAGE_HEIGHT);
                 JSONBoolean tagButtonVisibleForPublic = (JSONBoolean) tagButtonValue.get(FIELD_VISIBLE_FOR_PUBLIC);
                 result.add(new TagButton(tagButtonName.stringValue(), tagButtonTag.stringValue(),
-                        tagButtonImageURL.stringValue(), (int) tagButtonImageWidth.doubleValue(),
-                        (int) tagButtonImageHeight.doubleValue(), tagButtonComment.stringValue(),
+                        tagButtonImageURL == null ? null : tagButtonImageURL.stringValue(),
+                        tagButtonImageWidth == null ? -1 : (int) tagButtonImageWidth.doubleValue(),
+                        tagButtonImageHeight == null ? -1 : (int) tagButtonImageHeight.doubleValue(),
+                        tagButtonComment == null ? null : tagButtonComment.stringValue(),
                         tagButtonVisibleForPublic.booleanValue()));
             }
         }

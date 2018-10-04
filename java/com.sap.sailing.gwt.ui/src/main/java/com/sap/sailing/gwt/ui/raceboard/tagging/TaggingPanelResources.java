@@ -99,14 +99,9 @@ public interface TaggingPanelResources extends CellList.Resources, CellTable.Res
         String tagModificationPanelHeaderLabel();
         String tagModificationPanelHeaderButton();
         String tagInputPanel();
+        String tagInputPanelLabel();
         String tagInputPanelTag();
         String tagInputPanelComment();
-        String tagInputPanelImage();
-        String tagInputPanelImageTextBox();
-        String tagInputPanelImageButton();
-        String tagInputPanelImageFormPanel();
-        String tagInputPanelIsVisibleForPublic();
-        String tagInputPanelNoPermissionLabel();
 
         // tag filtering
         String tagFilterButton();

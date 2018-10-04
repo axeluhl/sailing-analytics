@@ -30,7 +30,8 @@ public class TagButton extends Button {
      * @param visibleForPublic
      *            should be <code>true</code> if everybody should see the generated tag, otherwise <code>false</code>
      */
-    protected TagButton(String buttonName, String tag, String imageURL, int imageWidth, int imageHeight, String comment, boolean visibleForPublic) {
+    protected TagButton(String buttonName, String tag, String imageURL, int imageWidth, int imageHeight, String comment,
+            boolean visibleForPublic) {
         super(buttonName);
         setStyleName(style.tagDialogButton());
 
@@ -69,7 +70,7 @@ public class TagButton extends Button {
     protected String getComment() {
         return comment;
     }
-    
+
     /**
      * Returns image width of corresponding tag.
      * 

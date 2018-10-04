@@ -86,6 +86,7 @@ public class URLFieldWithFileUpload extends Composite implements HasValue<String
         });
         removePanel.add(removeButton);
         urlTextBox = new TextBox();
+        urlTextBox.getElement().addClassName("url-textbox");
         urlTextBox.setWidth("400px");
         imageUrlPanel.add(urlTextBox);
         imageUrlPanel.add(removePanel);

@@ -258,62 +258,26 @@
 	padding-right: 5px;
 }
 
-.tagInputPanel>*:not(:first-child) {
-	border-top: none;
+.tagInputPanel table tr td:first-child {
+	vertical-align: top;
 }
 
-/* CSS Hack: When selected input is :active or :hover, increase z-index and set position relative 
-   to get default outline of browser not cut off */
-.tagInputPanel>*:active, .tagInputPanel>*:focus {
-	position: relative;
-	z-index: 1;
+@external url-textbox;
+.tagInputPanel .url-textbox {
+	width: auto !important;
 }
 
-.tagInputPanel>* {
-	width: 100%;
-	padding: 2px;
-	border: 1px solid #cecece;
+.tagInputPanelLabel {
+    vertical-align: top;	
 }
 
-.tagInputPanelTag {
-	border-radius: 4px 4px 0px 0px;
-}
-
-.tagInputPanelImage {
-	
-}
-
-.tagInputPanelImageTextBox {
-    border-style: 1px solid #cecece;
-}
-
-.tagInputPanelImageButton {
-    float: right;    
-}
-
-.tagInputPanelImageFormPanel {
-    display: inline-block;
-    float: right;
+.tagInputPanelTag,
+.tagInputPanelComment {
+    width: 100%;
 }
 
 .tagInputPanelComment {
-	border-radius: 0 0 4px 0;
 	resize: none;
-}
-
-.tagInputPanelIsVisibleForPublic {
-	display: inline-block;
-	width: auto;
-	margin: -2px 0 5px;
-	padding: 2px 5px 2px 2px;
-	resize: none;
-	font-size: 80%;
-}
-
-.tagInputPanelNoPermissionLabel{
-    border: none;
-    font-size: 80%; 
-    margin: 3px 0px 3px 0px;
 }
 
 /**************************** Tag filtering ****************************/

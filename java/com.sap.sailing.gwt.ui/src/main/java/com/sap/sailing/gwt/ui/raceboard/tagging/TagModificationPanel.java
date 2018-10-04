@@ -6,8 +6,8 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanel.State;
+import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
@@ -49,6 +49,7 @@ public class TagModificationPanel extends FlowPanel {
             if (taggingPanel.isLoggedInAndRaceLogAvailable()) {
                 taggingPanel.saveTag(inputPanel.getTag(), inputPanel.getComment(), inputPanel.getImageURL(),
                         inputPanel.getImageWidth(), inputPanel.getImageHeight(), inputPanel.isVisibleForPublic());
+                // TODO: Add callback to saveTag() to clear fields only if tag got really added
                 inputPanel.clearAllValues();
             }
         });
