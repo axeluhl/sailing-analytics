@@ -31,9 +31,6 @@ public interface HasTrackedLegOfCompetitorContext extends HasWindOnTrackedLeg {
     @Statistic(messageKey="SpeedAverage", resultDecimals=2, ordinal=0)
     public Double getSpeedAverage();
     
-    @Statistic(messageKey="SpeedAverageVsDistanceTraveled", resultDecimals=2, ordinal=0)
-    public Pair<Double, Double> getSpeedAverageVsDistanceTraveled();
-    
     @Statistic(messageKey="RankGainsOrLosses", resultDecimals=2, ordinal=1)
     public Integer getRankGainsOrLosses();
     

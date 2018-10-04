@@ -23,7 +23,6 @@ import com.sap.sse.common.Distance;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.datamining.data.Cluster;
 import com.sap.sse.datamining.shared.impl.dto.ClusterDTO;
@@ -137,11 +136,6 @@ public class TrackedLegOfCompetitorWithContext implements HasTrackedLegOfCompeti
                 return getTrackedRace().getAverageSpeedOverGround(getCompetitor(), finished).getKnots();
             }
         }
-    }
-    
-    @Override 
-    public Pair<Double, Double> getSpeedAverageVsDistanceTraveled(){
-        return new Pair<>(getSpeedAverage(), getDistanceTraveled().getMeters());
     }
     
     @Override
