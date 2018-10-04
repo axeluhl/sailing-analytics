@@ -2,8 +2,8 @@ package com.sap.sailing.domain.regattalike;
 
 /**
  * Types of registration of competitors to a regatta.
- * Regattas can be <b>closed</b>, so only invited competitors are allowed or <b>open</b>, which means competitors can register  
- * @author Thomas
+ * Regattas can be <b>closed</b>, so only invited competitors are allowed or <b>open</b>, which means competitors can register themselves.
+ * @author Thomas Wiese
  *
  */
 public enum CompetitorRegistrationType {
