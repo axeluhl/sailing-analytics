@@ -12,7 +12,6 @@ import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
-import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -20,6 +19,7 @@ import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogExcep
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.ranking.RankingMetricsFactory;
+import com.sap.sailing.domain.regattalike.CompetitorRegistrationType;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
 import com.sap.sailing.server.RacingEventService;
 

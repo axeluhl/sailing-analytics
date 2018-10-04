@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.common;
+package com.sap.sailing.domain.regattalike;
 
 /**
  * Types of registration of competitors to a regatta.
@@ -53,4 +53,5 @@ public enum CompetitorRegistrationType {
         // return "competitorRegistrationType" + this.labelPrefix;
         return this.labelPrefix;
     }
+    
 }
