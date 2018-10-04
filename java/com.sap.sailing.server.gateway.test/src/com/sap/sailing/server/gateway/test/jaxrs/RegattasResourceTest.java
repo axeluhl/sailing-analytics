@@ -52,14 +52,16 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         final TimePoint startDate = new MillisecondsTimePoint(cal.getTime());
         cal.set(2014, 5, 8, 16, 00);
         final TimePoint endDate = new MillisecondsTimePoint(cal.getTime());
-        Series testSeries = new SeriesImpl("TestSeries", /* isMedal */false, /* isFleetsCanRunInParallel */ true, fleets, raceColumnNames, /* trackedRegattaRegistry */null);
+        Series testSeries = new SeriesImpl("TestSeries", /* isMedal */false, /* isFleetsCanRunInParallel */ true,
+                fleets, raceColumnNames, /* trackedRegattaRegistry */null);
         series.add(testSeries);
-        racingEventService.createRegatta(regattaName, boatClassName, 
-                /* canBoatsOfCompetitorsChangePerRace */ true, startDate, endDate, UUID.randomUUID(), series, /*persistent*/ true,
-                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
+        racingEventService.createRegatta(regattaName, boatClassName, /* canBoatsOfCompetitorsChangePerRace */ true,
+                startDate, endDate, UUID.randomUUID(), series, /* persistent */ true,
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null,
+                /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
+                /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
         testSeries.addRaceColumn("R1", /* trackedRegattaRegistry */ null);
         testSeries.addRaceColumn("R2", /* trackedRegattaRegistry */ null);
-
 
         Course course = new CourseImpl("emptyCourse", Collections.emptySet());
         // get the same instance! of the boat class object, as else addRace will fail
@@ -68,22 +70,22 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
     }
 
     @Test
-    public void testGetRegattas() throws Exception {         
+    public void testGetRegattas() throws Exception {
         RegattasResource resource = new RegattasResource();
         RegattasResource spyResource = spyResource(resource);
-        
+
         Response regattasResponse = spyResource.getRegattas();
-        
+
         String jsonString = (String) regattasResponse.getEntity();
-        Object obj= JSONValue.parse(jsonString);
-        JSONArray array= (JSONArray) obj;
+        Object obj = JSONValue.parse(jsonString);
+        JSONArray array = (JSONArray) obj;
 
         assertTrue(array.size() == 1);
 
-        JSONObject firstElement = (JSONObject) array.get(0);  
+        JSONObject firstElement = (JSONObject) array.get(0);
         String jsonName = (String) firstElement.get("name");
         String jsonBoatClass = (String) firstElement.get("boatclass");
-        
+
         assertTrue(RegattaImpl.getDefaultName(regattaNamePart, boatClassName).equals(jsonName));
         assertTrue(boatClassName.equals(jsonBoatClass));
     }
@@ -93,8 +95,7 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         RegattasResource resource = new RegattasResource();
         RegattasResource spyResource = spyResource(resource);
 
-        Response response = spyResource.getManeuvers(regattaName, "Race 1", null,
-                null);
+        Response response = spyResource.getManeuvers(regattaName, "Race 1", null, null);
         // the current race is not tracked, expect an error
         assertTrue(response.getStatus() != 200);
     }
