@@ -14,6 +14,7 @@ import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.impl.AccessControlListImpl;
 import com.sap.sse.security.shared.impl.OwnershipImpl;
+import com.sap.sse.security.shared.impl.QualifiedObjectIdentifierImpl;
 
 public class AccessControlStoreImpl implements AccessControlStore {
     private static final long serialVersionUID = 2165649781000936074L;
@@ -43,7 +44,8 @@ public class AccessControlStoreImpl implements AccessControlStore {
         this(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), userStore);
     }
     
-    public AccessControlStoreImpl(final DomainObjectFactory domainObjectFactory, final MongoObjectFactory mongoObjectFactory, UserStore userStore) {
+    public AccessControlStoreImpl(final DomainObjectFactory domainObjectFactory,
+            final MongoObjectFactory mongoObjectFactory, UserStore userStore) {
         this.defaultTenant = userStore.getDefaultTenant();
         accessControlLists = new ConcurrentHashMap<>();
         ownerships = new ConcurrentHashMap<>();
@@ -56,6 +58,22 @@ public class AccessControlStoreImpl implements AccessControlStore {
                 ownerships.put(ownership.getIdOfAnnotatedObject(), ownership);
             }
         }
+
+        // check if we already have an ownership for the server, create if it is missing
+        boolean serverOwnershipIsMissing = true;
+        QualifiedObjectIdentifier expectedServerOwner = new QualifiedObjectIdentifierImpl("SERVER",
+                userStore.getDefaultTenant().getName());
+        for (OwnershipAnnotation ownerShip : ownerships.values()) {
+            if (ownerShip.getIdOfAnnotatedObject().equals(expectedServerOwner)) {
+                serverOwnershipIsMissing = false;
+            }
+            System.out.println("Ownership loaded from db: " + ownerShip.getIdOfAnnotatedObject() + " "
+                    + ownerShip.getDisplayNameOfAnnotatedObject());
+        }
+        if (serverOwnershipIsMissing) {
+            setOwnership(expectedServerOwner, null, defaultTenant, defaultTenant.getName());
+        }
+
     }
     
     @Override
