@@ -14,10 +14,18 @@
 <b>Description:</b>
 <p>Gets the maneuvers of the race specified, keyed by competitor. The mark passings are computed
 from the start of the race up to the end of the race, or the end of tracking or the current time point,
-whichever is earliest.<p>
-The maneuvers for each competitor are ordered by the time point.<br/>
-All slashes contained within the {regattaname} and {racename} parameters must be replaced by "__" (double underscore).</p>
-<br/>
+whichever is earliest.
+ <p>
+  The maneuvers for each competitor are ordered by the time point.<br />
+  All slashes contained within the {regattaname} and {racename}
+  parameters must be replaced by "__" (double underscore).
+ </p>
+ There are two optional parameters: competitorId and fromTime. 
+ <br> 
+ With competitorId, it is possible to filter the result to include only the given competitor. 
+ <br>
+ With fromTime it is possible to filter based on the maneuvers time. If not given, all maneuvers of a race will be returned.
+ <br/>
 <table>
 	<tr>
 		<td>Webservice Type:</td>
@@ -33,7 +41,7 @@ All slashes contained within the {regattaname} and {racename} parameters must be
 	</tr>
 	<tr>
 		<td>Optional parameters:</td>
-		<td>None</td>
+		<td>fromTime unixTimeStamp, competitorId UUID</td>
 	</tr>
 	<tr>
 		<td>Request method:</td>
