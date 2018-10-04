@@ -73,6 +73,9 @@ public interface SensorFixStore {
      *            the device to store the fix for. Must not be <code>null</code>.
      * @param fix
      *            The fix to store. Must not be <code>null</code>.
+     * @return An Iterable with RegattaAndRaceIdentifier is returned, that will contain races with new maneuvers, which
+     *         were not available at the last time the given device stored a fix, the Iterable can be empty. It can also
+     *         contain multiple identifiers, if the devicemapping is currently ambiguous
      */
     <FixT extends Timed> Iterable<RegattaAndRaceIdentifier> storeFixes(DeviceIdentifier device, Iterable<FixT> fixes);
 
