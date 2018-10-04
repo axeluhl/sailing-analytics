@@ -1066,38 +1066,41 @@ public class RegattasResource extends AbstractSailingServerResource {
                         .type(MediaType.TEXT_PLAIN).build();
             } else {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
-                response = Response.status(Status.NOT_FOUND).entity(
-                        "Could not find a trackedrace with name '" + StringEscapeUtils.escapeHtml(raceName) + "'.")
-                        .type(MediaType.TEXT_PLAIN).build();
-
-                List<Pair<Competitor, Iterable<Maneuver>>> data = new ArrayList<>();
-                Iterable<Competitor> competitors = trackedRace.getRace().getCompetitors();
-                UUID competitorFilter = null;
-                if (competitorId != null) {
-                    competitorFilter = UUID.fromString(competitorId);
-                }
-                final TimePoint endTime = determineEndTimeForManeuverDetection(trackedRace);
-                final TimePoint startTime;
-                if (fromTime != null) {
-                    startTime = new MillisecondsTimePoint(Long.parseLong(fromTime));
+                if (trackedRace == null) {
+                    response = Response.status(Status.NOT_FOUND).entity(
+                            "Could not find a trackedrace with name '" + StringEscapeUtils.escapeHtml(raceName) + "'.")
+                            .type(MediaType.TEXT_PLAIN).build();
                 } else {
-                    startTime = trackedRace.getStartOfRace();
-                }
-
-                for (Competitor competitor : competitors) {
-                    if (competitorFilter == null || competitor.getId().equals(competitorFilter)) {
-
-                        Iterable<Maneuver> maneuversForCompetitor = trackedRace.getManeuvers(competitor, startTime,
-                                endTime, false);
-                        data.add(new Pair<Competitor, Iterable<Maneuver>>(competitor, maneuversForCompetitor));
+                    List<Pair<Competitor, Iterable<Maneuver>>> data = new ArrayList<>();
+                    Iterable<Competitor> competitors = trackedRace.getRace().getCompetitors();
+                    UUID competitorFilter = null;
+                    if (competitorId != null) {
+                        competitorFilter = UUID.fromString(competitorId);
                     }
-                }
+                    final TimePoint endTime = determineEndTimeForManeuverDetection(trackedRace);
+                    final TimePoint startTime;
+                    if (fromTime != null) {
+                        startTime = new MillisecondsTimePoint(Long.parseLong(fromTime));
+                    } else {
+                        startTime = trackedRace.getStartOfRace();
+                    }
 
-                ManeuversJsonSerializer serializer = new ManeuversJsonSerializer(
-                        new ManeuverJsonSerializer(new GPSFixJsonSerializer(), new DistanceJsonSerializer()));
-                JSONObject jsonMarkPassings = serializer.serialize(data);
-                String json = jsonMarkPassings.toJSONString();
-                return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                    for (Competitor competitor : competitors) {
+                        if (competitorFilter == null || competitor.getId().equals(competitorFilter)) {
+
+                            Iterable<Maneuver> maneuversForCompetitor = trackedRace.getManeuvers(competitor, startTime,
+                                    endTime, false);
+                            data.add(new Pair<Competitor, Iterable<Maneuver>>(competitor, maneuversForCompetitor));
+                        }
+                    }
+
+                    ManeuversJsonSerializer serializer = new ManeuversJsonSerializer(
+                            new ManeuverJsonSerializer(new GPSFixJsonSerializer(), new DistanceJsonSerializer()));
+                    JSONObject jsonMarkPassings = serializer.serialize(data);
+                    String json = jsonMarkPassings.toJSONString();
+                    return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")
+                            .build();
+                }
             }
         }
         return response;
