@@ -7,7 +7,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
-import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.SecurityUser;
@@ -159,32 +158,9 @@ public class AccessControlStoreImpl implements AccessControlStore {
 
     @Override
     public OwnershipAnnotation getOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString) {
-        final OwnershipAnnotation storedOwnership = ownerships.get(idOfOwnedObjectAsString);
-        final OwnershipAnnotation result;
-        if (storedOwnership != null) {
-            result = storedOwnership;
-        } else {
-            result = createDefaultOwnership(idOfOwnedObjectAsString);
-        }
-        return result;
+        return ownerships.get(idOfOwnedObjectAsString);
     }
     
-    /**
-     * If there is no ownership information for an object and there is a {@link #defaultTenant} available,
-     * create a default {@link Ownership} information that lists the {@link #defaultTenant} as the tenant owner
-     * for the object in question; no user owner is specified. If no {@link #defaultTenant} is available,
-     * {@code null} is returned.
-     */
-    private OwnershipAnnotation createDefaultOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString) {
-        final Ownership result;
-        if (defaultTenant != null) {
-            result = new OwnershipImpl(/* userOwner */ null, /* tenantOwner */ defaultTenant);
-        } else {
-            result = null;
-        }
-        return result == null ? null : new OwnershipAnnotation(result, idOfOwnedObjectAsString, /* display name */ null);
-    }
-
     @Override 
     public Iterable<OwnershipAnnotation> getOwnerships() {
         return new ArrayList<>(ownerships.values());
