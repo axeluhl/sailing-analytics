@@ -450,7 +450,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public Ownership setOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString, SecurityUser userOwner, UserGroup tenantOwner, String displayNameOfOwnedObject) {
         final UUID tenantId;
-        if (tenantOwner == null || !tenantOwner.contains(userOwner)) {
+        if (tenantOwner == null || userOwner != null && !tenantOwner.contains(userOwner)) {
             tenantId = userOwner == null || userOwner.getDefaultTenant() == null ? null : userOwner.getDefaultTenant().getId();
         } else {
             tenantId = tenantOwner.getId();
