@@ -14,11 +14,13 @@ import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Venue;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 
 public class EventImpl extends EventBaseImpl implements Event {
     private static final long serialVersionUID = 855135446595485715L;
@@ -101,5 +103,15 @@ public class EventImpl extends EventBaseImpl implements Event {
         for (final String reviewedSpotsCollectionId : reviewedSpotsCollectionIds) {
             windFinderReviewedSpotsCollectionIds.putIfAbsent(reviewedSpotsCollectionId, true);
         }
+    }
+
+    @Override
+    public QualifiedObjectIdentifier getQualifiedObjectIdentifier() {
+        return SecuredDomainType.EVENT.getQualifiedObjectIdentifier(this.getId().toString());
+    }
+
+    @Override
+    public String getSecurityDisplayName() {
+        return this.getName();
     }
 }

@@ -14,8 +14,8 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
  * @author Axel Uhl (D043530)
  * 
  */
-public interface Event extends EventBase {
-    
+public interface Event extends EventBase, WithQualifiedObjectIdentifier {
+
     /**
      * For events, the ID is always a UUID.
      */

@@ -15,7 +15,8 @@ Require-Bundle: com.sap.sse.mongodb,
  com.sap.sse.common,
  com.sap.sse,
  com.sap.sailing.server.gateway.serialization.shared.android,
- com.sap.sse.shared.android
+ com.sap.sse.shared.android,
+ com.sap.sse.security.common;bundle-version="1.0.0"
 Export-Package: com.sap.sailing.domain.persistence,
  com.sap.sailing.domain.persistence.impl;
   x-friends:="com.sap.sailing.domain.persistence.test,

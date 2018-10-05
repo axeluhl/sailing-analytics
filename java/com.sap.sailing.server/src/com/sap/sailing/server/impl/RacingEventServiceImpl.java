@@ -95,6 +95,7 @@ import com.sap.sailing.domain.base.SailingServerConfiguration;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.WithQualifiedObjectIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
@@ -134,7 +135,6 @@ import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
@@ -915,15 +915,25 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private void ensureOwnerships(SecurityService securityService) {
         for (Event event : eventsById.values()) {
-            QualifiedObjectIdentifier eventIdentifier = SecuredDomainType.EVENT
-                    .getQualifiedObjectIdentifier(event.getId().toString());
-            OwnershipAnnotation owner = securityService.getOwnership(eventIdentifier);
-            UserGroup defaultTenant = securityService.getDefaultTenant();
-            if (owner == null) {
-                logger.info("Setting ownership for " + eventIdentifier + " to " + defaultTenant);
-                securityService.setOwnership(eventIdentifier, null, defaultTenant,
-                        event.getName());
-            }
+            migrateOwnership(event, securityService);
+        }
+        for (Regatta event : regattasByName.values()) {
+            migrateOwnership(event, securityService);
+        }
+    }
+
+    private void migrateOwnership(WithQualifiedObjectIdentifier objectToMigrate, SecurityService securityService) {
+        QualifiedObjectIdentifier identifier = objectToMigrate.getQualifiedObjectIdentifier();
+        OwnershipAnnotation owner = securityService.getOwnership(identifier);
+        UserGroup defaultTenant = securityService.getDefaultTenant();
+        // fix unowned objects, also fix wrongly converted objects due to older codebase that could not handle null
+        // users correctly
+        if (owner == null
+                || owner.getAnnotation().getTenantOwner() == null && owner.getAnnotation().getUserOwner() == null) {
+            logger.info(
+                    "Permission-Vertical Migration: Setting ownership for: " + identifier + " to default tenant: "
+                            + defaultTenant);
+            securityService.setOwnership(identifier, null, defaultTenant, objectToMigrate.getSecurityDisplayName());
         }
     }
 
