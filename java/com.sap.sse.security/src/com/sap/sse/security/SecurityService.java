@@ -314,4 +314,9 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void removeAccessToken(String username);
 
     SecurityUser loginByAccessToken(String accessToken);
+
+    /**
+     * Returns the default tenant of the underlying {@link UserStore#getDefaultTenant()}
+     */
+    UserGroup getDefaultTenant();
 }

@@ -1490,4 +1490,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             ((ReplicatingCacheManager) cm).clear();
         }
     }
+
+    @Override
+    public UserGroup getDefaultTenant() {
+        return userStore.getDefaultTenant();
+    }
 }
