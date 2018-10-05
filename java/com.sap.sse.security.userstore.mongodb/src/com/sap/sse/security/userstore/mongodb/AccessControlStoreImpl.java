@@ -14,7 +14,7 @@ import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.impl.AccessControlListImpl;
 import com.sap.sse.security.shared.impl.OwnershipImpl;
-import com.sap.sse.security.shared.impl.QualifiedObjectIdentifierImpl;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
 public class AccessControlStoreImpl implements AccessControlStore {
     private static final long serialVersionUID = 2165649781000936074L;
@@ -61,14 +61,13 @@ public class AccessControlStoreImpl implements AccessControlStore {
 
         // check if we already have an ownership for the server, create if it is missing
         boolean serverOwnershipIsMissing = true;
-        QualifiedObjectIdentifier expectedServerOwner = new QualifiedObjectIdentifierImpl("SERVER",
-                userStore.getDefaultTenant().getName());
+
+        QualifiedObjectIdentifier expectedServerOwner = SecuredSecurityTypes.SERVER
+                .getQualifiedObjectIdentifier(defaultTenant.getName());
         for (OwnershipAnnotation ownerShip : ownerships.values()) {
             if (ownerShip.getIdOfAnnotatedObject().equals(expectedServerOwner)) {
                 serverOwnershipIsMissing = false;
             }
-            System.out.println("Ownership loaded from db: " + ownerShip.getIdOfAnnotatedObject() + " "
-                    + ownerShip.getDisplayNameOfAnnotatedObject());
         }
         if (serverOwnershipIsMissing) {
             setOwnership(expectedServerOwner, null, defaultTenant, defaultTenant.getName());
