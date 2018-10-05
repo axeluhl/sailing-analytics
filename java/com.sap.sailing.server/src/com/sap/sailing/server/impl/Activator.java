@@ -6,6 +6,7 @@ import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -51,6 +52,7 @@ import com.sap.sse.mail.queue.impl.ExecutorMailQueue;
 import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.security.PreferenceConverter;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ServiceTrackerFactory;
 
@@ -87,6 +89,8 @@ public class Activator implements BundleActivator {
     private SailingNotificationServiceImpl notificationService;
 
     private ServiceTracker<MailService, MailService> mailServiceTracker;
+
+    private ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
     
     public Activator() {
         clearPersistentCompetitors = Boolean
@@ -108,6 +112,7 @@ public class Activator implements BundleActivator {
 
         trackedRegattaListener = new OSGiBasedTrackedRegattaListener(context);
         
+
         final TrackedRaceStatisticsCache trackedRaceStatisticsCache = new TrackedRaceStatisticsCacheImpl();
         registrations.add(context.registerService(TrackedRaceStatisticsCache.class.getName(), trackedRaceStatisticsCache, null));
         registrations.add(context.registerService(TrackedRegattaListener.class.getName(), trackedRaceStatisticsCache, null));
@@ -118,9 +123,35 @@ public class Activator implements BundleActivator {
         // instead.
         serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
 
+        
+        // We use a tracker for this, as else we would assume that the SecurityService cannot be started before this
+        // bundle, this way open() will fire instantly if the SecurityService already exists
+        final CompletableFuture<SecurityService> securityServiceAvailable = new CompletableFuture<>();
+        securityServiceTracker = new ServiceTracker<>(context, SecurityService.class,
+                new ServiceTrackerCustomizer<SecurityService, SecurityService>() {
+
+                    @Override
+                    public SecurityService addingService(ServiceReference<SecurityService> reference) {
+                        SecurityService securityService = context.getService(reference);
+                        securityServiceAvailable.complete(securityService);
+                        return securityService;
+                    }
+
+                    @Override
+                    public void modifiedService(ServiceReference<SecurityService> reference, SecurityService service) {
+                    }
+
+            @Override
+                    public void removedService(ServiceReference<SecurityService> reference, SecurityService service) {
+            }
+        });
+
         racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors, serviceFinderFactory,
-                trackedRegattaListener, notificationService, trackedRaceStatisticsCache, restoreTrackedRaces);
+                trackedRegattaListener, notificationService, trackedRaceStatisticsCache, restoreTrackedRaces,
+                securityServiceAvailable);
         notificationService.setRacingEventService(racingEventService);
+        
+        securityServiceTracker.open();
 
         masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
                 context, MasterDataImportClassLoaderService.class,
@@ -209,6 +240,7 @@ public class Activator implements BundleActivator {
         notificationService.stop();
         mailQueue.stop();
         mailServiceTracker.close();
+        securityServiceTracker.close();
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
         mbs.unregisterMBean(mBeanName);
     }

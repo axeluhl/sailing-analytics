@@ -28,6 +28,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -133,6 +134,7 @@ import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
@@ -284,6 +286,10 @@ import com.sap.sse.replication.OperationExecutionListener;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.util.ClearStateTestSupport;
@@ -503,8 +509,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      */
     private final RaceChangeObserverForAnniversaryDetection raceChangeObserverForAnniversaryDetection;
 
-    private final PairingListTemplateFactory pairingListTemplateFactory = PairingListTemplateFactory.INSTANCE; 
-    
+    private final PairingListTemplateFactory pairingListTemplateFactory = PairingListTemplateFactory.INSTANCE;
+
     /**
      * Providing the constructor parameters for a new {@link RacingEventServiceImpl} instance is a bit tricky
      * in some cases because containment and initialization order of some types is fairly tightly coupled.
@@ -544,7 +550,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     public RacingEventServiceImpl(boolean clearPersistentCompetitorAndBoatStore, final TypeBasedServiceFinderFactory serviceFinderFactory, boolean restoreTrackedRaces) {
-        this(clearPersistentCompetitorAndBoatStore, serviceFinderFactory, null, /* sailingNotificationService */ null, /* trackedRaceStatisticsCache */ null, restoreTrackedRaces);
+        this(clearPersistentCompetitorAndBoatStore, serviceFinderFactory, null, /* sailingNotificationService */ null,
+                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, null);
     }
 
     /**
@@ -552,20 +559,24 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * be cleared before the service starts.
      * 
      * @param clearPersistentCompetitorAndBoatStore
-     *            if <code>true</code>, the {@link PersistentCompetitorAndBoatStore} is created empty, with the corresponding
-     *            database collection cleared as well. Use with caution! When used with <code>false</code>, competitors and boats
-     *            created and stored during previous service executions will initially be loaded.
+     *            if <code>true</code>, the {@link PersistentCompetitorAndBoatStore} is created empty, with the
+     *            corresponding database collection cleared as well. Use with caution! When used with
+     *            <code>false</code>, competitors and boats created and stored during previous service executions will
+     *            initially be loaded.
      * @param sailingNotificationService
      *            a notification service to call upon events worth notifying users about, or {@code null} if no
      *            notification service is available, e.g., in test set-ups
      * @param trackedRaceStatisticsCache
      *            a cache that gives access to detailed statistics about TrackedRaces. If <code>null</code>, no detailed
      *            statistics about TrackedRaces will be calculated.
+     * @param securityServiceTracker
+     * @param securityServiceAvailable
      */
     public RacingEventServiceImpl(boolean clearPersistentCompetitorAndBoatStore,
             final TypeBasedServiceFinderFactory serviceFinderFactory, TrackedRegattaListenerManager trackedRegattaListener,
             SailingNotificationService sailingNotificationService,
-            TrackedRaceStatisticsCache trackedRaceStatisticsCache, boolean restoreTrackedRaces) {
+            TrackedRaceStatisticsCache trackedRaceStatisticsCache, boolean restoreTrackedRaces,
+            CompletableFuture<SecurityService> securityServiceAvailable) {
         this((final RaceLogResolver raceLogResolver) -> {
             return new ConstructorParameters() {
                 private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE
@@ -595,7 +606,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 }
             };
         }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), null, null, serviceFinderFactory, trackedRegattaListener,
-                sailingNotificationService, trackedRaceStatisticsCache, restoreTrackedRaces);
+                sailingNotificationService, trackedRaceStatisticsCache, restoreTrackedRaces,
+                securityServiceAvailable);
     }
 
     private RacingEventServiceImpl(final boolean clearPersistentCompetitorStore, WindStore windStore,
@@ -629,7 +641,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 }
             };
         }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), windStore, sensorFixStore, serviceFinderFactory, null,
-                sailingNotificationService, /* trackedRaceStatisticsCache */ null, restoreTrackedRaces);
+                sailingNotificationService, /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, null);
     }
 
     public RacingEventServiceImpl(final DomainObjectFactory domainObjectFactory, MongoObjectFactory mongoObjectFactory,
@@ -657,7 +669,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 }
             };
         }, mediaDB, windStore, sensorFixStore, null, null, /* sailingNotificationService */ null,
-                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces);
+                /* trackedRaceStatisticsCache */ null, restoreTrackedRaces, null);
     }
 
     /**
@@ -683,12 +695,16 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      *            {@code false}, all restore information is
      *            {@link MongoObjectFactory#removeAllConnectivityParametersForRacesToRestore() cleared} from the
      *            database, and the server starts out with an empty list of tracked races.
+     * @param securityServiceAvailable
+     *            will complete as soon as the securityServiceTracker is able to provide a SecurityService, NEVER hold a
+     *            reference to the result of this, as it might become invalid if bundles are replaced/ restarted
      */
     public RacingEventServiceImpl(Function<RaceLogResolver, ConstructorParameters> constructorParametersProvider,
             MediaDB mediaDb, final WindStore windStore, final SensorFixStore sensorFixStore,
             TypeBasedServiceFinderFactory serviceFinderFactory, TrackedRegattaListenerManager trackedRegattaListener,
             SailingNotificationService sailingNotificationService,
-            TrackedRaceStatisticsCache trackedRaceStatisticsCache, boolean restoreTrackedRaces) {
+            TrackedRaceStatisticsCache trackedRaceStatisticsCache, boolean restoreTrackedRaces,
+            CompletableFuture<SecurityService> securityServiceAvailable) {
         logger.info("Created " + this);
         this.numberOfTrackedRacesRestored = new AtomicInteger();
         this.scoreCorrectionListenersByLeaderboard = new ConcurrentHashMap<>();
@@ -803,6 +819,10 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 new QuarterChecker(), new SameDigitChecker());
         raceChangeObserverForAnniversaryDetection = new RaceChangeObserverForAnniversaryDetection(anniversaryRaceDeterminator);
         this.trackedRegattaListener.addListener(raceChangeObserverForAnniversaryDetection);
+        
+        if (securityServiceAvailable != null) {
+            securityServiceAvailable.thenAccept(t -> ensureOwnerships(t));
+        }
     }
 
     private void restoreTrackedRaces() {
@@ -893,6 +913,20 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         return domainObjectFactory;
     }
 
+    private void ensureOwnerships(SecurityService securityService) {
+        for (Event event : eventsById.values()) {
+            QualifiedObjectIdentifier eventIdentifier = SecuredDomainType.EVENT
+                    .getQualifiedObjectIdentifier(event.getId().toString());
+            OwnershipAnnotation owner = securityService.getOwnership(eventIdentifier);
+            UserGroup defaultTenant = securityService.getDefaultTenant();
+            if (owner == null) {
+                logger.info("Setting ownership for " + eventIdentifier + " to " + defaultTenant);
+                securityService.setOwnership(eventIdentifier, null, defaultTenant,
+                        event.getName());
+            }
+        }
+    }
+
     private void loadRaceIDToRegattaAssociations() {
         persistentRegattasForRaceIDs.putAll(domainObjectFactory.loadRaceIDToRegattaAssociations(this));
     }
@@ -915,12 +949,14 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     private Iterable<Pair<Event, Boolean>> loadStoredEvents() {
+
         Iterable<Pair<Event, Boolean>> loadedEventsWithRequireStoreFlag = domainObjectFactory.loadAllEvents(); 
         for (Pair<Event, Boolean> eventAndFlag : loadedEventsWithRequireStoreFlag) {
             Event event = eventAndFlag.getA();
             if (event.getId() != null)
                 eventsById.put(event.getId(), event);
         }
+
         return loadedEventsWithRequireStoreFlag;
     }
     
