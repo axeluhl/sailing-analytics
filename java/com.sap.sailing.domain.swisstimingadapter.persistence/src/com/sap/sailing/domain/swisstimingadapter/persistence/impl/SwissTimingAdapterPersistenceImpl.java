@@ -1,7 +1,6 @@
 package com.sap.sailing.domain.swisstimingadapter.persistence.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,14 +34,13 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         List<SwissTimingConfiguration> result = new ArrayList<SwissTimingConfiguration>();
         try {
             DBCollection stConfigs = database.getCollection(CollectionNames.SWISSTIMING_CONFIGURATIONS.name());
-            for (DBObject o : stConfigs.find()) {
+            for (DBObject o : stConfigs.find().sort(new BasicDBObject(FieldNames.ST_CONFIG_NAME.name(), 1))) {
                 SwissTimingConfiguration stConfig = loadSwissTimingConfiguration(o);
                 // the old SwissTiming configuration was not based on a JSON URL -> ignore such configurations
                 if (stConfig.getJsonURL() != null) {
                     result.add(stConfig);
                 }
             }
-            Collections.reverse(result);
         } catch (Exception e) {
             // something went wrong during DB access; report, then use empty new wind track
             logger.log(Level.SEVERE,
@@ -68,11 +66,10 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         List<SwissTimingArchiveConfiguration> result = new ArrayList<SwissTimingArchiveConfiguration>();
         try {
             DBCollection stConfigs = database.getCollection(CollectionNames.SWISSTIMING_ARCHIVE_CONFIGURATIONS.name());
-            for (DBObject o : stConfigs.find()) {
+            for (DBObject o : stConfigs.find().sort(new BasicDBObject(FieldNames.ST_ARCHIVE_JSON_URL.name(), 1))) {
                 SwissTimingArchiveConfiguration stConfig = loadSwissTimingArchiveConfiguration(o);
                 result.add(stConfig);
             }
-            Collections.reverse(result);
         } catch (Exception e) {
             // something went wrong during DB access; report, then use empty new wind track
             logger.log(Level.SEVERE,
@@ -124,7 +121,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         result.put(FieldNames.ST_ARCHIVE_JSON_URL.name(), createSwissTimingArchiveConfiguration.getJsonUrl());
         
         stArchiveConfigCollection.update(result, result, true, false);
-        }
+    }
     
     private void dropIndexSafe(DBCollection collection, String indexName) {
         collection.getIndexInfo().forEach(indexInfo -> {
