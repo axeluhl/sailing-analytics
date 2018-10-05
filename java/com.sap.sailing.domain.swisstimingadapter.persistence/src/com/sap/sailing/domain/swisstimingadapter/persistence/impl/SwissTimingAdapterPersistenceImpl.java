@@ -90,11 +90,14 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
     public void storeSwissTimingConfiguration(SwissTimingConfiguration swissTimingConfiguration) {
         DBCollection stConfigCollection = database.getCollection(CollectionNames.SWISSTIMING_CONFIGURATIONS.name());
         stConfigCollection.createIndex(new BasicDBObject(CollectionNames.SWISSTIMING_CONFIGURATIONS.name(), 1));
+        // remove old, non working index
+        dropIndexSafe(stConfigCollection, "SWISSTIMING_CONFIGURATIONS_1");
+        // adding unique index by config name
+        stConfigCollection.createIndex(new BasicDBObject(FieldNames.ST_CONFIG_NAME.name(), 1), "st_config_name_unique",
+                true);
+        
         BasicDBObject result = new BasicDBObject();
         result.put(FieldNames.ST_CONFIG_NAME.name(), swissTimingConfiguration.getName());
-        for (DBObject equallyNamedConfig : stConfigCollection.find(result)) {
-            stConfigCollection.remove(equallyNamedConfig);
-        }
         result.put(FieldNames.ST_CONFIG_JSON_URL.name(), swissTimingConfiguration.getJsonURL());
         result.put(FieldNames.ST_CONFIG_HOSTNAME.name(), swissTimingConfiguration.getHostname());
         result.put(FieldNames.ST_CONFIG_PORT.name(), swissTimingConfiguration.getPort());
@@ -102,19 +105,32 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         result.put(FieldNames.ST_CONFIG_UPDATE_USERNAME.name(), swissTimingConfiguration.getUpdateUsername());
         result.put(FieldNames.ST_CONFIG_UPDATE_PASSWORD.name(), swissTimingConfiguration.getUpdatePassword());
 
-        stConfigCollection.insert(result);
+        final BasicDBObject updateQuery = new BasicDBObject(FieldNames.ST_CONFIG_NAME.name(),
+                swissTimingConfiguration.getName());
+        stConfigCollection.update(updateQuery, result, true, false);
     }
 
     @Override
     public void storeSwissTimingArchiveConfiguration(
             SwissTimingArchiveConfiguration createSwissTimingArchiveConfiguration) {
         DBCollection stArchiveConfigCollection = database.getCollection(CollectionNames.SWISSTIMING_ARCHIVE_CONFIGURATIONS.name());
-        stArchiveConfigCollection.createIndex(new BasicDBObject(CollectionNames.SWISSTIMING_ARCHIVE_CONFIGURATIONS.name(), 1));
+        // remove old, non working index
+        dropIndexSafe(stArchiveConfigCollection, "SWISSTIMING_ARCHIVE_CONFIGURATIONS_1");
+        // adding unique index by json url
+        stArchiveConfigCollection.createIndex(new BasicDBObject(FieldNames.ST_ARCHIVE_JSON_URL.name(), 1), "st_config_name_unique",
+                true);
+        
         BasicDBObject result = new BasicDBObject();
         result.put(FieldNames.ST_ARCHIVE_JSON_URL.name(), createSwissTimingArchiveConfiguration.getJsonUrl());
-        for (DBObject equallyNamedConfig : stArchiveConfigCollection.find(result)) {
-            stArchiveConfigCollection.remove(equallyNamedConfig);
+        
+        stArchiveConfigCollection.update(result, result, true, false);
         }
-        stArchiveConfigCollection.insert(result);
+    
+    private void dropIndexSafe(DBCollection collection, String indexName) {
+        collection.getIndexInfo().forEach(indexInfo -> {
+            if (indexName.equals(indexInfo.get("name"))) {
+                collection.dropIndex(indexName);
+            }
+        });
     }
 }
