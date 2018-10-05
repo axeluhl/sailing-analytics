@@ -60,16 +60,9 @@ public class AccessControlStoreImpl implements AccessControlStore {
         }
 
         // check if we already have an ownership for the server, create if it is missing
-        boolean serverOwnershipIsMissing = true;
-
         QualifiedObjectIdentifier expectedServerOwner = SecuredSecurityTypes.SERVER
                 .getQualifiedObjectIdentifier(defaultTenant.getName());
-        for (OwnershipAnnotation ownerShip : ownerships.values()) {
-            if (ownerShip.getIdOfAnnotatedObject().equals(expectedServerOwner)) {
-                serverOwnershipIsMissing = false;
-            }
-        }
-        if (serverOwnershipIsMissing) {
+        if (!ownerships.containsKey(expectedServerOwner)) {
             setOwnership(expectedServerOwner, null, defaultTenant, defaultTenant.getName());
         }
 
