@@ -867,4 +867,21 @@ public class Util {
         returnValue.retainAll(Util.asList(toRetain));
         return returnValue;
     }
+
+    /**
+     * This method will determine the latest entry in the given Iterable
+     * 
+     * @return The object with the latest time stamp in the input or {@code null} if the input was empty. If multiple
+     *         objects have equal time points and no other object has a later time point, the first object in the
+     *         iteration order with such an equal time stamp is returned.
+     */
+    public static <T extends Timed> T latest(Iterable<T> timedObjects) {
+        T latest = null;
+        for (T timedObject : timedObjects) {
+            if (latest == null || timedObject.getTimePoint().after(latest.getTimePoint())) {
+                latest = timedObject;
+            }
+        }
+        return latest;
+    }
 }

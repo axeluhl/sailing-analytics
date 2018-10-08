@@ -41,6 +41,7 @@ import com.sap.sailing.declination.Declination;
 import com.sap.sailing.declination.DeclinationService;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.Position;
+import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -152,10 +153,12 @@ public class UDPExpeditionReceiverTest {
         }
 
         @Override
-        public <FixT extends Timed> void storeFixes(DeviceIdentifier device, Iterable<FixT> fixes) {
+        public <FixT extends Timed> Iterable<RegattaAndRaceIdentifier> storeFixes(DeviceIdentifier device,
+                Iterable<FixT> fixes) {
             for (final FixT fix : fixes) {
                 storeFix(device, fix);
             }
+            return Collections.emptySet();
         }
 
         @Override
