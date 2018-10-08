@@ -862,8 +862,9 @@ public class Util {
     /**
      * This method will determine the latest entry in the given Iterable
      * 
-     * @param timedObjects
-     * @return The object with the latest timestamp in the input or null if input was empty
+     * @return The object with the latest time stamp in the input or {@code null} if the input was empty. If multiple
+     *         objects have equal time points and no other object has a later time point, the first object in the
+     *         iteration order with such an equal time stamp is returned.
      */
     public static <T extends Timed> T latest(Iterable<T> timedObjects) {
         T latest = null;

@@ -247,14 +247,14 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
             Iterable<FixT> fixes) {
         Set<RegattaAndRaceIdentifier> raceWithChangedManeuver = new HashSet<>();
         @SuppressWarnings({ "unchecked", "rawtypes" })
+        final Map<DeviceIdentifier, Set<FixReceivedListener<FixT>>> listenersWithFixType = (Map) listeners;
         final Set<FixReceivedListener<FixT>> listenersToInform = LockUtil.executeWithReadLockAndResult(listenersLock, () -> {
             return new HashSet<>(Util.<DeviceIdentifier, Set<FixReceivedListener<FixT>>> get(
-                    (Map) listeners, device, Collections.emptySet()));
+                    listenersWithFixType, device, Collections.emptySet()));
         });
         for (FixT fix : fixes) {
             for (FixReceivedListener<FixT> listener : listenersToInform) {
-                final Iterable<RegattaAndRaceIdentifier> racesWithManeuverChangeFromListener = listener
-                        .fixReceived(device, fix);
+                final Iterable<RegattaAndRaceIdentifier> racesWithManeuverChangeFromListener = listener.fixReceived(device, fix);
                 Util.addAll(racesWithManeuverChangeFromListener, raceWithChangedManeuver);
             }
         }
