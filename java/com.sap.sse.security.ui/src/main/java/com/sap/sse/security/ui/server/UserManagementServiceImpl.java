@@ -172,7 +172,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public AccessControlList addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String groupIdAsString, String action) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.ACCESS_CONTROL_LIST.getStringPermissionForObjects(DefaultActions.UPDATE, idOfAccessControlledObject.toString())))) {
+        if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.ACCESS_CONTROL_LIST.getStringPermissionForObjects(DefaultActions.UPDATE, idOfAccessControlledObject.toString()))) {
             UserGroup userGroup = getUserGroup(groupIdAsString);
             return securityDTOFactory.createAccessControlListDTO(getSecurityService().addToAccessControlList(idOfAccessControlledObject, userGroup, action));
         } else {
