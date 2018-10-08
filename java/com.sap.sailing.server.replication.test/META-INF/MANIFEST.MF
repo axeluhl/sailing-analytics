@@ -31,5 +31,5 @@ Require-Bundle: com.sap.sailing.server,
  com.sap.sailing.server.gateway,
  javax.ws.rs,
  com.sap.sailing.server.testsupport,
- com.sap.sse.security;bundle-version="1.0.0"
+ com.sap.sse.security
 Automatic-Module-Name: com.sap.sailing.server.replication.test
