@@ -2739,8 +2739,6 @@ public abstract class TrackedRaceImpl extends TrackedRaceWithWindEssentials impl
         return result;
     }
 
-    
-
     /**
      * Fetches the boat class-specific parameter
      */
