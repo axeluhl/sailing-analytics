@@ -4,7 +4,6 @@ import com.sap.sailing.domain.base.configuration.RegattaConfiguration;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.leaderboard.HasRaceColumnsAndRegattaLike;
 import com.sap.sailing.domain.leaderboard.ScoringScheme;
 import com.sap.sailing.domain.ranking.RankingMetricConstructor;
@@ -18,7 +17,6 @@ import com.sap.sailing.util.RegattaUtil;
 import com.sap.sse.common.NamedWithID;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 
 /**
  * The name shall be unique across all regattas tracked concurrently. In particular, if you want to keep apart regattas
@@ -237,13 +235,4 @@ public interface Regatta extends NamedWithID, IsRegattaLike, HasRaceColumnsAndRe
      * @see #isControlTrackingFromStartAndFinishTimes()
      */
     void setControlTrackingFromStartAndFinishTimes(boolean controlTrackingFromStartAndFinishTimes);
-
-    default QualifiedObjectIdentifier getQualifiedObjectIdentifier() {
-        return SecuredDomainType.REGATTA.getQualifiedObjectIdentifier(getName());
-
-    }
-
-    default String getSecurityDisplayName() {
-        return getName();
-    }
 }

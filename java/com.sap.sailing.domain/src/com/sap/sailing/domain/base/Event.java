@@ -15,7 +15,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
  * 
  */
 public interface Event extends EventBase {
-
+    
     /**
      * For events, the ID is always a UUID.
      */
