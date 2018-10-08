@@ -37,6 +37,8 @@ import org.json.simple.parser.ParseException;
 import com.sap.sailing.datamining.SailingPredefinedQueries;
 import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.base.Boat;
@@ -375,13 +377,23 @@ public class RegattasResource extends AbstractSailingServerResource {
                 checkInCompetitor = true;
             }
             
-            //Check regattalog if device has been used already
+            // Check regattalog if device has been registered to this regatta already
+            boolean duplicateDeviceId = false;
             if (checkInCompetitor) {
-                //RegattaLog regattaLog = regatta.getRegattaLog();
-                //TODO: how to find out DeviceToCompetitorMappings
+                RegattaLog regattaLog = regatta.getRegattaLog();
+                duplicateDeviceId = regattaLog.getUnrevokedEvents().stream().anyMatch(event -> {
+                    if (event instanceof RegattaLogDeviceCompetitorMappingEvent) {
+                        return deviceUuid.equals(
+                                ((RegattaLogDeviceCompetitorMappingEvent) event).getDevice().getStringRepresentation());
+                    } else {
+                        return false;
+                    }
+                });
             }
             
-            if (registerCompetitor) {
+            if (duplicateDeviceId) {
+                response = this.getAlreadyRegisteredDeviceErrorResponse(regattaName, deviceUuid);
+            } else if (registerCompetitor) {
                 final User user = getService(SecurityService.class).getCurrentUser();
                 final String shortName;
                 final String name;

@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.shiro.util.ThreadState;
 import org.json.simple.JSONArray;
@@ -23,7 +24,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
@@ -43,9 +44,10 @@ import com.sap.sse.security.User;
 import com.sap.sse.security.shared.Account;
 
 public class RegattasResourceTest extends AbstractJaxRsApiTest {
-    private String boatClassName = "49er";
-    private String closedRegattaName = "TestRegatta";
-    private String openRegattaName = "TestOpenRegatta";
+    private final String boatClassName = "49er";
+    private final String closedRegattaName = "TestRegatta";
+    private final String openRegattaName = "TestOpenRegatta";
+    private final String deviceUuid = "00000000-1111-2222-3333-444444444444";
 
     @Before
     public void setUp() throws Exception {
@@ -125,8 +127,9 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
 
         final String name = RegattaImpl.getDefaultName(closedRegattaName, boatClassName);
         Response reponse = spyResource.createAndAddCompetitor(name, boatClassName, null, "GER", null, null, null,
-                "Max Mustermann", null, "abcd-abcd-abcd-abcd-abcd");
-        assertTrue(reponse.getStatus() + ": " + reponse.getEntity().toString(), reponse.getStatus() == 200);
+                "Max Mustermann", null, deviceUuid);
+        assertTrue(reponse.getStatus() + ": " + reponse.getEntity().toString(),
+                reponse.getStatus() == Status.OK.getStatusCode());
         assertTrue(spyResource.getService() == racingEventService);
 
         Regatta regatta = racingEventService.getRegattaByName(name);
@@ -150,22 +153,13 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         Regatta regatta = racingEventService.getRegattaByName(name);
 
         Response reponse = spyResource.createAndAddCompetitor(name, boatClassName, null, "GER", null, null, null,
-                "Max Mustermann", null, "abcd-abcd-abcd-abcd-abcd");
-        assertTrue(reponse.getStatus() + ": " + reponse.getEntity().toString(), reponse.getStatus() == 200);
+                "Max Mustermann", null, deviceUuid);
+        assertTrue(reponse.getStatus() + ": " + reponse.getEntity().toString(),
+                reponse.getStatus() == Status.OK.getStatusCode());
         assertTrue(spyResource.getService() == racingEventService);
 
         regatta = racingEventService.getRegattaByName(name);
-        Iterator<Competitor> cit = regatta.getAllCompetitors().iterator();
-        Competitor readCompetitor = cit.next();
-        assertNotNull(readCompetitor);
-
-        // should have one device registration event of type RegattaLogDeviceCompetitorMappingEventImpl...
-        assertTrue(regatta.getRegattaLog().getUnrevokedEvents().stream()
-                .filter(e -> e instanceof RegattaLogDeviceCompetitorMappingEventImpl).count() == 1);
-        // ..with requested device id
-        assertEquals("0000abcd-abcd-abcd-abcd-00000000abcd", ((RegattaLogDeviceCompetitorMappingEventImpl) regatta
-                .getRegattaLog().getUnrevokedEvents().iterator().next()).getDevice().getStringRepresentation());
-
+        testResponseOfOpenRegattaCompetitorRegistration(regatta, spyResource);
     }
 
     @Test
@@ -184,23 +178,35 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         Regatta regatta = racingEventService.getRegattaByName(name);
 
         Response reponse = spyResource.createAndAddCompetitor(name, boatClassName, null, "GER", null, null, null,
-                "Max Mustermann", null, "abcd-abcd-abcd-abcd-abcd");
-        assertTrue(reponse.getStatus() + ": " + reponse.getEntity().toString(), reponse.getStatus() == 200);
+                "Max Mustermann", null, deviceUuid);
+        assertTrue(reponse.getStatus() + ": " + reponse.getEntity().toString(),
+                reponse.getStatus() == Status.OK.getStatusCode());
         assertTrue(spyResource.getService() == racingEventService);
 
         regatta = racingEventService.getRegattaByName(name);
+        testResponseOfOpenRegattaCompetitorRegistration(regatta, spyResource);
+
+        subjectThreadState.clear();
+    }
+
+    private void testResponseOfOpenRegattaCompetitorRegistration(final Regatta regatta,
+            final RegattasResource spyResource) {
         Iterator<Competitor> cit = regatta.getAllCompetitors().iterator();
         Competitor readCompetitor = cit.next();
         assertNotNull(readCompetitor);
 
         // should have one device registration event of type RegattaLogDeviceCompetitorMappingEventImpl...
         assertTrue(regatta.getRegattaLog().getUnrevokedEvents().stream()
-                .filter(e -> e instanceof RegattaLogDeviceCompetitorMappingEventImpl).count() == 1);
-        // ..with requested device if
-        assertEquals("0000abcd-abcd-abcd-abcd-00000000abcd", ((RegattaLogDeviceCompetitorMappingEventImpl) regatta
-                .getRegattaLog().getUnrevokedEvents().iterator().next()).getDevice().getStringRepresentation());
+                .filter(e -> e instanceof RegattaLogDeviceCompetitorMappingEvent).count() == 1);
+        // ..with requested device id
+        assertEquals(deviceUuid, ((RegattaLogDeviceCompetitorMappingEvent) regatta.getRegattaLog().getUnrevokedEvents()
+                .iterator().next()).getDevice().getStringRepresentation());
 
-        subjectThreadState.clear();
+        // Same deviceUuid for registration should fail
+        Response response = spyResource.createAndAddCompetitor(regatta.getName(), boatClassName, null, "GER", null, null, null,
+                "Max Mustermann", null, deviceUuid);
+        assertTrue("Reponse http status should be forbidden (403) but is " + response.getStatus(),
+                response.getStatus() == Status.FORBIDDEN.getStatusCode());
     }
 
 }
