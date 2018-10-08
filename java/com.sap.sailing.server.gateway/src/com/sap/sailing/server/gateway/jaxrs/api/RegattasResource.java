@@ -35,6 +35,10 @@ import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.datamining.SailingPredefinedQueries;
+import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
+import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEventImpl;
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
@@ -49,6 +53,7 @@ import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -62,6 +67,7 @@ import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.racelogtracking.impl.SmartphoneUUIDIdentifierImpl;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
@@ -141,6 +147,21 @@ public class RegattasResource extends AbstractSailingServerResource {
 
     private Response getBadRegattaErrorResponse(String regattaName) {
         return Response.status(Status.NOT_FOUND).entity("Could not find a regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.")
+                .type(MediaType.TEXT_PLAIN).build();
+    }
+
+    private Response getBadRegattaRegistrationTypeErrorResponse(String regattaName) {
+        return Response.status(Status.FORBIDDEN).entity("Self-registration to regatta '" + StringEscapeUtils.escapeHtml(regattaName) + "' is not allowed.")
+                .type(MediaType.TEXT_PLAIN).build();
+    }
+
+    private Response getAlreadyRegisteredDeviceErrorResponse(String regattaName, String deviceId) {
+        return Response.status(Status.FORBIDDEN).entity("Device is already registered to regatta '" + StringEscapeUtils.escapeHtml(regattaName) + "'.")
+                .type(MediaType.TEXT_PLAIN).build();
+    }
+
+    private Response getAlreadyRegisteredUserErrorResponse(String regattaName, String userName) {
+        return Response.status(Status.FORBIDDEN).entity("User is already registered to regatta '" + StringEscapeUtils.escapeHtml(regattaName) + "'.")
                 .type(MediaType.TEXT_PLAIN).build();
     }
 
@@ -327,53 +348,90 @@ public class RegattasResource extends AbstractSailingServerResource {
             @QueryParam("timeontimefactor") Double timeOnTimeFactor,
             @QueryParam("timeondistanceallowancepernauticalmileasmillis") Long timeOnDistanceAllowancePerNauticalMileAsMillis,
             @QueryParam("searchtag") String searchTag, @QueryParam("competitorName") String competitorName,
-            @QueryParam("competitorEmail") String competitorEmail) {
+            @QueryParam("competitorEmail") String competitorEmail, @QueryParam("deviceUuid") String deviceUuid) {
         final Subject subject = SecurityUtils.getSubject();
-        subject.checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regattaName));
-        Response response;
-        Regatta regatta = findRegattaByName(regattaName);
+        
+        final Response response;
+        final Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else if (boatClassName == null) {
             response = getBadBoatClassResponse(boatClassName);
         } else {
-            final User user = getService(SecurityService.class).getCurrentUser();
-            final String shortName;
-            final String name;
-            if (competitorName != null) {
-                name = competitorName;
-                shortName = competitorName;
-            } else {
-                shortName = user.getName();
-                name = user.getFullName() == null ? shortName : user.getFullName();
+            boolean registerCompetitor = false;
+            boolean checkInCompetitor = false;
+            if (subject.isAuthenticated() && ("admin".equals(subject.getPrincipal()) /*|| regatta.owner.equals(subject)*/)) {         //TODO: correct admin-group and owner check
+                //case 1: admin or regatta owner is registering a competitor
+                subject.checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regattaName));
+                registerCompetitor = true;
+            } else if (subject.isAuthenticated() && regatta.getCompetitorRegistrationType().isOpen()) {  
+                //case 2: "unprivileged" authenticated user is registering
+                registerCompetitor = true;
+                //case 2.1: with device                                                                                 //TODO: correct to checkin in with device?
+                checkInCompetitor = deviceUuid != null;
+            } else if (deviceUuid != null && regatta.getCompetitorRegistrationType().isOpen()) {
+                //case 3: unauthorized with device
+                registerCompetitor = true;
+                checkInCompetitor = true;
             }
-            final String email;
-            if (competitorEmail != null) {
-                email = competitorEmail;
-            } else {
-                email = user.getEmail();
+            
+            //Check regattalog if device has been used already
+            if (checkInCompetitor) {
+                //RegattaLog regattaLog = regatta.getRegattaLog();
+                //TODO: how to find out DeviceToCompetitorMappings
             }
-
-            final Boat boat = new BoatImpl(UUID.randomUUID(), shortName, getService().getBaseDomainFactory()
-                    .getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */ true), sailId);
-
-            final TeamImpl team = new TeamImpl(shortName,
-                    Collections.singleton(new PersonImpl(name,
-                            getService().getBaseDomainFactory()
-                                    .getOrCreateNationality(nationalityThreeLetterIOCCode),
-                            /* dateOfBirth */ null, /* description */ null)),
-                    /* coach */ null);
-            final CompetitorWithBoat competitor = getService().getCompetitorAndBoatStore()
-                    .getOrCreateCompetitorWithBoat(UUID.randomUUID(),
-                            name, /* shortName */ null, /* displayColor */ null, email, /* flagImageURI */ null,
-                            team,
-                            timeOnTimeFactor,
-                            timeOnDistanceAllowancePerNauticalMileAsMillis == null ? null
-                                    : new MillisecondsDurationImpl(timeOnDistanceAllowancePerNauticalMileAsMillis),
-                            searchTag, (DynamicBoat) boat);
-            regatta.registerCompetitor(competitor);
-            response = Response.ok(CompetitorJsonSerializer.create().serialize(competitor).toJSONString()).
-                    header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            
+            if (registerCompetitor) {
+                final User user = getService(SecurityService.class).getCurrentUser();
+                final String shortName;
+                final String name;
+                if (competitorName != null) {
+                    name = competitorName;
+                    shortName = competitorName;
+                } else {
+                    shortName = user.getName();
+                    name = user.getFullName() == null ? shortName : user.getFullName();
+                }
+                final String email;
+                if (competitorEmail != null) {
+                    email = competitorEmail;
+                } else {
+                    email = user.getEmail();
+                }
+    
+                final Boat boat = new BoatImpl(UUID.randomUUID(), shortName, getService().getBaseDomainFactory()
+                        .getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */ true), sailId);
+    
+                final TeamImpl team = new TeamImpl(shortName,
+                        Collections.singleton(new PersonImpl(name,
+                                getService().getBaseDomainFactory()
+                                        .getOrCreateNationality(nationalityThreeLetterIOCCode),
+                                /* dateOfBirth */ null, /* description */ null)),
+                        /* coach */ null);
+                final CompetitorWithBoat competitor = getService().getCompetitorAndBoatStore()
+                        .getOrCreateCompetitorWithBoat(UUID.randomUUID(),
+                                name, /* shortName */ null, /* displayColor */ null, email, /* flagImageURI */ null,
+                                team,
+                                timeOnTimeFactor,
+                                timeOnDistanceAllowancePerNauticalMileAsMillis == null ? null
+                                        : new MillisecondsDurationImpl(timeOnDistanceAllowancePerNauticalMileAsMillis),
+                                searchTag, (DynamicBoat) boat);
+                regatta.registerCompetitor(competitor);
+                response = Response.ok(CompetitorJsonSerializer.create().serialize(competitor).toJSONString()).
+                        header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                
+                if (checkInCompetitor) {
+                    final DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
+                    final TimePoint now = MillisecondsTimePoint.now();
+                    RegattaLogDeviceMappingEventImpl<Competitor> event = 
+                            new RegattaLogDeviceCompetitorMappingEventImpl(now, now, new LogEventAuthorImpl(AbstractLogEventAuthor.NAME_COMPATIBILITY,
+                                    AbstractLogEventAuthor.PRIORITY_COMPATIBILITY), UUID.randomUUID(), competitor, device,
+                            now, /* to */ null);
+                    regatta.getRegattaLog().add(event);
+                }
+            } else {
+                response = getBadRegattaRegistrationTypeErrorResponse(regattaName);
+            }
         }
         return response;
     }

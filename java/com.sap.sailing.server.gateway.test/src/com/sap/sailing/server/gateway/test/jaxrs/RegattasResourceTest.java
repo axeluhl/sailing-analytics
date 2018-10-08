@@ -1,23 +1,39 @@
 package com.sap.sailing.server.gateway.test.jaxrs;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.shiro.config.Ini;
+import org.apache.shiro.mgt.DefaultSecurityManager;
+import org.apache.shiro.realm.text.IniRealm;
+import org.apache.shiro.subject.Subject;
+import org.apache.shiro.subject.support.SubjectThreadState;
+import org.apache.shiro.util.ThreadContext;
+import org.apache.shiro.util.ThreadState;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
@@ -28,6 +44,9 @@ import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sailing.server.gateway.jaxrs.api.RegattasResource;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.User;
+import com.sap.sse.security.shared.Account;
 
 public class RegattasResourceTest extends AbstractJaxRsApiTest {
     private String boatClassName = "49er";
@@ -55,6 +74,11 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         testSeries.addRaceColumn("R2", /* trackedRegattaRegistry */ null);
     }
 
+    @After
+    public void tearDown() {
+        ThreadContext.remove();
+    }
+
     @Test
     public void testGetRegattas() throws Exception {         
         RegattasResource resource = new RegattasResource();
@@ -76,4 +100,49 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         assertTrue(boatClassName.equals(jsonBoatClass));
     }
 
+    @Test
+    public void testGetRegatta() throws Exception {
+        RegattasResource resource = new RegattasResource();
+        RegattasResource spyResource = spyResource(resource);
+        final String name = RegattaImpl.getDefaultName(regattaName, boatClassName);
+        Response regattaResponse = spyResource.getRegatta(name);
+        String jsonString = (String) regattaResponse.getEntity();
+        assertNotNull(jsonString);
+        String readRegattaName = (String) ((JSONObject) JSONValue.parse(jsonString)).get("name");
+        assertEquals(name, readRegattaName);
+    }
+
+    @Test
+    public void testCompetitorRegistrationByAdmin() throws Exception {
+        Ini ini = new Ini();
+        ini.setSectionProperty("users", "admin", "admin");
+        DefaultSecurityManager securityManager = new DefaultSecurityManager(new IniRealm(ini));
+
+        ThreadContext.bind(securityManager);
+
+        Subject subject = mock(Subject.class);
+        when(subject.isAuthenticated()).thenReturn(true);
+        when(subject.getPrincipal()).thenReturn("admin");
+        ThreadState subjectThreadState = new SubjectThreadState(subject);
+        subjectThreadState.bind();
+
+        RegattasResource resource = new RegattasResource();
+        RegattasResource spyResource = spyResource(resource);
+        SecurityService securityService = mock(SecurityService.class);
+        User user = new User("admin", "noreply@sapsailing.com", new ArrayList<Account>(0));
+        when(securityService.getCurrentUser()).thenReturn(user);
+        doReturn(securityService).when(spyResource).getService(SecurityService.class);
+
+        final String name = RegattaImpl.getDefaultName(regattaName, boatClassName);
+        Response reponse = spyResource.createAndAddCompetitor(name, boatClassName, null, "GER", null, null, null,
+                "Max Mustermann", null, "abcd-abcd-abcd-abcd");
+        assertTrue(reponse.getStatus() + ": " + reponse.getEntity().toString(), reponse.getStatus() == 200);
+        assertTrue(spyResource.getService() == racingEventService);
+
+        Regatta regatta = racingEventService.getRegattaByName(name);
+
+        Iterator<Competitor> cit = regatta.getAllCompetitors().iterator();
+        Competitor readCompetitor = cit.next();
+        assertNotNull(readCompetitor);
+    }
 }
