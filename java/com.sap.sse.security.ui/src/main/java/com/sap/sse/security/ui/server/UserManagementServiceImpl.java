@@ -99,19 +99,19 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public RoleDefinition createRoleDefinition(String roleDefinitionIdAsString, String name) {
-        SecurityUtils.getSubject().checkPermission("role:create:"+roleDefinitionIdAsString);
+        SecurityUtils.getSubject().checkPermission(SecuredSecurityTypes.ROLE_DEFINITION.getStringPermissionForObjects(DefaultActions.CREATE, roleDefinitionIdAsString));
         return getSecurityService().createRoleDefinition(UUID.fromString(roleDefinitionIdAsString), name);
     }
 
     @Override
     public void deleteRoleDefinition(String roleIdAsString) {
-        SecurityUtils.getSubject().checkPermission("role:delete:" + roleIdAsString);
+        SecurityUtils.getSubject().checkPermission(SecuredSecurityTypes.ROLE_DEFINITION.getStringPermissionForObjects(DefaultActions.DELETE, roleIdAsString));
         getSecurityService().deleteRoleDefinition(getSecurityService().getRoleDefinition(UUID.fromString(roleIdAsString)));
     }
 
     @Override
     public void updateRoleDefinition(RoleDefinition roleDefinitionWithNewProperties) {
-        SecurityUtils.getSubject().checkPermission("role:edit:" + roleDefinitionWithNewProperties.getId().toString());
+        SecurityUtils.getSubject().checkPermission(SecuredSecurityTypes.ROLE_DEFINITION.getStringPermissionForObjects(DefaultActions.UPDATE, roleDefinitionWithNewProperties.getId().toString()));
         getSecurityService().updateRoleDefinition(roleDefinitionWithNewProperties);
     }
 
@@ -142,25 +142,24 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public Collection<AccessControlListAnnotation> getAccessControlLists() throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted("access_control:manage")) {
-            List<AccessControlListAnnotation> acls = new ArrayList<>();
-            for (AccessControlListAnnotation acl : getSecurityService().getAccessControlLists()) {
+        List<AccessControlListAnnotation> acls = new ArrayList<>();
+        for (AccessControlListAnnotation acl : getSecurityService().getAccessControlLists()) {
+            if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.ACCESS_CONTROL_LIST.getStringPermissionForObjects(DefaultActions.READ, acl.getIdOfAnnotatedObject().toString()))) {
                 acls.add(securityDTOFactory.createAccessControlListAnnotationDTO(acl));
             }
-            return acls;
-        } else {
-            throw new UnauthorizedException("Not permitted to manage access control");
         }
+        return acls;
     }
 
     @Override
     public AccessControlListAnnotation getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject) {
+        SecurityUtils.getSubject().checkPermission(SecuredSecurityTypes.ACCESS_CONTROL_LIST.getStringPermissionForObjects(DefaultActions.READ, idOfAccessControlledObject.toString()));
         return securityDTOFactory.createAccessControlListAnnotationDTO(getSecurityService().getAccessControlList(idOfAccessControlledObject));
     }
 
     @Override
     public AccessControlList updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, Map<String, Set<String>> permissionStrings) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted("tenant:grant_permission,revoke_permission")) {
+        if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.ACCESS_CONTROL_LIST.getStringPermissionForObjects(DefaultActions.UPDATE, idOfAccessControlledObject.toString()))) {
             Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
             for (String group : permissionStrings.keySet()) {
                 permissionMap.put(getSecurityService().getUserGroupByName(group), permissionStrings.get(group));
@@ -173,7 +172,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public AccessControlList addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String groupIdAsString, String action) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted("tenant:grant_permission:" + groupIdAsString)) {
+        if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.ACCESS_CONTROL_LIST.getStringPermissionForObjects(DefaultActions.UPDATE, idOfAccessControlledObject.toString()))) {
             UserGroup userGroup = getUserGroup(groupIdAsString);
             return securityDTOFactory.createAccessControlListDTO(getSecurityService().addToAccessControlList(idOfAccessControlledObject, userGroup, action));
         } else {
@@ -533,23 +532,23 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             return new SuccessInfo(true, "Set roles " + permissions + " for user " + username, /* redirectURL */null,
                     securityDTOFactory.createUserDTOFromUser(u, getSecurityService()));
         } else {
-            throw new UnauthorizedException("Not permitted to grant or revoke permissions for user");
+            throw new UnauthorizedException("Not permitted to grant or revoke permissions for user "+username);
         }
     }
 
     @Override
     public SuccessInfo deleteUser(String username) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted("user:delete:" + username)) {
-        try {
-            getSecurityService().deleteUser(username);
-            getSecurityService().deleteAccessControlList(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(username));
-            getSecurityService().deleteOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(username));
-            return new SuccessInfo(true, "Deleted user: " + username + ".", /* redirectURL */ null, null);
-        } catch (UserManagementException e) {
-            return new SuccessInfo(false, "Could not delete user.", /* redirectURL */ null, null);
-        }
+        if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER.getStringPermissionForObjects(DefaultActions.DELETE, username))) {
+            try {
+                getSecurityService().deleteUser(username);
+                getSecurityService().deleteAccessControlList(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(username));
+                getSecurityService().deleteOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(username));
+                return new SuccessInfo(true, "Deleted user: " + username + ".", /* redirectURL */ null, null);
+            } catch (UserManagementException e) {
+                return new SuccessInfo(false, "Could not delete user.", /* redirectURL */ null, null);
+            }
         } else {
-            throw new UnauthorizedException("Not permitted to delete user");
+            throw new UnauthorizedException("Not permitted to delete user "+username);
         }
     }
 

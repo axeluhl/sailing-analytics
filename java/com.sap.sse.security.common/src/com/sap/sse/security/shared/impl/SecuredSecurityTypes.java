@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
@@ -33,10 +34,11 @@ public class SecuredSecurityTypes extends HasPermissionsImpl {
         return Collections.unmodifiableSet(allInstances);
     }
 
+    public static enum UserActions implements Action { GRANT_PERMISSION, REVOKE_PERMISSION };
     /**
      * type-relative identifier is the {@link User#getName() username}.
      */
-    public static final HasPermissions USER = new SecuredSecurityTypes("USER");
+    public static final HasPermissions USER = new SecuredSecurityTypes("USER", DefaultActions.plus(UserActions.GRANT_PERMISSION, UserActions.REVOKE_PERMISSION));
 
     /**
      * type-relative identifier is the {@link RoleDefinition#getId() role ID's} string representation
@@ -47,6 +49,12 @@ public class SecuredSecurityTypes extends HasPermissionsImpl {
      * type-relative identifier is the {@link UserGroup#getId() group ID's} string representation
      */
     public static final HasPermissions USER_GROUP = new SecuredSecurityTypes("USER_GROUP");
+
+    /**
+     * type-relative identifier is the string representation of the {@link QualifiedObjectIdentifier} of the object
+     * that the access control list governs access to. 
+     */
+    public static final HasPermissions ACCESS_CONTROL_LIST = new SecuredSecurityTypes("ACCESS_CONTROL_LIST");
 
     public static enum ServerActions implements Action {
         CONFIGURE_FILE_STORAGE,
