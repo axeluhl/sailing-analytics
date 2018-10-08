@@ -287,7 +287,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     SwissTimingEventRecordDTO getRacesOfSwissTimingEvent(String eventJsonURL) throws Exception;
 
-    void storeSwissTimingConfiguration(String configName, String jsonURL, String hostname, Integer port, String updateURL, String updateUsername, String updatePassword);
+    void storeSwissTimingConfiguration(String configName, String jsonURL, String hostname, Integer port,
+            String updateURL, String updateUsername, String updatePassword) throws Exception;
 
     String[] getCountryCodes();
     
@@ -409,7 +410,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     List<SwissTimingArchiveConfigurationDTO> getPreviousSwissTimingArchiveConfigurations();
 
-    void storeSwissTimingArchiveConfiguration(String swissTimingUrl);
+    void storeSwissTimingArchiveConfiguration(String swissTimingUrl) throws Exception;
     
     void createCourseAreas(UUID eventId, String[] courseAreaNames);
     

@@ -1332,9 +1332,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI, String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) throws Exception {
-        tractracMongoObjectFactory.storeTracTracConfiguration(getTracTracAdapter().createTracTracConfiguration(name, jsonURL, liveDataURI, storedDataURI, 
-                courseDesignUpdateURI, tracTracUsername, tracTracPassword));
+    public void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
+            String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) throws Exception {
+        getSecurityService().setDefaultOwnershipAndRevertOnError(
+                SecuredDomainType.TRACTRAC_ACCOUNT.getQualifiedObjectIdentifier(name), () -> {
+                    SecurityUtils.getSubject().checkPermission(SecuredDomainType.TRACTRAC_ACCOUNT
+                            .getStringPermissionForObjects(DefaultActions.CREATE, name));
+                    tractracMongoObjectFactory.storeTracTracConfiguration(
+                            getTracTracAdapter().createTracTracConfiguration(name, jsonURL, liveDataURI, storedDataURI,
+                                    courseDesignUpdateURI, tracTracUsername, tracTracPassword));
+                });
     }
 
     private RaceDefinition getRaceByName(Regatta regatta, String raceName) {
@@ -2901,9 +2908,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void storeSwissTimingConfiguration(String configName, String jsonURL, String hostname, Integer port, String updateURL, String updateUsername, String updatePassword) {
+    public void storeSwissTimingConfiguration(String configName, String jsonURL, String hostname, Integer port,
+            String updateURL, String updateUsername, String updatePassword) throws Exception {
         if (!jsonURL.equalsIgnoreCase("test")) {
-            swissTimingAdapterPersistence.storeSwissTimingConfiguration(swissTimingFactory.createSwissTimingConfiguration(configName, jsonURL, hostname, port, updateURL, updateUsername, updatePassword));
+            getSecurityService().setDefaultOwnershipAndRevertOnError(
+                    SecuredDomainType.SWISS_TIMING_ACCOUNT.getQualifiedObjectIdentifier(configName), () -> {
+                        SecurityUtils.getSubject().checkPermission(SecuredDomainType.SWISS_TIMING_ACCOUNT
+                                .getStringPermissionForObjects(DefaultActions.CREATE, configName));
+                        swissTimingAdapterPersistence.storeSwissTimingConfiguration(
+                                swissTimingFactory.createSwissTimingConfiguration(configName, jsonURL, hostname, port,
+                                        updateURL, updateUsername, updatePassword));
+                    });
         }
     }
     
@@ -4679,9 +4694,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void storeSwissTimingArchiveConfiguration(String swissTimingJsonUrl) {
-        swissTimingAdapterPersistence.storeSwissTimingArchiveConfiguration(swissTimingFactory.createSwissTimingArchiveConfiguration(
-                swissTimingJsonUrl));
+    public void storeSwissTimingArchiveConfiguration(String swissTimingJsonUrl) throws Exception {
+        getSecurityService().setDefaultOwnershipAndRevertOnError(
+                SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT.getQualifiedObjectIdentifier(swissTimingJsonUrl), () -> {
+                    SecurityUtils.getSubject().checkPermission(SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT
+                            .getStringPermissionForObjects(DefaultActions.CREATE, swissTimingJsonUrl));
+                    swissTimingAdapterPersistence.storeSwissTimingArchiveConfiguration(swissTimingFactory.createSwissTimingArchiveConfiguration(
+                            swissTimingJsonUrl));
+                });
     }
 
     protected com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory() {
