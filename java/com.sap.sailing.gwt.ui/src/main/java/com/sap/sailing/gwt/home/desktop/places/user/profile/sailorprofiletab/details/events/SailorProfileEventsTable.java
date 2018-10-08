@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.events;
 
+import java.util.Arrays;
+import java.util.HashSet;
+
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.NumberCell;
@@ -71,7 +74,8 @@ public class SailorProfileEventsTable extends Composite {
     }
 
     private RegattaLeaderboardPlace getTargetPlace(ParticipatedRegattaDTO entry) {
-        return new RegattaLeaderboardPlace(entry.getEventId(), entry.getRegattaId());
+        return new RegattaLeaderboardPlace(entry.getEventId(), entry.getRegattaId(),
+                new HashSet<>(Arrays.asList(entry.getCompetitorDto().getIdAsString())));
     }
 
     private final Column<ParticipatedRegattaDTO, String> regattaNameColumn = new Column<ParticipatedRegattaDTO, String>(
