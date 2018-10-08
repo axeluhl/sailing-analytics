@@ -27,8 +27,7 @@ import com.sap.sse.security.shared.QualifiedObjectIdentifier;
  * @author Axel Uhl (d043530)
  *
  */
-public interface Regatta
-        extends NamedWithID, IsRegattaLike, HasRaceColumnsAndRegattaLike, WithQualifiedObjectIdentifier {
+public interface Regatta extends NamedWithID, IsRegattaLike, HasRaceColumnsAndRegattaLike {
 
     /**
      * As taken from the Racing Rules of Sailing:

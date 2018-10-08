@@ -95,7 +95,6 @@ import com.sap.sailing.domain.base.SailingServerConfiguration;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.Sideline;
 import com.sap.sailing.domain.base.Waypoint;
-import com.sap.sailing.domain.base.WithQualifiedObjectIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationIdentifier;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
@@ -135,6 +134,7 @@ import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
@@ -290,6 +290,7 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.util.ClearStateTestSupport;
@@ -914,16 +915,49 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     private void ensureOwnerships(SecurityService securityService) {
-        for (Event event : eventsById.values()) {
-            migrateOwnership(event, securityService);
+        for (Event event : getAllEvents()) {
+            QualifiedObjectIdentifier eventObjectIdentifier = SecuredDomainType.EVENT
+                    .getQualifiedObjectIdentifier(event.getId().toString());
+            migrateOwnership(eventObjectIdentifier, event.getName(), securityService);
         }
-        for (Regatta event : regattasByName.values()) {
-            migrateOwnership(event, securityService);
+        WildcardPermissionEncoder wildcardPermissionEncoder = new WildcardPermissionEncoder();
+        for (Regatta regatta : getAllRegattas()) {
+            QualifiedObjectIdentifier regattaObjectIdentifier = SecuredDomainType.REGATTA
+                    .getQualifiedObjectIdentifier(regatta.getName());
+            migrateOwnership(regattaObjectIdentifier, regatta.getName(), securityService);
+            DynamicTrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
+            if (trackedRegatta != null) {
+                for (DynamicTrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
+                    RegattaAndRaceIdentifier regattaAndRaceId = trackedRace.getRaceIdentifier();
+                    QualifiedObjectIdentifier trackedRaceObjectIdentifier = SecuredDomainType.TRACKED_RACE
+                            .getQualifiedObjectIdentifier(wildcardPermissionEncoder.encodeStringList(
+                                    regattaAndRaceId.getRegattaName(), regattaAndRaceId.getRaceName()));
+                    migrateOwnership(trackedRaceObjectIdentifier,
+                            regattaAndRaceId.getRegattaName() + "_" + regattaAndRaceId.getRaceName(),
+                            securityService);
+                }
+            }
+        }
+        for (Leaderboard leaderboard : getLeaderboards().values()) {
+            QualifiedObjectIdentifier leaderboardObjectIdentifier = SecuredDomainType.LEADERBOARD
+                    .getQualifiedObjectIdentifier(leaderboard.getName());
+            migrateOwnership(leaderboardObjectIdentifier, leaderboard.getDisplayName(),
+                    securityService);
+        }
+        for (LeaderboardGroup leaderboardGroup : getLeaderboardGroups().values()) {
+            QualifiedObjectIdentifier leaderboardGroupObjectIdentifier = SecuredDomainType.LEADERBOARD_GROUP
+                    .getQualifiedObjectIdentifier(leaderboardGroup.getId().toString());
+            migrateOwnership(leaderboardGroupObjectIdentifier, leaderboardGroup.getDisplayName(),
+                    securityService);
+        }
+        for (MediaTrack mediaTrack : getAllMediaTracks()) {
+            migrateOwnership(SecuredDomainType.MEDIA_TRACK.getQualifiedObjectIdentifier(mediaTrack.dbId),
+                    mediaTrack.title, securityService);
         }
     }
 
-    private void migrateOwnership(WithQualifiedObjectIdentifier objectToMigrate, SecurityService securityService) {
-        QualifiedObjectIdentifier identifier = objectToMigrate.getQualifiedObjectIdentifier();
+    private void migrateOwnership(QualifiedObjectIdentifier identifier, String displayName,
+            SecurityService securityService) {
         OwnershipAnnotation owner = securityService.getOwnership(identifier);
         UserGroup defaultTenant = securityService.getDefaultTenant();
         // fix unowned objects, also fix wrongly converted objects due to older codebase that could not handle null
@@ -933,7 +967,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             logger.info(
                     "Permission-Vertical Migration: Setting ownership for: " + identifier + " to default tenant: "
                             + defaultTenant);
-            securityService.setOwnership(identifier, null, defaultTenant, objectToMigrate.getSecurityDisplayName());
+            securityService.setOwnership(identifier, null, defaultTenant, displayName);
         }
     }
 
