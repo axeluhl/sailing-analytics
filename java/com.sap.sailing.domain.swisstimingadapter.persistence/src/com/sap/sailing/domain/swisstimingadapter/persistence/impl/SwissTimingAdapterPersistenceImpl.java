@@ -114,7 +114,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         // remove old, non working index
         dropIndexSafe(stArchiveConfigCollection, "SWISSTIMING_ARCHIVE_CONFIGURATIONS_1");
         // adding unique index by json url
-        stArchiveConfigCollection.createIndex(new BasicDBObject(FieldNames.ST_ARCHIVE_JSON_URL.name(), 1), "st_config_name_unique",
+        stArchiveConfigCollection.createIndex(new BasicDBObject(FieldNames.ST_ARCHIVE_JSON_URL.name(), 1), "st_archive_config_name_unique",
                 true);
         
         BasicDBObject result = new BasicDBObject();
