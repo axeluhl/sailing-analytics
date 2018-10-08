@@ -570,8 +570,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * @param trackedRaceStatisticsCache
      *            a cache that gives access to detailed statistics about TrackedRaces. If <code>null</code>, no detailed
      *            statistics about TrackedRaces will be calculated.
-     * @param securityServiceTracker
      * @param securityServiceAvailable
+     *            will complete as soon as the securityServiceTracker is able to provide a SecurityService, NEVER hold a
+     *            reference to the result of this, as it might become invalid if bundles are replaced/ restarted
      */
     public RacingEventServiceImpl(boolean clearPersistentCompetitorAndBoatStore,
             final TypeBasedServiceFinderFactory serviceFinderFactory, TrackedRegattaListenerManager trackedRegattaListener,
@@ -929,15 +930,15 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             if (trackedRegatta != null) {
                 trackedRegatta.lockTrackedRacesForRead();
                 try {
-                for (DynamicTrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
-                    RegattaAndRaceIdentifier regattaAndRaceId = trackedRace.getRaceIdentifier();
-                    QualifiedObjectIdentifier trackedRaceObjectIdentifier = SecuredDomainType.TRACKED_RACE
-                            .getQualifiedObjectIdentifier(wildcardPermissionEncoder.encodeStringList(
-                                    regattaAndRaceId.getRegattaName(), regattaAndRaceId.getRaceName()));
-                    migrateOwnership(trackedRaceObjectIdentifier,
-                            regattaAndRaceId.getRegattaName() + "_" + regattaAndRaceId.getRaceName(),
-                            securityService);
-                }
+                    for (DynamicTrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
+                        RegattaAndRaceIdentifier regattaAndRaceId = trackedRace.getRaceIdentifier();
+                        QualifiedObjectIdentifier trackedRaceObjectIdentifier = SecuredDomainType.TRACKED_RACE
+                                .getQualifiedObjectIdentifier(wildcardPermissionEncoder.encodeStringList(
+                                        regattaAndRaceId.getRegattaName(), regattaAndRaceId.getRaceName()));
+                        migrateOwnership(trackedRaceObjectIdentifier,
+                                regattaAndRaceId.getRegattaName() + "_" + regattaAndRaceId.getRaceName(),
+                                securityService);
+                    }
                 } finally {
                     trackedRegatta.unlockTrackedRacesAfterRead();
                 }
@@ -946,14 +947,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         for (Leaderboard leaderboard : getLeaderboards().values()) {
             QualifiedObjectIdentifier leaderboardObjectIdentifier = SecuredDomainType.LEADERBOARD
                     .getQualifiedObjectIdentifier(leaderboard.getName());
-            migrateOwnership(leaderboardObjectIdentifier, leaderboard.getDisplayName(),
-                    securityService);
+            migrateOwnership(leaderboardObjectIdentifier, leaderboard.getDisplayName(), securityService);
         }
         for (LeaderboardGroup leaderboardGroup : getLeaderboardGroups().values()) {
             QualifiedObjectIdentifier leaderboardGroupObjectIdentifier = SecuredDomainType.LEADERBOARD_GROUP
                     .getQualifiedObjectIdentifier(leaderboardGroup.getId().toString());
-            migrateOwnership(leaderboardGroupObjectIdentifier, leaderboardGroup.getDisplayName(),
-                    securityService);
+            migrateOwnership(leaderboardGroupObjectIdentifier, leaderboardGroup.getDisplayName(), securityService);
         }
         for (MediaTrack mediaTrack : getAllMediaTracks()) {
             migrateOwnership(SecuredDomainType.MEDIA_TRACK.getQualifiedObjectIdentifier(mediaTrack.dbId),
@@ -969,9 +968,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         // users correctly
         if (owner == null
                 || owner.getAnnotation().getTenantOwner() == null && owner.getAnnotation().getUserOwner() == null) {
-            logger.info(
-                    "Permission-Vertical Migration: Setting ownership for: " + identifier + " to default tenant: "
-                            + defaultTenant);
+            logger.info("Permission-Vertical Migration: Setting ownership for: " + identifier + " to default tenant: "
+                    + defaultTenant);
             securityService.setOwnership(identifier, null, defaultTenant, displayName);
         }
     }
