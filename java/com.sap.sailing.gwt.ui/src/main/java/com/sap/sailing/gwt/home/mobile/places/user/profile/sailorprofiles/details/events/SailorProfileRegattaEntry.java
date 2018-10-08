@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.details.events;
 
+import java.util.Arrays;
+import java.util.HashSet;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -46,7 +49,7 @@ public class SailorProfileRegattaEntry extends Composite {
     @UiField
     HTMLPanel contentContainerRegattasUi;
 
-    private final String eventId, regattaId;
+    private final String eventId, regattaId, competitorId;
 
     private final PlaceController placeController;
 
@@ -57,6 +60,7 @@ public class SailorProfileRegattaEntry extends Composite {
         this.placeController = placeController;
         this.regattaId = regatta.getRegattaId();
         this.eventId = regatta.getEventId();
+        this.competitorId = regatta.getCompetitorDto().getIdAsString();
         this.regattaNameUi.setInnerText(regatta.getRegattaName());
         this.regattaRankUi.setInnerText("Rank " + regatta.getRegattaRank());
         CompetitorWithoutClubnameItemDescription competitorDescription = new CompetitorWithoutClubnameItemDescription(
@@ -70,7 +74,8 @@ public class SailorProfileRegattaEntry extends Composite {
 
     @UiHandler("showLeaderboardButtonUi")
     void onClick(ClickEvent e) {
-        placeController.goTo(new RegattaLeaderboardPlace(eventId, regattaId));
+        placeController
+                .goTo(new RegattaLeaderboardPlace(eventId, regattaId, new HashSet<>(Arrays.asList(competitorId))));
     }
 
 }
