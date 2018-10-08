@@ -23,6 +23,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
@@ -157,6 +158,49 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         Iterator<Competitor> cit = regatta.getAllCompetitors().iterator();
         Competitor readCompetitor = cit.next();
         assertNotNull(readCompetitor);
+
+        // should have one device registration event of type RegattaLogDeviceCompetitorMappingEventImpl...
+        assertTrue(regatta.getRegattaLog().getUnrevokedEvents().stream()
+                .filter(e -> e instanceof RegattaLogDeviceCompetitorMappingEventImpl).count() == 1);
+        // ..with requested device id
+        assertEquals("0000abcd-abcd-abcd-abcd-00000000abcd", ((RegattaLogDeviceCompetitorMappingEventImpl) regatta
+                .getRegattaLog().getUnrevokedEvents().iterator().next()).getDevice().getStringRepresentation());
+
+    }
+
+    @Test
+    public void testCompetitorRegistrationAuthenticatedOnOpenRegatta() throws Exception {
+        setUpSecurityManager();
+        ThreadState subjectThreadState = setUpSubject("testuser");
+
+        RegattasResource resource = new RegattasResource();
+        RegattasResource spyResource = spyResource(resource);
+        doReturn(securityService).when(spyResource).getService(SecurityService.class);
+
+        User user = new User("admin", "noreply@sapsailing.com", new ArrayList<Account>(0));
+        when(securityService.getCurrentUser()).thenReturn(user);
+
+        final String name = RegattaImpl.getDefaultName(openRegattaName, boatClassName);
+        Regatta regatta = racingEventService.getRegattaByName(name);
+
+        Response reponse = spyResource.createAndAddCompetitor(name, boatClassName, null, "GER", null, null, null,
+                "Max Mustermann", null, "abcd-abcd-abcd-abcd-abcd");
+        assertTrue(reponse.getStatus() + ": " + reponse.getEntity().toString(), reponse.getStatus() == 200);
+        assertTrue(spyResource.getService() == racingEventService);
+
+        regatta = racingEventService.getRegattaByName(name);
+        Iterator<Competitor> cit = regatta.getAllCompetitors().iterator();
+        Competitor readCompetitor = cit.next();
+        assertNotNull(readCompetitor);
+
+        // should have one device registration event of type RegattaLogDeviceCompetitorMappingEventImpl...
+        assertTrue(regatta.getRegattaLog().getUnrevokedEvents().stream()
+                .filter(e -> e instanceof RegattaLogDeviceCompetitorMappingEventImpl).count() == 1);
+        // ..with requested device if
+        assertEquals("0000abcd-abcd-abcd-abcd-00000000abcd", ((RegattaLogDeviceCompetitorMappingEventImpl) regatta
+                .getRegattaLog().getUnrevokedEvents().iterator().next()).getDevice().getStringRepresentation());
+
+        subjectThreadState.clear();
     }
 
 }
