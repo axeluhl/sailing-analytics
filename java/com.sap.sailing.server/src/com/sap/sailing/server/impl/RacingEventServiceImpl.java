@@ -927,6 +927,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             migrateOwnership(regattaObjectIdentifier, regatta.getName(), securityService);
             DynamicTrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
             if (trackedRegatta != null) {
+                trackedRegatta.lockTrackedRacesForRead();
+                try {
                 for (DynamicTrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
                     RegattaAndRaceIdentifier regattaAndRaceId = trackedRace.getRaceIdentifier();
                     QualifiedObjectIdentifier trackedRaceObjectIdentifier = SecuredDomainType.TRACKED_RACE
@@ -935,6 +937,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     migrateOwnership(trackedRaceObjectIdentifier,
                             regattaAndRaceId.getRegattaName() + "_" + regattaAndRaceId.getRaceName(),
                             securityService);
+                }
+                } finally {
+                    trackedRegatta.unlockTrackedRacesAfterRead();
                 }
             }
         }
