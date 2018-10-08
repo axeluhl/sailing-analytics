@@ -2679,6 +2679,11 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         competitorSelectionProvider.setCompetitors(leaderboard.competitors, /* listenersNotToNotify */this);
     }
     
+    /** updates the selected competitors in the competitorSelectionProvider */
+    public void setSelection(Iterable<CompetitorDTO> newSelection) {
+        competitorSelectionProvider.setSelection(newSelection);
+    }
+
     /**
      * Due to a course change, a race may change its number of legs. All expanded race columns that show leg columns and
      * whose leg count changed need to be collapsed before the leaderboard is replaced, and expanded afterwards again.

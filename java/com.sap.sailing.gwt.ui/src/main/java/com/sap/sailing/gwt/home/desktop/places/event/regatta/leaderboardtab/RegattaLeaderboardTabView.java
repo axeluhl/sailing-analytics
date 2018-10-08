@@ -1,5 +1,9 @@
 package com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.UUID;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -14,6 +18,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RaceIdentifier;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
@@ -33,6 +38,7 @@ import com.sap.sailing.gwt.home.shared.refresh.RefreshManager;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshManagerWithErrorAndBusy;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
+import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateProvider;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
@@ -119,6 +125,38 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
                     if (leaderboardPanel.getLeaderboard() != null) {
                         leaderboard.updatedLeaderboard(leaderboardPanel.getLeaderboard());
                     }
+
+                    // select competitors from URL arguments
+                    leaderboardPanel.addLeaderboardUpdateListener(new LeaderboardUpdateListener() {
+                        @Override
+                        public void updatedLeaderboard(LeaderboardDTO leaderboard) {
+                            if (!myPlace.getSelectedCompetitors().isEmpty()) {
+                                Collection<CompetitorDTO> newSelection = new ArrayList<>();
+                                for (String selectedCompetitorId : myPlace.getSelectedCompetitors()) {
+                                    try {
+                                        UUID uuid = UUID.fromString(selectedCompetitorId);
+                                        for (CompetitorDTO competitor : leaderboard.competitors) {
+                                            if (selectedCompetitorId.equals(competitor.getIdAsString())) {
+                                                newSelection.add(competitor);
+                                                break;
+                                            }
+                                        }
+                                        //
+                                    } catch (IllegalArgumentException e) {
+                                        GWT.log(e.getMessage());
+                                    }
+                                }
+                                leaderboardPanel.setSelection(newSelection);
+                                if(!newSelection.isEmpty()) {
+                                    leaderboardPanel.removeLeaderboardUpdateListener(this);
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void currentRaceSelected(RaceIdentifier raceIdentifier, RaceColumnDTO raceColumn) {
+                        }
+                    });
                 }
             };
             if (leaderboardPanel == null) {
