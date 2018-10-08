@@ -45,6 +45,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.RunnableFuture;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -582,6 +583,7 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
@@ -1321,14 +1323,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public List<TracTracConfigurationDTO> getPreviousTracTracConfigurations() throws Exception {
-        Iterable<TracTracConfiguration> configs = tractracDomainObjectFactory.getTracTracConfigurations();
-        List<TracTracConfigurationDTO> result = new ArrayList<TracTracConfigurationDTO>();
-        for (TracTracConfiguration ttConfig : configs) {
-            result.add(new TracTracConfigurationDTO(ttConfig.getName(), ttConfig.getJSONURL().toString(),
-                    ttConfig.getLiveDataURI().toString(), ttConfig.getStoredDataURI().toString(), ttConfig.getCourseDesignUpdateURI().toString(),
-                    ttConfig.getTracTracUsername().toString(), ttConfig.getTracTracPassword().toString()));
-        }
-        return result;
+        final Iterable<TracTracConfiguration> configs = tractracDomainObjectFactory.getTracTracConfigurations();
+        return mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.TRACTRAC_ACCOUNT, DefaultActions.READ, configs,
+                TracTracConfiguration::getName,
+                ttConfig -> new TracTracConfigurationDTO(ttConfig.getName(), ttConfig.getJSONURL().toString(),
+                        ttConfig.getLiveDataURI().toString(), ttConfig.getStoredDataURI().toString(),
+                        ttConfig.getCourseDesignUpdateURI().toString(), ttConfig.getTracTracUsername().toString(),
+                        ttConfig.getTracTracPassword().toString()));
     }
 
     @Override
@@ -2866,13 +2867,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public List<SwissTimingConfigurationDTO> getPreviousSwissTimingConfigurations() {
         Iterable<SwissTimingConfiguration> configs = swissTimingAdapterPersistence.getSwissTimingConfigurations();
-        List<SwissTimingConfigurationDTO> result = new ArrayList<SwissTimingConfigurationDTO>();
-        for (SwissTimingConfiguration stConfig : configs) {
-            result.add(new SwissTimingConfigurationDTO(stConfig.getName(), stConfig.getJsonURL(),
-                    stConfig.getHostname(), stConfig.getPort(), stConfig.getUpdateURL(), stConfig.getUpdateUsername(),
-                    stConfig.getUpdatePassword()));
-        }
-        return result;
+        return mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.SWISS_TIMING_ACCOUNT, DefaultActions.READ, configs,
+                SwissTimingConfiguration::getName,
+                stConfig -> new SwissTimingConfigurationDTO(stConfig.getName(), stConfig.getJsonURL(),
+                        stConfig.getHostname(), stConfig.getPort(), stConfig.getUpdateURL(),
+                        stConfig.getUpdateUsername(), stConfig.getUpdatePassword()));
     }
 
     @Override
@@ -4682,15 +4681,33 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return result;
     }
+    
+    private <T> void filterObjectsWithReadPermissionForCurrentUser(HasPermissions permittedObject,
+            HasPermissions.Action action, Iterable<T> objectsToFilter, Function<T, String> objectIdExtractor,
+            Consumer<T> filteredObjectsConsumer) {
+        objectsToFilter.forEach(objectToCheck -> {
+            if (SecurityUtils.getSubject().isPermitted(
+                    permittedObject.getStringPermissionForObjects(action, objectIdExtractor.apply(objectToCheck)))) {
+                filteredObjectsConsumer.accept(objectToCheck);
+            }
+        });
+    }
+    
+    private <T, R> List<R> mapAndFilterByReadPermissionForCurrentUser(HasPermissions permittedObject, HasPermissions.Action action,
+            Iterable<T> objectsToFilter, Function<T, String> objectIdExtractor, Function<T, R> filteredObjectsMapper) {
+        final List<R> result = new ArrayList<>();
+        filterObjectsWithReadPermissionForCurrentUser(permittedObject, action, objectsToFilter, objectIdExtractor,
+                filteredObject -> result.add(filteredObjectsMapper.apply(filteredObject)));
+        return result;
+    }
 
     @Override
     public List<SwissTimingArchiveConfigurationDTO> getPreviousSwissTimingArchiveConfigurations() {
-        Iterable<SwissTimingArchiveConfiguration> configs = swissTimingAdapterPersistence.getSwissTimingArchiveConfigurations();
-        List<SwissTimingArchiveConfigurationDTO> result = new ArrayList<SwissTimingArchiveConfigurationDTO>();
-        for (SwissTimingArchiveConfiguration stArchiveConfig : configs) {
-            result.add(new SwissTimingArchiveConfigurationDTO(stArchiveConfig.getJsonUrl()));
-        }
-        return result;
+        Iterable<SwissTimingArchiveConfiguration> configs = swissTimingAdapterPersistence
+                .getSwissTimingArchiveConfigurations();
+        return mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT, DefaultActions.READ, configs,
+                SwissTimingArchiveConfiguration::getJsonUrl,
+                stArchiveConfig -> new SwissTimingArchiveConfigurationDTO(stArchiveConfig.getJsonUrl()));
     }
 
     @Override
