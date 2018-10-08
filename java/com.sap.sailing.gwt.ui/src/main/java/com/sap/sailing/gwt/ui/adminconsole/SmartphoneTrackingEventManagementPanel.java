@@ -74,6 +74,7 @@ import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Allows the user to start and stop tracking of races using the RaceLog-tracking connector.
@@ -87,10 +88,10 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
     protected boolean regattaHasCompetitors = false; 
     private Map<Triple<String, String, String>, Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>> raceWithStartAndEndOfTrackingTime = new HashMap<>();
     
-    public SmartphoneTrackingEventManagementPanel(SailingServiceAsync sailingService,
+    public SmartphoneTrackingEventManagementPanel(SailingServiceAsync sailingService, UserService userService,
             RegattaRefresher regattaRefresher, LeaderboardsRefresher leaderboardsRefresher,
             ErrorReporter errorReporter, StringMessages stringMessages) {
-        super(sailingService, regattaRefresher, leaderboardsRefresher, errorReporter,
+        super(sailingService, userService, regattaRefresher, leaderboardsRefresher, errorReporter,
                 stringMessages, /* multiSelection */ true);
         // add upload panel
         CaptionPanel importPanel = new CaptionPanel(stringMessages.importFixes());
@@ -124,7 +125,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
     }
     
     @Override
-    protected void addColumnsToLeaderboardTableAndSetSelectionModel(FlushableCellTable<StrippedLeaderboardDTO> leaderboardTable, 
+    protected void addColumnsToLeaderboardTableAndSetSelectionModel(UserService userService, FlushableCellTable<StrippedLeaderboardDTO> leaderboardTable, 
             AdminConsoleTableResources tableResources, ListDataProvider<StrippedLeaderboardDTO> listDataProvider) {
         ListHandler<StrippedLeaderboardDTO> leaderboardColumnListHandler = new ListHandler<StrippedLeaderboardDTO>(
                 filteredLeaderboardList.getList());

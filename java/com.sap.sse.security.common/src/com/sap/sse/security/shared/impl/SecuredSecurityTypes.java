@@ -55,4 +55,17 @@ public class SecuredSecurityTypes extends HasPermissionsImpl {
      * that the access control list governs access to. 
      */
     public static final HasPermissions ACCESS_CONTROL_LIST = new SecuredSecurityTypes("ACCESS_CONTROL_LIST");
+
+    public static enum ServerActions implements Action {
+        CONFIGURE_FILE_STORAGE,
+        CONFIGURE_LOCAL_SERVER,
+        CONFIGURE_REMOTE_INSTANCES,
+        IMPORT_MASTER_DATA
+    }
+
+    /**
+     * represents the logical server which may consist of a master and multiple replicas and has a unique server name;
+     * type-relative identifier is the server name
+     */
+    public static final HasPermissions SERVER = new SecuredSecurityTypes("SERVER", ServerActions.values());
 }

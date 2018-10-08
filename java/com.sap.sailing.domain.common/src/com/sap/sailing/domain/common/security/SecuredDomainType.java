@@ -105,12 +105,4 @@ public class SecuredDomainType extends HasPermissionsImpl {
      * type-relative identifier is the device configuration name
      */
     public static final HasPermissions RACE_MANAGER_APP_DEVICE_CONFIGURATION = new SecuredDomainType("RACE_MANAGER_APP_DEVICE_CONFIGURATION");
-    
-    public static enum ServerActions implements Action { CONFIGURE_FILE_STORAGE, CONFIGURE_LOCAL_SERVER, CONFIGURE_REMOTE_INSTANCES, IMPORT_MASTER_DATA }
-    
-    /**
-     * represents the logical server which may consist of a master and multiple replicas and has a unique server name;
-     * type-relative identifier is the server name
-     */
-    public static final HasPermissions SERVER = new SecuredDomainType("SERVER", ServerActions.values()); 
 }

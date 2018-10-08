@@ -125,7 +125,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         /* LEADERBOARDS */
         
         final HorizontalTabLayoutPanel leaderboardTabPanel = panel.addVerticalTab(getStringMessages().leaderboards(), "LeaderboardPanel");
-        final LeaderboardConfigPanel leaderboardConfigPanel = new LeaderboardConfigPanel(getSailingService(), this, this,
+        final LeaderboardConfigPanel leaderboardConfigPanel = new LeaderboardConfigPanel(getSailingService(), getUserService(), this, this,
                 getStringMessages(), /* showRaceDetails */true, this);
         leaderboardConfigPanel.ensureDebugId("LeaderboardConfiguration");
         panel.addToTabPanel(leaderboardTabPanel, new DefaultRefreshableAdminConsolePanel<LeaderboardConfigPanel>(leaderboardConfigPanel) {
@@ -241,7 +241,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         regattasDisplayers.add(swisstimingEventManagementPanel);
 
         final SmartphoneTrackingEventManagementPanel raceLogTrackingEventManagementPanel = new SmartphoneTrackingEventManagementPanel(
-                getSailingService(), this, this, this, getStringMessages());
+                getSailingService(), getUserService(), this, this, this, getStringMessages());
         raceLogTrackingEventManagementPanel.ensureDebugId("SmartphoneTrackingPanel");
         panel.addToTabPanel(connectorsTabPanel, new DefaultRefreshableAdminConsolePanel<SmartphoneTrackingEventManagementPanel>(raceLogTrackingEventManagementPanel) {
             @Override
@@ -294,18 +294,20 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
                 this, eventManagementPanel, this, this, mediaPanel);
         masterDataImportPanel.ensureDebugId("MasterDataImport");
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<MasterDataImportPanel>(masterDataImportPanel),
-                getStringMessages().masterDataImportPanel(), SecuredDomainType.SERVER.getPermissionForObjects(
-                        SecuredDomainType.ServerActions.IMPORT_MASTER_DATA, serverInfo.getServerName()));
+                getStringMessages().masterDataImportPanel(), SecuredSecurityTypes.SERVER.getPermissionForObjects(
+                        SecuredSecurityTypes.ServerActions.IMPORT_MASTER_DATA, serverInfo.getServerName()));
 
         RemoteServerInstancesManagementPanel remoteServerInstancesManagementPanel = new RemoteServerInstancesManagementPanel(getSailingService(), this, getStringMessages());
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<RemoteServerInstancesManagementPanel>(remoteServerInstancesManagementPanel),
                 getStringMessages().remoteServerInstances(),
-                SecuredDomainType.SERVER.getPermissionForObjects(SecuredDomainType.ServerActions.CONFIGURE_LOCAL_SERVER, serverInfo.getServerName()));
+                SecuredSecurityTypes.SERVER.getPermissionForObjects(
+                        SecuredSecurityTypes.ServerActions.CONFIGURE_LOCAL_SERVER, serverInfo.getServerName()));
 
         LocalServerManagementPanel localServerInstancesManagementPanel = new LocalServerManagementPanel(getSailingService(), this, getStringMessages());
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<LocalServerManagementPanel>(localServerInstancesManagementPanel),
                 getStringMessages().localServer(),
-                SecuredDomainType.SERVER.getPermissionForObjects(SecuredDomainType.ServerActions.CONFIGURE_LOCAL_SERVER, serverInfo.getServerName()));
+                SecuredSecurityTypes.SERVER.getPermissionForObjects(
+                        SecuredSecurityTypes.ServerActions.CONFIGURE_LOCAL_SERVER, serverInfo.getServerName()));
 
         final Set<HasPermissions> allSecuredTypes = new HashSet<>();
         Util.addAll(SecuredDomainType.getAllInstances(), allSecuredTypes);
@@ -341,8 +343,8 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
 
         final FileStoragePanel fileStoragePanel = new FileStoragePanel(getSailingService(), this);
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<FileStoragePanel>(fileStoragePanel),
-                getStringMessages().fileStorage(), SecuredDomainType.SERVER.getPermissionForObjects(
-                        SecuredDomainType.ServerActions.CONFIGURE_FILE_STORAGE, serverInfo.getServerName()));
+                getStringMessages().fileStorage(), SecuredSecurityTypes.SERVER.getPermissionForObjects(
+                        SecuredSecurityTypes.ServerActions.CONFIGURE_FILE_STORAGE, serverInfo.getServerName()));
         panel.initUI();
         fillRegattas();
         fillLeaderboardGroups();
