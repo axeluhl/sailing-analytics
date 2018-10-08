@@ -132,10 +132,10 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     
     /**
      * This map contains the last maneuver for each deviceId that was sent back. It is used to efficiently piggyback a
-     * notification about new possible maneuvers into the response to adding a gpsfix for smartphone tracking. This
+     * notification about new possible maneuvers into the response to adding a GPS fix for smart phone tracking. This
      * allows the client to not require any additional polling for maneuver retrieval. The map is never cleared, as it
-     * will not take a lot of memory itself, and will not grow further after each smartphone device pushed at least one
-     * gpsfix
+     * will not take a lot of memory itself, and will not grow further after each smart phone device pushed at least one
+     * GPS fix.
      */
     private final ConcurrentHashMap<UUID, Maneuver> lastNotifiedManeuverCache = new ConcurrentHashMap<>();
 
