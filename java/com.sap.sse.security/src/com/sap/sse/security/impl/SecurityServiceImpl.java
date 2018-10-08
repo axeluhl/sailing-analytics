@@ -74,6 +74,8 @@ import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.security.AccessControlStore;
+import com.sap.sse.security.Action;
+import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.BearerAuthenticationToken;
 import com.sap.sse.security.ClientUtils;
 import com.sap.sse.security.Credential;
@@ -107,8 +109,8 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UserRole;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.OwnershipImpl;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.util.ClearStateTestSupport;
 
 public class SecurityServiceImpl implements ReplicableSecurityService, ClearStateTestSupport {
@@ -457,6 +459,25 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         final String userOwnerName = userOwner == null ? null : userOwner.getName();
         return apply(s->s.internalSetOwnership(idOfOwnedObjectAsString, userOwnerName, tenantId, displayNameOfOwnedObject));
+    }
+    
+    @Override
+    public void setDefaultOwnershipAndRevertOnError(QualifiedObjectIdentifier objectIdentifier, Action action) throws Exception {
+        setDefaultOwnershipAndRevertOnError(objectIdentifier, () -> {
+            action.run();
+            return null;
+        });
+    }
+    
+    @Override
+    public <T> T setDefaultOwnershipAndRevertOnError(QualifiedObjectIdentifier objectIdentifier, ActionWithResult<T> action) throws Exception {
+        this.setOwnership(this.createDefaultOwnershipForNewObject(objectIdentifier));
+        try {
+            return action.run();
+        } catch (Exception e) {
+            this.deleteOwnership(objectIdentifier); // revert preliminary ownership allocation
+            throw e;
+        }
     }
 
     @Override

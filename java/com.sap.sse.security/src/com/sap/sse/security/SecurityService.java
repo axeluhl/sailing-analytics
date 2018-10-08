@@ -319,4 +319,10 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * Returns the default tenant of the underlying {@link UserStore#getDefaultTenant()}
      */
     UserGroup getDefaultTenant();
+
+    void setDefaultOwnershipAndRevertOnError(QualifiedObjectIdentifier objectIdentifier, Action action)
+            throws Exception;
+
+    <T> T setDefaultOwnershipAndRevertOnError(QualifiedObjectIdentifier objectIdentifier, ActionWithResult<T> action)
+            throws Exception;
 }

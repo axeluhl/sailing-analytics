@@ -5763,15 +5763,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final Account account;
         if (existingAccount == null) {
             final QualifiedObjectIdentifier igtimiAccountId = SecuredDomainType.IGTIMI_ACCOUNT.getQualifiedObjectIdentifier(eMailAddress);
-            getSecurityService().setOwnership(getSecurityService().createDefaultOwnershipForNewObject(igtimiAccountId));
-            try {
+            account = getSecurityService().setDefaultOwnershipAndRevertOnError(igtimiAccountId, () -> {
                 SecurityUtils.getSubject().checkPermission(SecuredDomainType.IGTIMI_ACCOUNT.getStringPermissionForObjects(
-                    DefaultActions.CREATE, eMailAddress));
-                account = getIgtimiConnectionFactory().createAccountToAccessUserData(eMailAddress, password);
-            } catch (AuthorizationException e) {
-                getSecurityService().deleteOwnership(igtimiAccountId); // revert preliminary ownership allocation
-                throw e;
-            }
+                        DefaultActions.CREATE, eMailAddress));
+                return getIgtimiConnectionFactory().createAccountToAccessUserData(eMailAddress, password);
+            });
         } else {
             logger.warning("Igtimi account "+eMailAddress+" already exists.");
             account = null; // account with that e-mail already exists
