@@ -395,8 +395,10 @@ public class RegattasResource extends AbstractSailingServerResource {
                 final String email;
                 if (competitorEmail != null) {
                     email = competitorEmail;
-                } else {
+                } else if (user != null && user.getEmail() != null) {
                     email = user.getEmail();
+                } else {
+                    email = null;
                 }
     
                 final Boat boat = new BoatImpl(UUID.randomUUID(), shortName, getService().getBaseDomainFactory()

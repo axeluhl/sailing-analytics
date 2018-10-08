@@ -1,7 +1,9 @@
 package com.sap.sailing.server.gateway.test.jaxrs;
 
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
@@ -12,6 +14,14 @@ import java.util.Date;
 import java.util.List;
 
 import javax.ws.rs.core.Response;
+
+import org.apache.shiro.config.Ini;
+import org.apache.shiro.mgt.DefaultSecurityManager;
+import org.apache.shiro.realm.text.IniRealm;
+import org.apache.shiro.subject.Subject;
+import org.apache.shiro.subject.support.SubjectThreadState;
+import org.apache.shiro.util.ThreadContext;
+import org.apache.shiro.util.ThreadState;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.impl.CompetitorImpl;
@@ -27,10 +37,12 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
+import com.sap.sse.security.SecurityService;
 
 public abstract class AbstractJaxRsApiTest {
     protected RacingEventService racingEventService;
     protected MongoDBService service;    
+    protected SecurityService securityService;
     
     protected static SimpleDateFormat TIMEPOINT_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
@@ -39,6 +51,27 @@ public abstract class AbstractJaxRsApiTest {
         service.getDB().dropDatabase();
         racingEventService = new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true,
                 new MockSmartphoneUuidServiceFinderFactory(), /* restoreTrackedRaces */ false);
+        securityService = mock(SecurityService.class);
+    }
+
+    public void setUpSecurityManager() {
+        Ini ini = new Ini();
+        ini.setSectionProperty("users", "admin", "admin");
+        DefaultSecurityManager securityManager = new DefaultSecurityManager(new IniRealm(ini));
+        ThreadContext.bind(securityManager);
+    }
+
+    public void tearDownSecurityManager() {
+        ThreadContext.remove();
+    }
+
+    public ThreadState setUpSubject(String principal) {
+        Subject subject = mock(Subject.class);
+        when(subject.isAuthenticated()).thenReturn(true);
+        when(subject.getPrincipal()).thenReturn(principal);
+        ThreadState subjectThreadState = new SubjectThreadState(subject);
+        subjectThreadState.bind();
+        return subjectThreadState;
     }
 
     protected <T extends AbstractSailingServerResource> T spyResource(T resource) {
