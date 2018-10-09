@@ -23,6 +23,7 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileN
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType.StatisticType;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO.SingleEntry;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileDesktopResources;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.ShowAndEditSailorProfile;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.events.CompetitorWithoutClubnameItemDescription;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.events.NavigatorColumn;
 import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
@@ -38,6 +39,10 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
+/**
+ * This element displays a given statistic for each sailor in a sailor profile in the {@link ShowAndEditSailorProfile}
+ * view.
+ */
 public class SailorProfileStatisticTable extends Composite {
 
     interface MyBinder extends UiBinder<Widget, SailorProfileStatisticTable> {
@@ -66,8 +71,10 @@ public class SailorProfileStatisticTable extends Composite {
         this.flagImageResolver = flagImageResolver;
         this.type = type;
         this.stringMessages = stringMessages;
+
         SailorProfileDesktopResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
+
         setupTable();
         titleUi.setInnerText(SailorProfileNumericStatisticTypeFormatter.getDisplayName(type, stringMessages));
         titleIconUi.setUrl(SailorProfileNumericStatisticTypeFormatter.getIcon(type));
@@ -79,9 +86,9 @@ public class SailorProfileStatisticTable extends Composite {
     }
 
     private void setupTable() {
-        boolean isAverage = type.getAggregationType() != StatisticType.AVERAGE;
+        boolean isAverage = type.getAggregationType() == StatisticType.AVERAGE;
 
-        if (isAverage) {
+        if (!isAverage) {
             sailorProfilesTable.addColumn(eventNameColumn, StringMessages.INSTANCE.eventName());
             sailorProfilesTable.addColumn(timeColumn, StringMessages.INSTANCE.time());
         }
@@ -92,7 +99,8 @@ public class SailorProfileStatisticTable extends Composite {
         sailorProfilesTable.addColumn(clubNameColumn, StringMessages.INSTANCE.name());
         sailorProfilesTable.addColumn(navigatorColumn);
 
-        if (isAverage) {
+        if (!isAverage) {
+            // TODO: add drill down for data mining
             navigatorColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
             navigatorColumn.setFieldUpdater(new FieldUpdater<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, String>() {
                 @Override
@@ -107,9 +115,6 @@ public class SailorProfileStatisticTable extends Composite {
         String result = null;
         if (type.getAggregationType() != StatisticType.AVERAGE) {
             final RegattaAndRaceIdentifier raceIdentifier = entry.getB().getRelatedRaceOrNull();
-            if (raceIdentifier != null) {
-
-            }
 
             // create raceboard context
             RaceboardContextDefinition raceboardContext = new RaceboardContextDefinition(
