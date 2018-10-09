@@ -5,6 +5,10 @@ import java.util.ArrayList;
 
 import com.sap.sse.common.Util;
 
+/**
+ * This object contains the name and id with a fixed set of Participated regattas ({@link ParticipatedRegattaDTO} in a
+ * {@link SailorProfileDTO} which is loaded asynchronously.
+ */
 public class ParticipatedEventDTO implements Serializable {
     private static final long serialVersionUID = -716458570343167392L;
 

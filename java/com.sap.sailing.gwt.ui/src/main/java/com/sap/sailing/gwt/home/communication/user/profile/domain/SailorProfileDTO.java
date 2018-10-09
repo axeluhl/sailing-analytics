@@ -10,11 +10,20 @@ import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.dispatch.shared.commands.Result;
 
-/** This objects contains all data related to displaying a SailorProfile in the frontend UI */
+/**
+ * This objects contains all data related to displaying a SailorProfile in the frontend UI. Since this object is also
+ * used when querying a sailor profile with a key from the backend, there is a field {@link #notFoundOnServer} to
+ * intercept the case that there is no corresponding sailor profile.<br/>
+ * <br/>
+ * Events and statistics are loaded asynchronously with {@link SailorProfileEventsDTO} and
+ * {@link SailorProfileStatisticDTO}.
+ */
 public class SailorProfileDTO implements Result, Serializable {
     private static final long serialVersionUID = -5957161570595861618L;
 
+    /** {@link #notFoundOnServer} is true, if the {@link #key} does has no corresponding sailor profile. */
     private boolean notFoundOnServer;
+
     private UUID key;
     private String name;
     private ArrayList<SimpleCompetitorWithIdDTO> competitors = new ArrayList<>();

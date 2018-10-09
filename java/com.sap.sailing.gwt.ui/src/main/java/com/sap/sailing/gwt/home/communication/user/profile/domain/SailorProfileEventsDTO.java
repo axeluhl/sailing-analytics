@@ -6,6 +6,10 @@ import java.util.ArrayList;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.dispatch.shared.commands.Result;
 
+/**
+ * Since the Events are loaded asynchronously after loading the {@link SailorProfileDTO}, this object contains a list of
+ * {@link ParticipatedEventDTO}.
+ */
 public class SailorProfileEventsDTO implements Serializable, Result {
     private static final long serialVersionUID = 4658596949068331464L;
 

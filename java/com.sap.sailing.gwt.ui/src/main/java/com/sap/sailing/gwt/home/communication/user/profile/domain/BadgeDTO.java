@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.communication.user.profile.domain;
 import java.io.Serializable;
 import java.util.UUID;
 
+/** This object represents a badge in a sailor profile {@link SailorProfileDTO} */
 public class BadgeDTO implements Serializable {
     private static final long serialVersionUID = 2374312724838738559L;
 

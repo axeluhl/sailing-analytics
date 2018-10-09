@@ -4,6 +4,11 @@ import java.io.Serializable;
 
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 
+/**
+ * This object contains all relevant data of a regatta, a competitor ({@link #competitorDto}) participated in.
+ * Additionally to the name of the regatta and the unique IDs of the regatta and the containing event, this objects
+ * contains information about the rank and points of the participating competitor.
+ */
 public class ParticipatedRegattaDTO implements Serializable {
     private static final long serialVersionUID = -126348629933556831L;
 

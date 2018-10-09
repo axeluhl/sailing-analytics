@@ -2,11 +2,12 @@ package com.sap.sailing.gwt.home.communication.user.profile.domain;
 
 import com.sap.sailing.gwt.ui.raceboard.RaceBoardModes;
 
+/** current types of statistics currently supported in the SailorProfiles and the corresponding backend service */
 public enum SailorProfileNumericStatisticType {
-    MAX_SPEED(StatisticType.HIGHEST_IS_BEST, RaceBoardModes.PLAYER),
-    BEST_DISTANCE_TO_START(StatisticType.LOWEST_IS_BEST, RaceBoardModes.START_ANALYSIS),
-    BEST_STARTLINE_SPEED(StatisticType.HIGHEST_IS_BEST, RaceBoardModes.START_ANALYSIS),
-    AVERAGE_STARTLINE_DISTANCE(StatisticType.AVERAGE, null);
+    MAX_SPEED(StatisticType.HIGHEST_IS_BEST, RaceBoardModes.PLAYER), BEST_DISTANCE_TO_START(
+            StatisticType.LOWEST_IS_BEST,
+            RaceBoardModes.START_ANALYSIS), BEST_STARTLINE_SPEED(StatisticType.HIGHEST_IS_BEST,
+                    RaceBoardModes.START_ANALYSIS), AVERAGE_STARTLINE_DISTANCE(StatisticType.AVERAGE, null);
 
     private StatisticType type;
     private RaceBoardModes mode;
@@ -25,9 +26,7 @@ public enum SailorProfileNumericStatisticType {
     }
 
     public static enum StatisticType {
-        LOWEST_IS_BEST,
-        HIGHEST_IS_BEST,
-        AVERAGE
+        LOWEST_IS_BEST, HIGHEST_IS_BEST, AVERAGE
     }
 
 }

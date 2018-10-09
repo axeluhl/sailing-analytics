@@ -13,7 +13,10 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.dispatch.shared.commands.Result;
 
-/** Contains the result of a single statistic, to allow async loading of statistics without blocking the rest **/
+/**
+ * Contains the result of a single statistic, to allow asynchronous loading of statistics without blocking loading the
+ * sailor profile or the events
+ **/
 public class SailorProfileStatisticDTO implements Result, Serializable {
     private static final long serialVersionUID = 2924378586764418626L;
     // keep as specified as possible to save gwt compiler time
