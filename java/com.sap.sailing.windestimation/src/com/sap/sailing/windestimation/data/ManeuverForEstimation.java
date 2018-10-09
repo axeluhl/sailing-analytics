@@ -34,6 +34,7 @@ public class ManeuverForEstimation {
     private final boolean markPassing;
     private final Double relativeBearingToNextMarkBefore;
     private final Double relativeBearingToNextMarkAfter;
+    private String regattaName;
 
     public ManeuverForEstimation(TimePoint maneuverTimePoint, Position maneuverPosition, Bearing middleCourse,
             SpeedWithBearing speedWithBearingBefore, SpeedWithBearing speedWithBearingAfter,
@@ -44,7 +45,7 @@ public class ManeuverForEstimation {
             double speedLossRatio, double speedGainRatio, double lowestSpeedVsExitingSpeedRatio, boolean clean,
             boolean cleanBefore, boolean cleanAfter, ManeuverCategory maneuverCategory, double scaledSpeedBefore,
             double scaledSpeedAfter, BoatClass boatClass, boolean markPassing, Double relativeBearingToNextMarkBefore,
-            Double relativeBearingToNextMarkAfter) {
+            Double relativeBearingToNextMarkAfter, String regattaName) {
         this.maneuverTimePoint = maneuverTimePoint;
         this.maneuverPosition = maneuverPosition;
         this.middleCourse = middleCourse;
@@ -71,6 +72,7 @@ public class ManeuverForEstimation {
         this.markPassing = markPassing;
         this.relativeBearingToNextMarkBefore = relativeBearingToNextMarkBefore;
         this.relativeBearingToNextMarkAfter = relativeBearingToNextMarkAfter;
+        this.regattaName = regattaName;
     }
 
     public TimePoint getManeuverTimePoint() {
@@ -175,6 +177,10 @@ public class ManeuverForEstimation {
 
     public boolean isMarkPassing() {
         return markPassing;
+    }
+
+    public String getRegattaName() {
+        return regattaName;
     }
 
 }

@@ -134,6 +134,8 @@ public abstract class AbstractManeuverBasedWindEstimationTrackImpl extends WindT
 
     private final String raceName;
 
+    private Map<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>, Double> likelihoodOfBeingTackCluster = new HashMap<>();
+
     public AbstractManeuverBasedWindEstimationTrackImpl(PolarDataService polarService, String raceName,
             BoatClass boatClass, long millisecondsOverWhichToAverage) {
         super(millisecondsOverWhichToAverage, DEFAULT_BASE_CONFIDENCE, /* useSpeed */false,
@@ -232,8 +234,6 @@ public abstract class AbstractManeuverBasedWindEstimationTrackImpl extends WindT
                 + " iterations");
         final Set<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>> clusters = clusterer
                 .getClusters();
-        // Now work towards identifying the two tack clusters
-        final Map<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>, Double> likelihoodOfBeingTackCluster = new HashMap<>();
         for (Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble> c : clusters) {
             likelihoodOfBeingTackCluster.put(c, getLikelihoodOfBeingTackCluster(c, clusters));
         }
@@ -486,5 +486,10 @@ public abstract class AbstractManeuverBasedWindEstimationTrackImpl extends WindT
 
     protected String getManeuverClassificationColumnTypes() {
         return "infoitem\tstring\tdate\tfloat\tfloat\tfloat\tfloat\tfloat\tfloat\tfloat";
+    }
+    
+    public Double getLikelihoodForClusterOfBeingTackCluster(
+            Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble> cluster) {
+        return likelihoodOfBeingTackCluster.get(cluster);
     }
 }

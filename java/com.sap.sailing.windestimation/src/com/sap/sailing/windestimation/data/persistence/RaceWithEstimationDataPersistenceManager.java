@@ -21,10 +21,10 @@ public interface RaceWithEstimationDataPersistenceManager<T> extends Persistence
 
     void addRace(String regattaName, String trackedRaceName, List<JSONObject> competitorTracks);
 
-    Iterator<CompetitorTrackWithEstimationData<T>> getCompetitorTrackIterator();
+    Iterator<CompetitorTrackWithEstimationData<T>> getCompetitorTrackIterator(String query);
 
-    Iterator<T> getCompetitorTrackElementsIterator();
+    Iterator<T> getCompetitorTrackElementsIterator(String query);
 
-    Iterator<RegattaWithEstimationData<T>> getRegattaIterator();
+    Iterator<RegattaWithEstimationData<T>> getRegattaIterator(String query);
 
 }

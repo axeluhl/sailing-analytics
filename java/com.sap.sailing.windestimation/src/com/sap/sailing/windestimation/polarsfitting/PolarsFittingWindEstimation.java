@@ -31,7 +31,7 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 
 public class PolarsFittingWindEstimation implements AverageWindEstimator {
 
-    private static final int COURSE_CLUSTER_SIZE = 5;
+    private static final int COURSE_CLUSTER_SIZE = 10;
 
     private final PolarDataService polarService;
     private final Map<BoatClass, SpeedStatistics[]> speedsPerBoatClass = new HashMap<>();
@@ -78,7 +78,7 @@ public class PolarsFittingWindEstimation implements AverageWindEstimator {
     }
 
     public SpeedWithBearingWithConfidence<Void> estimateWind() {
-        List<SpeedWithBearingWithConfidence<Double>> windCandidates = new ArrayList<>();
+        List<SpeedWithBearingWithConfidence<Void>> windCandidates = new ArrayList<>();
         for (int trueWindCourseCandidateInDegrees = 0; trueWindCourseCandidateInDegrees < 360; trueWindCourseCandidateInDegrees += 5) {
             int totalSpeeds = 0;
             int speedsWithinDeadWindZone = 0;
@@ -114,11 +114,10 @@ public class PolarsFittingWindEstimation implements AverageWindEstimator {
             SpeedWithConfidence<Void> windSpeedCandidate = calculateWindCandidate(windSpeedRangesWithFixesCount,
                     totalSpeeds, speedsWithinDeadWindZone);
             if (windSpeedCandidate != null) {
-                double confidenceFactor = calculatePointOfSailCountsConfidenceFactor(pointOfSailCounts);
                 windCandidates.add(new SpeedWithBearingWithConfidenceImpl<>(
                         new KnotSpeedWithBearingImpl(windSpeedCandidate.getObject().getKnots(),
                                 new DegreeBearingImpl(trueWindCourseCandidateInDegrees)),
-                        windSpeedCandidate.getConfidence(), confidenceFactor));
+                        windSpeedCandidate.getConfidence(), null));
             }
         }
         SpeedWithBearingWithConfidence<Void> bestCandidate = determineBestWindCandidateAndCalculateConfidence(
@@ -126,61 +125,16 @@ public class PolarsFittingWindEstimation implements AverageWindEstimator {
         return bestCandidate;
     }
 
-    private double calculatePointOfSailCountsConfidenceFactor(int[] pointOfSailCounts) {
-        double[] bonusFactors = new double[pointOfSailCounts.length];
-        int containsUpwind = 0;
-        int containsReaching = 0;
-        int containsDownwind = 0;
-        for (CoarseGrainedPointOfSail pointOfSail : CoarseGrainedPointOfSail.values()) {
-            int count = pointOfSailCounts[pointOfSail.ordinal()];
-            double bonusFactor = 1.0 / 10 - Math.min(9, count);
-            if (bonusFactor > 0.001) {
-                bonusFactors[pointOfSail.ordinal()] = bonusFactor;
-                switch (pointOfSail.getLegType()) {
-                case UPWIND:
-                    containsUpwind++;
-                    break;
-                case REACHING:
-                    containsReaching++;
-                    break;
-                case DOWNWIND:
-                    containsDownwind++;
-                    break;
-                }
-            }
-        }
-        double baseConfidence = 0;
-        if (containsUpwind > 0 && (containsReaching > 0 || containsDownwind > 0)) {
-            baseConfidence += 0.5;
-            if (containsReaching > 0 && containsDownwind > 0 || containsUpwind > 1 || containsDownwind > 1) {
-                baseConfidence += 0.25;
-                if (containsDownwind > 1 && containsUpwind > 1) {
-                    baseConfidence += 0.25;
-                }
-            }
-        } else if (containsDownwind > 0 && containsReaching > 0) {
-            baseConfidence += 0.25;
-        }
-
-        double confidence = 0;
-        for (double bonusFactor : bonusFactors) {
-            confidence += bonusFactor / bonusFactors.length * baseConfidence;
-        }
-        return confidence;
-    }
-
     private SpeedWithBearingWithConfidence<Void> determineBestWindCandidateAndCalculateConfidence(
-            List<SpeedWithBearingWithConfidence<Double>> windCandidates) {
-        SpeedWithBearingWithConfidence<Double> bestWindCandidate = null;
-        for (SpeedWithBearingWithConfidence<Double> windCandidate : windCandidates) {
+            List<SpeedWithBearingWithConfidence<Void>> windCandidates) {
+        SpeedWithBearingWithConfidence<Void> bestWindCandidate = null;
+        for (SpeedWithBearingWithConfidence<Void> windCandidate : windCandidates) {
             if (bestWindCandidate == null || bestWindCandidate.getConfidence() < windCandidate.getConfidence()) {
                 bestWindCandidate = windCandidate;
             }
         }
-
         double bestChallengingConfidence = 0;
-
-        for (SpeedWithBearingWithConfidence<Double> windCandidate : windCandidates) {
+        for (SpeedWithBearingWithConfidence<Void> windCandidate : windCandidates) {
             double bearingToBestCandidate = windCandidate.getObject().getBearing()
                     .getDifferenceTo(bestWindCandidate.getObject().getBearing()).getDegrees();
             double absBearingToBestCandidate = Math.abs(bearingToBestCandidate);
@@ -191,9 +145,9 @@ public class PolarsFittingWindEstimation implements AverageWindEstimator {
         if (bestWindCandidate == null) {
             return null;
         }
-        double realConfidence = (1
-                - (bestWindCandidate.getConfidence() - bestChallengingConfidence) / bestWindCandidate.getConfidence())
-                * bestWindCandidate.getConfidence();
+        double bestVariance = 1.0 / bestWindCandidate.getConfidence();
+        double bestChallengingVariance = 1.0 / bestChallengingConfidence;
+        double realConfidence = (bestChallengingVariance - bestVariance) / (bestChallengingVariance + bestVariance);
 
         return new SpeedWithBearingWithConfidenceImpl<Void>(bestWindCandidate.getObject(), realConfidence, null);
     }
@@ -209,30 +163,20 @@ public class PolarsFittingWindEstimation implements AverageWindEstimator {
         if (extendedWindSpeedRange == null) {
             return null;
         }
-        double upperSpeed = Math.min(50.0, extendedWindSpeedRange.getUpperSpeed());
-        double lowerSpeed = Math.max(1.0, extendedWindSpeedRange.getLowerSpeed());
-        if (upperSpeed < lowerSpeed) {
-            double temp = upperSpeed;
-            upperSpeed = lowerSpeed;
-            lowerSpeed = temp;
+        double twsInKnots = 0;
+        for (Pair<WindSpeedRange, Integer> windSpeedRangeWithFixesCount : windSpeedRangesWithFixesCount) {
+            double weight = 1.0 * windSpeedRangeWithFixesCount.getB() / totalSpeeds;
+            twsInKnots += weight * windSpeedRangeWithFixesCount.getA().getMiddleSpeed();
         }
-        double bestSpeed = 0;
-        double bestSquaredDeviationSum = Double.MAX_VALUE;
-        for (double speed = lowerSpeed; speed <= upperSpeed; speed += 0.1) {
-            double squaredDeviationSum = 0;
-            for (Pair<WindSpeedRange, Integer> windSpeedRangeWithFixesCount : windSpeedRangesWithFixesCount) {
-                double deviationOfSpeedFromRange = windSpeedRangeWithFixesCount.getA()
-                        .getDeviationOfSpeedFromRange(speed);
-                double relevanceFactor = 1.0 * windSpeedRangeWithFixesCount.getB() / totalSpeeds;
-                squaredDeviationSum += deviationOfSpeedFromRange * deviationOfSpeedFromRange * relevanceFactor;
-            }
-            squaredDeviationSum *= 1 - 1.0 * speedsWithinDeadWindZone / totalSpeeds;
-            if (bestSquaredDeviationSum > squaredDeviationSum) {
-                bestSpeed = speed;
-                bestSquaredDeviationSum = squaredDeviationSum;
-            }
+        double variance = 0;
+        for (Pair<WindSpeedRange, Integer> windSpeedRangeWithFixesCount : windSpeedRangesWithFixesCount) {
+            double deviationOfSpeedFromRange = windSpeedRangeWithFixesCount.getA()
+                    .getDeviationOfSpeedFromRange(twsInKnots);
+            double relevanceFactor = 1.0 * windSpeedRangeWithFixesCount.getB() / totalSpeeds;
+            variance += deviationOfSpeedFromRange * deviationOfSpeedFromRange * relevanceFactor;
         }
-        return new SpeedWithConfidenceImpl<Void>(new KnotSpeedImpl(bestSpeed), 1 / bestSquaredDeviationSum, null);
+        variance *= 1 - 1.0 * speedsWithinDeadWindZone / totalSpeeds;
+        return new SpeedWithConfidenceImpl<Void>(new KnotSpeedImpl(twsInKnots), 1 / variance, null);
     }
 
     public WindSpeedRange getWindSpeedRange(BoatClass boatClass, double avgSpeedInKnots, double absTwaInDegrees) {

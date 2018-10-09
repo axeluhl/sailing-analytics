@@ -16,8 +16,21 @@ public class WindUtil {
 
     private WindUtil() {
     }
-    
-    public static List<WindWithConfidence<Void>> getWindFixesWithAveragedWindSpeed(List<WindWithConfidence<Void>> windFixes) {
+
+    public static List<WindWithConfidence<Void>> getWindFixesWithFixedConfidence(
+            List<WindWithConfidence<Void>> windFixes, double fixedConfidence) {
+        List<WindWithConfidence<Void>> result = new ArrayList<>();
+        for (WindWithConfidence<Void> windWithConfidence : windFixes) {
+            WindWithConfidence<Void> newWindWithConfidence = new WindWithConfidenceImpl<>(
+                    windWithConfidence.getObject(), fixedConfidence, windWithConfidence.getRelativeTo(),
+                    windWithConfidence.useSpeed());
+            result.add(newWindWithConfidence);
+        }
+        return result;
+    }
+
+    public static List<WindWithConfidence<Void>> getWindFixesWithAveragedWindSpeed(
+            List<WindWithConfidence<Void>> windFixes) {
         if (windFixes.size() <= 1) {
             return windFixes;
         }

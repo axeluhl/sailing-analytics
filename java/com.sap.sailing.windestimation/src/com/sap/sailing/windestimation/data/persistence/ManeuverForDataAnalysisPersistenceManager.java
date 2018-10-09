@@ -17,6 +17,7 @@ public class ManeuverForDataAnalysisPersistenceManager
     @Override
     protected String getMongoDbEvalStringForTransformation() {
         return "db.getCollection('racesWithManeuversForDataAnalysis').aggregate([\r\n"
+                + "{$addFields: {\"competitorTracks.elements.regattaName\": '$regattaName'}},\r\n"
                 + "{$addFields: {\"competitorTracks.trackId\": {$concat: ['$regattaName', ' - ', '$trackedRaceName']}}},\r\n"
                 + "{$unwind: '$competitorTracks'},\r\n" + "{$addFields: {\r\n"
                 + "    \"competitorTracks.elements.trackId\": {$concat: ['$competitorTracks.trackId', ' # ', '$competitorTracks.competitorName']},\r\n"

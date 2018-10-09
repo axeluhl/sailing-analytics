@@ -55,14 +55,24 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
     }
 
     @Override
-    public Pair<String, T> getNextElement(String lastId) throws JsonDeserializationException, ParseException {
+    public Pair<String, T> getNextElement(String lastId, String query)
+            throws JsonDeserializationException, ParseException {
         Pair<String, T> result = null;
         BasicDBObject gtQuery = null;
         if (lastId != null) {
             gtQuery = new BasicDBObject();
             gtQuery.put(FIELD_DB_ID, new BasicDBObject("$gt", new ObjectId(lastId)));
         }
-        DBObject dbObject = db.getCollection(getCollectionName()).findOne(gtQuery);
+        String finalQuery = null;
+        if (gtQuery != null && query != null) {
+            finalQuery = "{$and: [" + gtQuery.toString() + ", " + query + "]}";
+        } else if (gtQuery != null) {
+            finalQuery = gtQuery.toString();
+        } else if (query != null) {
+            finalQuery = query;
+        }
+        DBObject dbQuery = finalQuery == null ? null : (DBObject) JSON.parse(finalQuery);
+        DBObject dbObject = db.getCollection(getCollectionName()).findOne(dbQuery);
         if (dbObject != null) {
             ObjectId dbId = (ObjectId) dbObject.get(FIELD_DB_ID);
             T element = deserializer.deserialize(getJSONObject(dbObject.toString()));
@@ -74,6 +84,17 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
     @Override
     public List<T> getAllElements() throws JsonDeserializationException, ParseException {
         return getAllElements(null);
+    }
+
+    @Override
+    public String getFilterQueryForYear(int year, boolean exclude) {
+        String query;
+        if (exclude) {
+            query = "{'regattaName': {$not: {$regex: '" + year + "'}}}";
+        } else {
+            query = "{'regattaName': {$regex: '" + year + "'}}";
+        }
+        return query;
     }
 
     @Override
@@ -93,8 +114,8 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
     }
 
     @Override
-    public PersistedElementsIterator<T> getIterator() {
-        return new PersistedElementsIteratorImpl();
+    public PersistedElementsIterator<T> getIterator(String query) {
+        return new PersistedElementsIteratorImpl(query);
     }
 
     protected JSONObject getJSONObject(String json) throws ParseException {
@@ -113,8 +134,10 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
         private long currentElementNumber = 0;
         private int numberOfCharsDuringLastStatusLog = 0;
         private long limit = Long.MAX_VALUE;
+        private String query;
 
-        public PersistedElementsIteratorImpl() {
+        public PersistedElementsIteratorImpl(String query) {
+            this.query = query;
             numberOfElements = countElements();
             LoggingUtil.logInfo(numberOfElements + " elements found in " + getCollectionName());
             prepareNext();
@@ -142,7 +165,7 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
                                     + (nextElementNumber * 100 / numberOfElements) + " %) from " + getCollectionName());
                 }
                 try {
-                    Pair<String, T> nextElementWithDbId = getNextElement(lastDbId);
+                    Pair<String, T> nextElementWithDbId = getNextElement(lastDbId, query);
                     if (nextElementWithDbId != null) {
                         this.lastDbId = nextElementWithDbId.getA();
                         this.nextElement = nextElementWithDbId.getB();

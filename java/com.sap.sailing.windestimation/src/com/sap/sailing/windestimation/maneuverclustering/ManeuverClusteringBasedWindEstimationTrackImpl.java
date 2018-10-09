@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalDouble;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -26,6 +27,7 @@ import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.transformer.EstimationDataUtil;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverClassifiersCache;
+import com.sap.sailing.windestimation.util.WindUtil;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.Util.Pair;
@@ -84,7 +86,7 @@ public class ManeuverClusteringBasedWindEstimationTrackImpl extends AbstractMane
             // 1.0
             result = (averageTackLikelihood
                     * (1.0 + BOOST_FACTOR_FOR_FULL_JIBE_CLUSTER_LIKELIHOOD * jibeClusterLikelihood))
-                    / (1 + BOOST_FACTOR_FOR_JIBE_TACK_SPEED_RATIO_LIKELIHOOD);
+                    / (1 + BOOST_FACTOR_FOR_FULL_JIBE_CLUSTER_LIKELIHOOD);
         } else {
             result = 0.1;
         }
@@ -157,7 +159,16 @@ public class ManeuverClusteringBasedWindEstimationTrackImpl extends AbstractMane
     @Override
     public List<WindWithConfidence<Void>> estimateWindTrack() {
         List<WindWithConfidence<Void>> result = new ArrayList<>();
+        List<Bearing> tackMiddleCogs = new ArrayList<>();
+        List<Double> tackLikelihoods = new ArrayList<>();
         getTackClusters().forEach((cluster) -> {
+            Pair<Bearing, Double> middleCog = getWeightedAverageMiddleManeuverCOGDegAndManeuverAngleDeg(cluster,
+                    ManeuverType.TACK);
+            if (middleCog != null && middleCog.getA() != null) {
+                tackMiddleCogs.add(middleCog.getA());
+            }
+            Double likelihoodForClusterOfBeingTackCluster = getLikelihoodForClusterOfBeingTackCluster(cluster);
+            tackLikelihoods.add(likelihoodForClusterOfBeingTackCluster);
             for (ManeuverClassification mc : cluster) {
                 final SpeedWithBearingWithConfidence<Void> estimatedWindSpeedAndBearing = mc
                         .getEstimatedWindSpeedAndBearing(ManeuverType.TACK);
@@ -170,7 +181,33 @@ public class ManeuverClusteringBasedWindEstimationTrackImpl extends AbstractMane
                 }
             }
         });
-        return result;
+        List<WindWithConfidence<Void>> resultWithAveragedSpeed = WindUtil.getWindFixesWithAveragedWindSpeed(result);
+        if (!tackMiddleCogs.isEmpty()) {
+            OptionalDouble optional = getClusters().stream().filter(cluster -> {
+                Pair<Bearing, Double> middleManeuverCOGDegAndManeuverAngleDeg = getWeightedAverageMiddleManeuverCOGDegAndManeuverAngleDeg(
+                        cluster, ManeuverType.JIBE);
+                if (middleManeuverCOGDegAndManeuverAngleDeg != null
+                        && middleManeuverCOGDegAndManeuverAngleDeg.getA() != null) {
+                    Bearing middleCog = middleManeuverCOGDegAndManeuverAngleDeg.getA();
+                    for (Bearing tackMiddleCog : tackMiddleCogs) {
+                        double diff = Math.abs(tackMiddleCog.getDifferenceTo(middleCog).getDegrees());
+                        if (diff <= 45) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+                return false;
+            }).mapToDouble(cluster -> getLikelihoodForClusterOfBeingTackCluster(cluster)).max();
+            if (optional.isPresent()) {
+                double tackProbability = tackLikelihoods.stream().mapToDouble(value -> value).max().getAsDouble();
+                double challengingScore = optional.getAsDouble();
+                double finalConfidence = tackProbability / (challengingScore + tackProbability);
+                resultWithAveragedSpeed = WindUtil.getWindFixesWithFixedConfidence(resultWithAveragedSpeed,
+                        finalConfidence);
+            }
+        }
+        return resultWithAveragedSpeed;
     }
 
 }

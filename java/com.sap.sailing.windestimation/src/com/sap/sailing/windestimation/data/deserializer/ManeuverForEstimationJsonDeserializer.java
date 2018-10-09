@@ -62,6 +62,7 @@ public class ManeuverForEstimationJsonDeserializer implements JsonDeserializer<M
         Double relativeBearingToNextMarkAfterInDegrees = (Double) object
                 .get(ManeuverForEstimationJsonSerializer.RELATIVE_BEARING_TO_NEXT_MARK_AFTER_IN_DEGREES);
         boolean markPassing = (boolean) object.get(ManeuverForEstimationJsonSerializer.MARK_PASSING);
+        String regattaName = (String) object.get("regattaName");
         ManeuverForEstimation maneuver = new ManeuverForEstimation(new MillisecondsTimePoint(maneuverTimePoint),
                 new DegreePosition(positionLatitude, positionLongitude), new DegreeBearingImpl(middleCourseInDegrees),
                 new KnotSpeedWithBearingImpl(speedBeforeInKnots, new DegreeBearingImpl(cogBefore)),
@@ -75,7 +76,7 @@ public class ManeuverForEstimationJsonDeserializer implements JsonDeserializer<M
                 deviationFromOptimalTackAngleInDegrees, deviationFromOptimalJibeAngleInDegrees, speedLossRatio,
                 speedGainRatio, lowestVsExitingSpeedRatio, clean, cleanBefore, cleanAfter, maneuverCategory,
                 scaledSpeedBefore, scaledSpeedAfter, boatClass, markPassing, relativeBearingToNextMarkBeforeInDegrees,
-                relativeBearingToNextMarkAfterInDegrees);
+                relativeBearingToNextMarkAfterInDegrees, regattaName);
         if (object.containsKey(ManeuverForEstimationJsonSerializer.WIND_SPEED)) {
             ManeuverTypeForClassification maneuverType = ManeuverTypeForClassification
                     .valueOf((String) object.get(ManeuverForEstimationJsonSerializer.MANEUVER_TYPE));
@@ -93,7 +94,8 @@ public class ManeuverForEstimationJsonDeserializer implements JsonDeserializer<M
                     maneuver.isCleanBefore(), maneuver.isCleanAfter(), maneuver.getManeuverCategory(),
                     maneuver.getScaledSpeedBefore(), maneuver.getScaledSpeedAfter(), maneuver.getBoatClass(),
                     markPassing, relativeBearingToNextMarkBeforeInDegrees, relativeBearingToNextMarkAfterInDegrees,
-                    maneuverType, new WindImpl(maneuver.getManeuverPosition(), maneuver.getManeuverTimePoint(),
+                    regattaName, maneuverType,
+                    new WindImpl(maneuver.getManeuverPosition(), maneuver.getManeuverTimePoint(),
                             new KnotSpeedWithBearingImpl(windSpeedInKnots, new DegreeBearingImpl(windCourse))));
         }
         return maneuver;

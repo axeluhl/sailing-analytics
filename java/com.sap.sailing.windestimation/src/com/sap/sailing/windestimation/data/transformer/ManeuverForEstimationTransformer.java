@@ -26,7 +26,7 @@ public class ManeuverForEstimationTransformer
                 .getElements()) {
             if (maneuver != null) {
                 ManeuverForEstimation maneuverForEstimation = getManeuverForEstimation(maneuver, previousManeuver,
-                        nextManeuver, speedScalingDivisor, competitorTrackWithElementsToTransform.getBoatClass());
+                        nextManeuver, speedScalingDivisor, competitorTrackWithElementsToTransform.getBoatClass(), "");
                 if (maneuverForEstimation != null) {
                     maneuversForEstimation.add(maneuverForEstimation);
                 }
@@ -36,7 +36,7 @@ public class ManeuverForEstimationTransformer
         }
         if (maneuver != null) {
             ManeuverForEstimation maneuverForEstimation = getManeuverForEstimation(maneuver, previousManeuver, null,
-                    speedScalingDivisor, competitorTrackWithElementsToTransform.getBoatClass());
+                    speedScalingDivisor, competitorTrackWithElementsToTransform.getBoatClass(), "");
             if (maneuverForEstimation != null) {
                 maneuversForEstimation.add(maneuverForEstimation);
             }
@@ -46,7 +46,7 @@ public class ManeuverForEstimationTransformer
 
     private ManeuverForEstimation getManeuverForEstimation(CompleteManeuverCurveWithEstimationData maneuver,
             CompleteManeuverCurveWithEstimationData previousManeuver,
-            CompleteManeuverCurveWithEstimationData nextManeuver, double speedScalingDivisor, BoatClass boatClass) {
+            CompleteManeuverCurveWithEstimationData nextManeuver, double speedScalingDivisor, BoatClass boatClass, String regattaName) {
         ManeuverCategory maneuverCategory = getManeuverCategory(maneuver);
         ManeuverTypeForClassification maneuverType = getManeuverTypeForClassification(maneuver, maneuverCategory);
         double speedLossRatio = maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getKnots() > 0
@@ -96,7 +96,7 @@ public class ManeuverForEstimationTransformer
                     deviationFromOptimalTackAngleInDegrees, deviationFromOptimalJibeAngleInDegrees, speedLossRatio,
                     speedGainRatio, lowestSpeedVsExitingSpeedRatio, clean, cleanBefore, cleanAfter, maneuverCategory,
                     scaledSpeedBeforeInKnots, scaledSpeedAfterInKnots, boatClass, maneuver.isMarkPassing(),
-                    relativeBearingToNextMarkBeforeManeuverInDegrees, relativeBearingToNextMarkAfterManeuverInDegrees);
+                    relativeBearingToNextMarkBeforeManeuverInDegrees, relativeBearingToNextMarkAfterManeuverInDegrees, regattaName);
         } else {
             maneuverForEstimation = new LabelledManeuverForEstimation(maneuver.getTimePoint(), maneuver.getPosition(),
                     maneuver.getCurveWithUnstableCourseAndSpeed().getMiddleCourse(),
@@ -111,7 +111,7 @@ public class ManeuverForEstimationTransformer
                     deviationFromOptimalTackAngleInDegrees, deviationFromOptimalJibeAngleInDegrees, speedLossRatio,
                     speedGainRatio, lowestSpeedVsExitingSpeedRatio, clean, cleanBefore, cleanAfter, maneuverCategory,
                     scaledSpeedBeforeInKnots, scaledSpeedAfterInKnots, boatClass, maneuver.isMarkPassing(),
-                    relativeBearingToNextMarkBeforeManeuverInDegrees, relativeBearingToNextMarkAfterManeuverInDegrees,
+                    relativeBearingToNextMarkBeforeManeuverInDegrees, relativeBearingToNextMarkAfterManeuverInDegrees, regattaName,
                     maneuverType, maneuver.getWind());
         }
         return maneuverForEstimation;

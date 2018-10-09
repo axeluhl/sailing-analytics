@@ -1,5 +1,7 @@
 package com.sap.sailing.windestimation.evaluation;
 
+import java.util.function.Function;
+
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
@@ -7,17 +9,20 @@ import com.sap.sailing.windestimation.data.persistence.PersistedElementsIterator
 import com.sap.sailing.windestimation.data.persistence.PolarDataServiceAccessUtil;
 import com.sap.sailing.windestimation.data.persistence.RaceWithCompleteManeuverCurvePersistenceManager;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverFeatures;
+import com.sap.sailing.windestimation.maneuvergraph.BestPathCalculatorForConfidenceEvaluation;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
-public class ManeuverSequenceGraphBasedWindEstimatorEvaluationRunner {
+public class WindEstimatorEvaluationRunner {
 
     private static final Integer MAX_RACES = null;
-    private static final boolean ENABLE_MARKS_INFORMATION = true;
-    private static final boolean ENABLE_SCALED_SPEED = true;
-    private static final boolean ENABLE_POLARS = true;
-    private static final double MIN_CORRECT_ESTIMATIONS_RATIO_FOR_CORRECT_RACE = 0.51;
+    private static final boolean ENABLE_MARKS_INFORMATION = false;
+    private static final boolean ENABLE_SCALED_SPEED = false;
+    private static final boolean ENABLE_POLARS = false;
+    private static final double MIN_CORRECT_ESTIMATIONS_RATIO_FOR_CORRECT_RACE = 0.75;
     private static final int MAX_TWS_DEVIATION_KNOTS = 2;
-    private static final int MAX_TWD_DEVIATION_DEG = 30;
+    private static final int MAX_TWD_DEVIATION_DEG = 20;
+    private static final Function<WindEstimatorFactories, WindEstimatorFactory<CompleteManeuverCurveWithEstimationData>> estimatorFactoryRetriever = factories -> factories
+            .maneuverGraph();
 
     public static void main(String[] args) throws Exception {
         WindEstimatorEvaluator<CompleteManeuverCurveWithEstimationData> evaluator = new WindEstimationEvaluatorImpl<>(
@@ -28,7 +33,7 @@ public class ManeuverSequenceGraphBasedWindEstimatorEvaluationRunner {
         PolarDataService polarService = PolarDataServiceAccessUtil.getPersistedPolarService();
         LoggingUtil.logInfo("Wind estimator evaluation started...");
         PersistedElementsIterator<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> racesIterator = persistenceManager
-                .getIterator();
+                .getIterator(persistenceManager.getFilterQueryForYear(2018, false));
         if (MAX_RACES != null) {
             racesIterator = racesIterator.limit(MAX_RACES);
         }
@@ -36,10 +41,11 @@ public class ManeuverSequenceGraphBasedWindEstimatorEvaluationRunner {
                 new ManeuverFeatures(ENABLE_POLARS, ENABLE_SCALED_SPEED, ENABLE_MARKS_INFORMATION));
 
         WindEstimatorEvaluationResult evaluationResult = evaluator.evaluateWindEstimator(
-                estimatorFactories.tackOutlierRemoval(),
+                estimatorFactoryRetriever.apply(estimatorFactories),
                 new TargetWindFromCompleteManeuverCurveWithEstimationDataExtractor(), racesIterator,
                 racesIterator.getNumberOfElements());
         LoggingUtil.logInfo("Wind estimator evaluation finished");
+        BestPathCalculatorForConfidenceEvaluation.toCsv();
         evaluationResult.printEvaluationStatistics(true);
     }
 

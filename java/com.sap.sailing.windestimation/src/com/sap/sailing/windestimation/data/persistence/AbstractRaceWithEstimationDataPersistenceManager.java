@@ -56,16 +56,16 @@ public abstract class AbstractRaceWithEstimationDataPersistenceManager<T> extend
         races.insert(dbObject);
     }
 
-    public Iterator<CompetitorTrackWithEstimationData<T>> getCompetitorTrackIterator() {
-        return new PersistedCompetitorTrackWithEstimationDataIteratorImpl();
+    public Iterator<CompetitorTrackWithEstimationData<T>> getCompetitorTrackIterator(String query) {
+        return new PersistedCompetitorTrackWithEstimationDataIteratorImpl(query);
     }
 
-    public Iterator<T> getCompetitorTrackElementsIterator() {
-        return new PersistedCompetitorTrackElementsIteratorImpl();
+    public Iterator<T> getCompetitorTrackElementsIterator(String query) {
+        return new PersistedCompetitorTrackElementsIteratorImpl(query);
     }
 
-    public Iterator<RegattaWithEstimationData<T>> getRegattaIterator() {
-        return new PersistedRegattasWithEstimationDataIteratorImpl();
+    public Iterator<RegattaWithEstimationData<T>> getRegattaIterator(String query) {
+        return new PersistedRegattasWithEstimationDataIteratorImpl(query);
     }
 
     protected class PersistedCompetitorTrackWithEstimationDataIteratorImpl
@@ -74,8 +74,8 @@ public abstract class AbstractRaceWithEstimationDataPersistenceManager<T> extend
         private final PersistedElementsIterator<RaceWithEstimationData<T>> racesIterator;
         private Iterator<CompetitorTrackWithEstimationData<T>> competitorTracksIteratorOfCurrentRace = null;
 
-        public PersistedCompetitorTrackWithEstimationDataIteratorImpl() {
-            racesIterator = getIterator();
+        public PersistedCompetitorTrackWithEstimationDataIteratorImpl(String query) {
+            racesIterator = getIterator(query);
         }
 
         @Override
@@ -105,8 +105,8 @@ public abstract class AbstractRaceWithEstimationDataPersistenceManager<T> extend
         private final Iterator<CompetitorTrackWithEstimationData<T>> competitorTrackIterator;
         private Iterator<T> elementsIteratorOfCurrentCompetitorTrack = null;
 
-        public PersistedCompetitorTrackElementsIteratorImpl() {
-            this.competitorTrackIterator = getCompetitorTrackIterator();
+        public PersistedCompetitorTrackElementsIteratorImpl(String query) {
+            this.competitorTrackIterator = getCompetitorTrackIterator(query);
         }
 
         @Override
@@ -137,8 +137,8 @@ public abstract class AbstractRaceWithEstimationDataPersistenceManager<T> extend
         private Iterator<RaceWithEstimationData<T>> racesIterator;
         private RaceWithEstimationData<T> nextRegatta;
 
-        public PersistedRegattasWithEstimationDataIteratorImpl() {
-            racesIterator = getIterator();
+        public PersistedRegattasWithEstimationDataIteratorImpl(String query) {
+            racesIterator = getIterator(query);
             nextRegatta = racesIterator.next();
         }
 

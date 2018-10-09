@@ -17,12 +17,14 @@ public interface PersistenceManager<T> {
 
     long countElements();
 
-    Pair<String, T> getNextElement(String lastId) throws JsonDeserializationException, ParseException;
-
-    PersistedElementsIterator<T> getIterator();
+    PersistedElementsIterator<T> getIterator(String query);
 
     List<T> getAllElements(String query) throws JsonDeserializationException, ParseException;
 
     List<T> getAllElements() throws JsonDeserializationException, ParseException;
+
+    Pair<String, T> getNextElement(String lastId, String query) throws JsonDeserializationException, ParseException;
+
+    String getFilterQueryForYear(int year, boolean exclude);
 
 }

@@ -17,6 +17,7 @@ public class ManeuverForEstimationPersistenceManager
     @Override
     protected String getMongoDbEvalStringForTransformation() {
         return "db.getCollection('racesWithManeuversForEstimation').aggregate([\r\n" + 
+                "{$addFields: {\"competitorTracks.elements.regattaName\": '$regattaName'}},\r\n" + 
                 "{$unwind: '$competitorTracks'},\r\n" + 
                 "{$match: {\r\n" + 
                 "    'competitorTracks.clean': true\r\n" + 

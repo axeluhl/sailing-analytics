@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.windestimation.maneuverclassifier.impl.NeuralNetworkManeuverClassifier;
-import com.sap.sailing.windestimation.maneuverclassifier.impl.RandomForestManeuverClassifier;
 
 public class ManeuverClassifiersFactory {
 
@@ -35,7 +34,7 @@ public class ManeuverClassifiersFactory {
 //        classifiers.add(new NaiveBayesManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes));
         classifiers.add(new NeuralNetworkManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes));
 //        classifiers.add(new QDAManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes));
-        classifiers.add(new RandomForestManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes));
+//        classifiers.add(new RandomForestManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes));
 //        classifiers.add(new SVMManeuverClassifier(maneuverFeatures, boatClass, supportedManeuverTypes));
         List<TrainableSingleManeuverOfflineClassifier> suitableClassifiers = classifiers.stream()
                 .filter(classifier -> classifier.hasSupportForProvidedFeatures()).collect(Collectors.toList());

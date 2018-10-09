@@ -22,14 +22,15 @@ public class LabelledManeuverForEstimation extends ManeuverForEstimation {
             double speedLossRatio, double speedGainRatio, double lowestSpeedVsExitingSpeedRatio, boolean clean,
             boolean cleanBefore, boolean cleanAfter, ManeuverCategory maneuverCategory, double scaledSpeedBefore,
             double scaledSpeedAfter, BoatClass boatClass, boolean markPassing, Double relativeBearingToNextMarkBefore,
-            Double relativeBearingToNextMarkAfter, ManeuverTypeForClassification maneuverType, Wind wind) {
+            Double relativeBearingToNextMarkAfter, String regattaName, ManeuverTypeForClassification maneuverType,
+            Wind wind) {
         super(maneuverTimePoint, maneuverPosition, middleCourse, speedWithBearingBefore, speedWithBearingAfter,
                 courseAtLowestSpeed, averageSpeedWithBearingBefore, averageSpeedWithBearingAfter, courseChangeInDegrees,
                 courseChangeWithinMainCurveInDegrees, maxTurningRateInDegreesPerSecond,
                 deviationFromOptimalTackAngleInDegrees, deviationFromOptimalJibeAngleInDegrees, speedLossRatio,
                 speedGainRatio, lowestSpeedVsExitingSpeedRatio, clean, cleanBefore, cleanAfter, maneuverCategory,
                 scaledSpeedBefore, scaledSpeedAfter, boatClass, markPassing, relativeBearingToNextMarkBefore,
-                relativeBearingToNextMarkAfter);
+                relativeBearingToNextMarkAfter, regattaName);
         this.maneuverType = maneuverType;
         this.wind = wind;
     }

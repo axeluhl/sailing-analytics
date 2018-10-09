@@ -31,7 +31,7 @@ public class IntersectedWindRange extends WindCourseRange implements AssumedWind
             // + (MAX_ABS_WIND_COURSE_DEVIATION_TOLERANCE_WITHIN_ANALYSIS_INTERVAL_IN_DEGREES + violationRange)
             // * 0.1);
             if (violationRange <= MAX_ABS_WIND_COURSE_DEVIATION_TOLERANCE_WITHIN_ANALYSIS_INTERVAL_IN_DEGREES) {
-                penaltyFactor = 1 / (1 + Math.pow((violationRange) / MAX_ABS_WIND_COURSE_DEVIATION_TOLERANCE_WITHIN_ANALYSIS_INTERVAL_IN_DEGREES * 2, 2));
+                penaltyFactor = 1 / (1 + Math.pow(violationRange / MAX_ABS_WIND_COURSE_DEVIATION_TOLERANCE_WITHIN_ANALYSIS_INTERVAL_IN_DEGREES * 2, 2));
             } else {
                 penaltyFactor = 1 / (1 + (Math.pow(violationRange, 2)));
             }
