@@ -14,12 +14,13 @@ import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 
+/** main entry point for sailor profiles overview on desktop */
 public class SailorProfileTabView extends Composite implements UserProfileTabView<SailorProfilePlace> {
 
     private SailingProfileOverviewPresenter currentPresenter;
     private final FlagImageResolver flagImageResolver;
 
-    UserProfileView.Presenter ownPresenter;
+    private UserProfileView.Presenter ownPresenter;
     private AcceptsOneWidget contentArea;
     private SailorProfilePlace place;
 
