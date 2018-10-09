@@ -45,7 +45,7 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
         canBoatsOfCompetitorsChangePerRaceCheckBox.ensureDebugId("CanBoatsOfCompetitorsChangePerRaceCheckBox");
         canBoatsOfCompetitorsChangePerRaceCheckBox.setValue(regatta.canBoatsOfCompetitorsChangePerRace);
         
-        EnumSet.allOf(CompetitorRegistrationType.class).forEach(t->competitorRegistrationTypeListBox.addItem(t.getLabel(), t.name()));
+        EnumSet.allOf(CompetitorRegistrationType.class).forEach(t->competitorRegistrationTypeListBox.addItem(t.getLabel(stringMessages), t.name()));
         competitorRegistrationTypeListBox.setSelectedIndex(regatta.competitorRegistrationType.ordinal());
     }
 

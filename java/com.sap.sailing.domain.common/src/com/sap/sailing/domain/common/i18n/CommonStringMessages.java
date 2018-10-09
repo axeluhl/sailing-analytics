@@ -14,5 +14,8 @@ public interface CommonStringMessages {
     String importWindTracks();
     String importSensorFixes();
     String updateEventLeaderboardGroupLinks();
+    String competitorRegistrationTypeClosed();
+    String competitorRegistrationTypeOpenModerated();
+    String competitorRegistrationTypeOpenUnmoderated();
 
 }

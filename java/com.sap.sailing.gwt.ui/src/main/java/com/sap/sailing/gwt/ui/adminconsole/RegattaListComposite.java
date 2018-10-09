@@ -176,7 +176,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         TextColumn<RegattaDTO> competitorRegistrationTypeColumn = new TextColumn<RegattaDTO>() {
             @Override
             public String getValue(RegattaDTO regatta) {
-                return regatta.competitorRegistrationType.getLabel();
+                return regatta.competitorRegistrationType.getLabel(stringMessages);
             }
         };
         competitorRegistrationTypeColumn.setSortable(true);

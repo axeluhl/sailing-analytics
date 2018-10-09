@@ -407,7 +407,7 @@ public class RegattaDetailsComposite extends Composite {
             useStartTimeInference.setText(regatta.useStartTimeInference ? stringMessages.yes() : stringMessages.no());
             controlTrackingFromStartAndFinishTimes.setText(regatta.controlTrackingFromStartAndFinishTimes ? stringMessages.yes() : stringMessages.no());
             canBoatsOfCompetitorsChangePerRace.setText(regatta.canBoatsOfCompetitorsChangePerRace ? stringMessages.yes() : stringMessages.no());
-            competitorRegistrationType.setText(regatta.competitorRegistrationType.getLabel());
+            competitorRegistrationType.setText(regatta.competitorRegistrationType.getLabel(stringMessages));
             openRegattaRegistrationLink.setText(regatta.competitorRegistrationType.isOpen()
                     ? "http://www.sapsailing.com"    //TODO: get correct URL for branch.io
                     : "-");
