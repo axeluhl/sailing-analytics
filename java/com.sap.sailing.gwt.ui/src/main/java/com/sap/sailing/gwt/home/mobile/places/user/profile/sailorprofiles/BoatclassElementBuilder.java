@@ -8,6 +8,10 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedS
 
 public final class BoatclassElementBuilder {
 
+    private BoatclassElementBuilder() {
+    }
+
+    /** @return a boatclass element for mobile display with the boatclass icon and the corresponding name */
     public static Element generateBoatclassElementForMobile(final BoatClassDTO boatclass) {
         SailorProfileMobileResources.INSTANCE.css().ensureInjected();
         Element elem = DOM.createDiv();

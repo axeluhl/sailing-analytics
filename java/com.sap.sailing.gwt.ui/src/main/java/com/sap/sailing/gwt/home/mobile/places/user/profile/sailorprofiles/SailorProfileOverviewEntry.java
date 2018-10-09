@@ -29,6 +29,7 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedS
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
+/** sailor profile overview entry with one sailor profile on mobile */
 public class SailorProfileOverviewEntry extends Composite {
 
     private static SailorProfileOverviewEntryUiBinder uiBinder = GWT.create(SailorProfileOverviewEntryUiBinder.class);
@@ -59,16 +60,22 @@ public class SailorProfileOverviewEntry extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         SailorProfileMobileResources.INSTANCE.css().ensureInjected();
         this.sectionTitleUi.setSectionTitle(entry.getName());
+
+        // add badges
         for (BadgeDTO badge : entry.getBadges()) {
             Element elem = DOM.createDiv();
             elem.setInnerText(badge.getName());
             badgesDivUi.appendChild(elem);
         }
+
+        // add competitors
         for (SimpleCompetitorWithIdDTO competitor : entry.getCompetitors()) {
             Element elem = DOM.createDiv();
             elem.setInnerText(competitor.getName());
             competitorsDivUi.appendChild(elem);
         }
+
+        // add boatclasses
         for (BoatClassDTO boatclass : entry.getBoatclasses()) {
             Element elem = DOM.createDiv();
             elem.setInnerSafeHtml(SharedSailorProfileResources.TEMPLATES.buildBoatclassIcon(
@@ -79,7 +86,7 @@ public class SailorProfileOverviewEntry extends Composite {
         this.uuidRef = entry.getKey();
         sectionTitleUi.initCollapsibility(contentContainerCompetitorsUi.getElement(), false);
 
-        Button removeButton = new Button("X");
+        final Button removeButton = new Button("X");
         removeButton.addClickHandler(e -> {
             e.preventDefault();
             e.getNativeEvent().preventDefault();
@@ -87,15 +94,15 @@ public class SailorProfileOverviewEntry extends Composite {
             ConfirmDialogFactory.showConfirmDialog(StringMessages.INSTANCE.sailorProfileRemoveMessage(),
                     new DialogCallback<Void>() {
 
-                @Override
-                public void ok(Void v) {
-                    presenter.removeSailorProfile(uuidRef);
-                }
+                        @Override
+                        public void ok(Void v) {
+                            presenter.removeSailorProfile(uuidRef);
+                        }
 
-                @Override
-                public void cancel() {
-                }
-            });
+                        @Override
+                        public void cancel() {
+                        }
+                    });
         });
 
         removeButton.addStyleName(SharedResources.INSTANCE.mainCss().buttonred());

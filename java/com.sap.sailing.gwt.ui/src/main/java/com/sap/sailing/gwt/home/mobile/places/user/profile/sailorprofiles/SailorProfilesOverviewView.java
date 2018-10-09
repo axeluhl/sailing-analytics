@@ -8,6 +8,7 @@ import com.sap.sailing.gwt.home.mobile.places.user.profile.UserProfileViewBase;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfilePresenter;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.view.SailorProfileView;
 
+/** interface abstracting {@link SailorProfilesOverviewImpl} */
 public interface SailorProfilesOverviewView
         extends UserProfileViewBase, SailorProfileView, SailorProfilesViewWithAuthenticationContext {
     public interface Presenter extends UserProfileViewBase.Presenter {

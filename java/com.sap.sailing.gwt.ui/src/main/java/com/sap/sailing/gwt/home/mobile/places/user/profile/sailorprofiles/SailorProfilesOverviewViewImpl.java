@@ -7,6 +7,7 @@ import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.Sai
 import com.sap.sailing.gwt.home.mobile.places.user.profile.AbstractUserProfileView;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
+/** wraps {@link SailorProfilesOverview} into {@link AbstractUserProfileView} */
 public class SailorProfilesOverviewViewImpl extends AbstractUserProfileView implements SailorProfilesOverviewView {
 
     private final SailorProfilesOverviewImpl sailorProfilesOverview;

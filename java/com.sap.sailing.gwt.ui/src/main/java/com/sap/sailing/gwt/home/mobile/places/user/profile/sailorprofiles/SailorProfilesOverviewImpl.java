@@ -20,7 +20,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
 /**
- * Implementation of {@link SailorProfileOverview} where users can see an overview over all his sailor profiles.
+ * Implementation of {@link SailorProfileOverview} where a user can see an overview over all his sailor profiles.
  */
 public class SailorProfilesOverviewImpl extends Composite implements SailorProfileOverview {
 

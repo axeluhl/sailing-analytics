@@ -22,6 +22,7 @@ import com.sap.sailing.gwt.ui.client.FlagImageResolverImpl;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.security.ui.authentication.AuthenticationContextEvent;
 
+/** main entry point for Sailor Profiles on mobile */
 public class SailorProfilesActivity extends AbstractUserProfileActivity
         implements SailorProfilesOverviewView.Presenter, HasLoginFormAndFactory {
 
@@ -41,12 +42,15 @@ public class SailorProfilesActivity extends AbstractUserProfileActivity
         editSailorProfilePresenter = new EditSailorProfilePresenter(clientFactory);
         if (place.getSailorProfileUuid() == null) {
             if (place.isCreateNew()) {
+                // no uuid & createNew -> go to details view to create new sailor profile
                 this.currentView = new SailorProfilesDetailsViewImpl(this);
             } else {
+                // no uuid & !createNew -> go to overview
                 this.currentView = new SailorProfilesOverviewViewImpl(this);
 
             }
         } else {
+            // existing uuid -> go to details
             this.currentView = new SailorProfilesDetailsViewImpl(this);
         }
         sailorProfileOverviewPresenter = new SailorProfileOverviewImplPresenter(this.currentView, this,
