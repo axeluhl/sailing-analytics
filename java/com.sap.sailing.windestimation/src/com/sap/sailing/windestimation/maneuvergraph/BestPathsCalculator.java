@@ -237,7 +237,7 @@ public class BestPathsCalculator {
                 if (!globalWindRange.isViolation() && globalWindRange.getAngleTowardStarboard() <= 20
                         && currentNode.getManeuverType() != ManeuverTypeForClassification.OTHER) {
                     DegreeBearingImpl windCourse = new DegreeBearingImpl(
-                            globalWindRange.getAvgWindCourse());
+                            currentNode.getValidWindRange().getAvgWindCourse());
                     Speed avgWindSpeed = getWindSpeed(currentLevel.getManeuver(), windCourse);
                     Wind wind = new WindImpl(currentLevel.getManeuver().getManeuverPosition(),
                             currentLevel.getManeuver().getManeuverTimePoint(),
