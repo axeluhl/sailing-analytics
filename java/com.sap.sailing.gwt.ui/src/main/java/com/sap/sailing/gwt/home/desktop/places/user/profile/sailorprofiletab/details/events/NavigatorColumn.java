@@ -10,8 +10,11 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.user.cellview.client.Column;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileDesktopResources;
 import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 
 public abstract class NavigatorColumn<T> extends Column<T, String> {
@@ -26,20 +29,11 @@ public abstract class NavigatorColumn<T> extends Column<T, String> {
 
                 @Override
                 public SafeHtml render(String url) {
-                    SafeHtmlBuilder builder = new SafeHtmlBuilder();
                     if (url != null) {
-                        builder.appendHtmlConstant("<a href='");
-                        builder.appendEscaped(url);
-                        builder.appendHtmlConstant("'><img src='");
-                        builder.appendHtmlConstant(
-                                SharedHomeResources.INSTANCE.arrowDownGrey().getSafeUri().asString());
-                        builder.appendHtmlConstant(
-                                "' style='-webkit-transform: rotate(270deg);-moz-transform: rotate(270deg);"
-                                        + "-ms-transform: rotate(270deg); transform: rotate(270deg);"
-                                        + "width:1.33333333333em; cursor:pointer; min-width:1.33333333em'");
-                        builder.appendHtmlConstant("/></a>");
+                        SafeUri src = SharedHomeResources.INSTANCE.arrowDownGrey().getSafeUri();
+                        return SailorProfileDesktopResources.TEMPLATE.navigator(UriUtils.fromSafeConstant(url), src);
                     }
-                    return builder.toSafeHtml();
+                    return new SafeHtmlBuilder().toSafeHtml();
                 }
 
                 @Override
