@@ -1,8 +1,6 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui"
-    xmlns:f="urn:import:com.sap.sailing.gwt.home.shared.partials.filter"
     xmlns:ms="urn:import:com.sap.sailing.gwt.home.mobile.partials.section"
-    xmlns:sh="urn:import:com.sap.sailing.gwt.home.mobile.partials.sectionHeader"
     xmlns:p="urn:import:com.sap.sailing.gwt.home.mobile.partials"
     xmlns:p2="urn:import:com.sap.sailing.gwt.home.shared.partials">
     <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />

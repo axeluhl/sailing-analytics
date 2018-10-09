@@ -8,6 +8,7 @@ import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.Sailor
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
+/** sailor profile details view with authentication wrapper for mobile */
 public class SailorProfilesDetailsViewImpl extends AbstractUserProfileView
         implements SailorProfilesViewWithAuthenticationContext, EditSailorProfileView {
 

@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.Sailor
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
+/** displays a single statistic table which contains all {@link SailorProfileStatsiticEntry} objects */
 public class SailorProfileStatisticTable extends Composite {
 
     private static SailorProfileOverviewEntryUiBinder uiBinder = GWT.create(SailorProfileOverviewEntryUiBinder.class);
@@ -46,11 +47,13 @@ public class SailorProfileStatisticTable extends Composite {
         this.sectionTitleUi
                 .setInnerText(SailorProfileNumericStatisticTypeFormatter.getDisplayName(type, stringMessages));
 
+        // add icon
         Image icon = new Image();
         icon.setUrl(SailorProfileNumericStatisticTypeFormatter.getIcon(type));
         icon.setSize("auto", "2em");
-
         this.sectionTitleIconUi.appendChild(icon.getElement());
+
+        // add SailorProfileStatisticTableEntry objects
         for (Entry<SimpleCompetitorWithIdDTO, ArrayList<SailorProfileStatisticDTO.SingleEntry>> entry : statistic
                 .getResult().entrySet()) {
             for (SingleEntry singleEntry : entry.getValue()) {

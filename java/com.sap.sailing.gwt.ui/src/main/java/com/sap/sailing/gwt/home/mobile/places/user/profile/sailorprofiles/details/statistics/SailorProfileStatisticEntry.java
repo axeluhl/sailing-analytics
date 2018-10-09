@@ -30,6 +30,10 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
+/**
+ * displays a single statistic value for a single user on mobile, shows event name, the time of interest, the value of
+ * the statistic, the name and club of the competitor, and a button to jump to the point in time in the race board
+ */
 public class SailorProfileStatisticEntry extends Composite {
 
     private static SailorProfileOverviewEntryUiBinder uiBinder = GWT.create(SailorProfileOverviewEntryUiBinder.class);
