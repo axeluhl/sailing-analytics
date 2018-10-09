@@ -198,13 +198,15 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         // should have one device registration event of type RegattaLogDeviceCompetitorMappingEventImpl...
         assertTrue(regatta.getRegattaLog().getUnrevokedEvents().stream()
                 .filter(e -> e instanceof RegattaLogDeviceCompetitorMappingEvent).count() == 1);
-        // ..with requested device id
-        assertEquals(deviceUuid, ((RegattaLogDeviceCompetitorMappingEvent) regatta.getRegattaLog().getUnrevokedEvents()
-                .iterator().next()).getDevice().getStringRepresentation());
+        // ...with requested device id
+        assertEquals(deviceUuid,
+                ((RegattaLogDeviceCompetitorMappingEvent) regatta.getRegattaLog().getUnrevokedEvents().stream()
+                        .filter(e -> e instanceof RegattaLogDeviceCompetitorMappingEvent).findFirst().get()).getDevice()
+                                .getStringRepresentation());
 
         // Same deviceUuid for registration should fail
-        Response response = spyResource.createAndAddCompetitor(regatta.getName(), boatClassName, null, "GER", null, null, null,
-                "Max Mustermann", null, deviceUuid);
+        Response response = spyResource.createAndAddCompetitor(regatta.getName(), boatClassName, null, "GER", null,
+                null, null, "Max Mustermann", null, deviceUuid);
         assertTrue("Reponse http status should be forbidden (403) but is " + response.getStatus(),
                 response.getStatus() == Status.FORBIDDEN.getStatusCode());
     }
