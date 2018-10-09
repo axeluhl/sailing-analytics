@@ -35,7 +35,6 @@ import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.datamining.SailingPredefinedQueries;
-import com.sap.sailing.domain.abstractlog.AbstractLogEventAuthor;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
@@ -366,7 +365,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 //case 1: admin or regatta owner is registering a competitor
                 subject.checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regattaName));
                 registerCompetitor = true;
-            } else if (subject.isAuthenticated() && regatta.getCompetitorRegistrationType().isOpen()) {  
+            } else if (subject.isAuthenticated() && regatta.getCompetitorRegistrationType().isOpen()) {
                 //case 2: "unprivileged" authenticated user is registering
                 registerCompetitor = true;
                 //case 2.1: with device                                                                                 //TODO: correct to checkin in with device?
@@ -437,10 +436,9 @@ public class RegattasResource extends AbstractSailingServerResource {
                 if (checkInCompetitor) {
                     final DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
                     final TimePoint now = MillisecondsTimePoint.now();
-                    RegattaLogDeviceMappingEventImpl<Competitor> event = 
-                            new RegattaLogDeviceCompetitorMappingEventImpl(now, now, new LogEventAuthorImpl(AbstractLogEventAuthor.NAME_COMPATIBILITY,
-                                    AbstractLogEventAuthor.PRIORITY_COMPATIBILITY), UUID.randomUUID(), competitor, device,
-                            now, /* to */ null);
+                    RegattaLogDeviceMappingEventImpl<Competitor> event = new RegattaLogDeviceCompetitorMappingEventImpl(
+                            now, now, new LogEventAuthorImpl(name, 0), UUID.randomUUID(), competitor, device, now,
+                            /* to */ null);
                     regatta.getRegattaLog().add(event);
                 }
             } else {
