@@ -33,7 +33,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
     protected final Map<DetailType, CheckBox> overallDetailCheckboxes;
     protected final StringMessages stringMessages;
     protected LongBox refreshIntervalInSecondsBox;
-    protected final boolean canBoatInfoBeShown;
+    protected final boolean canBoatInfoBeShownAsOverallDetail;
     
     protected RadioButton explicitRaceColumnSelectionRadioBtn;
     protected RadioButton lastNRacesColumnSelectionRadioBtn;
@@ -47,10 +47,10 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
     protected Iterable<DetailType> availableDetailTypes;
 
     protected LeaderboardSettingsDialogComponent(T initialSettings, StringMessages stringMessages,
-            Iterable<DetailType> availableDetailTypes, boolean canBoatInfoBeShown) {
+            Iterable<DetailType> availableDetailTypes, boolean canBoatInfoBeShownAsOverallDetail) {
         this.initialSettings = initialSettings;
         this.stringMessages = stringMessages;
-        this.canBoatInfoBeShown = canBoatInfoBeShown;
+        this.canBoatInfoBeShownAsOverallDetail = canBoatInfoBeShownAsOverallDetail;
         maneuverDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         legDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
         raceDetailCheckboxes = new LinkedHashMap<DetailType, CheckBox>();
@@ -111,16 +111,14 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
                 raceDetailDialogContent.addStyleName("dialogInnerContent");
                 raceDetailDialog.add(raceDetailDialogContent);
             }
-
-            // type == RACE_DISPLAY_BOATS -> !canBoatInfoBeShown [logical implication]
-            // if the type is equal to RACE_DISPLAY_BOATS, then canBoatInfoBeShown must be false to create a checkbox
-            // show 'Boats' checkbox in RaceDetailPanel only, if the competitors use different boats in each race
-            if (type != DetailType.RACE_DISPLAY_BOATS || !canBoatInfoBeShown) {
-                CheckBox checkbox = createAndRegisterCheckbox(dialog, type, currentRaceDetailSelection.contains(type),
-                        raceDetailCheckboxes);
-                raceDetailDialogContent.add(checkbox);
-                detailCountInCurrentFlowPanel++;
+            if (type == DetailType.RACE_DISPLAY_BOATS && canBoatInfoBeShownAsOverallDetail) {
+                // we do not need race level boats, if the boats do not change
+                continue;
             }
+            CheckBox checkbox = createAndRegisterCheckbox(dialog, type, currentRaceDetailSelection.contains(type),
+                    raceDetailCheckboxes);
+            raceDetailDialogContent.add(checkbox);
+            detailCountInCurrentFlowPanel++;
         }
         // Make it possible to configure added points
         FlowPanel addedScoresFlowPanel = new FlowPanel();
@@ -182,7 +180,7 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         showCompetitorBoatInfoColumnCheckBox = dialog.createCheckbox(stringMessages.showCompetitorBoatColumn());
         showCompetitorBoatInfoColumnCheckBox.setValue(initialSettings.isShowCompetitorBoatInfoColumn());
         overallDetailDialogContentSecondLine.add(showCompetitorBoatInfoColumnCheckBox);
-        showCompetitorBoatInfoColumnCheckBox.setVisible(canBoatInfoBeShown);
+        showCompetitorBoatInfoColumnCheckBox.setVisible(canBoatInfoBeShownAsOverallDetail);
         isCompetitorNationalityColumnVisible = dialog.createCheckbox(stringMessages.showCompetitorNationalityColumn());
         isCompetitorNationalityColumnVisible.setTitle(stringMessages.showCompetitorNationalityColumnTooltip());
         isCompetitorNationalityColumnVisible.setValue(initialSettings.isShowCompetitorNationality());
