@@ -37,6 +37,7 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 
 /**
  * Implementation of {@link EditSailorProfileView} where users can view the details of a SailorProfile and edit them.
+ * The data is loaded when the accordion is opened for the first time.
  */
 public class ShowAndEditSailorProfile extends Composite implements EditSailorProfileView {
 
@@ -98,7 +99,7 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
         boatClassesUi.setItems(entry.getBoatclasses());
         accordionEventsUi.clear();
 
-        // Get events
+        // Get events asynchronously
         presenter.getDataProvider().getEvents(entry.getKey(), new AsyncCallback<SailorProfileEventsDTO>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -115,17 +116,17 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
                 }
             }
 
+            /** adds empty widget */
             private void appendEmptyMessageIfNecessary(SailorProfileEventsDTO result) {
-
                 if (Util.isEmpty(result.getParticipatedEvents())) {
                     createEventsEmptyUiIfNecessary();
                     accordionEventsUi.addWidget(eventsEmptyUi);
-                }
-                else if (eventsEmptyUi != null && eventsEmptyUi.isAttached()) {
+                } else if (eventsEmptyUi != null && eventsEmptyUi.isAttached()) {
                     eventsEmptyUi.removeFromParent();
                 }
             }
 
+            /** creates empty widget */
             private void createEventsEmptyUiIfNecessary() {
                 if (eventsEmptyUi == null) {
                     eventsEmptyUi = new Label(StringMessages.INSTANCE.noEventsFoundForCompetitors());
@@ -136,12 +137,20 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
         });
 
         accordionStatisticsUi.clear();
+
+        setupTables(entry);
+
+    }
+
+    /** create tables for statistic types */
+    private void setupTables(SailorProfileDTO entry) {
         for (SailorProfileNumericStatisticType type : SailorProfileNumericStatisticType.values()) {
             SailorProfileStatisticTable table = new SailorProfileStatisticTable(flagImageResolver, type, i18n);
             accordionStatisticsUi.addWidget(table);
             if (accordionStatisticsUi.isExpanded()) {
                 updateStatistic(entry, type, table);
             } else {
+                // load the statistic data when the accordion is expanded for the first time
                 accordionStatisticsUi.addAccordionListener(new AccordionExpansionListener() {
                     @Override
                     public void onExpansion(boolean expanded) {
@@ -153,9 +162,9 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
                 });
             }
         }
-
     }
 
+    /** retrieve and update the statistic for a given type of a sailor profile entry */
     private void updateStatistic(SailorProfileDTO entry, SailorProfileNumericStatisticType type,
             SailorProfileStatisticTable table) {
         presenter.getDataProvider().getStatisticFor(entry.getKey(), type,

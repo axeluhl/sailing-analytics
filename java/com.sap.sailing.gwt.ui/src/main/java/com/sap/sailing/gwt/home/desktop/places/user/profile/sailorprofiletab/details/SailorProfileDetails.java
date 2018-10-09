@@ -10,6 +10,10 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSai
 import com.sap.sailing.gwt.home.shared.usermanagement.decorator.AuthorizedContentDecoratorDesktop;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
+/**
+ * View element which wraps around {@link ShowAndEditSailorProfile} and provides an
+ * {@link AuthorizedContentDecoratorDesktop}
+ */
 public class SailorProfileDetails extends Composite implements SailorProfileDetailsView {
 
     interface MyBinder extends UiBinder<Widget, SailorProfileDetails> {
