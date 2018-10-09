@@ -15,7 +15,7 @@ import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO.SingleEntry;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.statistic.SailorProfileNumericStatisticTypeFormater;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.statistic.SailorProfileNumericStatisticTypeFormatter;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfileMobileResources;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -44,10 +44,10 @@ public class SailorProfileStatisticTable extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         SailorProfileMobileResources.INSTANCE.css().ensureInjected();
         this.sectionTitleUi
-                .setInnerText(SailorProfileNumericStatisticTypeFormater.getDisplayName(type, stringMessages));
+                .setInnerText(SailorProfileNumericStatisticTypeFormatter.getDisplayName(type, stringMessages));
 
         Image icon = new Image();
-        icon.setUrl(SailorProfileNumericStatisticTypeFormater.getIcon(type));
+        icon.setUrl(SailorProfileNumericStatisticTypeFormatter.getIcon(type));
         icon.setSize("auto", "2em");
 
         this.sectionTitleIconUi.appendChild(icon.getElement());

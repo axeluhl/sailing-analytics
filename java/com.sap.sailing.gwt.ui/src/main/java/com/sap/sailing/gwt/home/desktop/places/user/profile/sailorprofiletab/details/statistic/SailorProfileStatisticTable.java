@@ -69,8 +69,8 @@ public class SailorProfileStatisticTable extends Composite {
         SailorProfileDesktopResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         setupTable();
-        titleUi.setInnerText(SailorProfileNumericStatisticTypeFormater.getDisplayName(type, stringMessages));
-        titleIconUi.setUrl(SailorProfileNumericStatisticTypeFormater.getIcon(type));
+        titleUi.setInnerText(SailorProfileNumericStatisticTypeFormatter.getDisplayName(type, stringMessages));
+        titleIconUi.setUrl(SailorProfileNumericStatisticTypeFormatter.getIcon(type));
     }
 
     public void setData(List<Pair<SimpleCompetitorWithIdDTO, SingleEntry>> data) {
@@ -87,7 +87,7 @@ public class SailorProfileStatisticTable extends Composite {
         }
 
         sailorProfilesTable.addColumn(actualValueColumn,
-                SailorProfileNumericStatisticTypeFormater.getColumnHeadingName(type, stringMessages));
+                SailorProfileNumericStatisticTypeFormatter.getColumnHeadingName(type, stringMessages));
         sailorProfilesTable.addColumn(competitorColumn, StringMessages.INSTANCE.competitor());
         sailorProfilesTable.addColumn(clubNameColumn, StringMessages.INSTANCE.name());
         sailorProfilesTable.addColumn(navigatorColumn);
@@ -141,7 +141,7 @@ public class SailorProfileStatisticTable extends Composite {
             new TextCell()) {
         @Override
         public String getValue(Pair<SimpleCompetitorWithIdDTO, SingleEntry> entry) {
-            return SailorProfileNumericStatisticTypeFormater.format(type, entry.getB().getValue(), stringMessages);
+            return SailorProfileNumericStatisticTypeFormatter.format(type, entry.getB().getValue(), stringMessages);
         }
     };
     private final Column<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, SimpleCompetitorWithIdDTO> competitorColumn = new Column<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, SimpleCompetitorWithIdDTO>(
@@ -177,7 +177,7 @@ public class SailorProfileStatisticTable extends Composite {
             new TextCell()) {
         @Override
         public String getValue(Pair<SimpleCompetitorWithIdDTO, SingleEntry> entry) {
-            return SailorProfileNumericStatisticTypeFormater.format(entry.getB().getRelatedTimePointOrNull());
+            return SailorProfileNumericStatisticTypeFormatter.format(entry.getB().getRelatedTimePointOrNull());
         }
     };
 }

@@ -9,9 +9,9 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.TimePoint;
 
 /** contains methods for formatting numeric statistics in sailor profiles */
-public final class SailorProfileNumericStatisticTypeFormater {
+public final class SailorProfileNumericStatisticTypeFormatter {
 
-    private SailorProfileNumericStatisticTypeFormater() {
+    private SailorProfileNumericStatisticTypeFormatter() {
     }
 
     private static final DateTimeFormat dateToHoursAndMinutesFormat = DateTimeFormat.getFormat("HH:mm");

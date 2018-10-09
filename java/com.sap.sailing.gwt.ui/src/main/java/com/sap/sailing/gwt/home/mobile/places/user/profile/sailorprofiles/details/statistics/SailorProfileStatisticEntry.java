@@ -17,7 +17,7 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileN
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType.StatisticType;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO.SingleEntry;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.events.CompetitorWithoutClubnameItemDescription;
-import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.statistic.SailorProfileNumericStatisticTypeFormater;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.statistic.SailorProfileNumericStatisticTypeFormatter;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfileMobileResources;
 import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
@@ -70,7 +70,7 @@ public class SailorProfileStatisticEntry extends Composite {
         SailorProfileMobileResources.INSTANCE.css().ensureInjected();
 
         if (type.getAggregationType() != StatisticType.AVERAGE) {
-            timeUi.setInnerText(SailorProfileNumericStatisticTypeFormater.format(entry.getRelatedTimePointOrNull()));
+            timeUi.setInnerText(SailorProfileNumericStatisticTypeFormatter.format(entry.getRelatedTimePointOrNull()));
             timeLabelUi.setInnerText(stringMessages.time() + ": ");
             eventNameUi.setInnerText(entry.getLeaderboardNameOrNull() + " - " + entry.getRaceNameOrNull());
             showPointInTimeButtonUi.addClickHandler(e -> showInRaceboard(entry, type, competitor.getIdAsString()));
@@ -81,8 +81,8 @@ public class SailorProfileStatisticEntry extends Composite {
         }
 
         valueLabelUi.setInnerText(
-                SailorProfileNumericStatisticTypeFormater.getColumnHeadingName(type, stringMessages) + ": ");
-        valueUi.setInnerText(SailorProfileNumericStatisticTypeFormater.format(type, entry.getValue(), stringMessages));
+                SailorProfileNumericStatisticTypeFormatter.getColumnHeadingName(type, stringMessages) + ": ");
+        valueUi.setInnerText(SailorProfileNumericStatisticTypeFormatter.format(type, entry.getValue(), stringMessages));
         competitorUi.add(new CompetitorWithoutClubnameItemDescription(competitor, flagImageResolver));
         clubNameUi.setInnerText(competitor.getName());
 
