@@ -51,13 +51,17 @@ public class GetEventsForSailorProfileAction implements SailingAction<SailorProf
         SailorProfilePreference pref = findSailorProfile(store, prefs);
         Collection<ParticipatedEventDTO> participatedEvents = new ArrayList<>();
 
+        // iterate over all existing events
         for (Event event : ctx.getRacingEventService().getAllEvents()) {
             Collection<ParticipatedRegattaDTO> participatedRegattas = new ArrayList<>();
+            // iterate over the leaderboard groups
             for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
                 if (leaderboardGroup.hasOverallLeaderboard()) {
                     leaderboardGroup.getOverallLeaderboard();
 
                 }
+
+                // iterate over the leaderboards in each leaderboard group
                 for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
 
                     // check if this leaderboard contains at least one of the selected competitors
@@ -120,6 +124,7 @@ public class GetEventsForSailorProfileAction implements SailingAction<SailorProf
         return new SailorProfileEventsDTO(participatedEvents);
     }
 
+    /** @return find SailorProfilePreference in SailorProfilePreferences by using {@link #uuid} */
     @GwtIncompatible
     private SailorProfilePreference findSailorProfile(CompetitorAndBoatStore store, SailorProfilePreferences prefs) {
         if (prefs == null) {

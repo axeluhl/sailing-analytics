@@ -24,8 +24,11 @@ import com.sap.sailing.server.impl.preferences.model.SailorProfilePreference;
 
 public interface SailorProfileConverter {
     /**
+     * converts the {@link SailorProfilePreference} to a {@link SailorProfileDTO} by converting the competitors and
+     * retrieve the corresponding boatclasses.
+     * 
      * @param notFoundOnServer
-     * @return converted SailorProfileDTO from SailorProfilePreference
+     * @return converted {@link SailorProfileDTO} from {@link SailorProfilePreference}
      */
     @GwtIncompatible
     default SailorProfileDTO convertSailorProfilePreferenceToDto(final SailorProfilePreference pref,
@@ -36,22 +39,25 @@ public interface SailorProfileConverter {
         } else {
             result = new SailorProfileDTO(pref.getUuid(), pref.getName(),
                     convertCompetitorsToDTOs(pref.getCompetitors()), new ArrayList<BadgeDTO>(),
-                    getCorrespondingBoatDTOs(pref.getCompetitors(), store, racingEventService));
+                    getCorrespondingBoatClassesDTOs(pref.getCompetitors(), store, racingEventService));
         }
         return result;
 
     }
 
-    /** @return converted list of SimpleCompetitorWithIdDTOs from Competitors */
+    /** @return converted list of SimpleCompetitorWithIdDTOs from Competitors without null values */
     @GwtIncompatible
     default List<SimpleCompetitorWithIdDTO> convertCompetitorsToDTOs(final Iterable<Competitor> comps) {
         return StreamSupport.stream(comps.spliterator(), false).filter(c -> c != null)
                 .map(c -> new SimpleCompetitorWithIdDTO(c)).collect(Collectors.toList());
     }
 
-    /** get the corresponding boat for each competitor in the list of competitors */
+    /**
+     * get the corresponding boat class for each competitor in the list of competitors from the
+     * {@link CompetitorAndBoatStore} and convert it to {@link BoatClassDTO}
+     */
     @GwtIncompatible
-    default Set<BoatClassDTO> getCorrespondingBoatDTOs(final Iterable<Competitor> comps,
+    default Set<BoatClassDTO> getCorrespondingBoatClassesDTOs(final Iterable<Competitor> comps,
             final CompetitorAndBoatStore store, RacingEventService racingEventService) {
         final Set<BoatClassDTO> boatclasses = new HashSet<>();
         for (Competitor c : comps) {
@@ -71,6 +77,10 @@ public interface SailorProfileConverter {
         return boatclasses;
     }
 
+    /**
+     * get the corresponding boat class for each competitor in the list of competitors from the leaderboard via the
+     * {@link RacingEventService}
+     */
     @GwtIncompatible
     default BoatClass getBoatClassForCompetitorWithoutBoatClass(RacingEventService racingEventService, Competitor c) {
         for (Event event : racingEventService.getAllEvents()) {

@@ -37,6 +37,7 @@ public class GetSailorProfileAction implements SailingAction<SailorProfileDTO>, 
         return convertSailorProfilePreferenceToDto(pref, store, ctx.getRacingEventService());
     }
 
+    /** find the SailorProfilePreference in SailorProfilePreferences from the {@link #uuid} */
     @GwtIncompatible
     private SailorProfilePreference findSailorProfile(CompetitorAndBoatStore store, SailorProfilePreferences prefs) {
         SailorProfilePreference result = null;

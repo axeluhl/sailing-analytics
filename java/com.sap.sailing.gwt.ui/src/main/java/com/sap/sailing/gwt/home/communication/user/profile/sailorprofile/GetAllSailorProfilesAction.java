@@ -27,10 +27,12 @@ public class GetAllSailorProfilesAction implements SailingAction<SailorProfilesD
         SailorProfilePreferences preferences = ctx.getPreferenceForCurrentUser(SailorProfilePreferences.PREF_NAME);
         SailorProfilesDTO result;
         List<SailorProfileDTO> list = new ArrayList<>();
+
+        // load sailor profile from preferences if available
         if (preferences != null) {
-            StreamSupport.stream(preferences.getSailorProfiles().spliterator(), false).forEach(s -> list.add(
-                    convertSailorProfilePreferenceToDto(s, ctx.getRacingEventService().getCompetitorAndBoatStore(),
-                            ctx.getRacingEventService())));
+            StreamSupport.stream(preferences.getSailorProfiles().spliterator(), false)
+                    .forEach(s -> list.add(convertSailorProfilePreferenceToDto(s,
+                            ctx.getRacingEventService().getCompetitorAndBoatStore(), ctx.getRacingEventService())));
         }
         result = new SailorProfilesDTO(list);
         return result;
