@@ -13,9 +13,14 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.shared.utils.CollapseAnimation;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
+/**
+ * This object is similar to the accordion ({@link MobileSection})on mobile. It has a header with a title and a
+ * collapsable content panel.
+ */
 public class DesktopAccordion extends Composite {
 
     interface DesktopAccordionUiBinder extends UiBinder<Widget, DesktopAccordion> {
@@ -36,6 +41,7 @@ public class DesktopAccordion extends Composite {
 
     private final CollapseAnimation animation;
 
+    /** true, as soon as the accordion was expanded once. */
     private boolean wasOpenend;
     private List<AccordionExpansionListener> accordionListeners;
 

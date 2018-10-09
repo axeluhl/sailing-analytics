@@ -45,9 +45,6 @@ import com.sap.sailing.gwt.ui.leaderboard.MultiRaceLeaderboardPanel;
 import com.sap.sse.gwt.client.shared.settings.DefaultOnSettingsLoadedCallback;
 import com.sap.sse.gwt.dispatch.shared.commands.CollectionResult;
 
-/**
- * Created by pgtaboada on 25.11.14.
- */
 public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<RegattaLeaderboardPlace> {
     interface MyBinder extends UiBinder<FlowPanel, RegattaLeaderboardTabView> {
     }
@@ -126,7 +123,12 @@ public class RegattaLeaderboardTabView extends SharedLeaderboardRegattaTabView<R
                         leaderboard.updatedLeaderboard(leaderboardPanel.getLeaderboard());
                     }
 
-                    // select competitors from URL arguments
+                    selectCompetitorsFromURLArgumentsWhenReady(myPlace, leaderboardPanel);
+                }
+
+                private void selectCompetitorsFromURLArgumentsWhenReady(final RegattaLeaderboardPlace myPlace,
+                        MultiRaceLeaderboardPanel leaderboardPanel) {
+                    // select competitors from URL arguments if present
                     leaderboardPanel.addLeaderboardUpdateListener(new LeaderboardUpdateListener() {
                         @Override
                         public void updatedLeaderboard(LeaderboardDTO leaderboard) {

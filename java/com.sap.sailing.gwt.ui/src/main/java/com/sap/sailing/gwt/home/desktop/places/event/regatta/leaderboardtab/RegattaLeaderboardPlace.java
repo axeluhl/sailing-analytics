@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.place.shared.Prefix;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.AbstractEventRegattaPlace;
 import com.sap.sailing.gwt.home.shared.places.PlaceTokenPrefixes;
@@ -29,9 +28,7 @@ public class RegattaLeaderboardPlace extends AbstractEventRegattaPlace {
 
     public RegattaLeaderboardPlace(EventContext context, Set<String> selectedCompetitors) {
         super(context);
-        GWT.log(selectedCompetitors + "");
         if (selectedCompetitors != null) {
-            GWT.log(selectedCompetitors.size() + "");
             this.selectedCompetitors.addAll(selectedCompetitors);
         }
     }
