@@ -9,6 +9,7 @@ import com.sap.sailing.domain.base.SharedDomainFactory;
 import com.sap.sse.common.IsManagedByCache;
 import com.sap.sse.common.impl.NamedImpl;
 
+/** used in {@link com.sap.sailing.server.impl.preferences.model.SailorProfilePreference} to store sailor profiles */
 public class SailorProfileImpl extends NamedImpl implements SailorProfile {
     private static final long serialVersionUID = -2714015903187029053L;
 
