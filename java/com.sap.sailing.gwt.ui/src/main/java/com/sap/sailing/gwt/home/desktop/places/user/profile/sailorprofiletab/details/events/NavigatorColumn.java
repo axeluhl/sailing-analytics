@@ -17,6 +17,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileDesktopResources;
 import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 
+/** NavigatorColumn to */
 public abstract class NavigatorColumn<T> extends Column<T, String> {
 
     public NavigatorColumn() {

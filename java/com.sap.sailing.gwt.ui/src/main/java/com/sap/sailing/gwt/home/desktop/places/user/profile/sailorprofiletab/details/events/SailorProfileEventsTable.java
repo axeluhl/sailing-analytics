@@ -20,12 +20,14 @@ import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableRes
 import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedEventDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedRegattaDTO;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab.RegattaLeaderboardPlace;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.ShowAndEditSailorProfile;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sse.common.Util;
 
+/** This element displays the events a sailor has participated in in the {@link ShowAndEditSailorProfile} view. */
 public class SailorProfileEventsTable extends Composite {
 
     interface MyBinder extends UiBinder<Widget, SailorProfileEventsTable> {
@@ -49,14 +51,12 @@ public class SailorProfileEventsTable extends Composite {
         this.flagImageResolver = flagImageResolver;
         this.placeController = placeController;
         initWidget(uiBinder.createAndBindUi(this));
-        setupTable();
+        setupTable(event.getParticipatedRegattas());
 
         titleUi.setInnerText(event.getEventName());
-        sailorProfilesTable.setPageSize(Util.size(event.getParticipatedRegattas()));
-        sailorProfilesTable.setList(event.getParticipatedRegattas());
     }
 
-    private void setupTable() {
+    private void setupTable(Iterable<ParticipatedRegattaDTO> regattas) {
         sailorProfilesTable.addColumn(regattaNameColumn, StringMessages.INSTANCE.regattaName());
         sailorProfilesTable.addColumn(regattaRank, StringMessages.INSTANCE.regattaRank());
         sailorProfilesTable.addColumn(competitorColumn, StringMessages.INSTANCE.competitor());
@@ -71,6 +71,9 @@ public class SailorProfileEventsTable extends Composite {
                 placeController.goTo(getTargetPlace(entry));
             }
         });
+
+        sailorProfilesTable.setPageSize(Util.size(regattas));
+        sailorProfilesTable.setList(regattas);
     }
 
     private RegattaLeaderboardPlace getTargetPlace(ParticipatedRegattaDTO entry) {

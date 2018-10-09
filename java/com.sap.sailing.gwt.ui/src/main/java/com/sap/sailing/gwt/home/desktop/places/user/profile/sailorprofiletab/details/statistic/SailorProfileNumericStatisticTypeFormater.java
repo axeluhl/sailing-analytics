@@ -1,12 +1,18 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.statistic;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType;
 import com.sap.sailing.gwt.home.shared.partials.statistics.StatisticsBoxResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.TimePoint;
 
-public class SailorProfileNumericStatisticTypeFormater {
+/** contains methods for formatting numeric statistics in sailor profiles */
+public final class SailorProfileNumericStatisticTypeFormater {
+
+    private SailorProfileNumericStatisticTypeFormater() {
+    }
 
     private static final DateTimeFormat dateToHoursAndMinutesFormat = DateTimeFormat.getFormat("HH:mm");
 
@@ -25,25 +31,28 @@ public class SailorProfileNumericStatisticTypeFormater {
         }
     }
 
-    public static String getIcon(SailorProfileNumericStatisticType type) {
+    /** @return an icon safe uri corresponding to the given statistic type */
+    public static SafeUri getIcon(SailorProfileNumericStatisticType type) {
         switch (type) {
         case AVERAGE_STARTLINE_DISTANCE:
-            return StatisticsBoxResources.INSTANCE.fastestSailorWhite().getSafeUri().asString();
+            return StatisticsBoxResources.INSTANCE.fastestSailorWhite().getSafeUri();
         case BEST_DISTANCE_TO_START:
-            return StatisticsBoxResources.INSTANCE.fastestSailorWhite().getSafeUri().asString();
+            return StatisticsBoxResources.INSTANCE.fastestSailorWhite().getSafeUri();
         case BEST_STARTLINE_SPEED:
-            return StatisticsBoxResources.INSTANCE.maxSpeedWhite().getSafeUri().asString();
+            return StatisticsBoxResources.INSTANCE.maxSpeedWhite().getSafeUri();
         case MAX_SPEED:
-            return StatisticsBoxResources.INSTANCE.maxSpeedWhite().getSafeUri().asString();
+            return StatisticsBoxResources.INSTANCE.maxSpeedWhite().getSafeUri();
         default:
-            return "";
+            return UriUtils.fromSafeConstant("");
         }
     }
 
+    /** @return the {@link #timePoint} formatted as hours and minutes */
     public static String format(TimePoint timePoint) {
         return dateToHoursAndMinutesFormat.format(timePoint.asDate());
     }
 
+    /** @return the formatted value with unit corresponding to the given statistic type */
     public static String format(SailorProfileNumericStatisticType type, Double value, StringMessages stringMessages) {
         switch (type) {
         case AVERAGE_STARTLINE_DISTANCE:
@@ -58,6 +67,7 @@ public class SailorProfileNumericStatisticTypeFormater {
         }
     }
 
+    /** @return the column heading name corresponding to the given statistic type */
     public static String getColumnHeadingName(SailorProfileNumericStatisticType type, StringMessages stringMessages) {
         switch (type) {
         case AVERAGE_STARTLINE_DISTANCE:
