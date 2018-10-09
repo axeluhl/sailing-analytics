@@ -24,7 +24,7 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
         double transitionProbabilityUntilCurrentNode = -1;
         IntersectedWindRange intersectedWindRangeUntilCurrentNode = null;
         for (GraphNode node : currentLevel.getLevelNodes()) {
-            IntersectedWindRange intersectedWindRange = previousNodeInfo.getWindRange()
+            IntersectedWindRange intersectedWindRange = previousNode.getValidWindRange()
                     .intersect(node.getValidWindRange());
             double transitionProbability = intersectedWindRange
                     .getPenaltyFactorForTransition(secondsPassedSincePreviousWindRange);

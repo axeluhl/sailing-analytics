@@ -9,19 +9,19 @@ import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverClassifiersCache;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverFeatures;
 import com.sap.sailing.windestimation.polarsfitting.PolarsFittingWindEstimation;
-import com.sap.sailing.windestimation.tackoutlierremoval.TackOutlierRemovalWindEstimator;
+import com.sap.sailing.windestimation.tackoutlierremoval.MeanBasedOutlierRemovalWindEstimator;
 
 /**
  * 
  * @author Vladislav Chumak (D069712)
  *
  */
-public class TackOutlierRemovalBasedWindEstimatorImpl extends AbstractManeuverForEstimationBasedWindEstimatorImpl {
+public class OutlierRemovalMeanBasedWindEstimatorImpl extends AbstractManeuverForEstimationBasedWindEstimatorImpl {
 
     private final PolarDataService polarService;
     private final ManeuverFeatures maneuverFeatures;
 
-    public TackOutlierRemovalBasedWindEstimatorImpl(PolarDataService polarService, ManeuverFeatures maneuverFeatures) {
+    public OutlierRemovalMeanBasedWindEstimatorImpl(PolarDataService polarService, ManeuverFeatures maneuverFeatures) {
         this.polarService = polarService;
         this.maneuverFeatures = maneuverFeatures;
     }
@@ -29,7 +29,7 @@ public class TackOutlierRemovalBasedWindEstimatorImpl extends AbstractManeuverFo
     @Override
     public List<WindWithConfidence<Void>> estimateWindTrackWithManeuvers(
             RaceWithEstimationData<ManeuverForEstimation> race) {
-        TackOutlierRemovalWindEstimator estimator = new TackOutlierRemovalWindEstimator(race.getCompetitorTracks(),
+        MeanBasedOutlierRemovalWindEstimator estimator = new MeanBasedOutlierRemovalWindEstimator(race.getCompetitorTracks(),
                 new ManeuverClassifiersCache(60000, maneuverFeatures, polarService),
                 maneuverFeatures.isPolarsInformation() ? new PolarsFittingWindEstimation(polarService) : null);
         return estimator.estimateWindTrack();

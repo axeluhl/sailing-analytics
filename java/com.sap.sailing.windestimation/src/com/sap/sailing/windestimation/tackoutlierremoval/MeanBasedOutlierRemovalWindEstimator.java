@@ -7,6 +7,7 @@ import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
+import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
 import com.sap.sailing.windestimation.WindTrackEstimator;
@@ -21,12 +22,14 @@ import com.sap.sailing.windestimation.util.WindUtil;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Speed;
 
-public class TackOutlierRemovalWindEstimator2 implements WindTrackEstimator {
+public class MeanBasedOutlierRemovalWindEstimator implements WindTrackEstimator {
 
     private static final double MAX_DEVIATON_FROM_AVG_WIND_COURSE = 30;
     private final List<WindWithConfidence<Void>> windTrackWithConfidence = new ArrayList<>();
+    private ScalableBearing windCourseSum = null;
+    private double likelihoodSum = 0;
 
-    public TackOutlierRemovalWindEstimator2(
+    public MeanBasedOutlierRemovalWindEstimator(
             List<CompetitorTrackWithEstimationData<ManeuverForEstimation>> competitorTracks,
             ManeuverClassifiersCache maneuverClassifiersCache, PolarsFittingWindEstimation polarsFitting) {
         for (CompetitorTrackWithEstimationData<ManeuverForEstimation> competitorTrack : competitorTracks) {
@@ -55,6 +58,11 @@ public class TackOutlierRemovalWindEstimator2 implements WindTrackEstimator {
                                 new KnotSpeedWithBearingImpl(windSpeed.getKnots(), windCourse));
                         windTrackWithConfidence.add(new WindWithConfidenceImpl<Void>(wind, highestLikelihood, null,
                                 windSpeed.getKnots() >= 2));
+                        ScalableBearing scalableWindCourse = new ScalableBearing(wind.getBearing())
+                                .multiply(highestLikelihood);
+                        likelihoodSum += highestLikelihood;
+                        windCourseSum = windCourseSum == null ? scalableWindCourse
+                                : windCourseSum.add(scalableWindCourse);
                     }
                 }
             }
@@ -63,49 +71,26 @@ public class TackOutlierRemovalWindEstimator2 implements WindTrackEstimator {
 
     @Override
     public List<WindWithConfidence<Void>> estimateWindTrack() {
-        Wind previous = null;
-        Wind current = null;
-        Wind firstNonOutlier = null;
-        Wind firstNearlyNonOutlier = null;
-        for (WindWithConfidence<Void> windWithConfidence : windTrackWithConfidence) {
-            Wind next = windWithConfidence.getObject();
-            if (current != null && Math.abs(current.getBearing().getDifferenceTo(next.getBearing())
-                    .getDegrees()) <= MAX_DEVIATON_FROM_AVG_WIND_COURSE) {
-                if (firstNearlyNonOutlier == null) {
-                    firstNearlyNonOutlier = current;
-                }
-                if (previous != null && Math.abs(current.getBearing().getDifferenceTo(previous.getBearing())
-                        .getDegrees()) <= MAX_DEVIATON_FROM_AVG_WIND_COURSE) {
-                    firstNonOutlier = current;
-                    break;
-                }
-            }
-            previous = current;
-            current = next;
-        }
-
-        Wind lastNonOutlier = firstNonOutlier == null ? firstNearlyNonOutlier : firstNonOutlier;
-        if (lastNonOutlier == null) {
-            return windTrackWithConfidence;
-        }
         List<WindWithConfidence<Void>> windFixes = new ArrayList<>();
         double sumOfConfidencesOfIncludedFixes = 0;
         double sumOfConfidencesOfExcludedFixes = 0;
-        for (WindWithConfidence<Void> windWithConfidence : windTrackWithConfidence) {
-            current = windWithConfidence.getObject();
-            if (Math.abs(current.getBearing().getDifferenceTo(lastNonOutlier.getBearing())
-                    .getDegrees()) <= MAX_DEVIATON_FROM_AVG_WIND_COURSE) {
-                windFixes.add(windWithConfidence);
-                lastNonOutlier = current;
-                sumOfConfidencesOfIncludedFixes += windWithConfidence.getConfidence();
-            } else {
-                sumOfConfidencesOfExcludedFixes += windWithConfidence.getConfidence();
+        if (windCourseSum != null) {
+            Bearing averageWindCourse = windCourseSum.divide(likelihoodSum);
+            for (WindWithConfidence<Void> windWithConfidence : windTrackWithConfidence) {
+                Wind wind = windWithConfidence.getObject();
+                if (Math.abs(averageWindCourse.getDifferenceTo(wind.getBearing())
+                        .getDegrees()) <= MAX_DEVIATON_FROM_AVG_WIND_COURSE) {
+                    windFixes.add(windWithConfidence);
+                    sumOfConfidencesOfIncludedFixes += windWithConfidence.getConfidence();
+                } else {
+                    sumOfConfidencesOfExcludedFixes += windWithConfidence.getConfidence();
+                }
             }
         }
         double finalConfidence = sumOfConfidencesOfIncludedFixes
                 / (sumOfConfidencesOfIncludedFixes + sumOfConfidencesOfExcludedFixes);
         windFixes = WindUtil.getWindFixesWithFixedConfidence(windFixes, finalConfidence);
-//        windFixes = WindUtil.getWindFixesWithAveragedWindSpeed(windFixes);
+        windFixes = WindUtil.getWindFixesWithAveragedWindSpeed(windFixes);
         return windFixes;
     }
 

@@ -5,8 +5,8 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.windestimation.ManeuverClusteringBasedWindEstimatorImpl;
 import com.sap.sailing.windestimation.ManeuverGraphBasedWindEstimatorImpl;
 import com.sap.sailing.windestimation.PolarsFittingBasedWindEstimatorImpl;
-import com.sap.sailing.windestimation.TackOutlierRemovalBasedWindEstimatorImpl;
-import com.sap.sailing.windestimation.TackOutlierRemovalBasedWindEstimatorImpl2;
+import com.sap.sailing.windestimation.OutlierRemovalMeanBasedWindEstimatorImpl;
+import com.sap.sailing.windestimation.OutlierRemovalNeighborBasedWindEstimatorImpl;
 import com.sap.sailing.windestimation.WindEstimator;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverFeatures;
 
@@ -55,22 +55,22 @@ public class WindEstimatorFactories {
         };
     }
 
-    public WindEstimatorFactory<CompleteManeuverCurveWithEstimationData> tackOutlierRemoval() {
+    public WindEstimatorFactory<CompleteManeuverCurveWithEstimationData> outlierRemovalMean() {
         return new WindEstimatorFactory<CompleteManeuverCurveWithEstimationData>() {
 
             @Override
             public WindEstimator<CompleteManeuverCurveWithEstimationData> createNewEstimatorInstance() {
-                return new TackOutlierRemovalBasedWindEstimatorImpl(polarService, maneuverFeatures);
+                return new OutlierRemovalMeanBasedWindEstimatorImpl(polarService, maneuverFeatures);
             }
         };
     }
 
-    public WindEstimatorFactory<CompleteManeuverCurveWithEstimationData> tackOutlierRemoval2() {
+    public WindEstimatorFactory<CompleteManeuverCurveWithEstimationData> outlierRemovalNeighbor() {
         return new WindEstimatorFactory<CompleteManeuverCurveWithEstimationData>() {
 
             @Override
             public WindEstimator<CompleteManeuverCurveWithEstimationData> createNewEstimatorInstance() {
-                return new TackOutlierRemovalBasedWindEstimatorImpl2(polarService, maneuverFeatures);
+                return new OutlierRemovalNeighborBasedWindEstimatorImpl(polarService, maneuverFeatures);
             }
         };
     }
