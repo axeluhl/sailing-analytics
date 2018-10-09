@@ -42,7 +42,7 @@ public abstract class RaceBoardModeWithPerRaceCompetitors extends AbstractRaceBo
     @Override
     public void competitorsForRaceDefined(Iterable<CompetitorDTO> competitorsInRace) {
         this.competitorsInRace = competitorsInRace;
-        trigger();
+        checkIfTrigger();
     }
     
     protected Iterable<CompetitorDTO> getCompetitorsInRace() {

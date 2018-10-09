@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
+import com.google.gwt.core.client.Duration;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.maps.client.MapWidget;
 import com.google.gwt.maps.client.base.LatLng;
@@ -54,7 +55,6 @@ public class Swarm implements TimeListener {
     private boolean swarmOffScreen = false;
 
     private int swarmPause = 0;
-    private boolean swarmContinue = true;
 
     /**
      * Bounds in the map's coordinate system which may have undergone rotation and translation. See the
@@ -96,47 +96,95 @@ public class Swarm implements TimeListener {
     }
 
     public void start(final int animationIntervalMillis) {
+        removeBoundsChangeHandler();
         fullcanvas.setCanvasSettings();
-        // if map is not yet loaded, wait for it
-        if (map.getBounds() != null) {
-            startWithMap(animationIntervalMillis);
-        } else {
-            removeBoundsChangeHandler();
-            BoundsChangeMapHandler handler = new BoundsChangeMapHandler() {
-                @Override
-                public void onEvent(BoundsChangeMapEvent event) {
-                    if (swarmContinue) {
-                        startWithMap(animationIntervalMillis);
-                    }
+        if (loopTimer == null) {
+            loopTimer = new com.google.gwt.user.client.Timer() {
+                public void run() {
+                    updateSwarmOneTick(animationIntervalMillis);
                 }
             };
-            boundsChangeHandlers.put(handler, map.addBoundsChangeHandler(handler));
+        }
+
+        // the map already exists, ensure swam is started
+        if (map.getBounds() != null) {
+            startSwarmIfNecessaryAndUpdateProjection();
+            loopTimer.schedule(0);
+        }
+        // add handler, so the swarm updates itself without calls from the map required
+        BoundsChangeMapHandler handler = new BoundsChangeMapHandler() {
+            @Override
+            public void onEvent(BoundsChangeMapEvent event) {
+                startSwarmIfNecessaryAndUpdateProjection();
+                loopTimer.schedule(0);
+            }
+        };
+        boundsChangeHandlers.put(handler, map.addBoundsChangeHandler(handler));
+    }
+
+    private void startSwarmIfNecessaryAndUpdateProjection() {
+        if (projection == null) {
+            projection = new Mercator(fullcanvas, map);
+
+        }
+        // ensure projection fits the map
+        projection.calibrate();
+        // ensure canvas fits the map
+        updateBounds();
+        if (particles == null) {
+            // if this is the first start, also createParticles
+            createParticles();
+        } else {
+            // clear all tails, as else there will be long smears over the map
+            clearNextFrame = true;
         }
     }
 
-    private void startWithMap(int animationIntervalMillis) {
-        projection = new Mercator(fullcanvas, map);
-        projection.calibrate();
-        updateBounds();
-        if (particles == null) {
-            createParticles();
-        } else {
-            clearNextFrame = true;
+    private void updateSwarmOneTick(int animationIntervalMillis) {
+        double time0 = Duration.currentTimeMillis();
+        // upon zooming the swarm is shortly paused, to ensure no strange rendering during the css zoom
+        // animations
+        if (swarmPause > 1) {
+            swarmPause--;
+        } else if (swarmPause == 1) {
+            // ensure bounds and projections are up to date
+            startSwarmIfNecessaryAndUpdateProjection();
+            if (zoomChanged) {
+                // ensure amount of particles is updated
+                diffPx = new Vector(0, 0);
+                recycleParticles();
+                zoomChanged = false;
+            } else {
+                // process the offset
+                diffPx = fullcanvas.getDiffPx();
+            }
+            swarmPause = 0;
         }
-        swarmContinue = true;
-        startLoopIfNecessary(animationIntervalMillis);
+        // update the swarm if it is not paused
+        if ((!swarmOffScreen) && (swarmPause == 0)) {
+            execute(diffPx);
+            diffPx = new Vector(0, 0);
+        }
+        double time1 = Duration.currentTimeMillis();
+        // wait at least 10ms for the next iteration; try to get one iteration done every
+        // animationIntervalMillis if possible
+        double timeDelta = time1 - time0;
+        // log("fps: "+(1000.0/timeDelta));
+        loopTimer.schedule((int) Math.max(10, animationIntervalMillis - timeDelta));
     }
 
     private void removeBoundsChangeHandler() {
         for (HandlerRegistration reg : boundsChangeHandlers.values()) {
             reg.removeHandler();
         }
+        boundsChangeHandlers.clear();
 
     }
 
     public void stop() {
-        swarmContinue = false;
         removeBoundsChangeHandler();
+        projection.clearCanvas();
+        loopTimer.cancel();
     }
 
     private Particle recycleOrCreateParticle(Particle particle) {
@@ -226,52 +274,12 @@ public class Swarm implements TimeListener {
                 + visibleBoundsOfField.getNorthEast().getLatitude() / 180. * Math.PI) / 2);
     }
 
-    private void startLoopIfNecessary(final int animationIntervalMillis) {
-        if (loopTimer == null) {
-            // Create animation-loop based on timer timeout
-            loopTimer = new com.google.gwt.user.client.Timer() {
-                public void run() {
-                    Date time0 = new Date();
-                    if (swarmPause > 1) {
-                        swarmPause--;
-                    } else if (swarmPause == 1) {
-                        fullcanvas.setCanvasSettings();
-                        projection.calibrate();
-                        updateBounds();
-                        if (zoomChanged) {
-                            diffPx = new Vector(0, 0);
-                            recycleParticles();
-                            zoomChanged = false;
-                        } else {
-                            diffPx = fullcanvas.getDiffPx();
-                        }
-                        swarmPause = 0;
-                    }
-                    if ((!swarmOffScreen) && (swarmPause == 0)) {
-                        execute(diffPx);
-                        diffPx = new Vector(0, 0);
-                    }
-                    Date time1 = new Date();
-                    if (swarmContinue) {
-                        // wait at least 10ms for the next iteration; try to get one iteration done every
-                        // animationIntervalMillis if possible
-                        long timeDelta = time1.getTime() - time0.getTime();
-                        // log("fps: "+(1000.0/timeDelta));
-                        loopTimer.schedule((int) Math.max(10, animationIntervalMillis - timeDelta));
-                    } else {
-                        projection.clearCanvas();
-                    }
-                }
-            };
-            loopTimer.schedule(animationIntervalMillis);
-        }
-    }
-
     private void drawSwarm() {
         Context2d ctxt = canvas.getContext2d();
+        // clearing neds to be done with a little over zero, thanks IE
         ctxt.setGlobalAlpha(0.06);
         if (clearNextFrame) {
-            // ctxt.setGlobalAlpha(1);
+            // skip this frame, as it will contain an extreme delta due to the map movement
             clearNextFrame = false;
         } else {
             ctxt.setGlobalCompositeOperation("destination-out");

@@ -1,9 +1,7 @@
-package com.sap.sailing.media;
+package com.sap.sailing.media.mp4;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.Date;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -20,24 +18,24 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-public class MediaFileParser {
-    public static void main(String[] args) throws MalformedURLException, ParserConfigurationException, SAXException, IOException {
-        new MediaFileParser().checkMetadata(new File(args[0]));
-    }
-    
-    public void checkMetadata(File file) throws IOException, ParserConfigurationException, SAXException {
-        boolean spherical = false;
-        long durationInMillis = -1;
-        Date recordStartedTimer = null;
-        try (IsoFile isof = new IsoFile(file)) {
-            recordStartedTimer = determineRecordingStart(isof);
-            spherical = determine360(isof);
-            durationInMillis = determineDurationInMillis(isof);
-            System.out.println("Start: "+recordStartedTimer.toString()+", duration: "+durationInMillis+"ms; spherical: "+spherical);
-        }
-    }
+public class MP4MediaParser {
+    /**
+     * The relevant size at the start and end of a file, that most likely will contain all metadata
+     */
+    public static final int REQUIRED_SIZE_IN_BYTES = 10000000;
 
-    private boolean determine360(IsoFile isof) throws ParserConfigurationException, SAXException, IOException {
+    /**
+     * Determine whether or not the provided {@link IsoFile ISO file} contains any "spherical" information within the
+     * user defined box <code>moov[0]/trak[0]/uuid</code>.
+     * 
+     * @param isof
+     *            {@link IsoFile ISO file} to analyze
+     * @return <code>true</code> if spherical information are contained, <code>false</code> otherwise
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     * @throws IOException
+     */
+    public static boolean determine360(IsoFile isof) throws ParserConfigurationException, SAXException, IOException {
         boolean spherical = false;
         UserBox uuidBox = Path.getPath(isof, "moov[0]/trak[0]/uuid");
         if (uuidBox != null) {
@@ -56,19 +54,36 @@ public class MediaFileParser {
         return spherical;
     }
 
-    private long determineDurationInMillis(IsoFile isof) {
+    /**
+     * Tries to determine the {@link Long duration} of the provided {@link IsoFile ISO file} based on its
+     * {@link IsoFile#getMovieBox() movie header}.
+     * 
+     * @param isof
+     *            {@link IsoFile ISO file} to analyze
+     * @return the determined duration in {@link Long millis}, <code>-1</code> if the duration could not be determined
+     */
+    public static long determineDurationInMillis(IsoFile isof) {
         long duration = -1;
         MovieBox mbox = isof.getMovieBox();
         if (mbox != null) {
             MovieHeaderBox mhb = mbox.getMovieHeaderBox();
             if (mhb != null) {
-                duration = mhb.getDuration()*1000 / mhb.getTimescale();
+                duration = mhb.getDuration() * 1000 / mhb.getTimescale();
             }
         }
         return duration;
     }
-    
-    private Date determineRecordingStart(IsoFile isof) {
+
+    /**
+     * Tries to determine the {@link Date point in time} when the recording started from the provided {@link IsoFile ISO
+     * file} based on its {@link IsoFile#getMovieBox() movie header}.
+     * 
+     * @param isof
+     *            {@link IsoFile ISO file} to analyze
+     * @return the determined {@link Date point in time} when the recording started, <code>null</code> if the recording
+     *         start could not be determined
+     */
+    public static Date determineRecordingStart(IsoFile isof) {
         Date creationTime = null;
         MovieBox mbox = isof.getMovieBox();
         if (mbox != null) {
