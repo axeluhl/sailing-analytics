@@ -7,17 +7,25 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.LeaderboardSearchResult;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.impl.LeaderboardSearchResultImpl;
+import com.sap.sailing.domain.common.dto.TagDTO;
+import com.sap.sailing.domain.common.tagging.RaceLogNotFoundException;
+import com.sap.sailing.domain.common.tagging.ServiceNotFoundException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.tagging.TaggingService;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.filter.AbstractListFilter;
 import com.sap.sse.common.search.KeywordQuery;
@@ -35,6 +43,8 @@ import com.sap.sse.common.search.ResultImpl;
  *
  */
 public class RegattaByKeywordSearchService {
+    private static final Logger logger = Logger.getLogger(RegattaByKeywordSearchService.class.getName());
+    
     Result<LeaderboardSearchResult> search(final RacingEventService racingEventService, KeywordQuery query) {
         ResultImpl<LeaderboardSearchResult> result = new ResultImpl<>(query, new LeaderboardSearchResultRanker(racingEventService));
         final Map<LeaderboardGroup, Set<Event>> eventsForLeaderboardGroup = new HashMap<>();
@@ -63,6 +73,7 @@ public class RegattaByKeywordSearchService {
                 Util.add(leaderboardGroupsForLeaderboard, leaderboard, leaderboardGroup);
             }
         }
+        final TaggingService taggingService = racingEventService.getTaggingService();
         AbstractListFilter<Leaderboard> leaderboardFilter = new AbstractListFilter<Leaderboard>() {
             @Override
             public Iterable<String> getStrings(Leaderboard leaderboard) {
@@ -76,6 +87,23 @@ public class RegattaByKeywordSearchService {
                     String competitorDisplayName = leaderboard.getDisplayName(competitor);
                     if (competitorDisplayName != null) {
                         leaderboardStrings.add(competitorDisplayName);
+                    }
+                }
+                for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
+                    for (final Fleet fleet : raceColumn.getFleets()) {
+                        try {
+                            for (final TagDTO tag : taggingService.getTags(leaderboard, raceColumn, fleet, /* searchSince */ null, /* returnRevokedTags */ false)) {
+                                if (tag.getTag() != null) {
+                                    leaderboardStrings.add(tag.getTag());
+                                }
+                                if (tag.getComment() != null) {
+                                    leaderboardStrings.add(tag.getComment());
+                                }
+                            }
+                        } catch (RaceLogNotFoundException | ServiceNotFoundException e) {
+                            logger.log(Level.WARNING, "Problem obtaining tags for leaderboard "+leaderboard.getName()+
+                                    ", race column "+raceColumn.getName()+" and fleet "+fleet.getName(), e);
+                        }
                     }
                 }
                 final Iterable<LeaderboardGroup> leaderboardGroupsHostingLeaderboard = leaderboardGroupsForLeaderboard.get(leaderboard);

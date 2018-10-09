@@ -13,6 +13,8 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogTagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.state.impl.ReadonlyRaceStateImpl;
+import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.dto.TagDTO;
@@ -21,6 +23,7 @@ import com.sap.sailing.domain.common.security.Permission.Mode;
 import com.sap.sailing.domain.common.tagging.RaceLogNotFoundException;
 import com.sap.sailing.domain.common.tagging.ServiceNotFoundException;
 import com.sap.sailing.domain.common.tagging.TagAlreadyExistsException;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.Activator;
@@ -231,10 +234,24 @@ public class TaggingServiceImpl implements TaggingService {
     }
 
     @Override
+    public List<TagDTO> getTags(Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet, TimePoint searchSince,
+            boolean returnRevokedTags) throws RaceLogNotFoundException, ServiceNotFoundException {
+        final List<TagDTO> result = new ArrayList<TagDTO>();
+        Util.addAll(getPublicTags(raceColumn.getRaceLog(fleet), searchSince, returnRevokedTags), result);
+        Util.addAll(getPrivateTags(leaderboard.getName(), raceColumn.getName(), fleet.getName()), result);
+        return result;
+    }
+
+    @Override
     public List<TagDTO> getPublicTags(String leaderboardName, String raceColumnName, String fleetName,
             TimePoint searchSince, boolean returnRevokedTags) throws RaceLogNotFoundException {
-        final List<TagDTO> result = new ArrayList<TagDTO>();
         RaceLog raceLog = racingService.getRaceLog(leaderboardName, raceColumnName, fleetName);
+        return getPublicTags(raceLog, searchSince, returnRevokedTags);
+    }
+    
+    @Override
+    public List<TagDTO> getPublicTags(RaceLog raceLog, TimePoint searchSince, boolean returnRevokedTags) throws RaceLogNotFoundException {
+        final List<TagDTO> result = new ArrayList<TagDTO>();
         if (raceLog == null) {
             throw new RaceLogNotFoundException();
         }

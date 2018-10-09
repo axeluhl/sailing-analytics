@@ -5,12 +5,15 @@ import java.util.List;
 import org.apache.shiro.authz.AuthorizationException;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.domain.common.tagging.RaceLogNotFoundException;
 import com.sap.sailing.domain.common.tagging.ServiceNotFoundException;
 import com.sap.sailing.domain.common.tagging.TagAlreadyExistsException;
+import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sse.common.TimePoint;
 
 // TODO: use document settings id for tags/tag-buttons/... as race identifier
@@ -152,6 +155,14 @@ public interface TaggingService {
      */
     List<TagDTO> getTags(String leaderboardName, String raceColumnName, String fleetName, TimePoint searchSince,
             boolean returnRevokedTags) throws RaceLogNotFoundException, ServiceNotFoundException;
+    
+    /**
+     * Same as {@link #getTags(String, String, String, TimePoint, boolean)}, only that instead of the object names
+     * for leaderboard, race column and fleet the objects themselves are passed, accelerating the search for the
+     * matching {@link RaceLog} and therefore accelerating the search for public tags.
+     */
+    List<TagDTO> getTags(Leaderboard leaderboard, RaceColumn raceColumn, Fleet fleet, TimePoint searchSince,
+            boolean returnRevokedTags) throws RaceLogNotFoundException, ServiceNotFoundException;
 
     /**
      * Returns all public tags for the specified race.
@@ -176,6 +187,13 @@ public interface TaggingService {
      */
     List<TagDTO> getPublicTags(String leaderboardName, String raceColumnName, String fleetName, TimePoint searchSince,
             boolean returnRevokedTags) throws RaceLogNotFoundException;
+    
+    /**
+     * Same as {@link #getPublicTags(String, String, String, TimePoint, boolean)}, only that the search for a {@link RaceLog}
+     * by leaderboard/race column/fleet name is eliminated by passing the {@link RaceLog} directly.
+     */
+    List<TagDTO> getPublicTags(RaceLog raceLog, TimePoint searchSince, boolean returnRevokedTags)
+            throws RaceLogNotFoundException;
 
     /**
      * Returns all public tags since the given <code>searchSince</code> for the specified race.

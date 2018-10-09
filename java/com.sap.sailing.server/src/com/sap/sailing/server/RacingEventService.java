@@ -489,8 +489,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Map<Competitor, Boat> getCompetitorToBoatMappingsForRace(String leaderboardName, String raceColumnName, String fleetName);
     
     /**
-     * @param controlTrackingFromStartAndFinishTimes TODO
-     * @param rankingMetricConstructor TODO
      * @return a pair with the found or created regatta, and a boolean that tells whether the regatta was created during
      *         the call
      */
