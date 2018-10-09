@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.ButtonCell;
-import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -34,8 +33,9 @@ import com.sap.sailing.gwt.ui.leaderboard.SortedCellTable;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
+/** Sailor Profile Overview where all the sailor profiles are listed */
 public class SailorProfileOverviewImpl extends Composite implements SailorProfileOverview {
-    ApplicationHistoryMapper historyMapper = GWT.create(ApplicationHistoryMapper.class);
+    private static ApplicationHistoryMapper historyMapper = GWT.create(ApplicationHistoryMapper.class);
 
     interface MyBinder extends UiBinder<Widget, SailorProfileOverviewImpl> {
     }
@@ -62,6 +62,7 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
         SharedSailorProfileResources.INSTANCE.css().ensureInjected();
         SailorProfileDesktopResources.INSTANCE.css().ensureInjected();
         SharedResources.INSTANCE.mainCss().ensureInjected();
+
         decoratorUi = new AuthorizedContentDecoratorDesktop(presenter);
         initWidget(uiBinder.createAndBindUi(this));
         setupTable();
@@ -88,30 +89,21 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
         addWordwrapStyle(boatClassColumn);
 
         addButtonStyle(navigatorColumn);
-        navigatorColumn.setFieldUpdater(new FieldUpdater<SailorProfileDTO, String>() {
-            @Override
-            public void update(int index, SailorProfileDTO entry, String value) {
-                presenter.getClientFactory().getPlaceController().goTo(getTargetPlace(entry));
-            }
-        });
+        navigatorColumn.setFieldUpdater((int index, SailorProfileDTO entry, String value) -> presenter
+                .getClientFactory().getPlaceController().goTo(getTargetPlace(entry)));
 
         removeColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
-        removeColumn.setFieldUpdater(new FieldUpdater<SailorProfileDTO, String>() {
-            @Override
-            public void update(int index, SailorProfileDTO dto, String value) {
-                ConfirmDialogFactory.showConfirmDialog(StringMessages.INSTANCE.sailorProfileRemoveMessage(),
-                        new DialogCallback<Void>() {
-                            @Override
-                            public void ok(Void editedObject) {
-                                presenter.removeSailorProfile(dto.getKey());
-                            }
+        removeColumn.setFieldUpdater((int index, SailorProfileDTO dto, String value) -> ConfirmDialogFactory
+                .showConfirmDialog(StringMessages.INSTANCE.sailorProfileRemoveMessage(), new DialogCallback<Void>() {
+                    @Override
+                    public void ok(Void editedObject) {
+                        presenter.removeSailorProfile(dto.getKey());
+                    }
 
-                            @Override
-                            public void cancel() {
-                            }
-                        });
-            }
-        });
+                    @Override
+                    public void cancel() {
+                    }
+                }));
 
         sailorProfilesTable.addCellPreviewHandler(e -> {
             /* no navigation for remove column */
@@ -137,9 +129,8 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
         addButton.addStyleName(SharedResources.INSTANCE.mainCss().buttonprimary());
         addButton.addStyleName(SharedResources.INSTANCE.mainCss().button());
         footerUi.add(addButton);
-        addButton.addClickHandler((event) -> {
-            presenter.getClientFactory().getPlaceController().goTo(new SailorProfilePlace(true));
-        });
+        addButton.addClickHandler(
+                event -> presenter.getClientFactory().getPlaceController().goTo(new SailorProfilePlace(true)));
     }
 
     private final Column<SailorProfileDTO, String> profileNameColumn = new Column<SailorProfileDTO, String>(
@@ -186,7 +177,6 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
     };
 
     private final Column<SailorProfileDTO, String> navigatorColumn = new NavigatorColumn<SailorProfileDTO>() {
-
         @Override
         public String getValue(SailorProfileDTO object) {
             return "#" + historyMapper.getToken(getTargetPlace(object));
@@ -213,12 +203,7 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
     private class RemoveButtonCell extends ButtonCell {
         @Override
         public void render(Context context, SafeHtml data, SafeHtmlBuilder sb) {
-            sb.appendHtmlConstant("<button type=\"button\" tabindex=\"-1\" style=\"background-color: #e94a1b\">");
-            if (data != null) {
-                sb.append(data);
-            }
-            sb.appendHtmlConstant("</button>");
+            sb.append(SailorProfileDesktopResources.TEMPLATE.removeButtonCell(data));
         }
-
     }
 }

@@ -18,6 +18,9 @@ public interface SailorProfileDesktopResources extends ClientBundle {
     public interface SailorProfileDesktopTemplates extends SafeHtmlTemplates {
         @Template("<a href='{0}'><img src='{1}' style='-webkit-transform: rotate(270deg);-moz-transform: rotate(270deg);-ms-transform: rotate(270deg); transform: rotate(270deg);width:1.33333333333em; cursor:pointer; min-width:1.33333333em'/></a>")
         SafeHtml navigator(SafeUri url, SafeUri imageUrl);
+
+        @Template("<button type='button' tabindex='-1' style='background-color: #e94a1b'>{0}</button>")
+        SafeHtml removeButtonCell(SafeHtml title);
     }
 
     public interface SailorProfilesCss extends CssResource {
