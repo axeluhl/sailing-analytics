@@ -16,6 +16,10 @@ import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 
+/**
+ * event entry on mobile in the sailor profile details: displays a single event with all participated regattas and
+ * users.
+ */
 public class SailorProfileEventEntry extends Composite {
 
     private static SailorProfileOverviewEntryUiBinder uiBinder = GWT.create(SailorProfileOverviewEntryUiBinder.class);

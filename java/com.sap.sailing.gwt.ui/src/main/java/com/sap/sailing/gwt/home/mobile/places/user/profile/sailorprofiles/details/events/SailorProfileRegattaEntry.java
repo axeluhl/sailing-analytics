@@ -21,6 +21,10 @@ import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.det
 import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfileMobileResources;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 
+/**
+ * regatta entry on mobile in the sailor profile details: displays a single regatta in the context of a single event
+ * with name, rank, competitor, club name, points and a leaderboard button.
+ */
 public class SailorProfileRegattaEntry extends Composite {
 
     private static SailorProfileOverviewEntryUiBinder uiBinder = GWT.create(SailorProfileOverviewEntryUiBinder.class);
