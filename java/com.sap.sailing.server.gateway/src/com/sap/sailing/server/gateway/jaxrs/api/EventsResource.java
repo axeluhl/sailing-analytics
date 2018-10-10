@@ -356,7 +356,7 @@ public class EventsResource extends AbstractSailingServerResource {
         RegattaCreationParametersDTO regattaCreationParametersDTO = new RegattaCreationParametersDTO(
                 createDefaultSeriesCreationParameters(regattaName, numberOfRaces));
         UUID regattaId = UUID.randomUUID();
-        Regatta regatta = getSecurityService().setOwnershipCheckPermissionAndRevertOnError(
+        getSecurityService().setOwnershipCheckPermissionAndRevertOnError(
                 getSecurityService().getDefaultTenant(), SecuredDomainType.REGATTA, regattaName, DefaultActions.CREATE,
                 regattaName, new ActionWithResult<Regatta>() {
 
