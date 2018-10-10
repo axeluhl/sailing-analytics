@@ -327,6 +327,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     <T> T setDefaultOwnershipAndRevertOnError(QualifiedObjectIdentifier objectIdentifier, ActionWithResult<T> action)
             throws Exception;
 
+    <T> T setOwnershipCheckPermissionAndRevertOnError(UserGroup tenantOwner, HasPermissions type, String typeIdentifier,
+            HasPermissions.Action action, String securityDisplayName, ActionWithResult<T> actionWithResult);
     <T> T setOwnershipCheckPermissionAndRevertOnError(String tenantOwnerName, HasPermissions type,
             String typeIdentifier, HasPermissions.Action action, String securityDisplayName,
             ActionWithResult<T> actionWithResult);

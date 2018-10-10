@@ -1522,12 +1522,21 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public <T> T setOwnershipCheckPermissionAndRevertOnError(String tenantOwnerName, HasPermissions type,
             String typeIdentifier, com.sap.sse.security.shared.HasPermissions.Action action, String securityDisplayName,
             ActionWithResult<T> actionWithResult) {
+        final UserGroup group = getUserGroupByName(tenantOwnerName);
+
+        return setOwnershipCheckPermissionAndRevertOnError(group, type, typeIdentifier, action, securityDisplayName,
+                actionWithResult);
+    }
+
+    @Override
+    public <T> T setOwnershipCheckPermissionAndRevertOnError(UserGroup tenantOwner, HasPermissions type,
+            String typeIdentifier, com.sap.sse.security.shared.HasPermissions.Action action, String securityDisplayName,
+            ActionWithResult<T> actionWithResult) {
         QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifier(typeIdentifier);
         T result = null;
         try {
-            final UserGroup group = getUserGroupByName(tenantOwnerName);
             final User user = getUserByName((String) SecurityUtils.getSubject().getPrincipal());
-            setOwnership(identifier, user, group, securityDisplayName);
+            setOwnership(identifier, user, tenantOwner, securityDisplayName);
             SecurityUtils.getSubject().checkPermission(type.getStringPermissionForObjects(action, typeIdentifier));
             result = actionWithResult.run();
         } catch (AuthorizationException e) {
