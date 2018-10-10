@@ -414,9 +414,9 @@ public class EventsResource extends AbstractSailingServerResource {
 
                     @Override
                     public Event run() throws Exception {
-                        return createEvent(eventName, eventDescription, venueName, isPublic, startDate, endDate,
-                                officialWebsiteURL, baseURL, leaderboardGroupIds, eventId, sailorsInfoWebsiteURLs,
-                                images, videos);
+                        return getService()
+                        .apply(new CreateEvent(eventName, eventDescription, startDate, endDate, venueName, isPublic, eventId,
+                                officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, images, videos, leaderboardGroupIds));
                     }
                 });
 
@@ -525,18 +525,6 @@ public class EventsResource extends AbstractSailingServerResource {
         return getService().apply(new AddColumnToSeries(new RegattaName(regattaName), seriesName, columnName));
     }
 
-    private Event createEvent(String eventName, String eventDescription, String venueName, boolean isPublic,
-            TimePoint startDate, TimePoint endDate, URL officialWebsiteURL, URL baseURL,
-            List<UUID> leaderboardGroupIds, UUID eventId, Map<Locale, URL> sailorsInfoWebsiteURLs,
-            Iterable<ImageDescriptor> images, Iterable<VideoDescriptor> videos) {
-        if (enforceSecurityChecks) {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.EVENT.getStringPermissionForObjects(DefaultActions.CREATE, eventName));
-        }
-        return getService()
-                .apply(new CreateEvent(eventName, eventDescription, startDate, endDate, venueName, isPublic, eventId,
-                        officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, images, videos, leaderboardGroupIds));
-    }
-    
     private void updateEvent(Event event, LeaderboardGroup leaderboardGroup){
         if (enforceSecurityChecks) {
             SecurityUtils.getSubject().checkPermission(SecuredDomainType.EVENT.getStringPermissionForObjects(DefaultActions.UPDATE, event.getId().toString()));
