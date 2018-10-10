@@ -242,6 +242,6 @@ public interface Regatta
 
     @Override
     default QualifiedObjectIdentifier getIdentifier() {
-        return SecuredDomainType.REGATTA.getQualifiedObjectIdentifier(getId().toString());
+        return SecuredDomainType.REGATTA.getQualifiedObjectIdentifier(getName());
     }
 }
