@@ -17,6 +17,7 @@ import com.sap.sse.security.impl.ReplicableSecurityService;
 import com.sap.sse.security.operations.SecurityOperation;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
@@ -325,4 +326,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     <T> T setDefaultOwnershipAndRevertOnError(QualifiedObjectIdentifier objectIdentifier, ActionWithResult<T> action)
             throws Exception;
+
+    <T> T setOwnershipCheckPermissionAndRevertOnError(String tenantOwnerName, HasPermissions type,
+            String typeIdentifier, HasPermissions.Action action, String securityDisplayName,
+            ActionWithResult<T> actionWithResult);
 }

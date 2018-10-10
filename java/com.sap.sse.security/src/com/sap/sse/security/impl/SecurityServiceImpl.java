@@ -94,6 +94,7 @@ import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.AdminRole;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
@@ -1515,5 +1516,26 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public UserGroup getDefaultTenant() {
         return userStore.getDefaultTenant();
+    }
+
+    @Override
+    public <T> T setOwnershipCheckPermissionAndRevertOnError(String tenantOwnerName, HasPermissions type,
+            String typeIdentifier, com.sap.sse.security.shared.HasPermissions.Action action, String securityDisplayName,
+            ActionWithResult<T> actionWithResult) {
+        QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifier(typeIdentifier);
+        T result = null;
+        try {
+            final UserGroup group = getUserGroupByName(tenantOwnerName);
+            final User user = getUserByName((String) SecurityUtils.getSubject().getPrincipal());
+            setOwnership(identifier, user, group, securityDisplayName);
+            SecurityUtils.getSubject().checkPermission(type.getStringPermissionForObjects(action, typeIdentifier));
+            result = actionWithResult.run();
+        } catch (AuthorizationException e) {
+            deleteOwnership(identifier);
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return result;
     }
 }

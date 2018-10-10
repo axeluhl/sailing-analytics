@@ -4,7 +4,9 @@ import java.util.UUID;
 
 import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 
 /**
  * An event is a group of {@link Regatta regattas} carried out at a common venue within a common time frame. For
@@ -70,4 +72,9 @@ public interface Event extends EventBase {
      * logo / link on the event's UI representation.
      */
     void setWindFinderReviewedSpotsCollection(Iterable<String> reviewedSpotsCollectionIds);
+
+    @Override
+    default QualifiedObjectIdentifier getIdentifier() {
+        return SecuredDomainType.EVENT.getQualifiedObjectIdentifier(getId().toString());
+    }
 }

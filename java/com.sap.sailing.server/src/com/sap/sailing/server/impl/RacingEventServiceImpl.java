@@ -134,7 +134,6 @@ import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
@@ -290,7 +289,7 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.UserGroup;
-import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.util.ClearStateTestSupport;
@@ -917,27 +916,16 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private void ensureOwnerships(SecurityService securityService) {
         for (Event event : getAllEvents()) {
-            QualifiedObjectIdentifier eventObjectIdentifier = SecuredDomainType.EVENT
-                    .getQualifiedObjectIdentifier(event.getId().toString());
-            migrateOwnership(eventObjectIdentifier, event.getName(), securityService);
+            migrateOwnership(event, securityService);
         }
-        WildcardPermissionEncoder wildcardPermissionEncoder = new WildcardPermissionEncoder();
         for (Regatta regatta : getAllRegattas()) {
-            QualifiedObjectIdentifier regattaObjectIdentifier = SecuredDomainType.REGATTA
-                    .getQualifiedObjectIdentifier(regatta.getName());
-            migrateOwnership(regattaObjectIdentifier, regatta.getName(), securityService);
+            migrateOwnership(regatta, securityService);
             DynamicTrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
             if (trackedRegatta != null) {
                 trackedRegatta.lockTrackedRacesForRead();
                 try {
                     for (DynamicTrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
-                        RegattaAndRaceIdentifier regattaAndRaceId = trackedRace.getRaceIdentifier();
-                        QualifiedObjectIdentifier trackedRaceObjectIdentifier = SecuredDomainType.TRACKED_RACE
-                                .getQualifiedObjectIdentifier(wildcardPermissionEncoder.encodeStringList(
-                                        regattaAndRaceId.getRegattaName(), regattaAndRaceId.getRaceName()));
-                        migrateOwnership(trackedRaceObjectIdentifier,
-                                regattaAndRaceId.getRegattaName() + "_" + regattaAndRaceId.getRaceName(),
-                                securityService);
+                        migrateOwnership(trackedRace, securityService);
                     }
                 } finally {
                     trackedRegatta.unlockTrackedRacesAfterRead();
@@ -945,19 +933,18 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             }
         }
         for (Leaderboard leaderboard : getLeaderboards().values()) {
-            QualifiedObjectIdentifier leaderboardObjectIdentifier = SecuredDomainType.LEADERBOARD
-                    .getQualifiedObjectIdentifier(leaderboard.getName());
-            migrateOwnership(leaderboardObjectIdentifier, leaderboard.getDisplayName(), securityService);
+            migrateOwnership(leaderboard, securityService);
         }
         for (LeaderboardGroup leaderboardGroup : getLeaderboardGroups().values()) {
-            QualifiedObjectIdentifier leaderboardGroupObjectIdentifier = SecuredDomainType.LEADERBOARD_GROUP
-                    .getQualifiedObjectIdentifier(leaderboardGroup.getId().toString());
-            migrateOwnership(leaderboardGroupObjectIdentifier, leaderboardGroup.getDisplayName(), securityService);
+            migrateOwnership(leaderboardGroup, securityService);
         }
         for (MediaTrack mediaTrack : getAllMediaTracks()) {
-            migrateOwnership(SecuredDomainType.MEDIA_TRACK.getQualifiedObjectIdentifier(mediaTrack.dbId),
-                    mediaTrack.title, securityService);
+            migrateOwnership(mediaTrack, securityService);
         }
+    }
+
+    private void migrateOwnership(WithQualifiedObjectIdentifier identifier, SecurityService securityService) {
+        migrateOwnership(identifier.getIdentifier(), identifier.getName(), securityService);
     }
 
     private void migrateOwnership(QualifiedObjectIdentifier identifier, String displayName,

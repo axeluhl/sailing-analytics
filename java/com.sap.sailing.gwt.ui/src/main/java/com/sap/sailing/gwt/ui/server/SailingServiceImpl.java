@@ -64,7 +64,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;
 import org.osgi.framework.BundleContext;
@@ -579,6 +578,7 @@ import com.sap.sse.replication.ReplicationFactory;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.impl.ReplicaDescriptor;
+import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.shared.AccessControlList;
@@ -1017,7 +1017,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         regattaDTO.canBoatsOfCompetitorsChangePerRace = regatta.canBoatsOfCompetitorsChangePerRace();
         regattaDTO.configuration = convertToRegattaConfigurationDTO(regatta.getRegattaConfiguration());
         regattaDTO.rankingMetricType = regatta.getRankingMetricType();
-        this.addSecurityInformation(regattaDTO, SecuredDomainType.REGATTA.getQualifiedObjectIdentifier(regatta.getName()));
+        this.addSecurityInformation(regattaDTO, regatta.getIdentifier());
         return regattaDTO;
     }
 
@@ -2522,18 +2522,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public StrippedLeaderboardDTO createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName, int[] discardThresholds, ScoringSchemeType scoringSchemeType,
+    public StrippedLeaderboardDTO createFlexibleLeaderboard(String tenantOwnerName, String leaderboardName,
+            String leaderboardDisplayName, int[] discardThresholds, ScoringSchemeType scoringSchemeType,
             UUID courseAreaId) {
         return createStrippedLeaderboardDTO(getService().apply(new CreateFlexibleLeaderboard(leaderboardName, leaderboardDisplayName, discardThresholds,
                 baseDomainFactory.createScoringScheme(scoringSchemeType), courseAreaId)), false, false);
     }
 
-    public StrippedLeaderboardDTO createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, String leaderboardDisplayName, int[] discardThresholds) {
+    public StrippedLeaderboardDTO createRegattaLeaderboard(String tenantOwnerName, RegattaIdentifier regattaIdentifier,
+            String leaderboardDisplayName, int[] discardThresholds) {
         return createStrippedLeaderboardDTO(getService().apply(new CreateRegattaLeaderboard(regattaIdentifier, leaderboardDisplayName, discardThresholds)), false, false);
     }
 
     @Override
-    public StrippedLeaderboardDTO createRegattaLeaderboardWithEliminations(String name, String displayName,
+    public StrippedLeaderboardDTO createRegattaLeaderboardWithEliminations(String tenantOwnerName, String name,
+            String displayName,
             String fullRegattaLeaderboardName) {
         return createStrippedLeaderboardDTO(getService().apply(new CreateRegattaLeaderboardWithEliminations(name, displayName, fullRegattaLeaderboardName)), false, false);
     }
@@ -2656,8 +2659,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 raceColumnDTO.setRaceLogTrackingInfo(fleetDTO, raceLogTrackingInfo);
             }
         }
-        this.addSecurityInformation(leaderboardDTO,
-                SecuredDomainType.LEADERBOARD.getQualifiedObjectIdentifier(leaderboard.getName()));
+        this.addSecurityInformation(leaderboardDTO, leaderboard.getIdentifier());
         return leaderboardDTO;
     }
 
@@ -3778,8 +3780,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
             groupDTO.setOverallLeaderboardScoringSchemeType(overallLeaderboard.getScoringScheme().getType());
         }
-        this.addSecurityInformation(groupDTO,
-                SecuredDomainType.LEADERBOARD_GROUP.getQualifiedObjectIdentifier(leaderboardGroup.getId().toString()));
+        this.addSecurityInformation(groupDTO, leaderboardGroup.getIdentifier());
         return groupDTO;
     }
 
@@ -3801,12 +3802,33 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description, String displayName,
+    public LeaderboardGroupDTO createLeaderboardGroup(String tenantOwnerName, String groupName, String description,
+            String displayName,
             boolean displayGroupsInReverseOrder,
             int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType) {
-        CreateLeaderboardGroup createLeaderboardGroupOp = new CreateLeaderboardGroup(groupName, description, displayName,
-                displayGroupsInReverseOrder, new ArrayList<String>(), overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType);
-        return convertToLeaderboardGroupDTO(getService().apply(createLeaderboardGroupOp), false, false);
+        List<String> leaderBoards = new ArrayList<>();
+
+        return doCreateLeaderboardGroup(tenantOwnerName, groupName, description, displayName,
+                displayGroupsInReverseOrder, overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType,
+                leaderBoards);
+    }
+
+    private LeaderboardGroupDTO doCreateLeaderboardGroup(String tenantOwnerName, String groupName, String description,
+            String displayName, boolean displayGroupsInReverseOrder, int[] overallLeaderboardDiscardThresholds,
+            ScoringSchemeType overallLeaderboardScoringSchemeType, List<String> leaderBoards) {
+        UUID newLeaderboardGroupId = UUID.randomUUID();
+        return getSecurityService().setOwnershipCheckPermissionAndRevertOnError(tenantOwnerName,
+                SecuredDomainType.LEADERBOARD_GROUP, newLeaderboardGroupId.toString(), DefaultActions.CREATE,
+                displayName, new ActionWithResult<LeaderboardGroupDTO>() {
+                    @Override
+                    public LeaderboardGroupDTO run() throws Exception {
+                        CreateLeaderboardGroup createLeaderboardGroupOp = new CreateLeaderboardGroup(
+                                newLeaderboardGroupId, groupName, description, displayName, displayGroupsInReverseOrder,
+                                leaderBoards, overallLeaderboardDiscardThresholds,
+                                overallLeaderboardScoringSchemeType);
+                        return convertToLeaderboardGroupDTO(getService().apply(createLeaderboardGroupOp), false, false);
+                    }
+                });
     }
 
     @Override
@@ -3977,31 +3999,30 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images, Iterable<VideoDTO> videos, 
             Iterable<UUID> leaderboardGroupIds, String tenantOwnerName)
             throws MalformedURLException, UnauthorizedException {
-        final EventDTO result;
-        UUID eventUuid = UUID.randomUUID();
-        getSecurityService().setOwnership(SecuredDomainType.EVENT.getQualifiedObjectIdentifier(eventUuid.toString()),
-                getSecurityService().getUserByName((String) SecurityUtils.getSubject().getPrincipal()),
-                getSecurityService().getUserGroupByName(tenantOwnerName), eventName);
-        try {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.EVENT.getStringPermissionForObjects(DefaultActions.CREATE, eventUuid.toString()));
-            TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
-            TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
-            URL officialWebsiteURL = officialWebsiteURLAsString != null ? new URL(officialWebsiteURLAsString) : null;
-            URL baseURL = baseURLAsString != null ? new URL(baseURLAsString) : null;
-            Map<Locale, URL> sailorsInfoWebsiteURLs = convertToLocalesAndUrls(sailorsInfoWebsiteURLsByLocaleName);
-            List<ImageDescriptor> eventImages = convertToImages(images);
-            List<VideoDescriptor> eventVideos = convertToVideos(videos);
-            getService().apply(
-                    new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint, venue, isPublic, eventUuid,
-                            officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs, eventImages, eventVideos, leaderboardGroupIds));
-            createCourseAreas(eventUuid, courseAreaNames.toArray(new String[courseAreaNames.size()]));
-            result = getEventById(eventUuid, false);
-            return result;
-        } catch (AuthorizationException e) {
-            // revert ownership creation, then re-throw
-            getSecurityService().deleteOwnership(SecuredDomainType.EVENT.getQualifiedObjectIdentifier(eventUuid.toString()));
-            throw e;
-        }
+        final UUID eventUuid = UUID.randomUUID();
+
+        return getSecurityService().setOwnershipCheckPermissionAndRevertOnError(tenantOwnerName,
+                SecuredDomainType.EVENT,
+                eventUuid.toString(), DefaultActions.CREATE, eventName, new ActionWithResult<EventDTO>() {
+                    @Override
+                    public EventDTO run() throws Exception {
+                        TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
+                        TimePoint endTimePoint = endDate != null ? new MillisecondsTimePoint(endDate) : null;
+                        URL officialWebsiteURL = officialWebsiteURLAsString != null
+                                ? new URL(officialWebsiteURLAsString)
+                                : null;
+                        URL baseURL = baseURLAsString != null ? new URL(baseURLAsString) : null;
+                        Map<Locale, URL> sailorsInfoWebsiteURLs = convertToLocalesAndUrls(
+                                sailorsInfoWebsiteURLsByLocaleName);
+                        List<ImageDescriptor> eventImages = convertToImages(images);
+                        List<VideoDescriptor> eventVideos = convertToVideos(videos);
+                        getService().apply(new CreateEvent(eventName, eventDescription, startTimePoint, endTimePoint,
+                                venue, isPublic, eventUuid, officialWebsiteURL, baseURL, sailorsInfoWebsiteURLs,
+                                eventImages, eventVideos, leaderboardGroupIds));
+                        createCourseAreas(eventUuid, courseAreaNames.toArray(new String[courseAreaNames.size()]));
+                        return getEventById(eventUuid, false);
+                    }
+                });
     }
 
     @Override
@@ -4257,7 +4278,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     windFinderTrackerFactory, /* useCachedSpotsForTrackedRaces */ false));
         }
 
-        this.addSecurityInformation(eventDTO, SecuredDomainType.EVENT.getQualifiedObjectIdentifier(event.getId().toString()));
+        this.addSecurityInformation(eventDTO, event.getIdentifier());
         return eventDTO;
     }
 
@@ -4496,20 +4517,29 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public RegattaDTO createRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace, Date startDate, Date endDate, 
+    public RegattaDTO createRegatta(String tenantOwnerName, String regattaName, String boatClassName,
+            boolean canBoatsOfCompetitorsChangePerRace, Date startDate, Date endDate,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
             boolean persistent, ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObjects(DefaultActions.CREATE, regattaName));
-        TimePoint startTimePoint = startDate != null ?  new MillisecondsTimePoint(startDate) : null;
-        TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
-        Regatta regatta = getService().apply(
-                new AddSpecificRegatta(
-                        regattaName, boatClassName, canBoatsOfCompetitorsChangePerRace, startTimePoint, endTimePoint, UUID.randomUUID(),
-                        seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
-                        persistent, baseDomainFactory.createScoringScheme(scoringSchemeType), defaultCourseAreaId, buoyZoneRadiusInHullLengths, useStartTimeInference,
-                        controlTrackingFromStartAndFinishTimes, rankingMetricType));
-        return convertToRegattaDTO(regatta);
+
+        return getSecurityService().setOwnershipCheckPermissionAndRevertOnError(tenantOwnerName,
+                SecuredDomainType.REGATTA,
+                regattaName, DefaultActions.CREATE, regattaName, new ActionWithResult<RegattaDTO>() {
+
+                    @Override
+                    public RegattaDTO run() throws Exception {
+                        TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
+                        TimePoint endTimePoint = endDate != null ? new MillisecondsTimePoint(endDate) : null;
+                        Regatta regatta = getService().apply(new AddSpecificRegatta(regattaName, boatClassName,
+                                canBoatsOfCompetitorsChangePerRace, startTimePoint, endTimePoint, UUID.randomUUID(),
+                                seriesNamesWithFleetNamesAndFleetOrderingAndMedal, persistent,
+                                baseDomainFactory.createScoringScheme(scoringSchemeType), defaultCourseAreaId,
+                                buoyZoneRadiusInHullLengths, useStartTimeInference,
+                                controlTrackingFromStartAndFinishTimes, rankingMetricType));
+                        return convertToRegattaDTO(regatta);
+                    }
+                });
     }
     
     @Override
@@ -4782,9 +4812,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
     
-    private void createRegattaFromRegattaDTO(RegattaDTO regatta) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObjects(DefaultActions.CREATE, regatta.getName()));
-        this.createRegatta(regatta.getName(), regatta.boatClass.getName(), regatta.canBoatsOfCompetitorsChangePerRace, regatta.startDate, regatta.endDate,
+    private void createRegattaFromRegattaDTO(String tenantOwnerName, RegattaDTO regatta) {
+        this.createRegatta(tenantOwnerName, regatta.getName(), regatta.boatClass.getName(),
+                regatta.canBoatsOfCompetitorsChangePerRace, regatta.startDate, regatta.endDate,
                         new RegattaCreationParametersDTO(getSeriesCreationParameters(regatta)), 
                         true, regatta.scoringScheme, regatta.defaultCourseAreaUuid, regatta.buoyZoneRadiusInHullLengths, regatta.useStartTimeInference,
                         regatta.controlTrackingFromStartAndFinishTimes, regatta.rankingMetricType);
@@ -4843,22 +4873,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void createRegattaStructure(final Iterable<RegattaDTO> regattas, final EventDTO newEvent) throws MalformedURLException {
+    public void createRegattaStructure(String tenantOwnerName, final Iterable<RegattaDTO> regattas,
+            final EventDTO newEvent) throws MalformedURLException {
         final List<String> leaderboardNames = new ArrayList<String>();
         for (RegattaDTO regatta : regattas) {
-            createRegattaFromRegattaDTO(regatta);
+            createRegattaFromRegattaDTO(tenantOwnerName, regatta);
             addRaceColumnsToRegattaSeries(regatta);
             if (getLeaderboard(regatta.getName()) == null) {
                 leaderboardNames.add(regatta.getName());
-                createRegattaLeaderboard(regatta.getRegattaIdentifier(), regatta.boatClass.toString(), new int[0]);
+                createRegattaLeaderboard(tenantOwnerName, regatta.getRegattaIdentifier(), regatta.boatClass.toString(),
+                        new int[0]);
             }
         }
-        createAndAddLeaderboardGroup(newEvent, leaderboardNames);
+        createAndAddLeaderboardGroup(tenantOwnerName, newEvent, leaderboardNames);
         // TODO find a way to import the competitors for the selected regattas. You'll need the regattas as Iterable<RegattaResults>
         // structureImporter.setCompetitors(regattas, "");
     }
 
-    private void createAndAddLeaderboardGroup(final EventDTO newEvent, List<String> leaderboardNames) throws MalformedURLException {
+    private void createAndAddLeaderboardGroup(String tenantOwnerName, final EventDTO newEvent,
+            List<String> leaderboardNames) throws MalformedURLException {
         LeaderboardGroupDTO leaderboardGroupDTO = null;
         String description = "";
         if (newEvent.getDescription() != null) {
@@ -4869,11 +4902,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
         // create Leaderboard Group
         if (getService().getLeaderboardGroupByName(eventName) == null) {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD_GROUP.getStringPermissionForObjects(DefaultActions.CREATE, eventName));
-            CreateLeaderboardGroup createLeaderboardGroupOp = new CreateLeaderboardGroup(eventName, description,
-                    eventName, false, leaderboardNames, null, null);
-            leaderboardGroupDTO = convertToLeaderboardGroupDTO(getService().apply(createLeaderboardGroupOp), false,
-                    false);
+            leaderboardGroupDTO = doCreateLeaderboardGroup(tenantOwnerName, eventName, description, eventName, false,
+                    null, null,
+                    leaderboardNames);
             eventLeaderboardGroupUUIDs.add(leaderboardGroupDTO.getId());
         } else {
             updateLeaderboardGroup(eventName, eventName, newEvent.getDescription(), eventName, leaderboardNames, null, null);

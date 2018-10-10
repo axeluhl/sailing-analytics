@@ -18,10 +18,11 @@ public class CreateLeaderboardGroup extends AbstractLeaderboardGroupOperation<Le
     private final int[] overallLeaderboardDiscardThresholds;
     private final ScoringSchemeType overallLeaderboardScoringSchemeType;
 
-    public CreateLeaderboardGroup(String leaderboardGroupName, String description, String displayName, boolean displayGroupsInReverseOrder,
+    public CreateLeaderboardGroup(UUID id, String leaderboardGroupName, String description, String displayName,
+            boolean displayGroupsInReverseOrder,
             List<String> leaderboardNames, int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType) {
         super(leaderboardGroupName);
-        this.id = UUID.randomUUID();
+        this.id = id;
         this.description = description;
         this.displayName = displayName;
         this.displayGroupsInReverseOrder = displayGroupsInReverseOrder;

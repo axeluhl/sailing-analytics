@@ -156,7 +156,9 @@ public class SearchServiceTest {
         server.apply(new AddColumnToSeries(pfingstbusch470.getRegattaIdentifier(), "Default", "R3"));
         RegattaLeaderboard pfingstbusch470Leaderboard = server.apply(new CreateRegattaLeaderboard(pfingstbusch470.getRegattaIdentifier(),
                 /* leaderboardDisplayName */ null, /* discardThresholds */ new int[0]));
-        final LeaderboardGroup pfingstbuschLeaderboardGroup = server.apply(new CreateLeaderboardGroup("Pfingstbusch", "Pfingstbusch", /* displayName */ null,
+        UUID newGroupid = UUID.randomUUID();
+        final LeaderboardGroup pfingstbuschLeaderboardGroup = server.apply(new CreateLeaderboardGroup(newGroupid,
+                "Pfingstbusch", "Pfingstbusch", /* displayName */ null,
                 /* displayGroupsInReverseOrder */ false, Arrays.asList(new String[] { RegattaImpl.getDefaultName("Pfingstbusch", "29er"), RegattaImpl.getDefaultName("Pfingstbusch", "470") }),
                 new int[0], /* overallLeaderboardScoringSchemeType */ null));
         server.apply(new AddLeaderboardGroupToEvent(pfingstbusch.getId(), pfingstbuschLeaderboardGroup.getId()));
@@ -178,7 +180,9 @@ public class SearchServiceTest {
         server.apply(new AddColumnToSeries(aalRegatta.getRegattaIdentifier(), "Default", "R2"));
         RegattaLeaderboard aalRegattaLeaderboard = server.apply(new CreateRegattaLeaderboard(aalRegatta.getRegattaIdentifier(),
                 /* leaderboardDisplayName */ null, /* discardThresholds */ new int[0]));
-        final LeaderboardGroup aalLeaderboardGroup = server.apply(new CreateLeaderboardGroup("Aal Regatta", "Aal Regatta", /* displayName */ null,
+        UUID newGroupid2 = UUID.randomUUID();
+        final LeaderboardGroup aalLeaderboardGroup = server.apply(new CreateLeaderboardGroup(newGroupid2, "Aal Regatta",
+                "Aal Regatta", /* displayName */ null,
                 /* displayGroupsInReverseOrder */ false, Collections.singletonList(RegattaImpl.getDefaultName("Aalregatta", "ORC")),
                 new int[0], /* overallLeaderboardScoringSchemeType */ null));
         server.apply(new AddLeaderboardGroupToEvent(aalEvent.getId(), aalLeaderboardGroup.getId()));

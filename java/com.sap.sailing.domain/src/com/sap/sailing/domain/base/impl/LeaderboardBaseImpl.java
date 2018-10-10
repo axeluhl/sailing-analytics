@@ -2,6 +2,8 @@ package com.sap.sailing.domain.base.impl;
 
 import com.sap.sailing.domain.base.LeaderboardBase;
 import com.sap.sailing.domain.base.LeaderboardChangeListener;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 
 public class LeaderboardBaseImpl implements LeaderboardBase {
     private static final long serialVersionUID = -5332972141344617372L;
@@ -30,5 +32,9 @@ public class LeaderboardBaseImpl implements LeaderboardBase {
 
     @Override
     public void removeLeaderboardChangeListener(LeaderboardChangeListener listener) {
+    }
+
+    public QualifiedObjectIdentifier getIdentifier() {
+        return SecuredDomainType.LEADERBOARD.getQualifiedObjectIdentifier(getName());
     }
 }

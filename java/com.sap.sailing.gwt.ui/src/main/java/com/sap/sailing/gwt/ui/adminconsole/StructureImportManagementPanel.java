@@ -96,10 +96,12 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
      * in {@link #regattaDefaultsPerStructure} for which the values of this map can be used as key.
      */
     private final Map<RegattaDTO, RegattaStructure> regattaStructures;
+    private UserService userService;
     
     public StructureImportManagementPanel(SailingServiceAsync sailingService, UserService userService,
             ErrorReporter errorReporter, StringMessages stringMessages, RegattaRefresher regattaRefresher,
             EventManagementPanel eventManagementPanel) {
+        this.userService = userService;
         this.regattaDefaultsPerStructure = new HashMap<>();
         this.regattaStructures = new HashMap<>();
         this.eventManagementPanel = eventManagementPanel;
@@ -155,7 +157,8 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
                 if (getSelectedEvent() != null) {
                     List<RegattaDTO> selectedOriginalRegattasFromXRR = regattaListComposite.getSelectedRegattas();
                     if (!selectedOriginalRegattasFromXRR.isEmpty()) {
-                        createRegattas(selectedOriginalRegattasFromXRR, getSelectedEvent());
+                        createRegattas(userService.getCurrentUser().getDefaultTenant().getName(),
+                                selectedOriginalRegattasFromXRR, getSelectedEvent());
                     } else {
                         errorReporter.reportError(stringMessages.pleaseSelectAtLeastOneRegatta());
                     }
@@ -452,7 +455,8 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
         return result;
     }
 
-    private void createRegattas(final Iterable<RegattaDTO> selectedOriginalRegattasFromXRR, EventDTO newEvent) {
+    private void createRegattas(String tenant, final Iterable<RegattaDTO> selectedOriginalRegattasFromXRR,
+            EventDTO newEvent) {
         eventManagementPanel.fillEvents();
         final Set<RegattaDTO> regattaConfigurationsToCreate = new HashSet<>();
         for (RegattaDTO originalRegattaFromXRR : selectedOriginalRegattasFromXRR) {
@@ -469,7 +473,8 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
             }
             regattaConfigurationsToCreate.add(cloneFromDefaults);
         }
-        sailingService.createRegattaStructure(regattaConfigurationsToCreate, newEvent, new AsyncCallback<Void>() {
+        sailingService.createRegattaStructure(tenant, regattaConfigurationsToCreate, newEvent,
+                new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(stringMessages.errorAddingResultImportUrl(caught.getMessage()));

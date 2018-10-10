@@ -5,7 +5,9 @@ import java.util.UUID;
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.base.Venue;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 
 /**
  * A simplified implementation of the {@link EventBase} interface which maintains an immutable collection of
@@ -33,5 +35,10 @@ public class StrippedEventImpl extends EventBaseImpl {
     @Override
     public Iterable<LeaderboardGroupBase> getLeaderboardGroups() {
         return leaderboardGroups;
+    }
+
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return SecuredDomainType.EVENT.getQualifiedObjectIdentifier(getId().toString());
     }
 }

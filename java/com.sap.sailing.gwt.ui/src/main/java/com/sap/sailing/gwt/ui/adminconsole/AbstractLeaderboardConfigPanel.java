@@ -98,6 +98,8 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
     protected HandlerRegistration trackedRaceListHandlerRegistration;
     
     private final LeaderboardsRefresher leaderboardsRefresher;
+
+    protected UserService userService;
     
     public static class RaceColumnDTOAndFleetDTOWithNameBasedEquality extends Triple<RaceColumnDTO, FleetDTO, StrippedLeaderboardDTO> {
         private static final long serialVersionUID = -8742476113296862662L;
@@ -143,6 +145,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
             final ErrorReporter errorReporter, StringMessages theStringConstants, boolean multiSelection) {
         this.stringMessages = theStringConstants;
         this.sailingService = sailingService;
+        this.userService = userService;
         filteredLeaderboardList = new ListDataProvider<StrippedLeaderboardDTO>();
         allRegattas = new ArrayList<RegattaDTO>();
         this.errorReporter = errorReporter;
