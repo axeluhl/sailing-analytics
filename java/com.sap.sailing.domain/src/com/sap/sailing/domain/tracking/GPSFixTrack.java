@@ -191,4 +191,11 @@ public interface GPSFixTrack<ItemType, FixType extends GPSFix> extends MappedTra
      */
     SpeedWithBearingStepsIterable getSpeedWithBearingSteps(TimePoint fromTimePoint, TimePoint toTimePoint);
 
+    /**
+     * For a fix that doesn't necessarily need to be part of this track already decides whether this fix is considered
+     * valid in the scope of this track. This means that if the fix is part of the track it will be returned in
+     * {@link #getFixes()} if and only if this method returns {@code true}.
+     */
+    boolean isValid(FixType e);
+
 }
