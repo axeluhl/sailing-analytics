@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -300,6 +301,7 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
             public void onSuccess(List<SwissTimingArchiveConfigurationDTO> result) {
                 previousConfigurationsComboBox.clear();
                 previousConfigurations.clear();
+                Collections.sort(result, (c1, c2) -> c1.getJsonUrl().compareTo(c2.getJsonUrl()));
                 for (SwissTimingArchiveConfigurationDTO configEntry : result) {
                     String name = configEntry.getJsonUrl();
                     previousConfigurations.put(name, configEntry);

@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -461,6 +462,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                 while (previousConfigurationsComboBox.getItemCount() > 0) {
                     previousConfigurationsComboBox.removeItem(0);
                 }
+                Collections.sort(result, (c1, c2) -> c1.getName().compareTo(c2.getName()));
                 for (SwissTimingConfigurationDTO stConfig : result) {
                     previousConfigurations.put(stConfig.getName(), stConfig);
                     previousConfigurationsComboBox.addItem(stConfig.getName());

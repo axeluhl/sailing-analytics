@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
@@ -31,7 +30,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         List<TracTracConfiguration> result = new ArrayList<TracTracConfiguration>();
         try {
             DBCollection ttConfigs = database.getCollection(CollectionNames.TRACTRAC_CONFIGURATIONS.name());
-            for (DBObject o : ttConfigs.find().sort(new BasicDBObject(FieldNames.TT_CONFIG_NAME.name(), 1))) {
+            for (DBObject o : ttConfigs.find()) {
                 TracTracConfiguration ttConfig = loadTracTracConfiguration(o);
                 result.add(ttConfig);
             }

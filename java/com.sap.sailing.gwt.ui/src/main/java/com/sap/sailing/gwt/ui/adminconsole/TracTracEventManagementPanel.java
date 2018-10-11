@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -485,6 +486,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                     public void onSuccess(List<TracTracConfigurationDTO> result) {
                         TracTracEventManagementPanel.this.previousConfigurations.clear();
                         TracTracEventManagementPanel.this.connectionsHistoryListBox.clear();
+                        Collections.sort(result, (c1, c2) -> c1.name.compareTo(c2.name));
                         for (TracTracConfigurationDTO config : result) {
                             TracTracEventManagementPanel.this.previousConfigurations.put(config.name, config);
                             TracTracEventManagementPanel.this.connectionsHistoryListBox.addItem(config.name, config.name);

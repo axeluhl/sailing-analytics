@@ -34,7 +34,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         List<SwissTimingConfiguration> result = new ArrayList<SwissTimingConfiguration>();
         try {
             DBCollection stConfigs = database.getCollection(CollectionNames.SWISSTIMING_CONFIGURATIONS.name());
-            for (DBObject o : stConfigs.find().sort(new BasicDBObject(FieldNames.ST_CONFIG_NAME.name(), 1))) {
+            for (DBObject o : stConfigs.find()) {
                 SwissTimingConfiguration stConfig = loadSwissTimingConfiguration(o);
                 // the old SwissTiming configuration was not based on a JSON URL -> ignore such configurations
                 if (stConfig.getJsonURL() != null) {
@@ -66,7 +66,7 @@ public class SwissTimingAdapterPersistenceImpl implements SwissTimingAdapterPers
         List<SwissTimingArchiveConfiguration> result = new ArrayList<SwissTimingArchiveConfiguration>();
         try {
             DBCollection stConfigs = database.getCollection(CollectionNames.SWISSTIMING_ARCHIVE_CONFIGURATIONS.name());
-            for (DBObject o : stConfigs.find().sort(new BasicDBObject(FieldNames.ST_ARCHIVE_JSON_URL.name(), 1))) {
+            for (DBObject o : stConfigs.find()) {
                 SwissTimingArchiveConfiguration stConfig = loadSwissTimingArchiveConfiguration(o);
                 result.add(stConfig);
             }
