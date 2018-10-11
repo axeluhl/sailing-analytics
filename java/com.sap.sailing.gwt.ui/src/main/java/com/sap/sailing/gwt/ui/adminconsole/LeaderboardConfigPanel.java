@@ -906,7 +906,9 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             
             @Override
             public void ok(final LeaderboardDescriptor newLeaderboard) {
-                sailingService.createFlexibleLeaderboard(newLeaderboard.getName(), newLeaderboard.getDisplayName(),
+                        sailingService.createFlexibleLeaderboard(
+                                userService.getCurrentUser().getDefaultTenant().getName(), newLeaderboard.getName(),
+                                newLeaderboard.getDisplayName(),
                         newLeaderboard.getDiscardThresholds(), newLeaderboard.getScoringScheme(), newLeaderboard.getCourseAreaId(),
                         new MarkedAsyncCallback<StrippedLeaderboardDTO>(
                                 new AsyncCallback<StrippedLeaderboardDTO>() {
@@ -937,7 +939,9 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             @Override
             public void ok(final LeaderboardDescriptor newLeaderboard) {
                 RegattaIdentifier regattaIdentifier = new RegattaName(newLeaderboard.getRegattaName());
-                sailingService.createRegattaLeaderboard(regattaIdentifier, newLeaderboard.getDisplayName(), newLeaderboard.getDiscardThresholds(),
+                        sailingService.createRegattaLeaderboard(
+                                userService.getCurrentUser().getDefaultTenant().getName(), regattaIdentifier,
+                                newLeaderboard.getDisplayName(), newLeaderboard.getDiscardThresholds(),
                         new AsyncCallback<StrippedLeaderboardDTO>() {
                     @Override
                     public void onFailure(Throwable t) {
@@ -967,7 +971,9 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
 
             @Override
             public void ok(final LeaderboardDescriptorWithEliminations newLeaderboard) {
-                sailingService.createRegattaLeaderboardWithEliminations(newLeaderboard.getName(), newLeaderboard.getDisplayName(),
+                        sailingService.createRegattaLeaderboardWithEliminations(
+                                userService.getCurrentUser().getDefaultTenant().getName(), newLeaderboard.getName(),
+                                newLeaderboard.getDisplayName(),
                         newLeaderboard.getRegattaName(), new AsyncCallback<StrippedLeaderboardDTO>() {
                     @Override
                     public void onFailure(Throwable t) {

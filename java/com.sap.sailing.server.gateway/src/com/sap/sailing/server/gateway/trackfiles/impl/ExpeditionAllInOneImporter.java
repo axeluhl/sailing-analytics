@@ -636,7 +636,9 @@ public class ExpeditionAllInOneImporter {
 
     private void createLeaderboardGroupAndAddItToTheEvent(final String leaderboardGroupName, final String regattaNameAndleaderboardName,
             final String description, final Event event) {
-        final LeaderboardGroup leaderboardGroup = service.apply(new CreateLeaderboardGroup(leaderboardGroupName,
+        UUID newGroupid = UUID.randomUUID();
+        final LeaderboardGroup leaderboardGroup = service
+                .apply(new CreateLeaderboardGroup(newGroupid, leaderboardGroupName,
                 description, null, false, Collections.singletonList(regattaNameAndleaderboardName), null, null));
         service.apply(new UpdateEvent(event.getId(), event.getName(), event.getDescription(), event.getStartDate(),
                 event.getEndDate(), event.getVenue().getName(), event.isPublic(),

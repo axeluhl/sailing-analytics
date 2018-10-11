@@ -118,6 +118,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.common.media.MediaTagConstants;
+import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtService;
 import com.sap.sse.gwt.client.media.ImageDTO;
@@ -210,11 +212,15 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     StrippedLeaderboardDTO updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThreasholds, UUID newCourseAreaId);
 
-    StrippedLeaderboardDTO createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName, int[] discardThresholds, ScoringSchemeType scoringSchemeType, UUID courseAreaId);
+    StrippedLeaderboardDTO createFlexibleLeaderboard(String tenantOwnerName, String leaderboardName,
+            String leaderboardDisplayName, int[] discardThresholds, ScoringSchemeType scoringSchemeType,
+            UUID courseAreaId);
 
-    StrippedLeaderboardDTO createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, String leaderboardDisplayName, int[] discardThresholds);
+    StrippedLeaderboardDTO createRegattaLeaderboard(String tenantOwnerName, RegattaIdentifier regattaIdentifier,
+            String leaderboardDisplayName, int[] discardThresholds);
 
-    StrippedLeaderboardDTO createRegattaLeaderboardWithEliminations(String name, String displayName, String regattaName);
+    StrippedLeaderboardDTO createRegattaLeaderboardWithEliminations(String tenantOwnerName, String name,
+            String displayName, String regattaName);
 
     void removeLeaderboard(String leaderboardName);
 
@@ -232,7 +238,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     void moveLeaderboardColumnDown(String leaderboardName, String columnName);
     
-    RegattaDTO createRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace, Date startDate, Date endDate,
+    RegattaDTO createRegatta(String tenantOwnerName, String regattaName, String boatClassName,
+            boolean canBoatsOfCompetitorsChangePerRace, Date startDate, Date endDate,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent,
             ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType);
@@ -309,7 +316,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     void removeLeaderboardGroups(Set<String> groupNames);
     
-    LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description, String displayName,
+    LeaderboardGroupDTO createLeaderboardGroup(String tenantOwnerName, String groupName, String description,
+            String displayName,
             boolean displayGroupsInReverseOrder, int[] overallLeaderboardDiscardThresholds,
             ScoringSchemeType overallLeaderboardScoringSchemeType);
     
@@ -615,7 +623,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      */
     Iterable<RegattaDTO> getRegattas(String manage2SailJsonUrl);
 
-    void createRegattaStructure(Iterable<RegattaDTO> regattas, EventDTO newEvent) throws Exception;
+    void createRegattaStructure(String tenantOwnerName, Iterable<RegattaDTO> regattas, EventDTO newEvent)
+            throws Exception;
 
     Integer getStructureImportOperationProgress();
     

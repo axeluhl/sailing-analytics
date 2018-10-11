@@ -10,7 +10,8 @@ Require-Bundle: com.sap.sailing.domain.common,
  com.sap.sailing.domain.shared.android,
  org.json.simple;bundle-version="1.1.0",
  com.sap.sse.common,
- com.sap.sse.shared.android
+ com.sap.sse.shared.android,
+ com.sap.sse.security.common
 Export-Package: com.sap.sailing.server.gateway.deserialization,
  com.sap.sailing.server.gateway.deserialization.coursedata.impl,
  com.sap.sailing.server.gateway.deserialization.impl,

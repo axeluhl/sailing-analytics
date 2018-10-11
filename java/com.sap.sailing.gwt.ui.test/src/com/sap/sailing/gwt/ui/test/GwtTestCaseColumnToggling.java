@@ -120,7 +120,8 @@ public class GwtTestCaseColumnToggling extends GWTTestCase {
 
             @Override
             public void onSuccess(Void result) {
-                service.createFlexibleLeaderboard(LEADERBOARD_NAME, null, new int[] { 1, 2 }, ScoringSchemeType.LOW_POINT, null,
+                service.createFlexibleLeaderboard("default",
+                        LEADERBOARD_NAME, null, new int[] { 1, 2 }, ScoringSchemeType.LOW_POINT, null,
                         new AsyncCallback<StrippedLeaderboardDTO>() {
                             @Override
                             public void onSuccess(StrippedLeaderboardDTO result) {

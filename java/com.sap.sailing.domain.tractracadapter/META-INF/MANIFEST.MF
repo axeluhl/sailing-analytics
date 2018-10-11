@@ -13,7 +13,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse,
  com.sap.sse.common,
  com.sap.sailing.server.gateway.serialization.shared.android,
- com.sap.sailing.domain.shared.android
+ com.sap.sailing.domain.shared.android,
+ com.sap.sse.security.common
 Export-Package: com.sap.sailing.domain.tractracadapter,
  com.sap.sailing.domain.tractracadapter.impl;
   x-friends:="com.sap.sailing.domain.test,

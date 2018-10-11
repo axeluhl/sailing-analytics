@@ -71,7 +71,9 @@ public class RemoveLeaderboardGroupTest {
                 "Kiel", /* isPublic */ true, UUID.randomUUID(), /* officialWebsiteURLAsString */ null, /*baseURL*/null,
                 /* sailorsInfoWebsiteURLAsString */ null, /* images */Collections.<ImageDescriptor> emptyList(),
                 /* videos */Collections.<VideoDescriptor> emptyList(), /* leaderboardGroupIds */ Collections.<UUID> emptyList()));
-        final LeaderboardGroup pfingstbuschLeaderboardGroup = server.apply(new CreateLeaderboardGroup("Pfingstbusch", "Pfingstbusch", /* displayName */ null,
+        UUID newGroupid = UUID.randomUUID();
+        final LeaderboardGroup pfingstbuschLeaderboardGroup = server
+                .apply(new CreateLeaderboardGroup(newGroupid, "Pfingstbusch", "Pfingstbusch", /* displayName */ null,
                 /* displayGroupsInReverseOrder */ false, /* leaderboard names */ Collections.emptyList(),
                 new int[0], /* overallLeaderboardScoringSchemeType */ ScoringSchemeType.LOW_POINT));
         server.apply(new AddLeaderboardGroupToEvent(pfingstbusch.getId(), pfingstbuschLeaderboardGroup.getId()));

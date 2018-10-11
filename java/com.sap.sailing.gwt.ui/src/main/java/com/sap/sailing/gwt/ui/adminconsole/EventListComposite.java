@@ -562,7 +562,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
     private void openCreateRegattaDialog(List<RegattaDTO> existingRegattas,
             List<EventDTO> existingEvents, EventDTO createdEvent) {
         RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas, existingEvents, createdEvent, stringMessages,
-                new CreateRegattaCallback(sailingService, stringMessages, errorReporter, regattaRefresher, eventsRefresher, existingEvents));
+                new CreateRegattaCallback(userService, sailingService, stringMessages, errorReporter, regattaRefresher,
+                        eventsRefresher, existingEvents));
         dialog.ensureDebugId("RegattaCreateDialog");
         dialog.show();
     }
@@ -574,7 +575,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         LeaderboardGroupCreateDialog leaderboardGroupCreateDialog = new LeaderboardGroupCreateDialog(existingLeaderboardGroups, stringMessages, new DialogCallback<LeaderboardGroupDialog.LeaderboardGroupDescriptor>() {
             @Override
             public void ok(final LeaderboardGroupDescriptor newGroup) {
-                sailingService.createLeaderboardGroup(newGroup.getName(), newGroup.getDescription(),
+                        sailingService.createLeaderboardGroup(userService.getCurrentUser().getDefaultTenant().getName(),
+                                newGroup.getName(), newGroup.getDescription(),
                         newGroup.getDisplayName(), newGroup.isDisplayLeaderboardsInReverseOrder(),
                         newGroup.getOverallLeaderboardDiscardThresholds(), newGroup.getOverallLeaderboardScoringSchemeType(), new MarkedAsyncCallback<LeaderboardGroupDTO>(
                                 new AsyncCallback<LeaderboardGroupDTO>() {

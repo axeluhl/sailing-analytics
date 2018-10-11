@@ -259,13 +259,16 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName,
             int[] newDiscardingThreasholds, UUID newCourseAreaId, AsyncCallback<StrippedLeaderboardDTO> callback);
 
-    void createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName, int[] discardThresholds,
+    void createFlexibleLeaderboard(String tenantOwnerName, String leaderboardName, String leaderboardDisplayName,
+            int[] discardThresholds,
             ScoringSchemeType scoringSchemeType, UUID courseAreaId, AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
-    void createRegattaLeaderboard(RegattaIdentifier regattaIdentifier, String leaderboardDisplayName,
+    void createRegattaLeaderboard(String tenantOwnerName, RegattaIdentifier regattaIdentifier,
+            String leaderboardDisplayName,
             int[] discardThresholds, AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
-    void createRegattaLeaderboardWithEliminations(String name, String displayName, String regattaName,
+    void createRegattaLeaderboardWithEliminations(String tenantOwnerName, String name, String displayName,
+            String regattaName,
             AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
     void removeLeaderboard(String leaderboardName, AsyncCallback<Void> asyncCallback);
@@ -370,7 +373,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      * @param displayGroupsInReverseOrder
      *            TODO
      */
-    void createLeaderboardGroup(String groupName, String description, String displayName,
+    void createLeaderboardGroup(String tenantOwnerName, String groupName, String description, String displayName,
             boolean displayGroupsInReverseOrder, int[] overallLeaderboardDiscardThresholds,
             ScoringSchemeType overallLeaderboardScoringSchemeType, AsyncCallback<LeaderboardGroupDTO> callback);
 
@@ -456,7 +459,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void moveRaceColumnInSeriesDown(RegattaIdentifier regattaIdentifier, String seriesName, String columnName,
             AsyncCallback<Void> callback);
 
-    void createRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace, Date startDate, Date endDate,
+    void createRegatta(String tenantOwnerName, String regattaName, String boatClassName,
+            boolean canBoatsOfCompetitorsChangePerRace, Date startDate, Date endDate,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent,
             ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType,
@@ -779,7 +783,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void updateSuppressedMarkPassings(String leaderboardName, String raceColumnName, String fleetName,
             Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorDTO competitorDTO, AsyncCallback<Void> callback);
 
-    void createRegattaStructure(Iterable<RegattaDTO> regattaNames, EventDTO newEvent, AsyncCallback<Void> asyncCallback);
+    void createRegattaStructure(String tenantOwnerName, Iterable<RegattaDTO> regattaNames, EventDTO newEvent,
+            AsyncCallback<Void> asyncCallback);
 
     void updateFixedMarkPassing(String leaderboardName, String raceColumnName, String fleetName,
             Integer indexOfWaypoint, Date dateOfMarkPassing, CompetitorDTO competitorDTO, AsyncCallback<Void> callback);

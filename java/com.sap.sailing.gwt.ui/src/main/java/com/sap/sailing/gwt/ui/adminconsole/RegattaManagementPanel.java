@@ -51,11 +51,13 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
     private RegattaDetailsComposite regattaDetailsComposite;
 
     private final CaptionPanel regattasPanel;
+    private final UserService userService;
     
     public RegattaManagementPanel(SailingServiceAsync sailingService, UserService userService,
             ErrorReporter errorReporter, StringMessages stringMessages, RegattaRefresher regattaRefresher,
             EventsRefresher eventsRefresher) {
         this.sailingService = sailingService;
+        this.userService = userService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;
@@ -176,7 +178,8 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
 
     private void openCreateRegattaDialog(Collection<RegattaDTO> existingRegattas, final List<EventDTO> existingEvents) {
         RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas, existingEvents, /*eventToSelect*/ null, stringMessages,
-                new CreateRegattaCallback(sailingService, stringMessages, errorReporter, regattaRefresher, eventsRefresher, existingEvents));
+                new CreateRegattaCallback(userService, sailingService, stringMessages, errorReporter, regattaRefresher,
+                        eventsRefresher, existingEvents));
         dialog.ensureDebugId("RegattaCreateDialog");
         dialog.show();
     }
