@@ -92,6 +92,7 @@ import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
+import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.HasPermissions;
@@ -121,6 +122,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private static final String ADMIN_USERNAME = "admin";
 
     private static final String ADMIN_DEFAULT_PASSWORD = "admin";
+    
+    private static final String ANONYMOUS_USERNAME = "<anonymous>";
 
     private CachingSecurityManager securityManager;
     
@@ -242,8 +245,16 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             }
             setOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(ADMIN_USERNAME), adminUser, /* no admin tenant */ null, ADMIN_USERNAME);
             addRoleForUser(adminUser, new RoleImpl(adminRoleDefinition));
+            
+            if (userStore.getUserByName(ANONYMOUS_USERNAME) == null) {
+                logger.info(ANONYMOUS_USERNAME + " not found -> creating it now");
+                createUserInternal(ANONYMOUS_USERNAME, null, getDefaultTenant());
+                setOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(ANONYMOUS_USERNAME), adminUser,
+                        /* no tenant */ null, ANONYMOUS_USERNAME);
+            }
         } catch (UserManagementException | MailException | UserGroupManagementException e) {
-            logger.log(Level.SEVERE, "Exception while creating default admin user", e);
+            logger.log(Level.SEVERE,
+                    "Exception while creating default " + ADMIN_USERNAME + " and " + ANONYMOUS_USERNAME + " user", e);
         }
     }
     
@@ -686,10 +697,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         byte[] salt = rng.nextBytes().getBytes();
         String hashedPasswordBase64 = hashPassword(password, salt);
         UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
-        final UserImpl result = userStore.createUser(username, email, tenant, upa); // TODO: get the principal as owner
-        // now the user creation needs to be replicated so that when replicating role addition and group assignment
-        // the replica will be able to resolve the user correctly
-        apply(s->s.internalStoreUser(result));
+        final UserImpl result = createUserInternal(username, email, tenant, upa);
         addRoleForUser(result, new RoleImpl(UserRole.getInstance(), /* tenant qualifier */ null, /* user qualifier */ result));
         addUserToUserGroup(tenant, result);
         // the new user becomes its owner to ensure the user role is correctly working
@@ -716,6 +724,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 }
             }.start();
         }
+        return result;
+    }
+
+    private UserImpl createUserInternal(String username, String email, UserGroup defaultTenant, Account... accounts) throws UserManagementException {
+        final UserImpl result = userStore.createUser(username, email, defaultTenant, accounts); // TODO: get the principal as owner
+        // now the user creation needs to be replicated so that when replicating role addition and group assignment
+        // the replica will be able to resolve the user correctly
+        apply(s -> s.internalStoreUser(result));
         return result;
     }
 
