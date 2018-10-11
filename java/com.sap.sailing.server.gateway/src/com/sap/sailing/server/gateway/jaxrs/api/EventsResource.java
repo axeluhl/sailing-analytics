@@ -346,8 +346,8 @@ public class EventsResource extends AbstractSailingServerResource {
         RegattaCreationParametersDTO regattaCreationParametersDTO = new RegattaCreationParametersDTO(
                 createDefaultSeriesCreationParameters(regattaName, numberOfRaces));
         UUID regattaId = UUID.randomUUID();
-        getSecurityService().setOwnershipCheckPermissionAndRevertOnError(
-                getSecurityService().getDefaultTenant(), SecuredDomainType.REGATTA, regattaName, DefaultActions.CREATE,
+        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                getSecurityService().getDefaultTenant(), SecuredDomainType.REGATTA, regattaName, 
                 regattaName, new ActionWithResult<Regatta>() {
 
                     @Override
@@ -398,9 +398,9 @@ public class EventsResource extends AbstractSailingServerResource {
         Map<Locale, URL> sailorsInfoWebsiteURLs = new HashMap<Locale,URL>();
         Iterable<ImageDescriptor> images = Collections.<ImageDescriptor> emptyList();
         Iterable<VideoDescriptor> videos = Collections.<VideoDescriptor> emptyList();
-        Event event = getSecurityService().setOwnershipCheckPermissionAndRevertOnError(
+        Event event = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 getSecurityService().getDefaultTenant(), SecuredDomainType.EVENT, eventId.toString(),
-                DefaultActions.CREATE, eventName, new ActionWithResult<Event>() {
+                eventName, new ActionWithResult<Event>() {
 
                     @Override
                     public Event run() throws Exception {
@@ -448,9 +448,10 @@ public class EventsResource extends AbstractSailingServerResource {
             List<Integer> overallLeaderboardDiscardThresholdsParam, String overallLeaderboardScoringSchemeTypeParam)
             throws NotFoundException {
         UUID leaderboardGroupId = UUID.randomUUID();
-        LeaderboardGroup leaderboardGroup = getSecurityService().setOwnershipCheckPermissionAndRevertOnError(
+        LeaderboardGroup leaderboardGroup = getSecurityService()
+                .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 getSecurityService().getDefaultTenant(), SecuredDomainType.LEADERBOARD_GROUP, leaderboardGroupName,
-                DefaultActions.CREATE, leaderboardGroupName, new ActionWithResult<LeaderboardGroup>() {
+                leaderboardGroupName, new ActionWithResult<LeaderboardGroup>() {
 
             @Override
             public LeaderboardGroup run() throws Exception {
@@ -575,8 +576,9 @@ public class EventsResource extends AbstractSailingServerResource {
     }
 
     private RegattaLeaderboard createRegattaLeaderboard(String regattaName, int[] discardThresholds) {
-        return getSecurityService().setOwnershipCheckPermissionAndRevertOnError(getSecurityService().getDefaultTenant(),
-                SecuredDomainType.LEADERBOARD, regattaName, DefaultActions.CREATE, regattaName,
+        return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                getSecurityService().getDefaultTenant(),
+                SecuredDomainType.LEADERBOARD, regattaName, regattaName,
                 new ActionWithResult<RegattaLeaderboard>() {
 
                     @Override

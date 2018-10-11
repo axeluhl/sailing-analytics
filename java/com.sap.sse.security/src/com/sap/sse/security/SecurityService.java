@@ -321,15 +321,11 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     UserGroup getDefaultTenant();
 
-    void setDefaultOwnershipAndRevertOnError(QualifiedObjectIdentifier objectIdentifier, Action action)
-            throws Exception;
+    <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(UserGroup tenantOwner, HasPermissions type,
+            String typeIdentifier,
+            String securityDisplayName, ActionWithResult<T> actionWithResult);
 
-    <T> T setDefaultOwnershipAndRevertOnError(QualifiedObjectIdentifier objectIdentifier, ActionWithResult<T> action)
-            throws Exception;
-
-    <T> T setOwnershipCheckPermissionAndRevertOnError(UserGroup tenantOwner, HasPermissions type, String typeIdentifier,
-            HasPermissions.Action action, String securityDisplayName, ActionWithResult<T> actionWithResult);
-    <T> T setOwnershipCheckPermissionAndRevertOnError(String tenantOwnerName, HasPermissions type,
-            String typeIdentifier, HasPermissions.Action action, String securityDisplayName,
+    <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(String tenantOwnerName, HasPermissions type,
+            String typeIdentifier, String securityDisplayName,
             ActionWithResult<T> actionWithResult);
 }

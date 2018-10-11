@@ -1335,13 +1335,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void storeTracTracConfiguration(String name, String jsonURL, String liveDataURI, String storedDataURI,
             String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) throws Exception {
-        getSecurityService().setDefaultOwnershipAndRevertOnError(
-                SecuredDomainType.TRACTRAC_ACCOUNT.getQualifiedObjectIdentifier(name), () -> {
-                    SecurityUtils.getSubject().checkPermission(SecuredDomainType.TRACTRAC_ACCOUNT
-                            .getStringPermissionForObjects(DefaultActions.CREATE, name));
-                    tractracMongoObjectFactory.storeTracTracConfiguration(
-                            getTracTracAdapter().createTracTracConfiguration(name, jsonURL, liveDataURI, storedDataURI,
-                                    courseDesignUpdateURI, tracTracUsername, tracTracPassword));
+
+        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                getSecurityService().getDefaultTenant(), SecuredDomainType.TRACTRAC_ACCOUNT, name, name,
+                new ActionWithResult<Void>() {
+
+                    @Override
+                    public Void run() throws Exception {
+                        tractracMongoObjectFactory.storeTracTracConfiguration(
+                                getTracTracAdapter().createTracTracConfiguration(name, jsonURL, liveDataURI,
+                                        storedDataURI, courseDesignUpdateURI, tracTracUsername, tracTracPassword));
+                        return null;
+                    }
                 });
     }
 
@@ -2912,13 +2917,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void storeSwissTimingConfiguration(String configName, String jsonURL, String hostname, Integer port,
             String updateURL, String updateUsername, String updatePassword) throws Exception {
         if (!jsonURL.equalsIgnoreCase("test")) {
-            getSecurityService().setDefaultOwnershipAndRevertOnError(
-                    SecuredDomainType.SWISS_TIMING_ACCOUNT.getQualifiedObjectIdentifier(configName), () -> {
-                        SecurityUtils.getSubject().checkPermission(SecuredDomainType.SWISS_TIMING_ACCOUNT
-                                .getStringPermissionForObjects(DefaultActions.CREATE, configName));
-                        swissTimingAdapterPersistence.storeSwissTimingConfiguration(
-                                swissTimingFactory.createSwissTimingConfiguration(configName, jsonURL, hostname, port,
-                                        updateURL, updateUsername, updatePassword));
+            getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                    getSecurityService().getDefaultTenant(), SecuredDomainType.SWISS_TIMING_ACCOUNT, configName,
+                    configName, new ActionWithResult<Void>() {
+
+                        @Override
+                        public Void run() throws Exception {
+                            swissTimingAdapterPersistence.storeSwissTimingConfiguration(
+                                    swissTimingFactory.createSwissTimingConfiguration(configName, jsonURL, hostname,
+                                            port, updateURL, updateUsername, updatePassword));
+                            return null;
+                        }
                     });
         }
     }
@@ -3817,9 +3826,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             String displayName, boolean displayGroupsInReverseOrder, int[] overallLeaderboardDiscardThresholds,
             ScoringSchemeType overallLeaderboardScoringSchemeType, List<String> leaderBoards) {
         UUID newLeaderboardGroupId = UUID.randomUUID();
-        return getSecurityService().setOwnershipCheckPermissionAndRevertOnError(tenantOwnerName,
-                SecuredDomainType.LEADERBOARD_GROUP, newLeaderboardGroupId.toString(), DefaultActions.CREATE,
-                displayName, new ActionWithResult<LeaderboardGroupDTO>() {
+        return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(tenantOwnerName,
+                SecuredDomainType.LEADERBOARD_GROUP, newLeaderboardGroupId.toString(), displayName,
+                new ActionWithResult<LeaderboardGroupDTO>() {
                     @Override
                     public LeaderboardGroupDTO run() throws Exception {
                         CreateLeaderboardGroup createLeaderboardGroupOp = new CreateLeaderboardGroup(
@@ -4001,9 +4010,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             throws MalformedURLException, UnauthorizedException {
         final UUID eventUuid = UUID.randomUUID();
 
-        return getSecurityService().setOwnershipCheckPermissionAndRevertOnError(tenantOwnerName,
+        return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(tenantOwnerName,
                 SecuredDomainType.EVENT,
-                eventUuid.toString(), DefaultActions.CREATE, eventName, new ActionWithResult<EventDTO>() {
+                eventUuid.toString(), eventName, new ActionWithResult<EventDTO>() {
                     @Override
                     public EventDTO run() throws Exception {
                         TimePoint startTimePoint = startDate != null ? new MillisecondsTimePoint(startDate) : null;
@@ -4523,9 +4532,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             boolean persistent, ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType) {
 
-        return getSecurityService().setOwnershipCheckPermissionAndRevertOnError(tenantOwnerName,
+        return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(tenantOwnerName,
                 SecuredDomainType.REGATTA,
-                regattaName, DefaultActions.CREATE, regattaName, new ActionWithResult<RegattaDTO>() {
+                regattaName, regattaName, new ActionWithResult<RegattaDTO>() {
 
                     @Override
                     public RegattaDTO run() throws Exception {
@@ -4742,12 +4751,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void storeSwissTimingArchiveConfiguration(String swissTimingJsonUrl) throws Exception {
-        getSecurityService().setDefaultOwnershipAndRevertOnError(
-                SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT.getQualifiedObjectIdentifier(swissTimingJsonUrl), () -> {
-                    SecurityUtils.getSubject().checkPermission(SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT
-                            .getStringPermissionForObjects(DefaultActions.CREATE, swissTimingJsonUrl));
-                    swissTimingAdapterPersistence.storeSwissTimingArchiveConfiguration(swissTimingFactory.createSwissTimingArchiveConfiguration(
-                            swissTimingJsonUrl));
+        getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                getSecurityService().getDefaultTenant(), SecuredDomainType.SWISS_TIMING_ACCOUNT, swissTimingJsonUrl,
+                swissTimingJsonUrl, new ActionWithResult<Void>() {
+                    @Override
+                    public Void run() throws Exception {
+                        swissTimingAdapterPersistence.storeSwissTimingArchiveConfiguration(
+                                swissTimingFactory.createSwissTimingArchiveConfiguration(swissTimingJsonUrl));
+                        return null;
+                    }
                 });
     }
 
@@ -5830,12 +5842,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final Account existingAccount = getIgtimiConnectionFactory().getExistingAccountByEmail(eMailAddress);
         final Account account;
         if (existingAccount == null) {
-            final QualifiedObjectIdentifier igtimiAccountId = SecuredDomainType.IGTIMI_ACCOUNT.getQualifiedObjectIdentifier(eMailAddress);
-            account = getSecurityService().setDefaultOwnershipAndRevertOnError(igtimiAccountId, () -> {
-                SecurityUtils.getSubject().checkPermission(SecuredDomainType.IGTIMI_ACCOUNT.getStringPermissionForObjects(
-                        DefaultActions.CREATE, eMailAddress));
-                return getIgtimiConnectionFactory().createAccountToAccessUserData(eMailAddress, password);
-            });
+            account = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                    getSecurityService().getDefaultTenant(), SecuredDomainType.IGTIMI_ACCOUNT, eMailAddress,
+                    eMailAddress,
+                    () -> getIgtimiConnectionFactory()
+                            .createAccountToAccessUserData(eMailAddress, password));
         } else {
             logger.warning("Igtimi account "+eMailAddress+" already exists.");
             account = null; // account with that e-mail already exists

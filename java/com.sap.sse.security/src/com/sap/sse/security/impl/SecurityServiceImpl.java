@@ -74,7 +74,6 @@ import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.security.AccessControlStore;
-import com.sap.sse.security.Action;
 import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.BearerAuthenticationToken;
 import com.sap.sse.security.ClientUtils;
@@ -96,6 +95,7 @@ import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
@@ -476,32 +476,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 displayNameOfOwnedObject));
     }
     
-    @Override
-    public void setDefaultOwnershipAndRevertOnError(QualifiedObjectIdentifier objectIdentifier, Action action) throws Exception {
-        setDefaultOwnershipAndRevertOnError(objectIdentifier, () -> {
-            action.run();
-            return null;
-        });
-    }
-    
-    @Override
-    public <T> T setDefaultOwnershipAndRevertOnError(QualifiedObjectIdentifier objectIdentifier,
-            ActionWithResult<T> action) throws Exception {
-        boolean didSetOwnerShip = false;
-        if (getOwnership(objectIdentifier) == null) {
-            this.setOwnership(this.createDefaultOwnershipForNewObject(objectIdentifier));
-            didSetOwnerShip = true;
-        }
-        try {
-            return action.run();
-        } catch (Exception e) {
-            if (didSetOwnerShip) {
-                this.deleteOwnership(objectIdentifier); // revert preliminary ownership allocation
-            }
-            throw e;
-        }
-    }
-
     @Override
     public Ownership internalSetOwnership(QualifiedObjectIdentifier idAsString, String userOwnerName, UUID tenantOwnerId, String displayName) {
         return accessControlStore.setOwnership(idAsString, getUserByName(userOwnerName), getUserGroup(tenantOwnerId), displayName).getAnnotation();
@@ -1548,18 +1522,19 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public <T> T setOwnershipCheckPermissionAndRevertOnError(String tenantOwnerName, HasPermissions type,
-            String typeIdentifier, com.sap.sse.security.shared.HasPermissions.Action action, String securityDisplayName,
+    public <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(String tenantOwnerName,
+            HasPermissions type, String typeIdentifier, String securityDisplayName,
             ActionWithResult<T> actionWithResult) {
         final UserGroup group = getUserGroupByName(tenantOwnerName);
 
-        return setOwnershipCheckPermissionAndRevertOnError(group, type, typeIdentifier, action, securityDisplayName,
+        return setOwnershipCheckPermissionForObjectCreationAndRevertOnError(group, type, typeIdentifier,
+                securityDisplayName,
                 actionWithResult);
     }
 
     @Override
-    public <T> T setOwnershipCheckPermissionAndRevertOnError(UserGroup tenantOwner, HasPermissions type,
-            String typeIdentifier, com.sap.sse.security.shared.HasPermissions.Action action, String securityDisplayName,
+    public <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(UserGroup tenantOwner,
+            HasPermissions type, String typeIdentifier, String securityDisplayName,
             ActionWithResult<T> actionWithResult) {
         QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifier(typeIdentifier);
         T result = null;
@@ -1570,7 +1545,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 didSetOwnerShip = true;
                 setOwnership(identifier, user, tenantOwner, securityDisplayName);
             }
-            SecurityUtils.getSubject().checkPermission(type.getStringPermissionForObjects(action, typeIdentifier));
+            SecurityUtils.getSubject()
+                    .checkPermission(type.getStringPermissionForObjects(DefaultActions.CREATE, typeIdentifier));
             result = actionWithResult.run();
         } catch (AuthorizationException e) {
             if (didSetOwnerShip) {

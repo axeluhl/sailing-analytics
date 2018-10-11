@@ -69,17 +69,17 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
         Mockito.doAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
-                return invocation.getArgumentAt(5, ActionWithResult.class).run();
+                return invocation.getArgumentAt(4, ActionWithResult.class).run();
             }
-        }).when(securityService).setOwnershipCheckPermissionAndRevertOnError(
-                Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        }).when(securityService).setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
         Mockito.doAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
-                return invocation.getArgumentAt(5, ActionWithResult.class).run();
+                return invocation.getArgumentAt(4, ActionWithResult.class).run();
             }
-        }).when(securityService).setOwnershipCheckPermissionAndRevertOnError(
-                Mockito.any(UserGroup.class), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+        }).when(securityService).setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                Mockito.any(UserGroup.class), Mockito.any(), Mockito.any(), Mockito.any(),
                 Mockito.any());
 
         Mockito.doReturn(true).when(fakeSubject).isAuthenticated();
