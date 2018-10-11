@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,6 +16,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
@@ -55,6 +57,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     protected final DoubleBox buoyZoneRadiusInHullLengthsDoubleBox;
     protected final ListEditorComposite<SeriesDTO> seriesEditor;
     private final ListBox rankingMetricListBox;
+    protected final ListBox competitorRegistrationTypeListBox;
 
     protected final List<EventDTO> existingEvents;
     private EventDTO defaultEvent;
@@ -103,6 +106,10 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         courseAreaListBox.setEnabled(false);
         this.seriesEditor = createSeriesEditor(series);
         setupEventAndCourseAreaListBoxes(stringMessages);
+
+        competitorRegistrationTypeListBox = createListBox(false);
+        EnumSet.allOf(CompetitorRegistrationType.class).forEach(t->competitorRegistrationTypeListBox.addItem(t.getLabel(stringMessages), t.name()));
+        competitorRegistrationTypeListBox.setSelectedIndex(regatta.competitorRegistrationType.ordinal());
     }
 
     /**
@@ -146,7 +153,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-        Grid formGrid = new Grid(9, 2);
+        Grid formGrid = new Grid(10, 2);
         panel.add(formGrid);
 
         formGrid.setWidget(0, 0, new Label(stringMessages.timeZone() + ":"));
@@ -167,6 +174,8 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         formGrid.setWidget(7, 1, controlTrackingFromStartAndFinishTimesCheckBox);
         formGrid.setWidget(8, 0, new Label(stringMessages.buoyZoneRadiusInHullLengths() + ":"));
         formGrid.setWidget(8, 1, buoyZoneRadiusInHullLengthsDoubleBox);
+        formGrid.setWidget(9, 0, new Label(stringMessages.competitorRegistrationType() + ":"));
+        formGrid.setWidget(9, 1, competitorRegistrationTypeListBox);
         setupAdditionalWidgetsOnPanel(panel, formGrid);
         return panel;
     }
@@ -294,6 +303,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         result.buoyZoneRadiusInHullLengths = buoyZoneRadiusInHullLengthsDoubleBox.getValue();
         setCourseAreaInRegatta(result);
         result.series = getSeriesEditor().getValue();
+        result.competitorRegistrationType = CompetitorRegistrationType.valueOf(competitorRegistrationTypeListBox.getSelectedValue());
         return result;
     }
 
