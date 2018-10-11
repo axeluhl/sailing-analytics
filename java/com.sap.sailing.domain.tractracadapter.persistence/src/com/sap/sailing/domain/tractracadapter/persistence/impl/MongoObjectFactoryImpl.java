@@ -18,9 +18,9 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     public void storeTracTracConfiguration(TracTracConfiguration tracTracConfiguration) {
         DBCollection ttConfigCollection = database.getCollection(CollectionNames.TRACTRAC_CONFIGURATIONS.name());
         // remove old, non working index
-        dropIndexSafe(ttConfigCollection, "TRACTRAC_CONFIGURATIONS_1");
-        // adding unique index by config name
-        ttConfigCollection.createIndex(new BasicDBObject(FieldNames.TT_CONFIG_NAME.name(), 1), "tt_config_name_unique",
+        dropIndexSafe(ttConfigCollection, "TRACTRAC_CONFIGURATIONS_1", "tt_config_name_unique");
+        // adding unique index by JSON URL
+        ttConfigCollection.createIndex(new BasicDBObject(FieldNames.TT_CONFIG_JSON_URL.name(), 1), "tt_config_json_url_unique",
                 true);
         
         final BasicDBObject result = new BasicDBObject();
@@ -33,15 +33,17 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.TT_CONFIG_TRACTRAC_PASSWORD.name(), tracTracConfiguration.getTracTracPassword());
         
         // Object with given name is updated or created if it does not exist yet
-        final BasicDBObject updateQuery = new BasicDBObject(FieldNames.TT_CONFIG_NAME.name(),
-                tracTracConfiguration.getName());
+        final BasicDBObject updateQuery = new BasicDBObject(FieldNames.TT_CONFIG_JSON_URL.name(),
+                tracTracConfiguration.getJSONURL());
         ttConfigCollection.update(updateQuery, result, true, false);
     }
 
-    private void dropIndexSafe(DBCollection collection, String indexName) {
+    private void dropIndexSafe(DBCollection collection, String... indexNames) {
         collection.getIndexInfo().forEach(indexInfo -> {
-            if (indexName.equals(indexInfo.get("name"))) {
-                collection.dropIndex(indexName);
+            for (String indexName : indexNames) {
+                if (indexName.equals(indexInfo.get("name"))) {
+                    collection.dropIndex(indexName);
+                }
             }
         });
     }
