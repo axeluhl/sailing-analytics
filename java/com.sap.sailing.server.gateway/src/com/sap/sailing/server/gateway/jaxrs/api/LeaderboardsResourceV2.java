@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -105,7 +106,8 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         List<DetailType> raceDetailsToShow = calculateRaceDetailTypesToShow(raceDetailNames);
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(
                 resultTimePoint, raceColumnsToShow, /* addOverallDetails */
-                false, getService(), getService().getBaseDomainFactory(),
+                hasOverallDetail(raceDetailNames),
+                getService(), getService().getBaseDomainFactory(),
                 /* fillTotalPointsUncorrected */false);
         JSONObject jsonLeaderboard = new JSONObject();
         writeCommonLeaderboardData(jsonLeaderboard, leaderboard, resultState, leaderboardDTO.getTimePoint(), maxCompetitorsCount);
@@ -204,9 +206,9 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                     JSONObject jsonRaceDetails = new JSONObject();
                     jsonEntry.put("data", jsonRaceDetails);
                     for (DetailType type : raceDetailsToShow) {
-                        Pair<String, Object> valueForRaceDetailType = getValueForRaceDetailType(type, leaderboardEntry, currentLegEntry);
+                        Pair<String, Object> valueForRaceDetailType = getValueForRaceDetailType(type, leaderboardRowDTO, leaderboardEntry, currentLegEntry);
                         if (valueForRaceDetailType != null && valueForRaceDetailType.getA() != null && valueForRaceDetailType.getB() != null) {
-                            jsonRaceDetails.put(valueForRaceDetailType.getA(),  valueForRaceDetailType.getB());
+                            jsonRaceDetails.put(valueForRaceDetailType.getA(), valueForRaceDetailType.getB());
                         }
                     }                    
                 }
@@ -214,6 +216,13 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
             competitorCounter++;
         }
         return jsonLeaderboard;
+    }
+
+    private boolean hasOverallDetail(List<String> raceDetailNames) {
+        final HashSet<String> availableOverallDetailTypeNames = new HashSet<>(
+                Arrays.asList(getAvailableOverallDetailColumnTypes()).stream().map(dt->dt.name()).collect(Collectors.toSet()));
+        // returns true if the set changed, meaning there was an overall detail type in the raceDetailNames
+        return availableOverallDetailTypeNames.removeAll(raceDetailNames);
     }
 
     private List<DetailType> calculateRaceDetailTypesToShow(List<String> raceDetailTypesNames) {
@@ -252,10 +261,15 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 DetailType.RACE_CURRENT_SPEED_OVER_GROUND_IN_KNOTS,
                 DetailType.RACE_DISTANCE_TO_COMPETITOR_FARTHEST_AHEAD_IN_METERS, 
                 DetailType.NUMBER_OF_MANEUVERS,
-                DetailType.RACE_CURRENT_LEG };
+                DetailType.RACE_CURRENT_LEG,
+                DetailType.OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS };
     }
 
-    private Pair<String, Object> getValueForRaceDetailType(DetailType type, LeaderboardEntryDTO entry, LegEntryDTO currentLegEntry) {
+    private DetailType[] getAvailableOverallDetailColumnTypes() {
+        return new DetailType[] { DetailType.OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS };
+    }
+
+    private Pair<String, Object> getValueForRaceDetailType(DetailType type, LeaderboardRowDTO leaderboardRowDTO, LeaderboardEntryDTO entry, LegEntryDTO currentLegEntry) {
         String name;
         Object value = null;
         Pair<String, Object> result = null;
@@ -321,6 +335,10 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                 if (currentLegNumber > 0) {
                     value = currentLegNumber;
                 }
+                break;
+            case OVERALL_MAXIMUM_SPEED_OVER_GROUND_IN_KNOTS:
+                name = "maxSpeedOverGroundInKnots";
+                value = leaderboardRowDTO.maximumSpeedOverGroundInKnots==null?null:roundDouble(leaderboardRowDTO.maximumSpeedOverGroundInKnots, 2);
                 break;
             default:
                 name = null;

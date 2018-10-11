@@ -64,6 +64,7 @@ import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.ranking.RankingMetric.RankingInfo;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.GPSFixTrack;
+import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
 import com.sap.sailing.domain.tracking.TrackedRace;
@@ -117,6 +118,7 @@ import com.sap.sse.common.Duration;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.RGBColor;
@@ -1029,29 +1031,76 @@ public class RegattasResource extends AbstractSailingServerResource {
         return response;
     }
 
+    private TimePoint determineEndTimeForManeuverDetection(TrackedRace trackedRace) {
+        final TimePoint endOfRace = trackedRace.getEndOfRace();
+        final TimePoint endTime;
+        if (endOfRace != null) {
+            endTime = endOfRace;
+        } else {
+            final TimePoint endOfTracking = trackedRace.getEndOfTracking();
+            if (endOfTracking == null || endOfTracking.after(MillisecondsTimePoint.now())) {
+                endTime = MillisecondsTimePoint.now();
+            } else {
+                endTime = endOfTracking;
+            }
+        }
+        return endTime;
+    }
+
     @GET
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}/races/{racename}/maneuvers")
-    public Response getManeuvers(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName) {
+    public Response getManeuvers(@PathParam("regattaname") String regattaName, @PathParam("racename") String raceName,
+            @QueryParam("competitorId") String competitorId, @QueryParam("fromTime") String fromTime) {
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = Response.status(Status.NOT_FOUND)
-                    .entity("Could not find a regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.").type(MediaType.TEXT_PLAIN)
-                    .build();
+                    .entity("Could not find a regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.")
+                    .type(MediaType.TEXT_PLAIN).build();
         } else {
             RaceDefinition race = findRaceByName(regatta, raceName);
             if (race == null) {
                 response = Response.status(Status.NOT_FOUND)
-                        .entity("Could not find a race with name '" + StringEscapeUtils.escapeHtml(raceName) + "'.").type(MediaType.TEXT_PLAIN)
-                        .build();
+                        .entity("Could not find a race with name '" + StringEscapeUtils.escapeHtml(raceName) + "'.")
+                        .type(MediaType.TEXT_PLAIN).build();
             } else {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
-                ManeuversJsonSerializer serializer = new ManeuversJsonSerializer(CompetitorAndBoatJsonSerializer.create(),
-                        new ManeuverJsonSerializer(new GPSFixJsonSerializer(), new DistanceJsonSerializer()));
-                JSONObject jsonMarkPassings = serializer.serialize(trackedRace);
-                String json = jsonMarkPassings.toJSONString();
-                return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                if (trackedRace == null) {
+                    response = Response.status(Status.NOT_FOUND).entity(
+                            "Could not find a trackedrace with name '" + StringEscapeUtils.escapeHtml(raceName) + "'.")
+                            .type(MediaType.TEXT_PLAIN).build();
+                } else {
+                    List<Pair<Competitor, Iterable<Maneuver>>> data = new ArrayList<>();
+                    Iterable<Competitor> competitors = trackedRace.getRace().getCompetitors();
+                    UUID competitorFilter = null;
+                    if (competitorId != null) {
+                        competitorFilter = UUID.fromString(competitorId);
+                    }
+                    final TimePoint endTime = determineEndTimeForManeuverDetection(trackedRace);
+                    final TimePoint startTime;
+                    if (fromTime != null) {
+                        startTime = new MillisecondsTimePoint(Long.parseLong(fromTime));
+                    } else {
+                        startTime = trackedRace.getStartOfRace();
+                    }
+
+                    for (Competitor competitor : competitors) {
+                        if (competitorFilter == null || competitor.getId().equals(competitorFilter)) {
+
+                            Iterable<Maneuver> maneuversForCompetitor = trackedRace.getManeuvers(competitor, startTime,
+                                    endTime, false);
+                            data.add(new Pair<Competitor, Iterable<Maneuver>>(competitor, maneuversForCompetitor));
+                        }
+                    }
+
+                    ManeuversJsonSerializer serializer = new ManeuversJsonSerializer(
+                            new ManeuverJsonSerializer(new GPSFixJsonSerializer(), new DistanceJsonSerializer()));
+                    JSONObject jsonMarkPassings = serializer.serialize(data);
+                    String json = jsonMarkPassings.toJSONString();
+                    return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")
+                            .build();
+                }
             }
         }
         return response;
