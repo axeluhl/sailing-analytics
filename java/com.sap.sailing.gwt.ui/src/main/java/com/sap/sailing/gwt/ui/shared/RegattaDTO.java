@@ -41,6 +41,7 @@ public class RegattaDTO extends NamedDTO {
     public CompetitorRegistrationType competitorRegistrationType = CompetitorRegistrationType.CLOSED;
     public RankingMetrics rankingMetricType;
     public Double buoyZoneRadiusInHullLengths;
+    public String registrationLinkSecret;
     
     public RegattaDTO() {}
     
@@ -74,6 +75,7 @@ public class RegattaDTO extends NamedDTO {
         this.canBoatsOfCompetitorsChangePerRace = other.canBoatsOfCompetitorsChangePerRace;
         this.competitorRegistrationType = other.competitorRegistrationType;
         this.buoyZoneRadiusInHullLengths = other.buoyZoneRadiusInHullLengths;
+        this.registrationLinkSecret = other.registrationLinkSecret;
     }
     
     public Pair<SeriesDTO, FleetDTO> getSeriesAndFleet(RegattaAndRaceIdentifier raceIdentifier) {

@@ -64,12 +64,18 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         final TimePoint endDate = new MillisecondsTimePoint(cal.getTime());
         Series testSeries = new SeriesImpl("TestSeries", /* isMedal */false, /* isFleetsCanRunInParallel */ true, fleets, raceColumnNames, /* trackedRegattaRegistry */null);
         series.add(testSeries);
-        racingEventService.createRegatta(RegattaImpl.getDefaultName(closedRegattaName, boatClassName), boatClassName, 
-                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED, startDate, endDate, UUID.randomUUID(), series, /*persistent*/ true,
-                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
-        racingEventService.createRegatta(RegattaImpl.getDefaultName(openRegattaName, boatClassName), boatClassName, 
-                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.OPEN_MODERATED, startDate, endDate, UUID.randomUUID(), series, /*persistent*/ true,
-                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null, /*buoyZoneRadiusInHullLengths*/2.0, /* useStartTimeInference */ true, /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
+        racingEventService.createRegatta(RegattaImpl.getDefaultName(closedRegattaName, boatClassName), boatClassName,
+                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.CLOSED,
+                /* registrationLinkSecret */ null, startDate, endDate, UUID.randomUUID(), series, /* persistent */ true,
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null,
+                /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
+                /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
+        racingEventService.createRegatta(RegattaImpl.getDefaultName(openRegattaName, boatClassName), boatClassName,
+                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.OPEN_MODERATED,
+                /* registrationLinkSecret */ null, startDate, endDate, UUID.randomUUID(), series, /* persistent */ true,
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null,
+                /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
+                /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
         testSeries.addRaceColumn("R1", /* trackedRegattaRegistry */ null);
         testSeries.addRaceColumn("R2", /* trackedRegattaRegistry */ null);
     }

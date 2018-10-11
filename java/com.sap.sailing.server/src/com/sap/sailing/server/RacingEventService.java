@@ -336,7 +336,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      *            cannot be {@code true} if {@link useStartTimeInference} is also {@code true}
      */
     Regatta createRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace,
-            CompetitorRegistrationType competitorRegistrationType, TimePoint startDate, TimePoint endDate, Serializable id, Iterable<? extends Series> series,
+            CompetitorRegistrationType competitorRegistrationType, String registrationLinkSecret, TimePoint startDate, TimePoint endDate, Serializable id, Iterable<? extends Series> series,
             boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths,
             boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor);
     
@@ -497,7 +497,7 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      */
     Util.Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String fullRegattaName, String boatClassName, 
             boolean canBoatsOfCompetitorsChangePerRace, CompetitorRegistrationType competitorRegistrationType,
-            TimePoint startDate, TimePoint endDate, Serializable id, 
+            String registrationLinkSecret, TimePoint startDate, TimePoint endDate, Serializable id,
             Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
             Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetricConstructor rankingMetricConstructor);

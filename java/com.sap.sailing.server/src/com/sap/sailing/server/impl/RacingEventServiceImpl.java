@@ -1447,7 +1447,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public Regatta createRegatta(String fullRegattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace,
-            CompetitorRegistrationType competitorRegistrationType, TimePoint startDate, TimePoint endDate,
+            CompetitorRegistrationType competitorRegistrationType, String registrationLinkSecret, TimePoint startDate, TimePoint endDate,
             Serializable id, Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
             Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
             RankingMetricConstructor rankingMetricConstructor) {
@@ -1455,7 +1455,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             throw new IllegalArgumentException("Cannot set both of useStartTimeInference and controlTrackingFromStartAndFinishTimes to true");
         }
         com.sap.sse.common.Util.Pair<Regatta, Boolean> regattaWithCreatedFlag = getOrCreateRegattaWithoutReplication(
-                fullRegattaName, boatClassName, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, startDate, endDate, id, series, persistent, scoringScheme,
+                fullRegattaName, boatClassName, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, registrationLinkSecret, startDate, endDate, id, series, persistent, scoringScheme,
                 defaultCourseAreaId, buoyZoneRadiusInHullLengths, useStartTimeInference, controlTrackingFromStartAndFinishTimes, rankingMetricConstructor);
         Regatta regatta = regattaWithCreatedFlag.getA();
         if (regattaWithCreatedFlag.getB()) {
@@ -1487,10 +1487,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public com.sap.sse.common.Util.Pair<Regatta, Boolean> getOrCreateRegattaWithoutReplication(String fullRegattaName,
-            String boatClassName, boolean canBoatsOfCompetitorsChangePerRace, CompetitorRegistrationType competitorRegistrationType,
-            TimePoint startDate, TimePoint endDate, Serializable id,
-            Iterable<? extends Series> series, boolean persistent, ScoringScheme scoringScheme,
-            Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
+            String boatClassName, boolean canBoatsOfCompetitorsChangePerRace,
+            CompetitorRegistrationType competitorRegistrationType, String registrationLinkSecret, TimePoint startDate,
+            TimePoint endDate, Serializable id, Iterable<? extends Series> series, boolean persistent,
+            ScoringScheme scoringScheme, Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths,
+            boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
             RankingMetricConstructor rankingMetricConstructor) {
         CourseArea courseArea = getCourseArea(defaultCourseAreaId);
         Regatta regatta = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), fullRegattaName,
@@ -1696,11 +1697,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         if (regatta.getDefaultCourseArea() != null) {
             courseAreaId = regatta.getDefaultCourseArea().getId();
         }
-        replicate(new AddSpecificRegatta(regatta.getName(), regatta.getBoatClass() == null ? null : regatta
-                .getBoatClass().getName(), regatta.canBoatsOfCompetitorsChangePerRace(), regatta.getCompetitorRegistrationType(),
-                regatta.getStartDate(), regatta.getEndDate(), regatta.getId(),
+        replicate(new AddSpecificRegatta(regatta.getName(),
+                regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName(),
+                regatta.canBoatsOfCompetitorsChangePerRace(), regatta.getCompetitorRegistrationType(),
+                /* registrationLinkSecret */ null, regatta.getStartDate(), regatta.getEndDate(), regatta.getId(),
                 getSeriesWithoutRaceColumnsConstructionParametersAsMap(regatta), regatta.isPersistent(),
-                regatta.getScoringScheme(), courseAreaId, regatta.getBuoyZoneRadiusInHullLengths(), regatta.useStartTimeInference(), regatta.isControlTrackingFromStartAndFinishTimes(),
+                regatta.getScoringScheme(), courseAreaId, regatta.getBuoyZoneRadiusInHullLengths(),
+                regatta.useStartTimeInference(), regatta.isControlTrackingFromStartAndFinishTimes(),
                 regatta.getRankingMetricType()));
         RegattaIdentifier regattaIdentifier = regatta.getRegattaIdentifier();
         for (RaceDefinition race : regatta.getAllRaces()) {

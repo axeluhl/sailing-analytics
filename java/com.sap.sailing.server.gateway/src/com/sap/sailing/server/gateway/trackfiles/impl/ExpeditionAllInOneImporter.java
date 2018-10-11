@@ -626,10 +626,10 @@ public class ExpeditionAllInOneImporter {
                         /*hasSplitFleetContiguousScoring*/ false, /*maximumNumberOfDiscards*/ null));
         final RegattaCreationParametersDTO regattaCreationParameters = new RegattaCreationParametersDTO(seriesCreationParameters);
         regatta = service.apply(new AddSpecificRegatta(regattaNameAndleaderboardName, boatClassName,
-            /* can boats of competitors change */ false,  CompetitorRegistrationType.CLOSED,
-            /* start date */ null, /* end date */ null, UUID.randomUUID(),
-                regattaCreationParameters, true, scoringScheme, courseAreaId, buoyZoneRadiusInHullLengths, true,
-                false, rankingMetric));
+                /* can boats of competitors change */ false, CompetitorRegistrationType.CLOSED,
+                /* registrationLinkSecret */ null, /* start date */ null, /* end date */ null, UUID.randomUUID(),
+                regattaCreationParameters, true, scoringScheme, courseAreaId, buoyZoneRadiusInHullLengths, true, false,
+                rankingMetric));
         this.ensureBoatClassDetermination(regatta);
         service.apply(new AddColumnToSeries(regattaIdentifier, seriesName, raceColumnName));
         return regatta;

@@ -596,6 +596,15 @@ public class MockedTrackedRace implements DynamicTrackedRace {
                     @Override
                     public void setFleetsCanRunInParallelToTrue() {
                     }
+
+                    @Override
+                    public String getRegistrationLinkSecret() {
+                        return null;
+                    }
+
+                    @Override
+                    public void setRegistrationLinkSecret(String registrationLinkSecret) {
+                    }
                 };
             }
 

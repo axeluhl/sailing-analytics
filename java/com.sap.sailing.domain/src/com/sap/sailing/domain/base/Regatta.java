@@ -235,4 +235,8 @@ public interface Regatta extends NamedWithID, IsRegattaLike, HasRaceColumnsAndRe
      * @see #isControlTrackingFromStartAndFinishTimes()
      */
     void setControlTrackingFromStartAndFinishTimes(boolean controlTrackingFromStartAndFinishTimes);
+    
+    String getRegistrationLinkSecret();
+    void setRegistrationLinkSecret(String registrationLinkSecret);
+    
 }

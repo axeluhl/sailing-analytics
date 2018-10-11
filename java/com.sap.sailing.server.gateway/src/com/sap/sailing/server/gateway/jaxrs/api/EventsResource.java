@@ -562,7 +562,7 @@ public static void main(String...a) {
             SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.CREATE, regattaName));
         }
         Regatta regatta = getService().apply(new AddSpecificRegatta(regattaName, boatClassName, canBoatsOfCompetitorsChangePerRace,
-                competitorRegistrationType, startDate, endDate, regattaId,
+                competitorRegistrationType, /* registrationLinkSecret */ null, startDate, endDate, regattaId,
                 regattaCreationParametersDTO, /* isPersistent */ true, scoringScheme, courseAreaId, buoyZoneRadiusInHullLengths,
                 useStartTimeInterference, controlTrackingFromStartAndFinishTimes, rankingMetric));
         return regatta;

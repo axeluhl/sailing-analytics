@@ -36,9 +36,10 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
     private final boolean canBoatsOfCompetitorsChangePerRace;
     private final CompetitorRegistrationType competitorRegistrationType;
     private final RankingMetrics rankingMetricType;
+    private final String registrationLinkSecret;
     
     public AddSpecificRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace,
-            CompetitorRegistrationType competitorRegistrationType, TimePoint startDate, TimePoint endDate, Serializable id,
+            CompetitorRegistrationType competitorRegistrationType, String registrationLinkSecret, TimePoint startDate, TimePoint endDate, Serializable id,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedalAndDiscardingThresholds,
             boolean persistent, ScoringScheme scoringScheme, Serializable defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType) {
@@ -53,12 +54,13 @@ public class AddSpecificRegatta extends AbstractAddRegattaOperation {
         this.controlTrackingFromStartAndFinishTimes = controlTrackingFromStartAndFinishTimes;
         this.rankingMetricType = rankingMetricType;
         this.buoyZoneRadiusInHullLengths = buoyZoneRadiusInHullLengths;
+        this.registrationLinkSecret = registrationLinkSecret;
     }
 
     @Override
     public Regatta internalApplyTo(RacingEventService toState) throws Exception {
         Regatta regatta = toState.createRegatta(getRegattaName(), getBoatClassName(), canBoatsOfCompetitorsChangePerRace, 
-                competitorRegistrationType, getStartDate(), getEndDate(), getId(), createSeries(toState),
+                competitorRegistrationType, registrationLinkSecret, getStartDate(), getEndDate(), getId(), createSeries(toState),
                 persistent, scoringScheme, defaultCourseAreaId, buoyZoneRadiusInHullLengths, useStartTimeInference, controlTrackingFromStartAndFinishTimes, RankingMetricsFactory.getRankingMetricConstructor(rankingMetricType));
         return regatta;
     }

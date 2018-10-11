@@ -125,6 +125,8 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
     private CourseArea defaultCourseArea;
     private RegattaConfiguration configuration;
     private RaceExecutionOrderCache raceExecutionOrderCache;
+    
+    private String registrationLinkSecret;
 
     /**
      * Regattas may be constructed as implicit default regattas in which case they won't need to be stored durably and
@@ -963,6 +965,16 @@ public class RegattaImpl extends NamedImpl implements Regatta, RaceColumnListene
         RegattaLog regattaLog = getRegattaLike().getRegattaLog();
         RegattaLogBoatDeregistrator<RegattaLog, RegattaLogEvent, RegattaLogEventVisitor> deregisterer = new RegattaLogBoatDeregistrator<>(regattaLog, boats, regattaLogEventAuthorForRegatta);
         deregisterer.deregister(deregisterer.analyze());
+    }
+
+    @Override
+    public String getRegistrationLinkSecret() {
+        return registrationLinkSecret;
+    }
+
+    @Override
+    public void setRegistrationLinkSecret(String registrationLinkSecret) {
+        this.registrationLinkSecret = registrationLinkSecret;
     }
  
 }

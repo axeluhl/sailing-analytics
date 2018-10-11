@@ -96,9 +96,9 @@ public class SlicingTest {
                 new SeriesCreationParametersDTO(fleets, false, false, true, false, new int[0], false, 0));
         final RegattaCreationParametersDTO regattaCreationParameters = new RegattaCreationParametersDTO(
                 seriesCreationParameters);
-        final RegattaDTO regatta = sailingService.createRegatta(regattaName, boatClassName, false, CompetitorRegistrationType.CLOSED, null, null,
-                regattaCreationParameters, false, ScoringSchemeType.HIGH_POINT, null, 3.0, false, false,
-                RankingMetrics.ONE_DESIGN);
+        final RegattaDTO regatta = sailingService.createRegatta(regattaName, boatClassName, false,
+                CompetitorRegistrationType.CLOSED, null, null, null, regattaCreationParameters, false,
+                ScoringSchemeType.HIGH_POINT, null, 3.0, false, false, RankingMetrics.ONE_DESIGN);
         final List<Pair<String, Integer>> columnNames = new ArrayList<>();
         columnNames.add(new Pair<>(columnNameOriginalRace, 0));
         sailingService.addRaceColumnsToSeries(regatta.getRegattaIdentifier(), seriesName, columnNames);

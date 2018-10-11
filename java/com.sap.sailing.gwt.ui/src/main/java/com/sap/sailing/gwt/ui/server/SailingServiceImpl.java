@@ -1002,6 +1002,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         regattaDTO.competitorRegistrationType = regatta.getCompetitorRegistrationType();
         regattaDTO.configuration = convertToRegattaConfigurationDTO(regatta.getRegattaConfiguration());
         regattaDTO.rankingMetricType = regatta.getRankingMetricType();
+        regattaDTO.registrationLinkSecret = regatta.getRegistrationLinkSecret();
         return regattaDTO;
     }
 
@@ -4427,7 +4428,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public RegattaDTO createRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace,
-            CompetitorRegistrationType competitorRegistrationType, Date startDate, Date endDate, 
+            CompetitorRegistrationType competitorRegistrationType, String registrationLinkSecret, Date startDate, Date endDate,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
             boolean persistent, ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType) {
@@ -4436,7 +4437,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         TimePoint endTimePoint = endDate != null ?  new MillisecondsTimePoint(endDate) : null;
         Regatta regatta = getService().apply(
                 new AddSpecificRegatta(
-                        regattaName, boatClassName, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, startTimePoint, endTimePoint, UUID.randomUUID(),
+                        regattaName, boatClassName, canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, registrationLinkSecret, startTimePoint, endTimePoint, UUID.randomUUID(),
                         seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
                         persistent, baseDomainFactory.createScoringScheme(scoringSchemeType), defaultCourseAreaId, buoyZoneRadiusInHullLengths, useStartTimeInference,
                         controlTrackingFromStartAndFinishTimes, rankingMetricType));
@@ -4689,10 +4690,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         logger.info("Create Regatta from DTO " + regatta);
         SecurityUtils.getSubject().checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.CREATE, regatta.getName()));
         this.createRegatta(regatta.getName(), regatta.boatClass.getName(), regatta.canBoatsOfCompetitorsChangePerRace,
-                        regatta.competitorRegistrationType, regatta.startDate, regatta.endDate,
-                        new RegattaCreationParametersDTO(getSeriesCreationParameters(regatta)), 
-                        true, regatta.scoringScheme, regatta.defaultCourseAreaUuid, regatta.buoyZoneRadiusInHullLengths, regatta.useStartTimeInference,
-                        regatta.controlTrackingFromStartAndFinishTimes, regatta.rankingMetricType);
+                regatta.competitorRegistrationType, /* registrationLinkSecret */ null, regatta.startDate,
+                regatta.endDate, new RegattaCreationParametersDTO(getSeriesCreationParameters(regatta)), true,
+                regatta.scoringScheme, regatta.defaultCourseAreaUuid, regatta.buoyZoneRadiusInHullLengths,
+                regatta.useStartTimeInference, regatta.controlTrackingFromStartAndFinishTimes,
+                regatta.rankingMetricType);
     }
     
     private SeriesParameters getSeriesParameters(SeriesDTO seriesDTO) {

@@ -457,7 +457,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             AsyncCallback<Void> callback);
 
     void createRegatta(String regattaName, String boatClassName, boolean canBoatsOfCompetitorsChangePerRace,
-            CompetitorRegistrationType competitorRegistrationType, Date startDate, Date endDate,
+            CompetitorRegistrationType competitorRegistrationType, String registrationLinkSecret, Date startDate, Date endDate,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal, boolean persistent,
             ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType,
