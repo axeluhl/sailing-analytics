@@ -7,6 +7,7 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
 /**
  * An event is a group of {@link Regatta regattas} carried out at a common venue within a common time frame. For
@@ -16,7 +17,7 @@ import com.sap.sse.security.shared.QualifiedObjectIdentifier;
  * @author Axel Uhl (D043530)
  * 
  */
-public interface Event extends EventBase {
+public interface Event extends EventBase, WithQualifiedObjectIdentifier {
     
     /**
      * For events, the ID is always a UUID.

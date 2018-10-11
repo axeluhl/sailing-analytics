@@ -176,7 +176,8 @@ public class EventsResource extends AbstractSailingServerResource {
             @FormParam("boatclassname") String boatClassNameParam,
             @FormParam("numberofraces") String numberOfRacesParam) throws ParseException, NotFoundException,
             NumberFormatException, IOException, org.json.simple.parser.ParseException, InvalidDateException {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.EVENT.getStringPermissionForObjects(DefaultActions.CREATE, eventId));
+        SecurityUtils.getSubject()
+                .checkPermission(SecuredDomainType.EVENT.getStringPermissionForObjects(DefaultActions.CREATE, eventId));
         final Response response;
         UUID id;
         try {
