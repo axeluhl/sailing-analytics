@@ -96,6 +96,8 @@ public class TaggingServiceTest {
             SecurityUtils.setSecurityManager(securityService.getSecurityManager());
             Activator.setSecurityService(securityService);
         } else {
+            logger.info("Creating dummy UserStoreImpl to trigger loading of userstore mongodb bundle");
+            new UserStoreImpl(); // only to trigger bundle loading and activation so that security service can find the bundle and its original user store
             logger.info("Setup for TaggingServiceTest in an OSGi environment");
             // TODO: This timeout of 2 minutes is just for debugging purposes and should not be used in production!
             securityService = ServiceTrackerFactory.createAndOpen(Activator.getContext(), SecurityService.class)
