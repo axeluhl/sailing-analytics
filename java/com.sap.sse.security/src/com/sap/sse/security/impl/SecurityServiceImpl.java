@@ -692,6 +692,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         apply(s->s.internalStoreUser(result));
         addRoleForUser(result, new RoleImpl(UserRole.getInstance(), /* tenant qualifier */ null, /* user qualifier */ result));
         addUserToUserGroup(tenant, result);
+        // the new user becomes its owner to ensure the user role is correctly working
+        // the default tenant is the owning tenant to allow users having admin role for a specific server tenant to also be able to delete users
+        accessControlStore.setOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(username), result, getDefaultTenant(), username);
         // the new user becomes the owning user of its own specific tenant which initially only contains the new user
         accessControlStore.setOwnership(SecuredSecurityTypes.USER_GROUP.getQualifiedObjectIdentifier(tenant.getId().toString()), result, tenant, tenant.getName());
         result.setFullName(fullName);
