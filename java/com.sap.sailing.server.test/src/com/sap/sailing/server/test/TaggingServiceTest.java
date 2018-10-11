@@ -97,7 +97,7 @@ public class TaggingServiceTest {
             Activator.setSecurityService(securityService);
         } else {
             logger.info("Setup for TaggingServiceTest in an OSGi environment");
-            // TODO: This timeout of 2 minutes ist just for debugging purpose and should not be used in production!
+            // TODO: This timeout of 2 minutes is just for debugging purposes and should not be used in production!
             securityService = ServiceTrackerFactory.createAndOpen(Activator.getContext(), SecurityService.class)
                     .waitForService(120 * 1000);
         }
