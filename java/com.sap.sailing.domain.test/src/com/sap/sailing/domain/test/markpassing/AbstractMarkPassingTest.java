@@ -25,7 +25,6 @@ import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.impl.WindSourceImpl;
-import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.markpassingcalculation.Candidate;
 import com.sap.sailing.domain.markpassingcalculation.CandidateChooser;
@@ -277,7 +276,7 @@ public abstract class AbstractMarkPassingTest extends OnlineTracTracBasedTest {
 
     protected void calculateMarkPassingsForPartialTrack(Competitor c, final TimePoint upToTimePoint,
             CandidateFinder finder, CandidateChooser chooser) {
-        List<GPSFix> fixes = new ArrayList<GPSFix>();
+        List<GPSFixMoving> fixes = new ArrayList<>();
         try {
             getTrackedRace().getTrack(c).lockForRead();
             for (GPSFixMoving fix : getTrackedRace().getTrack(c).getFixes()) {
