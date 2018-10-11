@@ -11,7 +11,8 @@ Require-Bundle: com.sap.sailing.domain.common,
  com.sap.sailing.domain,
  com.sap.sse,
  com.sap.sse.common,
- com.sap.sailing.server.gateway.serialization.shared.android
+ com.sap.sailing.server.gateway.serialization.shared.android,
+ com.sap.sse.security.common
 Export-Package: com.sap.sailing.server.gateway.deserialization.impl,
  com.sap.sailing.server.gateway.serialization,
  com.sap.sailing.server.gateway.serialization.impl,
