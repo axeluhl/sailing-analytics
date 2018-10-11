@@ -173,7 +173,7 @@ public class UserStoreImpl implements UserStore {
                 mongoObjectFactory.storeSettings(settings);
             }
             for (RoleDefinition roleDefinition : domainObjectFactory.loadAllRoleDefinitions()) {
-                roleDefinitions.put(UUID.fromString(roleDefinition.getId().toString()), roleDefinition);
+                roleDefinitions.put(roleDefinition.getId(), roleDefinition);
             }
             if (roleDefinitions.isEmpty()) {
                 logger.info("Empty set of role definitions suggests we are under migration. Creating default roles.");
