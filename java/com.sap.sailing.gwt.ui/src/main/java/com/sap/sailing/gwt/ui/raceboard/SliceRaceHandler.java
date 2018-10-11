@@ -28,7 +28,6 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * Encapsulates the UI to slice a race from an existing race.
@@ -124,10 +123,8 @@ public class SliceRaceHandler {
     }
     
     private boolean allowsEditing() {
-        final UserDTO currentUser = userService.getCurrentUser();
-        return currentUser != null
-                && currentUser.hasPermission(SecuredDomainType.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, selectedRaceIdentifier.getRegattaName()))
-                && currentUser.hasPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+        return userService.hasPermission(SecuredDomainType.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, selectedRaceIdentifier.getRegattaName()))
+                && userService.hasPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
     }
 
     private void doSlice() {

@@ -20,6 +20,12 @@ import com.sap.sse.gwt.client.Storage;
 import com.sap.sse.gwt.client.StorageEvent;
 import com.sap.sse.gwt.client.StorageEvent.Handler;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.Ownership;
+import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.OwnershipImpl;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.oauth.client.util.ClientUtils;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -350,5 +356,38 @@ public class UserService {
         if(storage != null) {
             storage.setItem(STORAGE_KEY_FOR_USER_LOGIN_HINT, String.valueOf(MillisecondsTimePoint.now().asMillis()));
         }
+    }
+    
+    public boolean hasPermission(String permission) {
+        return hasPermission(new WildcardPermission(permission));
+    }
+
+    public boolean hasPermission(WildcardPermission permission) {
+        return hasPermission(permission, /* ownership */ null, /* acl */ null);
+    }
+    
+    public boolean hasPermission(WildcardPermission permission, Ownership ownership) {
+        return hasPermission(permission, ownership, /* acl */ null);
+    }
+    
+    public boolean hasPermission(WildcardPermission permission, Ownership ownership, AccessControlList acl) {
+        // TODO handle anonymous case
+        if (currentUser == null) {
+            return false;
+        }
+        return currentUser.hasPermission(permission, ownership, acl);
+    }
+
+    /**
+     * Checks whether the user has permission to {@link DefaultActions#CREATE create} an object of the logical type
+     * specified, assuming that it will be created with this user as the {@link Ownership#getUserOwner() user owner} and
+     * this user's {@link #getDefaultTenant() default group} as the {@link Ownership#getTenantOwner() group owner}.
+     */
+    public boolean hasCreatePermission(HasPermissions logicalSecuredObjectType) {
+        if (currentUser == null) {
+            return false;
+        }
+        return hasPermission(logicalSecuredObjectType.getPermission(DefaultActions.CREATE),
+                new OwnershipImpl(currentUser, currentUser.getDefaultTenant()));
     }
 }

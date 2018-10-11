@@ -88,7 +88,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
         userService.addUserStatusEventHandler(new UserStatusEventHandler() {
             @Override
             public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
-                eventBus.fireEvent(new AuthenticationContextEvent(new AuthenticationContextImpl(user)));
+                eventBus.fireEvent(new AuthenticationContextEvent(new AuthenticationContextImpl(user, userService)));
             }
         });
         eventBus.addHandler(AuthenticationSignOutRequestEvent.TYPE, new AuthenticationSignOutRequestEvent.Handler() {
@@ -243,7 +243,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
 
     @Override
     public AuthenticationContext getAuthenticationContext() {
-        return new AuthenticationContextImpl(userService.getCurrentUser());
+        return new AuthenticationContextImpl(userService.getCurrentUser(), userService);
     }
     
     @Override

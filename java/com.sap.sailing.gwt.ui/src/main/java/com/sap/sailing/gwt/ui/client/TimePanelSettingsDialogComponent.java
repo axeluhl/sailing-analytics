@@ -61,8 +61,7 @@ public class TimePanelSettingsDialogComponent<T extends TimePanelSettings> imple
             @Override
             public String getErrorMessage(TimePanelSettings valueToValidate) {
                 String errorMessage = null;
-                if (userService.getCurrentUser() != null
-                        && userService.getCurrentUser().hasPermission(SecuredDomainType.DETAIL_TIMER.getName())) {
+                if (userService.hasPermission(SecuredDomainType.DETAIL_TIMER.getName())) {
                     if (valueToValidate.getRefreshInterval() < 50) {
                         errorMessage = stringMessages.refreshIntervalMustBeGreaterThanXSeconds("0.05");
                     }

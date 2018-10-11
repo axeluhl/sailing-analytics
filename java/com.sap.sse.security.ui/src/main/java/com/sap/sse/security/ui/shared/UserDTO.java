@@ -6,13 +6,10 @@ import java.util.List;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.AccessControlList;
-import com.sap.sse.security.shared.HasPermissions;
-import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.shared.impl.OwnershipImpl;
 import com.sap.sse.security.shared.impl.SecurityUserImpl;
 
 public class UserDTO extends SecurityUserImpl implements IsSerializable {
@@ -84,33 +81,9 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable {
     public Iterable<UserGroup> getUserGroups() {
         return groups;
     }
-    
-    public boolean hasPermission(String permission) {
-        return hasPermission(new WildcardPermission(permission));
-    }
-
-    @Override
-    public boolean hasPermission(WildcardPermission permission) {
-        return hasPermission(permission, /* ownership */ null, getUserGroups(), /* acl */ null);
-    }
-
-    @Override
-    public boolean hasPermission(WildcardPermission permission, Ownership ownership) {
-        return hasPermission(permission, ownership, /* acl */ null);
-    }
 
     public boolean hasPermission(WildcardPermission permission, Ownership ownership, AccessControlList acl) {
         return hasPermission(permission, ownership, getUserGroups(), acl);
-    }
-    
-    /**
-     * Checks whether the user has permission to {@link DefaultActions#CREATE create} an object of the logical type
-     * specified, assuming that it will be created with this user as the {@link Ownership#getUserOwner() user owner} and
-     * this user's {@link #getDefaultTenant() default group} as the {@link Ownership#getTenantOwner() group owner}.
-     */
-    public boolean hasCreatePermission(HasPermissions logicalSecuredObjectType) {
-        return hasPermission(logicalSecuredObjectType.getPermission(DefaultActions.CREATE),
-                new OwnershipImpl(this, getDefaultTenant()));
     }
     
     public List<AccountDTO> getAccounts() {

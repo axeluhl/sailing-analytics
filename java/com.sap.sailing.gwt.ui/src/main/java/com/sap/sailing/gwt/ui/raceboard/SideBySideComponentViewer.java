@@ -75,6 +75,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
     private LayoutPanel mainPanel;
 
     private TouchSplitLayoutPanel splitLayoutPanel;
+    private final UserService userService;
 
     public SideBySideComponentViewer(final Component<?> leftComponentP, final Component<?> rightComponentP,
             final MediaPlayerManagerComponent mediaPlayerManagerComponent, List<Component<?>> components,
@@ -85,6 +86,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         this.leftComponent = leftComponentP;
         this.rightComponent = rightComponentP;
         this.components = components;
+        this.userService = userService;
         this.mediaSelectionButton = createMediaSelectionButton(mediaPlayerManagerComponent);
         this.mediaManagementButton = createMediaManagementButton(mediaPlayerManagerComponent);
         this.markPassingsPanel = markPassingsPanel;
@@ -282,7 +284,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
         final Splitter markPassingsSplitter = splitLayoutPanel.getAssociatedSplitter(markPassingsPanel);
         final Splitter markPositionSplitter = splitLayoutPanel.getAssociatedSplitter(markPositionPanel);
         boolean forceLayout = false;
-        if (user != null && user.hasPermission(SecuredDomainType.MANAGE_MARK_PASSINGS.getPermission(), /* TODO race ownership */ null, /* TODO race acl */ null)) {
+        if (userService.hasPermission(SecuredDomainType.MANAGE_MARK_PASSINGS.getPermission(), /* TODO race ownership */ null, /* TODO race acl */ null)) {
             if (markPassingsSplitter != null) { // if the panel is not present, the splitter may not be found
                 markPassingsSplitter.getToggleButton().setVisible(true);
             }
@@ -293,7 +295,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
                 markPassingsSplitter.getToggleButton().setVisible(false);
             }
         }
-        if (user != null && user.hasPermission(SecuredDomainType.MANAGE_MARK_POSITIONS.getPermission(), /* TODO race ownership */ null, /* TODO race acl */ null)) {
+        if (userService.hasPermission(SecuredDomainType.MANAGE_MARK_POSITIONS.getPermission(), /* TODO race ownership */ null, /* TODO race acl */ null)) {
             if (markPositionSplitter != null) { // if the panel is not present, the splitter may not be found
                 markPositionSplitter.getToggleButton().setVisible(true);
             }

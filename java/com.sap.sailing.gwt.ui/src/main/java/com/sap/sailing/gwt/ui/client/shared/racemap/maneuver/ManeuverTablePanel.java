@@ -98,8 +98,8 @@ public class ManeuverTablePanel extends AbstractCompositeComponent<ManeuverTable
         final UserStatusEventHandler userStatusChangeHandler = new UserStatusEventHandler() {
             @Override
             public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
-                hasCanReplayDuringLiveRacesPermission = user != null
-                        && user.hasPermission(SecuredDomainType.CAN_REPLAY_DURING_LIVE_RACES.getStringPermission());
+                hasCanReplayDuringLiveRacesPermission = userService
+                        .hasPermission(SecuredDomainType.CAN_REPLAY_DURING_LIVE_RACES.getStringPermission());
             }
         };
         userService.addUserStatusEventHandler(userStatusChangeHandler);

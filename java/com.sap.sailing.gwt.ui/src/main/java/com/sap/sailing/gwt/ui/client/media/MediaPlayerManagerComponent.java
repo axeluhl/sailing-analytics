@@ -53,7 +53,6 @@ import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 import com.sap.sse.gwt.client.useragent.UserAgentDetails;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSettings> implements PlayStateListener, TimeListener,
         MediaPlayerManager, CloseHandler<Window>, ClosingHandler {
@@ -566,17 +565,13 @@ public class MediaPlayerManagerComponent extends AbstractComponent<MediaPlayerSe
 
     @Override
     public boolean allowsEditing(String mediaTrackDbId) {
-        UserDTO currentUser = userService.getCurrentUser();
-        return currentUser != null
-                && currentUser.hasPermission(SecuredDomainType.MEDIA_TRACK.getPermissionForObjects(DefaultActions.UPDATE, mediaTrackDbId),
+        return userService.hasPermission(SecuredDomainType.MEDIA_TRACK.getPermissionForObjects(DefaultActions.UPDATE, mediaTrackDbId),
                         /* TODO media track ownership */ null, /* TODO media track ACL */ null);
     }
 
     @Override
     public boolean allowsCreating() {
-        UserDTO currentUser = userService.getCurrentUser();
-        return currentUser != null
-                && currentUser.hasCreatePermission(SecuredDomainType.MEDIA_TRACK);
+        return userService.hasCreatePermission(SecuredDomainType.MEDIA_TRACK);
     }
 
     @Override

@@ -105,7 +105,7 @@ public class AuthorizedContentDecorator extends Composite implements RequiresRes
 
     private boolean isPermitted(AuthenticationContext userManagementContext) {
         return permissionToCheck == null
-                || userManagementContext.getCurrentUser().hasPermission(permissionToCheck);
+                || userManagementContext.hasPermission(permissionToCheck);
     }
 
     /**

@@ -258,10 +258,9 @@ public class MediaSynchControl implements EditFlag {
     }
 
     private boolean hasRightToEdit() {
-        UserDTO currentUser = userservice.getCurrentUser();
-        return currentUser != null
-                && currentUser.hasPermission(SecuredDomainType.MEDIA_TRACK.getPermissionForObjects(DefaultActions.UPDATE, mediaTrackDbId),
-                        /* TODO ownership */ null);
+        return userservice.hasPermission(
+                SecuredDomainType.MEDIA_TRACK.getPermissionForObjects(DefaultActions.UPDATE, mediaTrackDbId),
+                /* TODO ownership */ null);
     }
 
     private boolean isDirty() {

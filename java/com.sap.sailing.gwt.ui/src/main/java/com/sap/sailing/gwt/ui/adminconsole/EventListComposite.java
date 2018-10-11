@@ -159,7 +159,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             }
         });
         eventControlsPanel.add(createEventBtn);
-        if (!userService.getCurrentUser().hasPermission(SecuredDomainType.EVENT.getStringPermission(DefaultActions.CREATE))) {
+        if (!userService.hasPermission(SecuredDomainType.EVENT.getStringPermission(DefaultActions.CREATE))) {
             createEventBtn.setVisible(false);
         }
 

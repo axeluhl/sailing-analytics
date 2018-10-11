@@ -59,7 +59,7 @@ public class RaceTimePanel extends TimePanel<RaceTimePanelSettings> implements R
     private final UserStatusEventHandler userStatusEventHandler = new UserStatusEventHandler() {
         @Override
         public void onUserStatusChange(UserDTO user, boolean preAuthenticated) {
-            RaceTimePanel.this.hasCanReplayDuringLiveRacesPermission = user != null && user.hasPermission(
+            RaceTimePanel.this.hasCanReplayDuringLiveRacesPermission = userService.hasPermission(
                     SecuredDomainType.CAN_REPLAY_DURING_LIVE_RACES.getPermission(), /* TODO race ownership */ null, /* TODO race acl */ null);
         }
     };

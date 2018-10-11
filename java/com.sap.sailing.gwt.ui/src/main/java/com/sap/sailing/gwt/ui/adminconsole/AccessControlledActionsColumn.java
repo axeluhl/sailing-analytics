@@ -16,7 +16,6 @@ import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 public class AccessControlledActionsColumn<T extends NamedSecuredObjectDTO, S extends ImagesBarCell>
         extends ImagesBarColumn<T, S> {
@@ -66,10 +65,9 @@ public class AccessControlledActionsColumn<T extends NamedSecuredObjectDTO, S ex
     @Override
     public final String getValue(final T object) {
         final ArrayList<String> allowedActions = new ArrayList<>();
-        final UserDTO user = userService.getCurrentUser();
         for (final String name : nameToCallbackMap.keySet()) {
             final Action action = nameToActionMap.get(name);
-            if (isNotRestrictedOrHasPermission(user, action, object)) {
+            if (isNotRestrictedOrHasPermission(action, object)) {
                 final String escapedName = name.replace("\\", "\\\\").replace(",", "\\,");
                 allowedActions.add(escapedName);
             }
@@ -77,14 +75,14 @@ public class AccessControlledActionsColumn<T extends NamedSecuredObjectDTO, S ex
         return String.join(",", allowedActions);
     }
 
-    private boolean isNotRestrictedOrHasPermission(final UserDTO user, final Action action, final T object) {
+    private boolean isNotRestrictedOrHasPermission(final Action action, final T object) {
         final boolean result;
         if (action == null) {
             result = true;
         } else {
             final Ownership ownership = object.getOwnership();
             final AccessControlList accessControlList = object.getAccessControlList();
-            result = user.hasPermission(permissionFactory.apply(action, object), ownership, accessControlList);
+            result = userService.hasPermission(permissionFactory.apply(action, object), ownership, accessControlList);
         }
         return result;
     }
