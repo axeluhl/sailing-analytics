@@ -3,6 +3,7 @@ package com.sap.sailing.server.gateway.test.jaxrs;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -15,25 +16,34 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.mgt.SecurityManager;
+import org.apache.shiro.subject.Subject;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.jaxrs.api.AbstractLeaderboardsResource;
-import com.sap.sailing.server.gateway.jaxrs.api.EventsResource;
 import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardGroupsResource;
 import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardsResource;
 import com.sap.sailing.server.gateway.jaxrs.api.RegattasResource;
 import com.sap.sse.InvalidDateException;
+import com.sap.sse.security.ActionWithResult;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.impl.UserGroupImpl;
 
 public class EventResourceTest extends AbstractJaxRsApiTest {
-    private EventsResource eventsResource;
+    private DummyEventsRessource eventsResource;
     private RegattasResource regattasResource;
     private LeaderboardGroupsResource leaderboardGroupsResource;
     private LeaderboardsResource leaderboardsResource;
@@ -45,7 +55,38 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
         super.setUp();
         uriInfo = mock(UriInfo.class);
         when(uriInfo.getBaseUri()).thenReturn(new URI("http://127.0.0.1:8888/"));
-        eventsResource = createResource(new EventsResource(/* enforce security */ false));
+
+        UserGroupImpl defaultTenant = new UserGroupImpl(new UUID(0, 1), "defaultTenant");
+
+        SecurityService securityService = Mockito.mock(SecurityService.class);
+        SecurityManager securityManager = Mockito.mock(org.apache.shiro.mgt.SecurityManager.class);
+        Subject fakeSubject = Mockito.mock(Subject.class);
+
+        SecurityUtils.setSecurityManager(securityManager);
+        Mockito.doReturn(fakeSubject).when(securityManager).createSubject(Mockito.any());
+
+        Mockito.doReturn(defaultTenant).when(securityService).getDefaultTenant();
+        Mockito.doAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                return invocation.getArgumentAt(5, ActionWithResult.class).run();
+            }
+        }).when(securityService).setOwnershipCheckPermissionAndRevertOnError(
+                Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.doAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                return invocation.getArgumentAt(5, ActionWithResult.class).run();
+            }
+        }).when(securityService).setOwnershipCheckPermissionAndRevertOnError(
+                Mockito.any(UserGroup.class), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+                Mockito.any());
+
+        Mockito.doReturn(true).when(fakeSubject).isAuthenticated();
+
+        eventsResource = createResource(new DummyEventsRessource());
+        doReturn(securityService).when(eventsResource).getSecurityService();
+
         regattasResource = createResource(new RegattasResource());
         leaderboardGroupsResource = createResource(new LeaderboardGroupsResource());
         leaderboardsResource = createResource(new LeaderboardsResource());

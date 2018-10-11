@@ -96,17 +96,8 @@ import com.sap.sse.shared.media.VideoDescriptor;
 public class EventsResource extends AbstractSailingServerResource {
     private static final SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     
-    private final boolean enforceSecurityChecks;
     
     public EventsResource() {
-        enforceSecurityChecks = true;
-    }
-    
-    /**
-     * Gives test clients a way to test without the need to mock the complete Shiro environment
-     */
-    public EventsResource(boolean enforceSecurityChecks) {
-        this.enforceSecurityChecks = enforceSecurityChecks;
     }
     
     @POST
@@ -185,9 +176,7 @@ public class EventsResource extends AbstractSailingServerResource {
             @FormParam("boatclassname") String boatClassNameParam,
             @FormParam("numberofraces") String numberOfRacesParam) throws ParseException, NotFoundException,
             NumberFormatException, IOException, org.json.simple.parser.ParseException, InvalidDateException {
-        if (enforceSecurityChecks) {
             SecurityUtils.getSubject().checkPermission(SecuredDomainType.EVENT.getStringPermissionForObjects(DefaultActions.CREATE, eventId));
-        }
         final Response response;
         UUID id;
         try {
@@ -479,11 +468,7 @@ public class EventsResource extends AbstractSailingServerResource {
 
     private String getDefaultEventName() {
         final String username;
-        if (enforceSecurityChecks) {
-            username = getCurrentUser().getName();
-        } else {
-            username = "Dummy User";
-        }
+        username = getCurrentUser().getName();
         return "Session "+username+" "+dateTimeFormat.format(new Date());
     }
 
@@ -497,9 +482,8 @@ public class EventsResource extends AbstractSailingServerResource {
     }
 
     private void updateSeries(String regattaName, SeriesCreationParametersDTO defaultSeries) {
-        if (enforceSecurityChecks) {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regattaName));
-        }
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regattaName));
         getService().apply(new UpdateSeries(new RegattaName(regattaName), "Default", "Default", defaultSeries.isMedal(),
                 defaultSeries.isFleetsCanRunInParallel(), defaultSeries.getDiscardingThresholds(),
                 defaultSeries.isStartsWithZero(), defaultSeries.isFirstColumnIsNonDiscardableCarryForward(),
@@ -519,16 +503,14 @@ public class EventsResource extends AbstractSailingServerResource {
     }
 
     private RaceColumnInSeries addRaceColumn(String regattaName, String seriesName, String columnName) {
-        if (enforceSecurityChecks) {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regattaName));
-        }
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regattaName));
         return getService().apply(new AddColumnToSeries(new RegattaName(regattaName), seriesName, columnName));
     }
 
     private void updateEvent(Event event, LeaderboardGroup leaderboardGroup){
-        if (enforceSecurityChecks) {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.EVENT.getStringPermissionForObjects(DefaultActions.UPDATE, event.getId().toString()));
-        }
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.EVENT.getStringPermissionForObjects(DefaultActions.UPDATE, event.getId().toString()));
         List<UUID> newLeaderboardGroupIds = new ArrayList<>();
         StreamSupport.stream(event.getLeaderboardGroups().spliterator(), false)
                 .forEach(lg -> newLeaderboardGroupIds.add(lg.getId()));
@@ -540,9 +522,8 @@ public class EventsResource extends AbstractSailingServerResource {
     }
 
     private CourseArea addCourseArea(UUID eventId, String courseAreaName) {
-        if (enforceSecurityChecks) {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.EVENT.getStringPermissionForObjects(DefaultActions.UPDATE, eventId.toString()));
-        }
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.EVENT.getStringPermissionForObjects(DefaultActions.UPDATE, eventId.toString()));
         String[] courseAreaNames = new String[] { courseAreaName };
         UUID[] courseAreaIds = new UUID[] { UUID.randomUUID() };
         return getService().apply(new AddCourseAreas(eventId, courseAreaNames, courseAreaIds))[0];
