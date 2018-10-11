@@ -451,15 +451,18 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public Ownership setOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString, SecurityUser userOwner, UserGroup tenantOwner, String displayNameOfOwnedObject) {
+    public Ownership setOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString, SecurityUser userOwner,
+            UserGroup tenantOwner, String displayNameOfOwnedObject) {
         final UUID tenantId;
         if (tenantOwner == null || userOwner != null && !tenantOwner.contains(userOwner)) {
-            tenantId = userOwner == null || userOwner.getDefaultTenant() == null ? null : userOwner.getDefaultTenant().getId();
+            tenantId = userOwner == null || userOwner.getDefaultTenant() == null ? null
+                    : userOwner.getDefaultTenant().getId();
         } else {
             tenantId = tenantOwner.getId();
         }
         final String userOwnerName = userOwner == null ? null : userOwner.getName();
-        return apply(s->s.internalSetOwnership(idOfOwnedObjectAsString, userOwnerName, tenantId, displayNameOfOwnedObject));
+        return apply(s -> s.internalSetOwnership(idOfOwnedObjectAsString, userOwnerName, tenantId,
+                displayNameOfOwnedObject));
     }
     
     @Override
@@ -471,12 +474,19 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public <T> T setDefaultOwnershipAndRevertOnError(QualifiedObjectIdentifier objectIdentifier, ActionWithResult<T> action) throws Exception {
-        this.setOwnership(this.createDefaultOwnershipForNewObject(objectIdentifier));
+    public <T> T setDefaultOwnershipAndRevertOnError(QualifiedObjectIdentifier objectIdentifier,
+            ActionWithResult<T> action) throws Exception {
+        boolean didSetOwnerShip = false;
+        if (getOwnership(objectIdentifier) == null) {
+            this.setOwnership(this.createDefaultOwnershipForNewObject(objectIdentifier));
+            didSetOwnerShip = true;
+        }
         try {
             return action.run();
         } catch (Exception e) {
-            this.deleteOwnership(objectIdentifier); // revert preliminary ownership allocation
+            if (didSetOwnerShip) {
+                this.deleteOwnership(objectIdentifier); // revert preliminary ownership allocation
+            }
             throw e;
         }
     }
@@ -1534,13 +1544,19 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             ActionWithResult<T> actionWithResult) {
         QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifier(typeIdentifier);
         T result = null;
+        boolean didSetOwnerShip = false;
         try {
             final User user = getUserByName((String) SecurityUtils.getSubject().getPrincipal());
-            setOwnership(identifier, user, tenantOwner, securityDisplayName);
+            if (getOwnership(identifier) == null) {
+                didSetOwnerShip = true;
+                setOwnership(identifier, user, tenantOwner, securityDisplayName);
+            }
             SecurityUtils.getSubject().checkPermission(type.getStringPermissionForObjects(action, typeIdentifier));
             result = actionWithResult.run();
         } catch (AuthorizationException e) {
-            deleteOwnership(identifier);
+            if (didSetOwnerShip) {
+                deleteOwnership(identifier);
+            }
             throw e;
         } catch (Exception e) {
             throw new RuntimeException(e);
