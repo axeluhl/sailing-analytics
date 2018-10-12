@@ -1,5 +1,6 @@
 #!/bin/bash
 set -o functrace
+source ./configuration/correctFilePathInRelationToCurrentOs.sh
 
 # This indicates the type of the project
 # and is used to correctly resolve bundle names
@@ -23,7 +24,7 @@ find_project_home ()
         return 0
     fi
 
-    echo $1 | sed -e 's/\/cygdrive\/\([a-zA-Z]\)/\1:/'
+    echo $(correct_file_path  "$1")
 }
 
 # this holds for default installation
@@ -40,8 +41,9 @@ if [[ "$PROJECT_HOME" == "" ]]; then
     exit 1
 fi
 
+#reading the filepath and editing it, so it fits for eclipse #currently save works for cygwin, gitbash and linux
 if [ "$SERVERS_HOME" = "" ]; then
-  SERVERS_HOME=`echo "$USER_HOME/servers" | sed -e 's/\/cygdrive\/\([a-zA-Z]\)/\1:/'`
+	SERVERS_HOME=$(correct_file_path  "$USER_HOME/servers")
 fi
 
 # x86 or x86_64 should work for most cases

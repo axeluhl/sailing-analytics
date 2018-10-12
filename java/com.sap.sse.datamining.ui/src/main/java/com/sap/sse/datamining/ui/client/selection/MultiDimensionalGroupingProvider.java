@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -55,7 +56,10 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
         }
         return NaturalComparator.compare(d1.getDisplayName(), d2.getDisplayName());
     };
-
+    
+    @FunctionalInterface
+    private static interface DimensionMatcher extends BiPredicate<FunctionDTO, FunctionDTO> { }
+    
     private final DataMiningServiceAsync dataMiningService;
     private final ErrorReporter errorReporter;
     private final Set<GroupingChangedListener> listeners;
@@ -67,7 +71,9 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
     private boolean isUpdating;
     private DataRetrieverChainDefinitionDTO currentRetrieverChainDefinition;
     private final List<FunctionDTO> availableDimensions;
+    
     private Iterable<FunctionDTO> dimensionsToSelect;
+    private DimensionMatcher dimensionMatcher;
     private Consumer<Iterable<String>> selectionCallback;
 
     public MultiDimensionalGroupingProvider(Component<?> parent, ComponentContext<?> context,
@@ -122,6 +128,20 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
     }
 
     private void updateAvailableDimensions() {
+        // Try to recover the selection even if the retriever chain has been null in between
+        Collection<FunctionDTO> currentDimensions = getDimensionsToGroupBy();
+        if (!currentDimensions.isEmpty()) {
+            dimensionsToSelect = currentDimensions;
+            // Match dimensions by display name to retain dimensions of different retriever chains that appear to be equal
+            dimensionMatcher = (d1, d2) -> {
+                if (d1 == d2) return true;
+                if (d1 == null || d2 == null) return false;
+                
+                return d1.getDisplayName().equals(d2.getDisplayName());
+            };
+            selectionCallback = EmptyApplyCallback;
+        }
+        
         if (currentRetrieverChainDefinition != null) {
             isUpdating = true;
             dataMiningService.getDimensionsFor(currentRetrieverChainDefinition,
@@ -137,7 +157,7 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
                             if (!availableDimensions.isEmpty()) {
                                 Collections.sort(availableDimensions, DimensionComparator);
                                 if (dimensionsToSelect != null) {
-                                    setSelectedDimensions(dimensionsToSelect, selectionCallback);
+                                    setSelectedDimensions(dimensionsToSelect, dimensionMatcher, selectionCallback);
                                 } else {
                                     Optional<FunctionDTO> dimensionWithLowestOrdinal = availableDimensions.stream().min((d1, d2) -> {
                                         int ordinal1 = d1 == null ? Integer.MAX_VALUE : d1.getOrdinal();
@@ -147,6 +167,7 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
                                     dimensionWithLowestOrdinal.ifPresent(d -> firstDimensionToGroupByBox.setValue(d, true));
                                 }
                                 dimensionsToSelect = null;
+                                dimensionMatcher = null;
                                 selectionCallback = null;
                             } else {
                                 notifyListeners();
@@ -157,6 +178,7 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
                         public void onFailure(Throwable caught) {
                             errorReporter.reportError("Error fetching the dimensions from the server: " + caught.getMessage());
                             dimensionsToSelect = null;
+                            dimensionMatcher = null;
                             selectionCallback = null;
                             isUpdating = false;
                         }
@@ -165,8 +187,6 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
             clear();
             ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
             addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);
-            dimensionsToSelect = null;
-            selectionCallback = null;
         }
     }
 
@@ -284,25 +304,34 @@ public class MultiDimensionalGroupingProvider extends AbstractDataMiningComponen
     public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition, Consumer<Iterable<String>> callback) {
         DataRetrieverChainDefinitionDTO newRetrieverChain = queryDefinition.getDataRetrieverChainDefinition();
         dimensionsToSelect = queryDefinition.getDimensionsToGroupBy();
+        dimensionMatcher = Objects::equals;
         selectionCallback = callback;
         if (!isAwaitingReload && !isUpdating && currentRetrieverChainDefinition.equals(newRetrieverChain)) {
             clearDimensionBoxes();
             ValueListBox<FunctionDTO> firstDimensionToGroupByBox = createDimensionToGroupByBox();
             addDimensionToGroupByBoxAndUpdateAcceptableValues(firstDimensionToGroupByBox);
             
-            setSelectedDimensions(dimensionsToSelect, selectionCallback);
+            setSelectedDimensions(dimensionsToSelect, dimensionMatcher, selectionCallback);
             dimensionsToSelect = null;
+            dimensionMatcher = null;
             selectionCallback = null;
         }
     }
 
-    private void setSelectedDimensions(Iterable<FunctionDTO> dimensions, Consumer<Iterable<String>> callback) {
+    private void setSelectedDimensions(Iterable<FunctionDTO> dimensions, DimensionMatcher matcher, Consumer<Iterable<String>> callback) {
         Collection<FunctionDTO> missingDimensions = new ArrayList<>();
         int boxIndex = 0;
         for (FunctionDTO dimension : dimensions) {
-            int index = availableDimensions.indexOf(dimension);
-            if (index != -1) {
-                setDimensionToGroupBy(boxIndex, availableDimensions.get(index));
+            FunctionDTO dimensionToSelect = null;
+            for (int i = 0; i < availableDimensions.size(); i++) {
+                FunctionDTO availableDimension = availableDimensions.get(i);
+                if (matcher.test(dimension, availableDimension)) {
+                    dimensionToSelect = availableDimension;
+                    break;
+                }
+            }
+            if (dimensionToSelect != null) {
+                setDimensionToGroupBy(boxIndex, dimensionToSelect);
                 boxIndex++;
             } else {
                 missingDimensions.add(dimension);

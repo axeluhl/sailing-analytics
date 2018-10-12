@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.openqa.selenium.WebDriver;
 
 import com.sap.sailing.selenium.pages.adminconsole.AdminConsolePage;
 import com.sap.sailing.selenium.pages.adminconsole.leaderboard.LeaderboardConfigurationPanelPO;
@@ -44,7 +45,6 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
     private TrackableRaceDescriptor trackableRace;
     private TrackedRaceDescriptor trackedRace;
     private RaceDescriptor raceColumn;
-    private AdminConsolePage adminConsole;
     
     @Override
     @Before
@@ -55,14 +55,15 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
         this.raceColumn = new RaceDescriptor("D3", "Default", false, false, 0.0);
         clearState(getContextRoot());
         super.setUp();
-        adminConsole = configureRegattaAndLeaderboard();
+        configureRegattaAndLeaderboard();
     }
     
     @Test
     public void testCorrectDisplayOfRaceColumnWithAndWithoutStartTimeInference() {
         this.environment.getWindowManager().withExtraWindow((adminConsoleWindow, leaderboardWindow) -> {
-            leaderboardWindow.switchToWindow();
-            LeaderboardPage leaderboard = LeaderboardPage.goToPage(getWebDriver(), getContextRoot(), LEADERBOARD, /* race details */ false);
+            final WebDriver leaderboardWindowDriver = leaderboardWindow.switchToWindow();
+            setUpAuthenticatedSession(leaderboardWindowDriver);
+            LeaderboardPage leaderboard = LeaderboardPage.goToPage(leaderboardWindowDriver, getContextRoot(), LEADERBOARD, /* race details */ false);
             LeaderboardTablePO leaderboardTable = leaderboard.getLeaderboardTable();
             List<String> races = leaderboardTable.getRaceNames();
             assertThat("Expected only D3", races, equalTo(Arrays.asList("D3")));
@@ -71,13 +72,16 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
                 String raceColumnContent = e.getColumnContent(d3ColumnIndex);
                 assertTrue(Integer.parseInt(raceColumnContent) > 0); // all competitors have a positive score in R3
             }
-            adminConsoleWindow.switchToWindow();
+
+            WebDriver driver = adminConsoleWindow.switchToWindow();
+            AdminConsolePage adminConsole = AdminConsolePage.goToPage(driver, getContextRoot());
             // Go to the administration console and unset the "useStartTimeInference" flag
             RegattaStructureManagementPanelPO regattaManagementPanel = adminConsole.goToRegattaStructure();
             RegattaListCompositePO regattaList = regattaManagementPanel.getRegattaList();
             RegattaEditDialogPO regattaEditDialog = regattaList.editRegatta(regatta);
             regattaEditDialog.setUseStartTimeInference(false);
             regattaEditDialog.pressOk();
+            
             leaderboardWindow.switchToWindow();
             leaderboard.refresh();
             for (LeaderboardEntry e : leaderboardTable.getEntries()) {
@@ -87,7 +91,7 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
         });
     }
     
-    private AdminConsolePage configureRegattaAndLeaderboard() {
+    private void configureRegattaAndLeaderboard() {
         // Open the admin console for some configuration steps
         AdminConsolePage adminConsole = AdminConsolePage.goToPage(getWebDriver(), getContextRoot());
         // Create a regatta with 1 series and 5 races as well as a leaderboard
@@ -111,6 +115,5 @@ public class TestSwitchingOffStartOfRaceInference extends AbstractSeleniumTest {
         leaderboardConfiguration.createRegattaLeaderboard(this.regatta);
         LeaderboardDetailsPanelPO leaderboardDetails = leaderboardConfiguration.getLeaderboardDetails(LEADERBOARD);
         leaderboardDetails.linkRace(this.raceColumn, this.trackedRace);
-        return adminConsole;
     }
 }

@@ -19,16 +19,17 @@ public class TabbedSailingResultsPresenter extends TabbedResultsPresenter {
             DrillDownCallback drillDownCallback, StringMessages stringMessages) {
         super(parent, context, drillDownCallback);
 
-        registerResultsPresenter(PolarAggregation.class,
-                new PolarResultsPresenter(TabbedSailingResultsPresenter.this, getComponentContext(), stringMessages));
+        registerResultsPresenter(PolarAggregation.class, new ResultsPresenterFactory<>(PolarResultsPresenter.class,
+                () -> new PolarResultsPresenter(this, getComponentContext(), stringMessages)));
 
-        registerResultsPresenter(PolarBackendData.class, new PolarBackendResultsPresenter(
-                TabbedSailingResultsPresenter.this, getComponentContext(), stringMessages));
+        registerResultsPresenter(PolarBackendData.class, new ResultsPresenterFactory<>(PolarBackendResultsPresenter.class,
+                () -> new PolarBackendResultsPresenter(this, getComponentContext(), stringMessages)));
 
-        registerResultsPresenter(ManeuverSpeedDetailsAggregation.class, new ManeuverSpeedDetailsResultsPresenter(
-                TabbedSailingResultsPresenter.this, getComponentContext(), stringMessages));
+        registerResultsPresenter(ManeuverSpeedDetailsAggregation.class,
+                new ResultsPresenterFactory<>(ManeuverSpeedDetailsResultsPresenter.class,
+                        () -> new ManeuverSpeedDetailsResultsPresenter(this, getComponentContext(), stringMessages)));
 
-        registerResultsPresenter(PairWithStats.class, new NumberPairResultsPresenter(TabbedSailingResultsPresenter.this,
-                getComponentContext(), stringMessages));
+        registerResultsPresenter(PairWithStats.class, new ResultsPresenterFactory<>(NumberPairResultsPresenter.class,
+                () -> new NumberPairResultsPresenter(this, getComponentContext(), stringMessages)));
     }
 }

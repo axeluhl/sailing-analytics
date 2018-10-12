@@ -45,6 +45,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogCourseDesignChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogCourseDesignChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventImpl;
+import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsFromRaceLogEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogCloseOpenEndedDeviceMappingEventImpl;
@@ -64,11 +65,13 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Waypoint;
+import com.sap.sailing.domain.base.impl.AbstractRaceColumn;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.MaxPointsReason;
 import com.sap.sailing.domain.common.NoWindException;
+import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.common.PassingInstruction;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
@@ -82,6 +85,7 @@ import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.domain.common.impl.RaceColumnConstants;
 import com.sap.sailing.domain.common.racelog.RaceLogServletConstants;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
+import com.sap.sailing.domain.common.racelog.tracking.NotDenotableForRaceLogTrackingException;
 import com.sap.sailing.domain.common.racelog.tracking.NotDenotedForRaceLogTrackingException;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.common.security.Permission;
@@ -115,6 +119,8 @@ import com.sap.sailing.server.gateway.serialization.coursedata.impl.WaypointJson
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorAndBoatJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
+import com.sap.sailing.server.operationaltransformation.RemoveAndUntrackRace;
+import com.sap.sailing.server.operationaltransformation.StopTrackingRace;
 import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
@@ -843,11 +849,28 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
+    @Path("{leaderboardName}/removeTrackedRace")
+    public Response removeTrackedRace(@PathParam("leaderboardName") String leaderboardName,
+            @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
+            @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName)
+            throws MalformedURLException, IOException, InterruptedException {
+        SecurityUtils.getSubject()
+                .checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
+        return stopOrRemoveTrackedRace(leaderboardName, raceColumnName, fleetName, true);
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
     @Path("{leaderboardName}/stoptracking")
     public Response stopTracking(@PathParam("leaderboardName") String leaderboardName,
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME) String raceColumnName,
             @QueryParam(RaceLogServletConstants.PARAMS_RACE_FLEET_NAME) String fleetName) throws MalformedURLException, IOException, InterruptedException {
         SecurityUtils.getSubject().checkPermission(Permission.LEADERBOARD.getStringPermissionForObjects(Mode.UPDATE, leaderboardName));
+        return stopOrRemoveTrackedRace(leaderboardName, raceColumnName, fleetName, false);
+    }
+
+    private Response stopOrRemoveTrackedRace(String leaderboardName, String raceColumnName, String fleetName, boolean remove)
+            throws MalformedURLException, IOException, InterruptedException {
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         final Response result;
         if (leaderboard == null) {
@@ -865,7 +888,11 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                             if (trackedRace != null) {
                                 final Regatta regatta = trackedRace.getTrackedRegatta().getRegatta();
                                 final RaceDefinition race = trackedRace.getRace();
-                                getService().stopTracking(regatta, race);
+                                if(remove) {
+                                    getService().apply(new RemoveAndUntrackRace(trackedRace.getRaceIdentifier()));
+                                } else {
+                                    getService().apply(new StopTrackingRace(trackedRace.getRaceIdentifier()));
+                                }
                                 jsonResult.put("regatta", regatta.getName());
                                 jsonResult.put("race", race.getName());
                                 jsonResultArray.add(jsonResult);
@@ -1242,4 +1269,63 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         }
         return response;
     }
+
+    @POST
+    @Path("{leaderboardName}/denoteForTracking")
+    public Response denoteForTracking(@PathParam("leaderboardName") String leaderboardName,
+            @QueryParam("raceColumnName") String raceColumnName, @QueryParam("fleetName") String fleetName,
+            @QueryParam("raceName") String raceName) throws NotFoundException, NotDenotableForRaceLogTrackingException {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        SecurityUtils.getSubject().checkPermission(Permission.MANAGE_TRACKED_RACES.getStringPermission(Mode.UPDATE));
+        if (leaderboard == null) {
+            throw new NotFoundException("leaderboard with name " + leaderboardName + " not found");
+        }
+        RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+        if (raceColumn == null) {
+            throw new NotFoundException("raceColumn with name " + raceColumnName + " not found");
+        }
+        Fleet fleet = raceColumn.getFleetByName(fleetName);
+        if (fleet == null) {
+            throw new NotFoundException("fleet with name " + fleetName + " not found");
+        }
+
+        boolean result = getRaceLogTrackingAdapter().denoteRaceForRaceLogTracking(getService(), leaderboard, raceColumn,
+                fleet, raceName);
+        return (result ? Response.ok() : Response.notModified()).build();
+    }
+
+    @POST
+    @Path("{leaderboardName}/enableRaceLogForCompetitorRegistration")
+    public Response enableRaceLogForCompetitorRegistration(@PathParam("leaderboardName") String leaderboardName,
+            @QueryParam("raceColumnName") String raceColumnName, @QueryParam("fleetName") String fleetName,
+            @QueryParam("raceName") String raceName) throws NotFoundException, NotDenotableForRaceLogTrackingException {
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        SecurityUtils.getSubject().checkPermission(Permission.MANAGE_ALL_COMPETITORS.getStringPermission(Mode.UPDATE));
+        if (leaderboard == null) {
+            throw new NotFoundException("leaderboard with name " + leaderboardName + " not found");
+        }
+        RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
+        if (raceColumn == null) {
+            throw new NotFoundException("raceColumn with name " + raceColumnName + " not found");
+        }
+        Fleet fleet = raceColumn.getFleetByName(fleetName);
+        if (fleet == null) {
+            throw new NotFoundException("fleet with name " + fleetName + " not found");
+        }
+
+        final AbstractLogEventAuthor raceLogEventAuthorForRaceColumn = new LogEventAuthorImpl(
+                AbstractRaceColumn.class.getName(), 0);
+
+        TimePoint now = MillisecondsTimePoint.now();
+        RaceLog raceLog = raceColumn.getRaceLog(fleet);
+        if (raceLog == null) {
+            throw new IllegalStateException("Racelog for fleet is null");
+        }
+        int passId = raceLog.getCurrentPassId();
+        raceLog.add(new RaceLogUseCompetitorsFromRaceLogEventImpl(now, raceLogEventAuthorForRaceColumn, now,
+                UUID.randomUUID(), passId));
+        return (raceColumn.isCompetitorRegistrationInRacelogEnabled(fleet) ? Response.ok() : Response.notModified())
+                .build();
+    }
+
 }
