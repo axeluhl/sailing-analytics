@@ -10,6 +10,14 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileE
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfilesDTO;
+import com.sap.sailing.gwt.home.communication.user.profile.sailorprofile.CreateSailorProfileAction;
+import com.sap.sailing.gwt.home.communication.user.profile.sailorprofile.GetAllSailorProfilesAction;
+import com.sap.sailing.gwt.home.communication.user.profile.sailorprofile.GetEventsForSailorProfileAction;
+import com.sap.sailing.gwt.home.communication.user.profile.sailorprofile.GetNumericStatisticForSailorProfileAction;
+import com.sap.sailing.gwt.home.communication.user.profile.sailorprofile.GetSailorProfileAction;
+import com.sap.sailing.gwt.home.communication.user.profile.sailorprofile.RemoveSailorProfileAction;
+import com.sap.sailing.gwt.home.communication.user.profile.sailorprofile.UpdateSailorProfileCompetitorsAction;
+import com.sap.sailing.gwt.home.communication.user.profile.sailorprofile.UpdateSailorProfileTitleAction;
 import com.sap.sailing.gwt.home.shared.partials.editable.EditableSuggestedMultiSelection.EditModeChangeHandler;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggestedCompetitorMultiSelectionPresenter;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionPresenter;
@@ -24,7 +32,6 @@ public class StatefulSailorProfileDataProvider implements
         SuggestedMultiSelectionPresenter<SimpleCompetitorWithIdDTO, SuggestedMultiSelectionPresenter.Display<SimpleCompetitorWithIdDTO>>,
         EditModeChangeHandler {
 
-    private SailorProfileDataProvider sailorProfileDataProvider;
     private final AbstractSuggestedCompetitorMultiSelectionPresenter<Display<SimpleCompetitorWithIdDTO>> competitorDataProvider;
 
     private EditSailorProfileView sailorView;
@@ -36,7 +43,6 @@ public class StatefulSailorProfileDataProvider implements
     public StatefulSailorProfileDataProvider(ClientFactoryWithDispatchAndError clientFactory,
             AbstractSuggestedCompetitorMultiSelectionPresenter<Display<SimpleCompetitorWithIdDTO>> competitorDataProvider) {
         this.clientFactory = clientFactory;
-        this.sailorProfileDataProvider = new SailorProfileDataProviderImpl(clientFactory);
         this.competitorDataProvider = competitorDataProvider;
     }
 
@@ -45,23 +51,24 @@ public class StatefulSailorProfileDataProvider implements
     }
 
     public void loadSailorProfile(UUID uuid) {
-        sailorProfileDataProvider.findSailorProfileById(uuid, createRefreshCallback(uuid));
+        clientFactory.getDispatch().execute(new GetSailorProfileAction(uuid), createRefreshCallback(uuid));
     }
 
     public void updateTitle(String newTitle) {
-        sailorProfileDataProvider.updateTitle(uuid, newTitle, createRefreshCallback(uuid));
+        clientFactory.getDispatch().execute(new UpdateSailorProfileTitleAction(uuid, newTitle),
+                createRefreshCallback(uuid));
     }
 
-    public void getEvents(UUID key, AsyncCallback<SailorProfileEventsDTO> asyncCallback) {
-        sailorProfileDataProvider.getEvents(key, asyncCallback);
+    public void getEvents(UUID uuid, AsyncCallback<SailorProfileEventsDTO> asyncCallback) {
+        clientFactory.getDispatch().execute(new GetEventsForSailorProfileAction(uuid), asyncCallback);
     }
 
     public void loadSailorProfiles(AsyncCallback<SailorProfilesDTO> callback) {
-        sailorProfileDataProvider.loadSailorProfiles(callback);
+        clientFactory.getDispatch().execute(new GetAllSailorProfilesAction(), callback);
     }
 
     public void createNewEntry(UUID uuid, String newTitle) {
-        sailorProfileDataProvider.createNewSailorProfile(uuid, newTitle, createRefreshCallback(uuid));
+        clientFactory.getDispatch().execute(new CreateSailorProfileAction(uuid, newTitle), createRefreshCallback(uuid));
     }
 
     @Override
@@ -72,19 +79,19 @@ public class StatefulSailorProfileDataProvider implements
     @Override
     public void addSelection(SimpleCompetitorWithIdDTO item) {
         competitors.add(item);
-        sailorProfileDataProvider.updateCompetitors(uuid, competitors, createRefreshCallback(uuid));
+        updateCompetitors();
     }
 
     @Override
     public void removeSelection(SimpleCompetitorWithIdDTO item) {
         competitors.remove(item);
-        sailorProfileDataProvider.updateCompetitors(uuid, competitors, createRefreshCallback(uuid));
+        updateCompetitors();
     }
 
     @Override
     public void clearSelection() {
         competitors.clear();
-        sailorProfileDataProvider.updateCompetitors(uuid, competitors, createRefreshCallback(uuid));
+        updateCompetitors();
     }
 
     @Override
@@ -119,18 +126,22 @@ public class StatefulSailorProfileDataProvider implements
     @Override
     public void onEditModeChanged(boolean edit) {
         if (!edit) {
-            sailorProfileDataProvider.updateCompetitors(uuid, competitors, createRefreshCallback(uuid));
+            updateCompetitors();
         }
     }
 
     public void removeSailorProfile(UUID uuid, AsyncCallback<SailorProfileDTO> callback) {
-        sailorProfileDataProvider.removeSailorProfile(uuid, callback);
+        clientFactory.getDispatch().execute(new RemoveSailorProfileAction(uuid), callback);
     }
 
     public void getStatisticFor(UUID uuid, SailorProfileNumericStatisticType type,
             AsyncCallback<SailorProfileStatisticDTO> callback) {
-        sailorProfileDataProvider.getNumericStatistics(uuid, type, callback);
+        clientFactory.getDispatch().execute(new GetNumericStatisticForSailorProfileAction(uuid, type), callback);
+    }
 
+    public void updateCompetitors() {
+        clientFactory.getDispatch().execute(new UpdateSailorProfileCompetitorsAction(uuid, competitors),
+                createRefreshCallback(uuid));
     }
 
     public AsyncCallback<SailorProfileDTO> createRefreshCallback(UUID uuid) {
