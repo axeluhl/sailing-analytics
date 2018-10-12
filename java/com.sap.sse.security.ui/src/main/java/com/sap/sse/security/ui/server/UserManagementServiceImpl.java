@@ -99,8 +99,9 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     private UserDTO getAnonymousUser() {
-        // TODO Auto-generated method stub
-        return null;
+        final User anonymousUser = getSecurityService().getAnonymousUser();
+        return anonymousUser == null ? null
+                : securityDTOFactory.createUserDTOFromUser(anonymousUser, getSecurityService());
     }
 
     @Override
@@ -351,21 +352,17 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public UserDTO createSimpleUser(String username, String email, String password, String fullName, String company, String localeName, String validationBaseURL, String tenantOwnerName) throws UserManagementException, MailException, UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted("user:create")) {
-            UserImpl u = null;
-            try {
-                u = getSecurityService().createSimpleUser(username, email, password, fullName, company, getLocaleFromLocaleName(localeName), validationBaseURL);
-            } catch (UserManagementException | UserGroupManagementException e) {
-                logger.log(Level.SEVERE, "Error creating user "+username, e);
-                throw new UserManagementException(e.getMessage());
-            }
-            if (u == null) {
-                return null;
-            }
-            return securityDTOFactory.createUserDTOFromUser(u, getSecurityService());
-        } else {
-            throw new UnauthorizedException("Not permitted to create user");
+        UserImpl u = null;
+        try {
+            u = getSecurityService().createSimpleUser(username, email, password, fullName, company, getLocaleFromLocaleName(localeName), validationBaseURL);
+        } catch (UserManagementException | UserGroupManagementException e) {
+            logger.log(Level.SEVERE, "Error creating user "+username, e);
+            throw new UserManagementException(e.getMessage());
         }
+        if (u == null) {
+            return null;
+        }
+        return securityDTOFactory.createUserDTOFromUser(u, getSecurityService());
     }
 
 

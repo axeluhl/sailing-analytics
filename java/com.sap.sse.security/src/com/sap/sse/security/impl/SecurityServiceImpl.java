@@ -126,8 +126,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     private static final String ADMIN_DEFAULT_PASSWORD = "admin";
     
-    public static final String ANONYMOUS_USERNAME = "<anonymous>";
-
     private CachingSecurityManager securityManager;
     
     /**
@@ -249,15 +247,19 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             setOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(ADMIN_USERNAME), adminUser, /* no admin tenant */ null, ADMIN_USERNAME);
             addRoleForUser(adminUser, new RoleImpl(adminRoleDefinition));
             
-            if (userStore.getUserByName(ANONYMOUS_USERNAME) == null) {
-                logger.info(ANONYMOUS_USERNAME + " not found -> creating it now");
-                createUserInternal(ANONYMOUS_USERNAME, null, getDefaultTenant());
-                setOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(ANONYMOUS_USERNAME), adminUser,
-                        /* no tenant */ null, ANONYMOUS_USERNAME);
+            if (userStore.getUserByName(SecurityService.ANONYMOUS_USERNAME) == null) {
+                logger.info(SecurityService.ANONYMOUS_USERNAME + " not found -> creating it now");
+                createUserInternal(SecurityService.ANONYMOUS_USERNAME, null, getDefaultTenant());
+                setOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(SecurityService.ANONYMOUS_USERNAME), adminUser,
+                        /* no tenant */ null, SecurityService.ANONYMOUS_USERNAME);
+                // The permission to create new users is initially added but not recreated on server start if the admin removed in in the meanwhile.
+                // This allows servers to be configured to not permit self-registration of new users but only users being managed by an admin user.
+                addPermissionForUser(ANONYMOUS_USERNAME,
+                        SecuredSecurityTypes.USER.getPermission(DefaultActions.CREATE));
             }
         } catch (UserManagementException | MailException | UserGroupManagementException e) {
             logger.log(Level.SEVERE,
-                    "Exception while creating default " + ADMIN_USERNAME + " and " + ANONYMOUS_USERNAME + " user", e);
+                    "Exception while creating default " + ADMIN_USERNAME + " and " + SecurityService.ANONYMOUS_USERNAME + " user", e);
         }
     }
     
@@ -652,6 +654,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public UserImpl createSimpleUser(final String username, final String email, String password, String fullName,
             String company, Locale locale, final String validationBaseURL) throws UserManagementException, MailException, UserGroupManagementException {
+        SecurityUtils.getSubject().checkPermission(
+                SecuredSecurityTypes.USER.getStringPermissionForObjects(DefaultActions.CREATE, username));
         logger.info("Creating user "+username);
         if (userStore.getUserByName(username) != null) {
             logger.warning("User "+username+" already exists");
@@ -1478,6 +1482,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             throw new RuntimeException(e);
         }
         return result;
+    }
+
+    @Override
+    public User getAnonymousUser() {
+        return userStore.getUserByName(SecurityService.ANONYMOUS_USERNAME);
     }
 
     // ----------------- Replication -------------
