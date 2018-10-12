@@ -1338,16 +1338,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 getSecurityService().getDefaultTenant(), SecuredDomainType.TRACTRAC_ACCOUNT, name, name,
-                new ActionWithResult<Void>() {
-
-                    @Override
-                    public Void run() throws Exception {
-                        tractracMongoObjectFactory.storeTracTracConfiguration(
-                                getTracTracAdapter().createTracTracConfiguration(name, jsonURL, liveDataURI,
-                                        storedDataURI, courseDesignUpdateURI, tracTracUsername, tracTracPassword));
-                        return null;
-                    }
-                });
+                () -> tractracMongoObjectFactory.storeTracTracConfiguration(
+                        getTracTracAdapter().createTracTracConfiguration(name, jsonURL, liveDataURI, storedDataURI,
+                                courseDesignUpdateURI, tracTracUsername, tracTracPassword)));
     }
 
     private RaceDefinition getRaceByName(Regatta regatta, String raceName) {
@@ -2919,16 +2912,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (!jsonURL.equalsIgnoreCase("test")) {
             getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                     getSecurityService().getDefaultTenant(), SecuredDomainType.SWISS_TIMING_ACCOUNT, configName,
-                    configName, new ActionWithResult<Void>() {
-
-                        @Override
-                        public Void run() throws Exception {
-                            swissTimingAdapterPersistence.storeSwissTimingConfiguration(
-                                    swissTimingFactory.createSwissTimingConfiguration(configName, jsonURL, hostname,
-                                            port, updateURL, updateUsername, updatePassword));
-                            return null;
-                        }
-                    });
+                    configName,
+                    () -> swissTimingAdapterPersistence
+                            .storeSwissTimingConfiguration(swissTimingFactory.createSwissTimingConfiguration(configName,
+                                    jsonURL, hostname, port, updateURL, updateUsername, updatePassword)));
         }
     }
     
@@ -4753,14 +4740,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void storeSwissTimingArchiveConfiguration(String swissTimingJsonUrl) throws Exception {
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 getSecurityService().getDefaultTenant(), SecuredDomainType.SWISS_TIMING_ACCOUNT, swissTimingJsonUrl,
-                swissTimingJsonUrl, new ActionWithResult<Void>() {
-                    @Override
-                    public Void run() throws Exception {
-                        swissTimingAdapterPersistence.storeSwissTimingArchiveConfiguration(
-                                swissTimingFactory.createSwissTimingArchiveConfiguration(swissTimingJsonUrl));
-                        return null;
-                    }
-                });
+                swissTimingJsonUrl, () -> swissTimingAdapterPersistence.storeSwissTimingArchiveConfiguration(
+                        swissTimingFactory.createSwissTimingArchiveConfiguration(swissTimingJsonUrl)));
     }
 
     protected com.sap.sailing.domain.base.DomainFactory getBaseDomainFactory() {

@@ -50,6 +50,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
     private String randomName; 
     private UriInfo uriInfo;
     
+    @SuppressWarnings("unchecked")
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -80,7 +81,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
             }
         }).when(securityService).setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 Mockito.any(UserGroup.class), Mockito.any(), Mockito.any(), Mockito.any(),
-                Mockito.any());
+                Mockito.any(ActionWithResult.class));
 
         Mockito.doReturn(true).when(fakeSubject).isAuthenticated();
 

@@ -74,6 +74,7 @@ import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.security.AccessControlStore;
+import com.sap.sse.security.Action;
 import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.BearerAuthenticationToken;
 import com.sap.sse.security.ClientUtils;
@@ -1531,6 +1532,17 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return setOwnershipCheckPermissionForObjectCreationAndRevertOnError(group, type, typeIdentifier,
                 securityDisplayName,
                 actionWithResult);
+    }
+
+    @Override
+    public void setOwnershipCheckPermissionForObjectCreationAndRevertOnError(UserGroup tenantOwner,
+            HasPermissions type, String typeIdentifier, String securityDisplayName,
+            Action action) {
+        setOwnershipCheckPermissionForObjectCreationAndRevertOnError(tenantOwner, type, typeIdentifier,
+                securityDisplayName, () -> {
+                    action.run();
+                    return null;
+                });
     }
 
     @Override
