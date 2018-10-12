@@ -144,13 +144,14 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
     }
 
     private void setupTitleChangeHandler() {
-        profileTitleUi.addTextChangeHandler(
-                text -> presenter.getSharedSailorProfilePresenter().getDataProvider().updateTitle(text));
+        profileTitleUi.addTextChangeHandler(text -> presenter.getSharedSailorProfilePresenter().getDataProvider()
+                .updateTitle(currentData.getKey(), text));
     }
 
     private void createMultiSelection() {
         editableSuggestedMultiselect = new EditableSuggestedMultiSelectionCompetitor(
-                presenter.getSharedSailorProfilePresenter().getDataProvider(), presenter.getFlagImageResolver(), true);
+                presenter.getSharedSailorProfilePresenter().getCompetitorPresenter(), presenter.getFlagImageResolver(),
+                true);
         contentContainerCompetitorsUi.add(editableSuggestedMultiselect);
         final InlineEditButton editButton = editableSuggestedMultiselect.getEditButton();
         editButton.setVisible(false);

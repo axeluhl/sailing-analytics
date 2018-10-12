@@ -103,4 +103,8 @@ public class InlineEditLabel extends Composite implements HasText {
     public void addTextChangeHandler(TextChangeHandler handler) {
         changeHandlers.add(handler);
     }
+
+    public void clearTextChangeHandlers() {
+        changeHandlers.clear();
+    }
 }

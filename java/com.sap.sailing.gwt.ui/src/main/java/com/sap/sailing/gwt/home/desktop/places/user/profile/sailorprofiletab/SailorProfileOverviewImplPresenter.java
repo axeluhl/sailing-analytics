@@ -9,10 +9,10 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfiles
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfilePresenter;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView.Presenter;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.view.SailorProfileOverview;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.view.SailorProfileView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.HasLoginFormAndFactory;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.view.SailorProfileOverview;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.view.SailorProfileView;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sse.gwt.client.mvp.ClientFactory;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;

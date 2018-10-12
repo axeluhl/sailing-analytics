@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.de
 
 import java.util.ArrayList;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -74,20 +75,20 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
         this.presenter = presenter;
         this.flagImageResolver = flagImageResolver;
         presenter.getDataProvider().setView(this);
-        competitorSelectionUi = new EditableSuggestedMultiSelectionCompetitor(presenter.getDataProvider(),
+        competitorSelectionUi = new EditableSuggestedMultiSelectionCompetitor(presenter.getCompetitorPresenter(),
                 flagImageResolver);
         initWidget(uiBinder.createAndBindUi(this));
         SharedSailorProfileResources.INSTANCE.css().ensureInjected();
         SailorProfileDesktopResources.INSTANCE.css().ensureInjected();
         boatClassesUi.setText(i18n.boatClasses());
-        setupTitleChangeListener();
         accordionPolarDiagramUi.setVisible(false);
     }
 
-    private void setupTitleChangeListener() {
+    private void setupTitleChangeListener(final UUID uuid) {
         // setup title change handler
+        titleUi.clearTextChangeHandlers();
         titleUi.addTextChangeHandler((text) -> {
-            presenter.getDataProvider().updateTitle(text);
+            presenter.getDataProvider().updateTitle(uuid, text);
         });
     }
 
@@ -139,6 +140,7 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
         accordionStatisticsUi.clear();
 
         setupTables(entry);
+        setupTitleChangeListener(entry.getKey());
 
     }
 

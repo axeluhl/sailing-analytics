@@ -18,9 +18,6 @@ import com.sap.sailing.gwt.home.communication.user.profile.sailorprofile.GetSail
 import com.sap.sailing.gwt.home.communication.user.profile.sailorprofile.RemoveSailorProfileAction;
 import com.sap.sailing.gwt.home.communication.user.profile.sailorprofile.UpdateSailorProfileCompetitorsAction;
 import com.sap.sailing.gwt.home.communication.user.profile.sailorprofile.UpdateSailorProfileTitleAction;
-import com.sap.sailing.gwt.home.shared.partials.editable.EditableSuggestedMultiSelection.EditModeChangeHandler;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggestedCompetitorMultiSelectionPresenter;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionPresenter;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.ClientFactoryWithDispatchAndError;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
@@ -28,22 +25,20 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 
-public class StatefulSailorProfileDataProvider implements
-        SuggestedMultiSelectionPresenter<SimpleCompetitorWithIdDTO, SuggestedMultiSelectionPresenter.Display<SimpleCompetitorWithIdDTO>>,
-        EditModeChangeHandler {
-
-    private final AbstractSuggestedCompetitorMultiSelectionPresenter<Display<SimpleCompetitorWithIdDTO>> competitorDataProvider;
+public class SailorProfileDataProvider {
 
     private EditSailorProfileView sailorView;
+    private SailorProfilesCompetitorSelectionPresenter competitorSelectionPresenter;
 
-    private Collection<SimpleCompetitorWithIdDTO> competitors;
-    private UUID uuid;
     private final ClientFactoryWithDispatchAndError clientFactory;
 
-    public StatefulSailorProfileDataProvider(ClientFactoryWithDispatchAndError clientFactory,
-            AbstractSuggestedCompetitorMultiSelectionPresenter<Display<SimpleCompetitorWithIdDTO>> competitorDataProvider) {
+    public SailorProfileDataProvider(ClientFactoryWithDispatchAndError clientFactory) {
         this.clientFactory = clientFactory;
-        this.competitorDataProvider = competitorDataProvider;
+    }
+
+    public void setCompetitorSelectionPresenter(
+            SailorProfilesCompetitorSelectionPresenter competitorSelectionPresenter) {
+        this.competitorSelectionPresenter = competitorSelectionPresenter;
     }
 
     public void setView(EditSailorProfileView sailorView) {
@@ -54,7 +49,7 @@ public class StatefulSailorProfileDataProvider implements
         clientFactory.getDispatch().execute(new GetSailorProfileAction(uuid), createRefreshCallback(uuid));
     }
 
-    public void updateTitle(String newTitle) {
+    public void updateTitle(UUID uuid, String newTitle) {
         clientFactory.getDispatch().execute(new UpdateSailorProfileTitleAction(uuid, newTitle),
                 createRefreshCallback(uuid));
     }
@@ -71,65 +66,6 @@ public class StatefulSailorProfileDataProvider implements
         clientFactory.getDispatch().execute(new CreateSailorProfileAction(uuid, newTitle), createRefreshCallback(uuid));
     }
 
-    @Override
-    public Object getKey(SimpleCompetitorWithIdDTO item) {
-        return competitorDataProvider.getKey(item);
-    }
-
-    @Override
-    public void addSelection(SimpleCompetitorWithIdDTO item) {
-        competitors.add(item);
-        updateCompetitors();
-    }
-
-    @Override
-    public void removeSelection(SimpleCompetitorWithIdDTO item) {
-        competitors.remove(item);
-        updateCompetitors();
-    }
-
-    @Override
-    public void clearSelection() {
-        competitors.clear();
-        updateCompetitors();
-    }
-
-    @Override
-    public void getSuggestionItems(Iterable<String> queryTokens, int limit,
-            SuggestionItemsCallback<SimpleCompetitorWithIdDTO> callback) {
-        competitorDataProvider.getSuggestionItems(queryTokens, limit, callback);
-    }
-
-    @Override
-    public String createSuggestionKeyString(SimpleCompetitorWithIdDTO value) {
-        return competitorDataProvider.createSuggestionKeyString(value);
-    }
-
-    @Override
-    public void addDisplay(SuggestedMultiSelectionPresenter.Display<SimpleCompetitorWithIdDTO> display) {
-        competitorDataProvider.addDisplay(display);
-    }
-
-    @Override
-    public void persist() {
-    }
-
-    @Override
-    public void initSelectedItems(Collection<SimpleCompetitorWithIdDTO> selectedItems) {
-    }
-
-    @Override
-    public String createSuggestionAdditionalDisplayString(SimpleCompetitorWithIdDTO value) {
-        return competitorDataProvider.createSuggestionAdditionalDisplayString(value);
-    }
-
-    @Override
-    public void onEditModeChanged(boolean edit) {
-        if (!edit) {
-            updateCompetitors();
-        }
-    }
-
     public void removeSailorProfile(UUID uuid, AsyncCallback<SailorProfileDTO> callback) {
         clientFactory.getDispatch().execute(new RemoveSailorProfileAction(uuid), callback);
     }
@@ -139,12 +75,18 @@ public class StatefulSailorProfileDataProvider implements
         clientFactory.getDispatch().execute(new GetNumericStatisticForSailorProfileAction(uuid, type), callback);
     }
 
-    public void updateCompetitors() {
-        clientFactory.getDispatch().execute(new UpdateSailorProfileCompetitorsAction(uuid, competitors),
-                createRefreshCallback(uuid));
+    public AsyncCallback<SailorProfileDTO> createRefreshCallback(UUID uuid) {
+        return createRefreshCallback(uuid, this.competitorSelectionPresenter);
     }
 
-    public AsyncCallback<SailorProfileDTO> createRefreshCallback(UUID uuid) {
+    public void updateCompetitors(UUID uuid, Collection<SimpleCompetitorWithIdDTO> competitors,
+            SailorProfilesCompetitorSelectionPresenter competitorSelectionProvider) {
+        clientFactory.getDispatch().execute(new UpdateSailorProfileCompetitorsAction(uuid, competitors),
+                createRefreshCallback(uuid, competitorSelectionProvider));
+    }
+
+    public AsyncCallback<SailorProfileDTO> createRefreshCallback(UUID uuid,
+            SailorProfilesCompetitorSelectionPresenter competitorSelectionProvider) {
         return new AsyncCallback<SailorProfileDTO>() {
 
             @Override
@@ -160,8 +102,9 @@ public class StatefulSailorProfileDataProvider implements
                             NotificationType.ERROR);
                     clientFactory.getPlaceController().goTo(new SailorProfilePlace());
                 } else {
-                    competitors = result.getCompetitors();
-                    StatefulSailorProfileDataProvider.this.uuid = result.getKey();
+                    if (competitorSelectionProvider != null) {
+                        competitorSelectionProvider.setCompetitorsAndUUID(result.getCompetitors(), result.getKey());
+                    }
                     sailorView.setEntry(result);
                 }
             }

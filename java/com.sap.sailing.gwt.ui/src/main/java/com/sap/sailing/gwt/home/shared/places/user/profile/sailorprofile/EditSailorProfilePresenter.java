@@ -7,7 +7,8 @@ import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggestedCompetitorMultiSelectionPresenter;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionPresenter;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.dataprovider.StatefulSailorProfileDataProvider;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.dataprovider.SailorProfileDataProvider;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.dataprovider.SailorProfilesCompetitorSelectionPresenter;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sse.gwt.client.mvp.ClientFactory;
 
@@ -23,12 +24,15 @@ public class EditSailorProfilePresenter implements EditSailorProfileView.Present
 
     private final ClientFactoryWithDispatchAndError clientFactory;
 
-    private final StatefulSailorProfileDataProvider sailorProfileDataProvider;
+    private final SailorProfileDataProvider sailorProfileDataProvider;
+    private final SailorProfilesCompetitorSelectionPresenter sailorProfilesCompetitorSelectionPresenter;
 
     public EditSailorProfilePresenter(ClientFactoryWithDispatchAndError clientFactory) {
         this.clientFactory = clientFactory;
-        this.sailorProfileDataProvider = new StatefulSailorProfileDataProvider(clientFactory,
-                new SuggestedMultiSelectionCompetitorDataProviderImpl(clientFactory));
+        this.sailorProfileDataProvider = new SailorProfileDataProvider(clientFactory);
+        this.sailorProfilesCompetitorSelectionPresenter = new SailorProfilesCompetitorSelectionPresenter(
+                new SuggestedMultiSelectionCompetitorDataProviderImpl(clientFactory), this.sailorProfileDataProvider);
+        this.sailorProfileDataProvider.setCompetitorSelectionPresenter(this.sailorProfilesCompetitorSelectionPresenter);
     }
 
     private class SuggestedMultiSelectionCompetitorDataProviderImpl extends
@@ -40,12 +44,12 @@ public class EditSailorProfilePresenter implements EditSailorProfileView.Present
 
         @Override
         protected void persist(Collection<SimpleCompetitorWithIdDTO> selectedItem) {
-            /** persistence is done in {@link StatefulSailorProfileDataProvider} */
+            /** persistence is done in {@link SailorProfileDataProvider} */
         }
     }
 
     @Override
-    public StatefulSailorProfileDataProvider getDataProvider() {
+    public SailorProfileDataProvider getDataProvider() {
         return sailorProfileDataProvider;
     }
 
@@ -56,5 +60,10 @@ public class EditSailorProfilePresenter implements EditSailorProfileView.Present
 
     public ClientFactoryWithDispatchAndError getClientFactory() {
         return clientFactory;
+    }
+
+    @Override
+    public SailorProfilesCompetitorSelectionPresenter getCompetitorPresenter() {
+        return sailorProfilesCompetitorSelectionPresenter;
     }
 }

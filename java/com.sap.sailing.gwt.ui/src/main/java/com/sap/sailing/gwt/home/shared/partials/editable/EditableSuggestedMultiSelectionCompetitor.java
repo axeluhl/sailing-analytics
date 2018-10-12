@@ -5,19 +5,19 @@ import com.sap.sailing.gwt.home.shared.partials.multiselection.HeadlessSuggested
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorItemDescription;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionPresenter;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionView;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.dataprovider.StatefulSailorProfileDataProvider;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.dataprovider.SailorProfilesCompetitorSelectionPresenter;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 public class EditableSuggestedMultiSelectionCompetitor
         extends EditableSuggestedMultiSelection<SimpleCompetitorWithIdDTO> {
 
-    public EditableSuggestedMultiSelectionCompetitor(final StatefulSailorProfileDataProvider dataProvider,
+    public EditableSuggestedMultiSelectionCompetitor(final SailorProfilesCompetitorSelectionPresenter dataProvider,
             final FlagImageResolver flagImageResolver) {
         this(dataProvider, flagImageResolver, false);
     }
 
-    public EditableSuggestedMultiSelectionCompetitor(final StatefulSailorProfileDataProvider dataProvider,
+    public EditableSuggestedMultiSelectionCompetitor(final SailorProfilesCompetitorSelectionPresenter dataProvider,
             final FlagImageResolver flagImageResolver, final boolean headless) {
         super(competitor -> new SuggestedMultiSelectionCompetitorItemDescription(competitor, flagImageResolver),
                 new CompetitorDisplayImpl(dataProvider, flagImageResolver).selectionUi, dataProvider,
