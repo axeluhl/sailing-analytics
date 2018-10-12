@@ -279,7 +279,8 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                                             Window.alert(getStringMessages().errorUpdatingRoles(user.getName(), result.getMessage()));
                                         } else {
                                             getFilterField().remove(updatedUser);
-                                            final UserDTO userWithUpdatedRoles = result.getUserDTO();
+                                                                    UserDTO userWithUpdatedRoles = result.getUserDTO()
+                                                                            .getA();
                                             getFilterField().add(userWithUpdatedRoles);
                                             if (userService.getCurrentUser().getName().equals(userWithUpdatedRoles.getName())) {
                                                 // if the current user's roles changed, update the user object in the user service and notify others
@@ -299,8 +300,17 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                                                                     errorReporter.reportError(getStringMessages().errorUpdatingPermissions(user.getName(), result.getMessage()));
                                                                 } else {
                                                                     getFilterField().remove(userWithUpdatedRoles);
-                                                                    getFilterField().add(result.getUserDTO());
-                                                                    if (userService.getCurrentUser().getName().equals(result.getUserDTO().getName())) {
+                                                                                                            getFilterField()
+                                                                                                                    .add(result
+                                                                                                                            .getUserDTO()
+                                                                                                                            .getA());
+                                                                                                            if (userService
+                                                                                                                    .getCurrentUser()
+                                                                                                                    .getName()
+                                                                                                                    .equals(result
+                                                                                                                            .getUserDTO()
+                                                                                                                            .getA()
+                                                                                                                            .getName())) {
                                                                         // if the current user's permissions changed, update the user object in the user service and notify others
                                                                         userService.updateUser(/* notify other instances */ true);
                                                                     }

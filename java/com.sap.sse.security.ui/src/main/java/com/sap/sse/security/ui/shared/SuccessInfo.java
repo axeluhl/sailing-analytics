@@ -1,6 +1,7 @@
 package com.sap.sse.security.ui.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sse.common.Util.Pair;
 
 public class SuccessInfo implements IsSerializable {
 
@@ -10,12 +11,12 @@ public class SuccessInfo implements IsSerializable {
     
     private boolean successful;
     private String message;
-    private UserDTO userDTO;
+    private Pair<UserDTO, UserDTO> userDTO;
     private String redirectURL;
     
     SuccessInfo() {} // for serializtion only
     
-    public SuccessInfo(boolean successful, String message, String redirectURL, UserDTO userDTO) {
+    public SuccessInfo(boolean successful, String message, String redirectURL, Pair<UserDTO, UserDTO> userDTO) {
         super();
         this.successful = successful;
         this.message = message;
@@ -31,7 +32,7 @@ public class SuccessInfo implements IsSerializable {
         return message;
     }
 
-    public UserDTO getUserDTO() {
+    public Pair<UserDTO, UserDTO> getUserDTO() {
         return userDTO;
     }
 

@@ -157,7 +157,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
                     callback.onSuccess(result);
                     if (ExperimentalFeatures.REFRESH_ON_LOCALE_CHANGE_IN_USER_PROFILE) {
                         // when a user logs in we explicitly switch to the user's locale event if a locale is given by the URL
-                        redirectIfLocaleIsSetAndLocaleIsNotGivenInTheURL(result.getUserDTO().getLocale());
+                        redirectIfLocaleIsSetAndLocaleIsNotGivenInTheURL(result.getUserDTO().getA().getLocale());
                     }
                 } else {
                     if (SuccessInfo.FAILED_TO_LOGIN.equals(result.getMessage())) {

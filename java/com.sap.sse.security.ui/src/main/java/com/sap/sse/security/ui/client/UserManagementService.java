@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.RemoteService;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.security.shared.AccessControlList;
@@ -66,7 +67,7 @@ public interface UserManagementService extends RemoteService {
 
     Collection<UserDTO> getFilteredSortedUserList(String filter) throws UnauthorizedException;
 
-    UserDTO getCurrentUser() throws UnauthorizedException;
+    Pair<UserDTO, UserDTO> getCurrentUser() throws UnauthorizedException;
 
     SuccessInfo login(String username, String password);
 
@@ -139,7 +140,7 @@ public interface UserManagementService extends RemoteService {
 
     public String getAuthorizationUrl(CredentialDTO credential) throws OAuthException;
 
-    public UserDTO verifySocialUser(CredentialDTO credential) throws OAuthException;
+    public Pair<UserDTO, UserDTO> verifySocialUser(CredentialDTO credential) throws OAuthException;
 
     OwnershipAnnotation getOwnership(QualifiedObjectIdentifier idOfOwnedObject);
 }

@@ -11,6 +11,7 @@ import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.GenericSerializableSettings;
@@ -82,6 +83,8 @@ public class UserService {
 
     private final String id;
 
+    private UserDTO anonymousUser;
+
     public UserService(UserManagementServiceAsync userManagementService) {
         this.id = ""+(System.currentTimeMillis() * Random.nextInt()); // something pretty random
         this.userManagementService = userManagementService;
@@ -127,10 +130,10 @@ public class UserService {
      *            if <code>true</code>, other instances of this class will be notified about the result of the call
      */
     public void updateUser(final boolean notifyOtherInstances) {
-        userManagementService.getCurrentUser(new MarkedAsyncCallback<UserDTO>(
-                new AsyncCallback<UserDTO>() {
+        userManagementService.getCurrentUser(
+                new MarkedAsyncCallback<Pair<UserDTO, UserDTO>>(new AsyncCallback<Pair<UserDTO, UserDTO>>() {
             @Override
-            public void onSuccess(UserDTO result) {
+                    public void onSuccess(Pair<UserDTO, UserDTO> result) {
                 setCurrentUser(result, notifyOtherInstances);
             }
 
@@ -168,17 +171,17 @@ public class UserService {
         final String authProviderName = ClientUtils.getAuthProviderNameFromCookie();
         logger.info("Verifying " + authProviderName + " user ...");
         userManagementService.verifySocialUser(ClientUtils.getCredential(),
-                new MarkedAsyncCallback<UserDTO>(new AsyncCallback<UserDTO>() {
+                new MarkedAsyncCallback<Pair<UserDTO, UserDTO>>(new AsyncCallback<Pair<UserDTO, UserDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 callback.onFailure(caught);
             }
 
             @Override
-            public void onSuccess(UserDTO result) {
+                    public void onSuccess(Pair<UserDTO, UserDTO> result) {
                 setCurrentUser(result, /* notifyOtherInstances */ true);
-                logger.info(authProviderName + " user '" + result.getName() + "' is verified!\n");
-                callback.onSuccess(result);
+                        logger.info(authProviderName + " user '" + result.getA().getName() + "' is verified!\n");
+                        callback.onSuccess(result.getA());
             }
         }));
     }
@@ -208,16 +211,21 @@ public class UserService {
         return currentUser;
     }
 
-    private void setCurrentUser(UserDTO result, final boolean notifyOtherInstances) {
-        if (result != null) {
+    private void setCurrentUser(Pair<UserDTO, UserDTO> resultAndAnomynous, final boolean notifyOtherInstances) {
+        if (resultAndAnomynous.getA() == null) {
+            currentUser = null;
+        } else {
             // we remember that a user was authenticated to suppress the hint for some time
             setUserLoginHintToStorage();
+            currentUser = resultAndAnomynous.getA();
         }
-        currentUser = result;
-        preAuthenticated = (!userInitiallyLoaded && result != null);
+        anonymousUser = resultAndAnomynous.getB();
+
+        preAuthenticated = (!userInitiallyLoaded && currentUser != null);
         userInitiallyLoaded = true;
-        logger.info("User changed to " + (result == null ? "No User" : (result.getName() + " roles: "
-                + result.getRoles())));
+        logger.info("User changed to "
+                + (currentUser == null ? "No User" : (currentUser.getName() + " roles: " + currentUser.getRoles())));
+        logger.info("User anonymous changed to " + anonymousUser.getName() + " roles: " + anonymousUser.getRoles());
         notifyUserStatusEventHandlers(preAuthenticated);
         if (notifyOtherInstances) {
             fireUserUpdateEvent();
@@ -371,11 +379,13 @@ public class UserService {
     }
     
     public boolean hasPermission(WildcardPermission permission, Ownership ownership, AccessControlList acl) {
-        // TODO handle anonymous case
-        if (currentUser == null) {
+        if (anonymousUser == null) {
             return false;
         }
-        return currentUser.hasPermission(permission, ownership, acl);
+        if (anonymousUser.hasPermission(permission, ownership, acl)) {
+            return true;
+        }
+        return currentUser != null && currentUser.hasPermission(permission, ownership, acl);
     }
 
     /**

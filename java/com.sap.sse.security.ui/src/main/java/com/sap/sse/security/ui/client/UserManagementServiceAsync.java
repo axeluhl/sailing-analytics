@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
@@ -58,7 +59,7 @@ public interface UserManagementServiceAsync {
     
     void getUserByName(String username, AsyncCallback<UserDTO> callback);
 
-    void getCurrentUser(AsyncCallback<UserDTO> callback);
+    void getCurrentUser(AsyncCallback<Pair<UserDTO, UserDTO>> callback);
 
     void login(String username, String password, AsyncCallback<SuccessInfo> callback);
 
@@ -131,6 +132,6 @@ public interface UserManagementServiceAsync {
 
     void getAuthorizationUrl(CredentialDTO credential, AsyncCallback<String> callback);
 
-    void verifySocialUser(CredentialDTO credential, AsyncCallback<UserDTO> callback);
+    void verifySocialUser(CredentialDTO credential, AsyncCallback<Pair<UserDTO, UserDTO>> markedAsyncCallback);
 
 }
