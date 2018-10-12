@@ -133,6 +133,10 @@ name to make sure you get to the event you're interested in.
 		<td><a href="regattaCompetitorsGet.html">/api/v1/regattas/{regattaname}/competitors</a></td>
 		<td>Obtains the competitors participating in a regatta</td>
 	</tr>
+    <tr>
+        <td><a href="regattaUpdateOrCreateSeries.html">/api/v1/regattas/updateOrCreateSeries</a></td>
+        <td>Creates a Series in an regatta, and configures the Series it contains</td>
+    </tr>
 	<tr>
 		<td><a href="regattasCompetitorsCreateAndAdd.html">/api/v1/regattas/{regattaname}/competitors/createandadd</a></td>
 		<td>Creates a competitor and adds it to the regatta</td>
@@ -201,6 +205,18 @@ name to make sure you get to the event you're interested in.
 		<td><a href="leaderboardRaceStopTracking.html">/api/v1/leaderboards/{name}/stoptracking</a></td>
 		<td>Stops tracking for a race</td>
 	</tr>
+    <tr>
+        <td><a href="leaderboardRaceRemove.html">/api/v1/leaderboards/{name}/removeTrackedRace</a></td>
+        <td>Removes a tracked race</td>
+    </tr>
+    <tr>
+        <td><a href="leaderboardRaceDenoteForTracking.html">/api/v1/leaderboards/{name}/denoteForTracking</a></td>
+        <td>Denotes a race for tracking</td>
+    </tr>
+    <tr>
+        <td><a href="leaderboardRaceEnableRaceLogForCompetitorRegistration.html">/api/v1/leaderboards/{name}/leaderboardRaceEnableRaceLogForCompetitorRegistration</a></td>
+        <td>Enables racelog useage for competitor registration</td>
+    </tr>
 	<tr>
 		<td><a href="leaderboardMarkGpsFixesPostDoc.html">/api/v1/leaderboards/{name}/marks/{id}/gps_fixes</a></td>
 		<td>Pings the location of a mark via the RegattaLog</td>
@@ -253,6 +269,26 @@ name to make sure you get to the event you're interested in.
         <tr>
         <td><a href="putWind.html">/api/v1/wind/putWind</a></td>
         <td>Allows to add wind values to 1-x races, similar to AdminConsole</td>
+    </tr>
+        </tr>
+        <tr>
+        <td><a href="addCompetitorToRace.html">/api/v1/mark/addCompetitorToRace</a></td>
+        <td>Updates the competitor registrations</td>
+    </tr>
+     </tr>
+        <tr>
+        <td><a href="addCourseDefinitionToRaceLog.html">/api/v1/mark/addCourseDefinitionToRaceLog</a></td>
+        <td>Allows to create a Coursedefinition that is then inserted into the racelog</td>
+    </tr>
+     </tr>
+        <tr>
+        <td><a href="addMarkFix.html">/api/v1/mark/addMarkFix</a></td>
+        <td>Adds a fix to a specified Mark, the Marks uuid must be known</td>
+    </tr>
+     </tr>
+        <tr>
+        <td><a href="addMarkToRegatta.html">/api/v1/mark/addMarkToRegatta</a></td>
+        <td>Adds a Mark to a specified Regatta</td>
     </tr>
 </tbody>
 </table>

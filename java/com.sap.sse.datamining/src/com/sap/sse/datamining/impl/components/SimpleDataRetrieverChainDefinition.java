@@ -122,9 +122,9 @@ public class SimpleDataRetrieverChainDefinition<DataSourceType, DataType> implem
             Class<? extends Processor<InputType, ResultType>> retrieverType, Class<SettingsType> settingsType) {
         try {
             if (settingsType == null) {
-                retrieverType.getConstructor(ExecutorService.class, Collection.class, int.class);
+                retrieverType.getConstructor(ExecutorService.class, Collection.class, int.class, String.class);
             } else {
-                retrieverType.getConstructor(ExecutorService.class, Collection.class, settingsType, int.class);
+                retrieverType.getConstructor(ExecutorService.class, Collection.class, settingsType, int.class, String.class);
             }
         } catch (NoSuchMethodException | SecurityException e) {
             throw new IllegalArgumentException("Couldn't get an usable constructor from the given nextRetrieverType '"

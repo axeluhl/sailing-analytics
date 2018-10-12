@@ -223,7 +223,7 @@ public class CandidateFinderImpl implements CandidateFinder {
             }
         } else {
             for (final Competitor competitor : race.getRace().getCompetitors()) {
-                final List<GPSFix> newFixesForCompetitor = new ArrayList<>();
+                final List<GPSFixMoving> newFixesForCompetitor = new ArrayList<>();
                 final DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(competitor);
                 if (track != null) {
                     track.lockForRead();
@@ -289,7 +289,7 @@ public class CandidateFinderImpl implements CandidateFinder {
 
     @Override
     public Util.Pair<Iterable<Candidate>, Iterable<Candidate>> getAllCandidates(Competitor c) {
-        Set<GPSFix> fixes = getAllFixes(c);
+        Set<GPSFixMoving> fixes = getAllFixes(c);
         distanceCache.get(c).clear();
         xteCache.get(c).clear();
         synchronized (xteCandidates) {
@@ -302,9 +302,9 @@ public class CandidateFinderImpl implements CandidateFinder {
     }
 
     @Override
-    public Map<Competitor, List<GPSFix>> calculateFixesAffectedByNewMarkFixes(Map<Mark, List<GPSFix>> markFixes) {
+    public Map<Competitor, List<GPSFixMoving>> calculateFixesAffectedByNewMarkFixes(Map<Mark, List<GPSFix>> markFixes) {
         // TODO Right now creates on time stretch between the 2 outside markfixes
-        Map<Competitor, List<GPSFix>> affectedFixes = new HashMap<>();
+        Map<Competitor, List<GPSFixMoving>> affectedFixes = new HashMap<>();
         TimePoint start = null;
         TimePoint end = null;
         for (Entry<Mark, List<GPSFix>> fixes : markFixes.entrySet()) {
@@ -317,9 +317,9 @@ public class CandidateFinderImpl implements CandidateFinder {
             }
         }
         for (Competitor c : race.getRace().getCompetitors()) {
-            List<GPSFix> competitorFixes = new ArrayList<>();
+            List<GPSFixMoving> competitorFixes = new ArrayList<>();
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
-            GPSFix comFix = track.getFirstFixAtOrAfter(start);
+            GPSFixMoving comFix = track.getFirstFixAtOrAfter(start);
             if (comFix != null) {
                 if (end != null) {
                     while (comFix != null && !comFix.getTimePoint().after(end)) {
@@ -345,7 +345,7 @@ public class CandidateFinderImpl implements CandidateFinder {
     }
 
     @Override
-    public Util.Pair<Iterable<Candidate>, Iterable<Candidate>> getCandidateDeltas(Competitor c, Iterable<GPSFix> fixes) {
+    public Util.Pair<Iterable<Candidate>, Iterable<Candidate>> getCandidateDeltas(Competitor c, Iterable<GPSFixMoving> fixes) {
         List<Candidate> newCans = new ArrayList<>();
         List<Candidate> wrongCans = new ArrayList<>();
         Course course = race.getRace().getCourse();
@@ -408,7 +408,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                             badCans.addAll(distanceCans.values());
                             distanceCans.clear();
                         }
-                        Set<GPSFix> allFixes = getAllFixes(c);
+                        Set<GPSFixMoving> allFixes = getAllFixes(c);
                         newCans.addAll(checkForDistanceCandidateChanges(c, allFixes, changedWaypoints).getA());
                         newCans.addAll(checkForXTECandidatesChanges(c, allFixes, changedWaypoints).getA());
                         result.put(c, new Util.Pair<List<Candidate>, List<Candidate>>(newCans, badCans));
@@ -525,13 +525,13 @@ public class CandidateFinderImpl implements CandidateFinder {
         return instruction;
     }
 
-    private Set<GPSFix> getAllFixes(Competitor c) {
-        Set<GPSFix> fixes = new TreeSet<GPSFix>(comp);
+    private Set<GPSFixMoving> getAllFixes(Competitor c) {
+        Set<GPSFixMoving> fixes = new TreeSet<>(comp);
         if (timeRangeForValidCandidates.getTimeRangeOrNull() != null) {
             DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
             track.lockForRead();
             try {
-                for (GPSFix fix : track.getFixes(
+                for (GPSFixMoving fix : track.getFixes(
                         timeRangeForValidCandidates.getTimeRangeOrNull().from(), /* fromInclusive */ true,
                         timeRangeForValidCandidates.getTimeRangeOrNull().to(),   /*  toInclusive  */ true)) {
                     fixes.add(fix);
@@ -549,7 +549,7 @@ public class CandidateFinderImpl implements CandidateFinder {
      * probability exceeds {@link #penaltyForSkipping}, the fix is considered a candidate.
      */
     private Util.Pair<List<Candidate>, List<Candidate>> checkForDistanceCandidateChanges(Competitor c,
-            Iterable<GPSFix> fixes, Iterable<Waypoint> waypoints) {
+            Iterable<GPSFixMoving> fixes, Iterable<Waypoint> waypoints) {
         Util.Pair<List<Candidate>, List<Candidate>> result = new Util.Pair<List<Candidate>, List<Candidate>>(
                 new ArrayList<Candidate>(), new ArrayList<Candidate>());
         TreeSet<GPSFix> affectedFixes = new TreeSet<GPSFix>(comp);
@@ -705,12 +705,13 @@ public class CandidateFinderImpl implements CandidateFinder {
      * @param waypointAsList
      */
     private Util.Pair<List<Candidate>, List<Candidate>> checkForXTECandidatesChanges(Competitor c,
-            Iterable<GPSFix> fixes, Iterable<Waypoint> waypoints) {
+            Iterable<GPSFixMoving> fixes, Iterable<Waypoint> waypoints) {
         Util.Pair<List<Candidate>, List<Candidate>> result = new Util.Pair<List<Candidate>, List<Candidate>>(
                 new ArrayList<Candidate>(), new ArrayList<Candidate>());
         DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
-        for (GPSFix fix : fixes) {
-            if (timeRangeForValidCandidates.getTimeRangeOrNull() != null && timeRangeForValidCandidates.getTimeRangeOrNull().includes(fix.getTimePoint())) {
+        for (GPSFixMoving fix : fixes) {
+            if (timeRangeForValidCandidates.getTimeRangeOrNull() != null && timeRangeForValidCandidates.getTimeRangeOrNull().includes(fix.getTimePoint())
+                    && track.isValid(fix)) {
                 TimePoint t = fix.getTimePoint();
                 GPSFix fixBefore;
                 GPSFix fixAfter;
