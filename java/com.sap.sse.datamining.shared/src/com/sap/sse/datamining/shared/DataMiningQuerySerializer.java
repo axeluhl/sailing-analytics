@@ -9,18 +9,17 @@ import java.util.Base64;
 
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 
+/** This serializer can (de-)serialize a {@link StatisticQueryDefinitionDTO} into a Base64-String. */
 public final class DataMiningQuerySerializer {
 
     private DataMiningQuerySerializer() {
     }
 
-    public static String toBase64String(StatisticQueryDefinitionDTO dto) {
+    /** @return the {@link StatisticQueryDefinitionDTO} as a base 64 string serialized with java serialization */
+    public static String toBase64String(final StatisticQueryDefinitionDTO dto) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        try {
-            ObjectOutputStream out = new ObjectOutputStream(stream);
+        try (ObjectOutputStream out = new ObjectOutputStream(stream)) {
             out.writeObject(dto);
-            out.close();
-            stream.close();
             byte[] bytes = stream.toByteArray();
             return new String(Base64.getEncoder().encode(bytes), "UTF-8");
         } catch (IOException e) {
@@ -29,10 +28,16 @@ public final class DataMiningQuerySerializer {
         return "";
     }
 
-    public static StatisticQueryDefinitionDTO fromBase64String(String string) {
+    /** @return the {@link StatisticQueryDefinitionDTO} from a base 64 string deserialized with java serialization */
+    public static StatisticQueryDefinitionDTO fromBase64String(final String string) {
+        byte[] bytes;
         try {
-            byte[] bytes = Base64.getDecoder().decode(string);
-            ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
+            bytes = Base64.getDecoder().decode(string);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+
+        try (ByteArrayInputStream stream = new ByteArrayInputStream(bytes)) {
             ObjectInputStream in;
             in = new ObjectInputStream(stream);
             Object o = in.readObject();
