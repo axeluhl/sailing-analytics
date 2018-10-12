@@ -126,7 +126,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     private static final String ADMIN_DEFAULT_PASSWORD = "admin";
     
-    private static final String ANONYMOUS_USERNAME = "<anonymous>";
+    public static final String ANONYMOUS_USERNAME = "<anonymous>";
 
     private CachingSecurityManager securityManager;
     

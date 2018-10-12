@@ -20,6 +20,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sse.security.impl.Activator;
+import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.PermissionChecker;
@@ -190,9 +191,14 @@ public abstract class AbstractCompositeAuthorizingRealm extends AuthorizingRealm
     }
 
     private boolean isPermitted(WildcardPermission wildcardPermission, User user, OwnershipAnnotation ownership, AccessControlListAnnotation acl) {
+        return isPermittedForUser(wildcardPermission, user, ownership, acl) || isPermittedForUser(wildcardPermission,
+                getUserStore().getUserByName(SecurityServiceImpl.ANONYMOUS_USERNAME), ownership, acl);
+    }
+    
+    private boolean isPermittedForUser(WildcardPermission wildcardPermission, User user, OwnershipAnnotation ownership, AccessControlListAnnotation acl) {
         return PermissionChecker.isPermitted(wildcardPermission, 
                 user, getUserStore().getUserGroupsOfUser(user), ownership==null?null:ownership.getAnnotation(), 
-                acl==null?null:acl.getAnnotation());
+                        acl==null?null:acl.getAnnotation());
     }
     
     @Override
