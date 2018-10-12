@@ -1,0 +1,9 @@
+{
+    "ANDROID":[
+        {
+            "version": "1.0.8",
+            "groupid": "com.sap.mobile.android.validation",
+            "file": "src/validationapp/build/outputs/apk/releaseUnsigned/validationapp-releaseUnsigned-unsigned.apk","artifactid": "validationapp"
+        }
+    ]
+}
