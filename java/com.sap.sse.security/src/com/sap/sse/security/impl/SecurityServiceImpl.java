@@ -654,6 +654,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public UserImpl createSimpleUser(final String username, final String email, String password, String fullName,
             String company, Locale locale, final String validationBaseURL) throws UserManagementException, MailException, UserGroupManagementException {
+        SecurityUtils.getSubject().checkPermission(
+                SecuredSecurityTypes.USER.getStringPermissionForObjects(DefaultActions.CREATE, username));
         logger.info("Creating user "+username);
         if (userStore.getUserByName(username) != null) {
             logger.warning("User "+username+" already exists");
