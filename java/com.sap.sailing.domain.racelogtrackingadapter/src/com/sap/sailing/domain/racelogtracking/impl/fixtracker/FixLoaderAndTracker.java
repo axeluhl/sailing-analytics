@@ -344,7 +344,7 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
             if (lastDetectedManeuver != null) {
                 Maneuver lastNotifiedManeuverOrNull = lastNotifiedManeuverCache.get(comp.getId());
                 if (!lastDetectedManeuver.equals(lastNotifiedManeuverOrNull)) {
-                    lastNotifiedManeuverCache.put((UUID) comp.getId(), lastNotifiedManeuverOrNull);
+                    lastNotifiedManeuverCache.put((UUID) comp.getId(), lastDetectedManeuver);
                     changed = true;
                     logger.info(comp.getName() + " new maneuver is " + lastDetectedManeuver);
                 }
