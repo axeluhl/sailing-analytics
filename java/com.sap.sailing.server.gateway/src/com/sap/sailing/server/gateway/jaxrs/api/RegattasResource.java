@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,7 +36,6 @@ import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.datamining.SailingPredefinedQueries;
-import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.Course;
@@ -320,24 +320,16 @@ public class RegattasResource extends AbstractSailingServerResource {
         return response;
     }
 
-    @POST
-    @Produces("application/json;charset=UTF-8")
-    @Path("{regattaname}/competitors/createandadd")
-    public Response createAndAddCompetitor(@PathParam("regattaname") String regattaName,
-            @QueryParam("boatclass") String boatClassName, @QueryParam("sailid") String sailId,
-            @QueryParam("nationalityIOC") String nationalityThreeLetterIOCCode,
-            @QueryParam("timeontimefactor") Double timeOnTimeFactor,
-            @QueryParam("timeondistanceallowancepernauticalmileasmillis") Long timeOnDistanceAllowancePerNauticalMileAsMillis,
-            @QueryParam("searchtag") String searchTag, @QueryParam("competitorName") String competitorName,
-            @QueryParam("competitorEmail") String competitorEmail) {
+    private Response createAndAddCompetitor(String regattaName,
+            String nationalityThreeLetterIOCCode, Double timeOnTimeFactor,
+            Long timeOnDistanceAllowancePerNauticalMileAsMillis, String searchTag, String competitorName,
+            String competitorEmail, Function<String, DynamicBoat> boatObtainer) {
         final Subject subject = SecurityUtils.getSubject();
         subject.checkPermission(Permission.REGATTA.getStringPermissionForObjects(Mode.UPDATE, regattaName));
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
-        } else if (boatClassName == null) {
-            response = getBadBoatClassResponse(boatClassName);
         } else {
             final User user = getService(SecurityService.class).getCurrentUser();
             final String shortName;
@@ -355,27 +347,65 @@ public class RegattasResource extends AbstractSailingServerResource {
             } else {
                 email = user.getEmail();
             }
-
-            final Boat boat = new BoatImpl(UUID.randomUUID(), shortName, getService().getBaseDomainFactory()
-                    .getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */ true), sailId);
-
+            DynamicBoat boat = boatObtainer.apply(shortName);
             final TeamImpl team = new TeamImpl(shortName,
                     Collections.singleton(new PersonImpl(name,
-                            getService().getBaseDomainFactory()
-                                    .getOrCreateNationality(nationalityThreeLetterIOCCode),
+                            getService().getBaseDomainFactory().getOrCreateNationality(nationalityThreeLetterIOCCode),
                             /* dateOfBirth */ null, /* description */ null)),
                     /* coach */ null);
             final CompetitorWithBoat competitor = getService().getCompetitorAndBoatStore()
-                    .getOrCreateCompetitorWithBoat(UUID.randomUUID(),
-                            name, /* shortName */ null, /* displayColor */ null, email, /* flagImageURI */ null,
-                            team,
-                            timeOnTimeFactor,
+                    .getOrCreateCompetitorWithBoat(UUID.randomUUID(), name, /* shortName */ null,
+                            /* displayColor */ null, email, /* flagImageURI */ null, team, timeOnTimeFactor,
                             timeOnDistanceAllowancePerNauticalMileAsMillis == null ? null
                                     : new MillisecondsDurationImpl(timeOnDistanceAllowancePerNauticalMileAsMillis),
-                            searchTag, (DynamicBoat) boat);
+                            searchTag, boat);
             regatta.registerCompetitor(competitor);
-            response = Response.ok(CompetitorJsonSerializer.create().serialize(competitor).toJSONString()).
-                    header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            response = Response.ok(CompetitorJsonSerializer.create().serialize(competitor).toJSONString())
+                    .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+        }
+        return response;
+    }
+
+    @POST
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/competitors/createandadd")
+    public Response createAndAddCompetitor(@PathParam("regattaname") String regattaName,
+            @QueryParam("boatclass") String boatClassName, @QueryParam("sailid") String sailId,
+            @QueryParam("nationalityIOC") String nationalityThreeLetterIOCCode,
+            @QueryParam("timeontimefactor") Double timeOnTimeFactor,
+            @QueryParam("timeondistanceallowancepernauticalmileasmillis") Long timeOnDistanceAllowancePerNauticalMileAsMillis,
+            @QueryParam("searchtag") String searchTag, @QueryParam("competitorName") String competitorName,
+            @QueryParam("competitorEmail") String competitorEmail) {
+        Response response;
+        if (boatClassName == null) {
+            response = getBadBoatClassResponse(boatClassName);
+        } else {
+            response = createAndAddCompetitor(regattaName, nationalityThreeLetterIOCCode, timeOnTimeFactor,
+                    timeOnDistanceAllowancePerNauticalMileAsMillis, searchTag, competitorName, competitorEmail,
+                    shortName -> new BoatImpl(UUID.randomUUID(), shortName, getService().getBaseDomainFactory()
+                            .getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */ true), sailId));
+        }
+        return response;
+    }
+
+    @POST
+    @Produces("application/json;charset=UTF-8")
+    @Path("{regattaname}/competitors/createandaddwithboat")
+    public Response createAndAddCompetitorWithBoat(@PathParam("regattaname") String regattaName,
+            @QueryParam("boatId") String boatId, @QueryParam("sailid") String sailId,
+            @QueryParam("nationalityIOC") String nationalityThreeLetterIOCCode,
+            @QueryParam("timeontimefactor") Double timeOnTimeFactor,
+            @QueryParam("timeondistanceallowancepernauticalmileasmillis") Long timeOnDistanceAllowancePerNauticalMileAsMillis,
+            @QueryParam("searchtag") String searchTag, @QueryParam("competitorName") String competitorName,
+            @QueryParam("competitorEmail") String competitorEmail) {
+        Response response;
+        DynamicBoat boat = getService().getCompetitorAndBoatStore().getExistingBoatByIdAsString(boatId);
+        if (boat == null) {
+            response = Response.status(Status.NOT_FOUND).entity("Boat is not valid").type(MediaType.TEXT_PLAIN).build();
+        } else {
+            response = createAndAddCompetitor(regattaName, nationalityThreeLetterIOCCode, timeOnTimeFactor,
+                    timeOnDistanceAllowancePerNauticalMileAsMillis, searchTag, competitorName, competitorEmail,
+                    t -> boat);
         }
         return response;
     }
@@ -399,7 +429,8 @@ public class RegattasResource extends AbstractSailingServerResource {
                 competitorId = competitorIdAsString;
             }
 
-            final Competitor competitor = getService().getCompetitorAndBoatStore().getExistingCompetitorById(competitorId);
+            final Competitor competitor = getService().getCompetitorAndBoatStore()
+                    .getExistingCompetitorById(competitorId);
             if (competitor == null) {
                 response = getBadCompetitorIdResponse(competitorId);
             } else {
