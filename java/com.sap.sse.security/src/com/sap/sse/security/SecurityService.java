@@ -40,7 +40,7 @@ import com.sap.sse.security.shared.WildcardPermission;
  *
  */
 public interface SecurityService extends ReplicableWithObjectInputStream<ReplicableSecurityService, SecurityOperation<?>> {
-    String ANONYMOUS_USERNAME = "<anonymous>";
+    String ALL_USERNAME = "<all>";
 
     SecurityManager getSecurityManager();
 
@@ -334,5 +334,5 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void setOwnershipCheckPermissionForObjectCreationAndRevertOnError(UserGroup tenantOwner, HasPermissions type,
             String typeIdentifier, String securityDisplayName, Action action);
 
-    User getAnonymousUser();
+    User getAllUser();
 }
