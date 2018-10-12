@@ -1413,6 +1413,60 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
     }
 
+    @Override
+    public UserGroup getDefaultTenant() {
+        return userStore.getDefaultTenant();
+    }
+
+    @Override
+    public <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(String tenantOwnerName,
+            HasPermissions type, String typeIdentifier, String securityDisplayName,
+            ActionWithResult<T> actionWithResult) {
+        final UserGroup group = getUserGroupByName(tenantOwnerName);
+
+        return setOwnershipCheckPermissionForObjectCreationAndRevertOnError(group, type, typeIdentifier,
+                securityDisplayName,
+                actionWithResult);
+    }
+
+    @Override
+    public void setOwnershipCheckPermissionForObjectCreationAndRevertOnError(UserGroup tenantOwner,
+            HasPermissions type, String typeIdentifier, String securityDisplayName,
+            Action action) {
+        setOwnershipCheckPermissionForObjectCreationAndRevertOnError(tenantOwner, type, typeIdentifier,
+                securityDisplayName, () -> {
+                    action.run();
+                    return null;
+                });
+    }
+
+    @Override
+    public <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(UserGroup tenantOwner,
+            HasPermissions type, String typeIdentifier, String securityDisplayName,
+            ActionWithResult<T> actionWithResult) {
+        QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifier(typeIdentifier);
+        T result = null;
+        boolean didSetOwnerShip = false;
+        try {
+            final User user = getUserByName((String) SecurityUtils.getSubject().getPrincipal());
+            if (getOwnership(identifier) == null) {
+                didSetOwnerShip = true;
+                setOwnership(identifier, user, tenantOwner, securityDisplayName);
+            }
+            SecurityUtils.getSubject()
+                    .checkPermission(type.getStringPermissionForObjects(DefaultActions.CREATE, typeIdentifier));
+            result = actionWithResult.run();
+        } catch (AuthorizationException e) {
+            if (didSetOwnerShip) {
+                deleteOwnership(identifier);
+            }
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return result;
+    }
+
     // ----------------- Replication -------------
     @Override
     public void clearReplicaState() throws MalformedURLException, IOException, InterruptedException {
@@ -1516,59 +1570,5 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (cm instanceof ReplicatingCacheManager) {
             ((ReplicatingCacheManager) cm).clear();
         }
-    }
-
-    @Override
-    public UserGroup getDefaultTenant() {
-        return userStore.getDefaultTenant();
-    }
-
-    @Override
-    public <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(String tenantOwnerName,
-            HasPermissions type, String typeIdentifier, String securityDisplayName,
-            ActionWithResult<T> actionWithResult) {
-        final UserGroup group = getUserGroupByName(tenantOwnerName);
-
-        return setOwnershipCheckPermissionForObjectCreationAndRevertOnError(group, type, typeIdentifier,
-                securityDisplayName,
-                actionWithResult);
-    }
-
-    @Override
-    public void setOwnershipCheckPermissionForObjectCreationAndRevertOnError(UserGroup tenantOwner,
-            HasPermissions type, String typeIdentifier, String securityDisplayName,
-            Action action) {
-        setOwnershipCheckPermissionForObjectCreationAndRevertOnError(tenantOwner, type, typeIdentifier,
-                securityDisplayName, () -> {
-                    action.run();
-                    return null;
-                });
-    }
-
-    @Override
-    public <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(UserGroup tenantOwner,
-            HasPermissions type, String typeIdentifier, String securityDisplayName,
-            ActionWithResult<T> actionWithResult) {
-        QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifier(typeIdentifier);
-        T result = null;
-        boolean didSetOwnerShip = false;
-        try {
-            final User user = getUserByName((String) SecurityUtils.getSubject().getPrincipal());
-            if (getOwnership(identifier) == null) {
-                didSetOwnerShip = true;
-                setOwnership(identifier, user, tenantOwner, securityDisplayName);
-            }
-            SecurityUtils.getSubject()
-                    .checkPermission(type.getStringPermissionForObjects(DefaultActions.CREATE, typeIdentifier));
-            result = actionWithResult.run();
-        } catch (AuthorizationException e) {
-            if (didSetOwnerShip) {
-                deleteOwnership(identifier);
-            }
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return result;
     }
 }
