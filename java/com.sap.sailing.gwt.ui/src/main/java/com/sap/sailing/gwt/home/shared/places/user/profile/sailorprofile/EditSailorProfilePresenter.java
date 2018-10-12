@@ -8,6 +8,7 @@ import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggestedCompetitorMultiSelectionPresenter;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionPresenter;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.dataprovider.SailorProfileDataProvider;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.dataprovider.SailorProfileDataProviderImpl;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.dataprovider.SailorProfilesCompetitorSelectionPresenter;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
 import com.sap.sse.gwt.client.mvp.ClientFactory;
@@ -29,7 +30,7 @@ public class EditSailorProfilePresenter implements EditSailorProfileView.Present
 
     public EditSailorProfilePresenter(ClientFactoryWithDispatchAndError clientFactory) {
         this.clientFactory = clientFactory;
-        this.sailorProfileDataProvider = new SailorProfileDataProvider(clientFactory);
+        this.sailorProfileDataProvider = new SailorProfileDataProviderImpl(clientFactory);
         this.sailorProfilesCompetitorSelectionPresenter = new SailorProfilesCompetitorSelectionPresenter(
                 new SuggestedMultiSelectionCompetitorDataProviderImpl(clientFactory), this.sailorProfileDataProvider);
         this.sailorProfileDataProvider.setCompetitorSelectionPresenter(this.sailorProfilesCompetitorSelectionPresenter);
