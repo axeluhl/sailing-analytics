@@ -6,8 +6,21 @@ import java.util.UUID;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.shared.partials.editable.EditableSuggestedMultiSelection.EditModeChangeHandler;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggestedCompetitorMultiSelectionPresenter;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelection;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionPresenter;
 
+/**
+ * This presenter functions as an adapter from the {@link AbstractSuggestedCompetitorMultiSelectionPresenter} to the
+ * {@link SailorProfileDataProvider}. It handles competitor selection events and functions as a change handler for edit
+ * mode change events. <br/>
+ * <br/>
+ * This presenter holds the uuid of the currently selected sailor profile and the competitors which are contained in
+ * this sailor profile. Storing/Loading of these competitors is done in {@link SailorProfileDataProvider}, which also
+ * sets the competitors via {@link #setCompetitorsAndUUID(Collection, UUID)}. <br/>
+ * <br/>
+ * The {@link #competitorDataProvider} is used as an adapter to the displayed {@link SuggestedMultiSelection} in the
+ * sailor profiles.
+ */
 public class SailorProfilesCompetitorSelectionPresenter implements EditModeChangeHandler,
         SuggestedMultiSelectionPresenter<SimpleCompetitorWithIdDTO, SuggestedMultiSelectionPresenter.Display<SimpleCompetitorWithIdDTO>> {
 
@@ -16,13 +29,13 @@ public class SailorProfilesCompetitorSelectionPresenter implements EditModeChang
     private Collection<SimpleCompetitorWithIdDTO> competitors;
     private UUID uuid;
 
-    private final SailorProfileDataProvider statefulSailorProfileDataProvider;
+    private final SailorProfileDataProvider sailorProfileDataProvider;
 
     public SailorProfilesCompetitorSelectionPresenter(
             AbstractSuggestedCompetitorMultiSelectionPresenter<Display<SimpleCompetitorWithIdDTO>> competitorDataProvider,
             SailorProfileDataProvider sailorProfileDataProvider) {
         this.competitorDataProvider = competitorDataProvider;
-        this.statefulSailorProfileDataProvider = sailorProfileDataProvider;
+        this.sailorProfileDataProvider = sailorProfileDataProvider;
     }
 
     public void setCompetitorsAndUUID(Collection<SimpleCompetitorWithIdDTO> competitors, UUID uuid) {
@@ -41,7 +54,7 @@ public class SailorProfilesCompetitorSelectionPresenter implements EditModeChang
     @Override
     public void onEditModeChanged(boolean edit) {
         if (!edit) {
-            statefulSailorProfileDataProvider.updateCompetitors(uuid, competitors, this);
+            sailorProfileDataProvider.updateCompetitors(uuid, competitors, this);
         }
     }
 
@@ -53,19 +66,19 @@ public class SailorProfilesCompetitorSelectionPresenter implements EditModeChang
     @Override
     public void addSelection(SimpleCompetitorWithIdDTO item) {
         competitors.add(item);
-        statefulSailorProfileDataProvider.updateCompetitors(uuid, competitors, this);
+        sailorProfileDataProvider.updateCompetitors(uuid, competitors, this);
     }
 
     @Override
     public void removeSelection(SimpleCompetitorWithIdDTO item) {
         competitors.remove(item);
-        statefulSailorProfileDataProvider.updateCompetitors(uuid, competitors, this);
+        sailorProfileDataProvider.updateCompetitors(uuid, competitors, this);
     }
 
     @Override
     public void clearSelection() {
         competitors.clear();
-        statefulSailorProfileDataProvider.updateCompetitors(uuid, competitors, this);
+        sailorProfileDataProvider.updateCompetitors(uuid, competitors, this);
     }
 
     @Override

@@ -12,6 +12,7 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileS
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfilesDTO;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
 
+/** @see SailorProfileDataProviderImpl */
 public interface SailorProfileDataProvider {
 
     void setCompetitorSelectionPresenter(SailorProfilesCompetitorSelectionPresenter competitorSelectionPresenter);

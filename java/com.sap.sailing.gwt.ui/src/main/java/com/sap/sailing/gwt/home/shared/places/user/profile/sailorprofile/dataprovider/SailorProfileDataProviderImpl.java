@@ -25,6 +25,12 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 
+/**
+ * Data Provider to provide information for the sailor profile overview and single sailor profiles. This data provider
+ * is also used to add, update or delete sailor profiles. The logic for handling of the competitors (except storing and
+ * loading them) can be found in {@link SailorProfilesCompetitorSelectionPresenter}, which is also notified with every
+ * refresh.
+ */
 public class SailorProfileDataProviderImpl implements SailorProfileDataProvider {
 
     private EditSailorProfileView sailorView;
