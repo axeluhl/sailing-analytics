@@ -66,6 +66,7 @@ import org.scribe.builder.api.YahooApi;
 import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
+import com.sap.sse.ServerStartupConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mail.MailService;
@@ -114,6 +115,7 @@ import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.OwnershipImpl;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.util.ClearStateTestSupport;
 
 public class SecurityServiceImpl implements ReplicableSecurityService, ClearStateTestSupport {
@@ -1444,6 +1446,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(UserGroup tenantOwner,
             HasPermissions type, String typeIdentifier, String securityDisplayName,
             ActionWithResult<T> actionWithResult) {
+        return setOwnershipCheckPermissionForObjectCreationAndRevertOnError(tenantOwner, type, typeIdentifier,
+                securityDisplayName, actionWithResult, true);
+    }
+    
+    private <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(UserGroup tenantOwner,
+            HasPermissions type, String typeIdentifier, String securityDisplayName,
+            ActionWithResult<T> actionWithResult, boolean checkCreateObjectOnServer) {
         QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifier(typeIdentifier);
         T result = null;
         boolean didSetOwnerShip = false;
@@ -1452,6 +1461,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             if (getOwnership(identifier) == null) {
                 didSetOwnerShip = true;
                 setOwnership(identifier, user, tenantOwner, securityDisplayName);
+            }
+            if (checkCreateObjectOnServer) {
+                SecurityUtils.getSubject().checkPermission(SecuredSecurityTypes.SERVER
+                        .getStringPermissionForObjects(ServerActions.CREATE_OBJECT, ServerStartupConstants.SERVER_NAME));
             }
             SecurityUtils.getSubject()
                     .checkPermission(type.getStringPermissionForObjects(DefaultActions.CREATE, typeIdentifier));
