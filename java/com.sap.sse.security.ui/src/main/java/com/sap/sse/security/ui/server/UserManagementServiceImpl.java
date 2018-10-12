@@ -314,7 +314,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         logger.fine("Request: " + getThreadLocalRequest().getRequestURL());
         User user = getSecurityService().getCurrentUser();
         if (user == null) {
-            return null;
+            return new Pair<UserDTO, UserDTO>(null, getAnonymousUser());
         }
         if (SecurityUtils.getSubject().isPermitted("user:view:" + user.getName())) {
             return new Pair<UserDTO, UserDTO>(securityDTOFactory.createUserDTOFromUser(user, getSecurityService()),
