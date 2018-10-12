@@ -1480,6 +1480,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return result;
     }
 
+    @Override
+    public User getAnonymousUser() {
+        return userStore.getUserByName(ANONYMOUS_USERNAME);
+    }
+
     // ----------------- Replication -------------
     @Override
     public void clearReplicaState() throws MalformedURLException, IOException, InterruptedException {

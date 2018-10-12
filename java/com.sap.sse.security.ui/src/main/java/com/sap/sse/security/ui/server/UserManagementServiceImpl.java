@@ -98,8 +98,9 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     private UserDTO getAnonymousUser() {
-        // TODO Auto-generated method stub
-        return null;
+        final User anonymousUser = getSecurityService().getAnonymousUser();
+        return anonymousUser == null ? null
+                : securityDTOFactory.createUserDTOFromUser(anonymousUser, getSecurityService());
     }
 
     @Override

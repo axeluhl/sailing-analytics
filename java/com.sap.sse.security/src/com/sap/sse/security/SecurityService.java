@@ -331,4 +331,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     void setOwnershipCheckPermissionForObjectCreationAndRevertOnError(UserGroup tenantOwner, HasPermissions type,
             String typeIdentifier, String securityDisplayName, Action action);
+
+    User getAnonymousUser();
 }
