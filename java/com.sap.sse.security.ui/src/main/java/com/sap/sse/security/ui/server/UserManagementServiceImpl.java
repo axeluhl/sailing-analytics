@@ -97,6 +97,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }.start();
     }
 
+    private UserDTO getAnonymousUser() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
     @Override
     public RoleDefinition createRoleDefinition(String roleDefinitionIdAsString, String name) {
         SecurityUtils.getSubject().checkPermission(SecuredSecurityTypes.ROLE_DEFINITION.getStringPermissionForObjects(DefaultActions.CREATE, roleDefinitionIdAsString));
