@@ -19,7 +19,7 @@ import com.sap.sailing.gwt.home.communication.user.profile.sailorprofile.RemoveS
 import com.sap.sailing.gwt.home.communication.user.profile.sailorprofile.UpdateSailorProfileCompetitorsAction;
 import com.sap.sailing.gwt.home.communication.user.profile.sailorprofile.UpdateSailorProfileTitleAction;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.ClientFactoryWithDispatchAndError;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileDetailsView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.Notification;
@@ -33,7 +33,7 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
  */
 public class SailorProfileDataProviderImpl implements SailorProfileDataProvider {
 
-    private EditSailorProfileView sailorView;
+    private EditSailorProfileDetailsView sailorView;
     private SailorProfilesCompetitorSelectionPresenter competitorSelectionPresenter;
 
     private final ClientFactoryWithDispatchAndError clientFactory;
@@ -49,7 +49,7 @@ public class SailorProfileDataProviderImpl implements SailorProfileDataProvider 
     }
 
     @Override
-    public void setView(EditSailorProfileView sailorView) {
+    public void setView(EditSailorProfileDetailsView sailorView) {
         this.sailorView = sailorView;
     }
 

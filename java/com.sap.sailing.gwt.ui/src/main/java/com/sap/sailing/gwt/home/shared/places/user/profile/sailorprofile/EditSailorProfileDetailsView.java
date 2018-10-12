@@ -6,7 +6,8 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileD
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.dataprovider.SailorProfileDataProvider;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.dataprovider.SailorProfilesCompetitorSelectionPresenter;
 
-public interface EditSailorProfileView extends IsWidget {
+/** abstract interface over Sailor Profile Details on mobile and desktop */
+public interface EditSailorProfileDetailsView extends IsWidget {
 
     public interface Presenter {
 

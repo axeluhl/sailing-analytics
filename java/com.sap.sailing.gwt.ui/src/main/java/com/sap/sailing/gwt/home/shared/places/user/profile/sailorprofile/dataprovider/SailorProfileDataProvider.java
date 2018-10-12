@@ -10,14 +10,14 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileE
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfilesDTO;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileDetailsView;
 
 /** @see SailorProfileDataProviderImpl */
 public interface SailorProfileDataProvider {
 
     void setCompetitorSelectionPresenter(SailorProfilesCompetitorSelectionPresenter competitorSelectionPresenter);
 
-    void setView(EditSailorProfileView sailorView);
+    void setView(EditSailorProfileDetailsView sailorView);
 
     void loadSailorProfile(UUID uuid);
 

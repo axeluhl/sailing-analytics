@@ -28,7 +28,7 @@ import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.detail
 import com.sap.sailing.gwt.home.shared.partials.editable.EditableSuggestedMultiSelectionCompetitor;
 import com.sap.sailing.gwt.home.shared.partials.editable.InlineEditButton;
 import com.sap.sailing.gwt.home.shared.partials.editable.InlineEditLabel;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileDetailsView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileResources;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.view.SailorProfileView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -36,10 +36,10 @@ import com.sap.sse.common.Util;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
 /**
- * Implementation of {@link SailorProfileView} and {@link EditSailorProfileView} where users can change the details of
+ * Implementation of {@link SailorProfileView} and {@link EditSailorProfileDetailsView} where users can change the details of
  * the sailor profiles.
  */
-public class SailorProfilesDetailsImpl extends Composite implements SailorProfileView, EditSailorProfileView {
+public class SailorProfilesDetailsImpl extends Composite implements SailorProfileView, EditSailorProfileDetailsView {
 
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
     private static StringMessages stringMessages = GWT.create(StringMessages.class);

@@ -7,8 +7,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfilesDTO;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfilePresenter;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView.Presenter;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileDetailsView;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileDetailsView.Presenter;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.HasLoginFormAndFactory;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.view.SailorProfileOverview;
@@ -21,7 +21,7 @@ public class SailorProfileOverviewImplPresenter implements SailingProfileOvervie
 
     private final SailorProfileView view;
     private final HasLoginFormAndFactory loginAndFactory;
-    private final EditSailorProfileView.Presenter sharedSailorProfilePresenter;
+    private final EditSailorProfileDetailsView.Presenter sharedSailorProfilePresenter;
     private final FlagImageResolver flagImageResolver;
 
     public SailorProfileOverviewImplPresenter(final SailorProfileView view,

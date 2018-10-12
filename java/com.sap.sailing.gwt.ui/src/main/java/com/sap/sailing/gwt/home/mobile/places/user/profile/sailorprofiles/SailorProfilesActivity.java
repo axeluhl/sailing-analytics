@@ -14,7 +14,7 @@ import com.sap.sailing.gwt.home.mobile.places.user.profile.AbstractUserProfileAc
 import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.details.SailorProfilesDetailsViewImpl;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.ClientFactoryWithDispatchAndError;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfilePresenter;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileDetailsView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.HasLoginFormAndFactory;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.view.SailorProfileView;
@@ -89,8 +89,8 @@ public class SailorProfilesActivity extends AbstractUserProfileActivity
                                 }
                             });
                 }
-            } else if (cView instanceof EditSailorProfileView) {
-                EditSailorProfileView detailsView = (EditSailorProfileView) cView;
+            } else if (cView instanceof EditSailorProfileDetailsView) {
+                EditSailorProfileDetailsView detailsView = (EditSailorProfileDetailsView) cView;
                 editSailorProfilePresenter.getDataProvider().setView(detailsView);
                 if (place.isCreateNew()) {
                     editSailorProfilePresenter.getDataProvider().createNewEntry(UUID.randomUUID(),

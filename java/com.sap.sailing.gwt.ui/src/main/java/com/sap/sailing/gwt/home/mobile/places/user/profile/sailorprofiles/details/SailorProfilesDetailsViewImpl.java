@@ -5,12 +5,12 @@ import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.Sai
 import com.sap.sailing.gwt.home.mobile.places.user.profile.AbstractUserProfileView;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfilesOverviewView;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfilesViewWithAuthenticationContext;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileDetailsView;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
 /** sailor profile details view with authentication wrapper for mobile */
 public class SailorProfilesDetailsViewImpl extends AbstractUserProfileView
-        implements SailorProfilesViewWithAuthenticationContext, EditSailorProfileView {
+        implements SailorProfilesViewWithAuthenticationContext, EditSailorProfileDetailsView {
 
     private final SailorProfilesDetailsImpl sailorProfilesDetailsView;
 

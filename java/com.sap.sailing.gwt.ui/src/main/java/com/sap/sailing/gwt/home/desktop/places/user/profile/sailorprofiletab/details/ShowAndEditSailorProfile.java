@@ -27,7 +27,7 @@ import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.det
 import com.sap.sailing.gwt.home.shared.partials.editable.EditableSuggestedMultiSelectionCompetitor;
 import com.sap.sailing.gwt.home.shared.partials.editable.InlineEditLabel;
 import com.sap.sailing.gwt.home.shared.partials.listview.BoatClassListView;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileView;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileDetailsView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileResources;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -37,10 +37,10 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 
 /**
- * Implementation of {@link EditSailorProfileView} where users can view the details of a SailorProfile and edit them.
+ * Implementation of {@link EditSailorProfileDetailsView} where users can view the details of a SailorProfile and edit them.
  * The data is loaded when the accordion is opened for the first time.
  */
-public class ShowAndEditSailorProfile extends Composite implements EditSailorProfileView {
+public class ShowAndEditSailorProfile extends Composite implements EditSailorProfileDetailsView {
 
     private static SharedSailorProfileUiBinder uiBinder = GWT.create(SharedSailorProfileUiBinder.class);
 
@@ -66,11 +66,11 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
 
     Label eventsEmptyUi;
 
-    private final EditSailorProfileView.Presenter presenter;
+    private final EditSailorProfileDetailsView.Presenter presenter;
 
     private FlagImageResolver flagImageResolver;
 
-    public ShowAndEditSailorProfile(EditSailorProfileView.Presenter presenter, FlagImageResolver flagImageResolver,
+    public ShowAndEditSailorProfile(EditSailorProfileDetailsView.Presenter presenter, FlagImageResolver flagImageResolver,
             SailorProfileDetailsView parent) {
         this.presenter = presenter;
         this.flagImageResolver = flagImageResolver;
