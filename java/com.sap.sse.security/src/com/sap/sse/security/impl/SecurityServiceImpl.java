@@ -126,8 +126,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     private static final String ADMIN_DEFAULT_PASSWORD = "admin";
     
-    public static final String ANONYMOUS_USERNAME = "<anonymous>";
-
     private CachingSecurityManager securityManager;
     
     /**
@@ -249,15 +247,15 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             setOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(ADMIN_USERNAME), adminUser, /* no admin tenant */ null, ADMIN_USERNAME);
             addRoleForUser(adminUser, new RoleImpl(adminRoleDefinition));
             
-            if (userStore.getUserByName(ANONYMOUS_USERNAME) == null) {
-                logger.info(ANONYMOUS_USERNAME + " not found -> creating it now");
-                createUserInternal(ANONYMOUS_USERNAME, null, getDefaultTenant());
-                setOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(ANONYMOUS_USERNAME), adminUser,
-                        /* no tenant */ null, ANONYMOUS_USERNAME);
+            if (userStore.getUserByName(SecurityService.ANONYMOUS_USERNAME) == null) {
+                logger.info(SecurityService.ANONYMOUS_USERNAME + " not found -> creating it now");
+                createUserInternal(SecurityService.ANONYMOUS_USERNAME, null, getDefaultTenant());
+                setOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(SecurityService.ANONYMOUS_USERNAME), adminUser,
+                        /* no tenant */ null, SecurityService.ANONYMOUS_USERNAME);
             }
         } catch (UserManagementException | MailException | UserGroupManagementException e) {
             logger.log(Level.SEVERE,
-                    "Exception while creating default " + ADMIN_USERNAME + " and " + ANONYMOUS_USERNAME + " user", e);
+                    "Exception while creating default " + ADMIN_USERNAME + " and " + SecurityService.ANONYMOUS_USERNAME + " user", e);
         }
     }
     
@@ -1482,7 +1480,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public User getAnonymousUser() {
-        return userStore.getUserByName(ANONYMOUS_USERNAME);
+        return userStore.getUserByName(SecurityService.ANONYMOUS_USERNAME);
     }
 
     // ----------------- Replication -------------

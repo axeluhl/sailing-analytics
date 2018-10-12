@@ -40,6 +40,8 @@ import com.sap.sse.security.shared.WildcardPermission;
  *
  */
 public interface SecurityService extends ReplicableWithObjectInputStream<ReplicableSecurityService, SecurityOperation<?>> {
+    String ANONYMOUS_USERNAME = "<anonymous>";
+
     SecurityManager getSecurityManager();
 
     /**
