@@ -98,10 +98,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }.start();
     }
 
-    private UserDTO getAnonymousUser() {
-        final User anonymousUser = getSecurityService().getAnonymousUser();
-        return anonymousUser == null ? null
-                : securityDTOFactory.createUserDTOFromUser(anonymousUser, getSecurityService());
+    private UserDTO getAllUser() {
+        final User allUser = getSecurityService().getAllUser();
+        return allUser == null ? null
+                : securityDTOFactory.createUserDTOFromUser(allUser, getSecurityService());
     }
 
     @Override
@@ -314,11 +314,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         logger.fine("Request: " + getThreadLocalRequest().getRequestURL());
         User user = getSecurityService().getCurrentUser();
         if (user == null) {
-            return new Pair<UserDTO, UserDTO>(null, getAnonymousUser());
+            return new Pair<UserDTO, UserDTO>(null, getAllUser());
         }
         if (SecurityUtils.getSubject().isPermitted("user:view:" + user.getName())) {
             return new Pair<UserDTO, UserDTO>(securityDTOFactory.createUserDTOFromUser(user, getSecurityService()),
-                    getAnonymousUser());
+                    getAllUser());
         } else {
             throw new UnauthorizedException("Not permitted to view current user");
         }
@@ -331,7 +331,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             UserDTO user = securityDTOFactory.createUserDTOFromUser(getSecurityService().getUserByName(username),
                     getSecurityService());
             return new SuccessInfo(true, "Success. Redirecting to " + redirectURL, redirectURL,
-                    new Pair<UserDTO, UserDTO>(user, getAnonymousUser()));
+                    new Pair<UserDTO, UserDTO>(user, getAllUser()));
         } catch (UserManagementException | AuthenticationException e) {
             return new SuccessInfo(false, SuccessInfo.FAILED_TO_LOGIN, /* redirectURL */ null, null);
         }
@@ -495,7 +495,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             logger.info(message);
             final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(u, getSecurityService());
             return new SuccessInfo(true, message, /* redirectURL */null,
-                    new Pair<UserDTO, UserDTO>(userDTO, getAnonymousUser()));
+                    new Pair<UserDTO, UserDTO>(userDTO, getAllUser()));
         } else {
             throw new UnauthorizedException("Not permitted to grant permissions to user");
         }
@@ -538,7 +538,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             final String message = "Set roles " + permissions + " for user " + username;
             final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(u, getSecurityService());
             return new SuccessInfo(true, message, /* redirectURL */null,
-                    new Pair<UserDTO, UserDTO>(userDTO, getAnonymousUser()));
+                    new Pair<UserDTO, UserDTO>(userDTO, getAllUser()));
         } else {
             throw new UnauthorizedException("Not permitted to grant or revoke permissions for user "+username);
         }
@@ -615,7 +615,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             e.printStackTrace();
         }
         final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
-        return new Pair<UserDTO, UserDTO>(userDTO, getAnonymousUser());
+        return new Pair<UserDTO, UserDTO>(userDTO, getAllUser());
     }
 
     private HttpSession getHttpSession() {
