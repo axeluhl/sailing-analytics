@@ -71,8 +71,6 @@ public class RoleDefinitionsPanel extends VerticalPanel {
         this.removeButton = new Button(stringMessages.remove());
         this.refreshButton = new Button(stringMessages.refresh());
         rolesListDataProvider = new ListDataProvider<RoleDefinition>();
-        roleDefinitionsTable = createRoleDefinitionsTable(tableResources);
-        roleDefinitionsTable.ensureDebugId("RolesCellTable");
         filterablePanelRoleDefinitions = new LabeledAbstractFilterablePanel<RoleDefinition>(new Label(stringMessages.filterRoles()), new ArrayList<>(),
                 rolesListDataProvider) {
             @Override
@@ -85,6 +83,8 @@ public class RoleDefinitionsPanel extends VerticalPanel {
                 return roleDefinitionsTable;
             }
         };
+        roleDefinitionsTable = createRoleDefinitionsTable(tableResources);
+        roleDefinitionsTable.ensureDebugId("RolesCellTable");
         filterablePanelRoleDefinitions.getTextBox().ensureDebugId("RolesFilterTextBox");
         addButton.addClickHandler(e->createRoleDefinition());
         refreshableRoleDefinitionMultiSelectionModel = (RefreshableMultiSelectionModel<? super RoleDefinition>) roleDefinitionsTable.getSelectionModel();
