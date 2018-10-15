@@ -114,7 +114,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
 
                                 @Override
                                 public void onSuccess(StatisticQueryDefinitionDTO result) {
-                                    // queryDefinitionProvider.applyQueryDefinition(result);
+                                    queryDefinitionProvider.applyQueryDefinition(result);
                                     queryRunner.run(result);
                                 }
 

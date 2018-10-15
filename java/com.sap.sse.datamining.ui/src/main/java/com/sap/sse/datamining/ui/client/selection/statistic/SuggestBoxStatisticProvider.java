@@ -88,6 +88,9 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
     private final List<StatisticWithContext> availableStatistics;
     private final ExtractionFunctionSuggestBox extractionFunctionSuggestBox;
 
+    private final Collection<Runnable> initializationCompleteListeners = new ArrayList<>();
+    private boolean initializationComplete = false;
+
     public SuggestBoxStatisticProvider(Component<?> parent, ComponentContext<?> componentContext,
             DataMiningServiceAsync dataMiningService, ErrorReporter errorReporter,
             DataMiningSettingsControl settingsControl, DataMiningSettingsInfoManager settingsManager) {
@@ -310,6 +313,9 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
             aggregatorListBox.setValue(null, true);
             aggregatorListBox.setAcceptableValues(availableAggregators);
             aggregatorListBox.setEnabled(!availableAggregators.isEmpty());
+            initializationComplete = true;
+            initializationCompleteListeners.forEach(i -> i.run());
+            initializationCompleteListeners.clear();
         }
     }
 
@@ -471,6 +477,11 @@ public class SuggestBoxStatisticProvider extends AbstractDataMiningComponent<Com
     public void applyQueryDefinition(StatisticQueryDefinitionDTO queryDefinition, Consumer<Iterable<String>> callback) {
         Collection<String> errorMessages = new ArrayList<>();
 
+        if (!initializationComplete) {
+            // apply query definition as soon as initialization is complete
+            initializationCompleteListeners.add(() -> applyQueryDefinition(queryDefinition, callback));
+            return;
+        }
         AggregationProcessorDefinitionDTO aggregator = queryDefinition.getAggregatorDefinition();
         AggregatorGroup aggregatorToSelect = null;
         for (AggregatorGroup availableAggregator : availableAggregators) {
