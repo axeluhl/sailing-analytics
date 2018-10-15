@@ -197,9 +197,9 @@ public abstract class AbstractCompositeAuthorizingRealm extends AuthorizingRealm
     private boolean isPermittedForUser(WildcardPermission wildcardPermission, User user, OwnershipAnnotation ownership,
             AccessControlListAnnotation acl) {
         User allUser = getUserStore().getUserByName(SecurityService.ALL_USERNAME);
-        return PermissionChecker.isPermitted(wildcardPermission, user, user.getUserGroups(), allUser,
-                allUser.getUserGroups(), ownership == null ? null : ownership.getAnnotation(),
-                acl == null ? null : acl.getAnnotation());
+        return PermissionChecker.isPermitted(wildcardPermission, user, user == null ? null : user.getUserGroups(),
+                allUser, allUser == null ? null : allUser.getUserGroups(),
+                ownership == null ? null : ownership.getAnnotation(), acl == null ? null : acl.getAnnotation());
     }
     
     @Override
