@@ -5,6 +5,8 @@ import java.util.Map.Entry;
 import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -31,8 +33,10 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSai
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileResources;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.settings.SailingSettingsConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.Storage;
@@ -189,12 +193,19 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
                                 data.add(new Pair<SimpleCompetitorWithIdDTO, SingleEntry>(entry.getKey(), value));
                             }
                         }
-                        final String identifier = UUID.randomUUID().toString();
+                        final String identifier = SailingSettingsConstants.DATAMINING_QUERY_PREFIX
+                                + UUID.randomUUID().toString();
                         navigationUrl = "DataMining.html?q=" + identifier;
                         table.setNavigationTarget(this::func);
-                        if (Storage.isSessionStorageSupported()) {
-                            Storage store = Storage.getSessionStorageIfSupported();
-                            store.setItem(identifier, answer.getDataMiningQuery());
+                        if (Storage.isLocalStorageSupported() && answer.getDataMiningQuery() != null) {
+
+                            JSONObject json = new JSONObject();
+                            json.put("payload", new JSONString(answer.getDataMiningQuery()));
+                            json.put("creation", new JSONString("" + MillisecondsTimePoint.now().asMillis()));
+
+                            Storage store = Storage.getLocalStorageIfSupported();
+                            store.setItem(identifier,
+                                    json.toString());
                         }
                         table.setData(data);
                     }

@@ -4,6 +4,8 @@ import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
@@ -105,25 +107,29 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                 splitPanel.addSouth(resultsPresenter.getEntryWidget(), 350);
                 splitPanel.add(queryDefinitionProvider.getEntryWidget());
 
-                if (Storage.isSessionStorageSupported()) {
-                    Storage store = Storage.getSessionStorageIfSupported();
-                    String serializedQuery = store.getItem(queryIdentifier);
+                if (Storage.isLocalStorageSupported()) {
+                    Storage store = Storage.getLocalStorageIfSupported();
+                    String jsonString = store.getItem(queryIdentifier);
+                    if (jsonString != null) {
+                        JSONObject json = JSONParser.parseStrict(jsonString).isObject();
+                        String serializedQuery = json.get("payload").isString().stringValue();
 
-                    dataMiningService.getDeserializedQuery(serializedQuery,
-                            new AsyncCallback<StatisticQueryDefinitionDTO>() {
+                        dataMiningService.getDeserializedQuery(serializedQuery,
+                                new AsyncCallback<StatisticQueryDefinitionDTO>() {
 
-                                @Override
-                                public void onSuccess(StatisticQueryDefinitionDTO result) {
-                                    queryDefinitionProvider.applyQueryDefinition(result);
-                                    queryRunner.run(result);
-                                }
+                                    @Override
+                                    public void onSuccess(StatisticQueryDefinitionDTO result) {
+                                        queryDefinitionProvider.applyQueryDefinition(result);
+                                        queryRunner.run(result);
+                                    }
 
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    GWT.log(caught.getMessage());
-                                }
-                            });
-
+                                    @Override
+                                    public void onFailure(Throwable caught) {
+                                        GWT.log(caught.getMessage());
+                                    }
+                                });
+                        store.removeItem(queryIdentifier);
+                    }
                 }
                 return splitPanel;
             }
