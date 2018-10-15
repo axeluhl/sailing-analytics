@@ -422,7 +422,7 @@ public class DomainFactoryImpl implements DomainFactory {
     @Override
     public void addUpdateHandlers(String updateURL, String username, String password, Serializable eventId,
             RaceDefinition raceDefinition, DynamicTrackedRace trackedRace) throws URISyntaxException {
-        final URI updateURI = new URI(updateURL);
+        final URI updateURI = updateURL == null ? null : new URI(updateURL);
         CourseDesignUpdateHandler courseDesignHandler = new CourseDesignUpdateHandler(
                 updateURI, username, password, eventId, raceDefinition.getId());
         StartTimeUpdateHandler startTimeHandler = new StartTimeUpdateHandler(

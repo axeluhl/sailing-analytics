@@ -56,6 +56,9 @@ public interface HasTrackedRaceContext {
     @Statistic(messageKey="NumberOfMarkFixes", resultDecimals=0, ordinal=2)
     public int getNumberOfMarkFixes();
     
+    @Statistic(messageKey="NumberOfWindFixes", resultDecimals=0, ordinal=1)
+    public int getNumberOfWindFixes();
+    
     // Convenience methods for race dependent calculation to avoid code duplication
     public Double getRelativeScoreForCompetitor(Competitor competitor);
     

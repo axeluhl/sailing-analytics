@@ -559,7 +559,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     .size()];
             int i = 0;
             for (Object discardingThresholdAsObject : dbDiscardIndexResultsStartingWithHowManyRaces) {
-                discardIndexResultsStartingWithHowManyRaces[i++] = (Integer) discardingThresholdAsObject;
+                discardIndexResultsStartingWithHowManyRaces[i++] = ((Number) discardingThresholdAsObject).intValue();
             }
             result = new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces);
         }
@@ -1267,8 +1267,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     logger.log(Level.WARNING, "Error loading racing procedure configration for regatta.", e);
                 }
             }
-            final Double buoyZoneRadiusInHullLengths = (Double) dbRegatta
+            final Number buoyZoneRadiusInHullLengthsAsNumber = (Number) dbRegatta
                     .get(FieldNames.REGATTA_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS.name());
+            final Double buoyZoneRadiusInHullLengths = buoyZoneRadiusInHullLengthsAsNumber==null?null:(Double) buoyZoneRadiusInHullLengthsAsNumber.doubleValue();
             final Boolean useStartTimeInference = (Boolean) dbRegatta
                     .get(FieldNames.REGATTA_USE_START_TIME_INFERENCE.name());
             final Boolean controlTrackingFromStartAndFinishTimes = (Boolean) dbRegatta
