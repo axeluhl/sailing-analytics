@@ -384,8 +384,7 @@ public class UserService {
         if (anonymousUser == null) {
             return false;
         }
-        return PermissionChecker.isPermitted(permission, currentUser, currentUser.getUserGroups(), anonymousUser,
-                anonymousUser.getUserGroups(), ownership, acl);
+        return PermissionChecker.isPermitted(permission, currentUser, anonymousUser, ownership, acl);
     }
 
     /**

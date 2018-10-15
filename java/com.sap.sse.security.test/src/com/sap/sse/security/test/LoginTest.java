@@ -111,8 +111,7 @@ public class LoginTest {
         UserStoreImpl store2 = new UserStoreImpl(DEFAULT_TENANT_NAME);
         User allUser = userStore.getUserByName(SecurityService.ALL_USERNAME);
         User user = store2.getUserByName("me");
-        assertTrue(PermissionChecker.isPermitted(new WildcardPermission("a:b:c"), user, user.getUserGroups(), allUser,
-                allUser.getUserGroups(), null, null));
+        assertTrue(PermissionChecker.isPermitted(new WildcardPermission("a:b:c"), user, allUser, null, null));
     }
 
 }

@@ -479,8 +479,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
             for (WildcardPermission requiredPermission : permissionsRequired) {
                 // TODO bug4763: obtain ownership and ACL through a provider pattern; providers may be passed to this panel's constructor
                 UserDTO anonymous = userService.getAnonymousUser();
-                if (PermissionChecker.isPermitted(requiredPermission, user, user.getUserGroups(), anonymous,
-                        anonymous.getUserGroups(), null, null)) {
+                if (PermissionChecker.isPermitted(requiredPermission, user, anonymous, null, null)) {
                     hasPermission = true;
                     break;
                 }

@@ -1,5 +1,6 @@
 package com.sap.sse.security.shared;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -35,6 +36,24 @@ public class PermissionChecker {
      * @param acl
      *            may be {@code null} in which case no ACL-specific checks are performed
      */
+    public static boolean isPermitted(WildcardPermission permission, SecurityUser user, SecurityUser allUser,
+            Ownership ownership, AccessControlList acl) {
+        return isPermitted(permission, user, user == null ? null : user.getUserGroups(),
+                allUser, allUser == null ? null : allUser.getUserGroups(), ownership, acl);
+    }
+
+    /**
+     * @param permission
+     *            Permission of the form "data_object_type:action:instance_id". The instance id can be omitted when a
+     *            general permission for the data object type is asked after (e.g. "event:create"). If the action
+     *            contains more than one sub-part (divided by {@link WildcardPermission#SUBPART_DIVIDER_TOKEN}) then
+     *            this is considered an error, and an {@link IllegalArgumentException} will be thrown.
+     * @param ownership
+     *            may be {@code null}, causing user- or tenant-parameterized roles and no user ownership override to be
+     *            applied
+     * @param acl
+     *            may be {@code null} in which case no ACL-specific checks are performed
+     */
     public static boolean isPermitted(WildcardPermission permission, SecurityUser user,
             Iterable<UserGroup> groupsOfWhichUserIsMember, SecurityUser allUser,
             Iterable<UserGroup> allUserGroupsOfWhichUserIsMember, Ownership ownership, AccessControlList acl) {
@@ -58,7 +77,10 @@ public class PermissionChecker {
                 }
                 action = (String) parts.get(1).toArray()[0];
             }
-            result = acl.hasPermission(action, groupsOfWhichUserIsMember);
+            Set<UserGroup> allGroups = new HashSet<>();
+            Util.addAll(groupsOfWhichUserIsMember, allGroups);
+            Util.addAll(allUserGroupsOfWhichUserIsMember, allGroups);
+            result = acl.hasPermission(action, allGroups);
         }
 
         // anonymous can only grant it if not already decided by acl
