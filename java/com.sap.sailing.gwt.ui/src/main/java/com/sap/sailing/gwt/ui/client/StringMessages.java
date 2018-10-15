@@ -1195,6 +1195,11 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String canNotRegisterBoats();
     String competitorRegistrationType();
     String competitorRegistrationTypeShort();
+    String registrationLink();
+    String registrationLinkConfig();
+    String registrationLinkDialog();
+    String registrationLinkSecret();
+    String explainRegistrationLinkDialog();
     String numberOfQueueMessagesSent();
     String totalSize();
     String averageMessageSize();

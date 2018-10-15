@@ -553,7 +553,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void updateRegatta(RegattaIdentifier regattaIdentifier, Date startDate, Date endDate, UUID defaultCourseAreaUuid,
             RegattaConfigurationDTO regattaConfiguration, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
-            boolean controlTrackingFromStartAndFinishTimes, AsyncCallback<Void> callback);
+            boolean controlTrackingFromStartAndFinishTimes, String registrationLinkSecret, AsyncCallback<Void> callback);
 
     /**
      * @param detailType

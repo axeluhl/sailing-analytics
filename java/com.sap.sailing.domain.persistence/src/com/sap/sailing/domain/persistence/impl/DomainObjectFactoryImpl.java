@@ -1297,7 +1297,6 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             } else {
                 competitorRegistrationType = CompetitorRegistrationType.CLOSED;
             }
-            
             final RankingMetricConstructor rankingMetricConstructor = loadRankingMetricConstructor(dbRegatta);
             if (createMigratableRegatta) {
                 result = new MigratableRegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, boatClass,
@@ -1319,6 +1318,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         rankingMetricConstructor);
             }
             result.setRegattaConfiguration(configuration);
+            String registrationLinkSecret = (String) dbRegatta.get(FieldNames.REGATTA_REGISTRATION_LINK_SECRET.name());
+            result.setRegistrationLinkSecret(registrationLinkSecret);
         }
         return result;
     }

@@ -102,7 +102,7 @@ public class RegattaDetailsComposite extends Composite {
         configuration = createLabelAndValueWidget(grid, currentRow++, stringMessages.racingProcedureConfiguration(), "RacingProcedureLabel");
         scoringSystem = createLabelAndValueWidget(grid, currentRow++, stringMessages.scoringSystem(), "ScoringSystemLabel");
         rankingMetric = createLabelAndValueWidget(grid, currentRow++, stringMessages.rankingMetric(), "RankingMetricLabel");
-        openRegattaRegistrationLink = createLabelAndValueWidget(grid, currentRow++, "Registration Link", "OpenRegattaRegistrationLinkLabel") ;
+        openRegattaRegistrationLink = createLabelAndValueWidget(grid, currentRow++, stringMessages.registrationLink(), "OpenRegattaRegistrationLinkLabel") ;
         
         seriesTable = createRegattaSeriesTable();
         seriesTable.ensureDebugId("SeriesCellTable");
