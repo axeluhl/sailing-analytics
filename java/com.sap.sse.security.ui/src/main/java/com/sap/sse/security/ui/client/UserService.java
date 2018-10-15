@@ -399,15 +399,15 @@ public class UserService {
             return false;
         }
         return hasPermission(logicalSecuredObjectType.getPermission(DefaultActions.CREATE),
-                new OwnershipImpl(currentUser, currentUser.getDefaultTenant()));
+                new OwnershipImpl(currentUser, getCurrentTenant()));
     }
-    
+
+    public UserGroup getCurrentTenant() {
+        return currentUser == null ? null : currentUser.getDefaultTenant();
+    }
+
     public String getCurrentTenantName() {
-        if (currentUser == null) {
-            return null;
-        } else {
-            final UserGroup defaultTenant = currentUser.getDefaultTenant();
-            return defaultTenant == null ? null : defaultTenant.getName();
-        }
+        final UserGroup defaultTenant = getCurrentTenant();
+        return defaultTenant == null ? null : defaultTenant.getName();
     }
 }

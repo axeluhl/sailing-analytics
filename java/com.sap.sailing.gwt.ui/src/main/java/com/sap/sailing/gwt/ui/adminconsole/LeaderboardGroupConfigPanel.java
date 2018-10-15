@@ -749,7 +749,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
     }
 
     private void createNewGroup(final LeaderboardGroupDescriptor newGroup) {
-        sailingService.createLeaderboardGroup(userService.getCurrentUser().getDefaultTenant().getName(),
+        sailingService.createLeaderboardGroup(userService.getCurrentTenantName(),
                 newGroup.getName(), newGroup.getDescription(),
                 newGroup.getDisplayName(), newGroup.isDisplayLeaderboardsInReverseOrder(),
                 newGroup.getOverallLeaderboardDiscardThresholds(), newGroup.getOverallLeaderboardScoringSchemeType(), new MarkedAsyncCallback<LeaderboardGroupDTO>(

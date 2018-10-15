@@ -157,7 +157,7 @@ public class StructureImportManagementPanel extends SimplePanel implements Regat
                 if (getSelectedEvent() != null) {
                     List<RegattaDTO> selectedOriginalRegattasFromXRR = regattaListComposite.getSelectedRegattas();
                     if (!selectedOriginalRegattasFromXRR.isEmpty()) {
-                        createRegattas(userService.getCurrentUser().getDefaultTenant().getName(),
+                        createRegattas(userService.getCurrentTenantName(),
                                 selectedOriginalRegattasFromXRR, getSelectedEvent());
                     } else {
                         errorReporter.reportError(stringMessages.pleaseSelectAtLeastOneRegatta());
