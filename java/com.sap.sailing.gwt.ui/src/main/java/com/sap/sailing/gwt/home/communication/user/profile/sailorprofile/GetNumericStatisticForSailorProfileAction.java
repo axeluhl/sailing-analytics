@@ -2,9 +2,12 @@ package com.sap.sailing.gwt.home.communication.user.profile.sailorprofile;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NavigableSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -23,6 +26,7 @@ import com.sap.sailing.gwt.home.communication.SailingAction;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType;
+import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType.StatisticType;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO.SingleEntry;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
@@ -110,6 +114,8 @@ public class GetNumericStatisticForSailorProfileAction
                 .map(Competitor::getName).collect(Collectors.toList());
         String serializedQuery = DataMiningQueryCreatorForSailorProfiles.getSerializedDataMiningQuery(type,
                 competitorNames);
+
+        keepOnlyBestIfNecessary(result, type.getAggregationType());
         return new SailorProfileStatisticDTO(result, serializedQuery);
     }
 
@@ -140,6 +146,38 @@ public class GetNumericStatisticForSailorProfileAction
         default:
             break;
         }
+    }
+
+    /** reduces result map to only the best competitor if statistic is not average */
+    @GwtIncompatible
+    private void keepOnlyBestIfNecessary(Map<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>> results,
+            StatisticType type) {
+
+        final Set<SimpleCompetitorWithIdDTO> competitorsToRemove = new HashSet<>();
+        if (type == StatisticType.HIGHEST_IS_BEST || type == StatisticType.LOWEST_IS_BEST) {
+
+            // set best value to min/max depending whether highest/lowest is best
+            double best = (type == StatisticType.HIGHEST_IS_BEST) ? Double.MIN_VALUE : Double.MAX_VALUE;
+            SimpleCompetitorWithIdDTO bestCompetitor = null;
+
+            for (Entry<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>> mapEntry : results.entrySet()) {
+                for (SingleEntry statisticEntry : mapEntry.getValue()) {
+
+                    // lower is better -> best must be bigger then the value of this entry to update the best
+                    // higher is better -> best must be smaller then the value of this entry to update the best
+                    if ((type == StatisticType.LOWEST_IS_BEST && best > statisticEntry.getValue())
+                            || type == StatisticType.HIGHEST_IS_BEST && best < statisticEntry.getValue()) {
+                        best = statisticEntry.getValue();
+                        competitorsToRemove.add(bestCompetitor);
+                        bestCompetitor = mapEntry.getKey();
+                    } else {
+                        competitorsToRemove.add(mapEntry.getKey());
+                        continue;
+                    }
+                }
+            }
+        }
+        competitorsToRemove.forEach(competitor -> results.remove(competitor));
     }
 
     /**
