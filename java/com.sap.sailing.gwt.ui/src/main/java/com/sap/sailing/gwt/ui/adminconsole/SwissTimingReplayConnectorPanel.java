@@ -13,6 +13,7 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
@@ -193,12 +194,17 @@ public class SwissTimingReplayConnectorPanel extends AbstractEventManagementPane
         raceTable.addColumn(raceStartTrackingColumn, stringMessages.startTime());
         raceTable.setWidth("300px");
         raceList = new ListDataProvider<SwissTimingReplayRaceDTO>();
-        filterablePanelEvents = new LabeledAbstractFilterablePanel<SwissTimingReplayRaceDTO>(lblFilterEvents, availableSwissTimingRaces, raceTable, raceList) {
+        filterablePanelEvents = new LabeledAbstractFilterablePanel<SwissTimingReplayRaceDTO>(lblFilterEvents, availableSwissTimingRaces, raceList) {
             @Override
             public List<String> getSearchableStrings(SwissTimingReplayRaceDTO t) {
                 List<String> strings = new ArrayList<String>();
                 strings.addAll(Arrays.asList(t.boat_class, t.flight_number, t.getName(), t.rsc));
                 return strings;
+            }
+
+            @Override
+            public AbstractCellTable<SwissTimingReplayRaceDTO> getCellTable() {
+                return raceTable;
             }
         };
         raceTable.setSelectionModel(new RefreshableMultiSelectionModel<SwissTimingReplayRaceDTO>(
