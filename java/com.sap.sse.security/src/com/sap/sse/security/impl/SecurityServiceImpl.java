@@ -996,7 +996,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void deleteUser(String username) throws UserManagementException {
-        apply(s->s.internalDeleteUser(username));
+        checkPermissionAndDeleteOwnershipForObjectRemoval(SecuredSecurityTypes.USER, username,
+                () -> apply(s -> s.internalDeleteUser(username)));
     }
 
     @Override
@@ -1496,6 +1497,21 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             throw new RuntimeException(e);
         }
         return result;
+    }
+    
+    @Override
+    public void checkPermissionAndDeleteOwnershipForObjectRemoval(HasPermissions type,
+            String typeIdentifier, Action action) {
+        QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifier(typeIdentifier);
+        try {
+            SecurityUtils.getSubject()
+                    .checkPermission(type.getStringPermissionForObjects(DefaultActions.DELETE, typeIdentifier));
+            action.run();
+            deleteOwnership(identifier);
+            deleteAccessControlList(identifier);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

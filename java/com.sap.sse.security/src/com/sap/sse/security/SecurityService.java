@@ -337,4 +337,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
             String typeIdentifier, String securityDisplayName, Action action);
 
     User getAllUser();
+
+    void checkPermissionAndDeleteOwnershipForObjectRemoval(HasPermissions type, String typeIdentifier,
+            Action action);
 }
