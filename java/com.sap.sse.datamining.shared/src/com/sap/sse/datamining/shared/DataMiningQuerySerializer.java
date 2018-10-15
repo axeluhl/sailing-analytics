@@ -5,8 +5,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.Base64;
 
+import com.sap.sse.common.Base64Utils;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 
 /** This serializer can (de-)serialize a {@link StatisticQueryDefinitionDTO} into a Base64-String. */
@@ -21,7 +21,7 @@ public final class DataMiningQuerySerializer {
         try (ObjectOutputStream out = new ObjectOutputStream(stream)) {
             out.writeObject(dto);
             byte[] bytes = stream.toByteArray();
-            return new String(Base64.getEncoder().encode(bytes), "UTF-8");
+            return new String(Base64Utils.toBase64(bytes));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -32,7 +32,7 @@ public final class DataMiningQuerySerializer {
     public static StatisticQueryDefinitionDTO fromBase64String(final String string) {
         byte[] bytes;
         try {
-            bytes = Base64.getDecoder().decode(string);
+            bytes = Base64Utils.fromBase64(string);
         } catch (IllegalArgumentException e) {
             return null;
         }
