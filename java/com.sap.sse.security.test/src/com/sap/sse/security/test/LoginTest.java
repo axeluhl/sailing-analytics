@@ -20,8 +20,10 @@ import com.sap.sse.common.Util;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.AccessControlStore;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.impl.Activator;
 import com.sap.sse.security.impl.SecurityServiceImpl;
+import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleImpl;
@@ -107,7 +109,10 @@ public class LoginTest {
         userStore.createUser("me", "me@sap.com", new UserGroupImpl(UUID.randomUUID(), "me-tenant"));
         userStore.addPermissionForUser("me", new WildcardPermission("a:b:c"));
         UserStoreImpl store2 = new UserStoreImpl(DEFAULT_TENANT_NAME);
-        assertTrue(store2.getUserByName("me").hasPermission(new WildcardPermission("a:b:c")));
+        User allUser = userStore.getUserByName(SecurityService.ALL_USERNAME);
+        User user = store2.getUserByName("me");
+        assertTrue(PermissionChecker.isPermitted(new WildcardPermission("a:b:c"), user, user.getUserGroups(), allUser,
+                allUser.getUserGroups(), null, null));
     }
 
 }

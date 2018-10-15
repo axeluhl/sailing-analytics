@@ -35,8 +35,9 @@ public class PermissionChecker {
      * @param acl
      *            may be {@code null} in which case no ACL-specific checks are performed
      */
-    public static boolean isPermitted(WildcardPermission permission, SecurityUser user, Iterable<UserGroup> groupsOfWhichUserIsMember,
-            Ownership ownership, AccessControlList acl) {
+    public static boolean isPermitted(WildcardPermission permission, SecurityUser user,
+            Iterable<UserGroup> groupsOfWhichUserIsMember, SecurityUser allUser,
+            Iterable<UserGroup> allUserGroupsOfWhichUserIsMember, Ownership ownership, AccessControlList acl) {
         List<Set<String>> parts = permission.getParts();
         // permission has at least data object type and action as parts
         // and data object part only has one sub-part
@@ -59,6 +60,22 @@ public class PermissionChecker {
             }
             result = acl.hasPermission(action, groupsOfWhichUserIsMember);
         }
+
+        // anonymous can only grant it if not already decided by acl
+        if (result == PermissionState.NONE) {
+            PermissionState anonymous = checkUserPermissions(permission, allUser, ownership, result);
+            if (anonymous == PermissionState.GRANTED) {
+                result = anonymous;
+            }
+        }
+        if (result == PermissionState.NONE) {
+            result = checkUserPermissions(permission, allUser, ownership, result);
+        }
+        return result == PermissionState.GRANTED;
+    }
+
+    private static PermissionState checkUserPermissions(WildcardPermission permission, SecurityUser user,
+            Ownership ownership, PermissionState result) {
         // 2. check direct permissions
         if (result == PermissionState.NONE && user != null) { // no direct permissions for anonymous users
             for (WildcardPermission directPermission : user.getPermissions()) {
@@ -77,7 +94,7 @@ public class PermissionChecker {
                 }
             }
         }
-        return result == PermissionState.GRANTED;
+        return result;
     }
     
     /**

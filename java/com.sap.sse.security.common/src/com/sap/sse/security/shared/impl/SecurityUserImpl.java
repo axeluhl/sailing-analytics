@@ -11,9 +11,7 @@ import java.util.Set;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.GwtIncompatible;
-import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Ownership;
-import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.UserGroup;
@@ -110,22 +108,6 @@ public class SecurityUserImpl implements SecurityUser {
         return permissions;
     }
     
-    @Override
-    public boolean hasPermission(WildcardPermission permission) {
-        return hasPermission(permission, /* ownership */ null);
-    }
-    
-    @Override
-    public boolean hasPermission(WildcardPermission permission, Ownership ownership) {
-        return hasPermission(permission, ownership, getUserGroups(), /* ACL */ null);
-    }
-
-    @Override
-    public boolean hasPermission(WildcardPermission permission, Ownership ownership,
-            Iterable<UserGroup> groupsThisUserIsPartOf, AccessControlList acl) {
-        return PermissionChecker.isPermitted(permission, this, groupsThisUserIsPartOf, ownership, acl);
-    }
-
     public void addRole(Role role) {
         roles.add(role);
     }

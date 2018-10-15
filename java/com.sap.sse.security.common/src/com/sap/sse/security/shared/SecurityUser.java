@@ -19,33 +19,6 @@ public interface SecurityUser extends NamedWithID {
     UserGroup getDefaultTenant();
 
     /**
-     * Checks whether this user has the {@code permission} requested. For this, the {@link #getRoles() roles}
-     * and {@link #getPermissions() permissions} are checked; however, since this method does not accept
-     * {@link Ownership} or {@link AccessControlList} parameters, no further inferences are made.
-     */
-    boolean hasPermission(WildcardPermission permission);
-    
-    /**
-     * Checks whether this user has the {@code permission} requested. For this, the {@link #getRoles() roles} and
-     * {@link #getPermissions() permissions} are checked, furthermore if this user is the
-     * {@link Ownership#getUserOwner() user owner} as per the {@code ownership} information, the permission will be
-     * granted because users have all rights to the objects they own. Furthermore, tenant and user parameterized roles
-     * will be applied based on the {@code ownership} information. No {@link AccessControlList} rules are applied here.
-     */
-    boolean hasPermission(WildcardPermission permission, Ownership ownership);
-    
-    /**
-     * Checks whether this user has the {@code permission} requested. For this, the {@link #getRoles() roles} and
-     * {@link #getPermissions() permissions} are checked, furthermore if this user is the
-     * {@link Ownership#getUserOwner() user owner} as per the {@code ownership} information, the permission will be
-     * granted because users have all rights to the objects they own. Furthermore, tenant and user parameterized roles
-     * will be applied based on the {@code ownership} information. If the user belongs to one or more groups
-     * ({@code groupsThisUserIsPartOf}) and a non-{@code null} {@code acl} is provided, the access control list
-     * permissions are applied accordingly.
-     */
-    boolean hasPermission(WildcardPermission permission, Ownership ownership, Iterable<UserGroup> groupsThisUserIsPartOf, AccessControlList acl);
-    
-    /**
      * Returns the "raw" permissions explicitly set for this user. This does not include permissions
      * inferred by any {@link PermissionsForRoleProvider} for the {@link #getRoles() roles} that this
      * user has. Use {@link #getAllPermissions(PermissionsForRoleProvider)} for that.

@@ -5,8 +5,6 @@ import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.common.Util;
-import com.sap.sse.security.shared.AccessControlList;
-import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
@@ -82,10 +80,6 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable {
         return groups;
     }
 
-    public boolean hasPermission(WildcardPermission permission, Ownership ownership, AccessControlList acl) {
-        return hasPermission(permission, ownership, getUserGroups(), acl);
-    }
-    
     public List<AccountDTO> getAccounts() {
         return accounts;
     }

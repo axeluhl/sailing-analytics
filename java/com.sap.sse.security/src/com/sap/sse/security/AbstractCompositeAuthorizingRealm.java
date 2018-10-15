@@ -194,10 +194,12 @@ public abstract class AbstractCompositeAuthorizingRealm extends AuthorizingRealm
                 getUserStore().getUserByName(SecurityService.ALL_USERNAME), ownership, acl);
     }
     
-    private boolean isPermittedForUser(WildcardPermission wildcardPermission, User user, OwnershipAnnotation ownership, AccessControlListAnnotation acl) {
-        return PermissionChecker.isPermitted(wildcardPermission, 
-                user, getUserStore().getUserGroupsOfUser(user), ownership==null?null:ownership.getAnnotation(), 
-                        acl==null?null:acl.getAnnotation());
+    private boolean isPermittedForUser(WildcardPermission wildcardPermission, User user, OwnershipAnnotation ownership,
+            AccessControlListAnnotation acl) {
+        User allUser = getUserStore().getUserByName(SecurityService.ALL_USERNAME);
+        return PermissionChecker.isPermitted(wildcardPermission, user, user.getUserGroups(), allUser,
+                allUser.getUserGroups(), ownership == null ? null : ownership.getAnnotation(),
+                acl == null ? null : acl.getAnnotation());
     }
     
     @Override

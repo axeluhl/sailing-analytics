@@ -107,7 +107,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
      * admin console and its panels.
      */
     private final Iterable<? extends WildcardPermission> acceptablePermissionsRequiredToSeeWidgets;
-    
+
     /**
      * Generic selection handler that forwards selected tabs to a refresher that ensures that data gets reloaded. If
      * you add a new tab then make sure to have a look at #refreshDataFor(Widget widget) to ensure that upon
@@ -160,11 +160,12 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
         return target;
     }
     
-    public AdminConsolePanel(UserService userService,
-            ServerInfoDTO serverInfo, String releaseNotesAnchorLabel,
-            String releaseNotesURL, ErrorReporter errorReporter, LoginPanelCss loginPanelCss, StringMessages stringMessages) {
-        this(userService, serverInfo, releaseNotesAnchorLabel, releaseNotesURL, errorReporter, loginPanelCss,
-                stringMessages, /* acceptablePermissionsRequiredToSeeWidgets==null means accept any permission */ null);
+    public AdminConsolePanel(UserService userService, ServerInfoDTO serverInfo,
+            String releaseNotesAnchorLabel, String releaseNotesURL, ErrorReporter errorReporter,
+            LoginPanelCss loginPanelCss, StringMessages stringMessages) {
+        this(userService, serverInfo, releaseNotesAnchorLabel, releaseNotesURL, errorReporter,
+                loginPanelCss, stringMessages,
+                /* acceptablePermissionsRequiredToSeeWidgets==null means accept any permission */ null);
     }
 
     public AdminConsolePanel(UserService userService,
@@ -454,7 +455,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
                 widgetForSetup = currentWidget;
             }
         }
-        panelsByWidget.get(unwrapScrollPanel(widgetForSetup)).setupWidgetByParams(params);;
+        panelsByWidget.get(unwrapScrollPanel(widgetForSetup)).setupWidgetByParams(params);
     }
 
     /**
@@ -477,7 +478,9 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
             hasPermission = false;
             for (WildcardPermission requiredPermission : permissionsRequired) {
                 // TODO bug4763: obtain ownership and ACL through a provider pattern; providers may be passed to this panel's constructor
-                if (PermissionChecker.isPermitted(requiredPermission, user, user.getUserGroups(), /* ownership */ null, /* acl */ null)) {
+                UserDTO anonymous = userService.getAnonymousUser();
+                if (PermissionChecker.isPermitted(requiredPermission, user, user.getUserGroups(), anonymous,
+                        anonymous.getUserGroups(), null, null)) {
                     hasPermission = true;
                     break;
                 }

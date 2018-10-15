@@ -25,6 +25,7 @@ import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.Ownership;
+import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.OwnershipImpl;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -382,10 +383,8 @@ public class UserService {
         if (anonymousUser == null) {
             return false;
         }
-        if (anonymousUser.hasPermission(permission, ownership, acl)) {
-            return true;
-        }
-        return currentUser != null && currentUser.hasPermission(permission, ownership, acl);
+        return PermissionChecker.isPermitted(permission, currentUser, currentUser.getUserGroups(), anonymousUser,
+                anonymousUser.getUserGroups(), ownership, acl);
     }
 
     /**
@@ -399,5 +398,9 @@ public class UserService {
         }
         return hasPermission(logicalSecuredObjectType.getPermission(DefaultActions.CREATE),
                 new OwnershipImpl(currentUser, currentUser.getDefaultTenant()));
+    }
+
+    public UserDTO getAnonymousUser() {
+        return anonymousUser;
     }
 }
