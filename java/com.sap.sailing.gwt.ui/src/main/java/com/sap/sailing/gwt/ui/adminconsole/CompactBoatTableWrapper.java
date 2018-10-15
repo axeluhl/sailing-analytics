@@ -11,6 +11,7 @@ import java.util.Set;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -131,7 +132,7 @@ public class CompactBoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO
                 return comparator.compare(o1.getIdAsString(), o2.getIdAsString());
             }
         });
-        filterField = new CustomizableFilterablePanel<BoatDTO>(new ArrayList<>(), getTable(), getDataProvider()) {
+        filterField = new CustomizableFilterablePanel<BoatDTO>(new ArrayList<>(), getDataProvider()) {
             @Override
             public Iterable<String> getSearchableStrings(BoatDTO boat) {
                 List<String> string = new ArrayList<String>();
@@ -140,6 +141,11 @@ public class CompactBoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO
                 string.add(boat.getIdAsString());
                 string.add(boat.getBoatClass().getName());
                 return string;
+            }
+
+            @Override
+            public AbstractCellTable<BoatDTO> getCellTable() {
+                return table;
             }  
         };
         final CheckBox filterToBoatsRegisteredOnRegatta = new CheckBox(stringMessages.filterToBoatsRegisteredOnRegatta());

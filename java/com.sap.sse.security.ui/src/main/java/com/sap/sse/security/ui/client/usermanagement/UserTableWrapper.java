@@ -12,6 +12,7 @@ import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -174,7 +175,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
         });
         
         filterField = new LabeledAbstractFilterablePanel<UserDTO>(new Label(stringMessages.filterUsers()),
-                new ArrayList<UserDTO>(), table, dataProvider) {
+                new ArrayList<UserDTO>(), dataProvider) {
             @Override
             public Iterable<String> getSearchableStrings(UserDTO t) {
                 List<String> string = new ArrayList<String>();
@@ -184,6 +185,11 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                 string.add(t.getCompany());
                 string.add(t.getUserGroups().toString());
                 return string;
+            }
+
+            @Override
+            public AbstractCellTable<UserDTO> getCellTable() {
+                return table;
             }
         };
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());

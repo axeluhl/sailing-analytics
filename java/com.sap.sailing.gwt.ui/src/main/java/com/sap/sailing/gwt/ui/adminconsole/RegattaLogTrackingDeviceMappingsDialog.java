@@ -26,6 +26,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -170,7 +171,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
         deviceMappingPanel.add(chart);
         filterField = new LabeledAbstractFilterablePanel<DeviceMappingDTO>(
                 new Label(stringMessages.filterDeviceMappings()),
-                new ArrayList<DeviceMappingDTO>(), deviceMappingTable.getTable(), deviceMappingTable.getDataProvider()) {
+                new ArrayList<DeviceMappingDTO>(), deviceMappingTable.getDataProvider()) {
             @Override
             public Iterable<String> getSearchableStrings(DeviceMappingDTO t) {
                 List<String> string = new ArrayList<String>();
@@ -178,6 +179,11 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
                 string.add(t.deviceIdentifier.deviceType);
                 string.add(t.deviceIdentifier.deviceId);
                 return string;
+            }
+
+            @Override
+            public AbstractCellTable<DeviceMappingDTO> getCellTable() {
+                return deviceMappingTable.getTable();
             }
         };
         filterField.addFilter(new Filter<DeviceMappingDTO>() {

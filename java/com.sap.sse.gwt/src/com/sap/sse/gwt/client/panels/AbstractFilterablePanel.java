@@ -46,7 +46,6 @@ import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
  */
 public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     protected ListDataProvider<T> all;
-    protected AbstractCellTable<T> display;
     protected final ListDataProvider<T> filtered;
     protected final TextBox textBox;
     
@@ -71,13 +70,11 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      *            Filtering will still use the text box contents, even if the box is ultimately not shown; but under
      *            normal circumstances the text box will be empty in this case, not making filtering any stricter.
      */
-    public AbstractFilterablePanel(Iterable<T> all, AbstractCellTable<T> display, final ListDataProvider<T> filtered,
+    public AbstractFilterablePanel(Iterable<T> all, final ListDataProvider<T> filtered,
             boolean drawTextBox) {
         filters.add(filterer);
-        
         setSpacing(5);
         this.all = new ListDataProvider<>();
-        this.display = display;
         this.filtered = filtered;
         this.textBox = new TextBox();
         this.textBox.ensureDebugId("FilterTextBox");
@@ -88,8 +85,8 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         }
     }
 
-    public AbstractFilterablePanel(Iterable<T> all, AbstractCellTable<T> display, final ListDataProvider<T> filtered) {
-        this(all, display, filtered, /* show default filter text box */ true);
+    public AbstractFilterablePanel(Iterable<T> all, final ListDataProvider<T> filtered) {
+        this(all, filtered, /* show default filter text box */ true);
     }
 
     private void setAll(Iterable<? extends T> all) {
@@ -181,7 +178,10 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
         filtered.flush();
         sort();
     }
+    
 
+    public abstract AbstractCellTable<T> getCellTable();
+   
     protected void retainElementsInFilteredThatPassFilter() {
         List<T> filteredElements = new ArrayList<>();
         for (T t : all.getList()) {
@@ -202,10 +202,10 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
     }
 
     protected void sort() {
-        if (display != null) {
-            ColumnSortEvent.fire(display, display.getColumnSortList());
+        if (getCellTable() != null) {
+            ColumnSortEvent.fire(getCellTable(), getCellTable().getColumnSortList());
         }
-    }
+   }
 
     public void addDefaultTextBox() {
         add(getTextBox());
@@ -245,7 +245,9 @@ public abstract class AbstractFilterablePanel<T> extends HorizontalPanel {
      * @param table
      *            {@link AbstractCellTable} on which this panel works.
      */
+    /*
     public void setTable(AbstractCellTable<T> table) {
         display = table;
     }
+    */
 }

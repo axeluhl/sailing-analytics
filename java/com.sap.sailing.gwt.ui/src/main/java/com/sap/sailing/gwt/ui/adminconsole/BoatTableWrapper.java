@@ -10,6 +10,7 @@ import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -140,7 +141,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
         });
 
         filterField = new LabeledAbstractFilterablePanel<BoatDTO>(new Label(stringMessages.filterBoats()),
-                new ArrayList<BoatDTO>(), table, dataProvider) {
+                new ArrayList<BoatDTO>(), dataProvider) {
             @Override
             public Iterable<String> getSearchableStrings(BoatDTO boat) {
                 List<String> string = new ArrayList<String>();
@@ -149,6 +150,11 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
                 string.add(boat.getBoatClass().getName());
                 string.add(boat.getIdAsString());
                 return string;
+            }
+
+            @Override
+            public AbstractCellTable<BoatDTO> getCellTable() {
+                return table;
             }
         };
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());

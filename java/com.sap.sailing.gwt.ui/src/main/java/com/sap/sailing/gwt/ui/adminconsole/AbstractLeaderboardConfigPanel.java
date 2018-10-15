@@ -13,6 +13,7 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.client.Window;
@@ -172,13 +173,18 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         leaderboardTable = new FlushableCellTable<StrippedLeaderboardDTO>(/* pageSize */10000, tableRes);
         filterLeaderboardPanel = new LabeledAbstractFilterablePanel<StrippedLeaderboardDTO>(lblFilterEvents,
-                availableLeaderboardList, leaderboardTable, filteredLeaderboardList) {
+                availableLeaderboardList, filteredLeaderboardList) {
             @Override
             public List<String> getSearchableStrings(StrippedLeaderboardDTO t) {
                 List<String> strings = new ArrayList<String>();
                 strings.add(t.getName());
                 strings.add(t.displayName);
                 return strings;
+            }
+
+            @Override
+            public AbstractCellTable<StrippedLeaderboardDTO> getCellTable() {
+                return leaderboardTable;
             }
         };
         filterLeaderboardPanel.getTextBox().ensureDebugId("LeaderboardsFilterTextBox");

@@ -13,6 +13,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -87,7 +88,7 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
         filteredDeviceConfigurations.addDataDisplay(allDeviceConfigurations);
         final List<ExpeditionDeviceConfiguration> emptyList = Collections.emptyList();
         filterDeviceConfigurationsPanel = new LabeledAbstractFilterablePanel<ExpeditionDeviceConfiguration>(new Label(stringMessages.expeditionDeviceConfigurations()),
-                emptyList, allDeviceConfigurations, filteredDeviceConfigurations) {
+                emptyList, filteredDeviceConfigurations) {
             @Override
             public Iterable<String> getSearchableStrings(ExpeditionDeviceConfiguration t) {
                 Set<String> strings = new HashSet<>();
@@ -95,6 +96,11 @@ public class ExpeditionDeviceConfigurationsPanel extends FlowPanel {
                 strings.add(t.getDeviceUuid().toString());
                 strings.add(""+t.getExpeditionBoatId());
                 return strings;
+            }
+
+            @Override
+            public AbstractCellTable<ExpeditionDeviceConfiguration> getCellTable() {
+                return allDeviceConfigurations;
             }
         };
         refreshableDeviceConfigurationsSelectionModel = new RefreshableSingleSelectionModel<>(new EntityIdentityComparator<ExpeditionDeviceConfiguration>() {

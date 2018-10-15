@@ -11,6 +11,7 @@ import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -71,17 +72,21 @@ public class RoleDefinitionsPanel extends VerticalPanel {
         this.removeButton = new Button(stringMessages.remove());
         this.refreshButton = new Button(stringMessages.refresh());
         rolesListDataProvider = new ListDataProvider<RoleDefinition>();
+        roleDefinitionsTable = createRoleDefinitionsTable(tableResources);
+        roleDefinitionsTable.ensureDebugId("RolesCellTable");
         filterablePanelRoleDefinitions = new LabeledAbstractFilterablePanel<RoleDefinition>(new Label(stringMessages.filterRoles()), new ArrayList<>(),
-                new CellTable<RoleDefinition>(), rolesListDataProvider) {
+                rolesListDataProvider) {
             @Override
             public Iterable<String> getSearchableStrings(RoleDefinition roleDefinition) {
                 return Arrays.asList(roleDefinition.getName(), roleDefinition.getId().toString(), roleDefinition.getPermissions().toString());
             }
+            
+            @Override
+            public AbstractCellTable<RoleDefinition> getCellTable() {
+                return roleDefinitionsTable;
+            }
         };
         filterablePanelRoleDefinitions.getTextBox().ensureDebugId("RolesFilterTextBox");
-        roleDefinitionsTable = createRoleDefinitionsTable(tableResources);
-        roleDefinitionsTable.ensureDebugId("RolesCellTable");
-        filterablePanelRoleDefinitions.setTable(roleDefinitionsTable);
         addButton.addClickHandler(e->createRoleDefinition());
         refreshableRoleDefinitionMultiSelectionModel = (RefreshableMultiSelectionModel<? super RoleDefinition>) roleDefinitionsTable.getSelectionModel();
         removeButton.addClickHandler(e->{

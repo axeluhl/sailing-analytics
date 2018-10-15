@@ -1044,15 +1044,15 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
 
     private void refreshLeaderboardInTable(final String oldLeaderboardName, StrippedLeaderboardDTO updatedLeaderboard) {
         int indexOfLeaderboard = 0;
-        for (int i = 0; i < filteredLeaderboardList.getList().size(); i++) {
-            StrippedLeaderboardDTO dao = filteredLeaderboardList.getList().get(i);
+                for (int i = 0; i < availableLeaderboardList.size(); i++) {
+                    StrippedLeaderboardDTO dao = availableLeaderboardList.get(i);
             if (dao.getName().equals(oldLeaderboardName)) {
                 indexOfLeaderboard = i;
                 break;
             }
         }
-        filteredLeaderboardList.getList().set(indexOfLeaderboard, updatedLeaderboard);
-        filteredLeaderboardList.refresh();
+                availableLeaderboardList.set(indexOfLeaderboard, updatedLeaderboard);
+                filterLeaderboardPanel.updateAll(availableLeaderboardList);
     }
 
     private void removeLeaderboards(final Collection<StrippedLeaderboardDTO> leaderboards) {

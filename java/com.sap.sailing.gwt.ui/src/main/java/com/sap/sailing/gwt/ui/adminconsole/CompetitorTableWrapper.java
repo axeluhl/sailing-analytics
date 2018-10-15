@@ -11,6 +11,7 @@ import com.google.gwt.core.client.Callback;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -290,7 +291,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         });
         
         filterField = new LabeledAbstractFilterablePanel<CompetitorDTO>(new Label(getStringMessages().filterCompetitors()),
-                new ArrayList<CompetitorDTO>(), table, dataProvider) {
+                new ArrayList<CompetitorDTO>(), dataProvider) {
             @Override
             public Iterable<String> getSearchableStrings(CompetitorDTO t) {
                 List<String> string = new ArrayList<String>();
@@ -303,6 +304,11 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                     string.add(((CompetitorWithBoatDTO) t).getSailID());
                 }
                 return string;
+            }
+
+            @Override
+            public AbstractCellTable<CompetitorDTO> getCellTable() {
+                return table;
             }
         };
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());

@@ -13,6 +13,7 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.Handler;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -230,7 +231,7 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
         raceTable.setWidth("300px");
         raceList = new ListDataProvider<SwissTimingRaceRecordDTO>();
         filterablePanelEvents = new LabeledAbstractFilterablePanel<SwissTimingRaceRecordDTO>(lblFilterEvents,
-                availableSwissTimingRaces, raceTable, raceList) {
+                availableSwissTimingRaces, raceList) {
             @Override
             public Iterable<String> getSearchableStrings(SwissTimingRaceRecordDTO t) {
                 List<String> strings = new ArrayList<>();
@@ -244,6 +245,11 @@ public class SwissTimingEventManagementPanel extends AbstractEventManagementPane
                     strings.add(dateFormatter.render(t.raceStartTime));
                 }
                 return strings;
+            }
+
+            @Override
+            public AbstractCellTable<SwissTimingRaceRecordDTO> getCellTable() {
+                return raceTable;
             }
         };
         
