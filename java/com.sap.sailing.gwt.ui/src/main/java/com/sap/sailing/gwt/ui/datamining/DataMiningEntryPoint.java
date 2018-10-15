@@ -59,6 +59,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
     }
 
     private void createDataminingPanel(final String queryIdentifier) {
+        removeUrlParameter();
         SAPHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(getStringMessages().dataMining());
         GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(),
                 header.getAuthenticationMenuView());
@@ -141,5 +142,17 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         panel.add(authorizedContentDecorator);
         rootPanel.add(panel);
     }
+
+    private void removeUrlParameter() {
+        String newUrl = Window.Location.createUrlBuilder().setHost(Window.Location.getHost())
+                .setPort(Integer.parseInt(Window.Location.getPort())).setPath(Window.Location.getPath())
+                .setProtocol(Window.Location.getProtocol()).buildString();
+        newUrl = newUrl.replaceAll("\\?.*$", "");
+        updateUrl(Window.getTitle(), newUrl);
+    }
+
+    private native void updateUrl(String title, String newUrl)/*-{
+        $wnd.history.replaceState(null, title, newUrl);
+    }-*/;
 
 }
