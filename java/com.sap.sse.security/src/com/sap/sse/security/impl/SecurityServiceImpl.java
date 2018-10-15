@@ -240,7 +240,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             if (!userStore.hasUsers()) {
                 logger.info("No users found, creating default user \""+ADMIN_USERNAME+"\" with password \""+ADMIN_DEFAULT_PASSWORD+"\"");
                 adminUser = createSimpleUser(ADMIN_USERNAME, "nobody@sapsailing.com", ADMIN_DEFAULT_PASSWORD,
-                        /* fullName */ null, /* company */ null, Locale.ENGLISH, /* validationBaseURL */ null);
+                        /* fullName */ null, /* company */ null, Locale.ENGLISH, /* validationBaseURL */ null,
+                        getDefaultTenant());
             } else {
                 adminUser = userStore.getUserByName(ADMIN_USERNAME);
             }
@@ -648,45 +649,58 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public UserImpl createSimpleUser(final String username, final String email, String password, String fullName,
             String company, final String validationBaseURL) throws UserManagementException, MailException, UserGroupManagementException {
-        return createSimpleUser(username, email, password, fullName, company, /* locale */ null, validationBaseURL);
+        return createSimpleUser(username, email, password, fullName, company, /* locale */ null, validationBaseURL,
+                getDefaultTenant());
     }
 
     @Override
     public UserImpl createSimpleUser(final String username, final String email, String password, String fullName,
-            String company, Locale locale, final String validationBaseURL) throws UserManagementException, MailException, UserGroupManagementException {
-        SecurityUtils.getSubject().checkPermission(
-                SecuredSecurityTypes.USER.getStringPermissionForObjects(DefaultActions.CREATE, username));
-        logger.info("Creating user "+username);
-        if (userStore.getUserByName(username) != null) {
-            logger.warning("User "+username+" already exists");
-            throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
-        }
-        final String defaultTenantNameForUsername = getDefaultTenantNameForUsername(username);
-        final UserGroup tenant;
-        if (username == null || username.length() < 3) {
-            throw new UserManagementException(UserManagementException.USERNAME_DOES_NOT_MEET_REQUIREMENTS);
-        } else if (password == null || password.length() < 5) {
-            throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
-        }
-        if (userStore.getUserGroupByName(defaultTenantNameForUsername) != null) {
-            logger.info("Found existing tenant "+defaultTenantNameForUsername+" to be used as default tenant for new user "+username);
-            tenant = userStore.getUserGroupByName(defaultTenantNameForUsername);
-        } else {
-            logger.info("Creating user group "+defaultTenantNameForUsername+" as default tenant for new user "+username);
-            tenant = createUserGroup(UUID.randomUUID(), defaultTenantNameForUsername);
-        }
-        RandomNumberGenerator rng = new SecureRandomNumberGenerator();
-        byte[] salt = rng.nextBytes().getBytes();
-        String hashedPasswordBase64 = hashPassword(password, salt);
-        UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
-        final UserImpl result = createUserInternal(username, email, tenant, upa);
-        addRoleForUser(result, new RoleImpl(UserRole.getInstance(), /* tenant qualifier */ null, /* user qualifier */ result));
-        addUserToUserGroup(tenant, result);
-        // the new user becomes its owner to ensure the user role is correctly working
-        // the default tenant is the owning tenant to allow users having admin role for a specific server tenant to also be able to delete users
-        accessControlStore.setOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(username), result, getDefaultTenant(), username);
-        // the new user becomes the owning user of its own specific tenant which initially only contains the new user
-        accessControlStore.setOwnership(SecuredSecurityTypes.USER_GROUP.getQualifiedObjectIdentifier(tenant.getId().toString()), result, tenant, tenant.getName());
+            String company, Locale locale, final String validationBaseURL, String tenantOwner) throws UserManagementException, MailException, UserGroupManagementException {
+        return createSimpleUser(username, email, password, fullName, company, locale, validationBaseURL, getUserGroupByName(tenantOwner));
+    }
+    
+    private UserImpl createSimpleUser(final String username, final String email, String password, String fullName,
+            String company, Locale locale, final String validationBaseURL, UserGroup tenantOwner) throws UserManagementException, MailException, UserGroupManagementException {
+        
+        final UserImpl result = setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                tenantOwner == null ? getDefaultTenant() : tenantOwner, SecuredSecurityTypes.USER, username, username,
+                () -> {
+            logger.info("Creating user "+username);
+            if (userStore.getUserByName(username) != null) {
+                logger.warning("User "+username+" already exists");
+                throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
+            }
+            final String defaultTenantNameForUsername = getDefaultTenantNameForUsername(username);
+            final UserGroup tenant;
+            if (username == null || username.length() < 3) {
+                throw new UserManagementException(UserManagementException.USERNAME_DOES_NOT_MEET_REQUIREMENTS);
+            } else if (password == null || password.length() < 5) {
+                throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
+            }
+            if (userStore.getUserGroupByName(defaultTenantNameForUsername) != null) {
+                logger.info("Found existing tenant "+defaultTenantNameForUsername+" to be used as default tenant for new user "+username);
+                tenant = userStore.getUserGroupByName(defaultTenantNameForUsername);
+            } else {
+                logger.info("Creating user group "+defaultTenantNameForUsername+" as default tenant for new user "+username);
+                tenant = createUserGroup(UUID.randomUUID(), defaultTenantNameForUsername);
+            }
+            RandomNumberGenerator rng = new SecureRandomNumberGenerator();
+            byte[] salt = rng.nextBytes().getBytes();
+            String hashedPasswordBase64 = hashPassword(password, salt);
+            UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
+            final UserImpl createdUser = createUserInternal(username, email, tenant, upa);
+            addRoleForUser(createdUser, new RoleImpl(UserRole.getInstance(), /* tenant qualifier */ null, /* user qualifier */ createdUser));
+            addUserToUserGroup(tenant, createdUser);
+            
+            // the new user becomes its owner to ensure the user role is correctly working
+            // the default tenant is the owning tenant to allow users having admin role for a specific server tenant to also be able to delete users
+            accessControlStore.setOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(username), createdUser, getDefaultTenant(), username);
+            // the new user becomes the owning user of its own specific tenant which initially only contains the new user
+            accessControlStore.setOwnership(SecuredSecurityTypes.USER_GROUP.getQualifiedObjectIdentifier(tenant.getId().toString()), createdUser, tenant, tenant.getName());
+            
+            return createdUser;
+        }, false);
+        
         result.setFullName(fullName);
         result.setCompany(company);
         result.setLocale(locale);
