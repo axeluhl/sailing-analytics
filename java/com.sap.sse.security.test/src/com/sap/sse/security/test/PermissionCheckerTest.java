@@ -17,7 +17,6 @@ import org.junit.Test;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.security.AbstractCompositeAuthorizingRealm;
 import com.sap.sse.security.AccessControlStore;
-import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.UsernamePasswordRealm;
 import com.sap.sse.security.shared.AccessControlList;
@@ -47,7 +46,6 @@ public class PermissionCheckerTest {
     private SecurityUser adminUser;
     private UserGroup userTenant;
     private User user;
-    private User allUser;
     private ArrayList<UserGroup> tenants;
     private Ownership ownership;
     private Ownership adminOwnership;
@@ -63,7 +61,6 @@ public class PermissionCheckerTest {
     public void setUp() throws UserGroupManagementException, UserManagementException {
         final String adminTenantName = "admin-tenant";
         userStore = new UserStoreImpl(adminTenantName);
-        allUser = userStore.getUserByName(SecurityService.ALL_USERNAME);
         accessControlStore = new AccessControlStoreImpl(userStore);
         AbstractCompositeAuthorizingRealm.setTestStores(userStore, accessControlStore);
         realm = new UsernamePasswordRealm();
@@ -91,16 +88,16 @@ public class PermissionCheckerTest {
     
     @Test
     public void testOwnership() throws UserManagementException {
-        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, allUser, allUser.getUserGroups(),
+        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 null, acl));
-        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, allUser, allUser.getUserGroups(),
+        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 adminOwnership, acl));
         // being the owning user does not imply any permissions per se
-        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, allUser, allUser.getUserGroups(),
+        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 ownership, acl));
         userStore.addRoleForUser(user.getName(), new RoleImpl(AdminRole.getInstance(), /* qualified for userTenant */ null, /* qualified for user */ user));
         // having the admin role qualified for objects owned by user should help
-        assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, allUser, allUser.getUserGroups(),
+        assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 ownership, acl));
     }
     
@@ -146,62 +143,62 @@ public class PermissionCheckerTest {
     
     @Test
     public void testAccessControlList() {
-        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, allUser, allUser.getUserGroups(),
+        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 adminOwnership, null));
-        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, allUser, allUser.getUserGroups(),
+        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 adminOwnership, acl));
         acl.addPermission(userTenant, DefaultActions.READ.name());
-        assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, allUser, allUser.getUserGroups(),
+        assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 adminOwnership, acl));
         // ensure that anonymous users don't have access because they don't belong to any group
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, /* user */ null, /* groups */ new HashSet<>(),
-                allUser, allUser.getUserGroups(), adminOwnership, acl));
+                null, null, adminOwnership, acl));
         user.addPermission(eventReadPermission);
-        assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, allUser, allUser.getUserGroups(),
+        assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 adminOwnership, acl));
         final Set<String> permissionSet = new HashSet<>();
         permissionSet.add("!" + DefaultActions.READ.name());
         acl.setPermissions(userTenant, permissionSet);
-        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, allUser, allUser.getUserGroups(),
+        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 adminOwnership, acl));
         // User ownership shall NOT imply permissions; the revoking ACL still takes precedence
-        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, allUser, allUser.getUserGroups(),
+        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 ownership, acl));
         // now add "public read" permission to ACL:
         acl.addPermission(null, DefaultActions.READ.name());
         assertTrue(PermissionChecker.isPermitted(eventReadPermission, /* user */ null, /* groups */ new HashSet<>(),
-                allUser, allUser.getUserGroups(), adminOwnership, acl));
+                null, null, adminOwnership, acl));
         // now deny "public read" permission in ACL which is expected to supersede the granting from above:
         acl.denyPermission(null, DefaultActions.READ.name());
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, /* user */ null, /* groups */ new HashSet<>(),
-                allUser, allUser.getUserGroups(), adminOwnership, acl));
+                null, null, adminOwnership, acl));
     }
     
     @Test
     public void testDirectPermission() {
-        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, allUser, allUser.getUserGroups(),
+        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 adminOwnership, acl));
         user.addPermission(eventReadPermission);
-        assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, allUser, allUser.getUserGroups(),
+        assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 adminOwnership, acl));
     }
     
     @Test
     public void testRole() {
-        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, allUser, allUser.getUserGroups(),
+        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 adminOwnership, acl));
         final RoleImpl globalRole = new RoleImpl(globalRoleDefinition);
         user.addRole(globalRole);
-        assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, allUser, allUser.getUserGroups(),
+        assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 adminOwnership, acl));
         user.removeRole(globalRole);
         user.addRole(new RoleImpl(globalRoleDefinition, this.userTenant, /* user qualifier */ null));
-        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, allUser, allUser.getUserGroups(),
+        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 adminOwnership, acl));
         Ownership testOwnership = new OwnershipImpl(adminUser, userTenant);
-        assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, allUser, allUser.getUserGroups(),
+        assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 testOwnership, acl));
-        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, allUser, allUser.getUserGroups(),
+        assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 null, acl));
     }
 }
