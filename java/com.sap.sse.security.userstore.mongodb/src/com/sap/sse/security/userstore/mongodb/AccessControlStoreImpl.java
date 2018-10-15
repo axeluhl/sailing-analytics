@@ -135,7 +135,9 @@ public class AccessControlStoreImpl implements AccessControlStore {
     @Override
     public void removeAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject) {
         AccessControlListAnnotation acl = accessControlLists.remove(idOfAccessControlledObject);
-        mongoObjectFactory.deleteAccessControlList(idOfAccessControlledObject, acl.getAnnotation());
+        if (acl != null) {
+            mongoObjectFactory.deleteAccessControlList(idOfAccessControlledObject, acl.getAnnotation());
+        }
     }
 
     @Override
@@ -154,7 +156,9 @@ public class AccessControlStoreImpl implements AccessControlStore {
     @Override
     public void removeOwnership(QualifiedObjectIdentifier idAsString) {
         OwnershipAnnotation ownership = ownerships.remove(idAsString);
-        mongoObjectFactory.deleteOwnership(idAsString, ownership.getAnnotation());
+        if (ownership != null) {
+            mongoObjectFactory.deleteOwnership(idAsString, ownership.getAnnotation());
+        }
     }
 
     @Override
