@@ -69,7 +69,7 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         Button createButton = new Button(stringMessages.createUser(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                new CreateUserDialog(stringMessages, userManagementService, userCreatedHandlers).show();
+                new CreateUserDialog(stringMessages, userManagementService, userCreatedHandlers, userService).show();
             }
         });
         buttonPanel.add(createButton);
