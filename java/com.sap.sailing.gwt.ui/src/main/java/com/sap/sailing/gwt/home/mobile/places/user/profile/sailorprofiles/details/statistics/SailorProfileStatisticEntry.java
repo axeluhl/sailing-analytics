@@ -1,9 +1,12 @@
 package com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.details.statistics;
 
 import java.util.HashMap;
+import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
@@ -26,8 +29,11 @@ import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapLifecycle;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
+import com.sap.sailing.gwt.ui.shared.settings.SailingSettingsConstants;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
+import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.gwt.client.Storage;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 
 /**
@@ -69,7 +75,8 @@ public class SailorProfileStatisticEntry extends Composite {
     Button showPointInTimeButtonUi;
 
     public SailorProfileStatisticEntry(SailorProfileNumericStatisticType type, SimpleCompetitorWithIdDTO competitor,
-            SingleEntry entry, FlagImageResolver flagImageResolver, StringMessages stringMessages) {
+            SingleEntry entry, FlagImageResolver flagImageResolver, StringMessages stringMessages,
+            String serializedDataMiningQuery) {
         initWidget(uiBinder.createAndBindUi(this));
         SailorProfileMobileResources.INSTANCE.css().ensureInjected();
 
@@ -81,7 +88,8 @@ public class SailorProfileStatisticEntry extends Composite {
         } else {
             timeDivUi.removeFromParent();
             eventNameUi.removeFromParent();
-            showPointInTimeButtonUi.removeFromParent();
+            showPointInTimeButtonUi.setText(StringMessages.INSTANCE.showInDataMining());
+            showPointInTimeButtonUi.addClickHandler(e -> handleLocalStorage(serializedDataMiningQuery));
         }
 
         valueLabelUi.setInnerText(
@@ -89,7 +97,21 @@ public class SailorProfileStatisticEntry extends Composite {
         valueUi.setInnerText(SailorProfileNumericStatisticTypeFormatter.format(type, entry.getValue(), stringMessages));
         competitorUi.add(new CompetitorWithoutClubnameItemDescription(competitor, flagImageResolver));
         clubNameUi.setInnerText(competitor.getName());
+    }
 
+    private void handleLocalStorage(String serializedDataMiningQuery) {
+        final String identifier = SailingSettingsConstants.DATAMINING_QUERY_PREFIX + UUID.randomUUID().toString();
+        String navigationUrl = "DataMining.html?q=" + identifier;
+        if (Storage.isLocalStorageSupported() && serializedDataMiningQuery != null) {
+
+            JSONObject json = new JSONObject();
+            json.put("payload", new JSONString(serializedDataMiningQuery));
+            json.put("creation", new JSONString("" + MillisecondsTimePoint.now().asMillis()));
+
+            Storage store = Storage.getLocalStorageIfSupported();
+            store.setItem(identifier, json.toString());
+        }
+        Window.Location.assign(navigationUrl);
     }
 
     private void showInRaceboard(final SingleEntry entry, final SailorProfileNumericStatisticType type,

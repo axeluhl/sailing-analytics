@@ -58,7 +58,7 @@ public class SailorProfileStatisticTable extends Composite {
                 .getResult().entrySet()) {
             for (SingleEntry singleEntry : entry.getValue()) {
                 contentContainerStatistic.add(new SailorProfileStatisticEntry(type, entry.getKey(), singleEntry,
-                        flagImageResolver, stringMessages));
+                        flagImageResolver, stringMessages, statistic.getDataMiningQuery()));
             }
         }
     }
