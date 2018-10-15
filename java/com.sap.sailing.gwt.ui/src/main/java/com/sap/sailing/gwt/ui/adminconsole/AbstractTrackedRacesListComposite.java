@@ -465,8 +465,8 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
     }
 
     public void selectRaceByIdentifier(RegattaAndRaceIdentifier raceIdentifier) {
-        if (raceList != null) {
-            for (RaceDTO race : raceList.getList()) {
+        if (allRaces != null) {
+            for (RaceDTO race : allRaces) {
                 String regattaName = race.getRegattaName();
                 if (regattaName.equals(raceIdentifier.getRegattaName())
                         && race.getName().equals(raceIdentifier.getRaceName())) {
