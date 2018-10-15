@@ -69,7 +69,7 @@ public class PermissionChecker {
             }
         }
         if (result == PermissionState.NONE) {
-            result = checkUserPermissions(permission, allUser, ownership, result);
+            result = checkUserPermissions(permission, user, ownership, result);
         }
         return result == PermissionState.GRANTED;
     }
