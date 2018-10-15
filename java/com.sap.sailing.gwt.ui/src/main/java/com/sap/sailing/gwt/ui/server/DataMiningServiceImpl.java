@@ -35,6 +35,7 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.datamining.impl.components.management.ReducedDimensions;
 import com.sap.sse.datamining.impl.data.QueryResultImpl;
+import com.sap.sse.datamining.shared.DataMiningQuerySerializer;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.SerializationDummy;
@@ -400,5 +401,10 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     @Override
     public SerializationDummy pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy() {
         return null;
+    }
+
+    @Override
+    public StatisticQueryDefinitionDTO getDeserializedQuery(String serializedQuery) {
+        return DataMiningQuerySerializer.fromBase64String(serializedQuery);
     }
 }

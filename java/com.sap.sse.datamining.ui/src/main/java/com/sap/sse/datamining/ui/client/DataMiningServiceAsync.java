@@ -76,4 +76,6 @@ public interface DataMiningServiceAsync {
      * This is necessary, because the type is somehow hidden from GWT. For Further information look at bug 1503.<br />
      */
     void pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy(AsyncCallback<SerializationDummy> callback);
+
+    void getDeserializedQuery(String serializedQuery, AsyncCallback<StatisticQueryDefinitionDTO> callback);
 }

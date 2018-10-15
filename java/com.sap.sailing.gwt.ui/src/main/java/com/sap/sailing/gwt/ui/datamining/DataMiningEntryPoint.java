@@ -4,6 +4,8 @@ import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
@@ -28,6 +30,7 @@ import com.sap.sse.datamining.ui.client.DataMiningSettingsInfoManager;
 import com.sap.sse.datamining.ui.client.execution.SimpleQueryRunner;
 import com.sap.sse.datamining.ui.client.selection.QueryDefinitionProviderWithControls;
 import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sse.gwt.client.Storage;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.resources.Highcharts;
 import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
@@ -50,10 +53,10 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         session = new UUIDDataMiningSession(UUID.randomUUID());
         EntryPointHelper.registerASyncService((ServiceDefTarget) dataMiningService,
                 RemoteServiceMappingConstants.dataMiningServiceRemotePath);
-        createDataminingPanel();
+        createDataminingPanel(Window.Location.getParameter("q"));
     }
 
-    private void createDataminingPanel() {
+    private void createDataminingPanel(final String queryIdentifier) {
         SAPHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(getStringMessages().dataMining());
         GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(),
                 header.getAuthenticationMenuView());
@@ -62,7 +65,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         authorizedContentDecorator.setPermissionToCheck(Permission.DATA_MINING,
                 SailingPermissionsForRoleProvider.INSTANCE);
         authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
-            
+
             private QueryDefinitionProviderWithControls queryDefinitionProvider;
             private SimpleQueryRunner queryRunner;
             private final DataMiningSettingsInfoManager settingsManager = new DataMiningSettingsInfoManagerImpl(
@@ -83,7 +86,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                         queryDefinitionProvider.applyQueryDefinition(queryDefinition);
                     }
                 });
-                
+
                 queryDefinitionProvider = new QueryDefinitionProviderWithControls(null, null, session,
                         dataMiningService, DataMiningEntryPoint.this, settingsControl, settingsManager,
                         queryDefinition -> queryRunner.run(queryDefinition));
@@ -97,10 +100,31 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                  * automatic execution of queries. Re-enable this, when this functionality is desired again.
                  */
                 // settingsControl.addSettingsComponent(queryRunner);
-                
+
                 SplitLayoutPanel splitPanel = new SplitLayoutPanel(10);
                 splitPanel.addSouth(resultsPresenter.getEntryWidget(), 350);
                 splitPanel.add(queryDefinitionProvider.getEntryWidget());
+
+                if (Storage.isSessionStorageSupported()) {
+                    Storage store = Storage.getSessionStorageIfSupported();
+                    String serializedQuery = store.getItem(queryIdentifier);
+
+                    dataMiningService.getDeserializedQuery(serializedQuery,
+                            new AsyncCallback<StatisticQueryDefinitionDTO>() {
+
+                                @Override
+                                public void onSuccess(StatisticQueryDefinitionDTO result) {
+                                    // queryDefinitionProvider.applyQueryDefinition(result);
+                                    queryRunner.run(result);
+                                }
+
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    GWT.log(caught.getMessage());
+                                }
+                            });
+
+                }
                 return splitPanel;
             }
         });

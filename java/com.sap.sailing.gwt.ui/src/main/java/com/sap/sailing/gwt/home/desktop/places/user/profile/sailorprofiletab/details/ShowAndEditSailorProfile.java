@@ -35,6 +35,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.Storage;
 
 /**
  * Implementation of {@link EditSailorProfileDetailsView} where users can view the details of a SailorProfile and edit them.
@@ -172,6 +173,8 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
         presenter.getDataProvider().getStatisticFor(entry.getKey(), type,
                 new AsyncCallback<SailorProfileStatisticDTO>() {
 
+                    private String navigationUrl;
+
                     @Override
                     public void onFailure(Throwable caught) {
                         Notification.notify(i18n.couldNotDetermineStatistic(), NotificationType.WARNING);
@@ -186,7 +189,18 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
                                 data.add(new Pair<SimpleCompetitorWithIdDTO, SingleEntry>(entry.getKey(), value));
                             }
                         }
+                        final String identifier = UUID.randomUUID().toString();
+                        navigationUrl = "DataMining.html?q=" + identifier;
+                        table.setNavigationTarget(this::func);
+                        if (Storage.isSessionStorageSupported()) {
+                            Storage store = Storage.getSessionStorageIfSupported();
+                            store.setItem(identifier, answer.getDataMiningQuery());
+                        }
                         table.setData(data);
+                    }
+
+                    String func(Object o) {
+                        return navigationUrl;
                     }
                 });
     }

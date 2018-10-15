@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.de
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Function;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -66,6 +67,8 @@ public class SailorProfileStatisticTable extends Composite {
 
     private StringMessages stringMessages;
 
+    private Function<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, String> navigationTarget;
+
     public SailorProfileStatisticTable(FlagImageResolver flagImageResolver, SailorProfileNumericStatisticType type,
             StringMessages stringMessages) {
         this.flagImageResolver = flagImageResolver;
@@ -78,6 +81,10 @@ public class SailorProfileStatisticTable extends Composite {
         setupTable();
         titleUi.setInnerText(SailorProfileNumericStatisticTypeFormatter.getDisplayName(type, stringMessages));
         titleIconUi.setUrl(SailorProfileNumericStatisticTypeFormatter.getIcon(type));
+    }
+
+    public void setNavigationTarget(Function<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, String> navigationTarget) {
+        this.navigationTarget = navigationTarget;
     }
 
     public void setData(List<Pair<SimpleCompetitorWithIdDTO, SingleEntry>> data) {
@@ -99,15 +106,17 @@ public class SailorProfileStatisticTable extends Composite {
         sailorProfilesTable.addColumn(clubNameColumn, StringMessages.INSTANCE.name());
         sailorProfilesTable.addColumn(navigatorColumn);
 
+        navigatorColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
+        navigatorColumn.setFieldUpdater(new FieldUpdater<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, String>() {
+            @Override
+            public void update(int index, Pair<SimpleCompetitorWithIdDTO, SingleEntry> entry, String value) {
+                Window.Location.assign(value);
+            }
+        });
         if (!isAverage) {
-            // TODO: add drill down for data mining
-            navigatorColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
-            navigatorColumn.setFieldUpdater(new FieldUpdater<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, String>() {
-                @Override
-                public void update(int index, Pair<SimpleCompetitorWithIdDTO, SingleEntry> entry, String value) {
-                    Window.Location.assign(value);
-                }
-            });
+            setNavigationTarget(this::createRaceboardURL);
+        } else {
+            // navigation target is set from outside
         }
     }
 
@@ -138,7 +147,7 @@ public class SailorProfileStatisticTable extends Composite {
     private final Column<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, String> navigatorColumn = new NavigatorColumn<Pair<SimpleCompetitorWithIdDTO, SingleEntry>>() {
         @Override
         public String getValue(Pair<SimpleCompetitorWithIdDTO, SingleEntry> entry) {
-            return createRaceboardURL(entry);
+            return navigationTarget.apply(entry);
         }
     };
 

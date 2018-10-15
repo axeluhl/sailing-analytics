@@ -2,9 +2,12 @@ package com.sap.sailing.gwt.home.communication.user.profile.sailorprofile;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
@@ -103,7 +106,11 @@ public class GetNumericStatisticForSailorProfileAction
             }
             result.put(new SimpleCompetitorWithIdDTO(competitor), aggregator.getResult());
         }
-        return new SailorProfileStatisticDTO(result);
+        List<String> competitorNames = StreamSupport.stream(pref.getCompetitors().spliterator(), false)
+                .map(Competitor::getName).collect(Collectors.toList());
+        String serializedQuery = DataMiningQueryCreatorForSailorProfiles.getSerializedDataMiningQuery(type,
+                competitorNames);
+        return new SailorProfileStatisticDTO(result, serializedQuery);
     }
 
     /**
@@ -219,9 +226,8 @@ public class GetNumericStatisticForSailorProfileAction
                 RegattaAndRaceIdentifier regattaAndRaceIdentifierOrNull, String bestLeaderboardName,
                 String bestLeaderboardGroupName, UUID eventId, String bestRaceName) {
             if (speed != null) {
-                add(speed.getKnots(), bestTimePointOrNull, startTimePointOrNull,
-                        regattaAndRaceIdentifierOrNull, bestLeaderboardName, bestLeaderboardGroupName, eventId,
-                        bestRaceName);
+                add(speed.getKnots(), bestTimePointOrNull, startTimePointOrNull, regattaAndRaceIdentifierOrNull,
+                        bestLeaderboardName, bestLeaderboardGroupName, eventId, bestRaceName);
             }
         }
 

@@ -64,4 +64,6 @@ public interface DataMiningService extends RemoteService {
     StatisticQueryDefinitionDTO localize(StatisticQueryDefinitionDTO queryDefinition, String localeInfoName);
 
     SerializationDummy pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy();
+
+    StatisticQueryDefinitionDTO getDeserializedQuery(String serializedQuery);
 }
