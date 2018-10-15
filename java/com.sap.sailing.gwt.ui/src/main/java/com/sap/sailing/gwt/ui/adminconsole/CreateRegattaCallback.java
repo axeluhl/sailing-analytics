@@ -68,7 +68,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
                     seriesDTO.hasSplitFleetContiguousScoring(), seriesDTO.getMaximumNumberOfDiscards());
             seriesStructure.put(seriesDTO.getName(), seriesPair);
         }
-        sailingService.createRegatta(userService.getCurrentUser().getDefaultTenant().getName(), newRegatta.getName(),
+        sailingService.createRegatta(userService.getCurrentTenantName(), newRegatta.getName(),
                 newRegatta.boatClass == null ? null : newRegatta.boatClass.getName(),
                 newRegatta.canBoatsOfCompetitorsChangePerRace, newRegatta.startDate, newRegatta.endDate, 
                 new RegattaCreationParametersDTO(seriesStructure), true,
@@ -138,7 +138,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
             @Override
             public void ok(RegattaIdentifier regattaIdentifier) {
                         sailingService.createRegattaLeaderboard(
-                                userService.getCurrentUser().getDefaultTenant().getName(), regattaIdentifier,
+                                userService.getCurrentTenantName(), regattaIdentifier,
                                 /* displayName */ null, new int[] {},
                         new AsyncCallback<StrippedLeaderboardDTO>() {
                     @Override

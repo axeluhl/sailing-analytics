@@ -354,7 +354,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public UserDTO createSimpleUser(String username, String email, String password, String fullName, String company, String localeName, String validationBaseURL, String tenantOwnerName) throws UserManagementException, MailException, UnauthorizedException {
         UserImpl u = null;
         try {
-            u = getSecurityService().createSimpleUser(username, email, password, fullName, company, getLocaleFromLocaleName(localeName), validationBaseURL);
+            u = getSecurityService().createSimpleUser(username, email, password, fullName, company, getLocaleFromLocaleName(localeName), validationBaseURL, tenantOwnerName);
         } catch (UserManagementException | UserGroupManagementException e) {
             logger.log(Level.SEVERE, "Error creating user "+username, e);
             throw new UserManagementException(e.getMessage());

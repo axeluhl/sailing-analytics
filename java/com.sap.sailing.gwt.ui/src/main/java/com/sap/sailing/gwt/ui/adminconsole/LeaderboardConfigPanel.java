@@ -907,7 +907,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             @Override
             public void ok(final LeaderboardDescriptor newLeaderboard) {
                         sailingService.createFlexibleLeaderboard(
-                                userService.getCurrentUser().getDefaultTenant().getName(), newLeaderboard.getName(),
+                                userService.getCurrentTenantName(), newLeaderboard.getName(),
                                 newLeaderboard.getDisplayName(),
                         newLeaderboard.getDiscardThresholds(), newLeaderboard.getScoringScheme(), newLeaderboard.getCourseAreaId(),
                         new MarkedAsyncCallback<StrippedLeaderboardDTO>(
@@ -940,7 +940,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             public void ok(final LeaderboardDescriptor newLeaderboard) {
                 RegattaIdentifier regattaIdentifier = new RegattaName(newLeaderboard.getRegattaName());
                         sailingService.createRegattaLeaderboard(
-                                userService.getCurrentUser().getDefaultTenant().getName(), regattaIdentifier,
+                                userService.getCurrentTenantName(), regattaIdentifier,
                                 newLeaderboard.getDisplayName(), newLeaderboard.getDiscardThresholds(),
                         new AsyncCallback<StrippedLeaderboardDTO>() {
                     @Override
@@ -972,7 +972,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             @Override
             public void ok(final LeaderboardDescriptorWithEliminations newLeaderboard) {
                         sailingService.createRegattaLeaderboardWithEliminations(
-                                userService.getCurrentUser().getDefaultTenant().getName(), newLeaderboard.getName(),
+                                userService.getCurrentTenantName(), newLeaderboard.getName(),
                                 newLeaderboard.getDisplayName(),
                         newLeaderboard.getRegattaName(), new AsyncCallback<StrippedLeaderboardDTO>() {
                     @Override

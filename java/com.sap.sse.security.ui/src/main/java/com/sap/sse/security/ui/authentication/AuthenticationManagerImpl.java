@@ -115,7 +115,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     public void createAccount(final String name, String email, String password, String fullName, 
             String company, SuccessCallback<UserDTO> callback) {
         userManagementService.createSimpleUser(name, email, password, fullName, company,
-                LocaleInfo.getCurrentLocale().getLocaleName(), emailConfirmationUrl, "tenant",
+                LocaleInfo.getCurrentLocale().getLocaleName(), emailConfirmationUrl, null,
                 new AsyncCallbackImpl<UserDTO>(callback) {
                     @Override
                     public void onFailure(Throwable caught) {

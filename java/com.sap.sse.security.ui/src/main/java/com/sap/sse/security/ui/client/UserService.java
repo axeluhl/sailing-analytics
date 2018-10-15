@@ -26,6 +26,7 @@ import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.PermissionChecker;
+import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.OwnershipImpl;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -397,7 +398,16 @@ public class UserService {
             return false;
         }
         return hasPermission(logicalSecuredObjectType.getPermission(DefaultActions.CREATE),
-                new OwnershipImpl(currentUser, currentUser.getDefaultTenant()));
+                new OwnershipImpl(currentUser, getCurrentTenant()));
+    }
+
+    public UserGroup getCurrentTenant() {
+        return currentUser == null ? null : currentUser.getDefaultTenant();
+    }
+
+    public String getCurrentTenantName() {
+        final UserGroup defaultTenant = getCurrentTenant();
+        return defaultTenant == null ? null : defaultTenant.getName();
     }
 
     public UserDTO getAnonymousUser() {
