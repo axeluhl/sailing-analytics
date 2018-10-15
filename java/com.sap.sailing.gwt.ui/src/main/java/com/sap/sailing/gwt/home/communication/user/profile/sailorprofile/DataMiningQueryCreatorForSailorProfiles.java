@@ -14,7 +14,6 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileN
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Distance;
 import com.sap.sse.datamining.shared.DataMiningQuerySerializer;
-import com.sap.sse.datamining.shared.data.AverageWithStats;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
@@ -46,8 +45,8 @@ public final class DataMiningQueryCreatorForSailorProfiles {
             final List<String> competitorNames) {
         FunctionDTO statistic = new FunctionDTO(false, "getDistanceToStartLineAtStart()",
                 HasRaceOfCompetitorContext.class.getName(), Distance.class.getName(), new ArrayList<String>(), "", 0);
-        AggregationProcessorDefinitionDTO aggregator = new AggregationProcessorDefinitionDTO("Average",
-                Distance.class.getName(), AverageWithStats.class.getName(), "");
+        AggregationProcessorDefinitionDTO aggregator = new AggregationProcessorDefinitionDTO("Minimum",
+                Distance.class.getName(), Distance.class.getName(), "");
 
         ArrayList<DataRetrieverLevelDTO> retrieverLevels = new ArrayList<>();
         retrieverLevels.add(new DataRetrieverLevelDTO(0, leaderboardGroupRetrievalProcessorName,
@@ -68,13 +67,17 @@ public final class DataMiningQueryCreatorForSailorProfiles {
         FunctionDTO filterDimension0 = new FunctionDTO(true, "getCompetitor().getName()",
                 HasRaceOfCompetitorContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
         HashSet<Serializable> filterDimension0_Selection = new HashSet<>();
-        competitorNames.forEach(c -> filterDimension0_Selection.add(c));
+        competitorNames.forEach(filterDimension0_Selection::add);
         retrieverlevel3_FilterSelection.put(filterDimension0, filterDimension0_Selection);
         queryDefinition.setFilterSelectionFor(retrieverChain.getRetrieverLevel(3), retrieverlevel3_FilterSelection);
 
-        FunctionDTO dimensionToGroupBy0 = new FunctionDTO(true, "getCompetitor().getName()",
+        FunctionDTO dimensionToGroupBy0 = new FunctionDTO(true, "getTrackedRaceContext().getRace().getName()",
                 HasRaceOfCompetitorContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
         queryDefinition.appendDimensionToGroupBy(dimensionToGroupBy0);
+
+        FunctionDTO dimensionToGroupBy1 = new FunctionDTO(true, "getCompetitor().getName()",
+                HasRaceOfCompetitorContext.class.getName(), String.class.getName(), new ArrayList<String>(), "", 0);
+        queryDefinition.appendDimensionToGroupBy(dimensionToGroupBy1);
 
         return queryDefinition;
     }
