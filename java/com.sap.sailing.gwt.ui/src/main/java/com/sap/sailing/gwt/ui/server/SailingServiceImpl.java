@@ -578,6 +578,7 @@ import com.sap.sse.replication.ReplicationFactory;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.impl.ReplicaDescriptor;
+import com.sap.sse.security.Action;
 import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
@@ -590,6 +591,7 @@ import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 import com.sap.sse.security.ui.server.SecurityDTOFactory;
 import com.sap.sse.shared.media.ImageDescriptor;
@@ -2678,9 +2680,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void removeLeaderboard(String leaderboardName) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.DELETE, leaderboardName));
-        getService().apply(new RemoveLeaderboard(leaderboardName));
-        getSecurityService().deleteAllDataForRemovedObject(SecuredDomainType.LEADERBOARD.getQualifiedObjectIdentifier(leaderboardName));
+        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(SecuredDomainType.LEADERBOARD,
+                leaderboardName, new Action() {
+                    @Override
+                    public void run() throws Exception {
+                        getService().apply(new RemoveLeaderboard(leaderboardName));
+                    }
+                });
     }
 
     @Override
@@ -3794,7 +3800,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private void removeLeaderboardGroup(String groupName) {
-        getService().apply(new RemoveLeaderboardGroup(groupName));
+        LeaderboardGroupDTO group = getLeaderboardGroupByName(groupName, false);
+        if (group != null) {
+            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(SecuredDomainType.LEADERBOARD_GROUP,
+                    group.getId().toString(), new Action() {
+                        @Override
+                        public void run() throws Exception {
+                            getService().apply(new RemoveLeaderboardGroup(groupName));
+                        }
+                    });
+        }
     }
 
     @Override
@@ -4056,12 +4071,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void removeEvent(UUID eventId) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.EVENT.getStringPermissionForObjects(DefaultActions.DELETE, eventId.toString()))) {
-            getService().apply(new RemoveEvent(eventId));
-            getSecurityService().deleteAllDataForRemovedObject(SecuredDomainType.EVENT.getQualifiedObjectIdentifier(eventId.toString()));
-        } else {
-            throw new UnauthorizedException("You are not permitted to remove event " + eventId);
-        }
+        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(SecuredDomainType.EVENT,
+                eventId.toString(), new Action() {
+                    @Override
+                    public void run() throws Exception {
+                        getService().apply(new RemoveEvent(eventId));
+                    }
+                });
     }
 
     @Override
@@ -4422,7 +4438,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public void removeRegatta(RegattaIdentifier regattaIdentifier) {
-        getService().apply(new RemoveRegatta(regattaIdentifier));
+        Regatta regatta = getService().getRegatta(regattaIdentifier);
+        if (regatta != null) {
+            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(SecuredDomainType.REGATTA,
+                    regatta.getName(), new Action() {
+                        @Override
+                        public void run() throws Exception {
+                            getService().apply(new RemoveRegatta(regattaIdentifier));
+                        }
+                    });
+        }
     }
     
     @Override

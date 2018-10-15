@@ -57,8 +57,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     
     void setOwnership(OwnershipAnnotation ownership);
 
-    void deleteAllDataForRemovedObject(QualifiedObjectIdentifier idOfRemovedObject);
-
     Iterable<AccessControlListAnnotation> getAccessControlLists();
 
     AccessControlListAnnotation getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject);

@@ -348,12 +348,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void deleteAllDataForRemovedObject(QualifiedObjectIdentifier idOfRemovedObject) {
-        deleteAccessControlList(idOfRemovedObject);
-        deleteOwnership(idOfRemovedObject);
-    }
-
-    @Override
     public RoleDefinition getRoleDefinition(UUID idOfRoleDefinition) {
         return userStore.getRoleDefinition(idOfRoleDefinition);
     }
