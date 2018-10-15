@@ -661,45 +661,38 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     private UserImpl createSimpleUser(final String username, final String email, String password, String fullName,
             String company, Locale locale, final String validationBaseURL, UserGroup tenantOwner) throws UserManagementException, MailException, UserGroupManagementException {
+        logger.info("Creating user "+username);
+        if (userStore.getUserByName(username) != null) {
+            logger.warning("User "+username+" already exists");
+            throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
+        }
+        final String defaultTenantNameForUsername = getDefaultTenantNameForUsername(username);
+        final UserGroup tenant;
+        if (username == null || username.length() < 3) {
+            throw new UserManagementException(UserManagementException.USERNAME_DOES_NOT_MEET_REQUIREMENTS);
+        } else if (password == null || password.length() < 5) {
+            throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
+        }
+        if (userStore.getUserGroupByName(defaultTenantNameForUsername) != null) {
+            logger.info("Found existing tenant "+defaultTenantNameForUsername+" to be used as default tenant for new user "+username);
+            tenant = userStore.getUserGroupByName(defaultTenantNameForUsername);
+        } else {
+            logger.info("Creating user group "+defaultTenantNameForUsername+" as default tenant for new user "+username);
+            tenant = createUserGroup(UUID.randomUUID(), defaultTenantNameForUsername);
+        }
+        RandomNumberGenerator rng = new SecureRandomNumberGenerator();
+        byte[] salt = rng.nextBytes().getBytes();
+        String hashedPasswordBase64 = hashPassword(password, salt);
+        UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
+        final UserImpl result = createUserInternal(username, email, tenant, upa);
+        addRoleForUser(result, new RoleImpl(UserRole.getInstance(), /* tenant qualifier */ null, /* user qualifier */ result));
+        addUserToUserGroup(tenant, result);
         
-        final UserImpl result = setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                tenantOwner == null ? getDefaultTenant() : tenantOwner, SecuredSecurityTypes.USER, username, username,
-                () -> {
-            logger.info("Creating user "+username);
-            if (userStore.getUserByName(username) != null) {
-                logger.warning("User "+username+" already exists");
-                throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
-            }
-            final String defaultTenantNameForUsername = getDefaultTenantNameForUsername(username);
-            final UserGroup tenant;
-            if (username == null || username.length() < 3) {
-                throw new UserManagementException(UserManagementException.USERNAME_DOES_NOT_MEET_REQUIREMENTS);
-            } else if (password == null || password.length() < 5) {
-                throw new UserManagementException(UserManagementException.PASSWORD_DOES_NOT_MEET_REQUIREMENTS);
-            }
-            if (userStore.getUserGroupByName(defaultTenantNameForUsername) != null) {
-                logger.info("Found existing tenant "+defaultTenantNameForUsername+" to be used as default tenant for new user "+username);
-                tenant = userStore.getUserGroupByName(defaultTenantNameForUsername);
-            } else {
-                logger.info("Creating user group "+defaultTenantNameForUsername+" as default tenant for new user "+username);
-                tenant = createUserGroup(UUID.randomUUID(), defaultTenantNameForUsername);
-            }
-            RandomNumberGenerator rng = new SecureRandomNumberGenerator();
-            byte[] salt = rng.nextBytes().getBytes();
-            String hashedPasswordBase64 = hashPassword(password, salt);
-            UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
-            final UserImpl createdUser = createUserInternal(username, email, tenant, upa);
-            addRoleForUser(createdUser, new RoleImpl(UserRole.getInstance(), /* tenant qualifier */ null, /* user qualifier */ createdUser));
-            addUserToUserGroup(tenant, createdUser);
-            
-            // the new user becomes its owner to ensure the user role is correctly working
-            // the default tenant is the owning tenant to allow users having admin role for a specific server tenant to also be able to delete users
-            accessControlStore.setOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(username), createdUser, getDefaultTenant(), username);
-            // the new user becomes the owning user of its own specific tenant which initially only contains the new user
-            accessControlStore.setOwnership(SecuredSecurityTypes.USER_GROUP.getQualifiedObjectIdentifier(tenant.getId().toString()), createdUser, tenant, tenant.getName());
-            
-            return createdUser;
-        }, false);
+        // the new user becomes its owner to ensure the user role is correctly working
+        // the default tenant is the owning tenant to allow users having admin role for a specific server tenant to also be able to delete users
+        accessControlStore.setOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(username), result, getDefaultTenant(), username);
+        // the new user becomes the owning user of its own specific tenant which initially only contains the new user
+        accessControlStore.setOwnership(SecuredSecurityTypes.USER_GROUP.getQualifiedObjectIdentifier(tenant.getId().toString()), result, tenant, tenant.getName());
         
         result.setFullName(fullName);
         result.setCompany(company);
@@ -996,8 +989,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void deleteUser(String username) throws UserManagementException {
-        checkPermissionAndDeleteOwnershipForObjectRemoval(SecuredSecurityTypes.USER, username,
-                () -> apply(s -> s.internalDeleteUser(username)));
+        apply(s -> s.internalDeleteUser(username));
     }
 
     @Override
@@ -1469,6 +1461,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 securityDisplayName, actionWithResult, true);
     }
     
+    public <T> T setOwnershipCheckCreatePermissionAndRevertOnError(String tenantOwnerName,
+            HasPermissions type, String typeIdentifier, String securityDisplayName,
+            ActionWithResult<T> actionWithResult) {
+        final UserGroup tenantOwner = getUserGroupByName(tenantOwnerName);
+        return setOwnershipCheckPermissionForObjectCreationAndRevertOnError(tenantOwner, type, typeIdentifier,
+                securityDisplayName, actionWithResult, false);
+    }
+    
     private <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(UserGroup tenantOwner,
             HasPermissions type, String typeIdentifier, String securityDisplayName,
             ActionWithResult<T> actionWithResult, boolean checkCreateObjectOnServer) {
@@ -1502,13 +1502,23 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void checkPermissionAndDeleteOwnershipForObjectRemoval(HasPermissions type,
             String typeIdentifier, Action action) {
+        checkPermissionAndDeleteOwnershipForObjectRemoval(type, typeIdentifier, () -> {
+            action.run();
+            return null;
+        });
+    }
+    
+    @Override
+    public <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(HasPermissions type,
+            String typeIdentifier, ActionWithResult<T> action) {
         QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifier(typeIdentifier);
         try {
             SecurityUtils.getSubject()
-                    .checkPermission(type.getStringPermissionForObjects(DefaultActions.DELETE, typeIdentifier));
-            action.run();
+            .checkPermission(type.getStringPermissionForObjects(DefaultActions.DELETE, typeIdentifier));
+            final T result = action.run();
             deleteOwnership(identifier);
             deleteAccessControlList(identifier);
+            return result;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

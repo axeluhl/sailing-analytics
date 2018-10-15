@@ -350,18 +350,19 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         return new SuccessInfo(true, "Logged out.", /* redirectURL */ null, null);
     }
 
-    @Override
-    public UserDTO createSimpleUser(String username, String email, String password, String fullName, String company, String localeName, String validationBaseURL, String tenantOwnerName) throws UserManagementException, MailException, UnauthorizedException {
-        UserImpl u = null;
-        try {
-            u = getSecurityService().createSimpleUser(username, email, password, fullName, company, getLocaleFromLocaleName(localeName), validationBaseURL, tenantOwnerName);
-        } catch (UserManagementException | UserGroupManagementException e) {
-            logger.log(Level.SEVERE, "Error creating user "+username, e);
-            throw new UserManagementException(e.getMessage());
-        }
-        if (u == null) {
-            return null;
-        }
+    public UserDTO createSimpleUser(String username, String email, String password, String fullName, String company,
+            String localeName, String validationBaseURL, String tenantOwnerName)
+            throws UserManagementException, MailException, UnauthorizedException {
+        final UserImpl u = getSecurityService().setOwnershipCheckCreatePermissionAndRevertOnError(tenantOwnerName,
+                SecuredSecurityTypes.USER, username, username, () -> {
+                    try {
+                        return getSecurityService().createSimpleUser(username, email, password, fullName, company,
+                                getLocaleFromLocaleName(localeName), validationBaseURL, tenantOwnerName);
+                    } catch (UserManagementException | UserGroupManagementException e) {
+                        logger.log(Level.SEVERE, "Error creating user " + username, e);
+                        throw new UserManagementException(e.getMessage());
+                    }
+                });
         return securityDTOFactory.createUserDTOFromUser(u, getSecurityService());
     }
 
@@ -546,18 +547,19 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public SuccessInfo deleteUser(String username) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER.getStringPermissionForObjects(DefaultActions.DELETE, username))) {
-            try {
-                getSecurityService().deleteUser(username);
-                getSecurityService().deleteAccessControlList(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(username));
-                getSecurityService().deleteOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(username));
-                return new SuccessInfo(true, "Deleted user: " + username + ".", /* redirectURL */ null, null);
-            } catch (UserManagementException e) {
-                return new SuccessInfo(false, "Could not delete user.", /* redirectURL */ null, null);
-            }
-        } else {
-            throw new UnauthorizedException("Not permitted to delete user "+username);
-        }
+        return getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(SecuredSecurityTypes.USER,
+                username, () -> {
+                    try {
+                        getSecurityService().deleteUser(username);
+                        getSecurityService().deleteAccessControlList(
+                                SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(username));
+                        getSecurityService()
+                                .deleteOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(username));
+                        return new SuccessInfo(true, "Deleted user: " + username + ".", /* redirectURL */ null, null);
+                    } catch (UserManagementException e) {
+                        return new SuccessInfo(false, "Could not delete user.", /* redirectURL */ null, null);
+                    }
+                });
     }
 
     @Override

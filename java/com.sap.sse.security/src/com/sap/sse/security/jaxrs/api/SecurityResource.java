@@ -26,6 +26,7 @@ import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sun.jersey.api.client.ClientResponse.Status;
 
 @Path("/restsecurity")
@@ -113,14 +114,17 @@ public class SecurityResource extends AbstractSecurityResource {
     public Response createUser(@Context UriInfo uriInfo, @QueryParam("username") String username, @QueryParam("email") String email,
             @QueryParam("password") String password, @QueryParam("fullName") String fullName,
             @QueryParam("company") String company) {
-        try {
-            final String validationBaseURL = getEmailValidationBaseURL(uriInfo);
-            getService().createSimpleUser(username, email, password, fullName, company, validationBaseURL);
-            SecurityUtils.getSubject().login(new UsernamePasswordToken(username, password));
-            return respondWithAccessTokenForUser(username);
-        } catch (UserManagementException | MailException | UserGroupManagementException e) {
-            return Response.status(Status.PRECONDITION_FAILED).entity(e.getMessage()).build();
-        }
+        return getService().setOwnershipCheckCreatePermissionAndRevertOnError(null, SecuredSecurityTypes.USER, username,
+                username, () -> {
+                    try {
+                        final String validationBaseURL = getEmailValidationBaseURL(uriInfo);
+                        getService().createSimpleUser(username, email, password, fullName, company, validationBaseURL);
+                        SecurityUtils.getSubject().login(new UsernamePasswordToken(username, password));
+                        return respondWithAccessTokenForUser(username);
+                    } catch (UserManagementException | MailException | UserGroupManagementException e) {
+                        return Response.status(Status.PRECONDITION_FAILED).entity(e.getMessage()).build();
+                    }
+                });
     }
 
     private String getEmailValidationBaseURL(UriInfo uriInfo) {
@@ -167,19 +171,15 @@ public class SecurityResource extends AbstractSecurityResource {
     @Path("/user")
     @Produces("text/plain;charset=UTF-8")
     public Response deleteUser(@QueryParam("username") String username) {
-        final Subject subject = SecurityUtils.getSubject();
-        // the signed-in subject has role ADMIN
-        if (!subject.hasRole(AdminRole.getInstance().getName()) && (subject.getPrincipal() == null
-                || !username.equals(subject.getPrincipal().toString()))) {
-            return Response.status(Status.UNAUTHORIZED).build();
-        } else {
-            try {
-                getService().deleteUser(username);
-                return Response.ok().build();
-            } catch (UserManagementException e) {
-                return Response.status(Status.PRECONDITION_FAILED).entity(e.getMessage()).build();
-            }
-        }
+        return getService().checkPermissionAndDeleteOwnershipForObjectRemoval(SecuredSecurityTypes.USER, username,
+                () -> {
+                    try {
+                        getService().deleteUser(username);
+                        return Response.ok().build();
+                    } catch (UserManagementException e) {
+                        return Response.status(Status.PRECONDITION_FAILED).entity(e.getMessage()).build();
+                    }
+                });
     }
     
     @PUT
