@@ -1509,12 +1509,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(HasPermissions type,
-            String typeIdentifier, ActionWithResult<T> action) {
+    public <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(HasPermissions type, String typeIdentifier,
+            ActionWithResult<T> action) {
         QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifier(typeIdentifier);
         try {
             SecurityUtils.getSubject()
-            .checkPermission(type.getStringPermissionForObjects(DefaultActions.DELETE, typeIdentifier));
+                    .checkPermission(type.getStringPermissionForObjects(DefaultActions.DELETE, typeIdentifier));
             final T result = action.run();
             deleteOwnership(identifier);
             deleteAccessControlList(identifier);

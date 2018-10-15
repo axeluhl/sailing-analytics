@@ -551,10 +551,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 username, () -> {
                     try {
                         getSecurityService().deleteUser(username);
-                        getSecurityService().deleteAccessControlList(
-                                SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(username));
-                        getSecurityService()
-                                .deleteOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(username));
                         return new SuccessInfo(true, "Deleted user: " + username + ".", /* redirectURL */ null, null);
                     } catch (UserManagementException e) {
                         return new SuccessInfo(false, "Could not delete user.", /* redirectURL */ null, null);
