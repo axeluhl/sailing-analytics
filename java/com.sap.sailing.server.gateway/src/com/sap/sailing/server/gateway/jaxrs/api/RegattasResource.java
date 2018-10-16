@@ -327,7 +327,6 @@ public class RegattasResource extends AbstractSailingServerResource {
             String nationalityThreeLetterIOCCode, Double timeOnTimeFactor,
             Long timeOnDistanceAllowancePerNauticalMileAsMillis, String searchTag, String competitorName,
             String competitorEmail, Function<String, DynamicBoat> boatObtainer) {
-        final Subject subject = SecurityUtils.getSubject();
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {

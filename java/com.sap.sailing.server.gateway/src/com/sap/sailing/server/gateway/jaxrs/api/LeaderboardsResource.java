@@ -133,7 +133,6 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 import com.sap.sse.util.impl.UUIDHelper;
 
 @Path("/v1/leaderboards")
@@ -898,7 +897,6 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
             JSONArray jsonResultArray = new JSONArray();
-            final WildcardPermissionEncoder wildcardPermissionEncoder = new WildcardPermissionEncoder();
             for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
                 if (raceColumnName == null || raceColumn.getName().equals(raceColumnName)) {
                     for (final Fleet fleet : raceColumn.getFleets()) {
