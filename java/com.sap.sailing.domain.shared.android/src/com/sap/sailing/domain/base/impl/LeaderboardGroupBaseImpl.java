@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import com.sap.sailing.domain.base.LeaderboardGroupBase;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 
 public abstract class LeaderboardGroupBaseImpl implements LeaderboardGroupBase {
@@ -66,7 +67,12 @@ public abstract class LeaderboardGroupBaseImpl implements LeaderboardGroupBase {
     }
 
     public QualifiedObjectIdentifier getIdentifier() {
-        return SecuredDomainType.LEADERBOARD_GROUP.getQualifiedObjectIdentifier(getId().toString());
+        return getType().getQualifiedObjectIdentifier(getId().toString());
+    }
+
+    @Override
+    public HasPermissions getType() {
+        return SecuredDomainType.LEADERBOARD_GROUP;
     }
 
 }

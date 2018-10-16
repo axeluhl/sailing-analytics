@@ -6,6 +6,7 @@ import com.sap.sailing.domain.common.WindSource;
 import com.sap.sailing.domain.common.WindSourceType;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
@@ -76,6 +77,11 @@ public interface Event extends EventBase, WithQualifiedObjectIdentifier {
 
     @Override
     default QualifiedObjectIdentifier getIdentifier() {
-        return SecuredDomainType.EVENT.getQualifiedObjectIdentifier(getId().toString());
+        return getType().getQualifiedObjectIdentifier(getId().toString());
+    }
+
+    @Override
+    default HasPermissions getType() {
+        return SecuredDomainType.EVENT;
     }
 }

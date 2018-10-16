@@ -3,6 +3,7 @@ package com.sap.sailing.domain.base.impl;
 import com.sap.sailing.domain.base.LeaderboardBase;
 import com.sap.sailing.domain.base.LeaderboardChangeListener;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 
 public class LeaderboardBaseImpl implements LeaderboardBase {
@@ -35,6 +36,11 @@ public class LeaderboardBaseImpl implements LeaderboardBase {
     }
 
     public QualifiedObjectIdentifier getIdentifier() {
-        return SecuredDomainType.LEADERBOARD.getQualifiedObjectIdentifier(getName());
+        return getType().getQualifiedObjectIdentifier(getName());
+    }
+
+    @Override
+    public HasPermissions getType() {
+        return SecuredDomainType.LEADERBOARD;
     }
 }

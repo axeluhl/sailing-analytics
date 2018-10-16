@@ -18,6 +18,7 @@ import com.sap.sailing.util.RegattaUtil;
 import com.sap.sse.common.NamedWithID;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
@@ -242,6 +243,11 @@ public interface Regatta
 
     @Override
     default QualifiedObjectIdentifier getIdentifier() {
-        return SecuredDomainType.REGATTA.getQualifiedObjectIdentifier(getName());
+        return getType().getQualifiedObjectIdentifier(getName());
+    }
+
+    @Override
+    default HasPermissions getType() {
+        return SecuredDomainType.REGATTA;
     }
 }

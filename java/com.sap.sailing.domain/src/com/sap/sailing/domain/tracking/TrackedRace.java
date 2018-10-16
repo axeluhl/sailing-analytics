@@ -63,6 +63,7 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
@@ -1135,12 +1136,17 @@ public interface TrackedRace
     default QualifiedObjectIdentifier getIdentifier() {
         RegattaAndRaceIdentifier regattaAndRaceId = getRaceIdentifier();
         WildcardPermissionEncoder wildcardPermissionEncoder = new WildcardPermissionEncoder();
-        return SecuredDomainType.TRACKED_RACE.getQualifiedObjectIdentifier(wildcardPermissionEncoder
+        return getType().getQualifiedObjectIdentifier(wildcardPermissionEncoder
                 .encodeStringList(regattaAndRaceId.getRegattaName(), regattaAndRaceId.getRaceName()));
     }
 
     @Override
     default String getName() {
         return getRaceIdentifier().getRaceName() + "@" + getRaceIdentifier().getRegattaName();
+    }
+
+    @Override
+    default HasPermissions getType() {
+        return SecuredDomainType.TRACKED_RACE;
     }
 }

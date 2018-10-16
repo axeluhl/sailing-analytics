@@ -35,6 +35,7 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 
 /**
@@ -618,6 +619,11 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     }
 
     default QualifiedObjectIdentifier getIdentifier() {
-        return SecuredDomainType.LEADERBOARD.getQualifiedObjectIdentifier(getName());
+        return getType().getQualifiedObjectIdentifier(getName());
+    }
+
+    @Override
+    default HasPermissions getType() {
+        return SecuredDomainType.LEADERBOARD;
     }
 }
