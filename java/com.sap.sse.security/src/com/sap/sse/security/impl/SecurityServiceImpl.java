@@ -568,6 +568,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException {
         logger.info("Removing user group "+userGroup.getName());
+        accessControlStore.getOwnerships().forEach(oa -> {
+            Ownership annotation = oa.getAnnotation();
+            if (userGroup.equals(annotation.getTenantOwner())) {
+                setOwnership(oa.getIdOfAnnotatedObject(), annotation.getUserOwner(), null);
+            }
+        });
         final UUID groupId = userGroup.getId();
         apply(s->s.internalDeleteUserGroup(groupId));
     }
