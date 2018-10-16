@@ -236,22 +236,21 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             assert adminRoleDefinition != null;
         }
         try {
-            final SecurityUser adminUser;
             if (!userStore.hasUsers()) {
                 logger.info("No users found, creating default user \""+ADMIN_USERNAME+"\" with password \""+ADMIN_DEFAULT_PASSWORD+"\"");
-                adminUser = createSimpleUser(ADMIN_USERNAME, "nobody@sapsailing.com", ADMIN_DEFAULT_PASSWORD,
+                final SecurityUser adminUser = createSimpleUser(ADMIN_USERNAME, "nobody@sapsailing.com",
+                        ADMIN_DEFAULT_PASSWORD,
                         /* fullName */ null, /* company */ null, Locale.ENGLISH, /* validationBaseURL */ null,
                         getDefaultTenant());
-            } else {
-                adminUser = userStore.getUserByName(ADMIN_USERNAME);
+                setOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(ADMIN_USERNAME), adminUser,
+                        /* no admin tenant */ null, ADMIN_USERNAME);
+                addRoleForUser(adminUser, new RoleImpl(adminRoleDefinition));
             }
-            setOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(ADMIN_USERNAME), adminUser, /* no admin tenant */ null, ADMIN_USERNAME);
-            addRoleForUser(adminUser, new RoleImpl(adminRoleDefinition));
             
             if (userStore.getUserByName(SecurityService.ALL_USERNAME) == null) {
                 logger.info(SecurityService.ALL_USERNAME + " not found -> creating it now");
                 createUserInternal(SecurityService.ALL_USERNAME, null, getDefaultTenant());
-                setOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(SecurityService.ALL_USERNAME), adminUser,
+                setOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(SecurityService.ALL_USERNAME), null,
                         /* no tenant */ null, SecurityService.ALL_USERNAME);
                 // The permission to create new users is initially added but not recreated on server start if the admin removed in in the meanwhile.
                 // This allows servers to be configured to not permit self-registration of new users but only users being managed by an admin user.
