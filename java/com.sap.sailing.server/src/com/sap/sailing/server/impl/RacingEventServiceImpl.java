@@ -134,6 +134,7 @@ import com.sap.sailing.domain.common.impl.DataImportProgressImpl;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.common.racelog.RaceLogRaceStatus;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
 import com.sap.sailing.domain.common.tracking.SensorFix;
@@ -286,6 +287,7 @@ import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.UserGroup;
@@ -510,6 +512,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     private final RaceChangeObserverForAnniversaryDetection raceChangeObserverForAnniversaryDetection;
 
     private final PairingListTemplateFactory pairingListTemplateFactory = PairingListTemplateFactory.INSTANCE;
+
+    private final Set<String> migratedSecuredDomainObjectTypes = new HashSet<>();
 
     /**
      * Providing the constructor parameters for a new {@link RacingEventServiceImpl} instance is a bit tricky
@@ -941,6 +945,15 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         for (MediaTrack mediaTrack : getAllMediaTracks()) {
             migrateOwnership(mediaTrack, securityService);
         }
+        // do not warn, if the server appears to be empty, eg newly set up.
+        if (!Util.isEmpty(getAllEvents())) {
+            for (HasPermissions type : SecuredDomainType.getAllInstances()) {
+                if (!migratedSecuredDomainObjectTypes.contains(type.getName())) {
+                    logger.severe("Permission-Vertical Migration: It appears that no migration for SecuredDomainType."
+                            + type.getName() + " did happen");
+                }
+            }
+        }
     }
 
     private void migrateOwnership(WithQualifiedObjectIdentifier identifier, SecurityService securityService) {
@@ -949,6 +962,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private void migrateOwnership(QualifiedObjectIdentifier identifier, String displayName,
             SecurityService securityService) {
+        migratedSecuredDomainObjectTypes.add(identifier.getTypeIdentifier());
         OwnershipAnnotation owner = securityService.getOwnership(identifier);
         UserGroup defaultTenant = securityService.getDefaultTenant();
         // fix unowned objects, also fix wrongly converted objects due to older codebase that could not handle null
