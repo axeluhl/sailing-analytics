@@ -13,7 +13,10 @@ public class UserRole extends RolePrototype {
                 new WildcardPermission(SecuredSecurityTypes.USER.getStringPermission(HasPermissions.DefaultActions.UPDATE)),
                 new WildcardPermission(
                         SecuredSecurityTypes.USER.getStringPermission(HasPermissions.DefaultActions.READ)),
-                new WildcardPermission("*:" + DefaultActions.CREATE.name() + ":*"));
+                new WildcardPermission("*:" + DefaultActions.CREATE.name() + ":*"),
+                new WildcardPermission("*:" + DefaultActions.READ.name() + ":*"),
+                new WildcardPermission("*:" + DefaultActions.UPDATE.name() + ":*"),
+                new WildcardPermission("*:" + DefaultActions.DELETE.name() + ":*"));
     }
     
     public static UserRole getInstance() {
