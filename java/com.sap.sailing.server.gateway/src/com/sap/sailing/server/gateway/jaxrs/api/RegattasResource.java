@@ -349,7 +349,8 @@ public class RegattasResource extends AbstractSailingServerResource {
             @QueryParam("timeontimefactor") Double timeOnTimeFactor,
             @QueryParam("timeondistanceallowancepernauticalmileasmillis") Long timeOnDistanceAllowancePerNauticalMileAsMillis,
             @QueryParam("searchtag") String searchTag, @QueryParam("competitorName") String competitorName,
-            @QueryParam("competitorEmail") String competitorEmail, @QueryParam("deviceUuid") String deviceUuid) {
+            @QueryParam("competitorEmail") String competitorEmail, @QueryParam("deviceUuid") String deviceUuid,
+            @QueryParam("secret") String registrationLinkSecret) {
         final Subject subject = SecurityUtils.getSubject();
         
         final Response response;
@@ -371,9 +372,11 @@ public class RegattasResource extends AbstractSailingServerResource {
                 //case 2.1: with device                                                                                 //TODO: correct to checkin in with device?
                 checkInCompetitor = deviceUuid != null;
             } else if (deviceUuid != null && regatta.getCompetitorRegistrationType().isOpen()) {
-                //case 3: unauthorized with device
-                registerCompetitor = true;
-                checkInCompetitor = true;
+                //case 3: unauthorized with device (check secret)
+                if (regatta.getRegistrationLinkSecret() != null && regatta.getRegistrationLinkSecret().equals(registrationLinkSecret)) {
+                    registerCompetitor = true;
+                    checkInCompetitor = true;
+                }
             }
             
             // Check regattalog if device has been registered to this regatta already

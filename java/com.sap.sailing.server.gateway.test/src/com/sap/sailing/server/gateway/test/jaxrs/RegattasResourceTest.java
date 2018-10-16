@@ -48,6 +48,7 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
     private final String closedRegattaName = "TestRegatta";
     private final String openRegattaName = "TestOpenRegatta";
     private final String deviceUuid = "00000000-1111-2222-3333-444444444444";
+    private final String secret = "ABCDEF";
 
     @Before
     public void setUp() throws Exception {
@@ -71,8 +72,8 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
                 /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
                 /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
         racingEventService.createRegatta(RegattaImpl.getDefaultName(openRegattaName, boatClassName), boatClassName,
-                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.OPEN_MODERATED,
-                /* registrationLinkSecret */ null, startDate, endDate, UUID.randomUUID(), series, /* persistent */ true,
+                /* canBoatsOfCompetitorsChangePerRace */ true, CompetitorRegistrationType.OPEN_UNMODERATED,
+                /* registrationLinkSecret */ secret, startDate, endDate, UUID.randomUUID(), series, /* persistent */ true,
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null,
                 /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
                 /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
@@ -133,7 +134,7 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
 
         final String name = RegattaImpl.getDefaultName(closedRegattaName, boatClassName);
         Response reponse = spyResource.createAndAddCompetitor(name, boatClassName, null, "GER", null, null, null,
-                "Max Mustermann", null, deviceUuid);
+                "Max Mustermann", null, deviceUuid, null);
         assertTrue(reponse.getStatus() + ": " + reponse.getEntity().toString(),
                 reponse.getStatus() == Status.OK.getStatusCode());
         assertTrue(spyResource.getService() == racingEventService);
@@ -159,13 +160,28 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         Regatta regatta = racingEventService.getRegattaByName(name);
 
         Response reponse = spyResource.createAndAddCompetitor(name, boatClassName, null, "GER", null, null, null,
-                "Max Mustermann", null, deviceUuid);
+                "Max Mustermann", null, deviceUuid, secret);
         assertTrue(reponse.getStatus() + ": " + reponse.getEntity().toString(),
                 reponse.getStatus() == Status.OK.getStatusCode());
         assertTrue(spyResource.getService() == racingEventService);
 
         regatta = racingEventService.getRegattaByName(name);
         testResponseOfOpenRegattaCompetitorRegistration(regatta, spyResource);
+    }
+    
+    @Test
+    public void testCompetitorRegistrationAnonymousOnOpenRegattaWrongSecret() throws Exception {
+        setUpSecurityManager();
+
+        RegattasResource resource = new RegattasResource();
+        RegattasResource spyResource = spyResource(resource);
+        doReturn(securityService).when(spyResource).getService(SecurityService.class);
+
+        final String name = RegattaImpl.getDefaultName(openRegattaName, boatClassName);
+        Response reponse = spyResource.createAndAddCompetitor(name, boatClassName, null, "GER", null, null, null,
+                "Max Mustermann", null, deviceUuid, "WRONGSECRET");
+        assertTrue(reponse.getStatus() + ": " + reponse.getEntity().toString(),
+                reponse.getStatus() == Status.FORBIDDEN.getStatusCode());
     }
 
     @Test
@@ -184,7 +200,7 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         Regatta regatta = racingEventService.getRegattaByName(name);
 
         Response reponse = spyResource.createAndAddCompetitor(name, boatClassName, null, "GER", null, null, null,
-                "Max Mustermann", null, deviceUuid);
+                "Max Mustermann", null, deviceUuid, secret);
         assertTrue(reponse.getStatus() + ": " + reponse.getEntity().toString(),
                 reponse.getStatus() == Status.OK.getStatusCode());
         assertTrue(spyResource.getService() == racingEventService);
@@ -212,7 +228,7 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
 
         // Same deviceUuid for registration should fail
         Response response = spyResource.createAndAddCompetitor(regatta.getName(), boatClassName, null, "GER", null,
-                null, null, "Max Mustermann", null, deviceUuid);
+                null, null, "Max Mustermann", null, deviceUuid, secret);
         assertTrue("Reponse http status should be forbidden (403) but is " + response.getStatus(),
                 response.getStatus() == Status.FORBIDDEN.getStatusCode());
     }
