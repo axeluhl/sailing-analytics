@@ -1,9 +1,12 @@
 package com.sap.sse.security;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import javax.servlet.ServletContext;
 
@@ -344,4 +347,11 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     
     <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(HasPermissions type, String typeIdentifier,
             ActionWithResult<T> action);
+
+    <T> void filterObjectsWithPermissionForCurrentUser(HasPermissions permittedObject,
+            com.sap.sse.security.shared.HasPermissions.Action action, Iterable<T> objectsToFilter,
+            Function<T, String> objectIdExtractor, Consumer<T> filteredObjectsConsumer);
+
+    <T, R> List<R> mapAndFilterByReadPermissionForCurrentUser(HasPermissions permittedObject, Iterable<T> objectsToFilter,
+            Function<T, String> objectIdExtractor, Function<T, R> filteredObjectsMapper);
 }

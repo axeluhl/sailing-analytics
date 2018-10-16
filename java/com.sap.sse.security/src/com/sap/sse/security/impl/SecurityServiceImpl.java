@@ -8,10 +8,12 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -19,6 +21,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -1515,6 +1519,27 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public <T> void filterObjectsWithPermissionForCurrentUser(HasPermissions permittedObject,
+            HasPermissions.Action action, Iterable<T> objectsToFilter, Function<T, String> objectIdExtractor,
+            Consumer<T> filteredObjectsConsumer) {
+        objectsToFilter.forEach(objectToCheck -> {
+            if (SecurityUtils.getSubject().isPermitted(
+                    permittedObject.getStringPermissionForObjects(action, objectIdExtractor.apply(objectToCheck)))) {
+                filteredObjectsConsumer.accept(objectToCheck);
+            }
+        });
+    }
+
+    @Override
+    public <T, R> List<R> mapAndFilterByReadPermissionForCurrentUser(HasPermissions permittedObject,
+            Iterable<T> objectsToFilter, Function<T, String> objectIdExtractor, Function<T, R> filteredObjectsMapper) {
+        final List<R> result = new ArrayList<>();
+        filterObjectsWithPermissionForCurrentUser(permittedObject, DefaultActions.READ, objectsToFilter,
+                objectIdExtractor, filteredObject -> result.add(filteredObjectsMapper.apply(filteredObject)));
+        return result;
     }
 
     @Override

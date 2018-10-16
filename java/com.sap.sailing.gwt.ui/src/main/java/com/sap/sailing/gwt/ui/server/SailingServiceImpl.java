@@ -45,7 +45,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.RunnableFuture;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -584,7 +583,6 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
-import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
@@ -965,8 +963,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public List<RegattaDTO> getRegattas() {
-        return mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.REGATTA, getService().getAllRegattas(),
-                Regatta::getName, this::convertToRegattaDTO);
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.REGATTA,
+                getService().getAllRegattas(), Regatta::getName, this::convertToRegattaDTO);
     }
 
     @Override
@@ -1322,8 +1320,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public List<TracTracConfigurationDTO> getPreviousTracTracConfigurations() throws Exception {
         final Iterable<TracTracConfiguration> configs = tractracDomainObjectFactory.getTracTracConfigurations();
-        return mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.TRACTRAC_ACCOUNT, configs,
-                TracTracConfiguration::getName,
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.TRACTRAC_ACCOUNT,
+                configs, TracTracConfiguration::getName,
                 ttConfig -> new TracTracConfigurationDTO(ttConfig.getName(), ttConfig.getJSONURL().toString(),
                         ttConfig.getLiveDataURI().toString(), ttConfig.getStoredDataURI().toString(),
                         ttConfig.getCourseDesignUpdateURI().toString(), ttConfig.getTracTracUsername().toString(),
@@ -2540,8 +2538,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public List<StrippedLeaderboardDTO> getLeaderboards() {
         final Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
-        return mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.LEADERBOARD, leaderboards.values(),
-                Leaderboard::getName, leaderboard -> createStrippedLeaderboardDTO(leaderboard, false, false));
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.LEADERBOARD,
+                leaderboards.values(), Leaderboard::getName,
+                leaderboard -> createStrippedLeaderboardDTO(leaderboard, false, false));
     }
 
     @Override
@@ -2865,8 +2864,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public List<SwissTimingConfigurationDTO> getPreviousSwissTimingConfigurations() {
         Iterable<SwissTimingConfiguration> configs = swissTimingAdapterPersistence.getSwissTimingConfigurations();
-        return mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.SWISS_TIMING_ACCOUNT, configs,
-                SwissTimingConfiguration::getName,
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.SWISS_TIMING_ACCOUNT,
+                configs, SwissTimingConfiguration::getName,
                 stConfig -> new SwissTimingConfigurationDTO(stConfig.getName(), stConfig.getJsonURL(),
                         stConfig.getHostname(), stConfig.getPort(), stConfig.getUpdateURL(),
                         stConfig.getUpdateUsername(), stConfig.getUpdatePassword()));
@@ -3740,7 +3739,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public List<LeaderboardGroupDTO> getLeaderboardGroups(boolean withGeoLocationData) {
         final Map<String, LeaderboardGroup> leaderboardGroups = getService().getLeaderboardGroups();
-        return mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.LEADERBOARD_GROUP,
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.LEADERBOARD_GROUP,
                 leaderboardGroups.values(), lg -> lg.getId().toString(),
                 leaderboardGroup -> convertToLeaderboardGroupDTO(leaderboardGroup, withGeoLocationData, false));
     }
@@ -3888,16 +3887,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public List<EventDTO> getEvents() throws MalformedURLException {
-        return mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.EVENT, getService().getAllEvents(), event -> event.getId().toString(), event -> {
-            EventDTO eventDTO = convertToEventDTO(event, false);
-            try {
-                eventDTO.setBaseURL(getEventBaseURLFromEventOrRequest(event));
-            } catch (MalformedURLException e) {
-                throw new RuntimeException(e);
-            }
-            eventDTO.setIsOnRemoteServer(false);
-            return eventDTO;
-        });
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.EVENT,
+                getService().getAllEvents(), event -> event.getId().toString(), event -> {
+                    EventDTO eventDTO = convertToEventDTO(event, false);
+                    try {
+                        eventDTO.setBaseURL(getEventBaseURLFromEventOrRequest(event));
+                    } catch (MalformedURLException e) {
+                        throw new RuntimeException(e);
+                    }
+                    eventDTO.setIsOnRemoteServer(false);
+                    return eventDTO;
+                });
     }
 
     @Override
@@ -4720,32 +4720,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         }
         return result;
     }
-    
-    private <T> void filterObjectsWithPermissionForCurrentUser(HasPermissions permittedObject,
-            HasPermissions.Action action, Iterable<T> objectsToFilter, Function<T, String> objectIdExtractor,
-            Consumer<T> filteredObjectsConsumer) {
-        objectsToFilter.forEach(objectToCheck -> {
-            if (SecurityUtils.getSubject().isPermitted(
-                    permittedObject.getStringPermissionForObjects(action, objectIdExtractor.apply(objectToCheck)))) {
-                filteredObjectsConsumer.accept(objectToCheck);
-            }
-        });
-    }
-    
-    private <T, R> List<R> mapAndFilterByReadPermissionForCurrentUser(HasPermissions permittedObject,
-            Iterable<T> objectsToFilter, Function<T, String> objectIdExtractor, Function<T, R> filteredObjectsMapper) {
-        final List<R> result = new ArrayList<>();
-        filterObjectsWithPermissionForCurrentUser(permittedObject, DefaultActions.READ, objectsToFilter,
-                objectIdExtractor, filteredObject -> result.add(filteredObjectsMapper.apply(filteredObject)));
-        return result;
-    }
 
     @Override
     public List<SwissTimingArchiveConfigurationDTO> getPreviousSwissTimingArchiveConfigurations() {
         Iterable<SwissTimingArchiveConfiguration> configs = swissTimingAdapterPersistence
                 .getSwissTimingArchiveConfigurations();
-        return mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT, configs,
-                SwissTimingArchiveConfiguration::getJsonUrl,
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(
+                SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT, configs, SwissTimingArchiveConfiguration::getJsonUrl,
                 stArchiveConfig -> new SwissTimingArchiveConfigurationDTO(stArchiveConfig.getJsonUrl()));
     }
 
