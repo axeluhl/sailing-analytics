@@ -261,6 +261,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public SuccessInfo deleteUserGroup(String userGroupIdAsString) throws UnauthorizedException {
+        try {
         return getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(SecuredSecurityTypes.USER_GROUP,
                 userGroupIdAsString, () -> {
                     try {
@@ -273,6 +274,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                         return new SuccessInfo(false, "Could not delete user group.", /* redirectURL */ null, null);
                     }
                 });
+        } catch (AuthorizationException e) {
+            return new SuccessInfo(false, "You are not permitted to delete user group " + userGroupIdAsString, /* redirectURL */ null,
+                    null);
+        }
     }
 
     @Override
@@ -545,15 +550,21 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public SuccessInfo deleteUser(String username) throws UnauthorizedException {
-        return getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(SecuredSecurityTypes.USER,
-                username, () -> {
-                    try {
-                        getSecurityService().deleteUser(username);
-                        return new SuccessInfo(true, "Deleted user: " + username + ".", /* redirectURL */ null, null);
-                    } catch (UserManagementException e) {
-                        return new SuccessInfo(false, "Could not delete user.", /* redirectURL */ null, null);
-                    }
-                });
+        try {
+            return getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(SecuredSecurityTypes.USER,
+                    username, () -> {
+                        try {
+                            getSecurityService().deleteUser(username);
+                            return new SuccessInfo(true, "Deleted user: " + username + ".", /* redirectURL */ null,
+                                    null);
+                        } catch (UserManagementException e) {
+                            return new SuccessInfo(false, "Could not delete user.", /* redirectURL */ null, null);
+                        }
+                    });
+        } catch (AuthorizationException e) {
+            return new SuccessInfo(false, "You are not permitted to delete user " + username, /* redirectURL */ null,
+                    null);
+        }
     }
 
     @Override
