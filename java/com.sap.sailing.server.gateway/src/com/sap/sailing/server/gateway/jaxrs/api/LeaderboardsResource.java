@@ -10,6 +10,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -131,9 +132,9 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.util.impl.UUIDHelper;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
+import com.sap.sse.util.impl.UUIDHelper;
 
 @Path("/v1/leaderboards")
 public class LeaderboardsResource extends AbstractLeaderboardsResource {
@@ -144,8 +145,10 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
     public Response getLeaderboards() {
         JSONArray jsonLeaderboards = new JSONArray();
         Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
-        for (String leaderboardName : leaderboards.keySet()) {
-            jsonLeaderboards.add(leaderboardName);
+        for (Entry<String, Leaderboard> leaderboardName : leaderboards.entrySet()) {
+            if (getSecurityService().hasCurrentUserReadPermission(leaderboardName.getValue())) {
+                jsonLeaderboards.add(leaderboardName.getKey());
+            }
         }
         String json = jsonLeaderboards.toJSONString();
         return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
@@ -168,15 +171,17 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                         .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
                         .type(MediaType.TEXT_PLAIN).build();
             } else {
+                getSecurityService().checkCurrentUserReadPermission(leaderboard);
                 try {
                     TimePoint timePoint = calculateTimePointForResultState(leaderboard, resultState);
                     JSONObject jsonLeaderboard;
-                    jsonLeaderboard = getLeaderboardJson(resultState, maxCompetitorsCount, requestTimePoint, leaderboard, timePoint,
-                            /* race column names */ null, /* race detail names */ null);
+                    jsonLeaderboard = getLeaderboardJson(resultState, maxCompetitorsCount, requestTimePoint,
+                            leaderboard, timePoint, /* race column names */ null, /* race detail names */ null);
                     StringWriter sw = new StringWriter();
                     jsonLeaderboard.writeJSONString(sw);
                     String json = sw.getBuffer().toString();
-                    response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                    response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")
+                            .build();
                 } catch (NoWindException | InterruptedException | ExecutionException | IOException e) {
                     response = Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage())
                             .type(MediaType.TEXT_PLAIN).build();
@@ -250,6 +255,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     .entity("Leaderboard does not exist or does not hold a RegattaLog").type(MediaType.TEXT_PLAIN)
                     .build();
         }
+        Response response;
+        getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
         HasRegattaLike hasRegattaLike = (HasRegattaLike) leaderboard;
         DomainFactory domainFactory = getService().getDomainObjectFactory().getBaseDomainFactory();
         AbstractLogEventAuthor author = new LogEventAuthorImpl(AbstractLogEventAuthor.NAME_COMPATIBILITY,
@@ -263,8 +270,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             logger.fine("JSON requestObject is: " + requestObject.toString());
         } catch (ParseException | JsonDeserializationException e) {
             logger.log(Level.WARNING, "Exception while parsing post request", e);
-            return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
-                    .type(MediaType.TEXT_PLAIN).build();
+            return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request").type(MediaType.TEXT_PLAIN)
+                    .build();
         }
         final TimePoint now = MillisecondsTimePoint.now();
         String competitorId = (String) requestObject.get(DeviceMappingConstants.JSON_COMPETITOR_ID_AS_STRING);
@@ -280,8 +287,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         if ((competitorId == null && boatId == null && markId == null) || deviceUuid == null || fromMillis == null) {
             // || deviceType == null
             logger.warning("Invalid JSON body in request");
-            return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
-                    .type(MediaType.TEXT_PLAIN).build();
+            return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request").type(MediaType.TEXT_PLAIN)
+                    .build();
         }
         DeviceIdentifier device = new SmartphoneUUIDIdentifierImpl(UUID.fromString(deviceUuid));
         TimePoint from = new MillisecondsTimePoint(fromMillis);
@@ -289,37 +296,38 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         final Named mappedTo;
         if (competitorId != null) {
             // map to a competitor
-            final Competitor mappedToCompetitor = domainFactory.getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(competitorId);
+            final Competitor mappedToCompetitor = domainFactory.getCompetitorAndBoatStore()
+                    .getExistingCompetitorByIdAsString(competitorId);
             mappedTo = mappedToCompetitor;
             if (mappedToCompetitor == null) {
                 logger.warning("No competitor found for id " + competitorId);
-                return Response.status(Status.BAD_REQUEST).entity("No competitor found for id " + StringEscapeUtils.escapeHtml(competitorId))
+                return Response.status(Status.BAD_REQUEST)
+                        .entity("No competitor found for id " + StringEscapeUtils.escapeHtml(competitorId))
                         .type(MediaType.TEXT_PLAIN).build();
             }
             Set<Competitor> registered = (Set<Competitor>) hasRegattaLike.getAllCompetitors();
             if (!registered.contains(mappedToCompetitor)) {
                 logger.warning("Competitor found but not registered on a race of " + leaderboardName);
-                return Response.status(Status.BAD_REQUEST)
-                        .entity("Competitor found but not registered on a race of " + StringEscapeUtils.escapeHtml(leaderboardName))
-                        .type(MediaType.TEXT_PLAIN).build();
+                return Response.status(Status.BAD_REQUEST).entity("Competitor found but not registered on a race of "
+                        + StringEscapeUtils.escapeHtml(leaderboardName)).type(MediaType.TEXT_PLAIN).build();
             }
-            event = new RegattaLogDeviceCompetitorMappingEventImpl(now, now, author, UUID.randomUUID(), mappedToCompetitor, device,
-                    from, /* to */ null);
+            event = new RegattaLogDeviceCompetitorMappingEventImpl(now, now, author, UUID.randomUUID(),
+                    mappedToCompetitor, device, from, /* to */ null);
         } else if (boatId != null) {
             // map to a boat
             final Boat mappedToBoat = domainFactory.getCompetitorAndBoatStore().getExistingBoatByIdAsString(boatId);
             mappedTo = mappedToBoat;
             if (mappedToBoat == null) {
                 logger.warning("No boat found for id " + boatId);
-                return Response.status(Status.BAD_REQUEST).entity("No boat found for id " + StringEscapeUtils.escapeHtml(boatId))
+                return Response.status(Status.BAD_REQUEST)
+                        .entity("No boat found for id " + StringEscapeUtils.escapeHtml(boatId))
                         .type(MediaType.TEXT_PLAIN).build();
             }
             Iterable<Boat> registered = hasRegattaLike.getAllBoats();
             if (!Util.contains(registered, mappedToBoat)) {
                 logger.warning("Boat found but not registered for leaderboard " + leaderboardName);
-                return Response.status(Status.BAD_REQUEST)
-                        .entity("Boat found but not registered for leaderboard " + StringEscapeUtils.escapeHtml(leaderboardName))
-                        .type(MediaType.TEXT_PLAIN).build();
+                return Response.status(Status.BAD_REQUEST).entity("Boat found but not registered for leaderboard "
+                        + StringEscapeUtils.escapeHtml(leaderboardName)).type(MediaType.TEXT_PLAIN).build();
             }
             event = new RegattaLogDeviceBoatMappingEventImpl(now, now, author, UUID.randomUUID(), mappedToBoat, device,
                     from, /* to */ null);
@@ -329,15 +337,17 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             mappedTo = mappedToMark;
             if (mappedToMark == null) {
                 logger.warning("No mark found for id " + markId);
-                return Response.status(Status.BAD_REQUEST).entity("No mark found for id " + StringEscapeUtils.escapeHtml(markId))
+                return Response.status(Status.BAD_REQUEST)
+                        .entity("No mark found for id " + StringEscapeUtils.escapeHtml(markId))
                         .type(MediaType.TEXT_PLAIN).build();
             }
             event = new RegattaLogDeviceMarkMappingEventImpl(now, now, author, UUID.randomUUID(), mappedToMark, device,
                     from, /* to */ null);
         }
         hasRegattaLike.getRegattaLike().getRegattaLog().add(event);
-        logger.fine("Successfully checked in "+((markId!=null)?"mark ":"competitor ") + mappedTo.getName());
-        return Response.status(Status.OK).build();
+        logger.fine("Successfully checked in " + ((markId != null) ? "mark " : "competitor ") + mappedTo.getName());
+        response = Response.status(Status.OK).build();
+        return response;
     }
 
     @POST
@@ -351,6 +361,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     .entity("Leaderboard does not exist or does not hold a RegattaLog").type(MediaType.TEXT_PLAIN)
                     .build();
         }
+        Response response;
+        getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
         IsRegattaLike isRegattaLike = ((HasRegattaLike) leaderboard).getRegattaLike();
         AbstractLogEventAuthor author = new LogEventAuthorImpl(AbstractLogEventAuthor.NAME_COMPATIBILITY,
                 AbstractLogEventAuthor.PRIORITY_COMPATIBILITY);
@@ -363,8 +375,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             requestObject = Helpers.toJSONObjectSafe(requestBody);
         } catch (ParseException | JsonDeserializationException e) {
             logger.warning(String.format("Exception while parsing post request:\n%s", e.toString()));
-            return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
-                    .type(MediaType.TEXT_PLAIN).build();
+            return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request").type(MediaType.TEXT_PLAIN)
+                    .build();
         }
         logger.fine("JSON requestObject is: " + requestObject.toString());
         Long toMillis = (Long) requestObject.get(DeviceMappingConstants.JSON_TO_MILLIS);
@@ -373,15 +385,16 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         String markId = (String) requestObject.get(DeviceMappingConstants.JSON_MARK_ID_AS_STRING);
         String deviceUuid = (String) requestObject.get(DeviceMappingConstants.JSON_DEVICE_UUID);
         TimePoint closingTimePointInclusive = new MillisecondsTimePoint(toMillis);
-        if (toMillis == null || deviceUuid == null || closingTimePointInclusive == null ||
-                (competitorId == null && boatId == null && markId == null)) {
+        if (toMillis == null || deviceUuid == null || closingTimePointInclusive == null
+                || (competitorId == null && boatId == null && markId == null)) {
             logger.warning("Invalid JSON body in request");
-            return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request")
-                    .type(MediaType.TEXT_PLAIN).build();
+            return Response.status(Status.BAD_REQUEST).entity("Invalid JSON body in request").type(MediaType.TEXT_PLAIN)
+                    .build();
         }
         final NamedWithID mappedTo;
         if (competitorId != null) {
-            final Competitor mappedToCompetitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(competitorId);
+            final Competitor mappedToCompetitor = getService().getCompetitorAndBoatStore()
+                    .getExistingCompetitorByIdAsString(competitorId);
             mappedTo = mappedToCompetitor;
             if (mappedToCompetitor == null) {
                 logger.warning("No competitor found for id " + competitorId);
@@ -406,7 +419,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                 return Response.status(Status.BAD_REQUEST).entity("No mark found for id " + markId)
                         .type(MediaType.TEXT_PLAIN).build();
             }
-            
+
         }
         final String mappedToTypeString;
         if (competitorId != null) {
@@ -414,7 +427,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         } else {
             mappedToTypeString = (markId != null) ? "mark" : "boat";
         }
-        OpenEndedDeviceMappingFinder finder = new OpenEndedDeviceMappingFinder(isRegattaLike.getRegattaLog(), mappedTo, deviceUuid);
+        OpenEndedDeviceMappingFinder finder = new OpenEndedDeviceMappingFinder(isRegattaLike.getRegattaLog(), mappedTo,
+                deviceUuid);
         Serializable deviceMappingEventId = finder.analyze();
         if (deviceMappingEventId == null) {
             logger.warning("No corresponding open " + mappedToTypeString + " to device mapping has been found");
@@ -426,7 +440,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                 author, deviceMappingEventId, closingTimePointInclusive);
         isRegattaLike.getRegattaLog().add(event);
         logger.fine("Successfully checked out " + mappedToTypeString + mappedTo.getName());
-        return Response.status(Status.OK).build();
+        response = Response.status(Status.OK).build();
+        return response;
     }
 
     @GET
@@ -436,21 +451,24 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             @PathParam("competitorId") String competitorIdAsString) {
         Response response;
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        Competitor competitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(
-                competitorIdAsString);
+        getSecurityService().checkCurrentUserReadPermission(leaderboard);
+        Competitor competitor = getService().getCompetitorAndBoatStore()
+                .getExistingCompetitorByIdAsString(competitorIdAsString);
 
         if (competitor == null) {
-            response = Response.status(Status.NOT_FOUND)
-                    .entity("Could not find a competitor with id '" + StringEscapeUtils.escapeHtml(competitorIdAsString) + "'.")
+            response = Response
+                    .status(Status.NOT_FOUND).entity("Could not find a competitor with id '"
+                            + StringEscapeUtils.escapeHtml(competitorIdAsString) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         } else if (leaderboard == null) {
-            response = Response.status(Status.NOT_FOUND)
-                    .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
+            response = Response.status(Status.NOT_FOUND).entity(
+                    "Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
             JSONObject json = CompetitorsResource.getCompetitorJSON(competitor);
             json.put("displayName", leaderboard.getDisplayName(competitor));
-            response = Response.ok(json.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            response = Response.ok(json.toJSONString())
+                    .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
         return response;
     }
@@ -890,9 +908,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                             if (trackedRace != null) {
                                 final Regatta regatta = trackedRace.getTrackedRegatta().getRegatta();
                                 final RaceDefinition race = trackedRace.getRace();
-                                SecurityUtils.getSubject().checkPermission(
-                                        SecuredDomainType.TRACKED_RACE.getStringPermissionForObjects(DefaultActions.UPDATE,
-                                                wildcardPermissionEncoder.encodeStringList(regatta.getName(), race.getName())));
+                                getSecurityService().checkCurrentUserUpdatePermission(trackedRace);
                                 if (remove) {
                                     getService().apply(new RemoveAndUntrackRace(trackedRace.getRaceIdentifier()));
                                 } else {
@@ -930,7 +946,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     .entity("Leaderboard with name '" + leaderboardName + "'does not contain a RegattaLog'.")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-
+        getSecurityService().checkCurrentUserReadPermission(leaderboard);
         final Set<Mark> marks = new HashSet<Mark>();
         if (raceColumnName == null) {
             if (fleetName != null) {
@@ -998,7 +1014,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         }
-
+        getSecurityService().checkCurrentUserReadPermission(leaderboard);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         if (raceColumn == null) {
             return Response
@@ -1108,6 +1124,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     .entity("Leaderboard with name '" + leaderboardName + "'does not contain a RegattaLog'.")
                     .type(MediaType.TEXT_PLAIN).build();
         }
+        getSecurityService().hasCurrentUserReadPermission(leaderboard);
         Mark mark = null;
         for (final RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             for (final Mark availableMark : raceColumn.getAvailableMarks()) {
@@ -1164,6 +1181,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     .entity("Leaderboard '" + StringEscapeUtils.escapeHtml(leaderboardName) + "' does not have an attached RegattaLog.")
                     .type(MediaType.TEXT_PLAIN).build();
         }
+
         final Mark mark = service.getBaseDomainFactory().getExistingMarkByIdAsString(markId);
         if (mark == null) {
             return Response.status(Status.NOT_FOUND).entity("Could not find a mark with ID '" + StringEscapeUtils.escapeHtml(markId) + "'.")
@@ -1200,6 +1218,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
+            getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
             final Iterable<RaceColumn> raceColumns;
             final RaceColumn raceColumn;
             if (raceColumnName == null) {
@@ -1259,7 +1278,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     .entity("Could not find a leaderboard with name '" + StringEscapeUtils.escapeHtml(leaderboardName) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
-            SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboard.getName()));
+            getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
             final RaceColumn raceColumn;
             raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
             if (raceColumn == null) {
@@ -1281,7 +1300,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             @QueryParam("raceColumnName") String raceColumnName, @QueryParam("fleetName") String fleetName,
             @QueryParam("raceName") String raceName) throws NotFoundException, NotDenotableForRaceLogTrackingException {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+        getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
         if (leaderboard == null) {
             throw new NotFoundException("leaderboard with name " + leaderboardName + " not found");
         }
@@ -1305,7 +1324,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
             @QueryParam("raceColumnName") String raceColumnName, @QueryParam("fleetName") String fleetName,
             @QueryParam("raceName") String raceName) throws NotFoundException, NotDenotableForRaceLogTrackingException {
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+        getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
         if (leaderboard == null) {
             throw new NotFoundException("leaderboard with name " + leaderboardName + " not found");
         }
