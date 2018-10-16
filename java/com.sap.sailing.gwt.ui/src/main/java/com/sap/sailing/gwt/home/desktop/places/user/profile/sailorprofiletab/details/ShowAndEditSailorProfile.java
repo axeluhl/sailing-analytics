@@ -42,8 +42,8 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.Storage;
 
 /**
- * Implementation of {@link EditSailorProfileDetailsView} where users can view the details of a SailorProfile and edit them.
- * The data is loaded when the accordion is opened for the first time.
+ * Implementation of {@link EditSailorProfileDetailsView} where users can view the details of a SailorProfile and edit
+ * them. The data is loaded when the accordion is opened for the first time.
  */
 public class ShowAndEditSailorProfile extends Composite implements EditSailorProfileDetailsView {
 
@@ -75,8 +75,8 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
 
     private FlagImageResolver flagImageResolver;
 
-    public ShowAndEditSailorProfile(EditSailorProfileDetailsView.Presenter presenter, FlagImageResolver flagImageResolver,
-            SailorProfileDetailsView parent) {
+    public ShowAndEditSailorProfile(EditSailorProfileDetailsView.Presenter presenter,
+            FlagImageResolver flagImageResolver, SailorProfileDetailsView parent) {
         this.presenter = presenter;
         this.flagImageResolver = flagImageResolver;
         presenter.getDataProvider().setView(this);
@@ -193,19 +193,20 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
                                 data.add(new Pair<SimpleCompetitorWithIdDTO, SingleEntry>(entry.getKey(), value));
                             }
                         }
-                        final String identifier = SailingSettingsConstants.DATAMINING_QUERY_PREFIX
-                                + UUID.randomUUID().toString();
-                        navigationUrl = "DataMining.html?q=" + identifier;
-                        table.setNavigationTarget(this::func);
-                        if (Storage.isLocalStorageSupported() && answer.getDataMiningQuery() != null) {
+                        if (answer.getDataMiningQuery() != null) {
+                            final String identifier = SailingSettingsConstants.DATAMINING_QUERY_PREFIX
+                                    + UUID.randomUUID().toString();
+                            navigationUrl = "DataMining.html?q=" + identifier;
+                            table.setNavigationTarget(this::func);
+                            if (Storage.isLocalStorageSupported() && answer.getDataMiningQuery() != null) {
 
-                            JSONObject json = new JSONObject();
-                            json.put("payload", new JSONString(answer.getDataMiningQuery()));
-                            json.put("creation", new JSONString("" + MillisecondsTimePoint.now().asMillis()));
+                                JSONObject json = new JSONObject();
+                                json.put("payload", new JSONString(answer.getDataMiningQuery()));
+                                json.put("creation", new JSONString("" + MillisecondsTimePoint.now().asMillis()));
 
-                            Storage store = Storage.getLocalStorageIfSupported();
-                            store.setItem(identifier,
-                                    json.toString());
+                                Storage store = Storage.getLocalStorageIfSupported();
+                                store.setItem(identifier, json.toString());
+                            }
                         }
                         table.setData(data);
                     }

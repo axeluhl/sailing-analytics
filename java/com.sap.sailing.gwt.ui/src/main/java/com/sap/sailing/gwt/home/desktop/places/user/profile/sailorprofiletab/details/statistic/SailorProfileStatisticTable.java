@@ -14,6 +14,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
@@ -63,7 +64,9 @@ public class SailorProfileStatisticTable extends Composite {
     Image titleIconUi;
 
     @UiField
-    Image titleHeaderRight;
+    Anchor anchor;
+
+    private final Image titleHeaderRight;
 
     private final FlagImageResolver flagImageResolver;
 
@@ -83,37 +86,36 @@ public class SailorProfileStatisticTable extends Composite {
 
         SailorProfileDesktopResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
-
+        titleHeaderRight = new Image();
+        titleHeaderRight.addStyleName(SailorProfileDesktopResources.INSTANCE.css().statisticsTableHeaderRight());
         setupTable();
         titleUi.setInnerText(SailorProfileNumericStatisticTypeFormatter.getDisplayName(type, stringMessages));
         titleIconUi.setUrl(SailorProfileNumericStatisticTypeFormatter.getIcon(type));
     }
 
     /**
-     * @param individualNavigationLinks
-     *            true -> {@link #navigationTarget} is called when the arrow in each row is clicked <br/>
-     *            false -> {@link #navigationTarget} is called when the arrow in the table header is clicked
+     * @param isAverage
+     *            false -> {@link #navigationTarget} is called when the arrow in each row is clicked <br/>
+     *            true -> {@link #navigationTarget} is called when the arrow in the table header is clicked
      * @param navigationTarget
      */
     private void setNavigationTarget(Function<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, String> navigationTarget,
-            boolean individualNavigationLinks) {
-        if (individualNavigationLinks) {
-            this.navigationTarget = navigationTarget;
-            titleHeaderRight.setVisible(false);
-            sailorProfilesTable.addColumn(navigatorColumn);
-        } else {
+            boolean isAverage) {
+        if (isAverage) {
             setNavigationTarget(navigationTarget);
             titleHeaderRight.setVisible(true);
             sailorProfilesTable.removeColumn(navigatorColumn);
+        } else {
+            this.navigationTarget = navigationTarget;
+            titleHeaderRight.setVisible(false);
+            sailorProfilesTable.addColumn(navigatorColumn);
         }
     }
 
     /** sets {@link #navigationTarget} which is called when the arrow in the table header is clicked */
     public void setNavigationTarget(Function<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, String> navigationTarget) {
         titleHeaderRight.setUrl(SharedHomeResources.INSTANCE.arrowDownWhite().getSafeUri());
-        titleHeaderRight.addClickHandler(e -> {
-            Window.Location.assign(dataMiningUrl);
-        });
+        anchor.getElement().appendChild(titleHeaderRight.getElement());
         this.navigationTarget = navigationTarget;
     }
 
@@ -122,6 +124,7 @@ public class SailorProfileStatisticTable extends Composite {
         sailorProfilesTable.setList(data);
         if (data.size() > 0) {
             dataMiningUrl = navigationTarget.apply(data.get(0));
+            anchor.setHref(dataMiningUrl);
         }
     }
 
@@ -146,7 +149,7 @@ public class SailorProfileStatisticTable extends Composite {
             }
         });
         if (!isAverage) {
-            setNavigationTarget(this::createRaceboardURL, true);
+            setNavigationTarget(this::createRaceboardURL, false);
         } else {
             // navigation target is set from outside
         }

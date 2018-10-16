@@ -16,7 +16,6 @@ import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.home.desktop.partials.desktopaccordion.DesktopAccordionResources;
 import com.sap.sse.common.Util;
 
@@ -51,7 +50,6 @@ public class ListView<T> extends Composite implements HasText {
     }
 
     public void addListItem(T val) {
-        GWT.log("adding list item: " + ((BoatClassDTO) val).getName());
         Widget item = itemProducer.apply(val).asWidget();
 
         itemContainerUi.add(item);
