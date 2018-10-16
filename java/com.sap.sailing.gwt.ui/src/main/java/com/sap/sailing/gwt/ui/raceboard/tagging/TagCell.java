@@ -168,11 +168,12 @@ public class TagCell extends AbstractCell<TagDTO> {
         SafeHtml safeCreated = SafeHtmlUtils.fromString(stringMessages.tagCreated(tag.getUsername(),
                 DateTimeFormat.getFormat("E d/M/y, HH:mm").format(tag.getRaceTimepoint().asDate())));
         SafeHtml safeComment = SafeHtmlUtils.fromString(tag.getComment());
-        //resized image gets prefered
         SafeUri trustedImageURL = null;
+        /* TODO: As soon as bug 4772 (clicking on an image opens it with full size) is resolved,
+         * prefer resized image in preview. Until then full size image is preferred.
         if(tag.getResizedImageURL() != null && !tag.getResizedImageURL().isEmpty()) {
             trustedImageURL = UriUtils.fromTrustedString(tag.getResizedImageURL());
-        } else if(tag.getImageURL() != null && !tag.getImageURL().isEmpty()){
+        } else */ if (tag.getImageURL() != null && !tag.getImageURL().isEmpty()){
             trustedImageURL = UriUtils.fromTrustedString(tag.getImageURL());
         }
 
