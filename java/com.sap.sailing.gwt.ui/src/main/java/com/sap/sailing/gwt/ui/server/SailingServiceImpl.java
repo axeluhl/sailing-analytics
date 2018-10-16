@@ -965,11 +965,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public List<RegattaDTO> getRegattas() {
-        List<RegattaDTO> result = new ArrayList<RegattaDTO>();
-        for (Regatta regatta : getService().getAllRegattas()) {
-            result.add(convertToRegattaDTO(regatta));
-        }
-        return result;
+        return mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.REGATTA, getService().getAllRegattas(),
+                Regatta::getName, this::convertToRegattaDTO);
     }
 
     @Override
@@ -2542,13 +2539,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public List<StrippedLeaderboardDTO> getLeaderboards() {
-        Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
-        List<StrippedLeaderboardDTO> results = new ArrayList<StrippedLeaderboardDTO>();
-        for(Leaderboard leaderboard: leaderboards.values()) {
-            StrippedLeaderboardDTO dao = createStrippedLeaderboardDTO(leaderboard, false, false);
-            results.add(dao);
-        }
-        return results;
+        final Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
+        return mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.LEADERBOARD, leaderboards.values(),
+                Leaderboard::getName, leaderboard -> createStrippedLeaderboardDTO(leaderboard, false, false));
     }
 
     @Override
@@ -3746,14 +3739,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public List<LeaderboardGroupDTO> getLeaderboardGroups(boolean withGeoLocationData) {
-        ArrayList<LeaderboardGroupDTO> leaderboardGroupDTOs = new ArrayList<LeaderboardGroupDTO>();
-        Map<String, LeaderboardGroup> leaderboardGroups = getService().getLeaderboardGroups();
-
-        for (LeaderboardGroup leaderboardGroup : leaderboardGroups.values()) {
-            leaderboardGroupDTOs.add(convertToLeaderboardGroupDTO(leaderboardGroup, withGeoLocationData, false));
-        }
-
-        return leaderboardGroupDTOs;
+        final Map<String, LeaderboardGroup> leaderboardGroups = getService().getLeaderboardGroups();
+        return mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.LEADERBOARD_GROUP,
+                leaderboardGroups.values(), lg -> lg.getId().toString(),
+                leaderboardGroup -> convertToLeaderboardGroupDTO(leaderboardGroup, withGeoLocationData, false));
     }
 
     @Override
@@ -3899,16 +3888,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public List<EventDTO> getEvents() throws MalformedURLException {
-        List<EventDTO> result = new ArrayList<EventDTO>();
-        for (Event event : getService().getAllEvents()) {
-            if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.EVENT.getStringPermissionForObjects(DefaultActions.READ, event.getId().toString()))) {
-                EventDTO eventDTO = convertToEventDTO(event, false);
+        return mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.EVENT, getService().getAllEvents(), event -> event.getId().toString(), event -> {
+            EventDTO eventDTO = convertToEventDTO(event, false);
+            try {
                 eventDTO.setBaseURL(getEventBaseURLFromEventOrRequest(event));
-                eventDTO.setIsOnRemoteServer(false);
-                result.add(eventDTO);
+            } catch (MalformedURLException e) {
+                throw new RuntimeException(e);
             }
-        }
-        return result;
+            eventDTO.setIsOnRemoteServer(false);
+            return eventDTO;
+        });
     }
 
     @Override
@@ -4755,7 +4744,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public List<SwissTimingArchiveConfigurationDTO> getPreviousSwissTimingArchiveConfigurations() {
         Iterable<SwissTimingArchiveConfiguration> configs = swissTimingAdapterPersistence
                 .getSwissTimingArchiveConfigurations();
-        return mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT, DefaultActions.READ, configs,
+        return mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.SWISS_TIMING_ARCHIVE_ACCOUNT, configs,
                 SwissTimingArchiveConfiguration::getJsonUrl,
                 stArchiveConfig -> new SwissTimingArchiveConfigurationDTO(stArchiveConfig.getJsonUrl()));
     }
