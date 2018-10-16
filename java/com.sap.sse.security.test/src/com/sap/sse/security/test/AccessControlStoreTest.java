@@ -1,8 +1,8 @@
 package com.sap.sse.security.test;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.net.UnknownHostException;
 import java.util.HashSet;
@@ -18,7 +18,6 @@ import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
-import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.User;
@@ -96,20 +95,12 @@ public class AccessControlStoreTest {
     public void testDeleteOwnership() throws UserGroupManagementException {
         accessControlStore.setOwnership(testId, testOwner, testTenantOwner, testDisplayName);
         accessControlStore.removeOwnership(testId);
-        // expecting to fall back to default tenant ownership
-        final OwnershipAnnotation defaultOwnership = accessControlStore.getOwnership(testId);
-        assertDefaultOwnership(defaultOwnership);
+        // expecting to be unowned
+        assertTrue(accessControlStore.getOwnership(testId) == null);
         newStores();
-        assertDefaultOwnership(accessControlStore.getOwnership(testId));
+        assertTrue(accessControlStore.getOwnership(testId) == null);
     }
 
-    private void assertDefaultOwnership(final OwnershipAnnotation defaultOwnershipToCheck) {
-        assertNull(defaultOwnershipToCheck.getAnnotation().getUserOwner());
-        assertNotNull(defaultOwnershipToCheck.getAnnotation().getTenantOwner());
-        assertEquals(DEFAULT_TENANT_NAME, defaultOwnershipToCheck.getAnnotation().getTenantOwner().getName());
-        assertNull(defaultOwnershipToCheck.getDisplayNameOfAnnotatedObject());
-    }
-    
     @Test
     public void testCreateRole() throws UserGroupManagementException {
         userStore.createRoleDefinition(testRoleId, testDisplayName, new HashSet<WildcardPermission>());
