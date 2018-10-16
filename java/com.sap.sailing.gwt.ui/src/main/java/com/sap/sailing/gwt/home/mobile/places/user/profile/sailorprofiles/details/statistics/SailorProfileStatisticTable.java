@@ -2,6 +2,7 @@ package com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.detai
 
 import java.util.ArrayList;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
@@ -61,8 +62,14 @@ public class SailorProfileStatisticTable extends Composite {
         this.sectionTitleIconUi.appendChild(icon.getElement());
 
         // add SailorProfileStatisticTableEntry objects
-        for (Entry<SimpleCompetitorWithIdDTO, ArrayList<SailorProfileStatisticDTO.SingleEntry>> entry : statistic
-                .getResult().entrySet()) {
+        Set<Entry<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>>> entrySet = statistic
+                .getResult().entrySet();
+
+        //sort entries
+        ArrayList<Entry<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>>> data = new ArrayList<>();
+        data.addAll(entrySet);
+        data.sort((o1, o2) -> Double.compare(o1.getValue().get(0).getValue(), o2.getValue().get(0).getValue()));
+        for (Entry<SimpleCompetitorWithIdDTO, ArrayList<SailorProfileStatisticDTO.SingleEntry>> entry : data) {
             for (SingleEntry singleEntry : entry.getValue()) {
                 contentContainerStatistic.add(new SailorProfileStatisticEntry(type, entry.getKey(), singleEntry,
                         flagImageResolver, stringMessages, statistic.getDataMiningQuery()));
