@@ -47,5 +47,7 @@ public interface SailorProfileDesktopResources extends ClientBundle {
         String statisticsTableHeaderIcon();
 
         String statisticsTableHeader();
+
+        String statisticsTableHeaderRight();
     }
 }

@@ -27,6 +27,7 @@ import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.Sai
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.ShowAndEditSailorProfile;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.events.CompetitorWithoutClubnameItemDescription;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.events.NavigatorColumn;
+import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
@@ -61,13 +62,18 @@ public class SailorProfileStatisticTable extends Composite {
     @UiField
     Image titleIconUi;
 
-    private FlagImageResolver flagImageResolver;
+    @UiField
+    Image titleHeaderRight;
 
-    private SailorProfileNumericStatisticType type;
+    private final FlagImageResolver flagImageResolver;
 
-    private StringMessages stringMessages;
+    private final SailorProfileNumericStatisticType type;
+
+    private final StringMessages stringMessages;
 
     private Function<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, String> navigationTarget;
+
+    private String dataMiningUrl;
 
     public SailorProfileStatisticTable(FlagImageResolver flagImageResolver, SailorProfileNumericStatisticType type,
             StringMessages stringMessages) {
@@ -83,13 +89,40 @@ public class SailorProfileStatisticTable extends Composite {
         titleIconUi.setUrl(SailorProfileNumericStatisticTypeFormatter.getIcon(type));
     }
 
+    /**
+     * @param individualNavigationLinks
+     *            true -> {@link #navigationTarget} is called when the arrow in each row is clicked <br/>
+     *            false -> {@link #navigationTarget} is called when the arrow in the table header is clicked
+     * @param navigationTarget
+     */
+    private void setNavigationTarget(Function<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, String> navigationTarget,
+            boolean individualNavigationLinks) {
+        if (individualNavigationLinks) {
+            this.navigationTarget = navigationTarget;
+            titleHeaderRight.setVisible(false);
+            sailorProfilesTable.addColumn(navigatorColumn);
+        } else {
+            setNavigationTarget(navigationTarget);
+            titleHeaderRight.setVisible(true);
+            sailorProfilesTable.removeColumn(navigatorColumn);
+        }
+    }
+
+    /** sets {@link #navigationTarget} which is called when the arrow in the table header is clicked */
     public void setNavigationTarget(Function<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, String> navigationTarget) {
+        titleHeaderRight.setUrl(SharedHomeResources.INSTANCE.arrowDownWhite().getSafeUri());
+        titleHeaderRight.addClickHandler(e -> {
+            Window.Location.assign(dataMiningUrl);
+        });
         this.navigationTarget = navigationTarget;
     }
 
     public void setData(List<Pair<SimpleCompetitorWithIdDTO, SingleEntry>> data) {
         sailorProfilesTable.setPageSize(data.size());
         sailorProfilesTable.setList(data);
+        if (data.size() > 0) {
+            dataMiningUrl = navigationTarget.apply(data.get(0));
+        }
     }
 
     private void setupTable() {
@@ -104,7 +137,6 @@ public class SailorProfileStatisticTable extends Composite {
                 SailorProfileNumericStatisticTypeFormatter.getColumnHeadingName(type, stringMessages));
         sailorProfilesTable.addColumn(competitorColumn, StringMessages.INSTANCE.competitor());
         sailorProfilesTable.addColumn(clubNameColumn, StringMessages.INSTANCE.name());
-        sailorProfilesTable.addColumn(navigatorColumn);
 
         navigatorColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
         navigatorColumn.setFieldUpdater(new FieldUpdater<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, String>() {
@@ -114,7 +146,7 @@ public class SailorProfileStatisticTable extends Composite {
             }
         });
         if (!isAverage) {
-            setNavigationTarget(this::createRaceboardURL);
+            setNavigationTarget(this::createRaceboardURL, true);
         } else {
             // navigation target is set from outside
         }

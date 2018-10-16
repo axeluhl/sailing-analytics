@@ -10,6 +10,7 @@
             <div class="{spr.css.eventsTableTitle} {spr.css.statisticsTableHeader}">
                 <g:Image addStyleNames="{spr.css.statisticsTableHeaderIcon}" ui:field="titleIconUi" />
                 <span ui:field="titleUi" />
+                <g:Image ui:field="titleHeaderRight" addStyleNames="{spr.css.statisticsTableHeaderRight}"/>
             </div>
             <c:CellTable ui:field="sailorProfilesTable" addStyleNames="{spr.css.eventsTable}">
                 <c:emptyTableWidget>
