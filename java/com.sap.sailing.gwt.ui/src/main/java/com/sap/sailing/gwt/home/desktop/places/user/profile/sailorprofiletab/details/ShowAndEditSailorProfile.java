@@ -5,8 +5,6 @@ import java.util.Map.Entry;
 import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONString;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -29,6 +27,7 @@ import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.det
 import com.sap.sailing.gwt.home.shared.partials.editable.EditableSuggestedMultiSelectionCompetitor;
 import com.sap.sailing.gwt.home.shared.partials.editable.InlineEditLabel;
 import com.sap.sailing.gwt.home.shared.partials.listview.BoatClassListView;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.DataMiningQueryForSailorProfilesPersistor;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileDetailsView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileResources;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
@@ -36,10 +35,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.settings.SailingSettingsConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
-import com.sap.sse.gwt.client.Storage;
 
 /**
  * Implementation of {@link EditSailorProfileDetailsView} where users can view the details of a SailorProfile and edit
@@ -151,6 +148,7 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
 
     /** create tables for statistic types */
     private void setupTables(SailorProfileDTO entry) {
+        DataMiningQueryForSailorProfilesPersistor.removeDMQueriesFromLocalStorage();
         for (SailorProfileNumericStatisticType type : SailorProfileNumericStatisticType.values()) {
             SailorProfileStatisticTable table = new SailorProfileStatisticTable(flagImageResolver, type, i18n);
             accordionStatisticsUi.addWidget(table);
@@ -198,15 +196,8 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
                                     + UUID.randomUUID().toString();
                             navigationUrl = "DataMining.html?q=" + identifier;
                             table.setNavigationTarget(this::func);
-                            if (Storage.isLocalStorageSupported() && answer.getDataMiningQuery() != null) {
-
-                                JSONObject json = new JSONObject();
-                                json.put("payload", new JSONString(answer.getDataMiningQuery()));
-                                json.put("creation", new JSONString("" + MillisecondsTimePoint.now().asMillis()));
-
-                                Storage store = Storage.getLocalStorageIfSupported();
-                                store.setItem(identifier, json.toString());
-                            }
+                            DataMiningQueryForSailorProfilesPersistor.writeDMQueriesToLocalStorageIfPossible(answer,
+                                    identifier);
                         }
                         table.setData(data);
                     }

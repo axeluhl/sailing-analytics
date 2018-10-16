@@ -6,8 +6,6 @@ import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONString;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
@@ -23,12 +21,11 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileS
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO.SingleEntry;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.statistic.SailorProfileNumericStatisticTypeFormatter;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfileMobileResources;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.DataMiningQueryForSailorProfilesPersistor;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileResources;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.settings.SailingSettingsConstants;
-import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.gwt.client.Storage;
 
 /** displays a single statistic table which contains all {@link SailorProfileStatsiticEntry} objects */
 public class SailorProfileStatisticTable extends Composite {
@@ -82,24 +79,15 @@ public class SailorProfileStatisticTable extends Composite {
         button.addStyleName(SailorProfileMobileResources.INSTANCE.css().showLeaderboardButton() + " "
                 + SharedSailorProfileResources.INSTANCE.css().inverseButton());
         button.setText(StringMessages.INSTANCE.showInDataMining());
-        button.addClickHandler(e -> handleLocalStorage(statistic.getDataMiningQuery()));
+        button.addClickHandler(e -> handleLocalStorage(statistic));
         contentContainerStatistic.add(button);
     }
 
     /** store serialized data mining query into user store */
-    private void handleLocalStorage(String serializedDataMiningQuery) {
+    private void handleLocalStorage(SailorProfileStatisticDTO dto) {
         final String identifier = SailingSettingsConstants.DATAMINING_QUERY_PREFIX + UUID.randomUUID().toString();
-        String navigationUrl = "DataMining.html?q=" + identifier;
-        if (Storage.isLocalStorageSupported() && serializedDataMiningQuery != null) {
-
-            JSONObject json = new JSONObject();
-            json.put("payload", new JSONString(serializedDataMiningQuery));
-            json.put("creation", new JSONString("" + MillisecondsTimePoint.now().asMillis()));
-
-            Storage store = Storage.getLocalStorageIfSupported();
-            store.setItem(identifier, json.toString());
-        }
-        Window.Location.assign(navigationUrl);
+        DataMiningQueryForSailorProfilesPersistor.writeDMQueriesToLocalStorageIfPossible(dto, identifier);
+        Window.Location.assign("DataMining.html?q=" + identifier);
     }
 
 }

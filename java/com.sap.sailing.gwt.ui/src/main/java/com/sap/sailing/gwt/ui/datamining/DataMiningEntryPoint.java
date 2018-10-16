@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.Window;
@@ -20,6 +21,7 @@ import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthenticat
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.datamining.presentation.TabbedSailingResultsPresenter;
+import com.sap.sailing.gwt.ui.shared.settings.SailingSettingsConstants;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.UUIDDataMiningSession;
@@ -110,26 +112,28 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
 
                 if (Storage.isLocalStorageSupported()) {
                     Storage store = Storage.getLocalStorageIfSupported();
-                    String jsonString = store.getItem(queryIdentifier);
-                    if (jsonString != null) {
-                        JSONObject json = JSONParser.parseStrict(jsonString).isObject();
-                        String serializedQuery = json.get("payload").isString().stringValue();
+                    String storedElem = store.getItem(SailingSettingsConstants.DATAMINING_QUERY);
+                    JSONArray arr = JSONParser.parseStrict(storedElem).isArray();
+                    for (int i = 0; i < arr.size(); i++) {
+                        JSONObject json = arr.get(i).isObject();
+                        if (queryIdentifier.equals(json.get("uuid").isString().stringValue())) {
+                            String serializedQuery = json.get("payload").isString().stringValue();
+                            dataMiningService.getDeserializedQuery(serializedQuery,
+                                    new AsyncCallback<StatisticQueryDefinitionDTO>() {
 
-                        dataMiningService.getDeserializedQuery(serializedQuery,
-                                new AsyncCallback<StatisticQueryDefinitionDTO>() {
+                                        @Override
+                                        public void onSuccess(StatisticQueryDefinitionDTO result) {
+                                            queryDefinitionProvider.applyQueryDefinition(result);
+                                            queryRunner.run(result);
+                                        }
 
-                                    @Override
-                                    public void onSuccess(StatisticQueryDefinitionDTO result) {
-                                        queryDefinitionProvider.applyQueryDefinition(result);
-                                        queryRunner.run(result);
-                                    }
-
-                                    @Override
-                                    public void onFailure(Throwable caught) {
-                                        GWT.log(caught.getMessage());
-                                    }
-                                });
-                        store.removeItem(queryIdentifier);
+                                        @Override
+                                        public void onFailure(Throwable caught) {
+                                            GWT.log(caught.getMessage());
+                                        }
+                                    });
+                            break;
+                        }
                     }
                 }
                 return splitPanel;
