@@ -2,7 +2,9 @@ package com.sap.sse.security.ui.client.usermanagement;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -76,22 +78,33 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         final Button deleteButton = new Button(stringMessages.remove(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                assert userSelectionModel.getSelectedSet().size() == 1;
-                final UserDTO userToDelete = userSelectionModel.getSelectedSet().iterator().next();
-                final String username = userToDelete.getName();
-                if (Window.confirm(stringMessages.doYouReallyWantToDeleteUser(username))) {
-                    userManagementService.deleteUser(username, new AsyncCallback<SuccessInfo>() {
+                assert userSelectionModel.getSelectedSet().size() > 0;
+                final Set<UserDTO> usersToDelete = new HashSet<>();
+                final Set<String> usernamesToDelete = new HashSet<>();
+                for (UserDTO userToDelete : userSelectionModel.getSelectedSet()) {
+                    usersToDelete.add(userToDelete);
+                    usernamesToDelete.add(userToDelete.getName());
+                }
+                if (Window.confirm(usernamesToDelete.size() == 1
+                        ? stringMessages.doYouReallyWantToDeleteUser(usernamesToDelete.iterator().next())
+                        : stringMessages.doYouReallyWantToDeleteNUsers(usernamesToDelete.size()))) {
+                    userManagementService.deleteUsers(usernamesToDelete, new AsyncCallback<Set<SuccessInfo>>() {
                         @Override
-                        public void onSuccess(SuccessInfo result) {
-                            for (UserDeletedEventHandler userDeletedHandler : userDeletedHandlers) {
-                                userDeletedHandler.onUserDeleted(userToDelete);
+                        public void onSuccess(Set<SuccessInfo> result) {
+                            for (UserDTO userToDelete : usersToDelete) {
+                                for (UserDeletedEventHandler userDeletedHandler : userDeletedHandlers) {
+                                    userDeletedHandler.onUserDeleted(userToDelete);
+                                }
                             }
-                            Notification.notify(result.getMessage(), NotificationType.SUCCESS);
+                            for (SuccessInfo successInfo : result) {
+                                Notification.notify(successInfo.getMessage(), NotificationType.SUCCESS);
+                            }
                         }
 
                         @Override
                         public void onFailure(Throwable caught) {
-                            errorReporter.reportError(stringMessages.errorDeletingUser(username, caught.getMessage()));
+                            errorReporter.reportError(stringMessages
+                                    .errorDeletingUser(usernamesToDelete.iterator().next(), caught.getMessage()));
                         }
                     });
                 }

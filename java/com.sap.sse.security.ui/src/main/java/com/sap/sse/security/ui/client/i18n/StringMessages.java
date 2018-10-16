@@ -41,6 +41,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String deleteUser();
     String deleteUserQuestion();
     String doYouReallyWantToDeleteUser(String username);
+    String doYouReallyWantToDeleteNUsers(int count);
     String account(String accountType);
     String save();
     String remove();

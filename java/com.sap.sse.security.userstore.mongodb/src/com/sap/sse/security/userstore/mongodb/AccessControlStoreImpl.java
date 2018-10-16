@@ -173,7 +173,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
     @Override
     public void clear() {
         accessControlLists.clear();
-        ownerships.clear();        
+        ownerships.clear();
     }
 
     @Override

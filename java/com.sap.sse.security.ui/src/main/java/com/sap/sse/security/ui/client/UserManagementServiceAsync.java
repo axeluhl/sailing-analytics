@@ -93,6 +93,8 @@ public interface UserManagementServiceAsync {
     void setPermissionsForUser(String username, Iterable<WildcardPermission> permissions, AsyncCallback<SuccessInfo> callback);
 
     void deleteUser(String username, AsyncCallback<SuccessInfo> callback);
+    
+    void deleteUsers(Set<String> usernames, AsyncCallback<Set<SuccessInfo>> callback);
 
     void getSettings(AsyncCallback<Map<String, String>> callback);
 

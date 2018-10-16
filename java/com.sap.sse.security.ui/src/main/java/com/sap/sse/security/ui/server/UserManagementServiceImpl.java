@@ -261,19 +261,22 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public SuccessInfo deleteUserGroup(String userGroupIdAsString) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER_GROUP.getStringPermissionForObjects(DefaultActions.DELETE, userGroupIdAsString))) {
-            try {
-                UUID userGroupId = UUID.fromString(userGroupIdAsString);
-                final UserGroup userGroup = getSecurityService().getUserGroup(userGroupId);
-                getSecurityService().deleteUserGroup(userGroup);
-                getSecurityService().deleteAccessControlList(SecuredSecurityTypes.USER_GROUP.getQualifiedObjectIdentifier(userGroupIdAsString));
-                getSecurityService().deleteOwnership(SecuredSecurityTypes.USER_GROUP.getQualifiedObjectIdentifier(userGroupIdAsString));
-                return new SuccessInfo(true, "Deleted user group: " + userGroup.getName() + ".", /* redirectURL */ null, null);
-            } catch (UserGroupManagementException e) {
-                return new SuccessInfo(false, "Could not delete user group.", /* redirectURL */ null, null);
-            }
-        } else {
-            throw new UnauthorizedException("Not permitted to delete user group");
+        try {
+            return getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(SecuredSecurityTypes.USER_GROUP,
+                    userGroupIdAsString, () -> {
+                        try {
+                            final UUID userGroupId = UUID.fromString(userGroupIdAsString);
+                            final UserGroup userGroup = getSecurityService().getUserGroup(userGroupId);
+                            getSecurityService().deleteUserGroup(userGroup);
+                            return new SuccessInfo(true, "Deleted user group: " + userGroup.getName() + ".",
+                                    /* redirectURL */ null, null);
+                        } catch (UserGroupManagementException e) {
+                            return new SuccessInfo(false, "Could not delete user group.", /* redirectURL */ null, null);
+                        }
+                    });
+        } catch (AuthorizationException e) {
+            return new SuccessInfo(false, "You are not permitted to delete user group " + userGroupIdAsString, /* redirectURL */ null,
+                    null);
         }
     }
 
@@ -547,15 +550,30 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public SuccessInfo deleteUser(String username) throws UnauthorizedException {
-        return getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(SecuredSecurityTypes.USER,
-                username, () -> {
-                    try {
-                        getSecurityService().deleteUser(username);
-                        return new SuccessInfo(true, "Deleted user: " + username + ".", /* redirectURL */ null, null);
-                    } catch (UserManagementException e) {
-                        return new SuccessInfo(false, "Could not delete user.", /* redirectURL */ null, null);
-                    }
-                });
+        try {
+            return getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(SecuredSecurityTypes.USER,
+                    username, () -> {
+                        try {
+                            getSecurityService().deleteUser(username);
+                            return new SuccessInfo(true, "Deleted user: " + username + ".", /* redirectURL */ null,
+                                    null);
+                        } catch (UserManagementException e) {
+                            return new SuccessInfo(false, "Could not delete user.", /* redirectURL */ null, null);
+                        }
+                    });
+        } catch (AuthorizationException e) {
+            return new SuccessInfo(false, "You are not permitted to delete user " + username, /* redirectURL */ null,
+                    null);
+        }
+    }
+    
+    @Override
+    public Set<SuccessInfo> deleteUsers(Set<String> usernames) throws UnauthorizedException {
+        final Set<SuccessInfo> result = new HashSet<>();
+        for (String username : usernames) {
+            result.add(deleteUser(username));
+        }
+        return result;
     }
 
     @Override

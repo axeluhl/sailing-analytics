@@ -89,6 +89,8 @@ public interface UserManagementService extends RemoteService {
 
     SuccessInfo deleteUser(String username) throws UnauthorizedException;
 
+    Set<SuccessInfo> deleteUsers(Set<String> usernames) throws UnauthorizedException;
+
     SuccessInfo logout();
 
     SuccessInfo setRolesForUser(String username,
