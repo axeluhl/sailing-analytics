@@ -117,6 +117,7 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UserRole;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.OwnershipImpl;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
@@ -1653,5 +1654,29 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (cm instanceof ReplicatingCacheManager) {
             ((ReplicatingCacheManager) cm).clear();
         }
+    }
+
+    @Override
+    public boolean hasCurrentUserReadPermission(WithQualifiedObjectIdentifier object) {
+        return SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObjects(
+                DefaultActions.READ, object.getIdentifier().getTypeRelativeObjectIdentifier()));
+    }
+
+    @Override
+    public boolean hasCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object) {
+        return SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObjects(
+                DefaultActions.UPDATE, object.getIdentifier().getTypeRelativeObjectIdentifier()));
+    }
+
+    @Override
+    public void checkCurrentUserReadPermission(WithQualifiedObjectIdentifier object) {
+        SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObjects(DefaultActions.READ,
+                object.getIdentifier().getTypeRelativeObjectIdentifier()));
+    }
+
+    @Override
+    public void checkCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object) {
+        SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObjects(DefaultActions.UPDATE,
+                object.getIdentifier().getTypeRelativeObjectIdentifier()));
     }
 }

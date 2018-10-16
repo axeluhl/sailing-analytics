@@ -33,6 +33,7 @@ import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
 /**
  * A service interface for security management. Intended to be used as an OSGi service that can be registered, e.g., by
@@ -354,4 +355,12 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     <T, R> List<R> mapAndFilterByReadPermissionForCurrentUser(HasPermissions permittedObject, Iterable<T> objectsToFilter,
             Function<T, String> objectIdExtractor, Function<T, R> filteredObjectsMapper);
+
+    boolean hasCurrentUserReadPermission(WithQualifiedObjectIdentifier object);
+
+    boolean hasCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object);
+
+    void checkCurrentUserReadPermission(WithQualifiedObjectIdentifier object);
+
+    void checkCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object);
 }
