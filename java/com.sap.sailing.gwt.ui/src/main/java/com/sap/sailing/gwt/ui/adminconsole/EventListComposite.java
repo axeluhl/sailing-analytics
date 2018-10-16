@@ -553,11 +553,9 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                             public void onSuccess(List<EventDTO> result) {
                                 openCreateRegattaDialog(existingRegattas, Collections.unmodifiableList(result), createdEvent);
                             }
-                        });                        
+                        });
                     }
                 });
-                                
-                
             }
         });
         dialog.ensureDebugId("CreateDefaultRegattaDialog");
