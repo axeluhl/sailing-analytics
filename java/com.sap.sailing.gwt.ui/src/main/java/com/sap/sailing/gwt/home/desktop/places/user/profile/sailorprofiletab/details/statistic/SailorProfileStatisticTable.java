@@ -166,6 +166,27 @@ public class SailorProfileStatisticTable extends Composite {
         } else {
             // navigation target is set from outside
         }
+
+        addButtonStyle(actualValueColumn);
+        addButtonStyle(clubNameColumn);
+        addButtonStyle(competitorColumn);
+        addButtonStyle(eventNameColumn);
+        addButtonStyle(navigatorColumn);
+        addButtonStyle(timeColumn);
+
+        sailorProfilesTable.addCellPreviewHandler(e -> {
+            /* no navigation for remove column */
+            if ("click".equals(e.getNativeEvent().getType())) {
+                GWT.log(e.getNativeEvent().getType());
+                Window.Location.assign(navigationTarget.apply(e.getValue()));
+            }
+        });
+    }
+
+    private void addButtonStyle(Column<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, ?> col) {
+        col.setCellStyleNames(col.getCellStyleNames(null, null) + " "
+                + SailorProfileDesktopResources.INSTANCE.css().clickableColumn());
+
     }
 
     private String createRaceboardURL(Pair<SimpleCompetitorWithIdDTO, SingleEntry> entry) {
