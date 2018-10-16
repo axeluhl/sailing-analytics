@@ -986,6 +986,16 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void deleteUser(String username) throws UserManagementException {
+        final User userToDelete = userStore.getUserByName(username);
+        if (userToDelete == null) {
+            throw new UserManagementException(UserManagementException.USER_DOES_NOT_EXIST);
+        }
+        accessControlStore.getOwnerships().forEach(oa -> {
+            Ownership annotation = oa.getAnnotation();
+            if (userToDelete.equals(annotation.getUserOwner())) {
+                setOwnership(oa.getIdOfAnnotatedObject(), null, annotation.getTenantOwner());
+            }
+        });
         apply(s -> s.internalDeleteUser(username));
     }
 
