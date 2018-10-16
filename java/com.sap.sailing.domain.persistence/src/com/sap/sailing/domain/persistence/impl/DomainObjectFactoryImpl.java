@@ -1285,7 +1285,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             
             CompetitorRegistrationType competitorRegistrationType;
             if (dbRegatta.containsField(FieldNames.REGATTA_COMPETITOR_REGISTRATION_TYPE.name())) {
-                String competitorRegistrationTypeName = (String) dbRegatta
+                final String competitorRegistrationTypeName = (String) dbRegatta
                         .get(FieldNames.REGATTA_COMPETITOR_REGISTRATION_TYPE.name());
                 try {
                     competitorRegistrationType = competitorRegistrationTypeName == null

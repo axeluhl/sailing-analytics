@@ -442,9 +442,7 @@ public class EventsResource extends AbstractSailingServerResource {
         }
         return new Util.Triple<>(event, leaderboardGroup, leaderboard);
     }
-public static void main(String...a) {
-    System.out.println(StringUtils.join(CompetitorRegistrationType.values(), ", "));
-}
+
     private LeaderboardGroup validateAndAddLeaderboardGroup(UUID eventId, String leaderboardGroupName,
             String leaderboardGroupDescription, String leaderboardGroupDisplayName,
             boolean displayGroupsInReverseOrder, List<String> leaderboardNamesParam,

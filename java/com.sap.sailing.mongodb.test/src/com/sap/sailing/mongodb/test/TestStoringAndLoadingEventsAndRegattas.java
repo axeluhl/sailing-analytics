@@ -547,7 +547,7 @@ public class TestStoringAndLoadingEventsAndRegattas extends AbstractMongoDBTest 
                 .getName(), q2YellowTrackedRace.getRaceIdentifier()));
         MaxPointsReason hassosLoadedMaxPointsReason = loadedLeaderboard.getScoreCorrection().getMaxPointsReason(hasso, loadedQ2, MillisecondsTimePoint.now());
         assertEquals(MaxPointsReason.DNF, hassosLoadedMaxPointsReason);
-        assertTrue(regatta.getCompetitorRegistrationType() == loadedRegatta.getCompetitorRegistrationType());
+        assertEquals(regatta.getCompetitorRegistrationType(), loadedRegatta.getCompetitorRegistrationType());
     }
 
     private void logColumnsInRegattaLeaderboard(RegattaLeaderboard regattaLeaderboard) {
