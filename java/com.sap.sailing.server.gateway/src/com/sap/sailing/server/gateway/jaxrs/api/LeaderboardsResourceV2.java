@@ -69,6 +69,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
                         .type(MediaType.TEXT_PLAIN).build();
             } else {
                 try {
+                    getSecurityService().checkCurrentUserReadPermission(leaderboard);
                     TimePoint timePoint;
                     try {
                         timePoint = parseTimePoint(time, timeasmillis, calculateTimePointForResultState(leaderboard, resultState));
