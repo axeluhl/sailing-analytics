@@ -415,8 +415,8 @@ public class EventsResource extends AbstractSailingServerResource {
         }
         final CompetitorRegistrationType competitorRegistrationType;
         try {
-            competitorRegistrationType = CompetitorRegistrationType.valueOf(competitorRegistrationTypeString);
-        } catch (IllegalArgumentException | NullPointerException e) {
+            competitorRegistrationType = CompetitorRegistrationType.valueOfOrDefault(competitorRegistrationTypeString, /* failForUnknown */ true);
+        } catch (IllegalArgumentException iae) {
             throw new IllegalArgumentException(ExceptionManager.incorrectParameterValue(competitorRegistrationTypeString,
                     StringUtils.join(CompetitorRegistrationType.values(), ", ")));
         }

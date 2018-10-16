@@ -1283,21 +1283,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 createMigratableRegatta = true;
             }
             
-            CompetitorRegistrationType competitorRegistrationType;
-            if (dbRegatta.containsField(FieldNames.REGATTA_COMPETITOR_REGISTRATION_TYPE.name())) {
-                final String competitorRegistrationTypeName = (String) dbRegatta
-                        .get(FieldNames.REGATTA_COMPETITOR_REGISTRATION_TYPE.name());
-                try {
-                    competitorRegistrationType = competitorRegistrationTypeName == null
-                            ? CompetitorRegistrationType.CLOSED
-                            : CompetitorRegistrationType.valueOf(competitorRegistrationTypeName);
-                } catch (IllegalArgumentException iae) {
-                    logger.log(Level.WARNING, "Unknown CompetitorRegistrationType {0} for regatta.", competitorRegistrationTypeName);
-                    competitorRegistrationType = CompetitorRegistrationType.CLOSED;
-                }
-            } else {
-                competitorRegistrationType = CompetitorRegistrationType.CLOSED;
-            }
+            CompetitorRegistrationType competitorRegistrationType = CompetitorRegistrationType
+                    .valueOfOrDefault((String) dbRegatta.get(FieldNames.REGATTA_COMPETITOR_REGISTRATION_TYPE.name()));
             final RankingMetricConstructor rankingMetricConstructor = loadRankingMetricConstructor(dbRegatta);
             if (createMigratableRegatta) {
                 result = new MigratableRegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, boatClass,

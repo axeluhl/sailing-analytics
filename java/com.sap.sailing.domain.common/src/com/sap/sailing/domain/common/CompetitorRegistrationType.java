@@ -1,5 +1,8 @@
 package com.sap.sailing.domain.common;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.sap.sailing.domain.common.i18n.CommonStringMessages;
 
 /**
@@ -19,6 +22,8 @@ public enum CompetitorRegistrationType {
 
     /** Competitors are registering themselves without the need of confirmation. */
     OPEN_UNMODERATED(true, false);
+
+    private static final Logger logger = Logger.getLogger(CompetitorRegistrationType.class.getName());
 
     private boolean open;
     private boolean moderated;
@@ -44,6 +49,47 @@ public enum CompetitorRegistrationType {
      */
     public boolean isModerated() {
         return this.moderated;
+    }
+
+    /**
+     * Get ComptetitorRegistrationType for given name. If the name is unknown or null it returns {@link #CLOSED} as
+     * default value.
+     * 
+     * @param name
+     *            enum name
+     * @param failForUnknown
+     *            if set and name is not konwn competitor type than this method throws IllegalArgumentException
+     * @return CompetitorRegistrationType
+     */
+    public static CompetitorRegistrationType valueOfOrDefault(String name, boolean failForUnknown) {
+        if (name == null) {
+            return CLOSED;
+        } else {
+            try {
+                return valueOf(name);
+            } catch (IllegalArgumentException iae) {
+                if (failForUnknown) {
+                    throw iae;
+                } else {
+                    logger.log(Level.WARNING, "Unknown CompetitorRegistrationType " + name
+                            + " for regatta. Interpreting it to default CLOSED.");
+                    return CLOSED;
+                }
+            }
+
+        }
+    }
+
+    /**
+     * et ComptetitorRegistrationType for given name. If the name is unknown or null it returns {{@link #CLOSED} as
+     * default value.
+     * 
+     * @param name
+     *            enum name
+     * @return CompetitorRegistrationType
+     */
+    public static CompetitorRegistrationType valueOfOrDefault(String name) {
+        return valueOfOrDefault(name, false);
     }
 
     /**
