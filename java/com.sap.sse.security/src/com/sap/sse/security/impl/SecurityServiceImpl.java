@@ -1441,40 +1441,41 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void setOwnershipCheckPermissionForObjectCreationAndRevertOnError(UserGroup tenantOwner,
-            HasPermissions type, String typeIdentifier, String securityDisplayName,
-            Action action) {
-        setOwnershipCheckPermissionForObjectCreationAndRevertOnError(tenantOwner, type, typeIdentifier,
+            HasPermissions type, String typeRelativeObjectIdentifier, String securityDisplayName,
+            Action actionToCreateObject) {
+        setOwnershipCheckPermissionForObjectCreationAndRevertOnError(tenantOwner, type, typeRelativeObjectIdentifier,
                 securityDisplayName, () -> {
-                    action.run();
+                    actionToCreateObject.run();
                     return null;
                 });
     }
 
     @Override
     public <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(UserGroup tenantOwner,
-            HasPermissions type, String typeIdentifier, String securityDisplayName,
-            ActionWithResult<T> actionWithResult) {
-        return setOwnershipCheckPermissionForObjectCreationAndRevertOnError(tenantOwner, type, typeIdentifier,
-                securityDisplayName, actionWithResult, true);
+            HasPermissions type, String typeRelativeObjectIdentifier, String securityDisplayName,
+            ActionWithResult<T> createActionReturningCreatedObject) {
+        return setOwnershipCheckPermissionForObjectCreationAndRevertOnError(tenantOwner, type, typeRelativeObjectIdentifier,
+                securityDisplayName, createActionReturningCreatedObject, true);
     }
     
     public <T> T setOwnershipCheckCreatePermissionAndRevertOnError(String tenantOwnerName,
-            HasPermissions type, String typeIdentifier, String securityDisplayName,
-            ActionWithResult<T> actionWithResult) {
+            HasPermissions type, String typeRelativeObjectIdentifier, String securityDisplayName,
+            ActionWithResult<T> createActionReturningCreatedObject) {
         final UserGroup tenantOwner = getUserGroupByName(tenantOwnerName);
-        return setOwnershipCheckPermissionForObjectCreationAndRevertOnError(tenantOwner, type, typeIdentifier,
-                securityDisplayName, actionWithResult, false);
+        return setOwnershipCheckPermissionForObjectCreationAndRevertOnError(tenantOwner, type, typeRelativeObjectIdentifier,
+                securityDisplayName, createActionReturningCreatedObject, false);
     }
     
     private <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(UserGroup tenantOwner,
-            HasPermissions type, String typeIdentifier, String securityDisplayName,
-            ActionWithResult<T> actionWithResult, boolean checkCreateObjectOnServer) {
-        QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifier(typeIdentifier);
+            HasPermissions type, String typeRelativeObjectIdentifier, String securityDisplayName,
+            ActionWithResult<T> createActionReturningCreatedObject, boolean checkCreateObjectOnServer) {
+        QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifier(typeRelativeObjectIdentifier);
         T result = null;
         boolean didSetOwnerShip = false;
         try {
             final User user = getUserByName((String) SecurityUtils.getSubject().getPrincipal());
-            if (getOwnership(identifier) == null) {
+            final OwnershipAnnotation preexistingOwnership = getOwnership(identifier);
+            if (preexistingOwnership == null) {
                 didSetOwnerShip = true;
                 setOwnership(identifier, user, tenantOwner, securityDisplayName);
             }
@@ -1483,8 +1484,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                         .getStringPermissionForObjects(ServerActions.CREATE_OBJECT, ServerStartupConstants.SERVER_NAME));
             }
             SecurityUtils.getSubject()
-                    .checkPermission(type.getStringPermissionForObjects(DefaultActions.CREATE, typeIdentifier));
-            result = actionWithResult.run();
+                    .checkPermission(identifier.getStringPermission(DefaultActions.CREATE));
+            result = createActionReturningCreatedObject.run();
         } catch (AuthorizationException e) {
             if (didSetOwnerShip) {
                 deleteOwnership(identifier);
@@ -1498,21 +1499,21 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public void checkPermissionAndDeleteOwnershipForObjectRemoval(HasPermissions type,
-            String typeIdentifier, Action action) {
-        checkPermissionAndDeleteOwnershipForObjectRemoval(type, typeIdentifier, () -> {
-            action.run();
+            String typeRelativeObjectIdentifier, Action actionToDeleteObject) {
+        checkPermissionAndDeleteOwnershipForObjectRemoval(type, typeRelativeObjectIdentifier, () -> {
+            actionToDeleteObject.run();
             return null;
         });
     }
     
     @Override
-    public <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(HasPermissions type, String typeIdentifier,
-            ActionWithResult<T> action) {
-        QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifier(typeIdentifier);
+    public <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(HasPermissions type, String typeRelativeObjectIdentifier,
+            ActionWithResult<T> actionToDeleteObject) {
+        QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifier(typeRelativeObjectIdentifier);
         try {
             SecurityUtils.getSubject()
-                    .checkPermission(type.getStringPermissionForObjects(DefaultActions.DELETE, typeIdentifier));
-            final T result = action.run();
+                    .checkPermission(identifier.getStringPermission(DefaultActions.DELETE));
+            final T result = actionToDeleteObject.run();
             deleteOwnership(identifier);
             deleteAccessControlList(identifier);
             return result;

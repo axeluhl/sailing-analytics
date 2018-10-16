@@ -327,26 +327,26 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     UserGroup getDefaultTenant();
 
     <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(UserGroup tenantOwner, HasPermissions type,
-            String typeIdentifier,
-            String securityDisplayName, ActionWithResult<T> actionWithResult);
+            String typeRelativeObjectIdentifier,
+            String securityDisplayName, ActionWithResult<T> createActionReturningCreatedObject);
 
     <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(String tenantOwnerName, HasPermissions type,
-            String typeIdentifier, String securityDisplayName,
-            ActionWithResult<T> actionWithResult);
+            String typeRelativeObjectIdentifier, String securityDisplayName,
+            ActionWithResult<T> createActionReturningCreatedObject);
 
     void setOwnershipCheckPermissionForObjectCreationAndRevertOnError(UserGroup tenantOwner, HasPermissions type,
-            String typeIdentifier, String securityDisplayName, Action action);
+            String typeRelativeObjectIdentifier, String securityDisplayName, Action actionToCreateObject);
 
     <T> T setOwnershipCheckCreatePermissionAndRevertOnError(String tenantOwnerName, HasPermissions type,
-            String typeIdentifier, String securityDisplayName, ActionWithResult<T> actionWithResult);
+            String typeRelativeObjectIdentifier, String securityDisplayName, ActionWithResult<T> createActionReturningCreatedObject);
 
     User getAllUser();
 
-    void checkPermissionAndDeleteOwnershipForObjectRemoval(HasPermissions type, String typeIdentifier,
-            Action action);
+    void checkPermissionAndDeleteOwnershipForObjectRemoval(HasPermissions type, String typeRelativeObjectIdentifier,
+            Action actionToDeleteObject);
     
-    <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(HasPermissions type, String typeIdentifier,
-            ActionWithResult<T> action);
+    <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(HasPermissions type, String typeRelativeObjectIdentifier,
+            ActionWithResult<T> actionToDeleteObject);
 
     <T> void filterObjectsWithPermissionForCurrentUser(HasPermissions permittedObject,
             com.sap.sse.security.shared.HasPermissions.Action action, Iterable<T> objectsToFilter,
