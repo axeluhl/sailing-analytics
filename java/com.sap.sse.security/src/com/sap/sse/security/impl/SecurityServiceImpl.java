@@ -1478,6 +1478,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             if (preexistingOwnership == null) {
                 didSetOwnerShip = true;
                 setOwnership(identifier, user, tenantOwner, securityDisplayName);
+            } else {
+                logger.fine("Preexisting ownership found for " + identifier + ": " + preexistingOwnership);
             }
             if (checkCreateObjectOnServer) {
                 SecurityUtils.getSubject().checkPermission(SecuredSecurityTypes.SERVER
