@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
 import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableResources;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType;
@@ -119,13 +120,13 @@ public class SailorProfileStatisticTable extends Composite {
         this.navigationTarget = navigationTarget;
     }
 
-    public void setData(List<Pair<SimpleCompetitorWithIdDTO, SingleEntry>> data) {
+    public void setData(final List<Pair<SimpleCompetitorWithIdDTO, SingleEntry>> data) {
         sailorProfilesTable.setPageSize(data.size());
-        sailorProfilesTable.setList(data);
         if (data.size() > 0) {
             dataMiningUrl = navigationTarget.apply(data.get(0));
             anchor.setHref(dataMiningUrl);
         }
+        sailorProfilesTable.setList(data);
     }
 
     private void setupTable() {
@@ -136,8 +137,20 @@ public class SailorProfileStatisticTable extends Composite {
             sailorProfilesTable.addColumn(timeColumn, StringMessages.INSTANCE.time());
         }
 
+        actualValueColumn.setSortable(true);
+        sailorProfilesTable.getColumnSortList().push(actualValueColumn);
+        sailorProfilesTable.setInitialSortColumn(actualValueColumn);
+        sailorProfilesTable.setDefaultSortOrder(actualValueColumn, true);
+
         sailorProfilesTable.addColumn(actualValueColumn,
-                SailorProfileNumericStatisticTypeFormatter.getColumnHeadingName(type, stringMessages));
+                SailorProfileNumericStatisticTypeFormatter.getColumnHeadingName(type, stringMessages),
+                new InvertibleComparatorAdapter<Pair<SimpleCompetitorWithIdDTO, SingleEntry>>(true) {
+                    @Override
+                    public int compare(Pair<SimpleCompetitorWithIdDTO, SingleEntry> o1,
+                            Pair<SimpleCompetitorWithIdDTO, SingleEntry> o2) {
+                        return o1.getB().getValue().compareTo(o2.getB().getValue());
+                    }
+                }, true);
         sailorProfilesTable.addColumn(competitorColumn, StringMessages.INSTANCE.competitor());
         sailorProfilesTable.addColumn(clubNameColumn, StringMessages.INSTANCE.name());
 
