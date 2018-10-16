@@ -1325,7 +1325,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public List<TracTracConfigurationDTO> getPreviousTracTracConfigurations() throws Exception {
         final Iterable<TracTracConfiguration> configs = tractracDomainObjectFactory.getTracTracConfigurations();
-        return mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.TRACTRAC_ACCOUNT, DefaultActions.READ, configs,
+        return mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.TRACTRAC_ACCOUNT, configs,
                 TracTracConfiguration::getName,
                 ttConfig -> new TracTracConfigurationDTO(ttConfig.getName(), ttConfig.getJSONURL().toString(),
                         ttConfig.getLiveDataURI().toString(), ttConfig.getStoredDataURI().toString(),
@@ -2872,7 +2872,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public List<SwissTimingConfigurationDTO> getPreviousSwissTimingConfigurations() {
         Iterable<SwissTimingConfiguration> configs = swissTimingAdapterPersistence.getSwissTimingConfigurations();
-        return mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.SWISS_TIMING_ACCOUNT, DefaultActions.READ, configs,
+        return mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.SWISS_TIMING_ACCOUNT, configs,
                 SwissTimingConfiguration::getName,
                 stConfig -> new SwissTimingConfigurationDTO(stConfig.getName(), stConfig.getJsonURL(),
                         stConfig.getHostname(), stConfig.getPort(), stConfig.getUpdateURL(),
@@ -4732,7 +4732,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
     
-    private <T> void filterObjectsWithReadPermissionForCurrentUser(HasPermissions permittedObject,
+    private <T> void filterObjectsWithPermissionForCurrentUser(HasPermissions permittedObject,
             HasPermissions.Action action, Iterable<T> objectsToFilter, Function<T, String> objectIdExtractor,
             Consumer<T> filteredObjectsConsumer) {
         objectsToFilter.forEach(objectToCheck -> {
@@ -4743,11 +4743,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         });
     }
     
-    private <T, R> List<R> mapAndFilterByReadPermissionForCurrentUser(HasPermissions permittedObject, HasPermissions.Action action,
+    private <T, R> List<R> mapAndFilterByReadPermissionForCurrentUser(HasPermissions permittedObject,
             Iterable<T> objectsToFilter, Function<T, String> objectIdExtractor, Function<T, R> filteredObjectsMapper) {
         final List<R> result = new ArrayList<>();
-        filterObjectsWithReadPermissionForCurrentUser(permittedObject, action, objectsToFilter, objectIdExtractor,
-                filteredObject -> result.add(filteredObjectsMapper.apply(filteredObject)));
+        filterObjectsWithPermissionForCurrentUser(permittedObject, DefaultActions.READ, objectsToFilter,
+                objectIdExtractor, filteredObject -> result.add(filteredObjectsMapper.apply(filteredObject)));
         return result;
     }
 
