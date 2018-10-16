@@ -262,18 +262,18 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public SuccessInfo deleteUserGroup(String userGroupIdAsString) throws UnauthorizedException {
         try {
-        return getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(SecuredSecurityTypes.USER_GROUP,
-                userGroupIdAsString, () -> {
-                    try {
-                        final UUID userGroupId = UUID.fromString(userGroupIdAsString);
-                        final UserGroup userGroup = getSecurityService().getUserGroup(userGroupId);
-                        getSecurityService().deleteUserGroup(userGroup);
-                        return new SuccessInfo(true, "Deleted user group: " + userGroup.getName() + ".",
-                                /* redirectURL */ null, null);
-                    } catch (UserGroupManagementException e) {
-                        return new SuccessInfo(false, "Could not delete user group.", /* redirectURL */ null, null);
-                    }
-                });
+            return getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(SecuredSecurityTypes.USER_GROUP,
+                    userGroupIdAsString, () -> {
+                        try {
+                            final UUID userGroupId = UUID.fromString(userGroupIdAsString);
+                            final UserGroup userGroup = getSecurityService().getUserGroup(userGroupId);
+                            getSecurityService().deleteUserGroup(userGroup);
+                            return new SuccessInfo(true, "Deleted user group: " + userGroup.getName() + ".",
+                                    /* redirectURL */ null, null);
+                        } catch (UserGroupManagementException e) {
+                            return new SuccessInfo(false, "Could not delete user group.", /* redirectURL */ null, null);
+                        }
+                    });
         } catch (AuthorizationException e) {
             return new SuccessInfo(false, "You are not permitted to delete user group " + userGroupIdAsString, /* redirectURL */ null,
                     null);
@@ -565,6 +565,15 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             return new SuccessInfo(false, "You are not permitted to delete user " + username, /* redirectURL */ null,
                     null);
         }
+    }
+    
+    @Override
+    public Set<SuccessInfo> deleteUsers(Set<String> usernames) throws UnauthorizedException {
+        final Set<SuccessInfo> result = new HashSet<>();
+        for (String username : usernames) {
+            result.add(deleteUser(username));
+        }
+        return result;
     }
 
     @Override
