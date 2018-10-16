@@ -187,7 +187,9 @@ public class RegattasResource extends AbstractSailingServerResource {
 
         JSONArray regattasJson = new JSONArray();
         for (Regatta regatta : getService().getAllRegattas()) {
-            regattasJson.add(regattaJsonSerializer.serialize(regatta));
+            if (getSecurityService().hasCurrentUserReadPermission(regatta)) {
+                regattasJson.add(regattaJsonSerializer.serialize(regatta));
+            }
         }
         String json = regattasJson.toJSONString();
         return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
