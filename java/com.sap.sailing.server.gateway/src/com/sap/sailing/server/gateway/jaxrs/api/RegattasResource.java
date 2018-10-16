@@ -202,6 +202,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             SeriesJsonSerializer seriesJsonSerializer = new SeriesJsonSerializer(new FleetJsonSerializer(
                     new ColorJsonSerializer()));
             JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(seriesJsonSerializer, null, null);
@@ -228,6 +229,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             NationalityJsonSerializer nationalityJsonSerializer = new NationalityJsonSerializer();
             BoatJsonSerializer boatJsonSerializer = new BoatJsonSerializer(new BoatClassJsonSerializer());
             CompetitorJsonSerializer competitorJsonSerializer = new CompetitorJsonSerializer(new TeamJsonSerializer(
@@ -256,6 +258,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             RaceDefinition race = findRaceByName(regatta, raceName);
             if (race == null) {
                 response = getBadRaceErrorResponse(regattaName, raceName);
@@ -279,6 +282,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             final CompetitorJsonSerializer competitorSerializer = CompetitorJsonSerializer.create();
             final JSONArray result = new JSONArray();
             for (final Competitor competitor : regatta.getAllCompetitors()) {
@@ -295,13 +299,12 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Path("{regattaname}/competitors/{competitorid}/add")
     public Response addCompetitor(@PathParam("regattaname") String regattaName,
             @PathParam("competitorid") String competitorIdAsString) {
-        final Subject subject = SecurityUtils.getSubject();
-        subject.checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regattaName));
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
+            getSecurityService().checkCurrentUserUpdatePermission(regatta);
             Serializable competitorId;
             try {
                 competitorId = UUID.fromString(competitorIdAsString);
@@ -325,12 +328,12 @@ public class RegattasResource extends AbstractSailingServerResource {
             Long timeOnDistanceAllowancePerNauticalMileAsMillis, String searchTag, String competitorName,
             String competitorEmail, Function<String, DynamicBoat> boatObtainer) {
         final Subject subject = SecurityUtils.getSubject();
-        subject.checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regattaName));
         Response response;
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
+            getSecurityService().checkCurrentUserUpdatePermission(regatta);
             final User user = getService(SecurityService.class).getCurrentUser();
             final String shortName;
             final String name;
