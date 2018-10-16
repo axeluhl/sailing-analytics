@@ -10,6 +10,7 @@ import javax.ws.rs.core.Response;
 import org.json.simple.JSONArray;
 
 import com.sap.sailing.domain.base.LeaderboardSearchResult;
+import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.CourseAreaJsonSerializer;
@@ -42,8 +43,25 @@ public class SearchResource extends AbstractSailingServerResource {
         Iterable<LeaderboardSearchResult> searchResults = search(query).getHits();
         JSONArray jsonSearchResults = new JSONArray();
         for (LeaderboardSearchResult searchResult : searchResults) {
-            jsonSearchResults.add(serializer.serialize(searchResult));
+            if(searchResult.getLeaderboard() == null || getSecurityService().hasCurrentUserReadPermission(searchResult.getLeaderboard())) {
+                if(searchResult.getRegatta() == null || getSecurityService().hasCurrentUserReadPermission(searchResult.getRegatta())) {
+                    if (searchResult.getLeaderboard() == null || checkAll(searchResult.getLeaderboardGroups())) {
+                        jsonSearchResults.add(serializer.serialize(searchResult));
+                    }
+                }
+            }
+            
         }
         return Response.ok(jsonSearchResults.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+    }
+
+    private boolean checkAll(Iterable<LeaderboardGroup> leaderboardGroups) {
+        boolean result = true;
+        for (LeaderboardGroup leaderboardGroup : leaderboardGroups) {
+            if (!getSecurityService().hasCurrentUserReadPermission(leaderboardGroup)) {
+                result = false;
+            }
+        }
+        return result;
     }
 }
