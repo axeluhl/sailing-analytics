@@ -230,14 +230,12 @@ public class EventsResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response getEvents(@QueryParam("showNonPublic") String showNonPublic) {
-        // TODO bug2589, bug3504: the following will require EVENT:READ permission; it requires cross-server links to be
-        // authentication aware...
-        // SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermission(Permission.Mode.READ));
         JsonSerializer<EventBase> eventSerializer = new EventBaseJsonSerializer(
                 new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer());
         JSONArray result = new JSONArray();
-        for (EventBase event : getService().getAllEvents()) {
-            if ((showNonPublic != null && Boolean.valueOf(showNonPublic)) || event.isPublic()) {
+        for (Event event : getService().getAllEvents()) {
+            if (getSecurityService().hasCurrentUserReadPermission(event)
+                    && ((showNonPublic != null && Boolean.valueOf(showNonPublic)) || event.isPublic())) {
                 result.add(eventSerializer.serialize(event));
             }
         }
@@ -249,10 +247,6 @@ public class EventsResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     @Path("{eventId}")
     public Response getEvent(@PathParam("eventId") String eventId) {
-        // TODO bug2589, bug3504: the following will require EVENT:READ permission; it requires cross-server links to be
-        // authentication aware...
-        // SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermissionForObjects(Permission.Mode.READ,
-        // eventId));
         Response response;
         UUID eventUuid;
         try {
@@ -264,12 +258,18 @@ public class EventsResource extends AbstractSailingServerResource {
         if (event == null) {
             response = getBadEventErrorResponse(eventId);
         } else {
-            JsonSerializer<EventBase> eventSerializer = new EventBaseJsonSerializer(
-                    new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer());
-            JSONObject eventJson = eventSerializer.serialize(event);
-    
-            String json = eventJson.toJSONString();
-            response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+            if (getSecurityService().hasCurrentUserReadPermission(event)) {
+                JsonSerializer<EventBase> eventSerializer = new EventBaseJsonSerializer(
+                        new VenueJsonSerializer(new CourseAreaJsonSerializer()),
+                        new LeaderboardGroupBaseJsonSerializer());
+                JSONObject eventJson = eventSerializer.serialize(event);
+
+                String json = eventJson.toJSONString();
+                response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")
+                        .build();
+            } else {
+                response = Response.status(Status.FORBIDDEN).build();
+            }
         }
         return response;
     }
@@ -282,10 +282,6 @@ public class EventsResource extends AbstractSailingServerResource {
             @QueryParam("filterByCourseArea") String filterByCourseArea,
             @QueryParam("filterByDayOffset") String filterByDayOffset,
             @QueryParam("clientTimeZoneOffsetInMinutes") Integer clientTimeZoneOffsetInMinutes) {
-        // TODO bug2589, bug3504: the following will require EVENT:READ permission; it requires cross-server links to be
-        // authentication aware...
-        // SecurityUtils.getSubject().checkPermission(Permission.EVENT.getStringPermissionForObjects(Permission.Mode.READ,
-        // eventId));
         Response response;
         UUID eventUuid;
         try {
@@ -297,22 +293,27 @@ public class EventsResource extends AbstractSailingServerResource {
         if (event == null) {
             response = getBadEventErrorResponse(eventId);
         } else {
-            final Duration clientTimeZoneOffset;
-            if (filterByDayOffset != null) {
-                if (clientTimeZoneOffsetInMinutes != null) {
-                    clientTimeZoneOffset = new MillisecondsDurationImpl(1000 * 60 * clientTimeZoneOffsetInMinutes);
+            if (getSecurityService().hasCurrentUserReadPermission(event)) {
+                final Duration clientTimeZoneOffset;
+                if (filterByDayOffset != null) {
+                    if (clientTimeZoneOffsetInMinutes != null) {
+                        clientTimeZoneOffset = new MillisecondsDurationImpl(1000 * 60 * clientTimeZoneOffsetInMinutes);
+                    } else {
+                        clientTimeZoneOffset = Duration.NULL;
+                    }
                 } else {
-                    clientTimeZoneOffset = Duration.NULL;
+                    clientTimeZoneOffset = null;
                 }
+                EventRaceStatesSerializer eventRaceStatesSerializer = new EventRaceStatesSerializer(filterByCourseArea,
+                        filterByLeaderboard, filterByDayOffset, clientTimeZoneOffset, getService());
+                JSONObject raceStatesJson = eventRaceStatesSerializer.serialize(
+                        new Pair<Event, Iterable<Leaderboard>>(event, getService().getLeaderboards().values()));
+                String json = raceStatesJson.toJSONString();
+                response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")
+                        .build();
             } else {
-                clientTimeZoneOffset = null;
+                response = Response.status(Status.FORBIDDEN).build();
             }
-            EventRaceStatesSerializer eventRaceStatesSerializer = new EventRaceStatesSerializer(filterByCourseArea,
-                    filterByLeaderboard, filterByDayOffset, clientTimeZoneOffset, getService());
-            JSONObject raceStatesJson = eventRaceStatesSerializer
-                    .serialize(new Pair<Event, Iterable<Leaderboard>>(event, getService().getLeaderboards().values()));
-            String json = raceStatesJson.toJSONString();
-            response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
         return response;
     }
@@ -511,8 +512,7 @@ public class EventsResource extends AbstractSailingServerResource {
     }
 
     private void updateEvent(Event event, LeaderboardGroup leaderboardGroup){
-        SecurityUtils.getSubject().checkPermission(
-                SecuredDomainType.EVENT.getStringPermissionForObjects(DefaultActions.UPDATE, event.getId().toString()));
+        getSecurityService().checkCurrentUserUpdatePermission(event);
         List<UUID> newLeaderboardGroupIds = new ArrayList<>();
         StreamSupport.stream(event.getLeaderboardGroups().spliterator(), false)
                 .forEach(lg -> newLeaderboardGroupIds.add(lg.getId()));
