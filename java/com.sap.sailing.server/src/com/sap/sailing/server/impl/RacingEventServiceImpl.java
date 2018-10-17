@@ -912,6 +912,18 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
 
     private void ensureOwnerships(SecurityService securityService) {
+        securityService.assumeOwnershipMigrated(SecuredDomainType.MANAGE_MARK_PASSINGS.getName(),
+                SecuredDomainType.getAllInstances());
+        securityService.assumeOwnershipMigrated(SecuredDomainType.MANAGE_MARK_POSITIONS.getName(),
+                SecuredDomainType.getAllInstances());
+        securityService.assumeOwnershipMigrated(SecuredDomainType.CAN_REPLAY_DURING_LIVE_RACES.getName(),
+                SecuredDomainType.getAllInstances());
+        securityService.assumeOwnershipMigrated(SecuredDomainType.DETAIL_TIMER.getName(), SecuredDomainType.getAllInstances());
+        securityService.assumeOwnershipMigrated(SecuredDomainType.DATA_MINING.getName(),
+                SecuredDomainType.getAllInstances());
+        securityService.assumeOwnershipMigrated(SecuredDomainType.REPLICATOR.getName(),
+                SecuredDomainType.getAllInstances());
+
         for (Event event : getAllEvents()) {
             securityService.migrateOwnership(event, SecuredDomainType.getAllInstances());
         }

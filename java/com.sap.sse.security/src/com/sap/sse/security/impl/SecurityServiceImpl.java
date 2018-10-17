@@ -1708,17 +1708,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public void migrateOwnership(final QualifiedObjectIdentifier identifier, final String displayName,
             final Iterable<HasPermissions> permissions) {
         
-        final List<String> allRequiredPermissionsAsString = new ArrayList<>();
-        for (HasPermissions permission : permissions) {
-            allRequiredPermissionsAsString.add(permission.getName());
-        }
-        // the given Iterable cannot guarantee, that the order is always the same
-        Collections.sort(allRequiredPermissionsAsString);
-        
-        Pair<Class<? extends HasPermissions>, List<String>> key = new Pair<>(Util.first(permissions).getClass(),
-                allRequiredPermissionsAsString);
-        final List<String> alreadyMigrated = migratedHasPermissionTypes.computeIfAbsent(key,
-                t -> new CopyOnWriteArrayList<>());
+        final List<String> alreadyMigrated = getMigrationInfoForKey(permissions);
         if (migrationCompleteCheckTask != null) {
             // java util timer cannot be rescheduled, so cancel and create a new one
             migrationCompleteCheckTask.cancel();
@@ -1745,6 +1735,21 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (!alreadyMigrated.contains(identifier.getTypeIdentifier())) {
             alreadyMigrated.add(identifier.getTypeIdentifier());
         }
+    }
+
+    private List<String> getMigrationInfoForKey(final Iterable<HasPermissions> permissions) {
+        final List<String> allRequiredPermissionsAsString = new ArrayList<>();
+        for (HasPermissions permission : permissions) {
+            allRequiredPermissionsAsString.add(permission.getName());
+        }
+        // the given Iterable cannot guarantee, that the order is always the same
+        Collections.sort(allRequiredPermissionsAsString);
+
+        Pair<Class<? extends HasPermissions>, List<String>> key = new Pair<>(Util.first(permissions).getClass(),
+                allRequiredPermissionsAsString);
+        final List<String> alreadyMigrated = migratedHasPermissionTypes.computeIfAbsent(key,
+                t -> new CopyOnWriteArrayList<>());
+        return alreadyMigrated;
     }
 
     protected void checkMigration() {
@@ -1795,5 +1800,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public void checkCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object) {
         SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObjects(DefaultActions.UPDATE,
                 object.getIdentifier().getTypeRelativeObjectIdentifier()));
+    }
+
+    @Override
+    public void assumeOwnershipMigrated(String typeName, Iterable<HasPermissions> permissions) {
+        final List<String> alreadyMigrated = getMigrationInfoForKey(permissions);
+        alreadyMigrated.add(typeName);
     }
 }
