@@ -258,18 +258,13 @@ public class EventsResource extends AbstractSailingServerResource {
         if (event == null) {
             response = getBadEventErrorResponse(eventId);
         } else {
-            if (getSecurityService().hasCurrentUserReadPermission(event)) {
-                JsonSerializer<EventBase> eventSerializer = new EventBaseJsonSerializer(
-                        new VenueJsonSerializer(new CourseAreaJsonSerializer()),
-                        new LeaderboardGroupBaseJsonSerializer());
-                JSONObject eventJson = eventSerializer.serialize(event);
+            getSecurityService().checkCurrentUserReadPermission(event);
+            JsonSerializer<EventBase> eventSerializer = new EventBaseJsonSerializer(
+                    new VenueJsonSerializer(new CourseAreaJsonSerializer()), new LeaderboardGroupBaseJsonSerializer());
+            JSONObject eventJson = eventSerializer.serialize(event);
 
-                String json = eventJson.toJSONString();
-                response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")
-                        .build();
-            } else {
-                response = Response.status(Status.FORBIDDEN).build();
-            }
+            String json = eventJson.toJSONString();
+            response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
         }
         return response;
     }

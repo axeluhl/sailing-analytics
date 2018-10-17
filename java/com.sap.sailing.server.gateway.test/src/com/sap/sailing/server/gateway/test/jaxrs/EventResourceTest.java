@@ -33,20 +33,18 @@ import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.jaxrs.api.AbstractLeaderboardsResource;
-import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardGroupsResource;
-import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardsResource;
-import com.sap.sailing.server.gateway.jaxrs.api.RegattasResource;
 import com.sap.sse.InvalidDateException;
 import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
 
 public class EventResourceTest extends AbstractJaxRsApiTest {
     private DummyEventsRessource eventsResource;
-    private RegattasResource regattasResource;
-    private LeaderboardGroupsResource leaderboardGroupsResource;
-    private LeaderboardsResource leaderboardsResource;
+    private DummyRegattasResource regattasResource;
+    private DummyLeaderboardGroupsResource leaderboardGroupsResource;
+    private DummyLeaderboardsResource leaderboardsResource;
     private String randomName; 
     private UriInfo uriInfo;
     
@@ -83,14 +81,24 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
                 Mockito.any(UserGroup.class), Mockito.any(), Mockito.any(), Mockito.any(),
                 Mockito.any(ActionWithResult.class));
 
+        Mockito.doReturn(true).when(securityService)
+                .hasCurrentUserReadPermission(Mockito.any(WithQualifiedObjectIdentifier.class));
+
+        Mockito.doNothing().when(securityService)
+                .checkCurrentUserReadPermission(Mockito.any());
+
         Mockito.doReturn(true).when(fakeSubject).isAuthenticated();
+
 
         eventsResource = createResource(new DummyEventsRessource());
         doReturn(securityService).when(eventsResource).getSecurityService();
 
-        regattasResource = createResource(new RegattasResource());
-        leaderboardGroupsResource = createResource(new LeaderboardGroupsResource());
-        leaderboardsResource = createResource(new LeaderboardsResource());
+        regattasResource = createResource(new DummyRegattasResource());
+        doReturn(securityService).when(regattasResource).getSecurityService();
+        leaderboardGroupsResource = createResource(new DummyLeaderboardGroupsResource());
+        doReturn(securityService).when(leaderboardGroupsResource).getSecurityService();
+        leaderboardsResource = createResource(new DummyLeaderboardsResource());
+        doReturn(securityService).when(leaderboardsResource).getSecurityService();
         randomName = randomName();
     }
     
