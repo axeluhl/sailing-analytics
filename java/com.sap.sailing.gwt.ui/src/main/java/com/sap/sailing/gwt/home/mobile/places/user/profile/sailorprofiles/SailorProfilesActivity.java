@@ -12,7 +12,7 @@ import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.Sai
 import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.AbstractUserProfileActivity;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.details.SailorProfilesDetailsViewImpl;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.ClientFactoryWithDispatchAndError;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.ClientFactoryWithDispatchAndErrorAndUserService;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfilePresenter;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileDetailsView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.HasLoginFormAndFactory;
@@ -113,7 +113,7 @@ public class SailorProfilesActivity extends AbstractUserProfileActivity
     }
 
     @Override
-    public ClientFactoryWithDispatchAndError getClientFactory() {
+    public ClientFactoryWithDispatchAndErrorAndUserService getClientFactory() {
         return editSailorProfilePresenter.getClientFactory();
     }
 

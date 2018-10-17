@@ -36,8 +36,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.security.ui.authentication.app.NeedsAuthenticationContext;
 
 /**
- * Implementation of {@link SailorProfileView} and {@link EditSailorProfileDetailsView} where users can change the details of
- * the sailor profiles.
+ * Implementation of {@link SailorProfileView} and {@link EditSailorProfileDetailsView} where users can change the
+ * details of the sailor profiles.
  */
 public class SailorProfilesDetailsImpl extends Composite implements SailorProfileView, EditSailorProfileDetailsView {
 
@@ -236,8 +236,8 @@ public class SailorProfilesDetailsImpl extends Composite implements SailorProfil
     }
 
     private void addStatistic(SailorProfileNumericStatisticType type, SailorProfileStatisticDTO statistic) {
-        contentContainerStatisticsUi.add(
-                new SailorProfileStatisticTable(type, statistic, presenter.getFlagImageResolver(), stringMessages));
+        contentContainerStatisticsUi.add(new SailorProfileStatisticTable(type, statistic,
+                presenter.getFlagImageResolver(), stringMessages, presenter.getClientFactory().getUserService()));
         if (statisticsEmpty != null) {
             contentContainerStatisticsUi.remove(statisticsEmpty);
         }

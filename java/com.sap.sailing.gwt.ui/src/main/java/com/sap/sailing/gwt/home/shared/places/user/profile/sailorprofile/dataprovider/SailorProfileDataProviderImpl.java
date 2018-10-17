@@ -18,7 +18,7 @@ import com.sap.sailing.gwt.home.communication.user.profile.sailorprofile.GetSail
 import com.sap.sailing.gwt.home.communication.user.profile.sailorprofile.RemoveSailorProfileAction;
 import com.sap.sailing.gwt.home.communication.user.profile.sailorprofile.UpdateSailorProfileCompetitorsAction;
 import com.sap.sailing.gwt.home.communication.user.profile.sailorprofile.UpdateSailorProfileTitleAction;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.ClientFactoryWithDispatchAndError;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.ClientFactoryWithDispatchAndErrorAndUserService;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileDetailsView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -36,9 +36,9 @@ public class SailorProfileDataProviderImpl implements SailorProfileDataProvider 
     private EditSailorProfileDetailsView sailorView;
     private SailorProfilesCompetitorSelectionPresenter competitorSelectionPresenter;
 
-    private final ClientFactoryWithDispatchAndError clientFactory;
+    private final ClientFactoryWithDispatchAndErrorAndUserService clientFactory;
 
-    public SailorProfileDataProviderImpl(ClientFactoryWithDispatchAndError clientFactory) {
+    public SailorProfileDataProviderImpl(ClientFactoryWithDispatchAndErrorAndUserService clientFactory) {
         this.clientFactory = clientFactory;
     }
 

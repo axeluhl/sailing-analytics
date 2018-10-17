@@ -4,6 +4,6 @@ public interface HasLoginFormAndFactory {
 
     void doTriggerLoginForm();
 
-    ClientFactoryWithDispatchAndError getClientFactory();
+    ClientFactoryWithDispatchAndErrorAndUserService getClientFactory();
 
 }

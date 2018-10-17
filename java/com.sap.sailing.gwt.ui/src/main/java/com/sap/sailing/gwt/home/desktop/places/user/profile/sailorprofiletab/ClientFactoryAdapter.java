@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab;
 
 import com.sap.sailing.gwt.home.desktop.places.user.profile.UserProfileView;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.ClientFactoryWithDispatchAndError;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.ClientFactoryWithDispatchAndErrorAndUserService;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.HasLoginFormAndFactory;
 
 /**
@@ -22,7 +22,7 @@ public class ClientFactoryAdapter implements HasLoginFormAndFactory {
     }
 
     @Override
-    public ClientFactoryWithDispatchAndError getClientFactory() {
+    public ClientFactoryWithDispatchAndErrorAndUserService getClientFactory() {
         return presenter.getClientFactory();
     }
 }

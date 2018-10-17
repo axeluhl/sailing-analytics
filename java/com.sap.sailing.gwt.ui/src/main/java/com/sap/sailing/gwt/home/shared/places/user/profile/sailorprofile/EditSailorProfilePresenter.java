@@ -23,12 +23,12 @@ import com.sap.sse.gwt.client.mvp.ClientFactory;
  */
 public class EditSailorProfilePresenter implements EditSailorProfileDetailsView.Presenter {
 
-    private final ClientFactoryWithDispatchAndError clientFactory;
+    private final ClientFactoryWithDispatchAndErrorAndUserService clientFactory;
 
     private final SailorProfileDataProvider sailorProfileDataProvider;
     private final SailorProfilesCompetitorSelectionPresenter sailorProfilesCompetitorSelectionPresenter;
 
-    public EditSailorProfilePresenter(ClientFactoryWithDispatchAndError clientFactory) {
+    public EditSailorProfilePresenter(ClientFactoryWithDispatchAndErrorAndUserService clientFactory) {
         this.clientFactory = clientFactory;
         this.sailorProfileDataProvider = new SailorProfileDataProviderImpl(clientFactory);
         this.sailorProfilesCompetitorSelectionPresenter = new SailorProfilesCompetitorSelectionPresenter(
@@ -59,7 +59,7 @@ public class EditSailorProfilePresenter implements EditSailorProfileDetailsView.
         return clientFactory.getPlaceController();
     }
 
-    public ClientFactoryWithDispatchAndError getClientFactory() {
+    public ClientFactoryWithDispatchAndErrorAndUserService getClientFactory() {
         return clientFactory;
     }
 

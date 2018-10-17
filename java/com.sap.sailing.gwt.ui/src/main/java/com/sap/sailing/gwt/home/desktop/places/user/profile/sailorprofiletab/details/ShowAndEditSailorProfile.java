@@ -37,6 +37,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Implementation of {@link EditSailorProfileDetailsView} where users can view the details of a SailorProfile and edit
@@ -72,10 +73,13 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
 
     private FlagImageResolver flagImageResolver;
 
+    private UserService userService;
+
     public ShowAndEditSailorProfile(EditSailorProfileDetailsView.Presenter presenter,
-            FlagImageResolver flagImageResolver, SailorProfileDetailsView parent) {
+            FlagImageResolver flagImageResolver, SailorProfileDetailsView parent, UserService userService) {
         this.presenter = presenter;
         this.flagImageResolver = flagImageResolver;
+        this.userService = userService;
         presenter.getDataProvider().setView(this);
         competitorSelectionUi = new EditableSuggestedMultiSelectionCompetitor(presenter.getCompetitorPresenter(),
                 flagImageResolver);
@@ -150,7 +154,8 @@ public class ShowAndEditSailorProfile extends Composite implements EditSailorPro
     private void setupTables(SailorProfileDTO entry) {
         DataMiningQueryForSailorProfilesPersistor.removeDMQueriesFromLocalStorage();
         for (SailorProfileNumericStatisticType type : SailorProfileNumericStatisticType.values()) {
-            SailorProfileStatisticTable table = new SailorProfileStatisticTable(flagImageResolver, type, i18n);
+            SailorProfileStatisticTable table = new SailorProfileStatisticTable(flagImageResolver, type, i18n,
+                    userService);
             accordionStatisticsUi.addWidget(table);
             if (accordionStatisticsUi.isExpanded()) {
                 updateStatistic(entry, type, table);

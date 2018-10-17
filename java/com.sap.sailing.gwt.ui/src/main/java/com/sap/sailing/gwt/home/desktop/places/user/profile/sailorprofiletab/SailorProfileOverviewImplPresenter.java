@@ -6,15 +6,15 @@ import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfilesDTO;
-import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfilePresenter;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.ClientFactoryWithDispatchAndErrorAndUserService;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileDetailsView;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileDetailsView.Presenter;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfilePresenter;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.HasLoginFormAndFactory;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.view.SailorProfileOverview;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.view.SailorProfileView;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
-import com.sap.sse.gwt.client.mvp.ClientFactory;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 
 public class SailorProfileOverviewImplPresenter implements SailingProfileOverviewPresenter {
@@ -40,7 +40,7 @@ public class SailorProfileOverviewImplPresenter implements SailingProfileOvervie
     }
 
     @Override
-    public ClientFactory getClientFactory() {
+    public ClientFactoryWithDispatchAndErrorAndUserService getClientFactory() {
         return loginAndFactory.getClientFactory();
     }
 

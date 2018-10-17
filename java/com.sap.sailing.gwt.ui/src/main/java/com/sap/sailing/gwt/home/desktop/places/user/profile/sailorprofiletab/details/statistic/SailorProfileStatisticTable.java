@@ -20,6 +20,8 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.impl.InvertibleComparatorAdapter;
+import com.sap.sailing.domain.common.security.Permission;
+import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableResources;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType;
@@ -42,6 +44,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.settings.Settings;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * This element displays a given statistic for each sailor in a sailor profile in the {@link ShowAndEditSailorProfile}
@@ -79,8 +82,11 @@ public class SailorProfileStatisticTable extends Composite {
 
     private String dataMiningUrl;
 
+    private UserService userService;
+
     public SailorProfileStatisticTable(FlagImageResolver flagImageResolver, SailorProfileNumericStatisticType type,
-            StringMessages stringMessages) {
+            StringMessages stringMessages, UserService userService) {
+        this.userService = userService;
         this.flagImageResolver = flagImageResolver;
         this.type = type;
         this.stringMessages = stringMessages;
@@ -126,6 +132,10 @@ public class SailorProfileStatisticTable extends Composite {
             dataMiningUrl = navigationTarget.apply(data.get(0));
             anchor.setHref(dataMiningUrl);
         }
+        if (!userService.getCurrentUser().hasPermission(Permission.DATA_MINING.getStringPermission(),
+                SailingPermissionsForRoleProvider.INSTANCE)) {
+            anchor.setVisible(false);
+        }
         sailorProfilesTable.setList(data);
     }
 
@@ -167,20 +177,22 @@ public class SailorProfileStatisticTable extends Composite {
             // navigation target is set from outside
         }
 
-        addButtonStyle(actualValueColumn);
-        addButtonStyle(clubNameColumn);
-        addButtonStyle(competitorColumn);
-        addButtonStyle(eventNameColumn);
-        addButtonStyle(navigatorColumn);
-        addButtonStyle(timeColumn);
+        if (userService.getCurrentUser().hasPermission(Permission.DATA_MINING.getStringPermission(),
+                SailingPermissionsForRoleProvider.INSTANCE)) {
+            addButtonStyle(actualValueColumn);
+            addButtonStyle(clubNameColumn);
+            addButtonStyle(competitorColumn);
+            addButtonStyle(eventNameColumn);
+            addButtonStyle(navigatorColumn);
+            addButtonStyle(timeColumn);
 
-        sailorProfilesTable.addCellPreviewHandler(e -> {
-            /* no navigation for remove column */
-            if ("click".equals(e.getNativeEvent().getType())) {
-                GWT.log(e.getNativeEvent().getType());
-                Window.Location.assign(navigationTarget.apply(e.getValue()));
-            }
-        });
+            sailorProfilesTable.addCellPreviewHandler(e -> {
+                /* no navigation for remove column */
+                if ("click".equals(e.getNativeEvent().getType())) {
+                    Window.Location.assign(navigationTarget.apply(e.getValue()));
+                }
+            });
+        }
     }
 
     private void addButtonStyle(Column<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, ?> col) {

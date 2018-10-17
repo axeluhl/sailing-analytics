@@ -15,6 +15,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.security.Permission;
+import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType.StatisticType;
@@ -27,6 +29,7 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedS
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.settings.SailingSettingsConstants;
+import com.sap.sse.security.ui.client.UserService;
 
 /** displays a single statistic table which contains all {@link SailorProfileStatsiticEntry} objects */
 public class SailorProfileStatisticTable extends Composite {
@@ -49,7 +52,7 @@ public class SailorProfileStatisticTable extends Composite {
     DivElement sectionTitleIconUi;
 
     public SailorProfileStatisticTable(SailorProfileNumericStatisticType type, SailorProfileStatisticDTO statistic,
-            FlagImageResolver flagImageResolver, StringMessages stringMessages) {
+            FlagImageResolver flagImageResolver, StringMessages stringMessages, final UserService userService) {
         initWidget(uiBinder.createAndBindUi(this));
         SailorProfileMobileResources.INSTANCE.css().ensureInjected();
         this.sectionTitleUi
@@ -62,10 +65,9 @@ public class SailorProfileStatisticTable extends Composite {
         this.sectionTitleIconUi.appendChild(icon.getElement());
 
         // add SailorProfileStatisticTableEntry objects
-        Set<Entry<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>>> entrySet = statistic
-                .getResult().entrySet();
+        Set<Entry<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>>> entrySet = statistic.getResult().entrySet();
 
-        //sort entries
+        // sort entries
         ArrayList<Entry<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>>> data = new ArrayList<>();
         data.addAll(entrySet);
         data.sort((o1, o2) -> Double.compare(o1.getValue().get(0).getValue(), o2.getValue().get(0).getValue()));
@@ -75,7 +77,8 @@ public class SailorProfileStatisticTable extends Composite {
                         flagImageResolver, stringMessages, statistic.getDataMiningQuery()));
             }
         }
-        if (type.getAggregationType() == StatisticType.AVERAGE) {
+        if (type.getAggregationType() == StatisticType.AVERAGE && userService.getCurrentUser().hasPermission(
+                Permission.DATA_MINING.getStringPermission(), SailingPermissionsForRoleProvider.INSTANCE)) {
             addDataminingButton(statistic);
         }
     }
