@@ -85,19 +85,20 @@ public class PermissionChecker {
 
         // anonymous can only grant it if not already decided by acl
         if (result == PermissionState.NONE) {
-            PermissionState anonymous = checkUserPermissions(permission, allUser, ownership, result);
+            PermissionState anonymous = checkUserPermissions(permission, allUser, ownership);
             if (anonymous == PermissionState.GRANTED) {
                 result = anonymous;
             }
         }
         if (result == PermissionState.NONE) {
-            result = checkUserPermissions(permission, user, ownership, result);
+            result = checkUserPermissions(permission, user, ownership);
         }
         return result == PermissionState.GRANTED;
     }
 
     private static PermissionState checkUserPermissions(WildcardPermission permission, SecurityUser user,
-            Ownership ownership, PermissionState result) {
+            Ownership ownership) {
+        PermissionState result = PermissionState.NONE;
         // 2. check direct permissions
         if (result == PermissionState.NONE && user != null) { // no direct permissions for anonymous users
             for (WildcardPermission directPermission : user.getPermissions()) {
