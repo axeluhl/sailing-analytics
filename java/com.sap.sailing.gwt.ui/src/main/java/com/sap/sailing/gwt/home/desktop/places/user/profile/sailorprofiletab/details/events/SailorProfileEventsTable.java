@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.common.theme.component.celltable.DesignedCellTableRes
 import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedEventDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.ParticipatedRegattaDTO;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.leaderboardtab.RegattaLeaderboardPlace;
+import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileDesktopResources;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.ShowAndEditSailorProfile;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
@@ -74,6 +75,25 @@ public class SailorProfileEventsTable extends Composite {
 
         sailorProfilesTable.setPageSize(Util.size(regattas));
         sailorProfilesTable.setList(regattas);
+
+        addButtonStyle(regattaNameColumn);
+        addButtonStyle(regattaRank);
+        addButtonStyle(competitorColumn);
+        addButtonStyle(clubNameColumn);
+        addButtonStyle(sumPointsColumn);
+        addButtonStyle(navigatorColumn);
+
+        sailorProfilesTable.addCellPreviewHandler(e -> {
+            /* no navigation for remove column */
+            if ("click".equals(e.getNativeEvent().getType())) {
+                placeController.goTo(getTargetPlace(e.getValue()));
+            }
+        });
+    }
+
+    private void addButtonStyle(Column<?, ?> col) {
+        col.setCellStyleNames(col.getCellStyleNames(null, null) + " "
+                + SailorProfileDesktopResources.INSTANCE.css().clickableColumn());
     }
 
     private RegattaLeaderboardPlace getTargetPlace(ParticipatedRegattaDTO entry) {

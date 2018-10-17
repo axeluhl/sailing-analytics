@@ -195,10 +195,9 @@ public class SailorProfileStatisticTable extends Composite {
         }
     }
 
-    private void addButtonStyle(Column<Pair<SimpleCompetitorWithIdDTO, SingleEntry>, ?> col) {
+    private void addButtonStyle(Column<?, ?> col) {
         col.setCellStyleNames(col.getCellStyleNames(null, null) + " "
                 + SailorProfileDesktopResources.INSTANCE.css().clickableColumn());
-
     }
 
     private String createRaceboardURL(Pair<SimpleCompetitorWithIdDTO, SingleEntry> entry) {

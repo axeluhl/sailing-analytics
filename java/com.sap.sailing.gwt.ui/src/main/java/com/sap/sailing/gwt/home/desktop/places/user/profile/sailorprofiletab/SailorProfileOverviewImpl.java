@@ -119,10 +119,9 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
                 + SailorProfileDesktopResources.INSTANCE.css().clickableColumn());
     }
 
-    private void addButtonStyle(Column<SailorProfileDTO, ?> col) {
+    private void addButtonStyle(Column<?, ?> col) {
         col.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell() + " "
                 + SailorProfileDesktopResources.INSTANCE.css().clickableColumn());
-
     }
 
     private void createFooter() {
