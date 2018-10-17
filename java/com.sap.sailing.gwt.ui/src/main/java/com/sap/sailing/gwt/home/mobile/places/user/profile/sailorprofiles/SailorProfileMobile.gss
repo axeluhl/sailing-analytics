@@ -136,9 +136,8 @@
 .overviewTableFooterMobile {
     cursor: pointer;
     border-top: 2px solid #ccc;
-    border-bottom: 2px solid #ccc;
     font-size: 1rem;
-    padding: 1em;
+    padding: 1em 1em 0;
     vertical-align: middle;
     width: auto;
     display: block;
