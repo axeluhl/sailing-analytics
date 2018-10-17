@@ -409,7 +409,7 @@ public class RegattaDetailsComposite extends Composite {
             canBoatsOfCompetitorsChangePerRace.setText(regatta.canBoatsOfCompetitorsChangePerRace ? stringMessages.yes() : stringMessages.no());
             competitorRegistrationType.setText(regatta.competitorRegistrationType.getLabel(stringMessages));
             openRegattaRegistrationLink.setText(regatta.competitorRegistrationType.isOpen()
-                    ? "http://www.sapsailing.com"    //TODO: get correct URL for branch.io
+                    ? "http://www.sapsailing.com?secret=" + regatta.registrationLinkSecret    //TODO: get correct URL for branch.io
                     : "-");
             buoyZoneRadiusInHullLengths.setText(String.valueOf(regatta.buoyZoneRadiusInHullLengths));
             

@@ -25,6 +25,7 @@ import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
+import com.sap.sailing.gwt.ui.common.client.RandomString;
 import com.sap.sailing.gwt.ui.leaderboard.RankingMetricTypeFormatter;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
@@ -115,6 +116,19 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         competitorRegistrationTypeListBox = createListBox(false);
         EnumSet.allOf(CompetitorRegistrationType.class).forEach(t->competitorRegistrationTypeListBox.addItem(t.getLabel(stringMessages), t.name()));
         competitorRegistrationTypeListBox.setSelectedIndex(regatta.competitorRegistrationType.ordinal());
+        competitorRegistrationTypeListBox.addChangeHandler(new ChangeHandler() {
+
+            @Override
+            public void onChange(ChangeEvent event) {
+                if (CompetitorRegistrationType.valueOf(competitorRegistrationTypeListBox.getSelectedValue()).isOpen()) {
+                    registrationLinkWithQRCodeOpenButton.setEnabled(true);
+                    registrationLinkWithQRCode.setSecret(RandomString.createRandomSecret(20));
+                } else {
+                    registrationLinkWithQRCodeOpenButton.setEnabled(false);
+                    registrationLinkWithQRCode.setSecret(null);
+                }
+            }
+        });
 
         registrationLinkWithQRCode = new RegistrationLinkWithQRCode();
         registrationLinkWithQRCode.setSecret(regatta.registrationLinkSecret);

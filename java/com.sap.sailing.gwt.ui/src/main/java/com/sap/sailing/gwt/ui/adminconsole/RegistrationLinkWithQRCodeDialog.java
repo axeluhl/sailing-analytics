@@ -1,8 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
@@ -12,6 +9,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.common.client.RandomString;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 
 public class RegistrationLinkWithQRCodeDialog extends DataEntryDialog<RegistrationLinkWithQRCode> {
@@ -36,7 +34,7 @@ public class RegistrationLinkWithQRCodeDialog extends DataEntryDialog<Registrati
             
             @Override
             public void onClick(ClickEvent event) {
-                final String randomString = createRandomSecret(20);
+                final String randomString = RandomString.createRandomSecret(20);
                 registrationLinkWithQRCode.setSecret(randomString);
                 secretTextBox.setText(randomString);
             }
@@ -64,13 +62,6 @@ public class RegistrationLinkWithQRCodeDialog extends DataEntryDialog<Registrati
         formGrid.setWidget(0, 2, generateSecretButton);
 
         return panel;
-    }
-
-    private static String createRandomSecret(int length) {
-        String randomString = Stream.generate(Math::random).map(r -> (int) (r * 100))
-                .filter(i -> (i > 47 && i < 58 || i > 64 && i < 90)).limit(length)
-                .map(i -> (String) String.valueOf((char) i.intValue())).collect(Collectors.joining());
-        return randomString;
     }
 
 }
