@@ -1,10 +1,13 @@
 package com.sap.sse.security.shared;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.HasPermissions.Action;
 
 /**
  * The {@link PermissionChecker} is an implementation of the permission checking algorithm also described in <a href=
@@ -134,7 +137,104 @@ public class PermissionChecker {
         }
         return false;
     }
+    
+    /**
+     * This is not the fully featured permission check!<br>
+     * This method checks if a user owns all permissions implied by the given {@link WildcardPermission}. If a user
+     * wants to grant another user a specific permissions, he needs to own all permissions that may be implied by the
+     * granted permission.<br>
+     * The regular permission check only succeeds if a requested permission is completely implied by a granted
+     * permission. This is fine when checking for a specific permission like USER:UPDATE:my_user. If one user grants a
+     * meta permission like USER:*:* for another user this would mean the current user needs an equivalent meta
+     * permission or one that is even more general like *:*:* or USER,USER_GROUP:*:*. In contrast to that, a user who
+     * owns the permissions USER:*:* and USER_GROUP:*:* may not grant USER,USER_GROUP:*:* because this meta permission
+     * is not implied by a single permission held by the current user.<br>
+     * To solve this we use the given {@link HasPermissions} instances to resolve wildcards for the type and action
+     * parts and construct distinct permissions to check. This means the given {@link HasPermissions} need to be a
+     * complete list for the running system. Otherwise we potentially do not check for all required types if the given
+     * {@link WildcardPermission} has a wildcard as type part.
+     */
+    public static boolean checkMetaPermission(WildcardPermission permission,
+            Iterable<HasPermissions> allPermissionTypes, SecurityUser user, SecurityUser allUser, Ownership ownership) {
+        assert permission != null;
+        assert allPermissionTypes != null;
+        List<Set<String>> parts = permission.getParts();
+        final Set<String> typeParts;
+        final boolean isTypePartWildcard;
+        if (parts.size() >= 1) {
+            typeParts = parts.get(0);
+            isTypePartWildcard = typeParts.contains(WildcardPermission.WILDCARD_TOKEN);
+        } else {
+            typeParts = null;
+            isTypePartWildcard = true;
+        }
 
+        final Set<String> actionParts;
+        final boolean isActionPartWildcard;
+        if (parts.size() >= 2) {
+            actionParts = parts.get(1);
+            isActionPartWildcard = actionParts.contains(WildcardPermission.WILDCARD_TOKEN);
+        } else {
+            actionParts = null;
+            isActionPartWildcard = true;
+        }
+
+        final Set<String> idParts;
+        final boolean isIdPartWildcard;
+        if (parts.size() >= 3) {
+            idParts = parts.get(2);
+            isIdPartWildcard = idParts.contains(WildcardPermission.WILDCARD_TOKEN);
+        } else {
+            idParts = null;
+            isIdPartWildcard = true;
+        }
+
+        Map<String, HasPermissions> allPermissionTypesByName = new HashMap<>();
+        for (HasPermissions hasPermissions : allPermissionTypes) {
+            allPermissionTypesByName.put(hasPermissions.getName(), hasPermissions);
+        }
+
+        final Set<WildcardPermission> effectivePermissionsToCheck = new HashSet<>();
+        final String effectiveIdPartToCheck = WildcardPermission.PART_DIVIDER_TOKEN
+                + (isIdPartWildcard ? WildcardPermission.WILDCARD_TOKEN
+                        : Util.joinStrings(WildcardPermission.SUBPART_DIVIDER_TOKEN, idParts));
+        final Set<String> effectiveTypePartsToCheck;
+        if (isTypePartWildcard) {
+            effectiveTypePartsToCheck = allPermissionTypesByName.keySet();
+        } else {
+            effectiveTypePartsToCheck = typeParts;
+        }
+
+        for (String typePart : effectiveTypePartsToCheck) {
+            HasPermissions hasPermissions = allPermissionTypesByName.get(typePart);
+            final Set<String> effectiveActionPartsToCheck;
+            if (hasPermissions == null) {
+                effectiveActionPartsToCheck = actionParts;
+            } else {
+                effectiveActionPartsToCheck = new HashSet<>();
+                for (Action action : hasPermissions.getAvailableActions()) {
+                    if (isActionPartWildcard || actionParts.contains(action.name())) {
+                        effectiveActionPartsToCheck.add(action.name());
+                    }
+                }
+            }
+
+            for (String actionPart : effectiveActionPartsToCheck) {
+                effectivePermissionsToCheck.add(new WildcardPermission(
+                        typePart + WildcardPermission.PART_DIVIDER_TOKEN + actionPart + effectiveIdPartToCheck));
+            }
+        }
+
+        for (WildcardPermission effectiveWildcardPermissionToCheck : effectivePermissionsToCheck) {
+            if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, ownership) != PermissionState.GRANTED
+                    || checkUserPermissions(effectiveWildcardPermissionToCheck, allUser,
+                            ownership) != PermissionState.GRANTED) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
     private static PermissionState checkUserPermissions(WildcardPermission permission, SecurityUser user,
             Ownership ownership) {
         PermissionState result = PermissionState.NONE;
