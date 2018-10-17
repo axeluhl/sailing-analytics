@@ -108,6 +108,7 @@ import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
@@ -1579,6 +1580,18 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public User getAllUser() {
         return userStore.getUserByName(SecurityService.ALL_USERNAME);
+    }
+    
+    @Override
+    public boolean hasCurrentUserRoleForOwnedObject(HasPermissions type, String typeRelativeObjectIdentifier,
+            RoleDefinition roleToCheck) {
+        assert type != null;
+        assert typeRelativeObjectIdentifier != null;
+        assert roleToCheck != null;
+        OwnershipAnnotation ownershipToCheck = getOwnership(
+                type.getQualifiedObjectIdentifier(typeRelativeObjectIdentifier));
+        return PermissionChecker.ownsUserASpecificRole(getCurrentUser(), getAllUser(),
+                ownershipToCheck == null ? null : ownershipToCheck.getAnnotation(), roleToCheck.getName());
     }
 
     // ----------------- Replication -------------

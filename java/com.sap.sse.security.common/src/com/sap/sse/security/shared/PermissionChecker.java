@@ -96,6 +96,41 @@ public class PermissionChecker {
         return result == PermissionState.GRANTED;
     }
 
+    public static boolean ownsUserASpecificRole(SecurityUser user, SecurityUser allUser, Ownership ownership,
+            String requiredRoleName) {
+        return ownsUserASpecificRole(user, ownership, requiredRoleName)
+                || ownsUserASpecificRole(allUser, ownership, requiredRoleName);
+
+    }
+
+    private static boolean ownsUserASpecificRole(SecurityUser user, Ownership ownership, String requiredRoleName) {
+        if (user == null) {
+            return false;
+        }
+        for (Role roleOwnedByUser : user.getRoles()) {
+            if (roleOwnedByUser.getName().equals(requiredRoleName)) {
+                if (roleOwnedByUser.getQualifiedForTenant() == null && roleOwnedByUser.getQualifiedForUser() == null) {
+                    // the role is not qualified by a user or group which means it counts for any ownership
+                    return true;
+                }
+                if (ownership == null || (ownership.getTenantOwner() == null && ownership.getUserOwner() == null)) {
+                    // the role is qualified but there is now ownership which means the user needs the unqualified
+                    // version of the role
+                    continue;
+                }
+                if (roleOwnedByUser.getQualifiedForTenant() != null
+                        && roleOwnedByUser.getQualifiedForTenant().equals(ownership.getTenantOwner())) {
+                    return true;
+                }
+                if (roleOwnedByUser.getQualifiedForUser() != null
+                        && roleOwnedByUser.getQualifiedForUser().equals(ownership.getUserOwner())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private static PermissionState checkUserPermissions(WildcardPermission permission, SecurityUser user,
             Ownership ownership) {
         PermissionState result = PermissionState.NONE;

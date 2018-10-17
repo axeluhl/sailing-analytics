@@ -367,4 +367,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void migrateOwnership(WithQualifiedObjectIdentifier object, Iterable<HasPermissions> permissions);
 
     void migrateOwnership(QualifiedObjectIdentifier object, String displayName, Iterable<HasPermissions> permissions);
+
+    boolean hasCurrentUserRoleForOwnedObject(HasPermissions type, String typeRelativeObjectIdentifier,
+            RoleDefinition roleToCheck);
 }
