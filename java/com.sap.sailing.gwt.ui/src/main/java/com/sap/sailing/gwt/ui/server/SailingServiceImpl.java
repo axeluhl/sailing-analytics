@@ -1321,7 +1321,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public List<TracTracConfigurationDTO> getPreviousTracTracConfigurations() throws Exception {
         final Iterable<TracTracConfiguration> configs = tractracDomainObjectFactory.getTracTracConfigurations();
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.TRACTRAC_ACCOUNT,
-                configs, TracTracConfiguration::getName,
+                configs, TracTracConfiguration::getJSONURL,
                 ttConfig -> new TracTracConfigurationDTO(ttConfig.getName(), ttConfig.getJSONURL().toString(),
                         ttConfig.getLiveDataURI().toString(), ttConfig.getStoredDataURI().toString(),
                         ttConfig.getCourseDesignUpdateURI().toString(), ttConfig.getTracTracUsername().toString(),
@@ -1333,7 +1333,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) throws Exception {
 
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                getSecurityService().getDefaultTenant(), SecuredDomainType.TRACTRAC_ACCOUNT, name, name,
+                getSecurityService().getDefaultTenant(), SecuredDomainType.TRACTRAC_ACCOUNT, jsonURL, name,
                 () -> tractracMongoObjectFactory.storeTracTracConfiguration(
                         getTracTracAdapter().createTracTracConfiguration(name, jsonURL, liveDataURI, storedDataURI,
                                 courseDesignUpdateURI, tracTracUsername, tracTracPassword)));

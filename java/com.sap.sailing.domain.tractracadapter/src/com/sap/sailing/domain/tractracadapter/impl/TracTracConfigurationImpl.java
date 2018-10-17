@@ -3,6 +3,7 @@ package com.sap.sailing.domain.tractracadapter.impl;
 import com.sap.sailing.domain.tractracadapter.TracTracConfiguration;
 
 public class TracTracConfigurationImpl implements TracTracConfiguration {
+    private static final long serialVersionUID = 1L;
     private final String name;
     private final String jsonURL;
     private final String liveDataURI;
