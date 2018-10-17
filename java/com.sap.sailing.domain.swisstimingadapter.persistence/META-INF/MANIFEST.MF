@@ -13,10 +13,12 @@ Require-Bundle: com.sap.sailing.domain.swisstimingadapter,
  com.sap.sailing.domain.common,
  com.sap.sse.common,
  com.sap.sailing.domain.persistence,
- com.sap.sse
+ com.sap.sse,
+ com.sap.sse.security.common
 Export-Package: com.sap.sailing.domain.swisstimingadapter.persistence,
  com.sap.sailing.domain.swisstimingadapter.persistence.impl;x-friends:="com.sap.sailing.domain.swisstimingadapter.test,com.sap.sailing.mongodb.test"
-Import-Package: org.osgi.framework,
+Import-Package: com.sap.sse.security,
+ org.osgi.framework,
  org.osgi.util.tracker;version="1.5.1"
 Bundle-Activator: com.sap.sailing.domain.swisstimingadapter.persistence.impl.Activator
 Automatic-Module-Name: com.sap.sailing.domain.swisstimingadapter.persistence
