@@ -90,6 +90,9 @@ public class SecuredDomainType extends HasPermissionsImpl {
      */
     public static final HasPermissions IGTIMI_ACCOUNT = new SecuredDomainType("IGTIMI_ACCOUNT");
     
+    /**
+     * type-relative identifier is the jsonurl of the configuration: TracTracConfiguration::getJsonUrl
+     */
     public static final HasPermissions TRACTRAC_ACCOUNT = new SecuredDomainType("TRACTRAC_ACCOUNT");
     
     public static final HasPermissions SWISS_TIMING_ACCOUNT = new SecuredDomainType("SWISS_TIMING_ACCOUNT");
