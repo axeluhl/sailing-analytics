@@ -363,4 +363,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void checkCurrentUserReadPermission(WithQualifiedObjectIdentifier object);
 
     void checkCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object);
+
+    void migrateOwnership(WithQualifiedObjectIdentifier object, Iterable<HasPermissions> permissions);
+
+    void migrateOwnership(QualifiedObjectIdentifier object, String displayName, Iterable<HasPermissions> permissions);
 }

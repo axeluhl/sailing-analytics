@@ -18,9 +18,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -72,6 +75,7 @@ import org.scribe.oauth.OAuthService;
 
 import com.sap.sse.ServerStartupConstants;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mail.MailService;
 import com.sap.sse.replication.OperationExecutionListener;
@@ -130,7 +134,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private static final String ADMIN_USERNAME = "admin";
 
     private static final String ADMIN_DEFAULT_PASSWORD = "admin";
+
+    private static final long MIGRATION_CHECK_DELAY = 20000;
     
+    private final Map<Pair<Class<? extends HasPermissions>, List<String>>, List<String>> migratedHasPermissionTypes = new ConcurrentHashMap<>();
+
+    private final Timer migrationTimer;
+
     private CachingSecurityManager securityManager;
     
     /**
@@ -156,7 +166,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private Set<OperationWithResultWithIdWrapper<?, ?>> operationsSentToMasterForReplication;
     
     private ThreadLocal<Boolean> currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
-    
+
+    private TimerTask migrationCompleteCheckTask;
+
     private static Ini shiroConfiguration;
     static {
         shiroConfiguration = new Ini();
@@ -189,6 +201,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (setAsActivatorSecurityService) {
             Activator.setSecurityService(this);
         }
+        migrationTimer = new Timer();
+
         operationsSentToMasterForReplication = new HashSet<>();
         cacheManager = new ReplicatingCacheManager();
         this.operationExecutionListeners = new ConcurrentHashMap<>();
@@ -1669,6 +1683,80 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         CacheManager cm = getSecurityManager().getCacheManager();
         if (cm instanceof ReplicatingCacheManager) {
             ((ReplicatingCacheManager) cm).clear();
+        }
+    }
+
+    @Override
+    public void migrateOwnership(WithQualifiedObjectIdentifier identifier, Iterable<HasPermissions> permissions) {
+        migrateOwnership(identifier.getIdentifier(), identifier.getName(), permissions);
+    }
+
+    @Override
+    public void migrateOwnership(final QualifiedObjectIdentifier identifier, final String displayName,
+            final Iterable<HasPermissions> permissions) {
+        
+        final List<String> allRequiredPermissionsAsString = new ArrayList<>();
+        for (HasPermissions permission : permissions) {
+            allRequiredPermissionsAsString.add(permission.getName());
+        }
+        // the given Iterable cannot guarantee, that the order is always the same
+        Collections.sort(allRequiredPermissionsAsString);
+        
+        Pair<Class<? extends HasPermissions>, List<String>> key = new Pair<>(Util.first(permissions).getClass(),
+                allRequiredPermissionsAsString);
+        final List<String> alreadyMigrated = migratedHasPermissionTypes.computeIfAbsent(key,
+                t -> new CopyOnWriteArrayList<>());
+        if (migrationCompleteCheckTask != null) {
+            // java util timer cannot be rescheduled, so cancel and create a new one
+            migrationCompleteCheckTask.cancel();
+        }
+        migrationCompleteCheckTask = new TimerTask() {
+            @Override
+            public void run() {
+                checkMigration();
+            }
+        };
+        migrationTimer.schedule(migrationCompleteCheckTask, MIGRATION_CHECK_DELAY, MIGRATION_CHECK_DELAY);
+
+        final OwnershipAnnotation owner = this.getOwnership(identifier);
+        final UserGroup defaultTenant = this.getDefaultTenant();
+        // fix unowned objects, also fix wrongly converted objects due to older codebase that could not handle null
+        // users correctly
+        if (owner == null
+                || owner.getAnnotation().getTenantOwner() == null && owner.getAnnotation().getUserOwner() == null) {
+            logger.info("Permission-Vertical Migration: Setting ownership for: " + identifier + " to default tenant: "
+                    + defaultTenant);
+            this.setOwnership(identifier, null, defaultTenant, displayName);
+        }
+
+        if (!alreadyMigrated.contains(identifier.getTypeIdentifier())) {
+            alreadyMigrated.add(identifier.getTypeIdentifier());
+        }
+    }
+
+    protected void checkMigration() {
+        boolean allChecksSucessfull = true;
+        for (Entry<Pair<Class<? extends HasPermissions>, List<String>>, List<String>> migrationTypeEntry : migratedHasPermissionTypes
+                .entrySet()) {
+            Class<? extends HasPermissions> clazz = migrationTypeEntry.getKey().getA();
+            List<String> shouldHave = migrationTypeEntry.getKey().getB();
+            List<String> didMigrate = migrationTypeEntry.getValue();
+            if (didMigrate.containsAll(shouldHave)) {
+                logger.info("Permission-Vertical Migration: Sucessfully migrated all types in "
+                        + clazz.getName());
+            } else {
+                List<String> notMigrated = new ArrayList<>(shouldHave);
+                notMigrated.removeAll(didMigrate);
+                logger.severe("Permission-Vertical Migration: Did not migrate all Types for " + clazz.getName()
+                        + " missing: "
+                        + notMigrated);
+                logger.severe(
+                        "Permission-Vertical Migration: Check will be retried in " + MIGRATION_CHECK_DELAY + "ms");
+                allChecksSucessfull = false;
+            }
+        }
+        if (allChecksSucessfull) {
+            migrationTimer.cancel();
         }
     }
 

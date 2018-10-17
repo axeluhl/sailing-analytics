@@ -287,11 +287,6 @@ import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.shared.HasPermissions;
-import com.sap.sse.security.shared.OwnershipAnnotation;
-import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.UserGroup;
-import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.util.ClearStateTestSupport;
@@ -512,8 +507,6 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     private final RaceChangeObserverForAnniversaryDetection raceChangeObserverForAnniversaryDetection;
 
     private final PairingListTemplateFactory pairingListTemplateFactory = PairingListTemplateFactory.INSTANCE;
-
-    private final Set<String> migratedSecuredDomainObjectTypes = new HashSet<>();
 
     /**
      * Providing the constructor parameters for a new {@link RacingEventServiceImpl} instance is a bit tricky
@@ -920,16 +913,16 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private void ensureOwnerships(SecurityService securityService) {
         for (Event event : getAllEvents()) {
-            migrateOwnership(event, securityService);
+            securityService.migrateOwnership(event, SecuredDomainType.getAllInstances());
         }
         for (Regatta regatta : getAllRegattas()) {
-            migrateOwnership(regatta, securityService);
+            securityService.migrateOwnership(regatta, SecuredDomainType.getAllInstances());
             DynamicTrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
             if (trackedRegatta != null) {
                 trackedRegatta.lockTrackedRacesForRead();
                 try {
                     for (DynamicTrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
-                        migrateOwnership(trackedRace, securityService);
+                        securityService.migrateOwnership(trackedRace, SecuredDomainType.getAllInstances());
                     }
                 } finally {
                     trackedRegatta.unlockTrackedRacesAfterRead();
@@ -937,41 +930,13 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             }
         }
         for (Leaderboard leaderboard : getLeaderboards().values()) {
-            migrateOwnership(leaderboard, securityService);
+            securityService.migrateOwnership(leaderboard, SecuredDomainType.getAllInstances());
         }
         for (LeaderboardGroup leaderboardGroup : getLeaderboardGroups().values()) {
-            migrateOwnership(leaderboardGroup, securityService);
+            securityService.migrateOwnership(leaderboardGroup, SecuredDomainType.getAllInstances());
         }
         for (MediaTrack mediaTrack : getAllMediaTracks()) {
-            migrateOwnership(mediaTrack, securityService);
-        }
-        // do not warn, if the server appears to be empty, eg newly set up.
-        if (!Util.isEmpty(getAllEvents())) {
-            for (HasPermissions type : SecuredDomainType.getAllInstances()) {
-                if (!migratedSecuredDomainObjectTypes.contains(type.getName())) {
-                    logger.severe("Permission-Vertical Migration: It appears that no migration for SecuredDomainType."
-                            + type.getName() + " did happen");
-                }
-            }
-        }
-    }
-
-    private void migrateOwnership(WithQualifiedObjectIdentifier identifier, SecurityService securityService) {
-        migrateOwnership(identifier.getIdentifier(), identifier.getName(), securityService);
-    }
-
-    private void migrateOwnership(QualifiedObjectIdentifier identifier, String displayName,
-            SecurityService securityService) {
-        migratedSecuredDomainObjectTypes.add(identifier.getTypeIdentifier());
-        OwnershipAnnotation owner = securityService.getOwnership(identifier);
-        UserGroup defaultTenant = securityService.getDefaultTenant();
-        // fix unowned objects, also fix wrongly converted objects due to older codebase that could not handle null
-        // users correctly
-        if (owner == null
-                || owner.getAnnotation().getTenantOwner() == null && owner.getAnnotation().getUserOwner() == null) {
-            logger.info("Permission-Vertical Migration: Setting ownership for: " + identifier + " to default tenant: "
-                    + defaultTenant);
-            securityService.setOwnership(identifier, null, defaultTenant, displayName);
+            securityService.migrateOwnership(mediaTrack, SecuredDomainType.getAllInstances());
         }
     }
 
