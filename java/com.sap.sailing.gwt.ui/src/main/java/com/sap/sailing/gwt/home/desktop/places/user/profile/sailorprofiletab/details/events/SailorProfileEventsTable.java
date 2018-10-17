@@ -84,7 +84,6 @@ public class SailorProfileEventsTable extends Composite {
         addButtonStyle(navigatorColumn);
 
         sailorProfilesTable.addCellPreviewHandler(e -> {
-            /* no navigation for remove column */
             if ("click".equals(e.getNativeEvent().getType())) {
                 placeController.goTo(getTargetPlace(e.getValue()));
             }

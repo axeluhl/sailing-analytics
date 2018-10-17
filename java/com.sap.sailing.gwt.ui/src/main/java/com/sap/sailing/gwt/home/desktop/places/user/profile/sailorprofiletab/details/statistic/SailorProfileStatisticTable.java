@@ -187,7 +187,6 @@ public class SailorProfileStatisticTable extends Composite {
             addButtonStyle(timeColumn);
 
             sailorProfilesTable.addCellPreviewHandler(e -> {
-                /* no navigation for remove column */
                 if ("click".equals(e.getNativeEvent().getType())) {
                     Window.Location.assign(navigationTarget.apply(e.getValue()));
                 }
