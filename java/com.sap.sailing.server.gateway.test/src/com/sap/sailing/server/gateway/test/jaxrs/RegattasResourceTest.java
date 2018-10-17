@@ -30,7 +30,6 @@ import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
-import com.sap.sailing.server.gateway.jaxrs.api.RegattasResource;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -71,10 +70,7 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
 
     @Test
     public void testGetRegattas() throws Exception {
-        RegattasResource resource = new RegattasResource();
-        RegattasResource spyResource = spyResource(resource);
-
-        Response regattasResponse = spyResource.getRegattas();
+        Response regattasResponse = regattasResource.getRegattas();
 
         String jsonString = (String) regattasResponse.getEntity();
         Object obj = JSONValue.parse(jsonString);
@@ -92,10 +88,7 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
 
     @Test
     public void testNullCheckForTrackedRaceInGetManeuvers() throws Exception {
-        RegattasResource resource = new RegattasResource();
-        RegattasResource spyResource = spyResource(resource);
-
-        Response response = spyResource.getManeuvers(regattaName, "Race 1", null, null);
+        Response response = regattasResource.getManeuvers(regattaName, "Race 1", null, null);
         // the current race is not tracked, expect an error
         assertTrue(response.getStatus() != 200);
     }

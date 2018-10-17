@@ -3,7 +3,6 @@ package com.sap.sailing.server.gateway.test.jaxrs;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -16,89 +15,27 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.RandomStringUtils;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.mgt.SecurityManager;
-import org.apache.shiro.subject.Subject;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
-import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sailing.server.gateway.jaxrs.api.AbstractLeaderboardsResource;
 import com.sap.sse.InvalidDateException;
-import com.sap.sse.security.ActionWithResult;
-import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.shared.UserGroup;
-import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
-import com.sap.sse.security.shared.impl.UserGroupImpl;
 
 public class EventResourceTest extends AbstractJaxRsApiTest {
-    private DummyEventsRessource eventsResource;
-    private DummyRegattasResource regattasResource;
-    private DummyLeaderboardGroupsResource leaderboardGroupsResource;
-    private DummyLeaderboardsResource leaderboardsResource;
     private String randomName; 
     private UriInfo uriInfo;
     
-    @SuppressWarnings("unchecked")
     @Before
     public void setUp() throws Exception {
         super.setUp();
         uriInfo = mock(UriInfo.class);
         when(uriInfo.getBaseUri()).thenReturn(new URI("http://127.0.0.1:8888/"));
-
-        UserGroupImpl defaultTenant = new UserGroupImpl(new UUID(0, 1), "defaultTenant");
-
-        SecurityService securityService = Mockito.mock(SecurityService.class);
-        SecurityManager securityManager = Mockito.mock(org.apache.shiro.mgt.SecurityManager.class);
-        Subject fakeSubject = Mockito.mock(Subject.class);
-
-        SecurityUtils.setSecurityManager(securityManager);
-        Mockito.doReturn(fakeSubject).when(securityManager).createSubject(Mockito.any());
-
-        Mockito.doReturn(defaultTenant).when(securityService).getDefaultTenant();
-        Mockito.doAnswer(new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                return invocation.getArgumentAt(4, ActionWithResult.class).run();
-            }
-        }).when(securityService).setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                Mockito.anyString(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-        Mockito.doAnswer(new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                return invocation.getArgumentAt(4, ActionWithResult.class).run();
-            }
-        }).when(securityService).setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                Mockito.any(UserGroup.class), Mockito.any(), Mockito.any(), Mockito.any(),
-                Mockito.any(ActionWithResult.class));
-
-        Mockito.doReturn(true).when(securityService)
-                .hasCurrentUserReadPermission(Mockito.any(WithQualifiedObjectIdentifier.class));
-
-        Mockito.doNothing().when(securityService)
-                .checkCurrentUserReadPermission(Mockito.any());
-
-        Mockito.doReturn(true).when(fakeSubject).isAuthenticated();
-
-
-        eventsResource = createResource(new DummyEventsRessource());
-        doReturn(securityService).when(eventsResource).getSecurityService();
-
-        regattasResource = createResource(new DummyRegattasResource());
-        doReturn(securityService).when(regattasResource).getSecurityService();
-        leaderboardGroupsResource = createResource(new DummyLeaderboardGroupsResource());
-        doReturn(securityService).when(leaderboardGroupsResource).getSecurityService();
-        leaderboardsResource = createResource(new DummyLeaderboardsResource());
-        doReturn(securityService).when(leaderboardsResource).getSecurityService();
         randomName = randomName();
     }
     
@@ -304,10 +241,6 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
         return (String) toJSONObject((String) createEventResponse.getEntity()).get("eventid");
     }
 
-    private <T extends AbstractSailingServerResource> T createResource(T resource){
-        return spyResource(resource);
-    }
-    
     private String getEventAsString(String eventId) {
         return (String) eventsResource.getEvent(eventId).getEntity();
     }

@@ -23,7 +23,6 @@ import com.sap.sailing.domain.base.impl.NationalityImpl;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
 import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
-import com.sap.sailing.server.gateway.jaxrs.api.CompetitorsResource;
 import com.sap.sse.filestorage.FileStorageManagementService;
 import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.InvalidPropertiesException;
@@ -56,7 +55,6 @@ public class CompetitorsResourceTeamImageTest extends AbstractJaxRsApiTest {
     public void storeAndRemoveTeamImage() throws URISyntaxException, ParseException, MalformedURLException,
             IOException, OperationFailedException, InvalidPropertiesException {
         //set team image
-        CompetitorsResource r = spyResource(new CompetitorsResource());
         String fileExtension = teamImageFile.substring(teamImageFile.lastIndexOf("."));;
         InputStream stream = getClass().getResourceAsStream("/" + teamImageFile);
         
@@ -65,7 +63,7 @@ public class CompetitorsResourceTeamImageTest extends AbstractJaxRsApiTest {
         // URL has the bundleresource:// scheme instead of file:, which File() can't handle
         long length = stream.available();
         
-        String jsonString = r.setTeamImage(id, stream, fileExtension, length);
+        String jsonString = competitorsResource.setTeamImage(id, stream, fileExtension, length);
         
         //now download and compare
         JSONObject json = (JSONObject) JSONValue.parseWithException(jsonString);

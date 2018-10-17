@@ -44,9 +44,9 @@ public class LeaderboardGroupsResource extends AbstractSailingServerResource {
     public Response getLeaderboardGroups() {
         JSONArray jsonLeaderboardGroups = new JSONArray();
         Map<String, LeaderboardGroup> leaderboardGroups = getService().getLeaderboardGroups();
-        for (Entry<String, LeaderboardGroup> leaderboardGroupName : leaderboardGroups.entrySet()) {
-            if (getSecurityService().hasCurrentUserReadPermission(leaderboardGroupName.getValue())) {
-                jsonLeaderboardGroups.add(leaderboardGroupName);
+        for (Entry<String, LeaderboardGroup> leaderboardGroupEntry : leaderboardGroups.entrySet()) {
+            if (getSecurityService().hasCurrentUserReadPermission(leaderboardGroupEntry.getValue())) {
+                jsonLeaderboardGroups.add(leaderboardGroupEntry.getKey());
             }
         }
 

@@ -2,7 +2,6 @@ package com.sap.sailing.server.gateway.test.jaxrs;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.mockito.Mockito.doReturn;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,9 +26,7 @@ import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.leaderboard.impl.HighPoint;
 import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
-import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapterFactory;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
-import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardsResource;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -71,10 +68,9 @@ public class LeaderboardsResourcePingMarkTest extends AbstractJaxRsApiTest {
 
     @Test
     public void testCheckinAndCheckout() throws Exception {
-        LeaderboardsResource resource = spyResource(new LeaderboardsResource());
-        doReturn(RaceLogTrackingAdapterFactory.INSTANCE.getAdapter(racingEventService.getBaseDomainFactory())).when(resource).getRaceLogTrackingAdapter();
         {
-        Response response = resource.pingMark(PING_MARK_JSON, leaderboard.getName(), mark.getId().toString());
+            Response response = leaderboardsResource.pingMark(PING_MARK_JSON, leaderboard.getName(),
+                    mark.getId().toString());
         assertThat("response is ok", response.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
             Map<Mark, List<DeviceMappingWithRegattaLogEvent<Mark>>> mappings = new RegattaLogDeviceMarkMappingFinder(
                     log).analyze();
@@ -85,7 +81,8 @@ public class LeaderboardsResourcePingMarkTest extends AbstractJaxRsApiTest {
         {
         // now produce a second ping; this should produce also only one fix; no additional artificial fixes are
         // created (anymore; they used to be before bug2851)
-        Response response = resource.pingMark(PING2_MARK_JSON, leaderboard.getName(), mark.getId().toString());
+            Response response = leaderboardsResource.pingMark(PING2_MARK_JSON, leaderboard.getName(),
+                    mark.getId().toString());
         assertThat("response is ok", response.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
             Map<Mark, List<DeviceMappingWithRegattaLogEvent<Mark>>> mappings = new RegattaLogDeviceMarkMappingFinder(
                     log).analyze();

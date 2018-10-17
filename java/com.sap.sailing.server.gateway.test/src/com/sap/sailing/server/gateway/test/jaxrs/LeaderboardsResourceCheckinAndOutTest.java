@@ -38,7 +38,6 @@ import com.sap.sailing.domain.racelogtracking.DeviceMapping;
 import com.sap.sailing.domain.racelogtracking.DeviceMappingWithRegattaLogEvent;
 import com.sap.sailing.domain.racelogtracking.SmartphoneUUIDIdentifier;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
-import com.sap.sailing.server.gateway.jaxrs.api.LeaderboardsResource;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -68,7 +67,6 @@ public class LeaderboardsResourceCheckinAndOutTest extends AbstractJaxRsApiTest 
 
     @Test
     public void testCheckinAndCheckout() throws Exception {
-        LeaderboardsResource resource = spyResource(new LeaderboardsResource());
         UUID deviceUuid = UUID.randomUUID();
 
         // checkin
@@ -78,7 +76,7 @@ public class LeaderboardsResourceCheckinAndOutTest extends AbstractJaxRsApiTest 
         json.put(DeviceMappingConstants.JSON_DEVICE_UUID, deviceUuid.toString());
         json.put(DeviceMappingConstants.JSON_FROM_MILLIS, fromMillis);
 
-        Response response = resource.postCheckin(json.toString(), leaderboard.getName());
+        Response response = leaderboardsResource.postCheckin(json.toString(), leaderboard.getName());
         assertThat("checkin returns OK", response.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
 
         Iterable<Competitor> registeredCompetitors = new CompetitorsInLogAnalyzer<>(log).analyze();
@@ -103,7 +101,7 @@ public class LeaderboardsResourceCheckinAndOutTest extends AbstractJaxRsApiTest 
         json.put(DeviceMappingConstants.JSON_COMPETITOR_ID_AS_STRING, competitor.getId().toString());
         json.put(DeviceMappingConstants.JSON_DEVICE_UUID, deviceUuid.toString());
 
-        response = resource.postCheckout(json.toString(), leaderboard.getName());
+        response = leaderboardsResource.postCheckout(json.toString(), leaderboard.getName());
         assertThat("checkout returns OK", response.getStatus(), equalTo(Response.Status.OK.getStatusCode()));
 
         mappings = new RegattaLogDeviceCompetitorMappingFinder(log).analyze();

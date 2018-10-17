@@ -12,7 +12,6 @@ import com.sap.sailing.domain.base.impl.BoatClassImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.server.gateway.deserialization.impl.BoatJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.Helpers;
-import com.sap.sailing.server.gateway.jaxrs.api.BoatsResource;
 
 public class BoatResourceTest extends AbstractJaxRsApiTest {
     private final String id = "af855a56-9726-4a9c-a77e-da955bd289be";
@@ -29,8 +28,7 @@ public class BoatResourceTest extends AbstractJaxRsApiTest {
 
     @Test
     public void testGetBoatAsJson() throws Exception {
-        BoatsResource resource = spyResource(new BoatsResource());
-        String jsonString = resource.getBoat(id).getEntity().toString();
+        String jsonString = boatsResource.getBoat(id).getEntity().toString();
         
         BoatJsonDeserializer boatJsonDeserializer = BoatJsonDeserializer.create(racingEventService.getBaseDomainFactory());
         JSONObject jsonObject = Helpers.toJSONObjectSafe(JSONValue.parse(jsonString));
