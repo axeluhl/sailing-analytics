@@ -238,7 +238,11 @@ public class TaggingServiceImpl implements TaggingService {
             boolean returnRevokedTags) throws RaceLogNotFoundException, ServiceNotFoundException {
         final List<TagDTO> result = new ArrayList<TagDTO>();
         Util.addAll(getPublicTags(raceColumn.getRaceLog(fleet), searchSince, returnRevokedTags), result);
-        Util.addAll(getPrivateTags(leaderboard.getName(), raceColumn.getName(), fleet.getName()), result);
+        try {
+            Util.addAll(getPrivateTags(leaderboard.getName(), raceColumn.getName(), fleet.getName()), result);
+        } catch (AuthorizationException e) {
+            // user is not logged in, may fail while unit testing because no user is logged in
+        }
         return result;
     }
 
@@ -248,9 +252,10 @@ public class TaggingServiceImpl implements TaggingService {
         RaceLog raceLog = racingService.getRaceLog(leaderboardName, raceColumnName, fleetName);
         return getPublicTags(raceLog, searchSince, returnRevokedTags);
     }
-    
+
     @Override
-    public List<TagDTO> getPublicTags(RaceLog raceLog, TimePoint searchSince, boolean returnRevokedTags) throws RaceLogNotFoundException {
+    public List<TagDTO> getPublicTags(RaceLog raceLog, TimePoint searchSince, boolean returnRevokedTags)
+            throws RaceLogNotFoundException {
         final List<TagDTO> result = new ArrayList<TagDTO>();
         if (raceLog == null) {
             throw new RaceLogNotFoundException();
