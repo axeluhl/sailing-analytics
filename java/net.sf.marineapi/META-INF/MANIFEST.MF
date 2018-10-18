@@ -4,7 +4,11 @@ Bundle-Name: Marineapi
 Bundle-SymbolicName: net.sf.marineapi
 Bundle-Version: 0.5.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Export-Package: net.sf.marineapi.nmea.event,
+Export-Package: net.sf.marineapi.ais.event,
+ net.sf.marineapi.ais.message,
+ net.sf.marineapi.ais.parser,
+ net.sf.marineapi.ais.util,
+ net.sf.marineapi.nmea.event,
  net.sf.marineapi.nmea.io,
  net.sf.marineapi.nmea.parser,
  net.sf.marineapi.nmea.sentence,

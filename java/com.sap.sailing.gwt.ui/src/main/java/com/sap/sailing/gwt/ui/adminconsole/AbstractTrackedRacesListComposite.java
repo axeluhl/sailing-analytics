@@ -17,6 +17,7 @@ import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -143,7 +144,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         filterPanel.add(lblFilterRaces);
         filterPanel.setCellVerticalAlignment(lblFilterRaces, HasVerticalAlignment.ALIGN_MIDDLE);
         raceList = raceTableWrapper.getDataProvider();
-        filterablePanelRaces = new CustomizableFilterablePanel<RaceDTO>(allRaces, raceTable, raceList) {            
+        filterablePanelRaces = new CustomizableFilterablePanel<RaceDTO>(allRaces, raceList) {            
             @Override
             public List<String> getSearchableStrings(RaceDTO t) {
                 List<String> strings = new ArrayList<String>();
@@ -151,6 +152,11 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
                 strings.add(t.boatClass);
                 strings.add(t.getRegattaName());
                 return strings;
+            }
+
+            @Override
+            public AbstractCellTable<RaceDTO> getCellTable() {
+                return raceTable;
             }
         };
         raceTableWrapper.registerSelectionModelOnNewDataProvider(filterablePanelRaces.getAllListDataProvider());
@@ -459,8 +465,8 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
     }
 
     public void selectRaceByIdentifier(RegattaAndRaceIdentifier raceIdentifier) {
-        if (raceList != null) {
-            for (RaceDTO race : raceList.getList()) {
+        if (allRaces != null) {
+            for (RaceDTO race : allRaces) {
                 String regattaName = race.getRegattaName();
                 if (regattaName.equals(raceIdentifier.getRegattaName())
                         && race.getName().equals(raceIdentifier.getRaceName())) {
