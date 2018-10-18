@@ -59,8 +59,8 @@ public abstract class AbstractJaxRsApiTest {
     public void setUp() throws Exception {
         service = MongoDBConfiguration.getDefaultTestConfiguration().getService();
         service.getDB().dropDatabase();
-        racingEventService = new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true,
-                new MockSmartphoneUuidServiceFinderFactory(), /* restoreTrackedRaces */ false);
+        racingEventService = Mockito.spy(new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true,
+                new MockSmartphoneUuidServiceFinderFactory(), /* restoreTrackedRaces */ false));
 
         UserGroupImpl defaultTenant = new UserGroupImpl(new UUID(0, 1), "defaultTenant");
 
