@@ -1650,7 +1650,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String chartSelectionHint();
     String chooseALanguage();
     String solutions();
-    String blog();
     String officalEventWebsite();
     String moreInfo();
     String viewAnalysis();

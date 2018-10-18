@@ -26,6 +26,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -43,6 +44,8 @@ import com.sap.sailing.gwt.ui.shared.DeviceMappingDTO;
 import com.sap.sailing.gwt.ui.shared.TypedDeviceMappingDTO;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
+import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 
@@ -63,6 +66,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
     private DeviceMappingTableWrapper deviceMappingTable;
     private LabeledAbstractFilterablePanel<DeviceMappingDTO> filterField;
     private CheckBox showPingMappingsCb;
+    private BusyIndicator busyIndicator;
     
     private Point[] data;
     
@@ -77,6 +81,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.leaderboardName = leaderboardName;
+        this.busyIndicator = new SimpleBusyIndicator();
         refresh();
     }
     
@@ -106,6 +111,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
                 importFoiling();
             }
         }));
+        buttonPanel.add(busyIndicator);
         mainPanel.add(buttonPanel);
         
         deviceMappingTable = new DeviceMappingTableWrapper(sailingService, stringMessages, errorReporter);
@@ -169,7 +175,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
         deviceMappingPanel.add(chart);
         filterField = new LabeledAbstractFilterablePanel<DeviceMappingDTO>(
                 new Label(stringMessages.filterDeviceMappings()),
-                new ArrayList<DeviceMappingDTO>(), deviceMappingTable.getTable(), deviceMappingTable.getDataProvider()) {
+                new ArrayList<DeviceMappingDTO>(), deviceMappingTable.getDataProvider()) {
             @Override
             public Iterable<String> getSearchableStrings(DeviceMappingDTO t) {
                 List<String> string = new ArrayList<String>();
@@ -177,6 +183,11 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
                 string.add(t.deviceIdentifier.deviceType);
                 string.add(t.deviceIdentifier.deviceId);
                 return string;
+            }
+
+            @Override
+            public AbstractCellTable<DeviceMappingDTO> getCellTable() {
+                return deviceMappingTable.getTable();
             }
         };
         filterField.addFilter(new Filter<DeviceMappingDTO>() {
@@ -265,9 +276,11 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
     }
     
     private void refresh() {
+        busyIndicator.setBusy(true);
         sailingService.getDeviceMappings(leaderboardName, new AsyncCallback<List<DeviceMappingDTO>>() {
             @Override
             public void onSuccess(List<DeviceMappingDTO> result) {
+                busyIndicator.setBusy(false);
                 mappings = result;
                 updateChart();
                 filterField.updateAll(mappings);
@@ -275,6 +288,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
 
             @Override
             public void onFailure(Throwable caught) {
+                busyIndicator.setBusy(false);
                 errorReporter.reportError("Could not load mappings for marks: " + caught.getMessage());
             }
         });

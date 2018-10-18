@@ -14,6 +14,7 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -289,7 +290,7 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
         AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
         racesTable = new FlushableCellTable<TracTracRaceRecordDTO>(10000, tableResources);
         racesTable.ensureDebugId("TrackableRacesCellTable");
-        this.racesFilterablePanel = new LabeledAbstractFilterablePanel<TracTracRaceRecordDTO>(racesFilterLabel, availableTracTracRaces, racesTable, raceList) {
+        this.racesFilterablePanel = new LabeledAbstractFilterablePanel<TracTracRaceRecordDTO>(racesFilterLabel, availableTracTracRaces, raceList) {
             @Override
             public List<String> getSearchableStrings(TracTracRaceRecordDTO t) {
                 List<String> strings = new ArrayList<String>();
@@ -301,6 +302,11 @@ public class TracTracEventManagementPanel extends AbstractEventManagementPanel {
                     }
                 }
                 return strings;
+            }
+
+            @Override
+            public AbstractCellTable<TracTracRaceRecordDTO> getCellTable() {
+                return racesTable;
             }
         };
         racesFilterablePanel.getTextBox().ensureDebugId("TrackableRacesFilterTextBox");
