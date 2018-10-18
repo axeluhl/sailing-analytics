@@ -2,7 +2,6 @@ package com.sap.sailing.server.gateway.test.jaxrs;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,7 +39,6 @@ public class CompetitorsResourceTeamImageTest extends AbstractJaxRsApiTest {
     @Before
     public void setUpSubClass() throws Exception {
         super.setUp();
-        racingEventService = spy(racingEventService);
         storageService = AmazonS3TestSupport.createService();
         FileStorageManagementService fsmsMock = mock(FileStorageManagementService.class);
         doReturn(fsmsMock).when(racingEventService).getFileStorageManagementService();
