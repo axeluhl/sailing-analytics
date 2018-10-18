@@ -2105,4 +2105,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String resizeSuccessfull();
     String resizeUnsuccessfull();
     String automaticResizeNeedsStorageService();
+    String qrCodeTitle(String competitorName, String leaderName);
+    String qrCodeSubtitle(String eventName, String eventLocationAndVenue);
+    String qrCodeInfoMessage();
+    String qrCodeErrorMessage();
+    String qrCodeTitleBouy(String leaderboardName);
 }
