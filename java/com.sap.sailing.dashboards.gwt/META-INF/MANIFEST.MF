@@ -16,27 +16,21 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.shared.android,
  com.sap.sailing.gwt.ui,
  org.moxieapps.gwt.highcharts;bundle-version="1.6.0";resolution:=optional,
+ com.github.branflake2267.gwt-maps-api;bundle-version="3.10";resolution:=optional,
  com.sap.sse.gwt,
- com.sap.sailing.domain.igtimiadapter,
- com.sap.sailing.expeditionconnector,
- com.sap.sailing.server.gateway,
- com.sap.sailing.declination,
- org.json.simple;bundle-version="1.1.0",
- com.sap.sailing.udpconnector,
+ com.sap.sailing.expeditionconnector.common,
  com.googlecode.mgwt;bundle-version="2.0.0";resolution:=optional,
  com.sap.sse.gwt.adminconsole,
  org.apache.commons.math;bundle-version="2.1.0",
- com.sap.sse.security.ui
+ com.sap.sse.security.ui,
+ com.sap.sse
 Bundle-ActivationPolicy: lazy
-Import-Package: com.sap.sse.util,
- javax.servlet;version="3.1.0",
+Import-Package: javax.servlet;version="3.1.0",
  javax.servlet.descriptor;version="3.1.0",
  javax.servlet.http;version="3.1.0",
  org.apache.commons.io,
  org.osgi.framework;version="1.5.0",
  org.osgi.util.tracker
 Web-ContextPath: /dashboards
-Bundle-ClassPath: WEB-INF/classes/,
- WEB-INF/lib/gwt-maps-api-3.9.0-build-17.jar,
- WEB-INF/lib/gwt-ajaxloader.jar
+Bundle-ClassPath: WEB-INF/classes/
 Automatic-Module-Name: com.sap.sailing.dashboards.gwt

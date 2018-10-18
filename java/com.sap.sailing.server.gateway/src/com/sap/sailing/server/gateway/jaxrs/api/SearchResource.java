@@ -17,6 +17,7 @@ import com.sap.sailing.server.gateway.serialization.impl.EventBaseJsonSerializer
 import com.sap.sailing.server.gateway.serialization.impl.LeaderboardGroupBaseJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.LeaderboardSearchResultJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.impl.VenueJsonSerializer;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 
@@ -37,7 +38,7 @@ public class SearchResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response search(@QueryParam("q") String keywords) {
-        KeywordQuery query = new KeywordQuery(keywords.split(" "));
+        KeywordQuery query = new KeywordQuery(Util.splitAlongWhitespaceRespectingDoubleQuotedPhrases(keywords));
         Iterable<LeaderboardSearchResult> searchResults = search(query).getHits();
         JSONArray jsonSearchResults = new JSONArray();
         for (LeaderboardSearchResult searchResult : searchResults) {

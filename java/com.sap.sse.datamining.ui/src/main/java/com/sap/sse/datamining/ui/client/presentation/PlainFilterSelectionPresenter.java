@@ -8,21 +8,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
-import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.settings.AbstractSettings;
-import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
-import com.sap.sse.datamining.ui.client.DataRetrieverChainDefinitionChangedListener;
-import com.sap.sse.datamining.ui.client.DataRetrieverChainDefinitionProvider;
-import com.sap.sse.datamining.ui.client.FilterSelectionChangedListener;
 import com.sap.sse.datamining.ui.client.FilterSelectionPresenter;
 import com.sap.sse.datamining.ui.client.FilterSelectionProvider;
 import com.sap.sse.datamining.ui.client.StringMessages;
@@ -31,41 +25,28 @@ import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class PlainFilterSelectionPresenter extends AbstractComponent<AbstractSettings> implements
-        FilterSelectionPresenter, FilterSelectionChangedListener, DataRetrieverChainDefinitionChangedListener {
+public class PlainFilterSelectionPresenter extends AbstractComponent<AbstractSettings> implements FilterSelectionPresenter {
 
     private final FilterSelectionProvider filterSelectionProvider;
-    private DataRetrieverChainDefinitionDTO retrieverChain;
 
     private final HorizontalPanel mainPanel;
     private final VerticalPanel presentationPanel;
 
     public PlainFilterSelectionPresenter(Component<?> parent, ComponentContext<?> context,
-            StringMessages stringMessages, DataRetrieverChainDefinitionProvider retrieverChainProvider,
-            FilterSelectionProvider filterSelectionProvider) {
+            StringMessages stringMessages, FilterSelectionProvider filterSelectionProvider) {
         super(parent, context);
         this.filterSelectionProvider = filterSelectionProvider;
         this.filterSelectionProvider.addSelectionChangedListener(this);
-        // TODO Is listening to the retriever chain really necessary? Shouldn't the filter selection change
-        // if the filter selection provider is affected by a changing retriever chain?
-        retrieverChainProvider.addDataRetrieverChainDefinitionChangedListener(this);
 
         Label currentSelectionLabel = new Label(stringMessages.currentFilterSelection());
         currentSelectionLabel.setWidth("75px");
-        currentSelectionLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
+        currentSelectionLabel.addStyleName("emphasizedLabel");
         presentationPanel = new VerticalPanel();
 
         mainPanel = new HorizontalPanel();
+        mainPanel.setStyleName("filterSelectionPresenter");
         mainPanel.add(currentSelectionLabel);
         mainPanel.add(presentationPanel);
-    }
-
-    @Override
-    public void dataRetrieverChainDefinitionChanged(DataRetrieverChainDefinitionDTO newDataRetrieverChainDefinition) {
-        if (!Objects.equals(retrieverChain, newDataRetrieverChainDefinition)) {
-            retrieverChain = newDataRetrieverChainDefinition;
-            presentationPanel.clear();
-        }
     }
 
     @Override
@@ -76,16 +57,12 @@ public class PlainFilterSelectionPresenter extends AbstractComponent<AbstractSet
                 .getSelection();
         List<DataRetrieverLevelDTO> sortedLevels = new ArrayList<>(selection.keySet());
         Collections.sort(sortedLevels);
-        boolean first = true;
         for (DataRetrieverLevelDTO retrieverLevel : sortedLevels) {
             Map<FunctionDTO, HashSet<? extends Serializable>> levelSelection = selection.get(retrieverLevel);
             RetrieverLevelFilterSelectionPresenter levelSelectionPresenter = new RetrieverLevelFilterSelectionPresenter(
                     retrieverLevel, levelSelection);
-            if (!first) {
-                levelSelectionPresenter.getEntryWidget().getElement().getStyle().setMarginTop(5, Unit.PX);
-            }
+            levelSelectionPresenter.getEntryWidget().addStyleName("dataMiningMarginBottom");
             presentationPanel.add(levelSelectionPresenter.getEntryWidget());
-            first = false;
         }
     }
 
@@ -97,17 +74,22 @@ public class PlainFilterSelectionPresenter extends AbstractComponent<AbstractSet
                 Map<FunctionDTO, HashSet<? extends Serializable>> levelSelection) {
 
             Label levelLabel = new Label(retrieverLevel.getRetrievedDataType().getDisplayName());
-            levelLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
             levelLabel.setWidth("100px");
+            levelLabel.addStyleName("emphasizedLabel");
 
             VerticalPanel presentationPanel = new VerticalPanel();
             List<FunctionDTO> sortedDimensions = new ArrayList<>(levelSelection.keySet());
             Collections.sort(sortedDimensions);
+            boolean first = true;
             for (FunctionDTO dimension : sortedDimensions) {
                 Collection<? extends Serializable> dimensionSelection = levelSelection.get(dimension);
                 DimensionFilterSelectionPresenter dimensionSelectionPresenter = new DimensionFilterSelectionPresenter(
                         dimension, dimensionSelection);
+                if (!first) {
+                    dimensionSelectionPresenter.getEntryWidget().getElement().getStyle().setMarginTop(2, Unit.PX);
+                }
                 presentationPanel.add(dimensionSelectionPresenter.getEntryWidget());
+                first = false;
             }
 
             mainPanel = new HorizontalPanel();
@@ -129,7 +111,7 @@ public class PlainFilterSelectionPresenter extends AbstractComponent<AbstractSet
                 Collection<? extends Serializable> dimensionSelection) {
             mainPanel = new HorizontalPanel();
             Label dimensionLabel = new Label(dimension.getDisplayName() + ":");
-            dimensionLabel.getElement().getStyle().setMarginRight(2, Unit.PX);
+            dimensionLabel.addStyleName("dimensionLabel");
             mainPanel.add(dimensionLabel);
 
             StringBuilder selectionStringBuilder = new StringBuilder();
@@ -172,7 +154,7 @@ public class PlainFilterSelectionPresenter extends AbstractComponent<AbstractSet
 
     @Override
     public String getDependentCssClassName() {
-        return "plainFilterSelectionPresenter";
+        return "filterSelectionPresenter";
     }
 
     @Override

@@ -247,6 +247,12 @@ public abstract class AbstractEventActivity<PLACE extends AbstractEventPlace> ex
         EventContext ctx = new EventContext(getCtx()).withRegattaId(regattaId).withRegattaAnalyticsManager(null);
         return clientFactory.getNavigator().getEventNavigation(new RegattaRacesPlace(ctx), null, false);
     }
+
+    @Override
+    public PlaceNavigation<?> getRegattaRacesNavigation(String regattaId, String prefSeriesName) {
+        EventContext ctx = new EventContext(getCtx()).withRegattaId(regattaId).withRegattaAnalyticsManager(null);
+        return clientFactory.getNavigator().getEventNavigation(new RegattaRacesPlace(ctx, prefSeriesName), null, false);
+    }
     
     public PlaceNavigation<?> getLatesNewsNavigation() {
         EventContext ctx = new EventContext(getCtx()).withRegattaId(null).withRegattaAnalyticsManager(null);

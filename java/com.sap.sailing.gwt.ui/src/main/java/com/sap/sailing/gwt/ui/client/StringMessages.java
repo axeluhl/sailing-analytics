@@ -411,6 +411,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String successfullyUpdatedResultImportUrls();
     String errorRemovingResultImportUrls(String message);
     String pleaseEnterNonEmptyUrl();
+    String pleaseEnterNonEmptyUrlOrUploadImage();
     String addResultImportUrl();
     String errorAddingResultImportUrl(String message);
     String remoteServerInstances();
@@ -1441,7 +1442,7 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String courseGeometry();
     String degreesToWind(String diff);
     String miniLeeaderboardLegendText();
-    String currentOfTotal(int current, int total);
+    String currentOfTotalRaces(int current, @PluralCount(DefaultRule_1_0n.class) int total);
     String noFinishedRaces();
     String racesOverview();
     String listFormatLabel();
@@ -1479,6 +1480,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String addEventLogo();
     String noImagesDefinedYet();
     String imageSizeError(String imageType, int minWidth, int maxWidth, int minHeight, int maxHeight);
+    String imageToSmallError(String imageType, int minWidth, int minHeight);
+    String imageResizeError(String imageType, double minRatio, double maxRatio, double ratio);
     String couldNotRetrieveImageSizeYet();
     @Override
     String pleaseOnlyUploadContentYouHaveAllUsageRightsFor();
@@ -1647,7 +1650,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String chartSelectionHint();
     String chooseALanguage();
     String solutions();
-    String blog();
     String officalEventWebsite();
     String moreInfo();
     String viewAnalysis();
@@ -2093,7 +2095,13 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String manage2SailEventIdBoxTooltip();
     String manage2SailPort();
     String windFinderSpotCollectionsList();
+    String audioFiles();
+    String selectMedia();
     String swissTimingUpdateURL();
     String swissTimingUpdateUsername();
     String swissTimingUpdatePassword();
+    String allowResizing();
+    String resizeSuccessfull();
+    String resizeUnsuccessfull();
+    String automaticResizeNeedsStorageService();
 }

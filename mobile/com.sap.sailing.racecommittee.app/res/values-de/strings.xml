@@ -365,7 +365,7 @@
     <string name="race_summary_wind_direction_value">aus %.0f°</string>
     <string name="race_summary_wind_speed">Durchschnittliche Windgeschwindigkeit</string>
     <string name="record_voice">Stimme aufzeichnen</string>
-    <string name="finishing_started">Erstes Schiff im Ziel um %s</string>
+    <string name="finishing_started">Erster im Ziel um %1$s</string>
     <string name="finishing_started_since">(%s)</string>
     <string name="finishing_done">Jetzt runter</string>
     <string name="finished_edit">Liste bearbeiten</string>
