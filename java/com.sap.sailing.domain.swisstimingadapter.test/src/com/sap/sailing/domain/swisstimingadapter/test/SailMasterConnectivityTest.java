@@ -64,9 +64,9 @@ public class SailMasterConnectivityTest {
         Race race4702 = new RaceImpl("W4702", "R2", "470 Women Race 2");
         Race race4711 = new RaceImpl("4711", "R2", "A wonderful test race");
         Race race4712 = new RaceImpl("4712", "R2", "Not such a wonderful race");
-        connector4702 = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("localhost", port, race4702.getRaceID(), race4702.getRaceName(), race4702.getDescription(), null /* boat class */);
-        connector4711 = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("localhost", port, race4711.getRaceID(), race4702.getRaceName(), race4711.getDescription(), null /* boat class */);
-        connector4712 = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("localhost", port, race4712.getRaceID(), race4702.getRaceName(), race4712.getDescription(), null /* boat class */);
+        connector4702 = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("localhost", port, race4702.getRaceID(), race4702.getRaceName(), race4702.getDescription(), null /* boat class */, /* SwissTimingRaceTracker */ null);
+        connector4711 = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("localhost", port, race4711.getRaceID(), race4702.getRaceName(), race4711.getDescription(), null /* boat class */, /* SwissTimingRaceTracker */ null);
+        connector4712 = SwissTimingFactory.INSTANCE.getOrCreateSailMasterConnector("localhost", port, race4712.getRaceID(), race4702.getRaceName(), race4712.getDescription(), null /* boat class */, /* SwissTimingRaceTracker */ null);
         Thread.sleep(1000); // wait until all connectors are really connected to the SailMasterDummy
     }
 
