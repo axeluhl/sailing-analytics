@@ -96,8 +96,12 @@ public class PermissionChecker {
         return result == PermissionState.GRANTED;
     }
 
+    /**
+     * Checks if a user has a specific role either for a given ownership or globally if no ownership exists.
+     */
     public static boolean ownsUserASpecificRole(SecurityUser user, SecurityUser allUser, Ownership ownership,
             String requiredRoleName) {
+        assert requiredRoleName != null;
         return ownsUserASpecificRole(user, ownership, requiredRoleName)
                 || ownsUserASpecificRole(allUser, ownership, requiredRoleName);
 
