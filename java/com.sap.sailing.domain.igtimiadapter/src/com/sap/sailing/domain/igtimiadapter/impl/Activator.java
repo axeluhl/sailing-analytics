@@ -13,13 +13,18 @@ import org.apache.http.client.ClientProtocolException;
 import org.json.simple.parser.ParseException;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sailing.domain.igtimiadapter.Account;
 import com.sap.sailing.domain.igtimiadapter.Client;
 import com.sap.sailing.domain.igtimiadapter.IgtimiConnectionFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.DomainObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.MongoObjectFactory;
 import com.sap.sailing.domain.igtimiadapter.persistence.PersistenceFactory;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.util.ServiceTrackerFactory;
 import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 /**
@@ -93,6 +98,23 @@ public class Activator implements BundleActivator {
                 }
             }
         });
+        
+        new Thread(() -> {
+            final ServiceTracker<SecurityService, SecurityService> securityServiceServiceTracker = ServiceTrackerFactory
+                    .createAndOpen(context, SecurityService.class);
+            try {
+                final SecurityService securityService = securityServiceServiceTracker.waitForService(0);
+                IgtimiConnectionFactoryImpl igtimiConnectionFactory = connectionFactory.get();
+                for (Account account : igtimiConnectionFactory.getAllAccounts()) {
+                    securityService.migrateOwnership(account, SecuredDomainType.getAllInstances());
+                }
+                securityService.assumeOwnershipMigrated(SecuredDomainType.IGTIMI_ACCOUNT.getName(),
+                        SecuredDomainType.getAllInstances());
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Exception trying to migrate IgtimiAccounts implementation", e);
+            }
+        }, getClass().getName() + " registering connectivity handler").start();
+        
     }
     
     public static Activator getInstance() throws ClientProtocolException, IllegalStateException, IOException, ParseException {
