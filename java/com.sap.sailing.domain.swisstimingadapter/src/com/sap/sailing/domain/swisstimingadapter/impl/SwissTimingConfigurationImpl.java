@@ -3,6 +3,8 @@ package com.sap.sailing.domain.swisstimingadapter.impl;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingConfiguration;
 
 public class SwissTimingConfigurationImpl implements SwissTimingConfiguration {
+    private static final long serialVersionUID = -4594050191153845375L;
+    
     private final String name;
     private final String jsonURL;
     private final String hostname;
