@@ -296,13 +296,11 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
                             DeviceMappingConstants.URL_COMPETITOR_ID_AS_STRING, competitor.getId().toString(),
                             NonGwtUrlHelper.INSTANCE);
                     final RaceLogTrackingInvitationMailBuilder mail = new RaceLogTrackingInvitationMailBuilder(locale)
-                            .withSubject(competitor.getName()) //
-                            .addEventLogo(event) //
-                            .addHeadline(event, leaderboard) //
-                            .addSailInSightIntroductoryText(competitor.getName()) //
-                            .addQrCodeImage(url) //
-                            .addOpenInAppTextAndLinks(url, iOSAppUrl, androidAppUrl) //
-                            .addInstallAppTextAndLinks(iOSAppUrl, androidAppUrl);
+                            .withSubject(competitor.getName())
+                            .addEventLogo(event)
+                            .addHeadline(event, leaderboard)
+                            .addSailInSightIntroductoryText(competitor.getName())
+                            .addSailInsightDeeplink(url);
                     getMailService().sendMail(toAddress, mail.getSubject(), mail.getMultipartSupplier());
                 } catch (MessagingException | MailException | IOException e) {
                     logger.log(Level.SEVERE, "Error while trying to send invitation mail to competitor"
@@ -328,13 +326,11 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
             try {
                 final String buoyTender = RaceLogTrackingI18n.buoyTender(locale);
                 final RaceLogTrackingInvitationMailBuilder mail = new RaceLogTrackingInvitationMailBuilder(locale)
-                        .withSubject(buoyTender) //
-                        .addEventLogo(event) //
-                        .addHeadline(event, leaderboard) //
-                        .addBuoyPingerIntroductoryText(buoyTender) //
-                        .addQrCodeImage(url) //
-                        .addOpenInAppTextAndLinks(url, iOSAppUrl, androidAppUrl) //
-                        .addInstallAppTextAndLinks(iOSAppUrl, androidAppUrl);
+                        .withSubject(buoyTender)
+                        .addEventLogo(event)
+                        .addHeadline(event, leaderboard)
+                        .addBuoyPingerIntroductoryText(buoyTender)
+                        .addBuoyPingerDeeplink(url);
                 getMailService().sendMail(toAddress, mail.getSubject(), mail.getMultipartSupplier());
             } catch (MessagingException | MailException | IOException e) {
                 logger.log(Level.SEVERE, "Error while trying to send invitation mail to buoy tender "
