@@ -1,8 +1,9 @@
 package com.sap.sailing.gwt.ui.raceboard.tagging;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextArea;
@@ -11,112 +12,235 @@ import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
-import com.sap.sse.common.Util;
-import com.sap.sse.common.Util.Pair;
 import com.sap.sse.gwt.adminconsole.URLFieldWithFileUpload;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
  * Panel containing input fields for tag/tag button creation and modification.
  */
-// TODO: use DataEntryDialog
 public class TagInputPanel extends FlowPanel {
-
-    private final TagPanelStyle style = TaggingPanelResources.INSTANCE.style();
 
     private static final String DEFAULT_TAG = "";
     private static final String DEFAULT_COMMENT = "";
     private static final String DEFAULT_IMAGE_URL = "";
     private static final boolean DEFAULT_VISIBLE_FOR_PUBLIC = false;
 
-    private final TaggingPanel taggingPanel;
-    private final Grid grid;
-    private final TextBox tagTextBox;
-    private final URLFieldWithFileUpload imageUrlUploaderPanel;
-    private final TextArea commentTextArea;
-    private final FlowPanel checkboxWrapper;
-    private final CheckBox visibleForPublicCheckBox;
-    private final Label noPermissionForPublicTagsLabel;
+    /**
+     * Extends {@link DataEntryDialog} to provide input validation for tags. The dialog itself is never shown to the
+     * user therfor methods {@link #show()} and {@link #center()} are overriden to have no effect. Instead input fields
+     * can be used in other UIs as validator still has access to these fields.
+     */
+    private class TagEntryFields extends DataEntryDialog<TagDTO> {
+        private final StringMessages stringMessages;
+        private final TaggingPanel taggingPanel;
+        private final TextBox tagTextBox;
+        private final TextArea commentTextArea;
+        private final CheckBox visibleForPublicCheckBox;
+        private final URLFieldWithFileUpload imageUploadPanel;
 
-    private int imageWidth = -1;
-    private int imageHeight = -1;
+        public TagEntryFields(StringMessages stringMessages, TaggingPanel taggingPanel,
+                DialogCallback<TagDTO> callback) {
+            // set empty values for parameters which are not shown to the user. okayButtonText will be set by the using
+            // components.
+            super(/* title */ "", /* message */ "", /* okayButtonText */ "", stringMessages.cancel(), null,
+                    /* animationEnabled */ true, callback);
+            this.setValidator(this::validate);
+            this.stringMessages = stringMessages;
+            this.taggingPanel = taggingPanel;
+            tagTextBox = createTextBox(DEFAULT_TAG);
+            commentTextArea = createTextArea(DEFAULT_COMMENT);
+            visibleForPublicCheckBox = createCheckbox(stringMessages.tagVisibleForPublicCheckBox());
+            visibleForPublicCheckBox.setValue(DEFAULT_VISIBLE_FOR_PUBLIC);
+            imageUploadPanel = new URLFieldWithFileUpload(stringMessages);
+            validateAndUpdate();
+        }
+
+        /**
+         * Validates given <code>tagToValidate</code> and returns error message in case input is not valid.
+         * 
+         * @param tagToValidate
+         *            tag to be checked
+         * @return <code>error message</code> in case input is not valid, otherwise <code>null</code>
+         */
+        private String validate(TagDTO tagToValidate) {
+            if (tagToValidate == null) {
+                return stringMessages.unknown();
+            } else if (tagToValidate.getTag() == null || tagToValidate.getTag().isEmpty()) {
+                return stringMessages.tagNotSpecified();
+            } else if (taggingPanel.tagAlreadyExists(tagToValidate.getTag(), tagToValidate.getComment(),
+                    tagToValidate.getImageURL(), tagToValidate.getResizedImageURL(), tagToValidate.isVisibleForPublic(),
+                    tagToValidate.getRaceTimepoint())) {
+                return stringMessages.tagAlreadyExists();
+            }
+            return null;
+        }
+
+        public TextBox getTagTextBox() {
+            return tagTextBox;
+        }
+
+        public TextArea getCommentTextArea() {
+            return commentTextArea;
+        }
+
+        public CheckBox getVisibleForPublicCheckBox() {
+            return visibleForPublicCheckBox;
+        }
+
+        public URLFieldWithFileUpload getImageUploadPanel() {
+            return imageUploadPanel;
+        }
+
+        public Button getOkButton() {
+            return super.getOkButton();
+        }
+
+        public Button getCancelButton() {
+            return super.getCancelButton();
+        }
+
+        public Label getStatusLabel() {
+            return super.getStatusLabel();
+        }
+
+        public boolean validateAndUpdate() {
+            return super.validateAndUpdate();
+        }
+
+        /**
+         * Returns {@link TagDTO} created by input fields which does only contain values entered explicitly by user.
+         */
+        @Override
+        protected TagDTO getResult() {
+            return new TagDTO(getTagTextBox().getValue(), getCommentTextArea().getValue(),
+                    getImageUploadPanel().getURL(), null, getVisibleForPublicCheckBox().getValue(), null, null, null);
+        }
+
+        @Override
+        protected FocusWidget getInitialFocusWidget() {
+            return null;
+        }
+
+        @Override
+        public void show() {
+        }
+
+        @Override
+        public void center() {
+        }
+    }
+
+    private final TagPanelStyle style = TaggingPanelResources.INSTANCE.style();
+    private final TaggingPanel taggingPanel;
+    private final TagEntryFields tagEntryFields;
+    private final Grid grid;
+    private final FlowPanel checkboxWrapper;
+    private final Label noPermissionForPublicTagsLabel;
 
     /**
      * Creates view allowing users to input values for tags and {@link TagButton tag-buttons}.
      */
     protected TagInputPanel(TaggingPanel taggingPanel, SailingServiceAsync sailingService,
-            StringMessages stringMessages) {
-        setStyleName(style.tagInputPanel());
+            StringMessages stringMessages, DialogCallback<TagDTO> callback) {
         this.taggingPanel = taggingPanel;
+        tagEntryFields = new TagEntryFields(stringMessages, taggingPanel, callback);
+        setStyleName(style.tagInputPanel());
         grid = new Grid(4, 2);
         // tag
         Label tagLabel = new Label(stringMessages.tagLabelTag() + ":");
-        tagTextBox = new TextBox();
-        tagTextBox.setStyleName(style.tagInputPanelTag());
-        tagTextBox.setTitle(stringMessages.tagLabelTag());
-        tagTextBox.getElement().setPropertyString("placeholder", stringMessages.tagLabelTag());
+        tagEntryFields.getTagTextBox().setTitle(stringMessages.tagLabelTag());
+        tagEntryFields.getTagTextBox().setStyleName(style.tagInputPanelTag());
+        tagEntryFields.getTagTextBox().getElement().setPropertyString("placeholder", stringMessages.tagLabelTag());
         grid.setWidget(0, 0, tagLabel);
-        grid.setWidget(0, 1, tagTextBox);
+        grid.setWidget(0, 1, tagEntryFields.getTagTextBox());
         // image upload
         Label imageLabel = new Label(stringMessages.tagLabelImage() + ":");
-        imageUrlUploaderPanel = new URLFieldWithFileUpload(stringMessages);
-        imageUrlUploaderPanel.addValueChangeHandler(event -> {
-            if (imageUrlUploaderPanel.getURL() == null || imageUrlUploaderPanel.getURL().isEmpty()) {
-                imageWidth = -1;
-                imageHeight = -1;
-            } else {
-                sailingService.resolveImageDimensions(imageUrlUploaderPanel.getURL(),
-                        new AsyncCallback<Util.Pair<Integer, Integer>>() {
-                            @Override
-                            public void onSuccess(Pair<Integer, Integer> imageSize) {
-                                if (imageSize != null) {
-                                    imageWidth = imageSize.getA();
-                                    imageHeight = imageSize.getB();
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                imageUrlUploaderPanel.setURL("");
-                            }
-                        });
-            }
-        });
         grid.setWidget(1, 0, imageLabel);
-        grid.setWidget(1, 1, imageUrlUploaderPanel);
+        grid.setWidget(1, 1, tagEntryFields.getImageUploadPanel());
         // comment
         Label commentLabel = new Label(stringMessages.tagLabelComment() + ":");
-        commentTextArea = new TextArea();
-        commentTextArea.setStyleName(style.tagInputPanelComment());
-        commentTextArea.setVisibleLines(4);
-        commentTextArea.setTitle(stringMessages.tagLabelComment());
-        commentTextArea.getElement().setPropertyString("placeholder", stringMessages.tagLabelComment());
+        tagEntryFields.getCommentTextArea().setTitle(stringMessages.tagLabelComment());
+        tagEntryFields.getCommentTextArea().setStyleName(style.tagInputPanelComment());
+        tagEntryFields.getCommentTextArea().setVisibleLines(4);
+        tagEntryFields.getCommentTextArea().getElement().setPropertyString("placeholder",
+                stringMessages.tagLabelComment());
         grid.setWidget(2, 0, commentLabel);
-        grid.setWidget(2, 1, commentTextArea);
+        grid.setWidget(2, 1, tagEntryFields.getCommentTextArea());
         // visibility
         Label visibilityLabel = new Label(stringMessages.tagLabelVisibility() + ":");
-        visibleForPublicCheckBox = new CheckBox(stringMessages.tagVisibleForPublicCheckBox());
-        visibleForPublicCheckBox.setValue(DEFAULT_VISIBLE_FOR_PUBLIC);
         noPermissionForPublicTagsLabel = new Label(stringMessages.tagPublicModificationPermissionMissing());
         checkboxWrapper = new FlowPanel();
-        checkboxWrapper.add(visibleForPublicCheckBox);
+        checkboxWrapper.add(tagEntryFields.getVisibleForPublicCheckBox());
         checkboxWrapper.add(noPermissionForPublicTagsLabel);
         grid.setWidget(3, 0, visibilityLabel);
         grid.setWidget(3, 1, checkboxWrapper);
-
         add(grid);
         clearAllValues();
     }
 
+    protected Button getOkButton() {
+        return tagEntryFields.getOkButton();
+    }
+
+    protected Button getCancelButton() {
+        return tagEntryFields.getCancelButton();
+    }
+
+    protected Label getStatusLabel() {
+        return tagEntryFields.getStatusLabel();
+    }
+
+    protected void validateAndUpdate() {
+        tagEntryFields.validateAndUpdate();
+    }
+
+    protected TextBox getTagTextBox() {
+        return tagEntryFields.getTagTextBox();
+    }
+
+    protected TextArea getCommentTextArea() {
+        return tagEntryFields.getCommentTextArea();
+    }
+
+    protected URLFieldWithFileUpload getImageURLTextBox() {
+        return tagEntryFields.getImageUploadPanel();
+    }
+
+    protected CheckBox getVisibleForPublicCheckBox() {
+        return tagEntryFields.getVisibleForPublicCheckBox();
+    }
+
+    protected String getTag() {
+        return getTagTextBox().getValue();
+    }
+
+    protected String getComment() {
+        return getCommentTextArea().getValue();
+    }
+
+    protected boolean isVisibleForPublic() {
+        return getVisibleForPublicCheckBox().getValue();
+    }
+
     public String getImageURL() {
-        return imageUrlUploaderPanel.getURL();
+        return tagEntryFields.getImageUploadPanel().getURL();
     }
 
-    public int getImageWidth() {
-        return imageWidth;
+    protected void setTag(String tag) {
+        getTagTextBox().setValue(tag);
     }
 
-    public int getImageHeight() {
-        return imageHeight;
+    protected void setComment(String comment) {
+        getCommentTextArea().setValue(comment);
+    }
+
+    protected void setImageURL(String imageURL) {
+        getImageURLTextBox().setValue(imageURL);
+    }
+
+    protected void setVisibleForPublic(boolean visibleForPublic) {
+        getVisibleForPublicCheckBox().setValue(visibleForPublic);
     }
 
     /**
@@ -169,18 +293,6 @@ public class TagInputPanel extends FlowPanel {
                 && isVisibleForPublic() == DEFAULT_VISIBLE_FOR_PUBLIC;
     }
 
-    protected String getTag() {
-        return tagTextBox.getValue();
-    }
-
-    protected String getComment() {
-        return commentTextArea.getValue();
-    }
-
-    protected boolean isVisibleForPublic() {
-        return visibleForPublicCheckBox.getValue();
-    }
-
     /**
      * Sets all input fields to values of given {@link TagDTO tag}.
      * 
@@ -195,44 +307,16 @@ public class TagInputPanel extends FlowPanel {
         setCurrentStatus();
     }
 
-    protected void setTag(String tag) {
-        tagTextBox.setValue(tag);
-    }
-
-    protected void setComment(String comment) {
-        commentTextArea.setValue(comment);
-    }
-
-    protected void setImageURL(String imageURL) {
-        imageUrlUploaderPanel.setValue(imageURL);
-    }
-
-    protected void setVisibleForPublic(boolean visibleForPublic) {
-        visibleForPublicCheckBox.setValue(visibleForPublic);
-    }
-
-    protected TextBox getTagTextBox() {
-        return tagTextBox;
-    }
-
-    protected URLFieldWithFileUpload getImageURLTextBox() {
-        return imageUrlUploaderPanel;
-    }
-
-    protected TextArea getCommentTextArea() {
-        return commentTextArea;
-    }
-
-    protected CheckBox getVisibleForPublicCheckBox() {
-        return visibleForPublicCheckBox;
-    }
-
+    /**
+     * Sets visibility of checkbox for visibility of tag. Users without permission for public tag creation will see
+     * information label instead.
+     */
     protected void setCurrentStatus() {
         if (taggingPanel.hasPermissionToModifyPublicTags()) {
-            visibleForPublicCheckBox.setVisible(true);
+            getVisibleForPublicCheckBox().setVisible(true);
             noPermissionForPublicTagsLabel.setVisible(false);
         } else {
-            visibleForPublicCheckBox.setVisible(false);
+            getVisibleForPublicCheckBox().setVisible(false);
             noPermissionForPublicTagsLabel.setVisible(true);
         }
     }

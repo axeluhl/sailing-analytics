@@ -70,6 +70,14 @@
 	display: inline-block;
 }
 
+@external errorLabel;
+.errorLabel {
+    padding-top: 5px;
+}
+
+.tagModificationPanel .errorLabel {
+	font-size: 14px;
+}
 
 /**************************** Tag-Cells ****************************/
 .tagCell {
@@ -185,7 +193,6 @@
 
 .tagDialogButton {
 	max-width: 100%;
-	padding: 4px 4px;
 	cursor: pointer;
 }
 

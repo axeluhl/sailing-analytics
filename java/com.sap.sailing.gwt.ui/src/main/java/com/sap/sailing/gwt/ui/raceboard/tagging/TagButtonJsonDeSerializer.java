@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONBoolean;
-import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 
@@ -19,8 +18,6 @@ public class TagButtonJsonDeSerializer {
     private static final String FIELD_TAG = "tag";
     private static final String FIELD_COMMENT = "comment";
     private static final String FIELD_IMAGE_URL = "imageURL";
-    private static final String FIELD_IMAGE_WIDTH = "imageWidth";
-    private static final String FIELD_IMAGE_HEIGHT = "imageHeight";
     private static final String FIELD_VISIBLE_FOR_PUBLIC = "public";
 
     public JSONArray serialize(List<TagButton> tagButtons) {
@@ -36,8 +33,6 @@ public class TagButtonJsonDeSerializer {
                 }
                 if (button.getImageURL() != null) {
                     tagButtonObject.put(FIELD_IMAGE_URL, new JSONString(button.getImageURL()));
-                    tagButtonObject.put(FIELD_IMAGE_WIDTH, new JSONNumber(button.getImageWidth()));
-                    tagButtonObject.put(FIELD_IMAGE_HEIGHT, new JSONNumber(button.getImageHeight()));
                 }
                 tagButtonObject.put(FIELD_VISIBLE_FOR_PUBLIC, JSONBoolean.getInstance(button.isVisibleForPublic()));
                 result.set(i++, tagButtonObject);
@@ -56,13 +51,9 @@ public class TagButtonJsonDeSerializer {
                 JSONString tagButtonTag = (JSONString) tagButtonValue.get(FIELD_TAG);
                 JSONString tagButtonComment = (JSONString) tagButtonValue.get(FIELD_COMMENT);
                 JSONString tagButtonImageURL = (JSONString) tagButtonValue.get(FIELD_IMAGE_URL);
-                JSONNumber tagButtonImageWidth = (JSONNumber) tagButtonValue.get(FIELD_IMAGE_WIDTH);
-                JSONNumber tagButtonImageHeight = (JSONNumber) tagButtonValue.get(FIELD_IMAGE_HEIGHT);
                 JSONBoolean tagButtonVisibleForPublic = (JSONBoolean) tagButtonValue.get(FIELD_VISIBLE_FOR_PUBLIC);
                 result.add(new TagButton(tagButtonName.stringValue(), tagButtonTag.stringValue(),
                         tagButtonImageURL == null ? null : tagButtonImageURL.stringValue(),
-                        tagButtonImageWidth == null ? -1 : (int) tagButtonImageWidth.doubleValue(),
-                        tagButtonImageHeight == null ? -1 : (int) tagButtonImageHeight.doubleValue(),
                         tagButtonComment == null ? null : tagButtonComment.stringValue(),
                         tagButtonVisibleForPublic.booleanValue()));
             }

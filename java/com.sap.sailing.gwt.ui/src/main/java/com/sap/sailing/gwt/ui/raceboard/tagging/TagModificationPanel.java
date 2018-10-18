@@ -4,10 +4,12 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
+import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanel.State;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
@@ -22,8 +24,9 @@ public class TagModificationPanel extends FlowPanel {
     private final StringMessages stringMessages;
 
     private final Label heading;
-    private final Panel editButtonsPanel, createButtonsPanel;
+    private final Panel buttonsPanel;
     private final TagInputPanel inputPanel;
+    private final Button editCustomTagButtons;
 
     /**
      * Creates panel used to create tags and {@link TagButton tag-buttons}.
@@ -37,24 +40,41 @@ public class TagModificationPanel extends FlowPanel {
             SailingServiceAsync sailingService, StringMessages stringMessages, UserService userService) {
         this.taggingPanel = taggingPanel;
         this.stringMessages = stringMessages;
-
         setStyleName(style.tagModificationPanel());
+        inputPanel = new TagInputPanel(taggingPanel, sailingService, stringMessages, new DialogCallback<TagDTO>() {
+            @Override
+            public void ok(TagDTO editedObject) {
+                if (taggingPanel.getCurrentState().equals(State.EDIT_TAG)) {
+                    taggingPanel.updateTag(taggingPanel.getSelectedTag(), inputPanel.getTag(), inputPanel.getComment(),
+                            inputPanel.getImageURL(), inputPanel.isVisibleForPublic());
+                    resetState();
+                } else {
+                    if (taggingPanel.isLoggedInAndRaceLogAvailable()) {
+                        taggingPanel.saveTag(inputPanel.getTag(), inputPanel.getComment(), inputPanel.getImageURL(),
+                                inputPanel.isVisibleForPublic());
+                        // TODO: Add callback to saveTag() to clear fields only if tag got really added
+                        inputPanel.clearAllValues();
+                    }
+                }
+            }
 
-        inputPanel = new TagInputPanel(taggingPanel, sailingService, stringMessages);
-
-        Button createTagFromInputFields = new Button(stringMessages.tagAddTag());
-        createTagFromInputFields.setStyleName(style.tagDialogButton());
-        createTagFromInputFields.addStyleName("gwt-Button");
-        createTagFromInputFields.addClickHandler(event -> {
-            if (taggingPanel.isLoggedInAndRaceLogAvailable()) {
-                taggingPanel.saveTag(inputPanel.getTag(), inputPanel.getComment(), inputPanel.getImageURL(),
-                        inputPanel.getImageWidth(), inputPanel.getImageHeight(), inputPanel.isVisibleForPublic());
-                // TODO: Add callback to saveTag() to clear fields only if tag got really added
-                inputPanel.clearAllValues();
+            @Override
+            public void cancel() {
+                if ((taggingPanel.getCurrentState().equals(State.CREATE_TAG) && !inputPanel.isInputEmpty())
+                        || (taggingPanel.getCurrentState().equals(State.EDIT_TAG)
+                                && !inputPanel.compareFieldsToTag(taggingPanel.getSelectedTag()))) {
+                    new ConfirmationDialog(stringMessages, stringMessages.tagDiscardChangesHeading(),
+                            stringMessages.tagDiscardChanges(), result -> {
+                                if (result) {
+                                    resetState();
+                                }
+                            });
+                } else {
+                    resetState();
+                }
             }
         });
-
-        Button editCustomTagButtons = new Button(stringMessages.tagEditCustomTagButtons());
+        editCustomTagButtons = new Button(stringMessages.tagEditCustomTagButtons());
         editCustomTagButtons.setStyleName(style.tagDialogButton());
         editCustomTagButtons.addStyleName("gwt-Button");
         editCustomTagButtons.addClickHandler(event -> {
@@ -62,47 +82,18 @@ public class TagModificationPanel extends FlowPanel {
                 new TagButtonDialog(taggingPanel, tagFooterPanel, sailingService, stringMessages, userService);
             }
         });
-
-        createButtonsPanel = new FlowPanel();
-        createButtonsPanel.setStyleName(style.buttonsPanel());
-        createButtonsPanel.add(editCustomTagButtons);
-        createButtonsPanel.add(createTagFromInputFields);
-        createButtonsPanel.setVisible(true);
-
-        Button saveTagChanges = new Button(stringMessages.save());
-        saveTagChanges.setStyleName(style.tagDialogButton());
-        saveTagChanges.addStyleName("gwt-Button");
-        saveTagChanges.addClickHandler(event -> {
-            taggingPanel.updateTag(taggingPanel.getSelectedTag(), inputPanel.getTag(), inputPanel.getComment(),
-                    inputPanel.getImageURL(), inputPanel.getImageWidth(), inputPanel.getImageHeight(),
-                    inputPanel.isVisibleForPublic());
-            resetState();
-        });
-
-        Button cancelTagChanges = new Button(stringMessages.cancel());
-        cancelTagChanges.setStyleName(style.tagDialogButton());
-        cancelTagChanges.addStyleName("gwt-Button");
-        cancelTagChanges.addClickHandler(event -> {
-            if ((taggingPanel.getCurrentState().equals(State.CREATE_TAG) && !inputPanel.isInputEmpty())
-                    || (taggingPanel.getCurrentState().equals(State.EDIT_TAG)
-                            && !inputPanel.compareFieldsToTag(taggingPanel.getSelectedTag()))) {
-                new ConfirmationDialog(stringMessages, stringMessages.tagDiscardChangesHeading(),
-                        stringMessages.tagDiscardChanges(), result -> {
-                            if (result) {
-                                resetState();
-                            }
-                        });
-            } else {
-                resetState();
-            }
-        });
-
-        editButtonsPanel = new FlowPanel();
-        editButtonsPanel.setStyleName(style.buttonsPanel());
-        editButtonsPanel.add(saveTagChanges);
-        editButtonsPanel.add(cancelTagChanges);
-        editButtonsPanel.setVisible(false);
-
+        inputPanel.getOkButton().setText(stringMessages.tagAddTag());
+        inputPanel.getOkButton().setStyleName(style.tagDialogButton());
+        inputPanel.getOkButton().addStyleName("gwt-Button");
+        inputPanel.getCancelButton().setText(stringMessages.cancel());
+        inputPanel.getCancelButton().setStyleName(style.tagDialogButton());
+        inputPanel.getCancelButton().addStyleName("gwt-Button");
+        buttonsPanel = new FlowPanel();
+        buttonsPanel.setStyleName(style.buttonsPanel());
+        buttonsPanel.add(editCustomTagButtons);
+        buttonsPanel.add(inputPanel.getOkButton());
+        buttonsPanel.add(inputPanel.getCancelButton());
+        buttonsPanel.setVisible(true);
         Panel headerPanel = new FlowPanel();
         headerPanel.setStyleName(style.tagModificationPanelHeader());
         heading = new Label(stringMessages.tagAddTags());
@@ -126,11 +117,10 @@ public class TagModificationPanel extends FlowPanel {
             }
         });
         headerPanel.add(closeFooterButton);
-
         add(headerPanel);
+        add(inputPanel.getStatusLabel());
         add(inputPanel);
-        add(createButtonsPanel);
-        add(editButtonsPanel);
+        add(buttonsPanel);
     }
 
     /**
@@ -142,13 +132,16 @@ public class TagModificationPanel extends FlowPanel {
     protected void setCurrentStatus(State state) {
         if (state.equals(State.EDIT_TAG)) {
             heading.setText(stringMessages.tagEditTag());
-            createButtonsPanel.setVisible(false);
-            editButtonsPanel.setVisible(true);
+            editCustomTagButtons.setVisible(false);
+            inputPanel.getOkButton().setText(stringMessages.save());
+            inputPanel.getCancelButton().setVisible(true);
             inputPanel.setTag(taggingPanel.getSelectedTag());
+            inputPanel.validateAndUpdate();
         } else {
             heading.setText(stringMessages.tagAddTags());
-            createButtonsPanel.setVisible(true);
-            editButtonsPanel.setVisible(false);
+            editCustomTagButtons.setVisible(true);
+            inputPanel.getOkButton().setText(stringMessages.tagAddTag());
+            inputPanel.getCancelButton().setVisible(false);
         }
         inputPanel.setCurrentStatus();
     }

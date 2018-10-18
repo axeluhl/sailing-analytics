@@ -11,7 +11,6 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.safehtml.shared.SafeUri;
-import com.google.gwt.user.cellview.client.AbstractHasData.RedrawEvent.Handler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -20,6 +19,7 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.gwt.ui.adminconsole.ImagesBarColumn;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigImagesBarCell;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -29,6 +29,7 @@ import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelSt
 import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
@@ -84,12 +85,23 @@ public class TagButtonDialog extends DialogBox {
 
     private final TaggingPanelResources resources = TaggingPanelResources.INSTANCE;
     private final TagPanelStyle style = resources.style();
-
     private final TaggingPanel taggingPanel;
     private final StringMessages stringMessages;
+    private final TagInputPanel inputPanel;
+    private final TagPreviewPanel tagPreviewPanel;
+    private final CellTable<TagButton> tagButtonTable;
+    private final TagFooterPanel footerPanel;
 
-    private Button closeButton, saveButton, cancelButton, addTagButtonButton;
     private TagButton selectedTagButton;
+
+    /**
+     * <b>May not be edited directly</b>!<br/>
+     * When {@link #updateTagMode} is set to <code>true</code>, UI is displaying version for updating a tag button
+     * (button names and click listener). When this boolean is set to <code>false</code>, UI is displaying version for
+     * creation of tag buttons. Use method {@link #setButtonMode(boolean)} to change this value and the corresponding
+     * UI.
+     */
+    private boolean updateTagMode = false;
 
     /**
      * Centered dialog which allows users to edit their personal {@link TagButton tag-buttons}.
@@ -103,39 +115,52 @@ public class TagButtonDialog extends DialogBox {
      * @param stringMessages
      *            string messages of {@link TaggingPanel}
      */
-    public TagButtonDialog(TaggingPanel taggingPanel, TagFooterPanel footerPanel, SailingServiceAsync sailingService, StringMessages stringMessages,
-            UserService userService) {
+    public TagButtonDialog(TaggingPanel taggingPanel, TagFooterPanel footerPanel, SailingServiceAsync sailingService,
+            StringMessages stringMessages, UserService userService) {
         this.taggingPanel = taggingPanel;
         this.stringMessages = stringMessages;
-
+        this.footerPanel = footerPanel;
         setGlassEnabled(true);
         setText(stringMessages.tagEditCustomTagButtons());
         addStyleName(style.tagButtonDialog());
-
-        TagInputPanel inputPanel = new TagInputPanel(taggingPanel, sailingService, stringMessages);
-        TagPreviewPanel tagPreviewPanel = new TagPreviewPanel(taggingPanel, inputPanel, stringMessages, userService);
-        CellTable<TagButton> tagButtonsTable = createTable(footerPanel, inputPanel, tagPreviewPanel);
-        tagButtonsTable.addRedrawHandler(new Handler() {
+        inputPanel = new TagInputPanel(taggingPanel, sailingService, stringMessages, new DialogCallback<TagDTO>() {
             @Override
-            public void onRedraw() {
-                // center dialog when content of tagButtonsTable changes (table needs to be redrawn)
-                center();
+            public void ok(TagDTO editedObject) {
+                if (updateTagMode) {
+                    onSaveTagButtonChangesPressed();
+                } else {
+                    onAddTagButtonPressed();
+                }
+            }
+
+            @Override
+            public void cancel() {
+                if (updateTagMode) {
+                    onCancelTagButtonChangesPressed();
+                } else {
+                    onCloseButtonPressed();
+                }
             }
         });
-        Panel controlButtonPanel = createButtonPanel(tagButtonsTable, inputPanel, tagPreviewPanel, footerPanel);
-
+        tagPreviewPanel = new TagPreviewPanel(taggingPanel, inputPanel, stringMessages, userService);
+        tagButtonTable = createTable(footerPanel, inputPanel, tagPreviewPanel);
+        tagButtonTable.addRedrawHandler(() -> {
+            // center dialog when content of tagButtonTable changes (table needs to be redrawn)
+            center();
+        });
+        Panel controlButtonPanel = createButtonPanel(tagButtonTable, inputPanel, tagPreviewPanel, footerPanel);
+        setButtonMode(false);
         // wrap tag buttons table to control max-height of table
         Panel tagButtonsTableWrapper = new SimplePanel();
         tagButtonsTableWrapper.setStyleName(style.tagButtonTableWrapper());
-        tagButtonsTableWrapper.add(tagButtonsTable);
-
+        tagButtonsTableWrapper.add(tagButtonTable);
         Panel mainPanel = new FlowPanel();
         mainPanel.setStyleName(style.tagButtonDialogPanel());
         mainPanel.add(tagButtonsTableWrapper);
+        mainPanel.add(inputPanel.getStatusLabel());
         mainPanel.add(inputPanel);
         mainPanel.add(controlButtonPanel);
         mainPanel.add(tagPreviewPanel);
-
         setWidget(mainPanel);
         center();
     }
@@ -195,38 +220,28 @@ public class TagButtonDialog extends DialogBox {
                             });
                 } else if (LeaderboardConfigImagesBarCell.ACTION_EDIT.equals(value)) {
                     selectedTagButton = button;
-
                     inputPanel.setTag(button.getTag());
                     inputPanel.setImageURL(button.getImageURL());
                     inputPanel.setComment(button.getComment());
                     inputPanel.setVisibleForPublic(button.isVisibleForPublic());
-
+                    inputPanel.validateAndUpdate();
                     tagPreviewPanel.renderPreview(inputPanel);
-
-                    saveButton.setVisible(true);
-                    cancelButton.setVisible(true);
-                    closeButton.setVisible(false);
-                    addTagButtonButton.setVisible(false);
-
+                    setButtonMode(true);
                     tagButtonTable.setVisible(false);
                     center();
                 }
             }
         });
-
         tagButtonTable.addColumn(tagColumn, stringMessages.tagLabelTag());
         tagButtonTable.addColumn(imageURLColumn, stringMessages.tagLabelImage());
         tagButtonTable.addColumn(commentColumn, stringMessages.tagLabelComment());
         tagButtonTable.addColumn(actionsColumn, stringMessages.tagLabelAction());
-
         // set these width values manually as they are not accessable via CSS classes
         tagButtonTable.setColumnWidth(tagColumn, "25%");
         tagButtonTable.setColumnWidth(imageURLColumn, "20%");
         tagButtonTable.setColumnWidth(commentColumn, "40%");
         tagButtonTable.setColumnWidth(actionsColumn, "15%");
-
         setRowData(tagButtonTable, taggingPanel.getTagButtons());
-
         return tagButtonTable;
     }
 
@@ -248,166 +263,17 @@ public class TagButtonDialog extends DialogBox {
      */
     private Panel createButtonPanel(CellTable<TagButton> tagButtonTable, TagInputPanel inputPanel,
             TagPreviewPanel tagPreviewPanel, TagFooterPanel footerPanel) {
-        addSaveButton(footerPanel, tagButtonTable, inputPanel, tagPreviewPanel);
-        addCancelButton(inputPanel, tagPreviewPanel, tagButtonTable);
-        addCloseButton(footerPanel, tagPreviewPanel);
-        addTagButtonButton(footerPanel, tagButtonTable, inputPanel, tagPreviewPanel);
-
-        Panel controlButtonPanel = new FlowPanel();
-        controlButtonPanel.setStyleName(style.buttonsPanel());
-        controlButtonPanel.add(addTagButtonButton);
-        controlButtonPanel.add(closeButton);
-        controlButtonPanel.add(saveButton);
-        controlButtonPanel.add(cancelButton);
-
-        return controlButtonPanel;
-    }
-
-    /**
-     * Creates a button allowing users to save their changes on a {@link TagButton}.
-     * 
-     * @param footerPanel
-     *            footer panel of {@link TaggingPanel}
-     * @param tagButtonTable
-     *            {@link com.google.gwt.user.cellview.client.CellTable CellTable} containing {@link TagButton
-     *            tag-buttons}
-     * @param inputPanel
-     *            input fields of {@link TagButtonDialog} which allow to create new and modify existing {@link TagButton
-     *            tag-buttons}
-     * @param tagPreviewPanel
-     *            renders {@link TagPreviewPanel} preview of current input fields
-     */
-    private void addSaveButton(TagFooterPanel footerPanel, CellTable<TagButton> tagButtonTable,
-            TagInputPanel inputPanel, TagPreviewPanel tagPreviewPanel) {
-        saveButton = new Button(stringMessages.save());
-        saveButton.setVisible(false);
-        saveButton.setStyleName(style.tagDialogButton());
-        saveButton.addStyleName("gwt-Button");
-        saveButton.addClickHandler(event -> {
-            if (!inputPanel.getTag().isEmpty()) {
-                selectedTagButton.setText(inputPanel.getTag());
-                selectedTagButton.setTag(inputPanel.getTag());
-                selectedTagButton.setComment(inputPanel.getComment());
-                selectedTagButton.setImage(inputPanel.getImageURL(), inputPanel.getImageWidth(), inputPanel.getImageHeight());
-                selectedTagButton.setVisibleForPublic(inputPanel.isVisibleForPublic());
-                footerPanel.storeAllTagButtons();
-                inputPanel.clearAllValues();
-                tagPreviewPanel.renderPreview(inputPanel);
-                tagButtonTable.redraw();
-
-                saveButton.setVisible(false);
-                cancelButton.setVisible(false);
-                closeButton.setVisible(true);
-                addTagButtonButton.setVisible(true);
-                selectedTagButton = null;
-                setRowData(tagButtonTable, taggingPanel.getTagButtons());
-            } else {
-                Notification.notify(stringMessages.tagNotSpecified(), NotificationType.WARNING);
-            }
-            center();
-        });
-    }
-
-    /**
-     * Creates a button allowing users to discard their changes on a {@link TagButton}.
-     * 
-     * @param tagButtonTable
-     *            {@link com.google.gwt.user.cellview.client.CellTable CellTable} containing {@link TagButton
-     *            tag-buttons}
-     * @param inputPanel
-     *            input fields of {@link TagButtonDialog} which allow to create new and modify existing {@link TagButton
-     *            tag-buttons}
-     * @param tagPreviewPanel
-     *            renders {@link TagPreviewPanel} preview of current input fields
-     */
-    private void addCancelButton(TagInputPanel inputPanel, TagPreviewPanel tagPreviewPanel,
-            CellTable<TagButton> tagButtonTable) {
-        cancelButton = new Button(stringMessages.cancel());
-        cancelButton.setVisible(false);
+        Button okButton = inputPanel.getOkButton();
+        okButton.setStyleName(style.tagDialogButton());
+        okButton.addStyleName("gwt-Button");
+        Button cancelButton = inputPanel.getCancelButton();
         cancelButton.setStyleName(style.tagDialogButton());
         cancelButton.addStyleName("gwt-Button");
-        cancelButton.addClickHandler(event -> {
-            // ask user for confirmation to discard changes if values of input fields changed
-            if (!inputPanel.compareFieldsToTagButton(selectedTagButton)) {
-                new ConfirmationDialog(stringMessages, stringMessages.tagDiscardChangesHeading(),
-                        stringMessages.tagDiscardChanges(), confirmed -> {
-                            if (confirmed) {
-                                inputPanel.clearAllValues();
-                                tagPreviewPanel.renderPreview(inputPanel);
-                                tagButtonTable.setVisible(true);
-                                saveButton.setVisible(false);
-                                cancelButton.setVisible(false);
-                                closeButton.setVisible(true);
-                                addTagButtonButton.setVisible(true);
-                                center();
-                            }
-                        });
-            } else {
-                inputPanel.clearAllValues();
-                tagPreviewPanel.renderPreview(inputPanel);
-                tagButtonTable.setVisible(true);
-                saveButton.setVisible(false);
-                cancelButton.setVisible(false);
-                closeButton.setVisible(true);
-                addTagButtonButton.setVisible(true);
-                center();
-            }
-        });
-    }
-
-    /**
-     * Creates a button allowing users to close the {@link TagButtonDialog}.
-     * 
-     * @param tagButtonTable
-     *            {@link com.google.gwt.user.cellview.client.CellTable CellTable} containing {@link TagButton
-     *            tag-buttons}
-     * @param inputPanel
-     *            input fields of {@link TagButtonDialog} which allow to create new and modify existing {@link TagButton
-     *            tag-buttons}
-     * @param tagPreviewPanel
-     *            renders {@link TagPreviewPanel} preview of current input fields
-     */
-    private void addCloseButton(TagFooterPanel footerPanel, TagPreviewPanel tagPreviewPanel) {
-        closeButton = new Button(stringMessages.close());
-        closeButton.setStyleName(style.tagDialogButton());
-        closeButton.addStyleName("gwt-Button");
-        closeButton.addClickHandler(event -> hide());
-    }
-
-    /**
-     * Creates a button allowing users to add a new {@link TagButton}.
-     * 
-     * @param footerPanel
-     *            footer panel of {@link TaggingPanel}
-     * @param tagButtonTable
-     *            {@link com.google.gwt.user.cellview.client.CellTable CellTable} containing {@link TagButton
-     *            tag-buttons}
-     * @param inputPanel
-     *            input fields of {@link TagButtonDialog} which allow to create new and modify existing {@link TagButton
-     *            tag-buttons}
-     * @param tagPreviewPanel
-     *            renders {@link TagPreviewPanel} preview of current input fields
-     */
-    private void addTagButtonButton(TagFooterPanel footerPanel, CellTable<TagButton> tagButtonTable,
-            TagInputPanel inputPanel, TagPreviewPanel tagPreviewPanel) {
-        addTagButtonButton = new Button(stringMessages.tagAddCustomTagButton());
-        addTagButtonButton.setStyleName(style.tagDialogButton());
-        addTagButtonButton.addStyleName("gwt-Button");
-        addTagButtonButton.addClickHandler(event -> {
-            if (!inputPanel.getTag().isEmpty()) {
-                TagButton tagButton = new TagButton(inputPanel.getTag(), inputPanel.getTag(), inputPanel.getImageURL(), inputPanel.getImageWidth(), inputPanel.getImageHeight(),
-                        inputPanel.getComment(), inputPanel.isVisibleForPublic());
-                inputPanel.clearAllValues();
-                tagPreviewPanel.renderPreview(inputPanel);
-                taggingPanel.addTagButton(tagButton);
-                footerPanel.storeAllTagButtons();
-                footerPanel.recalculateHeight();
-                setRowData(tagButtonTable, taggingPanel.getTagButtons());
-            } else {
-                Notification.notify(stringMessages.tagNotSpecified(), NotificationType.WARNING);
-            }
-            center();
-        });
+        Panel controlButtonPanel = new FlowPanel();
+        controlButtonPanel.setStyleName(style.buttonsPanel());
+        controlButtonPanel.add(okButton);
+        controlButtonPanel.add(cancelButton);
+        return controlButtonPanel;
     }
 
     /**
@@ -424,5 +290,95 @@ public class TagButtonDialog extends DialogBox {
     private void setRowData(CellTable<TagButton> tagButtonTable, List<TagButton> buttons) {
         tagButtonTable.setRowData(buttons);
         tagButtonTable.setVisible(!buttons.isEmpty());
+    }
+
+    /**
+     * Button click handler for 'save' button (can only be pressed when user is currently editing a tag button).
+     */
+    private void onSaveTagButtonChangesPressed() {
+        selectedTagButton.setText(inputPanel.getTag());
+        selectedTagButton.setTag(inputPanel.getTag());
+        selectedTagButton.setComment(inputPanel.getComment());
+        selectedTagButton.setImageURL(inputPanel.getImageURL());
+        selectedTagButton.setVisibleForPublic(inputPanel.isVisibleForPublic());
+        footerPanel.storeAllTagButtons();
+        inputPanel.clearAllValues();
+        tagPreviewPanel.renderPreview(inputPanel);
+        tagButtonTable.redraw();
+        setButtonMode(false);
+        selectedTagButton = null;
+        setRowData(tagButtonTable, taggingPanel.getTagButtons());
+        center();
+    }
+
+    /**
+     * Button click handler for 'cancel' button (can only be pressed when user is currently editing a tag button).
+     */
+    private void onCancelTagButtonChangesPressed() {
+        // ask user for confirmation to discard changes if values of input fields changed
+        if (!inputPanel.compareFieldsToTagButton(selectedTagButton)) {
+            new ConfirmationDialog(stringMessages, stringMessages.tagDiscardChangesHeading(),
+                    stringMessages.tagDiscardChanges(), confirmed -> {
+                        if (confirmed) {
+                            inputPanel.clearAllValues();
+                            tagPreviewPanel.renderPreview(inputPanel);
+                            tagButtonTable.setVisible(true);
+                            setButtonMode(false);
+                            center();
+                        }
+                    });
+        } else {
+            inputPanel.clearAllValues();
+            tagPreviewPanel.renderPreview(inputPanel);
+            tagButtonTable.setVisible(true);
+            setButtonMode(false);
+            center();
+        }
+    }
+
+    /**
+     * Button click handler for 'add tag button' button (can only be pressed when user is currently creating a new tag
+     * button).
+     */
+    private void onAddTagButtonPressed() {
+        if (inputPanel.getTag().isEmpty()) {
+            Notification.notify(stringMessages.tagNotSpecified(), NotificationType.WARNING);
+        } else {
+            TagButton tagButton = new TagButton(inputPanel.getTag(), inputPanel.getTag(), inputPanel.getImageURL(),
+                    inputPanel.getComment(), inputPanel.isVisibleForPublic());
+            inputPanel.clearAllValues();
+            tagPreviewPanel.renderPreview(inputPanel);
+            taggingPanel.addTagButton(tagButton);
+            footerPanel.storeAllTagButtons();
+            footerPanel.recalculateHeight();
+            setRowData(tagButtonTable, taggingPanel.getTagButtons());
+        }
+        center();
+    }
+
+    /**
+     * Button click handler for 'close' button (can only be pressed when user is currently creating a new tag button).
+     */
+    private void onCloseButtonPressed() {
+        hide();
+    }
+
+    /**
+     * Sets text of buttons regarding to current mode.
+     * 
+     * @param updateTag
+     *            should be <code>true</code> when user updates a tag button, otherwise <code>false</code> (default,
+     *            create new tag button)
+     */
+    private void setButtonMode(boolean updateTag) {
+        if (updateTag) {
+            inputPanel.getOkButton().setText(stringMessages.save());
+            inputPanel.getCancelButton().setText(stringMessages.cancel());
+            updateTagMode = true;
+        } else {
+            inputPanel.getOkButton().setText(stringMessages.tagAddCustomTagButton());
+            inputPanel.getCancelButton().setText(stringMessages.close());
+            updateTagMode = false;
+        }
     }
 }

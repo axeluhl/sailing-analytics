@@ -48,7 +48,7 @@ public class SideBySideComponentViewer implements UserStatusEventHandler {
 
     private static final int DEFAULT_SOUTH_SPLIT_PANEL_HEIGHT = 200;
     private final int MIN_LEADERBOARD_WIDTH = Math.min(432, Window.getClientWidth() - 40); // fallback value "432" works well for 505 and ESS
-    private final int MIN_TAGGING_WIDTH = Math.min(350, Window.getClientWidth() - 40);
+    private final int MIN_TAGGING_WIDTH = Math.min(440, Window.getClientWidth() - 40);
 
     /**
      * Absolute Panel that informs its children about a resize

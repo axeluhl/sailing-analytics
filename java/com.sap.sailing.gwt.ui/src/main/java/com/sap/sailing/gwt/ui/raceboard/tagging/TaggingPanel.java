@@ -32,6 +32,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
 import com.sap.sailing.gwt.ui.shared.RaceTimesInfoDTO;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.Notification;
@@ -247,65 +248,78 @@ public class TaggingPanel extends ComponentWithoutSettings
      * 
      * @see #saveTag(String, Sting, String, boolean, TimePoint, boolean)
      */
-    protected void saveTag(String tag, String comment, String imageURL, int imageWidth, int imageHeight,
-            boolean visibleForPublic) {
-        getResizedImageURLForImageURL(imageURL, imageHeight, imageWidth, new AsyncCallback<String>() {
+    protected void saveTag(String tag, String comment, String imageURL, boolean visibleForPublic) {
+        getResizedImageURLForImageURL(imageURL, new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
+                GWT.log(caught.getMessage());
             }
 
             @Override
-            public void onSuccess(String resultingResizedImageURL) {
-                saveTag(tag, comment, imageURL, resultingResizedImageURL, visibleForPublic, null);
+            public void onSuccess(String resizedImageURL) {
+                saveTag(tag, comment, imageURL, resizedImageURL, visibleForPublic, null);
             }
         });
     }
 
     /**
-     * Calling this method you get a resized image URL for your original image URL
+     * Returns image URL of resized image for given image URL.
      * 
      * @param imageURL
      *            URL of image which needs to be resized
-     * @param imageWidth
-     *            width of image needing to be resized
-     * @param imageHeight
-     *            height of image needing to be resized
      * @param callback
-     *            An asynchronous callback containing the result, a resized image URL
+     *            An asynchronous callback containing the resized image URL, <code>empty string</code> in case of empty
+     *            given image URL
      */
-    protected void getResizedImageURLForImageURL(String imageURL, int imageWidth, int imageHeight,
-            AsyncCallback<String> callback) {
+    protected void getResizedImageURLForImageURL(String imageURL, AsyncCallback<String> callback) {
         if (imageURL == null || imageURL.isEmpty()) {
-            callback.onSuccess(null);
+            callback.onSuccess("");
         } else {
-            if (imageWidth < MediaTagConstants.TAGGING_IMAGE.getMinWidth()
-                    || imageHeight < MediaTagConstants.TAGGING_IMAGE.getMinHeight()) {
-                callback.onSuccess(null);// image to small
-            } else {
-                if (imageWidth > MediaTagConstants.TAGGING_IMAGE.getMaxWidth()
-                        || imageHeight > MediaTagConstants.TAGGING_IMAGE.getMaxHeight()) {
-                    ArrayList<MediaTagConstants> tags = new ArrayList<MediaTagConstants>();
-                    tags.add(MediaTagConstants.TAGGING_IMAGE);
-                    sailingService.resizeImage(new ImageResizingTaskDTO(imageURL, new Date(), tags),
-                            new AsyncCallback<Set<ImageDTO>>() {
-                                @Override
-                                public void onFailure(Throwable caught) {
-                                    callback.onSuccess(null);
-                                }
-
-                                @Override
-                                public void onSuccess(Set<ImageDTO> result) {
-                                    String resizedImageURL = null;
-                                    if (result.size() != 0) {
-                                        resizedImageURL = result.iterator().next().getSourceRef();
-                                    }
-                                    callback.onSuccess(resizedImageURL);
-                                }
-                            });
-                } else {
-                    callback.onSuccess(imageURL);
+            sailingService.resolveImageDimensions(imageURL, new AsyncCallback<Pair<Integer, Integer>>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    callback.onFailure(caught);
                 }
-            }
+
+                @Override
+                public void onSuccess(Pair<Integer, Integer> result) {
+                    if (result == null || result.getA() == null || result.getB() == null) {
+                        callback.onFailure(new IllegalArgumentException("Size of image could not be determined!"));
+                    } else {
+                        int imageWidth = result.getA();
+                        int imageHeight = result.getB();
+                        if (imageWidth < MediaTagConstants.TAGGING_IMAGE.getMinWidth()
+                                || imageHeight < MediaTagConstants.TAGGING_IMAGE.getMinHeight()) {
+                            callback.onFailure(new IllegalArgumentException("Image is to small for resizing!"));
+                        } else {
+                            if (imageWidth > MediaTagConstants.TAGGING_IMAGE.getMaxWidth()
+                                    || imageHeight > MediaTagConstants.TAGGING_IMAGE.getMaxHeight()) {
+                                ArrayList<MediaTagConstants> tags = new ArrayList<MediaTagConstants>();
+                                tags.add(MediaTagConstants.TAGGING_IMAGE);
+                                sailingService.resizeImage(new ImageResizingTaskDTO(imageURL, new Date(), tags),
+                                        new AsyncCallback<Set<ImageDTO>>() {
+                                            @Override
+                                            public void onFailure(Throwable caught) {
+                                                callback.onFailure(caught);
+                                            }
+
+                                            @Override
+                                            public void onSuccess(Set<ImageDTO> result) {
+                                                String resizedImageURL = null;
+                                                if (result.size() != 0) {
+                                                    resizedImageURL = result.iterator().next().getSourceRef();
+                                                }
+                                                callback.onSuccess(resizedImageURL);
+                                            }
+                                        });
+                            } else {
+                                callback.onSuccess(imageURL);
+                            }
+                        }
+                    }
+
+                }
+            });
         }
     }
 
@@ -320,16 +334,7 @@ public class TaggingPanel extends ComponentWithoutSettings
      */
     protected void saveTag(String tag, String comment, String imageURL, String resizedImageURL,
             boolean visibleForPublic, TimePoint raceTimePoint) {
-        boolean tagIsNewTag = true;
-        // check if tag already exists
-        for (TagDTO tagDTO : tagListProvider.getAllTags()) {
-            if (tagDTO.equals(tag, comment, imageURL, resizedImageURL, visibleForPublic,
-                    userService.getCurrentUser().getName(), new MillisecondsTimePoint(getTimerTime()))) {
-                tagIsNewTag = false;
-                break;
-            }
-        }
-        if (!tagIsNewTag) {
+        if (tagAlreadyExists(tag, comment, imageURL, resizedImageURL, visibleForPublic, raceTimePoint)) {
             // tag does already exist
             Notification.notify(stringMessages.tagNotSavedReason(" " + stringMessages.tagAlreadyExists()),
                     NotificationType.WARNING);
@@ -420,19 +425,20 @@ public class TaggingPanel extends ComponentWithoutSettings
      * 
      * @see TagDTO
      */
-    protected void updateTag(TagDTO tagToUpdate, String tag, String comment, String imageURL, int imageWidth,
-            int imageHeight, boolean visibleForPublic) {
-        // A new resized image gets created every time a tag is updated(if tag shall contain an image)
-        getResizedImageURLForImageURL(imageURL, imageHeight, imageWidth, new AsyncCallback<String>() {
+    protected void updateTag(TagDTO tagToUpdate, String tag, String comment, String imageURL,
+            boolean visibleForPublic) {
+        // A new resized image gets created every time a tag is updated (if tag shall contain an image)
+        getResizedImageURLForImageURL(imageURL, new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
+                Notification.notify(stringMessages.tagNotSavedReason(caught.getMessage()), NotificationType.ERROR);
+                GWT.log(caught.getMessage());
             }
 
             @Override
-            public void onSuccess(String resultingResizedImageURL) {
+            public void onSuccess(String resizedImageURL) {
                 sailingService.updateTag(leaderboardName, raceColumn.getName(), fleet.getName(), tagToUpdate, tag,
-                        comment, imageURL, resultingResizedImageURL, visibleForPublic,
-                        new AsyncCallback<SuccessInfo>() {
+                        comment, imageURL, resizedImageURL, visibleForPublic, new AsyncCallback<SuccessInfo>() {
                             @Override
                             public void onFailure(Throwable caught) {
                                 Notification.notify(stringMessages.tagNotSavedReason(caught.getMessage()),
@@ -461,6 +467,22 @@ public class TaggingPanel extends ComponentWithoutSettings
                         });
             }
         });
+    }
+
+    /**
+     * Returns whether given tag already exists.
+     * 
+     * @return <code>true</code> if tag already exists (only checked client side), otherwise <code>false</code>
+     */
+    protected boolean tagAlreadyExists(String tag, String comment, String imageURL, String resizedImageURL,
+            boolean visibleForPublic, TimePoint raceTimePoint) {
+        for (TagDTO tagDTO : tagListProvider.getAllTags()) {
+            if (tagDTO.equals(tag, comment, imageURL, resizedImageURL, visibleForPublic,
+                    userService.getCurrentUser().getName(), new MillisecondsTimePoint(getTimerTime()))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -518,8 +540,8 @@ public class TaggingPanel extends ComponentWithoutSettings
      */
     protected void addTagButton(TagButton tagButton) {
         tagButton.addClickHandler(event -> {
-            saveTag(tagButton.getTag(), tagButton.getComment(), tagButton.getImageURL(), tagButton.getImageWidth(),
-                    tagButton.getImageHeight(), tagButton.isVisibleForPublic());
+            saveTag(tagButton.getTag(), tagButton.getComment(), tagButton.getImageURL(),
+                    tagButton.isVisibleForPublic());
         });
         tagButtons.add(tagButton);
     }

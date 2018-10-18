@@ -14,7 +14,6 @@ public class TagButton extends Button {
 
     private String tag, imageURL, comment;
     private boolean visibleForPublic;
-    private int imageWidth, imageHeight;
 
     /**
      * Creates tag button with given attributes.
@@ -30,8 +29,7 @@ public class TagButton extends Button {
      * @param visibleForPublic
      *            should be <code>true</code> if everybody should see the generated tag, otherwise <code>false</code>
      */
-    protected TagButton(String buttonName, String tag, String imageURL, int imageWidth, int imageHeight, String comment,
-            boolean visibleForPublic) {
+    protected TagButton(String buttonName, String tag, String imageURL, String comment, boolean visibleForPublic) {
         super(buttonName);
         setStyleName(style.tagDialogButton());
 
@@ -39,8 +37,6 @@ public class TagButton extends Button {
         this.imageURL = imageURL;
         this.comment = comment;
         this.visibleForPublic = visibleForPublic;
-        this.imageWidth = imageWidth;
-        this.imageHeight = imageHeight;
         addStyleName("gwt-Button");
     }
 
@@ -72,24 +68,6 @@ public class TagButton extends Button {
     }
 
     /**
-     * Returns image width of corresponding tag.
-     * 
-     * @return image width of tag
-     */
-    protected int getImageWidth() {
-        return imageWidth;
-    }
-
-    /**
-     * Returns image height of corresponding tag.
-     * 
-     * @return image height of tag
-     */
-    protected int getImageHeight() {
-        return imageHeight;
-    }
-
-    /**
      * Returns visibility of corresponding tag.
      * 
      * @return <code>true</code> if tag is visible for public, otherwise <code>false</code>
@@ -109,15 +87,13 @@ public class TagButton extends Button {
     }
 
     /**
-     * Sets URL, width and height of optional image for corresponding tag.
+     * Sets URL of optional image for corresponding tag.
      * 
      * @param imageURL
      *            image URL, may be <code>null</code>
      */
-    protected void setImage(String imageURL, int imageWidth, int imageHeight) {
+    protected void setImageURL(String imageURL) {
         this.imageURL = imageURL;
-        this.imageWidth = imageWidth;
-        this.imageHeight = imageHeight;
     }
 
     /**
