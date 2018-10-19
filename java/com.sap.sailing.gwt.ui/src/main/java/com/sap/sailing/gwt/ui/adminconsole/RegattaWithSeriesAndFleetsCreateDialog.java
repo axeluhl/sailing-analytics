@@ -60,7 +60,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
                 } else if ((startDate != null && endDate == null) || (startDate == null && endDate != null)) {
                     datesErrorMessage = stringMessages.pleaseEnterStartAndEndDate();
                 }
-                
+
                 if (datesErrorMessage != null) {
                     errorMessage = datesErrorMessage;
                 } else if (!nameNotEmpty) {
