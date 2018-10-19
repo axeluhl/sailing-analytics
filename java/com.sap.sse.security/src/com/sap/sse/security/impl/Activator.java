@@ -16,6 +16,7 @@ import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.UsernamePasswordRealm;
+import com.sap.sse.security.shared.HasPermissionsProvider;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ServiceTrackerFactory;
 
@@ -71,7 +72,11 @@ public class Activator implements BundleActivator {
     }
 
     private void createAndRegisterSecurityService(BundleContext bundleContext, UserStore userStore, AccessControlStore accessControlStore) {
-        securityService = new SecurityServiceImpl(ServiceTrackerFactory.createAndOpen(context, MailService.class), userStore, accessControlStore, /* setAsActivatorSecurityService */ true);
+        final ServiceTracker<HasPermissionsProvider, HasPermissionsProvider> hasPermissionsProviderTracker = new ServiceTracker<>(
+                bundleContext, HasPermissionsProvider.class, /* customizer */ null);
+        hasPermissionsProviderTracker.open();
+        securityService = new SecurityServiceImpl(ServiceTrackerFactory.createAndOpen(context, MailService.class),
+                userStore, accessControlStore, new OSGIHasPermissionsProvider(hasPermissionsProviderTracker), /* setAsActivatorSecurityService */ true);
         registration = context.registerService(SecurityService.class.getName(), securityService, null);
         final Dictionary<String, String> replicableServiceProperties = new Hashtable<>();
         replicableServiceProperties.put(Replicable.OSGi_Service_Registry_ID_Property_Name, securityService.getId().toString());

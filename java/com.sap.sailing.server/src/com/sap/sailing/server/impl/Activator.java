@@ -24,6 +24,7 @@ import com.sap.sailing.domain.abstractlog.race.analyzing.impl.RaceLogResolver;
 import com.sap.sailing.domain.base.RaceDefinition;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.common.WindFinderReviewedSpotsCollectionIdProvider;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.impl.DoubleVectorFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixImpl;
 import com.sap.sailing.domain.common.tracking.impl.GPSFixMovingImpl;
@@ -53,6 +54,7 @@ import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.security.PreferenceConverter;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.HasPermissionsProvider;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ServiceTrackerFactory;
 
@@ -112,6 +114,8 @@ public class Activator implements BundleActivator {
 
         trackedRegattaListener = new OSGiBasedTrackedRegattaListener(context);
         
+        registrations.add(context.registerService(HasPermissionsProvider.class.getName(),
+                (HasPermissionsProvider) SecuredDomainType::getAllInstances, null));
 
         final TrackedRaceStatisticsCache trackedRaceStatisticsCache = new TrackedRaceStatisticsCacheImpl();
         registrations.add(context.registerService(TrackedRaceStatisticsCache.class.getName(), trackedRaceStatisticsCache, null));

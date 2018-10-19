@@ -52,7 +52,8 @@ public class SecurityResourceTest {
             accessControlStore = new AccessControlStoreImpl(store);
             Activator.setTestStores(store, accessControlStore);
             service = new SecurityServiceImpl(/* mailServiceTracker */ null,
-                    store, accessControlStore, /* setAsActivatorSecurityService */ true);
+                    store, accessControlStore, /* hasPermissionsProvider */null,
+                    /* setAsActivatorSecurityService */ true);
             SecurityUtils.setSecurityManager(service.getSecurityManager());
             service.createSimpleUser(USERNAME, "a@b.c", PASSWORD, "The User", "SAP SE", /* validation URL */ null);
             authenticatedAdmin = SecurityUtils.getSubject();

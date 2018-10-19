@@ -106,6 +106,7 @@ import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.HasPermissionsProvider;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.PermissionChecker;
@@ -171,6 +172,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private TimerTask migrationCompleteCheckTask;
 
     private static Ini shiroConfiguration;
+
+    private final HasPermissionsProvider hasPermissionsProvider;
     static {
         shiroConfiguration = new Ini();
         shiroConfiguration.loadFromPath("classpath:shiro.ini");
@@ -185,7 +188,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      *            must not be <code>null</code>
      */
     public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore, AccessControlStore accessControlStore) {
-        this(mailServiceTracker, userStore, accessControlStore, /* setAsActivatorTestSecurityService */ false);
+        this(mailServiceTracker, userStore, accessControlStore, null, /* setAsActivatorTestSecurityService */ false);
     }
     
     /**
@@ -197,7 +200,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      *            replication.
      * 
      */
-    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore, AccessControlStore accessControlStore, boolean setAsActivatorSecurityService) {
+    public SecurityServiceImpl(ServiceTracker<MailService, MailService> mailServiceTracker, UserStore userStore, AccessControlStore accessControlStore, HasPermissionsProvider hasPermissionsProvider, boolean setAsActivatorSecurityService) {
         logger.info("Initializing Security Service with user store " + userStore);
         if (setAsActivatorSecurityService) {
             Activator.setSecurityService(this);
@@ -210,6 +213,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         this.userStore = userStore;
         this.accessControlStore = accessControlStore;
         this.mailServiceTracker = mailServiceTracker;
+        this.hasPermissionsProvider = hasPermissionsProvider;
         // Create default users if no users exist yet.
         initEmptyStore();
         initEmptyAccessControlStore();
@@ -1592,6 +1596,21 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 type.getQualifiedObjectIdentifier(typeRelativeObjectIdentifier));
         return PermissionChecker.ownsUserASpecificRole(getCurrentUser(), getAllUser(),
                 ownershipToCheck == null ? null : ownershipToCheck.getAnnotation(), roleToCheck.getName());
+    }
+    
+    private boolean hasCurrentUserMetaPermission(WildcardPermission permissionToCheck, Ownership ownership) {
+        if (hasPermissionsProvider == null) {
+            logger.warning(
+                    "Missing HasPermissionsProvider for meta permission check. Using basic permission check that will produce false negatives in some cases.");
+            // In case we can not resolve all available HasPermissions instances, a meta permission check will not be
+            // able to produce the expected results.
+            // A basic permission check is done instead. This will potentially produce false negatives but never false
+            // positives.
+            return PermissionChecker.isPermitted(permissionToCheck, getCurrentUser(), getAllUser(), ownership, null);
+        } else {
+            return PermissionChecker.checkMetaPermission(permissionToCheck,
+                    hasPermissionsProvider.getAllHasPermissions(), getCurrentUser(), getAllUser(), ownership);
+        }
     }
 
     // ----------------- Replication -------------
