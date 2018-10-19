@@ -183,7 +183,7 @@ public class PermissionChecker {
 
         for (WildcardPermission effectiveWildcardPermissionToCheck : effectivePermissionsToCheck) {
             if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, ownership, impliesChecker) != PermissionState.GRANTED
-                    || checkUserPermissions(effectiveWildcardPermissionToCheck, allUser,
+                    && checkUserPermissions(effectiveWildcardPermissionToCheck, allUser,
                             ownership, impliesChecker) != PermissionState.GRANTED) {
                 return false;
             }
@@ -276,9 +276,9 @@ public class PermissionChecker {
         final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleToPermissions(permission, allPermissionTypes);
         
         for (WildcardPermission effectiveWildcardPermissionToCheck : effectivePermissionsToCheck) {
-            if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, ownership, impliesAnyChecker) != PermissionState.GRANTED
+            if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, ownership, impliesAnyChecker) == PermissionState.GRANTED
                     || checkUserPermissions(effectiveWildcardPermissionToCheck, allUser,
-                            ownership, impliesAnyChecker) != PermissionState.GRANTED) {
+                            ownership, impliesAnyChecker) == PermissionState.GRANTED) {
                 return true;
             }
         }
