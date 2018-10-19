@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -21,6 +22,7 @@ import com.sap.sse.security.UserStore;
 import com.sap.sse.security.UsernamePasswordRealm;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AdminRole;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.PermissionChecker;
@@ -34,6 +36,7 @@ import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.AccessControlListImpl;
+import com.sap.sse.security.shared.impl.HasPermissionsImpl;
 import com.sap.sse.security.shared.impl.OwnershipImpl;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
@@ -56,6 +59,9 @@ public class PermissionCheckerTest {
     private UserStore userStore;
     private AccessControlStore accessControlStore;
     private PrincipalCollection principalCollection;
+    private HasPermissions type1 = new HasPermissionsImpl("DEMO", DefaultActions.READ, DefaultActions.UPDATE);
+    private HasPermissions type2 = new HasPermissionsImpl("TEST", DefaultActions.READ, DefaultActions.DELETE);
+    private Iterable<HasPermissions> allHasPermissions = Arrays.asList(type1, type2);
     
     @Before
     public void setUp() throws UserGroupManagementException, UserManagementException {
@@ -200,5 +206,115 @@ public class PermissionCheckerTest {
                 testOwnership, acl));
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 null, acl));
+    }
+
+    @Test
+    public void testMetaPermissionCheck() {
+        final WildcardPermission allPermission = new WildcardPermission("*");
+        final WildcardPermission singleTypePermission = type1.getPermission();
+        assertFalse(checkMetaPermissionWithGrantedUserPermissions(singleTypePermission));
+        assertTrue(checkMetaPermissionWithGrantedUserPermissions(singleTypePermission, allPermission));
+        assertTrue(checkMetaPermissionWithGrantedUserPermissions(singleTypePermission, type1.getPermission()));
+        assertFalse(checkMetaPermissionWithGrantedUserPermissions(singleTypePermission, type2.getPermission()));
+        assertFalse(checkMetaPermissionWithGrantedUserPermissions(singleTypePermission,
+                type1.getPermission(DefaultActions.READ)));
+        assertTrue(checkMetaPermissionWithGrantedUserPermissions(singleTypePermission,
+                type1.getPermission(DefaultActions.READ, DefaultActions.UPDATE)));
+
+        final WildcardPermission combinedTypePermission = new WildcardPermission(
+                type1.getName() + "," + type2.getName());
+        assertFalse(checkMetaPermissionWithGrantedUserPermissions(combinedTypePermission));
+        assertFalse(checkMetaPermissionWithGrantedUserPermissions(combinedTypePermission, type1.getPermission()));
+        assertTrue(checkMetaPermissionWithGrantedUserPermissions(combinedTypePermission, allPermission));
+        assertTrue(checkMetaPermissionWithGrantedUserPermissions(combinedTypePermission, combinedTypePermission));
+        assertTrue(checkMetaPermissionWithGrantedUserPermissions(combinedTypePermission, type1.getPermission(),
+                type2.getPermission()));
+        assertFalse(checkMetaPermissionWithGrantedUserPermissions(combinedTypePermission, type1.getPermission(),
+                type2.getPermission(DefaultActions.READ)));
+        assertTrue(checkMetaPermissionWithGrantedUserPermissions(combinedTypePermission, type1.getPermission(),
+                type2.getPermission(DefaultActions.READ, DefaultActions.DELETE)));
+
+        final WildcardPermission combinedTypeWithDistinctActionPermission = new WildcardPermission(
+                type1.getName() + "," + type2.getName() + ":" + DefaultActions.READ);
+        assertFalse(checkMetaPermissionWithGrantedUserPermissions(combinedTypeWithDistinctActionPermission));
+        assertFalse(checkMetaPermissionWithGrantedUserPermissions(combinedTypeWithDistinctActionPermission,
+                type1.getPermission()));
+        assertTrue(
+                checkMetaPermissionWithGrantedUserPermissions(combinedTypeWithDistinctActionPermission, allPermission));
+        assertTrue(checkMetaPermissionWithGrantedUserPermissions(combinedTypeWithDistinctActionPermission,
+                type1.getPermission(), type2.getPermission()));
+        assertTrue(checkMetaPermissionWithGrantedUserPermissions(combinedTypeWithDistinctActionPermission,
+                type1.getPermission(DefaultActions.READ), type2.getPermission()));
+        assertFalse(checkMetaPermissionWithGrantedUserPermissions(combinedTypeWithDistinctActionPermission,
+                type1.getPermission(DefaultActions.READ), type2.getPermission(DefaultActions.DELETE)));
+        assertTrue(checkMetaPermissionWithGrantedUserPermissions(combinedTypeWithDistinctActionPermission,
+                type1.getPermission(DefaultActions.READ), type2.getPermission(DefaultActions.READ)));
+    }
+
+    private boolean checkMetaPermissionWithGrantedUserPermissions(WildcardPermission permissionToCheck,
+            WildcardPermission... grantedPermissions) {
+        for (WildcardPermission p : grantedPermissions) {
+            user.addPermission(p);
+        }
+        boolean result = PermissionChecker.checkMetaPermission(permissionToCheck, allHasPermissions, user, null, null);
+        for (WildcardPermission p : grantedPermissions) {
+            user.removePermission(p);
+        }
+        return result;
+    }
+
+    @Test
+    public void testAnyPermissionCheck() {
+        final WildcardPermission allPermission = new WildcardPermission("*");
+        final WildcardPermission singleTypePermission = type1.getPermission();
+        assertFalse(checkAnyPermissionWithGrantedUserPermissions(singleTypePermission));
+        assertTrue(checkAnyPermissionWithGrantedUserPermissions(singleTypePermission, allPermission));
+        assertTrue(checkAnyPermissionWithGrantedUserPermissions(singleTypePermission, type1.getPermission()));
+        assertFalse(checkAnyPermissionWithGrantedUserPermissions(singleTypePermission, type2.getPermission()));
+        assertTrue(checkAnyPermissionWithGrantedUserPermissions(singleTypePermission,
+                type1.getPermission(DefaultActions.READ)));
+        assertTrue(checkAnyPermissionWithGrantedUserPermissions(singleTypePermission,
+                type1.getPermission(DefaultActions.READ, DefaultActions.UPDATE)));
+
+        final WildcardPermission combinedTypePermission = new WildcardPermission(
+                type1.getName() + "," + type2.getName());
+        assertFalse(checkAnyPermissionWithGrantedUserPermissions(combinedTypePermission));
+        assertTrue(checkAnyPermissionWithGrantedUserPermissions(combinedTypePermission, type1.getPermission()));
+        assertTrue(checkAnyPermissionWithGrantedUserPermissions(combinedTypePermission, allPermission));
+        assertTrue(checkAnyPermissionWithGrantedUserPermissions(combinedTypePermission, combinedTypePermission));
+        assertTrue(checkAnyPermissionWithGrantedUserPermissions(combinedTypePermission, type1.getPermission(),
+                type2.getPermission()));
+        assertTrue(checkAnyPermissionWithGrantedUserPermissions(combinedTypePermission,
+                type1.getPermission(DefaultActions.READ)));
+        assertTrue(checkAnyPermissionWithGrantedUserPermissions(combinedTypePermission,
+                type1.getPermission(DefaultActions.UPDATE), type2.getPermission(DefaultActions.READ)));
+        assertTrue(checkAnyPermissionWithGrantedUserPermissions(combinedTypePermission,
+                type1.getPermission(DefaultActions.READ, DefaultActions.UPDATE)));
+
+        final WildcardPermission combinedTypeWithDistinctActionPermission = new WildcardPermission(
+                type1.getName() + "," + type2.getName() + ":" + DefaultActions.READ);
+        assertFalse(checkAnyPermissionWithGrantedUserPermissions(combinedTypeWithDistinctActionPermission));
+        assertTrue(checkAnyPermissionWithGrantedUserPermissions(combinedTypeWithDistinctActionPermission,
+                type1.getPermission()));
+        assertTrue(
+                checkAnyPermissionWithGrantedUserPermissions(combinedTypeWithDistinctActionPermission, allPermission));
+        assertTrue(checkAnyPermissionWithGrantedUserPermissions(combinedTypeWithDistinctActionPermission,
+                type1.getPermission(), type2.getPermission()));
+        assertTrue(checkAnyPermissionWithGrantedUserPermissions(combinedTypeWithDistinctActionPermission,
+                type1.getPermission(DefaultActions.READ)));
+        assertTrue(checkAnyPermissionWithGrantedUserPermissions(combinedTypeWithDistinctActionPermission,
+                type1.getPermission(DefaultActions.READ), type2.getPermission(DefaultActions.DELETE)));
+    }
+
+    private boolean checkAnyPermissionWithGrantedUserPermissions(WildcardPermission permissionToCheck,
+            WildcardPermission... grantedPermissions) {
+        for (WildcardPermission p : grantedPermissions) {
+            user.addPermission(p);
+        }
+        boolean result = PermissionChecker.hasUserAnyPermission(permissionToCheck, allHasPermissions, user, null, null);
+        for (WildcardPermission p : grantedPermissions) {
+            user.removePermission(p);
+        }
+        return result;
     }
 }
