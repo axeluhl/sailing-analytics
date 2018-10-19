@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.SingleRaceLeaderboardSettingsDialogComponent;
+import com.sap.sailing.gwt.ui.actions.GetLeaderboardForRaceAction;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.RaceCompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
@@ -34,6 +36,7 @@ import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.common.impl.InvertibleComparatorAdapter;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.async.AsyncAction;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.AbstractSortableColumnWithMinMax;
@@ -330,7 +333,7 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
     @Override
     protected void updateLeaderboardAndRun(Runnable callWhenExpansionDataIsLoaded) {
         final LeaderboardDTO previousLeaderboard = getLeaderboard();
-        getSailingService().getLeaderboardByName(getLeaderboardName(),
+        getSailingService().getLeaderboardForRace(preSelectedRace, getLeaderboardName(),
                 timer.getPlayMode() == PlayModes.Live ? null : getLeaderboardDisplayDate(),
                 /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaceColumns(), shallAddOverallDetails(),
                 previousLeaderboard.getId(), /* fillTotalPointsUncorrected */ false,
@@ -349,6 +352,16 @@ public class SingleRaceLeaderboardPanel extends LeaderboardPanel<SingleRaceLeade
                                         true /* silentMode */);
                             }
                         }));
+    }
+
+    @Override
+    protected AsyncAction<LeaderboardDTO> getRetrieverAction() {
+        final Date date = getLeaderboardDisplayDate();
+        return new GetLeaderboardForRaceAction(getSailingService(), getLeaderboardName(), preSelectedRace,
+                useNullAsTimePoint() ? null : date,
+                /* namesOfRaceColumnsForWhichToLoadLegDetails */getNamesOfExpandedRaceColumns(),
+                shallAddOverallDetails(), /* previousLeaderboard */
+                getLeaderboard(), isFillTotalPointsUncorrected(), timer, getErrorReporter(), stringMessages);
     }
 
 }

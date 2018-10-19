@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
 import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
+import com.sap.sailing.gwt.ui.actions.GetLeaderboardForRaceAction;
 import com.sap.sailing.gwt.ui.client.LeaderboardUpdateListener;
 import com.sap.sailing.gwt.ui.client.RaceTimePanel;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProviderListener;
@@ -175,9 +176,9 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
         if (getRaceColumn() != null) {
             raceColumnNameAsList.add(getRaceColumn().getName());
         }
-        final GetLeaderboardByNameAction getLeaderboardByNameAction = new GetLeaderboardByNameAction(
+        final GetLeaderboardForRaceAction getLeaderboardByNameAction = new GetLeaderboardForRaceAction(
                 getLeaderboardPanel().getSailingService(), getLeaderboardPanel().getLeaderboard().getName(),
-                getTimer().getTime(), raceColumnNameAsList, /* addOverallDetails */ false,
+                raceIdentifier, getTimer().getTime(), raceColumnNameAsList, /* addOverallDetails */ false,
                 getLeaderboard(), /* fillTotalPointsUncorrected */ false,
                 /* timerToAdjustOffsetIn */ getTimer(), /* errorReporter */ null, StringMessages.INSTANCE);
         getLeaderboardPanel().getExecutor().execute(getLeaderboardByNameAction, LeaderboardPanel.LOAD_LEADERBOARD_DATA_CATEGORY, callback);

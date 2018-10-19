@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.leaderboard;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.MultiRaceLeaderboardSettingsDialogComponent;
+import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
@@ -27,6 +29,7 @@ import com.sap.sse.common.filter.BinaryOperator;
 import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.async.AsyncAction;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.AbstractSortableColumnWithMinMax;
@@ -246,5 +249,15 @@ public class MultiRaceLeaderboardPanel extends LeaderboardPanel<MultiRaceLeaderb
                                         true /* silentMode */);
                             }
                         }));
+    }
+
+    @Override
+    protected AsyncAction<LeaderboardDTO> getRetrieverAction() {
+        final Date date = getLeaderboardDisplayDate();
+        return new GetLeaderboardByNameAction(getSailingService(), getLeaderboardName(),
+                useNullAsTimePoint() ? null : date,
+                /* namesOfRaceColumnsForWhichToLoadLegDetails */getNamesOfExpandedRaceColumns(),
+                shallAddOverallDetails(), /* previousLeaderboard */
+                getLeaderboard(), isFillTotalPointsUncorrected(), timer, getErrorReporter(), stringMessages);
     }
 }

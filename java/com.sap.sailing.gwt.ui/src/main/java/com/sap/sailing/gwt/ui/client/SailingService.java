@@ -208,6 +208,11 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
             String previousLeaderboardId, boolean fillTotalPointsUncorrected) throws Exception;
 
+    IncrementalOrFullLeaderboardDTO getLeaderboardForRace(RegattaAndRaceIdentifier raceIdentifer,
+            String leaderboardName, Date date, Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
+            boolean addOverallDetails, String previousLeaderboardId, boolean fillTotalPointsUncorrected)
+            throws Exception;
+
     List<StrippedLeaderboardDTO> getLeaderboards();
     
     StrippedLeaderboardDTO updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThreasholds, UUID newCourseAreaId);

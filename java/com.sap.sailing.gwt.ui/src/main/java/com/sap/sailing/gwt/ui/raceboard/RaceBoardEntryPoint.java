@@ -49,7 +49,6 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint implements Pr
     @Override
     protected void doOnModuleLoad() {
         super.doOnModuleLoad();
-        GWT.debugger();
         EntryPointHelper.registerASyncService((ServiceDefTarget) mediaService,
                 RemoteServiceMappingConstants.mediaServiceRemotePath);
         raceboardContextDefinition = new SettingsToUrlSerializer()

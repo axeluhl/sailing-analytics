@@ -77,7 +77,6 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardPanelLifecycle;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.RaceColumnSelectionStrategies;
-import com.sap.sailing.gwt.ui.actions.GetLeaderboardByNameAction;
 import com.sap.sailing.gwt.ui.client.Collator;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.CompetitorSelectionProvider;
@@ -104,6 +103,7 @@ import com.sap.sse.common.filter.Filter;
 import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.common.impl.InvertibleComparatorAdapter;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.async.AsyncAction;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.celltable.AbstractSortableColumnWithMinMax;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
@@ -2425,17 +2425,15 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         }
     }
 
+    abstract protected AsyncAction<LeaderboardDTO> getRetrieverAction();
+
     public void loadCompleteLeaderboard(final boolean showProgress) {
-        final Date date = getLeaderboardDisplayDate();
         if (needsDataLoading()) {
             if (showProgress) {
                 addBusyTask();
             }
-            GetLeaderboardByNameAction getLeaderboardByNameAction = new GetLeaderboardByNameAction(sailingService,
-                    getLeaderboardName(), useNullAsTimePoint() ? null : date,
-                    /* namesOfRaceColumnsForWhichToLoadLegDetails */getNamesOfExpandedRaceColumns(),
-                    shallAddOverallDetails(), /* previousLeaderboard */
-                    getLeaderboard(), isFillTotalPointsUncorrected(), timer, errorReporter, stringMessages);
+
+            AsyncAction<LeaderboardDTO> getLeaderboardByNameAction = getRetrieverAction();
             this.asyncActionsExecutor.execute(getLeaderboardByNameAction, LOAD_LEADERBOARD_DATA_CATEGORY,
                     new AsyncCallback<LeaderboardDTO>() {
                         @Override
@@ -2490,7 +2488,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
      * additional call to {@link #loadCompleteLeaderboard(boolean)} would be required as <code>null</code> will be
      * passed in any case, not being affected by local time offsets.
      */
-    private boolean useNullAsTimePoint() {
+    protected boolean useNullAsTimePoint() {
         return timer.getPlayMode() == PlayModes.Live;
     }
 

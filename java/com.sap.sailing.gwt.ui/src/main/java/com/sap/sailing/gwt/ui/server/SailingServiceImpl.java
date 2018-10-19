@@ -885,6 +885,23 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 addOverallDetails, previousLeaderboardId, fillTotalPointsUncorrected);
     }
 
+    @Override
+    public IncrementalOrFullLeaderboardDTO getLeaderboardForRace(final RegattaAndRaceIdentifier race,
+            final String leaderboardName, final Date date,
+            final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
+            String previousLeaderboardId, boolean fillTotalPointsUncorrected)
+            throws NoWindException, InterruptedException, ExecutionException, IllegalArgumentException {
+        DynamicTrackedRace trackedRace = getService().getTrackedRace(race);
+        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderboard.getRaceColumnAndFleet(trackedRace) == null) {
+            // this race does not seem to be contained in the leaderboard, also check leaderboard
+            getSecurityService().checkCurrentUserReadPermission(leaderboard);
+        }
+        getSecurityService().checkCurrentUserReadPermission(trackedRace);
+        return getLeaderBoardByNameWithoutSecurity(leaderboardName, date, namesOfRaceColumnsForWhichToLoadLegDetails,
+                addOverallDetails, previousLeaderboardId, fillTotalPointsUncorrected);
+    }
+
     private IncrementalOrFullLeaderboardDTO getLeaderBoardByNameWithoutSecurity(final String leaderboardName,
             final Date date, final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
             boolean addOverallDetails, String previousLeaderboardId, boolean fillTotalPointsUncorrected)
@@ -894,7 +911,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             IncrementalOrFullLeaderboardDTO result = null;
             final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
             if (leaderboard != null) {
-                getSecurityService().checkCurrentUserReadPermission(leaderboard);
                 TimePoint timePoint;
                 if (date == null) {
                     timePoint = null;
