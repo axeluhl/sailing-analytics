@@ -68,11 +68,11 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
                 if (first) {
                     first = false;
                 } else {
-                    modesString.append(',');
+                    modesString.append(WildcardPermission.SUBPART_DIVIDER_TOKEN);
                 }
                 modesString.append(action.name());
             }
-            result = getName() + ":" + modesString.toString();
+            result = getName() + WildcardPermission.PART_DIVIDER_TOKEN + modesString.toString();
         }
         return result;
     }
@@ -88,13 +88,13 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
         final WildcardPermissionEncoder permissionEncoder = new WildcardPermissionEncoder();
         final StringBuilder result = new StringBuilder(getStringPermission(action));
         if (typeRelativeObjectIdentifiers != null && typeRelativeObjectIdentifiers.length > 0) {
-            result.append(':');
+            result.append(WildcardPermission.PART_DIVIDER_TOKEN);
             boolean first = true;
             for (String typeRelativeObjectIdentifier : typeRelativeObjectIdentifiers) {
                 if (first) {
                     first = false;
                 } else {
-                    result.append(',');
+                    result.append(WildcardPermission.SUBPART_DIVIDER_TOKEN);
                 }
                 result.append(permissionEncoder.encodeAsPermissionPart(typeRelativeObjectIdentifier));
             }
