@@ -148,6 +148,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
                         }).show();
             }
         });
+        registrationLinkWithQRCodeOpenButton.setEnabled(regatta.competitorRegistrationType.isOpen());
     }
 
     /**
