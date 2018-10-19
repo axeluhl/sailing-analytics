@@ -143,7 +143,7 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
     }
 
     @Override
-    protected RegattaDTO getResult() {        
+    protected RegattaDTO getResult() {
         RegattaDTO dto = super.getResult();
         List<SeriesDTO> seriesList = getSeriesEditor().getValue();
         for (SeriesDTO series : seriesList) {
