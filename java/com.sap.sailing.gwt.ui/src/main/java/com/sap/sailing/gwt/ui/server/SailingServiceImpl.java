@@ -880,11 +880,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
             String previousLeaderboardId, boolean fillTotalPointsUncorrected) throws NoWindException, InterruptedException, ExecutionException,
             IllegalArgumentException {
+        getSecurityService().checkCurrentUserReadPermission(getService().getLeaderboardByName(leaderboardName));
+        return getLeaderBoardByNameWithoutSecurity(leaderboardName, date, namesOfRaceColumnsForWhichToLoadLegDetails,
+                addOverallDetails, previousLeaderboardId, fillTotalPointsUncorrected);
+    }
+
+    private IncrementalOrFullLeaderboardDTO getLeaderBoardByNameWithoutSecurity(final String leaderboardName,
+            final Date date, final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
+            boolean addOverallDetails, String previousLeaderboardId, boolean fillTotalPointsUncorrected)
+            throws NoWindException, InterruptedException, ExecutionException {
         try {
             long startOfRequestHandling = System.currentTimeMillis();
             IncrementalOrFullLeaderboardDTO result = null;
             final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
             if (leaderboard != null) {
+                getSecurityService().checkCurrentUserReadPermission(leaderboard);
                 TimePoint timePoint;
                 if (date == null) {
                     timePoint = null;
@@ -1818,7 +1828,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             String leaderboardName, String leaderboardGroupName, UUID eventId) {
         RaceWithCompetitorsAndBoatsDTO raceDTO = null;
         Regatta regatta = getService().getRegattaByName(regattaName);
-        if (regatta != null) {
+        if (regatta != null && getSecurityService().hasCurrentUserReadPermission(regatta)) {
             RaceDefinition race = regatta.getRaceByName(raceName);
             if (race != null) {
                 RegattaAndRaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regatta.getName(), race.getName());
@@ -1838,12 +1848,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         LeaderboardGroup leaderboardGroup = leaderboardGroupName != null ? getService().getLeaderboardGroupByName(leaderboardGroupName) : null;
         Event event = eventId != null ? getService().getEvent(eventId)  : null;
+        if (!getSecurityService().hasCurrentUserReadPermission(event)) {
+            event = null;
+        }
         
-        boolean isValidLeaderboard = leaderboard != null; 
+        boolean isValidLeaderboard = leaderboard != null
+                && getSecurityService().hasCurrentUserReadPermission(leaderboard);
         boolean isValidLeaderboardGroup = false;
         if (leaderboardGroup != null) {
             for(Leaderboard leaderboardInGroup: leaderboardGroup.getLeaderboards()) {
-                if(leaderboardInGroup.getName().equals(leaderboard.getName())) {
+                if (leaderboardInGroup.getName().equals(leaderboard.getName())
+                        && getSecurityService().hasCurrentUserReadPermission(leaderboardInGroup)) {
                     isValidLeaderboardGroup = true;
                     break;
                 }
@@ -1853,7 +1868,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (event != null && leaderboardGroup != null) {
             isValidEvent = false;
             for (LeaderboardGroup leaderboardGroupInEvent: event.getLeaderboardGroups()) {
-                if (leaderboardGroupInEvent.getId().equals(leaderboardGroup.getId())) {
+                if (leaderboardGroupInEvent.getId().equals(leaderboardGroup.getId())
+                        && getSecurityService().hasCurrentUserReadPermission(leaderboardGroupInEvent)) {
                     isValidEvent = true;
                     break;
                 }
@@ -1871,6 +1887,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Date timeToGetTheEstimatedDurationFor, boolean estimatedDurationRequired) throws NoWindException {
         final HashSet<String> raceCompetitorIdsAsStrings;
         final TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+        getSecurityService().checkCurrentUserReadPermission(trackedRace);
+
         // if md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID is null, Arrays.equals will return false, and the
         // competitor set will be calculated and returned to the client
         if (trackedRace == null || Arrays.equals(md5OfIdsAsStringOfCompetitorParticipatingInRaceInAlphanumericOrderOfTheirID, trackedRace.getRace().getCompetitorMD5())) {
@@ -1947,6 +1965,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Map<CompetitorDTO, List<GPSFixDTOWithSpeedWindTackAndLegType>> result = new HashMap<>();
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
+            getSecurityService().checkCurrentUserReadPermission(trackedRace);
             for (Competitor competitor : trackedRace.getRace().getCompetitors()) {
                 if (fromPerCompetitorIdAsString.containsKey(competitor.getId().toString())) {
                     CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
@@ -2090,6 +2109,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
 
         if (trackedRace != null) {
+            getSecurityService().checkCurrentUserReadPermission(trackedRace);
             raceTimesInfo = new RaceTimesInfoDTO(raceIdentifier);
             List<LegInfoDTO> legInfos = new ArrayList<LegInfoDTO>();
             raceTimesInfo.setLegInfos(legInfos);
@@ -2158,9 +2178,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public List<RaceTimesInfoDTO> getRaceTimesInfos(Collection<RegattaAndRaceIdentifier> raceIdentifiers) {
         List<RaceTimesInfoDTO> raceTimesInfos = new ArrayList<RaceTimesInfoDTO>();
         for (RegattaAndRaceIdentifier raceIdentifier : raceIdentifiers) {
-            RaceTimesInfoDTO raceTimesInfo = getRaceTimesInfo(raceIdentifier);
-            if (raceTimesInfo != null) {
-                raceTimesInfos.add(raceTimesInfo);
+            TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
+            if (trackedRace == null || getSecurityService().hasCurrentUserReadPermission(trackedRace)) {
+                RaceTimesInfoDTO raceTimesInfo = getRaceTimesInfo(raceIdentifier);
+                if (raceTimesInfo != null) {
+                    raceTimesInfos.add(raceTimesInfo);
+                }
             }
         }
         return raceTimesInfos;
@@ -2196,6 +2219,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         CoursePositionsDTO result = new CoursePositionsDTO();
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
+            getSecurityService().checkCurrentUserReadPermission(trackedRace);
             final TimePoint dateAsTimePoint;
             if (date == null) {
                 dateAsTimePoint = MillisecondsTimePoint.now().minus(trackedRace.getDelayToLiveInMillis());
@@ -2271,6 +2295,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         List<MarkDTO> allMarks = new ArrayList<>();
         if (trackedRace != null) {
+            getSecurityService().checkCurrentUserReadPermission(trackedRace);
             for (Mark mark : trackedRace.getMarks()) {
                 Position pos = trackedRace.getOrCreateTrack(mark).getEstimatedPosition(dateAsTimePoint, false);
                 allMarks.add(convertToMarkDTO(mark, pos));
@@ -2358,6 +2383,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             List<Pair<ControlPointDTO, PassingInstruction>> courseDTO) {
         TrackedRace trackedRace = getExistingTrackedRace(raceIdentifier);
         if (trackedRace != null) {
+            getSecurityService().checkCurrentUserUpdatePermission(trackedRace);
             Course course = trackedRace.getRace().getCourse();
             List<Pair<ControlPoint, PassingInstruction>> controlPoints = new ArrayList<>();
             for (Pair<ControlPointDTO, PassingInstruction> waypointDTO : courseDTO) {
@@ -2508,6 +2534,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final LeaderboardType result;
         final Leaderboard leaderboard = getService().getLeaderboards().get(leaderboardName);
         if (leaderboard != null) {
+            getSecurityService().checkCurrentUserReadPermission(leaderboard);
             result = leaderboard.getLeaderboardType();
         } else {
             result = null;
@@ -2549,6 +2576,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         StrippedLeaderboardDTO result = null;
         Leaderboard leaderboard = leaderboards.get(leaderboardName);
         if (leaderboard != null) {
+            getSecurityService().checkCurrentUserReadPermission(leaderboard);
             result = createStrippedLeaderboardDTO(leaderboard, false, false);
         }
         return result;
@@ -3704,17 +3732,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Regatta regatta = getService().getRegattaByName(regattaNameAndRaceName.getRegattaName());
         RaceDefinition race = getRaceByName(regatta, regattaNameAndRaceName.getRaceName());
         DynamicTrackedRace trackedRace = getService().getOrCreateTrackedRegatta(regatta).getTrackedRace(race);
+        getSecurityService().checkCurrentUserReadPermission(trackedRace);
         return trackedRace;
     }
 
     @Override
     public TrackedRace getExistingTrackedRace(RegattaAndRaceIdentifier regattaNameAndRaceName) {
-        return getService().getExistingTrackedRace(regattaNameAndRaceName);
+        final DynamicTrackedRace existingTrackedRace = getService().getExistingTrackedRace(regattaNameAndRaceName);
+        getSecurityService().checkCurrentUserReadPermission(existingTrackedRace);
+        return existingTrackedRace;
     }
 
     @Override
     public Regatta getRegatta(RegattaName regattaIdentifier) {
-        return getService().getRegattaByName(regattaIdentifier.getRegattaName());
+        final Regatta regattaByName = getService().getRegattaByName(regattaIdentifier.getRegattaName());
+        getSecurityService().checkCurrentUserReadPermission(regattaByName);
+        return regattaByName;
     }
 
     /**
@@ -3746,7 +3779,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public LeaderboardGroupDTO getLeaderboardGroupByName(String groupName, boolean withGeoLocationData) {
-        return convertToLeaderboardGroupDTO(getService().getLeaderboardGroupByName(groupName), withGeoLocationData, false);
+        final LeaderboardGroup leaderboardGroupByName = getService().getLeaderboardGroupByName(groupName);
+        getSecurityService().checkCurrentUserReadPermission(leaderboardGroupByName);
+        return convertToLeaderboardGroupDTO(leaderboardGroupByName, withGeoLocationData, false);
     }
 
     private LeaderboardGroupDTO convertToLeaderboardGroupDTO(final LeaderboardGroup leaderboardGroup,
@@ -3776,6 +3811,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void renameLeaderboardGroup(String oldName, String newName) {
+        final LeaderboardGroup leaderboardGroupByName = getService().getLeaderboardGroupByName(oldName);
+        getSecurityService().checkCurrentUserUpdatePermission(leaderboardGroupByName);
         getService().apply(new RenameLeaderboardGroup(oldName, newName));
     }
 
@@ -4038,6 +4075,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public void createCourseAreas(UUID eventId, String[] courseAreaNames) {
+        getSecurityService().checkCurrentUserUpdatePermission(getService().getEvent(eventId));
         final UUID[] courseAreaIDs = new UUID[courseAreaNames.length];
         for (int i=0; i<courseAreaNames.length; i++) {
             courseAreaIDs[i] = UUID.randomUUID();
@@ -4047,6 +4085,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void removeCourseAreas(UUID eventId, UUID[] courseAreaIds) {
+        getSecurityService().checkCurrentUserDeletePermission(getService().getEvent(eventId));
         getService().apply(new RemoveCourseAreas(eventId, courseAreaIds));
     }
 
@@ -6869,7 +6908,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         
         ArrayList<LeaderboardGroupDTO> result = new ArrayList<>();
         for (LeaderboardGroup lg : event.getLeaderboardGroups()) {
-            result.add(convertToLeaderboardGroupDTO(lg, /* withGeoLocationData */false, true));
+            if (getSecurityService().hasCurrentUserReadPermission(lg)) {
+                result.add(convertToLeaderboardGroupDTO(lg, /* withGeoLocationData */false, true));
+            }
         }
         return result;
     }

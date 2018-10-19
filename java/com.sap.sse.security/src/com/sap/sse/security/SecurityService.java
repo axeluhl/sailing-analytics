@@ -364,6 +364,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     void checkCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object);
 
+    void checkCurrentUserDeletePermission(WithQualifiedObjectIdentifier object);
+
     /**
      * Since there are some HasPermission objects, that have no Ownership, this method is used to explicitly mention
      * that they are to be assumed as migrated.

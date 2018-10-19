@@ -1803,6 +1803,12 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
+    public void checkCurrentUserDeletePermission(WithQualifiedObjectIdentifier object) {
+        SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObjects(DefaultActions.DELETE,
+                object.getIdentifier().getTypeRelativeObjectIdentifier()));
+    }
+
+    @Override
     public void assumeOwnershipMigrated(String typeName, Iterable<HasPermissions> permissions) {
         final List<String> alreadyMigrated = getMigrationInfoForKey(permissions);
         alreadyMigrated.add(typeName);
