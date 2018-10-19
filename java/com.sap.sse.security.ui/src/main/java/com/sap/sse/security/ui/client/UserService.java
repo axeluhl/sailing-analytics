@@ -427,4 +427,9 @@ public class UserService {
         return PermissionChecker.checkMetaPermission(permissionToCheck, allKnownHasPermissions, getCurrentUser(),
                 anonymousUser, ownership);
     }
+    
+    public boolean hasCurrentUserAnyPermission(WildcardPermission permissionToCheck, Ownership ownership) {
+        return PermissionChecker.hasUserAnyPermission(permissionToCheck, allKnownHasPermissions, getCurrentUser(),
+                anonymousUser, ownership);
+    }
 }
