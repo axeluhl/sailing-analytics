@@ -160,9 +160,13 @@ public class WildcardPermission implements Serializable {
     ============================================*/
 
     public boolean implies(WildcardPermission wp) {
+        return implies(wp, true);
+    }
+    
+    private boolean implies(WildcardPermission wp, boolean checkWildcardPartsIfThisPermissionHasMoreParts) {
         // By default only supports comparisons with other WildcardPermissions
         List<Set<String>> otherParts = wp.getParts();
-
+        
         int i = 0;
         for (Set<String> otherPart : otherParts) {
             // If this permission has fewer parts than the other permission, everything after the number of parts contained
@@ -177,16 +181,22 @@ public class WildcardPermission implements Serializable {
                 i++;
             }
         }
-
-        // If this permission has more parts than the other parts, only imply it if all of the other parts are wildcards
-        for (; i < getParts().size(); i++) {
-            Set<String> part = getParts().get(i);
-            if (!part.contains(WILDCARD_TOKEN)) {
-                return false;
+        
+        if (checkWildcardPartsIfThisPermissionHasMoreParts) {
+            // If this permission has more parts than the other parts, only imply it if all of the other parts are wildcards
+            for (; i < getParts().size(); i++) {
+                Set<String> part = getParts().get(i);
+                if (!part.contains(WILDCARD_TOKEN)) {
+                    return false;
+                }
             }
         }
-
+        
         return true;
+    }
+    
+    public boolean impliesAny(WildcardPermission wp) {
+        return implies(wp, false);
     }
 
     /**

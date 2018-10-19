@@ -27,6 +27,27 @@ public class PermissionChecker {
         NONE
     }
     
+    // TODO use BiFunction and Method reference when we can use Java 8
+    private interface WildcardPermissionChecker {
+        boolean check(WildcardPermission grantedPermission, WildcardPermission permissionToCheck);
+    }
+    
+    private static final WildcardPermissionChecker impliesChecker = new WildcardPermissionChecker() {
+        
+        @Override
+        public boolean check(WildcardPermission grantedPermission, WildcardPermission permissionToCheck) {
+            return grantedPermission.implies(permissionToCheck);
+        }
+    };
+    
+    private static final WildcardPermissionChecker impliesAnyChecker = new WildcardPermissionChecker() {
+        
+        @Override
+        public boolean check(WildcardPermission grantedPermission, WildcardPermission permissionToCheck) {
+            return grantedPermission.impliesAny(permissionToCheck);
+        }
+    };
+    
     /**
      * @param permission
      *            Permission of the form "data_object_type:action:instance_id". The instance id can be omitted when a
@@ -88,13 +109,13 @@ public class PermissionChecker {
 
         // anonymous can only grant it if not already decided by acl
         if (result == PermissionState.NONE) {
-            PermissionState anonymous = checkUserPermissions(permission, allUser, ownership);
+            PermissionState anonymous = checkUserPermissions(permission, allUser, ownership, impliesChecker);
             if (anonymous == PermissionState.GRANTED) {
                 result = anonymous;
             }
         }
         if (result == PermissionState.NONE) {
-            result = checkUserPermissions(permission, user, ownership);
+            result = checkUserPermissions(permission, user, ownership, impliesChecker);
         }
         return result == PermissionState.GRANTED;
     }
@@ -158,6 +179,20 @@ public class PermissionChecker {
             Iterable<HasPermissions> allPermissionTypes, SecurityUser user, SecurityUser allUser, Ownership ownership) {
         assert permission != null;
         assert allPermissionTypes != null;
+        final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleToPermissions(permission, allPermissionTypes);
+
+        for (WildcardPermission effectiveWildcardPermissionToCheck : effectivePermissionsToCheck) {
+            if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, ownership, impliesChecker) != PermissionState.GRANTED
+                    || checkUserPermissions(effectiveWildcardPermissionToCheck, allUser,
+                            ownership, impliesChecker) != PermissionState.GRANTED) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static Set<WildcardPermission> expandSingleToPermissions(WildcardPermission permission,
+            Iterable<HasPermissions> allPermissionTypes) {
         List<Set<String>> parts = permission.getParts();
         final Set<String> typeParts;
         final boolean isTypePartWildcard;
@@ -195,9 +230,9 @@ public class PermissionChecker {
         }
 
         final Set<WildcardPermission> effectivePermissionsToCheck = new HashSet<>();
-        final String effectiveIdPartToCheck = WildcardPermission.PART_DIVIDER_TOKEN
-                + (isIdPartWildcard ? WildcardPermission.WILDCARD_TOKEN
-                        : Util.joinStrings(WildcardPermission.SUBPART_DIVIDER_TOKEN, idParts));
+        final String effectiveIdPartToCheck = isIdPartWildcard ? ""
+                : (WildcardPermission.PART_DIVIDER_TOKEN
+                        + Util.joinStrings(WildcardPermission.SUBPART_DIVIDER_TOKEN, idParts));
         final Set<String> effectiveTypePartsToCheck;
         if (isTypePartWildcard) {
             effectiveTypePartsToCheck = allPermissionTypesByName.keySet();
@@ -224,24 +259,39 @@ public class PermissionChecker {
                         typePart + WildcardPermission.PART_DIVIDER_TOKEN + actionPart + effectiveIdPartToCheck));
             }
         }
-
+        return effectivePermissionsToCheck;
+    }
+    
+    /**
+     * Checks if a user has at least one permission implied by the given {@link WildcardPermission}.<br>
+     * This is e.g. useful to decide if a user can see a specific tab/button/... in the UI. For example a user who has
+     * Permission USER:UPDATE:abc may see the user management UI. A generic Permission check for USER:UPDATE will fail
+     * because only users that have an unqualified version of a permission would pass that permission check. This means
+     * we need to check the permission for any possibly existing object ID.
+     */
+    public static boolean hasUserAnyPermission(WildcardPermission permission,
+            Iterable<HasPermissions> allPermissionTypes, SecurityUser user, SecurityUser allUser, Ownership ownership) {
+        assert permission != null;
+        assert allPermissionTypes != null;
+        final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleToPermissions(permission, allPermissionTypes);
+        
         for (WildcardPermission effectiveWildcardPermissionToCheck : effectivePermissionsToCheck) {
-            if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, ownership) != PermissionState.GRANTED
+            if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, ownership, impliesAnyChecker) != PermissionState.GRANTED
                     || checkUserPermissions(effectiveWildcardPermissionToCheck, allUser,
-                            ownership) != PermissionState.GRANTED) {
-                return false;
+                            ownership, impliesAnyChecker) != PermissionState.GRANTED) {
+                return true;
             }
         }
-        return true;
+        return false;
     }
     
     private static PermissionState checkUserPermissions(WildcardPermission permission, SecurityUser user,
-            Ownership ownership) {
+            Ownership ownership, WildcardPermissionChecker permissionChecker) {
         PermissionState result = PermissionState.NONE;
         // 2. check direct permissions
         if (result == PermissionState.NONE && user != null) { // no direct permissions for anonymous users
             for (WildcardPermission directPermission : user.getPermissions()) {
-                if (directPermission.implies(permission)) {
+                if (permissionChecker.check(directPermission, permission)) {
                     result = PermissionState.GRANTED;
                     break;
                 }
@@ -250,7 +300,7 @@ public class PermissionChecker {
         // 3. check role permissions
         if (result == PermissionState.NONE && user != null) { // an anonymous user does not have any roles
             for (Role role : user.getRoles()) {
-                if (implies(role, permission, ownership)) {
+                if (implies(role, permission, ownership, permissionChecker)) {
                     result = PermissionState.GRANTED;
                     break;
                 }
@@ -275,7 +325,7 @@ public class PermissionChecker {
      * @param ownership
      *            Ownership of the data object for which the {@code permission} is requested
      */
-   private static boolean implies(Role role, WildcardPermission permission, Ownership ownership) {
+   private static boolean implies(Role role, WildcardPermission permission, Ownership ownership, WildcardPermissionChecker permissionChecker) {
        final boolean roleIsTenantQualified = role.getQualifiedForTenant() != null;
        final boolean roleIsUserQualified = role.getQualifiedForUser() != null;
        final boolean permissionsApply;
@@ -293,7 +343,7 @@ public class PermissionChecker {
        if (permissionsApply) {
            result = false; // if the role grants no permissions at all or no permission implies the one requested for, access is not granted
             for (WildcardPermission rolePermission : role.getPermissions()) {
-                if (rolePermission.implies(permission)) {
+                if (permissionChecker.check(rolePermission, permission)) {
                     result = true;
                     break;
                 }
