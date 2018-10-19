@@ -1824,58 +1824,67 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public RaceboardDataDTO getRaceboardData(String regattaName, String raceName,
-            String leaderboardName, String leaderboardGroupName, UUID eventId) {
+    public RaceboardDataDTO getRaceboardData(String regattaName, String raceName, String leaderboardName,
+            String leaderboardGroupName, UUID eventId) {
+        RaceboardDataDTO result = new RaceboardDataDTO(null, false, false, Collections.emptyList(),
+                Collections.emptyList(), null);
         RaceWithCompetitorsAndBoatsDTO raceDTO = null;
         Regatta regatta = getService().getRegattaByName(regattaName);
-        if (regatta != null && getSecurityService().hasCurrentUserReadPermission(regatta)) {
+        if (regatta != null) {
             RaceDefinition race = regatta.getRaceByName(raceName);
             if (race != null) {
                 RegattaAndRaceIdentifier raceIdentifier = new RegattaNameAndRaceName(regatta.getName(), race.getName());
                 TrackedRace trackedRace = getService().getExistingTrackedRace(raceIdentifier);
-                Map<CompetitorDTO, BoatDTO> competitorsAndBoats = baseDomainFactory.convertToCompetitorAndBoatDTOs(race.getCompetitorsAndTheirBoats());
-                TrackedRaceDTO trackedRaceDTO = null;
+                getSecurityService().checkCurrentUserReadPermission(trackedRace);
                 if (trackedRace != null) {
-                    trackedRaceDTO = getBaseDomainFactory().createTrackedRaceDTO(trackedRace);
-                }
-                raceDTO = new RaceWithCompetitorsAndBoatsDTO(raceIdentifier, competitorsAndBoats, trackedRaceDTO, getService().isRaceBeingTracked(regatta, race));
-                if (trackedRace != null) {
-                    getBaseDomainFactory().updateRaceDTOWithTrackedRaceData(trackedRace, raceDTO);
-                }
-                raceDTO.boatClass = regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName();
-            }                
-        }
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
-        LeaderboardGroup leaderboardGroup = leaderboardGroupName != null ? getService().getLeaderboardGroupByName(leaderboardGroupName) : null;
-        Event event = eventId != null ? getService().getEvent(eventId)  : null;
-        if (!getSecurityService().hasCurrentUserReadPermission(event)) {
-            event = null;
-        }
-        
-        boolean isValidLeaderboard = leaderboard != null
-                && getSecurityService().hasCurrentUserReadPermission(leaderboard);
-        boolean isValidLeaderboardGroup = false;
-        if (leaderboardGroup != null) {
-            for(Leaderboard leaderboardInGroup: leaderboardGroup.getLeaderboards()) {
-                if (leaderboardInGroup.getName().equals(leaderboard.getName())
-                        && getSecurityService().hasCurrentUserReadPermission(leaderboardInGroup)) {
-                    isValidLeaderboardGroup = true;
-                    break;
+                    Map<CompetitorDTO, BoatDTO> competitorsAndBoats = baseDomainFactory
+                            .convertToCompetitorAndBoatDTOs(race.getCompetitorsAndTheirBoats());
+                    TrackedRaceDTO trackedRaceDTO = getBaseDomainFactory().createTrackedRaceDTO(trackedRace);
+                    raceDTO = new RaceWithCompetitorsAndBoatsDTO(raceIdentifier, competitorsAndBoats, trackedRaceDTO,
+                            getService().isRaceBeingTracked(regatta, race));
+                    if (trackedRace != null) {
+                        getBaseDomainFactory().updateRaceDTOWithTrackedRaceData(trackedRace, raceDTO);
+                    }
+                    raceDTO.boatClass = regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName();
+
+                    Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+                    LeaderboardGroup leaderboardGroup = leaderboardGroupName != null
+                            ? getService().getLeaderboardGroupByName(leaderboardGroupName)
+                            : null;
+                    Event event = eventId != null ? getService().getEvent(eventId) : null;
+                    if (!getSecurityService().hasCurrentUserReadPermission(event)) {
+                        event = null;
+                    }
+
+                    boolean isValidLeaderboardGroup = false;
+                    if (leaderboardGroup != null) {
+                        for (Leaderboard leaderboardInGroup : leaderboardGroup.getLeaderboards()) {
+                            if (leaderboardInGroup.getName().equals(leaderboard.getName())) {
+                                isValidLeaderboardGroup = true;
+                                break;
+                            }
+                        }
+                    }
+                    boolean isValidEvent = event != null;
+                    if (event != null && leaderboardGroup != null) {
+                        isValidEvent = false;
+                        for (LeaderboardGroup leaderboardGroupInEvent : event.getLeaderboardGroups()) {
+                            if (leaderboardGroupInEvent.getId().equals(leaderboardGroup.getId())) {
+                                isValidEvent = true;
+                                break;
+                            }
+                        }
+                    }
+                    Iterable<DetailType> detailTypesForCompetitorChart = determineDetailTypesForCompetitorChart(
+                            leaderboardGroupName, raceDTO.getRaceIdentifier());
+                    Iterable<DetailType> availableDetailTypesForLeaderboard = getAvailableDetailTypesForLeaderboard(
+                            leaderboardName, raceDTO.getRaceIdentifier());
+                    StrippedLeaderboardDTO leaderboardDTO = createStrippedLeaderboardDTO(leaderboard, false, false);
+                    result = new RaceboardDataDTO(raceDTO, isValidLeaderboardGroup, isValidEvent,
+                            detailTypesForCompetitorChart, availableDetailTypesForLeaderboard, leaderboardDTO);
                 }
             }
         }
-        boolean isValidEvent = event != null;
-        if (event != null && leaderboardGroup != null) {
-            isValidEvent = false;
-            for (LeaderboardGroup leaderboardGroupInEvent: event.getLeaderboardGroups()) {
-                if (leaderboardGroupInEvent.getId().equals(leaderboardGroup.getId())
-                        && getSecurityService().hasCurrentUserReadPermission(leaderboardGroupInEvent)) {
-                    isValidEvent = true;
-                    break;
-                }
-            }
-        }
-        RaceboardDataDTO result = new RaceboardDataDTO(raceDTO, isValidLeaderboard, isValidLeaderboardGroup, isValidEvent);
         return result;
     }
 

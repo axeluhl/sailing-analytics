@@ -69,7 +69,6 @@ import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.BoatDTO;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
-import com.sap.sailing.domain.common.dto.IncrementalOrFullLeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
@@ -106,7 +105,6 @@ import com.sap.sse.common.filter.FilterSet;
 import com.sap.sse.common.impl.InvertibleComparatorAdapter;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
-import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.AbstractSortableColumnWithMinMax;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.FlushableSortedCellTableWithStylableHeaders;
@@ -789,28 +787,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     /**
      * @param callWhenExpansionDataIsLoaded
      */
-    private void updateLeaderboardAndRun(final Runnable callWhenExpansionDataIsLoaded) {
-        final LeaderboardDTO previousLeaderboard = getLeaderboard();
-        getSailingService().getLeaderboardByName(getLeaderboardName(),
-                timer.getPlayMode() == PlayModes.Live ? null : getLeaderboardDisplayDate(),
-                /* namesOfRacesForWhichToLoadLegDetails */getNamesOfExpandedRaceColumns(), shallAddOverallDetails(),
-                previousLeaderboard.getId(), /* fillTotalPointsUncorrected */ false,
-                new MarkedAsyncCallback<IncrementalOrFullLeaderboardDTO>(
-                        new AsyncCallback<IncrementalOrFullLeaderboardDTO>() {
-                            @Override
-                            public void onSuccess(IncrementalOrFullLeaderboardDTO result) {
-                                updateLeaderboard(result.getLeaderboardDTO(previousLeaderboard));
-                                callWhenExpansionDataIsLoaded.run();
-                            }
 
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                getErrorReporter().reportError(
-                                        stringMessages.errorTryingToObtainLeaderboardContents(caught.getMessage()),
-                                        true /* silentMode */);
-                            }
-                        }));
-    }
+    protected abstract void updateLeaderboardAndRun(final Runnable callWhenExpansionDataIsLoaded);
 
     public void setRaceColumnSelectionToLastNStrategy(final Integer numberOfLastRacesToShow) {
         raceColumnSelection = new LastNRacesColumnSelection(numberOfLastRacesToShow, getRaceTimesInfoProvider());
@@ -2523,7 +2501,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
     /**
      * Determine from column expansion state which races need their leg details
      */
-    private Collection<String> getNamesOfExpandedRaceColumns() {
+    protected Collection<String> getNamesOfExpandedRaceColumns() {
         Collection<String> namesOfExpandedRaceColumns = new ArrayList<String>();
         for (int i = 0; i < getLeaderboardTable().getColumnCount(); i++) {
             Column<LeaderboardRowDTO, ?> column = getLeaderboardTable().getColumn(i);
@@ -2537,7 +2515,7 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
         return namesOfExpandedRaceColumns;
     }
 
-    private boolean shallAddOverallDetails() {
+    protected boolean shallAddOverallDetails() {
         return !selectedOverallDetailColumns.isEmpty();
     }
 
