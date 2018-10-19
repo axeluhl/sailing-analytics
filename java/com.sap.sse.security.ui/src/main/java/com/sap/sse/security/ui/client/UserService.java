@@ -11,6 +11,7 @@ import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.TimePoint;
+import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
@@ -29,6 +30,7 @@ import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.OwnershipImpl;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.oauth.client.util.ClientUtils;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -86,11 +88,15 @@ public class UserService {
     private final String id;
 
     private UserDTO anonymousUser;
+    
+    private final Set<HasPermissions> allKnownHasPermissions;
 
     public UserService(UserManagementServiceAsync userManagementService) {
         this.id = ""+(System.currentTimeMillis() * Random.nextInt()); // something pretty random
         this.userManagementService = userManagementService;
         handlers = new HashSet<>();
+        allKnownHasPermissions = new HashSet<>();
+        Util.addAll(SecuredSecurityTypes.getAllInstances(), allKnownHasPermissions);
         registerStorageEventHandler();
         updateUser(/* notifyOtherInstances */ false);
     }
@@ -411,5 +417,14 @@ public class UserService {
 
     public UserDTO getAnonymousUser() {
         return anonymousUser;
+    }
+    
+    public void addKnownHasPermissions(Iterable<HasPermissions> hasPermissions) {
+        Util.addAll(hasPermissions, allKnownHasPermissions);
+    }
+    
+    public boolean hasCurrentUserMetaPermission(WildcardPermission permissionToCheck, Ownership ownership) {
+        return PermissionChecker.checkMetaPermission(permissionToCheck, allKnownHasPermissions, getCurrentUser(),
+                anonymousUser, ownership);
     }
 }
