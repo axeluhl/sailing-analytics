@@ -10,7 +10,7 @@ import com.sap.sse.common.NamedWithID;
  * @author Axel Uhl (d043530)
  *
  */
-public interface UserGroup extends NamedWithID {
+public interface UserGroup extends NamedWithID, WithQualifiedObjectIdentifier {
     public Iterable<SecurityUser> getUsers();
     
     public void add(SecurityUser user);

@@ -14,8 +14,11 @@ import org.apache.shiro.crypto.hash.Sha256Hash;
 
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecurityUserImpl;
 
 public class UserImpl extends SecurityUserImpl implements User {
@@ -261,5 +264,15 @@ public class UserImpl extends SecurityUserImpl implements User {
     @Override
     public String getValidationSecret() {
         return validationSecret;
+    }
+
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getType().getQualifiedObjectIdentifier(getName());
+    }
+
+    @Override
+    public HasPermissions getType() {
+        return SecuredSecurityTypes.USER;
     }
 }

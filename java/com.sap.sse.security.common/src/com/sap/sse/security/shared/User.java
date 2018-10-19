@@ -14,7 +14,7 @@ import com.sap.sse.security.shared.Account.AccountType;
  * @author Axel Uhl (d043530)
  *
  */
-public interface User extends SecurityUser {
+public interface User extends SecurityUser, WithQualifiedObjectIdentifier {
     /**
      * An optional clear-text user name, used to address the user, e.g., in the UI ("Hello ...")
      */
@@ -86,4 +86,5 @@ public interface User extends SecurityUser {
     Locale getLocaleOrDefault();
     
     void setDefaultTenant(UserGroup newDefaultTenant);
+    
 }

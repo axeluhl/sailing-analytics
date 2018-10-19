@@ -11,6 +11,8 @@ import java.util.UUID;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.GwtIncompatible;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
@@ -118,5 +120,15 @@ public class UserGroupImpl implements UserGroup {
         } else if (!id.equals(other.id))
             return false;
         return true;
+    }
+
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getType().getQualifiedObjectIdentifier(getId().toString());
+    }
+
+    @Override
+    public HasPermissions getType() {
+        return SecuredSecurityTypes.USER_GROUP;
     }
 }
