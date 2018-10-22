@@ -62,6 +62,6 @@ public interface HasTrackedRaceContext {
     // Convenience methods for race dependent calculation to avoid code duplication
     public Double getRelativeScoreForCompetitor(Competitor competitor);
     
-    public Double getRankAtFinishForCompetitor(Competitor competitor);
+    public Integer getRankAtFinishForCompetitor(Competitor competitor);
     
 }

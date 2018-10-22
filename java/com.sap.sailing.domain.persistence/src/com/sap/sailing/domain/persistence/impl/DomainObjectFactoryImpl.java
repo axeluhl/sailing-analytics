@@ -554,11 +554,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         if (dbDiscardIndexResultsStartingWithHowManyRaces == null) {
             result = null;
         } else {
-            int[] discardIndexResultsStartingWithHowManyRaces = new int[dbDiscardIndexResultsStartingWithHowManyRaces
-                    .size()];
+            int[] discardIndexResultsStartingWithHowManyRaces = new int[dbDiscardIndexResultsStartingWithHowManyRaces.size()];
             int i = 0;
             for (Object discardingThresholdAsObject : dbDiscardIndexResultsStartingWithHowManyRaces) {
-                discardIndexResultsStartingWithHowManyRaces[i++] = (Integer) discardingThresholdAsObject;
+                discardIndexResultsStartingWithHowManyRaces[i++] = ((Number) discardingThresholdAsObject).intValue();
             }
             result = new ThresholdBasedResultDiscardingRuleImpl(discardIndexResultsStartingWithHowManyRaces);
         }
@@ -703,8 +702,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                             .containsField(FieldNames.LEADERBOARD_CORRECTED_SCORE.name())) {
                         final Double leaderboardCorrectedScore = ((Number) dbScoreCorrectionForCompetitorInRace
                                 .get(FieldNames.LEADERBOARD_CORRECTED_SCORE.name())).doubleValue();
-                        correctionsToUpdate.correctScoreByID(competitorId, raceColumn,
-                                (Double) leaderboardCorrectedScore);
+                        correctionsToUpdate.correctScoreByID(competitorId, raceColumn, leaderboardCorrectedScore);
                     }
                 }
             } else {
@@ -1266,8 +1264,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     logger.log(Level.WARNING, "Error loading racing procedure configration for regatta.", e);
                 }
             }
-            final Double buoyZoneRadiusInHullLengths = (Double) dbRegatta
+            final Number buoyZoneRadiusInHullLengthsAsNumber = (Number) dbRegatta
                     .get(FieldNames.REGATTA_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS.name());
+            final Double buoyZoneRadiusInHullLengths = buoyZoneRadiusInHullLengthsAsNumber==null?null:buoyZoneRadiusInHullLengthsAsNumber.doubleValue();
             final Boolean useStartTimeInference = (Boolean) dbRegatta
                     .get(FieldNames.REGATTA_USE_START_TIME_INFERENCE.name());
             final Boolean controlTrackingFromStartAndFinishTimes = (Boolean) dbRegatta
@@ -1357,8 +1356,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         if (isFleetCanRunInParallelObject != null) {
             isFleetsCanRunInParallel = (Boolean) dbSeries.get(FieldNames.SERIES_IS_FLEETS_CAN_RUN_IN_PARALLEL.name());
         }
-        final Integer maximumNumberOfDiscards = (Integer) dbSeries
+        final Number maximumNumberOfDiscardsAsObject = (Number) dbSeries
                 .get(FieldNames.SERIES_MAXIMUM_NUMBER_OF_DISCARDS.name());
+        final Integer maximumNumberOfDiscards = maximumNumberOfDiscardsAsObject == null ? null : maximumNumberOfDiscardsAsObject.intValue();
         Boolean startsWithZeroScore = (Boolean) dbSeries.get(FieldNames.SERIES_STARTS_WITH_ZERO_SCORE.name());
         Boolean hasSplitFleetContiguousScoring = (Boolean) dbSeries
                 .get(FieldNames.SERIES_HAS_SPLIT_FLEET_CONTIGUOUS_SCORING.name());
@@ -1427,11 +1427,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private Fleet loadFleet(DBObject dbFleet) {
         Fleet result;
         String name = (String) dbFleet.get(FieldNames.FLEET_NAME.name());
-        Integer ordering = (Integer) dbFleet.get(FieldNames.FLEET_ORDERING.name());
+        Number orderingAsNumber = (Number) dbFleet.get(FieldNames.FLEET_ORDERING.name());
+        Integer ordering = orderingAsNumber == null ? null : orderingAsNumber.intValue();
         if (ordering == null) {
             ordering = 0;
         }
-        Integer colorAsInt = (Integer) dbFleet.get(FieldNames.FLEET_COLOR.name());
+        Number colorAsNumber = (Number) dbFleet.get(FieldNames.FLEET_COLOR.name());
+        Integer colorAsInt = colorAsNumber == null ? null : colorAsNumber.intValue();
         Color color = null;
         if (colorAsInt != null) {
             int r = colorAsInt % 256;
@@ -1873,9 +1875,11 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             final Integer rank = (Integer) dbObject.get(FieldNames.LEADERBOARD_RANK.name());
             final MaxPointsReason maxPointsReason = MaxPointsReason
                     .valueOf((String) dbObject.get(FieldNames.LEADERBOARD_SCORE_CORRECTION_MAX_POINTS_REASON.name()));
-            final Double score = (Double) dbObject.get(FieldNames.LEADERBOARD_CORRECTED_SCORE.name());
-            final Long finishingTimePointAsMillis = (Long) dbObject
+            final Number scoreAsNumber = (Number) dbObject.get(FieldNames.LEADERBOARD_CORRECTED_SCORE.name());
+            final Double score = scoreAsNumber == null ? null : scoreAsNumber.doubleValue();
+            final Number finishingTimePointAsMillisAsNumber = (Number) dbObject
                     .get(FieldNames.RACE_LOG_FINISHING_TIME_AS_MILLIS.name());
+            final Long finishingTimePointAsMillis = finishingTimePointAsMillisAsNumber == null ? null : finishingTimePointAsMillisAsNumber.longValue();
             final TimePoint finishingTime = finishingTimePointAsMillis == null ? null
                     : new MillisecondsTimePoint(finishingTimePointAsMillis);
             final String comment = (String) dbObject.get(FieldNames.LEADERBOARD_SCORE_CORRECTION_COMMENT.name());
@@ -2071,7 +2075,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RegattaLogEvent loadRegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEvent(TimePoint createdAt,
             AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, DBObject dbObject) {
         final Competitor comp = getCompetitorByID(dbObject);
-        final Double timeOnTimeFactor = (Double) dbObject.get(FieldNames.REGATTA_LOG_TIME_ON_TIME_FACTOR.name());
+        final Number timeOnTimeFactorAsNumber = (Number) dbObject.get(FieldNames.REGATTA_LOG_TIME_ON_TIME_FACTOR.name());
+        final Double timeOnTimeFactor = timeOnTimeFactorAsNumber == null ? null : timeOnTimeFactorAsNumber.doubleValue();
         return new RegattaLogSetCompetitorTimeOnTimeFactorEventImpl(createdAt, logicalTimePoint, author, id, comp,
                 timeOnTimeFactor);
     }
@@ -2079,8 +2084,10 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private RegattaLogEvent loadRegattaLogSetCompetitorTimeOnTimeFactorEvent(TimePoint createdAt,
             AbstractLogEventAuthor author, TimePoint logicalTimePoint, Serializable id, DBObject dbObject) {
         final Competitor comp = getCompetitorByID(dbObject);
-        final Double timeOnDistanceSecondsAllowancePerNauticalMile = (Double) dbObject
+        final Number timeOnDistanceSecondsAllowancePerNauticalMileAsNumber = (Number) dbObject
                 .get(FieldNames.REGATTA_LOG_TIME_ON_DISTANCE_SECONDS_ALLOWANCE_PER_NAUTICAL_MILE.name());
+        final Double timeOnDistanceSecondsAllowancePerNauticalMile = timeOnDistanceSecondsAllowancePerNauticalMileAsNumber == null
+                ? null : timeOnDistanceSecondsAllowancePerNauticalMileAsNumber.doubleValue();
         final Duration timeOnDistanceAllowancePerNauticalMile = timeOnDistanceSecondsAllowancePerNauticalMile == null
                 ? null : new MillisecondsDurationImpl((long) (timeOnDistanceSecondsAllowancePerNauticalMile * 1000));
         return new RegattaLogSetCompetitorTimeOnDistanceAllowancePerNauticalMileEventImpl(createdAt, logicalTimePoint,
