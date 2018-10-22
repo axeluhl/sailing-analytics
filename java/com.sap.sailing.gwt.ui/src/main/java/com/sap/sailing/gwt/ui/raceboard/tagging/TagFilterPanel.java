@@ -122,6 +122,7 @@ public class TagFilterPanel extends FlowPanel implements KeyUpHandler, Filter<Ta
         refreshTagsButton.setStyleName(style.tagReloadButton());
         refreshTagsButton.addStyleName(style.imageReload());
         refreshTagsButton.addStyleName("gwt-Button");
+        refreshTagsButton.setTitle(stringMessages.refresh());
         refreshTagsButton.addClickHandler(event -> {
             taggingPanel.clearCache();
         });
