@@ -10,6 +10,7 @@ import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -938,7 +939,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public Iterable<RoleDefinition> getRoleDefinitions() {
-        return userStore.getRoleDefinitions();
+        Collection<RoleDefinition> result = new ArrayList<>();
+        filterObjectsWithPermissionForCurrentUser(SecuredSecurityTypes.ROLE_DEFINITION, DefaultActions.READ,
+                userStore.getRoleDefinitions(), t -> t.getId().toString(), t -> result.add(t));
+        return result;
     }
 
     @Override
