@@ -1352,26 +1352,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return cacheManager;
     }
 
-    private void ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(String username) {
-        final Subject subject = SecurityUtils.getSubject();
-        if (!subject.hasRole(AdminRole.getInstance().getName()) && (subject.getPrincipal() == null
-                || !username.equals(subject.getPrincipal().toString()))) {
-            final String currentUserName = subject.getPrincipal() == null ? "<anonymous>"
-                    : subject.getPrincipal().toString();
-            throw new AuthorizationException(
-                    "User " + currentUserName + " does not have the permission required to access data of user " + username);
-        }
-    }
-
     @Override
     public void setPreference(final String username, final String key, final String value) {
-        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
         apply(s->s.internalSetPreference(username, key, value));
     }
 
     @Override
     public void setPreferenceObject(final String username, final String key, final Object value) {
-        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
         final String preferenceObjectAsString = internalSetPreferenceObject(username, key, value);
         apply(s->s.internalSetPreference(username, key, preferenceObjectAsString));
     }
@@ -1389,7 +1376,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public void unsetPreference(String username, String key) {
-        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
         apply(s->s.internalUnsetPreference(username, key));
     }
 
@@ -1427,13 +1413,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public String getPreference(String username, String key) {
-        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
         return userStore.getPreference(username, key);
     }
 
     @Override
     public Map<String, String> getAllPreferences(String username) {
-        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
         return userStore.getAllPreferences(username);
     }
     

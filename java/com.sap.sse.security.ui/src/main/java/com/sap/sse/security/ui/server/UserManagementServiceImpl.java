@@ -688,71 +688,53 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public void setPreference(String username, String key, String value) throws UserManagementException, UnauthorizedException {
-        getSecurityService().checkCurrentUserUpdatePermission(getSecurityService().getCurrentUser());
-        try {
+        getSecurityService().checkCurrentUserUpdatePermission(getSecurityService().getUserByName(username));
             getSecurityService().setPreference(username, key, value);
-        } catch (AuthorizationException e) {
-            throw new UserManagementException(UserManagementException.USER_DOESNT_HAVE_PERMISSION);
-        }
     }
     
     @Override
     public void setPreferences(String username, Map<String, String> keyValuePairs)
             throws UserManagementException, UnauthorizedException {
-        getSecurityService().checkCurrentUserUpdatePermission(getSecurityService().getCurrentUser());
-        try {
-            for (Entry<String, String> entry : keyValuePairs.entrySet()) {
-                getSecurityService().setPreference(username, entry.getKey(), entry.getValue());
-            }
-        } catch (AuthorizationException e) {
-            throw new UserManagementException(UserManagementException.USER_DOESNT_HAVE_PERMISSION);
+        getSecurityService().checkCurrentUserUpdatePermission(getSecurityService().getUserByName(username));
+        for (Entry<String, String> entry : keyValuePairs.entrySet()) {
+            getSecurityService().setPreference(username, entry.getKey(), entry.getValue());
         }
     }
 
     @Override
     public void unsetPreference(String username, String key) throws UserManagementException, UnauthorizedException {
-        getSecurityService().checkCurrentUserUpdatePermission(getSecurityService().getCurrentUser());
-        try {
-            getSecurityService().unsetPreference(username, key);
-        } catch (AuthorizationException e) {
-            throw new UserManagementException(UserManagementException.USER_DOESNT_HAVE_PERMISSION);
-        }
+        getSecurityService().checkCurrentUserUpdatePermission(getSecurityService().getUserByName(username));
+        getSecurityService().unsetPreference(username, key);
     }
 
     @Override
     public String getPreference(String username, String key) throws UserManagementException, UnauthorizedException {
-        getSecurityService().checkCurrentUserReadPermission(getSecurityService().getCurrentUser());
-        try {
-            return getSecurityService().getPreference(username, key);
-        } catch (AuthorizationException e) {
-            throw new UserManagementException(UserManagementException.USER_DOESNT_HAVE_PERMISSION);
-        }
+        getSecurityService().checkCurrentUserReadPermission(getSecurityService().getUserByName(username));
+        return getSecurityService().getPreference(username, key);
     }
     
     @Override
     public Map<String, String> getPreferences(String username, List<String> keys) throws UserManagementException, UnauthorizedException {
+        getSecurityService().checkCurrentUserReadPermission(getSecurityService().getUserByName(username));
         Map<String, String> requestedPreferences = new HashMap<>();
         for (String key : keys) {
-            requestedPreferences.put(key, getPreference(username, key));
+            requestedPreferences.put(key, getSecurityService().getPreference(username, key));
         }
         return requestedPreferences;
     }
     
     @Override
-    public Map<String, String> getAllPreferences(String username) throws UserManagementException, UnauthorizedException {
-        getSecurityService().checkCurrentUserReadPermission(getSecurityService().getCurrentUser());
-        try {
-            final Map<String, String> allPreferences = getSecurityService().getAllPreferences(username);
-            final Map<String, String> result = new HashMap<>();
-            for (Map.Entry<String, String> entry : allPreferences.entrySet()) {
-                if (!entry.getKey().startsWith("_")) {
-                    result.put(entry.getKey(), entry.getValue());
-                }
+    public Map<String, String> getAllPreferences(String username)
+            throws UserManagementException, UnauthorizedException {
+        getSecurityService().checkCurrentUserReadPermission(getSecurityService().getUserByName(username));
+        final Map<String, String> allPreferences = getSecurityService().getAllPreferences(username);
+        final Map<String, String> result = new HashMap<>();
+        for (Map.Entry<String, String> entry : allPreferences.entrySet()) {
+            if (!entry.getKey().startsWith("_")) {
+                result.put(entry.getKey(), entry.getValue());
             }
-            return result;
-        } catch (AuthorizationException e) {
-            throw new UserManagementException(UserManagementException.USER_DOESNT_HAVE_PERMISSION);
         }
+        return result;
     }
 
     @Override
