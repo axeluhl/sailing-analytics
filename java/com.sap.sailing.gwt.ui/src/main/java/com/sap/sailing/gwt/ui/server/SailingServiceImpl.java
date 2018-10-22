@@ -881,7 +881,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             String previousLeaderboardId, boolean fillTotalPointsUncorrected) throws NoWindException, InterruptedException, ExecutionException,
             IllegalArgumentException {
         getSecurityService().checkCurrentUserReadPermission(getService().getLeaderboardByName(leaderboardName));
-        return getLeaderBoardByNameWithoutSecurity(leaderboardName, date, namesOfRaceColumnsForWhichToLoadLegDetails,
+        return getLeaderBoardByNameInternal(leaderboardName, date, namesOfRaceColumnsForWhichToLoadLegDetails,
                 addOverallDetails, previousLeaderboardId, fillTotalPointsUncorrected);
     }
 
@@ -891,18 +891,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
             String previousLeaderboardId, boolean fillTotalPointsUncorrected)
             throws NoWindException, InterruptedException, ExecutionException, IllegalArgumentException {
-        DynamicTrackedRace trackedRace = getService().getTrackedRace(race);
-        Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
+        final DynamicTrackedRace trackedRace = getService().getTrackedRace(race);
+        final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard.getRaceColumnAndFleet(trackedRace) == null) {
             // this race does not seem to be contained in the leaderboard, also check leaderboard
             getSecurityService().checkCurrentUserReadPermission(leaderboard);
         }
         getSecurityService().checkCurrentUserReadPermission(trackedRace);
-        return getLeaderBoardByNameWithoutSecurity(leaderboardName, date, namesOfRaceColumnsForWhichToLoadLegDetails,
+        return getLeaderBoardByNameInternal(leaderboardName, date, namesOfRaceColumnsForWhichToLoadLegDetails,
                 addOverallDetails, previousLeaderboardId, fillTotalPointsUncorrected);
     }
 
-    private IncrementalOrFullLeaderboardDTO getLeaderBoardByNameWithoutSecurity(final String leaderboardName,
+    private IncrementalOrFullLeaderboardDTO getLeaderBoardByNameInternal(final String leaderboardName,
             final Date date, final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails,
             boolean addOverallDetails, String previousLeaderboardId, boolean fillTotalPointsUncorrected)
             throws NoWindException, InterruptedException, ExecutionException {
