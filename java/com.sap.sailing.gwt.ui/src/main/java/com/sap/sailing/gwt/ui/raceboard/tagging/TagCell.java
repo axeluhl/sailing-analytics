@@ -23,6 +23,7 @@ import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Window;
 import com.sap.sailing.domain.common.dto.TagDTO;
+import com.sap.sailing.gwt.ui.client.GwtUrlHelper;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanel.State;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
@@ -325,7 +326,7 @@ public class TagCell extends AbstractCell<TagDTO> {
 
     /**
      * Appends given <code>tag</code> to <code>urlBuilder</code> by separating the {@link TagDTO#raceTimePoint} and
-     * {@link TagDTO#tag} with a single commata.
+     * {@link TagDTO#tag} with a single comma. The {@link TagDTO#getTag() tag title} is URL-encoded.
      * 
      * @param urlBuilder
      *            string builder which the tag parameter will be appended to
@@ -338,6 +339,6 @@ public class TagCell extends AbstractCell<TagDTO> {
         urlBuilder.append('=');
         urlBuilder.append(tag.getRaceTimepoint().asMillis());
         urlBuilder.append(',');
-        urlBuilder.append(tag.getTag());
+        urlBuilder.append(GwtUrlHelper.INSTANCE.encodeQueryString(tag.getTag()));
     }
 }
