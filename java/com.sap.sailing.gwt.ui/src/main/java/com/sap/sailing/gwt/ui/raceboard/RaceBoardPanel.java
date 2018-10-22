@@ -270,7 +270,7 @@ public class RaceBoardPanel
                     return INDENT_SMALL_CONTROL_STYLE;
                 }
                 return super.getLeftControlsIndentStyle();
-            }
+            }   
         };
         // now that the raceMap field has been initialized, check whether the buoy zone radius shall be looked up from
         // the regatta model on the server:
@@ -304,10 +304,9 @@ public class RaceBoardPanel
         raceMap.getRightHeaderPanel().add(userManagementMenuView);
         addChildComponent(raceMap);
         
-        // add panel for tagging functionality, hidden if no url parameter "tag" is passed 
-        // TODO: URL params should be parsed in EntryPoint, not in Panel
-        final String sharedTagURLParameter = Window.Location.getParameter(TagDTO.TAG_URL_PARAMETER);
-        String sharedTagTitel = null;
+        // add panel for tagging functionality, hidden if no URL parameter "tag" is passed 
+        final String sharedTagURLParameter = settings.getPerspectiveOwnSettings().getJumpToTag();
+        String sharedTagTitle = null;
         TimePoint sharedTagTimePoint = null;
         boolean showTaggingPanel = false;
         if (sharedTagURLParameter != null) {
@@ -316,13 +315,14 @@ public class RaceBoardPanel
             if (indexOfSeperator != -1) {
                 try {
                     sharedTagTimePoint = new MillisecondsTimePoint(Long.parseLong(sharedTagURLParameter.substring(0, indexOfSeperator)));
-                    sharedTagTitel = sharedTagURLParameter.substring(indexOfSeperator + 1, sharedTagURLParameter.length());
+                    sharedTagTitle = sharedTagURLParameter.substring(indexOfSeperator + 1, sharedTagURLParameter.length());
+                } catch(NumberFormatException nfe) {
+                    GWT.log("Problem extracting tag time point from URL parameter "+TagDTO.TAG_URL_PARAMETER, nfe);
                 }
-                catch(NumberFormatException nfe) {};
             }
         }
         taggingPanel = new TaggingPanel(parent, componentContext, stringMessages, sailingService, userService, timer,
-                raceTimesInfoProvider, sharedTagTimePoint, sharedTagTitel);
+                raceTimesInfoProvider, sharedTagTimePoint, sharedTagTitle);
         addChildComponent(taggingPanel);
         taggingPanel.setVisible(showTaggingPanel);
         

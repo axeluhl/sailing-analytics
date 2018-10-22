@@ -28,7 +28,7 @@ public class TagInputPanel extends FlowPanel {
 
     /**
      * Extends {@link DataEntryDialog} to provide input validation for tags. The dialog itself is never shown to the
-     * user therfor methods {@link #show()} and {@link #center()} are overriden to have no effect. Instead input fields
+     * user. Therefore methods {@link #show()} and {@link #center()} are overridden to have no effect. Instead input fields
      * can be used in other UIs as validator still has access to these fields.
      */
     private class TagEntryFields extends DataEntryDialog<TagDTO> {
@@ -64,16 +64,19 @@ public class TagInputPanel extends FlowPanel {
          * @return <code>error message</code> in case input is not valid, otherwise <code>null</code>
          */
         private String validate(TagDTO tagToValidate) {
+            final String result;
             if (tagToValidate == null) {
-                return stringMessages.unknown();
+                result = stringMessages.unknown();
             } else if (tagToValidate.getTag() == null || tagToValidate.getTag().isEmpty()) {
-                return stringMessages.tagNotSpecified();
+                result = stringMessages.tagNotSpecified();
             } else if (taggingPanel.tagAlreadyExists(tagToValidate.getTag(), tagToValidate.getComment(),
                     tagToValidate.getImageURL(), tagToValidate.getResizedImageURL(), tagToValidate.isVisibleForPublic(),
                     tagToValidate.getRaceTimepoint())) {
-                return stringMessages.tagAlreadyExists();
+                result = stringMessages.tagAlreadyExists();
+            } else {
+                result = null;
             }
-            return null;
+            return result;
         }
 
         public TextBox getTagTextBox() {
