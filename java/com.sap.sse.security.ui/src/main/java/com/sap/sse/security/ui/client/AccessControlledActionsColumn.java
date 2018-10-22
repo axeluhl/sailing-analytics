@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.adminconsole;
+package com.sap.sse.security.ui.client;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,7 +15,6 @@ import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.ui.client.UserService;
 
 public class AccessControlledActionsColumn<T extends NamedSecuredObjectDTO, S extends ImagesBarCell>
         extends ImagesBarColumn<T, S> {
