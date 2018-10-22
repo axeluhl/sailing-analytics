@@ -27,7 +27,6 @@ import com.sap.sse.gwt.client.panels.AbstractTabLayoutPanel;
 import com.sap.sse.gwt.client.panels.HorizontalTabLayoutPanel;
 import com.sap.sse.gwt.client.panels.VerticalTabLayoutPanel;
 import com.sap.sse.security.shared.HasPermissions;
-import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
@@ -478,8 +477,7 @@ public class AdminConsolePanel extends HeaderPanel implements HandleTabSelectabl
             hasPermission = false;
             for (WildcardPermission requiredPermission : permissionsRequired) {
                 // TODO bug4763: obtain ownership and ACL through a provider pattern; providers may be passed to this panel's constructor
-                UserDTO anonymous = userService.getAnonymousUser();
-                if (PermissionChecker.isPermitted(requiredPermission, user, anonymous, null, null)) {
+                if (userService.hasCurrentUserAnyPermission(requiredPermission, null)) {
                     hasPermission = true;
                     break;
                 }
