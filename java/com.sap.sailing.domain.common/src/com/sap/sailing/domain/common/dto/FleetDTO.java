@@ -1,6 +1,7 @@
 package com.sap.sailing.domain.common.dto;
 
 import com.sap.sse.common.Color;
+import com.sap.sse.security.shared.NamedDTO;
 
 public class FleetDTO extends NamedDTO {
     private static final long serialVersionUID = 1336494392278190103L;

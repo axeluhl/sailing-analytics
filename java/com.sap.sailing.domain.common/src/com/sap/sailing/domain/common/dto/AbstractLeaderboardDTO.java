@@ -13,6 +13,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.NamedSecuredObjectDTO;
 
 public abstract class AbstractLeaderboardDTO extends NamedSecuredObjectDTO implements Serializable {
     private static final long serialVersionUID = -205106531931903527L;

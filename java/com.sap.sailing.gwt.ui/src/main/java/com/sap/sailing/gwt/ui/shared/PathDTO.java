@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.List;
 
 import com.sap.sailing.domain.common.PathType;
-import com.sap.sailing.domain.common.dto.NamedDTO;
+import com.sap.sse.security.shared.NamedDTO;
 
 public class PathDTO extends NamedDTO {
     private static final long serialVersionUID = 4926185583314563898L;

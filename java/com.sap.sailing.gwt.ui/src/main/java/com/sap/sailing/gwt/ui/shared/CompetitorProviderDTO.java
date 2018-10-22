@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import com.sap.sailing.domain.common.dto.NamedDTO;
+import com.sap.sse.security.shared.NamedDTO;
 
 public class CompetitorProviderDTO extends NamedDTO {
     private static final long serialVersionUID = -8911619278385485713L;

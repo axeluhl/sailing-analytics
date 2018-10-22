@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sse.common.Color;
+import com.sap.sse.security.shared.NamedDTO;
 
 public class BoatDTO extends NamedDTO implements Serializable, MappableToDevice {
     private static final long serialVersionUID = -4076992788294272162L;

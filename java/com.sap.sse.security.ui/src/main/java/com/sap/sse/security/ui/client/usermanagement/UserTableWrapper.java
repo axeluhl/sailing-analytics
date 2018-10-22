@@ -37,6 +37,7 @@ import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.ui.client.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.EditAndRemoveImagesBarCell;
@@ -145,8 +146,9 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                 return new NaturalComparator().compare(r1.getRoles().toString(), r2.getRoles().toString());
             }
         });
-        ImagesBarColumn<UserDTO, EditAndRemoveImagesBarCell> userActionColumn = new ImagesBarColumn<UserDTO, EditAndRemoveImagesBarCell>(
-                new EditAndRemoveImagesBarCell(com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE));
+        ImagesBarColumn<UserDTO, EditAndRemoveImagesBarCell> userActionColumn = new AccessControlledActionsColumn<UserDTO, EditAndRemoveImagesBarCell>(
+                new EditAndRemoveImagesBarCell(com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE),
+                userService, null, null);
         userActionColumn.setFieldUpdater(new FieldUpdater<UserDTO, String>() {
             @Override
             public void update(int index, UserDTO user, String value) {

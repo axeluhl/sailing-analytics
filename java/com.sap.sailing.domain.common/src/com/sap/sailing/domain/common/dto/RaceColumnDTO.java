@@ -13,6 +13,7 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.NamedDTO;
 
 public class RaceColumnDTO extends NamedDTO implements Serializable {
     private static final long serialVersionUID = -3228244237400937852L;

@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.Collections;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.dto.NamedDTO;
+import com.sap.sse.security.shared.NamedDTO;
 
 public class RemoteSailingServerReferenceDTO extends NamedDTO implements IsSerializable {
     private static final long serialVersionUID = -4209262742778693873L;

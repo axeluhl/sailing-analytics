@@ -5,8 +5,8 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.sap.sailing.domain.common.dto.NamedSecuredObjectDTO;
 import com.sap.sse.common.Named;
+import com.sap.sse.security.shared.NamedSecuredObjectDTO;
 import com.sap.sse.security.shared.Ownership;
 
 /**

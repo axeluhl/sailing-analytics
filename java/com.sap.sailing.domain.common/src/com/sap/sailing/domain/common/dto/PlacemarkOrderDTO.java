@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import com.sap.sse.security.shared.NamedDTO;
+
 public class PlacemarkOrderDTO extends NamedDTO {
     private static final long serialVersionUID = -4981887843843495494L;
     private List<PlacemarkDTO> placemarks;

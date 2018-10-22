@@ -1,4 +1,4 @@
-package com.sap.sailing.domain.common.dto;
+package com.sap.sse.security.shared;
 
 import java.io.Serializable;
 

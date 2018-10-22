@@ -77,8 +77,10 @@ public class SecurityDTOFactory {
                         fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
         fromOriginalToStrippedDownUser.put(user, userDTO);
         userDTO.setDefaultTenant(createUserGroupDTOFromUserGroup(user.getDefaultTenant(), fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
+        SecurityDTOUtil.addSecurityInformation(securityService, userDTO, user.getIdentifier());
         return userDTO;
     }
+
 
     private Iterable<Role> createRolesDTOs(Iterable<Role> roles, Map<UserGroup, UserGroup> fromOriginalToStrippedDownTenant,
             Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser,
@@ -102,6 +104,7 @@ public class SecurityDTOFactory {
         for (Social s : Social.values()){
             socialUserDTO.setProperty(s.name(), socialUser.getProperty(s.name()));
         }
+
         return socialUserDTO;
     }
 

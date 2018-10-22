@@ -4,6 +4,7 @@ import java.util.Date;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TimingConstants;
+import com.sap.sse.security.shared.NamedDTO;
 
 /**
  * Master data about a single race that is to be transferred to the client. Holds only timing and a bit

@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.List;
 
-import com.sap.sailing.domain.common.dto.NamedDTO;
+import com.sap.sse.security.shared.NamedDTO;
 
 @SuppressWarnings("serial")
 public class SidelineDTO extends NamedDTO {

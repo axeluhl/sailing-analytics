@@ -8,11 +8,11 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.dto.NamedSecuredObjectDTO;
 import com.sap.sse.common.media.ImageSize;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
+import com.sap.sse.security.shared.NamedSecuredObjectDTO;
 import com.sap.sse.security.shared.SecuredObject;
 
 public class EventBaseDTO extends NamedSecuredObjectDTO implements IsSerializable, SecuredObject {

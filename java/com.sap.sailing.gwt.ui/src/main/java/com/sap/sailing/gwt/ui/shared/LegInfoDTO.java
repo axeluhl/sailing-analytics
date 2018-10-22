@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import com.sap.sailing.domain.common.LegType;
-import com.sap.sailing.domain.common.dto.NamedDTO;
+import com.sap.sse.security.shared.NamedDTO;
 
 public class LegInfoDTO extends NamedDTO {
     private static final long serialVersionUID = -1259587647778615708L;

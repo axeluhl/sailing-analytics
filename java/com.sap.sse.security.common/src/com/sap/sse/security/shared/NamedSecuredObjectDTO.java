@@ -1,8 +1,4 @@
-package com.sap.sailing.domain.common.dto;
-
-import com.sap.sse.security.shared.AccessControlList;
-import com.sap.sse.security.shared.Ownership;
-import com.sap.sse.security.shared.SecuredObject;
+package com.sap.sse.security.shared;
 
 /**
  * {@link NamedDTO} extension which also implements {@link SecuredObject} interface.

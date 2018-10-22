@@ -5,12 +5,15 @@ import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.SecuredObject;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.SecurityUserImpl;
 
-public class UserDTO extends SecurityUserImpl implements IsSerializable {
+public class UserDTO extends SecurityUserImpl implements IsSerializable, SecuredObject {
     private static final long serialVersionUID = -4807678211983511872L;
     
     private String email;
@@ -20,6 +23,8 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable {
     private List<AccountDTO> accounts;
     private boolean emailValidated;
     private List<UserGroup> groups;
+    private AccessControlList accessControlList;
+    private Ownership ownership;
 
     /**
      * @param groups may be {@code null} which is equivalent to passing an empty groups collection
@@ -90,5 +95,23 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable {
 
     public boolean isEmailValidated() {
         return emailValidated;
+    }
+
+    @Override
+    public final AccessControlList getAccessControlList() {
+        return accessControlList;
+    }
+
+    @Override
+    public final Ownership getOwnership() {
+        return ownership;
+    }
+
+    public final void setAccessControlList(final AccessControlList accessControlList) {
+        this.accessControlList = accessControlList;
+    }
+
+    public final void setOwnership(final Ownership ownership) {
+        this.ownership = ownership;
     }
 }

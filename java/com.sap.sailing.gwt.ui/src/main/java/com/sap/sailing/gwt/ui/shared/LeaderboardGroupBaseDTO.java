@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sailing.domain.common.dto.NamedSecuredObjectDTO;
+import com.sap.sse.security.shared.NamedSecuredObjectDTO;
 
 public class LeaderboardGroupBaseDTO extends NamedSecuredObjectDTO implements IsSerializable {
     

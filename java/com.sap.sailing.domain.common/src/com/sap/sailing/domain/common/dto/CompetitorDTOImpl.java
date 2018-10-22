@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
+import com.sap.sse.security.shared.NamedDTO;
 
 /**
  * Equality and hash code are based on the {@link #getIdAsString() ID}, the {@link #getSailID() sail number}, the

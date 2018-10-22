@@ -13,12 +13,12 @@ import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.domain.common.dto.FleetDTO;
-import com.sap.sailing.domain.common.dto.NamedSecuredObjectDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.security.shared.NamedSecuredObjectDTO;
 import com.sap.sse.security.shared.SecuredObject;
 
 public class RegattaDTO extends NamedSecuredObjectDTO implements SecuredObject {
