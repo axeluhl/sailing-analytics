@@ -109,13 +109,13 @@ public class PermissionChecker {
 
         // anonymous can only grant it if not already decided by acl
         if (result == PermissionState.NONE) {
-            PermissionState anonymous = checkUserPermissions(permission, allUser, ownership, impliesChecker);
+            PermissionState anonymous = checkUserPermissions(permission, allUser, ownership, impliesChecker, true);
             if (anonymous == PermissionState.GRANTED) {
                 result = anonymous;
             }
         }
         if (result == PermissionState.NONE) {
-            result = checkUserPermissions(permission, user, ownership, impliesChecker);
+            result = checkUserPermissions(permission, user, ownership, impliesChecker, true);
         }
         return result == PermissionState.GRANTED;
     }
@@ -182,9 +182,9 @@ public class PermissionChecker {
         final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleToPermissions(permission, allPermissionTypes);
 
         for (WildcardPermission effectiveWildcardPermissionToCheck : effectivePermissionsToCheck) {
-            if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, ownership, impliesChecker) != PermissionState.GRANTED
+            if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, ownership, impliesChecker, true) != PermissionState.GRANTED
                     && checkUserPermissions(effectiveWildcardPermissionToCheck, allUser,
-                            ownership, impliesChecker) != PermissionState.GRANTED) {
+                            ownership, impliesChecker, true) != PermissionState.GRANTED) {
                 return false;
             }
         }
@@ -276,9 +276,10 @@ public class PermissionChecker {
         final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleToPermissions(permission, allPermissionTypes);
         
         for (WildcardPermission effectiveWildcardPermissionToCheck : effectivePermissionsToCheck) {
-            if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, ownership, impliesAnyChecker) == PermissionState.GRANTED
-                    || checkUserPermissions(effectiveWildcardPermissionToCheck, allUser,
-                            ownership, impliesAnyChecker) == PermissionState.GRANTED) {
+            if (checkUserPermissions(effectiveWildcardPermissionToCheck, user, ownership, impliesAnyChecker,
+                    false) == PermissionState.GRANTED
+                    || checkUserPermissions(effectiveWildcardPermissionToCheck, allUser, ownership, impliesAnyChecker,
+                            false) == PermissionState.GRANTED) {
                 return true;
             }
         }
@@ -286,7 +287,8 @@ public class PermissionChecker {
     }
     
     private static PermissionState checkUserPermissions(WildcardPermission permission, SecurityUser user,
-            Ownership ownership, WildcardPermissionChecker permissionChecker) {
+            Ownership ownership, WildcardPermissionChecker permissionChecker,
+            boolean matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven) {
         PermissionState result = PermissionState.NONE;
         // 2. check direct permissions
         if (result == PermissionState.NONE && user != null) { // no direct permissions for anonymous users
@@ -300,7 +302,8 @@ public class PermissionChecker {
         // 3. check role permissions
         if (result == PermissionState.NONE && user != null) { // an anonymous user does not have any roles
             for (Role role : user.getRoles()) {
-                if (implies(role, permission, ownership, permissionChecker)) {
+                if (implies(role, permission, ownership, permissionChecker,
+                        matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven)) {
                     result = PermissionState.GRANTED;
                     break;
                 }
@@ -325,14 +328,17 @@ public class PermissionChecker {
      * @param ownership
      *            Ownership of the data object for which the {@code permission} is requested
      */
-   private static boolean implies(Role role, WildcardPermission permission, Ownership ownership, WildcardPermissionChecker permissionChecker) {
+   private static boolean implies(Role role, WildcardPermission permission, Ownership ownership, WildcardPermissionChecker permissionChecker,
+           boolean matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven) {
        final boolean roleIsTenantQualified = role.getQualifiedForTenant() != null;
        final boolean roleIsUserQualified = role.getQualifiedForUser() != null;
        final boolean permissionsApply;
        boolean result;
+       // It is possible that we have an ownership with null tenantOwner and null userOwner. This should be handled like no ownership was given.
+       final boolean ownershipIsGiven = ownership != null && (ownership.getTenantOwner() != null || ownership.getUserOwner() != null);
        if (roleIsTenantQualified || roleIsUserQualified) {
-           if (ownership == null) {
-               permissionsApply = false; // qualifications cannot be verified as no ownership info is provided; permissions do not apply
+           if (!ownershipIsGiven) {
+               permissionsApply = !matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven; // qualifications cannot be verified as no ownership info is provided; permissions do not apply
            } else {
                permissionsApply = (!roleIsTenantQualified || Util.equalsWithNull(role.getQualifiedForTenant(), ownership.getTenantOwner())) &&
                                   (!roleIsUserQualified || Util.equalsWithNull(role.getQualifiedForUser(), ownership.getUserOwner()));
