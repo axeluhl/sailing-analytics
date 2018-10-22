@@ -87,6 +87,8 @@ public interface HasPermissions {
     public enum DefaultActions implements Action {
         CREATE, READ, UPDATE, DELETE, CHANGE_OWNERSHIP;
         
+        public static final Action[] MUTATION_ACTIONS = new Action[] {CREATE, UPDATE, DELETE, CHANGE_OWNERSHIP};
+        
         /**
          * Returns all {@link DefaultActions} plus the {@code actions} passed, combined in one new array
          */

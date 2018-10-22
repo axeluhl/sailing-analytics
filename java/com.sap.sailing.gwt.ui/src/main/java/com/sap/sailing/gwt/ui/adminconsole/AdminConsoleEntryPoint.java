@@ -12,7 +12,6 @@ import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.domain.common.security.SecuredDomainType.ReplicatorActions;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
@@ -30,7 +29,6 @@ import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.SecurityStylesheetResources;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
-import com.sap.sse.common.Util;
 import com.sap.sse.gwt.adminconsole.AdminConsolePanel;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.adminconsole.DefaultRefreshableAdminConsolePanel;
@@ -42,7 +40,6 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.controls.filestorage.FileStoragePanel;
 import com.sap.sse.gwt.client.panels.HorizontalTabLayoutPanel;
 import com.sap.sse.gwt.resources.Highcharts;
-import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
@@ -119,7 +116,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
             public void refreshAfterBecomingVisible() {
                 fillRegattas();
             }
-        }, getStringMessages().regattas()); // no permissions required; we show those regattas the user may read
+        }, getStringMessages().regattas(), SecuredDomainType.EVENT.getPermission(DefaultActions.MUTATION_ACTIONS));
         regattasDisplayers.add(regattaManagementPanel);
         
         /* LEADERBOARDS */
@@ -133,8 +130,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
             public void refreshAfterBecomingVisible() {
                 fillLeaderboards();
             }
-        }, getStringMessages().leaderboards(), SecuredDomainType.LEADERBOARD.getPermission(DefaultActions.UPDATE),
-                SecuredDomainType.LEADERBOARD.getPermission(DefaultActions.CREATE));
+        }, getStringMessages().leaderboards(), SecuredDomainType.LEADERBOARD.getPermission(DefaultActions.MUTATION_ACTIONS));
         regattasDisplayers.add(leaderboardConfigPanel);
         leaderboardsDisplayers.add(leaderboardConfigPanel);
 
@@ -153,7 +149,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
                 refreshAfterBecomingVisible(); //Refresh to sure that actual data is provided
                 setupLeaderboardGroups(leaderboardGroupConfigPanel, params);
             }
-        }, getStringMessages().leaderboardGroups()); // no permissions required; we show those leaderboard groups the user may read
+        }, getStringMessages().leaderboardGroups(), SecuredDomainType.LEADERBOARD_GROUP.getPermission(DefaultActions.MUTATION_ACTIONS));
         regattasDisplayers.add(leaderboardGroupConfigPanel);
         leaderboardGroupsDisplayers.add(leaderboardGroupConfigPanel);
         leaderboardsDisplayers.add(leaderboardGroupConfigPanel);
@@ -171,7 +167,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
             public void refreshAfterBecomingVisible() {
                 fillRegattas();
             }
-        }, getStringMessages().trackedRaces()); // no permissions required; we show those races the user may read
+        }, getStringMessages().trackedRaces(), SecuredDomainType.TRACKED_RACE.getPermission(DefaultActions.MUTATION_ACTIONS));
         regattasDisplayers.add(trackedRacesManagementPanel);
 
         final CompetitorPanel competitorPanel = new CompetitorPanel(getSailingService(), getStringMessages(), this);
@@ -286,9 +282,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
             public void refreshAfterBecomingVisible() {
                 replicationPanel.updateReplicaList();
             }
-        }, getStringMessages().replication(), SecuredDomainType.REPLICATOR.getPermission(ReplicatorActions.START),
-                SecuredDomainType.REPLICATOR.getPermission(ReplicatorActions.STOP),
-                SecuredDomainType.REPLICATOR.getPermission(ReplicatorActions.DROP_CONNECTION)); // TODO bug4754 use server name as type-relative object identifier
+        }, getStringMessages().replication(), SecuredDomainType.REPLICATOR.getPermission()); // TODO bug4754 use server name as type-relative object identifier
 
         final MasterDataImportPanel masterDataImportPanel = new MasterDataImportPanel(getStringMessages(), getSailingService(),
                 this, eventManagementPanel, this, this, mediaPanel);
@@ -309,9 +303,6 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
                 SecuredSecurityTypes.SERVER.getPermissionForObjects(
                         SecuredSecurityTypes.ServerActions.CONFIGURE_LOCAL_SERVER, serverInfo.getServerName()));
 
-        final Set<HasPermissions> allSecuredTypes = new HashSet<>();
-        Util.addAll(SecuredDomainType.getAllInstances(), allSecuredTypes);
-        Util.addAll(SecuredSecurityTypes.getAllInstances(), allSecuredTypes);
         final UserManagementPanel<AdminConsoleTableResources> userManagementPanel = new UserManagementPanel<>(getUserService(), StringMessages.INSTANCE,
                 SecuredDomainType.getAllInstances(), this, tableResources);
         panel.addToTabPanel(advancedTabPanel,
@@ -320,7 +311,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
                     public void refreshAfterBecomingVisible() {
                         userManagementPanel.updateUsersAndACLs();
                     }
-                }, getStringMessages().userManagement()); // no permissions required; we show those users the user may read
+                }, getStringMessages().userManagement(), SecuredSecurityTypes.USER.getPermission(DefaultActions.MUTATION_ACTIONS));
 
         final RoleDefinitionsPanel roleManagementPanel = new RoleDefinitionsPanel(StringMessages.INSTANCE, getUserService().getUserManagementService(), 
                 tableResources, this);
@@ -330,7 +321,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
                     public void refreshAfterBecomingVisible() {
                         roleManagementPanel.updateRoleDefinitions();
                     }
-                }, getStringMessages().roles()); // no permissions required; we show those roles the user may read
+                }, getStringMessages().roles(), SecuredSecurityTypes.ROLE_DEFINITION.getPermission(DefaultActions.MUTATION_ACTIONS));
 
         final UserGroupManagementPanel userGroupManagementPanel = new UserGroupManagementPanel(getUserService(), StringMessages.INSTANCE);
         panel.addToTabPanel(advancedTabPanel,
@@ -339,7 +330,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
                     public void refreshAfterBecomingVisible() {
                         userGroupManagementPanel.updateUserGroupsAndUsers();
                     }
-                }, getStringMessages().userGroupManagement()); // no permissions required; we show those user groups the user may read
+                }, getStringMessages().userGroupManagement(), SecuredSecurityTypes.USER_GROUP.getPermission(DefaultActions.MUTATION_ACTIONS));
 
         final FileStoragePanel fileStoragePanel = new FileStoragePanel(getSailingService(), this);
         panel.addToTabPanel(advancedTabPanel, new DefaultRefreshableAdminConsolePanel<FileStoragePanel>(fileStoragePanel),
