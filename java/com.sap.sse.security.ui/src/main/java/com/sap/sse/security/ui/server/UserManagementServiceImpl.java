@@ -320,12 +320,9 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         if (user == null) {
             return new Pair<UserDTO, UserDTO>(null, getAllUser());
         }
-        if (SecurityUtils.getSubject().isPermitted("user:view:" + user.getName())) {
-            return new Pair<UserDTO, UserDTO>(securityDTOFactory.createUserDTOFromUser(user, getSecurityService()),
-                    getAllUser());
-        } else {
-            throw new UnauthorizedException("Not permitted to view current user");
-        }
+        getSecurityService().checkCurrentUserReadPermission(user);
+        return new Pair<UserDTO, UserDTO>(securityDTOFactory.createUserDTOFromUser(user, getSecurityService()),
+                getAllUser());
     }
 
     @Override
@@ -373,9 +370,9 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public void updateSimpleUserPassword(final String username, String oldPassword, String passwordResetSecret, String newPassword) throws UserManagementException {
-        if (SecurityUtils.getSubject().isPermitted("user:edit:" + username)
-            // someone knew a username and the correct password for that user
-         || (oldPassword != null && getSecurityService().checkPassword(username, oldPassword))
+        getSecurityService().checkCurrentUserUpdatePermission(getSecurityService().getCurrentUser());
+        if (// someone knew a username and the correct password for that user
+        (oldPassword != null && getSecurityService().checkPassword(username, oldPassword))
             // someone provided the correct password reset secret for the correct username
          || (passwordResetSecret != null && getSecurityService().checkPasswordResetSecret(username, passwordResetSecret))) {
             getSecurityService().updateSimpleUserPassword(username, newPassword);
@@ -395,7 +392,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public UserDTO updateUserProperties(final String username, String fullName, String company, String localeName) throws UserManagementException {
-        SecurityUtils.getSubject().checkPermission("user:edit:" + username);
+        getSecurityService().checkCurrentUserUpdatePermission(getSecurityService().getCurrentUser());
         getSecurityService().updateUserProperties(username, fullName, company,
                 getLocaleFromLocaleName(localeName));
         return securityDTOFactory.createUserDTOFromUser(getSecurityService().getUserByName(username), getSecurityService());
@@ -412,13 +409,14 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     
     @Override
     public void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL) throws UserManagementException, MailException {
-        SecurityUtils.getSubject().checkPermission("user:edit:" + username);
+        getSecurityService().checkCurrentUserUpdatePermission(getSecurityService().getCurrentUser());
         getSecurityService().updateSimpleUserEmail(username, newEmail, validationBaseURL);
     }
     
     @Override
-    public void resetPassword(String username, String email, String passwordResetBaseURL) throws UserManagementException, MailException {
-        SecurityUtils.getSubject().checkPermission("user:edit:" + username);
+    public void resetPassword(String username, String email, String passwordResetBaseURL)
+            throws UserManagementException, MailException {
+        getSecurityService().checkCurrentUserUpdatePermission(getSecurityService().getCurrentUser());
         if (username == null || username.isEmpty()) {
             username = getSecurityService().getUserByEmail(email).getName();
         }
@@ -690,55 +688,44 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public void setPreference(String username, String key, String value) throws UserManagementException, UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted("user:edit:" + username)) {
-            try {
-                getSecurityService().setPreference(username, key, value);
-            } catch (AuthorizationException e) {
-                throw new UserManagementException(UserManagementException.USER_DOESNT_HAVE_PERMISSION);
-            }
-        } else {
-            throw new UnauthorizedException("Not permitted to edit user");
+        getSecurityService().checkCurrentUserUpdatePermission(getSecurityService().getCurrentUser());
+        try {
+            getSecurityService().setPreference(username, key, value);
+        } catch (AuthorizationException e) {
+            throw new UserManagementException(UserManagementException.USER_DOESNT_HAVE_PERMISSION);
         }
     }
     
     @Override
-    public void setPreferences(String username, Map<String, String> keyValuePairs) throws UserManagementException, UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted("user:edit:" + username)) {
-            try {
-                for (Entry<String, String> entry : keyValuePairs.entrySet()) {
-                    getSecurityService().setPreference(username, entry.getKey(), entry.getValue());
-                }
-            } catch (AuthorizationException e) {
-                throw new UserManagementException(UserManagementException.USER_DOESNT_HAVE_PERMISSION);
+    public void setPreferences(String username, Map<String, String> keyValuePairs)
+            throws UserManagementException, UnauthorizedException {
+        getSecurityService().checkCurrentUserUpdatePermission(getSecurityService().getCurrentUser());
+        try {
+            for (Entry<String, String> entry : keyValuePairs.entrySet()) {
+                getSecurityService().setPreference(username, entry.getKey(), entry.getValue());
             }
-        } else {
-            throw new UnauthorizedException("Not permitted to edit user");
+        } catch (AuthorizationException e) {
+            throw new UserManagementException(UserManagementException.USER_DOESNT_HAVE_PERMISSION);
         }
     }
 
     @Override
     public void unsetPreference(String username, String key) throws UserManagementException, UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted("user:edit:" + username)) {
-            try {
-                getSecurityService().unsetPreference(username, key);
-            } catch (AuthorizationException e) {
-                throw new UserManagementException(UserManagementException.USER_DOESNT_HAVE_PERMISSION);
-            }
-        } else {
-            throw new UnauthorizedException("Not permitted to edit user");
+        getSecurityService().checkCurrentUserUpdatePermission(getSecurityService().getCurrentUser());
+        try {
+            getSecurityService().unsetPreference(username, key);
+        } catch (AuthorizationException e) {
+            throw new UserManagementException(UserManagementException.USER_DOESNT_HAVE_PERMISSION);
         }
     }
 
     @Override
     public String getPreference(String username, String key) throws UserManagementException, UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted("user:view:" + username)) {
-            try {
-                return getSecurityService().getPreference(username, key);
-            } catch (AuthorizationException e) {
-                throw new UserManagementException(UserManagementException.USER_DOESNT_HAVE_PERMISSION);
-            }
-        } else {
-            throw new UnauthorizedException("Not permitted to view user");
+        getSecurityService().checkCurrentUserReadPermission(getSecurityService().getCurrentUser());
+        try {
+            return getSecurityService().getPreference(username, key);
+        } catch (AuthorizationException e) {
+            throw new UserManagementException(UserManagementException.USER_DOESNT_HAVE_PERMISSION);
         }
     }
     
@@ -753,21 +740,18 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     
     @Override
     public Map<String, String> getAllPreferences(String username) throws UserManagementException, UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted("user:view:" + username)) {
-            try {
-                final Map<String, String> allPreferences = getSecurityService().getAllPreferences(username);
-                final Map<String, String> result = new HashMap<>();
-                for (Map.Entry<String, String> entry : allPreferences.entrySet()) {
-                    if(!entry.getKey().startsWith("_")) {
-                        result.put(entry.getKey(), entry.getValue());
-                    }
+        getSecurityService().checkCurrentUserReadPermission(getSecurityService().getCurrentUser());
+        try {
+            final Map<String, String> allPreferences = getSecurityService().getAllPreferences(username);
+            final Map<String, String> result = new HashMap<>();
+            for (Map.Entry<String, String> entry : allPreferences.entrySet()) {
+                if (!entry.getKey().startsWith("_")) {
+                    result.put(entry.getKey(), entry.getValue());
                 }
-                return result;
-            } catch (AuthorizationException e) {
-                throw new UserManagementException(UserManagementException.USER_DOESNT_HAVE_PERMISSION);
             }
-        } else {
-            throw new UnauthorizedException("Not permitted to view user");
+            return result;
+        } catch (AuthorizationException e) {
+            throw new UserManagementException(UserManagementException.USER_DOESNT_HAVE_PERMISSION);
         }
     }
 
