@@ -1799,30 +1799,45 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public boolean hasCurrentUserReadPermission(WithQualifiedObjectIdentifier object) {
+        if (object == null) {
+            return false;
+        }
         return SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObjects(
                 DefaultActions.READ, object.getIdentifier().getTypeRelativeObjectIdentifier()));
     }
 
     @Override
     public boolean hasCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object) {
+        if (object == null) {
+            return false;
+        }
         return SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObjects(
                 DefaultActions.UPDATE, object.getIdentifier().getTypeRelativeObjectIdentifier()));
     }
 
     @Override
     public void checkCurrentUserReadPermission(WithQualifiedObjectIdentifier object) {
+        if (object == null) {
+            throw new AuthorizationException();
+        }
         SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObjects(DefaultActions.READ,
                 object.getIdentifier().getTypeRelativeObjectIdentifier()));
     }
 
     @Override
     public void checkCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object) {
+        if (object == null) {
+            throw new AuthorizationException();
+        }
         SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObjects(DefaultActions.UPDATE,
                 object.getIdentifier().getTypeRelativeObjectIdentifier()));
     }
 
     @Override
     public void checkCurrentUserDeletePermission(WithQualifiedObjectIdentifier object) {
+        if (object == null) {
+            throw new AuthorizationException();
+        }
         SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObjects(DefaultActions.DELETE,
                 object.getIdentifier().getTypeRelativeObjectIdentifier()));
     }
