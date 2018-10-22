@@ -275,6 +275,24 @@ public class PermissionCheckerTest {
                 type1.getPermission(DefaultActions.READ)));
         assertTrue(checkAnyPermissionWithGrantedUserPermissions(singleTypePermission,
                 type1.getPermission(DefaultActions.READ, DefaultActions.UPDATE)));
+        assertTrue(checkAnyPermissionWithGrantedUserPermissions(singleTypePermission,
+                new WildcardPermission("*:" + DefaultActions.READ + "," + DefaultActions.UPDATE)));
+        assertTrue(checkAnyPermissionWithGrantedUserPermissions(singleTypePermission,
+                new WildcardPermission("*:" + DefaultActions.READ + "," + DefaultActions.UPDATE + ":*")));
+        
+        final WildcardPermission singleTypePermissionWithAction = type1.getPermission(DefaultActions.READ);
+        assertFalse(checkAnyPermissionWithGrantedUserPermissions(singleTypePermissionWithAction));
+        assertTrue(checkAnyPermissionWithGrantedUserPermissions(singleTypePermissionWithAction, allPermission));
+        assertTrue(checkAnyPermissionWithGrantedUserPermissions(singleTypePermissionWithAction, type1.getPermission()));
+        assertFalse(checkAnyPermissionWithGrantedUserPermissions(singleTypePermissionWithAction, type2.getPermission()));
+        assertTrue(checkAnyPermissionWithGrantedUserPermissions(singleTypePermissionWithAction,
+                type1.getPermission(DefaultActions.READ)));
+        assertTrue(checkAnyPermissionWithGrantedUserPermissions(singleTypePermissionWithAction,
+                type1.getPermission(DefaultActions.READ, DefaultActions.UPDATE)));
+        assertTrue(checkAnyPermissionWithGrantedUserPermissions(singleTypePermissionWithAction,
+                new WildcardPermission("*:" + DefaultActions.READ + "," + DefaultActions.UPDATE)));
+        assertTrue(checkAnyPermissionWithGrantedUserPermissions(singleTypePermissionWithAction,
+                new WildcardPermission("*:" + DefaultActions.READ + "," + DefaultActions.UPDATE + ":*")));
 
         final WildcardPermission combinedTypePermission = new WildcardPermission(
                 type1.getName() + "," + type2.getName());
@@ -290,6 +308,10 @@ public class PermissionCheckerTest {
                 type1.getPermission(DefaultActions.UPDATE), type2.getPermission(DefaultActions.READ)));
         assertTrue(checkAnyPermissionWithGrantedUserPermissions(combinedTypePermission,
                 type1.getPermission(DefaultActions.READ, DefaultActions.UPDATE)));
+        assertTrue(checkAnyPermissionWithGrantedUserPermissions(combinedTypePermission,
+                new WildcardPermission("*:" + DefaultActions.READ + "," + DefaultActions.UPDATE)));
+        assertTrue(checkAnyPermissionWithGrantedUserPermissions(combinedTypePermission,
+                new WildcardPermission("*:" + DefaultActions.READ + "," + DefaultActions.UPDATE + ":*")));
 
         final WildcardPermission combinedTypeWithDistinctActionPermission = new WildcardPermission(
                 type1.getName() + "," + type2.getName() + ":" + DefaultActions.READ);
