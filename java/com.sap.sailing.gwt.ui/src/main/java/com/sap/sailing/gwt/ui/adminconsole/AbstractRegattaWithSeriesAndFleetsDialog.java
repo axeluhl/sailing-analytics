@@ -114,6 +114,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         setupEventAndCourseAreaListBoxes(stringMessages);
 
         competitorRegistrationTypeListBox = createListBox(false);
+        competitorRegistrationTypeListBox.ensureDebugId("CompetitorRegistrationTypeListBox");
         EnumSet.allOf(CompetitorRegistrationType.class).forEach(t->competitorRegistrationTypeListBox.addItem(t.getLabel(stringMessages), t.name()));
         competitorRegistrationTypeListBox.setSelectedIndex(regatta.competitorRegistrationType.ordinal());
         competitorRegistrationTypeListBox.addChangeHandler(new ChangeHandler() {
@@ -135,8 +136,8 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         registrationLinkWithQRCodeOpenButton = new Button(stringMessages.registrationLinkConfig(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                new RegistrationLinkWithQRCodeDialog(stringMessages, registrationLinkWithQRCode,
-                        new DialogCallback<RegistrationLinkWithQRCode>() {
+                RegistrationLinkWithQRCodeDialog dialog = new RegistrationLinkWithQRCodeDialog(stringMessages,
+                        registrationLinkWithQRCode, new DialogCallback<RegistrationLinkWithQRCode>() {
                             @Override
                             public void ok(RegistrationLinkWithQRCode result) {
                                 registrationLinkWithQRCode = result;
@@ -145,9 +146,13 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
                             @Override
                             public void cancel() {
                             }
-                        }).show();
+                        });
+                dialog.ensureDebugId("RegistrationLinkWithQRCodeDialog");
+                dialog.show();
+
             }
         });
+        registrationLinkWithQRCodeOpenButton.ensureDebugId("RegistrationLinkWithQRCodeOpenButton");
         registrationLinkWithQRCodeOpenButton.setEnabled(regatta.competitorRegistrationType.isOpen());
     }
 

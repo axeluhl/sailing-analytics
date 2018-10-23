@@ -29,6 +29,7 @@ public class RegistrationLinkWithQRCodeDialog extends DataEntryDialog<Registrati
         this.registrationLinkWithQRCode = registrationLinkWithQRCode == null ? new RegistrationLinkWithQRCode()
                 : registrationLinkWithQRCode;
         secretTextBox = createTextBox(registrationLinkWithQRCode.getSecret(), 30);
+        secretTextBox.ensureDebugId("SecretTextBox");
         
         generateSecretButton = new Button("generate", new ClickHandler() {
             
@@ -39,6 +40,7 @@ public class RegistrationLinkWithQRCodeDialog extends DataEntryDialog<Registrati
                 secretTextBox.setText(randomString);
             }
         });
+        generateSecretButton.ensureDebugId("GenerateSecretButton");
     }
 
     @Override
