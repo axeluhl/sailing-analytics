@@ -117,6 +117,9 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public void updateRoleDefinition(RoleDefinition roleDefinitionWithNewProperties) {
+        // FIXME an additional check is needed to verify that a user may only grant/revoke permissions that he owns
+        // In case of role permissions this means the user needs to own an unqualified version of the permission because
+        // any user may own the role with any qualification
         SecurityUtils.getSubject().checkPermission(SecuredSecurityTypes.ROLE_DEFINITION.getStringPermissionForObjects(DefaultActions.UPDATE, roleDefinitionWithNewProperties.getId().toString()));
         getSecurityService().updateRoleDefinition(roleDefinitionWithNewProperties);
     }
@@ -194,6 +197,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public AccessControlList removeFromAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String groupOrTenantIdAsString, String permission) throws UnauthorizedException {
+        // FIXME replace permission check with a valid one
         if (SecurityUtils.getSubject().isPermitted("tenant:revoke_permission:" + groupOrTenantIdAsString)) {
             UserGroup userGroup = getUserGroup(groupOrTenantIdAsString);
             return securityDTOFactory.createAccessControlListDTO(getSecurityService().removeFromAccessControlList(idOfAccessControlledObject, userGroup, permission));
@@ -430,6 +434,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public SuccessInfo setRolesForUser(String username,
             Iterable<Triple<UUID, String, String>> roleDefinitionIdAndTenantQualifierNameAndUsernames)
             throws UnauthorizedException {
+        // FIXME an additional check is needed to verify that a user may only grant/revoke permissions that he owns
+        // The current user needs to have all permissions of a role for the specific tenant qualification or an unqualified version
         if (SecurityUtils.getSubject().isPermitted(
                 SecuredSecurityTypes.USER.getStringPermissionForObjects(UserActions.GRANT_PERMISSION, username))
                 && SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER
@@ -496,6 +502,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public SuccessInfo setPermissionsForUser(String username, Iterable<WildcardPermission> permissions) throws UnauthorizedException {
+        // FIXME an additional check is needed to verify that a user may only grant/revoke permissions that he owns
         if (SecurityUtils.getSubject().isPermitted(
                 SecuredSecurityTypes.USER.getStringPermissionForObjects(UserActions.GRANT_PERMISSION, username))
                 && SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER
