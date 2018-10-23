@@ -5,8 +5,8 @@
     <ui:with field="spr"
         type="com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailorProfileDesktopResources" />
     <g:HTMLPanel
-        addStyleNames="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopmediumsmall}">
-        <div class="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall} {spr.css.eventsTablePanel}">
+        addStyleNames="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopmediumsmall} {spr.css.marginLastTable}">
+        <div class="{res.mediaCss.grid} {spr.css.eventsTablePanel}">
             <div class="{spr.css.eventsTableTitle} {spr.css.statisticsTableHeader}">
                 <g:Image addStyleNames="{spr.css.statisticsTableHeaderIcon}" ui:field="titleIconUi" />
                 <span ui:field="titleUi" />

@@ -49,5 +49,7 @@ public interface SailorProfileDesktopResources extends ClientBundle {
         String statisticsTableHeaderRight();
 
         String addButton();
+
+        String marginLastTable();
     }
 }

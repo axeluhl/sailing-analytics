@@ -39,6 +39,10 @@
     overflow: hidden;
 }
 
+.marginLastTable:last-child {
+    margin-bottom: 1.333333333333333em;
+}
+
 .overviewTable {
     width: 100%;
 }

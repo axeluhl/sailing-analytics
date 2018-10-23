@@ -9,8 +9,8 @@
     <ui:style>
     </ui:style>
     <g:HTMLPanel
-        addStyleNames="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopmediumsmall}">
-        <div class="{res.mediaCss.grid} {res.mainCss.spacermarginbottommediumsmall} {spr.css.eventsTablePanel}">
+        addStyleNames="{res.mediaCss.column} {res.mediaCss.small12} {res.mainCss.spacermargintopmediumsmall} {spr.css.marginLastTable}">
+        <div class="{res.mediaCss.grid} {spr.css.eventsTablePanel}">
             <div class="{spr.css.eventsTableTitle}">
                 <span ui:field="titleUi" />
             </div>
