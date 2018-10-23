@@ -175,29 +175,36 @@ public class AccessControlStoreImpl implements AccessControlStore {
 
             @Override
             public void run() {
-                ownerships.put(id, ownership);
-                if (tenantOwner != null) {
-                    Set<OwnershipAnnotation> currentGroupOwnerships = userGroupToOwnership.get(tenantOwner);
-                    if (currentGroupOwnerships == null) {
-                        currentGroupOwnerships = Collections
-                                .newSetFromMap(new ConcurrentHashMap<OwnershipAnnotation, Boolean>());
-                        userGroupToOwnership.put(tenantOwner, currentGroupOwnerships);
-                    }
-                    currentGroupOwnerships.add(ownership);
-                }
-                if (tenantOwner != null) {
-                    Set<OwnershipAnnotation> currentUserOwnerships = userToOwnership.get(userOwnerName);
-                    if (currentUserOwnerships == null) {
-                        currentUserOwnerships = Collections
-                                .newSetFromMap(new ConcurrentHashMap<OwnershipAnnotation, Boolean>());
-                        userToOwnership.put(userOwnerName, currentUserOwnerships);
-                    }
-                    currentUserOwnerships.add(ownership);
-                }
+                internalRemoveOwnershipFromUserAndGroupMapsWithoutDBWrite(ownership);
+                internalSetOwnershipWithoutDBWrite(ownership);
             }
         });
         mongoObjectFactory.storeOwnership(ownership);
         return ownership;
+    }
+
+    private void internalSetOwnershipWithoutDBWrite(final OwnershipAnnotation ownership) {
+        ownerships.put(ownership.getIdOfAnnotatedObject(), ownership);
+        UserGroup tenantOwner = ownership.getAnnotation().getTenantOwner();
+        if (tenantOwner != null) {
+            Set<OwnershipAnnotation> currentGroupOwnerships = userGroupToOwnership.get(tenantOwner);
+            if (currentGroupOwnerships == null) {
+                currentGroupOwnerships = Collections
+                        .newSetFromMap(new ConcurrentHashMap<OwnershipAnnotation, Boolean>());
+                userGroupToOwnership.put(tenantOwner, currentGroupOwnerships);
+            }
+            currentGroupOwnerships.add(ownership);
+        }
+        SecurityUser userOwnerName = ownership.getAnnotation().getUserOwner();
+        if (userOwnerName != null) {
+            Set<OwnershipAnnotation> currentUserOwnerships = userToOwnership.get(userOwnerName);
+            if (currentUserOwnerships == null) {
+                currentUserOwnerships = Collections
+                        .newSetFromMap(new ConcurrentHashMap<OwnershipAnnotation, Boolean>());
+                userToOwnership.put(userOwnerName, currentUserOwnerships);
+            }
+            currentUserOwnerships.add(ownership);
+        }
     }
 
     @Override
@@ -207,29 +214,33 @@ public class AccessControlStoreImpl implements AccessControlStore {
             public void run() {
                 OwnershipAnnotation ownership = ownerships.remove(idAsString);
                 if (ownership != null) {
-                    Set<OwnershipAnnotation> currentGroupOwnerships = userGroupToOwnership
-                            .get(ownership.getAnnotation().getTenantOwner());
-                    if (currentGroupOwnerships != null) {
-                        currentGroupOwnerships.remove(ownership);
-                        if (currentGroupOwnerships.isEmpty()) {
-                            // no more entries, remove entry
-                            userGroupToOwnership.remove(ownership.getAnnotation().getTenantOwner());
-                        }
-                    }
-                    Set<OwnershipAnnotation> currentUserOwnerships = userToOwnership
-                            .get(ownership.getAnnotation().getUserOwner());
-                    if (currentUserOwnerships != null) {
-                        currentUserOwnerships.remove(ownership);
-                        if (currentUserOwnerships.isEmpty()) {
-                            // no more entries, remove entry
-                            userToOwnership.remove(ownership.getAnnotation().getUserOwner());
-                        }
-
-                    }
+                    internalRemoveOwnershipFromUserAndGroupMapsWithoutDBWrite(ownership);
                     mongoObjectFactory.deleteOwnership(idAsString, ownership.getAnnotation());
                 }
             }
+
         });
+    }
+
+    private void internalRemoveOwnershipFromUserAndGroupMapsWithoutDBWrite(OwnershipAnnotation ownership) {
+        Set<OwnershipAnnotation> currentGroupOwnerships = userGroupToOwnership
+                .get(ownership.getAnnotation().getTenantOwner());
+        if (currentGroupOwnerships != null) {
+            currentGroupOwnerships.remove(ownership);
+            if (currentGroupOwnerships.isEmpty()) {
+                // no more entries, remove entry
+                userGroupToOwnership.remove(ownership.getAnnotation().getTenantOwner());
+            }
+        }
+        Set<OwnershipAnnotation> currentUserOwnerships = userToOwnership.get(ownership.getAnnotation().getUserOwner());
+        if (currentUserOwnerships != null) {
+            currentUserOwnerships.remove(ownership);
+            if (currentUserOwnerships.isEmpty()) {
+                // no more entries, remove entry
+                userToOwnership.remove(ownership.getAnnotation().getUserOwner());
+            }
+
+        }
     }
 
     @Override
@@ -305,8 +316,22 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
 
     @Override
-    public void removeAllOwnershipsFor(SecurityUser user) {
-        // TODO Auto-generated method stub
-
+    public void removeAllOwnershipsFor(final SecurityUser user) {
+        LockUtil.executeWithWriteLock(lockForOwnerShips, new Runnable() {
+            @Override
+            public void run() {
+                Set<OwnershipAnnotation> knownOwnerships = userToOwnership.get(user);
+                // do not use setOwnership, we know the group will not change, and we can use the more effective remove
+                // for userToOwnership after deleting
+                for (OwnershipAnnotation ownership : knownOwnerships) {
+                    final OwnershipAnnotation userLessOwnership = new OwnershipAnnotation(
+                            new OwnershipImpl(null, ownership.getAnnotation().getTenantOwner()),
+                            ownership.getIdOfAnnotatedObject(), ownership.getDisplayNameOfAnnotatedObject());
+                    ownerships.put(ownership.getIdOfAnnotatedObject(), userLessOwnership);
+                    mongoObjectFactory.storeOwnership(userLessOwnership);
+                }
+                userToOwnership.remove(user);
+            }
+        });
     }
 }
