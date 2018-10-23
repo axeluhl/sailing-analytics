@@ -65,6 +65,8 @@ public class Activator implements BundleActivator {
 
     private static ExtenderBundleTracker extenderBundleTracker;
 
+    private static BundleContext context;
+
     private CachedOsgiTypeBasedServiceFinderFactory serviceFinderFactory;
 
     private RacingEventServiceImpl racingEventService;
@@ -100,6 +102,8 @@ public class Activator implements BundleActivator {
     }
 
     public void start(BundleContext context) throws Exception {
+        Activator.context = context;
+
         extenderBundleTracker = new ExtenderBundleTracker(context);
         extenderBundleTracker.open();
 
@@ -192,6 +196,10 @@ public class Activator implements BundleActivator {
                 properties));
     }
 
+    public static BundleContext getContext() {
+        return context;
+    }
+
     public void stop(BundleContext context) throws Exception {
         masterDataImportClassLoaderServiceTracker.close();
         if (extenderBundleTracker != null) {
@@ -280,5 +288,4 @@ public class Activator implements BundleActivator {
         }
 
     }
-
 }

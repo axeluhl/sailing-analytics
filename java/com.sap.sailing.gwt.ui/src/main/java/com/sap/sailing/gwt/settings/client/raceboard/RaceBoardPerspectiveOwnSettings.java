@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.settings.client.raceboard;
 
+import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.gwt.settings.client.settingtypes.DurationSetting;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
@@ -24,6 +25,7 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
     private transient BooleanSetting canReplayDuringLiveRaces;
     private transient DurationSetting initialDurationAfterRaceStartInReplay;
     private transient StringSetting selectedCompetitor;
+    private transient StringSetting jumpToTag;
     
     public static final String PARAM_VIEW_MODE = "viewMode";
     public static final String PARAM_VIEW_SHOW_LEADERBOARD = "viewShowLeaderboard";
@@ -35,7 +37,8 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
     public static final String PARAM_CAN_REPLAY_DURING_LIVE_RACES = "canReplayDuringLiveRaces";
     public static final String PARAM_TIME_AFTER_RACE_START_AS_HOURS_COLON_MILLIS_COLON_SECONDS = "t";
     public static final String PARAM_SELECTED_COMPETITOR = "c";
-    
+    public static final String PARAM_JUMP_TO_TAG = TagDTO.TAG_URL_PARAMETER;
+   
     public RaceBoardPerspectiveOwnSettings() {
     }
 
@@ -59,11 +62,12 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
         this.canReplayDuringLiveRaces = new BooleanSetting("canReplayDuringLiveRaces", this, false);
         this.initialDurationAfterRaceStartInReplay = new DurationSetting(PARAM_TIME_AFTER_RACE_START_AS_HOURS_COLON_MILLIS_COLON_SECONDS, this, null);
         this.selectedCompetitor = new StringSetting(PARAM_SELECTED_COMPETITOR, this, null);
+        this.jumpToTag = new StringSetting(PARAM_JUMP_TO_TAG, this, null);
     }
 
     public RaceBoardPerspectiveOwnSettings(String activeCompetitorsFilterSetName, Boolean showLeaderboard,
             Boolean showWindChart, Boolean showCompetitorsChart, Boolean canReplayDuringLiveRaces,
-            Duration initialDurationAfterRaceStartInReplay, String selectedCompetitor) {
+            Duration initialDurationAfterRaceStartInReplay, String selectedCompetitor, String jumpToTag) {
         this.activeCompetitorsFilterSetName.setValue(activeCompetitorsFilterSetName);
         this.showLeaderboard.setValue(showLeaderboard);
         this.showWindChart.setValue(showWindChart);
@@ -93,9 +97,13 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
         return canReplayDuringLiveRaces.getValue();
     }
 
+    public String getJumpToTag() {
+        return jumpToTag.getValue();
+    }
+
     public static RaceBoardPerspectiveOwnSettings readSettingsFromURL(boolean defaultForViewShowLeaderboard,
             boolean defaultForViewShowWindchart, boolean defaultForViewShowCompetitorsChart,
-            String defaultForViewCompetitorFilter, boolean defaultForCanReplayDuringLiveRaces) {
+            String defaultForViewCompetitorFilter, boolean defaultForCanReplayDuringLiveRaces, String defaultForJumpToTag) {
         final boolean showLeaderboard = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_LEADERBOARD, defaultForViewShowLeaderboard /* default */);
         final boolean showWindChart = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_WINDCHART, defaultForViewShowWindchart /* default */);
         final boolean showCompetitorsChart = GwtHttpRequestUtils.getBooleanParameter(PARAM_VIEW_SHOW_COMPETITORSCHART, defaultForViewShowCompetitorsChart /* default */);
@@ -105,9 +113,10 @@ public class RaceBoardPerspectiveOwnSettings extends AbstractGenericSerializable
                 PARAM_TIME_AFTER_RACE_START_AS_HOURS_COLON_MILLIS_COLON_SECONDS, null /* default */));
         final String selectedCompetitor = GwtHttpRequestUtils.getStringParameter(PARAM_SELECTED_COMPETITOR,
                 null /* default */);
+        final String jumpToTag = GwtHttpRequestUtils.getStringParameter(PARAM_JUMP_TO_TAG, defaultForJumpToTag /* default */);
         return new RaceBoardPerspectiveOwnSettings(activeCompetitorsFilterSetName, showLeaderboard, showWindChart,
                 showCompetitorsChart, canReplayWhileLiveIsPossible, initialDurationAfterRaceStartInReplay,
-                selectedCompetitor);
+                selectedCompetitor, jumpToTag);
     }
 
     public Duration getInitialDurationAfterRaceStartInReplay() {
