@@ -51,6 +51,9 @@ public class SailorProfileOverviewEntry extends Composite {
     @UiField
     HTMLPanel contentContainerCompetitorsUi;
 
+    @UiField
+    DivElement badgesArea;
+
     private final UUID uuidRef;
 
     private final SailingProfileOverviewPresenter presenter;
@@ -60,6 +63,8 @@ public class SailorProfileOverviewEntry extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
         SailorProfileMobileResources.INSTANCE.css().ensureInjected();
         this.sectionTitleUi.setSectionTitle(entry.getName());
+
+        badgesArea.getStyle().setDisplay(Display.NONE);
 
         // add badges
         for (BadgeDTO badge : entry.getBadges()) {

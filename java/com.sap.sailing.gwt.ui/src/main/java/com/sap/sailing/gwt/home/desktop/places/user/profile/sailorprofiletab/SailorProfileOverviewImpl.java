@@ -78,7 +78,7 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
 
     private void setupTable() {
         sailorProfilesTable.addColumn(profileNameColumn, i18n.profileName());
-        sailorProfilesTable.addColumn(badgeColumn, i18n.badges());
+        // sailorProfilesTable.addColumn(badgeColumn, i18n.badges());
         sailorProfilesTable.addColumn(competitorColumn, i18n.competitors());
         sailorProfilesTable.addColumn(boatClassColumn, i18n.boatClasses());
         sailorProfilesTable.addColumn(navigatorColumn);
