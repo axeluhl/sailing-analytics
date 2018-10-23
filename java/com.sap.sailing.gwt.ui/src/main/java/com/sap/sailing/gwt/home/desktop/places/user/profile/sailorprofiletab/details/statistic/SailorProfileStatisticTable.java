@@ -178,7 +178,7 @@ public class SailorProfileStatisticTable extends Composite {
         }
 
         if (userService.getCurrentUser().hasPermission(Permission.DATA_MINING.getStringPermission(),
-                SailingPermissionsForRoleProvider.INSTANCE)) {
+                SailingPermissionsForRoleProvider.INSTANCE) || !isAverage) {
             addButtonStyle(actualValueColumn);
             addButtonStyle(clubNameColumn);
             addButtonStyle(competitorColumn);
