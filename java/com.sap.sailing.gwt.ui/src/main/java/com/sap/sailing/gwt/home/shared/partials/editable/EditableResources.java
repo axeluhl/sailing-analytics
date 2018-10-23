@@ -30,5 +30,7 @@ public interface EditableResources extends ClientBundle {
         String listItem();
 
         String listItemBorder();
+
+        String listItemOffset();
     }
 }

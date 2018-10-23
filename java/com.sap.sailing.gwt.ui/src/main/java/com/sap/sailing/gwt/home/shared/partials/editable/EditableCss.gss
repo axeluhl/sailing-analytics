@@ -38,3 +38,8 @@
 .listItemBorder {
     border-top: 1px solid #ddd;
 }
+
+.listItemOffset {
+    position: relative;
+    top: -0.333333333333333333em;
+}

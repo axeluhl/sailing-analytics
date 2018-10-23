@@ -7,8 +7,6 @@ import java.util.function.Function;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.SpanElement;
-import com.google.gwt.dom.client.Style.Position;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -111,11 +109,8 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
             item.addStyleName(EditableResources.INSTANCE.css().listItemBorder());
         }
         item.addStyleName(EditableResources.INSTANCE.css().listItem());
-        // TODO: move to CSS file
-        DOM.getChild(item.getElement(), 1).getStyle().setPosition(Position.RELATIVE);
-        DOM.getChild(item.getElement(), 1).getStyle().setTop(-0.333333333333333333, Unit.EM);
-        DOM.getChild(item.getElement(), 2).getStyle().setPosition(Position.RELATIVE);
-        DOM.getChild(item.getElement(), 2).getStyle().setTop(-0.333333333333333333, Unit.EM);
+        DOM.getChild(item.getElement(), 1).addClassName(EditableResources.INSTANCE.css().listItemOffset());
+        DOM.getChild(item.getElement(), 2).addClassName(EditableResources.INSTANCE.css().listItemOffset());
         tableElements.put(listItem, item);
     }
 
