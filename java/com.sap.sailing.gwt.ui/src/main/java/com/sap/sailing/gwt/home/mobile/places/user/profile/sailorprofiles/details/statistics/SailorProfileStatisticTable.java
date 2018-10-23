@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.SailingPermissionsForRoleProvider;
@@ -22,6 +23,7 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileN
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileNumericStatisticType.StatisticType;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileStatisticDTO.SingleEntry;
+import com.sap.sailing.gwt.home.desktop.partials.desktopaccordion.DesktopAccordionResources;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.statistic.SailorProfileNumericStatisticTypeFormatter;
 import com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfileMobileResources;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.DataMiningQueryForSailorProfilesPersistor;
@@ -72,11 +74,21 @@ public class SailorProfileStatisticTable extends Composite {
         data.addAll(entrySet);
         data.sort((o1, o2) -> Double.compare(o1.getValue().size() > 0 ? o1.getValue().get(0).getValue() : 0,
                 o2.getValue().size() > 0 ? o2.getValue().get(0).getValue() : 0));
+
+        boolean hasData = false;
         for (Entry<SimpleCompetitorWithIdDTO, ArrayList<SailorProfileStatisticDTO.SingleEntry>> entry : data) {
+            hasData |= !entry.getValue().isEmpty();
+
             for (SingleEntry singleEntry : entry.getValue()) {
                 contentContainerStatistic.add(new SailorProfileStatisticEntry(type, entry.getKey(), singleEntry,
                         flagImageResolver, stringMessages, statistic.getDataMiningQuery()));
             }
+        }
+        if (!hasData) {
+            final Label lblEmpty = new Label(stringMessages.noStatisticsFoundForCompetitors());
+            lblEmpty.addStyleName(DesktopAccordionResources.INSTANCE.css().accordionEmptyMessage());
+
+            contentContainerStatistic.add(lblEmpty);
         }
         if (type.getAggregationType() == StatisticType.AVERAGE && userService.getCurrentUser().hasPermission(
                 Permission.DATA_MINING.getStringPermission(), SailingPermissionsForRoleProvider.INSTANCE)) {
