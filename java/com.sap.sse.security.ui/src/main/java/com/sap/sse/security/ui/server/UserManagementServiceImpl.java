@@ -52,6 +52,7 @@ import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.UserActions;
 import com.sap.sse.security.ui.client.UserManagementService;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
@@ -429,7 +430,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public SuccessInfo setRolesForUser(String username,
             Iterable<Triple<UUID, String, String>> roleDefinitionIdAndTenantQualifierNameAndUsernames)
             throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted("user:grant_permission,revoke_permission:" + username)) {
+        if (SecurityUtils.getSubject().isPermitted(
+                SecuredSecurityTypes.USER.getStringPermissionForObjects(UserActions.GRANT_PERMISSION, username))
+                && SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER
+                        .getStringPermissionForObjects(UserActions.REVOKE_PERMISSION, username))) {
             User u = getSecurityService().getUserByName(username);
             if (u == null) {
                 return new SuccessInfo(false, "User does not exist.", /* redirectURL */ null, null);
@@ -492,7 +496,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public SuccessInfo setPermissionsForUser(String username, Iterable<WildcardPermission> permissions) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted("user:grant_permission,revoke_permission:" + username)) {
+        if (SecurityUtils.getSubject().isPermitted(
+                SecuredSecurityTypes.USER.getStringPermissionForObjects(UserActions.GRANT_PERMISSION, username))
+                && SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER
+                        .getStringPermissionForObjects(UserActions.REVOKE_PERMISSION, username))) {
             User u = getSecurityService().getUserByName(username);
             if (u == null) {
                 return new SuccessInfo(false, "User does not exist.", /* redirectURL */null, null);
