@@ -208,16 +208,12 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public Collection<UserGroup> getUserGroups() {
-        List<UserGroup> userGroups = new ArrayList<>();
         final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser = new HashMap<>();
         final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup = new HashMap<>();
-        for (UserGroup g : getSecurityService().getUserGroupList()) {
-            if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER_GROUP.getStringPermissionForObjects(DefaultActions.READ, g.getId().toString()))) {
-                UserGroup userGroupDTO = securityDTOFactory.createUserGroupDTOFromUserGroup(g, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
-                userGroups.add(userGroupDTO);
-            }
-        }
-        return userGroups;
+        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredSecurityTypes.USER_GROUP,
+                getSecurityService().getUserGroupList(), ug -> ug.getId().toString(),
+                ug -> securityDTOFactory.createUserGroupDTOFromUserGroup(ug, fromOriginalToStrippedDownUser,
+                        fromOriginalToStrippedDownUserGroup));
     }
 
     @Override
@@ -244,22 +240,24 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public UserGroup createUserGroup(String name, String nameOfTenantOwner) throws UnauthorizedException, UserGroupManagementException {
-        if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER_GROUP.getStringPermission(DefaultActions.CREATE))) {
-            UUID newTenantId = UUID.randomUUID();
-            UserGroup userGroup;
-            try {
-                userGroup = getSecurityService().createUserGroup(newTenantId, name);
-            } catch (UserGroupManagementException e) {
-                throw new UserGroupManagementException(e.getMessage());
-            }
-            getSecurityService().setOwnership(SecuredSecurityTypes.USER_GROUP.getQualifiedObjectIdentifier(newTenantId.toString()),
-                    getSecurityService().getCurrentUser(), getSecurityService().getUserGroupByName(nameOfTenantOwner), name);
-            final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser = new HashMap<>();
-            final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup = new HashMap<>();
-            return securityDTOFactory.createUserGroupDTOFromUserGroup(userGroup, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
-        } else {
-            throw new UnauthorizedException("Not permitted to create user groups");
-        }
+        return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(nameOfTenantOwner,
+                SecuredSecurityTypes.USER_GROUP, name, name, () -> {
+                    UUID newTenantId = UUID.randomUUID();
+                    UserGroup userGroup;
+                    try {
+                        userGroup = getSecurityService().createUserGroup(newTenantId, name);
+                    } catch (UserGroupManagementException e) {
+                        throw new UserGroupManagementException(e.getMessage());
+                    }
+                    getSecurityService().setOwnership(
+                            SecuredSecurityTypes.USER_GROUP.getQualifiedObjectIdentifier(newTenantId.toString()),
+                            getSecurityService().getCurrentUser(),
+                            getSecurityService().getUserGroupByName(nameOfTenantOwner), name);
+                    final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser = new HashMap<>();
+                    final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup = new HashMap<>();
+                    return securityDTOFactory.createUserGroupDTOFromUserGroup(userGroup, fromOriginalToStrippedDownUser,
+                            fromOriginalToStrippedDownUserGroup);
+                });
     }
 
     @Override

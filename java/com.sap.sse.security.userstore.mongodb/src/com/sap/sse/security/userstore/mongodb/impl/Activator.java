@@ -38,6 +38,7 @@ public class Activator implements BundleActivator {
      */
     public void start(BundleContext bundleContext) throws Exception {
         Activator.context = bundleContext;
+        logger.info("Creating user store");
         final String defaultTenantName = System.getProperty(UserStore.DEFAULT_TENANT_NAME_PROPERTY_NAME, ServerStartupConstants.SERVER_NAME);
         final UserStoreImpl userStore = new UserStoreImpl(defaultTenantName);
         AccessControlStoreImpl accessControlStore = new AccessControlStoreImpl(userStore);
@@ -46,7 +47,7 @@ public class Activator implements BundleActivator {
         userStoreRegistration = context.registerService(UserStore.class.getName(),
                 userStore, null);
         preferenceConverterRegistrationManager = new PreferenceConverterRegistrationManager(bundleContext, userStore);
-        Logger.getLogger(Activator.class.getName()).info("User store registered.");
+        logger.info("User store registered.");
         for (CollectionNames name : CollectionNames.values()) {
             MongoDBService.INSTANCE.registerExclusively(CollectionNames.class, name.name());
         }
