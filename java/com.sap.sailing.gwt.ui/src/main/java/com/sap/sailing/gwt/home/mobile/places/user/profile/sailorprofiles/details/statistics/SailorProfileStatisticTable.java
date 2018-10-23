@@ -70,7 +70,8 @@ public class SailorProfileStatisticTable extends Composite {
         // sort entries
         ArrayList<Entry<SimpleCompetitorWithIdDTO, ArrayList<SingleEntry>>> data = new ArrayList<>();
         data.addAll(entrySet);
-        data.sort((o1, o2) -> Double.compare(o1.getValue().get(0).getValue(), o2.getValue().get(0).getValue()));
+        data.sort((o1, o2) -> Double.compare(o1.getValue().size() > 0 ? o1.getValue().get(0).getValue() : 0,
+                o2.getValue().size() > 0 ? o2.getValue().get(0).getValue() : 0));
         for (Entry<SimpleCompetitorWithIdDTO, ArrayList<SailorProfileStatisticDTO.SingleEntry>> entry : data) {
             for (SingleEntry singleEntry : entry.getValue()) {
                 contentContainerStatistic.add(new SailorProfileStatisticEntry(type, entry.getKey(), singleEntry,
