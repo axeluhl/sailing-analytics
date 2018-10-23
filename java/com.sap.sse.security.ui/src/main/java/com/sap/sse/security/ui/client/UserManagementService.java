@@ -65,8 +65,6 @@ public interface UserManagementService extends RemoteService {
     
     ArrayList<RoleDefinition> getRoleDefinitions();
 
-    Collection<UserDTO> getFilteredSortedUserList(String filter) throws UnauthorizedException;
-
     Pair<UserDTO, UserDTO> getCurrentUser() throws UnauthorizedException;
 
     SuccessInfo login(String username, String password);

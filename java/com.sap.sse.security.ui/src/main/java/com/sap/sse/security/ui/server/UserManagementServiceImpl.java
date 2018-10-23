@@ -2,8 +2,6 @@ package com.sap.sse.security.ui.server;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -33,7 +31,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.mail.MailException;
-import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.UserImpl;
@@ -426,32 +423,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public boolean validateEmail(String username, String validationSecret) throws UserManagementException {
         return getSecurityService().validateEmail(username, validationSecret);
-    }
-
-    @Override
-    public Collection<UserDTO> getFilteredSortedUserList(String filter) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted("users:manage")) {
-            List<UserDTO> users = new ArrayList<>();
-            for (User u : getSecurityService().getUserList()) {
-                if (filter != null && filter.isEmpty()) {
-                    if (u.getName().contains(filter)) {
-                        users.add(securityDTOFactory.createUserDTOFromUser(u, getSecurityService()));
-                    }
-                } else {
-                    users.add(securityDTOFactory.createUserDTOFromUser(u, getSecurityService()));
-                }
-            }
-            Collections.sort(users, new Comparator<UserDTO>() {
-                private final NaturalComparator naturalComparator = new NaturalComparator(/* caseSensitive */ false);
-                @Override
-                public int compare(UserDTO u1, UserDTO u2) {
-                    return naturalComparator.compare(u1.getName(), u2.getName());
-                }
-            });
-            return users;
-        } else {
-            throw new UnauthorizedException("Not permitted to manage users");
-        }
     }
 
     @Override

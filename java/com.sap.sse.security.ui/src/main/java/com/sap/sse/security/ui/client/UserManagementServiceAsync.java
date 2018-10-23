@@ -78,8 +78,6 @@ public interface UserManagementServiceAsync {
     void updateUserProperties(String username, String fullName, String company, String localeName,
             AsyncCallback<UserDTO> callback);
 
-    void getFilteredSortedUserList(String filter, AsyncCallback<Collection<UserDTO>> callback);
-
     void createRoleDefinition(String roleDefinitionIdAsString, String name, AsyncCallback<RoleDefinition> callback);
 
     void deleteRoleDefinition(String roleDefinitionIdAsString, AsyncCallback<Void> callback);
