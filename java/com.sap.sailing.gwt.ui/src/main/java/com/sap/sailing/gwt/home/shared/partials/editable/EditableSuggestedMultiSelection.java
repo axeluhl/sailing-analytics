@@ -14,11 +14,13 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.desktop.partials.desktopaccordion.DesktopAccordionResources;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionResources;
 import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionView;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.common.Util;
@@ -58,6 +60,9 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
     @UiField
     Label competitorsEmptyUi;
 
+    @UiField
+    HTMLPanel headerPanelUi;
+
     private final Map<T, IsWidget> tableElements = new HashMap<>();
     private final Function<T, IsWidget> itemProducer;
 
@@ -76,6 +81,7 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
         multiSelect.getElement().removeFromParent();
         if (isHeadless) {
             headerTitleUi.removeFromParent();
+            headerPanelUi.removeStyleName(SuggestedMultiSelectionResources.INSTANCE.css().suggestions());
         }
     }
 
