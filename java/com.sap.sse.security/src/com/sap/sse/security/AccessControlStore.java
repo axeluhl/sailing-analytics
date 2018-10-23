@@ -47,4 +47,8 @@ public interface AccessControlStore extends Named {
     
     void clear();
     void replaceContentsFrom(AccessControlStore newAccessControlStore);
+
+    void removeAllOwnershipsFor(UserGroup userGroup);
+
+    void removeAllOwnershipsFor(SecurityUser user);
 }

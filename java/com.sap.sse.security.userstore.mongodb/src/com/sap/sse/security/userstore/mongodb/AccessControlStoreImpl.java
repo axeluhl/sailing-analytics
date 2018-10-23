@@ -1,9 +1,13 @@
 package com.sap.sse.security.userstore.mongodb;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.concurrent.LockUtil.RunnableWithResult;
+import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
@@ -19,35 +23,44 @@ public class AccessControlStoreImpl implements AccessControlStore {
     private static final long serialVersionUID = 2165649781000936074L;
 
     // private static final Logger logger = Logger.getLogger(AccessControlStoreImpl.class.getName());
-    
+
     private String name = "Access control store";
-    
+
     /**
      * maps from object ID string representations to the access control lists for the respective key object
      */
     private final ConcurrentHashMap<QualifiedObjectIdentifier, AccessControlListAnnotation> accessControlLists;
-    
+
     /**
      * maps from object ID string representations to the ownership information for the respective key object
      */
     private final ConcurrentHashMap<QualifiedObjectIdentifier, OwnershipAnnotation> ownerships;
-    
+
+    private final ConcurrentHashMap<SecurityUser, Set<OwnershipAnnotation>> userToOwnership;
+    private final ConcurrentHashMap<UserGroup, Set<OwnershipAnnotation>> userGroupToOwnership;
+    private final NamedReentrantReadWriteLock lockForOwnerShips;
+
     private final UserGroup defaultTenant;
-    
+
     /**
      * Won't be serialized and remains <code>null</code> on the de-serializing end.
      */
     private final transient MongoObjectFactory mongoObjectFactory;
-    
+
     public AccessControlStoreImpl(UserStore userStore) {
-        this(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(), PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), userStore);
+        this(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(),
+                PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), userStore);
     }
-    
+
     public AccessControlStoreImpl(final DomainObjectFactory domainObjectFactory,
-            final MongoObjectFactory mongoObjectFactory, UserStore userStore) {
+            final MongoObjectFactory mongoObjectFactory, final UserStore userStore) {
         this.defaultTenant = userStore.getDefaultTenant();
         accessControlLists = new ConcurrentHashMap<>();
         ownerships = new ConcurrentHashMap<>();
+        userToOwnership = new ConcurrentHashMap<>();
+        userGroupToOwnership = new ConcurrentHashMap<>();
+        lockForOwnerShips = new NamedReentrantReadWriteLock("owbnerShipLock", true);
+
         this.mongoObjectFactory = mongoObjectFactory;
         if (domainObjectFactory != null) {
             for (AccessControlListAnnotation acl : domainObjectFactory.loadAllAccessControlLists(userStore)) {
@@ -66,27 +79,31 @@ public class AccessControlStoreImpl implements AccessControlStore {
         }
 
     }
-    
+
     @Override
     public Iterable<AccessControlListAnnotation> getAccessControlLists() {
         return new ArrayList<>(accessControlLists.values());
     }
-    
+
     @Override
-    public AccessControlListAnnotation getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
+    public AccessControlListAnnotation getAccessControlList(
+            QualifiedObjectIdentifier idOfAccessControlledObjectAsString) {
         return accessControlLists.get(idOfAccessControlledObjectAsString);
     }
 
     @Override
-    public AccessControlListAnnotation setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String displayNameOfAccessControlledObject) {
-        AccessControlListAnnotation acl = new AccessControlListAnnotation(new AccessControlListImpl(), idOfAccessControlledObject, displayNameOfAccessControlledObject);
+    public AccessControlListAnnotation setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
+            String displayNameOfAccessControlledObject) {
+        AccessControlListAnnotation acl = new AccessControlListAnnotation(new AccessControlListImpl(),
+                idOfAccessControlledObject, displayNameOfAccessControlledObject);
         accessControlLists.put(idOfAccessControlledObject, acl);
         mongoObjectFactory.storeAccessControlList(acl);
         return acl;
     }
 
     @Override
-    public void setAclPermissions(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup, Set<String> actions) {
+    public void setAclPermissions(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup,
+            Set<String> actions) {
         AccessControlListAnnotation acl = getOrCreateAcl(idOfAccessControlledObject);
         acl.getAnnotation().setPermissions(userGroup, actions);
         mongoObjectFactory.storeAccessControlList(acl);
@@ -95,20 +112,23 @@ public class AccessControlStoreImpl implements AccessControlStore {
     private AccessControlListAnnotation getOrCreateAcl(QualifiedObjectIdentifier idOfAccessControlledObject) {
         AccessControlListAnnotation acl = accessControlLists.get(idOfAccessControlledObject);
         if (acl == null) {
-            acl = new AccessControlListAnnotation(new AccessControlListImpl(), idOfAccessControlledObject, /* display name */ null);
+            acl = new AccessControlListAnnotation(new AccessControlListImpl(), idOfAccessControlledObject,
+                    /* display name */ null);
         }
         return acl;
     }
 
     @Override
-    public void addAclPermission(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup, String action) {
+    public void addAclPermission(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup,
+            String action) {
         AccessControlListAnnotation acl = getOrCreateAcl(idOfAccessControlledObject);
         acl.getAnnotation().addPermission(userGroup, action);
         mongoObjectFactory.storeAccessControlList(acl);
     }
 
     @Override
-    public void removeAclPermission(QualifiedObjectIdentifier idOfAccessControlledObjectAsString, UserGroup userGroup, String action) {
+    public void removeAclPermission(QualifiedObjectIdentifier idOfAccessControlledObjectAsString, UserGroup userGroup,
+            String action) {
         AccessControlListAnnotation acl = getOrCreateAcl(idOfAccessControlledObjectAsString);
         if (acl.getAnnotation().removePermission(userGroup, action)) {
             mongoObjectFactory.storeAccessControlList(acl);
@@ -116,7 +136,8 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
 
     @Override
-    public void denyAclPermission(QualifiedObjectIdentifier idOfAccessControlledObjectAsString, UserGroup userGroup, String action) {
+    public void denyAclPermission(QualifiedObjectIdentifier idOfAccessControlledObjectAsString, UserGroup userGroup,
+            String action) {
         AccessControlListAnnotation acl = getOrCreateAcl(idOfAccessControlledObjectAsString);
         if (acl.getAnnotation().denyPermission(userGroup, action)) {
             mongoObjectFactory.storeAccessControlList(acl);
@@ -124,7 +145,8 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
 
     @Override
-    public void removeAclDenial(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup, String action) {
+    public void removeAclDenial(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup,
+            String action) {
         AccessControlListAnnotation acl = getOrCreateAcl(idOfAccessControlledObject);
         if (acl.getAnnotation().removeDenial(userGroup, action)) {
             mongoObjectFactory.storeAccessControlList(acl);
@@ -143,47 +165,148 @@ public class AccessControlStoreImpl implements AccessControlStore {
     public String getName() {
         return name;
     }
-    
+
     @Override
-    public OwnershipAnnotation setOwnership(QualifiedObjectIdentifier id, SecurityUser userOwnerName, UserGroup tenantOwner, String displayNameOfOwnedObject) {
-        OwnershipAnnotation ownership = new OwnershipAnnotation(new OwnershipImpl(userOwnerName, tenantOwner), id, displayNameOfOwnedObject);
-        ownerships.put(id, ownership);
+    public OwnershipAnnotation setOwnership(final QualifiedObjectIdentifier id, final SecurityUser userOwnerName,
+            final UserGroup tenantOwner, String displayNameOfOwnedObject) {
+        final OwnershipAnnotation ownership = new OwnershipAnnotation(new OwnershipImpl(userOwnerName, tenantOwner), id,
+                displayNameOfOwnedObject);
+        LockUtil.executeWithWriteLock(lockForOwnerShips, new Runnable() {
+
+            @Override
+            public void run() {
+                ownerships.put(id, ownership);
+                if (tenantOwner != null) {
+                    Set<OwnershipAnnotation> currentGroupOwnerships = userGroupToOwnership.get(tenantOwner);
+                    if (currentGroupOwnerships == null) {
+                        currentGroupOwnerships = Collections
+                                .newSetFromMap(new ConcurrentHashMap<OwnershipAnnotation, Boolean>());
+                        userGroupToOwnership.put(tenantOwner, currentGroupOwnerships);
+                    }
+                    currentGroupOwnerships.add(ownership);
+                }
+                if (tenantOwner != null) {
+                    Set<OwnershipAnnotation> currentUserOwnerships = userToOwnership.get(userOwnerName);
+                    if (currentUserOwnerships == null) {
+                        currentUserOwnerships = Collections
+                                .newSetFromMap(new ConcurrentHashMap<OwnershipAnnotation, Boolean>());
+                        userToOwnership.put(userOwnerName, currentUserOwnerships);
+                    }
+                    currentUserOwnerships.add(ownership);
+                }
+            }
+        });
         mongoObjectFactory.storeOwnership(ownership);
         return ownership;
     }
 
     @Override
-    public void removeOwnership(QualifiedObjectIdentifier idAsString) {
-        OwnershipAnnotation ownership = ownerships.remove(idAsString);
-        if (ownership != null) {
-            mongoObjectFactory.deleteOwnership(idAsString, ownership.getAnnotation());
-        }
+    public void removeOwnership(final QualifiedObjectIdentifier idAsString) {
+        LockUtil.executeWithWriteLock(lockForOwnerShips, new Runnable() {
+            @Override
+            public void run() {
+                OwnershipAnnotation ownership = ownerships.remove(idAsString);
+                if (ownership != null) {
+                    Set<OwnershipAnnotation> currentGroupOwnerships = userGroupToOwnership
+                            .get(ownership.getAnnotation().getTenantOwner());
+                    if (currentGroupOwnerships != null) {
+                        currentGroupOwnerships.remove(ownership);
+                        if (currentGroupOwnerships.isEmpty()) {
+                            // no more entries, remove entry
+                            userGroupToOwnership.remove(ownership.getAnnotation().getTenantOwner());
+                        }
+                    }
+                    Set<OwnershipAnnotation> currentUserOwnerships = userToOwnership
+                            .get(ownership.getAnnotation().getUserOwner());
+                    if (currentUserOwnerships != null) {
+                        currentUserOwnerships.remove(ownership);
+                        if (currentUserOwnerships.isEmpty()) {
+                            // no more entries, remove entry
+                            userToOwnership.remove(ownership.getAnnotation().getUserOwner());
+                        }
+
+                    }
+                    mongoObjectFactory.deleteOwnership(idAsString, ownership.getAnnotation());
+                }
+            }
+        });
     }
 
     @Override
-    public OwnershipAnnotation getOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString) {
-        return ownerships.get(idOfOwnedObjectAsString);
+    public OwnershipAnnotation getOwnership(final QualifiedObjectIdentifier idOfOwnedObjectAsString) {
+        return LockUtil.executeWithReadLockAndResult(lockForOwnerShips, new RunnableWithResult<OwnershipAnnotation>() {
+
+            @Override
+            public OwnershipAnnotation run() {
+                return ownerships.get(idOfOwnedObjectAsString);
+            }
+        });
     }
-    
-    @Override 
+
+    @Override
     public Iterable<OwnershipAnnotation> getOwnerships() {
-        return new ArrayList<>(ownerships.values());
+        return LockUtil.executeWithReadLockAndResult(lockForOwnerShips,
+                new RunnableWithResult<Iterable<OwnershipAnnotation>>() {
+
+                    @Override
+                    public Iterable<OwnershipAnnotation> run() {
+                        return new ArrayList<>(ownerships.values());
+                    }
+                });
     }
-    
+
     @Override
     public void clear() {
         accessControlLists.clear();
-        ownerships.clear();
+        LockUtil.executeWithWriteLock(lockForOwnerShips, new Runnable() {
+
+            @Override
+            public void run() {
+                ownerships.clear();
+            }
+        });
     }
 
     @Override
-    public void replaceContentsFrom(AccessControlStore newAccessControlStore) {
+    public void replaceContentsFrom(final AccessControlStore newAccessControlStore) {
         clear();
         for (AccessControlListAnnotation acl : newAccessControlStore.getAccessControlLists()) {
             accessControlLists.put(acl.getIdOfAnnotatedObject(), acl);
         }
-        for (OwnershipAnnotation ownership : newAccessControlStore.getOwnerships()) {
-            ownerships.put(ownership.getIdOfAnnotatedObject(), ownership);
-        }
+        LockUtil.executeWithWriteLock(lockForOwnerShips, new Runnable() {
+
+            @Override
+            public void run() {
+                for (OwnershipAnnotation ownership : newAccessControlStore.getOwnerships()) {
+                    ownerships.put(ownership.getIdOfAnnotatedObject(), ownership);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void removeAllOwnershipsFor(final UserGroup userGroup) {
+        LockUtil.executeWithWriteLock(lockForOwnerShips, new Runnable() {
+            @Override
+            public void run() {
+                Set<OwnershipAnnotation> knownOwnerships = userGroupToOwnership.get(userGroup);
+                // do not use setOwnership, we know the user will not change, and we can use the more effective remove
+                // for userGroupToOwnership after deleting
+                for (OwnershipAnnotation ownership : knownOwnerships) {
+                    final OwnershipAnnotation groupLessOwnership = new OwnershipAnnotation(
+                            new OwnershipImpl(ownership.getAnnotation().getUserOwner(), null),
+                            ownership.getIdOfAnnotatedObject(), ownership.getDisplayNameOfAnnotatedObject());
+                    ownerships.put(ownership.getIdOfAnnotatedObject(), groupLessOwnership);
+                    mongoObjectFactory.storeOwnership(groupLessOwnership);
+                }
+                userGroupToOwnership.remove(userGroup);
+            }
+        });
+    }
+
+    @Override
+    public void removeAllOwnershipsFor(SecurityUser user) {
+        // TODO Auto-generated method stub
+
     }
 }
