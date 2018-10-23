@@ -42,10 +42,8 @@ public class QRCodePlace extends AbstractBasePlace {
         try {
             mode = InvitationMode.valueOf(getParameter(PARAM_MODE));
             rawCheckInUrl = Window.Location.getParameter(PARAM_CHECKIN_URL);
-            GWT.log("rawurl " + rawCheckInUrl);
             if (rawCheckInUrl != null) {
                 checkInUrl = decodeUrl(rawCheckInUrl);
-                GWT.log("checkInUrl " + checkInUrl);
                 parseUrl(checkInUrl);
 
                 if (leaderboardName == null) {

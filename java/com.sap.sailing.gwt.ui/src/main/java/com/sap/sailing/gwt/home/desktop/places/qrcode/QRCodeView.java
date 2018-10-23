@@ -65,6 +65,7 @@ public class QRCodeView extends Composite {
             break;
         }
 
+        urlAnchor.setHref(url);
         ScriptInjector.fromUrl("qrcode/qrcode.min.js").setWindow(ScriptInjector.TOP_WINDOW)
                 .setCallback(new Callback<Void, Exception>() {
 
@@ -73,7 +74,6 @@ public class QRCodeView extends Composite {
                         QRCodeWrapper qrCodeWrapper = QRCodeWrapper.wrap(qrCodeDivUi, 600,
                                 QRCodeWrapper.ERROR_CORRECTION_LEVEL_H);
                         qrCodeWrapper.setQrCodeContent(url);
-                        urlAnchor.setHref(url);
                     }
 
                     @Override

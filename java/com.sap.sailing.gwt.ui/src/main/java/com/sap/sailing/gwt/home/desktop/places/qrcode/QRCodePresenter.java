@@ -78,6 +78,8 @@ public class QRCodePresenter {
     }
 
     private final class DataCollector {
+        private static final String SAILINSIGHT_APP_BRANCHIO = "https://sailinsight-app.sapsailing.com/invite?checkinUrl=";
+        private static final String BUOYPINGER_APP_BRANCHIO = "https://buoypinger-app.sapsailing.com/invite?checkinUrl=";
         private boolean eventIsSet = false;
         private boolean competitorIsSet = false;
 
@@ -104,16 +106,14 @@ public class QRCodePresenter {
 
         private void proceedIfFinished() {
             if (competitorIsSet && eventIsSet) {
-                if (checkInUrl != null && competitor != null && event != null) {
+                if (checkInUrl != null && event != null) {
                     String branchIoUrl = null;
                     switch (invitationMode) {
                     case BOUY_TENDER:
-                        branchIoUrl = "https://buoypinger-app.sapsailing.com/invite?checkinUrl="
-                                + QRCodePresenter.this.checkInUrl;
+                        branchIoUrl = BUOYPINGER_APP_BRANCHIO + QRCodePresenter.this.checkInUrl;
                         break;
                     case COMPETITOR:
-                        branchIoUrl = "https://sailinsight-app.sapsailing.com/invite?checkinUrl="
-                                + QRCodePresenter.this.checkInUrl;
+                        branchIoUrl = SAILINSIGHT_APP_BRANCHIO + QRCodePresenter.this.checkInUrl;
                         break;
                     default:
                         break;
