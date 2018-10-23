@@ -1022,8 +1022,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public Void internalDeleteUser(String username) throws UserManagementException {
         User userToDelete = userStore.getUserByName(username);
         if (userToDelete != null) {
-            userStore.deleteUser(username);
+            // remove all permissions the user has
             accessControlStore.removeAllOwnershipsFor(userToDelete);
+            // also remove from all usergroups
+            for (UserGroup userGroup : userToDelete.getUserGroups()) {
+                internalRemoveUserFromUserGroup(userGroup.getId(), userToDelete.getName());
+            }
+            userStore.deleteUser(username);
         }
         return null;
     }

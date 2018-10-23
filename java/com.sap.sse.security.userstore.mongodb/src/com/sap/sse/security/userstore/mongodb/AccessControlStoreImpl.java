@@ -67,7 +67,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
                 accessControlLists.put(acl.getIdOfAnnotatedObject(), acl);
             }
             for (OwnershipAnnotation ownership : domainObjectFactory.loadAllOwnerships(userStore)) {
-                ownerships.put(ownership.getIdOfAnnotatedObject(), ownership);
+                internalSetOwnershipWithoutDBWrite(ownership);
             }
         }
 
@@ -175,10 +175,13 @@ public class AccessControlStoreImpl implements AccessControlStore {
 
             @Override
             public void run() {
+                // ensure the ownership is removed from the user and userGroup maps
                 internalRemoveOwnershipFromUserAndGroupMapsWithoutDBWrite(ownership);
+                // and ensure it is added properly
                 internalSetOwnershipWithoutDBWrite(ownership);
             }
         });
+        // and that it is finally written
         mongoObjectFactory.storeOwnership(ownership);
         return ownership;
     }
@@ -223,23 +226,29 @@ public class AccessControlStoreImpl implements AccessControlStore {
     }
 
     private void internalRemoveOwnershipFromUserAndGroupMapsWithoutDBWrite(OwnershipAnnotation ownership) {
-        Set<OwnershipAnnotation> currentGroupOwnerships = userGroupToOwnership
-                .get(ownership.getAnnotation().getTenantOwner());
-        if (currentGroupOwnerships != null) {
-            currentGroupOwnerships.remove(ownership);
-            if (currentGroupOwnerships.isEmpty()) {
-                // no more entries, remove entry
-                userGroupToOwnership.remove(ownership.getAnnotation().getTenantOwner());
+        UserGroup userGroupKey = ownership.getAnnotation().getTenantOwner();
+        if (userGroupKey != null) {
+            Set<OwnershipAnnotation> currentGroupOwnerships = userGroupToOwnership.get(userGroupKey);
+            if (currentGroupOwnerships != null) {
+                boolean didRemove = currentGroupOwnerships.remove(ownership);
+                if (didRemove && currentGroupOwnerships.isEmpty()) {
+                    // no more entries, remove entry
+                    userGroupToOwnership.remove(ownership.getAnnotation().getTenantOwner());
+                }
             }
         }
-        Set<OwnershipAnnotation> currentUserOwnerships = userToOwnership.get(ownership.getAnnotation().getUserOwner());
-        if (currentUserOwnerships != null) {
-            currentUserOwnerships.remove(ownership);
-            if (currentUserOwnerships.isEmpty()) {
-                // no more entries, remove entry
-                userToOwnership.remove(ownership.getAnnotation().getUserOwner());
-            }
+        SecurityUser userKey = ownership.getAnnotation().getUserOwner();
+        if (userKey != null) {
+            Set<OwnershipAnnotation> currentUserOwnerships = userToOwnership
+                    .get(ownership.getAnnotation().getUserOwner());
+            if (currentUserOwnerships != null) {
+                boolean didRemove = currentUserOwnerships.remove(ownership);
+                if (didRemove && currentUserOwnerships.isEmpty()) {
+                    // no more entries, remove entry
+                    userToOwnership.remove(ownership.getAnnotation().getUserOwner());
+                }
 
+            }
         }
     }
 
