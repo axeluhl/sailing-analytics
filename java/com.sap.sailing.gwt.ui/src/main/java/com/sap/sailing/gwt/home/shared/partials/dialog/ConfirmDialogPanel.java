@@ -12,6 +12,10 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
+/**
+ * dialog panel for yes/no confirm dialog which contains a yes button, a no button and a message field with the message
+ * in it.
+ */
 public class ConfirmDialogPanel extends Composite {
 
     private static ConfirmDialogPanelUiBinder uiBinder = GWT.create(ConfirmDialogPanelUiBinder.class);

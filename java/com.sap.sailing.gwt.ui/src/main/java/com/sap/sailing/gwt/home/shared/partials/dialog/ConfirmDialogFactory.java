@@ -5,8 +5,13 @@ import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
+/** factory class for confirm dialog with yes/no button */
 public final class ConfirmDialogFactory {
 
+    /**
+     * creates a yes/no {@link ConfirmDialogPanel} with {@link #message}, which calls {@link DialogCallback#ok(Object)}
+     * or {@link DialogCallback#cancel()}
+     */
     public static void showConfirmDialog(String message, final DialogCallback<Void> callback) {
         DialogResources.INSTANCE.css().ensureInjected();
         PopupPanel dialog = new PopupPanel();
