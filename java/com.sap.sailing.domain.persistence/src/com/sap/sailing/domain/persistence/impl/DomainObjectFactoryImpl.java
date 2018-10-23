@@ -62,6 +62,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.SimpleRaceLogIdentifier;
 import com.sap.sailing.domain.abstractlog.race.impl.CompetitorResultImpl;
@@ -84,6 +85,7 @@ import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartOfTrackingEventI
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartProcedureChangedEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogStartTimeEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogSuppressedMarkPassingsEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogTagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogWindFixEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.SimpleRaceLogIdentifierImpl;
 import com.sap.sailing.domain.abstractlog.race.scoring.AdditionalScoringInformationType;
@@ -1591,7 +1593,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         } else if (eventClass.equals(RaceLogUseCompetitorsFromRaceLogEvent.class.getSimpleName())) {
             resultEvent = loadRaceLogUseCompetitorsFromRaceLogEvent(createdAt, author, logicalTimePoint, id, passId,
                     competitors, dbObject);
-        } else {
+        } else if (eventClass.equals(RaceLogTagEvent.class.getSimpleName())) {
+            resultEvent = loadRaceLogTagEvent(createdAt, author, logicalTimePoint, id, passId, dbObject);
+        }else {
             throw new IllegalStateException(String.format("Unknown RaceLogEvent type %s", eventClass));
         }
         return new Pair<>(resultEvent, dbObjectForUpdate);
@@ -1765,6 +1769,16 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         RacingProcedureType type = RacingProcedureType
                 .valueOf(dbObject.get(FieldNames.RACE_LOG_START_PROCEDURE_TYPE.name()).toString());
         return new RaceLogStartProcedureChangedEventImpl(createdAt, logicalTimePoint, author, id, passId, type);
+    }
+    
+    private RaceLogEvent loadRaceLogTagEvent(TimePoint createdAt, AbstractLogEventAuthor author,
+            TimePoint logicalTimePoint, Serializable id, Integer passId,
+            DBObject dbObject) {
+        String tag = (String) dbObject.get(FieldNames.RACE_LOG_TAG.name());
+        String comment = (String) dbObject.get(FieldNames.RACE_LOG_COMMENT.name());
+        String imageUrl = (String) dbObject.get(FieldNames.RACE_LOG_IMAGE_URL.name());
+        String resizedImageURL = (String) dbObject.get(FieldNames.RACE_LOG_RESIZED_IMAGE_URL.name());
+        return new RaceLogTagEventImpl(tag, comment, imageUrl, resizedImageURL, createdAt, logicalTimePoint, author, id, passId);
     }
 
     private RaceLogEvent loadRaceLogGateLineOpeningTimeEvent(TimePoint createdAt, AbstractLogEventAuthor author,

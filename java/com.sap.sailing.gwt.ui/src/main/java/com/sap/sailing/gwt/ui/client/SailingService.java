@@ -10,6 +10,9 @@ import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sailing.domain.abstractlog.Revokable;
+import com.sap.sailing.domain.abstractlog.race.RaceLog;
+import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
+import com.sap.sailing.domain.abstractlog.race.state.ReadonlyRaceState;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
@@ -46,6 +49,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
+import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.racelog.tracking.CompetitorRegistrationOnRaceLogDisabledException;
 import com.sap.sailing.domain.common.racelog.tracking.DoesNotHaveRegattaLogException;
@@ -126,6 +130,8 @@ import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.gwt.client.replication.RemoteReplicationService;
+import com.sap.sse.security.UserStore;
+import com.sap.sse.security.ui.shared.SuccessInfo;
 
 /**
  * The client side stub for the RPC service. Usually, when a <code>null</code> date is passed to
@@ -193,9 +199,25 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             boolean extrapolate) throws NoWindException;
 
     RaceTimesInfoDTO getRaceTimesInfo(RegattaAndRaceIdentifier raceIdentifier);
-    
+
+    /**
+     * Returns {@link RaceTimesInfoDTO race times info} for specified race (<code>raceIdentifier</code>) including
+     * {@link RaceLogTagEvent tag events} since received timestamp (<code>searchSince</code>). Loads tags from
+     * {@link ReadonlyRaceState cache} instead of scanning the whole {@link RaceLog} every request.
+     */
+    RaceTimesInfoDTO getRaceTimesInfoIncludingTags(RegattaAndRaceIdentifier raceIdentifier, TimePoint searchSince);
+
     List<RaceTimesInfoDTO> getRaceTimesInfos(Collection<RegattaAndRaceIdentifier> raceIdentifiers);
-    
+
+    /**
+     * Collects besides {@link RaceTimesInfoDTO race times infos} public {@link RaceLogTagEvent tag events} from
+     * {@link ReadonlyRaceState cache} and compares the <code>createdAt</code> timepoint to the received
+     * <code>searchSince</code> timepoint. Returns {@link RaceTimesInfoDTO race times infos} including
+     * {@link RaceLogTagEvent public tag events} since the latest client-side received tag.
+     */
+    List<RaceTimesInfoDTO> getRaceTimesInfosIncludingTags(Collection<RegattaAndRaceIdentifier> raceIdentifiers,
+            Map<RegattaAndRaceIdentifier, TimePoint> searchSinceMap);
+
     CoursePositionsDTO getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date);
 
     RaceCourseDTO getRaceCourse(RegattaAndRaceIdentifier raceIdentifier, Date date);
@@ -552,7 +574,117 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      * @throws NotFoundException 
      */
     void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName, List<Util.Pair<ControlPointDTO, PassingInstruction>> course) throws NotFoundException;
-    
+
+    /**
+     * Adds public tag as {@link RaceLogTagEvent} to {@link RaceLog} and private tag to
+     * {@link com.sap.sse.security.UserStore UserStore}.
+     * 
+     * @param leaderboardName
+     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
+     * @param raceColumnName
+     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
+     * @param fleetName
+     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
+     * @param tag
+     *            title of tag, must <b>NOT</b> be <code>null</code>
+     * @param comment
+     *            optional comment of tag
+     * @param imageURLs
+     *            optional image URLs of tag
+     * @param visibleForPublic
+     *            when set to <code>true</code> tag will be saved as public tag (visible for every user), when set to
+     *            <code>false</code> tag will be saved as private tag (visible only for creator)
+     * @param raceTimepoint
+     *            timepoint in race where user created tag, must <b>NOT</b> be <code>null</code>
+     * @return <code>successful</code> {@link SuccessInfo} if tag was added successfully, otherwise
+     *         <code>non-successful</code> {@link SuccessInfo}
+     */
+    SuccessInfo addTag(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment,
+            String imageURL, String resizedImageURL, boolean visibleForPublic, TimePoint raceTimepoint);
+
+    /**
+     * Removes public {@link TagDTO tag} from {@link RaceLog} and private {@link TagDTO tag} from {@link UserStore}.
+     * 
+     * @param leaderboardName
+     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
+     * @param raceColumnName
+     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
+     * @param fleetName
+     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
+     * @param tag
+     *            tag to remove
+     * @return <code>successful</code> {@link SuccessInfo} if tag was removed successfully, otherwise
+     *         <code>non-successful</code> {@link SuccessInfo}
+     */
+    SuccessInfo removeTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag);
+
+    /**
+     * Updates given <code>tagToUpdate</code> with the given attributes <code>tag</code>, <code>comment</code>,
+     * <code>imageURL</code> and <code>visibleForPublic</code>. Tags are not really updated, instead public tags are
+     * revoked/private tags removed first and then the new tags gets saved depending on the new value
+     * <code>visibleForPublic</code>.
+     * 
+     * @param leaderboardName
+     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
+     * @param raceColumnName
+     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
+     * @param fleetName
+     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
+     * @param tagToUpdate
+     *            tag to be updated
+     * @param tag
+     *            new tag title
+     * @param comment
+     *            new comment
+     * @param imageURL
+     *            new image url
+     * @param visibleForPublic
+     *            new visibility status
+     * @return <code>successful</code> {@link SuccessInfo} if tag was updated successfully, otherwise
+     *         <code>non-successful</code> {@link SuccessInfo}
+     */
+    SuccessInfo updateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tagToUpdate,
+            String tag, String comment, String imageURL, String resizedImageURL, boolean visibleForPublic);
+
+    /**
+     * Returns all public and private tags of specified race and current user.
+     * 
+     * @param leaderboardName
+     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
+     * @param raceColumnName
+     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
+     * @param fleetName
+     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
+     * @return list of {@link TagDTO tags}
+     */
+    List<TagDTO> getAllTags(String leaderboardName, String raceColumnName, String fleetName);
+
+    /**
+     * Returns all public {@link TagDTO tags} of specified race.
+     * 
+     * @param leaderboardName
+     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
+     * @param raceColumnName
+     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
+     * @param fleetName
+     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
+     * @return list of public {@link TagDTO tags}
+     */
+    List<TagDTO> getPublicTags(String leaderboardName, String raceColumnName, String fleetName);
+
+    /**
+     * Returns all private {@link TagDTO tags} of specified race and current user.
+     * 
+     * @param leaderboardName
+     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
+     * @param raceColumnName
+     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
+     * @param fleetName
+     *            required to identify {@link RaceLog}, must <b>NOT</b> be <code>null</code>
+     * @return list of private {@link TagDTO tags}
+     */
+    List<TagDTO> getPrivateTags(String leaderboardName, String raceColumnName, String fleetName);
+
     RaceCourseDTO getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName, String fleetName) throws NotFoundException;
     
     /**
