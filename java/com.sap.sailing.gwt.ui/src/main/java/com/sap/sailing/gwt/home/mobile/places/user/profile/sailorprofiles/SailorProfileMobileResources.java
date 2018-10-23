@@ -67,6 +67,8 @@ public interface SailorProfileMobileResources extends ClientBundle {
 
         String detailsBoatclassesSelectionPanel();
 
+        String detailsBoatclassesEmptyLabel();
+
         String statisticTime();
 
         String statisticValue();

@@ -30,7 +30,7 @@
                     </h3>
                     <div ui:field="boatclassesDivUi" />
                     <g:Button
-                        styleName="{spr.css.inverseButton} spacermargintopsmall}"
+                        styleName="{spr.css.inverseButton}"
                         ui:field="detailsButtonUi" text="{i18n.showDetails}" />
                 </g:HTMLPanel>
             </ms:content>

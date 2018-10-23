@@ -209,3 +209,8 @@
     display: inline-block;
     font-weight: bold;
 }
+
+.detailsBoatclassesEmptyLabel {
+    font-size: .75em;
+    font-weight: initial;
+}
