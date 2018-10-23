@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
-import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -28,15 +27,16 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.AbstractSortableTextColumn;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
-import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.celltable.TableWrapper;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.client.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
@@ -146,33 +146,31 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                 return new NaturalComparator().compare(r1.getRoles().toString(), r2.getRoles().toString());
             }
         });
-        ImagesBarColumn<UserDTO, EditAndRemoveImagesBarCell> userActionColumn = new AccessControlledActionsColumn<UserDTO, EditAndRemoveImagesBarCell>(
-                new EditAndRemoveImagesBarCell(com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE),
-                userService, null, null);
-        userActionColumn.setFieldUpdater(new FieldUpdater<UserDTO, String>() {
-            @Override
-            public void update(int index, UserDTO user, String value) {
-                if (EditAndRemoveImagesBarCell.ACTION_EDIT.equals(value)) {
-                    editUser(user, additionalPermissions);
-                } else if (EditAndRemoveImagesBarCell.ACTION_REMOVE.equals(value)) {
-                    if (Window.confirm(stringMessages.doYouReallyWantToRemoveUser(user.getName()))) {
-                        getUserManagementService().deleteUser(user.getName(), new AsyncCallback<SuccessInfo>() {
-                            @Override
-                            public void onFailure(Throwable caught) {
-                                errorReporter.reportError(stringMessages.errorDeletingUser(user.getName(), caught.getMessage()));
-                            }
-
-                            @Override
-                            public void onSuccess(SuccessInfo result) {
-                                if (result.isSuccessful()) {
-                                    filterField.remove(user);
-                                } else {
-                                    errorReporter.reportError(stringMessages.errorDeletingUser(user.getName(), result.getMessage()));
-                                }
-                            }
-                        });
+        final AccessControlledActionsColumn<UserDTO, EditAndRemoveImagesBarCell> userActionColumn = new AccessControlledActionsColumn<>(
+                new EditAndRemoveImagesBarCell(stringMessages), userService, SecuredSecurityTypes.USER, UserDTO::getName);
+        userActionColumn.addAction(EditAndRemoveImagesBarCell.ACTION_EDIT, DefaultActions.UPDATE,
+                user -> editUser(user, additionalPermissions));
+        userActionColumn.addAction(EditAndRemoveImagesBarCell.ACTION_REMOVE, DefaultActions.DELETE, user -> {
+            if (Window.confirm(stringMessages.doYouReallyWantToRemoveUser(user.getName()))) {
+                getUserManagementService().deleteUser(user.getName(), new AsyncCallback<SuccessInfo>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        deletingUserFailed(user, caught.getMessage());
                     }
-                }
+
+                    @Override
+                    public void onSuccess(SuccessInfo result) {
+                        if (result.isSuccessful()) {
+                            filterField.remove(user);
+                        } else {
+                            deletingUserFailed(user, result.getMessage());
+                        }
+                    }
+                    
+                    private void deletingUserFailed(UserDTO user, String message) {
+                        errorReporter.reportError(stringMessages.errorDeletingUser(user.getName(), message));
+                    }
+                });
             }
         });
         
