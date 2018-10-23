@@ -46,6 +46,7 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogStartOfTrackingEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartProcedureChangedEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogStartTimeEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogSuppressedMarkPassingsEvent;
+import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
 import com.sap.sailing.domain.abstractlog.race.RaceLogWindFixEvent;
 import com.sap.sailing.domain.abstractlog.race.scoring.RaceLogAdditionalScoringInformationEvent;
 import com.sap.sailing.domain.abstractlog.race.tracking.RaceLogDenoteForTrackingEvent;
@@ -1087,6 +1088,24 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogUseCompetitorsFromRaceLogEvent(event));
         return result;
     }
+    
+    public DBObject storeRaceLogEntry(RaceLogIdentifier raceLogIdentifier, RaceLogTagEvent event) {
+        BasicDBObject result = new BasicDBObject();
+        storeRaceLogIdentifier(raceLogIdentifier, result);
+        result.put(FieldNames.RACE_LOG_EVENT.name(), storeRaceLogTagEvent(event));
+        return result;
+    }
+    
+    public DBObject storeRaceLogTagEvent(RaceLogTagEvent event) {
+        DBObject result = new BasicDBObject();
+        storeRaceLogEventProperties(event, result);
+        result.put(FieldNames.RACE_LOG_EVENT_CLASS.name(), RaceLogTagEvent.class.getSimpleName());
+        result.put(FieldNames.RACE_LOG_TAG.name(), event.getTag());
+        result.put(FieldNames.RACE_LOG_COMMENT.name(), event.getComment());
+        result.put(FieldNames.RACE_LOG_IMAGE_URL.name(), event.getImageURL());
+        result.put(FieldNames.RACE_LOG_RESIZED_IMAGE_URL.name(), event.getResizedImageURL());
+        return result;
+    }
 
     public DBObject storeRaceLogUseCompetitorsFromRaceLogEvent(RaceLogUseCompetitorsFromRaceLogEvent event) {
         DBObject result = new BasicDBObject();
@@ -1776,5 +1795,4 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             e.printStackTrace();
         }
     }
-
 }

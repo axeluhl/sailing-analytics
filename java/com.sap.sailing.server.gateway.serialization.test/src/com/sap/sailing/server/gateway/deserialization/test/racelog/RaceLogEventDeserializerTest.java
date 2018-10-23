@@ -12,6 +12,7 @@ import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogEndOfTrackingEventImpl;
 import com.sap.sailing.domain.abstractlog.race.impl.RaceLogFlagEventImpl;
+import com.sap.sailing.domain.abstractlog.race.impl.RaceLogTagEventImpl;
 import com.sap.sailing.domain.abstractlog.race.tracking.impl.RaceLogUseCompetitorsFromRaceLogEventImpl;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.impl.DynamicCompetitor;
@@ -21,6 +22,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.CompetitorJsonDeseria
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEndOfTrackingEventDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogEventDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogFlagEventDeserializer;
+import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogTagEventDeserializer;
 import com.sap.sailing.server.gateway.deserialization.racelog.impl.RaceLogUseCompetitorsFromRaceLogEventDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorJsonSerializer;
 import com.sap.sailing.server.gateway.serialization.racelog.impl.RaceLogEventSerializer;
@@ -33,6 +35,7 @@ public class RaceLogEventDeserializerTest {
     protected RaceLogFlagEventDeserializer mockitoRaceLogFlagEventDeserializer = Mockito.spy(new RaceLogFlagEventDeserializer(competitorDeserializer));
     protected RaceLogUseCompetitorsFromRaceLogEventDeserializer mockitoRaceLogUseCompetitorsFromRaceLogEventDeserializer = Mockito.spy(new RaceLogUseCompetitorsFromRaceLogEventDeserializer(competitorDeserializer));
     protected RaceLogEndOfTrackingEventDeserializer mockitoRaceLogEndOfTrackingEventDeserializer = Mockito.spy(new RaceLogEndOfTrackingEventDeserializer(competitorDeserializer));
+    protected RaceLogTagEventDeserializer mockitoRaceLogTagEventDeserializer = Mockito.spy(new RaceLogTagEventDeserializer(competitorDeserializer));
     
     public class InnerRaceLogEventDeserializer extends RaceLogEventDeserializer{
         
@@ -41,7 +44,7 @@ public class RaceLogEventDeserializerTest {
             super(mockitoRaceLogFlagEventDeserializer, null, null, null, null, null, null, null, null, null, null, null,
                     null, null, null, null, null, null, null, null, null,
                     mockitoRaceLogUseCompetitorsFromRaceLogEventDeserializer,
-                    mockitoRaceLogEndOfTrackingEventDeserializer);
+                    mockitoRaceLogEndOfTrackingEventDeserializer,mockitoRaceLogTagEventDeserializer);
         }
     }
     
@@ -126,4 +129,33 @@ public class RaceLogEventDeserializerTest {
         assertEquals(originalEvent.getCreatedAt(), newEvent.getCreatedAt());
 
     }  
+    
+    @Test
+    public void testSerializationAndDeserializationForRaceLogTagEvent() throws Exception{
+        RaceLogTagEventImpl originalEvent = new RaceLogTagEventImpl("tag", "comment", "a", "b", timePoint, timePoint2, author, UUID.randomUUID(), 3);
+        RaceLogEventSerializer serializer = (RaceLogEventSerializer) RaceLogEventSerializer.create(CompetitorJsonSerializer.create());
+        JSONObject object = serializer.serialize(originalEvent); 
+        
+        RaceLogEvent raceLogEvent = deserializer.deserialize(object);
+        
+        //assert correct deserializer was used
+        Mockito.verify(mockitoRaceLogTagEventDeserializer).deserialize(object);
+        
+        RaceLogTagEventImpl newEvent = (RaceLogTagEventImpl) raceLogEvent;
+        
+        //assert raceLogEvent has correct value
+        assertEquals(originalEvent.getTimePoint().toString(), newEvent.getTimePoint().toString());
+        assertEquals(originalEvent.getAuthor().toString(), newEvent.getAuthor().toString());
+        assertEquals(originalEvent.getPassId(), newEvent.getPassId());
+        assertEquals(originalEvent.getClass(), newEvent.getClass());
+        assertEquals(originalEvent.getId(), newEvent.getId());
+        assertEquals(originalEvent.getShortInfo(), newEvent.getShortInfo());
+        
+        assertEquals(originalEvent.getCreatedAt(), newEvent.getCreatedAt());
+        assertEquals(originalEvent.getTag(), newEvent.getTag());
+        assertEquals(originalEvent.getComment(), newEvent.getComment());
+        assertEquals(originalEvent.getImageURL(), newEvent.getImageURL());
+        assertEquals(originalEvent.getResizedImageURL(), newEvent.getResizedImageURL());
+        assertEquals(originalEvent.getUsername(), newEvent.getUsername());
+    }   
 }

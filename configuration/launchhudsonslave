@@ -1,7 +1,7 @@
 #!/bin/bash
 AWS=/root/.local/bin/aws
 REGION=eu-west-1
-HUDSON_SLAVE_AMI_ID=ami-63e9f689
+HUDSON_SLAVE_AMI_ID=ami-0da42b04d07c58be6
 echo Launching instance...
 instanceid=`$AWS ec2 run-instances --image-id $HUDSON_SLAVE_AMI_ID --count 1 --instance-type c5d.4xlarge --key-name Axel --security-groups "Sailing Analytics App" --region $REGION --placement AvailabilityZone=eu-west-1c --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=Hudson Ubuntu Slave}]' --instance-initiated-shutdown-behavior terminate | tee /tmp/slavelaunch.out | jq .Instances[0].InstanceId | sed -e 's/"//g'`
 if [ "$instanceid" = "" ]; then

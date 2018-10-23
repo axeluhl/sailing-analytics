@@ -44,9 +44,9 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
 
     @Override
     public SailMasterConnector getOrCreateSailMasterConnector(String host, int port, String raceId, String raceName,
-            String raceDescription, BoatClass boatClass) throws InterruptedException, ParseException {
+            String raceDescription, BoatClass boatClass, SwissTimingRaceTrackerImpl swissTimingRaceTracker) throws InterruptedException, ParseException {
         if (Boolean.valueOf(System.getProperty("simulateLiveMode", "false"))) {
-            return getOrCreateSailMasterLiveSimulatorConnector(host, port, raceId, raceName, raceDescription, boatClass);
+            return getOrCreateSailMasterLiveSimulatorConnector(host, port, raceId, raceName, raceDescription, boatClass, swissTimingRaceTracker);
         } else {
             Util.Triple<String, Integer, String> key = new Util.Triple<String, Integer, String>(host, port, raceId);
             SailMasterConnector result = connectors.get(key);
@@ -56,7 +56,7 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
                 } else {
                     logger.info("Creating a new connector for "+key+" because the old one was stopped");
                 }
-                result = new SailMasterConnectorImpl(host, port, raceId, raceName, raceDescription, boatClass);
+                result = new SailMasterConnectorImpl(host, port, raceId, raceName, raceDescription, boatClass, swissTimingRaceTracker);
                 connectors.put(key, result);
                 // TODO how do connectors get stopped, terminated and removed from the connectors map again?
             } else {
@@ -68,15 +68,15 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
 
     @Override
     public SailMasterConnector getOrCreateSailMasterLiveSimulatorConnector(String host, int port, String raceId, String raceName,
-            String raceDescription, BoatClass boatClass) throws InterruptedException, ParseException {
+            String raceDescription, BoatClass boatClass, SwissTimingRaceTrackerImpl swissTimingRaceTracker) throws InterruptedException, ParseException {
         Util.Triple<String, Integer, String> key = new Util.Triple<>(host, port, raceId);
         SailMasterConnector result = connectors.get(key);
         if (result == null) {
-            result = new SailMasterLiveSimulatorConnectorImpl(host, port, raceId, raceName, raceDescription, boatClass);
+            result = new SailMasterLiveSimulatorConnectorImpl(host, port, raceId, raceName, raceDescription, boatClass, swissTimingRaceTracker);
             connectors.put(key, result);
             // TODO how do connectors get stopped, terminated and removed from the connectors map again?
         } else if (result.isStopped()) {
-            result = new SailMasterLiveSimulatorConnectorImpl(host, port, raceId, raceName, raceDescription, boatClass);
+            result = new SailMasterLiveSimulatorConnectorImpl(host, port, raceId, raceName, raceDescription, boatClass, swissTimingRaceTracker);
             connectors.put(key, result);
         }
         return result;

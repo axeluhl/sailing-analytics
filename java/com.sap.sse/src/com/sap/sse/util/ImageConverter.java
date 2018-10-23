@@ -252,7 +252,7 @@ public class ImageConverter {
     private boolean isZeroByteArray(final byte[] bytes) {
         boolean toReturn = true;
         if (bytes != null) {
-            for (int i = 0; i < bytes.length; i++) {
+            for (int i = 0; toReturn && i < bytes.length; i++) {
                 if (bytes[i] != 0) {
                     toReturn = false;
                 }
