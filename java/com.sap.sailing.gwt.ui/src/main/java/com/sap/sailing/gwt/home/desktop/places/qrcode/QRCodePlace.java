@@ -42,8 +42,10 @@ public class QRCodePlace extends AbstractBasePlace {
         try {
             mode = InvitationMode.valueOf(getParameter(PARAM_MODE));
             rawCheckInUrl = Window.Location.getParameter(PARAM_CHECKIN_URL);
+            GWT.log("rawurl " + rawCheckInUrl);
             if (rawCheckInUrl != null) {
                 checkInUrl = decodeUrl(rawCheckInUrl);
+                GWT.log("checkInUrl " + checkInUrl);
                 parseUrl(checkInUrl);
 
                 if (leaderboardName == null) {
@@ -68,6 +70,10 @@ public class QRCodePlace extends AbstractBasePlace {
 
     private native String decodeUrl(String url)/*-{
         return decodeURIComponent(url)
+    }-*/;
+
+    private native String encodeUrl(String url)/*-{
+        return encodeURIComponent(url)
     }-*/;
 
     private void parseUrl(String checkInUrl) {
@@ -115,7 +121,7 @@ public class QRCodePlace extends AbstractBasePlace {
     }
 
     public String getEncodedCheckInUrl() {
-        return rawCheckInUrl;
+        return encodeUrl(rawCheckInUrl);
     }
 
     public UUID getEventId() {
