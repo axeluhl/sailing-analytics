@@ -125,9 +125,10 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
     }
 
     private void createFooter() {
-        Button addButton = new Button("+ " + i18n.addSailorProfileMessage());
+        Button addButton = new Button(i18n.addSailorProfileMessage());
         addButton.addStyleName(SharedResources.INSTANCE.mainCss().buttonprimary());
         addButton.addStyleName(SharedResources.INSTANCE.mainCss().button());
+        addButton.addStyleName(SailorProfileDesktopResources.INSTANCE.css().addButton());
         footerUi.add(addButton);
         addButton.addClickHandler(
                 event -> presenter.getClientFactory().getPlaceController().goTo(new SailorProfilePlace(true)));
