@@ -34,7 +34,7 @@ public class RPDMessageParsingTest {
     private void assertRPDMessageCanBeParsed(final String rpdMessage)
             throws InterruptedException, ParseException, IOException {
         final SailMasterMessage message = new SailMasterMessageImpl(rpdMessage);
-        final SailMasterConnectorImpl connector = new SailMasterConnectorImpl(/* host */ "8.8.8.8", /* port */ 443, /* raceId */ null, /* raceName */ null, /* raceDescription */ null, /* boatClass */ null);
+        final SailMasterConnectorImpl connector = new SailMasterConnectorImpl(/* host */ "8.8.8.8", /* port */ 443, /* raceId */ null, /* raceName */ null, /* raceDescription */ null, /* boatClass */ null, /* SwissTimingRaceTracker */ null);
         final boolean[] receivedPositionData = new boolean[1];
         final SailMasterListener listener = new SailMasterAdapter() {
             @Override

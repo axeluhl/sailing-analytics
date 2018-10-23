@@ -242,5 +242,4 @@ public class RaceStateImpl extends ReadonlyRaceStateImpl implements RaceState {
     public void forceUpdate() {
         super.update();
     }
-
 }

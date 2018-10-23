@@ -594,7 +594,9 @@ img.openColumn {
 	background-position: 5% 50%, 95% 50%
 }
 
-.gwt-SplitLayoutPanel-EastToggleButton-Open-leaderboard {
+.gwt-SplitLayoutPanel-EastToggleButton-Open-leaderboard,
+.gwt-SplitLayoutPanel-WestToggleButton-Open-leaderboard
+ {
 	background-color: white;
 	background-image:
 		url(images/viewicons/@1x/img/SAP_RV_Leaderboard_GHOSTED.png),
@@ -604,7 +606,8 @@ img.openColumn {
 	background-position: 5px center, calc(100% - 6px) center;
 }
 
-.gwt-SplitLayoutPanel-EastToggleButton-Closed-leaderboard {
+.gwt-SplitLayoutPanel-EastToggleButton-Closed-leaderboard,
+.gwt-SplitLayoutPanel-WestToggleButton-Closed-leaderboard {
 	background-color: white;
 	background-image:
 		url(images/viewicons/@1x/img/SAP_RV_Leaderboard_INACTIVE.png),
@@ -612,6 +615,26 @@ img.openColumn {
 	background-repeat: no-repeat, no-repeat;
 	background-position: 4% 50%, 96% 50%;
 	background-position: 5px center, calc(100% - 6px) center;
+}
+
+.gwt-SplitLayoutPanel-WestToggleButton-Open-tags {
+	background-color: white;
+    background-image:
+        url(images/viewicons/@1x/img/SAP_RV_Map_GHOSTED.png),
+        url(images/arrows_bottom_black_small.png);
+    background-repeat: no-repeat, no-repeat;
+    background-position: 4% 50%, 96% 50%;
+    background-position: 5px center, calc(100% - 6px) center;
+}
+
+.gwt-SplitLayoutPanel-WestToggleButton-Closed-tags {
+    background-color: white;
+    background-image:
+        url(images/viewicons/@1x/img/SAP_RV_Map_INACTIVE.png),
+        url(images/arrows_top_black_small.png);
+    background-repeat: no-repeat, no-repeat;
+    background-position: 4% 50%, 96% 50%;
+    background-position: 5px center, calc(100% - 6px) center;
 }
 
 .gwt-SplitLayoutPanel-NorthSouthToggleButton-Closed-media,
