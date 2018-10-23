@@ -58,7 +58,7 @@ public class GetNumericStatisticForSailorProfileAction
     }
 
     /**
-     * GWT serialisation only
+     * GWT serialization only
      */
     @SuppressWarnings("unused")
     private GetNumericStatisticForSailorProfileAction() {

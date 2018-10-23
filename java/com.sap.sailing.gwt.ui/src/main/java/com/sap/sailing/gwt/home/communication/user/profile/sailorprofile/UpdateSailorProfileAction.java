@@ -85,8 +85,12 @@ public abstract class UpdateSailorProfileAction implements SailingAction<SailorP
         return new Pair<SailorProfilePreferences, SailorProfilePreference>(prefs, sp);
     }
 
+    /**
+     * @return the updated SailorProfilePreference from the original {@link p}. If this returns null, p will be removed
+     */
     @GwtIncompatible
-    protected abstract SailorProfilePreference updatePreference(CompetitorAndBoatStore store,
-            SailorProfilePreference p);
+    protected SailorProfilePreference updatePreference(CompetitorAndBoatStore store, SailorProfilePreference p) {
+        return null;
+    }
 
 }
