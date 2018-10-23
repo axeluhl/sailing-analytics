@@ -14,7 +14,6 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
@@ -61,7 +60,7 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
     Label competitorsEmptyUi;
 
     @UiField
-    HTMLPanel headerPanelUi;
+    DivElement headerPanelUi;
 
     private final Map<T, IsWidget> tableElements = new HashMap<>();
     private final Function<T, IsWidget> itemProducer;
@@ -81,7 +80,7 @@ public class EditableSuggestedMultiSelection<T> extends Composite implements Has
         multiSelect.getElement().removeFromParent();
         if (isHeadless) {
             headerTitleUi.removeFromParent();
-            headerPanelUi.removeStyleName(SuggestedMultiSelectionResources.INSTANCE.css().suggestions());
+            headerPanelUi.removeClassName(SuggestedMultiSelectionResources.INSTANCE.css().suggestions());
         }
     }
 
