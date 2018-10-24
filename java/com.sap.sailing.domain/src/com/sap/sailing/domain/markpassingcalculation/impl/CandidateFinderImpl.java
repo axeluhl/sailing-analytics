@@ -709,7 +709,8 @@ public class CandidateFinderImpl implements CandidateFinder {
         Util.Pair<List<Candidate>, List<Candidate>> result = new Util.Pair<List<Candidate>, List<Candidate>>(
                 new ArrayList<Candidate>(), new ArrayList<Candidate>());
         DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
-        
+        final Map<TimePoint, GPSFixMoving> lastFixBeforeCache = new LimitedLinkedHashMap<>(10);
+        final Map<TimePoint, GPSFixMoving> firstFixAfterCache = new LimitedLinkedHashMap<>(10);
         for (GPSFixMoving fix : fixes) {
             if (timeRangeForValidCandidates.getTimeRangeOrNull() != null && timeRangeForValidCandidates.getTimeRangeOrNull().includes(fix.getTimePoint())) {
                 TimePoint t = fix.getTimePoint();
@@ -720,8 +721,8 @@ public class CandidateFinderImpl implements CandidateFinder {
                 try {
                     fixIsValid = track.isValid(fix);
                     if (fixIsValid) {
-                        fixBefore = track.getLastFixBefore(t);
-                        fixAfter = track.getFirstFixAfter(t);
+                        fixBefore = lastFixBeforeCache.computeIfAbsent(t, timePoint->track.getLastFixBefore(timePoint));
+                        fixAfter = firstFixAfterCache.computeIfAbsent(t, timePoint->track.getFirstFixAfter(timePoint));
                     }
                 } finally {
                     track.unlockAfterRead();
