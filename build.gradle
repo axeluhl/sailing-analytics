@@ -17,8 +17,10 @@ buildscript {
         classpath "com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.3"
     }
 }
-plugins {
-    id "com.diffplug.gradle.spotless" version "3.14.0"
+if (!project.hasProperty("xmake")) {
+    plugins {
+        id "com.diffplug.gradle.spotless" version "3.14.0"
+    }
 }
 allprojects {
     if (project.hasProperty("xmake")) {
@@ -72,14 +74,16 @@ ext {
     destinationFolder = new File("").absolutePath + "/java/com.sap.sailing.www/apps/"
 }
 
-spotless {
-    java {
-        importOrder "java", "javax", "org", "com", ""
-        removeUnusedImports()
-        eclipse().configFile("java/CodeFormatter.xml")
-        target project.fileTree(project.rootDir) {
-            include "mobile/com.sap.*/**/*.java"
-            exclude "**/generated*/**/*.*", "**/gen/**/*"
+if (!project.hasProperty("xmake")) {
+    spotless {
+        java {
+            importOrder "java", "javax", "org", "com", ""
+            removeUnusedImports()
+            eclipse().configFile("java/CodeFormatter.xml")
+            target project.fileTree(project.rootDir) {
+                include "mobile/com.sap.*/**/*.java"
+                exclude "**/generated*/**/*.*", "**/gen/**/*"
+            }
         }
     }
 }
