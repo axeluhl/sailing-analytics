@@ -148,11 +148,15 @@ public class HierarchicalDimensionListFilterSelectionProvider extends AbstractDa
         filteredFilterDimensions.addDataDisplay(filterDimensionsList);
         
         filterFilterDimensionsPanel = new AbstractFilterablePanel<DimensionWithContext>(
-            null, filterDimensionsList, filteredFilterDimensions)
-        {
+            null, filteredFilterDimensions) {
             @Override
             public Iterable<String> getSearchableStrings(DimensionWithContext dimension) {
                 return dimension.getMatchingStrings();
+            }
+
+            @Override
+            public AbstractCellTable<DimensionWithContext> getCellTable() {
+                return filterDimensionsList;
             }
         };
         filterFilterDimensionsPanel.addStyleName("filterFilterDimensionsPanel");

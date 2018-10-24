@@ -91,6 +91,7 @@ import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.server.anniversary.AnniversaryRaceDeterminator;
 import com.sap.sailing.server.masterdata.DataImportLockWithProgress;
 import com.sap.sailing.server.simulation.SimulationService;
+import com.sap.sailing.server.tagging.TaggingService;
 import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.TypeBasedServiceFinderFactory;
@@ -488,8 +489,6 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     Map<Competitor, Boat> getCompetitorToBoatMappingsForRace(String leaderboardName, String raceColumnName, String fleetName);
     
     /**
-     * @param controlTrackingFromStartAndFinishTimes TODO
-     * @param rankingMetricConstructor TODO
      * @return a pair with the found or created regatta, and a boolean that tells whether the regatta was created during
      *         the call
      */
@@ -605,7 +604,16 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
     PolarDataService getPolarDataService();
 
     SimulationService getSimulationService();
-    
+
+    /**
+     * {@link TaggingService} can be used to perform all CRUD operations on private and pulic
+     * {@link com.sap.sailing.domain.common.dto.TagDTO tags}. This service is used by the REST API and GWT client and
+     * needs to perform independant of the requesting resource.
+     * 
+     * @return instance of TaggingService
+     */
+    TaggingService getTaggingService();
+
     RaceTracker getRaceTrackerById(Object id);
     
     /**

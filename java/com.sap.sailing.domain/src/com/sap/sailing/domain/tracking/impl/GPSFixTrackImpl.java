@@ -947,6 +947,11 @@ public abstract class GPSFixTrackImpl<ItemType, FixType extends GPSFix> extends 
         };
     }
 
+    @Override
+    public boolean isValid(FixType e) {
+        return isValid(getInternalFixes(), e);
+    }
+    
     /**
      * When redefining this method, make sure to redefine
      * {@link #invalidateValidityAndEstimatedSpeedAndDistanceCaches(GPSFix)} accordingly. This implementation checks the
