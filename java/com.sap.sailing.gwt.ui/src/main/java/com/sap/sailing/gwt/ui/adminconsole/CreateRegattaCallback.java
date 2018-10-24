@@ -70,7 +70,8 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
         }
         sailingService.createRegatta(userService.getCurrentTenantName(), newRegatta.getName(),
                 newRegatta.boatClass == null ? null : newRegatta.boatClass.getName(),
-                newRegatta.canBoatsOfCompetitorsChangePerRace, newRegatta.startDate, newRegatta.endDate, 
+                newRegatta.canBoatsOfCompetitorsChangePerRace, newRegatta.competitorRegistrationType,
+                newRegatta.registrationLinkSecret, newRegatta.startDate, newRegatta.endDate, 
                 new RegattaCreationParametersDTO(seriesStructure), true,
                 newRegatta.scoringScheme, newRegatta.defaultCourseAreaUuid, newRegatta.buoyZoneRadiusInHullLengths, newRegatta.useStartTimeInference,
                 newRegatta.controlTrackingFromStartAndFinishTimes,

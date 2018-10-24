@@ -171,6 +171,7 @@ import com.sap.sailing.domain.base.impl.SeriesImpl;
 import com.sap.sailing.domain.base.impl.VenueImpl;
 import com.sap.sailing.domain.base.impl.WaypointImpl;
 import com.sap.sailing.domain.common.BoatClassMasterdata;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.CourseDesignerMode;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.MarkType;
@@ -1281,10 +1282,13 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 canBoatsOfCompetitorsChangePerRace = false;
                 createMigratableRegatta = true;
             }
+            
+            CompetitorRegistrationType competitorRegistrationType = CompetitorRegistrationType
+                    .valueOfOrDefault((String) dbRegatta.get(FieldNames.REGATTA_COMPETITOR_REGISTRATION_TYPE.name()));
             final RankingMetricConstructor rankingMetricConstructor = loadRankingMetricConstructor(dbRegatta);
             if (createMigratableRegatta) {
                 result = new MigratableRegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, boatClass,
-                        canBoatsOfCompetitorsChangePerRace, startDate, endDate, series, /* persistent */true,
+                        canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, startDate, endDate, series, /* persistent */true,
                         loadScoringScheme(dbRegatta), id, courseArea,
                         buoyZoneRadiusInHullLengths == null ? Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS
                                 : buoyZoneRadiusInHullLengths,
@@ -1293,7 +1297,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         rankingMetricConstructor, new MongoObjectFactoryImpl(database));
             } else {
                 result = new RegattaImpl(getRaceLogStore(), getRegattaLogStore(), name, boatClass,
-                        canBoatsOfCompetitorsChangePerRace, startDate, endDate, series, /* persistent */true,
+                        canBoatsOfCompetitorsChangePerRace, competitorRegistrationType, startDate, endDate, series, /* persistent */true,
                         loadScoringScheme(dbRegatta), id, courseArea,
                         buoyZoneRadiusInHullLengths == null ? Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS
                                 : buoyZoneRadiusInHullLengths,
@@ -1302,6 +1306,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                         rankingMetricConstructor);
             }
             result.setRegattaConfiguration(configuration);
+            String registrationLinkSecret = (String) dbRegatta.get(FieldNames.REGATTA_REGISTRATION_LINK_SECRET.name());
+            result.setRegistrationLinkSecret(registrationLinkSecret);
         }
         return result;
     }

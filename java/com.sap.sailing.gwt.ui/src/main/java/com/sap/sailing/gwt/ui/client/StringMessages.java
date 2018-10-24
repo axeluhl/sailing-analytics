@@ -1191,9 +1191,16 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String setTimeToNow();
     String useStartTimeInference();
     String controlTrackingFromStartAndFinishTimes();
-    String canBoatsOfCompetitorsChangePerRace();    
+    String canBoatsOfCompetitorsChangePerRace();
     String canBoatsChange();
     String canNotRegisterBoats();
+    String competitorRegistrationType();
+    String competitorRegistrationTypeShort();
+    String registrationLink();
+    String registrationLinkConfig();
+    String registrationLinkDialog();
+    String registrationLinkSecret();
+    String explainRegistrationLinkDialog();
     String numberOfQueueMessagesSent();
     String totalSize();
     String averageMessageSize();

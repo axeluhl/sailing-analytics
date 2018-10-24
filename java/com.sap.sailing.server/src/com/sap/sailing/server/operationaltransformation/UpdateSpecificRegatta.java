@@ -20,9 +20,12 @@ public class UpdateSpecificRegatta extends AbstractRacingEventServiceOperation<R
     private final boolean controlTrackingFromStartAndFinishTimes;
     private final TimePoint startDate;
     private final TimePoint endDate;
+    private final String registrationLinkSecret;
     
-    public UpdateSpecificRegatta(RegattaIdentifier regattaIdentifier, TimePoint startDate, TimePoint endDate, UUID newDefaultCourseAreaId,
-            RegattaConfiguration newConfiguration, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes) {
+    public UpdateSpecificRegatta(RegattaIdentifier regattaIdentifier, TimePoint startDate, TimePoint endDate,
+            UUID newDefaultCourseAreaId, RegattaConfiguration newConfiguration, Double buoyZoneRadiusInHullLengths,
+            boolean useStartTimeInference, boolean controlTrackingFromStartAndFinishTimes,
+            String registrationLinkSecret) {
         this.regattaIdentifier = regattaIdentifier;
         this.startDate = startDate;
         this.endDate = endDate;
@@ -31,11 +34,12 @@ public class UpdateSpecificRegatta extends AbstractRacingEventServiceOperation<R
         this.useStartTimeInference = useStartTimeInference;
         this.controlTrackingFromStartAndFinishTimes = controlTrackingFromStartAndFinishTimes;
         this.buoyZoneRadiusInHullLengths = buoyZoneRadiusInHullLengths;
+        this.registrationLinkSecret = registrationLinkSecret;
     }
 
     @Override
     public Regatta internalApplyTo(RacingEventService toState) throws Exception {
-        Regatta regatta = toState.updateRegatta(regattaIdentifier, startDate, endDate, newDefaultCourseAreaId, newConfiguration, null, buoyZoneRadiusInHullLengths, useStartTimeInference, controlTrackingFromStartAndFinishTimes);
+        Regatta regatta = toState.updateRegatta(regattaIdentifier, startDate, endDate, newDefaultCourseAreaId, newConfiguration, null, buoyZoneRadiusInHullLengths, useStartTimeInference, controlTrackingFromStartAndFinishTimes, registrationLinkSecret);
         return regatta;
     }
 

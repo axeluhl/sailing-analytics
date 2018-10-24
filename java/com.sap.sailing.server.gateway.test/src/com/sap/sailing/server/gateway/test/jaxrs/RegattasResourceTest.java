@@ -1,42 +1,63 @@
 package com.sap.sailing.server.gateway.test.jaxrs;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Course;
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Fleet;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
 import com.sap.sailing.domain.base.impl.CourseImpl;
 import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RaceDefinitionImpl;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.ranking.OneDesignRankingMetric;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.UserImpl;
+import com.sap.sse.security.shared.Account;
+import com.sap.sse.security.shared.User;
 
 public class RegattasResourceTest extends AbstractJaxRsApiTest {
     private String boatClassName = "49er";
-    private String regattaNamePart = "TestRegatta";
-    private String regattaName = RegattaImpl.getDefaultName(regattaNamePart, boatClassName);
+    private String closedRegattaNamePart = "TestRegatta";
+    private String openRegattaNamePart = "TestOpenRegatta";
+    private String closedRegattaName = RegattaImpl.getDefaultName(closedRegattaNamePart, boatClassName);
+    private String openRegattaName = RegattaImpl.getDefaultName(openRegattaNamePart, boatClassName);
+    private final String deviceUuid = "00000000-1111-2222-3333-444444444444";
+    private final String secret = "ABCDEF";
+    private final String competitorName1 = "Max Mustermann";
+    private final String competitorName2 = "Test Competitor";
 
     @Before
     public void setUp() throws Exception {
@@ -54,8 +75,13 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         Series testSeries = new SeriesImpl("TestSeries", /* isMedal */false, /* isFleetsCanRunInParallel */ true,
                 fleets, raceColumnNames, /* trackedRegattaRegistry */null);
         series.add(testSeries);
-        racingEventService.createRegatta(regattaName, boatClassName, /* canBoatsOfCompetitorsChangePerRace */ true,
-                startDate, endDate, UUID.randomUUID(), series, /* persistent */ true,
+        racingEventService.createRegatta(closedRegattaName, boatClassName, /* canBoatsOfCompetitorsChangePerRace */ true,
+                CompetitorRegistrationType.CLOSED, /* registrationLinkSecret */ null, startDate, endDate, UUID.randomUUID(), series, /* persistent */ true,
+                DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null,
+                /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
+                /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
+        racingEventService.createRegatta(openRegattaName, boatClassName, /* canBoatsOfCompetitorsChangePerRace */ true,
+                CompetitorRegistrationType.OPEN_MODERATED, secret, startDate, endDate, UUID.randomUUID(), series, /* persistent */ true,
                 DomainFactory.INSTANCE.createScoringScheme(ScoringSchemeType.LOW_POINT), null,
                 /* buoyZoneRadiusInHullLengths */2.0, /* useStartTimeInference */ true,
                 /* controlTrackingFromStartAndFinishTimes */ false, OneDesignRankingMetric::new);
@@ -65,7 +91,7 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         Course course = new CourseImpl("emptyCourse", Collections.emptySet());
         // get the same instance! of the boat class object, as else addRace will fail
         BoatClass boatClass = racingEventService.getBaseDomainFactory().getOrCreateBoatClass(boatClassName);
-        racingEventService.addRace(new RegattaName(regattaName), new RaceDefinitionImpl("Race 1", course, boatClass));
+        racingEventService.addRace(new RegattaName(closedRegattaName), new RaceDefinitionImpl("Race 1", course, boatClass));
     }
 
     @Test
@@ -76,21 +102,126 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         Object obj = JSONValue.parse(jsonString);
         JSONArray array = (JSONArray) obj;
 
-        assertTrue(array.size() == 1);
+        assertTrue(array.size() == 2);
 
         JSONObject firstElement = (JSONObject) array.get(0);
         String jsonName = (String) firstElement.get("name");
         String jsonBoatClass = (String) firstElement.get("boatclass");
 
-        assertTrue(RegattaImpl.getDefaultName(regattaNamePart, boatClassName).equals(jsonName));
+        assertTrue(closedRegattaName.equals(jsonName)
+                || openRegattaName.equals(jsonName));
         assertTrue(boatClassName.equals(jsonBoatClass));
     }
 
     @Test
     public void testNullCheckForTrackedRaceInGetManeuvers() throws Exception {
-        Response response = regattasResource.getManeuvers(regattaName, "Race 1", null, null);
+        Response response = regattasResource.getManeuvers(closedRegattaName, "Race 1", null, null);
         // the current race is not tracked, expect an error
         assertTrue(response.getStatus() != 200);
     }
 
+    @Test
+    public void testGetRegatta() throws Exception {
+        Response regattaResponse = regattasResource.getRegatta(closedRegattaName);
+        String jsonString = (String) regattaResponse.getEntity();
+        assertNotNull(jsonString);
+        String readRegattaName = (String) ((JSONObject) JSONValue.parse(jsonString)).get("name");
+        assertEquals(closedRegattaName, readRegattaName);
+    }
+
+    @Test
+    public void testCompetitorRegistrationByAdmin() throws Exception {
+        doReturn(securityService).when(regattasResource).getService(SecurityService.class);
+        doReturn(true).when(securityService).hasCurrentUserUpdatePermission(Mockito.any());
+        User user = new UserImpl("admin", "noreply@sapsailing.com", null, new ArrayList<Account>(0), null);
+        setUser(user);
+        when(securityService.getCurrentUser()).thenReturn(user);
+
+        Response response = regattasResource.createAndAddCompetitor(closedRegattaName, boatClassName, null, "GER", null,
+                null, null, competitorName1, null, deviceUuid, null);
+        assertTrue(response.getStatus() + ": " + response.getEntity().toString(),
+                response.getStatus() == Status.OK.getStatusCode());
+        assertTrue(regattasResource.getService() == racingEventService);
+
+        response = regattasResource.createAndAddCompetitor(closedRegattaName, boatClassName, null, "GER", null, null,
+                null, competitorName2, null, deviceUuid, null);
+        assertTrue(response.getStatus() + ": " + response.getEntity().toString(),
+                response.getStatus() == Status.OK.getStatusCode());
+
+        Regatta regatta = racingEventService.getRegattaByName(closedRegattaName);
+        Iterator<Competitor> cit = regatta.getAllCompetitors().iterator();
+        Competitor readCompetitor = cit.next();
+        assertNotNull(readCompetitor);
+        assertTrue(
+                competitorName1.equals(readCompetitor.getName()) || competitorName2.equals(readCompetitor.getName()));
+        readCompetitor = cit.next();
+        assertNotNull(readCompetitor);
+        assertTrue(
+                competitorName1.equals(readCompetitor.getName()) || competitorName2.equals(readCompetitor.getName()));
+    }
+
+    @Test
+    public void testCompetitorRegistrationAnonymousOnOpenRegatta() throws Exception {
+        doReturn(securityService).when(regattasResource).getService(SecurityService.class);
+        setUser(null);
+        Response response = regattasResource.createAndAddCompetitor(openRegattaName, boatClassName, null, "GER", null, null, null,
+                "Max Mustermann", null, deviceUuid, secret);
+        assertTrue(response.getStatus() + ": " + response.getEntity().toString(),
+                response.getStatus() == Status.OK.getStatusCode());
+        assertTrue(regattasResource.getService() == racingEventService);
+
+        Regatta regatta = racingEventService.getRegattaByName(openRegattaName);
+        testResponseOfOpenRegattaCompetitorRegistration(regatta);
+    }
+    
+    @Test
+    public void testCompetitorRegistrationAnonymousOnOpenRegattaWrongSecret() throws Exception {
+        doReturn(securityService).when(regattasResource).getService(SecurityService.class);
+        setUser(null);
+
+        Response response = regattasResource.createAndAddCompetitor(openRegattaName, boatClassName, null, "GER", null, null, null,
+                "Max Mustermann", null, deviceUuid, "WRONGSECRET");
+        assertTrue(response.getStatus() + ": " + response.getEntity().toString(),
+                response.getStatus() == Status.FORBIDDEN.getStatusCode());
+    }
+
+    @Test
+    public void testCompetitorRegistrationAuthenticatedOnOpenRegatta() throws Exception {
+        doReturn(securityService).when(regattasResource).getService(SecurityService.class);
+
+        User user = new UserImpl("max", "noreply@sapsailing.com", null, new ArrayList<Account>(0), null);
+        //when(securityService.getCurrentUser()).thenReturn(user);
+        setUser(user);
+        Regatta regatta = racingEventService.getRegattaByName(openRegattaName);
+
+        Response response = regattasResource.createAndAddCompetitor(openRegattaName, boatClassName, null, "GER", null, null, null,
+                "Max Mustermann", null, deviceUuid, secret);
+        assertTrue(response.getStatus() + ": " + response.getEntity().toString(),
+                response.getStatus() == Status.OK.getStatusCode());
+        assertTrue(regattasResource.getService() == racingEventService);
+
+        regatta = racingEventService.getRegattaByName(openRegattaName);
+        testResponseOfOpenRegattaCompetitorRegistration(regatta);
+    }
+
+    private void testResponseOfOpenRegattaCompetitorRegistration(final Regatta regatta) {
+        Iterator<Competitor> cit = regatta.getAllCompetitors().iterator();
+        Competitor readCompetitor = cit.next();
+        assertNotNull(readCompetitor);
+
+        // should have one device registration event of type RegattaLogDeviceCompetitorMappingEventImpl...
+        assertEquals(1, regatta.getRegattaLog().getUnrevokedEvents().stream()
+                .filter(e -> e instanceof RegattaLogDeviceCompetitorMappingEvent).count());
+        // ...with requested device id
+        assertEquals(deviceUuid,
+                ((RegattaLogDeviceCompetitorMappingEvent) regatta.getRegattaLog().getUnrevokedEvents().stream()
+                        .filter(e -> e instanceof RegattaLogDeviceCompetitorMappingEvent).findFirst().get()).getDevice()
+                                .getStringRepresentation());
+
+        // Same deviceUuid for registration should fail
+        Response response = regattasResource.createAndAddCompetitor(regatta.getName(), boatClassName, null, "GER", null,
+                null, null, "Max Mustermann", null, deviceUuid, secret);
+        assertTrue("Reponse http status should be forbidden (403) but is " + response.getStatus(),
+                response.getStatus() == Status.FORBIDDEN.getStatusCode());
+    }
 }

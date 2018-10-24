@@ -17,6 +17,8 @@ import javax.ws.rs.core.Response;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.subject.Subject;
+import org.apache.shiro.subject.support.SubjectThreadState;
+import org.apache.shiro.util.ThreadState;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -38,6 +40,7 @@ import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
@@ -52,7 +55,7 @@ public abstract class AbstractJaxRsApiTest {
     protected DummyLeaderboardsResource leaderboardsResource;
     protected DummyBoatsResource boatsResource;
     protected DummyCompetitorsResource competitorsResource;
-    
+
     protected static SimpleDateFormat TIMEPOINT_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
     @SuppressWarnings("unchecked")
@@ -114,11 +117,27 @@ public abstract class AbstractJaxRsApiTest {
                 .when(leaderboardsResource).getRaceLogTrackingAdapter();
     }
 
+    public ThreadState setUser(User user) {
+        Subject subject = Mockito.mock(Subject.class);
+        if (user == null) {
+            Mockito.when(subject.isAuthenticated()).thenReturn(false);
+            Mockito.when(subject.getPrincipal()).thenReturn(null);
+        } else {
+            Mockito.when(subject.isAuthenticated()).thenReturn(true);
+            Mockito.when(subject.getPrincipal()).thenReturn(user.getName());
+        }
+        Mockito.when(securityService.getCurrentUser()).thenReturn(user);
+
+        ThreadState subjectThreadState = new SubjectThreadState(subject);
+        subjectThreadState.bind();
+        return subjectThreadState;
+    }
+
     public SecurityService getSecurityService() {
         return securityService;
     }
 
-    private <T extends AbstractSailingServerResource> T spyResource(T resource) {
+    protected <T extends AbstractSailingServerResource> T spyResource(T resource) {
         T spyResource = spy(resource);
         doReturn(racingEventService).when(spyResource).getService();
         return spyResource;

@@ -34,7 +34,7 @@ public abstract class AbstractSailingServerResource {
         return resourceContext;
     }
     
-    protected <T> T getService(Class<T> clazz) {
+    public <T> T getService(Class<T> clazz) {
         BundleContext context = (BundleContext) servletContext
                 .getAttribute(RestServletContainer.OSGI_RFC66_WEBBUNDLE_BUNDLECONTEXT_NAME);
         ServiceTracker<T, T> tracker = new ServiceTracker<T, T>(context, clazz, null);

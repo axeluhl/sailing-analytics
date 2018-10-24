@@ -250,4 +250,17 @@ public interface Regatta
     default HasPermissions getType() {
         return SecuredDomainType.REGATTA;
     }
+
+    /**
+     * get secret for registration link of open regattas.
+     * @return secret to append on regisration URL
+     */
+    String getRegistrationLinkSecret();
+
+    /**
+     * set secret for registration link of open regattas to be appended to the URL.
+     * @param registrationLinkSecret secret string
+     */
+    void setRegistrationLinkSecret(String registrationLinkSecret);
+
 }

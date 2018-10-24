@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -8,6 +9,9 @@ import com.google.gwt.dom.client.OptionElement;
 import com.google.gwt.dom.client.SelectElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DoubleBox;
 import com.google.gwt.user.client.ui.Grid;
@@ -15,11 +19,13 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
+import com.sap.sailing.gwt.ui.common.client.RandomString;
 import com.sap.sailing.gwt.ui.leaderboard.RankingMetricTypeFormatter;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
@@ -55,9 +61,12 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     protected final DoubleBox buoyZoneRadiusInHullLengthsDoubleBox;
     protected final ListEditorComposite<SeriesDTO> seriesEditor;
     private final ListBox rankingMetricListBox;
+    protected final ListBox competitorRegistrationTypeListBox;
+    protected final Button registrationLinkWithQRCodeOpenButton;
 
     protected final List<EventDTO> existingEvents;
     private EventDTO defaultEvent;
+    private RegistrationLinkWithQRCode registrationLinkWithQRCode;
 
     public AbstractRegattaWithSeriesAndFleetsDialog(RegattaDTO regatta, Iterable<SeriesDTO> series, List<EventDTO> existingEvents, EventDTO correspondingEvent, 
             String title, String okButton, StringMessages stringMessages, Validator<T> validator, DialogCallback<T> callback) {
@@ -103,6 +112,42 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         courseAreaListBox.setEnabled(false);
         this.seriesEditor = createSeriesEditor(series);
         setupEventAndCourseAreaListBoxes(stringMessages);
+
+        competitorRegistrationTypeListBox = createListBox(false);
+        EnumSet.allOf(CompetitorRegistrationType.class).forEach(t->competitorRegistrationTypeListBox.addItem(t.getLabel(stringMessages), t.name()));
+        competitorRegistrationTypeListBox.setSelectedIndex(regatta.competitorRegistrationType.ordinal());
+        competitorRegistrationTypeListBox.addChangeHandler(new ChangeHandler() {
+
+            @Override
+            public void onChange(ChangeEvent event) {
+                if (CompetitorRegistrationType.valueOf(competitorRegistrationTypeListBox.getSelectedValue()).isOpen()) {
+                    registrationLinkWithQRCodeOpenButton.setEnabled(true);
+                    registrationLinkWithQRCode.setSecret(RandomString.createRandomSecret(20));
+                } else {
+                    registrationLinkWithQRCodeOpenButton.setEnabled(false);
+                    registrationLinkWithQRCode.setSecret(null);
+                }
+            }
+        });
+
+        registrationLinkWithQRCode = new RegistrationLinkWithQRCode();
+        registrationLinkWithQRCode.setSecret(regatta.registrationLinkSecret);
+        registrationLinkWithQRCodeOpenButton = new Button(stringMessages.registrationLinkConfig(), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                new RegistrationLinkWithQRCodeDialog(stringMessages, registrationLinkWithQRCode,
+                        new DialogCallback<RegistrationLinkWithQRCode>() {
+                            @Override
+                            public void ok(RegistrationLinkWithQRCode result) {
+                                registrationLinkWithQRCode = result;
+                            }
+
+                            @Override
+                            public void cancel() {
+                            }
+                        }).show();
+            }
+        });
     }
 
     /**
@@ -146,7 +191,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         if (additionalWidget != null) {
             panel.add(additionalWidget);
         }
-        Grid formGrid = new Grid(9, 2);
+        Grid formGrid = new Grid(11, 2);
         panel.add(formGrid);
 
         formGrid.setWidget(0, 0, new Label(stringMessages.timeZone() + ":"));
@@ -167,6 +212,10 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         formGrid.setWidget(7, 1, controlTrackingFromStartAndFinishTimesCheckBox);
         formGrid.setWidget(8, 0, new Label(stringMessages.buoyZoneRadiusInHullLengths() + ":"));
         formGrid.setWidget(8, 1, buoyZoneRadiusInHullLengthsDoubleBox);
+        formGrid.setWidget(9, 0, new Label(stringMessages.competitorRegistrationType() + ":"));
+        formGrid.setWidget(9, 1, competitorRegistrationTypeListBox);
+        formGrid.setWidget(10, 0, new Label(stringMessages.registrationLink() + ":"));
+        formGrid.setWidget(10, 1, registrationLinkWithQRCodeOpenButton);
         setupAdditionalWidgetsOnPanel(panel, formGrid);
         return panel;
     }
@@ -294,6 +343,12 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         result.buoyZoneRadiusInHullLengths = buoyZoneRadiusInHullLengthsDoubleBox.getValue();
         setCourseAreaInRegatta(result);
         result.series = getSeriesEditor().getValue();
+        result.competitorRegistrationType = CompetitorRegistrationType.valueOf(competitorRegistrationTypeListBox.getSelectedValue());
+        if (result.competitorRegistrationType.isOpen() && registrationLinkWithQRCode != null) {
+            result.registrationLinkSecret = registrationLinkWithQRCode.getSecret();
+        } else {
+            result.registrationLinkSecret = null;
+        }
         return result;
     }
 

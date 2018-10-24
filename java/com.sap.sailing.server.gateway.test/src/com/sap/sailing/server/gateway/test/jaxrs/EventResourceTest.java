@@ -21,6 +21,7 @@ import org.json.simple.JSONValue;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.NotFoundException;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.impl.DegreePosition;
@@ -112,7 +113,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
                 /* venueNameParam */ randomName, /* venueLat */ null, /* venueLng */ null, /* isPublicParam */ null,
                 /* officialWebsiteURLParam */ null, /* baseURLParam */ null, /* leaderboardGroupIdsListParam */ null,
                 /* createLeaderboardGroupParam */ "true", /* createRegattaParam */ "false",
-                /* boatClassNameParam */ null, /* numberOfRacesParam */ null, false);
+                /* boatClassNameParam */ null, /* numberOfRacesParam */ null, false, CompetitorRegistrationType.CLOSED.name());
     }
 
     private Response createEvent() throws ParseException, NotFoundException, NumberFormatException, IOException,
@@ -122,7 +123,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
                 /* venueNameParam */ randomName, /* venueLat */ null, /* venueLng */ null, /* isPublicParam */ null,
                 /* officialWebsiteURLParam */ null, /* baseURLParam */ null, /* leaderboardGroupIdsListParam */ null,
                 /* createLeaderboardGroupParam */ "false", /* createRegattaParam */ "false",
-                /* boatClassNameParam */ null, /* numberOfRacesParam */ null, false);
+                /* boatClassNameParam */ null, /* numberOfRacesParam */ null, false, CompetitorRegistrationType.CLOSED.name());
     }
 
     private Response createEventAtLocation(Position location) throws ParseException, NotFoundException,
@@ -133,7 +134,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
                 /* venueLng */ "" + location.getLngDeg(), /* isPublicParam */ null, /* officialWebsiteURLParam */ null,
                 /* baseURLParam */ null, /* leaderboardGroupIdsListParam */ null,
                 /* createLeaderboardGroupParam */ "false", /* createRegattaParam */ "false",
-                /* boatClassNameParam */ null, /* numberOfRacesParam */ null, false);
+                /* boatClassNameParam */ null, /* numberOfRacesParam */ null, false, CompetitorRegistrationType.CLOSED.name());
     }
 
     private Response createEventWithLeaderboardGroupAndRegatta() throws ParseException, NotFoundException,
@@ -143,7 +144,7 @@ public class EventResourceTest extends AbstractJaxRsApiTest {
                 /* venueNameParam */ randomName, /* venueLat */ null, /* venueLng */ null, /* isPublicParam */ null,
                 /* officialWebsiteURLParam */ null, /* baseURLParam */ null, /* leaderboardGroupIdsListParam */ null,
                 /* createLeaderboardGroupParam */ "true", /* createRegattaParam */ "true",
-                /* boatClassNameParam */ "A_CAT", /* numberOfRacesParam */ null, false);
+                /* boatClassNameParam */ "A_CAT", /* numberOfRacesParam */ null, false, CompetitorRegistrationType.CLOSED.name());
     }
     
     private Response getLeaderboard(String name) {

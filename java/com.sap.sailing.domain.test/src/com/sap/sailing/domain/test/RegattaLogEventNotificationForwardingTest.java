@@ -26,6 +26,7 @@ import com.sap.sailing.domain.base.impl.FleetImpl;
 import com.sap.sailing.domain.base.impl.RaceColumnListenerWithDefaultAction;
 import com.sap.sailing.domain.base.impl.RegattaImpl;
 import com.sap.sailing.domain.base.impl.SeriesImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
@@ -115,7 +116,7 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
     
     @Test
     public void testRegattaLeaderboardRegattaLogEventForwarding() {
-        Regatta regatta = new RegattaImpl("test", null, true, null, null, new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new);
+        Regatta regatta = new RegattaImpl("test", null, true, CompetitorRegistrationType.CLOSED, null, null, new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new);
         final RegattaLogEvent[] receivedRegattaLogEvent = new RegattaLogEvent[1];
         regatta.addRaceColumnListener(new RaceColumnListenerWithDefaultAction() {
             private static final long serialVersionUID = -3835439531940986851L;
@@ -136,7 +137,7 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
 
     @Test
     public void testRegattaLeaderboardRegattaLogEventForwardingAfterRegattaDeserialization() throws ClassNotFoundException, IOException {
-        Regatta regatta = new RegattaImpl("test", null, true, null, null, new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new);
+        Regatta regatta = new RegattaImpl("test", null, true, CompetitorRegistrationType.CLOSED, null, null, new HashSet<Series>(), false, null, "test", null, OneDesignRankingMetric::new);
         Regatta deserializedRegatta = cloneBySerialization(regatta, DomainFactory.INSTANCE);
         final RegattaLogEvent[] receivedRegattaLogEvent = new RegattaLogEvent[1];
         deserializedRegatta.addRaceColumnListener(new RaceColumnListenerWithDefaultAction() {
@@ -181,7 +182,7 @@ public class RegattaLogEventNotificationForwardingTest extends AbstractSerializa
         Series series = new SeriesImpl("Test Series", /* isMedal */ false, /* isFleetsCanRunInParallel */ true, 
                 /* fleets */ Collections.singleton(new FleetImpl("Default")),
                 Collections.singleton("R1"), /* trackedRegattaRegistry */ null);
-        Regatta regatta = new RegattaImpl("test", null, true, null, null, Collections.singleton(series), false,
+        Regatta regatta = new RegattaImpl("test", null, true, CompetitorRegistrationType.CLOSED, null, null, Collections.singleton(series), false,
                 new LowPoint(), "test", null, OneDesignRankingMetric::new);
         return regatta;
     }

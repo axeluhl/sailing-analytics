@@ -6,6 +6,7 @@ import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.base.Regatta;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sse.common.Duration;
@@ -31,7 +32,13 @@ public interface IsRegattaLike extends Serializable {
      * @return true when the competitors change their boats, false otherwise
      */
     boolean canBoatsOfCompetitorsChangePerRace(); 
-
+    
+    /**
+     * Get type of comeptitor registration.  
+     * @return type of competitor registration
+     */
+    CompetitorRegistrationType getCompetitorRegistrationType();
+    
     RaceColumn getRaceColumnByName(String raceColumnName);
     
     RegattaLikeIdentifier getRegattaLikeIdentifier();
