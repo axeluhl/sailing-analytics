@@ -59,7 +59,6 @@ import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettings;
 import com.sap.sailing.gwt.settings.client.leaderboard.LeaderboardSettingsDialogComponent;
 import com.sap.sailing.gwt.settings.client.leaderboard.MetaLeaderboardPerspectiveLifecycle;
 import com.sap.sailing.gwt.ui.adminconsole.DisablableCheckboxCell.IsEnabled;
-import com.sap.sailing.gwt.ui.adminconsole.EditOwnershipDialog.DialogConfig;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.LeaderboardsDisplayer;
 import com.sap.sailing.gwt.ui.client.LeaderboardsRefresher;
@@ -89,8 +88,11 @@ import com.sap.sse.gwt.client.shared.components.LinkWithSettingsGenerator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogForLinkSharing;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.security.shared.HasPermissions;
-import com.sap.sse.security.ui.client.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
+import com.sap.sse.security.ui.client.component.SecuredObjectOwnerColumn;
 
 public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel implements SelectedLeaderboardProvider, RegattasDisplayer,
 TrackedRaceChangedListener, LeaderboardsDisplayer {
@@ -322,7 +324,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         });
 
         final HasPermissions type = SecuredDomainType.LEADERBOARD;
-        final Function<StrippedLeaderboardDTO, String> idFactory = SecuredObjectUtils::getTypeRelativeObjectIdentifier;
+        final Function<StrippedLeaderboardDTO, String> idFactory = StrippedLeaderboardDTO::getName;
         final AccessControlledActionsColumn<StrippedLeaderboardDTO, LeaderboardConfigImagesBarCell> leaderboardActionColumn = new AccessControlledActionsColumn<>(
                 new LeaderboardConfigImagesBarCell(stringMessages), userService, type, idFactory);
         
@@ -388,6 +390,8 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         leaderboardTable.addColumn(leaderboardTypeColumn, stringMessages.type());
         leaderboardTable.addColumn(scoringSystemColumn, stringMessages.scoringSystem());
         leaderboardTable.addColumn(courseAreaColumn, stringMessages.courseArea());
+        SecuredObjectOwnerColumn.configureOwnerColumns(leaderboardTable, leaderboardColumnListHandler,
+                com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE);
         leaderboardTable.addColumn(leaderboardActionColumn, stringMessages.actions());
         leaderboardTable.addColumnSortHandler(leaderboardColumnListHandler);
         leaderboardTable.setSelectionModel(selectionCheckboxColumn.getSelectionModel(), selectionCheckboxColumn.getSelectionManager());

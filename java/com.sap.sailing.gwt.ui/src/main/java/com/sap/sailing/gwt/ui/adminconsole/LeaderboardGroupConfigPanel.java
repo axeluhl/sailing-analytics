@@ -20,9 +20,9 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable.Resources;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -41,7 +41,6 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
-import com.sap.sailing.gwt.ui.adminconsole.EditOwnershipDialog.DialogConfig;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardConfigPanel.AnchorCell;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupDialog.LeaderboardGroupDescriptor;
 import com.sap.sailing.gwt.ui.client.AbstractRegattaPanel;
@@ -71,8 +70,11 @@ import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
-import com.sap.sse.security.ui.client.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
+import com.sap.sse.security.ui.client.component.SecuredObjectOwnerColumn;
 
 public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements LeaderboardGroupsDisplayer, LeaderboardsDisplayer {
 
@@ -605,16 +607,8 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
             }
         });
 
-        final SecuredObjectOwnerColumn<LeaderboardGroupDTO> groupColumn = SecuredObjectOwnerColumn
-                .getGroupOwnerColumn();
-        groupColumn.setSortable(true);
-        leaderboardGroupsListHandler.setComparator(groupColumn, groupColumn.getComparator());
-        final SecuredObjectOwnerColumn<LeaderboardGroupDTO> userColumn = SecuredObjectOwnerColumn.getUserOwnerColumn();
-        userColumn.setSortable(true);
-        leaderboardGroupsListHandler.setComparator(userColumn, userColumn.getComparator());
-
         final HasPermissions type = SecuredDomainType.LEADERBOARD_GROUP;
-        final Function<LeaderboardGroupDTO, String> idFactory = SecuredObjectUtils::getTypeRelativeObjectIdentifier;
+        final Function<LeaderboardGroupDTO, String> idFactory = leaderboardGroup -> leaderboardGroup.getId().toString();
         final AccessControlledActionsColumn<LeaderboardGroupDTO, LeaderboardGroupConfigImagesBarCell> actionsColumn = new AccessControlledActionsColumn<>(
                 new LeaderboardGroupConfigImagesBarCell(stringMessages), userService, type, idFactory);
         actionsColumn.addAction(UPDATE.name(), UPDATE, this::openEditLeaderboardGroupDialog);
@@ -632,7 +626,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                     updateGroup(group.getName(), group, descriptor);
                 }, group -> errorReporter.reportError(stringMessages.errorUpdatingOwnership(group.getName())));
         actionsColumn.addAction(CHANGE_OWNERSHIP.name(), CHANGE_OWNERSHIP, config::openDialog);
-
 
         SelectionCheckboxColumn<LeaderboardGroupDTO> leaderboardTableSelectionColumn =
                 new SelectionCheckboxColumn<LeaderboardGroupDTO>(
@@ -656,8 +649,8 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         groupsTable.addColumn(groupDescriptionColumn, stringMessages.description());
         groupsTable.addColumn(groupDisplayNameColumn, stringMessages.displayName());
         groupsTable.addColumn(hasOverallLeaderboardColumn, stringMessages.useOverallLeaderboard());
-        groupsTable.addColumn(groupColumn, SecuredObjectUtils.SECURITY_MESSAGES.group());
-        groupsTable.addColumn(userColumn, SecuredObjectUtils.SECURITY_MESSAGES.user());
+        SecuredObjectOwnerColumn.configureOwnerColumns(groupsTable, leaderboardGroupsListHandler,
+                com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE);
         groupsTable.addColumn(actionsColumn, stringMessages.actions());
         groupsTable.addColumnSortHandler(leaderboardGroupsListHandler);
 

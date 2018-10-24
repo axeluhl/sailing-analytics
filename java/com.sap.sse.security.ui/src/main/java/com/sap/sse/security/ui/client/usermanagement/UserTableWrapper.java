@@ -37,10 +37,11 @@ import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
-import com.sap.sse.security.ui.client.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.component.EditAndRemoveImagesBarCell;
+import com.sap.sse.security.ui.client.component.SecuredObjectOwnerColumn;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
@@ -146,6 +147,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                 return new NaturalComparator().compare(r1.getRoles().toString(), r2.getRoles().toString());
             }
         });
+
         final AccessControlledActionsColumn<UserDTO, EditAndRemoveImagesBarCell> userActionColumn = new AccessControlledActionsColumn<>(
                 new EditAndRemoveImagesBarCell(stringMessages), userService, SecuredSecurityTypes.USER, UserDTO::getName);
         userActionColumn.addAction(EditAndRemoveImagesBarCell.ACTION_EDIT, DefaultActions.UPDATE,
@@ -204,6 +206,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
         table.addColumn(groupsColumn, stringMessages.groups());
         table.addColumn(rolesColumn, stringMessages.roles());
         table.addColumn(permissionsColumn, stringMessages.permissions());
+        SecuredObjectOwnerColumn.configureOwnerColumns(table, userColumnListHandler, stringMessages);
         table.addColumn(userActionColumn, stringMessages.actions());
         table.ensureDebugId("UsersTable");
     }

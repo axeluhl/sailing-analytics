@@ -32,7 +32,6 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.gwt.ui.adminconsole.EditOwnershipDialog.DialogConfig;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -54,8 +53,11 @@ import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
-import com.sap.sse.security.ui.client.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
+import com.sap.sse.security.ui.client.component.SecuredObjectOwnerColumn;
 
 /**
  * A composite showing the list of all regattas 
@@ -240,15 +242,8 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
             }
         });
 
-        final SecuredObjectOwnerColumn<RegattaDTO> groupColumn = SecuredObjectOwnerColumn.getGroupOwnerColumn();
-        groupColumn.setSortable(true);
-        columnSortHandler.setComparator(groupColumn, groupColumn.getComparator());
-        final SecuredObjectOwnerColumn<RegattaDTO> userColumn = SecuredObjectOwnerColumn.getUserOwnerColumn();
-        userColumn.setSortable(true);
-        columnSortHandler.setComparator(userColumn, userColumn.getComparator());
-
         final HasPermissions type = SecuredDomainType.REGATTA;
-        final Function<RegattaDTO, String> idFactory = SecuredObjectUtils::getTypeRelativeObjectIdentifier;
+        final Function<RegattaDTO, String> idFactory = RegattaDTO::getName;
         final AccessControlledActionsColumn<RegattaDTO, RegattaConfigImagesBarCell> actionsColumn = new AccessControlledActionsColumn<>(
                 new RegattaConfigImagesBarCell(stringMessages), userService, type, idFactory);
         actionsColumn.addAction(UPDATE.name(), UPDATE, this::editRegatta);
@@ -268,8 +263,8 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         table.addColumn(startEndDateColumn, stringMessages.from() + "/" + stringMessages.to());
         table.addColumn(regattaBoatClassColumn, stringMessages.boatClass());
         table.addColumn(rankingMetricColumn, stringMessages.rankingMetric());
-        table.addColumn(groupColumn, SecuredObjectUtils.SECURITY_MESSAGES.group());
-        table.addColumn(userColumn, SecuredObjectUtils.SECURITY_MESSAGES.user());
+        SecuredObjectOwnerColumn.configureOwnerColumns(table, columnSortHandler,
+                com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE);
         table.addColumn(actionsColumn, stringMessages.actions());
         table.setSelectionModel(regattaSelectionCheckboxColumn.getSelectionModel(), regattaSelectionCheckboxColumn.getSelectionManager());
         return table;

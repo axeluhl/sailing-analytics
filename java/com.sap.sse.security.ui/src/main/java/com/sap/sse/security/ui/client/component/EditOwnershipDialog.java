@@ -1,4 +1,4 @@
-package com.sap.sailing.gwt.ui.adminconsole;
+package com.sap.sse.security.ui.client.component;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -9,7 +9,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.gwt.ui.adminconsole.EditOwnershipDialog.OwnershipDialogResult;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
@@ -21,6 +20,7 @@ import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.impl.OwnershipImpl;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog.OwnershipDialogResult;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserDTO;
 
@@ -207,7 +207,7 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
          */
         public void openDialog(final T securedObject) {
             new EditOwnershipDialog(userManagementService, securedObject.getOwnership(),
-                    SecuredObjectUtils.SECURITY_MESSAGES, new EditOwnershipDialogCallback(securedObject)).show();
+                    StringMessages.INSTANCE, new EditOwnershipDialogCallback(securedObject)).show();
         }
 
         private class EditOwnershipDialogCallback implements DialogCallback<OwnershipDialogResult> {
