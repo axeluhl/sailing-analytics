@@ -27,10 +27,12 @@ public class NamedSecuredObjectDTO extends NamedDTO implements SecuredObject {
         return ownership;
     }
 
+    @Override
     public final void setAccessControlList(final AccessControlList accessControlList) {
         this.accessControlList = accessControlList;
     }
 
+    @Override
     public final void setOwnership(final Ownership ownership) {
         this.ownership = ownership;
     }

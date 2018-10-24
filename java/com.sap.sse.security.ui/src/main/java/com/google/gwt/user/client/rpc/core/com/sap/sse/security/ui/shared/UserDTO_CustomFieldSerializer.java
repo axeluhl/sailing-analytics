@@ -8,6 +8,8 @@ import com.google.gwt.user.client.rpc.SerializationException;
 import com.google.gwt.user.client.rpc.SerializationStreamReader;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
@@ -41,6 +43,8 @@ public class UserDTO_CustomFieldSerializer extends CustomFieldSerializer<UserDTO
         final ArrayList<UserGroup> groupsAsList = new ArrayList<>();
         Util.addAll(instance.getUserGroups(), groupsAsList);
         streamWriter.writeObject(groupsAsList);
+        streamWriter.writeObject(instance.getOwnership());
+        streamWriter.writeObject(instance.getAccessControlList());
     }
 
     @Override
@@ -69,7 +73,11 @@ public class UserDTO_CustomFieldSerializer extends CustomFieldSerializer<UserDTO
         final List<AccountDTO> accounts = (List<AccountDTO>) streamReader.readObject();
         @SuppressWarnings("unchecked")
         final ArrayList<UserGroup> groups = (ArrayList<UserGroup>) streamReader.readObject();
-        return new UserDTO(name, email, fullName, company, locale, emailValidated, accounts, roles, defaultTenant, permissions, groups);
+        final UserDTO userDTO = new UserDTO(name, email, fullName, company, locale, emailValidated, accounts, roles,
+                defaultTenant, permissions, groups);
+        userDTO.setOwnership((Ownership) streamReader.readObject());
+        userDTO.setAccessControlList((AccessControlList) streamReader.readObject());
+        return userDTO;
     }
 
     @Override
