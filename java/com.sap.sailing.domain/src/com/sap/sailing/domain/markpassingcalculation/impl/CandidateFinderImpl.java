@@ -550,20 +550,26 @@ public class CandidateFinderImpl implements CandidateFinder {
      */
     private Util.Pair<List<Candidate>, List<Candidate>> checkForDistanceCandidateChanges(Competitor c,
             Iterable<GPSFixMoving> fixes, Iterable<Waypoint> waypoints) {
+        final Map<TimePoint, GPSFixMoving> lastFixBeforeCache = new LimitedLinkedHashMap<>(10);
+        final Map<TimePoint, GPSFixMoving> firstFixAfterCache = new LimitedLinkedHashMap<>(10);
         Util.Pair<List<Candidate>, List<Candidate>> result = new Util.Pair<List<Candidate>, List<Candidate>>(
                 new ArrayList<Candidate>(), new ArrayList<Candidate>());
         TreeSet<GPSFix> affectedFixes = new TreeSet<GPSFix>(comp);
         GPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
-        for (GPSFix fix : fixes) {
+        for (GPSFixMoving fix : fixes) {
             if (timeRangeForValidCandidates.getTimeRangeOrNull() != null && timeRangeForValidCandidates.getTimeRangeOrNull().includes(fix.getTimePoint())) {
                 affectedFixes.add(fix);
-                GPSFix fixBefore;
-                GPSFix fixAfter;
+                GPSFix fixBefore = null;
+                GPSFix fixAfter = null;
+                final boolean fixIsValid;
                 track.lockForRead();
                 try {
-                    TimePoint timePoint = fix.getTimePoint();
-                    fixBefore = track.getLastFixBefore(timePoint);
-                    fixAfter = track.getFirstFixAfter(timePoint);
+                    fixIsValid = track.isValid(fix);
+                    if (fixIsValid) {
+                        TimePoint t = fix.getTimePoint();
+                        fixBefore = lastFixBeforeCache.computeIfAbsent(t, timePoint->track.getLastFixBefore(timePoint));
+                        fixAfter = firstFixAfterCache.computeIfAbsent(t, timePoint->track.getFirstFixAfter(timePoint));
+                    }
                 } finally {
                     track.unlockAfterRead();
                 }
