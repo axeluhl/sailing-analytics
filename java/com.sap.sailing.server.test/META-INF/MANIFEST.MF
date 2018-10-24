@@ -26,5 +26,6 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.server.testsupport
 Import-Package: com.sap.sailing.server.gateway.jaxrs,
  com.sap.sailing.server.gateway.jaxrs.spi,
- org.json.simple,
- javax.ws.rs.core;version="1.1.1"
+ com.sap.sse.security.userstore.mongodb,
+ javax.ws.rs.core;version="1.1.1",
+ org.json.simple

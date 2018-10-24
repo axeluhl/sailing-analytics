@@ -64,6 +64,8 @@ public class Activator implements BundleActivator {
 
     private static ExtenderBundleTracker extenderBundleTracker;
 
+    private static BundleContext context;
+
     private CachedOsgiTypeBasedServiceFinderFactory serviceFinderFactory;
 
     private RacingEventServiceImpl racingEventService;
@@ -99,6 +101,8 @@ public class Activator implements BundleActivator {
     }
 
     public void start(BundleContext context) throws Exception {
+        Activator.context = context;
+
         extenderBundleTracker = new ExtenderBundleTracker(context);
         extenderBundleTracker.open();
 
@@ -184,6 +188,10 @@ public class Activator implements BundleActivator {
         registrations.add(context.registerService(PreferenceConverter.class,
                 new GenericJSONPreferenceConverter<>(() -> new BoatClassNotificationPreferences(racingEventService)),
                 properties));
+    }
+
+    public static BundleContext getContext() {
+        return context;
     }
 
     public void stop(BundleContext context) throws Exception {
@@ -274,5 +282,4 @@ public class Activator implements BundleActivator {
         }
 
     }
-
 }
