@@ -85,9 +85,6 @@ spotless {
 }
 
 if (project.hasProperty("xmake")) {
-    sapGradleDistBaseUrl = "http://nexus.wdf.sap.corp:8081/nexus/content/repositories/build.releases/org/gradle/download/gradle/gradle"
-    sapGradleVersion = 4.4
-
     task wrapper(type: Wrapper) {
         distributionUrl "${sapGradleDistBaseUrl}/${sapGradleVersion}/gradle-${sapGradleVersion}-all.zip"
     }
