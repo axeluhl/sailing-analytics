@@ -106,14 +106,14 @@ public abstract class LeaderboardSettingsDialogComponent<T extends LeaderboardSe
         Collection<DetailType> currentRaceDetailSelection = initialSettings.getRaceDetailsToShow();
         FlowPanel raceDetailDialogContent = null;
         for (DetailType type : Util.retainCopy(DetailType.getAllRaceDetailTypes(), availableDetailTypes)) {
+            if (type == DetailType.RACE_DISPLAY_BOATS && canBoatInfoBeShownAsOverallDetail) {
+                // we do not need race level boats, if the boats do not change
+                continue;
+            }
             if (detailCountInCurrentFlowPanel % 8 == 0) {
                 raceDetailDialogContent = new FlowPanel();
                 raceDetailDialogContent.addStyleName("dialogInnerContent");
                 raceDetailDialog.add(raceDetailDialogContent);
-            }
-            if (type == DetailType.RACE_DISPLAY_BOATS && canBoatInfoBeShownAsOverallDetail) {
-                // we do not need race level boats, if the boats do not change
-                continue;
             }
             CheckBox checkbox = createAndRegisterCheckbox(dialog, type, currentRaceDetailSelection.contains(type),
                     raceDetailCheckboxes);
