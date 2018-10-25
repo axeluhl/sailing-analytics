@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.server;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilterInputStream;
@@ -52,6 +53,8 @@ import java.util.regex.Pattern;
 import java.util.stream.StreamSupport;
 import java.util.zip.GZIPInputStream;
 
+import javax.imageio.metadata.IIOMetadata;
+import javax.management.InvalidAttributeValueException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -60,6 +63,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authz.AuthorizationException;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -259,6 +263,7 @@ import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RaceLogTrackingInfoDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
 import com.sap.sailing.domain.common.dto.SeriesCreationParametersDTO;
+import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.domain.common.dto.TrackedRaceDTO;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KilometersPerHourSpeedImpl;
@@ -283,6 +288,9 @@ import com.sap.sailing.domain.common.racelog.tracking.TransformationException;
 import com.sap.sailing.domain.common.security.Permission;
 import com.sap.sailing.domain.common.security.Permission.Mode;
 import com.sap.sailing.domain.common.sharding.ShardingType;
+import com.sap.sailing.domain.common.tagging.RaceLogNotFoundException;
+import com.sap.sailing.domain.common.tagging.ServiceNotFoundException;
+import com.sap.sailing.domain.common.tagging.TagAlreadyExistsException;
 import com.sap.sailing.domain.common.tracking.BravoFix;
 import com.sap.sailing.domain.common.tracking.GPSFix;
 import com.sap.sailing.domain.common.tracking.GPSFixMoving;
@@ -544,12 +552,15 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.TimeRangeImpl;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.filestorage.FileStorageManagementService;
 import com.sap.sse.filestorage.FileStorageService;
 import com.sap.sse.filestorage.InvalidPropertiesException;
+import com.sap.sse.filestorage.OperationFailedException;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.media.ImageDTO;
+import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.gwt.dispatch.servlets.ProxiedRemoteServiceServlet;
 import com.sap.sse.gwt.server.filestorage.FileStorageServiceDTOUtils;
@@ -571,12 +582,15 @@ import com.sap.sse.replication.ReplicationService;
 import com.sap.sse.replication.impl.ReplicaDescriptor;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
+import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.MediaUtils;
 import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.shared.media.impl.ImageDescriptorImpl;
 import com.sap.sse.shared.media.impl.VideoDescriptorImpl;
 import com.sap.sse.util.HttpUrlConnectionHelper;
+import com.sap.sse.util.ImageConverter;
+import com.sap.sse.util.ImageConverter.ImageWithMetadata;
 import com.sap.sse.util.ServiceTrackerFactory;
 import com.sap.sse.util.ThreadPoolUtil;
 import com.sapsailing.xrr.structureimport.eventimport.RegattaJSON;
@@ -6225,13 +6239,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RegattaLogEvent event = null;
         TimePoint from = mapping.getTimeRange().hasOpenBeginning() ? null : mapping.getTimeRange().from();
         TimePoint to = mapping.getTimeRange().hasOpenEnd() ? null : mapping.getTimeRange().to();
-        if (dto.mappedTo instanceof MarkDTO) {
-            Mark mark = convertToMark(((MarkDTO) dto.mappedTo), true); 
+        if (mapping.getMappedTo() instanceof Mark) {
+            Mark mark = (Mark) mapping.getMappedTo();
             event = new RegattaLogDeviceMarkMappingEventImpl(now, now, getService().getServerAuthor(), UUID.randomUUID(), 
                     mark, mapping.getDevice(), from, to);
-        } else if (dto.mappedTo instanceof CompetitorWithBoatDTO) {
-            Competitor competitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(
-                    ((CompetitorWithBoatDTO) dto.mappedTo).getIdAsString());
+        } else if (mapping.getMappedTo() instanceof Competitor) {
+            Competitor competitor = (Competitor) mapping.getMappedTo();
             if (mapping.getDevice().getIdentifierType().equals(ExpeditionSensorDeviceIdentifier.TYPE)) {
                 event = new RegattaLogDeviceCompetitorExpeditionExtendedMappingEventImpl(
                         now, now, getService().getServerAuthor(), UUID.randomUUID(), 
@@ -6240,9 +6253,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 event = new RegattaLogDeviceCompetitorMappingEventImpl(now, now, getService().getServerAuthor(), UUID.randomUUID(), 
                         competitor, mapping.getDevice(), from, to);
             }
-        } else if (dto.mappedTo instanceof BoatDTO) {
-            final Boat boat = getService().getCompetitorAndBoatStore()
-                    .getExistingBoatByIdAsString(((BoatDTO) dto.mappedTo).getIdAsString());
+        } else if (mapping.getMappedTo() instanceof Boat) {
+            final Boat boat = (Boat) mapping.getMappedTo();
             event = new RegattaLogDeviceBoatMappingEventImpl(now, now, getService().getServerAuthor(), UUID.randomUUID(), 
                     boat, mapping.getDevice(), from, to);
         } else {
@@ -6294,9 +6306,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Mark mark = convertToMark(((MarkDTO) dto.mappedTo), true);
             //expect UUIDs
             return new DeviceMappingImpl<Mark>(mark, device, timeRange, dto.originalRaceLogEventIds, RegattaLogDeviceMarkMappingEventImpl.class);
-        } else if (dto.mappedTo instanceof CompetitorWithBoatDTO) {
+        } else if (dto.mappedTo instanceof CompetitorDTO) {
             Competitor competitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(
-                    ((CompetitorWithBoatDTO) dto.mappedTo).getIdAsString());
+                    ((CompetitorDTO) dto.mappedTo).getIdAsString());
             return new DeviceMappingImpl<Competitor>(competitor, device, timeRange, dto.originalRaceLogEventIds, RegattaLogDeviceCompetitorMappingEventImpl.class);
         } else if (dto.mappedTo instanceof BoatDTO) {
             final Boat boat = getService().getCompetitorAndBoatStore()
@@ -6664,6 +6676,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public FileStorageServicePropertyErrorsDTO testFileStorageServiceProperties(String serviceName, String localeInfoName) throws IOException {
         try {
+            if (serviceName == null) {
+                serviceName = getActiveFileStorageServiceName();
+            }
             FileStorageService service = getFileStorageService(serviceName);
             if (service != null) {
                 service.testProperties();
@@ -7881,5 +7896,255 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 ShardingContext.clearShardingConstraint(identifiedShardingType);
             }
         }
+    }
+
+    @Override
+    public Set<ImageDTO> resizeImage(final ImageResizingTaskDTO resizingTask) throws Exception {
+        if (resizingTask.getResizingTask() == null || resizingTask.getResizingTask().size() == 0) {
+            throw new InvalidAttributeValueException("Resizing Task can not be null or empty");
+        }
+        final ImageConverter converter = new ImageConverter();
+        // calculating the fileType of the image by its uri
+        final String sourceRef = resizingTask.getImage().getSourceRef();
+        final String fileType = sourceRef.substring(sourceRef.lastIndexOf(".") + 1);
+        final ImageWithMetadata imageAndMetadata = converter
+                .loadImage(HttpUrlConnectionHelper.redirectConnection(new URL(sourceRef)).getInputStream(), fileType);
+        final List<BufferedImage> resizedImages = converter.convertImage(imageAndMetadata.getImage(),
+                resizingTask.getResizingTask());
+        final List<String> sourceRefs = storeImages(resizedImages, fileType, imageAndMetadata.getMetadata());
+        // if an error occures while storing the files, all already stored files are removed before throwing an
+        // exception
+        if (sourceRefs == null || sourceRefs.size() < resizingTask.getResizingTask().size()) {
+            for (String alreadyStoredFileRef : sourceRefs) {
+                try {
+                    getService().getFileStorageManagementService().getActiveFileStorageService()
+                            .removeFile(new URI(alreadyStoredFileRef));
+                } catch (Exception e) {
+                }
+                // Exception occured while trying to revert changes after exception
+                // This only keeps some trash on the FileStorage
+            }
+            throw new Exception("Error occured while storing images on the FileStorage");
+        }
+        final Set<ImageDTO> resizedImagesAsDTOs = createImageDTOsFromURLsAndResizingTask(sourceRefs, resizingTask,
+                resizedImages);
+        for (String tag : resizingTask.getImage().getTags()) {
+            final MediaTagConstants predefinedTag = MediaTagConstants.fromName(tag);
+            if (predefinedTag != null && !resizingTask.getResizingTask().contains(predefinedTag)) {
+                final ImageDTO image = resizingTask.getImage();
+                for (MediaTagConstants tagConstant : resizingTask.getResizingTask()) {
+                    image.getTags().remove(tagConstant.getName());
+                }
+                resizedImagesAsDTOs.add(image);
+            }
+        }
+        return resizedImagesAsDTOs;
+    }
+
+    /**
+     * Takes a list of source URLs, the resizing task and the sizes of the resized images to create a ImageDTO for every
+     * resized image
+     * 
+     * @author Robin Fleige (D067799)
+     * 
+     * @param sourceRefs
+     *            list of source URLs
+     * @param resizingTask
+     *            the resizing task, with information about resizes and the original ImageDTO
+     * @param images
+     *            the BufferedImages, used to get their width and height
+     * @returns a List of ImageDTOs that contains an ImageDTO per resized image
+     */
+    private Set<ImageDTO> createImageDTOsFromURLsAndResizingTask(final List<String> sourceRefs,
+            final ImageResizingTaskDTO resizingTask, final List<BufferedImage> images) {
+        final Set<ImageDTO> imageDTOs = new HashSet<ImageDTO>();
+        for (int i = 0; i < sourceRefs.size(); i++) {
+            final ImageDTO imageDTO = resizingTask.cloneImageDTO();
+            for (MediaTagConstants tag : MediaTagConstants.values()) {
+                imageDTO.getTags().remove(tag.getName());
+            }
+            imageDTO.getTags().add(resizingTask.getResizingTask().get(i).getName());
+            imageDTO.setSourceRef(sourceRefs.get(i));
+            imageDTO.setSizeInPx(images.get(i).getWidth(), images.get(i).getHeight());
+            imageDTOs.add(imageDTO);
+        }
+        return imageDTOs;
+    }
+
+    /**
+     * Stores a list of BufferedImages and returns a list of URLs as Strings under which the BufferedImages are stored
+     * 
+     * @author Robin Fleige (D067799)
+     * 
+     * @param resizedImages
+     *            the BufferedImages that will be stored
+     * @param fileType
+     *            the format of the image, for example "png", "jpeg" or "jpg"
+     * @param metadata
+     *            the metadata of the original image
+     * @returns a list of URLs as Strings under which the BufferedImages are stored
+     */
+    private List<String> storeImages(final List<BufferedImage> resizedImages, final String fileType,
+            final IIOMetadata metadata) {
+        final List<String> sourceRefs = new ArrayList<>();
+
+        try {
+            for (final BufferedImage resizedImage : resizedImages) {
+                final InputStream fileStorageStream = new ImageConverter().imageWithMetadataToInputStream(resizedImage,
+                        metadata, fileType);
+                sourceRefs.add(getService().getFileStorageManagementService().getActiveFileStorageService()
+                        .storeFile(fileStorageStream, "." + fileType, new Long(fileStorageStream.available()))
+                        .toString());
+            }
+        } catch (NoCorrespondingServiceRegisteredException | IOException | OperationFailedException
+                | InvalidPropertiesException e) {
+            logger.log(Level.SEVERE, "Could not store file. Cause: " + e.getMessage());
+        }
+        return sourceRefs;
+    }
+    
+    @Override
+    public SuccessInfo addTag(String leaderboardName, String raceColumnName, String fleetName, String tag,
+            String comment, String imageURL, String resizedImageURL, boolean visibleForPublic,
+            TimePoint raceTimepoint) {
+        SuccessInfo successInfo = new SuccessInfo(true, null, null, null);
+        try {
+            getService().getTaggingService().addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL,
+                    resizedImageURL, visibleForPublic, raceTimepoint);
+        } catch (AuthorizationException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "missingAuthorization"),
+                    null, null);
+        } catch (IllegalArgumentException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "invalidParameters"), null,
+                    null);
+        } catch (RaceLogNotFoundException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "raceLogNotFound"), null,
+                    null);
+        } catch (ServiceNotFoundException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "securityServiceNotFound"),
+                    null, null);
+        } catch (TagAlreadyExistsException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "tagAlreadyExists"), null,
+                    null);
+        } catch (Exception e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "unknownError"), null,
+                    null);
+        }
+        return successInfo;
+    }
+
+    @Override
+    public SuccessInfo removeTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag) {
+        SuccessInfo successInfo = new SuccessInfo(true, null, null, null);
+        try {
+            getService().getTaggingService().removeTag(leaderboardName, raceColumnName, fleetName, tag);
+        } catch (AuthorizationException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "missingAuthorization"),
+                    null, null);
+        } catch (IllegalArgumentException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "invalidParameters"), null,
+                    null);
+        } catch (NotRevokableException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "tagNotRevokable"), null,
+                    null);
+        } catch (RaceLogNotFoundException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "raceLogNotFound"), null,
+                    null);
+        } catch (ServiceNotFoundException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "securityServiceNotFound"),
+                    null, null);
+        } catch (Exception e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "unknownError"), null,
+                    null);
+        }
+        return successInfo;
+    }
+
+    @Override
+    public SuccessInfo updateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tagToUpdate,
+            String tag, String comment, String imageURL, String resizedImageURL, boolean visibleForPublic) {
+        SuccessInfo successInfo = new SuccessInfo(true, null, null, null);
+        try {
+            getService().getTaggingService().updateTag(leaderboardName, raceColumnName, fleetName, tagToUpdate, tag,
+                    comment, imageURL, resizedImageURL, visibleForPublic);
+        } catch (AuthorizationException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "missingAuthorization"),
+                    null, null);
+        } catch (IllegalArgumentException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "invalidParameters"), null,
+                    null);
+        } catch (NotRevokableException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "tagNotRevokable"), null,
+                    null);
+        } catch (RaceLogNotFoundException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "raceLogNotFound"), null,
+                    null);
+        } catch (ServiceNotFoundException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "securityServiceNotFound"),
+                    null, null);
+        } catch (TagAlreadyExistsException e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "tagAlreadyExists"), null,
+                    null);
+        } catch (Exception e) {
+            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "unknownError"), null,
+                    null);
+        }
+        return successInfo;
+    }
+
+    @Override
+    public List<TagDTO> getAllTags(String leaderboardName, String raceColumnName, String fleetName) {
+        List<TagDTO> result = new ArrayList<TagDTO>();
+        result.addAll(getPublicTags(leaderboardName, raceColumnName, fleetName));
+        result.addAll(getPrivateTags(leaderboardName, raceColumnName, fleetName));
+        return result;
+    }
+
+    @Override
+    public List<TagDTO> getPublicTags(String leaderboardName, String raceColumnName, String fleetName) {
+        List<TagDTO> result = new ArrayList<TagDTO>();
+        try {
+            result.addAll(getService().getTaggingService().getPublicTags(leaderboardName, raceColumnName, fleetName, null, false));
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Problem obtaining public tags for leaderboard "+leaderboardName+", race column "+raceColumnName+
+                    ", fleet "+fleetName, e);
+            // do nothing as method will always return at least an empty list
+        }
+        return result;
+    }
+
+    @Override
+    public List<TagDTO> getPrivateTags(String leaderboardName, String raceColumnName, String fleetName) {
+        List<TagDTO> result = new ArrayList<TagDTO>();
+        try {
+            result.addAll(getService().getTaggingService().getPrivateTags(leaderboardName, raceColumnName, fleetName));
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Problem obtaining private tags for leaderboard "+leaderboardName+", race column "+raceColumnName+
+                    ", fleet "+fleetName, e);
+            // do nothing as method will always return at least an empty list
+        }
+        return result;
+    }
+
+    @Override
+    public RaceTimesInfoDTO getRaceTimesInfoIncludingTags(RegattaAndRaceIdentifier raceIdentifier,
+            TimePoint searchSince) {
+        RaceTimesInfoDTO raceTimesInfo = getRaceTimesInfo(raceIdentifier);
+        raceTimesInfo.setTags(getService().getTaggingService().getPublicTags(raceIdentifier, searchSince));
+        return raceTimesInfo;
+    }
+
+    @Override
+    public List<RaceTimesInfoDTO> getRaceTimesInfosIncludingTags(Collection<RegattaAndRaceIdentifier> raceIdentifiers,
+            Map<RegattaAndRaceIdentifier, TimePoint> searchSinceMap) {
+        List<RaceTimesInfoDTO> raceTimesInfos = new ArrayList<RaceTimesInfoDTO>();
+        for (RegattaAndRaceIdentifier raceIdentifier : raceIdentifiers) {
+            RaceTimesInfoDTO raceTimesInfo = getRaceTimesInfoIncludingTags(raceIdentifier,
+                    searchSinceMap.get(raceIdentifier));
+            if (raceTimesInfo != null) {
+                raceTimesInfos.add(raceTimesInfo);
+            }
+        }
+        return raceTimesInfos;
     }
 }

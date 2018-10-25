@@ -42,6 +42,7 @@ import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RaceDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
+import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.domain.common.racelog.RacingProcedureType;
 import com.sap.sailing.domain.common.tracking.impl.PreciseCompactGPSFixMovingImpl.PreciseCompactPosition;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
@@ -108,10 +109,12 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.gwt.client.ServerInfoRetriever;
 import com.sap.sse.gwt.client.filestorage.FileStorageManagementGwtServiceAsync;
 import com.sap.sse.gwt.client.media.ImageDTO;
+import com.sap.sse.gwt.client.media.ImageResizingTaskDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.gwt.client.replication.RemoteReplicationServiceAsync;
 import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
+import com.sap.sse.security.ui.shared.SuccessInfo;
 
 /**
  * The async counterpart of {@link SailingService}
@@ -237,8 +240,14 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getRaceTimesInfo(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<RaceTimesInfoDTO> callback);
 
+    void getRaceTimesInfoIncludingTags(RegattaAndRaceIdentifier raceIdentifier, TimePoint searchSince,
+            AsyncCallback<RaceTimesInfoDTO> callback);
+
     void getRaceTimesInfos(Collection<RegattaAndRaceIdentifier> raceIdentifiers,
             AsyncCallback<List<RaceTimesInfoDTO>> callback);
+
+    void getRaceTimesInfosIncludingTags(Collection<RegattaAndRaceIdentifier> raceIdentifiers,
+            Map<RegattaAndRaceIdentifier, TimePoint> searchSinceMap, AsyncCallback<List<RaceTimesInfoDTO>> callback);
 
     void getCoursePositions(RegattaAndRaceIdentifier raceIdentifier, Date date,
             AsyncCallback<CoursePositionsDTO> asyncCallback);
@@ -725,6 +734,25 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void addCourseDefinitionToRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             List<Util.Pair<ControlPointDTO, PassingInstruction>> course, AsyncCallback<Void> callback);
 
+    void addTag(String leaderboardName, String raceColumnName, String fleetName, String tag, String comment,
+            String imageURL, String resizedImageURL, boolean visibleForPublic, TimePoint raceTimepoint,
+            AsyncCallback<SuccessInfo> asyncCallback);
+
+    void updateTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tagToUpdate, String tag,
+            String comment, String imageURL, String resizedImageURL, boolean visibleForPublic, AsyncCallback<SuccessInfo> asyncCallback);
+
+    void removeTag(String leaderboardName, String raceColumnName, String fleetName, TagDTO tag,
+            AsyncCallback<SuccessInfo> asyncCallback);
+
+    void getAllTags(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<List<TagDTO>> asyncCallback);
+
+    void getPublicTags(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<List<TagDTO>> asyncCallback);
+
+    void getPrivateTags(String leaderboardName, String raceColumnName, String fleetName,
+            AsyncCallback<List<TagDTO>> asyncCallback);
+
     void getLastCourseDefinitionInRaceLog(String leaderboardName, String raceColumnName, String fleetName,
             AsyncCallback<RaceCourseDTO> callback);
 
@@ -989,4 +1017,11 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      * @see SailingService#checkIfRaceIsTracking(RegattaAndRaceIdentifier)
      */
     void checkIfRaceIsTracking(RegattaAndRaceIdentifier raceIdentifier, AsyncCallback<Boolean> asyncCallback);
+
+    /**
+     * @see SailingService#resizeImage(ImageResizingTaskDTO)
+     * @param imageResizingTask the information on how the contained ImageDTO should be resized
+     * @param asyncCallback The callback called after finishing resizing, storing the returned ImageDTOs somewhere is proposed
+     */
+    void resizeImage(ImageResizingTaskDTO imageResizingTask, AsyncCallback<Set<ImageDTO>> asyncCallback);
 }

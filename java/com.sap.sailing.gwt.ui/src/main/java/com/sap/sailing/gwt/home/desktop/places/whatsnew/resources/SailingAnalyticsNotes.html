@@ -4,6 +4,23 @@
 <div id="mainContent">
     <h4 class="articleHeadline">What's New - SAP Sailing Analytics</h4>
       <div class="innerContent">
+         <h5 class="articleSubheadline">October 2018</h5>
+         <ul class="bulletList">
+            <li>Searching for phrases containing whitespace characters with double quotes such as "Tobias Schadewaldt" will now work
+                across a distributed server and event landscape.</li>  
+                <li>A column showing the used boat can now be shown for each extended race column in leaderboards with multiple races.
+                This new column is activated per default, if the boats change between races. </li>  
+         </ul>
+
+         <h5 class="articleSubheadline">September 2018</h5>
+         <ul class="bulletList">
+            <li>In <tt>RaceBoard.html</tt> is a new feature available which allows users to create tags consisting of a title
+            and optional comment and/or image per race. These tags can be saved visible only for the creating user or for everbody 
+            (requiring special permissions) and can be used to mark interesting situations during a race. Tag buttons allow users to 
+            save frequently used tags as a preset which can be used quckily and do not require repeating input of the same tag.
+            Those tags and their comments are also used in order to find the containing leaderboard via the global search.</li>
+         </ul>
+
          <h5 class="articleSubheadline">August 2018</h5>
          <ul class="bulletList">
             <li>The windstreamlets are now colored dynamically according to the wind fields maximum and minimum wind speed.</li>  
@@ -21,7 +38,7 @@
                   <li>The suggested statistics are now grouped by their retriever chain</li>
                   <li>The aggregator and statistic control switched places and are now linked together. This means that
                      all aggregators/statistics can always be selected, but are grayed out if one component isn't supported
-                     by the other (e.g. an aggreagtor doesn't exist for the currently selected statistic). The other
+                     by the other (e.g. an aggregator doesn't exist for the currently selected statistic). The other
                      component will be reset when an unsupported component is selected.</li>
                   <li>Counting aggregators now work directly on the retrieved data elements and don't require the
                      selection of a specific statistic. Changing to a counting aggregator when a statistic is selected

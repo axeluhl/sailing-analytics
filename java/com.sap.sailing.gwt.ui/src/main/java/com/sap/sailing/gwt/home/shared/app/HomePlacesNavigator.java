@@ -10,6 +10,7 @@ import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
+import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.imprint.ImprintPlace;
 import com.sap.sailing.gwt.home.shared.places.morelogininformation.MoreLoginInformationPlace;
@@ -74,9 +75,9 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
         return createPlaceNavigation(baseUrl, isOnRemoteServer, place);
     }
 
-    public PlaceNavigation<SeriesDefaultPlace> getEventSeriesNavigation(String seriesId, String baseUrl,
+    public PlaceNavigation<SeriesDefaultPlace> getEventSeriesNavigation(SeriesContext ctx, String baseUrl,
             boolean isOnRemoteServer) {
-        SeriesDefaultPlace place = new SeriesDefaultPlace(seriesId);
+        SeriesDefaultPlace place = new SeriesDefaultPlace(ctx);
         return createPlaceNavigation(baseUrl, isOnRemoteServer, place);
     }
 

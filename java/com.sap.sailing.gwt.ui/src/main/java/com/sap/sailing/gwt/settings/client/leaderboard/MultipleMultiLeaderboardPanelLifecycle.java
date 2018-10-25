@@ -1,7 +1,8 @@
 package com.sap.sailing.gwt.settings.client.leaderboard;
 
+import java.util.Collections;
+
 import com.sap.sailing.domain.common.DetailType;
-import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 
 /**
@@ -11,8 +12,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 public class MultipleMultiLeaderboardPanelLifecycle extends MultiRaceLeaderboardPanelLifecycle {
     public static final String MID = "mlb";
 
-    public MultipleMultiLeaderboardPanelLifecycle(AbstractLeaderboardDTO leaderboard, StringMessages stringMessages, Iterable<DetailType> availableDetailTypes) {
-        super(leaderboard, stringMessages, availableDetailTypes);
+    public MultipleMultiLeaderboardPanelLifecycle(StringMessages stringMessages, Iterable<DetailType> availableDetailTypes) {
+        super(Collections.emptyList(), false, stringMessages, availableDetailTypes);
     }
 
     @Override
@@ -21,8 +22,8 @@ public class MultipleMultiLeaderboardPanelLifecycle extends MultiRaceLeaderboard
     }
 
     @Override
-    public MultiRaceLeaderboardSettings extractDocumentSettings(MultiRaceLeaderboardSettings leaderboardSettings) {
-        return createDefaultSettings();
+    public MultiRaceLeaderboardSettings extractDocumentSettings(MultiRaceLeaderboardSettings currentLeaderboardSettings) {
+        return currentLeaderboardSettings.withNamesOfRaceColumnsToShowDefaultsAndValues(Collections.emptyList());
     }
 
     @Override

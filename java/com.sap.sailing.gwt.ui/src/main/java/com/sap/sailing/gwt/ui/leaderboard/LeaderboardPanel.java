@@ -1158,6 +1158,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          */
         private final List<LegColumn> legColumns;
 
+        private BoatInfoColumn<LeaderboardRowDTO> boatInfoColumn;
+
         public TextRaceColumn(RaceColumnDTO race, boolean expandable, SortingOrder preferredSortingOrder,
                 String headerStyle, String columnStyle) {
             super(race, expandable, new TextCell(), preferredSortingOrder, headerStyle, columnStyle);
@@ -1492,6 +1494,16 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             for (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column : super.getDirectChildren()) {
                 result.add(column);
             }
+
+            if (isExpanded() && getLeaderboard().canBoatsOfCompetitorsChangePerRace && selectedRaceDetails.contains(DetailType.RACE_DISPLAY_BOATS)) {
+                if (boatInfoColumn == null) {
+                    BoatFetcher<LeaderboardRowDTO> boatFetcher = (LeaderboardRowDTO row) -> getLeaderboard()
+                            .getBoatOfCompetitor(getRaceColumnName(), row.competitor);
+                    boatInfoColumn = new BoatInfoColumn<LeaderboardRowDTO>(boatFetcher, style);
+                }
+                result.add(boatInfoColumn);
+            }
+
             if (isExpanded() && selectedRaceDetails.contains(DetailType.RACE_DISPLAY_LEGS)) {
                 // it is important to re-use existing LegColumn objects because
                 // removing the columns from the table
@@ -2465,6 +2477,11 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
                                 final boolean wasEmptyRaceColumnSelection = Util
                                         .isEmpty(raceColumnSelection.getSelectedRaceColumns());
                                 updateLeaderboard(result);
+                                // This constructs a new settings object with juse the default for namesOfRaceColumnsToShow being adjusted.
+                                // In case the namesOfRaceColumnsToShow setting isn't changed this will also cause the value to change.
+                                // This causes in consequence potentiallyChangedSettings to not be equal to currentSettings anymore.
+                                // We then apply the new settings to make all new race columns visible.
+                                // TODO check if there is an easier way to get to know if we need to reapply the settings.
                                 LS potentiallyChangedSettings = overrideDefaultsForNamesOfRaceColumns(currentSettings,
                                         result);
                                 // reapply, when this is the first time we received the race columns or if columns have

@@ -39,14 +39,4 @@ public class RaceTimePanelLifecycle implements
     public boolean hasSettings() {
         return true;
     }
-
-    @Override
-    public RaceTimePanelSettings extractUserSettings(RaceTimePanelSettings settings) {
-        return settings;
-    }
-
-    @Override
-    public RaceTimePanelSettings extractDocumentSettings(RaceTimePanelSettings settings) {
-        return settings;
-    }
 }

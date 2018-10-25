@@ -83,7 +83,7 @@ class RaceLogTrackingInvitationMailBuilder {
     }
 
     RaceLogTrackingInvitationMailBuilder addEventLogo(final Event event) {
-        final List<ImageDescriptor> imagesWithTag = event.findImagesWithTag(MediaTagConstants.LOGO);
+        final List<ImageDescriptor> imagesWithTag = event.findImagesWithTag(MediaTagConstants.LOGO.getName());
         if (imagesWithTag != null && !imagesWithTag.isEmpty()) {
             final ImageDescriptor imageDescriptor = imagesWithTag.get(0);
             final String logoUrl = imageDescriptor.getURL().toString();

@@ -55,9 +55,9 @@ Four solutions come to mind. (1) The creator of a data object could always be gr
 
 (3) There is an alternative approach to ownership. In this approach, a single user would own a data object so he can do everything with it. The tenant would then be a kind of secondary owner or group in Linux terms. This solves the problem that users could have no permissions to e.g. remove data objects that they have just created by accident. However, it also introduces a second layer of ownership. (4) Only grant the create permission when the user also has the corresponding delete permission.
 
-Approaches (2) and (4) are impractical. (2) is too complicated. The user would need delete permission for everything in the tenant for (4) to work.
+(4) A group and user ownership will be defined for objects created by a user. The group ownership will be decided based on a default group that the user may decide upon sign-in and which could default to the server's default user group. Before creating an object, the create permission is verified. This will then include the ownership that will be used for the new object. In particular, roles that the user has and which are qualified for the group/user ownership of the new object, the roles' permissions will apply. E.g., if the user has the ``admin`` role qualified for the server's default user group and this default user group is also used for the group ownership of new objects, then for each object that the user creates the user will also have permission to remove it again.
 
-Approach (1) solves the problem on hand, however these explicitly granted remove permissions are not just removed when the ownership of the data object changes, but remain. This could lead to users being able to delete data objects in other tenants, just because they created the object. Approach (3) more explicitly creates an ownership relation that can be edited and is thus chosen.
+Approach (4) solves the problem at hand and requires no special rules other than that the ownership of an object in creation is used for a check already *before* the object exists and has its ownership assigned.
 
 As the tenant is a data object itself, it also has an owner. The owning tenant of a tenant is the tenant itself. (TODO: Should it be possible to change the tenant owner of a tenant? What is the best default tenant owner for a tenant? The tenant itself or the tenant to which the user creating the tenant is currently logged on?)
 
@@ -190,13 +190,11 @@ It is always assumed that the ID of the user is “user” and the ID of its ten
 
 The above describes the data model that is relevant to the composite realm that implements the `isPermitted` function. The “permission” parameter should be of the pattern “type:action:instance”. It is assumed that the user (with associated permissions and roles), tenant, ownership associations and ACL entries are available. The following describes in which order the different sources for permissions are checked and how they depend on each other.
 
-1. Check if the user is the owning user or belongs to a tenant that is owning tenant of the data object for which the permission is requested
-  * If this is true return true
-2. Check if the ACL entries grant or explicitly revoke the permission to the user under consideration of the user’s roles
+1. Check if the ACL entries grant or explicitly revoke the permission to the user under consideration of the user’s roles
   * If there is an entry, return true if granted and false if revoked, but take the most explicit entry and in doubt return false
-3. Check if the permission is directly assigned to the user
+2. Check if the permission is directly assigned to the user
   * If this is true return true
-4. Check if a role grants the permission to the user, which for instances of parameterized roles requires the tenant/user parameter values to match the object's tenant / user.
+3. Check if a role grants the permission to the user, which for instances of qualified roles requires the tenant/user parameter values to match the object's tenant / user.
   * If this is true return true.
 
 ## Migration

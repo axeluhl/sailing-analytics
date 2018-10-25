@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.shared.partials.videoplayer;
 
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Composite;
@@ -73,12 +72,10 @@ public class VideoPlayer extends Composite {
         videoJSPlayer.setVideo(video.getMimeType(), video.getSourceRef());
     }
     
-    public Element getVideoElement() {
-        return videoJSPlayer.getVideoElement();
-    }
     public boolean isFullscreen() {
         return videoJSPlayer.isFullscreen();
     }
+
     public boolean paused() {
         return videoJSPlayer.paused();
     }

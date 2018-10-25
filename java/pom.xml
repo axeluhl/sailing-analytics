@@ -140,6 +140,8 @@
         <module>com.sap.sailing.dashboards.gwt</module>
         <module>com.sap.sailing.feature</module>
         <module>org.moxieapps.gwt.highcharts</module>
+        <module>com.google.gwt.ajaxloader</module>
+        <module>com.github.branflake2267.gwt-maps-api</module>
         <module>com.sap.sailing.grib</module>
         <module>com.sap.sailing.grib.test</module>
         <module>com.sap.sailing.nmeaconnector</module>

@@ -45,7 +45,7 @@ SERVER_STARTUP_NOTIFY=leon.radeck@sap.com
 
 ### 2. SAP instance configuration
 
-<img style="float: right" src="https://photos-1.dropbox.com/t/2/AABX17gY1wPcAmgxTjIUQju9wMnxgRFUa4OgOfUcpQPvkA/12/379951689/png/32x32/1/_/1/2/image1.PNG/EJmPwIIDGL0ZIAcoBw/vkl8xdvmZzFhJzi9lV_d78jD6jKNURBkF7C-XX2xVUk?preserve_transparency=1&size=1600x1200&size_mode=3" />
+<img style="float: right" src="https://wiki.sapsailing.com/wiki/images/aws_automation/activity_diagram.png" />
 
 Necessary configuration steps:
 
@@ -78,7 +78,7 @@ To reach the SAP instance by a specific URL (e.g. wcsantander2017.sapsailing.com
 - Configure the health check of the target group
 - Register instance within the target group
 
-<img style="float: right" src="https://photos-4.dropbox.com/t/2/AAAYdNOq2vlgkb-kUcQjkKOAxeJI2HoYvvl1El8_gUwHbA/12/379951689/png/32x32/1/_/1/2/image2.PNG/EJmPwIIDGL0ZIAcoBw/qm7Nd0NMACr7EJ67c_7xK6seOn-4raimfvpE_07Pkys?preserve_transparency=1&size=1600x1200&size_mode=3" />
+<img style="float: right" src="https://wiki.sapsailing.com/wiki/images/aws_automation/alb_overview.png" />
 
 Translation: Way of a HTTP/HTTPS request from the load balancer to the sap instance (simplified)
 
@@ -249,7 +249,7 @@ The script is built for the processing of parameters but the functionality is cu
 
 User input flow example: 
 
-<img style="float: right" src="https://photos-4.dropbox.com/t/2/AAA8lXNig-MSsQhRmhyIYOD1sgi59kfQr8NDqs5bPRenQA/12/379951689/png/32x32/1/_/1/2/image3.PNG/EJmPwIIDGL0ZIAcoBw/fF8VkVypSPKmR_NttUndnjGFJKkEk_ILuOF19hHAVbg?preserve_transparency=1&size=1600x1200&size_mode=3" />
+<img style="float: right" src="https://wiki.sapsailing.com/wiki/images/aws_automation/sequence_diagram_1.png" />
 
 Translation comment (1): 
 
@@ -262,7 +262,7 @@ The user input is assigned to the global variable region.
 
 If the input variable is not a text but a type of resource from AWS (e.g. load balancer) the following mechanism will take effect:
 
-<img style="float: right" src="https://photos-6.dropbox.com/t/2/AADRrPHFrAKtSKzuWZTPrcZbfuW_vB0tUp8nan8iJ0Zzcg/12/379951689/png/32x32/1/_/1/2/image4.PNG/EJmPwIIDGL0ZIAcoBw/LMRyG1oabKBs0d_vv7rPwDpTEY4lzGIHqBfV2rNU5hY?preserve_transparency=1&size=1600x1200&size_mode=3" />
+<img style="float: right" src="https://wiki.sapsailing.com/wiki/images/aws_automation/sequence_diagram_2.png" />
 
 Translation comment (1): 
 
@@ -356,7 +356,7 @@ The user can assign values to that variable that are then used as default propos
 
 1. Start EC2 instance 
 2. Query for its dns name for later ssh connection 
-3. WWait until ssh connection is established
+3. Wait until ssh connection is established
 4. Create event and change admin password if necessary
 5. Create launch template for replica with user data variable "REPLICATION_CHANNEL" matching to its master
 

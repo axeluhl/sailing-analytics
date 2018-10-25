@@ -10,6 +10,7 @@ public class VideoDTO extends AbstractMediaDTO {
     private String thumbnailRef;
     
     /** for GWT */
+    @Deprecated
     protected VideoDTO() {
     }
 
@@ -34,7 +35,7 @@ public class VideoDTO extends AbstractMediaDTO {
     }
 
     public boolean isFeatured() {
-        return hasTag(MediaTagConstants.FEATURED);
+        return hasTag(MediaTagConstants.FEATURED.getName());
     }
     
     @Override

@@ -1,0 +1,472 @@
+/**************************** General ****************************/
+.hidden {
+	display: none;
+	height: 0;
+	width: 0;
+	margin: 0;
+	padding: 0;
+	border: none;
+}
+
+.taggingPanel {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	margin: 0;
+	margin-left: 3px;
+	/* set visible to show outline of input fields */
+	overflow: visible !important;
+}
+
+.buttonsPanel {
+	display: inline-block;
+	width: 100%;
+	text-align: right;
+}
+
+.taggingPanel .buttonsPanel {
+	padding-right: 5px;
+}
+
+.taggingPanel .buttonsPanel button {
+    margin-bottom: 5px;
+}
+
+.taggingPanel .buttonsPanel:empty {
+	display: none;
+	margin: 0;
+}
+
+.taggingPanel button.toggleEditState {
+	position: absolute;
+	bottom: 5px;
+	left: 50%;
+	transform: translate(-50%, 0);
+	height: 40px;
+	width: 40px;
+	border: none;
+	border-radius: 20px;
+	box-shadow: 2px 2px 3px lightgrey;
+	background-color: #efaa00;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 40%;
+}
+
+.taggingPanel button.toggleEditState:hover {
+	background-color: #d79900;
+	cursor: pointer;
+	transition-duration: 0.2s;
+	transition-property: background-color;
+}
+
+.confirmationDialog {
+	background-color: white;
+}
+
+.confirmationDialogPanel {
+	display: inline-block;
+}
+
+@external errorLabel;
+.errorLabel {
+    padding-top: 5px;
+}
+
+.tagModificationPanel .errorLabel {
+	font-size: 14px;
+}
+
+/**************************** Tag-Cells ****************************/
+.tagCell {
+	box-shadow: 1px 2px 3px lightgrey;
+	margin-bottom: 5px;
+	margin-right: 3px;
+	padding: 5px 5px 0;
+	border: 1px solid lightgrey;
+	border-radius: 3px;
+}
+
+.tagCellHeading {
+	position: relative;
+	font-weight: bold;
+	word-wrap: break-word;
+}
+
+.tagCellHeading .tagCellHeadingButtons {
+	/* Use float instead of position:absolute to allow tag heading wrap around action buttons */
+	float: right;
+	text-align: right;
+}
+
+.tagCellHeading .tagCellHeadingButtons .tagActionButton {
+	padding: 2px;
+	border: none;
+	border-radius: 3px;
+	background: transparent;
+	line-height: initial;
+}
+
+.tagCellHeading .tagCellHeadingButtons .tagActionButton:hover {
+	cursor: pointer;
+	outline: none;
+	/* background-color: lightgrey;
+	transition-duration: 0.2s;
+	transition-property: background-color; */
+}
+
+.tagCellImage {
+	text-align: center;
+	margin: 0 -5px -3px;
+	padding: 5px 0 0;
+}
+
+.tagCellImage img {
+	min-width: 100%;
+	max-Width: 100%;
+	height: auto;
+}
+
+.tagCellImage:not(:last-child) {
+	margin-bottom: 0;
+	padding-bottom: 5px;
+}
+
+.tagCellImage:last-child img {
+	border-radius: 0 0 3px 3px;
+}
+
+.tagCellCreated {
+	font-size: 75%;
+	padding: 2px 0 5px;
+}
+
+.tagCellComment {
+	font-size: 85%;
+	padding-bottom: 5px;
+}
+
+/*
+ * In HeaderPanel (panel from GWT used for tagging panel), margin
+ * between content panel (tag cell list) and footer/header (tag creation 
+ * panel/filterbar) needs to be provided by footer/header and NOT by the
+ * content panel (which class tagCellListPanel is used for)!
+ */
+.tagCellListPanel {
+	height: 100%;
+	overflow: auto;
+}
+
+/**************************** Tag-Buttons ****************************/
+.tagButtonDialog {
+	background-color: white;
+	max-width: 95%;
+}
+
+@media screen and (min-width: 800px) {
+	.tagButtonDialog {
+		max-width: 90%;
+	}
+}
+
+@media screen and (min-width: 1000px) {
+	.tagButtonDialog {
+		max-width: 75%;
+	}
+}
+
+@media screen and (min-width: 1200px) {
+    .tagButtonDialog {
+        max-width: 65%;
+    }
+}
+
+.tagButtonDialogPanel {
+	display: inline-block;
+}
+
+.tagButtonDialogPanel .tagInputPanel {
+	padding: 0;
+}
+
+.tagDialogButton {
+	max-width: 100%;
+	cursor: pointer;
+}
+
+.buttonsPanel>.tagDialogButton:not(:first-child) {
+	margin-left: 5px;
+}
+
+.tagButtonTable {
+	width: 100%;
+	margin: 5px 0 0;
+	padding: 2px;
+	border-radius: 4px;
+	border: 1px solid #cecece;
+    overflow: scroll;
+	table-layout: fixed;
+}
+
+.tagButtonTableWrapper {
+	max-height: 50vh;
+	overflow-y: auto;
+}
+
+.tagPreviewPanel {
+	margin: 5px;
+	max-width: 500px;
+}
+
+.tagButtonPanel {
+	text-align: left;
+}
+
+.tagButtonPanelHeader {
+	font-weight: bold;
+	margin-bottom: 5px;
+	padding-top: 5px;
+}
+
+/**************************** Tag input / modification ****************************/
+.tagModificationPanel {
+	width: 100%;
+}
+
+.tagModificationPanelHeader {
+	padding-top: 5px;
+}
+
+.tagModificationPanelHeader .tagModificationPanelHeaderLabel {
+    font-weight: bold;
+}
+
+.tagModificationPanelHeader .tagModificationPanelHeaderButton {
+	position: absolute;
+	top: 5px;
+	right: 5px;
+	border: none;
+	border-radius: 3px;
+	background-color: transparent;
+}
+
+.tagModificationPanelHeader .tagModificationPanelHeaderButton:hover {
+    background-color: lightgrey;
+    cursor: pointer;
+    transition-duration: 0.2s;
+    transition-property: background-color;
+}
+
+.tagInputPanel {
+	width: 100%;
+	margin: 5px 0 0;
+	padding-right: 5px;
+}
+
+.tagInputPanel table tr td:first-child {
+	vertical-align: top;
+}
+
+@external url-textbox;
+.tagInputPanel .url-textbox {
+	width: auto !important;
+}
+
+.tagInputPanelLabel {
+    vertical-align: top;	
+}
+
+.tagInputPanelTag,
+.tagInputPanelComment {
+    width: 100%;
+}
+
+.tagInputPanelComment {
+	resize: none;
+}
+
+/**************************** Tag filtering ****************************/
+.tagFilterPanel {
+	width: 100%;
+	position: relative;
+	outline: 0;
+	margin: 10px 0;
+	border: none;
+	font-size: 1rem;
+	background-color: #FFFFFF;
+}
+
+.tagFilterSearchBox {
+	margin-right: 4.3em;
+	border: 1px solid #ccc;
+	background-color: #eaeaea;
+	border-radius: 4px;
+}
+
+.tagFilterSearchInput {
+	width: calc(100% - 5em);
+	height: 2.142857142857143em;
+	outline: 0 !important;
+	margin: 0 0 1px 2.4em;
+	padding: 0;
+	border: none;
+	font-size: 0.933333333333333em;
+	background-color: #eaeaea;
+}
+
+.tagFilterButton {
+	position: absolute;
+	top: 0.2em;
+	right: 2.4em;
+	transition: background-color .2s;
+}
+
+.tagReloadButton {
+    position: absolute;
+    top: 0.2em;
+    right: 0.2em;
+    transition: background-color .2s;
+}
+
+.tagFilterButton:focus,
+.tagFilterButton:hover,
+.tagReloadButton:focus,
+.tagReloadButton:hover {
+	background-color: #e2e2e2;
+}
+
+.tagFilterClearButton {
+	right: 5.2em;
+	top: 0.2em;
+}
+
+.tagFilterSettingsButton {
+	right: 2.4em;
+	top: 0.2em;
+}
+
+.tagFilterSearchButton {
+	top: 0.2em;
+	left: 0.2em;
+	opacity: 0.3;
+}
+
+.tagFilterHiddenButton {
+	display: none;
+}
+
+.tagFilterCurrentSelection {
+	margin: 0;
+	margin-top: 5px;
+}
+
+/**************************** SharedTag Dialog ****************************/
+.tagSharedURLLabel{
+	margin-bottom: 5px;
+}
+
+.tagSharedURLTextBox{
+    width: 100%;
+    margin-bottom: 5px;
+}
+
+.tagSharedURLDialog{
+	
+}
+
+/**************************** Disabled tags (during editing) ****************************/
+.taggingPanelDisabled .tagCell {
+	background-color: lightgrey;
+	cursor: context-menu;
+}
+
+.taggingPanelDisabled .tagCell.tagCellActive {
+	background-color: #e5f2f9;
+}
+.taggingPanelDisabled .tagCellHeadingButtons,
+.taggingPanelDisabled .tagCellHeadingButtons .tagEditButton,
+.taggingPanelDisabled .tagCellHeadingButtons .tagEditButton:hover,
+.taggingPanelDisabled .tagCellHeadingButtons .tagEditButton:focus,
+.taggingPanelDisabled .tagCellHeadingButtons .tagDeleteButton,
+.taggingPanelDisabled .tagCellHeadingButtons .tagDeleteButton:hover,
+.taggingPanelDisabled .tagCellHeadingButtons .tagDeleteButton:focus,
+.taggingPanelDisabled .tagCellHeadingButtons .tagShareButton,
+.taggingPanelDisabled .tagCellHeadingButtons .tagShareButton:hover,
+.taggingPanelDisabled .tagCellHeadingButtons .tagShareButton:focus{
+	cursor: not-allowed;
+	outline: none;
+}
+
+/**************************** Images ****************************/
+.imageShare {
+    gwt-sprite: "shareIcon";
+    width: 2em;
+    height: 2em;
+    background-size: contain;
+}
+
+.imageEdit {
+    gwt-sprite: "editIcon";
+    width: 2em;
+    height: 2em;
+    background-size: contain;
+}
+
+.imageDelete {
+    gwt-sprite: "deleteIcon";
+    width: 2em;
+    height: 2em;
+    background-size: contain;
+}
+
+.imageReload {
+	gwt-sprite: "reloadIcon";
+    width: 2em;
+    height: 2em;
+    background-size: contain;
+    background-position-y: 1px;
+}
+
+.imageActiveFilter {
+	gwt-sprite: "filterActiveButton";
+	width: 2em;
+	height: 2em;
+	background-size: contain;
+}
+
+.imageInactiveFilter {
+	gwt-sprite: "filterInactiveButton";
+	width: 2em;
+	height: 2em;
+	background-size: contain;
+}
+
+.imageSearch {
+	gwt-sprite: "searchButton";
+	width: 2em;
+	height: 2em;
+	background-size: contain;
+}
+
+.imageClearSearch {
+	gwt-sprite: "clearButton";
+	width: 2em;
+	height: 2em;
+	background-size: contain;
+}
+
+.imageSettings {
+	gwt-sprite: "settingsButton";
+	width: 2em;
+	height: 2em;
+	background-size: contain;
+}
+
+.imagePusTransparent {
+    gwt-sprite: "plusTransparent";
+    width: 2em;
+    height: 2em;
+    background-size: contain;
+}
