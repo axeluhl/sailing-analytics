@@ -16,6 +16,10 @@ import com.sap.sse.datamining.ui.client.StringMessages;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 
+/**
+ * UI Panel with the three buttons to load, store and remove and the suggest box to select a stored data mining query by
+ * name.
+ */
 public class StoredDataMiningQueryPanel extends Composite {
 
     private static PersistDataMiningQueryPanelUiBinder uiBinder = GWT.create(PersistDataMiningQueryPanelUiBinder.class);
@@ -91,6 +95,7 @@ public class StoredDataMiningQueryPanel extends Composite {
         }
     }
 
+    /** update the oracle of the suggest box with the names of the stored queries */
     public void updateOracle(Collection<String> collection) {
         oracle.clear();
         oracle.addAll(collection);
