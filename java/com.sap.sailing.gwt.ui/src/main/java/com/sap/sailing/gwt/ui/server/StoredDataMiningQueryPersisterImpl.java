@@ -2,7 +2,6 @@ package com.sap.sailing.gwt.ui.server;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -46,28 +45,14 @@ public class StoredDataMiningQueryPersisterImpl implements StoredDataMiningQuery
 
     @Override
     public StoredDataMiningQueryDTO updateOrCreateStoredQuery(StoredDataMiningQueryDTO query) {
-        Collection<StoredDataMiningQueryPreference> updatedQueries = new ArrayList<>();
-        updatedQueries.add(transform(query));
 
         StoredDataMiningQueryPreferences prefs = getPreferenceForCurrentUser(
                 SailingPreferences.STORED_DATAMINING_QUERY_PREFERENCES);
-        if (prefs != null) {
-            // copy existing preferences
-            Iterable<StoredDataMiningQueryPreference> storedPrefs = prefs.getStoredQueries();
 
-            // remove existing preference with the same UUID if it exists
-            Iterator<StoredDataMiningQueryPreference> it = storedPrefs.iterator();
-            while (it.hasNext()) {
-                StoredDataMiningQueryPreference storedPreference = it.next();
-                if (storedPreference.getId().equals(query.getId())) {
-                    it.remove();
-                    break;
-                }
-            }
+        // remove query
+        Collection<StoredDataMiningQueryPreference> updatedQueries = removeQueryFromIterable(query, prefs);
 
-            Util.addAll(storedPrefs, updatedQueries);
-        }
-
+        updatedQueries.add(transform(query));
         prefs = new StoredDataMiningQueryPreferences();
         prefs.setStoredQueries(updatedQueries);
         setPreferenceForCurrentUser(SailingPreferences.STORED_DATAMINING_QUERY_PREFERENCES, prefs);
@@ -76,25 +61,34 @@ public class StoredDataMiningQueryPersisterImpl implements StoredDataMiningQuery
 
     @Override
     public StoredDataMiningQueryDTO removeStoredQuery(StoredDataMiningQueryDTO query) {
-        Collection<StoredDataMiningQueryPreference> updatedQueries = new ArrayList<>();
-
         StoredDataMiningQueryPreferences prefs = getPreferenceForCurrentUser(
                 SailingPreferences.STORED_DATAMINING_QUERY_PREFERENCES);
+
+        // remove query
+        Collection<StoredDataMiningQueryPreference> updatedQueries = removeQueryFromIterable(query, prefs);
+
+        // update preferences
+        prefs = new StoredDataMiningQueryPreferences();
+        prefs.setStoredQueries(updatedQueries);
+        setPreferenceForCurrentUser(SailingPreferences.STORED_DATAMINING_QUERY_PREFERENCES, prefs);
+        return query;
+    }
+
+    private Collection<StoredDataMiningQueryPreference> removeQueryFromIterable(StoredDataMiningQueryDTO query,
+            StoredDataMiningQueryPreferences prefs) {
         if (prefs != null) {
             // copy existing preferences
             Iterable<StoredDataMiningQueryPreference> storedPrefs = prefs.getStoredQueries();
 
             // remove existing preference with the same UUID if it exists
             storedPrefs = StreamSupport.stream(storedPrefs.spliterator(), false)
-                    .filter(q -> q.getId().equals(query.getId())).collect(Collectors.toList());
+                    .filter(q -> !q.getId().equals(query.getId())).collect(Collectors.toList());
 
-            Util.addAll(storedPrefs, updatedQueries);
+            Collection<StoredDataMiningQueryPreference> updatedEntries = new ArrayList<>();
+            Util.addAll(storedPrefs, updatedEntries);
+            return updatedEntries;
         }
-
-        prefs = new StoredDataMiningQueryPreferences();
-        prefs.setStoredQueries(updatedQueries);
-        setPreferenceForCurrentUser(SailingPreferences.STORED_DATAMINING_QUERY_PREFERENCES, prefs);
-        return query;
+        return new ArrayList<>();
     }
 
     private void setPreferenceForCurrentUser(String preferenceKey, Object preference) {
