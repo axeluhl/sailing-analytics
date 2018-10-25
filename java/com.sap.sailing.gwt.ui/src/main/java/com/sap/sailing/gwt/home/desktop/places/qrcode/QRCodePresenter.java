@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.common.BranchIOConstants;
 import com.sap.sailing.gwt.home.communication.event.GetEventViewAction;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
@@ -78,8 +79,6 @@ public class QRCodePresenter {
     }
 
     private final class DataCollector {
-        private static final String SAILINSIGHT_APP_BRANCHIO = "https://sailinsight-app.sapsailing.com/invite?checkinUrl=";
-        private static final String BUOYPINGER_APP_BRANCHIO = "https://buoypinger-app.sapsailing.com/invite?checkinUrl=";
         private boolean eventIsSet = false;
         private boolean competitorIsSet = false;
 
@@ -110,10 +109,14 @@ public class QRCodePresenter {
                     String branchIoUrl = null;
                     switch (invitationMode) {
                     case BOUY_TENDER:
-                        branchIoUrl = BUOYPINGER_APP_BRANCHIO + QRCodePresenter.this.checkInUrl;
+                        branchIoUrl = BranchIOConstants.BUOYPINGER_APP_BRANCHIO + "?"
+                                + BranchIOConstants.BUOYPINGER_APP_BRANCHIO_PATH + "="
+                                + QRCodePresenter.this.checkInUrl;
                         break;
                     case COMPETITOR:
-                        branchIoUrl = SAILINSIGHT_APP_BRANCHIO + QRCodePresenter.this.checkInUrl;
+                        branchIoUrl = BranchIOConstants.SAILINSIGHT_APP_BRANCHIO + "?"
+                                + BranchIOConstants.SAILINSIGHT_APP_BRANCHIO_PATH + "="
+                                + QRCodePresenter.this.checkInUrl;
                         break;
                     default:
                         break;
