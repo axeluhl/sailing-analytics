@@ -13,6 +13,8 @@ import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.datamining.ui.client.StringMessages;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 
 public class StoredDataMiningQueryPanel extends Composite {
 
@@ -56,18 +58,32 @@ public class StoredDataMiningQueryPanel extends Composite {
 
     @UiHandler("saveQueryButtonUi")
     void onSaveClick(ClickEvent e) {
-        dataProvider.addOrUpdateQuery(suggestBoxUi.getValue(), dataProvider.getCurrentQuery());
+        if (dataProvider.addOrUpdateQuery(suggestBoxUi.getValue(), dataProvider.getCurrentQuery())) {
+            Notification.notify("Updated stored query '" + suggestBoxUi.getValue() + "'.", NotificationType.SUCCESS);
+        } else {
+            Notification.notify("Created new stored query '" + suggestBoxUi.getValue() + "'.",
+                    NotificationType.SUCCESS);
+        }
     }
 
     @UiHandler("loadQueryButtonUi")
     void onLoadClick(ClickEvent e) {
-        dataProvider.applyQuery(suggestBoxUi.getValue());
+        if (dataProvider.applyQuery(suggestBoxUi.getValue())) {
+            Notification.notify("Loaded stored query '" + suggestBoxUi.getValue() + "'.", NotificationType.SUCCESS);
+        } else {
+            Notification.notify("Could not find stored query '" + suggestBoxUi.getValue() + "'.",
+                    NotificationType.ERROR);
+        }
     }
 
     @UiHandler("removeQueryButtonUi")
     void onRemoveClick(ClickEvent e) {
         if (dataProvider.removeQuery(suggestBoxUi.getValue())) {
             suggestBoxUi.setValue("");
+            Notification.notify("Removed stored query '" + suggestBoxUi.getValue() + "'.", NotificationType.SUCCESS);
+        } else {
+            Notification.notify("Could not remove stored query '" + suggestBoxUi.getValue() + "'.",
+                    NotificationType.ERROR);
         }
     }
 
