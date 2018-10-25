@@ -16,11 +16,13 @@ import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.TimePoint;
 
+
 /**
  * 
  * @author Vladislav Chumak (D069712)
  *
  */
+
 public class GpsFixesWithEstimationDataJsonSerializer implements CompetitorTrackElementsJsonSerializer {
     public static final String GPS_FIXES = "gpsFixes";
     public static final String BOAT_CLASS = "boatClass";

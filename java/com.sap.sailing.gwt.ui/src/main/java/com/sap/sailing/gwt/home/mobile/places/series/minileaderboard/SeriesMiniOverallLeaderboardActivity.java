@@ -13,8 +13,8 @@ import com.sap.sailing.gwt.home.mobile.app.MobileApplicationClientFactory;
 import com.sap.sailing.gwt.home.mobile.places.event.minileaderboard.MiniLeaderboardPlace;
 import com.sap.sailing.gwt.home.shared.app.ActivityCallback;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay;
-import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.app.NavigationPathDisplay.NavigationItem;
+import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
@@ -37,12 +37,12 @@ public class SeriesMiniOverallLeaderboardActivity extends AbstractActivity imple
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         final SeriesContext ctx = place.getCtx();
-        final UUID seriesUUID = UUID.fromString(ctx.getSeriesId());
-        clientFactory.getDispatch().execute(new GetEventSeriesViewAction(seriesUUID), 
+        clientFactory.getDispatch().execute(new GetEventSeriesViewAction(ctx), 
                 new ActivityCallback<EventSeriesViewDTO>(clientFactory, panel) {
 
             @Override
             public void onSuccess(final EventSeriesViewDTO series) {
+                ctx.updateLeaderboardGroupId(series.getLeaderboardGroupUUID());
                 SeriesMiniOverallLeaderboardActivity.this.series = series;
                 initUi(panel, eventBus, series);
             }
@@ -51,7 +51,7 @@ public class SeriesMiniOverallLeaderboardActivity extends AbstractActivity imple
 
     private void initUi(AcceptsOneWidget panel, EventBus eventBus, EventSeriesViewDTO series) {
         final SeriesMiniOverallLeaderboardView view = new SeriesMiniOverallLeaderboardViewImpl(this, flagImageResolver);
-        view.setQuickFinderValues(series.getDisplayName(), series.getEventsDescending());
+        view.setQuickFinderValues(series.getDisplayName(), series.getEventsAndRegattasOfSeriesDescending());
         panel.setWidget(view.asWidget());
         
         initNavigationPath();
@@ -83,8 +83,9 @@ public class SeriesMiniOverallLeaderboardActivity extends AbstractActivity imple
     }
     
     @Override
-    public PlaceNavigation<?> getMiniLeaderboardNavigation(UUID eventId) {
-        return clientFactory.getNavigator().getEventNavigation(new MiniLeaderboardPlace(eventId.toString(), null), null, false);
+    public PlaceNavigation<?> getMiniLeaderboardNavigation(UUID eventId, String leaderboardName) {
+        return clientFactory.getNavigator()
+                .getEventNavigation(new MiniLeaderboardPlace(eventId.toString(), leaderboardName), null, false);
     }
     
     @Override

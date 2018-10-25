@@ -1514,8 +1514,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                 // so far no valid time range; now we have a valid one; use candidate
                 // from new start or range to new end of range
                 result = updateCandiatesAfterRaceTimeRangeChanged(
-                        newTimeRange.getTimeRangeOrNull().from(),
-                        newTimeRange.getTimeRangeOrNull().to());
+                        newTimeRange.getTimeRangeOrNull().from(), newTimeRange.getTimeRangeOrNull().to());
             } else {
                 final TimePoint oldTimePointWhenToStartConsideringCandidates = timeRangeForValidCandidates.getTimeRangeOrNull().from();
                 result = updateCandiatesAfterRaceTimeRangeChanged(newTimePointWhenToStartConsideringCandidates, oldTimePointWhenToStartConsideringCandidates);

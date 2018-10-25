@@ -35,5 +35,6 @@ Require-Bundle: javax.servlet;bundle-version="3.1.0",
  com.sap.sse.shared.android
 Web-ContextPath: /security
 Export-Package: com.sap.sse.security,
+ com.sap.sse.security.impl,
  com.sap.sse.security.jaxrs
 Automatic-Module-Name: com.sap.sse.security

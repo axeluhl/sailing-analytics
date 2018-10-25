@@ -30,6 +30,9 @@ public class RacesActivity extends AbstractEventActivity<RegattaRacesPlace> impl
     @Override
     protected EventViewBase initView() {
         final RacesView view = new RacesViewImpl(this);
+        if (isMultiRegattaEvent()) {
+            initSeriesNavigation(view);
+        }
         initQuickfinder(view, true);
         return view;
     }

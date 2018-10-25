@@ -37,11 +37,11 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     @Override
     public void start(final AcceptsOneWidget panel, final EventBus eventBus) {
         final SeriesContext ctx = place.getCtx();
-        final UUID seriesUUID = UUID.fromString(ctx.getSeriesId());
-        clientFactory.getDispatch().execute(new GetEventSeriesViewAction(seriesUUID), 
+        clientFactory.getDispatch().execute(new GetEventSeriesViewAction(ctx), 
                 new ActivityCallback<EventSeriesViewDTO>(clientFactory, panel) {
                     @Override
                     public void onSuccess(EventSeriesViewDTO series) {
+                        ctx.updateLeaderboardGroupId(series.getLeaderboardGroupUUID());
                         SeriesActivity.this.series = series;
                         initUi(panel, eventBus, series);
                     }
@@ -50,7 +50,7 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     
     private void initUi(final AcceptsOneWidget panel, EventBus eventBus, EventSeriesViewDTO series) {
         final SeriesView view = new SeriesViewImpl(this, flagImageResolver);
-        view.setQuickFinderValues(series.getDisplayName(), series.getEventsDescending());
+        view.setQuickFinderValues(series.getDisplayName(), series.getEventsAndRegattasOfSeriesDescending());
         panel.setWidget(view.asWidget());
         
         initNavigationPath();
@@ -70,8 +70,9 @@ public class SeriesActivity extends AbstractActivity implements SeriesView.Prese
     }
     
     @Override
-    public PlaceNavigation<?> getMiniLeaderboardNavigation(UUID eventId) {
-        return clientFactory.getNavigator().getEventNavigation(new MiniLeaderboardPlace(eventId.toString(), null), null, false);
+    public PlaceNavigation<?> getMiniLeaderboardNavigation(UUID eventId, String leaderboardName) {
+        return clientFactory.getNavigator()
+                .getEventNavigation(new MiniLeaderboardPlace(eventId.toString(), leaderboardName), null, false);
     }
     
     @Override
