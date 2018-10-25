@@ -69,8 +69,8 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="a0by.app.link" />
-                <data android:scheme="https" android:host="a0by-alternate.app.link" />
+                <data android:scheme="https" android:host="buoypinger-app.sapsailing.com" />
+                <data android:scheme="https" android:host="cci3-alternate.app.link" />
             </intent-filter>
         </activity>
         <activity
@@ -108,7 +108,7 @@
             android:authorities="com.sap.sailing.android.buoy.positioning.app.provider.db"
             android:exported="false"/>
 
-        <meta-data android:name="io.branch.sdk.BranchKey" android:value="key_live_jlwXLVWLSF02yReHSLbH3leitFbvlnQp" />
+        <meta-data android:name="io.branch.sdk.BranchKey" android:value="key_live_eat83QSy10Y5iW4yoXmjOpegwyjfVSN7" />
 
     </application>
 </manifest>

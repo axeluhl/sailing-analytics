@@ -68,8 +68,8 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="d-labs.app.link" />
-                <data android:scheme="https" android:host="d-labs-alternate.app.link" />
+                <data android:scheme="https" android:host="sailinsight-app.sapsailing.com" />
+                <data android:scheme="https" android:host="sapsailinsight-alternate.app.link" />
             </intent-filter>
 
         </activity>
@@ -149,7 +149,7 @@
             android:authorities="com.sap.sailing.android.tracking.app.provider.db"
             android:exported="false"/>
 
-        <meta-data android:name="io.branch.sdk.BranchKey" android:value="key_live_hcw9UuPC67XuavXlixn9ZhepFBkRkS8m" />
+        <meta-data android:name="io.branch.sdk.BranchKey" android:value="key_live_ges90RzIjjgM0vg8wbTtYcdmtCeYJMAZ" />
 
     </application>
 

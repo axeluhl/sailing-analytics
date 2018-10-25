@@ -49,9 +49,9 @@
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string></string>
 	<key>branch_app_domain</key>
-	<string>d-labs.app.link</string>
+	<string>sailinsight-app.sapsailing.com</string>
 	<key>branch_key</key>
-	<string>key_live_hcw9UuPC67XuavXlixn9ZhepFBkRkS8m</string>
+	<string>key_live_ges90RzIjjgM0vg8wbTtYcdmtCeYJMAZ</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
