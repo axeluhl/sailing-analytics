@@ -364,15 +364,15 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         final Function<EventDTO, String> idFactory = event -> event.id.toString();
         final AccessControlledActionsColumn<EventDTO, EventConfigImagesBarCell> actionsColumn = new AccessControlledActionsColumn<>(
                 new EventConfigImagesBarCell(stringMessages), userService, type, idFactory);
-        actionsColumn.addAction(UPDATE.name(), UPDATE, this::openEditEventDialog);
-        actionsColumn.addAction(DELETE.name(), DELETE, event -> {
+        actionsColumn.addAction(EventConfigImagesBarCell.ACTION_UPDATE, UPDATE, this::openEditEventDialog);
+        actionsColumn.addAction(EventConfigImagesBarCell.ACTION_DELETE, DELETE, event -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveEvent(event.getName()))) {
                 removeEvent(event);
             }
         });
         final DialogConfig<EventDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
                 idFactory, event -> updateEvent(event, event), stringMessages);
-        actionsColumn.addAction(CHANGE_OWNERSHIP.name(), CHANGE_OWNERSHIP, config::openDialog);
+        actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openDialog);
 
         eventNameColumn.setSortable(true);
         venueNameColumn.setSortable(true);

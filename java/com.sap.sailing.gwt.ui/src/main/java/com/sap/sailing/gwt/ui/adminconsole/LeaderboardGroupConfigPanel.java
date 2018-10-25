@@ -611,8 +611,9 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         final Function<LeaderboardGroupDTO, String> idFactory = leaderboardGroup -> leaderboardGroup.getId().toString();
         final AccessControlledActionsColumn<LeaderboardGroupDTO, LeaderboardGroupConfigImagesBarCell> actionsColumn = new AccessControlledActionsColumn<>(
                 new LeaderboardGroupConfigImagesBarCell(stringMessages), userService, type, idFactory);
-        actionsColumn.addAction(UPDATE.name(), UPDATE, this::openEditLeaderboardGroupDialog);
-        actionsColumn.addAction(DELETE.name(), DELETE, group -> {
+        actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_UPDATE, UPDATE,
+                this::openEditLeaderboardGroupDialog);
+        actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_DELETE, DELETE, group -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveLeaderboardGroup(group.getName()))) {
                 removeLeaderboardGroup(group);
             }
@@ -625,7 +626,8 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                             group.getOverallLeaderboardScoringSchemeType());
                     updateGroup(group.getName(), group, descriptor);
                 }, stringMessages);
-        actionsColumn.addAction(CHANGE_OWNERSHIP.name(), CHANGE_OWNERSHIP, config::openDialog);
+        actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
+                config::openDialog);
 
         SelectionCheckboxColumn<LeaderboardGroupDTO> leaderboardTableSelectionColumn =
                 new SelectionCheckboxColumn<LeaderboardGroupDTO>(

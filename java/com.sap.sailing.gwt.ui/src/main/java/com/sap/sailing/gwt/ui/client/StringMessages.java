@@ -2107,8 +2107,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String resizeSuccessfull();
     String resizeUnsuccessfull();
     String automaticResizeNeedsStorageService();
-    String changeOwnership();
-    String errorUpdatingOwnership(String nameOfOwnedObject);
     String soundOff();
     String turnOffAllSoundChannels();
     String tag();

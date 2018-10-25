@@ -246,15 +246,16 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         final Function<RegattaDTO, String> idFactory = RegattaDTO::getName;
         final AccessControlledActionsColumn<RegattaDTO, RegattaConfigImagesBarCell> actionsColumn = new AccessControlledActionsColumn<>(
                 new RegattaConfigImagesBarCell(stringMessages), userService, type, idFactory);
-        actionsColumn.addAction(UPDATE.name(), UPDATE, this::editRegatta);
-        actionsColumn.addAction(DELETE.name(), DELETE, regatta -> {
+        actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_UPDATE, UPDATE, this::editRegatta);
+        actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_DELETE, DELETE, regatta -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveRegatta(regatta.getName()))) {
                 removeRegatta(regatta);
             }
         });
         final DialogConfig<RegattaDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
                 idFactory, this::commitEditedRegatta, stringMessages);
-        actionsColumn.addAction(CHANGE_OWNERSHIP.name(), CHANGE_OWNERSHIP, config::openDialog);
+        actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
+                config::openDialog);
 
         table.addColumn(regattaSelectionCheckboxColumn, regattaSelectionCheckboxColumn.getHeader());
         table.addColumn(regattaNameColumn, stringMessages.regattaName());

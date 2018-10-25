@@ -328,8 +328,8 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         final AccessControlledActionsColumn<StrippedLeaderboardDTO, LeaderboardConfigImagesBarCell> leaderboardActionColumn = new AccessControlledActionsColumn<>(
                 new LeaderboardConfigImagesBarCell(stringMessages), userService, type, idFactory);
         
-        leaderboardActionColumn.addAction(UPDATE.name(), UPDATE, this::editLeaderboard);
-        leaderboardActionColumn.addAction(DELETE.name(), DELETE, leaderboardDTO -> {
+        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_UPDATE, UPDATE, this::editLeaderboard);
+        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_DELETE, DELETE, leaderboardDTO -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveLeaderboard(leaderboardDTO.getName()))) {
                 removeLeaderboard(leaderboardDTO);
             }
@@ -377,9 +377,10 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_CREATE_PAIRINGLIST, this::createPairingListTemplate);
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_PRINT_PAIRINGLIST, this::openPairingListEntryPoint);
         
-        final DialogConfig<StrippedLeaderboardDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
-                idFactory, leaderboardDTO -> reloadLeaderboardForTable(leaderboardDTO.getName()), stringMessages);
-        leaderboardActionColumn.addAction(CHANGE_OWNERSHIP.name(), CHANGE_OWNERSHIP, config::openDialog);
+        final DialogConfig<StrippedLeaderboardDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(),
+                type, idFactory, leaderboardDTO -> reloadLeaderboardForTable(leaderboardDTO.getName()), stringMessages);
+        leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
+                config::openDialog);
         
         leaderboardTable.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
         leaderboardTable.addColumn(linkColumn, stringMessages.name());
