@@ -436,7 +436,8 @@ public class UserService {
     public boolean hasCurrentUserPermissionToCreateObjectOfType(HasPermissions type) {
         // TODO: Additional check required
         // return hasPermission(SecuredSecurityTypes.SERVER.getPermissionForObjects(ServerActions.CREATE_OBJECT, oid));
-        return this.hasCurrentUserAnyPermission(type.getPermission(DefaultActions.CREATE),
-                new OwnershipImpl(currentUser, getCurrentTenant()));
+        final WildcardPermission createPermission = type.getPermission(DefaultActions.CREATE);
+        final OwnershipImpl ownershipOfNewlyCreatedObject = new OwnershipImpl(currentUser, getCurrentTenant());
+        return this.hasCurrentUserAnyPermission(createPermission, ownershipOfNewlyCreatedObject);
     }
 }
