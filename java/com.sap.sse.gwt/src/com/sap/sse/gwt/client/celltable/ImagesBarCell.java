@@ -16,7 +16,6 @@ import com.google.gwt.safecss.shared.SafeStylesUtils;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.text.shared.SafeHtmlRenderer;
 import com.google.gwt.text.shared.SimpleSafeHtmlRenderer;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
@@ -80,10 +79,6 @@ public abstract class ImagesBarCell extends AbstractSafeHtmlCell<String> {
 
     public ImagesBarCell() {
         super(SimpleSafeHtmlRenderer.getInstance(), "click", "keydown");
-    }
-
-    public ImagesBarCell(SafeHtmlRenderer<String> renderer) {
-        super(renderer, "click", "keydown");
     }
 
     protected static ImagesBarTemplates getImageTemplate() {

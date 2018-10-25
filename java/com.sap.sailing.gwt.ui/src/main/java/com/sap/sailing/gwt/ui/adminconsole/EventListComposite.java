@@ -72,7 +72,6 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
-import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
@@ -163,7 +162,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             }
         });
         eventControlsPanel.add(createEventBtn);
-        if (!userService.hasPermission(SecuredDomainType.EVENT.getStringPermission(DefaultActions.CREATE))) {
+        if (!userService.hasCurrentUserPermissionToCreateObjectOfType(SecuredDomainType.EVENT)) {
             createEventBtn.setVisible(false);
         }
 
@@ -364,15 +363,15 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         final Function<EventDTO, String> idFactory = event -> event.id.toString();
         final AccessControlledActionsColumn<EventDTO, EventConfigImagesBarCell> actionsColumn = new AccessControlledActionsColumn<>(
                 new EventConfigImagesBarCell(stringMessages), userService, type, idFactory);
-        actionsColumn.addAction(UPDATE.name(), UPDATE, this::openEditEventDialog);
-        actionsColumn.addAction(DELETE.name(), DELETE, event -> {
+        actionsColumn.addAction(EventConfigImagesBarCell.ACTION_UPDATE, UPDATE, this::openEditEventDialog);
+        actionsColumn.addAction(EventConfigImagesBarCell.ACTION_DELETE, DELETE, event -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveEvent(event.getName()))) {
                 removeEvent(event);
             }
         });
         final DialogConfig<EventDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
                 idFactory, event -> updateEvent(event, event), stringMessages);
-        actionsColumn.addAction(CHANGE_OWNERSHIP.name(), CHANGE_OWNERSHIP, config::openDialog);
+        actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openDialog);
 
         eventNameColumn.setSortable(true);
         venueNameColumn.setSortable(true);

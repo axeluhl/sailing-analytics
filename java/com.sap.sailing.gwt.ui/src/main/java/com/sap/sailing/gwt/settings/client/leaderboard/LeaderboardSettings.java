@@ -55,6 +55,7 @@ public abstract class LeaderboardSettings extends AbstractGenericSerializableSet
         legDetailsToShow = new EnumSetSetting<>("legDetailsToShow", this, legDetails, DetailType::valueOfString);
         List<DetailType> raceDetails = new ArrayList<>();
         raceDetails.add(DetailType.RACE_DISPLAY_LEGS);
+        raceDetails.add(DetailType.RACE_DISPLAY_BOATS);
         raceDetailsToShow = new EnumSetSetting<>("raceDetailsToShow", this, raceDetails, DetailType::valueOfString);
         List<DetailType> overallDetails = new ArrayList<>();
         overallDetails.add(DetailType.REGATTA_RANK);

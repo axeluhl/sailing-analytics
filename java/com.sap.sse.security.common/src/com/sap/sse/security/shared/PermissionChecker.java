@@ -341,7 +341,7 @@ public class PermissionChecker {
                permissionsApply = !matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven; // qualifications cannot be verified as no ownership info is provided; permissions do not apply
            } else {
                permissionsApply = (!roleIsTenantQualified || Util.equalsWithNull(role.getQualifiedForTenant(), ownership.getTenantOwner())) &&
-                                  (!roleIsUserQualified || Util.equalsWithNull(role.getQualifiedForUser(), ownership.getUserOwner()));
+                                  (!roleIsUserQualified || isSameUser(role.getQualifiedForUser(), ownership.getUserOwner()));
            }
        } else {
            permissionsApply = true; // permissions apply without qualifications
@@ -358,5 +358,18 @@ public class PermissionChecker {
             result = false;
         }
         return result;
+    }
+   
+    /**
+     * There are cases where need to check instances of different implementations if they represent the same user.
+     */
+    public static boolean isSameUser(SecurityUser user1, SecurityUser user2) {
+        if (user1 == user2) {
+            return true;
+        }
+        if (user1 == null || user2 == null) {
+            return false;
+        }
+        return user1.getName().equals(user2.getName());
     }
 }

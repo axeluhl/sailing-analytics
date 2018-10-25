@@ -148,7 +148,6 @@ public class RoleDefinitionsPanel extends VerticalPanel {
     private FlushableCellTable<RoleDefinition> createRoleDefinitionsTable(CellTableWithCheckboxResources tableResources) {
         final FlushableCellTable<RoleDefinition> table = new FlushableCellTable<>(/* pageSize */ 50, tableResources);
         rolesListDataProvider.addDataDisplay(table);
-        table.setWidth("100%");
         SelectionCheckboxColumn<RoleDefinition> roleSelectionCheckboxColumn = new SelectionCheckboxColumn<RoleDefinition>(
                 tableResources.cellTableStyle().cellTableCheckboxSelected(),
                 tableResources.cellTableStyle().cellTableCheckboxDeselected(),
@@ -187,24 +186,26 @@ public class RoleDefinitionsPanel extends VerticalPanel {
                 return new NaturalComparator().compare(r1.getPermissions().toString(), r2.getPermissions().toString());
             }
         });
-        ImagesBarColumn<RoleDefinition, EditAndRemoveImagesBarCell> regattaActionColumn = new ImagesBarColumn<RoleDefinition, EditAndRemoveImagesBarCell>(
-                new EditAndRemoveImagesBarCell(stringMessages));
-        regattaActionColumn.setFieldUpdater(new FieldUpdater<RoleDefinition, String>() {
+        final ImagesBarColumn<RoleDefinition, DefaultActionsImagesBarCell> roleActionColumn = new ImagesBarColumn<>(
+                new DefaultActionsImagesBarCell(stringMessages));
+        roleActionColumn.setFieldUpdater(new FieldUpdater<RoleDefinition, String>() {
             @Override
             public void update(int index, RoleDefinition roleDefinition, String value) {
-                if (EditAndRemoveImagesBarCell.ACTION_EDIT.equals(value)) {
+                if (DefaultActionsImagesBarCell.ACTION_UPDATE.equals(value)) {
                     editRole(roleDefinition);
-                } else if (EditAndRemoveImagesBarCell.ACTION_REMOVE.equals(value)) {
+                } else if (DefaultActionsImagesBarCell.ACTION_DELETE.equals(value)) {
                     if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(roleDefinition.getName()))) {
                         removeRole(roleDefinition);
                     }
+                } else if (DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP.equals(value)) {
+                    Window.alert("TODO Implement SecuredObject interface!");
                 }
             }
         });
         table.addColumn(roleSelectionCheckboxColumn, roleSelectionCheckboxColumn.getHeader());
         table.addColumn(roleDefinitionNameColumn, stringMessages.name());
         table.addColumn(permissionsColumn, stringMessages.permissions());
-        table.addColumn(regattaActionColumn, stringMessages.actions());
+        table.addColumn(roleActionColumn, stringMessages.actions());
         table.setSelectionModel(roleSelectionCheckboxColumn.getSelectionModel(), roleSelectionCheckboxColumn.getSelectionManager());
         return table;
     }
