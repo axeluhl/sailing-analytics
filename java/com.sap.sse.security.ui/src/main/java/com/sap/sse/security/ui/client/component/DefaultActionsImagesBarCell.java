@@ -28,7 +28,7 @@ public class DefaultActionsImagesBarCell extends ImagesBarCell {
      * @return {@link ImageSpec} for {@link DefaultActions#UPDATE update} action
      */
     protected ImageSpec getUpdateImageSpec() {
-        return new ImageSpec(ACTION_DELETE, stringMessages.actionEdit(), IconResources.INSTANCE.editIcon());
+        return new ImageSpec(ACTION_UPDATE, stringMessages.actionEdit(), IconResources.INSTANCE.editIcon());
     }
 
     /**
