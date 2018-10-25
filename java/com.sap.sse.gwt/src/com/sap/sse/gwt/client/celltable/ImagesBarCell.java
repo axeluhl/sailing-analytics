@@ -40,18 +40,26 @@ public abstract class ImagesBarCell extends AbstractSafeHtmlCell<String> {
         private final AbstractImagePrototype imagePrototype;
         private final String actionName;
         private final String tooltip;
+
+        public ImageSpec(String actionName, String tooltip, ImageResource imageResource) {
+            this(actionName, tooltip, AbstractImagePrototype.create(imageResource));
+        }
+
         public ImageSpec(String actionName, String tooltip, AbstractImagePrototype imagePrototype) {
             super();
             this.imagePrototype = imagePrototype;
             this.actionName = actionName;
             this.tooltip = tooltip;
         }
+
         public AbstractImagePrototype getImagePrototype() {
             return imagePrototype;
         }
+
         public String getActionName() {
             return actionName;
         }
+
         public String getTooltip() {
             return tooltip;
         }

@@ -8,9 +8,10 @@ package com.sap.sse.security.shared;
  */
 public interface SecuredObject {
     AccessControlList getAccessControlList();
-    
+
     Ownership getOwnership();
 
     void setAccessControlList(AccessControlList createAccessControlListDTO);
+
     void setOwnership(Ownership createOwnershipDTO);
 }

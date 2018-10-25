@@ -14,7 +14,8 @@ import com.sap.sse.security.shared.SecuredObject;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.UserGroup;
 
-public class SecurityDTOUtil {
+public abstract class SecurityDTOUtil {
+
     private SecurityDTOUtil() {
     }
 
@@ -23,22 +24,44 @@ public class SecurityDTOUtil {
      * {@link QualifiedObjectIdentifier qualified object identifier} to the provided {@link NamedSecuredObjectDTO
      * secured object DTO}.
      * 
-     * @param dto
+     * @param securityService
+     *            the {@link SecurityService} to determine access control list and ownership
+     * @param securedObject
      *            the {@link NamedSecuredObjectDTO} to add security information to
      * @param objectId
      *            the {@link QualifiedObjectIdentifier} to get security information for
      */
-    public static void addSecurityInformation(SecurityService securityService, final SecuredObject dto,
+    public static void addSecurityInformation(final SecurityService securityService, final SecuredObject securedObject,
             final QualifiedObjectIdentifier objectId) {
-        final SecurityDTOFactory securityDTOFactory = new SecurityDTOFactory();
+        addSecurityInformation(new SecurityDTOFactory(), securityService, securedObject, objectId);
+    }
+
+    /**
+     * Adds {@link AccessControlList access control list} and {@link Ownership ownership} information for the given
+     * {@link QualifiedObjectIdentifier qualified object identifier} to the provided {@link NamedSecuredObjectDTO
+     * secured object DTO}.
+     * 
+     * @param securityService
+     *            the {@link SecurityService} to determine access control list and ownership
+     * @param securityDTOFactory
+     *            the {@link SecurityDTOFactory} to use for DTO creation
+     * @param securedObject
+     *            the {@link NamedSecuredObjectDTO} to add security information to
+     * @param objectId
+     *            the {@link QualifiedObjectIdentifier} to get security information for
+     */
+    public static void addSecurityInformation(final SecurityDTOFactory securityDTOFactory,
+            final SecurityService securityService, final SecuredObject securedObject,
+            final QualifiedObjectIdentifier objectId) {
         final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser = new HashMap<>();
         final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup = new HashMap<>();
         final AccessControlListAnnotation accessControlList = securityService.getAccessControlList(objectId);
-        dto.setAccessControlList(securityDTOFactory.createAccessControlListDTO(
+        securedObject.setAccessControlList(securityDTOFactory.createAccessControlListDTO(
                 accessControlList == null ? null : accessControlList.getAnnotation(), fromOriginalToStrippedDownUser,
                 fromOriginalToStrippedDownUserGroup));
         final OwnershipAnnotation ownership = securityService.getOwnership(objectId);
-        dto.setOwnership(securityDTOFactory.createOwnershipDTO(ownership == null ? null : ownership.getAnnotation(),
-                fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
+        securedObject.setOwnership(
+                securityDTOFactory.createOwnershipDTO(ownership == null ? null : ownership.getAnnotation(),
+                        fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
     }
 }

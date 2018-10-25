@@ -25,9 +25,9 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -43,7 +43,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
-import com.sap.sailing.gwt.ui.adminconsole.EditOwnershipDialog.DialogConfig;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupDialog.LeaderboardGroupDescriptor;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.EventsRefresher;
@@ -74,8 +73,11 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.ui.client.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
+import com.sap.sse.security.ui.client.component.SecuredObjectOwnerColumn;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
@@ -359,7 +361,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         final SecuredObjectOwnerColumn<EventDTO> userColumn = SecuredObjectOwnerColumn.getUserOwnerColumn();
 
         final HasPermissions type = SecuredDomainType.EVENT;
-        final Function<EventDTO, String> idFactory = SecuredObjectUtils::getTypeRelativeObjectIdentifier;
+        final Function<EventDTO, String> idFactory = event -> event.id.toString();
         final AccessControlledActionsColumn<EventDTO, EventConfigImagesBarCell> actionsColumn = new AccessControlledActionsColumn<>(
                 new EventConfigImagesBarCell(stringMessages), userService, type, idFactory);
         actionsColumn.addAction(UPDATE.name(), UPDATE, this::openEditEventDialog);
@@ -369,8 +371,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             }
         });
         final DialogConfig<EventDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
-                idFactory, event -> updateEvent(event, event),
-                event -> errorReporter.reportError(stringMessages.errorUpdatingOwnership(event.getName())));
+                idFactory, event -> updateEvent(event, event), stringMessages);
         actionsColumn.addAction(CHANGE_OWNERSHIP.name(), CHANGE_OWNERSHIP, config::openDialog);
 
         eventNameColumn.setSortable(true);
@@ -395,8 +396,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         table.addColumn(leaderboardGroupsColumn, stringMessages.leaderboardGroups());
         table.addColumn(imagesColumn, stringMessages.images());
         table.addColumn(videosColumn, stringMessages.videos());
-        table.addColumn(groupColumn, SecuredObjectUtils.SECURITY_MESSAGES.group());
-        table.addColumn(userColumn, SecuredObjectUtils.SECURITY_MESSAGES.user());
+        table.addColumn(groupColumn, stringMessages.group());
+        table.addColumn(userColumn, stringMessages.user());
         table.addColumn(actionsColumn, stringMessages.actions());
         table.setSelectionModel(eventSelectionCheckboxColumn.getSelectionModel(), eventSelectionCheckboxColumn.getSelectionManager());
 

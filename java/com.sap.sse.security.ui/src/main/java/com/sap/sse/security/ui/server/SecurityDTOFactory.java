@@ -77,7 +77,7 @@ public class SecurityDTOFactory {
                         fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
         fromOriginalToStrippedDownUser.put(user, userDTO);
         userDTO.setDefaultTenant(createUserGroupDTOFromUserGroup(user.getDefaultTenant(), fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
-        SecurityDTOUtil.addSecurityInformation(securityService, userDTO, user.getIdentifier());
+        SecurityDTOUtil.addSecurityInformation(this, securityService, userDTO, user.getIdentifier());
         return userDTO;
     }
 

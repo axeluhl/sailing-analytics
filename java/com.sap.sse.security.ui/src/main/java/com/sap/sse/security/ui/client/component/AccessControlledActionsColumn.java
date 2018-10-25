@@ -1,4 +1,4 @@
-package com.sap.sse.security.ui.client;
+package com.sap.sse.security.ui.client.component;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,6 +12,7 @@ import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.Action;
+import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.SecuredObject;
 import com.sap.sse.security.shared.WildcardPermission;

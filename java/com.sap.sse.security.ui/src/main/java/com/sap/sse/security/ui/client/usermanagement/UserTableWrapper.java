@@ -1,11 +1,19 @@
 package com.sap.sse.security.ui.client.usermanagement;
 
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.DELETE;
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
+import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP;
+import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_DELETE;
+import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_UPDATE;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.Callback;
@@ -32,15 +40,17 @@ import com.sap.sse.gwt.client.celltable.TableWrapper;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
-import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
-import com.sap.sse.security.ui.client.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.client.component.EditAndRemoveImagesBarCell;
+import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
+import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
+import com.sap.sse.security.ui.client.component.SecuredObjectOwnerColumn;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
@@ -146,11 +156,13 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                 return new NaturalComparator().compare(r1.getRoles().toString(), r2.getRoles().toString());
             }
         });
-        final AccessControlledActionsColumn<UserDTO, EditAndRemoveImagesBarCell> userActionColumn = new AccessControlledActionsColumn<>(
-                new EditAndRemoveImagesBarCell(stringMessages), userService, SecuredSecurityTypes.USER, UserDTO::getName);
-        userActionColumn.addAction(EditAndRemoveImagesBarCell.ACTION_EDIT, DefaultActions.UPDATE,
-                user -> editUser(user, additionalPermissions));
-        userActionColumn.addAction(EditAndRemoveImagesBarCell.ACTION_REMOVE, DefaultActions.DELETE, user -> {
+
+        final HasPermissions type = SecuredSecurityTypes.USER;
+        final Function<UserDTO, String> idFactory = UserDTO::getName;
+        final AccessControlledActionsColumn<UserDTO, DefaultActionsImagesBarCell> userActionColumn = new AccessControlledActionsColumn<>(
+                new DefaultActionsImagesBarCell(stringMessages), userService, type, idFactory);
+        userActionColumn.addAction(ACTION_UPDATE, UPDATE, user -> editUser(user, additionalPermissions));
+        userActionColumn.addAction(ACTION_DELETE, DELETE, user -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveUser(user.getName()))) {
                 getUserManagementService().deleteUser(user.getName(), new AsyncCallback<SuccessInfo>() {
                     @Override
@@ -173,6 +185,9 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                 });
             }
         });
+        final DialogConfig<UserDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
+                idFactory, user -> Window.alert("TODO Updating user ownership ..."), stringMessages);
+        userActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openDialog);
         
         filterField = new LabeledAbstractFilterablePanel<UserDTO>(new Label(stringMessages.filterUsers()),
                 new ArrayList<UserDTO>(), dataProvider) {
@@ -204,6 +219,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
         table.addColumn(groupsColumn, stringMessages.groups());
         table.addColumn(rolesColumn, stringMessages.roles());
         table.addColumn(permissionsColumn, stringMessages.permissions());
+        SecuredObjectOwnerColumn.configureOwnerColumns(table, userColumnListHandler, stringMessages);
         table.addColumn(userActionColumn, stringMessages.actions());
         table.ensureDebugId("UsersTable");
     }
