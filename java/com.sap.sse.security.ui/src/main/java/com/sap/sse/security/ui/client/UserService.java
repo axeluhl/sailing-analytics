@@ -432,4 +432,11 @@ public class UserService {
         return PermissionChecker.hasUserAnyPermission(permissionToCheck, allKnownHasPermissions, getCurrentUser(),
                 anonymousUser, ownership);
     }
+    
+    public boolean hasCurrentUserPermissionToCreateObjectOfType(HasPermissions type) {
+        // TODO: Additional check required
+        // return hasPermission(SecuredSecurityTypes.SERVER.getPermissionForObjects(ServerActions.CREATE_OBJECT, oid));
+        return this.hasCurrentUserAnyPermission(type.getPermission(DefaultActions.CREATE),
+                new OwnershipImpl(currentUser, getCurrentTenant()));
+    }
 }
