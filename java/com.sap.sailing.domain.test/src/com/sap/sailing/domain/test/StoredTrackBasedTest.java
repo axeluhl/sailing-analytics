@@ -80,6 +80,10 @@ public abstract class StoredTrackBasedTest extends TrackBasedTest {
         return new CustomObjectInputStream(new FileInputStream(new File(RESOURCES+fileNameWithinResources)));
     }
     
+    /**
+     * We moved NamedDTO from sailing to sse some time ago. This breaks test cases that deserialize leaderboard DTO
+     * data. This ensures that this data can correctly be deserialized without the need of manipulating the binary data.
+     */
     private static class CustomObjectInputStream extends ObjectInputStream {
         public CustomObjectInputStream(InputStream in) throws IOException {
             super(in);
