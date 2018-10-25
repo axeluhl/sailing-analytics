@@ -253,8 +253,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
             }
         });
         final DialogConfig<RegattaDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
-                idFactory, this::commitEditedRegatta,
-                regatta -> errorReporter.reportError(stringMessages.errorUpdatingOwnership(regatta.getName())));
+                idFactory, this::commitEditedRegatta, stringMessages);
         actionsColumn.addAction(CHANGE_OWNERSHIP.name(), CHANGE_OWNERSHIP, config::openDialog);
 
         table.addColumn(regattaSelectionCheckboxColumn, regattaSelectionCheckboxColumn.getHeader());

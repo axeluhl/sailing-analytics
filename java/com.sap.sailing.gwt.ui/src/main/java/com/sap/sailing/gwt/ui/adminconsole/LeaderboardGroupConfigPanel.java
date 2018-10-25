@@ -624,7 +624,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                             group.isHasOverallLeaderboard(), group.getOverallLeaderboardDiscardThresholds(),
                             group.getOverallLeaderboardScoringSchemeType());
                     updateGroup(group.getName(), group, descriptor);
-                }, group -> errorReporter.reportError(stringMessages.errorUpdatingOwnership(group.getName())));
+                }, stringMessages);
         actionsColumn.addAction(CHANGE_OWNERSHIP.name(), CHANGE_OWNERSHIP, config::openDialog);
 
         SelectionCheckboxColumn<LeaderboardGroupDTO> leaderboardTableSelectionColumn =

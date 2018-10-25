@@ -378,8 +378,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_PRINT_PAIRINGLIST, this::openPairingListEntryPoint);
         
         final DialogConfig<StrippedLeaderboardDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
-                idFactory, leaderboardDTO -> reloadLeaderboardForTable(leaderboardDTO.getName()),
-                leaderboardDTO -> errorReporter.reportError(stringMessages.errorUpdatingOwnership(leaderboardDTO.getName())));
+                idFactory, leaderboardDTO -> reloadLeaderboardForTable(leaderboardDTO.getName()), stringMessages);
         leaderboardActionColumn.addAction(CHANGE_OWNERSHIP.name(), CHANGE_OWNERSHIP, config::openDialog);
         
         leaderboardTable.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());

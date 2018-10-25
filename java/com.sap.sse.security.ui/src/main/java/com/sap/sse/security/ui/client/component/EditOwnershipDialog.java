@@ -1,5 +1,7 @@
 package com.sap.sse.security.ui.client.component;
 
+import static com.sap.sse.gwt.client.Notification.NotificationType.ERROR;
+
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -9,13 +11,14 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
+import com.sap.sse.common.Named;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.HasPermissions;
-import com.sap.sse.security.shared.NamedSecuredObjectDTO;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.SecuredObject;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.impl.OwnershipImpl;
@@ -164,7 +167,7 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
 
     /**
      * Creates a new {@link DialogConfig dialog configuration} instance which be (re-)used to
-     * {@link DialogConfig#openDialog(NamedSecuredObjectDTO) open} a {@link EditOwnershipDialog dialog}.
+     * {@link DialogConfig#openDialog(Named) open} a {@link EditOwnershipDialog dialog}.
      * 
      * @param userManagementService
      *            {@link UserManagementServiceAsync} to use to the secured object's ownership
@@ -177,33 +180,34 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
      * @param errorCallback
      *            {@link Consumer callback} to execute when the dialog is confirmed and ownership update fails
      */
-    public static <T extends NamedSecuredObjectDTO> DialogConfig<T> create(
+    public static <T extends Named & SecuredObject> DialogConfig<T> create(
             final UserManagementServiceAsync userManagementService, final HasPermissions type,
             final Function<T, String> typeRelativeIdFactory, final Consumer<T> updateCallback,
-            final Consumer<T> errorCallback) {
-        return new DialogConfig<>(userManagementService, type, typeRelativeIdFactory, updateCallback, errorCallback);
+            final StringMessages stringMessages) {
+        return new DialogConfig<>(userManagementService, type, typeRelativeIdFactory, updateCallback, stringMessages);
     }
 
-    public static class DialogConfig<T extends NamedSecuredObjectDTO> {
+    public static class DialogConfig<T extends Named & SecuredObject> {
 
         private final UserManagementServiceAsync userManagementService;
-        private final Consumer<T> updateCallback, errorCallback;
+        private final Consumer<T> updateCallback;
         private final Function<T, QualifiedObjectIdentifier> identifierFactory;
+        private final StringMessages stringMessages;
 
         private DialogConfig(final UserManagementServiceAsync userManagementService, final HasPermissions type,
                 final Function<T, String> idFactory, final Consumer<T> updateCallback,
-                final Consumer<T> errorCallback) {
+                final StringMessages stringMessages) {
             this.userManagementService = userManagementService;
             this.identifierFactory = idFactory.andThen(type::getQualifiedObjectIdentifier);
             this.updateCallback = updateCallback;
-            this.errorCallback = errorCallback;
+            this.stringMessages = stringMessages;
         }
 
         /**
          * Opens a {@link EditOwnershipDialog dialog} to edit ownerships for the provided secured object instance.
          * 
          * @param securedObject
-         *            {@link NamedSecuredObjectDTO secured object} instance to edit ownerships for
+         *            {@link Named} {@link SecuredObject} instance to edit ownerships for
          */
         public void openDialog(final T securedObject) {
             new EditOwnershipDialog(userManagementService, securedObject.getOwnership(),
@@ -245,7 +249,7 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
 
                 @Override
                 public final void onFailure(Throwable caught) {
-                    errorCallback.accept(securedObject);
+                    Notification.notify(stringMessages.errorUpdatingOwnership(securedObject.getName()), ERROR);
                 }
             }
         }

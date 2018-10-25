@@ -371,8 +371,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             }
         });
         final DialogConfig<EventDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
-                idFactory, event -> updateEvent(event, event),
-                event -> errorReporter.reportError(stringMessages.errorUpdatingOwnership(event.getName())));
+                idFactory, event -> updateEvent(event, event), stringMessages);
         actionsColumn.addAction(CHANGE_OWNERSHIP.name(), CHANGE_OWNERSHIP, config::openDialog);
 
         eventNameColumn.setSortable(true);
@@ -397,8 +396,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         table.addColumn(leaderboardGroupsColumn, stringMessages.leaderboardGroups());
         table.addColumn(imagesColumn, stringMessages.images());
         table.addColumn(videosColumn, stringMessages.videos());
-        table.addColumn(groupColumn, com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE.group());
-        table.addColumn(userColumn, com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE.user());
+        table.addColumn(groupColumn, stringMessages.group());
+        table.addColumn(userColumn, stringMessages.user());
         table.addColumn(actionsColumn, stringMessages.actions());
         table.setSelectionModel(eventSelectionCheckboxColumn.getSelectionModel(), eventSelectionCheckboxColumn.getSelectionManager());
 
