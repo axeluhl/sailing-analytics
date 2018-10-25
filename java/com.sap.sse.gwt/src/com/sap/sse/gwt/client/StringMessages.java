@@ -86,7 +86,12 @@ public interface StringMessages extends Messages {
     String clearSelection();
 
     String load();
-
     String dataMiningStoredQueryPlaceholder();
+    String dataMiningStoredQueryUpdateSuccessful(String name);
+    String dataMiningStoredQueryCreationSuccessful(String name);
+    String dataMiningStoredQueryLoadedSuccessful(String name);
+    String dataMiningStoredQueryLoadedFailed(String name);
+    String dataMiningStoredQueryRemovedSuccessful(String name);
+    String dataMiningStoredQueryRemovedFailed(String name);
 
 }
