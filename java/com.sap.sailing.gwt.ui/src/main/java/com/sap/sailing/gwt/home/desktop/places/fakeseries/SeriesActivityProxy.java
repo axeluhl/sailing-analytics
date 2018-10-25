@@ -1,6 +1,5 @@
 package com.sap.sailing.gwt.home.desktop.places.fakeseries;
 
-import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -49,11 +48,11 @@ public class SeriesActivityProxy extends AbstractActivityProxy implements Provid
 
     @Override
     protected void startAsync() {
-        final UUID seriesUUID = UUID.fromString(ctx.getSeriesId());
-        clientFactory.getDispatch().execute(new GetEventSeriesViewAction(seriesUUID), 
+        clientFactory.getDispatch().execute(new GetEventSeriesViewAction(ctx), 
                 new ActivityProxyCallback<EventSeriesViewDTO>(clientFactory, place) {
             @Override
             public void onSuccess(EventSeriesViewDTO series) {
+                ctx.updateLeaderboardGroupId(series.getLeaderboardGroupUUID());
                 afterLoad(series);
             }
         });
