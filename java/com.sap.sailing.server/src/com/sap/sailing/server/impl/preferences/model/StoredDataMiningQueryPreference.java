@@ -6,6 +6,7 @@ import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.StringSetting;
 import com.sap.sse.common.settings.generic.UUIDSetting;
 
+/** preference object which contains a stored data mining query with a name and a unique id */
 public class StoredDataMiningQueryPreference extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = -7100595551754668437L;
 
@@ -14,13 +15,9 @@ public class StoredDataMiningQueryPreference extends AbstractGenericSerializable
     private transient StringSetting serializedQuery;
 
     public StoredDataMiningQueryPreference() {
-        name = new StringSetting("name", this);
-        id = new UUIDSetting("id", this);
-        serializedQuery = new StringSetting("serializedQuery", this);
     }
 
     public StoredDataMiningQueryPreference(String name, UUID uuid, String serializedQuery) {
-        this();
         this.name.setValue(name);
         this.id.setValue(uuid);
         this.serializedQuery.setValue(serializedQuery);
@@ -28,11 +25,9 @@ public class StoredDataMiningQueryPreference extends AbstractGenericSerializable
 
     @Override
     protected void addChildSettings() {
-        // We do not create the Setting instances here, because access to the RacingEventService would not be given.
-        // Doing this, Java/GWT Serialization isn't working anymore. Because the preferences are only serialized as JSON
-        // in the backend an transferred as DTO to the frontend, this isn't a problem. Due to usage of BoatClass and
-        // Competitor domain objects, it wouldn't be GWT compatible anyway.
-        // The usage of Java Serialization isn't planned by now, either.
+        name = new StringSetting("name", this);
+        id = new UUIDSetting("id", this);
+        serializedQuery = new StringSetting("serializedQuery", this);
     }
 
     public String getName() {
