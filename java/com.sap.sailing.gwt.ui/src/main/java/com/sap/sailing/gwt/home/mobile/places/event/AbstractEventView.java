@@ -15,7 +15,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.windfinder.SpotDTO;
-import com.sap.sailing.gwt.home.communication.event.EventReferenceWithStateDTO;
+import com.sap.sailing.gwt.home.communication.event.EventAndLeaderboardReferenceWithStateDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.mobile.partials.eventheader.EventHeader;
@@ -96,7 +96,7 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
         QuickfinderPresenter.getForRegattaLeaderboards(quickfinder, currentPresenter, regattasByLeaderboardGroupName);
     }
     
-    protected void setQuickFinderValues(Quickfinder quickfinder, String seriesName, Collection<EventReferenceWithStateDTO> eventsOfSeries) {
+    protected void setQuickFinderValues(Quickfinder quickfinder, String seriesName, Collection<EventAndLeaderboardReferenceWithStateDTO> eventsOfSeries) {
         QuickfinderPresenter.getForSeriesLeaderboards(quickfinder, seriesName, currentPresenter, eventsOfSeries);
     }
     
@@ -117,7 +117,7 @@ public abstract class AbstractEventView<P extends EventViewBase.Presenter> exten
     }
 
     @Override
-    public final void setQuickFinderValues(String seriesName, Collection<EventReferenceWithStateDTO> eventsOfSeries) {
+    public final void setQuickFinderValues(String seriesName, Collection<EventAndLeaderboardReferenceWithStateDTO> eventsOfSeries) {
         setQuickFinderValues(layout.quickFinderUi, seriesName, eventsOfSeries);
     }
     

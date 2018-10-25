@@ -189,6 +189,11 @@ public class TagDTO implements Serializable {
      * Compares attributes {@link #tag}, {@link #comment}, {@link #imageURL}, {@link #resizedImageURL},
      * {@link #visibleForPublic}, {@link #username} and {@link #raceTimepoint}, but <b>NOT</b> attributes
      * {@link #createdAt} and {@link #revokedAt}.
+     * 
+     * The key is chosen this way (incl. imageURL, resizedImageURL and comment) to identify each tag without using
+     * generated custom key. This allows users to create tags at the same time point without having to worry about using
+     * different titles or moving the time slider just a little bit forward to comment on the same situation with just
+     * multiple images or comments.
      */
     @Override
     public boolean equals(Object obj) {
