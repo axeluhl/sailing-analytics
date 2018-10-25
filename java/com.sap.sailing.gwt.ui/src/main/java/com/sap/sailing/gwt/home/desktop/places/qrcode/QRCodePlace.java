@@ -70,6 +70,10 @@ public class QRCodePlace extends AbstractBasePlace {
         return decodeURIComponent(url)
     }-*/;
 
+    private native String encodeUrl(String url)/*-{
+        return encodeURIComponent(url)
+    }-*/;
+
     private void parseUrl(String checkInUrl) {
         Iterable<Pair<String, String>> parameters = parseUrlParameters(checkInUrl);
         for (Pair<String, String> parameter : parameters) {
@@ -115,7 +119,7 @@ public class QRCodePlace extends AbstractBasePlace {
     }
 
     public String getEncodedCheckInUrl() {
-        return rawCheckInUrl;
+        return encodeUrl(rawCheckInUrl);
     }
 
     public UUID getEventId() {

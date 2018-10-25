@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.desktop.places.qrcode;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.ScriptInjector;
+import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -40,6 +41,9 @@ public class QRCodeView extends Composite {
     @UiField
     DivElement eventImageUi;
 
+    @UiField
+    AnchorElement urlAnchor;
+
     public QRCodeView() {
         super();
         initWidget(uiBinder.createAndBindUi(this));
@@ -61,21 +65,22 @@ public class QRCodeView extends Composite {
             break;
         }
 
+        urlAnchor.setHref(url);
         ScriptInjector.fromUrl("qrcode/qrcode.min.js").setWindow(ScriptInjector.TOP_WINDOW)
                 .setCallback(new Callback<Void, Exception>() {
 
-            @Override
-            public void onSuccess(Void result) {
-                QRCodeWrapper qrCodeWrapper = QRCodeWrapper.wrap(qrCodeDivUi, 600,
-                        QRCodeWrapper.ERROR_CORRECTION_LEVEL_H);
-                qrCodeWrapper.setQrCodeContent(url);
-            }
+                    @Override
+                    public void onSuccess(Void result) {
+                        QRCodeWrapper qrCodeWrapper = QRCodeWrapper.wrap(qrCodeDivUi, 600,
+                                QRCodeWrapper.ERROR_CORRECTION_LEVEL_H);
+                        qrCodeWrapper.setQrCodeContent(url);
+                    }
 
-            @Override
-            public void onFailure(Exception reason) {
-                Window.alert("could not load qrcode library " + reason.getMessage());
-            }
-        }).inject();
+                    @Override
+                    public void onFailure(Exception reason) {
+                        Window.alert("could not load qrcode library " + reason.getMessage());
+                    }
+                }).inject();
 
         eventImageUi.getStyle().setBackgroundImage("url('" + event.getLogoImage().getSourceRef() + "')");
         eventImageUi.getStyle().setWidth(event.getLogoImage().getWidthInPx(), Unit.PX);

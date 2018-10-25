@@ -45,8 +45,10 @@
                 class="{res.mainCss.spacermargintopsmall} {res.mainCss.spacermarginbottomsmall} {res.mediaCss.medium12} {style.qrCode}"
                 ui:field="qrCodeDivUi" />
             <div class="{res.mediaCss.medium12} {style.errorMessage}" ui:field="errorDivUi" />
-            <div class="{res.mediaCss.medium12} {style.infoMessage}" ui:field="infoDivUi">
-                <ui:text from="{i18n.qrCodeInfoMessage}" />
+                <div class="{res.mediaCss.medium12} {style.infoMessage}" ui:field="infoDivUi">
+                <a ui:field="urlAnchor">
+                    <ui:text from="{i18n.qrCodeInfoMessage}" />
+                </a>
             </div>
             <div class="{style.eventImage} {res.mainCss.spacermargintopsmall}">
                 <div ui:field="eventImageUi" />

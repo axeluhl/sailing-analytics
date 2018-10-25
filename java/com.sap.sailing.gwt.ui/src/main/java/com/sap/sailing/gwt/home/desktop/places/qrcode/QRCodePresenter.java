@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.common.BranchIOConstants;
 import com.sap.sailing.gwt.home.communication.event.GetEventViewAction;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
@@ -18,12 +19,12 @@ public class QRCodePresenter {
     private DataCollector dataCollector;
     private InvitationMode invitationMode;
 
-    public QRCodePresenter(UUID eventId, UUID competitorId, String leaderboardName, String checkInUrl,
-            QRCodeClientFactory clientFactory, InvitationMode invitationMode) {
+    public QRCodePresenter(UUID eventId, UUID competitorId, String leaderboardName,
+            String checkInUrl, QRCodeClientFactory clientFactory, InvitationMode invitationMode) {
         this.eventId = eventId;
+        this.checkInUrl = checkInUrl;
         this.competitorId = competitorId;
         this.leaderboardNameFromUrl = leaderboardName;
-        this.checkInUrl = checkInUrl;
         this.clientFactory = clientFactory;
         this.invitationMode = invitationMode;
     }
@@ -35,10 +36,12 @@ public class QRCodePresenter {
             view.setError();
         } else {
             dataCollector = new DataCollector(view);
-            retrieveCompetitor(competitorId);
+            if (competitorId != null) {
+                retrieveCompetitor(competitorId);
+            } else {
+                dataCollector.setCompetitor(null);
+            }
             retrieveEvent(eventId);
-            dataCollector.setLeaderboardName(leaderboardNameFromUrl);
-            dataCollector.setCheckInUrl(checkInUrl);
         }
     }
 
@@ -78,30 +81,14 @@ public class QRCodePresenter {
     private final class DataCollector {
         private boolean eventIsSet = false;
         private boolean competitorIsSet = false;
-        private boolean leaderboardNameIsSet = false;
-        private boolean CheckInUrlIsSet = false;
 
         private SimpleCompetitorWithIdDTO competitor;
         private EventViewDTO event;
-        private String leaderboardName;
-        private String checkInUrl;
 
         private final QRCodeView view;
 
         public DataCollector(QRCodeView view) {
             this.view = view;
-        }
-
-        public void setCheckInUrl(String checkInUrl) {
-            CheckInUrlIsSet = true;
-            this.checkInUrl = checkInUrl;
-            proceedIfFinished();
-        }
-
-        public void setLeaderboardName(String leaderboardName) {
-            leaderboardNameIsSet = true;
-            this.leaderboardName = leaderboardName;
-            proceedIfFinished();
         }
 
         public void setCompetitor(SimpleCompetitorWithIdDTO competitor) {
@@ -117,20 +104,30 @@ public class QRCodePresenter {
         }
 
         private void proceedIfFinished() {
-            if (CheckInUrlIsSet && competitorIsSet && eventIsSet && leaderboardNameIsSet) {
-                if (checkInUrl != null && competitor != null && event != null && leaderboardName != null) {
-                    view.setData(event, competitor, leaderboardName, checkInUrl, invitationMode);
+            if (competitorIsSet && eventIsSet) {
+                if (checkInUrl != null && event != null) {
+                    String branchIoUrl = null;
+                    switch (invitationMode) {
+                    case BOUY_TENDER:
+                        branchIoUrl = BranchIOConstants.BUOYPINGER_APP_BRANCHIO + "?"
+                                + BranchIOConstants.BUOYPINGER_APP_BRANCHIO_PATH + "="
+                                + QRCodePresenter.this.checkInUrl;
+                        break;
+                    case COMPETITOR:
+                        branchIoUrl = BranchIOConstants.SAILINSIGHT_APP_BRANCHIO + "?"
+                                + BranchIOConstants.SAILINSIGHT_APP_BRANCHIO_PATH + "="
+                                + QRCodePresenter.this.checkInUrl;
+                        break;
+                    default:
+                        break;
+                    }
+                    view.setData(event, competitor, leaderboardNameFromUrl, branchIoUrl, invitationMode);
                 } else {
                     view.setError();
-                    if (competitor == null) {
-                        GWT.log("Unknown competitor");
-                    }
-                    if (event == null) {
-                        GWT.log("Unknown event");
-                    }
-                    if (leaderboardName == null) {
-                        GWT.log("Unknown leaderboard");
-                    }
+                    GWT.log("checkInUrl " + checkInUrl);
+                    GWT.log("competitorId " + competitorId);
+                    GWT.log("invitationMode " + invitationMode);
+                    GWT.log("eventId " + eventId);
                 }
             }
         }
