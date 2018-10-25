@@ -12,6 +12,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sse.datamining.ui.client.StringMessages;
 
 public class StoredDataMiningQueryPanel extends Composite {
 
@@ -39,9 +40,12 @@ public class StoredDataMiningQueryPanel extends Composite {
     public StoredDataMiningQueryPanel() {
         suggestBoxUi = new SuggestBox(oracle);
         initWidget(uiBinder.createAndBindUi(this));
-        saveQueryButtonUi.setText("Save");
-        loadQueryButtonUi.setText("Load");
-        removeQueryButtonUi.setText("Remove");
+        saveQueryButtonUi.setText(StringMessages.INSTANCE.save());
+        loadQueryButtonUi.setText(StringMessages.INSTANCE.load());
+        removeQueryButtonUi.setText(StringMessages.INSTANCE.remove());
+        suggestBoxUi.getValueBox().getElement().setPropertyString("placeholder",
+                StringMessages.INSTANCE.dataMiningStoredQueryPlaceholder());
+        suggestBoxUi.getValueBox().addClickHandler(e -> suggestBoxUi.showSuggestionList());
     }
 
     public StoredDataMiningQueryPanel(StoredDataMiningQueryDataProvider dataProvider) {
@@ -70,5 +74,6 @@ public class StoredDataMiningQueryPanel extends Composite {
     public void updateOracle(Collection<String> collection) {
         oracle.clear();
         oracle.addAll(collection);
+        oracle.setDefaultSuggestionsFromText(collection);
     }
 }
