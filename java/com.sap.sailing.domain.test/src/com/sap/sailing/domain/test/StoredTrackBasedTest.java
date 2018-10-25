@@ -6,10 +6,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.io.ObjectStreamClass;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,6 +40,7 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
+import com.sap.sse.security.shared.NamedDTO;
 
 public abstract class StoredTrackBasedTest extends TrackBasedTest {
     private static final String RESOURCES = "resources/";
@@ -74,7 +77,23 @@ public abstract class StoredTrackBasedTest extends TrackBasedTest {
     }
     
     public static ObjectInputStream getObjectInputStream(String fileNameWithinResources) throws FileNotFoundException, IOException {
-        return new ObjectInputStream(new FileInputStream(new File(RESOURCES+fileNameWithinResources)));
+        return new CustomObjectInputStream(new FileInputStream(new File(RESOURCES+fileNameWithinResources)));
+    }
+    
+    private static class CustomObjectInputStream extends ObjectInputStream {
+        public CustomObjectInputStream(InputStream in) throws IOException {
+            super(in);
+            enableResolveObject(true);
+        }
+
+        @Override
+        protected ObjectStreamClass readClassDescriptor() throws IOException, ClassNotFoundException {
+            final ObjectStreamClass osc = super.readClassDescriptor();
+            if (osc.getName().equals("com.sap.sailing.domain.common.dto.NamedDTO")) {
+                return ObjectStreamClass.lookup(NamedDTO.class);
+            }
+            return osc;
+        }
     }
     
     private Set<String> getCompetitorNamesOfStoredTracks(String regattaName) {
