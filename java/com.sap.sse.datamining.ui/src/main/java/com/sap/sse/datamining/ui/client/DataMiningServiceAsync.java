@@ -78,9 +78,12 @@ public interface DataMiningServiceAsync {
      */
     void pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy(AsyncCallback<SerializationDummy> callback);
 
+    /** retrieves the {@link StoredDataMiningQueryDTO}s from the back end */
     void retrieveStoredQueries(AsyncCallback<ArrayList<StoredDataMiningQueryDTO>> callback);
 
+    /** updates or creates a {@link StoredDataMiningQueryDTO} in the back end */
     void updateOrCreateStoredQuery(StoredDataMiningQueryDTO query, AsyncCallback<StoredDataMiningQueryDTO> callback);
 
+    /** removes the {@link StoredDataMiningQueryDTO} if it exists from the back end */
     void removeStoredQuery(StoredDataMiningQueryDTO query, AsyncCallback<StoredDataMiningQueryDTO> callback);
 }
