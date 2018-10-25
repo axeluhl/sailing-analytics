@@ -92,7 +92,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                         queryDefinitionProvider, resultsPresenter);
                 queryDefinitionProvider.addControl(queryRunner.getEntryWidget());
                 StoredDataMiningQueryDataProvider dataProvider = new StoredDataMiningQueryDataProvider(
-                        queryDefinitionProvider, dataMiningService);
+                        queryDefinitionProvider, dataMiningService, queryRunner);
                 queryDefinitionProvider.addControl(new StoredDataMiningQueryPanel(dataProvider));
                 /*
                  * Running queries automatically when they've been changed is currently unnecessary, if not even

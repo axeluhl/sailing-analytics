@@ -13,6 +13,7 @@ import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.dto.StoredDataMiningQueryDTO;
 import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningQueryDTOImpl;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
+import com.sap.sse.datamining.ui.client.QueryRunner;
 import com.sap.sse.datamining.ui.client.selection.QueryDefinitionProviderWithControls;
 
 public class StoredDataMiningQueryDataProvider {
@@ -20,13 +21,15 @@ public class StoredDataMiningQueryDataProvider {
 
     private final QueryDefinitionProviderWithControls queryDefinitionProvider;
     private final DataMiningServiceAsync dataMiningService;
+    private final QueryRunner queryRunner;
 
     private StoredDataMiningQueryPanel uiPanel;
 
     public StoredDataMiningQueryDataProvider(QueryDefinitionProviderWithControls queryDefinitionProvider,
-            DataMiningServiceAsync dataMiningService) {
+            DataMiningServiceAsync dataMiningService, QueryRunner queryRunner) {
         this.queryDefinitionProvider = queryDefinitionProvider;
         this.dataMiningService = dataMiningService;
+        this.queryRunner = queryRunner;
     }
 
     public StatisticQueryDefinitionDTO getCurrentQuery() {
@@ -34,8 +37,19 @@ public class StoredDataMiningQueryDataProvider {
     }
 
     public boolean addOrUpdateQuery(String name, StatisticQueryDefinitionDTO query) {
-        StoredDataMiningQueryDTOImpl storedQuery = new StoredDataMiningQueryDTOImpl(name, UUID.randomUUID(), query);
-        boolean update = queryDefinitions.contains(storedQuery);
+        Optional<StoredDataMiningQueryDTO> findByName = findByName(name);
+
+        StoredDataMiningQueryDTO storedQuery;
+        boolean update;
+
+        if (findByName.isPresent()) {
+            StoredDataMiningQueryDTO existingQuery = findByName.get();
+            storedQuery = new StoredDataMiningQueryDTOImpl(name, existingQuery.getId(), query);
+            update = true;
+        } else {
+            storedQuery = new StoredDataMiningQueryDTOImpl(name, UUID.randomUUID(), query);
+            update = false;
+        }
 
         dataMiningService.updateOrCreateStoredQuery(storedQuery, new AsyncCallback<StoredDataMiningQueryDTO>() {
             @Override
@@ -45,6 +59,7 @@ public class StoredDataMiningQueryDataProvider {
 
             @Override
             public void onSuccess(StoredDataMiningQueryDTO result) {
+                queryDefinitions.remove(result);
                 queryDefinitions.add(result);
                 updateUi();
             }
@@ -77,6 +92,7 @@ public class StoredDataMiningQueryDataProvider {
         Optional<StoredDataMiningQueryDTO> query = findByName(name);
         if (query.isPresent()) {
             queryDefinitionProvider.applyQueryDefinition(query.get().getQuery());
+            queryRunner.queryDefinitionChanged(query.get().getQuery());
             return true;
         }
         return false;
