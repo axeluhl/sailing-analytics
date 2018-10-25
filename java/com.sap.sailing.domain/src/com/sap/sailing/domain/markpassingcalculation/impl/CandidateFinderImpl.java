@@ -550,8 +550,6 @@ public class CandidateFinderImpl implements CandidateFinder {
      */
     private Util.Pair<List<Candidate>, List<Candidate>> checkForDistanceCandidateChanges(Competitor c,
             Iterable<GPSFixMoving> fixes, Iterable<Waypoint> waypoints) {
-        final Map<TimePoint, GPSFixMoving> lastFixBeforeCache = new LimitedLinkedHashMap<>(10);
-        final Map<TimePoint, GPSFixMoving> firstFixAfterCache = new LimitedLinkedHashMap<>(10);
         Util.Pair<List<Candidate>, List<Candidate>> result = new Util.Pair<List<Candidate>, List<Candidate>>(
                 new ArrayList<Candidate>(), new ArrayList<Candidate>());
         TreeSet<GPSFix> affectedFixes = new TreeSet<GPSFix>(comp);
@@ -567,8 +565,8 @@ public class CandidateFinderImpl implements CandidateFinder {
                     fixIsValid = track.isValid(fix);
                     if (fixIsValid) {
                         TimePoint t = fix.getTimePoint();
-                        fixBefore = lastFixBeforeCache.computeIfAbsent(t, timePoint->track.getLastFixBefore(timePoint));
-                        fixAfter = firstFixAfterCache.computeIfAbsent(t, timePoint->track.getFirstFixAfter(timePoint));
+                        fixBefore = track.getLastFixBefore(t);
+                        fixAfter = track.getFirstFixAfter(t);
                     }
                 } finally {
                     track.unlockAfterRead();
@@ -715,8 +713,6 @@ public class CandidateFinderImpl implements CandidateFinder {
         Util.Pair<List<Candidate>, List<Candidate>> result = new Util.Pair<List<Candidate>, List<Candidate>>(
                 new ArrayList<Candidate>(), new ArrayList<Candidate>());
         DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
-        final Map<TimePoint, GPSFixMoving> lastFixBeforeCache = new LimitedLinkedHashMap<>(10);
-        final Map<TimePoint, GPSFixMoving> firstFixAfterCache = new LimitedLinkedHashMap<>(10);
         for (GPSFixMoving fix : fixes) {
             if (timeRangeForValidCandidates.getTimeRangeOrNull() != null && timeRangeForValidCandidates.getTimeRangeOrNull().includes(fix.getTimePoint())) {
                 TimePoint t = fix.getTimePoint();
@@ -727,8 +723,8 @@ public class CandidateFinderImpl implements CandidateFinder {
                 try {
                     fixIsValid = track.isValid(fix);
                     if (fixIsValid) {
-                        fixBefore = lastFixBeforeCache.computeIfAbsent(t, timePoint->track.getLastFixBefore(timePoint));
-                        fixAfter = firstFixAfterCache.computeIfAbsent(t, timePoint->track.getFirstFixAfter(timePoint));
+                        fixBefore = track.getLastFixBefore(t);
+                        fixAfter = track.getFirstFixAfter(t);
                     }
                 } finally {
                     track.unlockAfterRead();
