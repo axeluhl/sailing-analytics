@@ -255,11 +255,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     private void initEmptyStore() {
         final AdminRole adminRolePrototype = AdminRole.getInstance();
         RoleDefinition adminRoleDefinition = getRoleDefinition(adminRolePrototype.getId());
-        if (adminRoleDefinition == null) {
-            userStore.createPredefinedRoles();
-            adminRoleDefinition = getRoleDefinition(adminRolePrototype.getId());
-            assert adminRoleDefinition != null;
-        }
+        userStore.ensureDefaultRolesExist();
+        adminRoleDefinition = getRoleDefinition(adminRolePrototype.getId());
+        assert adminRoleDefinition != null;
         try {
             if (!userStore.hasUsers()) {
                 logger.info("No users found, creating default user \""+ADMIN_USERNAME+"\" with password \""+ADMIN_DEFAULT_PASSWORD+"\"");
@@ -1024,6 +1022,20 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (userToDelete != null) {
             // remove all permissions the user has
             accessControlStore.removeAllOwnershipsFor(userToDelete);
+
+            final String defaultTenantNameForUsername = getDefaultTenantNameForUsername(username);
+            UserGroup defaultTenantUserGroup = getUserGroupByName(defaultTenantNameForUsername);
+            if (defaultTenantUserGroup != null) {
+                List<SecurityUser> usersInGroupList = Util.asList(defaultTenantUserGroup.getUsers());
+                if (usersInGroupList.size() == 1 && usersInGroupList.contains(userToDelete)) {
+                    // no other user is in group, delete it as well
+                    try {
+                        internalDeleteUserGroup(defaultTenantUserGroup.getId());
+                    } catch (UserGroupManagementException e) {
+                        logger.log(Level.SEVERE, "Could not delete default tenant for user", e);
+                    }
+                }
+            }
             // also remove from all usergroups
             for (UserGroup userGroup : userToDelete.getUserGroups()) {
                 internalRemoveUserFromUserGroup(userGroup.getId(), userToDelete.getName());

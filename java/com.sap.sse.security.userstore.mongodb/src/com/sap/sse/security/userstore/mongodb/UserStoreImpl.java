@@ -226,7 +226,7 @@ public class UserStoreImpl implements UserStore {
     }
     
     @Override
-    public void createPredefinedRoles() {
+    public void ensureDefaultRolesExist() {
         final AdminRole adminRolePrototype = AdminRole.getInstance();
         if (getRoleDefinition(adminRolePrototype.getId()) == null) {
             logger.info("No admin role found. Creating default role \""+adminRolePrototype.getName()+"\" with permission \""+

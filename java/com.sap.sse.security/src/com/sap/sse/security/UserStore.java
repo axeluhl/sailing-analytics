@@ -229,5 +229,5 @@ public interface UserStore extends UserGroupProvider, Named {
     /**
      * Ensures that the predefined role definitions, particularly the "admin" and the "user" role, exist.
      */
-    void createPredefinedRoles();
+    void ensureDefaultRolesExist();
 }
