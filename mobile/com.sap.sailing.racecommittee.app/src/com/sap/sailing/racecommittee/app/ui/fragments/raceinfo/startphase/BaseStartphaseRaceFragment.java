@@ -21,7 +21,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingProcedure> extends BaseRaceInfoRaceFragment<ProcedureType> {
+public abstract class BaseStartphaseRaceFragment<ProcedureType extends RacingProcedure>
+        extends BaseRaceInfoRaceFragment<ProcedureType> {
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @Override

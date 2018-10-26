@@ -10,7 +10,7 @@ import android.content.Context;
 
 public class GeoUtils {
     public static Position getPositionForGivenPointDistanceAndBearing(Position givenPoint, Distance distance,
-                                                                      Bearing windDirection) {
+            Bearing windDirection) {
         final double earthRadiusInMeters = 6371000.0;
         double brng = windDirection.getRadians();
         double lat1 = givenPoint.getLatRad();
@@ -18,8 +18,7 @@ public class GeoUtils {
         double dist = distance.getMeters() / earthRadiusInMeters;
 
         double lat2 = Math.asin(Math.sin(lat1) * Math.cos(dist) + Math.cos(lat1) * Math.sin(dist) * Math.cos(brng));
-        double lon2 = lon1
-                + Math.atan2(Math.sin(brng) * Math.sin(dist) * Math.cos(lat1),
+        double lon2 = lon1 + Math.atan2(Math.sin(brng) * Math.sin(dist) * Math.cos(lat1),
                 Math.cos(dist) - Math.sin(lat1) * Math.sin(lat2));
         lon2 = (lon2 + 3 * Math.PI) % (2 * Math.PI) - Math.PI;
 

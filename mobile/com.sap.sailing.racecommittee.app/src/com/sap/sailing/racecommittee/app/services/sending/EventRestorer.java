@@ -23,7 +23,7 @@ public class EventRestorer implements MessageRestorer {
     public void restoreMessage(Context context, Intent messageIntent) {
         String raceId = messageIntent.getExtras().getString(MessageSendingService.CALLBACK_PAYLOAD);
         String serializedEventAsJson = messageIntent.getExtras().getString(MessageSendingService.PAYLOAD);
-        
+
         ExLog.i(context, TAG, String.format("Trying to re-add event to race log of race %s.", raceId));
         DataStore store = DataManager.create(context).getDataStore();
         if (!store.hasRace(raceId)) {
@@ -31,7 +31,8 @@ public class EventRestorer implements MessageRestorer {
             return;
         }
         try {
-            RaceLogEventDeserializer deserializer = RaceLogEventDeserializer.create(DataManager.create(context).getDataStore().getDomainFactory());
+            RaceLogEventDeserializer deserializer = RaceLogEventDeserializer
+                    .create(DataManager.create(context).getDataStore().getDomainFactory());
             RaceLogEvent event = deserializer.deserialize((JSONObject) new JSONParser().parse(serializedEventAsJson));
             boolean added = store.getRace(raceId).getRaceLog().add(event);
             if (added) {

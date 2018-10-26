@@ -8,10 +8,10 @@ import com.sap.sailing.racecommittee.app.R;
 import com.sap.sailing.racecommittee.app.ui.fragments.chooser.RaceInfoFragmentChooser;
 
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.support.v4.app.FragmentTransaction;
 
 public class RaceInfoFragment extends RaceFragment {
 
@@ -25,7 +25,7 @@ public class RaceInfoFragment extends RaceFragment {
         this.infoFragment = null; // will be set later by switchToInfoFragment()
     }
 
-    //TODO: Why is this needed if only used without arguments and even never called?
+    // TODO: Why is this needed if only used without arguments and even never called?
     public static RaceInfoFragment newInstance() {
         RaceInfoFragment fragment = new RaceInfoFragment();
         return fragment;
@@ -44,7 +44,7 @@ public class RaceInfoFragment extends RaceFragment {
 
         // Initial fragment selection...
 
-        //TODO: why at all is the fragment managing other fragments. Shouldn't this be done by the containing activity?
+        // TODO: why at all is the fragment managing other fragments. Shouldn't this be done by the containing activity?
         switchToInfoFragment();
     }
 
@@ -56,7 +56,7 @@ public class RaceInfoFragment extends RaceFragment {
 
     @Override
     public void onStop() {
-        //TODO: If the listener is added on resume it maybe should be removed onPause?!
+        // TODO: If the listener is added on resume it maybe should be removed onPause?!
         getRace().getState().removeChangedListener(stateChangedListener);
         super.onStop();
     }
@@ -69,9 +69,8 @@ public class RaceInfoFragment extends RaceFragment {
     }
 
     protected void switchToInfoFragment(RaceFragment chosenFragment) {
-        ExLog.i(getActivity(), TAG, String
-            .format("Switched to %s fragment for race %s with status %s", chosenFragment.getClass().getName(), getRace().getId(), getRace()
-                .getStatus()));
+        ExLog.i(getActivity(), TAG, String.format("Switched to %s fragment for race %s with status %s",
+                chosenFragment.getClass().getName(), getRace().getId(), getRace().getStatus()));
 
         this.infoFragment = chosenFragment;
         displayInfoFragment();

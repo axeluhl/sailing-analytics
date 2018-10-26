@@ -23,12 +23,12 @@ import android.support.v7.preference.PreferenceScreen;
  * Created by I074137 on 18.09.13.
  */
 public class BasePreferenceFragment extends PreferenceFragmentCompat {
-    
+
     @SuppressWarnings("unchecked")
     protected <T extends Preference> T findPreference(int resourceId) {
         return (T) findPreference(getString(resourceId));
     }
-    
+
     protected Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange(Preference preference, Object value) {
@@ -37,10 +37,7 @@ public class BasePreferenceFragment extends PreferenceFragmentCompat {
             if (preference instanceof ListPreference) {
                 ListPreference listPreference = (ListPreference) preference;
                 int index = listPreference.findIndexOfValue(stringValue);
-                preference.setSummary(
-                        index >= 0
-                                ? listPreference.getEntries()[index]
-                                : null);
+                preference.setSummary(index >= 0 ? listPreference.getEntries()[index] : null);
 
             } else if (preference instanceof MultiSelectListPreference || preference instanceof EditSetPreference) {
                 @SuppressWarnings("unchecked")
@@ -61,14 +58,14 @@ public class BasePreferenceFragment extends PreferenceFragmentCompat {
         sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
                 getPreferenceManager().getSharedPreferences().getString(preference.getKey(), ""));
     }
-    
+
     protected void bindPreferenceSummaryToInteger(Preference preference) {
         addOnPreferenceChangeListener(preference, sBindPreferenceSummaryToValueListener);
 
         sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
                 getPreferenceManager().getSharedPreferences().getInt(preference.getKey(), 0));
     }
-    
+
     protected void bindPreferenceSummaryToSet(Preference preference) {
         addOnPreferenceChangeListener(preference, sBindPreferenceSummaryToValueListener);
 
@@ -125,17 +122,18 @@ public class BasePreferenceFragment extends PreferenceFragmentCompat {
     }
 
     /**
-     * Called during {@link #onCreate(Bundle)} to supply the preferences for this fragment.
-     * Subclasses are expected to call {@link #setPreferenceScreen(PreferenceScreen)} either
-     * directly or via helper methods such as {@link #addPreferencesFromResource(int)}.
+     * Called during {@link #onCreate(Bundle)} to supply the preferences for this fragment. Subclasses are expected to
+     * call {@link #setPreferenceScreen(PreferenceScreen)} either directly or via helper methods such as
+     * {@link #addPreferencesFromResource(int)}.
      *
-     * @param savedInstanceState If the fragment is being re-created from
-     *                           a previous saved state, this is the state.
-     * @param rootKey            If non-null, this preference fragment should be rooted at the
-     *                           {@link PreferenceScreen} with this key.
+     * @param savedInstanceState
+     *            If the fragment is being re-created from a previous saved state, this is the state.
+     * @param rootKey
+     *            If non-null, this preference fragment should be rooted at the {@link PreferenceScreen} with this key.
      */
     @Override
-    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) { }
+    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+    }
 
     @Override
     public void onDisplayPreferenceDialog(Preference preference) {

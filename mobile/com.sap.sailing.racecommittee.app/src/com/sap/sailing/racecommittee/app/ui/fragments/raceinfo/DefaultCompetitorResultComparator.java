@@ -20,7 +20,7 @@ public class DefaultCompetitorResultComparator implements Comparator<CompetitorR
      * Tells whether a lower score is better than a higher score.
      */
     private final boolean lowPoint;
-    
+
     public DefaultCompetitorResultComparator(boolean lowPoint) {
         this.lowPoint = lowPoint;
     }
@@ -40,15 +40,17 @@ public class DefaultCompetitorResultComparator implements Comparator<CompetitorR
                 if (rMPR == null || rMPR == MaxPointsReason.NONE) {
                     result = 0;
                 } else {
-                    result = -1; // lhs is "less" than rhs because we want to sort penalized competitors towards the end ("greater")
+                    result = -1; // lhs is "less" than rhs because we want to sort penalized competitors towards the end
+                                 // ("greater")
                 }
             } else {
                 if (rMPR == null || rMPR == MaxPointsReason.NONE) {
-                    result = 1; // lhs is "greater" than lhs because we want to sort penalized competitors towards the end ("greater")
+                    result = 1; // lhs is "greater" than lhs because we want to sort penalized competitors towards the
+                                // end ("greater")
                 } else {
                     // both are penalized; compare by score:
-                    final int preResult = lhs.getScore() == null ? rhs.getScore() == null ? 0 : -1 : rhs.getScore() == null ? 1 :
-                        lhs.getScore().compareTo(rhs.getScore());
+                    final int preResult = lhs.getScore() == null ? rhs.getScore() == null ? 0 : -1
+                            : rhs.getScore() == null ? 1 : lhs.getScore().compareTo(rhs.getScore());
                     result = lowPoint ? preResult : -preResult;
                 }
             }

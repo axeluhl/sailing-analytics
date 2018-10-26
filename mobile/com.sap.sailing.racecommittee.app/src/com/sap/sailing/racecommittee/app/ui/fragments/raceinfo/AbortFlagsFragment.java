@@ -49,7 +49,8 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
 
     public static AbortFlagsFragment newInstance(Flags flag, String headerText) {
         if (flag != Flags.AP && flag != Flags.NOVEMBER) {
-            throw new IllegalArgumentException("The abort fragment can only be instantiated with AP or NOVEMBER, but was " + flag.name());
+            throw new IllegalArgumentException(
+                    "The abort fragment can only be instantiated with AP or NOVEMBER, but was " + flag.name());
         }
 
         AbortFlagsFragment fragment = new AbortFlagsFragment();
@@ -91,40 +92,40 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
         RaceState state = getRaceState();
         Flags mainFlag = Flags.valueOf(getArguments().getString(AppConstants.FLAG_KEY));
         switch (mainFlag) {
-            case AP:
-                logFlag(flag);
-                state.setAborted(now, /* postponed */ true, flag);
-                if (flag != Flags.NONE) {
-                    setProtestTime();
-                }
-                state.setAdvancePass(now);
-                break;
+        case AP:
+            logFlag(flag);
+            state.setAborted(now, /* postponed */ true, flag);
+            if (flag != Flags.NONE) {
+                setProtestTime();
+            }
+            state.setAdvancePass(now);
+            break;
 
-            case NOVEMBER:
-                logFlag(flag);
-                abortRunningRaces(now, flag);
-                break;
+        case NOVEMBER:
+            logFlag(flag);
+            abortRunningRaces(now, flag);
+            break;
 
-            default:
-                logFlag(flag);
-                state.setAdvancePass(now);
-                break;
+        default:
+            logFlag(flag);
+            state.setAdvancePass(now);
+            break;
         }
     }
 
     private void logFlag(Flags flag) {
         switch (flag) {
-            case ALPHA:
-                ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_ALPHA, getRace().getId());
-                break;
+        case ALPHA:
+            ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_ALPHA, getRace().getId());
+            break;
 
-            case HOTEL:
-                ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_HOTEL, getRace().getId());
-                break;
+        case HOTEL:
+            ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_HOTEL, getRace().getId());
+            break;
 
-            default:
-                ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_NONE, getRace().getId());
-                break;
+        default:
+            ExLog.i(getActivity(), LogEvent.RACE_CHOOSE_ABORT_NONE, getRace().getId());
+            break;
         }
     }
 
@@ -147,7 +148,7 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
 
     private abstract class ActionWithNowTimePoint implements Runnable {
         private final TimePoint now;
-        
+
         public ActionWithNowTimePoint(TimePoint now) {
             super();
             this.now = now;
@@ -157,21 +158,21 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
             return now;
         }
     }
-    
+
     private class AbortAction extends ActionWithNowTimePoint {
         private final ManagedRace raceToAbort;
         private final Flags flag;
-        
+
         public AbortAction(ManagedRace raceToAbort, TimePoint now, Flags flag) {
             super(now);
             this.raceToAbort = raceToAbort;
             this.flag = flag;
         }
-        
+
         protected ManagedRace getRaceToAbort() {
             return raceToAbort;
         }
-        
+
         @Override
         public void run() {
             abortRace(getNow(), raceToAbort.getState(), flag);
@@ -181,36 +182,37 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
     private class AbortAndRenewRelativeStartTime extends AbortAction {
         private final Duration startTimeDiff;
         private final SimpleRaceLogIdentifier dependentOn;
-        
-        public AbortAndRenewRelativeStartTime(ManagedRace raceToAbort, TimePoint now, Flags flag, Duration startTimeDiff, SimpleRaceLogIdentifier dependentOn) {
+
+        public AbortAndRenewRelativeStartTime(ManagedRace raceToAbort, TimePoint now, Flags flag,
+                Duration startTimeDiff, SimpleRaceLogIdentifier dependentOn) {
             super(raceToAbort, now, flag);
             this.startTimeDiff = startTimeDiff;
             this.dependentOn = dependentOn;
         }
-        
+
         @Override
         public void run() {
             super.run();
             getRaceToAbort().getState().forceNewDependentStartTime(getNow(), startTimeDiff, dependentOn);
         }
     }
-    
+
     private class MaterializeAbsoluteStartTime extends ActionWithNowTimePoint {
         private final ManagedRace onRace;
         private final TimePoint absoluteStartTime;
-        
+
         public MaterializeAbsoluteStartTime(TimePoint now, ManagedRace onRace, TimePoint absoluteStartTime) {
             super(now);
             this.onRace = onRace;
             this.absoluteStartTime = absoluteStartTime;
         }
-        
+
         @Override
         public void run() {
             onRace.getState().forceNewStartTime(getNow(), absoluteStartTime);
         }
     }
-    
+
     private void abortRunningRaces(final TimePoint now, final Flags flag) {
         final RacingActivity activity = (RacingActivity) getActivity();
         final LinkedHashMap<String, ManagedRace> races = activity.getRunningRaces();
@@ -225,25 +227,36 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
         builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                // We assume that adapter.getSelected() returns the races in an order such that races occurring at lesser
-                // indices may depend (directly or transitively) on races with greater indices, but not the other way around.
+                // We assume that adapter.getSelected() returns the races in an order such that races occurring at
+                // lesser
+                // indices may depend (directly or transitively) on races with greater indices, but not the other way
+                // around.
                 final List<ManagedRace> racesToAbort = adapter.getSelected();
                 final Set<ActionWithNowTimePoint> actions = new HashSet<>();
                 for (final ManagedRace raceToAbort : racesToAbort) { // raceToAbort is "R" from bug 3148 comment #2
-                    final List<ManagedRace> dependentRaces = activity
-                        .getRacesWithStartTimeImmediatelyDependingOn(raceToAbort, new RaceLogRaceStatus[] {
-                                RaceLogRaceStatus.STARTPHASE, RaceLogRaceStatus.RUNNING, RaceLogRaceStatus.FINISHING, RaceLogRaceStatus.FINISHED }); // Q
-                    final Iterable<SimpleRaceLogIdentifier> dependingOnRaces = raceToAbort.getState().getStartTimeFinderResult().getDependingOnRaces();
-                    final SimpleRaceLogIdentifier immediatelyDependsOnRace = dependingOnRaces.iterator().hasNext() ? dependingOnRaces.iterator().next() : null; // P
-                    // create abort command for raceToAbort; if it has a relative start time and immediately depends on another race that is also to be aborted
-                    // renew the relative start time in the new pass; if it has a relative start time and immediately depends on another race that is *not*
+                    final List<ManagedRace> dependentRaces = activity.getRacesWithStartTimeImmediatelyDependingOn(
+                            raceToAbort,
+                            new RaceLogRaceStatus[] { RaceLogRaceStatus.STARTPHASE, RaceLogRaceStatus.RUNNING,
+                                    RaceLogRaceStatus.FINISHING, RaceLogRaceStatus.FINISHED }); // Q
+                    final Iterable<SimpleRaceLogIdentifier> dependingOnRaces = raceToAbort.getState()
+                            .getStartTimeFinderResult().getDependingOnRaces();
+                    final SimpleRaceLogIdentifier immediatelyDependsOnRace = dependingOnRaces.iterator().hasNext()
+                            ? dependingOnRaces.iterator().next()
+                            : null; // P
+                    // create abort command for raceToAbort; if it has a relative start time and immediately depends on
+                    // another race that is also to be aborted
+                    // renew the relative start time in the new pass; if it has a relative start time and immediately
+                    // depends on another race that is *not*
                     // to be aborted, only abort but leave without start time definition.
                     if (immediatelyDependsOnRace != null) {
-                        final ManagedRace raceStateOfRaceThatTheRaceToBeAbortedImmediatelyDependsUpon = getManagedRace(racesToAbort, immediatelyDependsOnRace);
+                        final ManagedRace raceStateOfRaceThatTheRaceToBeAbortedImmediatelyDependsUpon = getManagedRace(
+                                racesToAbort, immediatelyDependsOnRace);
                         if (raceStateOfRaceThatTheRaceToBeAbortedImmediatelyDependsUpon != null) {
                             // the race on which raceToAbort depends immediately also is to be aborted
-                            final Duration startTimeDiff = raceToAbort.getState().getStartTimeFinderResult().getStartTimeDiff();
-                            actions.add(new AbortAndRenewRelativeStartTime(raceToAbort, now, flag, startTimeDiff, immediatelyDependsOnRace));
+                            final Duration startTimeDiff = raceToAbort.getState().getStartTimeFinderResult()
+                                    .getStartTimeDiff();
+                            actions.add(new AbortAndRenewRelativeStartTime(raceToAbort, now, flag, startTimeDiff,
+                                    immediatelyDependsOnRace));
                         } else {
                             // the race on which raceToAbort depends immediately is NOT to be aborted
                             actions.add(new AbortAction(raceToAbort, now, flag));
@@ -251,11 +264,13 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
                     } else {
                         actions.add(new AbortAction(raceToAbort, now, flag));
                     }
-                    for (final ManagedRace dependentRace : dependentRaces) { // dependentRace is "Q" from bug 3148 comment #2
+                    for (final ManagedRace dependentRace : dependentRaces) { // dependentRace is "Q" from bug 3148
+                                                                             // comment #2
                         final RaceState raceStateOfDependentRace = dependentRace.getState();
                         if (!racesToAbort.contains(dependentRace)) {
                             // materialize an absolute start time for dependentRace
-                            actions.add(new MaterializeAbsoluteStartTime(now, dependentRace, raceStateOfDependentRace.getStartTimeFinderResult().getStartTime()));
+                            actions.add(new MaterializeAbsoluteStartTime(now, dependentRace,
+                                    raceStateOfDependentRace.getStartTimeFinderResult().getStartTime()));
                         }
                     }
                 }
@@ -266,8 +281,10 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
                     action.run();
                 }
                 if (!racesToAbort.contains(getRace())) {
-                    BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE));
-                    BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT));
+                    BroadcastManager.getInstance(getActivity())
+                            .addIntent(new Intent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE));
+                    BroadcastManager.getInstance(getActivity())
+                            .addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT));
                 }
             }
         });
@@ -276,12 +293,14 @@ public class AbortFlagsFragment extends RaceFragment implements AbortFlagItemCli
         dialog.show();
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
         lp.copyFrom(dialog.getWindow().getAttributes());
-        int maxItemHeight = (int) getItemHeight(activity) * races.size() + getActivity().getResources().getDimensionPixelSize(R.dimen.abort_dialog_height);
+        int maxItemHeight = (int) getItemHeight(activity) * races.size()
+                + getActivity().getResources().getDimensionPixelSize(R.dimen.abort_dialog_height);
         lp.height = Math.min(maxItemHeight, (int) getMaxScreenHeight(activity));
         dialog.getWindow().setAttributes(lp);
     }
-    
-    private ManagedRace getManagedRace(final Iterable<ManagedRace> managedRaces, final SimpleRaceLogIdentifier raceLogIdentifier) {
+
+    private ManagedRace getManagedRace(final Iterable<ManagedRace> managedRaces,
+            final SimpleRaceLogIdentifier raceLogIdentifier) {
         for (final ManagedRace managedRace : managedRaces) {
             if (RaceHelper.getSimpleRaceLogIdentifier(managedRace).equals(raceLogIdentifier)) {
                 return managedRace;

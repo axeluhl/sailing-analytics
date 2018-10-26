@@ -10,7 +10,8 @@ import android.net.Uri;
 import android.support.annotation.Nullable;
 
 public class UrlHelper {
-    public static URL generateUrl(String baseURL, String path, List<Util.Pair<String, Object>> params) throws MalformedURLException {
+    public static URL generateUrl(String baseURL, String path, List<Util.Pair<String, Object>> params)
+            throws MalformedURLException {
         Uri.Builder builder = Uri.parse(baseURL).buildUpon();
         builder.path(path);
         if (params != null) {

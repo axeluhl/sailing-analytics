@@ -35,7 +35,8 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
     private final boolean mCanBoatsOfCompetitorsChangePerRace;
     private TrackingListFragment mParent;
 
-    public FinishListAdapter(Context context, List<CompetitorResultWithIdImpl> competitors, boolean canBoatsOfCompetitorsChangePerRace, TrackingListFragment parent) {
+    public FinishListAdapter(Context context, List<CompetitorResultWithIdImpl> competitors,
+            boolean canBoatsOfCompetitorsChangePerRace, TrackingListFragment parent) {
         super(context, competitors, parent);
         setHasStableIds(true);
         mContext = context;
@@ -46,31 +47,32 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
 
     @Override
     public ItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        //        NinePatchDrawable drawable = (NinePatchDrawable) ContextCompat.getDrawable(getActivity(), R.drawable.material_shadow_z3);
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.race_tracking_list_draggable_item, parent, false);
+        // NinePatchDrawable drawable = (NinePatchDrawable) ContextCompat.getDrawable(getActivity(),
+        // R.drawable.material_shadow_z3);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.race_tracking_list_draggable_item, parent,
+                false);
         ItemViewHolder itemViewHolder = new ItemViewHolder(view);
         return itemViewHolder;
     }
 
     /**
-     * Called by RecyclerView to display the data at the specified position. This method should
-     * update the contents of the {@link RecyclerView.ViewHolder#itemView} to reflect the item at the given
-     * position.
+     * Called by RecyclerView to display the data at the specified position. This method should update the contents of
+     * the {@link RecyclerView.ViewHolder#itemView} to reflect the item at the given position.
      * <p>
-     * Note that unlike {@link ListView}, RecyclerView will not call this method
-     * again if the position of the item changes in the data set unless the item itself is
-     * invalidated or the new position cannot be determined. For this reason, you should only
-     * use the <code>position</code> parameter while acquiring the related data item inside
-     * this method and should not keep a copy of it. If you need the position of an item later
-     * on (e.g. in a click listener), use {@link RecyclerView.ViewHolder#getAdapterPosition()} which will
-     * have the updated adapter position.
+     * Note that unlike {@link ListView}, RecyclerView will not call this method again if the position of the item
+     * changes in the data set unless the item itself is invalidated or the new position cannot be determined. For this
+     * reason, you should only use the <code>position</code> parameter while acquiring the related data item inside this
+     * method and should not keep a copy of it. If you need the position of an item later on (e.g. in a click listener),
+     * use {@link RecyclerView.ViewHolder#getAdapterPosition()} which will have the updated adapter position.
      * <p>
-     * Override {@link #onBindViewHolder(RecyclerView.ViewHolder, int, List)} instead if Adapter can
-     * handle efficient partial bind.
+     * Override {@link #onBindViewHolder(RecyclerView.ViewHolder, int, List)} instead if Adapter can handle efficient
+     * partial bind.
      *
-     * @param holder   The ViewHolder which should be updated to represent the contents of the
-     *                 item at the given position in the data set.
-     * @param position The position of the item within the adapter's data set.
+     * @param holder
+     *            The ViewHolder which should be updated to represent the contents of the item at the given position in
+     *            the data set.
+     * @param position
+     *            The position of the item within the adapter's data set.
      */
     @Override
     public void onBindViewHolder(ItemViewHolder holder, int position) {
@@ -91,15 +93,15 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         holder.competitor.setText(item.getCompetitorDisplayName());
         Drawable warning;
         switch (item.getMergeState()) {
-            case ERROR:
-                warning = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_red);
-                break;
-            case WARNING:
-                warning = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_yellow);
-                break;
-            default:
-                warning = null;
-                break;
+        case ERROR:
+            warning = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_red);
+            break;
+        case WARNING:
+            warning = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_yellow);
+            break;
+        default:
+            warning = null;
+            break;
         }
         holder.warning.setImageDrawable(warning);
         holder.penalty.setText(item.getMaxPointsReason().name());
@@ -144,7 +146,8 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         mParent.onItemRemove(position, item);
     }
 
-    private static Pair<Integer, Integer> getItemDraggableRange(CompetitorResultsList<CompetitorResultWithIdImpl> items) {
+    private static Pair<Integer, Integer> getItemDraggableRange(
+            CompetitorResultsList<CompetitorResultWithIdImpl> items) {
         final int start = 0;
         final int end = items.getFirstRankZeroPosition() - 1;
         return new Pair<Integer, Integer>(start, end);
@@ -197,8 +200,8 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         }
 
         /**
-         * Called when the {@link ItemTouchHelper} first registers an item as being moved or swiped.
-         * Implementations should update the item view to indicate it's active state.
+         * Called when the {@link ItemTouchHelper} first registers an item as being moved or swiped. Implementations
+         * should update the item view to indicate it's active state.
          */
         @Override
         public void onItemSelected() {
@@ -210,8 +213,8 @@ public class FinishListAdapter extends BaseDraggableSwipeAdapter<FinishListAdapt
         }
 
         /**
-         * Called when the {@link ItemTouchHelper} has completed the move or swipe, and the active item
-         * state should be cleared.
+         * Called when the {@link ItemTouchHelper} has completed the move or swipe, and the active item state should be
+         * cleared.
          */
         @Override
         public void onItemClear() {

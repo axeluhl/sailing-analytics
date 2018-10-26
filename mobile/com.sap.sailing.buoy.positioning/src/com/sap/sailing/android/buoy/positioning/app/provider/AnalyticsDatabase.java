@@ -45,30 +45,32 @@ public class AnalyticsDatabase extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE " + Tables.LEADERBOARDS + " (" + BaseColumns._ID
                 + " INTEGER PRIMARY KEY AUTOINCREMENT, " + Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " TEXT, "
-                + Leaderboard.LEADERBOARD_SERVER_URL + " TEXT, " + Leaderboard.LEADERBOARD_NAME
-                + " TEXT, " + Leaderboard.LEADERBOARD_DISPLAY_NAME + " TEXT );");
+                + Leaderboard.LEADERBOARD_SERVER_URL + " TEXT, " + Leaderboard.LEADERBOARD_NAME + " TEXT, "
+                + Leaderboard.LEADERBOARD_DISPLAY_NAME + " TEXT );");
 
         db.execSQL("CREATE TABLE " + Tables.CHECKIN_URIS + " (" + BaseColumns._ID
                 + " INTEGER PRIMARY KEY AUTOINCREMENT, " + CheckinUri.CHECKIN_URI_CHECKIN_DIGEST + " TEXT, "
                 + CheckinUri.CHECKIN_URI_VALUE + " TEXT );");
 
         db.execSQL("CREATE TABLE " + Tables.MARKS + " (" + BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + Mark.MARK_CHECKIN_DIGEST + " TEXT," + Mark.MARK_ID + " INTEGER," + Mark.MARK_NAME
-                + " TEXT," + Mark.MARK_TYPE + " TEXT," + Mark.MARK_CLASS_NAME + " TEXT );");
+                + Mark.MARK_CHECKIN_DIGEST + " TEXT," + Mark.MARK_ID + " INTEGER," + Mark.MARK_NAME + " TEXT,"
+                + Mark.MARK_TYPE + " TEXT," + Mark.MARK_CLASS_NAME + " TEXT );");
 
-        db.execSQL("CREATE TABLE " + Tables.MARK_PINGS + " (" + BaseColumns._ID
-                + " INTEGER PRIMARY KEY AUTOINCREMENT, " + MarkPing.MARK_ID + " INTEGER,"
-                + MarkPing.MARK_PING_TIMESTAMP + " TEXT," + MarkPing.MARK_PING_LATITUDE + " TEXT,"
-                + MarkPing.MARK_PING_LONGITUDE + " TEXT," + MarkPing.MARK_PING_ACCURACY + " REAL );");
+        db.execSQL("CREATE TABLE " + Tables.MARK_PINGS + " (" + BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + MarkPing.MARK_ID + " INTEGER," + MarkPing.MARK_PING_TIMESTAMP + " TEXT," + MarkPing.MARK_PING_LATITUDE
+                + " TEXT," + MarkPing.MARK_PING_LONGITUDE + " TEXT," + MarkPing.MARK_PING_ACCURACY + " REAL );");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        ExLog.i(mContext, TAG, "onUpgrade() called with: db = [" + db + "], oldVersion = [" + oldVersion + "], newVersion = [" + newVersion + "]");
+        ExLog.i(mContext, TAG, "onUpgrade() called with: db = [" + db + "], oldVersion = [" + oldVersion
+                + "], newVersion = [" + newVersion + "]");
 
         if (oldVersion < 2) {
-            db.execSQL("ALTER TABLE " + Tables.LEADERBOARDS + " ADD COLUMN " + Leaderboard.LEADERBOARD_DISPLAY_NAME + " TEXT");
-            db.execSQL("UPDATE " + Tables.LEADERBOARDS + " SET " + Leaderboard.LEADERBOARD_DISPLAY_NAME + " = " + Leaderboard.LEADERBOARD_NAME);
+            db.execSQL("ALTER TABLE " + Tables.LEADERBOARDS + " ADD COLUMN " + Leaderboard.LEADERBOARD_DISPLAY_NAME
+                    + " TEXT");
+            db.execSQL("UPDATE " + Tables.LEADERBOARDS + " SET " + Leaderboard.LEADERBOARD_DISPLAY_NAME + " = "
+                    + Leaderboard.LEADERBOARD_NAME);
         }
     }
 }

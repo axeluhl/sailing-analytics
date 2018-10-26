@@ -22,20 +22,16 @@ public abstract class AttachedDialogFragment extends LoggableDialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        return createDialog(
-                new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog)
-                    .setNegativeButton(getNegativeButtonLabel(),
-                    new OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            onNegativeButton();
-                        }
-                    })
-                    .setPositiveButton(getPositiveButtonLabel(), new OnClickListener() {
+        return createDialog(new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog)
+                .setNegativeButton(getNegativeButtonLabel(), new OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        onNegativeButton();
+                    }
+                }).setPositiveButton(getPositiveButtonLabel(), new OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         onPositiveButton();
                     }
-                }))
-            .create();
+                })).create();
     }
 
     protected void onNegativeButton() {

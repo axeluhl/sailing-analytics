@@ -15,12 +15,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.IdRes;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
-import android.view.View;
-import android.widget.ImageView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
+import android.view.View;
+import android.widget.ImageView;
 
 public abstract class BasePanelFragment extends RaceFragment {
 
@@ -40,8 +40,10 @@ public abstract class BasePanelFragment extends RaceFragment {
     protected final static int LEVEL_TOGGLED = 1;
 
     /**
-     * @param view  container view
-     * @param resId resource if of the marker drawable
+     * @param view
+     *            container view
+     * @param resId
+     *            resource if of the marker drawable
      * @return new level (LEVEL_UNKNOWN, LEVEL_NORMAL, LEVEL_TOGGLED)
      */
     protected int toggleMarker(View view, @IdRes int resId) {
@@ -60,8 +62,10 @@ public abstract class BasePanelFragment extends RaceFragment {
     }
 
     /**
-     * @param view  container view
-     * @param resId resource id of the marker drawable
+     * @param view
+     *            container view
+     * @param resId
+     *            resource id of the marker drawable
      * @return new level (LEVEL_UNKNOWN, LEVEL_NORMAL, LEVEL_TOGGLED)
      */
     @SuppressLint("Range")
@@ -82,8 +86,10 @@ public abstract class BasePanelFragment extends RaceFragment {
     }
 
     /**
-     * @param view  container view
-     * @param resId resource id of the marker drawable
+     * @param view
+     *            container view
+     * @param resId
+     *            resource id of the marker drawable
      * @return is view marked as normal (level == LEVEL_NORMAL)
      */
     protected boolean isNormal(View view, @IdRes int resId) {
@@ -91,9 +97,12 @@ public abstract class BasePanelFragment extends RaceFragment {
     }
 
     /**
-     * @param view  container view
-     * @param resId resource id of the marker drawable
-     * @param level 0 - normal / 1 - toggled
+     * @param view
+     *            container view
+     * @param resId
+     *            resource id of the marker drawable
+     * @param level
+     *            0 - normal / 1 - toggled
      * @return new level, which should be the input level, if everything is correct
      */
     protected int setMarkerLevel(View view, @IdRes int resId, int level) {
@@ -107,13 +116,13 @@ public abstract class BasePanelFragment extends RaceFragment {
                     drawable.setLevel(level);
                     retValue = drawable.getLevel();
                     switch (retValue) {
-                        case LEVEL_TOGGLED:
-                            view.setBackgroundColor(ThemeHelper.getColor(getActivity(), R.attr.sap_gray_black_20));
-                            break;
+                    case LEVEL_TOGGLED:
+                        view.setBackgroundColor(ThemeHelper.getColor(getActivity(), R.attr.sap_gray_black_20));
+                        break;
 
-                        default:
-                            view.setBackgroundColor(ThemeHelper.getColor(getActivity(), R.attr.sap_gray));
-                            break;
+                    default:
+                        view.setBackgroundColor(ThemeHelper.getColor(getActivity(), R.attr.sap_gray));
+                        break;
                     }
                 }
             }
@@ -191,7 +200,8 @@ public abstract class BasePanelFragment extends RaceFragment {
         showChangeDialog(positiveButton, null);
     }
 
-    protected void showChangeDialog(DialogInterface.OnClickListener positiveButton, DialogInterface.OnClickListener negativeButton) {
+    protected void showChangeDialog(DialogInterface.OnClickListener positiveButton,
+            DialogInterface.OnClickListener negativeButton) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
         builder.setTitle(getString(R.string.change_title));
         builder.setMessage(getString(R.string.change_message));

@@ -36,7 +36,8 @@ public class MoreFlagsAdapter extends BaseFlagsAdapter {
         mListener = listener;
 
         mFlags = new ArrayList<>();
-        mFlags.add(new MoreFlag(context.getString(R.string.flag_blue), context.getString(R.string.flag_blue_desc), Flags.BLUE));
+        mFlags.add(new MoreFlag(context.getString(R.string.flag_blue), context.getString(R.string.flag_blue_desc),
+                Flags.BLUE));
     }
 
     @Override
@@ -67,7 +68,8 @@ public class MoreFlagsAdapter extends BaseFlagsAdapter {
         if (flagImage != null) {
             flagImage.setVisibility(View.INVISIBLE);
             if (!TextUtils.isEmpty(item.file_name)) {
-                int flagResId = mContext.getResources().getIdentifier(item.file_name, "drawable", mContext.getPackageName());
+                int flagResId = mContext.getResources().getIdentifier(item.file_name, "drawable",
+                        mContext.getPackageName());
                 if (flagResId != 0) {
                     flagImage.setImageDrawable(ContextCompat.getDrawable(mContext, flagResId));
                     flagImage.setVisibility(View.VISIBLE);
@@ -143,6 +145,7 @@ public class MoreFlagsAdapter extends BaseFlagsAdapter {
 
     public interface MoreFlagItemClick {
         void onClick(MoreFlag flag);
+
         void showMore(MoreFlag flag);
     }
 }

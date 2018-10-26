@@ -6,7 +6,8 @@ import java.util.List;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 
-public abstract class BaseDraggableSwipeAdapter<VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> implements ItemTouchHelperAdapter {
+public abstract class BaseDraggableSwipeAdapter<VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH>
+        implements ItemTouchHelperAdapter {
 
     protected List mItems;
 
@@ -33,14 +34,16 @@ public abstract class BaseDraggableSwipeAdapter<VH extends RecyclerView.ViewHold
     }
 
     /**
-     * Called when an item has been dragged far enough to trigger a move. This is called every time
-     * an item is shifted, and <strong>not</strong> at the end of a "drop" event.<br/>
+     * Called when an item has been dragged far enough to trigger a move. This is called every time an item is shifted,
+     * and <strong>not</strong> at the end of a "drop" event.<br/>
      * <br/>
-     * Implementations should call {@link RecyclerView.Adapter#notifyItemMoved(int, int)} after
-     * adjusting the underlying data to reflect this move.
+     * Implementations should call {@link RecyclerView.Adapter#notifyItemMoved(int, int)} after adjusting the underlying
+     * data to reflect this move.
      *
-     * @param fromPosition The start position of the moved item.
-     * @param toPosition   Then resolved position of the moved item.
+     * @param fromPosition
+     *            The start position of the moved item.
+     * @param toPosition
+     *            Then resolved position of the moved item.
      * @return True if the item was moved to the new adapter position.
      * @see RecyclerView#getAdapterPositionFor(RecyclerView.ViewHolder)
      * @see RecyclerView.ViewHolder#getAdapterPosition()
@@ -55,10 +58,11 @@ public abstract class BaseDraggableSwipeAdapter<VH extends RecyclerView.ViewHold
     /**
      * Called when an item has been dismissed by a swipe.<br/>
      * <br/>
-     * Implementations should call {@link RecyclerView.Adapter#notifyItemRemoved(int)} after
-     * adjusting the underlying data to reflect this removal.
+     * Implementations should call {@link RecyclerView.Adapter#notifyItemRemoved(int)} after adjusting the underlying
+     * data to reflect this removal.
      *
-     * @param position The position of the item dismissed.
+     * @param position
+     *            The position of the item dismissed.
      * @see RecyclerView#getAdapterPositionFor(RecyclerView.ViewHolder)
      * @see RecyclerView.ViewHolder#getAdapterPosition()
      */

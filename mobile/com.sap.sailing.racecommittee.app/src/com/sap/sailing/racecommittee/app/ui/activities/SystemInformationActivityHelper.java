@@ -39,7 +39,9 @@ public class SystemInformationActivityHelper {
         if (activity.boundSendingService) {
             Date lastSuccessfulSend = activity.sendingService.getLastSuccessfulSend();
             String never = activity.getString(R.string.never);
-            statusView.setText(activity.getString(R.string.events_waiting_to_be_sent, activity.sendingService.getDelayedIntentsCount(), lastSuccessfulSend == null ? never : lastSuccessfulSend));
+            statusView.setText(activity.getString(R.string.events_waiting_to_be_sent,
+                    activity.sendingService.getDelayedIntentsCount(),
+                    lastSuccessfulSend == null ? never : lastSuccessfulSend));
 
             Iterable<String> delayedIntentsContent = activity.sendingService.getDelayedIntentsContent();
             StringBuilder waitingEvents = new StringBuilder();
@@ -102,8 +104,8 @@ public class SystemInformationActivityHelper {
             installView.setText(activity.getString(R.string.generic_error));
         } else {
             Date installDate = new Date(info.lastUpdateTime);
-            installView.setText(String.format("%s - %s", DateFormat.getLongDateFormat(activity).format(installDate), DateFormat
-                .getTimeFormat(activity).format(installDate)));
+            installView.setText(String.format("%s - %s", DateFormat.getLongDateFormat(activity).format(installDate),
+                    DateFormat.getTimeFormat(activity).format(installDate)));
         }
     }
 

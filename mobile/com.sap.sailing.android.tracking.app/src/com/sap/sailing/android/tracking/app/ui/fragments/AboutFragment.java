@@ -32,7 +32,8 @@ public class AboutFragment extends BaseFragment {
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_about, container, false);
         setLink((TextView) view.findViewById(R.id.about_partnership));
         view.findViewById(R.id.license_button).setOnClickListener(new View.OnClickListener() {
@@ -80,7 +81,8 @@ public class AboutFragment extends BaseFragment {
             }
         };
 
-        spannableString.setSpan(clickableSpan, message.indexOf(url), message.indexOf(url) + url.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannableString.setSpan(clickableSpan, message.indexOf(url), message.indexOf(url) + url.length(),
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         textView.setText(spannableString);
         textView.setMovementMethod(LinkMovementMethod.getInstance());
     }

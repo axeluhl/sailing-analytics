@@ -39,8 +39,8 @@ public abstract class CheckinData extends BaseCheckinData {
         uriString = data.uriStr;
     }
 
-    public void setCheckinDigestFromString(String checkinString) throws UnsupportedEncodingException,
-            NoSuchAlgorithmException {
+    public void setCheckinDigestFromString(String checkinString)
+            throws UnsupportedEncodingException, NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("SHA-256");
         md.update(checkinString.getBytes("UTF-8"));
         byte[] digest = md.digest();

@@ -34,9 +34,10 @@ import android.widget.ImageView;
 
 public abstract class RaceFragment extends LoggableFragment implements TickListener {
 
-    @IntDef({MOVE_DOWN, MOVE_NONE, MOVE_UP})
+    @IntDef({ MOVE_DOWN, MOVE_NONE, MOVE_UP })
     @Retention(RetentionPolicy.SOURCE)
-    protected @interface MOVE_VALUES {}
+    protected @interface MOVE_VALUES {
+    }
 
     private static final String TAG = RaceFragment.class.getName();
 
@@ -92,7 +93,8 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
             String raceId = getArguments().getString(AppConstants.INTENT_EXTRA_RACE_ID);
             managedRace = OnlineDataManager.create(getActivity()).getDataStore().getRace(raceId);
             if (managedRace == null) {
-                throw new IllegalStateException("Unable to obtain ManagedRace " + raceId + " from datastore on start of " + getClass().getName());
+                throw new IllegalStateException("Unable to obtain ManagedRace " + raceId
+                        + " from datastore on start of " + getClass().getName());
             }
         } else {
             ExLog.i(getActivity(), TAG, "no arguments!?");
@@ -148,7 +150,8 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
                 if (Util.isEmpty(courseDesign.getWaypoints())) {
                     courseName = courseDesign.getName();
                 } else {
-                    courseName = String.format(getString(R.string.course_design_number_waypoints), Util.size(courseDesign.getWaypoints()));
+                    courseName = String.format(getString(R.string.course_design_number_waypoints),
+                            Util.size(courseDesign.getWaypoints()));
                 }
             } else {
                 courseName = getString(R.string.no_course_active);
@@ -157,7 +160,8 @@ public abstract class RaceFragment extends LoggableFragment implements TickListe
         return courseName;
     }
 
-    protected @IdRes int getFrameId(Activity activity, @IdRes int defaultFrame, @IdRes int fallbackFrame, boolean changeVisibility) {
+    protected @IdRes int getFrameId(Activity activity, @IdRes int defaultFrame, @IdRes int fallbackFrame,
+            boolean changeVisibility) {
         int frame = 0;
         View view = activity.findViewById(defaultFrame);
         if (view != null) {

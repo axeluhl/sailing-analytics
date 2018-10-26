@@ -3,9 +3,9 @@ package com.sap.sailing.racecommittee.app.ui.adapters;
 import com.sap.sailing.racecommittee.app.ui.fragments.panels.SetupPanelFragment;
 import com.sap.sailing.racecommittee.app.ui.fragments.panels.TimePanelFragment;
 
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.os.Bundle;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
 public class PanelsAdapter extends FragmentStatePagerAdapter {
@@ -21,17 +21,17 @@ public class PanelsAdapter extends FragmentStatePagerAdapter {
     public Fragment getItem(int position) {
         Fragment fragment = new Fragment();
         switch (position) {
-            case 0:
-                fragment = TimePanelFragment.newInstance(mArguments);
-                break;
+        case 0:
+            fragment = TimePanelFragment.newInstance(mArguments);
+            break;
 
-            case 1:
-                fragment = SetupPanelFragment.newInstance(mArguments, 0);
-                break;
+        case 1:
+            fragment = SetupPanelFragment.newInstance(mArguments, 0);
+            break;
 
-            case 2:
-                fragment = SetupPanelFragment.newInstance(mArguments, 1);
-                break;
+        case 2:
+            fragment = SetupPanelFragment.newInstance(mArguments, 1);
+            break;
         }
 
         return fragment;

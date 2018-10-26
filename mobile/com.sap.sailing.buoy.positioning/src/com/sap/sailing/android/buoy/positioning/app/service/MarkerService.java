@@ -9,7 +9,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.util.Log;
 
-public class MarkerService extends IntentService implements  CheckinManager.DataChangedListner{
+public class MarkerService extends IntentService implements CheckinManager.DataChangedListner {
     private static String TAG = MarkerService.class.getName();
 
     public MarkerService() {

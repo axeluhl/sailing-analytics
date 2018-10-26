@@ -58,12 +58,12 @@ public abstract class DataManager implements ReadonlyDataManager {
      * {@link RaceStateService} then in turn clears the races on the data store.
      */
     public void unloadAllRaces() {
-        // It's not needed to call getDataStore().getRaces().clear() because it's already called by the service internally.
+        // It's not needed to call getDataStore().getRaces().clear() because it's already called by the service
+        // internally.
         Intent intent = new Intent(context, RaceStateService.class);
         intent.setAction(AppConstants.INTENT_ACTION_CLEAR_RACES);
         context.startService(intent);
     }
-
 
     public void stopService() {
         Intent intent = new Intent(context, RaceStateService.class);

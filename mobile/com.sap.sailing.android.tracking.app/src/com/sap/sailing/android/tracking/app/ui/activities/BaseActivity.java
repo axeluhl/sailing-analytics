@@ -16,7 +16,7 @@ public class BaseActivity extends AbstractBaseActivity {
 
     private static final String TAG = BaseActivity.class.getName();
     protected AppPreferences prefs;
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,19 +29,19 @@ public class BaseActivity extends AbstractBaseActivity {
         inflater.inflate(R.menu.options_menu, menu);
         return true;
     }
-    
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.options_menu_settings:
-                ExLog.i(this, TAG, "Clicked SETTINGS.");
-                startActivity(new Intent(this, SettingsActivity.class));
-                return true;
-            case R.id.options_menu_info:
-                AboutHelper.showInfoActivity(this);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        case R.id.options_menu_settings:
+            ExLog.i(this, TAG, "Clicked SETTINGS.");
+            startActivity(new Intent(this, SettingsActivity.class));
+            return true;
+        case R.id.options_menu_info:
+            AboutHelper.showInfoActivity(this);
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
         }
     }
 

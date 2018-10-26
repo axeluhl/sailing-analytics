@@ -70,7 +70,7 @@ public class CheckinManager {
     public CheckinManager(String url, CheckinDataActivity<CheckinData> activity) {
         this(url, activity, activity);
     }
-    
+
     public SharedDomainFactory getSharedDomainFactory() {
         return sharedDomainFactory;
     }
@@ -104,8 +104,9 @@ public class CheckinManager {
         urlData.hostWithPort = urlData.server + (urlData.port == -1 ? "" : (":" + urlData.port));
         String leaderboardNameFromQR = "";
         try {
-            leaderboardNameFromQR = URLEncoder.encode(
-                    uri.getQueryParameter(DeviceMappingConstants.URL_LEADERBOARD_NAME), "UTF-8").replace("+", "%20");
+            leaderboardNameFromQR = URLEncoder
+                    .encode(uri.getQueryParameter(DeviceMappingConstants.URL_LEADERBOARD_NAME), "UTF-8")
+                    .replace("+", "%20");
         } catch (UnsupportedEncodingException e) {
             ExLog.e(mContext, TAG, "Failed to encode leaderboard name: " + e.getMessage());
         } catch (NullPointerException e) {
@@ -115,7 +116,8 @@ public class CheckinManager {
         }
         if (urlData != null) {
             urlData.leaderboardName = leaderboardNameFromQR;
-            urlData.deviceUuid = new SmartphoneUUIDIdentifierImpl(UUID.fromString(UniqueDeviceUuid.getUniqueId(mContext)));
+            urlData.deviceUuid = new SmartphoneUUIDIdentifierImpl(
+                    UUID.fromString(UniqueDeviceUuid.getUniqueId(mContext)));
             urlData.getLeaderboardUrl = urlData.hostWithPort + prefs.getServerLeaderboardPath(urlData.leaderboardName);
         }
         return urlData;
@@ -145,7 +147,8 @@ public class CheckinManager {
                             getMarksRequest = new HttpGetRequest(new URL(urlData.getMarkUrl), mContext);
                             getMarksFromServer(leaderboardName, leaderboardDisplayName, getMarksRequest, urlData);
                         } catch (MalformedURLException e1) {
-                            ExLog.e(mContext, TAG, "Error: Failed to perform checking due to a MalformedURLException: " + e1.getMessage());
+                            ExLog.e(mContext, TAG, "Error: Failed to perform checking due to a MalformedURLException: "
+                                    + e1.getMessage());
                         }
                     }
                 }, new NetworkHelper.NetworkHelperFailureListener() {
@@ -165,7 +168,8 @@ public class CheckinManager {
      *            the leaderboard's display name if one has been explicitly provided, otherwise the same as
      *            {@code leaderboardName}
      */
-    private void getMarksFromServer(final String leaderboardName, final String leaderboardDisplayName, HttpGetRequest getMarksRequest, final URLData urlData) {
+    private void getMarksFromServer(final String leaderboardName, final String leaderboardDisplayName,
+            HttpGetRequest getMarksRequest, final URLData urlData) {
         NetworkHelper.getInstance(mContext).executeHttpJsonRequestAsync(getMarksRequest,
                 new NetworkHelperSuccessListener() {
 
@@ -181,21 +185,27 @@ public class CheckinManager {
                                 org.json.simple.JSONObject simpleMark;
                                 simpleMark = JsonHelper.convertToSimple(jsonMark);
                                 MarkDeserializer markDeserializer = new MarkDeserializer(getSharedDomainFactory());
-                                MarkInfo mark = MarkInfo.create(markDeserializer.deserialize(simpleMark), jsonMark.getString(MarkJsonSerializer.FIELD_CLASS), checkinDigest);
+                                MarkInfo mark = MarkInfo.create(markDeserializer.deserialize(simpleMark),
+                                        jsonMark.getString(MarkJsonSerializer.FIELD_CLASS), checkinDigest);
                                 if (jsonMark.has(MarkJsonSerializerWithPosition.FIELD_POSITION)) {
                                     if (!jsonMark.get(MarkJsonSerializerWithPosition.FIELD_POSITION).equals(null)) {
-                                        JSONObject positionJson = jsonMark.getJSONObject(MarkJsonSerializerWithPosition.FIELD_POSITION);
+                                        JSONObject positionJson = jsonMark
+                                                .getJSONObject(MarkJsonSerializerWithPosition.FIELD_POSITION);
                                         FlatGPSFixJsonDeserializer deserializer = new FlatGPSFixJsonDeserializer();
                                         org.json.simple.JSONObject simplePosition;
                                         simplePosition = JsonHelper.convertToSimple(positionJson);
                                         GPSFix gpsFix = deserializer.deserialize(simplePosition);
-                                        //accepts JSON messages without accuracy and with, without will simply be displayed as "set"
+                                        // accepts JSON messages without accuracy and with, without will simply be
+                                        // displayed as "set"
                                         final MarkPingInfo ping;
-                                        if (!positionJson.has(FlatGPSFixJsonSerializer.FIELD_ACCURACY) ||
-                                                positionJson.getDouble(FlatGPSFixJsonSerializer.FIELD_ACCURACY) == FlatGPSFixJsonSerializer.NOT_AVAILABLE_THROUGH_SERVER) {
-                                            ping = new MarkPingInfo(mark.getId(), gpsFix, FlatGPSFixJsonSerializer.NOT_AVAILABLE_THROUGH_SERVER);
+                                        if (!positionJson.has(FlatGPSFixJsonSerializer.FIELD_ACCURACY)
+                                                || positionJson.getDouble(
+                                                        FlatGPSFixJsonSerializer.FIELD_ACCURACY) == FlatGPSFixJsonSerializer.NOT_AVAILABLE_THROUGH_SERVER) {
+                                            ping = new MarkPingInfo(mark.getId(), gpsFix,
+                                                    FlatGPSFixJsonSerializer.NOT_AVAILABLE_THROUGH_SERVER);
                                         } else {
-                                            ping = new MarkPingInfo(mark.getId(), gpsFix, positionJson.getDouble(FlatGPSFixJsonSerializer.FIELD_ACCURACY));
+                                            ping = new MarkPingInfo(mark.getId(), gpsFix,
+                                                    positionJson.getDouble(FlatGPSFixJsonSerializer.FIELD_ACCURACY));
                                         }
                                         if (ping != null) {
                                             pings.add(ping);
@@ -237,7 +247,8 @@ public class CheckinManager {
      *            the leaderboard's display name if one has been explicitly provided, otherwise the same as
      *            {@code leaderboardName}
      */
-    private void saveCheckinDataAndNotifyListeners(URLData urlData, String leaderboardName, String leaderboardDisplayName) {
+    private void saveCheckinDataAndNotifyListeners(URLData urlData, String leaderboardName,
+            String leaderboardDisplayName) {
         CheckinData data = new CheckinData();
         data.serverWithPort = urlData.hostWithPort;
         data.leaderboardName = leaderboardName;
@@ -272,16 +283,16 @@ public class CheckinManager {
     private void setCheckinData(CheckinData data) {
         if (activity != null) {
             activity.onCheckinDataAvailable(data);
-        } else if (dataChangedListner != null){
+        } else if (dataChangedListner != null) {
             dataChangedListner.handleData(data);
         }
     }
 
-    public interface DataChangedListner{
+    public interface DataChangedListner {
         void handleData(CheckinData data);
     }
 
-    public void setDataChangedListner(DataChangedListner listener){
+    public void setDataChangedListner(DataChangedListner listener) {
         dataChangedListner = listener;
     }
 

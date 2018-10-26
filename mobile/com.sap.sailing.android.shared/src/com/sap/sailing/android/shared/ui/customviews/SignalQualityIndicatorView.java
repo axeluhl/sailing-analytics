@@ -56,20 +56,20 @@ public class SignalQualityIndicatorView extends View {
     private void setAccessibilityString() {
         String desc = getContext().getString(R.string.signal_accuracy_indicator_view_description) + " ";
         switch (mSignalQuality) {
-            case poor:
-                desc += getContext().getString(R.string.poor);
-                break;
+        case poor:
+            desc += getContext().getString(R.string.poor);
+            break;
 
-            case good:
-                desc += getContext().getString(R.string.good);
-                break;
+        case good:
+            desc += getContext().getString(R.string.good);
+            break;
 
-            case great:
-                desc += getContext().getString(R.string.great);
-                break;
+        case great:
+            desc += getContext().getString(R.string.great);
+            break;
 
-            default:
-                desc += getContext().getString(R.string.no_signal);
+        default:
+            desc += getContext().getString(R.string.no_signal);
 
         }
         setContentDescription(desc);
@@ -92,20 +92,20 @@ public class SignalQualityIndicatorView extends View {
 
         Paint paint;
         switch (mSignalQuality) {
-            case poor:
-                paint = paintPoor;
-                break;
+        case poor:
+            paint = paintPoor;
+            break;
 
-            case good:
-                paint = paintGood;
-                break;
+        case good:
+            paint = paintGood;
+            break;
 
-            case great:
-                paint = paintGreat;
-                break;
+        case great:
+            paint = paintGreat;
+            break;
 
-            default:
-                paint = paintNone;
+        default:
+            paint = paintNone;
         }
 
         rect.top = 0;
@@ -138,7 +138,8 @@ public class SignalQualityIndicatorView extends View {
     /**
      * Must be 0,2,3 or 4, otherwise 1 will be set
      *
-     * @param signalQuality the new signal quality
+     * @param signalQuality
+     *            the new signal quality
      */
     public void setSignalQuality(GPSQuality signalQuality) {
         GPSQuality previousSignalQuality = mSignalQuality;
@@ -172,20 +173,20 @@ public class SignalQualityIndicatorView extends View {
     public String getAccessibilityText() {
         String result;
         switch (mSignalQuality) {
-            case poor:
-                result = "poor signal quality";
-                break;
+        case poor:
+            result = "poor signal quality";
+            break;
 
-            case good:
-                result = "good signal quality";
-                break;
+        case good:
+            result = "good signal quality";
+            break;
 
-            case great:
-                result = "great signal quality";
-                break;
+        case great:
+            result = "great signal quality";
+            break;
 
-            default:
-                result = "no signal";
+        default:
+            result = "no signal";
         }
         return result;
     }

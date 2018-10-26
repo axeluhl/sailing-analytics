@@ -71,8 +71,7 @@ public abstract class HttpRequest {
     }
 
     /**
-     * Returns a copied {@link InputStream} of the server's response.
-     * You must close this stream when done.
+     * Returns a copied {@link InputStream} of the server's response. You must close this stream when done.
      */
     public InputStream execute() throws IOException {
         ExLog.i(context, TAG, String.format("(Request %d) Executing HTTP request on %s.", this.hashCode(), url));
@@ -98,7 +97,8 @@ public abstract class HttpRequest {
                     throw new UnauthorizedException(connection.getHeaderField("WWW-Authenticate"));
                 }
                 // 404 errors...
-                throw new FileNotFoundException(context.getString(R.string.http_request_exception, this.hashCode(), fnfe.getMessage(), connection.getResponseCode(), connection.getResponseMessage()));
+                throw new FileNotFoundException(context.getString(R.string.http_request_exception, this.hashCode(),
+                        fnfe.getMessage(), connection.getResponseCode(), connection.getResponseMessage()));
             }
 
             validateHttpResponseCode(connection);

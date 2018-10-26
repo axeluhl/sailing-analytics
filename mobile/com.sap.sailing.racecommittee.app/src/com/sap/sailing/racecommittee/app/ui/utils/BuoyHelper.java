@@ -43,8 +43,8 @@ public class BuoyHelper {
     }
 
     /**
-     * Turns a {@link Color} object into an Android color in the form {@code 0xAARRGGBB} with Alpha value 0.
-     * For {@code null} values of {@code color}, {@code 0} is returned.
+     * Turns a {@link Color} object into an Android color in the form {@code 0xAARRGGBB} with Alpha value 0. For
+     * {@code null} values of {@code color}, {@code 0} is returned.
      */
     private static int getAndroidIntColor(Color color) {
         final int result;

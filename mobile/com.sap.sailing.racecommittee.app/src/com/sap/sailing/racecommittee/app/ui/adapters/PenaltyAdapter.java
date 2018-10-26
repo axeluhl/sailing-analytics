@@ -105,17 +105,17 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
         }
         Drawable mergeIcon;
         switch (item.getMergeState()) {
-            case WARNING:
-                mergeIcon = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_yellow);
-                break;
+        case WARNING:
+            mergeIcon = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_yellow);
+            break;
 
-            case ERROR:
-                mergeIcon = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_red);
-                break;
+        case ERROR:
+            mergeIcon = ContextCompat.getDrawable(mContext, R.drawable.ic_warning_red);
+            break;
 
-            default:
-                mergeIcon = null;
-                break;
+        default:
+            mergeIcon = null;
+            break;
         }
         holder.mItemMergeState.setImageDrawable(mergeIcon);
     }
@@ -156,7 +156,8 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
                 result.addAll(mCompetitor);
             } else {
                 for (int i = 0; i < mCompetitor.size(); i++) {
-                    if (StringHelper.on(mContext).containsIgnoreCase(mCompetitor.get(i).getCompetitorDisplayName(), mFilter)) {
+                    if (StringHelper.on(mContext).containsIgnoreCase(mCompetitor.get(i).getCompetitorDisplayName(),
+                            mFilter)) {
                         result.add(mCompetitor.get(i));
                     }
                 }
@@ -168,16 +169,16 @@ public class PenaltyAdapter extends RecyclerView.Adapter<PenaltyAdapter.ViewHold
     private void sortData() {
         Comparator<CompetitorResultEditableImpl> comparator = null;
         switch (mOrderBy) {
-            case SAILING_NUMBER:
-                comparator = new DisplayNameComparator(SAILING_NUMBER_POSITION);
-                break;
+        case SAILING_NUMBER:
+            comparator = new DisplayNameComparator(SAILING_NUMBER_POSITION);
+            break;
 
-            case COMPETITOR_NAME:
-                comparator = new DisplayNameComparator(COMPETITOR_NAME_POSITION);
-                break;
+        case COMPETITOR_NAME:
+            comparator = new DisplayNameComparator(COMPETITOR_NAME_POSITION);
+            break;
 
-            default:
-                break;
+        default:
+            break;
         }
 
         if (comparator != null) {

@@ -11,36 +11,41 @@ import android.content.Context;
 
 public abstract class RaceInfoFragmentChooser {
     private static final String TAG = RaceInfoFragmentChooser.class.getName();
-    
+
     public static RaceInfoFragmentChooser on(RacingProcedureType racingProcedureType) {
         return new BasicRaceInfoFragmentChooser();
     }
-    
+
     protected abstract Class<? extends RaceFragment> getStartphaseFragment();
+
     protected abstract Class<? extends RaceFragment> getRunningFragment();
+
     protected abstract Class<? extends RaceFragment> getFinishingFragment();
+
     protected abstract Class<? extends RaceFragment> getFinishedFragment();
 
     public RaceFragment choose(Context context, ManagedRace managedRace) {
         switch (managedRace.getStatus()) {
-            case UNSCHEDULED:
-                return createInfoFragment(StartTimeFragment.newInstance(StartTimeFragment.START_MODE_PRESETUP), managedRace);
-            case PRESCHEDULED:
-            case SCHEDULED:
-            case STARTPHASE:
-                return createInfoFragment(context, getStartphaseFragment(), managedRace);
-            case RUNNING:
-                return createInfoFragment(context, getRunningFragment(), managedRace);
-            case FINISHING:
-                return createInfoFragment(context, getFinishingFragment(), managedRace);
-            case FINISHED:
-                return createInfoFragment(context, getFinishedFragment(), managedRace);
-            default:
-                return createInfoFragment(context, ErrorRaceFragment.class, managedRace);
+        case UNSCHEDULED:
+            return createInfoFragment(StartTimeFragment.newInstance(StartTimeFragment.START_MODE_PRESETUP),
+                    managedRace);
+        case PRESCHEDULED:
+        case SCHEDULED:
+        case STARTPHASE:
+            return createInfoFragment(context, getStartphaseFragment(), managedRace);
+        case RUNNING:
+            return createInfoFragment(context, getRunningFragment(), managedRace);
+        case FINISHING:
+            return createInfoFragment(context, getFinishingFragment(), managedRace);
+        case FINISHED:
+            return createInfoFragment(context, getFinishedFragment(), managedRace);
+        default:
+            return createInfoFragment(context, ErrorRaceFragment.class, managedRace);
         }
     }
 
-    protected RaceFragment createInfoFragment(Context context, Class<? extends RaceFragment> fragmentClass, ManagedRace managedRace) {
+    protected RaceFragment createInfoFragment(Context context, Class<? extends RaceFragment> fragmentClass,
+            ManagedRace managedRace) {
         try {
             RaceFragment fragment = fragmentClass.newInstance();
             return createInfoFragment(fragment, managedRace);

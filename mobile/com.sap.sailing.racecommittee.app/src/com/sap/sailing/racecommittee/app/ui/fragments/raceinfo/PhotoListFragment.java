@@ -68,7 +68,8 @@ public class PhotoListFragment extends BaseFragment {
                 @Override
                 public void onClick(View v) {
                     CameraHelper cameraHelper = CameraHelper.on(getActivity());
-                    Uri photoUri = cameraHelper.getOutputMediaFileUri(CameraHelper.MEDIA_TYPE_IMAGE, cameraHelper.getSubFolder(getRace()));
+                    Uri photoUri = cameraHelper.getOutputMediaFileUri(CameraHelper.MEDIA_TYPE_IMAGE,
+                            cameraHelper.getSubFolder(getRace()));
                     Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                     PackageManager manager = getActivity().getPackageManager();
                     List<ResolveInfo> activities = manager.queryIntentActivities(intent, 0);
@@ -87,7 +88,8 @@ public class PhotoListFragment extends BaseFragment {
             LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
             layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
             mPhotoList.setLayoutManager(layoutManager);
-            mPhotoList.addItemDecoration(new PaddingItemDecoration(getResources().getDimensionPixelOffset(R.dimen.side_padding)));
+            mPhotoList.addItemDecoration(
+                    new PaddingItemDecoration(getResources().getDimensionPixelOffset(R.dimen.side_padding)));
         }
 
         mSubmit = ViewHelper.get(layout, R.id.submit_button);
@@ -136,13 +138,13 @@ public class PhotoListFragment extends BaseFragment {
         }
 
         switch (requestCode) {
-            case PHOTO_SHOOTING:
-                refreshPhotoList();
-                ExLog.i(getActivity(), TAG, "Returned from Photo");
-                break;
+        case PHOTO_SHOOTING:
+            refreshPhotoList();
+            ExLog.i(getActivity(), TAG, "Returned from Photo");
+            break;
 
-            default:
-                break;
+        default:
+            break;
         }
     }
 
@@ -152,7 +154,8 @@ public class PhotoListFragment extends BaseFragment {
         File folder = cameraHelper.getOutputMediaFolder(cameraHelper.getSubFolder(getRace()));
         File[] files = folder.listFiles();
         for (File file : files) {
-            if (file.getName().endsWith(CameraHelper.MEDIA_TYPE_IMAGE_EXT) || file.getName().endsWith(CameraHelper.MEDIA_TYPE_VIDEO_EXT)) {
+            if (file.getName().endsWith(CameraHelper.MEDIA_TYPE_IMAGE_EXT)
+                    || file.getName().endsWith(CameraHelper.MEDIA_TYPE_VIDEO_EXT)) {
                 mPhotos.add(Uri.fromFile(file));
             }
         }
@@ -173,7 +176,8 @@ public class PhotoListFragment extends BaseFragment {
         File folder = cameraHelper.getOutputMediaFolder(cameraHelper.getSubFolder(getRace()));
         File[] files = folder.listFiles();
         for (File file : files) {
-            if (file.getName().endsWith(CameraHelper.MEDIA_TYPE_IMAGE_EXT) || file.getName().endsWith(CameraHelper.MEDIA_TYPE_VIDEO_EXT)) {
+            if (file.getName().endsWith(CameraHelper.MEDIA_TYPE_IMAGE_EXT)
+                    || file.getName().endsWith(CameraHelper.MEDIA_TYPE_VIDEO_EXT)) {
                 retValue.add(Uri.fromFile(file));
             }
         }
@@ -195,9 +199,12 @@ public class PhotoListFragment extends BaseFragment {
         StringBuilder builder = new StringBuilder();
         builder.append(getString(R.string.results_mail_body, RaceHelper.getRaceName(getRace())));
         builder.append(getString(R.string.results_mail_body_race_group, getRace().getRaceGroup().getName()));
-        builder.append(getString(R.string.results_mail_body_boat_class, getRace().getRaceGroup().getBoatClass().getName()));
-        builder.append(getString(R.string.results_mail_body_start, mDateFormat.format(getRaceState().getStartTime().asDate())));
-        builder.append(getString(R.string.results_mail_body_finish, mDateFormat.format(getRaceState().getFinishedTime().asDate())));
+        builder.append(
+                getString(R.string.results_mail_body_boat_class, getRace().getRaceGroup().getBoatClass().getName()));
+        builder.append(getString(R.string.results_mail_body_start,
+                mDateFormat.format(getRaceState().getStartTime().asDate())));
+        builder.append(getString(R.string.results_mail_body_finish,
+                mDateFormat.format(getRaceState().getFinishedTime().asDate())));
         return builder.toString();
     }
 }

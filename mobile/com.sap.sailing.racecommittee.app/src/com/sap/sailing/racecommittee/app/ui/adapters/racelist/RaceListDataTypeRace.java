@@ -74,12 +74,14 @@ public class RaceListDataTypeRace implements RaceListDataType {
     public String getRaceName() {
         return race.getName();
     }
-    
+
     public ManagedRace getRace() {
         return race;
     }
 
-    public RaceGroupSeriesFleet getFleet() { return fleet; }
+    public RaceGroupSeriesFleet getFleet() {
+        return fleet;
+    }
 
     public RaceLogRaceStatus getCurrentStatus() {
         return currentStatus;
@@ -111,9 +113,8 @@ public class RaceListDataTypeRace implements RaceListDataType {
     }
 
     private String formatStartTime() {
-        TimePoint startTime = race.getState().getStartTime(); 
-        if (startTime == null) 
-        {
+        TimePoint startTime = race.getState().getStartTime();
+        if (startTime == null) {
             return unknownTemplate;
         }
         return scheduleFormatter.format(startTime.asDate());

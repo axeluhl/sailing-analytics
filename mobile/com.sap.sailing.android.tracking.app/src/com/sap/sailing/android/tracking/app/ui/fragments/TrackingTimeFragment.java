@@ -96,24 +96,25 @@ public class TrackingTimeFragment extends BaseFragment {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case TIMER_SET:
-                    final long trackingTimerStarted = prefs.getTrackingTimerStarted();
-                    if (trackingTimerStarted > 0) {
-                        final TimePoint now = MillisecondsTimePoint.now();
-                        if (timer != null) {
-                            timer.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    timer.setText(TimeUtils.formatDurationSince(now.minus(trackingTimerStarted).asMillis()));
-                                }
-                            });
-                        }
+            case TIMER_SET:
+                final long trackingTimerStarted = prefs.getTrackingTimerStarted();
+                if (trackingTimerStarted > 0) {
+                    final TimePoint now = MillisecondsTimePoint.now();
+                    if (timer != null) {
+                        timer.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                timer.setText(
+                                        TimeUtils.formatDurationSince(now.minus(trackingTimerStarted).asMillis()));
+                            }
+                        });
                     }
-                    sendEmptyMessageDelayed(TIMER_SET, TIMER_DELAY);
-                    break;
+                }
+                sendEmptyMessageDelayed(TIMER_SET, TIMER_DELAY);
+                break;
 
-                default:
-                    super.handleMessage(msg);
+            default:
+                super.handleMessage(msg);
             }
         }
     }

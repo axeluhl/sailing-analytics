@@ -134,12 +134,14 @@ public class ThemeHelper {
         }
     }
 
-    public static void setPickerColor(Context context, TimePicker timePicker, @ColorInt int textColor, @ColorInt int dividerColor) {
+    public static void setPickerColor(Context context, TimePicker timePicker, @ColorInt int textColor,
+            @ColorInt int dividerColor) {
         setPickerTextColor(context, timePicker, textColor);
         setPickerDividerColor(context, timePicker, dividerColor);
     }
 
-    public static void setPickerColor(Context context, NumberPicker numberPicker, @ColorInt int textColor, @ColorInt int dividerColor) {
+    public static void setPickerColor(Context context, NumberPicker numberPicker, @ColorInt int textColor,
+            @ColorInt int dividerColor) {
         setPickerTextColor(context, numberPicker, textColor);
         setPickerDividerColor(context, numberPicker, dividerColor);
     }
@@ -150,7 +152,8 @@ public class ThemeHelper {
             View child = numberPicker.getChildAt(i);
             if (child instanceof EditText) {
                 try {
-                    ((EditText) child).setTextSize(TypedValue.COMPLEX_UNIT_PX, context.getResources().getDimension(dimen));
+                    ((EditText) child).setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                            context.getResources().getDimension(dimen));
                     numberPicker.invalidate();
                 } catch (IllegalArgumentException e) {
                     ExLog.w(context, TAG, "IllegalArgumentException - " + e.getMessage());
@@ -159,9 +162,7 @@ public class ThemeHelper {
         }
     }
 
-    public static
-    @ColorInt
-    int getColor(Context context, @AttrRes int colorId) {
+    public static @ColorInt int getColor(Context context, @AttrRes int colorId) {
         int color = 0;
         TypedValue typedValue = new TypedValue();
         Resources.Theme theme = context.getTheme();

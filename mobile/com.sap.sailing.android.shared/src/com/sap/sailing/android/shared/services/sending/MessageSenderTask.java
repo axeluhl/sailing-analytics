@@ -40,10 +40,11 @@ public class MessageSenderTask extends AsyncTask<Intent, Void, MessageSenderResu
         }
         InputStream responseStream = null;
         try {
-            ExLog.i(context, TAG, "Posting message" +(isResend?" (resend)":"")+": " + payload);
+            ExLog.i(context, TAG, "Posting message" + (isResend ? " (resend)" : "") + ": " + payload);
             HttpRequest post = new HttpJsonPostRequest(context, new URL(url), payload);
             responseStream = post.execute();
-            ExLog.i(context, TAG, "Post successful for the following" +(isResend?" (resend)":"")+" message: " + payload);
+            ExLog.i(context, TAG,
+                    "Post successful for the following" + (isResend ? " (resend)" : "") + " message: " + payload);
             result = new MessageSenderResult(intent, responseStream);
         } catch (IOException e) {
             ExLog.e(context, TAG, String.format("Post not successful, exception occured: %s", e.toString()));

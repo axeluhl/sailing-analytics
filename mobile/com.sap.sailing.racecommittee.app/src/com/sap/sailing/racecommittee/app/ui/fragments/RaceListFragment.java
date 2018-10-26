@@ -67,7 +67,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class RaceListFragment extends LoggableFragment implements OnItemClickListener, OnItemSelectedListener, TickListener, OnScrollListener {
+public class RaceListFragment extends LoggableFragment
+        implements OnItemClickListener, OnItemSelectedListener, TickListener, OnScrollListener {
 
     private final static String TAG = RaceListFragment.class.getName();
     private final static String LAYOUT = "layout";
@@ -185,15 +186,15 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
             }
             Drawable drawable = ContextCompat.getDrawable(getActivity(), id);
             switch (getFilterMode()) {
-                case ALL:
-                    mAllRacesButton.setTextColor(colorOrange);
-                    BitmapHelper.setBackground(mAllRacesButton, drawable);
-                    break;
+            case ALL:
+                mAllRacesButton.setTextColor(colorOrange);
+                BitmapHelper.setBackground(mAllRacesButton, drawable);
+                break;
 
-                default:
-                    mCurrentRacesButton.setTextColor(colorOrange);
-                    BitmapHelper.setBackground(mCurrentRacesButton, drawable);
-                    break;
+            default:
+                mCurrentRacesButton.setTextColor(colorOrange);
+                BitmapHelper.setBackground(mCurrentRacesButton, drawable);
+                break;
             }
         }
     }
@@ -285,7 +286,8 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
 
                 @Override
                 public void onClick(View v) {
-                    BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_RELOAD_RACES));
+                    BroadcastManager.getInstance(getActivity())
+                            .addIntent(new Intent(AppConstants.INTENT_ACTION_RELOAD_RACES));
                 }
             });
         }
@@ -348,13 +350,13 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     @Override
     public void onScrollStateChanged(AbsListView view, int scrollState) {
         switch (scrollState) {
-            case SCROLL_STATE_FLING:
-            case SCROLL_STATE_TOUCH_SCROLL:
-                mUpdateList = false;
-                break;
+        case SCROLL_STATE_FLING:
+        case SCROLL_STATE_TOUCH_SCROLL:
+            mUpdateList = false;
+            break;
 
-            default:
-                mUpdateList = true;
+        default:
+            mUpdateList = true;
         }
     }
 
@@ -389,8 +391,9 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     public void setUp(DrawerLayout drawerLayout, String course, String author) {
         mDrawerLayout = drawerLayout;
         mDrawerLayout.setStatusBarBackgroundColor(ThemeHelper.getColor(getActivity(), R.attr.colorPrimaryDark));
-        mDrawerToggle = new ActionBarDrawerToggle(getActivity(), mDrawerLayout, (Toolbar) getActivity()
-            .findViewById(R.id.toolbar), R.string.nav_drawer_open, R.string.nav_drawer_close) {
+        mDrawerToggle = new ActionBarDrawerToggle(getActivity(), mDrawerLayout,
+                (Toolbar) getActivity().findViewById(R.id.toolbar), R.string.nav_drawer_open,
+                R.string.nav_drawer_close) {
             @Override
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
@@ -423,7 +426,8 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
     }
 
     public void setupOn(Iterable<ManagedRace> races) {
-        ExLog.i(getActivity(), TAG, String.format("Setting up %s with %d races.", this.getClass().getSimpleName(), Util.size(races)));
+        ExLog.i(getActivity(), TAG,
+                String.format("Setting up %s with %d races.", this.getClass().getSimpleName(), Util.size(races)));
         unregisterOnAllRaces();
         mManagedRacesById.clear();
         mRacesByGroup.clear();
@@ -490,8 +494,9 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
         // Find the race group for which the
         List<ManagedRace> races = new ArrayList<>();
         for (RaceGroupSeriesFleet raceGroupSeriesFleet : mRacesByGroup.keySet()) {
-            Boolean matchingRaceGroup = raceGroupSeriesDisplayName.equals(
-                    new RaceGroupSeries(raceGroupSeriesFleet.getRaceGroup(), raceGroupSeriesFleet.getSeries()).getDisplayName());
+            Boolean matchingRaceGroup = raceGroupSeriesDisplayName
+                    .equals(new RaceGroupSeries(raceGroupSeriesFleet.getRaceGroup(), raceGroupSeriesFleet.getSeries())
+                            .getDisplayName());
             if (matchingRaceGroup) {
                 if (!isRaceListDirty(races)) {
                     // collect all races for a single fragment in case of portrait mode;
@@ -507,7 +512,8 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
                 }
             }
         }
-        if (AppUtils.with(getActivity()).isPortrait() && (getActivity().findViewById(R.id.protest_time_fragment)) != null) {
+        if (AppUtils.with(getActivity()).isPortrait()
+                && (getActivity().findViewById(R.id.protest_time_fragment)) != null) {
             ProtestTimeDialogFragment fragment = ProtestTimeDialogFragment.newInstance(races);
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
             transaction.replace(R.id.protest_time_fragment, fragment);
@@ -573,7 +579,8 @@ public class RaceListFragment extends LoggableFragment implements OnItemClickLis
                     showProtestTimeDialog(raceGroupSeriesDisplayName);
                     mDrawerLayout.closeDrawers();
                 } else {
-                    ExLog.e(getActivity(), TAG, "INTENT_ACTION_SHOW_PROTEST does not carry an INTENT_ACTION_EXTRA with the race group name!");
+                    ExLog.e(getActivity(), TAG,
+                            "INTENT_ACTION_SHOW_PROTEST does not carry an INTENT_ACTION_EXTRA with the race group name!");
                 }
             }
         }

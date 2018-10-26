@@ -14,7 +14,7 @@ public class MarkerUtils {
     private static PendingIntent mPendingIntent;
     private static int mRequestCode = 42;
 
-    private MarkerUtils (Context context) {
+    private MarkerUtils(Context context) {
         mContext = context;
     }
 
@@ -29,7 +29,8 @@ public class MarkerUtils {
         intent.putExtra(mContext.getString(R.string.check_in_url_key), checkinUrl);
         mPendingIntent = PendingIntent.getService(mContext, mRequestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         long dataRefreshInterval = preferences.getDataRefreshInterval() * 1000;
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), dataRefreshInterval, mPendingIntent);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), dataRefreshInterval,
+                mPendingIntent);
     }
 
     public void stopMarkerService() {
@@ -43,7 +44,8 @@ public class MarkerUtils {
             AppPreferences preferences = new AppPreferences(mContext);
             AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
             long dataRefreshInterval = preferences.getDataRefreshInterval() * 1000;
-            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), dataRefreshInterval, mPendingIntent);
+            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), dataRefreshInterval,
+                    mPendingIntent);
         }
     }
 }

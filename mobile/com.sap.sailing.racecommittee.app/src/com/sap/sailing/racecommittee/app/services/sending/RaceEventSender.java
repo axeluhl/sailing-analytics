@@ -28,7 +28,7 @@ public class RaceEventSender implements RaceLogChangedListener {
 
     @Override
     public void eventAdded(RaceLogEvent event) {
-        ExLog.i(service, TAG, "RaceEventSender.eventAdded: "+event.getShortInfo());
+        ExLog.i(service, TAG, "RaceEventSender.eventAdded: " + event.getShortInfo());
         JSONObject serializedEvent = serializer.serialize(event);
         try {
             service.startService(EventSendingServiceUtil.createEventIntent(service, race, event.getId(),

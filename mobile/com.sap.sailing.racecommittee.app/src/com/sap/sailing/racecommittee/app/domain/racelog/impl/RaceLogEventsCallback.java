@@ -33,9 +33,9 @@ import android.os.IBinder;
  * </p>
  * <p>
  * If the server sends back some {@link RaceLogEvent}s the {@link RaceLogEventsCallback} will try to reach the
- * {@link MessageSendingService} and tell him about the server-side {@link RaceLogEvent}s that will be added to
- * the {@link RaceLog}. This gives the {@link MessageSendingService} the chance to ignore them the next time they
- * come around. The execution of the {@link RaceLogEventsCallback} will be deferred until the service is bound.
+ * {@link MessageSendingService} and tell him about the server-side {@link RaceLogEvent}s that will be added to the
+ * {@link RaceLog}. This gives the {@link MessageSendingService} the chance to ignore them the next time they come
+ * around. The execution of the {@link RaceLogEventsCallback} will be deferred until the service is bound.
  * </p>
  * <p>
  * If the {@link MessageSendingService} cannot be reached (this is a really bad sign) the events are added to the
@@ -52,9 +52,10 @@ public class RaceLogEventsCallback implements ServerReplyCallback {
         addEvents(context, raceId, dataManager, eventsToAdd);
     }
 
-    protected List<RaceLogEvent> parseResponse(Context context, ReadonlyDataManager dataManager, InputStream responseStream) {
+    protected List<RaceLogEvent> parseResponse(Context context, ReadonlyDataManager dataManager,
+            InputStream responseStream) {
         List<RaceLogEvent> eventsToAdd = new ArrayList<RaceLogEvent>();
-        
+
         JSONParser parser = new JSONParser();
         try {
             JSONArray eventsToAddAsJson = (JSONArray) parser.parse(new InputStreamReader(responseStream));
@@ -81,8 +82,9 @@ public class RaceLogEventsCallback implements ServerReplyCallback {
             ExLog.i(context, TAG, "No server-side events to add for race " + raceId);
             return;
         }
-        
-        ExLog.i(context, TAG, String.format("Server sent %d events to be added for race %s.", eventsToAdd.size(), raceId));
+
+        ExLog.i(context, TAG,
+                String.format("Server sent %d events to be added for race %s.", eventsToAdd.size(), raceId));
 
         if (!dataManager.getDataStore().hasRace(raceId)) {
             ExLog.w(context, TAG, "I have no race " + raceId);
@@ -93,19 +95,21 @@ public class RaceLogEventsCallback implements ServerReplyCallback {
             ExLog.w(context, TAG, "Unable to retrieve race log for race " + raceId);
             return;
         }
-        
+
         EventSendingConnection connection = new EventSendingConnection(context, eventsToAdd, raceLog);
         if (context.bindService(new Intent(context, MessageSendingService.class), connection,
                 Context.BIND_AUTO_CREATE)) {
             // execution deferred until service is bound
             ExLog.i(context, TAG, "Waiting for sending service to be bound.");
         } else {
-            ExLog.e(context, TAG,"Unable to bind to sending service. Processing server response without suppressing received events...");
+            ExLog.e(context, TAG,
+                    "Unable to bind to sending service. Processing server response without suppressing received events...");
             addEvents(context, eventsToAdd, raceLog, null);
         }
     }
 
-    protected void addEvents(Context context, List<RaceLogEvent> eventsToAdd, RaceLog raceLog, MessageSendingService sendingService) {
+    protected void addEvents(Context context, List<RaceLogEvent> eventsToAdd, RaceLog raceLog,
+            MessageSendingService sendingService) {
         for (RaceLogEvent eventToAddToRaceLog : eventsToAdd) {
             if (sendingService != null) {
                 sendingService.registerMessageForSuppression(eventToAddToRaceLog.getId());
@@ -116,7 +120,8 @@ public class RaceLogEventsCallback implements ServerReplyCallback {
     }
 
     /**
-     * Connects to the {@link MessageSendingService} and continues with execution. The service will be released afterwards.
+     * Connects to the {@link MessageSendingService} and continues with execution. The service will be released
+     * afterwards.
      */
     private class EventSendingConnection implements ServiceConnection {
 

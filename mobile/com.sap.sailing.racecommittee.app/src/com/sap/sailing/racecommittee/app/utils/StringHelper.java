@@ -20,18 +20,18 @@ public class StringHelper {
 
     public String getAuthor(String author) {
         switch (author) {
-            case AppConstants.AUTHOR_TYPE_OFFICER_VESSEL:
-                author = mContext.getString(R.string.author_type_officer_vessel);
-                break;
-            case AppConstants.AUTHOR_TYPE_SUPERUSER:
-                author = mContext.getString(R.string.author_type_superuser);
-                break;
-            case AppConstants.AUTHOR_TYPE_SHORE_CONTROL:
-                author = mContext.getString(R.string.author_type_shore_control);
-                break;
-            case AppConstants.AUTHOR_TYPE_VIEWER:
-                author = mContext.getString(R.string.author_viewer);
-                break;
+        case AppConstants.AUTHOR_TYPE_OFFICER_VESSEL:
+            author = mContext.getString(R.string.author_type_officer_vessel);
+            break;
+        case AppConstants.AUTHOR_TYPE_SUPERUSER:
+            author = mContext.getString(R.string.author_type_superuser);
+            break;
+        case AppConstants.AUTHOR_TYPE_SHORE_CONTROL:
+            author = mContext.getString(R.string.author_type_shore_control);
+            break;
+        case AppConstants.AUTHOR_TYPE_VIEWER:
+            author = mContext.getString(R.string.author_viewer);
+            break;
         }
         return author;
     }

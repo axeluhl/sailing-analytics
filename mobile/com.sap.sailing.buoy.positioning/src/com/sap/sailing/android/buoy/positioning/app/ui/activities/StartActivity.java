@@ -24,7 +24,8 @@ public class StartActivity extends AbstractStartActivity<CheckinData> {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(getString(R.string.title_activity_start));
             getSupportActionBar().setHomeButtonEnabled(false);
-            ColorDrawable backgroundDrawable = new ColorDrawable(ContextCompat.getColor(this, R.color.toolbar_background));
+            ColorDrawable backgroundDrawable = new ColorDrawable(
+                    ContextCompat.getColor(this, R.color.toolbar_background));
             getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
             int sidePadding = (int) getResources().getDimension(R.dimen.toolbar_left_padding);
             toolbar.setPadding(sidePadding, 0, 0, 0);
@@ -47,14 +48,14 @@ public class StartActivity extends AbstractStartActivity<CheckinData> {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.about:
-                AboutHelper.showInfoActivity(this);
-                return true;
-            case R.id.settings:
-                startActivity(new Intent(this, SettingActivity.class));
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        case R.id.about:
+            AboutHelper.showInfoActivity(this);
+            return true;
+        case R.id.settings:
+            startActivity(new Intent(this, SettingActivity.class));
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
         }
     }
 

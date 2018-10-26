@@ -91,7 +91,8 @@ public class PhotoListAdapter extends RecyclerView.Adapter<PhotoListAdapter.View
 
         private final File file;
 
-        public DeleteListener(RecyclerView.Adapter<PhotoListAdapter.ViewHolder> adapter, Context context, List<Uri> uris, File file) {
+        public DeleteListener(RecyclerView.Adapter<PhotoListAdapter.ViewHolder> adapter, Context context,
+                List<Uri> uris, File file) {
             weakAdapter = new WeakReference<>(adapter);
             weakContext = new WeakReference<>(context);
             weakList = new WeakReference<>(uris);

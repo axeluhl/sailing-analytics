@@ -24,7 +24,8 @@ public class LogoutTask extends AsyncTask<String, Void, Void> {
         try {
             url = new URL(baseUrl + LOGOUT_REQUEST);
         } catch (MalformedURLException e) {
-            ExLog.e(context, TAG, "Error: Failed to perform checking due to a MalformedURLException: " + e.getMessage());
+            ExLog.e(context, TAG,
+                    "Error: Failed to perform checking due to a MalformedURLException: " + e.getMessage());
 
         }
     }

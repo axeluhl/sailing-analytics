@@ -123,7 +123,8 @@ public class RaceFlagViewerFragment extends BaseFragment {
                 mLayout.setVisibility(View.VISIBLE);
                 if (mFlagCache == null) {
                     mLayout.removeAllViews();
-                    FlagPoleState poleState = getRaceState().getRacingProcedure().getActiveFlags(getRaceState().getStartTime(), now);
+                    FlagPoleState poleState = getRaceState().getRacingProcedure()
+                            .getActiveFlags(getRaceState().getStartTime(), now);
                     List<FlagPole> currentState = poleState.getCurrentState();
                     List<FlagPole> upcoming = poleState.computeUpcomingChanges();
                     FlagPole nextPole = FlagPoleState.getMostInterestingFlagPole(upcoming);
@@ -134,11 +135,11 @@ public class RaceFlagViewerFragment extends BaseFragment {
                         size++;
                         flag = flagPole.getUpperFlag();
                         mLayout.addView(createFlagView(now, poleState, flag, isNextFlag(nextPole, flag),
-                            currentState.size() == size, flagPole.isDisplayed(), UPPER_FLAG));
+                                currentState.size() == size, flagPole.isDisplayed(), UPPER_FLAG));
                         if (!flagPole.getLowerFlag().equals(Flags.NONE)) {
                             flag = flagPole.getLowerFlag();
                             mLayout.addView(createFlagView(now, poleState, flag, isNextFlag(nextPole, flag),
-                                currentState.size() == size, false, LOWER_FLAG));
+                                    currentState.size() == size, false, LOWER_FLAG));
                         }
                     }
                 } else {
@@ -158,7 +159,8 @@ public class RaceFlagViewerFragment extends BaseFragment {
                 TimePoint flagDown = procedure.getIndividualRecallRemovalTime();
                 if (now.before(flagDown)) {
                     mRecall.setVisibility(View.VISIBLE);
-                    mXrayCountdown.setText(getString(R.string.until_xray_removed, TimeUtils.formatDuration(now, flagDown, false)));
+                    mXrayCountdown.setText(
+                            getString(R.string.until_xray_removed, TimeUtils.formatDuration(now, flagDown, false)));
                 }
             }
         }
@@ -178,10 +180,12 @@ public class RaceFlagViewerFragment extends BaseFragment {
         return flagView;
     }
 
-    private RelativeLayout createFlagView(TimePoint now, FlagPoleState poleState, final Flags flag, boolean isNext, boolean lastEntry,
-        boolean isDisplayed, int flagType) {
-        RelativeLayout layout = (RelativeLayout) getActivity().getLayoutInflater().inflate(R.layout.race_flag, mLayout, false);
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f);
+    private RelativeLayout createFlagView(TimePoint now, FlagPoleState poleState, final Flags flag, boolean isNext,
+            boolean lastEntry, boolean isDisplayed, int flagType) {
+        RelativeLayout layout = (RelativeLayout) getActivity().getLayoutInflater().inflate(R.layout.race_flag, mLayout,
+                false);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT, 1.0f);
         layout.setLayoutParams(layoutParams);
 
         TimePoint changeAt = poleState.getNextStateValidFrom();
@@ -237,8 +241,9 @@ public class RaceFlagViewerFragment extends BaseFragment {
     }
 
     private int getFleetColorId() {
-        Util.Triple<Integer, Integer, Integer> rgb =
-            getRace().getFleet().getColor() == null ? new Util.Triple<>(0, 0, 0) : getRace().getFleet().getColor().getAsRGB();
+        Util.Triple<Integer, Integer, Integer> rgb = getRace().getFleet().getColor() == null
+                ? new Util.Triple<>(0, 0, 0)
+                : getRace().getFleet().getColor().getAsRGB();
         return Color.rgb(rgb.getA(), rgb.getB(), rgb.getC());
     }
 

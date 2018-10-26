@@ -95,10 +95,12 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             final SeriesBase series = race.getSeries();
             RaceState state = race.getState();
             boolean draft = state.getFinishPositioningList() != null && state.getFinishPositioningList().hasConflicts();
-            boolean confirmed  = state.getConfirmedFinishPositioningList() != null && state.getConfirmedFinishPositioningList().hasConflicts();
+            boolean confirmed = state.getConfirmedFinishPositioningList() != null
+                    && state.getConfirmedFinishPositioningList().hasConflicts();
             boolean hasConflict = draft || confirmed;
             if (!viewItemsSeriesHeaders.containsKey(series)) {
-                viewItemsSeriesHeaders.put(series, new RaceListDataTypeHeader(new RaceGroupSeries(race), mInflater, hasConflict));
+                viewItemsSeriesHeaders.put(series,
+                        new RaceListDataTypeHeader(new RaceGroupSeries(race), mInflater, hasConflict));
             } else {
                 if (hasConflict) {
                     viewItemsSeriesHeaders.get(series).setHasConflict(true);
@@ -132,9 +134,8 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
 
     @Override
     public int getItemViewType(int position) {
-        return (getItem(position) instanceof RaceListDataTypeHeader ?
-            ViewType.HEADER.index :
-            getItem(position) instanceof RaceListDataTypeRace ? ViewType.RACE.index : -1);
+        return (getItem(position) instanceof RaceListDataTypeHeader ? ViewType.HEADER.index
+                : getItem(position) instanceof RaceListDataTypeRace ? ViewType.RACE.index : -1);
     }
 
     @Override
@@ -172,14 +173,15 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 } else {
                     holder.fleet_series.setVisibility(View.VISIBLE);
                 }
-                holder.protest_image.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), Flags.BRAVO.name(), flag_size));
+                holder.protest_image
+                        .setImageDrawable(FlagsResources.getFlagDrawable(getContext(), Flags.BRAVO.name(), flag_size));
                 holder.protest_image.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_PROTEST);
                         // TODO don't use toString() to convey semantics and perform check; bug 3617
-                        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, new RaceGroupSeries(header.getRaceGroup(), header.getSeries())
-                            .getDisplayName());
+                        intent.putExtra(AppConstants.INTENT_ACTION_EXTRA,
+                                new RaceGroupSeries(header.getRaceGroup(), header.getSeries()).getDisplayName());
                         BroadcastManager.getInstance(getContext()).addIntent(intent);
                     }
                 });
@@ -205,7 +207,10 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             if (state != null) {
                 CompetitorResults draft = state.getFinishPositioningList();
                 CompetitorResults confirmed = state.getConfirmedFinishPositioningList();
-                holder.warning_sign.setVisibility(((draft != null && draft.hasConflicts()) || confirmed != null && confirmed.hasConflicts()) ? View.VISIBLE : View.GONE);
+                holder.warning_sign.setVisibility(
+                        ((draft != null && draft.hasConflicts()) || confirmed != null && confirmed.hasConflicts())
+                                ? View.VISIBLE
+                                : View.GONE);
                 if (state.getStartTime() != null) {
                     int startRes = R.string.race_started;
                     if (state.getFinishedTime() == null) {
@@ -226,20 +231,21 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                 if (state.getFinishedTime() != null) {
                     holder.time.setVisibility(View.GONE);
                     holder.race_finished.setVisibility(View.VISIBLE);
-                    holder.race_finished.setText(mResources.getString(R.string.race_finished, dateFormat.format(state.getFinishedTime().asDate())));
+                    holder.race_finished.setText(mResources.getString(R.string.race_finished,
+                            dateFormat.format(state.getFinishedTime().asDate())));
                 }
                 setDependingText(holder, race);
                 if (state.getStartTime() == null && state.getFinishedTime() == null) {
                     switch (race.getRace().getStatus()) {
-                        case PRESCHEDULED:
-                            holder.panel_right.setVisibility(View.GONE);
-                            holder.race_scheduled.setVisibility(View.GONE);
-                            holder.race_unscheduled.setVisibility(View.GONE);
-                            break;
+                    case PRESCHEDULED:
+                        holder.panel_right.setVisibility(View.GONE);
+                        holder.race_scheduled.setVisibility(View.GONE);
+                        holder.race_unscheduled.setVisibility(View.GONE);
+                        break;
 
-                        default:
-                            holder.race_scheduled.setVisibility(View.GONE);
-                            holder.race_unscheduled.setVisibility(View.VISIBLE);
+                    default:
+                        holder.race_scheduled.setVisibility(View.GONE);
+                        holder.race_unscheduled.setVisibility(View.VISIBLE);
                     }
                 } else {
                     if (holder.race_name != null) {
@@ -265,8 +271,9 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             if (result != null && result.isDependentStartTime()) {
                 SimpleRaceLogIdentifier identifier = Util.get(result.getDependingOnRaces(), 0);
                 ManagedRace depending_race = DataManager.create(getContext()).getDataStore().getRace(identifier);
-                holder.depends_on.setText(getContext().getString(R.string.minutes_after_long, result.getStartTimeDiff().asMinutes(), RaceHelper
-                    .getShortReverseRaceName(depending_race, " / ", race.getRace())));
+                holder.depends_on.setText(
+                        getContext().getString(R.string.minutes_after_long, result.getStartTimeDiff().asMinutes(),
+                                RaceHelper.getShortReverseRaceName(depending_race, " / ", race.getRace())));
                 holder.depends_on.setVisibility(View.VISIBLE);
             }
         }
@@ -298,11 +305,13 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
      * encompasses the header items for all non-empty series and the race items for all races in their series.
      */
     private List<RaceListDataType> getShownViewItems(List<ManagedRace> races) {
-        final Map<RaceListDataTypeHeader, List<RaceListDataTypeRace>> raceItemsByHeader = getRaceItemsGroupedBySeriesHeader(races);
+        final Map<RaceListDataTypeHeader, List<RaceListDataTypeRace>> raceItemsByHeader = getRaceItemsGroupedBySeriesHeader(
+                races);
         return serializeItems(raceItemsByHeader);
     }
 
-    private List<RaceListDataType> serializeItems(final Map<RaceListDataTypeHeader, List<RaceListDataTypeRace>> raceItemsByHeader) {
+    private List<RaceListDataType> serializeItems(
+            final Map<RaceListDataTypeHeader, List<RaceListDataTypeRace>> raceItemsByHeader) {
         final List<RaceListDataType> result = new ArrayList<>();
         final List<RaceListDataTypeHeader> headers = new ArrayList<>(raceItemsByHeader.keySet());
         Collections.sort(headers, new Comparator<RaceListDataTypeHeader>() {
@@ -338,7 +347,8 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         return result;
     }
 
-    private Map<RaceListDataTypeHeader, List<RaceListDataTypeRace>> getRaceItemsGroupedBySeriesHeader(final List<ManagedRace> filteredRaces) {
+    private Map<RaceListDataTypeHeader, List<RaceListDataTypeRace>> getRaceItemsGroupedBySeriesHeader(
+            final List<ManagedRace> filteredRaces) {
         final Map<RaceListDataTypeHeader, List<RaceListDataTypeRace>> raceItemsByHeader = new HashMap<>();
         for (final ManagedRace race : filteredRaces) {
             final SeriesBase series = race.getSeries();
@@ -352,7 +362,8 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             if (viewItemForRace != null) {
                 raceItemsInSeries.add(viewItemForRace);
             } else {
-                Log.w(TAG, "A view item for race " + race + " provided by the filter could not be found", new RuntimeException("Here is where it happened"));
+                Log.w(TAG, "A view item for race " + race + " provided by the filter could not be found",
+                        new RuntimeException("Here is where it happened"));
             }
         }
         return raceItemsByHeader;
@@ -446,27 +457,28 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                     if (isNext != 0) {
                         flag = FlagsResources.getFlagDrawable(getContext(), currentFlag.name(), flag_size);
                         switch (isNext) {
-                            case 1:
-                                if (nextPole.isDisplayed()) {
-                                    arrow = BitmapHelper.getAttrDrawable(getContext(), R.attr.arrow_up);
-                                } else {
-                                    arrow = BitmapHelper.getAttrDrawable(getContext(), R.attr.arrow_down);
-                                }
-                                break;
-
-                            case 2:
+                        case 1:
+                            if (nextPole.isDisplayed()) {
                                 arrow = BitmapHelper.getAttrDrawable(getContext(), R.attr.arrow_up);
-                                break;
+                            } else {
+                                arrow = BitmapHelper.getAttrDrawable(getContext(), R.attr.arrow_down);
+                            }
+                            break;
 
-                            default:
-                                ExLog.i(getContext(), TAG, "unknown flag");
+                        case 2:
+                            arrow = BitmapHelper.getAttrDrawable(getContext(), R.attr.arrow_up);
+                            break;
+
+                        default:
+                            ExLog.i(getContext(), TAG, "unknown flag");
                         }
                         timer = TimeUtils.formatDuration(now, poleState.getNextStateValidFrom());
                     }
                 }
             } else if (state.getStatus() == RaceLogRaceStatus.FINISHING) {
                 if (!currentState.isEmpty()) {
-                    flag = FlagsResources.getFlagDrawable(getContext(), currentState.get(0).getUpperFlag().name(), flag_size);
+                    flag = FlagsResources.getFlagDrawable(getContext(), currentState.get(0).getUpperFlag().name(),
+                            flag_size);
                 } else {
                     flag = null;
                 }

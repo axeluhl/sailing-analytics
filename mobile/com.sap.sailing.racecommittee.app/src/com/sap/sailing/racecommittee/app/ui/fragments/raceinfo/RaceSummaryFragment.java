@@ -73,8 +73,8 @@ public class RaceSummaryFragment extends BaseFragment {
             editStartTime.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    replaceFragment(RaceTimeChangeFragment
-                        .newInstance(RaceTimeChangeFragment.START_TIME_MODE), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
+                    replaceFragment(RaceTimeChangeFragment.newInstance(RaceTimeChangeFragment.START_TIME_MODE),
+                            getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
                 }
             });
         }
@@ -84,8 +84,8 @@ public class RaceSummaryFragment extends BaseFragment {
             editFinishingTime.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    replaceFragment(RaceTimeChangeFragment
-                        .newInstance(RaceTimeChangeFragment.FINISHING_TIME_MODE), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
+                    replaceFragment(RaceTimeChangeFragment.newInstance(RaceTimeChangeFragment.FINISHING_TIME_MODE),
+                            getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
                 }
             });
         }
@@ -95,8 +95,8 @@ public class RaceSummaryFragment extends BaseFragment {
             editFinishedTime.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    replaceFragment(RaceTimeChangeFragment
-                        .newInstance(RaceTimeChangeFragment.FINISHED_TIME_MODE), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
+                    replaceFragment(RaceTimeChangeFragment.newInstance(RaceTimeChangeFragment.FINISHED_TIME_MODE),
+                            getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
                 }
             });
         }
@@ -148,17 +148,22 @@ public class RaceSummaryFragment extends BaseFragment {
         if (mFinishStartTime != null && getRaceState().getFinishingTime() != null) {
             mFinishStartTime.setText(mDateFormat.format(finishingTime.getTime()));
         }
-        if (mFinishStartDuration != null && getRaceState().getStartTime() != null && getRaceState().getFinishingTime() != null) {
-            mFinishStartDuration.setText(TimeUtils.formatTimeAgo(getActivity(), finishingTime.getTimeInMillis() - startTime.getTimeInMillis()));
+        if (mFinishStartDuration != null && getRaceState().getStartTime() != null
+                && getRaceState().getFinishingTime() != null) {
+            mFinishStartDuration.setText(TimeUtils.formatTimeAgo(getActivity(),
+                    finishingTime.getTimeInMillis() - startTime.getTimeInMillis()));
         }
         if (mFinishEndTime != null && getRaceState().getFinishedTime() != null) {
             mFinishEndTime.setText(mDateFormat.format(finishedTime.getTime()));
         }
-        if (mFinishEndDuration != null && getRaceState().getStartTime() != null && getRaceState().getFinishedTime() != null) {
-            mFinishEndDuration.setText(TimeUtils.formatTimeAgo(getActivity(), finishedTime.getTimeInMillis() -  startTime.getTimeInMillis()));
+        if (mFinishEndDuration != null && getRaceState().getStartTime() != null
+                && getRaceState().getFinishedTime() != null) {
+            mFinishEndDuration.setText(TimeUtils.formatTimeAgo(getActivity(),
+                    finishedTime.getTimeInMillis() - startTime.getTimeInMillis()));
         }
         if (mFinishDuration != null) {
-            mFinishDuration.setText(TimeUtils.formatTimeAgo(getActivity(), finishedTime.getTimeInMillis() - finishingTime.getTimeInMillis()));
+            mFinishDuration.setText(TimeUtils.formatTimeAgo(getActivity(),
+                    finishedTime.getTimeInMillis() - finishingTime.getTimeInMillis()));
         }
 
         if (mRegionProtest != null) {
@@ -174,7 +179,8 @@ public class RaceSummaryFragment extends BaseFragment {
                     mProtestTimeEnd.setText(mDateFormat.format(protestTime.to().asDate()));
                 }
                 if (mProtestTimeDuration != null) {
-                    mProtestTimeDuration.setText(TimeUtils.formatTimeAgo(getActivity(), protestTime.to().minus(protestTime.from().asMillis()).asMillis()));
+                    mProtestTimeDuration.setText(TimeUtils.formatTimeAgo(getActivity(),
+                            protestTime.to().minus(protestTime.from().asMillis()).asMillis()));
                 }
             }
         }
@@ -188,13 +194,15 @@ public class RaceSummaryFragment extends BaseFragment {
 
                 TextView direction = ViewHelper.get(getView(), R.id.wind_direction);
                 if (direction != null) {
-                    String wind_direction = String.format(getString(R.string.race_summary_wind_direction_value), wind.getFrom().getDegrees());
+                    String wind_direction = String.format(getString(R.string.race_summary_wind_direction_value),
+                            wind.getFrom().getDegrees());
                     direction.setText(wind_direction);
                 }
 
                 TextView speed = ViewHelper.get(getView(), R.id.wind_speed);
                 if (speed != null) {
-                    String wind_speed = String.format(getString(R.string.race_summary_wind_speed_value), wind.getKnots());
+                    String wind_speed = String.format(getString(R.string.race_summary_wind_speed_value),
+                            wind.getKnots());
                     speed.setText(wind_speed);
                 }
             }

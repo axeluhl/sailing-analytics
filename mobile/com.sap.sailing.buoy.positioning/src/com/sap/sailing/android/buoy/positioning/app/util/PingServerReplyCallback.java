@@ -22,6 +22,7 @@ public class PingServerReplyCallback implements ServerReplyCallback {
     @Override
     public void processResponse(Context context, InputStream inputStream, String callbackPayload) {
         Log.d(TAG, "Context origin:");
-        LocalBroadcastManager.getInstance(context).sendBroadcast(new Intent(context.getString(R.string.ping_reached_server)));
+        LocalBroadcastManager.getInstance(context)
+                .sendBroadcast(new Intent(context.getString(R.string.ping_reached_server)));
     }
 }

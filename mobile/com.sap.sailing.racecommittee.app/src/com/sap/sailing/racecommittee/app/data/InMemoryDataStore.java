@@ -82,9 +82,7 @@ public enum InMemoryDataStore implements DataStore {
     }
 
     /*
-     * * * * * *
-     *  EVENTS *
-     * * * * * *
+     * * * * * * EVENTS * * * * * *
      */
 
     @Override
@@ -108,9 +106,7 @@ public enum InMemoryDataStore implements DataStore {
     }
 
     /*
-     * * * * * * * *
-     * COURSE AREA *
-     * * * * * * * *
+     * * * * * * * * COURSE AREA * * * * * * * *
      */
 
     @Override
@@ -165,9 +161,7 @@ public enum InMemoryDataStore implements DataStore {
     }
 
     /*
-     * * * * * * *  *
-     * MANAGED RACE *
-     * * * * * * *  *
+     * * * * * * * * MANAGED RACE * * * * * * * *
      */
 
     @Override
@@ -204,7 +198,8 @@ public enum InMemoryDataStore implements DataStore {
             managedRaceById.putAll(output);
             output.clear();
         } else {
-            throw new IndexOutOfBoundsException("index " + index + " must be greater than zero and less than size of the map");
+            throw new IndexOutOfBoundsException(
+                    "index " + index + " must be greater than zero and less than size of the map");
         }
     }
 
@@ -215,7 +210,8 @@ public enum InMemoryDataStore implements DataStore {
     }
 
     private SimpleRaceLogIdentifier convertManagedRaceIdentifierToSimpleRaceLogIdentifier(ManagedRaceIdentifier id) {
-        return new SimpleRaceLogIdentifierImpl(id.getRaceGroup().getName(), id.getRaceColumnName(), id.getFleet().getName());
+        return new SimpleRaceLogIdentifierImpl(id.getRaceGroup().getName(), id.getRaceColumnName(),
+                id.getFleet().getName());
     }
 
     @Override
@@ -234,17 +230,18 @@ public enum InMemoryDataStore implements DataStore {
     }
 
     /**
-     * Parses a serialized version of a ManagedRaceIdentifier and creates a SimpleRaceLogIdentifier
-     * this is needed as the serialized version is passed around in the bundle context, but the
-     * InMemoryDataStore now has to use SimpleRaceLogIdentifier as key in the managedRaces HashMap in
-     * order to allow for retrieving a managed race with exclusively the information provided by a
-     * SimpleRaceLogIdentifier (which is less than the information provided by a ManagedRaceIdentifier)
+     * Parses a serialized version of a ManagedRaceIdentifier and creates a SimpleRaceLogIdentifier this is needed as
+     * the serialized version is passed around in the bundle context, but the InMemoryDataStore now has to use
+     * SimpleRaceLogIdentifier as key in the managedRaces HashMap in order to allow for retrieving a managed race with
+     * exclusively the information provided by a SimpleRaceLogIdentifier (which is less than the information provided by
+     * a ManagedRaceIdentifier)
      *
-     * @param escapedId serialized version of a ManagedRaceIdentifier
+     * @param escapedId
+     *            serialized version of a ManagedRaceIdentifier
      * @return corresponding SimpleRaceLogIdentifier
      */
     public SimpleRaceLogIdentifier parseManagedRaceLogIdentifier(final String escapedId) {
-        //Undo escaping
+        // Undo escaping
         final Triple<String, String, String> id = FleetIdentifierImpl.unescape(escapedId);
         return new SimpleRaceLogIdentifierImpl(id.getA(), id.getB(), id.getC());
     }
@@ -255,9 +252,7 @@ public enum InMemoryDataStore implements DataStore {
     }
 
     /*
-     * * * * * *
-     *  MARKS  *
-     * * * * * *
+     * * * * * * MARKS * * * * * *
      */
 
     @Override

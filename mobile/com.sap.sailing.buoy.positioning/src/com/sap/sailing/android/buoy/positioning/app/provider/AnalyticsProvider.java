@@ -79,8 +79,9 @@ public class AnalyticsProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         if (BuildConfig.DEBUG) {
             ExLog.i(getContext(), TAG,
-                "query() called with: uri = [" + uri + "], projection = [" + Arrays.toString(projection) + "], selection = [" + selection
-                    + "], selectionArgs = [" + Arrays.toString(selectionArgs) + "], sortOrder = [" + sortOrder + "]");
+                    "query() called with: uri = [" + uri + "], projection = [" + Arrays.toString(projection)
+                            + "], selection = [" + selection + "], selectionArgs = [" + Arrays.toString(selectionArgs)
+                            + "], sortOrder = [" + sortOrder + "]");
         }
 
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
@@ -90,16 +91,16 @@ public class AnalyticsProvider extends ContentProvider {
         String table = null;
         SQLiteQueryBuilder builder = new SQLiteQueryBuilder();
         switch (sUriMatcher.match(uri)) {
-            case LEADERBOARDS_MARKS_JOINED:
-                table = Tables.LEADERBOARDS_MARKS_JOINED;
-                break;
+        case LEADERBOARDS_MARKS_JOINED:
+            table = Tables.LEADERBOARDS_MARKS_JOINED;
+            break;
 
-            case MARKS_LEADERBOARDS_JOINED:
-                table = Tables.MARKS_LEADERBOARDS_JOINED;
-                break;
+        case MARKS_LEADERBOARDS_JOINED:
+            table = Tables.MARKS_LEADERBOARDS_JOINED;
+            break;
 
-            default:
-                break;
+        default:
+            break;
         }
 
         if (table != null) {
@@ -121,32 +122,32 @@ public class AnalyticsProvider extends ContentProvider {
     @Override
     public String getType(Uri uri) {
         switch (sUriMatcher.match(uri)) {
-            case LEADERBOARD:
-                return Leaderboard.CONTENT_TYPE;
+        case LEADERBOARD:
+            return Leaderboard.CONTENT_TYPE;
 
-            case LEADERBOARD_ID:
-                return Leaderboard.CONTENT_ITEM_TYPE;
+        case LEADERBOARD_ID:
+            return Leaderboard.CONTENT_ITEM_TYPE;
 
-            case CHECKIN_URI:
-                return CheckinUri.CONTENT_TYPE;
+        case CHECKIN_URI:
+            return CheckinUri.CONTENT_TYPE;
 
-            case CHECKIN_URI_ID:
-                return CheckinUri.CONTENT_ITEM_TYPE;
+        case CHECKIN_URI_ID:
+            return CheckinUri.CONTENT_ITEM_TYPE;
 
-            case MARK:
-                return Mark.CONTENT_TYPE;
+        case MARK:
+            return Mark.CONTENT_TYPE;
 
-            case MARK_ID:
-                return Mark.CONTENT_ITEM_TYPE;
+        case MARK_ID:
+            return Mark.CONTENT_ITEM_TYPE;
 
-            case MARK_PING:
-                return MarkPing.CONTENT_TYPE;
+        case MARK_PING:
+            return MarkPing.CONTENT_TYPE;
 
-            case MARK_PING_ID:
-                return MarkPing.CONTENT_ITEM_TYPE;
+        case MARK_PING_ID:
+            return MarkPing.CONTENT_ITEM_TYPE;
 
-            default:
-                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        default:
+            throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
     }
 
@@ -160,24 +161,24 @@ public class AnalyticsProvider extends ContentProvider {
 
         String table;
         switch (sUriMatcher.match(uri)) {
-            case LEADERBOARD:
-                table = Tables.LEADERBOARDS;
-                break;
+        case LEADERBOARD:
+            table = Tables.LEADERBOARDS;
+            break;
 
-            case CHECKIN_URI:
-                table = Tables.CHECKIN_URIS;
-                break;
+        case CHECKIN_URI:
+            table = Tables.CHECKIN_URIS;
+            break;
 
-            case MARK:
-                table = Tables.MARKS;
-                break;
+        case MARK:
+            table = Tables.MARKS;
+            break;
 
-            case MARK_PING:
-                table = Tables.MARK_PINGS;
-                break;
+        case MARK_PING:
+            table = Tables.MARK_PINGS;
+            break;
 
-            default:
-                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        default:
+            throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
 
         long id = db.insertOrThrow(table, null, values);
@@ -188,33 +189,32 @@ public class AnalyticsProvider extends ContentProvider {
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         if (BuildConfig.DEBUG) {
-            ExLog.i(getContext(), TAG,
-                "delete() called with: uri = [" + uri + "], selection = [" + selection + "], selectionArgs = ["
-                    + Arrays.toString(selectionArgs) + "]");
+            ExLog.i(getContext(), TAG, "delete() called with: uri = [" + uri + "], selection = [" + selection
+                    + "], selectionArgs = [" + Arrays.toString(selectionArgs) + "]");
         }
 
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 
         String table;
         switch (sUriMatcher.match(uri)) {
-            case LEADERBOARD:
-                table = Tables.LEADERBOARDS;
-                break;
+        case LEADERBOARD:
+            table = Tables.LEADERBOARDS;
+            break;
 
-            case CHECKIN_URI:
-                table = Tables.CHECKIN_URIS;
-                break;
+        case CHECKIN_URI:
+            table = Tables.CHECKIN_URIS;
+            break;
 
-            case MARK:
-                table = Tables.MARKS;
-                break;
+        case MARK:
+            table = Tables.MARKS;
+            break;
 
-            case MARK_PING:
-                table = Tables.MARK_PINGS;
-                break;
+        case MARK_PING:
+            table = Tables.MARK_PINGS;
+            break;
 
-            default:
-                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        default:
+            throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
 
         int rowsDeleted = db.delete(table, selection, selectionArgs);
@@ -225,25 +225,24 @@ public class AnalyticsProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         if (BuildConfig.DEBUG) {
-            ExLog.i(getContext(), TAG,
-                "update() called with: uri = [" + uri + "], values = [" + values + "], selection = [" + selection + "], selectionArgs = [" + Arrays
-                    .toString(selectionArgs) + "]");
+            ExLog.i(getContext(), TAG, "update() called with: uri = [" + uri + "], values = [" + values
+                    + "], selection = [" + selection + "], selectionArgs = [" + Arrays.toString(selectionArgs) + "]");
         }
 
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 
         String table;
         switch (sUriMatcher.match(uri)) {
-            case LEADERBOARD:
-                table = Tables.LEADERBOARDS;
-                break;
+        case LEADERBOARD:
+            table = Tables.LEADERBOARDS;
+            break;
 
-            case MARK:
-                table = Tables.MARKS;
-                break;
+        case MARK:
+            table = Tables.MARKS;
+            break;
 
-            default:
-                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        default:
+            throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
 
         int rowsUpdated = db.update(table, values, selection, selectionArgs);
@@ -262,32 +261,32 @@ public class AnalyticsProvider extends ContentProvider {
         final SelectionBuilder builder = new SelectionBuilder(getContext());
 
         switch (sUriMatcher.match(uri)) {
-            case LEADERBOARD:
-                return builder.table(Tables.LEADERBOARDS);
+        case LEADERBOARD:
+            return builder.table(Tables.LEADERBOARDS);
 
-            case LEADERBOARD_ID:
-                return builder.table(Tables.LEADERBOARDS).where(BaseColumns._ID + " = ?", uri.getLastPathSegment());
+        case LEADERBOARD_ID:
+            return builder.table(Tables.LEADERBOARDS).where(BaseColumns._ID + " = ?", uri.getLastPathSegment());
 
-            case CHECKIN_URI:
-                return builder.table(Tables.CHECKIN_URIS);
+        case CHECKIN_URI:
+            return builder.table(Tables.CHECKIN_URIS);
 
-            case CHECKIN_URI_ID:
-                return builder.table(Tables.CHECKIN_URIS).where(BaseColumns._ID + " = ?", uri.getLastPathSegment());
+        case CHECKIN_URI_ID:
+            return builder.table(Tables.CHECKIN_URIS).where(BaseColumns._ID + " = ?", uri.getLastPathSegment());
 
-            case MARK:
-                return builder.table(Tables.MARKS);
+        case MARK:
+            return builder.table(Tables.MARKS);
 
-            case MARK_ID:
-                return builder.table(Tables.MARKS).where(BaseColumns._ID + " = ?", uri.getLastPathSegment());
+        case MARK_ID:
+            return builder.table(Tables.MARKS).where(BaseColumns._ID + " = ?", uri.getLastPathSegment());
 
-            case MARK_PING:
-                return builder.table(Tables.MARK_PINGS);
+        case MARK_PING:
+            return builder.table(Tables.MARK_PINGS);
 
-            case MARK_PING_ID:
-                return builder.table(Tables.MARK_PINGS).where(BaseColumns._ID + " = ?", uri.getLastPathSegment());
+        case MARK_PING_ID:
+            return builder.table(Tables.MARK_PINGS).where(BaseColumns._ID + " = ?", uri.getLastPathSegment());
 
-            default:
-                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        default:
+            throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
     }
 }

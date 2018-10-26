@@ -16,7 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 public abstract class BaseFinishedRaceFragment<ProcedureType extends RacingProcedure>
-    extends BaseRaceInfoRaceFragment<ProcedureType> {
+        extends BaseRaceInfoRaceFragment<ProcedureType> {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

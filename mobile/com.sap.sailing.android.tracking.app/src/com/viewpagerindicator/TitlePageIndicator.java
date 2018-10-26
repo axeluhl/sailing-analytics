@@ -194,15 +194,15 @@ public class TitlePageIndicator extends View implements PageIndicator {
 
         // Retrieve the colors to be used for this view and apply them.
         mFooterLineHeight = a.getDimension(R.styleable.TitlePageIndicator_footerLineHeight, defaultFooterLineHeight);
-        mFooterIndicatorStyle = IndicatorStyle.fromValue(a.getInteger(
-                R.styleable.TitlePageIndicator_footerIndicatorStyle, defaultFooterIndicatorStyle));
+        mFooterIndicatorStyle = IndicatorStyle.fromValue(
+                a.getInteger(R.styleable.TitlePageIndicator_footerIndicatorStyle, defaultFooterIndicatorStyle));
         mFooterIndicatorHeight = a.getDimension(R.styleable.TitlePageIndicator_footerIndicatorHeight,
                 defaultFooterIndicatorHeight);
         mFooterIndicatorUnderlinePadding = a.getDimension(
                 R.styleable.TitlePageIndicator_footerIndicatorUnderlinePadding, defaultFooterIndicatorUnderlinePadding);
         mFooterPadding = a.getDimension(R.styleable.TitlePageIndicator_footerPadding, defaultFooterPadding);
-        mLinePosition = LinePosition.fromValue(a.getInteger(R.styleable.TitlePageIndicator_linePosition,
-                defaultLinePosition));
+        mLinePosition = LinePosition
+                .fromValue(a.getInteger(R.styleable.TitlePageIndicator_linePosition, defaultLinePosition));
         mTopPadding = a.getDimension(R.styleable.TitlePageIndicator_topPadding, defaultTopPadding);
         mTitlePadding = a.getDimension(R.styleable.TitlePageIndicator_titlePadding, defaultTitlePadding);
         mClipPadding = a.getDimension(R.styleable.TitlePageIndicator_clipPadding, defaultClipPadding);

@@ -42,7 +42,8 @@ public class GateStartTimingFragment extends BaseFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View layout = LayoutInflater.from(getActivity()).inflate(R.layout.race_schedule_procedure_timing, container, false);
+        View layout = LayoutInflater.from(getActivity()).inflate(R.layout.race_schedule_procedure_timing, container,
+                false);
 
         HeaderLayout header = ViewHelper.get(layout, R.id.header);
         if (header != null) {
@@ -73,11 +74,11 @@ public class GateStartTimingFragment extends BaseFragment {
         mTimeGolf = (NumberPicker) getActivity().findViewById(R.id.time_golf);
         mProcedure = getRaceState().getTypedRacingProcedure();
         ViewHelper.disableSave(mTimeLaunch);
-        ThemeHelper.setPickerColor(getActivity(), mTimeLaunch, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
-            .getColor(getActivity(), R.attr.sap_yellow_1));
+        ThemeHelper.setPickerColor(getActivity(), mTimeLaunch, ThemeHelper.getColor(getActivity(), R.attr.white),
+                ThemeHelper.getColor(getActivity(), R.attr.sap_yellow_1));
         ViewHelper.disableSave(mTimeGolf);
-        ThemeHelper.setPickerColor(getActivity(), mTimeGolf, ThemeHelper.getColor(getActivity(), R.attr.white), ThemeHelper
-            .getColor(getActivity(), R.attr.sap_yellow_1));
+        ThemeHelper.setPickerColor(getActivity(), mTimeGolf, ThemeHelper.getColor(getActivity(), R.attr.white),
+                ThemeHelper.getColor(getActivity(), R.attr.sap_yellow_1));
 
         setTimeLaunchWidget();
         setTimeGolfWidget();

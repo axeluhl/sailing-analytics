@@ -11,12 +11,11 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 
 /**
- * An implementation of {@link ItemTouchHelper.Callback} that enables basic drag & drop and
- * swipe-to-dismiss. Drag events are automatically started by an item long-press.<br/>
+ * An implementation of {@link ItemTouchHelper.Callback} that enables basic drag & drop and swipe-to-dismiss. Drag
+ * events are automatically started by an item long-press.<br/>
  * </br/>
- * Expects the <code>RecyclerView.Adapter</code> to listen for {@link
- * ItemTouchHelperAdapter} callbacks and the <code>RecyclerView.ViewHolder</code> to implement
- * {@link BaseDraggableSwipeViewHolder}.
+ * Expects the <code>RecyclerView.Adapter</code> to listen for {@link ItemTouchHelperAdapter} callbacks and the
+ * <code>RecyclerView.ViewHolder</code> to implement {@link BaseDraggableSwipeViewHolder}.
  */
 public class ItemTouchHelperCallback extends ItemTouchHelper.Callback {
 
@@ -42,7 +41,8 @@ public class ItemTouchHelperCallback extends ItemTouchHelper.Callback {
         if (source.getItemViewType() != target.getItemViewType()) {
             return false;
         }
-        if (target instanceof BaseDraggableSwipeViewHolder && !((BaseDraggableSwipeViewHolder) target).isDragAllowed()) {
+        if (target instanceof BaseDraggableSwipeViewHolder
+                && !((BaseDraggableSwipeViewHolder) target).isDragAllowed()) {
             return false;
         }
         // Notify the adapter of the move
@@ -57,9 +57,10 @@ public class ItemTouchHelperCallback extends ItemTouchHelper.Callback {
     }
 
     @Override
-    public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+    public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY,
+            int actionState, boolean isCurrentlyActive) {
         View itemView = viewHolder.itemView;
-        boolean hasContainer  = itemView.findViewById(R.id.container) != null;
+        boolean hasContainer = itemView.findViewById(R.id.container) != null;
         if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE && hasContainer) {
             itemView.setTranslationX(dX);
 
@@ -73,7 +74,7 @@ public class ItemTouchHelperCallback extends ItemTouchHelper.Callback {
                     .setBackgroundColor(ThemeHelper.getColor(recyclerView.getContext(), R.attr.sap_gray_black_30));
 
             Drawable background = BitmapHelper.getAttrDrawable(recyclerView.getContext(), bgRes);
-            background.setBounds(0, itemView.getTop(),   itemView.getRight(), itemView.getBottom());
+            background.setBounds(0, itemView.getTop(), itemView.getRight(), itemView.getBottom());
             background.draw(c);
         } else {
             super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);

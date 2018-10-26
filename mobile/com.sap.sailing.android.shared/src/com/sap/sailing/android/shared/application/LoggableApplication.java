@@ -13,16 +13,22 @@ import android.content.Context;
 import android.content.Intent;
 
 /**
- * <p>Registers an additional exception handler for uncaught exception to have some crash logging.</p>
- * <p>Offers a static {@link StringContext} to handle i18n in ugly cases.</p>
- * <p>Sets the default preference values (if not set)</p> 
+ * <p>
+ * Registers an additional exception handler for uncaught exception to have some crash logging.
+ * </p>
+ * <p>
+ * Offers a static {@link StringContext} to handle i18n in ugly cases.
+ * </p>
+ * <p>
+ * Sets the default preference values (if not set)
+ * </p>
  */
 public class LoggableApplication extends Application {
 
     private final static String TAG = LoggableApplication.class.getSimpleName();
-    
+
     private static StringContext stringContext;
-    
+
     public static StringContext getStringContext() {
         return stringContext;
     }
@@ -31,15 +37,15 @@ public class LoggableApplication extends Application {
     public void onCreate() {
         super.onCreate();
         ExLog.i(this, TAG, "Application is starting.");
-        
-        Thread.setDefaultUncaughtExceptionHandler(new LoggingExceptionHandler(Thread
-                .getDefaultUncaughtExceptionHandler(), this));
-        
-        LifecycleLogger.enableLifecycleLogging(PrefUtils.getBoolean(this, R.string.preference_enableLifecycleLogging_key,
-                R.bool.preference_enableLifecycleLogging_default));
+
+        Thread.setDefaultUncaughtExceptionHandler(
+                new LoggingExceptionHandler(Thread.getDefaultUncaughtExceptionHandler(), this));
+
+        LifecycleLogger.enableLifecycleLogging(PrefUtils.getBoolean(this,
+                R.string.preference_enableLifecycleLogging_key, R.bool.preference_enableLifecycleLogging_default));
         stringContext = new StringContext(new WeakReference<Context>(getApplicationContext()));
     }
-    
+
     public static void restartApp(Context context) {
         Intent i = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

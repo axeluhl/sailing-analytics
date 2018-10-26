@@ -3,10 +3,10 @@ package com.sap.sailing.racecommittee.app.data.loaders;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.racecommittee.app.data.clients.LoadClient;
 
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
-import android.support.v4.content.Loader;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.Loader;
 
 /**
  * <p>
@@ -55,7 +55,7 @@ public class DataLoaderCallbacks<T> implements LoaderCallbacks<DataLoaderResult<
 
     @Override
     public void onLoadFinished(Loader<DataLoaderResult<T>> loader, DataLoaderResult<T> result) {
-    	
+
         if (result.isSuccessful()) {
             clientCallback.onLoadSucceeded(result.getResult(), result.isResultCached());
         } else {

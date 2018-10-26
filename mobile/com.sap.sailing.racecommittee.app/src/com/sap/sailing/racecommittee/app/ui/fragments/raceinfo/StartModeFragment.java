@@ -44,17 +44,17 @@ public class StartModeFragment extends BaseFragment {
 
         if (getArguments() != null) {
             switch (getArguments().getInt(START_MODE, START_MODE_PRESETUP)) {
-                case START_MODE_PLANNED:
-                    if (AppUtils.with(getActivity()).isLandscape()) {
-                        if (getView() != null) {
-                            View header = getView().findViewById(R.id.header);
-                            header.setVisibility(View.GONE);
-                        }
+            case START_MODE_PLANNED:
+                if (AppUtils.with(getActivity()).isLandscape()) {
+                    if (getView() != null) {
+                        View header = getView().findViewById(R.id.header);
+                        header.setVisibility(View.GONE);
                     }
-                    break;
+                }
+                break;
 
-                default:
-                    break;
+            default:
+                break;
             }
         }
 

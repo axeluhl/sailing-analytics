@@ -155,26 +155,26 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.options_menu_settings:
-                ExLog.i(this, TAG, "Clicked SETTINGS.");
-                startActivity(new Intent(this, SettingsActivity.class));
-                return true;
-            case R.id.options_menu_checkout:
-                ExLog.i(this, TAG, "Clicked CHECKOUT.");
-                displayCheckoutConfirmationDialog();
-                return true;
-            case R.id.options_menu_add_team_image:
-                ExLog.i(this, TAG, "Clicked ADD TEAM IMAGE");
-                getRegattaFragment().showChooseExistingPictureOrTakeNewPhotoAlert();
-                return true;
-            case R.id.options_menu_refresh:
-                manager.callServerAndGenerateCheckinData();
-                return true;
-            case R.id.options_menu_info:
-                AboutHelper.showInfoActivity(this);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        case R.id.options_menu_settings:
+            ExLog.i(this, TAG, "Clicked SETTINGS.");
+            startActivity(new Intent(this, SettingsActivity.class));
+            return true;
+        case R.id.options_menu_checkout:
+            ExLog.i(this, TAG, "Clicked CHECKOUT.");
+            displayCheckoutConfirmationDialog();
+            return true;
+        case R.id.options_menu_add_team_image:
+            ExLog.i(this, TAG, "Clicked ADD TEAM IMAGE");
+            getRegattaFragment().showChooseExistingPictureOrTakeNewPhotoAlert();
+            return true;
+        case R.id.options_menu_refresh:
+            manager.callServerAndGenerateCheckinData();
+            return true;
+        case R.id.options_menu_info:
+            AboutHelper.showInfoActivity(this);
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
         }
     }
 
@@ -272,7 +272,7 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
         sb.append("://");
         sb.append(url.getHost());
         sb.append(":");
-        //get given port by check-in url or standard http(s) protocol port by defaultPort
+        // get given port by check-in url or standard http(s) protocol port by defaultPort
         sb.append((url.getPort() == -1) ? url.getDefaultPort() : url.getPort());
         sb.append(prefs.getServerCompetitorTeamPath(competitorId));
 
@@ -282,29 +282,31 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
     public void askServerAboutTeamImageUrl(final ImageView imageView) {
         try {
             HttpGetRequest getCompetitorTeamRequest = new HttpGetRequest(getTeamImageApiUrl(competitor.id), this);
-            NetworkHelper.getInstance(this).executeHttpJsonRequestAsync(getCompetitorTeamRequest, new NetworkHelperSuccessListener() {
-                @Override
-                public void performAction(JSONObject response) {
-                    try {
-                        String teamImageUri = response.getString("imageUri");
-                        if (teamImageUri != null) {
-                            new DownloadLeaderboardImageTask(imageView).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, teamImageUri);
+            NetworkHelper.getInstance(this).executeHttpJsonRequestAsync(getCompetitorTeamRequest,
+                    new NetworkHelperSuccessListener() {
+                        @Override
+                        public void performAction(JSONObject response) {
+                            try {
+                                String teamImageUri = response.getString("imageUri");
+                                if (teamImageUri != null) {
+                                    new DownloadLeaderboardImageTask(imageView)
+                                            .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, teamImageUri);
+                                }
+                            } catch (JSONException e) {
+                                ExLog.e(getApplicationContext(), TAG,
+                                        "Error: Failed to get teamImageURL: " + e.getMessage());
+                            }
                         }
-                    } catch (JSONException e) {
-                        ExLog.e(getApplicationContext(), TAG, "Error: Failed to get teamImageURL: " + e.getMessage());
-                    }
-                }
-            }, new NetworkHelperFailureListener() {
-                @Override
-                public void performAction(NetworkHelperError e) {
-                    ExLog.e(getApplicationContext(), TAG,
-                            "Error: Failed to get teamImageURL: " + e.getMessage());
-                }
-            });
+                    }, new NetworkHelperFailureListener() {
+                        @Override
+                        public void performAction(NetworkHelperError e) {
+                            ExLog.e(getApplicationContext(), TAG,
+                                    "Error: Failed to get teamImageURL: " + e.getMessage());
+                        }
+                    });
 
         } catch (MalformedURLException e) {
-            ExLog.e(this, TAG,
-                    "Error: Failed to perform checking due to a MalformedURLException: " + e.getMessage());
+            ExLog.e(this, TAG, "Error: Failed to perform checking due to a MalformedURLException: " + e.getMessage());
         }
     }
 
@@ -481,25 +483,23 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
             return;
         }
         try {
-            HttpJsonPostRequest request = new HttpJsonPostRequest(this, new URL(checkoutURLStr), checkoutData.toString());
-            NetworkHelper.getInstance(this).executeHttpJsonRequestAsync(request,
-                    new NetworkHelperSuccessListener() {
-                        @Override
-                        public void performAction(JSONObject response) {
-                            DatabaseHelper.getInstance().deleteRegattaFromDatabase(RegattaActivity.this,
-                                    event.checkinDigest);
-                            deleteImageFile(getCompetitorImageFileName(competitor.id));
-                            dismissProgressDialog();
-                            finish();
-                        }
-                    }, new NetworkHelperFailureListener() {
-                        @Override
-                        public void performAction(NetworkHelperError e) {
-                            dismissProgressDialog();
-                            showErrorPopup(R.string.error,
-                                    R.string.error_could_not_complete_operation_on_server_try_again);
-                        }
-                    });
+            HttpJsonPostRequest request = new HttpJsonPostRequest(this, new URL(checkoutURLStr),
+                    checkoutData.toString());
+            NetworkHelper.getInstance(this).executeHttpJsonRequestAsync(request, new NetworkHelperSuccessListener() {
+                @Override
+                public void performAction(JSONObject response) {
+                    DatabaseHelper.getInstance().deleteRegattaFromDatabase(RegattaActivity.this, event.checkinDigest);
+                    deleteImageFile(getCompetitorImageFileName(competitor.id));
+                    dismissProgressDialog();
+                    finish();
+                }
+            }, new NetworkHelperFailureListener() {
+                @Override
+                public void performAction(NetworkHelperError e) {
+                    dismissProgressDialog();
+                    showErrorPopup(R.string.error, R.string.error_could_not_complete_operation_on_server_try_again);
+                }
+            });
         } catch (MalformedURLException e) {
             ExLog.w(this, TAG, "Error, can't check out, MalformedURLException: " + e.getMessage());
         }
@@ -636,7 +636,8 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
 
         protected void onPostExecute(File result) {
             if (result != null && result.exists()) {
-                bmImage.setImageBitmap(BitmapHelper.decodeSampleBitmapFromFile(result.getPath(), bmImage.getMeasuredWidth(), bmImage.getMeasuredHeight(), null));
+                bmImage.setImageBitmap(BitmapHelper.decodeSampleBitmapFromFile(result.getPath(),
+                        bmImage.getMeasuredWidth(), bmImage.getMeasuredHeight(), null));
                 userImageUpdated();
             } else {
                 ExLog.e(RegattaActivity.this, TAG, "Failed to download leaderboard image at url " + downloadUrl);
@@ -665,7 +666,8 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData>
                 InputStream in = new java.net.URL(downloadUrl).openStream();
                 mIcon11 = BitmapFactory.decodeStream(in);
             } catch (Exception e) {
-                ExLog.e(RegattaActivity.this, TAG, "Failed to download flat image at url " + downloadUrl + ": " + e.getMessage());
+                ExLog.e(RegattaActivity.this, TAG,
+                        "Failed to download flat image at url " + downloadUrl + ": " + e.getMessage());
             }
             return mIcon11;
         }

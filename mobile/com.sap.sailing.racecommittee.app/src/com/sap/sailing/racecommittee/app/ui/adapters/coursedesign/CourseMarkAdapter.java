@@ -25,7 +25,8 @@ public class CourseMarkAdapter extends RecyclerView.Adapter<CourseMarkAdapter.Vi
     private int mType;
     private CourseListDataElementWithIdImpl mElement;
 
-    public CourseMarkAdapter(Context context, ArrayList<Mark> marks, MarkImageHelper imageHelper, int type, CourseListDataElementWithIdImpl element) {
+    public CourseMarkAdapter(Context context, ArrayList<Mark> marks, MarkImageHelper imageHelper, int type,
+            CourseListDataElementWithIdImpl element) {
         mContext = context;
         mMarks = marks;
         mImageHelper = imageHelper;

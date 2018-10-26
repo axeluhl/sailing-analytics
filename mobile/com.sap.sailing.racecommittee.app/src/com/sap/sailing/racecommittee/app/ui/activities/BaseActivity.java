@@ -43,18 +43,18 @@ public class BaseActivity extends SendingServiceAwareActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.options_menu_settings:
-                ExLog.i(this, TAG, "Clicked SETTINGS");
-                startActivity(new Intent(this, PreferenceActivity.class));
-                return true;
+        case R.id.options_menu_settings:
+            ExLog.i(this, TAG, "Clicked SETTINGS");
+            startActivity(new Intent(this, PreferenceActivity.class));
+            return true;
 
-            case R.id.options_menu_info:
-                ExLog.i(this, TAG, "Clicked INFO");
-                startActivity(new Intent(this, SystemInformationActivity.class));
-                return true;
+        case R.id.options_menu_info:
+            ExLog.i(this, TAG, "Clicked INFO");
+            startActivity(new Intent(this, SystemInformationActivity.class));
+            return true;
 
-            default:
-                return super.onOptionsItemSelected(item);
+        default:
+            return super.onOptionsItemSelected(item);
         }
     }
 
@@ -65,8 +65,8 @@ public class BaseActivity extends SendingServiceAwareActivity {
     }
 
     /**
-     * {@link #resetDataManager() Resets the data manager} (which all redefinitions must do) and then
-     * fades this activity.
+     * {@link #resetDataManager() Resets the data manager} (which all redefinitions must do) and then fades this
+     * activity.
      */
     protected boolean onReset() {
         resetDataManager();

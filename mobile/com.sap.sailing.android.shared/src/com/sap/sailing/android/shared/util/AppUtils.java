@@ -33,7 +33,8 @@ public class AppUtils {
     /**
      * Locks the phone screen to portrait and tablets to landscape
      *
-     * @param activity Activity to lock
+     * @param activity
+     *            Activity to lock
      */
     public static void lockOrientation(Activity activity) {
         if (with(activity).isPhone()) {

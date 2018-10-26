@@ -23,18 +23,17 @@ import android.content.Context;
 import android.support.annotation.UiThread;
 
 /**
- * Generic tracker which is used for tracking or reading a barcode (and can really be used for
- * any type of item).  This is used to receive newly detected items, add a graphical representation
- * to an overlay, update the graphics as the item changes, and remove the graphics when the item
- * goes away.
+ * Generic tracker which is used for tracking or reading a barcode (and can really be used for any type of item). This
+ * is used to receive newly detected items, add a graphical representation to an overlay, update the graphics as the
+ * item changes, and remove the graphics when the item goes away.
  */
 public class BarcodeGraphicTracker extends Tracker<Barcode> {
 
     private BarcodeUpdateListener mBarcodeUpdateListener;
 
     /**
-     * Consume the item instance detected from an Activity or Fragment level by implementing the
-     * BarcodeUpdateListener interface method onBarcodeDetected.
+     * Consume the item instance detected from an Activity or Fragment level by implementing the BarcodeUpdateListener
+     * interface method onBarcodeDetected.
      */
     public interface BarcodeUpdateListener {
         @UiThread

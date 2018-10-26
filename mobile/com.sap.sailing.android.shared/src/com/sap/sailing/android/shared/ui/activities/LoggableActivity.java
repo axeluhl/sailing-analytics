@@ -53,7 +53,7 @@ public abstract class LoggableActivity extends AppCompatActivity {
         super.onDestroy();
         lifeLogger.onDestroy(this);
     }
-    
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();

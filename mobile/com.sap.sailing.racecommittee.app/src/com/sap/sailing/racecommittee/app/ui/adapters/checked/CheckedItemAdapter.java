@@ -68,7 +68,8 @@ public class CheckedItemAdapter extends ArrayAdapter<CheckedItem> {
 
         if (!TextUtils.isEmpty(item.getSubtext())) {
             subTextView.setText(item.getSubtext());
-            subTextView.setTextColor(ThemeHelper.getColor(getContext(), position == checkedPosition ? R.attr.white : R.attr.sap_light_gray));
+            subTextView.setTextColor(ThemeHelper.getColor(getContext(),
+                    position == checkedPosition ? R.attr.white : R.attr.sap_light_gray));
             subTextView.setVisibility(View.VISIBLE);
             mainTextView.setTextColor(ThemeHelper.getColor(getContext(), R.attr.white));
         } else {

@@ -47,12 +47,14 @@ public class AccuracyView extends LinearLayout {
 
     public void setAccuracy(float accuracy) {
         if (accuracy <= 0) {
-            setText(getContext().getString(R.string.not_available), ContextCompat.getColor(getContext(), R.color.sap_red));
+            setText(getContext().getString(R.string.not_available),
+                    ContextCompat.getColor(getContext(), R.color.sap_red));
             hide(mSegment01);
             hide(mSegment02);
             hide(mSegment03);
         } else {
-            setText(getContext().getString(R.string.accuracy_value, accuracy), ThemeHelper.getColor(getContext(), R.attr.white));
+            setText(getContext().getString(R.string.accuracy_value, accuracy),
+                    ThemeHelper.getColor(getContext(), R.attr.white));
             if (accuracy <= 10) {
                 setColor(mSegment01, R.color.accuracy_green);
                 setColor(mSegment02, R.color.accuracy_green);

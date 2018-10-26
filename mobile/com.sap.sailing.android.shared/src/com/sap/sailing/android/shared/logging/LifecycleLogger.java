@@ -1,8 +1,8 @@
 package com.sap.sailing.android.shared.logging;
 
 import android.app.Activity;
-import android.support.v4.app.Fragment;
 import android.content.Context;
+import android.support.v4.app.Fragment;
 
 /**
  * Logger to track all activity and fragment lifecycle events.
@@ -24,9 +24,8 @@ public class LifecycleLogger implements LifecycleCallbacks {
             context = ((Fragment) activityOrFragment).getActivity();
         }
         if (isLifecycleLoggingEnabled) {
-            ExLog.i(context, TAG,
-                    String.format("%s %s %s", action, activityOrFragment.getClass().getSimpleName(),
-                            Integer.toHexString(System.identityHashCode(activityOrFragment))));
+            ExLog.i(context, TAG, String.format("%s %s %s", action, activityOrFragment.getClass().getSimpleName(),
+                    Integer.toHexString(System.identityHashCode(activityOrFragment))));
         }
     }
 

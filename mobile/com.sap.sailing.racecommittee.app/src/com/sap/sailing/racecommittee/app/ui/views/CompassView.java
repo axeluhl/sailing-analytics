@@ -130,7 +130,8 @@ public class CompassView extends RelativeLayout {
             public void onDismiss(DialogInterface dialog) {
                 degreeView.requestFocus();
                 degreeView.selectAll();
-                InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                InputMethodManager imm = (InputMethodManager) getContext()
+                        .getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.showSoftInput(degreeView, InputMethodManager.SHOW_IMPLICIT);
             }
         });

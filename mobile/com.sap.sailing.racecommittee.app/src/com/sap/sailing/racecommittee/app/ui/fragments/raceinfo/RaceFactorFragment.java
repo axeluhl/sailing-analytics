@@ -67,14 +67,14 @@ public class RaceFactorFragment extends BaseFragment implements View.OnClickList
 
         if (getView() != null && getArguments() != null) {
             switch (getArguments().getInt(START_MODE, START_MODE_PRESETUP)) {
-                case START_MODE_PLANNED:
-                    if (AppUtils.with(getActivity()).isLandscape()) {
-                        mHeader.setVisibility(View.GONE);
-                    }
-                    break;
+            case START_MODE_PLANNED:
+                if (AppUtils.with(getActivity()).isLandscape()) {
+                    mHeader.setVisibility(View.GONE);
+                }
+                break;
 
-                default:
-                    break;
+            default:
+                break;
             }
         }
 
@@ -101,7 +101,8 @@ public class RaceFactorFragment extends BaseFragment implements View.OnClickList
         uri.appendQueryParameter(RaceLogServletConstants.PARAMS_RACE_COLUMN_NAME, getRace().getName());
         uri.appendQueryParameter(RaceColumnConstants.EXPLICIT_FACTOR, factor);
 
-        getActivity().startService(MessageSendingService.createMessageIntent(getActivity(), uri.toString(), null, UUID.randomUUID(), "{}", null));
+        getActivity().startService(MessageSendingService.createMessageIntent(getActivity(), uri.toString(), null,
+                UUID.randomUUID(), "{}", null));
 
         if (!TextUtils.isEmpty(factor)) {
             getRace().setExplicitFactor(Double.parseDouble(factor));
@@ -111,7 +112,8 @@ public class RaceFactorFragment extends BaseFragment implements View.OnClickList
 
         if (isAdded()) {
             BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_CLEAR_TOGGLE));
-            BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT));
+            BroadcastManager.getInstance(getActivity())
+                    .addIntent(new Intent(AppConstants.INTENT_ACTION_SHOW_MAIN_CONTENT));
             BroadcastManager.getInstance(getActivity()).addIntent(new Intent(AppConstants.INTENT_ACTION_UPDATE_SCREEN));
         }
     }

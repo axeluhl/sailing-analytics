@@ -87,8 +87,8 @@ public class PanelButton extends FrameLayout implements DialogInterface.OnClickL
         setPanelType(PanelType.fromId(a.getInt(R.styleable.PanelButton_buttonType, PanelType.Value.value)));
 
         switch (mType) {
-            default:
-                inflate(getContext(), R.layout.panel_button_setup, this);
+        default:
+            inflate(getContext(), R.layout.panel_button_setup, this);
         }
 
         mLayer = findViewById(R.id.panel_layer);
@@ -96,7 +96,8 @@ public class PanelButton extends FrameLayout implements DialogInterface.OnClickL
 
         mHeader = (TextView) findViewById(R.id.panel_button_header);
         mFooter = (TextView) findViewById(R.id.panel_button_footer);
-        setCaptionPosition(CaptionPosition.fromId(a.getInt(R.styleable.PanelButton_captionPosition, CaptionPosition.top.value)));
+        setCaptionPosition(
+                CaptionPosition.fromId(a.getInt(R.styleable.PanelButton_captionPosition, CaptionPosition.top.value)));
         setCaption(a.getString(R.styleable.PanelButton_buttonCaption));
 
         mValue = (TextView) findViewById(R.id.panel_value);
@@ -144,16 +145,16 @@ public class PanelButton extends FrameLayout implements DialogInterface.OnClickL
             mFooter.setVisibility(GONE);
         }
         switch (mCaptionPosition) {
-            case bottom:
-                if (mFooter != null) {
-                    mFooter.setVisibility(VISIBLE);
-                }
-                break;
+        case bottom:
+            if (mFooter != null) {
+                mFooter.setVisibility(VISIBLE);
+            }
+            break;
 
-            default:
-                if (mHeader != null) {
-                    mHeader.setVisibility(VISIBLE);
-                }
+        default:
+            if (mHeader != null) {
+                mHeader.setVisibility(VISIBLE);
+            }
         }
         setCaption(mCaption);
     }
@@ -162,16 +163,16 @@ public class PanelButton extends FrameLayout implements DialogInterface.OnClickL
         mCaption = caption;
 
         switch (mCaptionPosition) {
-            case bottom:
-                if (mFooter != null) {
-                    mFooter.setText(caption);
-                }
-                break;
+        case bottom:
+            if (mFooter != null) {
+                mFooter.setText(caption);
+            }
+            break;
 
-            default:
-                if (mHeader != null) {
-                    mHeader.setText(caption);
-                }
+        default:
+            if (mHeader != null) {
+                mHeader.setText(caption);
+            }
         }
     }
 
@@ -195,12 +196,12 @@ public class PanelButton extends FrameLayout implements DialogInterface.OnClickL
         mType = type;
         if (mType != null) {
             switch (mType) {
-                case Switch:
-                    mTouchEventListener.setEnabled(false);
-                    break;
+            case Switch:
+                mTouchEventListener.setEnabled(false);
+                break;
 
-                default:
-                    mTouchEventListener.setEnabled(true);
+            default:
+                mTouchEventListener.setEnabled(true);
             }
         } else {
             mTouchEventListener.setEnabled(true);
@@ -256,20 +257,20 @@ public class PanelButton extends FrameLayout implements DialogInterface.OnClickL
 
     public void setLinePosition(int position) {
         switch (position) {
-            case 0:
-                mLine = findViewById(R.id.line_left);
-                break;
+        case 0:
+            mLine = findViewById(R.id.line_left);
+            break;
 
-            case 1:
-                mLine = findViewById(R.id.line_bottom);
-                break;
+        case 1:
+            mLine = findViewById(R.id.line_bottom);
+            break;
 
-            case 2:
-                mLine = findViewById(R.id.line_right);
-                break;
+        case 2:
+            mLine = findViewById(R.id.line_right);
+            break;
 
-            default:
-                // no-op
+        default:
+            // no-op
         }
 
         if (mLine != null) {
@@ -291,26 +292,26 @@ public class PanelButton extends FrameLayout implements DialogInterface.OnClickL
         }
 
         switch (mType) {
-            case Value:
-                if (mValue != null) {
-                    mValue.setVisibility(VISIBLE);
-                }
-                break;
+        case Value:
+            if (mValue != null) {
+                mValue.setVisibility(VISIBLE);
+            }
+            break;
 
-            case Image:
-                if (mImageLayout != null) {
-                    mImageLayout.setVisibility(VISIBLE);
-                }
-                break;
+        case Image:
+            if (mImageLayout != null) {
+                mImageLayout.setVisibility(VISIBLE);
+            }
+            break;
 
-            case Switch:
-                if (mSwitch != null) {
-                    mSwitch.setVisibility(VISIBLE);
-                }
-                break;
+        case Switch:
+            if (mSwitch != null) {
+                mSwitch.setVisibility(VISIBLE);
+            }
+            break;
 
-            default:
-                // no-op
+        default:
+            // no-op
         }
     }
 
@@ -318,7 +319,8 @@ public class PanelButton extends FrameLayout implements DialogInterface.OnClickL
         showChangeDialog(positiveButton, null);
     }
 
-    protected void showChangeDialog(DialogInterface.OnClickListener positiveButton, DialogInterface.OnClickListener negativeButton) {
+    protected void showChangeDialog(DialogInterface.OnClickListener positiveButton,
+            DialogInterface.OnClickListener negativeButton) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppTheme_AlertDialog);
         builder.setTitle(getContext().getString(R.string.change_title));
         builder.setMessage(getContext().getString(R.string.change_message));
@@ -378,13 +380,13 @@ public class PanelButton extends FrameLayout implements DialogInterface.OnClickL
                 drawable.setLevel(level);
                 retValue = drawable.getLevel();
                 switch (retValue) {
-                    case LEVEL_TOGGLED:
-                        mLayer.setBackgroundColor(ThemeHelper.getColor(getContext(), R.attr.sap_gray_black_20));
-                        break;
+                case LEVEL_TOGGLED:
+                    mLayer.setBackgroundColor(ThemeHelper.getColor(getContext(), R.attr.sap_gray_black_20));
+                    break;
 
-                    default:
-                        mLayer.setBackgroundColor(ThemeHelper.getColor(getContext(), R.attr.sap_gray));
-                        break;
+                default:
+                    mLayer.setBackgroundColor(ThemeHelper.getColor(getContext(), R.attr.sap_gray));
+                    break;
                 }
             }
         }

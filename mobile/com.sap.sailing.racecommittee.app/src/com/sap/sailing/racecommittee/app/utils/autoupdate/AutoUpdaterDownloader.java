@@ -11,7 +11,7 @@ public abstract class AutoUpdaterDownloader<T> extends AsyncTask<URL, Float, T> 
 
     protected final AutoUpdaterState state;
     protected final Context context;
-    
+
     public AutoUpdaterDownloader(AutoUpdaterState state, Context context) {
         this.state = state;
         this.context = context;
@@ -30,17 +30,18 @@ public abstract class AutoUpdaterDownloader<T> extends AsyncTask<URL, Float, T> 
         if (isCancelled()) {
             return;
         }
-        
+
         if (result == null) {
             onError();
         } else {
             onSuccess(result);
-        }       
+        }
     }
 
-    
     protected abstract T downloadInBackground(URL url);
+
     protected abstract void onError();
+
     protected abstract void onSuccess(T result);
 
 }

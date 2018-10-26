@@ -51,7 +51,8 @@ public class GateStartPathFinderFragment extends BaseFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View layout = LayoutInflater.from(getActivity()).inflate(R.layout.race_schedule_procedure_pathfinder, container, false);
+        final View layout = LayoutInflater.from(getActivity()).inflate(R.layout.race_schedule_procedure_pathfinder,
+                container, false);
 
         mNat = ViewHelper.get(layout, R.id.pathfinder_nat);
         mNum = ViewHelper.get(layout, R.id.pathfinder_num);

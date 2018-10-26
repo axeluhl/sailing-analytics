@@ -17,7 +17,7 @@ public class RaceLogPollingTask extends AsyncTask<Util.Pair<String, URL>, /* Pro
     public interface PollingResultListener {
         void onPollingFinished();
     }
-    
+
     private final PollingResultListener mListener;
     private final Context mContext;
 
@@ -33,7 +33,7 @@ public class RaceLogPollingTask extends AsyncTask<Util.Pair<String, URL>, /* Pro
             if (isCancelled()) {
                 return null;
             }
-            
+
             HttpRequest request = new HttpJsonPostRequest(mContext, query.getB());
             InputStream responseStream;
             try {

@@ -47,8 +47,8 @@ public class ExLog {
         if (UNIQUE_ID == null) {
             UNIQUE_ID = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
         }
-        i(context, "ID: " + String.valueOf(eventID), System.currentTimeMillis() + ":" + (UNIQUE_ID == null ? "" : UNIQUE_ID)
-                + ":" + (msg == null ? "" : msg));
+        i(context, "ID: " + String.valueOf(eventID), System.currentTimeMillis() + ":"
+                + (UNIQUE_ID == null ? "" : UNIQUE_ID) + ":" + (msg == null ? "" : msg));
     }
 
     public static String UNIQUE_ID = null;

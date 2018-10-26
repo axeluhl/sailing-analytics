@@ -9,7 +9,7 @@ import android.content.Context;
 import android.util.Log;
 
 public class LoggingExceptionHandler implements UncaughtExceptionHandler {
-    
+
     private static final String TAG = LoggingExceptionHandler.class.getName();
 
     private UncaughtExceptionHandler defaultHandler;

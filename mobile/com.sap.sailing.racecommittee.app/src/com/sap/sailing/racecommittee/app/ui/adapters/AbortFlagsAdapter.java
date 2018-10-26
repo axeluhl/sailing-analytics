@@ -58,11 +58,13 @@ public class AbortFlagsAdapter extends BaseFlagsAdapter {
             secondFlag = "_" + otherFlag.name().toLowerCase(Locale.US);
         }
 
-        flagNameId = mContext.getResources().getIdentifier("string/flag_" + primaryFlag + secondFlag, null, mContext.getPackageName());
+        flagNameId = mContext.getResources().getIdentifier("string/flag_" + primaryFlag + secondFlag, null,
+                mContext.getPackageName());
         if (flagNameId != 0) {
             flagName = mContext.getString(flagNameId);
         }
-        flagDescId = mContext.getResources().getIdentifier("string/flag_" + primaryFlag + secondFlag + "_desc", null, mContext.getPackageName());
+        flagDescId = mContext.getResources().getIdentifier("string/flag_" + primaryFlag + secondFlag + "_desc", null,
+                mContext.getPackageName());
         if (flagDescId != 0) {
             flagDesc = mContext.getString(flagDescId);
         }
@@ -99,7 +101,8 @@ public class AbortFlagsAdapter extends BaseFlagsAdapter {
         if (flagImage != null) {
             Drawable flagDrawable;
             flagImage.setVisibility(View.INVISIBLE);
-            int flagResId = mContext.getResources().getIdentifier(item.file_name, "drawable", mContext.getPackageName());
+            int flagResId = mContext.getResources().getIdentifier(item.file_name, "drawable",
+                    mContext.getPackageName());
             if (flagResId != 0) {
                 String[] flag = item.file_name.split("_");
                 String flagName = flag[1];

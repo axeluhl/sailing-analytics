@@ -54,8 +54,8 @@ public class AppPreferences extends BaseAppPreferences {
     }
 
     public String getServerLeaderboardPath(String leaderboardName) {
-        return context.getString(R.string.preference_server_leaderboard_path).replace(
-                "{leaderboard_name}", leaderboardName);
+        return context.getString(R.string.preference_server_leaderboard_path).replace("{leaderboard_name}",
+                leaderboardName);
     }
 
     public String getServerCompetitorPath(String competitorId) throws UnsupportedEncodingException {
@@ -63,9 +63,8 @@ public class AppPreferences extends BaseAppPreferences {
                 URLEncoder.encode(competitorId, "UTF-8").replaceAll("\\+", "%20"));
     }
 
-    public String getServerCompetitorTeamPath(String competitorId){
-        return context.getString(R.string.preference_server_team_info_path).replace("{competitor_id}",
-            competitorId);
+    public String getServerCompetitorTeamPath(String competitorId) {
+        return context.getString(R.string.preference_server_team_info_path).replace("{competitor_id}", competitorId);
     }
 
     public String getServerMarkPath(String leaderboardName, String markId) {
@@ -122,8 +121,7 @@ public class AppPreferences extends BaseAppPreferences {
     }
 
     public void setTrackingTimerStarted(long milliseconds) {
-        preferences.edit().putLong(context.getString(R.string.preference_tracking_timer_started), milliseconds)
-                .apply();
+        preferences.edit().putLong(context.getString(R.string.preference_tracking_timer_started), milliseconds).apply();
     }
 
     public long getTrackingTimerStarted() {
@@ -149,7 +147,9 @@ public class AppPreferences extends BaseAppPreferences {
     }
 
     public void setMessageResendIntervalInMillis(int intervalInMillis) {
-        preferences.edit().putInt(context.getString(R.string.preference_messageResendIntervalMillis_key), intervalInMillis).apply();
+        preferences.edit()
+                .putInt(context.getString(R.string.preference_messageResendIntervalMillis_key), intervalInMillis)
+                .apply();
     }
 
     /**

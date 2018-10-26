@@ -93,7 +93,7 @@ public class CameraSourcePreview extends ViewGroup {
             try {
                 startIfReady();
             } catch (SecurityException se) {
-                ExLog.e(getContext(), TAG,"Do not have permission to start the camera" + se);
+                ExLog.e(getContext(), TAG, "Do not have permission to start the camera" + se);
             } catch (IOException e) {
                 ExLog.e(getContext(), TAG, "Could not start camera source." + e);
             }
@@ -124,7 +124,7 @@ public class CameraSourcePreview extends ViewGroup {
         // Swap width and height sizes when in portrait, since it will be rotated 90 degrees
         if (isPortraitMode()) {
             int tmp = width;
-            //noinspection SuspiciousNameCombination
+            // noinspection SuspiciousNameCombination
             width = height;
             height = tmp;
         }
@@ -134,12 +134,12 @@ public class CameraSourcePreview extends ViewGroup {
 
         // Computes height and width for potentially doing fit width.
         int childWidth = layoutWidth;
-        int childHeight = (int)(((float) layoutWidth / (float) width) * height);
+        int childHeight = (int) (((float) layoutWidth / (float) width) * height);
 
         // If height is too tall using fit width, does fit height instead.
         if (childHeight < layoutHeight) {
             childHeight = layoutHeight;
-            childWidth = (int)(((float) layoutHeight / (float) height) * width);
+            childWidth = (int) (((float) layoutHeight / (float) height) * width);
         }
 
         for (int i = 0; i < getChildCount(); ++i) {
@@ -149,7 +149,7 @@ public class CameraSourcePreview extends ViewGroup {
         try {
             startIfReady();
         } catch (SecurityException se) {
-            ExLog.e(getContext(), TAG,"Do not have permission to start the camera" + se);
+            ExLog.e(getContext(), TAG, "Do not have permission to start the camera" + se);
         } catch (IOException e) {
             ExLog.e(getContext(), TAG, "Could not start camera source." + e);
         }

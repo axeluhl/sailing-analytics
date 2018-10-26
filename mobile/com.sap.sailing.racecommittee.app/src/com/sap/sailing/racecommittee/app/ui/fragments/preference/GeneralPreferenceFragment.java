@@ -45,7 +45,8 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
 
         bindPreferenceSummaryToSet(findPreference(R.string.preference_course_areas_key));
         bindPreferenceSummaryToValue(findPreference(R.string.preference_mail_key));
-        bindPreferenceToListEntry(findPreference(R.string.preference_theme_key), getString(R.string.preference_theme_default));
+        bindPreferenceToListEntry(findPreference(R.string.preference_theme_key),
+                getString(R.string.preference_theme_default));
         addOnPreferenceChangeListener(findPreference(R.string.preference_theme_key), new OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -58,20 +59,22 @@ public class GeneralPreferenceFragment extends BasePreferenceFragment {
                 return true;
             }
         });
-        addOnPreferenceChangeListener(findPreference(R.string.preference_non_public_events_key), new OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                AppPreferences.on(getActivity()).setNeedConfigRefresh(true);
-                if (DataManager.create(getActivity()).getDataStore().getCourseUUID() != null) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
-                    builder.setTitle(getString(R.string.non_public_changed_title));
-                    builder.setMessage(getString(R.string.app_refresh_message));
-                    builder.setPositiveButton(android.R.string.ok, null);
-                    builder.show();
-                }
-                return true;
-            }
-        });
+        addOnPreferenceChangeListener(findPreference(R.string.preference_non_public_events_key),
+                new OnPreferenceChangeListener() {
+                    @Override
+                    public boolean onPreferenceChange(Preference preference, Object newValue) {
+                        AppPreferences.on(getActivity()).setNeedConfigRefresh(true);
+                        if (DataManager.create(getActivity()).getDataStore().getCourseUUID() != null) {
+                            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(),
+                                    R.style.AppTheme_AlertDialog);
+                            builder.setTitle(getString(R.string.non_public_changed_title));
+                            builder.setMessage(getString(R.string.app_refresh_message));
+                            builder.setPositiveButton(android.R.string.ok, null);
+                            builder.show();
+                        }
+                        return true;
+                    }
+                });
     }
 
     private void setupPolling() {

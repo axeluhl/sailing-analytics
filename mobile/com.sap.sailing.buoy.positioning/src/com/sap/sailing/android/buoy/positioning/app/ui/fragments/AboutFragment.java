@@ -1,10 +1,10 @@
 package com.sap.sailing.android.buoy.positioning.app.ui.fragments;
 
 import com.sap.sailing.android.buoy.positioning.app.R;
+import com.sap.sailing.android.shared.ui.fragments.BaseFragment;
 import com.sap.sailing.android.shared.util.AppUtils;
 import com.sap.sailing.android.shared.util.EulaHelper;
 import com.sap.sailing.android.shared.util.LicenseHelper;
-import com.sap.sailing.android.shared.ui.fragments.BaseFragment;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -26,7 +26,8 @@ public class AboutFragment extends BaseFragment {
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_about, container, false);
         view.findViewById(R.id.license_button).setOnClickListener(new View.OnClickListener() {
             @Override

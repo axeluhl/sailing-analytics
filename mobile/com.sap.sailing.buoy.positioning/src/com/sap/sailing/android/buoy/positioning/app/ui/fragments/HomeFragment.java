@@ -73,11 +73,12 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
 
     private void checkinWithApiAndStartRegattaActivity(CheckinData checkinData) {
         try {
-            if (!DatabaseHelper.getInstance().markLeaderboardCombinationAvailable(getActivity(), checkinData.checkinDigest)) {
+            if (!DatabaseHelper.getInstance().markLeaderboardCombinationAvailable(getActivity(),
+                    checkinData.checkinDigest)) {
                 DatabaseHelper.getInstance().deleteRegattaFromDatabase(getActivity(), checkinData.checkinDigest);
             }
-            DatabaseHelper.getInstance().storeCheckinRow(getActivity(), checkinData.marks,
-                    checkinData.getLeaderboard(), checkinData.getCheckinUrl(), checkinData.pings);
+            DatabaseHelper.getInstance().storeCheckinRow(getActivity(), checkinData.marks, checkinData.getLeaderboard(),
+                    checkinData.getCheckinUrl(), checkinData.pings);
             adapter.notifyDataSetChanged();
         } catch (DatabaseHelper.GeneralDatabaseHelperException e) {
             ExLog.e(getActivity(), TAG, "Batch insert failed: " + e.getMessage());
@@ -90,7 +91,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
         }
         startRegatta(checkinData.leaderboardDisplayName, checkinData.checkinDigest);
     }
-    
+
     @Override
     public void handleScannedOrUrlMatchedUri(Uri uri) {
         @SuppressWarnings("unchecked")
@@ -159,8 +160,10 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
 
             // -1, because there's a header row
             Cursor cursor = (Cursor) adapter.getItem(position - 1);
-            String checkinDigest = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Leaderboard.LEADERBOARD_CHECKIN_DIGEST));
-            String leaderboardName = cursor.getString(cursor.getColumnIndex(AnalyticsContract.Leaderboard.LEADERBOARD_DISPLAY_NAME));
+            String checkinDigest = cursor
+                    .getString(cursor.getColumnIndex(AnalyticsContract.Leaderboard.LEADERBOARD_CHECKIN_DIGEST));
+            String leaderboardName = cursor
+                    .getString(cursor.getColumnIndex(AnalyticsContract.Leaderboard.LEADERBOARD_DISPLAY_NAME));
             startRegatta(leaderboardName, checkinDigest);
         }
     }

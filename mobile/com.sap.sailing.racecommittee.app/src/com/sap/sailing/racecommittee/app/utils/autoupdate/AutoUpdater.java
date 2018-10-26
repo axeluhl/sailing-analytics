@@ -87,12 +87,9 @@ public class AutoUpdater {
             }
         };
 
-        builder.setTitle(R.string.auto_update_completed)
-            .setMessage(R.string.auto_update_completed_text)
-            .setPositiveButton(R.string.auto_update_completed_take_me_there, okListener)
-            .setNegativeButton(android.R.string.cancel, cancelListener)
-            .create()
-            .show();
+        builder.setTitle(R.string.auto_update_completed).setMessage(R.string.auto_update_completed_text)
+                .setPositiveButton(R.string.auto_update_completed_take_me_there, okListener)
+                .setNegativeButton(android.R.string.cancel, cancelListener).create().show();
     }
 
     private void setWasUpdated(SharedPreferences updatedPreferences, boolean wasUpdated) {
@@ -105,8 +102,7 @@ public class AutoUpdater {
 
     private void clearUpdateCache() {
         for (File file : FileHandlerUtils.getExternalApplicationFolder(context).listFiles()) {
-            if (file.getName().startsWith("auto-update-") &&
-                    file.getName().endsWith(".apk")) {
+            if (file.getName().startsWith("auto-update-") && file.getName().endsWith(".apk")) {
                 boolean result = file.delete();
                 if (result) {
                     ExLog.i(context, TAG, String.format("Deleted old update file %s", file.getName()));

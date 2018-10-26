@@ -16,9 +16,9 @@ import com.sap.sailing.android.shared.data.LeaderboardInfo;
 import com.sap.sailing.android.shared.logging.ExLog;
 import com.sap.sailing.android.shared.ui.customviews.GPSQuality;
 import com.sap.sailing.android.shared.ui.customviews.SignalQualityIndicatorView;
+import com.sap.sailing.android.shared.ui.fragments.BaseFragment;
 import com.sap.sailing.android.shared.util.LocationHelper;
 import com.sap.sailing.android.shared.util.ViewHelper;
-import com.sap.sailing.android.shared.ui.fragments.BaseFragment;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
@@ -41,8 +41,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class BuoyFragment extends BaseFragment
-        implements android.location.LocationListener, OnMapReadyCallback {
+public class BuoyFragment extends BaseFragment implements android.location.LocationListener, OnMapReadyCallback {
 
     private static final String TAG = BuoyFragment.class.getName();
 
@@ -66,7 +65,6 @@ public class BuoyFragment extends BaseFragment
 
     protected LocationManager locationManager;
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
@@ -86,16 +84,15 @@ public class BuoyFragment extends BaseFragment
 
         positioningActivity = (PositioningActivity) getActivity();
 
-        SupportMapFragment mapFragment = (SupportMapFragment) this.getChildFragmentManager()
-            .findFragmentById(R.id.map);
+        SupportMapFragment mapFragment = (SupportMapFragment) this.getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
         locationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
             /**
-             * prior to JellyBean, the minimum time for location updates parameter MIGHT be ignored,
-             * so providing a minimum distance value greater than 0 is recommended
+             * prior to JellyBean, the minimum time for location updates parameter MIGHT be ignored, so providing a
+             * minimum distance value greater than 0 is recommended
              */
             minLocationUpdateDistanceInMeters = .5f;
         }
@@ -108,8 +105,7 @@ public class BuoyFragment extends BaseFragment
         super.onResume();
         disablePositionButton();
         positioningActivity = (PositioningActivity) getActivity();
-        SupportMapFragment mapFragment = (SupportMapFragment) this.getChildFragmentManager()
-            .findFragmentById(R.id.map);
+        SupportMapFragment mapFragment = (SupportMapFragment) this.getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         initialLocationUpdate = true;
         MarkInfo mark = positioningActivity.getMarkInfo();
@@ -129,7 +125,8 @@ public class BuoyFragment extends BaseFragment
         mMap.getUiSettings().setZoomControlsEnabled(true);
         // Enabling MyLocation Layer of Google Map
         if (!hasPermissions()) {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_PERMISSIONS_REQUEST_CODE);
+            requestPermissions(new String[] { Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION }, REQUEST_PERMISSIONS_REQUEST_CODE);
             return;
         }
         mMap.setMyLocationEnabled(true);
@@ -149,7 +146,8 @@ public class BuoyFragment extends BaseFragment
 
     private void disablePositionButton() {
         setPositionButton.setEnabled(false);
-        int resId = LocationHelper.isGPSEnabled(getActivity()) ? R.string.set_position_no_gps_yet : R.string.set_position_disabled_gps;
+        int resId = LocationHelper.isGPSEnabled(getActivity()) ? R.string.set_position_no_gps_yet
+                : R.string.set_position_disabled_gps;
         setPositionButton.setText(resId);
     }
 
@@ -165,10 +163,12 @@ public class BuoyFragment extends BaseFragment
     public void onStart() {
         super.onStart();
         if (!hasPermissions()) {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_PERMISSIONS_REQUEST_CODE);
+            requestPermissions(new String[] { Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION }, REQUEST_PERMISSIONS_REQUEST_CODE);
             return;
         }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_MIN_TIME, minLocationUpdateDistanceInMeters, this);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_MIN_TIME,
+                minLocationUpdateDistanceInMeters, this);
         lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
     }
 
@@ -176,7 +176,7 @@ public class BuoyFragment extends BaseFragment
     public void onPause() {
         super.onPause();
         locationManager.removeUpdates(this);
-        
+
         mBroadcastManager.unregisterReceiver(mReceiver);
     }
 
@@ -191,7 +191,8 @@ public class BuoyFragment extends BaseFragment
                 double savedLongitude = Double.parseDouble(markPing.getLongitude());
                 savedPosition = new LatLng(savedLatitude, savedLongitude);
                 float[] results = new float[1];
-                Location.distanceBetween(location.getLatitude(), location.getLongitude(), savedLatitude, savedLongitude, results);
+                Location.distanceBetween(location.getLatitude(), location.getLongitude(), savedLatitude, savedLongitude,
+                        results);
                 float distance = results[0];
                 distanceText = getString(R.string.buoy_detail_distance, distance);
             }
@@ -204,10 +205,9 @@ public class BuoyFragment extends BaseFragment
         distanceTextView.setText(distanceText);
     }
 
-    
     /**
      * Methods implemented through LocationManager
-     */ 
+     */
     @Override
     public void onLocationChanged(Location location) {
         lastKnownLocation = location;
@@ -218,26 +218,26 @@ public class BuoyFragment extends BaseFragment
         setUpTextUI(lastKnownLocation);
         updateMap();
     }
-    
+
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-      //no-op
+        // no-op
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-        //provider (GPS) disabled by the user while tracking
+        // provider (GPS) disabled by the user while tracking
         disablePositionButton();
         setUpTextUI(null);
         signalQualityIndicatorView.setSignalQuality(GPSQuality.noSignal);
-        
+
         LocationHelper.showNoGPSError(getActivity(), getString(R.string.enable_gps));
     }
 
     @Override
     public void onProviderEnabled(String provider) {
-        //provider (GPS) (re)enabled by the user while tracking
-        //call disablePositionButton() so that its text says "searching for GPS" again
+        // provider (GPS) (re)enabled by the user while tracking
+        // call disablePositionButton() so that its text says "searching for GPS" again
         disablePositionButton();
     }
 
@@ -278,8 +278,10 @@ public class BuoyFragment extends BaseFragment
     }
 
     private boolean hasPermissions() {
-        boolean fine = ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-        boolean coarse = ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        boolean fine = ActivityCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        boolean coarse = ActivityCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
         return fine && coarse;
     }
 
@@ -293,7 +295,8 @@ public class BuoyFragment extends BaseFragment
                     MarkInfo mark = positioningActivity.getMarkInfo();
                     LeaderboardInfo leaderBoard = positioningActivity.getLeaderBoard();
                     helper.storePingInDatabase(getActivity(), lastKnownLocation, mark);
-                    helper.sendPingToServer(getActivity(), lastKnownLocation, leaderBoard, mark, PingServerReplyCallback.class);
+                    helper.sendPingToServer(getActivity(), lastKnownLocation, leaderBoard, mark,
+                            PingServerReplyCallback.class);
                     ((PositioningActivity) getActivity()).updatePing();
                     savedPosition = new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude());
                     pingListener.updatePing();

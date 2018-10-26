@@ -46,12 +46,16 @@ public class PositionListFragment extends LoggableListFragment {
 
         preferences = AppPreferences.on(getActivity());
 
-        values.add(new LoginTypeItem(1, getString(R.string.login_type_officer_on_vessel),  AppConstants.AUTHOR_TYPE_OFFICER_VESSEL, LoginType.OFFICER));
-        values.add(new LoginTypeItem(2, getString(R.string.login_type_shore_control), AppConstants.AUTHOR_TYPE_SHORE_CONTROL, LoginType.OFFICER));
-// TODO define configuration to activate super user
-//        values.add(new LoginTypeItem(0, getString(R.string.login_type_superuser), AppConstants.AUTHOR_TYPE_SUPERUSER, LoginType.OFFICER));
+        values.add(new LoginTypeItem(1, getString(R.string.login_type_officer_on_vessel),
+                AppConstants.AUTHOR_TYPE_OFFICER_VESSEL, LoginType.OFFICER));
+        values.add(new LoginTypeItem(2, getString(R.string.login_type_shore_control),
+                AppConstants.AUTHOR_TYPE_SHORE_CONTROL, LoginType.OFFICER));
+        // TODO define configuration to activate super user
+        // values.add(new LoginTypeItem(0, getString(R.string.login_type_superuser), AppConstants.AUTHOR_TYPE_SUPERUSER,
+        // LoginType.OFFICER));
         if (preferences.isDemoAllowed()) {
-            values.add(new LoginTypeItem(3, getString(R.string.login_type_viewer), AppConstants.AUTHOR_TYPE_VIEWER, LoginType.VIEWER));
+            values.add(new LoginTypeItem(3, getString(R.string.login_type_viewer), AppConstants.AUTHOR_TYPE_VIEWER,
+                    LoginType.VIEWER));
         }
 
         final List<CheckedItem> items = new ArrayList<>();
@@ -82,7 +86,8 @@ public class PositionListFragment extends LoggableListFragment {
         author = new LogEventAuthorImpl(item.mName, item.mPrio);
         preferences.setSendingActive(item.mType == LoginType.OFFICER);
         preferences.setAuthor(author);
-        ExLog.i(getActivity(), PositionListFragment.class.getName(), "Logging in as: " + selectedLoginType + "->" + author);
+        ExLog.i(getActivity(), PositionListFragment.class.getName(),
+                "Logging in as: " + selectedLoginType + "->" + author);
         if (host != null) {
             host.onPositionSelected(selectedLoginType);
         }

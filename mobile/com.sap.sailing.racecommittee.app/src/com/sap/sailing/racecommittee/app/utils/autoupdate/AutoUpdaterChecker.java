@@ -44,8 +44,8 @@ public class AutoUpdaterChecker {
         this.dialog = new ProgressDialog(context);
         dialog.setTitle(context.getString(R.string.auto_update));
         dialog.setCancelable(true);
-        dialog.setButton(DialogInterface.BUTTON_POSITIVE,
-                context.getString(android.R.string.cancel), new DialogInterface.OnClickListener() {
+        dialog.setButton(DialogInterface.BUTTON_POSITIVE, context.getString(android.R.string.cancel),
+                new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface arg0, int arg1) {
                         dialog.cancel();
@@ -76,7 +76,8 @@ public class AutoUpdaterChecker {
 
             try {
                 URL versionUrl = composeVersionUrl();
-                ExLog.i(context, TAG, context.getString(R.string.auto_update_downloading_version, versionUrl.toString()));
+                ExLog.i(context, TAG,
+                        context.getString(R.string.auto_update_downloading_version, versionUrl.toString()));
 
                 final AutoUpdaterVersionDownloader downloader = new AutoUpdaterVersionDownloader(this, context);
                 downloader.execute(versionUrl);
@@ -96,7 +97,8 @@ public class AutoUpdaterChecker {
         public void updateToVersion(int serverVersion, final String apkFileName) {
             int currentVersion = AppUtils.with(context).getPackageInfo().versionCode;
             boolean needsUpdate = currentVersion != serverVersion;
-            ExLog.i(context, TAG, String.format("Server version is %d. Local version is %d.", serverVersion, currentVersion));
+            ExLog.i(context, TAG,
+                    String.format("Server version is %d. Local version is %d.", serverVersion, currentVersion));
 
             DialogInterface.OnClickListener dismissListener = new OnClickListener() {
                 @Override
@@ -119,17 +121,22 @@ public class AutoUpdaterChecker {
                 }
             };
 
-            String messageFormat = needsUpdate ? context.getString(R.string.auto_update_click_install) : context.getString(R.string.auto_update_force_install);
+            String messageFormat = needsUpdate ? context.getString(R.string.auto_update_click_install)
+                    : context.getString(R.string.auto_update_force_install);
             if (!AppUtils.with(context).isSideLoaded()) {
-                messageFormat += "\n\n" + context.getString(R.string.auto_update_with_store, AppUtils.with(context).getStoreName());
+                messageFormat += "\n\n"
+                        + context.getString(R.string.auto_update_with_store, AppUtils.with(context).getStoreName());
             }
 
             AlertDialog.Builder updateDialog = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
-            updateDialog
-                    .setTitle(R.string.auto_update)
-                    .setMessage(String.format(messageFormat, serverVersion))
-                    .setPositiveButton(context.getString(needsUpdate ? R.string.auto_update_install : android.R.string.ok), needsUpdate ? updateListener : dismissListener)
-                    .setNegativeButton(context.getString(needsUpdate ? android.R.string.cancel : R.string.auto_update_install_anyway), needsUpdate ? dismissListener : updateListener)
+            updateDialog.setTitle(R.string.auto_update).setMessage(String.format(messageFormat, serverVersion))
+                    .setPositiveButton(
+                            context.getString(needsUpdate ? R.string.auto_update_install : android.R.string.ok),
+                            needsUpdate ? updateListener : dismissListener)
+                    .setNegativeButton(
+                            context.getString(
+                                    needsUpdate ? android.R.string.cancel : R.string.auto_update_install_anyway),
+                            needsUpdate ? dismissListener : updateListener)
                     .setOnCancelListener(cancelListener);
             if (needsUpdate || forceUpdate) {
                 updateDialog.show();
@@ -148,7 +155,8 @@ public class AutoUpdaterChecker {
                 final AutoUpdaterApkDownloader downloader = new AutoUpdaterApkDownloader(this, target, context);
 
                 URL downloadUrl = composeDownloadUrl(apkFileName);
-                ExLog.i(context, TAG, String.format("Download from %s to file %s.", downloadUrl.toString(), target.getAbsolutePath()));
+                ExLog.i(context, TAG, String.format("Download from %s to file %s.", downloadUrl.toString(),
+                        target.getAbsolutePath()));
                 downloader.execute(downloadUrl);
                 dialog.setOnCancelListener(new OnCancelListener() {
                     @Override
@@ -183,22 +191,19 @@ public class AutoUpdaterChecker {
         public void onError() {
             dialog.dismiss();
             AlertDialog.Builder errorDialog = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog);
-            errorDialog
-                    .setTitle(R.string.auto_update)
-                    .setMessage(R.string.auto_update_error)
-                    .setPositiveButton(android.R.string.ok, null)
-                    .show();
+            errorDialog.setTitle(R.string.auto_update).setMessage(R.string.auto_update_error)
+                    .setPositiveButton(android.R.string.ok, null).show();
         }
 
         protected URL composeVersionUrl() throws MalformedURLException {
             String packageName = context.getPackageName();
-            return new URL(serverUrl.getProtocol(), serverUrl.getHost(), serverUrl.getPort(), serverUrl.getPath()
-                    + "/apps/" + packageName + ".version");
+            return new URL(serverUrl.getProtocol(), serverUrl.getHost(), serverUrl.getPort(),
+                    serverUrl.getPath() + "/apps/" + packageName + ".version");
         }
 
         protected URL composeDownloadUrl(String apkFileName) throws MalformedURLException {
-            return new URL(serverUrl.getProtocol(), serverUrl.getHost(), serverUrl.getPort(), serverUrl.getPath()
-                    + "/apps/" + apkFileName);
+            return new URL(serverUrl.getProtocol(), serverUrl.getHost(), serverUrl.getPort(),
+                    serverUrl.getPath() + "/apps/" + apkFileName);
         }
     }
 }

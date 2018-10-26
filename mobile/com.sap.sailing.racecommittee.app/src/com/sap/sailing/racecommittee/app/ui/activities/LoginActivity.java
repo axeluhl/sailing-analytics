@@ -69,8 +69,8 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
 import android.widget.Toast;
 
-public class LoginActivity extends BaseActivity
-        implements EventSelectedListenerHost, CourseAreaSelectedListenerHost, PositionSelectedListenerHost, DialogListenerHost.DialogResultListener {
+public class LoginActivity extends BaseActivity implements EventSelectedListenerHost, CourseAreaSelectedListenerHost,
+        PositionSelectedListenerHost, DialogListenerHost.DialogResultListener {
 
     private final static String CourseAreaListFragmentTag = "CourseAreaListFragmentTag";
     private final static String AreaPositionListFragmentTag = "AreaPositionListFragmentTag";
@@ -101,18 +101,18 @@ public class LoginActivity extends BaseActivity
 
             final Serializable eventId = selectEvent(event);
 
-            //FIXME: its weird to have this button setup in here
+            // FIXME: its weird to have this button setup in here
             setupSignInButton();
 
-            //prepare views after the event selection
+            // prepare views after the event selection
 
-            //close all currently open list views
+            // close all currently open list views
             if (loginListViews != null) {
                 loginListViews.closeAll();
             }
             addCourseAreaListFragment(eventId);
 
-            //send intent to open the course area selection list
+            // send intent to open the course area selection list
             Intent intent = new Intent(AppConstants.INTENT_ACTION_TOGGLE);
             intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_AREA);
             BroadcastManager.getInstance(LoginActivity.this).addIntent(intent);
@@ -133,7 +133,7 @@ public class LoginActivity extends BaseActivity
                 loginListViews.closeAll();
             }
             addAreaPositionListFragment();
-            //send intent to open the position selection list
+            // send intent to open the position selection list
             Intent intent = new Intent(AppConstants.INTENT_ACTION_TOGGLE);
             intent.putExtra(AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_POSITION);
             BroadcastManager.getInstance(LoginActivity.this).addIntent(intent);
@@ -150,7 +150,8 @@ public class LoginActivity extends BaseActivity
             sign_in.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ExLog.i(LoginActivity.this, TAG, "Logged in: " + eventName + " - " + courseAreaName + " - " + positionName);
+                    ExLog.i(LoginActivity.this, TAG,
+                            "Logged in: " + eventName + " - " + courseAreaName + " - " + positionName);
                     login();
                 }
             });
@@ -175,7 +176,7 @@ public class LoginActivity extends BaseActivity
     private Serializable selectEvent(EventBase event) {
         final Serializable eventId = event.getId();
         eventName = event.getName();
-        //TODO: explicitly set the header text of the fragment to this name
+        // TODO: explicitly set the header text of the fragment to this name
         selectEvent(eventId);
         loginListViews.getEventContainer().setHeaderText(eventName);
         return eventId;
@@ -347,13 +348,12 @@ public class LoginActivity extends BaseActivity
     @Override
     public void onPositionSelected(LoginType type) {
 
-        //FIXME: this is some kind of exception handling
-        /*if (mSelectedCourseAreaUUID == null) {
-            String toastText = getString(R.string.selected_course_area_lost);
-            Toast.makeText(LoginActivity.this, toastText, Toast.LENGTH_LONG).show();
-            ExLog.e(LoginActivity.this, TAG, "Course area reference was not set - cannot start racing activity.");
-            return;
-        }*/
+        // FIXME: this is some kind of exception handling
+        /*
+         * if (mSelectedCourseAreaUUID == null) { String toastText = getString(R.string.selected_course_area_lost);
+         * Toast.makeText(LoginActivity.this, toastText, Toast.LENGTH_LONG).show(); ExLog.e(LoginActivity.this, TAG,
+         * "Course area reference was not set - cannot start racing activity."); return; }
+         */
 
         selectPosition(type);
         // prepare views after position selected
@@ -403,38 +403,43 @@ public class LoginActivity extends BaseActivity
     private void setupDataManager() {
         showProgressSpinner();
 
-        DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(AppPreferences.on(getApplicationContext())
-                .getDeviceIdentifier());
+        DeviceConfigurationIdentifier identifier = new DeviceConfigurationIdentifierImpl(
+                AppPreferences.on(getApplicationContext()).getDeviceIdentifier());
 
-        LoaderCallbacks<?> configurationLoader = dataManager.createConfigurationLoader(identifier, new LoadClient<DeviceConfiguration>() {
+        LoaderCallbacks<?> configurationLoader = dataManager.createConfigurationLoader(identifier,
+                new LoadClient<DeviceConfiguration>() {
 
-            @Override
-            public void onLoadFailed(Exception reason) {
-                dismissProgressSpinner();
+                    @Override
+                    public void onLoadFailed(Exception reason) {
+                        dismissProgressSpinner();
 
-                preferences.setDefaultProtestTimeDurationInMinutesCustomEditable(true);
-                if (reason instanceof FileNotFoundException) {
-                    Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_not_found), Toast.LENGTH_LONG).show();
-                    ExLog.w(LoginActivity.this, TAG, String.format("There seems to be no configuration for this device: %s", reason.toString()));
-                } else {
-                    Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_failed), Toast.LENGTH_LONG).show();
-                    ExLog.ex(LoginActivity.this, TAG, reason);
-                }
+                        preferences.setDefaultProtestTimeDurationInMinutesCustomEditable(true);
+                        if (reason instanceof FileNotFoundException) {
+                            Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_not_found),
+                                    Toast.LENGTH_LONG).show();
+                            ExLog.w(LoginActivity.this, TAG, String.format(
+                                    "There seems to be no configuration for this device: %s", reason.toString()));
+                        } else {
+                            Toast.makeText(getApplicationContext(), getString(R.string.loading_configuration_failed),
+                                    Toast.LENGTH_LONG).show();
+                            ExLog.ex(LoginActivity.this, TAG, reason);
+                        }
 
-                slideUpBackdropDelayed();
-            }
+                        slideUpBackdropDelayed();
+                    }
 
-            @Override
-            public void onLoadSucceeded(DeviceConfiguration configuration, boolean isCached) {
-                dismissProgressSpinner();
+                    @Override
+                    public void onLoadSucceeded(DeviceConfiguration configuration, boolean isCached) {
+                        dismissProgressSpinner();
 
-                // this is our 'global' configuration, let's store it in app preferences
-                PreferencesDeviceConfigurationLoader.wrap(configuration, preferences).store();
+                        // this is our 'global' configuration, let's store it in app preferences
+                        PreferencesDeviceConfigurationLoader.wrap(configuration, preferences).store();
 
-                Toast.makeText(LoginActivity.this, getString(R.string.loading_configuration_succeded), Toast.LENGTH_LONG).show();
-                slideUpBackdropDelayed();
-            }
-        });
+                        Toast.makeText(LoginActivity.this, getString(R.string.loading_configuration_succeded),
+                                Toast.LENGTH_LONG).show();
+                        slideUpBackdropDelayed();
+                    }
+                });
 
         if (!preferences.isOfflineMode()) {
             // reload the configuration if needed...
@@ -491,7 +496,8 @@ public class LoginActivity extends BaseActivity
         int upperRoom = backdrop.getHeight() + (backdrop.getHeight() / 5);
         View subTitle = ViewHelper.get(backdrop, R.id.backdrop_login);
         if (subTitle != null) {
-            upperRoom = backdrop.getHeight() - subTitle.getHeight() - getResources().getDimensionPixelSize(R.dimen.default_padding_half);
+            upperRoom = backdrop.getHeight() - subTitle.getHeight()
+                    - getResources().getDimensionPixelSize(R.dimen.default_padding_half);
         }
         ObjectAnimator frameAnimation = ObjectAnimator.ofFloat(backdrop, "y", 0, -upperRoom);
         ValueAnimator heightAnimation = ValueAnimator.ofInt(0, upperRoom);
@@ -530,7 +536,8 @@ public class LoginActivity extends BaseActivity
     /**
      * Reset the data (reload from server)
      *
-     * @param force Reload data, even if the backdrop is moved up
+     * @param force
+     *            Reload data, even if the backdrop is moved up
      */
     private void resetData(boolean force) {
         if (!force && backdrop.getY() != 0) {
@@ -577,7 +584,8 @@ public class LoginActivity extends BaseActivity
         @Override
         public void onAnimationEnd(Animator animation) {
             if (submit != null) {
-                submit.animate().alpha(1f).setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime));
+                submit.animate().alpha(1f)
+                        .setDuration(getResources().getInteger(android.R.integer.config_shortAnimTime));
             }
         }
 

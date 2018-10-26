@@ -88,33 +88,33 @@ public class RegattaFragment extends BaseFragment implements LoaderCallbacks<Cur
     public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
         String checkinDigest = ((RegattaActivity) getActivity()).getCheckinDigest();
         switch (loaderId) {
-            case MARKER_LOADER:
-                return new CursorLoader(getActivity(), AnalyticsContract.MarksLeaderBoardsJoined.CONTENT_URI, null,
+        case MARKER_LOADER:
+            return new CursorLoader(getActivity(), AnalyticsContract.MarksLeaderBoardsJoined.CONTENT_URI, null,
                     AnalyticsContract.Mark.MARK_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
-            default:
-                return null;
+        default:
+            return null;
         }
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         switch (loader.getId()) {
-            case MARKER_LOADER:
-                adapter.changeCursor(cursor);
-                break;
-            default:
-                break;
+        case MARKER_LOADER:
+            adapter.changeCursor(cursor);
+            break;
+        default:
+            break;
         }
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         switch (loader.getId()) {
-            case MARKER_LOADER:
-                adapter.changeCursor(null);
-                break;
-            default:
-                break;
+        case MARKER_LOADER:
+            adapter.changeCursor(null);
+            break;
+        default:
+            break;
         }
     }
 

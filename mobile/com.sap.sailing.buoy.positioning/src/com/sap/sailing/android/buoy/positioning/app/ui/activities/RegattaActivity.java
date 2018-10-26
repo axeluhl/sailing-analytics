@@ -62,7 +62,8 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData> {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
-            ColorDrawable backgroundDrawable = new ColorDrawable(ContextCompat.getColor(this, R.color.toolbar_background));
+            ColorDrawable backgroundDrawable = new ColorDrawable(
+                    ContextCompat.getColor(this, R.color.toolbar_background));
             getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
             toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
             getSupportActionBar().setTitle(leaderboardName);
@@ -118,20 +119,20 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData> {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.refresh:
-                ExLog.i(this, TAG, "Clicked REFRESH.");
-                CheckinManager manager = new CheckinManager(checkinUrl, this);
-                manager.callServerAndGenerateCheckinData();
-                return true;
-            case R.id.check_out:
-                displayCheckoutConfirmationDialog();
-                return true;
-            case R.id.about:
-                AboutHelper.showInfoActivity(this);
-                return true;
-            case R.id.settings:
-                startActivity(new Intent(this, SettingActivity.class));
-                return true;
+        case R.id.refresh:
+            ExLog.i(this, TAG, "Clicked REFRESH.");
+            CheckinManager manager = new CheckinManager(checkinUrl, this);
+            manager.callServerAndGenerateCheckinData();
+            return true;
+        case R.id.check_out:
+            displayCheckoutConfirmationDialog();
+            return true;
+        case R.id.about:
+            AboutHelper.showInfoActivity(this);
+            return true;
+        case R.id.settings:
+            startActivity(new Intent(this, SettingActivity.class));
+            return true;
         default:
             return super.onOptionsItemSelected(item);
         }
@@ -153,7 +154,7 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData> {
                 displayDatabaseError();
                 return;
             }
-    
+
             if (BuildConfig.DEBUG) {
                 ExLog.i(this, TAG, "Batch-insert of checkinData completed.");
             }
@@ -176,7 +177,7 @@ public class RegattaActivity extends AbstractRegattaActivity<CheckinData> {
         builder.show();
     }
 
-    private void checkOut(){
+    private void checkOut() {
         DatabaseHelper.getInstance().deleteRegattaFromDatabase(this, checkinDigest);
         finish();
     }

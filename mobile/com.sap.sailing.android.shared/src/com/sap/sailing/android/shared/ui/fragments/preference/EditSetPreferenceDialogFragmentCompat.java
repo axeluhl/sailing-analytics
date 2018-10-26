@@ -51,12 +51,14 @@ public class EditSetPreferenceDialogFragmentCompat extends PreferenceDialogFragm
         }
 
         // setup list view
-        final ArrayRemoveAdapter<String> adapter = new ArrayRemoveAdapter<String>(view.getContext(), new ArrayList<String>(currentValue));
+        final ArrayRemoveAdapter<String> adapter = new ArrayRemoveAdapter<String>(view.getContext(),
+                new ArrayList<String>(currentValue));
         listView.setEmptyView(view.findViewById(R.id.edit_set_preference_list_empty));
         listView.setAdapter(adapter);
 
         // setup inputView
-        ArrayAdapter<String> autoCompleteAdapter = new ArrayAdapter<String>(view.getContext(), android.R.layout.simple_dropdown_item_1line, new ArrayList<String>(exampleValues));
+        ArrayAdapter<String> autoCompleteAdapter = new ArrayAdapter<String>(view.getContext(),
+                android.R.layout.simple_dropdown_item_1line, new ArrayList<String>(exampleValues));
         inputView.setAdapter(autoCompleteAdapter);
         inputView.addTextChangedListener(new TextWatcher() {
             @Override
@@ -66,10 +68,12 @@ public class EditSetPreferenceDialogFragmentCompat extends PreferenceDialogFragm
             }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) { }
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
 
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
         });
 
         // setup add button
@@ -87,7 +91,8 @@ public class EditSetPreferenceDialogFragmentCompat extends PreferenceDialogFragm
     @Override
     public void onDialogClosed(boolean positiveResult) {
         DialogPreference preference = getPreference();
-        if (positiveResult && (preference instanceof EditSetPreference) && preference.callChangeListener(new HashSet<String>(currentValue))) {
+        if (positiveResult && (preference instanceof EditSetPreference)
+                && preference.callChangeListener(new HashSet<String>(currentValue))) {
             ExLog.i(getContext(), TAG, "Storing result...");
             preference.persistStringSet(currentValue);
         }

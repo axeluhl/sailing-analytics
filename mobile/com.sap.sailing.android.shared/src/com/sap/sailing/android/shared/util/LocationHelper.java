@@ -12,6 +12,7 @@ public class LocationHelper {
 
     /**
      * Helper method to check if device receives gps updates
+     * 
      * @param context
      * @return
      */
@@ -28,6 +29,7 @@ public class LocationHelper {
 
     /**
      * Helper method that checks if gps is activated in the settings and shows and error message if not.
+     * 
      * @param context
      */
     public static void checkGPSAvailable(final Context context) {
@@ -36,6 +38,7 @@ public class LocationHelper {
 
     /**
      * Helper method that checks if gps is activated in the settings and shows and error message if not.
+     * 
      * @param context
      * @param errorMessage
      */
@@ -47,21 +50,21 @@ public class LocationHelper {
 
     /**
      * Show an alert dialog that sends the user to android location settings when tapping on the positive button.
+     * 
      * @param context
      * @param errorMessage
      */
     public static void showNoGPSError(final Context context, String errorMessage) {
         if (context != null) {
             AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppTheme_AlertDialog)
-                .setCancelable(true)
-                .setTitle(context.getString(R.string.warning))
-                .setNegativeButton(android.R.string.no, null)
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        openLocationSettings(context);
-                    }
-                });
+                    .setCancelable(true).setTitle(context.getString(R.string.warning))
+                    .setNegativeButton(android.R.string.no, null)
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            openLocationSettings(context);
+                        }
+                    });
             if (errorMessage != null) {
                 builder.setMessage(errorMessage);
             } else {
@@ -73,6 +76,7 @@ public class LocationHelper {
 
     /**
      * Helper method to access androids location settings
+     * 
      * @param context
      */
     public static void openLocationSettings(Context context) {

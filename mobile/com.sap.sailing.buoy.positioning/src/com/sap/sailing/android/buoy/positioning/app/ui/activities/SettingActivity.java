@@ -19,7 +19,8 @@ public class SettingActivity extends AppCompatActivity {
 
         setupToolbar();
 
-        getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, new GeneralPreferenceFragment()).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, new GeneralPreferenceFragment())
+                .commit();
     }
 
     private void setupToolbar() {
@@ -40,7 +41,8 @@ public class SettingActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
-            ColorDrawable backgroundDrawable = new ColorDrawable(ContextCompat.getColor(this, R.color.toolbar_background));
+            ColorDrawable backgroundDrawable = new ColorDrawable(
+                    ContextCompat.getColor(this, R.color.toolbar_background));
             getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
             toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
             getSupportActionBar().setTitle(getString(R.string.settings));

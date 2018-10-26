@@ -16,7 +16,7 @@ public class CourseFragmentMap extends CourseFragment {
         fragment.setArguments(args);
         return fragment;
     }
-    
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.race_schedule_course_map, container, false);

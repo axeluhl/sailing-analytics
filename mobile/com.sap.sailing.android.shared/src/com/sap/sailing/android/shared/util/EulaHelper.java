@@ -47,12 +47,12 @@ public class EulaHelper {
     public void showEulaDialog(@StyleRes int theme) {
         AlertDialog.Builder builder;
         switch (theme) {
-            case NO_THEME:
-                builder = new AlertDialog.Builder(mContext);
-                break;
+        case NO_THEME:
+            builder = new AlertDialog.Builder(mContext);
+            break;
 
-            default:
-                builder = new AlertDialog.Builder(mContext, theme);
+        default:
+            builder = new AlertDialog.Builder(mContext, theme);
         }
 
         builder.setTitle(R.string.eula_title);
@@ -65,7 +65,7 @@ public class EulaHelper {
             }
         });
         AlertDialog alertDialog = builder.show();
-        ((TextView)alertDialog.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
+        ((TextView) alertDialog.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
     }
 
     private void storeEulaAccepted() {
@@ -98,10 +98,12 @@ public class EulaHelper {
             }
         };
 
-        spannableString.setSpan(clickableSpan, message.indexOf(clickableText), message.indexOf(clickableText) + clickableText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannableString.setSpan(clickableSpan, message.indexOf(clickableText),
+                message.indexOf(clickableText) + clickableText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         TypedValue typedValue = new TypedValue();
         theme.resolveAttribute(R.attr.colorAccent, typedValue, true);
-        spannableString.setSpan(new ForegroundColorSpan(typedValue.data), message.indexOf(clickableText), message.indexOf(clickableText) + clickableText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannableString.setSpan(new ForegroundColorSpan(typedValue.data), message.indexOf(clickableText),
+                message.indexOf(clickableText) + clickableText.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
         return spannableString;
     }

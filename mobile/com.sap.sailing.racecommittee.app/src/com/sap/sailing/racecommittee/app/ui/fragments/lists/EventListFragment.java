@@ -30,7 +30,8 @@ public class EventListFragment extends NamedListFragment<EventBase> {
     }
 
     @Override
-    protected LoaderCallbacks<DataLoaderResult<Collection<EventBase>>> createLoaderCallbacks(ReadonlyDataManager manager) {
+    protected LoaderCallbacks<DataLoaderResult<Collection<EventBase>>> createLoaderCallbacks(
+            ReadonlyDataManager manager) {
         return manager.createEventsLoader(this);
     }
 

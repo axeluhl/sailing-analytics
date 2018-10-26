@@ -24,9 +24,9 @@ import com.sap.sailing.racecommittee.app.ui.fragments.lists.selection.ItemSelect
 import com.sap.sse.common.Named;
 
 import android.app.Activity;
+import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
-import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -34,7 +34,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-public abstract class NamedListFragment<T extends Named> extends LoggableListFragment implements LoadClient<Collection<T>>, DialogListenerHost {
+public abstract class NamedListFragment<T extends Named> extends LoggableListFragment
+        implements LoadClient<Collection<T>>, DialogListenerHost {
 
     protected ArrayList<T> namedList;
     protected List<CheckedItem> checkedItems;
@@ -44,7 +45,8 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
 
     protected abstract ItemSelectedListener<T> attachListener(Activity activity);
 
-    protected abstract LoaderCallbacks<DataLoaderResult<Collection<T>>> createLoaderCallbacks(ReadonlyDataManager manager);
+    protected abstract LoaderCallbacks<DataLoaderResult<Collection<T>>> createLoaderCallbacks(
+            ReadonlyDataManager manager);
 
     private void loadItems() {
         setupLoader();
@@ -122,7 +124,7 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
         namedList.clear();
         checkedItems.clear();
         listAdapter.setCheckedPosition(-1);
-        //TODO: Quickfix for 2889
+        // TODO: Quickfix for 2889
         if (data != null) {
             namedList.addAll(data);
             Collections.sort(namedList, new NaturalNamedComparator<T>());
@@ -149,17 +151,20 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
                 startDate.setTime(eventBase.getStartDate().asDate());
                 Calendar endDate = Calendar.getInstance();
                 endDate.setTime(eventBase.getEndDate().asDate());
-                String start = String.format("%s %s", startDate.getDisplayName(Calendar.MONTH, Calendar.LONG, locale), startDate.get(Calendar.DATE));
+                String start = String.format("%s %s", startDate.getDisplayName(Calendar.MONTH, Calendar.LONG, locale),
+                        startDate.get(Calendar.DATE));
                 String end = "";
                 if (startDate.get(Calendar.MONTH) != endDate.get(Calendar.MONTH)) {
                     end = endDate.getDisplayName(Calendar.MONTH, Calendar.LONG, locale);
                 }
-                if (startDate.get(Calendar.MONTH) != endDate.get(Calendar.MONTH) || startDate.get(Calendar.DATE) != endDate.get(Calendar.DATE)) {
+                if (startDate.get(Calendar.MONTH) != endDate.get(Calendar.MONTH)
+                        || startDate.get(Calendar.DATE) != endDate.get(Calendar.DATE)) {
                     end += " " + endDate.get(Calendar.DATE);
                 }
                 dateString = String.format("%s %s %s", start, (!TextUtils.isEmpty(end.trim())) ? "-" : "", end.trim());
-                subText = String.format("%s%s %s", eventBase.getVenue().getName().trim(), (!TextUtils.isEmpty(dateString) ? ", " : ""), (!TextUtils
-                    .isEmpty(dateString) ? dateString : ""));
+                subText = String.format("%s%s %s", eventBase.getVenue().getName().trim(),
+                        (!TextUtils.isEmpty(dateString) ? ", " : ""),
+                        (!TextUtils.isEmpty(dateString) ? dateString : ""));
             }
         }
         return subText;
@@ -173,13 +178,14 @@ public abstract class NamedListFragment<T extends Named> extends LoggableListFra
     }
 
     public void setupLoader() {
-        getLoaderManager().initLoader(0, null, createLoaderCallbacks(OnlineDataManager.create(getActivity()))).forceLoad();
+        getLoaderManager().initLoader(0, null, createLoaderCallbacks(OnlineDataManager.create(getActivity())))
+                .forceLoad();
     }
 
     private void showLoadFailedDialog(String message) {
         FragmentManager manager = getFragmentManager();
         FragmentAttachedDialogFragment dialog = LoadFailedDialog.create(message);
-        //FIXME this can't be the real solution for the autologin
+        // FIXME this can't be the real solution for the autologin
         dialog.setTargetFragment(this, 0);
         // We cannot use DialogFragment#show here because we need to commit the transaction
         // allowing a state loss, because we are effectively in Loader#onLoadFinished()

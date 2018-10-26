@@ -18,7 +18,7 @@ public class EditSetPreference extends DialogPreference {
     private static final int mDialogLayoutResId = R.layout.edit_set_preference;
 
     private Set<String> currentValue;
-    
+
     private Set<String> exampleValues;
 
     public EditSetPreference(Context context, AttributeSet attrs) {
@@ -42,7 +42,7 @@ public class EditSetPreference extends DialogPreference {
     public int getDialogLayoutResource() {
         return mDialogLayoutResId;
     }
-    
+
     @SuppressWarnings("unchecked")
     @Override
     protected void onSetInitialValue(boolean restorePersistedValue, Object defaultValue) {
@@ -55,7 +55,7 @@ public class EditSetPreference extends DialogPreference {
             persistStringSet(currentValue);
         }
     }
-    
+
     @Override
     protected Object onGetDefaultValue(TypedArray a, int index) {
         Set<String> defaultValue = new HashSet<String>();
@@ -70,12 +70,11 @@ public class EditSetPreference extends DialogPreference {
         if (!shouldPersist()) {
             return defaultReturnValue;
         }
-        
+
         Set<String> fallbackDefault = defaultReturnValue == null ? null : new HashSet<String>(defaultReturnValue);
         Set<String> value = getSharedPreferences().getStringSet(getKey(), fallbackDefault);
-        
+
         return value == null ? null : new HashSet<String>(value);
     }
-
 
 }

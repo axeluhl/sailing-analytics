@@ -52,7 +52,8 @@ public class FinishedButtonFragment extends BasePanelFragment {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             return manager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY);
         } else {
-            return manager.hasSystemFeature(PackageManager.FEATURE_CAMERA) || manager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT);
+            return manager.hasSystemFeature(PackageManager.FEATURE_CAMERA)
+                    || manager.hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT);
         }
     }
 
@@ -122,12 +123,14 @@ public class FinishedButtonFragment extends BasePanelFragment {
             }
 
             if (!view.equals(mPhoto)) {
-                resetFragment(null, getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), PhotoListFragment.class);
+                resetFragment(null, getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false),
+                        PhotoListFragment.class);
                 setMarkerLevel(mPhoto, R.id.photo_marker, LEVEL_NORMAL);
             }
 
             if (!view.equals(mList)) {
-                resetFragment(null, getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false), TrackingListFragment.class);
+                resetFragment(null, getFrameId(getActivity(), R.id.race_edit, R.id.race_content, false),
+                        TrackingListFragment.class);
                 setMarkerLevel(mList, R.id.list_marker, LEVEL_NORMAL);
             }
         }
@@ -138,19 +141,20 @@ public class FinishedButtonFragment extends BasePanelFragment {
         @Override
         public void onClick(View v) {
             if (mRecordLock == null || mRecordLock.getVisibility() == View.GONE) {
-                sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_REPLAY);
+                sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
+                        AppConstants.INTENT_ACTION_TOGGLE_REPLAY);
                 switch (toggleMarker(v, R.id.record_marker)) {
-                    case LEVEL_NORMAL:
-                        sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
-                        break;
+                case LEVEL_NORMAL:
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+                    break;
 
-                    case LEVEL_TOGGLED:
-                        // TODO
-                        break;
+                case LEVEL_TOGGLED:
+                    // TODO
+                    break;
 
-                    default:
-                        ExLog.i(getActivity(), TAG, "Unknown return value");
-                        break;
+                default:
+                    ExLog.i(getActivity(), TAG, "Unknown return value");
+                    break;
                 }
             }
         }
@@ -161,20 +165,21 @@ public class FinishedButtonFragment extends BasePanelFragment {
         @Override
         public void onClick(View v) {
             if (mPhotoLock == null || mPhotoLock.getVisibility() == View.GONE) {
-                sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_PHOTOS);
+                sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
+                        AppConstants.INTENT_ACTION_TOGGLE_PHOTOS);
                 switch (toggleMarker(v, R.id.photo_marker)) {
-                    case LEVEL_NORMAL:
-                        sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
-                        break;
+                case LEVEL_NORMAL:
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+                    break;
 
-                    case LEVEL_TOGGLED:
-                        replaceFragment(PhotoListFragment
-                            .newInstance(getRecentArguments()), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
-                        break;
+                case LEVEL_TOGGLED:
+                    replaceFragment(PhotoListFragment.newInstance(getRecentArguments()),
+                            getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
+                    break;
 
-                    default:
-                        ExLog.i(getActivity(), TAG, "Unknown return value");
-                        break;
+                default:
+                    ExLog.i(getActivity(), TAG, "Unknown return value");
+                    break;
                 }
             }
         }
@@ -185,20 +190,21 @@ public class FinishedButtonFragment extends BasePanelFragment {
         @Override
         public void onClick(View v) {
             if (mListLock == null || mListLock.getVisibility() == View.GONE) {
-                sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA, AppConstants.INTENT_ACTION_TOGGLE_LIST);
+                sendIntent(AppConstants.INTENT_ACTION_TOGGLE, AppConstants.INTENT_ACTION_EXTRA,
+                        AppConstants.INTENT_ACTION_TOGGLE_LIST);
                 switch (toggleMarker(v, R.id.list_marker)) {
-                    case LEVEL_NORMAL:
-                        sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
-                        break;
+                case LEVEL_NORMAL:
+                    sendIntent(AppConstants.INTENT_ACTION_SHOW_SUMMARY_CONTENT);
+                    break;
 
-                    case LEVEL_TOGGLED:
-                        replaceFragment(TrackingListFragment
-                            .newInstance(getRecentArguments(), 0), getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
-                        break;
+                case LEVEL_TOGGLED:
+                    replaceFragment(TrackingListFragment.newInstance(getRecentArguments(), 0),
+                            getFrameId(getActivity(), R.id.finished_edit, R.id.finished_content, true));
+                    break;
 
-                    default:
-                        ExLog.i(getActivity(), TAG, "Unknown return value");
-                        break;
+                default:
+                    ExLog.i(getActivity(), TAG, "Unknown return value");
+                    break;
                 }
             }
         }
@@ -217,18 +223,18 @@ public class FinishedButtonFragment extends BasePanelFragment {
                 if (intent.getExtras() != null) {
                     String data = intent.getExtras().getString(AppConstants.INTENT_ACTION_EXTRA);
                     switch (data) {
-                        case AppConstants.INTENT_ACTION_TOGGLE_REPLAY:
-                            uncheckMarker(mRecord);
-                            break;
-                        case AppConstants.INTENT_ACTION_TOGGLE_PHOTOS:
-                            uncheckMarker(mPhoto);
-                            break;
-                        case AppConstants.INTENT_ACTION_TOGGLE_LIST:
-                            uncheckMarker(mList);
-                            break;
-                        default:
-                            uncheckMarker(new View(context));
-                            break;
+                    case AppConstants.INTENT_ACTION_TOGGLE_REPLAY:
+                        uncheckMarker(mRecord);
+                        break;
+                    case AppConstants.INTENT_ACTION_TOGGLE_PHOTOS:
+                        uncheckMarker(mPhoto);
+                        break;
+                    case AppConstants.INTENT_ACTION_TOGGLE_LIST:
+                        uncheckMarker(mList);
+                        break;
+                    default:
+                        uncheckMarker(new View(context));
+                        break;
                     }
                 }
             }

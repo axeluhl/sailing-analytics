@@ -75,7 +75,7 @@ public class BarcodeCaptureActivity extends AppCompatActivity implements Barcode
 
         mPreview = findViewById(R.id.barcode_preview);
 
-        // Check for the camera permission before accessing the camera.  If the
+        // Check for the camera permission before accessing the camera. If the
         // permission is not granted yet, request permission.
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
         if (rc == PackageManager.PERMISSION_GRANTED) {
@@ -86,14 +86,13 @@ public class BarcodeCaptureActivity extends AppCompatActivity implements Barcode
     }
 
     /**
-     * Handles the requesting of the camera permission.  This includes
-     * showing a "Snackbar" message of why the permission is needed then
-     * sending the request.
+     * Handles the requesting of the camera permission. This includes showing a "Snackbar" message of why the permission
+     * is needed then sending the request.
      */
     private void requestCameraPermission() {
         ExLog.w(this, TAG, "Camera permission is not granted. Requesting permission");
 
-        final String[] permissions = new String[]{Manifest.permission.CAMERA};
+        final String[] permissions = new String[] { Manifest.permission.CAMERA };
 
         if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
             ActivityCompat.requestPermissions(this, permissions, RC_HANDLE_CAMERA_PERM);
@@ -113,20 +112,18 @@ public class BarcodeCaptureActivity extends AppCompatActivity implements Barcode
     }
 
     /**
-     * Creates and starts the camera.  Note that this uses a higher resolution in comparison
-     * to other detection examples to enable the barcode detector to detect small barcodes
-     * at long distances.
+     * Creates and starts the camera. Note that this uses a higher resolution in comparison to other detection examples
+     * to enable the barcode detector to detect small barcodes at long distances.
      *
-     * Suppressing InlinedApi since there is a check that the minimum version is met before using
-     * the constant.
+     * Suppressing InlinedApi since there is a check that the minimum version is met before using the constant.
      */
     @SuppressLint("InlinedApi")
     private void createCameraSource() {
         Context context = getApplicationContext();
 
-        // A barcode detector is created to track barcodes.  An associated multi-processor instance
+        // A barcode detector is created to track barcodes. An associated multi-processor instance
         // is set to receive the barcode detection results, track the barcodes, and maintain
-        // graphics for each barcode on screen.  The factory is used by the multi-processor to
+        // graphics for each barcode on screen. The factory is used by the multi-processor to
         // create a separate tracker instance for each barcode.
         BarcodeDetector barcodeDetector = new BarcodeDetector.Builder(context).build();
         BarcodeTrackerFactory barcodeFactory = new BarcodeTrackerFactory(this);
@@ -135,16 +132,16 @@ public class BarcodeCaptureActivity extends AppCompatActivity implements Barcode
         if (!barcodeDetector.isOperational()) {
             // Note: The first time that an app using the barcode or face API is installed on a
             // device, GMS will download a native libraries to the device in order to do detection.
-            // Usually this completes before the app is run for the first time.  But if that
+            // Usually this completes before the app is run for the first time. But if that
             // download has not yet completed, then the above call will not detect any barcodes
             // and/or faces.
             //
             // isOperational() can be used to check if the required native libraries are currently
-            // available.  The detectors will automatically become operational once the library
+            // available. The detectors will automatically become operational once the library
             // downloads complete on device.
             ExLog.w(this, TAG, "Detector dependencies are not yet available.");
 
-            // Check for low storage.  If there is low storage, the native library will not be
+            // Check for low storage. If there is low storage, the native library will not be
             // downloaded, so detection will not become operational.
             IntentFilter lowstorageFilter = new IntentFilter(Intent.ACTION_DEVICE_STORAGE_LOW);
             boolean hasLowStorage = registerReceiver(null, lowstorageFilter) != null;
@@ -155,12 +152,11 @@ public class BarcodeCaptureActivity extends AppCompatActivity implements Barcode
             }
         }
 
-        // Creates and starts the camera.  Note that this uses a higher resolution in comparison
+        // Creates and starts the camera. Note that this uses a higher resolution in comparison
         // to other detection examples to enable the barcode detector to detect small barcodes
         // at long distances.
         CameraSource.Builder builder = new CameraSource.Builder(getApplicationContext(), barcodeDetector)
-                .setFacing(CameraSource.CAMERA_FACING_BACK)
-                .setRequestedFps(15.0f);
+                .setFacing(CameraSource.CAMERA_FACING_BACK).setRequestedFps(15.0f);
 
         // make sure that auto focus is an available option
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
@@ -191,8 +187,8 @@ public class BarcodeCaptureActivity extends AppCompatActivity implements Barcode
     }
 
     /**
-     * Releases the resources associated with the camera source, the associated detectors, and the
-     * rest of the processing pipeline.
+     * Releases the resources associated with the camera source, the associated detectors, and the rest of the
+     * processing pipeline.
      */
     @Override
     protected void onDestroy() {
@@ -203,23 +199,25 @@ public class BarcodeCaptureActivity extends AppCompatActivity implements Barcode
     }
 
     /**
-     * Callback for the result from requesting permissions. This method
-     * is invoked for every call on {@link #requestPermissions(String[], int)}.
+     * Callback for the result from requesting permissions. This method is invoked for every call on
+     * {@link #requestPermissions(String[], int)}.
      * <p>
-     * <strong>Note:</strong> It is possible that the permissions request interaction
-     * with the user is interrupted. In this case you will receive empty permissions
-     * and results arrays which should be treated as a cancellation.
+     * <strong>Note:</strong> It is possible that the permissions request interaction with the user is interrupted. In
+     * this case you will receive empty permissions and results arrays which should be treated as a cancellation.
      * </p>
      *
-     * @param requestCode  The request code passed in {@link #requestPermissions(String[], int)}.
-     * @param permissions  The requested permissions. Never null.
-     * @param grantResults The grant results for the corresponding permissions
-     *                     which is either {@link PackageManager#PERMISSION_GRANTED}
-     *                     or {@link PackageManager#PERMISSION_DENIED}. Never null.
+     * @param requestCode
+     *            The request code passed in {@link #requestPermissions(String[], int)}.
+     * @param permissions
+     *            The requested permissions. Never null.
+     * @param grantResults
+     *            The grant results for the corresponding permissions which is either
+     *            {@link PackageManager#PERMISSION_GRANTED} or {@link PackageManager#PERMISSION_DENIED}. Never null.
      * @see #requestPermissions(String[], int)
      */
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+            @NonNull int[] grantResults) {
         if (requestCode != RC_HANDLE_CAMERA_PERM) {
             ExLog.i(this, TAG, "Got unexpected permission result: " + requestCode);
             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -233,8 +231,8 @@ public class BarcodeCaptureActivity extends AppCompatActivity implements Barcode
             return;
         }
 
-        ExLog.e(this, TAG, "Permission not granted: results len = " + grantResults.length +
-                " Result code = " + (grantResults.length > 0 ? grantResults[0] : "(empty)"));
+        ExLog.e(this, TAG, "Permission not granted: results len = " + grantResults.length + " Result code = "
+                + (grantResults.length > 0 ? grantResults[0] : "(empty)"));
 
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
@@ -243,15 +241,13 @@ public class BarcodeCaptureActivity extends AppCompatActivity implements Barcode
         };
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog);
-        builder.setMessage("can't use camera")
-            .setPositiveButton(R.string.ok, listener)
-            .show();
+        builder.setMessage("can't use camera").setPositiveButton(R.string.ok, listener).show();
     }
 
     /**
-     * Starts or restarts the camera source, if it exists.  If the camera source doesn't exist yet
-     * (e.g., because onResume was called before the camera source was created), this will be called
-     * again when the camera source is created.
+     * Starts or restarts the camera source, if it exists. If the camera source doesn't exist yet (e.g., because
+     * onResume was called before the camera source was created), this will be called again when the camera source is
+     * created.
      */
     @SuppressWarnings("MissingPermission")
     private void startCameraSource() throws SecurityException {
@@ -276,7 +272,7 @@ public class BarcodeCaptureActivity extends AppCompatActivity implements Barcode
     @Override
     public void onBarcodeDetected(Barcode barcode) {
         ExLog.i(this, TAG, barcode.displayValue);
-        //do something with barcode data returned
+        // do something with barcode data returned
         Intent data = new Intent();
         data.putExtra(BarcodeObject, barcode);
         setResult(CommonStatusCodes.SUCCESS, data);

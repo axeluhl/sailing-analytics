@@ -49,7 +49,8 @@ public class PositioningActivity extends BaseActivity implements pingListener {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
-            ColorDrawable backgroundDrawable = new ColorDrawable(ContextCompat.getColor(this, R.color.toolbar_background));
+            ColorDrawable backgroundDrawable = new ColorDrawable(
+                    ContextCompat.getColor(this, R.color.toolbar_background));
             getSupportActionBar().setBackgroundDrawable(backgroundDrawable);
             toolbar.setNavigationIcon(R.drawable.sap_logo_64dp);
             getSupportActionBar().setTitle(markInfo.getName());
@@ -84,14 +85,14 @@ public class PositioningActivity extends BaseActivity implements pingListener {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.about:
-                AboutHelper.showInfoActivity(this);
-                return true;
-            case R.id.settings:
-                startActivity(new Intent(this, SettingActivity.class));
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        case R.id.about:
+            AboutHelper.showInfoActivity(this);
+            return true;
+        case R.id.settings:
+            startActivity(new Intent(this, SettingActivity.class));
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
         }
     }
 

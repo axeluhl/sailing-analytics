@@ -64,7 +64,7 @@ public class DatabaseHelper {
         CheckinUrlInfo checkinUrlInfo = new CheckinUrlInfo();
         checkinUrlInfo.checkinDigest = checkinDigest;
         Cursor uc = context.getContentResolver().query(CheckinUri.CONTENT_URI, null,
-            CheckinUri.CHECKIN_URI_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
+                CheckinUri.CHECKIN_URI_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
         if (uc != null) {
             if (uc.moveToFirst()) {
                 checkinUrlInfo.rowId = uc.getInt(uc.getColumnIndex(BaseColumns._ID));
@@ -77,8 +77,8 @@ public class DatabaseHelper {
 
     public List<MarkInfo> getMarks(Context context, String checkinDigest) {
         List<MarkInfo> marks = new ArrayList<>();
-        Cursor mc = context.getContentResolver().query(Mark.CONTENT_URI, null,
-            Mark.MARK_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
+        Cursor mc = context.getContentResolver().query(Mark.CONTENT_URI, null, Mark.MARK_CHECKIN_DIGEST + " = ?",
+                new String[] { checkinDigest }, null);
         if (mc != null) {
             mc.moveToFirst();
             while (!mc.isAfterLast()) {
@@ -86,8 +86,7 @@ public class DatabaseHelper {
                 final String markIdAsString = mc.getString(mc.getColumnIndex(Mark.MARK_ID));
                 final Serializable markId = UUIDHelper.tryUuidConversion(markIdAsString);
                 MarkInfo markInfo = new MarkInfo(markId, markName,
-                        mc.getString((mc.getColumnIndex(Mark.MARK_CLASS_NAME))),
-                        checkinDigest);
+                        mc.getString((mc.getColumnIndex(Mark.MARK_CLASS_NAME))), checkinDigest);
                 marks.add(markInfo);
                 mc.moveToNext();
             }
@@ -98,8 +97,8 @@ public class DatabaseHelper {
 
     public List<MarkPingInfo> getMarkPings(Context context, String markID) {
         List<MarkPingInfo> marks = new ArrayList<>();
-        Cursor mpc = context.getContentResolver().query(MarkPing.CONTENT_URI, null,
-            MarkPing.MARK_ID + " = ?", new String[] { markID }, MarkPing.MARK_PING_TIMESTAMP + " DESC");
+        Cursor mpc = context.getContentResolver().query(MarkPing.CONTENT_URI, null, MarkPing.MARK_ID + " = ?",
+                new String[] { markID }, MarkPing.MARK_PING_TIMESTAMP + " DESC");
         if (mpc != null) {
             mpc.moveToFirst();
             while (!mpc.isAfterLast()) {
@@ -130,9 +129,11 @@ public class DatabaseHelper {
         for (MarkInfo mark : marks) {
             deletePingsFromDataBase(context, mark.getId().toString());
         }
-        int d2 = cr.delete(Leaderboard.CONTENT_URI, Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest });
+        int d2 = cr.delete(Leaderboard.CONTENT_URI, Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = ?",
+                new String[] { checkinDigest });
         int d3 = cr.delete(Mark.CONTENT_URI, Mark.MARK_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest });
-        int d4 = cr.delete(CheckinUri.CONTENT_URI, CheckinUri.CHECKIN_URI_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest });
+        int d4 = cr.delete(CheckinUri.CONTENT_URI, CheckinUri.CHECKIN_URI_CHECKIN_DIGEST + " = ?",
+                new String[] { checkinDigest });
         if (BuildConfig.DEBUG) {
             ExLog.i(context, TAG, "Checkout, number of leaderbards deleted: " + d2);
             ExLog.i(context, TAG, "Checkout, number of marks deleted: " + d3);
@@ -143,11 +144,16 @@ public class DatabaseHelper {
     /**
      * When checking in, store info on the event, the competitor and the leaderboard in the database.
      *
-     * @param context android context
-     * @param markList the list of marks to be stored
-     * @param leaderboard leaderboard to be stored
-     * @param checkinURL the checkin url to be stored
-     * @param pings the list of mark pings to be stored
+     * @param context
+     *            android context
+     * @param markList
+     *            the list of marks to be stored
+     * @param leaderboard
+     *            leaderboard to be stored
+     * @param checkinURL
+     *            the checkin url to be stored
+     * @param pings
+     *            the list of mark pings to be stored
      * @throws GeneralDatabaseHelperException
      */
     public void storeCheckinRow(Context context, List<MarkInfo> markList, LeaderboardInfo leaderboard,
@@ -188,7 +194,8 @@ public class DatabaseHelper {
         opList.add(ContentProviderOperation.newInsert(CheckinUri.CONTENT_URI).withValues(cv).build());
         try {
             cr.applyBatch(AnalyticsContract.CONTENT_AUTHORITY, opList);
-            LocalBroadcastManager.getInstance(context.getApplicationContext()).sendBroadcast(new Intent(context.getString(R.string.database_changed)));
+            LocalBroadcastManager.getInstance(context.getApplicationContext())
+                    .sendBroadcast(new Intent(context.getString(R.string.database_changed)));
         } catch (RemoteException e) {
             throw new GeneralDatabaseHelperException(e.getMessage());
         } catch (OperationApplicationException e) {
@@ -214,11 +221,12 @@ public class DatabaseHelper {
         leaderboardValues.put(Leaderboard.LEADERBOARD_DISPLAY_NAME, leaderboard.displayName);
         leaderboardValues.put(Leaderboard.LEADERBOARD_SERVER_URL, leaderboard.serverUrl);
         leaderboardValues.put(Leaderboard.LEADERBOARD_CHECKIN_DIGEST, leaderboard.checkinDigest);
-        cr.update(Leaderboard.CONTENT_URI, leaderboardValues, Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = ?", new String[] {leaderboard.checkinDigest});
+        cr.update(Leaderboard.CONTENT_URI, leaderboardValues, Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = ?",
+                new String[] { leaderboard.checkinDigest });
 
         // Delete all marks for this leaderboard
         List<MarkInfo> currentMarks = getMarks(context, leaderboard.checkinDigest);
-        for (MarkInfo mark : currentMarks){
+        for (MarkInfo mark : currentMarks) {
             deleteMark(context, mark);
         }
         // insert marks from server into database
@@ -236,7 +244,8 @@ public class DatabaseHelper {
             cr.insert(Mark.CONTENT_URI, cmv);
         }
 
-        LocalBroadcastManager.getInstance(context.getApplicationContext()).sendBroadcast(new Intent(context.getString(R.string.database_changed)));
+        LocalBroadcastManager.getInstance(context.getApplicationContext())
+                .sendBroadcast(new Intent(context.getString(R.string.database_changed)));
     }
 
     public void storeMarkPing(Context context, MarkPingInfo markPing) throws GeneralDatabaseHelperException {
@@ -263,7 +272,7 @@ public class DatabaseHelper {
 
     public boolean markLeaderboardCombinationAvailable(Context context, String checkinDigest) {
         Cursor lc = context.getContentResolver().query(Leaderboard.CONTENT_URI, null,
-            Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
+                Leaderboard.LEADERBOARD_CHECKIN_DIGEST + " = ?", new String[] { checkinDigest }, null);
         int count = 0;
         if (lc != null) {
             count = lc.getCount();

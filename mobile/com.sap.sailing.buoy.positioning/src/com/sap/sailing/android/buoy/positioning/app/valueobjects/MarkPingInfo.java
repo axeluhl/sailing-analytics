@@ -8,7 +8,7 @@ public class MarkPingInfo {
     private final Serializable markId;
     private final GPSFix gpsFix;
     private final double accuracy;
-    
+
     public MarkPingInfo(Serializable markId, GPSFix gpsFix, double accuracy) {
         super();
         this.markId = markId;

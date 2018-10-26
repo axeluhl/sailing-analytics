@@ -18,16 +18,18 @@ public class PreferencesDeviceConfigurationLoader implements ConfigurationLoader
     private final AppPreferences preferences;
     private final ConfigurationLoader<RegattaConfiguration> regattaConfigurationLoader;
 
-    public static PreferencesDeviceConfigurationLoader wrap(DeviceConfiguration configuration, AppPreferences preferences) {
+    public static PreferencesDeviceConfigurationLoader wrap(DeviceConfiguration configuration,
+            AppPreferences preferences) {
         RegattaConfiguration regattaConfiguration = configuration.getRegattaConfiguration();
         if (regattaConfiguration == null) {
             regattaConfiguration = new RegattaConfigurationImpl();
         }
-        return new PreferencesDeviceConfigurationLoader(configuration, new PreferencesRegattaConfigurationLoader(regattaConfiguration, preferences), preferences);
+        return new PreferencesDeviceConfigurationLoader(configuration,
+                new PreferencesRegattaConfigurationLoader(regattaConfiguration, preferences), preferences);
     }
 
-    private PreferencesDeviceConfigurationLoader(DeviceConfiguration configuration, PreferencesRegattaConfigurationLoader regattaLoader,
-        AppPreferences preferences) {
+    private PreferencesDeviceConfigurationLoader(DeviceConfiguration configuration,
+            PreferencesRegattaConfigurationLoader regattaLoader, AppPreferences preferences) {
         if (!(configuration instanceof DeviceConfigurationImpl)) {
             throw new IllegalArgumentException("configuration");
         }
@@ -68,13 +70,15 @@ public class PreferencesDeviceConfigurationLoader implements ConfigurationLoader
         }
         if (configuration.getByNameCourseDesignerCourseNames() != null) {
             preferences.setByNameCourseDesignerCourseNames(configuration.getByNameCourseDesignerCourseNames());
-            logApply(context, "by name course designer course names", configuration.getByNameCourseDesignerCourseNames());
+            logApply(context, "by name course designer course names",
+                    configuration.getByNameCourseDesignerCourseNames());
         }
 
         preferences.setNeedConfigRefresh(false);
     }
 
     private static void logApply(Context context, String configurationName, Object value) {
-        ExLog.i(context, TAG, String.format("Applied '%s' configuration: %s.", configurationName, value == null ? "null" : value.toString()));
+        ExLog.i(context, TAG, String.format("Applied '%s' configuration: %s.", configurationName,
+                value == null ? "null" : value.toString()));
     }
 }

@@ -12,8 +12,8 @@ public class AppPreferences extends BaseAppPreferences {
     }
 
     public String getServerLeaderboardPath(String leaderboardName) {
-        return context.getString(R.string.preference_server_leaderboard_path).replace(
-                "{leaderboard_name}", leaderboardName);
+        return context.getString(R.string.preference_server_leaderboard_path).replace("{leaderboard_name}",
+                leaderboardName);
     }
 
     public String getServerMarkPath(String leaderboardName) {
@@ -28,14 +28,14 @@ public class AppPreferences extends BaseAppPreferences {
                 .replace("{leaderboard_name}", cleanLeaderBoardName).replace("{mark-id}", markIdAsString);
     }
 
-    public void setDataRefreshInterval(long interval){
+    public void setDataRefreshInterval(long interval) {
         preferences.edit().putLong(context.getString(R.string.preference_data_refresh_interval_seconds_key), interval)
-            .apply();
+                .apply();
         MarkerUtils.withContext(context).restartMarkerService();
     }
 
-    public long getDataRefreshInterval(){
+    public long getDataRefreshInterval() {
         return preferences.getLong(context.getString(R.string.preference_data_refresh_interval_seconds_key),
-            context.getResources().getInteger(R.integer.preference_data_refresh_interval_seconds_default));
+                context.getResources().getInteger(R.integer.preference_data_refresh_interval_seconds_default));
     }
 }

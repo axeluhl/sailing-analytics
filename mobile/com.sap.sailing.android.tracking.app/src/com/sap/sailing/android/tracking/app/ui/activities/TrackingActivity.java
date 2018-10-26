@@ -76,8 +76,10 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         if (savedInstanceState != null) {
-            lastCompassIndicatorText = savedInstanceState.getString(SIS_LAST_COMPASS_TEXT, getString(R.string.initial_hyphen_degrees));
-            lastSpeedIndicatorTextWithoutUnit = savedInstanceState.getString(SIS_LAST_SPEED_TEXT, getString(R.string.initial_hyphen));
+            lastCompassIndicatorText = savedInstanceState.getString(SIS_LAST_COMPASS_TEXT,
+                    getString(R.string.initial_hyphen_degrees));
+            lastSpeedIndicatorTextWithoutUnit = savedInstanceState.getString(SIS_LAST_SPEED_TEXT,
+                    getString(R.string.initial_hyphen));
         } else {
             lastCompassIndicatorText = getString(R.string.initial_hyphen_degrees);
             lastSpeedIndicatorTextWithoutUnit = getString(R.string.initial_hyphen);
@@ -232,7 +234,8 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     }
 
     @Override
-    public void gpsQualityAndAccuracyUpdated(final GPSQuality quality, final float accuracy, final Bearing bearing, final Speed speed) {
+    public void gpsQualityAndAccuracyUpdated(final GPSQuality quality, final float accuracy, final Bearing bearing,
+            final Speed speed) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -343,17 +346,17 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         @Override
         public Fragment getItem(int position) {
             switch (position) {
-                case VIEW_PAGER_FRAGMENT_STOP_BUTTON:
-                    trackingTimeFragment = new TrackingTimeFragment();
-                    return trackingTimeFragment;
-                case VIEW_PAGER_FRAGMENT_COMPASS:
-                    cFragment = new CompassFragment();
-                    return cFragment;
-                case VIEW_PAGER_FRAGMENT_SPEED:
-                    sFragment = new SpeedFragment();
-                    return sFragment;
-                default:
-                    return null;
+            case VIEW_PAGER_FRAGMENT_STOP_BUTTON:
+                trackingTimeFragment = new TrackingTimeFragment();
+                return trackingTimeFragment;
+            case VIEW_PAGER_FRAGMENT_COMPASS:
+                cFragment = new CompassFragment();
+                return cFragment;
+            case VIEW_PAGER_FRAGMENT_SPEED:
+                sFragment = new SpeedFragment();
+                return sFragment;
+            default:
+                return null;
             }
         }
 
@@ -379,15 +382,13 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
 
     public void showStopTrackingConfirmationDialog() {
         AlertDialog dialog = new AlertDialog.Builder(this, R.style.AppTheme_AlertDialog)
-            .setTitle(R.string.please_confirm)
-            .setMessage(R.string.do_you_really_want_to_stop_tracking)
-            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                .setTitle(R.string.please_confirm).setMessage(R.string.do_you_really_want_to_stop_tracking)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    stopTracking();
-                }
-            })
-            .setNegativeButton(android.R.string.no, null).create();
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        stopTracking();
+                    }
+                }).setNegativeButton(android.R.string.no, null).create();
 
         dialog.show();
     }

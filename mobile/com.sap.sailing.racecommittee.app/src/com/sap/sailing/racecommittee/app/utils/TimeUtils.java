@@ -13,7 +13,8 @@ import android.widget.TimePicker;
 
 public class TimeUtils extends com.sap.sailing.android.shared.util.TimeUtils {
 
-    public static void initTimePickerWithSeconds(Context context, final Calendar time, @Nullable final TimePicker timePicker, @Nullable NumberPicker secondPicker) {
+    public static void initTimePickerWithSeconds(Context context, final Calendar time,
+            @Nullable final TimePicker timePicker, @Nullable NumberPicker secondPicker) {
         int textColor = ThemeHelper.getColor(context, R.attr.white);
         int dividerColor = ThemeHelper.getColor(context, R.attr.sap_yellow_1);
         if (timePicker != null) {

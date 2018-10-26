@@ -41,7 +41,8 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
 
     private boolean mEditable;
 
-    public CourseElementAdapter(Context context, List<CourseListDataElementWithIdImpl> elements, MarkImageHelper imageHelper, boolean editable, CourseFragmentMarks parent) {
+    public CourseElementAdapter(Context context, List<CourseListDataElementWithIdImpl> elements,
+            MarkImageHelper imageHelper, boolean editable, CourseFragmentMarks parent) {
         super(context, elements, parent);
         setHasStableIds(true);
         mContext = context;
@@ -64,12 +65,12 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
         View layout;
 
         switch (viewType) {
-            case ADD_VIEW:
-                layout = LayoutInflater.from(mContext).inflate(R.layout.course_marks_waypoint_new_item, parent, false);
-                return new AddItemHolder(layout, mParent);
-            default:
-                layout = LayoutInflater.from(mContext).inflate(R.layout.course_marks_waypoint_item, parent, false);
-                return new ItemViewHolder(layout, mParent);
+        case ADD_VIEW:
+            layout = LayoutInflater.from(mContext).inflate(R.layout.course_marks_waypoint_new_item, parent, false);
+            return new AddItemHolder(layout, mParent);
+        default:
+            layout = LayoutInflater.from(mContext).inflate(R.layout.course_marks_waypoint_item, parent, false);
+            return new ItemViewHolder(layout, mParent);
         }
     }
 
@@ -113,9 +114,9 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
             itemHolder.rightText.setVisibility(View.VISIBLE);
             itemHolder.rightImage.setImageDrawable(mImageHelper.resolveMarkImage(mContext, element.getRightMark()));
             itemHolder.rightImage.setVisibility(View.VISIBLE);
-        } else if (element.getPassingInstructions() != null &&
-                PassingInstruction.Gate.equals(element.getPassingInstructions()) ||
-                PassingInstruction.Line.equals(element.getPassingInstructions())) {
+        } else if (element.getPassingInstructions() != null
+                && PassingInstruction.Gate.equals(element.getPassingInstructions())
+                || PassingInstruction.Line.equals(element.getPassingInstructions())) {
             itemHolder.addItem.setVisibility(View.VISIBLE);
         }
     }
@@ -125,9 +126,8 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
         if (mEditable) {
             if (mItems != null && mItems.size() != 0) {
                 CourseListDataElementWithIdImpl element = mItems.get(mItems.size() - 1);
-                if (element.getRightMark() == null &&
-                    PassingInstruction.Gate.equals(element.getPassingInstructions()) ||
-                    PassingInstruction.Line.equals(element.getPassingInstructions())) {
+                if (element.getRightMark() == null && PassingInstruction.Gate.equals(element.getPassingInstructions())
+                        || PassingInstruction.Line.equals(element.getPassingInstructions())) {
                     return mItems.size();
                 }
                 return mItems.size() + 1;
@@ -149,20 +149,20 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
 
     private static String getDisplayValueForRounding(PassingInstruction direction) {
         switch (direction) {
-            case Gate:
-                return "G";
-            case Port:
-                return "P";
-            case Single_Unknown:
-                return "U";
-            case Starboard:
-                return "S";
-            case Line:
-                return "L";
-            case Offset:
-                return "O";
-            default:
-                return "";
+        case Gate:
+            return "G";
+        case Port:
+            return "P";
+        case Single_Unknown:
+            return "U";
+        case Starboard:
+            return "S";
+        case Line:
+            return "L";
+        case Offset:
+            return "O";
+        default:
+            return "";
         }
     }
 
@@ -199,10 +199,12 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
         }
 
         @Override
-        public void onItemSelected() { }
+        public void onItemSelected() {
+        }
 
         @Override
-        public void onItemClear() { }
+        public void onItemClear() {
+        }
 
         @Override
         public boolean isDragAllowed() {
@@ -210,7 +212,8 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
         }
     }
 
-    public class ItemViewHolder extends RecyclerView.ViewHolder implements BaseDraggableSwipeViewHolder, View.OnClickListener {
+    public class ItemViewHolder extends RecyclerView.ViewHolder
+            implements BaseDraggableSwipeViewHolder, View.OnClickListener {
 
         public ViewGroup container;
         public View dragHandle;
@@ -259,25 +262,25 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
-                case R.id.column_left:
-                    mItemClickListener.showMarkDialog(TOUCH_LEFT_AREA, mItems.get(getAdapterPosition()));
-                    break;
-                case R.id.column_right:
-                    if (addItem.getVisibility() == View.GONE) {
-                        mItemClickListener.showMarkDialog(TOUCH_RIGHT_AREA, mItems.get(getAdapterPosition()));
-                    }
-                    break;
-                case R.id.rounding_direction:
-                    mItemClickListener.onItemEditClick(TOUCH_TYPE_AREA, mItems.get(getAdapterPosition()));
-                    break;
-                default:
-                    mItemClickListener.showMarkDialog(TOUCH_TYPE_AREA, null);
+            case R.id.column_left:
+                mItemClickListener.showMarkDialog(TOUCH_LEFT_AREA, mItems.get(getAdapterPosition()));
+                break;
+            case R.id.column_right:
+                if (addItem.getVisibility() == View.GONE) {
+                    mItemClickListener.showMarkDialog(TOUCH_RIGHT_AREA, mItems.get(getAdapterPosition()));
+                }
+                break;
+            case R.id.rounding_direction:
+                mItemClickListener.onItemEditClick(TOUCH_TYPE_AREA, mItems.get(getAdapterPosition()));
+                break;
+            default:
+                mItemClickListener.showMarkDialog(TOUCH_TYPE_AREA, null);
             }
         }
 
         /**
-         * Called when the {@link ItemTouchHelper} first registers an item as being moved or swiped.
-         * Implementations should update the item view to indicate it's active state.
+         * Called when the {@link ItemTouchHelper} first registers an item as being moved or swiped. Implementations
+         * should update the item view to indicate it's active state.
          */
         @Override
         public void onItemSelected() {
@@ -285,8 +288,8 @@ public class CourseElementAdapter extends BaseDraggableSwipeAdapter<RecyclerView
         }
 
         /**
-         * Called when the {@link ItemTouchHelper} has completed the move or swipe, and the active item
-         * state should be cleared.
+         * Called when the {@link ItemTouchHelper} has completed the move or swipe, and the active item state should be
+         * cleared.
          */
         @Override
         public void onItemClear() {

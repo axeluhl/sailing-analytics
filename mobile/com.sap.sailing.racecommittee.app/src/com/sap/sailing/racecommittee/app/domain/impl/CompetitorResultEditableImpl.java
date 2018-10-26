@@ -8,7 +8,7 @@ import com.sap.sse.common.TimePoint;
 
 public class CompetitorResultEditableImpl implements CompetitorResult {
     private static final long serialVersionUID = 3928498127285186791L;
-    
+
     private Serializable mCompetitorId;
     private String mCompetitorDisplayName;
     private int mOneBasedRank;
@@ -110,7 +110,7 @@ public class CompetitorResultEditableImpl implements CompetitorResult {
     public void setChecked(boolean checked) {
         mChecked = checked;
     }
-    
+
     public MergeState getMergeState() {
         return mMergeState == null ? MergeState.OK : mMergeState; // default for having de-serialized an old version
     }
@@ -143,7 +143,8 @@ public class CompetitorResultEditableImpl implements CompetitorResult {
             return false;
         if (mCompetitorId != null ? !mCompetitorId.equals(that.mCompetitorId) : that.mCompetitorId != null)
             return false;
-        if (mCompetitorDisplayName != null ? !mCompetitorDisplayName.equals(that.mCompetitorDisplayName) : that.mCompetitorDisplayName != null)
+        if (mCompetitorDisplayName != null ? !mCompetitorDisplayName.equals(that.mCompetitorDisplayName)
+                : that.mCompetitorDisplayName != null)
             return false;
         if (mMaxPointsReason != that.mMaxPointsReason)
             return false;

@@ -33,7 +33,7 @@ public class PreferenceHelper {
 
     private final Context context;
     private final String sharedPreferencesName;
-    
+
     public PreferenceHelper(Context context) {
         this(context, getDefaultSharedPreferencesName(context));
     }
@@ -56,16 +56,19 @@ public class PreferenceHelper {
         boolean hasSetDefaultsBefore = hasSetDefaultsBefore();
         boolean readAgain = forceReset || isCleared || !hasSetDefaultsBefore;
 
-        ExLog.i(context, TAG, String.format("Preference state: {cleared=%s, setDefaultsBefore=%s, readAgain=%s}", isCleared,
-                hasSetDefaultsBefore, readAgain));
+        ExLog.i(context, TAG, String.format("Preference state: {cleared=%s, setDefaultsBefore=%s, readAgain=%s}",
+                isCleared, hasSetDefaultsBefore, readAgain));
 
         resetPreferences(readAgain);
     }
 
     public void resetPreferences(boolean force) {
-        PreferenceManager.setDefaultValues(context, sharedPreferencesName, Context.MODE_PRIVATE, R.xml.preference_course_designer, force);
-        PreferenceManager.setDefaultValues(context, sharedPreferencesName, Context.MODE_PRIVATE, R.xml.preference_general, force);
-        PreferenceManager.setDefaultValues(context, sharedPreferencesName, Context.MODE_PRIVATE, R.xml.preference_regatta_defaults, force);
+        PreferenceManager.setDefaultValues(context, sharedPreferencesName, Context.MODE_PRIVATE,
+                R.xml.preference_course_designer, force);
+        PreferenceManager.setDefaultValues(context, sharedPreferencesName, Context.MODE_PRIVATE,
+                R.xml.preference_general, force);
+        PreferenceManager.setDefaultValues(context, sharedPreferencesName, Context.MODE_PRIVATE,
+                R.xml.preference_regatta_defaults, force);
     }
 
     public void clearPreferences() {

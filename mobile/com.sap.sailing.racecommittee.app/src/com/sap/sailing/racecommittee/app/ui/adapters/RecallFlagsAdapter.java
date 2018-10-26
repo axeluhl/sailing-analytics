@@ -37,9 +37,11 @@ public class RecallFlagsAdapter extends BaseFlagsAdapter {
 
         mFlags = new ArrayList<>();
         if (procedure.hasIndividualRecall()) {
-            mFlags.add(new RecallFlag(context.getString(R.string.flag_xray), context.getString(R.string.flag_xray_desc), Flags.XRAY));
+            mFlags.add(new RecallFlag(context.getString(R.string.flag_xray), context.getString(R.string.flag_xray_desc),
+                    Flags.XRAY));
         }
-        mFlags.add(new RecallFlag(context.getString(R.string.flag_first_subst), context.getString(R.string.flag_first_subst_desc), Flags.FIRSTSUBSTITUTE));
+        mFlags.add(new RecallFlag(context.getString(R.string.flag_first_subst),
+                context.getString(R.string.flag_first_subst_desc), Flags.FIRSTSUBSTITUTE));
     }
 
     @Override
