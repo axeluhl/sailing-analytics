@@ -14,6 +14,11 @@
 <b>Description:</b>
 <p>Creates a new competitor and registers it with the regatta. Competitor creation can be controlled by a number of
 parameter; defaults will be obtained from the authenticated user invoking the service.<br/>
+This provides functionality <li> for the regatta owner (or any user with update permission on the regatta) to add new
+competitors to the regatta <li> and for any user (inclusive anonymous) to register himself to an regatta that is 
+explicitly open for self-registrations. In this case a deviceUuid is required to immediately checkin the device.<br>
+User self-registration is restricted to allow only one registration per device. Also a secret is required to make sure
+that the regatta to register on is correctly referenced.
 All slashes contained within the {regattaname} parameter must be replaced by "__" (double underscore).</p>
 <br/>
 <table>
@@ -30,14 +35,28 @@ All slashes contained within the {regattaname} parameter must be replaced by "__
         <td>boatId the string representation of the boat to use</td>
     </tr>
     <tr>
+        <td>Additional mandatory parameters for user self-registrations on open regattas:</td>
+        <td>
+            <div>deviceUuid the Uuid of the device used for self registration</div>
+            <div>secret secret string required for self registration validation purpose</div>
+            <div>competitorName the name to use for the newly created/added competitor (if a user is authenticated,
+            this becomes optional if no competitorName is provided in this case, the name of the users is used for the
+            competitor name)</div>
+        </td>
+    <tr>
+    <tr>
         <td>Optional parameters:</td>
         <td>
+            <div>sailid the sail number to use</div>
             <div>nationalityIOC three-letter IOC country code</div>
             <div>timeontimefactor a double value telling the ToT / TMF / time-on-time factor for handicap racing</div>
             <div>timeondistanceallowancepernauticalmileasmillis distance-based allowance in milliseconds for handicap racing (ToD)</div>
             <div>searchtag a search tag for the competitor</div>
-            <div>competitorName the name to use for the newly created/added competitor</div>
+            <div>competitorShortName shortname of the competitor, if not set the shortname is the same as competitorName or the username</div>
             <div>competitorEmail the email to use for the newly created/added competitor</div>
+            <div>displayColor display color in RGB format</div>
+            <div>flagImageURI URI for the competitor flag image</div>
+            <div>teamImageURI URI for the team image</div>
         </td>
     </tr>
     <tr>
@@ -46,7 +65,12 @@ All slashes contained within the {regattaname} parameter must be replaced by "__
     </tr>
     <tr>
         <td>Example:</td>
-        <td>curl -X POST -H "Authorization: Bearer KMTuXevrA0CYyM6O1W2E0QB9gVeP8tIpgjafJOvj/6A=" "http://127.0.0.1:8888/sailingserver/api/v1/regattas/Smartphone%20Tracking%20Test%2022.06/competitors/createandaddwithboat?boatId=95c3ada5-e666-48e4-9dc3-799df41f8264&sailid=GER+123&nationalityIOC=GER"</td>
+        <td>curl -X POST -H "Authorization: Bearer KMTuXevrA0CYyM6O1W2E0QB9gVeP8tIpgjafJOvj/6A=" "http://127.0.0.1:8888/sailingserver/api/v1/regattas/Smartphone%20Tracking%20Test%2022.06/competitors/createandaddwithboat?boatId=95c3ada5-e666-48e4-9dc3-799df41f8264&sailid=GER+123&nationalityIOC=GER&competitorName=Firstname%20Lastname"</td>
+    </tr>
+    <tr>
+        <td>Examples for user self registration:</td>
+        <td>curl -X POST -H "Authorization: Bearer KMTuXevrA0CYyM6O1W2E0QB9gVeP8tIpgjafJOvj/6A=" "http://127.0.0.1:8888/sailingserver/api/v1/regattas/Smartphone%20Tracking%20Test%2022.06/competitors/createandaddwithboat?boatId=95c3ada5-e666-48e4-9dc3-799df41f8264&sailid=GER+123&nationalityIOC=GER&secret=KFJHKH265kJH724KJHKH2374567&deviceUuid=00000000-1111-2222-3333-444444444444"<br/>
+        curl -X POST "http://127.0.0.1:8888/sailingserver/api/v1/regattas/Smartphone%20Tracking%20Test%2022.06/competitors/createandaddwithboat?boatId=95c3ada5-e666-48e4-9dc3-799df41f8264&sailid=GER+123&nationalityIOC=GER&competitorName=Test%20User&secret=KFJHKH265kJH724KJHKH2374567&deviceUuid=00000000-1111-2222-3333-444444444444"</td>
     </tr>
 </table>
 <div style="height: 1em;"></div>
