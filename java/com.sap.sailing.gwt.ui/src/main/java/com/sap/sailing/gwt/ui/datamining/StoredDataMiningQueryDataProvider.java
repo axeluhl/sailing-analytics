@@ -18,7 +18,7 @@ import com.sap.sse.datamining.ui.client.selection.QueryDefinitionProviderWithCon
 
 /**
  * Data provider and presenter for {@link StoredDataMiningQueryPanel}. holds the {@link #queryDefinitions} and handles
- * the backend calls to find/load/store/remove stored queries
+ * the backend calls to find/load/store/remove stored queries.
  */
 public class StoredDataMiningQueryDataProvider {
     private final Set<StoredDataMiningQueryDTO> queryDefinitions = new HashSet<>();
@@ -36,14 +36,14 @@ public class StoredDataMiningQueryDataProvider {
         this.queryRunner = queryRunner;
     }
 
-    /** @return the query currently selected in the query definition provider */
+    /** @return the query currently selected in the query definition provider. */
     public StatisticQueryDefinitionDTO getCurrentQuery() {
         return queryDefinitionProvider.getQueryDefinition();
     }
 
     /**
-     * creates a new stored query with the {@link name} or updates the stored query if it already exists with the new
-     * {@link #query}
+     * Creates a new stored query with the {@link name} or updates the stored query if it already exists with the new
+     * {@link #query}.
      * 
      * @return true, if stored query was present and this is an update<br/>
      *         false, if a new stored query was created
@@ -82,7 +82,7 @@ public class StoredDataMiningQueryDataProvider {
     }
 
     /**
-     * removes a query by {@link #name}
+     * Removes a query by {@link #name}.
      * 
      * @return true, if a stored query with the {@link #name} existed<br/>
      *         false, if no query with the corresponding name could be found
@@ -109,8 +109,8 @@ public class StoredDataMiningQueryDataProvider {
     }
 
     /**
-     * applies the stored data mining with the {@link #name} to the query definition provider and the query runner
-     * without executing it
+     * Applies the stored data mining with the {@link #name} to the query definition provider and the query runner
+     * without executing it.
      * 
      * @return true, if a stored query with the {@link #name} existed<br/>
      *         false, if no query with the corresponding name could be found
@@ -125,13 +125,13 @@ public class StoredDataMiningQueryDataProvider {
         return false;
     }
 
-    /** sets the associated {@link StoredDataMiningQueryPanel} and refreshes the stored named queries to present */
+    /** Sets the associated {@link StoredDataMiningQueryPanel} and refreshes the stored named queries to present. */
     public void setUiPanel(StoredDataMiningQueryPanel uiPanel) {
         this.uiPanel = uiPanel;
         refreshQueries();
     }
 
-    /** update the oracle in the {@link StoredDataMiningQueryPanel} */
+    /** Update the oracle in the {@link StoredDataMiningQueryPanel}. */
     private void updateUi() {
         if (uiPanel != null) {
             uiPanel.updateOracle(
@@ -139,7 +139,7 @@ public class StoredDataMiningQueryDataProvider {
         }
     }
 
-    /** refresh the stored queries and update the {@link StoredDataMiningQueryPanel} */
+    /** Refresh the stored queries and update the {@link StoredDataMiningQueryPanel}. */
     private void refreshQueries() {
         dataMiningService.retrieveStoredQueries(new AsyncCallback<ArrayList<StoredDataMiningQueryDTO>>() {
             @Override

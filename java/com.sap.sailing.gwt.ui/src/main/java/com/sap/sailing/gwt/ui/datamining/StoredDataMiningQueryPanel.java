@@ -95,7 +95,7 @@ public class StoredDataMiningQueryPanel extends Composite {
         }
     }
 
-    /** update the oracle of the suggest box with the names of the stored queries */
+    /** Updates the oracle of the suggest box with the names of the stored queries. */
     public void updateOracle(Collection<String> collection) {
         oracle.clear();
         oracle.addAll(collection);

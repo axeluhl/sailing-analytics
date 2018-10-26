@@ -84,7 +84,6 @@ public interface StringMessages extends Messages {
     String centralAngleInRadian();
     String centralAngleInDegree();   
     String clearSelection();
-
     String load();
     String dataMiningStoredQueryPlaceholder();
     String dataMiningStoredQueryUpdateSuccessful(String name);

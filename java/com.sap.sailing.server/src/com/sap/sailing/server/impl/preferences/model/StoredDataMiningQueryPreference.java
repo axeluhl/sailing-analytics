@@ -6,7 +6,7 @@ import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.StringSetting;
 import com.sap.sse.common.settings.generic.UUIDSetting;
 
-/** preference object which contains a stored data mining query with a name and a unique id */
+/** Preference object which contains a stored data mining query with a name and a unique id. */
 public class StoredDataMiningQueryPreference extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = -7100595551754668437L;
 

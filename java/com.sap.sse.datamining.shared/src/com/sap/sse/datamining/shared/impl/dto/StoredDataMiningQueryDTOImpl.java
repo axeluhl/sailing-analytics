@@ -5,7 +5,7 @@ import java.util.UUID;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.dto.StoredDataMiningQueryDTO;
 
-/** contains a storable data mining query */
+/** Contains a storable data mining query. */
 public class StoredDataMiningQueryDTOImpl implements StoredDataMiningQueryDTO {
 
     private static final long serialVersionUID = -5119084914429627047L;

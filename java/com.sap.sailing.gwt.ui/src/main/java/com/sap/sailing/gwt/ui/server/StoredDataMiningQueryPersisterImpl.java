@@ -20,7 +20,7 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.User;
 import com.sap.sse.security.UserStore;
 
-/** implementation of {@link StoredDataMiningQueryPersister} */
+/** Implementation of {@link StoredDataMiningQueryPersister}. */
 public class StoredDataMiningQueryPersisterImpl implements StoredDataMiningQueryPersister {
 
     private final SecurityService securityService;
@@ -45,7 +45,7 @@ public class StoredDataMiningQueryPersisterImpl implements StoredDataMiningQuery
                 .collect(Collectors.toList()));
     }
 
-    /** updates or creates a new stored query and returns it */
+    /** Updates or creates a new stored query and returns it. */
     @Override
     public StoredDataMiningQueryDTO updateOrCreateStoredQuery(StoredDataMiningQueryDTO query) {
 
@@ -62,7 +62,7 @@ public class StoredDataMiningQueryPersisterImpl implements StoredDataMiningQuery
         return query;
     }
 
-    /** removes a stored query from the user store and returns it */
+    /** Removes a stored query from the user store and returns it. */
     @Override
     public StoredDataMiningQueryDTO removeStoredQuery(StoredDataMiningQueryDTO query) {
         StoredDataMiningQueryPreferences prefs = getPreferenceForCurrentUser(
@@ -78,7 +78,7 @@ public class StoredDataMiningQueryPersisterImpl implements StoredDataMiningQuery
         return query;
     }
 
-    /** remove a query from an iterable by filtering the UUIDs of all queries in the iterable */
+    /** Remove a query from an iterable by filtering the UUIDs of all queries in the iterable. */
     private Collection<StoredDataMiningQueryPreference> removeQueryFromIterable(StoredDataMiningQueryDTO query,
             StoredDataMiningQueryPreferences prefs) {
         if (prefs != null) {
@@ -96,25 +96,25 @@ public class StoredDataMiningQueryPersisterImpl implements StoredDataMiningQuery
         return new ArrayList<>();
     }
 
-    /** sets a preference for the current user */
+    /** Sets a preference for the current user. */
     private void setPreferenceForCurrentUser(String preferenceKey, Object preference) {
         User currentUser = securityService.getCurrentUser();
         if (currentUser != null) {
             try {
-                securityService.setPreferenceObject(currentUser.getName(), preferenceKey, preference);
+                userStore.setPreferenceObject(currentUser.getName(), preferenceKey, preference);
             } catch (AuthorizationException e) {
                 throw new ServerDispatchException(e);
             }
         }
     }
 
-    /** converts a {@link StoredDataMiningQueryPreference} to a {@link StoredDataMiningQueryDTO} */
+    /** Converts a {@link StoredDataMiningQueryPreference} to a {@link StoredDataMiningQueryDTO}. */
     private StoredDataMiningQueryDTO transform(StoredDataMiningQueryPreference pref) {
         StatisticQueryDefinitionDTO query = DataMiningQuerySerializer.fromBase64String(pref.getSerializedQuery());
         return new StoredDataMiningQueryDTOImpl(pref.getName(), pref.getId(), query);
     }
 
-    /** converts a {@link StoredDataMiningQueryDTO} to a {@link StoredDataMiningQueryPreference} */
+    /** Converts a {@link StoredDataMiningQueryDTO} to a {@link StoredDataMiningQueryPreference}. */
     private StoredDataMiningQueryPreference transform(StoredDataMiningQueryDTO dto) {
         String serializedQuery = DataMiningQuerySerializer.toBase64String(dto.getQuery());
         return new StoredDataMiningQueryPreference(dto.getName(), dto.getId(), serializedQuery);
