@@ -1,0 +1,58 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:style>
+        .errorMessage {
+        font-size: 2em;
+        font-weight: bold;
+        text-align:center;
+        }
+        .titleMessage{
+        font-size: 2em;
+        font-weight: bold;
+        text-align:center;
+
+        }
+        .subtitleMessage{
+        font-size: 1.5em;
+        text-align:center;
+        }
+        .infoMessage{
+        font-size: 1.5em;
+        font-weight: bold;
+        text-align:center;
+        }
+        .qrCode{
+        text-align:center;
+        }
+        .qrCode img:last-child{
+        display:inline-block !important;
+        }
+        .eventImage{
+        text-align: center;
+        }
+        .eventImage div{
+        display:inline-block;
+        }
+    </ui:style>
+    <g:HTML addStyleNames="{res.mediaCss.grid}">
+        <div class="{res.mediaCss.column}  ">
+            <div class="{res.mainCss.spacermargintopsmall} {res.mediaCss.medium12} {style.titleMessage}"
+                ui:field="titleDivUi" />
+            <div class="{res.mediaCss.medium12} {style.subtitleMessage}" ui:field="subtitleDivUi" />
+            <div
+                class="{res.mainCss.spacermargintopsmall} {res.mainCss.spacermarginbottomsmall} {res.mediaCss.medium12} {style.qrCode}"
+                ui:field="qrCodeDivUi" />
+            <div class="{res.mediaCss.medium12} {style.errorMessage}" ui:field="errorDivUi" />
+                <div class="{res.mediaCss.medium12} {style.infoMessage}" ui:field="infoDivUi">
+                <a ui:field="urlAnchor">
+                    <ui:text from="{i18n.qrCodeInfoMessage}" />
+                </a>
+            </div>
+            <div class="{style.eventImage} {res.mainCss.spacermargintopsmall}">
+                <div ui:field="eventImageUi" />
+            </div>
+        </div>
+    </g:HTML>
+</ui:UiBinder>    

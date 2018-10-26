@@ -30,6 +30,7 @@ import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlListListDataProvider;
@@ -74,6 +75,10 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
                 new CreateUserDialog(stringMessages, userManagementService, userCreatedHandlers, userService).show();
             }
         });
+        if (!userService.hasCurrentUserPermissionToCreateObjectOfType(SecuredSecurityTypes.USER)) {
+            createButton.setVisible(false);
+        }
+        
         buttonPanel.add(createButton);
         final Button deleteButton = new Button(stringMessages.remove(), new ClickHandler() {
             @Override
@@ -110,6 +115,9 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
                 }
             }
         });
+        if (!userService.hasCurrentUserPermissionToDeleteAnyObjectOfType(SecuredSecurityTypes.USER)) {
+            deleteButton.setVisible(false);
+        }
         // TODO: find the right place for the acl controls
         Button editACLButton = new Button(stringMessages.editACL(), new ClickHandler() {
             @Override

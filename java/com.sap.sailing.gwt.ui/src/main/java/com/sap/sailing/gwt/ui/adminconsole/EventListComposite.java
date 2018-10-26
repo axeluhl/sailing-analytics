@@ -186,6 +186,9 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             }
         });
         eventControlsPanel.add(removeEventsButton);
+        if (!userService.hasCurrentUserPermissionToDeleteAnyObjectOfType(SecuredDomainType.EVENT)) {
+            removeEventsButton.setVisible(false);
+        }
 
         eventListDataProvider = new ListDataProvider<EventDTO>();
         filterTextbox = new LabeledAbstractFilterablePanel<EventDTO>(new Label(stringMessages.filterEventsByName()),

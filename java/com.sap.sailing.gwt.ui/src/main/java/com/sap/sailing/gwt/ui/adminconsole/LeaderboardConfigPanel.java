@@ -88,6 +88,7 @@ import com.sap.sse.gwt.client.shared.components.LinkWithSettingsGenerator;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogForLinkSharing;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
 import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
@@ -138,6 +139,9 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 createFlexibleLeaderboard();
             }
         });
+        if (!userService.hasCurrentUserPermissionToCreateObjectOfType(SecuredDomainType.LEADERBOARD)) {
+            createFlexibleLeaderboardBtn.setVisible(false);
+        }
 
         Button createRegattaLeaderboardBtn = new Button(stringMessages.createRegattaLeaderboard() + "...");
         createRegattaLeaderboardBtn.ensureDebugId("CreateRegattaLeaderboardButton");
@@ -158,6 +162,11 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 createRegattaLeaderboardWithEliminations();
             }
         });
+        if (!userService.hasCurrentUserPermissionToCreateObjectOfType(SecuredDomainType.LEADERBOARD) || !userService
+                .hasCurrentUserAnyPermission(SecuredDomainType.REGATTA.getPermission(DefaultActions.READ), null)) {
+            createRegattaLeaderboardBtn.setVisible(false);
+            createRegattaLeaderboardWithEliminationsBtn.setVisible(false);
+        }
         
         leaderboardRemoveButton = new Button(stringMessages.remove());
         leaderboardRemoveButton.ensureDebugId("LeaderboardsRemoveButton");
@@ -179,6 +188,9 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             }
         });
         controlsPanel.add(leaderboardRemoveButton);
+        if (!userService.hasCurrentUserPermissionToDeleteAnyObjectOfType(SecuredDomainType.LEADERBOARD)) {
+            leaderboardRemoveButton.setVisible(false);
+        }
     }
     
     @Override

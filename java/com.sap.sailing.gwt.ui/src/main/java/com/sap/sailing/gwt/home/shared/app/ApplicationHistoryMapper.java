@@ -19,6 +19,7 @@ import com.sap.sailing.gwt.home.desktop.places.fakeseries.analyticstab.EventSeri
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.eventstab.SeriesEventsPlace;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.leaderboardstab.EventSeriesLeaderboardsPlace;
 import com.sap.sailing.gwt.home.desktop.places.fakeseries.overallleaderboardtab.EventSeriesOverallLeaderboardPlace;
+import com.sap.sailing.gwt.home.desktop.places.qrcode.QRCodePlace;
 import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.mobile.places.event.latestnews.LatestNewsPlace;
@@ -79,7 +80,7 @@ import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserProfileS
         PasswordResetPlace.Tokenizer.class,
         MoreLoginInformationPlace.Tokenizer.class,
         // Other places
-        ErrorPlace.Tokenizer.class
+        ErrorPlace.Tokenizer.class, QRCodePlace.Tokenizer.class
 })
 public interface ApplicationHistoryMapper extends PlaceHistoryMapper {
 }
