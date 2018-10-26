@@ -52,11 +52,11 @@ import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.User;
 
 public class RegattasResourceTest extends AbstractJaxRsApiTest {
-    private String boatClassName = "49er";
-    private String closedRegattaNamePart = "TestRegatta";
-    private String openRegattaNamePart = "TestOpenRegatta";
-    private String closedRegattaName = RegattaImpl.getDefaultName(closedRegattaNamePart, boatClassName);
-    private String openRegattaName = RegattaImpl.getDefaultName(openRegattaNamePart, boatClassName);
+    private final String boatClassName = "49er";
+    private final String closedRegattaNamePart = "TestRegatta";
+    private final String openRegattaNamePart = "TestOpenRegatta";
+    private final String closedRegattaName = RegattaImpl.getDefaultName(closedRegattaNamePart, boatClassName);
+    private final String openRegattaName = RegattaImpl.getDefaultName(openRegattaNamePart, boatClassName);
     private final String deviceUuid = "00000000-1111-2222-3333-444444444444";
     private final String secret = "ABCDEF";
     private final String competitorName1 = "Max Mustermann";

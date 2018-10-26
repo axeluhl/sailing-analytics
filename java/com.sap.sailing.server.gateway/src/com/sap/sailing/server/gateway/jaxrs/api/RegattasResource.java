@@ -459,7 +459,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     /* coach */ null, teamImageURI);
             final CompetitorWithBoat competitor = getService().getCompetitorAndBoatStore()
                     .getOrCreateCompetitorWithBoat(UUID.randomUUID(), eCompetitorName,
-                            /* shortName */ eCompetitorShortName, color, eCompetitorEmail, flagImageURI, team,
+                            eCompetitorShortName, color, eCompetitorEmail, flagImageURI, team,
                             timeOnTimeFactor,
                             timeOnDistanceAllowancePerNauticalMileAsMillis == null ? null
                                     : new MillisecondsDurationImpl(timeOnDistanceAllowancePerNauticalMileAsMillis),
