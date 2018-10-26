@@ -19,6 +19,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.EventsRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
@@ -84,6 +85,9 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
             }
         });
         regattaManagementControlsPanel.add(addRegattaBtn);
+        if (!userService.hasCurrentUserPermissionToCreateObjectOfType(SecuredDomainType.REGATTA)) {
+            addRegattaBtn.setVisible(false);
+        }
         
         removeRegattaButton = new Button(stringMessages.remove());
         removeRegattaButton.ensureDebugId("RemoveRegattaButton");
@@ -104,8 +108,11 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
                     return Window.confirm(stringMessages.doYouReallyWantToRemoveNonVisibleRegattas(regattaNames));
                 } 
                 return Window.confirm(stringMessages.doYouReallyWantToRemoveRegattas());
-            }          
+            }
         });
+        if (!userService.hasCurrentUserPermissionToDeleteAnyObjectOfType(SecuredDomainType.REGATTA)) {
+            removeRegattaButton.setVisible(false);
+        }
         
         regattaManagementControlsPanel.add(removeRegattaButton);
         regattasContentPanel.add(regattaManagementControlsPanel);

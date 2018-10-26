@@ -440,4 +440,9 @@ public class UserService {
         final OwnershipImpl ownershipOfNewlyCreatedObject = new OwnershipImpl(currentUser, getCurrentTenant());
         return this.hasCurrentUserAnyPermission(createPermission, ownershipOfNewlyCreatedObject);
     }
+    
+    public boolean hasCurrentUserPermissionToDeleteAnyObjectOfType(HasPermissions type) {
+        final WildcardPermission createPermission = type.getPermission(DefaultActions.DELETE);
+        return this.hasCurrentUserAnyPermission(createPermission, null);
+    }
 }
