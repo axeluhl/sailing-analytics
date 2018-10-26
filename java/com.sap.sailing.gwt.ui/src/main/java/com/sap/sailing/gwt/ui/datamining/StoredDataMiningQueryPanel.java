@@ -11,6 +11,8 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
+import com.google.gwt.user.client.ui.SuggestBox.DefaultSuggestionDisplay;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.datamining.ui.client.StringMessages;
 import com.sap.sse.gwt.client.Notification;
@@ -44,7 +46,13 @@ public class StoredDataMiningQueryPanel extends Composite {
     private StoredDataMiningQueryDataProvider dataProvider;
 
     public StoredDataMiningQueryPanel() {
-        suggestBoxUi = new SuggestBox(oracle);
+        suggestBoxUi = new SuggestBox(oracle, new TextBox(), new DefaultSuggestionDisplay() {
+            @Override
+            public void hideSuggestions() {
+                updateSaveLoadButtons();
+                super.hideSuggestions();
+            }
+        });
         initWidget(uiBinder.createAndBindUi(this));
         saveQueryButtonUi.setText(StringMessages.INSTANCE.save());
         loadQueryButtonUi.setText(StringMessages.INSTANCE.load());
@@ -52,6 +60,15 @@ public class StoredDataMiningQueryPanel extends Composite {
         suggestBoxUi.getValueBox().getElement().setPropertyString("placeholder",
                 StringMessages.INSTANCE.dataMiningStoredQueryPlaceholder());
         suggestBoxUi.getValueBox().addClickHandler(e -> suggestBoxUi.showSuggestionList());
+        suggestBoxUi.getValueBox().addKeyUpHandler(e -> updateSaveLoadButtons());
+        suggestBoxUi.getValueBox().addBlurHandler(e -> updateSaveLoadButtons());
+    }
+
+    private void updateSaveLoadButtons() {
+        String text = suggestBoxUi.getValueBox().getText();
+        saveQueryButtonUi.setEnabled(text != null && !"".equals(text.trim()));
+        loadQueryButtonUi.setEnabled(dataProvider.containsQueryName(text));
+        removeQueryButtonUi.setEnabled(dataProvider.containsQueryName(text));
     }
 
     public StoredDataMiningQueryPanel(StoredDataMiningQueryDataProvider dataProvider) {
@@ -62,12 +79,13 @@ public class StoredDataMiningQueryPanel extends Composite {
 
     @UiHandler("saveQueryButtonUi")
     void onSaveClick(ClickEvent e) {
-        if (dataProvider.addOrUpdateQuery(suggestBoxUi.getValue(), dataProvider.getCurrentQuery())) {
-            Notification.notify(StringMessages.INSTANCE.dataMiningStoredQueryUpdateSuccessful(suggestBoxUi.getValue()),
+        String value = suggestBoxUi.getValue().trim();
+        if (dataProvider.addOrUpdateQuery(value, dataProvider.getCurrentQuery())) {
+            Notification.notify(StringMessages.INSTANCE.dataMiningStoredQueryUpdateSuccessful(value),
                     NotificationType.SUCCESS);
         } else {
             Notification.notify(
-                    StringMessages.INSTANCE.dataMiningStoredQueryCreationSuccessful(suggestBoxUi.getValue()),
+                    StringMessages.INSTANCE.dataMiningStoredQueryCreationSuccessful(value),
                     NotificationType.SUCCESS);
         }
     }
@@ -100,5 +118,9 @@ public class StoredDataMiningQueryPanel extends Composite {
         oracle.clear();
         oracle.addAll(collection);
         oracle.setDefaultSuggestionsFromText(collection);
+
+        loadQueryButtonUi.setEnabled(!collection.isEmpty());
+        removeQueryButtonUi.setEnabled(!collection.isEmpty());
+        updateSaveLoadButtons();
     }
 }

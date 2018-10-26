@@ -159,4 +159,12 @@ public class StoredDataMiningQueryDataProvider {
     private Optional<StoredDataMiningQueryDTO> findByName(final String name) {
         return queryDefinitions.stream().filter(s -> s.getName().equals(name)).findAny();
     }
+
+    /**
+     * @return true: if {@link #text} is a valid name of a stored query<br/>
+     *         false: else
+     */
+    public boolean containsQueryName(String text) {
+        return findByName(text).isPresent();
+    }
 }
