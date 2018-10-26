@@ -505,6 +505,9 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
             }
         });
         leaderboardGroupsControlsPanel.add(createGroupButton);
+        if (!userService.hasCurrentUserPermissionToCreateObjectOfType(SecuredDomainType.LEADERBOARD_GROUP)) {
+            createGroupButton.setVisible(false);
+        }
         
         Button refreshButton = new Button(stringMessages.refresh());
         refreshButton.ensureDebugId("RefreshLeaderboardGroupsButton");
@@ -549,7 +552,9 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
             }
         });
         leaderboardGroupsControlsPanel.add(removeButton);
-        
+        if (!userService.hasCurrentUserPermissionToDeleteAnyObjectOfType(SecuredDomainType.LEADERBOARD_GROUP)) {
+            removeButton.setVisible(false);
+        }
        
         groupNameColumn.setSortable(true);
         leaderboardGroupsListHandler.setComparator(groupNameColumn, new Comparator<LeaderboardGroupDTO>() {
