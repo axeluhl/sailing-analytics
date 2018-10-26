@@ -6,6 +6,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -61,6 +63,8 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
     private final String competitorShortName1 = "MM";
     private final String competitorName2 = "Test Competitor";
     private final String competitorShortName2 = "TC";
+    private final String flagImageUri = "file://flag.jpg";
+    private final String teamImageUri = "file://team.jpg";
 
     @Before
     public void setUp() throws Exception {
@@ -142,13 +146,15 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         when(securityService.getCurrentUser()).thenReturn(user);
 
         Response response = regattasResource.createAndAddCompetitor(closedRegattaName, boatClassName, null, "GER",
-                "#F00", null, null, null, competitorName1, competitorShortName1, null, deviceUuid, null);
+                "#F00", flagImageUri, teamImageUri, null, null, null, competitorName1, competitorShortName1, null,
+                deviceUuid, null);
         assertTrue(response.getStatus() + ": " + response.getEntity().toString(),
                 response.getStatus() == Status.OK.getStatusCode());
         assertTrue(regattasResource.getService() == racingEventService);
 
-        response = regattasResource.createAndAddCompetitor(closedRegattaName, boatClassName, null, "GER", "#0F0", null,
-                null, null, competitorName2, competitorShortName2, null, deviceUuid, null);
+        response = regattasResource.createAndAddCompetitor(closedRegattaName, boatClassName, null, "GER", "#0F0",
+                flagImageUri, teamImageUri, null, null, null, competitorName2, competitorShortName2, null, deviceUuid,
+                null);
         assertTrue(response.getStatus() + ": " + response.getEntity().toString(),
                 response.getStatus() == Status.OK.getStatusCode());
 
@@ -169,7 +175,8 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         doReturn(securityService).when(regattasResource).getService(SecurityService.class);
         setUser(null);
         Response response = regattasResource.createAndAddCompetitor(openRegattaName, boatClassName, null, "GER", "#F00",
-                null, null, null, competitorName1, competitorShortName1, null, deviceUuid, secret);
+                flagImageUri, teamImageUri, null, null, null, competitorName1, competitorShortName1, null, deviceUuid,
+                secret);
         assertTrue(response.getStatus() + ": " + response.getEntity().toString(),
                 response.getStatus() == Status.OK.getStatusCode());
         assertTrue(regattasResource.getService() == racingEventService);
@@ -184,7 +191,7 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         setUser(null);
 
         Response response = regattasResource.createAndAddCompetitor(openRegattaName, boatClassName, null, "GER", "#F00",
-                null, null, null, competitorName1, competitorShortName1, null, deviceUuid, "WRONGSECRET");
+                flagImageUri, teamImageUri, null, null, null, competitorName1, competitorShortName1, null, deviceUuid, "WRONGSECRET");
         assertTrue(response.getStatus() + ": " + response.getEntity().toString(),
                 response.getStatus() == Status.FORBIDDEN.getStatusCode());
     }
@@ -199,7 +206,8 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         Regatta regatta = racingEventService.getRegattaByName(openRegattaName);
 
         Response response = regattasResource.createAndAddCompetitor(openRegattaName, boatClassName, null, "GER", "#F00",
-                null, null, null, competitorName1, competitorShortName1, null, deviceUuid, secret);
+                flagImageUri, teamImageUri, null, null, null, competitorName1, competitorShortName1, null, deviceUuid,
+                secret);
         assertTrue(response.getStatus() + ": " + response.getEntity().toString(),
                 response.getStatus() == Status.OK.getStatusCode());
         assertTrue(regattasResource.getService() == racingEventService);
@@ -208,7 +216,7 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         testResponseOfOpenRegattaCompetitorRegistration(regatta);
     }
 
-    private void testResponseOfOpenRegattaCompetitorRegistration(final Regatta regatta) {
+    private void testResponseOfOpenRegattaCompetitorRegistration(final Regatta regatta) throws URISyntaxException {
         Iterator<Competitor> cit = regatta.getAllCompetitors().iterator();
         Competitor readCompetitor = cit.next();
         assertNotNull(readCompetitor);
@@ -224,10 +232,12 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         assertEquals(Color.RED, readCompetitor.getColor());
         assertEquals(competitorName1, readCompetitor.getName());
         assertEquals(competitorShortName1, readCompetitor.getShortName());
+        assertEquals(new URI(flagImageUri), readCompetitor.getFlagImage());
+        assertEquals(new URI(teamImageUri), readCompetitor.getTeam().getImage());
 
         // Same deviceUuid for registration should fail
         Response response = regattasResource.createAndAddCompetitor(regatta.getName(), boatClassName, null, "GER",
-                "#F00", null, null, null, "XXX", "XXX", null, deviceUuid, secret);
+                "#F00", flagImageUri, teamImageUri, null, null, null, "XXX", "XXX", null, deviceUuid, secret);
         assertTrue("Reponse http status should be forbidden (403) but is " + response.getStatus(),
                 response.getStatus() == Status.FORBIDDEN.getStatusCode());
     }

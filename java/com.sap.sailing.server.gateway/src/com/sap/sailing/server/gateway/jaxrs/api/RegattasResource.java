@@ -1,6 +1,8 @@
 package com.sap.sailing.server.gateway.jaxrs.api;
 
 import java.io.Serializable;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -349,8 +351,9 @@ public class RegattasResource extends AbstractSailingServerResource {
 
     private Response createAndAddCompetitor(String regattaName, String nationalityThreeLetterIOCCode, String rgbColor,
             Double timeOnTimeFactor, Long timeOnDistanceAllowancePerNauticalMileAsMillis, String searchTag,
-            String competitorName, String competitorShortName, String competitorEmail,
-            Function<String, DynamicBoat> boatObtainer, String deviceUuid, String registrationLinkSecret) {
+            String competitorName, String competitorShortName, String competitorEmail, String flagImageURIString,
+            String teamImageURIString, Function<String, DynamicBoat> boatObtainer, String deviceUuid,
+            String registrationLinkSecret) {
 
         final Subject subject = SecurityUtils.getSubject();
         final User user = getSecurityService().getCurrentUser();
@@ -427,15 +430,37 @@ public class RegattasResource extends AbstractSailingServerResource {
                             String.format("invalid color %s", iae.getMessage()));
                 }
             }
+            final URI flagImageURI;
+            if (flagImageURIString == null || flagImageURIString.length() == 0) {
+                flagImageURI = null;
+            } else {
+                try {
+                    flagImageURI = new URI(flagImageURIString);
+                } catch (URISyntaxException use) {
+                    return getBadRegattaRegistrationValidationErrorResponse(
+                            String.format("invalid flagImageURIString %s", flagImageURIString));
+                }
+            }
+            final URI teamImageURI;
+            if (teamImageURIString == null || teamImageURIString.length() == 0) {
+                teamImageURI = null;
+            } else {
+                try {
+                    teamImageURI = new URI(teamImageURIString);
+                } catch (URISyntaxException use) {
+                    return getBadRegattaRegistrationValidationErrorResponse(
+                            String.format("invalid flagImageURIString %s", teamImageURIString));
+                }
+            }
             final TeamImpl team = new TeamImpl(eCompetitorShortName,
                     Collections.singleton(new PersonImpl(eCompetitorName,
                             getService().getBaseDomainFactory().getOrCreateNationality(nationalityThreeLetterIOCCode),
                             /* dateOfBirth */ null, /* description */ null)),
-                    /* coach */ null);
+                    /* coach */ null, teamImageURI);
             final CompetitorWithBoat competitor = getService().getCompetitorAndBoatStore()
                     .getOrCreateCompetitorWithBoat(UUID.randomUUID(), eCompetitorName,
-                            /* shortName */ eCompetitorShortName, color, eCompetitorEmail, /* flagImageURI */ null,
-                            team, timeOnTimeFactor,
+                            /* shortName */ eCompetitorShortName, color, eCompetitorEmail, flagImageURI, team,
+                            timeOnTimeFactor,
                             timeOnDistanceAllowancePerNauticalMileAsMillis == null ? null
                                     : new MillisecondsDurationImpl(timeOnDistanceAllowancePerNauticalMileAsMillis),
                             searchTag, boat);
@@ -463,7 +488,8 @@ public class RegattasResource extends AbstractSailingServerResource {
     public Response createAndAddCompetitor(@PathParam("regattaname") String regattaName,
             @QueryParam("boatclass") String boatClassName, @QueryParam("sailid") String sailId,
             @QueryParam("nationalityIOC") String nationalityThreeLetterIOCCode,
-            @QueryParam("displayColor") String displayColor, @QueryParam("timeontimefactor") Double timeOnTimeFactor,
+            @QueryParam("displayColor") String displayColor, @QueryParam("flagImageURI") String flagImageURI,
+            @QueryParam("teamImageURI") String teamImageURI, @QueryParam("timeontimefactor") Double timeOnTimeFactor,
             @QueryParam("timeondistanceallowancepernauticalmileasmillis") Long timeOnDistanceAllowancePerNauticalMileAsMillis,
             @QueryParam("searchtag") String searchTag, @QueryParam("competitorName") String competitorName,
             @QueryParam("competitorShortName") String competitorShortName,
@@ -475,7 +501,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         } else {
             response = createAndAddCompetitor(regattaName, nationalityThreeLetterIOCCode, displayColor,
                     timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMileAsMillis, searchTag, competitorName,
-                    competitorShortName, competitorEmail,
+                    competitorShortName, competitorEmail, flagImageURI, teamImageURI,
                     shortName -> new BoatImpl(UUID.randomUUID(), shortName, getService().getBaseDomainFactory()
                             .getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */ true), sailId),
                     deviceUuid, registrationLinkSecret);
@@ -489,6 +515,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     public Response createAndAddCompetitorWithBoat(@PathParam("regattaname") String regattaName,
             @QueryParam("boatId") String boatId, @QueryParam("sailid") String sailId,
             @QueryParam("nationalityIOC") String nationalityThreeLetterIOCCode,
+            @QueryParam("flagImageURI") String flagImageURI, @QueryParam("teamImageURI") String teamImageURI,
             @QueryParam("displayColor") String displayColor, @QueryParam("timeontimefactor") Double timeOnTimeFactor,
             @QueryParam("timeondistanceallowancepernauticalmileasmillis") Long timeOnDistanceAllowancePerNauticalMileAsMillis,
             @QueryParam("searchtag") String searchTag, @QueryParam("competitorName") String competitorName,
@@ -502,7 +529,8 @@ public class RegattasResource extends AbstractSailingServerResource {
         } else {
             response = createAndAddCompetitor(regattaName, nationalityThreeLetterIOCCode, displayColor,
                     timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMileAsMillis, searchTag, competitorName,
-                    competitorShortName, competitorEmail, t -> boat, deviceUuid, registrationLinkSecret);
+                    competitorShortName, competitorEmail, flagImageURI, teamImageURI, t -> boat, deviceUuid,
+                    registrationLinkSecret);
         }
         return response;
     }
