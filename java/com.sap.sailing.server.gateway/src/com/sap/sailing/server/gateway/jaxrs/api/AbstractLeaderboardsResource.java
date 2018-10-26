@@ -196,15 +196,14 @@ public abstract class AbstractLeaderboardsResource extends AbstractSailingServer
 
     protected JSONObject getLeaderboardJson(ResultStates resultState, Integer maxCompetitorsCount,
             TimePoint requestTimePoint, Leaderboard leaderboard, TimePoint timePoint, List<String> raceColumnNames,
-            List<String> raceDetailNames)
-            throws NoWindException, InterruptedException, ExecutionException {
-                final JSONObject jsonLeaderboard;
-                if (timePoint != null || resultState == ResultStates.Live) {
-                    jsonLeaderboard = getLeaderboardJson(leaderboard, timePoint, resultState, maxCompetitorsCount, raceColumnNames, raceDetailNames);
-                } else {
-                    jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, maxCompetitorsCount);
-                }
-                return jsonLeaderboard;
-            }
-
+            List<String> raceDetailNames) throws NoWindException, InterruptedException, ExecutionException {
+        final JSONObject jsonLeaderboard;
+        if (timePoint != null || resultState == ResultStates.Live) {
+            jsonLeaderboard = getLeaderboardJson(leaderboard, timePoint, resultState, maxCompetitorsCount,
+                    raceColumnNames, raceDetailNames);
+        } else {
+            jsonLeaderboard = createEmptyLeaderboardJson(leaderboard, resultState, maxCompetitorsCount);
+        }
+        return jsonLeaderboard;
+    }
 }
