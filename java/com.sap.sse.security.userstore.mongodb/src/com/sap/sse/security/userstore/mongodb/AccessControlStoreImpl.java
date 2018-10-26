@@ -421,25 +421,29 @@ public class AccessControlStoreImpl implements AccessControlStore {
             @Override
             public void run() {
                 Set<OwnershipAnnotation> knownOwnerships = userGroupToOwnership.get(userGroup);
-                // do not use setOwnership, we know the user will not change, and we can use the more effective
-                // remove
-                // for userGroupToOwnership after deleting
-                for (OwnershipAnnotation ownership : knownOwnerships) {
-                    final OwnershipAnnotation groupLessOwnership = new OwnershipAnnotation(
-                            new OwnershipImpl(ownership.getAnnotation().getUserOwner(), null),
-                            ownership.getIdOfAnnotatedObject(), ownership.getDisplayNameOfAnnotatedObject());
-                    ownerships.put(ownership.getIdOfAnnotatedObject(), groupLessOwnership);
-                    mongoObjectFactory.storeOwnership(groupLessOwnership);
+                if (knownOwnerships != null) {
+                    // do not use setOwnership, we know the user will not change, and we can use the more effective
+                    // remove
+                    // for userGroupToOwnership after deleting
+                    for (OwnershipAnnotation ownership : knownOwnerships) {
+                        final OwnershipAnnotation groupLessOwnership = new OwnershipAnnotation(
+                                new OwnershipImpl(ownership.getAnnotation().getUserOwner(), null),
+                                ownership.getIdOfAnnotatedObject(), ownership.getDisplayNameOfAnnotatedObject());
+                        ownerships.put(ownership.getIdOfAnnotatedObject(), groupLessOwnership);
+                        mongoObjectFactory.storeOwnership(groupLessOwnership);
+                    }
+                    userGroupToOwnership.remove(userGroup);
                 }
-                userGroupToOwnership.remove(userGroup);
 
                 Set<AccessControlListAnnotation> knownACLEntries = userGroupToAccessControlListAnnotation
                         .get(userGroup);
-                for (AccessControlListAnnotation acl : knownACLEntries) {
-                    internalRemoveUserGroupToACLMapping(userGroup, acl);
-                    mongoObjectFactory.storeAccessControlList(acl);
+                if (knownACLEntries != null) {
+                    for (AccessControlListAnnotation acl : knownACLEntries) {
+                        internalRemoveUserGroupToACLMapping(userGroup, acl);
+                        mongoObjectFactory.storeAccessControlList(acl);
+                    }
+                    userGroupToAccessControlListAnnotation.remove(userGroup);
                 }
-                userGroupToAccessControlListAnnotation.remove(userGroup);
             }
         });
     }
@@ -450,16 +454,19 @@ public class AccessControlStoreImpl implements AccessControlStore {
             @Override
             public void run() {
                 Set<OwnershipAnnotation> knownOwnerships = userToOwnership.get(user);
-                // do not use setOwnership, we know the group will not change, and we can use the more effective remove
-                // for userToOwnership after deleting
-                for (OwnershipAnnotation ownership : knownOwnerships) {
-                    final OwnershipAnnotation userLessOwnership = new OwnershipAnnotation(
-                            new OwnershipImpl(null, ownership.getAnnotation().getTenantOwner()),
-                            ownership.getIdOfAnnotatedObject(), ownership.getDisplayNameOfAnnotatedObject());
-                    ownerships.put(ownership.getIdOfAnnotatedObject(), userLessOwnership);
-                    mongoObjectFactory.storeOwnership(userLessOwnership);
+                if (knownOwnerships != null) {
+                    // do not use setOwnership, we know the group will not change, and we can use the more effective
+                    // remove
+                    // for userToOwnership after deleting
+                    for (OwnershipAnnotation ownership : knownOwnerships) {
+                        final OwnershipAnnotation userLessOwnership = new OwnershipAnnotation(
+                                new OwnershipImpl(null, ownership.getAnnotation().getTenantOwner()),
+                                ownership.getIdOfAnnotatedObject(), ownership.getDisplayNameOfAnnotatedObject());
+                        ownerships.put(ownership.getIdOfAnnotatedObject(), userLessOwnership);
+                        mongoObjectFactory.storeOwnership(userLessOwnership);
+                    }
+                    userToOwnership.remove(user);
                 }
-                userToOwnership.remove(user);
             }
         });
     }
