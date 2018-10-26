@@ -58,7 +58,9 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
     private final String deviceUuid = "00000000-1111-2222-3333-444444444444";
     private final String secret = "ABCDEF";
     private final String competitorName1 = "Max Mustermann";
+    private final String competitorShortName1 = "MM";
     private final String competitorName2 = "Test Competitor";
+    private final String competitorShortName2 = "TC";
 
     @Before
     public void setUp() throws Exception {
@@ -140,13 +142,13 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         when(securityService.getCurrentUser()).thenReturn(user);
 
         Response response = regattasResource.createAndAddCompetitor(closedRegattaName, boatClassName, null, "GER",
-                "#F00", null, null, null, competitorName1, null, deviceUuid, null);
+                "#F00", null, null, null, competitorName1, competitorShortName1, null, deviceUuid, null);
         assertTrue(response.getStatus() + ": " + response.getEntity().toString(),
                 response.getStatus() == Status.OK.getStatusCode());
         assertTrue(regattasResource.getService() == racingEventService);
 
         response = regattasResource.createAndAddCompetitor(closedRegattaName, boatClassName, null, "GER", "#0F0", null,
-                null, null, competitorName2, null, deviceUuid, null);
+                null, null, competitorName2, competitorShortName2, null, deviceUuid, null);
         assertTrue(response.getStatus() + ": " + response.getEntity().toString(),
                 response.getStatus() == Status.OK.getStatusCode());
 
@@ -167,7 +169,7 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         doReturn(securityService).when(regattasResource).getService(SecurityService.class);
         setUser(null);
         Response response = regattasResource.createAndAddCompetitor(openRegattaName, boatClassName, null, "GER", "#F00",
-                null, null, null, "Max Mustermann", null, deviceUuid, secret);
+                null, null, null, competitorName1, competitorShortName1, null, deviceUuid, secret);
         assertTrue(response.getStatus() + ": " + response.getEntity().toString(),
                 response.getStatus() == Status.OK.getStatusCode());
         assertTrue(regattasResource.getService() == racingEventService);
@@ -182,7 +184,7 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         setUser(null);
 
         Response response = regattasResource.createAndAddCompetitor(openRegattaName, boatClassName, null, "GER", "#F00",
-                null, null, null, "Max Mustermann", null, deviceUuid, "WRONGSECRET");
+                null, null, null, competitorName1, competitorShortName1, null, deviceUuid, "WRONGSECRET");
         assertTrue(response.getStatus() + ": " + response.getEntity().toString(),
                 response.getStatus() == Status.FORBIDDEN.getStatusCode());
     }
@@ -197,7 +199,7 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         Regatta regatta = racingEventService.getRegattaByName(openRegattaName);
 
         Response response = regattasResource.createAndAddCompetitor(openRegattaName, boatClassName, null, "GER", "#F00",
-                null, null, null, "Max Mustermann", null, deviceUuid, secret);
+                null, null, null, competitorName1, competitorShortName1, null, deviceUuid, secret);
         assertTrue(response.getStatus() + ": " + response.getEntity().toString(),
                 response.getStatus() == Status.OK.getStatusCode());
         assertTrue(regattasResource.getService() == racingEventService);
@@ -220,10 +222,12 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
                         .filter(e -> e instanceof RegattaLogDeviceCompetitorMappingEvent).findFirst().get()).getDevice()
                                 .getStringRepresentation());
         assertEquals(Color.RED, readCompetitor.getColor());
+        assertEquals(competitorName1, readCompetitor.getName());
+        assertEquals(competitorShortName1, readCompetitor.getShortName());
 
         // Same deviceUuid for registration should fail
         Response response = regattasResource.createAndAddCompetitor(regatta.getName(), boatClassName, null, "GER",
-                "#F00", null, null, null, "Max Mustermann", null, deviceUuid, secret);
+                "#F00", null, null, null, "XXX", "XXX", null, deviceUuid, secret);
         assertTrue("Reponse http status should be forbidden (403) but is " + response.getStatus(),
                 response.getStatus() == Status.FORBIDDEN.getStatusCode());
     }

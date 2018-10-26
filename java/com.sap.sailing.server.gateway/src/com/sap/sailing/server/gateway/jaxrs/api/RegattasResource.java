@@ -349,8 +349,8 @@ public class RegattasResource extends AbstractSailingServerResource {
 
     private Response createAndAddCompetitor(String regattaName, String nationalityThreeLetterIOCCode, String rgbColor,
             Double timeOnTimeFactor, Long timeOnDistanceAllowancePerNauticalMileAsMillis, String searchTag,
-            String competitorName, String competitorEmail, Function<String, DynamicBoat> boatObtainer,
-            String deviceUuid, String registrationLinkSecret) {
+            String competitorName, String competitorShortName, String competitorEmail,
+            Function<String, DynamicBoat> boatObtainer, String deviceUuid, String registrationLinkSecret) {
 
         final Subject subject = SecurityUtils.getSubject();
         final User user = getSecurityService().getCurrentUser();
@@ -367,7 +367,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             // TODO: this could be also a selfregistration? perhaps decide about deviceUuid
             registerCompetitor = true;
             eCompetitorName = competitorName;
-            eCompetitorShortName = competitorName;
+            eCompetitorShortName = competitorShortName == null ? eCompetitorName : competitorShortName;
             eCompetitorEmail = competitorEmail;
         } else if (subject.isAuthenticated() && regatta.getCompetitorRegistrationType().isOpen()) {
             // case 2: "unprivileged" authenticated user is registering
@@ -379,7 +379,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                 return getBadRegattaRegistrationValidationErrorResponse("invalid user (missing)");
             }
             eCompetitorName = competitorName != null ? competitorName : user.getFullName();
-            eCompetitorShortName = user.getName();
+            eCompetitorShortName = competitorShortName == null ? user.getName() : competitorShortName;
             eCompetitorEmail = competitorEmail != null ? competitorEmail : user.getEmail();
             // case 2.1: with device
             checkInCompetitor = deviceUuid != null;
@@ -391,7 +391,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             registerCompetitor = true;
             checkInCompetitor = true;
             eCompetitorName = competitorName;
-            eCompetitorShortName = competitorName;
+            eCompetitorShortName = competitorShortName == null ? eCompetitorName : competitorShortName;
             eCompetitorEmail = competitorEmail;
         } else {
             return getBadRegattaRegistrationTypeErrorResponse(regattaName);
@@ -434,8 +434,8 @@ public class RegattasResource extends AbstractSailingServerResource {
                     /* coach */ null);
             final CompetitorWithBoat competitor = getService().getCompetitorAndBoatStore()
                     .getOrCreateCompetitorWithBoat(UUID.randomUUID(), eCompetitorName,
-                            /* shortName */ eCompetitorShortName, color, eCompetitorEmail,
-                            /* flagImageURI */ null, team, timeOnTimeFactor,
+                            /* shortName */ eCompetitorShortName, color, eCompetitorEmail, /* flagImageURI */ null,
+                            team, timeOnTimeFactor,
                             timeOnDistanceAllowancePerNauticalMileAsMillis == null ? null
                                     : new MillisecondsDurationImpl(timeOnDistanceAllowancePerNauticalMileAsMillis),
                             searchTag, boat);
@@ -466,6 +466,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             @QueryParam("displayColor") String displayColor, @QueryParam("timeontimefactor") Double timeOnTimeFactor,
             @QueryParam("timeondistanceallowancepernauticalmileasmillis") Long timeOnDistanceAllowancePerNauticalMileAsMillis,
             @QueryParam("searchtag") String searchTag, @QueryParam("competitorName") String competitorName,
+            @QueryParam("competitorShortName") String competitorShortName,
             @QueryParam("competitorEmail") String competitorEmail, @QueryParam("deviceUuid") String deviceUuid,
             @QueryParam("secret") String registrationLinkSecret) {
         Response response;
@@ -474,7 +475,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         } else {
             response = createAndAddCompetitor(regattaName, nationalityThreeLetterIOCCode, displayColor,
                     timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMileAsMillis, searchTag, competitorName,
-                    competitorEmail,
+                    competitorShortName, competitorEmail,
                     shortName -> new BoatImpl(UUID.randomUUID(), shortName, getService().getBaseDomainFactory()
                             .getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */ true), sailId),
                     deviceUuid, registrationLinkSecret);
@@ -491,6 +492,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             @QueryParam("displayColor") String displayColor, @QueryParam("timeontimefactor") Double timeOnTimeFactor,
             @QueryParam("timeondistanceallowancepernauticalmileasmillis") Long timeOnDistanceAllowancePerNauticalMileAsMillis,
             @QueryParam("searchtag") String searchTag, @QueryParam("competitorName") String competitorName,
+            @QueryParam("competitorShortName") String competitorShortName,
             @QueryParam("competitorEmail") String competitorEmail, @QueryParam("deviceUuid") String deviceUuid,
             @QueryParam("secret") String registrationLinkSecret) {
         Response response;
@@ -500,7 +502,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         } else {
             response = createAndAddCompetitor(regattaName, nationalityThreeLetterIOCCode, displayColor,
                     timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMileAsMillis, searchTag, competitorName,
-                    competitorEmail, t -> boat, deviceUuid, registrationLinkSecret);
+                    competitorShortName, competitorEmail, t -> boat, deviceUuid, registrationLinkSecret);
         }
         return response;
     }
