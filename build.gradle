@@ -13,15 +13,16 @@ buildscript {
         }
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:3.1.4"
+        classpath 'com.android.tools.build:gradle:3.2.1'
         classpath "com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.3"
     }
-}
-if (!project.hasProperty("xmake")) {
-    plugins {
-        id "com.diffplug.gradle.spotless" version "3.14.0"
+    repositories {
+        google()
     }
 }
+// plugins {
+//     id "com.diffplug.gradle.spotless" version "3.14.0"
+// }
 allprojects {
     if (project.hasProperty("xmake")) {
         repositories {
@@ -42,13 +43,13 @@ allprojects {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-    defaultTasks 'clean', 'assemble', 'install'
+    defaultTasks 'clean', 'assemble'
 }
 
 // dependency versions for all sub modules
 ext {
     // regular
-    buildTools = "28.0.2"
+    buildTools = "28.0.3"
     compileSdk = 28
     minSdk = 16
     targetSdk = 28
