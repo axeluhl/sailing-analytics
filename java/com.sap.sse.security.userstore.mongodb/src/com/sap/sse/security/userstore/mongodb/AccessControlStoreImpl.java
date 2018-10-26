@@ -82,7 +82,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
                         internalAddACL(acl);
                     }
                     for (OwnershipAnnotation ownership : domainObjectFactory.loadAllOwnerships(userStore)) {
-                        mapUserAndUserGroupToOwnership(ownership);
+                        internalSetOwnershipAndmapUserAndUserGroupToOwnership(ownership);
                     }
                 }
 
@@ -288,7 +288,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
                 // first removing it, prevents the necessity to do a delta update
                 removeUserAndUserGroupToOwnershipMapping(ownership);
                 // and add it to the new ownership
-                mapUserAndUserGroupToOwnership(ownership);
+                internalSetOwnershipAndmapUserAndUserGroupToOwnership(ownership);
             }
         });
         // and that it is finally written
@@ -296,7 +296,7 @@ public class AccessControlStoreImpl implements AccessControlStore {
         return ownership;
     }
 
-    private void mapUserAndUserGroupToOwnership(final OwnershipAnnotation ownership) {
+    private void internalSetOwnershipAndmapUserAndUserGroupToOwnership(final OwnershipAnnotation ownership) {
         ownerships.put(ownership.getIdOfAnnotatedObject(), ownership);
         UserGroup tenantOwner = ownership.getAnnotation().getTenantOwner();
         if (tenantOwner != null) {
