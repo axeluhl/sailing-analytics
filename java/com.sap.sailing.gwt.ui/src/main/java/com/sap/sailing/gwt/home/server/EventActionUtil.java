@@ -65,17 +65,23 @@ public final class EventActionUtil {
         return new LeaderboardContext(context, event, event.getLeaderboardGroups(), overallLeaderboard);
     }
     
-    public static LeaderboardContext getLeaderboardContext(SailingDispatchContext context, UUID eventId, String leaderboardId) {
+    public static LeaderboardContext getLeaderboardContextWithReadPermissions(SailingDispatchContext context, UUID eventId, String leaderboardId) {
         RacingEventService service = context.getRacingEventService();
         Event event = service.getEvent(eventId);
+        context.getSecurityService().checkCurrentUserReadPermission(event);
         final LinkedHashSet<LeaderboardGroup> leaderboardGroups = new LinkedHashSet<>();
         Leaderboard leaderboard = null;
         for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
-            for (Leaderboard l : leaderboardGroup.getLeaderboards()) {
-                if (l.getName().equals(leaderboardId)) {
-                    leaderboardGroups.add(leaderboardGroup);
-                    leaderboard = l;
+            if (context.getSecurityService().hasCurrentUserReadPermission(leaderboardGroup)) {
+                for (Leaderboard l : leaderboardGroup.getLeaderboards()) {
+                    if (context.getSecurityService().hasCurrentUserReadPermission(l)) {
+                        if (l.getName().equals(leaderboardId)) {
+                            leaderboardGroups.add(leaderboardGroup);
+                            leaderboard = l;
+                        }
+                    }
                 }
+
             }
         }
         if (leaderboardGroups.isEmpty()) {
@@ -110,14 +116,15 @@ public final class EventActionUtil {
         return calculateTtlForNonLiveEvent(event, eventState);
     }
 
-    public static <T extends DTO> ResultWithTTL<T> withLiveRaceOrDefaultSchedule(SailingDispatchContext context,
+    public static <T extends DTO> ResultWithTTL<T> withLiveRaceOrDefaultScheduleWithReadPermissions(SailingDispatchContext context,
             UUID eventId, CalculationWithEvent<T> callback) {
-        return withLiveRaceOrDefaultSchedule(context, eventId, callback, null);
+        return withLiveRaceOrDefaultScheduleWithReadPermissions(context, eventId, callback, null);
     }
 
-    public static <T extends DTO> ResultWithTTL<T> withLiveRaceOrDefaultSchedule(SailingDispatchContext context,
+    public static <T extends DTO> ResultWithTTL<T> withLiveRaceOrDefaultScheduleWithReadPermissions(SailingDispatchContext context,
             UUID eventId, CalculationWithEvent<T> callback, T defaultResult) {
         Event event = context.getRacingEventService().getEvent(eventId);
+        context.getSecurityService().checkCurrentUserReadPermission(event);
         EventState eventState = HomeServiceUtil.calculateEventState(event);
         if (eventState == EventState.FINISHED) {
             return new ResultWithTTL<T>(calculateTtlForNonLiveEvent(event, eventState), defaultResult);
@@ -167,25 +174,29 @@ public final class EventActionUtil {
         return Duration.NULL;
     }
     
-    public static void forLeaderboardsOfEvent(SailingDispatchContext context, UUID eventId, LeaderboardCallback callback) {
+    public static void forLeaderboardsOfEventWithReadPermissions(SailingDispatchContext context, UUID eventId, LeaderboardCallback callback) {
         RacingEventService service = context.getRacingEventService();
         Event event = service.getEvent(eventId);
         if (event == null) {
             throw new RuntimeException("Event not found");
         }
-        forLeaderboardsOfEvent(context, event, callback);
+        forLeaderboardsOfEventWithReadPermissions(context, event, callback);
     }
 
-    public static void forLeaderboardsOfEvent(SailingDispatchContext context, Event event, LeaderboardCallback callback) {
+    public static void forLeaderboardsOfEventWithReadPermissions(SailingDispatchContext context, Event event, LeaderboardCallback callback) {
         final Map<Leaderboard, LinkedHashSet<LeaderboardGroup>> leaderboardGroupsForLeaderboard = new HashMap<>();
         for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
-            for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
-                LinkedHashSet<LeaderboardGroup> set = leaderboardGroupsForLeaderboard.get(leaderboard);
-                if (set == null) {
-                    set = new LinkedHashSet<>();
-                    leaderboardGroupsForLeaderboard.put(leaderboard, set);
+            if (context.getSecurityService().hasCurrentUserReadPermission(leaderboardGroup)) {
+                for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+                    if (context.getSecurityService().hasCurrentUserReadPermission(leaderboard)) {
+                        LinkedHashSet<LeaderboardGroup> set = leaderboardGroupsForLeaderboard.get(leaderboard);
+                        if (set == null) {
+                            set = new LinkedHashSet<>();
+                            leaderboardGroupsForLeaderboard.put(leaderboard, set);
+                        }
+                        set.add(leaderboardGroup);
+                    }
                 }
-                set.add(leaderboardGroup);
             }
         }
         for (Entry<Leaderboard, LinkedHashSet<LeaderboardGroup>> e : leaderboardGroupsForLeaderboard.entrySet()) {
@@ -203,16 +214,16 @@ public final class EventActionUtil {
         }
     }
     
-    public static void forRacesOfEvent(final SailingDispatchContext context, UUID eventId, final RaceCallback callback) {
-        forLeaderboardsOfEvent(context, eventId, new LeaderboardCallback() {
+    public static void forRacesOfEventWithReadPermissions(final SailingDispatchContext context, UUID eventId, final RaceCallback callback) {
+        forLeaderboardsOfEventWithReadPermissions(context, eventId, new LeaderboardCallback() {
             @Override
             public void doForLeaderboard(LeaderboardContext leaderboardContext) {
-                leaderboardContext.forRaces(callback);
+                leaderboardContext.forRacesWithReadPermissions(callback);
             }
         });
     }
     
-    public static void forRacesOfRegatta(SailingDispatchContext context, UUID eventId, String regattaName, RaceCallback callback) {
-        getLeaderboardContext(context, eventId, regattaName).forRaces(callback);
+    public static void forRacesOfRegattaWithReadPermissions(SailingDispatchContext context, UUID eventId, String regattaName, RaceCallback callback) {
+        getLeaderboardContextWithReadPermissions(context, eventId, regattaName).forRacesWithReadPermissions(callback);
     }
 }

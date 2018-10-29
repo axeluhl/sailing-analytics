@@ -34,5 +34,6 @@ Require-Bundle: com.sap.sailing.server,
  com.sap.sse.security,
  org.apache.shiro.web;bundle-version="1.2.2",
  org.apache.shiro.core;bundle-version="1.2.2",
- javax.servlet;bundle-version="3.1.0"
+ javax.servlet;bundle-version="3.1.0",
+ com.sap.sse.security.common
 Automatic-Module-Name: com.sap.sailing.server.testsupport

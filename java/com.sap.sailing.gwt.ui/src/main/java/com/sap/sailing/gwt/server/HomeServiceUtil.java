@@ -52,6 +52,7 @@ import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 import com.sap.sse.gwt.dispatch.shared.exceptions.ServerDispatchException;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.MediaDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
@@ -454,11 +455,12 @@ public final class HomeServiceUtil {
         return courseArea == null ? null : courseArea.getId().toString();
     }
     
-    public static void forAllPublicEvents(RacingEventService service, HttpServletRequest request,
+    public static void forAllPublicEventsWithReadPermission(RacingEventService service, HttpServletRequest request,
+            SecurityService securityService,
             EventVisitor... visitors) throws DispatchException {
         URL requestedBaseURL = getRequestBaseURL(request);
         for (Event event : service.getAllEvents()) {
-            if(event.isPublic()) {
+            if (event.isPublic() && securityService.hasCurrentUserReadPermission(event)) {
                 for(EventVisitor visitor : visitors) {
                     visitor.visit(event, false, requestedBaseURL);
                 }
@@ -472,7 +474,7 @@ public final class HomeServiceUtil {
             URL baseURL = getBaseURL(serverRef.getURL());
             if (remoteEvents != null) {
                 for (EventBase remoteEvent : remoteEvents) {
-                    if(remoteEvent.isPublic()) {
+                    if (remoteEvent.isPublic() && securityService.hasCurrentUserReadPermission(remoteEvent)) {
                         for(EventVisitor visitor : visitors) {
                             visitor.visit(remoteEvent, true, baseURL);
                         }

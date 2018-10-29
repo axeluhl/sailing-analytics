@@ -19,7 +19,8 @@ public class GetEventListViewAction implements SailingAction<EventListViewDTO>, 
     @GwtIncompatible
     public EventListViewDTO execute(SailingDispatchContext context) {
         EventListDataCalculator eventListDataCalculator = new EventListDataCalculator(context.getRacingEventService());
-        HomeServiceUtil.forAllPublicEvents(context.getRacingEventService(), context.getRequest(),
+        HomeServiceUtil.forAllPublicEventsWithReadPermission(context.getRacingEventService(), context.getRequest(),
+                context.getSecurityService(),
                 eventListDataCalculator);
         return eventListDataCalculator.getResult();
     }

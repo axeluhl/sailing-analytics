@@ -88,6 +88,11 @@ public class SailingDispatchContextImpl implements SailingDispatchContext {
     }
     
     @Override
+    public SecurityService getSecurityService() {
+        return securityService;
+    }
+
+    @Override
     public URL getRequestBaseURL() throws DispatchException {
         return HomeServiceUtil.getRequestBaseURL(request);
     }
