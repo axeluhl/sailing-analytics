@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
@@ -41,6 +42,8 @@ public class WhatsNewDialogPanel extends Composite {
     }
 
     public WhatsNewDialogPanel(String message, DialogCallback<Void> callback, PopupPanel parent) {
+        DialogResources.INSTANCE.css().ensureInjected();
+        SharedResources.INSTANCE.mainCss().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         this.callback = callback;
         this.parent = parent;

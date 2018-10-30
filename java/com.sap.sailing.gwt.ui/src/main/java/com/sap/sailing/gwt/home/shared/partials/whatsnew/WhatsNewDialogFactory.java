@@ -8,7 +8,6 @@ import com.google.gwt.place.shared.PlaceController;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.PopupPanel;
-import com.sap.sailing.gwt.common.client.SharedResources;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewResources;
@@ -31,8 +30,6 @@ public final class WhatsNewDialogFactory {
     }
 
     private static void showWhatsNewDialog(PlaceController placeController) {
-        DialogResources.INSTANCE.css().ensureInjected();
-        SharedResources.INSTANCE.mainCss().ensureInjected();
         PopupPanel dialog = new PopupPanel();
         WhatsNewDialogPanel confirmDialogPanel = new WhatsNewDialogPanel(StringMessages.INSTANCE.whatsNewDialog(),
                 new DialogCallback<Void>() {
