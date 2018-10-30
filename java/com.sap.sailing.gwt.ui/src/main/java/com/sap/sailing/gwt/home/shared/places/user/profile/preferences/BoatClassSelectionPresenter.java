@@ -1,10 +1,10 @@
-package com.sap.sailing.gwt.home.shared.partials.multiselection;
+package com.sap.sailing.gwt.home.shared.places.user.profile.preferences;
 
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionBoatClassDataProvider.Display;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionPresenter;
 
-public interface SuggestedMultiSelectionBoatClassDataProvider
-        extends SuggestedMultiSelectionDataProvider<BoatClassDTO, Display> {
+public interface BoatClassSelectionPresenter
+        extends SuggestedMultiSelectionPresenter<BoatClassDTO, BoatClassSelectionPresenter.Display> {
     
     void setNotifyAboutUpcomingRaces(boolean notifyAboutUpcomingRaces);
     
@@ -12,7 +12,7 @@ public interface SuggestedMultiSelectionBoatClassDataProvider
     
     void initNotifications(boolean notifyAboutUpcomingRaces, boolean notifyAboutResults);
     
-    interface Display extends SuggestedMultiSelectionDataProvider.Display<BoatClassDTO> {
+    interface Display extends SuggestedMultiSelectionPresenter.Display<BoatClassDTO> {
         
         void setNotifyAboutUpcomingRaces(boolean notifyAboutUpcomingRaces);
         

@@ -31,6 +31,10 @@
     padding: 1.4em .666666666666667em .733333333333333em 1.333333333333333em;
 }
 
+.textCellWordWrap {
+    white-space: normal;
+}
+
 .buttonCell {
     text-align: right;
     vertical-align: middle;

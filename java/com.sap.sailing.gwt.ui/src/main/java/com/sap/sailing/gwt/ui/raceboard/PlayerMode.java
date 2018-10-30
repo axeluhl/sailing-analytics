@@ -41,6 +41,7 @@ public class PlayerMode extends AbstractRaceBoardMode {
             @Override
             public void onSettingsReloaded(SingleRaceLeaderboardSettings patchedSettings) {
                 leaderboardPanel.updateSettings(patchedSettings);
+                PlayerMode.super.onInitializationFinished();
             }
             
         });

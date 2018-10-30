@@ -40,6 +40,7 @@ import com.sap.sailing.server.RacingEventServiceMXBean;
 import com.sap.sailing.server.impl.preferences.model.BoatClassNotificationPreferences;
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreferences;
 import com.sap.sailing.server.impl.preferences.model.StoredDataMiningQueryPreferences;
+import com.sap.sailing.server.impl.preferences.model.SailorProfilePreferences;
 import com.sap.sailing.server.notification.impl.SailingNotificationServiceImpl;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCacheImpl;
@@ -189,10 +190,14 @@ public class Activator implements BundleActivator {
         registrations.add(context.registerService(PreferenceConverter.class,
                 new GenericJSONPreferenceConverter<>(() -> new BoatClassNotificationPreferences(racingEventService)),
                 properties));
-
         properties.put(PreferenceConverter.KEY_PARAMETER_NAME, StoredDataMiningQueryPreferences.PREF_NAME);
         registrations.add(context.registerService(PreferenceConverter.class,
                 new GenericJSONPreferenceConverter<>(() -> new StoredDataMiningQueryPreferences()), properties));
+        properties.put(PreferenceConverter.KEY_PARAMETER_NAME, SailorProfilePreferences.PREF_NAME);
+        registrations.add(context.registerService(PreferenceConverter.class,
+                new GenericJSONPreferenceConverter<>(
+                        () -> new SailorProfilePreferences(racingEventService.getCompetitorAndBoatStore())),
+                properties));
     }
 
     public static BundleContext getContext() {
