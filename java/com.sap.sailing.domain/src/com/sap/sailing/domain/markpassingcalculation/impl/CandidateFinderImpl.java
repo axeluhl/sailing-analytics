@@ -554,16 +554,20 @@ public class CandidateFinderImpl implements CandidateFinder {
                 new ArrayList<Candidate>(), new ArrayList<Candidate>());
         TreeSet<GPSFix> affectedFixes = new TreeSet<GPSFix>(comp);
         GPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
-        for (GPSFix fix : fixes) {
+        for (GPSFixMoving fix : fixes) {
             if (timeRangeForValidCandidates.getTimeRangeOrNull() != null && timeRangeForValidCandidates.getTimeRangeOrNull().includes(fix.getTimePoint())) {
                 affectedFixes.add(fix);
-                GPSFix fixBefore;
-                GPSFix fixAfter;
+                GPSFix fixBefore = null;
+                GPSFix fixAfter = null;
+                final boolean fixIsValid;
                 track.lockForRead();
                 try {
-                    TimePoint timePoint = fix.getTimePoint();
-                    fixBefore = track.getLastFixBefore(timePoint);
-                    fixAfter = track.getFirstFixAfter(timePoint);
+                    fixIsValid = track.isValid(fix);
+                    if (fixIsValid) {
+                        TimePoint t = fix.getTimePoint();
+                        fixBefore = track.getLastFixBefore(t);
+                        fixAfter = track.getFirstFixAfter(t);
+                    }
                 } finally {
                     track.unlockAfterRead();
                 }

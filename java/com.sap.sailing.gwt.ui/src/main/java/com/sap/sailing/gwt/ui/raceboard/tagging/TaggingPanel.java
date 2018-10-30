@@ -645,9 +645,19 @@ public class TaggingPanel extends ComponentWithoutSettings
 
     /**
      * Updates {@link TagListProvider#getAllTags() local list of tags} when response of {@link SailingServiceAsync
-     * SailingService} gets dispatched to all listeners by {@link RaceTimesInfoProvider}. {@link SailingServiceAsync
-     * SailingService} sends only difference of tags in comparison based on the <code>createdAt</code>-timestamp of the
-     * {@link RaceTimesInfoProvider#latestReceivedTagTimes latest received tag events}.
+     * SailingService} gets dispatched to all listeners by {@link RaceTimesInfoProvider} and highlights shared tag in
+     * case a tag is shared via URL. {@link SailingServiceAsync SailingService} sends only difference of tags in
+     * comparison based on the <code>createdAt</code>-timestamp of the
+     * {@link RaceTimesInfoProvider#latestReceivedTagTimes latest received tag events}. <br/>
+     * <br/>
+     * <b>Notice for shared tags:</b><br/>
+     * There is a mismatch with the key of tags in general in comparison to shared tags which get highlighted by this
+     * method. Tags use every attribute except for createdAt and revokedAt time points to identify them as the same tag
+     * without using a generated custom ID (see also {@link TagDTO#equals(Object) equals()}). Appending these parameters
+     * to the URL is unnecessary and may create a pretty long URL when sharing a tag. To prevent this, only title and
+     * race time point are part of the URL parameter. The problem with this solution is that a wrong tag might be
+     * highlighted instead of the shared one when multiple tags have the same title and race time point. We decided to
+     * ignore this corner case and highlight the first matching tag (see bug 4104, comment 34).
      */
     @Override
     public void raceTimesInfosReceived(Map<RegattaAndRaceIdentifier, RaceTimesInfoDTO> raceTimesInfo,
@@ -695,10 +705,8 @@ public class TaggingPanel extends ComponentWithoutSettings
                     preventTimeJumpAtSelectionChangeForOnce = true;
                     updateContent();
                 }
-                // After tags were added for the first time, find tag which matches the URL Parameter "tag", highlight
-                // it and jump to its logical timepoint
-                // Loading of tags has to be enabled first, that is why raceInfo.getTags() might be null
-                // and so the highlighting of tags must wait till raceInfo.getTags() is not null
+                // Search for tag which matches the URL Parameter "tag", highlight the corresponding tag and jump to its
+                // logical race time point after tags have been loaded for the first time.
                 if (tagHasNotBeenHighlightedYet && raceInfo.getTags() != null) {
                     tagHasNotBeenHighlightedYet = false;
                     if (timePointToHighlight != null) {

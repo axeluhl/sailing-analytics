@@ -1,15 +1,19 @@
 package com.sap.sailing.gwt.home.shared.app;
 
+import java.util.UUID;
+
 import com.google.gwt.place.shared.PlaceController;
 import com.sap.sailing.gwt.home.desktop.places.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.desktop.places.contact.ContactPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.RegattaOverviewPlace;
+import com.sap.sailing.gwt.home.desktop.places.qrcode.QRCodePlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
 import com.sap.sailing.gwt.home.shared.places.event.EventDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.events.EventsPlace;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.AbstractSeriesPlace;
+import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesContext;
 import com.sap.sailing.gwt.home.shared.places.fakeseries.SeriesDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.imprint.ImprintPlace;
 import com.sap.sailing.gwt.home.shared.places.morelogininformation.MoreLoginInformationPlace;
@@ -60,6 +64,11 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
         return createGlobalPlaceNavigation(new ContactPlace());
     }
 
+    public PlaceNavigation<QRCodePlace> getQRCodeNavigation(UUID eventId, UUID competitorId, String leaderboardName,
+            String checkInUrl) {
+        return createGlobalPlaceNavigation(new QRCodePlace(eventId, competitorId, leaderboardName, checkInUrl));
+    }
+
     public PlaceNavigation<ImprintPlace> getImprintNavigation() {
         return createGlobalPlaceNavigation(new ImprintPlace());
     }
@@ -75,9 +84,9 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
         return createPlaceNavigation(baseUrl, isOnRemoteServer, place);
     }
 
-    public PlaceNavigation<SeriesDefaultPlace> getEventSeriesNavigation(String seriesId, String baseUrl,
+    public PlaceNavigation<SeriesDefaultPlace> getEventSeriesNavigation(SeriesContext ctx, String baseUrl,
             boolean isOnRemoteServer) {
-        SeriesDefaultPlace place = new SeriesDefaultPlace(seriesId);
+        SeriesDefaultPlace place = new SeriesDefaultPlace(ctx);
         return createPlaceNavigation(baseUrl, isOnRemoteServer, place);
     }
 

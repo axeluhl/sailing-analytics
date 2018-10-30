@@ -3,8 +3,9 @@ package com.sap.sailing.gwt.home.communication.event;
 import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
+import com.sap.sse.gwt.dispatch.shared.commands.Result;
 
-public class SimpleCompetitorWithIdDTO extends SimpleCompetitorDTO {
+public class SimpleCompetitorWithIdDTO extends SimpleCompetitorDTO implements Result {
 
     private static final long serialVersionUID = -1236159499763467614L;
 

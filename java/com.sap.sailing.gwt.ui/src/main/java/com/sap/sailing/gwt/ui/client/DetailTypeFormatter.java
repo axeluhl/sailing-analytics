@@ -142,6 +142,8 @@ public class DetailTypeFormatter {
             return stringMessages.penaltyCircle();
         case RACE_DISPLAY_LEGS:
             return stringMessages.legs();
+        case RACE_DISPLAY_BOATS:
+            return stringMessages.boats();
         case RACE_CURRENT_LEG:
             return stringMessages.currentLeg();
         case LEG_TIME_TRAVELED:
@@ -510,6 +512,7 @@ public class DetailTypeFormatter {
         case LEG_RANK_GAIN:
         case NUMBER_OF_MANEUVERS:
         case RACE_DISPLAY_LEGS:
+        case RACE_DISPLAY_BOATS:
         case LEG_SIDE_TO_WHICH_MARK_AT_LEG_START_WAS_ROUNDED:
         case CHART_BEAT_ANGLE:
         case OVERALL_TIME_ON_TIME_FACTOR:
@@ -622,6 +625,8 @@ public class DetailTypeFormatter {
         case RACE_CURRENT_LEG:
             return stringMessages.currentLegTooltip();
         case RACE_DISPLAY_LEGS:
+            return "";
+        case RACE_DISPLAY_BOATS:
             return "";
         case LEG_DISTANCE_TRAVELED:
             return stringMessages.distanceTraveledTooltip();

@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.shared.places.fakeseries;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import com.google.gwt.place.shared.Place;
 import com.sap.sailing.gwt.common.client.AbstractMapTokenizer;
@@ -21,7 +22,8 @@ public abstract class AbstractSeriesPlace extends Place {
     }
 
     public AbstractSeriesPlace(String eventUuidAsString) {
-        this.ctx = new SeriesContext(eventUuidAsString);
+        UUID asUUID = UUID.fromString(eventUuidAsString);
+        this.ctx = SeriesContext.createWithSeriesId(asUUID);
     }
 
     public String getTitle(String eventName) {
@@ -29,20 +31,35 @@ public abstract class AbstractSeriesPlace extends Place {
     }
 
     public String getSeriesUuidAsString() {
-        return ctx.getSeriesId();
+        return ctx.getSeriesId().toString();
     }
     
     public static abstract class Tokenizer<PLACE extends AbstractSeriesPlace> extends AbstractMapTokenizer<PLACE> {
         private final static String PARAM_EVENTID = "seriesId";
-
+	private final static String PARAM_LEADERBOARD_GROUP_UUID = "leaderboardGroupId";
+       
         protected PLACE getPlaceFromParameters(Map<String, Set<String>> parameters) {
-            return getRealPlace(new SeriesContext(parameters.get(PARAM_EVENTID).stream().findFirst().orElse("")));
+            String leaderboardGroupIdRaw = parameters.get(PARAM_LEADERBOARD_GROUP_UUID).stream().findFirst().orElse("");
+            SeriesContext ctx;
+            if (leaderboardGroupIdRaw != null) {
+                ctx = SeriesContext.createWithLeaderboardGroupId(UUID.fromString(leaderboardGroupIdRaw));
+            } else {
+                String eventIdRaw = parameters.get(PARAM_EVENTID).stream().findFirst().orElse("");
+                ctx = SeriesContext.createWithSeriesId(UUID.fromString(eventIdRaw));
+            }
+            return getRealPlace(ctx);
         }
         
         protected Map<String, Set<String>> getParameters(PLACE place) {
             Map<String, Set<String>> parameters = new HashMap<>();
             SeriesContext context = place.getCtx();
-            Util.addToValueSet(parameters, PARAM_EVENTID, context.getSeriesId());
+            if(context.getLeaderboardGroupId() != null) {
+               Util.addToValueSet(parameters, PARAM_LEADERBOARD_GROUP_UUID, context.getLeaderboardGroupId().toString());
+            }
+            //fallback only generate old urls if not possible otherwise!
+            if(context.getLeaderboardGroupId() == null && context.getSeriesId() != null) {
+                Util.addToValueSet(parameters, PARAM_EVENTID, context.getSeriesId().toString());
+            }
             return parameters;
         }
         
