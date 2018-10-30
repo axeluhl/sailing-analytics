@@ -1,6 +1,8 @@
 package com.sap.sailing.gwt.ui.datamining;
 
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
@@ -20,6 +22,7 @@ import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.presentation.TabbedSailingResultsPresenter;
 import com.sap.sailing.gwt.ui.shared.settings.SailingSettingsConstants;
 import com.sap.sse.datamining.shared.DataMiningSession;
@@ -34,6 +37,8 @@ import com.sap.sse.datamining.ui.client.DataMiningSettingsInfoManager;
 import com.sap.sse.datamining.ui.client.execution.SimpleQueryRunner;
 import com.sap.sse.datamining.ui.client.selection.QueryDefinitionProviderWithControls;
 import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.Storage;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.resources.Highcharts;
@@ -46,6 +51,7 @@ import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAut
 public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
 
     public static final ComponentResources resources = GWT.create(ComponentResources.class);
+    private static final Logger LOG = Logger.getLogger(DataMiningEntryPoint.class.getName());
 
     private final DataMiningServiceAsync dataMiningService = GWT.create(DataMiningService.class);
     private DataMiningSession session;
@@ -129,12 +135,15 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
 
                                         @Override
                                         public void onFailure(Throwable caught) {
-                                            GWT.log(caught.getMessage());
+                                            LOG.log(Level.SEVERE, caught.getMessage(), caught);
                                         }
                                     });
                             break;
                         }
                     }
+                }
+                else {
+                    Notification.notify(StringMessages.INSTANCE.warningBrowserUnsupported(), NotificationType.ERROR);
                 }
                 return splitPanel;
             }
