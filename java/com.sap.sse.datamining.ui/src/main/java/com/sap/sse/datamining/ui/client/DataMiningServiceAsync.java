@@ -11,6 +11,7 @@ import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.SerializationDummy;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.dto.StoredDataMiningQueryDTO;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
@@ -76,4 +77,13 @@ public interface DataMiningServiceAsync {
      * This is necessary, because the type is somehow hidden from GWT. For Further information look at bug 1503.<br />
      */
     void pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy(AsyncCallback<SerializationDummy> callback);
+
+    /** Retrieves the {@link StoredDataMiningQueryDTO}s from the back end. */
+    void retrieveStoredQueries(AsyncCallback<ArrayList<StoredDataMiningQueryDTO>> callback);
+
+    /** Updates or creates a {@link StoredDataMiningQueryDTO} in the back end. */
+    void updateOrCreateStoredQuery(StoredDataMiningQueryDTO query, AsyncCallback<StoredDataMiningQueryDTO> callback);
+
+    /** Removes the {@link StoredDataMiningQueryDTO} if it exists from the back end. */
+    void removeStoredQuery(StoredDataMiningQueryDTO query, AsyncCallback<StoredDataMiningQueryDTO> callback);
 }

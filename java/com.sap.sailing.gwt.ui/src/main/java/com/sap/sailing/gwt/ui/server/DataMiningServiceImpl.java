@@ -39,6 +39,7 @@ import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.SerializationDummy;
 import com.sap.sse.datamining.shared.data.QueryResultState;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.dto.StoredDataMiningQueryDTO;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
@@ -50,7 +51,10 @@ import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.datamining.shared.impl.dto.ReducedDimensionsDTO;
 import com.sap.sse.datamining.ui.client.DataMiningService;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.util.ServiceTrackerFactory;
 
 public class DataMiningServiceImpl extends RemoteServiceServlet implements DataMiningService {
     private static final long serialVersionUID = -7951930891674894528L;
@@ -58,12 +62,21 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     private final BundleContext context;
 
     private final ServiceTracker<DataMiningServer, DataMiningServer> dataMiningServerTracker;
+    private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
+    private final ServiceTracker<UserStore, UserStore> userStoreServiceTracker;
+
+    private final StoredDataMiningQueryPersister storedDataMiningQueryPersistor;
 
     private final DataMiningDTOFactory dtoFactory;
 
     public DataMiningServiceImpl() {
         context = Activator.getDefault();
         dataMiningServerTracker = createAndOpenDataMiningServerTracker(context);
+        securityServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
+        userStoreServiceTracker = ServiceTrackerFactory.createAndOpen(context, UserStore.class);
+
+        storedDataMiningQueryPersistor = new StoredDataMiningQueryPersisterImpl(securityServiceTracker.getService(),
+                userStoreServiceTracker.getService());
         dtoFactory = new DataMiningDTOFactory();
     }
 
@@ -400,5 +413,26 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     @Override
     public SerializationDummy pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy() {
         return null;
+    }
+
+    @Override
+    public ArrayList<StoredDataMiningQueryDTO> retrieveStoredQueries() {
+        return storedDataMiningQueryPersistor.retrieveStoredQueries();
+    }
+
+    @Override
+    public StoredDataMiningQueryDTO updateOrCreateStoredQuery(StoredDataMiningQueryDTO query) {
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.DATA_MINING.getStringPermissionForObjects(DefaultActions.UPDATE, query.getName()));
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.DATA_MINING.getStringPermissionForObjects(DefaultActions.CREATE, query.getName()));
+        return storedDataMiningQueryPersistor.updateOrCreateStoredQuery(query);
+    }
+
+    @Override
+    public StoredDataMiningQueryDTO removeStoredQuery(StoredDataMiningQueryDTO query) {
+        SecurityUtils.getSubject().checkPermission(
+                SecuredDomainType.DATA_MINING.getStringPermissionForObjects(DefaultActions.DELETE, query.getName()));
+        return storedDataMiningQueryPersistor.removeStoredQuery(query);
     }
 }

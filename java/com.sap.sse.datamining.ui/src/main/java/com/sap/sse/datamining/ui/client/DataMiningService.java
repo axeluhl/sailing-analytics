@@ -11,6 +11,7 @@ import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.SerializationDummy;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.dto.StoredDataMiningQueryDTO;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
@@ -64,4 +65,10 @@ public interface DataMiningService extends RemoteService {
     StatisticQueryDefinitionDTO localize(StatisticQueryDefinitionDTO queryDefinition, String localeInfoName);
 
     SerializationDummy pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy();
+
+    ArrayList<StoredDataMiningQueryDTO> retrieveStoredQueries();
+
+    StoredDataMiningQueryDTO updateOrCreateStoredQuery(StoredDataMiningQueryDTO query);
+
+    StoredDataMiningQueryDTO removeStoredQuery(StoredDataMiningQueryDTO query);
 }

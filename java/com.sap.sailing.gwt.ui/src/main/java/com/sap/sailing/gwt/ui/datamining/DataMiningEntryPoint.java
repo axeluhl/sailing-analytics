@@ -90,6 +90,9 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                 queryRunner = new SimpleQueryRunner(null, null, session, dataMiningService, DataMiningEntryPoint.this,
                         queryDefinitionProvider, resultsPresenter);
                 queryDefinitionProvider.addControl(queryRunner.getEntryWidget());
+                StoredDataMiningQueryDataProvider dataProvider = new StoredDataMiningQueryDataProvider(
+                        queryDefinitionProvider, dataMiningService, queryRunner);
+                queryDefinitionProvider.addControl(new StoredDataMiningQueryPanel(dataProvider));
                 /*
                  * Running queries automatically when they've been changed is currently unnecessary, if not even
                  * counterproductive. This removes the query runner settings to prevent that the user can enable the
