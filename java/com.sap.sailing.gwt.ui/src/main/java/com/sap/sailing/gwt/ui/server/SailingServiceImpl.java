@@ -7496,7 +7496,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (expeditionConnector != null) {
             for (final ExpeditionDeviceConfiguration config : expeditionConnector.getDeviceConfigurations()) {
                 if (subject.isPermitted(SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getStringPermissionForObjects(DefaultActions.READ,
-                        config.getDeviceUuid().toString()))) {
+                        WildcardPermissionEncoder.encode(getServerInfo().getServerName(), config.getName())))) {
                     result.add(config);
                 }
             }
@@ -7506,6 +7506,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
+        final Subject subject = SecurityUtils.getSubject();
+        subject.checkPermission(
+                SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getStringPermissionForObjects(DefaultActions.CREATE,
+                        WildcardPermissionEncoder.encode(getServerInfo().getServerName(),
+                                deviceConfiguration.getName())));
+
         // TODO consider replication
         final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
         if (expeditionConnector != null) {
@@ -7515,6 +7521,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
+        final Subject subject = SecurityUtils.getSubject();
+        subject.checkPermission(SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getStringPermissionForObjects(
+                DefaultActions.DELETE,
+                WildcardPermissionEncoder.encode(getServerInfo().getServerName(), deviceConfiguration.getName())));
+
         // TODO consider replication
         final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
         if (expeditionConnector != null) {

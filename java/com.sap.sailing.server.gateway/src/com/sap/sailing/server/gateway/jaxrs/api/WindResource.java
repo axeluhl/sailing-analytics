@@ -43,14 +43,13 @@ public class WindResource extends AbstractSailingServerResource {
         WindSourceType windSourceType = WindSourceType.valueOf((String) requestObject.get("windSourceType"));
         JSONArray answer = new JSONArray();
         String windSourceId = (String) requestObject.get("windSourceId");
-        final WildcardPermissionEncoder wildcardPermissionEncoder = new WildcardPermissionEncoder();
         for (Object regattaNameAndRaceName : regattaNamesAndRaceNames) {
             final JSONObject regattaNameAndRaceNameObject = Helpers.toJSONObjectSafe(regattaNameAndRaceName);
             String regattaName = (String) regattaNameAndRaceNameObject.get("regattaName");
             String raceName = (String) regattaNameAndRaceNameObject.get("raceName");
             // add wind only to those races the subject is permitted to update
             if (SecurityUtils.getSubject().isPermitted(SecuredDomainType.TRACKED_RACE.getStringPermissionForObjects(DefaultActions.UPDATE,
-                    wildcardPermissionEncoder.encodeStringList(regattaName, raceName)))) {
+                            WildcardPermissionEncoder.encode(regattaName, raceName)))) {
                 RegattaNameAndRaceName identifier = new RegattaNameAndRaceName(regattaName, raceName);
                 JSONObject answerForRace = new JSONObject();
                 answerForRace.put("regattaNameAndRaceName", regattaNameAndRaceName);
