@@ -77,17 +77,19 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
     }
 
     private void setupTable() {
+
         sailorProfilesTable.addColumn(profileNameColumn, i18n.profileName());
         // sailorProfilesTable.addColumn(badgeColumn, i18n.badges());
         sailorProfilesTable.addColumn(competitorColumn, i18n.competitors());
         sailorProfilesTable.addColumn(boatClassColumn, i18n.boatClasses());
         sailorProfilesTable.addColumn(navigatorColumn);
         sailorProfilesTable.addColumn(removeColumn);
+        // sailorProfilesTable.setColumnWidth(boatClassColumn, "6em");
 
         addWordwrapStyle(profileNameColumn);
         addWordwrapStyle(badgeColumn);
         addWordwrapStyle(competitorColumn);
-        addWordwrapStyle(boatClassColumn);
+        addBoatclassStyle(boatClassColumn);
 
         addButtonStyle(navigatorColumn);
         navigatorColumn.setFieldUpdater((int index, SailorProfileDTO entry, String value) -> presenter
@@ -117,6 +119,12 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
     private void addWordwrapStyle(Column<SailorProfileDTO, ?> col) {
         col.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().textCellWordWrap() + " "
                 + SailorProfileDesktopResources.INSTANCE.css().clickableColumn());
+    }
+
+    private void addBoatclassStyle(Column<SailorProfileDTO, ?> col) {
+        col.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().textCellWordWrap() + " "
+                + SailorProfileDesktopResources.INSTANCE.css().clickableColumn() + " "
+                + SailorProfileDesktopResources.INSTANCE.css().boatClassColumn());
     }
 
     private void addButtonStyle(Column<?, ?> col) {

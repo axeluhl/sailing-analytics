@@ -96,3 +96,7 @@
 .addButton {
     text-transform: uppercase;
 }
+
+.boatClassColumn {
+    min-width: 120px;
+}

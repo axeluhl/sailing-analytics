@@ -51,5 +51,7 @@ public interface SailorProfileDesktopResources extends ClientBundle {
         String addButton();
 
         String marginLastTable();
+
+        String boatClassColumn();
     }
 }
