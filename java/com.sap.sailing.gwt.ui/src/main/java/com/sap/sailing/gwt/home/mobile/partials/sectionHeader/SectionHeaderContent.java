@@ -161,10 +161,11 @@ public class SectionHeaderContent extends Composite {
     }
 
     private void setClassName(Element element, String className, boolean set) {
-        if (set)
+        if (set) {
             element.addClassName(className);
-        else
+        } else {
             element.removeClassName(className);
+        }
     }
 
     public void appendHeaderElement(Widget widget) {
