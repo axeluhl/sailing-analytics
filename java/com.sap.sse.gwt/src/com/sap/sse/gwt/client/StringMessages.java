@@ -93,5 +93,7 @@ public interface StringMessages extends Messages {
     String dataMiningStoredQueryRemovedSuccessful(String name);
     String dataMiningStoredQueryRemovedFailed(String name);
     String loadOrSaveQueries();
+    String whatsNewDialog();
+    String showChangelog();
 
 }

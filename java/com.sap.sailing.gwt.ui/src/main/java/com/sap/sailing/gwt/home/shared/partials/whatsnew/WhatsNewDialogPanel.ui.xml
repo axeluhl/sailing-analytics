@@ -1,0 +1,23 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+
+    <ui:with field="res" type="com.sap.sailing.gwt.home.shared.partials.whatsnew.DialogResources" />
+    <ui:with field="res2" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+
+    <g:HTMLPanel>
+        <div class="{res.css.message}" ui:field="messageField" />
+        <div class="{res.css.buttonPanel}">
+            <g:Button
+                styleName="{res2.mainCss.button} {res2.mainCss.buttonprimary} {res.css.buttonAdjustments}"
+                ui:field="showChangelogButtonUi">
+                <ui:text from="{i18n.showChangelog}" />
+            </g:Button>
+            <g:Button
+                styleName="{res2.mainCss.button} {res2.mainCss.buttonprimaryoutlined} {res.css.buttonAdjustments}"
+                ui:field="cancelButtonUi">
+                <ui:text from="{i18n.cancel}" />
+            </g:Button>
+        </div>
+    </g:HTMLPanel>
+</ui:UiBinder> 
