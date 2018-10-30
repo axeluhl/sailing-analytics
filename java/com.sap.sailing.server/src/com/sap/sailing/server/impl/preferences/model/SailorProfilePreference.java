@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
-import com.sap.sailing.domain.base.SailorProfile;
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.StringSetting;
 import com.sap.sse.common.settings.generic.UUIDSetting;
@@ -21,13 +20,6 @@ public class SailorProfilePreference extends AbstractGenericSerializableSettings
         uuid = new UUIDSetting("uuid", this);
         name = new StringSetting("name", this);
         competitors = new CompetitorSetSetting("competitors", this, store);
-    }
-
-    public SailorProfilePreference(CompetitorAndBoatStore store, SailorProfile sailorProfile) {
-        this(store);
-        uuid.setValue(sailorProfile.getUuid());
-        name.setValue(sailorProfile.getName());
-        competitors.setValues(sailorProfile.getCompetitors());
     }
 
     /** copy constructor with changed competitors */
