@@ -587,8 +587,8 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
-import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
+import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.MediaUtils;
 import com.sap.sse.shared.media.VideoDescriptor;
@@ -8255,9 +8255,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } catch (RaceLogNotFoundException e) {
             successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "raceLogNotFound"), null,
                     null);
-        } catch (ServiceNotFoundException e) {
-            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "securityServiceNotFound"),
-                    null, null);
         } catch (Exception e) {
             successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "unknownError"), null,
                     null);
@@ -8284,9 +8281,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } catch (RaceLogNotFoundException e) {
             successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "raceLogNotFound"), null,
                     null);
-        } catch (ServiceNotFoundException e) {
-            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "securityServiceNotFound"),
-                    null, null);
         } catch (TagAlreadyExistsException e) {
             successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "tagAlreadyExists"), null,
                     null);

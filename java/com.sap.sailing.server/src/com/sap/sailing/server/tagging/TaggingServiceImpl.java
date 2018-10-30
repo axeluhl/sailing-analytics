@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.AuthorizationException;
-import org.apache.shiro.subject.Subject;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -18,7 +17,6 @@ import com.sap.sailing.domain.base.RaceColumn;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.dto.TagDTO;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tagging.RaceLogNotFoundException;
 import com.sap.sailing.domain.common.tagging.ServiceNotFoundException;
 import com.sap.sailing.domain.common.tagging.TagAlreadyExistsException;
@@ -30,7 +28,6 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.util.ServiceTrackerFactory;
 
 public class TaggingServiceImpl implements TaggingService {
@@ -63,19 +60,14 @@ public class TaggingServiceImpl implements TaggingService {
      * Returns instance of {@link SecurityService} to access the user store.
      * 
      * @return instance of {@link SecurityService}
-     * @throws ServiceNotFoundException
      */
-    private SecurityService getSecurityService() throws ServiceNotFoundException {
-        SecurityService securityService;
-        // securityServiceTracker is null in non-OSGi environment (local JUnit tests) => use static reference of
-        // security service, otherwise use OSGi service tracker
+    private SecurityService getSecurityService() {
+        SecurityService securityService = null;
         if (securityServiceTracker != null) {
             securityService = securityServiceTracker.getService();
-        } else {
-            securityService = com.sap.sse.security.impl.Activator.getSecurityService();
         }
         if (securityService == null) {
-            throw new ServiceNotFoundException("Security service not found!");
+            throw new RuntimeException("Security service not found!");
         }
         return securityService;
     }
@@ -83,11 +75,8 @@ public class TaggingServiceImpl implements TaggingService {
     private void addPublicTag(String leaderboardName, String raceColumnName, String fleetName, String tag,
             String comment, String imageURL, String resizedImageURL, TimePoint raceTimepoint)
             throws RaceLogNotFoundException, TagAlreadyExistsException {
-        // TODO: As soon as permission-vertical branch got merged into master, apply
-        // new permission system at this permission check (see bug 4104, comment 9)
-        // functionality: Check if user has the permission to add RaceLogEvents to RaceLog.
-        SecurityUtils.getSubject()
-                .checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
+        getSecurityService().checkCurrentUserUpdatePermission(racingService.getLeaderboardByName(leaderboardName));
+
         RaceLog raceLog = racingService.getRaceLog(leaderboardName, raceColumnName, fleetName);
         if (raceLog == null) {
             throw new RaceLogNotFoundException();
@@ -138,17 +127,8 @@ public class TaggingServiceImpl implements TaggingService {
                     && tagEvent.getUsername().equals(tag.getUsername())
                     && tagEvent.getLogicalTimePoint().equals(tag.getRaceTimepoint())) {
 
-                // TODO: As soon as permission-vertical branch got merged into master, apply
-                // new permission system at this permission check (see bug 4104, comment 9)
-                // functionality: Check if user has the permission to delete tag from RaceLog (same user or
-                // admin).
-                Subject subject = SecurityUtils.getSubject();
-                subject.checkPermission(
-                        SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
-                if (!((subject.getPrincipal() != null && subject.getPrincipal().equals(tag.getUsername()))
-                        || subject.hasRole("admin"))) {
-                    throw new AuthorizationException();
-                }
+                getSecurityService()
+                        .checkCurrentUserUpdatePermission(racingService.getLeaderboardByName(leaderboardName));
                 raceLog.revokeEvent(tagEvent.getAuthor(), tagEvent, "Revoked");
                 break;
             }
