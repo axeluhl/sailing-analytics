@@ -1596,7 +1596,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 ownershipToCheck == null ? null : ownershipToCheck.getAnnotation(), roleToCheck.getName());
     }
     
-    private boolean hasCurrentUserMetaPermission(WildcardPermission permissionToCheck, Ownership ownership) {
+    @Override
+    public boolean hasCurrentUserMetaPermission(WildcardPermission permissionToCheck, Ownership ownership) {
         if (hasPermissionsProvider == null) {
             logger.warning(
                     "Missing HasPermissionsProvider for meta permission check. Using basic permission check that will produce false negatives in some cases.");

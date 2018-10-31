@@ -500,7 +500,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public SuccessInfo setPermissionsForUser(String username, Iterable<WildcardPermission> permissions) throws UnauthorizedException {
-        // FIXME an additional check is needed to verify that a user may only grant/revoke permissions that he owns
         if (SecurityUtils.getSubject().isPermitted(
                 SecuredSecurityTypes.USER.getStringPermissionForObjects(UserActions.GRANT_PERMISSION, username))
                 && SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER
@@ -519,7 +518,12 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             Util.addAll(permissions, permissionsToAdd);
             Util.removeAll(u.getPermissions(), permissionsToAdd);
             for (WildcardPermission permissionToAdd : permissionsToAdd) {
-                getSecurityService().addPermissionForUser(username, permissionToAdd);
+                OwnershipAnnotation currentUsersOwnerShip = getSecurityService()
+                        .getOwnership(getSecurityService().getCurrentUser().getIdentifier());
+                if (getSecurityService().hasCurrentUserMetaPermission(permissionToAdd,
+                        currentUsersOwnerShip.getAnnotation())) {
+                    getSecurityService().addPermissionForUser(username, permissionToAdd);
+                }
             }
             final String message = "Set roles " + permissions + " for user " + username;
             final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(u, getSecurityService());
