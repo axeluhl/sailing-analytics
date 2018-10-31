@@ -13,7 +13,7 @@ import com.sap.sailing.gwt.home.mobile.places.searchresult.SearchResultViewImpl;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.app.ResettableNavigationPathDisplay;
 import com.sap.sailing.gwt.home.shared.partials.busy.BusyViewImpl;
-import com.sap.sailing.gwt.home.shared.partials.whatsnew.WhatsNewDialogFactory;
+import com.sap.sailing.gwt.home.shared.partials.dialog.whatsnew.WhatsNewDialogFactory;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultClientFactory;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.start.StartPlace;

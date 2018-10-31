@@ -1,8 +1,12 @@
-package com.sap.sailing.gwt.home.shared.partials.whatsnew;
+package com.sap.sailing.gwt.home.shared.partials.dialog.whatsnew;
 
 import com.sap.sse.common.settings.generic.AbstractGenericSerializableSettings;
 import com.sap.sse.common.settings.generic.LongSetting;
 
+/**
+ * Stores the number of characters in the changelog when the last login occured. This is needed to determine whether to
+ * show a 'What's New' dialog to the user after login.
+ */
 public class WhatsNewSettings extends AbstractGenericSerializableSettings {
     private static final long serialVersionUID = 1545042411098078525L;
 

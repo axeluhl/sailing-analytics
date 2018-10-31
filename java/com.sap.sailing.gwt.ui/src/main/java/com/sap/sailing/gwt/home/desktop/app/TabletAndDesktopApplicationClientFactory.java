@@ -21,7 +21,7 @@ import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNa
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewView;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.partials.busy.BusyViewImpl;
-import com.sap.sailing.gwt.home.shared.partials.whatsnew.WhatsNewDialogFactory;
+import com.sap.sailing.gwt.home.shared.partials.dialog.whatsnew.WhatsNewDialogFactory;
 import com.sap.sailing.gwt.home.shared.places.searchresult.SearchResultView;
 import com.sap.sailing.gwt.home.shared.places.solutions.SolutionsPlace.SolutionsNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.user.confirmation.ConfirmationPlace;
