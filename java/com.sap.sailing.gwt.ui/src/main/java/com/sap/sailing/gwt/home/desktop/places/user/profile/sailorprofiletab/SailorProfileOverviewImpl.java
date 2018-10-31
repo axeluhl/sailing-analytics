@@ -99,15 +99,16 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
         removeColumn.setFieldUpdater((int index, SailorProfileDTO dto, String value) -> ConfirmDialogFactory
                 .showConfirmDialog(StringMessages.INSTANCE.sailorProfileRemoveMessage(),
                         StringMessages.INSTANCE.confirmDeletion(), new DialogCallback<Void>() {
-                    @Override
-                    public void ok(Void editedObject) {
-                        presenter.removeSailorProfile(dto.getKey());
-                    }
+                            @Override
+                            public void ok(Void editedObject) {
+                                presenter.removeSailorProfile(dto.getKey());
+                                presenter.getClientFactory().getPlaceController().goTo(new SailorProfilePlace());
+                            }
 
-                    @Override
-                    public void cancel() {
-                    }
-                }));
+                            @Override
+                            public void cancel() {
+                            }
+                        }));
 
         sailorProfilesTable.addCellPreviewHandler(e -> {
             /* no navigation for remove column */
