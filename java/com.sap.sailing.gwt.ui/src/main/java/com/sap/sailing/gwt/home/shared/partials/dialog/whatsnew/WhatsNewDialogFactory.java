@@ -3,16 +3,13 @@ package com.sap.sailing.gwt.home.shared.partials.dialog.whatsnew;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.place.shared.PlaceController;
-import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewResources;
-import com.sap.sailing.gwt.home.shared.partials.dialog.DialogResources;
-import com.sap.sailing.gwt.home.shared.partials.dialog.TwoOptionsDialogPanel;
+import com.sap.sailing.gwt.home.shared.partials.dialog.DialogFactory;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.settings.SettingsToJsonSerializerGWT;
 import com.sap.sse.security.ui.client.UserService;
@@ -34,13 +31,13 @@ public final class WhatsNewDialogFactory {
     public static void registerWithUserService(UserService userService, PlaceController placeController) {
         userService.addUserStatusEventHandler((userDTO, b) -> {
             if (userDTO != null) {
-                showWhatsNewDialogIfNecessary(userService, placeController);
+                showWhatsNewDialogIfNecessaryAndUpdatePreference(userService, placeController);
             }
         }, false);
     }
 
+    /** Shows a What's New Dialog. */
     private static void showWhatsNewDialog(PlaceController placeController) {
-        DialogResources.INSTANCE.css().ensureInjected();
         DialogCallback<Void> dialogCallback = new DialogCallback<Void>() {
             @Override
             public void ok(Void editedObject) {
@@ -52,26 +49,18 @@ public final class WhatsNewDialogFactory {
             }
         };
 
-        PopupPanel dialog = new PopupPanel();
-
-        TwoOptionsDialogPanel dialogPanel = new TwoOptionsDialogPanel(StringMessages.INSTANCE.whatsNewDialogMessage(),
-                StringMessages.INSTANCE.whatsNewDialogTitle(), dialogCallback, dialog);
-        dialogPanel.addStyleName(DialogResources.INSTANCE.css().dialog());
-        dialogPanel.setButtonLabels(StringMessages.INSTANCE.showChangelog(), StringMessages.INSTANCE.cancel());
-
-        dialog.setWidget(dialogPanel);
-        dialog.addStyleName(DialogResources.INSTANCE.css().backgroundPanel());
+        PopupPanel dialog = DialogFactory.createDialog(StringMessages.INSTANCE.whatsNewDialogMessage(),
+                StringMessages.INSTANCE.whatsNewDialogTitle(), false, StringMessages.INSTANCE.showChangelog(),
+                StringMessages.INSTANCE.cancel(), dialogCallback);
         dialog.show();
-
-        dialog.addDomHandler(e -> dialog.hide(), ClickEvent.getType());
-        dialog.sinkEvents(Event.ONCLICK | Event.ONTOUCHEND);
     }
 
     /**
      * Shows a dialog, if the changelog changed for more than {@link #THRESHOLD_WHATS_NEW} characters since the last
      * login of the current user.
      */
-    private static void showWhatsNewDialogIfNecessary(UserService userService, PlaceController placeController) {
+    private static void showWhatsNewDialogIfNecessaryAndUpdatePreference(UserService userService,
+            PlaceController placeController) {
         final long linesInWhatsChangedDocument = WhatsNewResources.INSTANCE.getSailingAnalyticsNotesHtml().getText()
                 .length();
         userService.getPreference(WhatsNewSettings.PREF_NAME, new AsyncCallback<String>() {
