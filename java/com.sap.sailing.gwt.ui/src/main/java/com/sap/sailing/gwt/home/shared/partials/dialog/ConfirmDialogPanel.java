@@ -32,19 +32,23 @@ public class ConfirmDialogPanel extends Composite {
     @UiField
     DivElement messageField;
 
+    @UiField
+    DivElement titleField;
+
     private final DialogCallback<Void> callback;
 
     private final PopupPanel parent;
 
     public ConfirmDialogPanel() {
-        this("", null, null);
+        this("", "", null, null);
     }
 
-    public ConfirmDialogPanel(String message, DialogCallback<Void> callback, PopupPanel parent) {
+    public ConfirmDialogPanel(String message, String title, DialogCallback<Void> callback, PopupPanel parent) {
         initWidget(uiBinder.createAndBindUi(this));
         this.callback = callback;
         this.parent = parent;
         messageField.setInnerText(message);
+        titleField.setInnerText(title);
     }
 
     @UiHandler("yesButton")

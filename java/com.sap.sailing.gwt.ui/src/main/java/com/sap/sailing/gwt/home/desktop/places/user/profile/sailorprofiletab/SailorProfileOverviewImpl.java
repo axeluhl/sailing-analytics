@@ -97,7 +97,8 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
 
         removeColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
         removeColumn.setFieldUpdater((int index, SailorProfileDTO dto, String value) -> ConfirmDialogFactory
-                .showConfirmDialog(StringMessages.INSTANCE.sailorProfileRemoveMessage(), new DialogCallback<Void>() {
+                .showConfirmDialog(StringMessages.INSTANCE.sailorProfileRemoveMessage(),
+                        StringMessages.INSTANCE.confirmDeletion(), new DialogCallback<Void>() {
                     @Override
                     public void ok(Void editedObject) {
                         presenter.removeSailorProfile(dto.getKey());

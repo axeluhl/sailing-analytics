@@ -3,6 +3,7 @@
 
     <ui:with field="res" type="com.sap.sailing.gwt.home.shared.partials.dialog.DialogResources" />
     <g:HTMLPanel>
+        <div class="{res.css.title}" ui:field="titleField" />
         <div class="{res.css.message}" ui:field="messageField" />
         <div class="{res.css.buttonPanel}">
             <g:Button styleName="{res.css.yesButton} {res.css.button}" ui:field="yesButton">Yes</g:Button>

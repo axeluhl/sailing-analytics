@@ -97,8 +97,7 @@ public class SailorProfileOverviewEntry extends Composite {
             e.getNativeEvent().preventDefault();
             e.getNativeEvent().stopPropagation();
             ConfirmDialogFactory.showConfirmDialog(StringMessages.INSTANCE.sailorProfileRemoveMessage(),
-                    new DialogCallback<Void>() {
-
+                    StringMessages.INSTANCE.confirmDeletion(), new DialogCallback<Void>() {
                         @Override
                         public void ok(Void v) {
                             presenter.removeSailorProfile(uuidRef);

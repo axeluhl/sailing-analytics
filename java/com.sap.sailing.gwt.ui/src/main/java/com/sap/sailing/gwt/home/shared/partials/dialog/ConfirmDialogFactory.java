@@ -12,10 +12,11 @@ public final class ConfirmDialogFactory {
      * creates a yes/no {@link ConfirmDialogPanel} with {@link #message}, which calls {@link DialogCallback#ok(Object)}
      * or {@link DialogCallback#cancel()}
      */
-    public static void showConfirmDialog(String message, final DialogCallback<Void> callback) {
+    public static void showConfirmDialog(final String message, final String title,
+            final DialogCallback<Void> callback) {
         DialogResources.INSTANCE.css().ensureInjected();
         PopupPanel dialog = new PopupPanel();
-        ConfirmDialogPanel confirmDialogPanel = new ConfirmDialogPanel(message, callback, dialog);
+        ConfirmDialogPanel confirmDialogPanel = new ConfirmDialogPanel(message, title, callback, dialog);
         dialog.setWidget(confirmDialogPanel);
         confirmDialogPanel.addStyleName(DialogResources.INSTANCE.css().dialog());
         dialog.addStyleName(DialogResources.INSTANCE.css().backgroundPanel());
