@@ -37,17 +37,7 @@ public final class WhatsNewDialogFactory {
     }
 
     /** Shows a What's New Dialog. */
-    private static void showWhatsNewDialog(PlaceController placeController) {
-        DialogCallback<Void> dialogCallback = new DialogCallback<Void>() {
-            @Override
-            public void ok(Void editedObject) {
-                placeController.goTo(new WhatsNewPlace(WhatsNewNavigationTabs.SailingAnalytics));
-            }
-
-            @Override
-            public void cancel() {
-            }
-        };
+    private static void showWhatsNewDialog(PlaceController placeController, DialogCallback<Void> dialogCallback) {
 
         PopupPanel dialog = DialogFactory.createDialog(StringMessages.INSTANCE.whatsNewDialogMessage(),
                 StringMessages.INSTANCE.whatsNewDialogTitle(), false, StringMessages.INSTANCE.showChangelog(),
@@ -68,19 +58,31 @@ public final class WhatsNewDialogFactory {
             @Override
             public void onSuccess(String result) {
                 SettingsToJsonSerializerGWT settingsToJsonSerializerGWT = new SettingsToJsonSerializerGWT();
+
+                DialogCallback<Void> dialogCallback = new DialogCallback<Void>() {
+                    @Override
+                    public void ok(Void editedObject) {
+                        updateOrCreatePreference(linesInWhatsChangedDocument, settingsToJsonSerializerGWT);
+                        placeController.goTo(new WhatsNewPlace(WhatsNewNavigationTabs.SailingAnalytics));
+                    }
+
+                    @Override
+                    public void cancel() {
+                        updateOrCreatePreference(linesInWhatsChangedDocument, settingsToJsonSerializerGWT);
+                    }
+                };
+
                 if (result != null) {
                     // deserialize whats-new-setting
                     WhatsNewSettings pref = settingsToJsonSerializerGWT.deserialize(new WhatsNewSettings(), result);
 
                     if (pref.getNumberOfCharsOnLastLogin() > linesInWhatsChangedDocument + THRESHOLD_WHATS_NEW) {
                         // check if length change is over threshold
-                        updateOrCreatePreference(linesInWhatsChangedDocument, settingsToJsonSerializerGWT);
-                        WhatsNewDialogFactory.showWhatsNewDialog(placeController);
+                        WhatsNewDialogFactory.showWhatsNewDialog(placeController, dialogCallback);
                     }
                 } else {
                     // create preference
-                    updateOrCreatePreference(linesInWhatsChangedDocument, settingsToJsonSerializerGWT);
-                    WhatsNewDialogFactory.showWhatsNewDialog(placeController);
+                    WhatsNewDialogFactory.showWhatsNewDialog(placeController, dialogCallback);
                 }
             }
 
