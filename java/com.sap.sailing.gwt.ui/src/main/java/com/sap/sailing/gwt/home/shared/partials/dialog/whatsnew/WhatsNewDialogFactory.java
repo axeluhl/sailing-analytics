@@ -51,8 +51,8 @@ public final class WhatsNewDialogFactory {
      */
     private static void showWhatsNewDialogIfNecessaryAndUpdatePreference(UserService userService,
             PlaceController placeController) {
-        final long linesInWhatsChangedDocument = WhatsNewResources.INSTANCE.getSailingAnalyticsNotesHtml().getText()
-                .length();
+        final long charactersInWhatsChangedDocument = WhatsNewResources.INSTANCE.getSailingAnalyticsNotesHtml()
+                .getText().length();
         userService.getPreference(WhatsNewSettings.PREF_NAME, new AsyncCallback<String>() {
 
             @Override
@@ -62,13 +62,13 @@ public final class WhatsNewDialogFactory {
                 DialogCallback<Void> dialogCallback = new DialogCallback<Void>() {
                     @Override
                     public void ok(Void editedObject) {
-                        updateOrCreatePreference(linesInWhatsChangedDocument, settingsToJsonSerializerGWT);
+                        updateOrCreatePreference(charactersInWhatsChangedDocument, settingsToJsonSerializerGWT);
                         placeController.goTo(new WhatsNewPlace(WhatsNewNavigationTabs.SailingAnalytics));
                     }
 
                     @Override
                     public void cancel() {
-                        updateOrCreatePreference(linesInWhatsChangedDocument, settingsToJsonSerializerGWT);
+                        updateOrCreatePreference(charactersInWhatsChangedDocument, settingsToJsonSerializerGWT);
                     }
                 };
 
@@ -76,7 +76,7 @@ public final class WhatsNewDialogFactory {
                     // deserialize whats-new-setting
                     WhatsNewSettings pref = settingsToJsonSerializerGWT.deserialize(new WhatsNewSettings(), result);
 
-                    if (pref.getNumberOfCharsOnLastLogin() > linesInWhatsChangedDocument + THRESHOLD_WHATS_NEW) {
+                    if (pref.getNumberOfCharsOnLastLogin() > charactersInWhatsChangedDocument + THRESHOLD_WHATS_NEW) {
                         // check if length change is over threshold
                         WhatsNewDialogFactory.showWhatsNewDialog(placeController, dialogCallback);
                     }
@@ -92,10 +92,10 @@ public final class WhatsNewDialogFactory {
             }
 
             /** Updates or creates a {@link WhatsNewSettings} object. */
-            private void updateOrCreatePreference(long linesInWhatsChangedDocument,
+            private void updateOrCreatePreference(long charactersInWhatsChangedDocument,
                     SettingsToJsonSerializerGWT settingsToJsonSerializerGWT) {
                 String serializedSetting = settingsToJsonSerializerGWT
-                        .serializeToString(new WhatsNewSettings(linesInWhatsChangedDocument));
+                        .serializeToString(new WhatsNewSettings(charactersInWhatsChangedDocument));
                 userService.setPreference(WhatsNewSettings.PREF_NAME, serializedSetting, new AsyncCallback<Void>() {
 
                     @Override
