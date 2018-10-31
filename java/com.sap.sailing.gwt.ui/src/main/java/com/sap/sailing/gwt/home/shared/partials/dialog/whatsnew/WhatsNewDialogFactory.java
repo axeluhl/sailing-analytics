@@ -30,7 +30,7 @@ public final class WhatsNewDialogFactory {
     private WhatsNewDialogFactory() {
     }
 
-    /** automatically shows the whats-new dialog after login, if necessary */
+    /** Automatically shows the whats-new dialog after login, if necessary. */
     public static void registerWithUserService(UserService userService, PlaceController placeController) {
         userService.addUserStatusEventHandler((userDTO, b) -> {
             if (userDTO != null) {
@@ -95,6 +95,12 @@ public final class WhatsNewDialogFactory {
                 }
             }
 
+            @Override
+            public void onFailure(Throwable caught) {
+                LOG.log(Level.SEVERE, caught.getMessage(), caught);
+            }
+
+            /** Updates or creates a {@link WhatsNewSettings} object. */
             private void updateOrCreatePreference(long linesInWhatsChangedDocument,
                     SettingsToJsonSerializerGWT settingsToJsonSerializerGWT) {
                 String serializedSetting = settingsToJsonSerializerGWT
@@ -110,11 +116,6 @@ public final class WhatsNewDialogFactory {
                     public void onSuccess(Void result) {
                     }
                 });
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-                LOG.log(Level.SEVERE, caught.getMessage(), caught);
             }
         });
     }

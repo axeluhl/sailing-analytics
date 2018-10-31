@@ -12,8 +12,8 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 public final class ConfirmDialogFactory {
 
     /**
-     * creates a yes/no {@link TwoOptionsDialogPanel} with {@link #message}, which calls
-     * {@link DialogCallback#ok(Object)} or {@link DialogCallback#cancel()}
+     * Creates a yes/no {@link TwoOptionsDialogPanel} with {@link #message}, which calls
+     * {@link DialogCallback#ok(Object)} or {@link DialogCallback#cancel()}.
      */
     public static void showConfirmDialog(final String message, final String title,
             final DialogCallback<Void> callback) {

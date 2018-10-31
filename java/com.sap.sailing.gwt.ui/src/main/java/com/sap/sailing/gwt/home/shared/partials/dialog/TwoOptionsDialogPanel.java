@@ -13,7 +13,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
- * dialog panel for yes/no confirm dialog which contains a yes button, a no button and a message field with the message
+ * Dialog panel for yes/no confirm dialog which contains a yes button, a no button and a message field with the message
  * in it.
  */
 public class TwoOptionsDialogPanel extends Composite {
@@ -51,13 +51,15 @@ public class TwoOptionsDialogPanel extends Composite {
         titleField.setInnerText(title);
     }
 
+    /** Sets the labels of the {@link #firstButton} and {@link #secondButton}. */
     public void setButtonLabels(String firstButtonText, String secondButtonText) {
         firstButton.setText(firstButtonText);
         secondButton.setText(secondButtonText);
     }
 
+    /** Changes the color of the {@link #firstButton} to red. */
     public void setFirstButtonDestructive() {
-        firstButton.addStyleName(DialogResources.INSTANCE.css().yesButton());
+        firstButton.addStyleName(DialogResources.INSTANCE.css().destructiveButton());
     }
 
     @UiHandler("firstButton")
