@@ -11,8 +11,8 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewResources;
-import com.sap.sailing.gwt.home.shared.partials.dialog.ConfirmDialogPanel;
 import com.sap.sailing.gwt.home.shared.partials.dialog.DialogResources;
+import com.sap.sailing.gwt.home.shared.partials.dialog.TwoOptionsDialogPanel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.settings.SettingsToJsonSerializerGWT;
 import com.sap.sse.security.ui.client.UserService;
@@ -41,23 +41,25 @@ public final class WhatsNewDialogFactory {
 
     private static void showWhatsNewDialog(PlaceController placeController) {
         DialogResources.INSTANCE.css().ensureInjected();
+        DialogCallback<Void> dialogCallback = new DialogCallback<Void>() {
+            @Override
+            public void ok(Void editedObject) {
+                placeController.goTo(new WhatsNewPlace(WhatsNewNavigationTabs.SailingAnalytics));
+            }
+
+            @Override
+            public void cancel() {
+            }
+        };
+
         PopupPanel dialog = new PopupPanel();
-        ConfirmDialogPanel confirmDialogPanel = new ConfirmDialogPanel(StringMessages.INSTANCE.whatsNewDialogMessage(),
-                StringMessages.INSTANCE.whatsNewDialogTitle(), new DialogCallback<Void>() {
-                    @Override
-                    public void ok(Void editedObject) {
-                        placeController.goTo(new WhatsNewPlace(WhatsNewNavigationTabs.SailingAnalytics));
-                    }
 
-                    @Override
-                    public void cancel() {
-                    }
-                }, dialog);
-        dialog.setWidget(confirmDialogPanel);
-        confirmDialogPanel.addStyleName(DialogResources.INSTANCE.css().dialog());
+        TwoOptionsDialogPanel dialogPanel = new TwoOptionsDialogPanel(StringMessages.INSTANCE.whatsNewDialogMessage(),
+                StringMessages.INSTANCE.whatsNewDialogTitle(), dialogCallback, dialog);
+        dialogPanel.addStyleName(DialogResources.INSTANCE.css().dialog());
+        dialogPanel.setButtonLabels(StringMessages.INSTANCE.showChangelog(), StringMessages.INSTANCE.cancel());
 
-        confirmDialogPanel.setButtonLabels(StringMessages.INSTANCE.showChangelog(), StringMessages.INSTANCE.cancel());
-
+        dialog.setWidget(dialogPanel);
         dialog.addStyleName(DialogResources.INSTANCE.css().backgroundPanel());
         dialog.show();
 

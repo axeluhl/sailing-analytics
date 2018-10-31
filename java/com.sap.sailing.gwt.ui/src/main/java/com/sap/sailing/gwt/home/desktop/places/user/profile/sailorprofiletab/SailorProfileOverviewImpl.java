@@ -24,7 +24,7 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.BadgeDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.events.NavigatorColumn;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
-import com.sap.sailing.gwt.home.shared.partials.dialog.ConfirmDialogFactory;
+import com.sap.sailing.gwt.home.shared.partials.dialog.confirm.ConfirmDialogFactory;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileResources;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.view.SailorProfileOverview;

@@ -16,11 +16,11 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
  * dialog panel for yes/no confirm dialog which contains a yes button, a no button and a message field with the message
  * in it.
  */
-public class ConfirmDialogPanel extends Composite {
+public class TwoOptionsDialogPanel extends Composite {
 
     private static ConfirmDialogPanelUiBinder uiBinder = GWT.create(ConfirmDialogPanelUiBinder.class);
 
-    interface ConfirmDialogPanelUiBinder extends UiBinder<Widget, ConfirmDialogPanel> {
+    interface ConfirmDialogPanelUiBinder extends UiBinder<Widget, TwoOptionsDialogPanel> {
     }
 
     @UiField
@@ -39,11 +39,11 @@ public class ConfirmDialogPanel extends Composite {
 
     private final PopupPanel parent;
 
-    public ConfirmDialogPanel() {
+    public TwoOptionsDialogPanel() {
         this("", "", null, null);
     }
 
-    public ConfirmDialogPanel(String message, String title, DialogCallback<Void> callback, PopupPanel parent) {
+    public TwoOptionsDialogPanel(String message, String title, DialogCallback<Void> callback, PopupPanel parent) {
         initWidget(uiBinder.createAndBindUi(this));
         this.callback = callback;
         this.parent = parent;

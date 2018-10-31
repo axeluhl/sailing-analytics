@@ -1,8 +1,10 @@
-package com.sap.sailing.gwt.home.shared.partials.dialog;
+package com.sap.sailing.gwt.home.shared.partials.dialog.confirm;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.sap.sailing.gwt.home.shared.partials.dialog.DialogResources;
+import com.sap.sailing.gwt.home.shared.partials.dialog.TwoOptionsDialogPanel;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
@@ -10,18 +12,20 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 public final class ConfirmDialogFactory {
 
     /**
-     * creates a yes/no {@link ConfirmDialogPanel} with {@link #message}, which calls {@link DialogCallback#ok(Object)}
-     * or {@link DialogCallback#cancel()}
+     * creates a yes/no {@link TwoOptionsDialogPanel} with {@link #message}, which calls
+     * {@link DialogCallback#ok(Object)} or {@link DialogCallback#cancel()}
      */
     public static void showConfirmDialog(final String message, final String title,
             final DialogCallback<Void> callback) {
         DialogResources.INSTANCE.css().ensureInjected();
         PopupPanel dialog = new PopupPanel();
-        ConfirmDialogPanel confirmDialogPanel = new ConfirmDialogPanel(message, title, callback, dialog);
-        dialog.setWidget(confirmDialogPanel);
-        confirmDialogPanel.addStyleName(DialogResources.INSTANCE.css().dialog());
-        confirmDialogPanel.setButtonLabels(StringMessages.INSTANCE.yes(), StringMessages.INSTANCE.no());
-        confirmDialogPanel.setFirstButtonDestructive();
+
+        TwoOptionsDialogPanel dialogPanel = new TwoOptionsDialogPanel(message, title, callback, dialog);
+        dialogPanel.addStyleName(DialogResources.INSTANCE.css().dialog());
+        dialogPanel.setButtonLabels(StringMessages.INSTANCE.yes(), StringMessages.INSTANCE.no());
+        dialogPanel.setFirstButtonDestructive();
+
+        dialog.setWidget(dialogPanel);
         dialog.addStyleName(DialogResources.INSTANCE.css().backgroundPanel());
         dialog.show();
 
