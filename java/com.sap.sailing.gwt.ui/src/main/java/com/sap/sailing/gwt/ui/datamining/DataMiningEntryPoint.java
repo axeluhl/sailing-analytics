@@ -63,7 +63,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         session = new UUIDDataMiningSession(UUID.randomUUID());
         EntryPointHelper.registerASyncService((ServiceDefTarget) dataMiningService,
                 RemoteServiceMappingConstants.dataMiningServiceRemotePath);
-        runWithServerInfo(serverInfo->createDataminingPanel(serverInfo, Window.Location.getParameter("q")));
+        runWithServerInfo(serverInfo -> createDataminingPanel(serverInfo, Window.Location.getParameter("q")));
     }
 
     private void createDataminingPanel(ServerInfoDTO serverInfo, String queryIdentifier) {
@@ -118,32 +118,35 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                 splitPanel.addSouth(resultsPresenter.getEntryWidget(), 350);
                 splitPanel.add(queryDefinitionProvider.getEntryWidget());
 
-                if (Storage.isLocalStorageSupported()) {
-                    Storage store = Storage.getLocalStorageIfSupported();
-                    String storedElem = store.getItem(SailingSettingsConstants.DATAMINING_QUERY);
-                    JSONArray arr = JSONParser.parseStrict(storedElem).isArray();
-                    for (int i = 0; i < arr.size(); i++) {
-                        JSONObject json = arr.get(i).isObject();
-                        if (queryIdentifier.equals(json.get("uuid").isString().stringValue())) {
-                            String serializedQuery = json.get("payload").isString().stringValue();
-                            dataMiningService.getDeserializedQuery(serializedQuery,
-                                    new AsyncCallback<StatisticQueryDefinitionDTO>() {
-                                        @Override
-                                        public void onSuccess(StatisticQueryDefinitionDTO result) {
-                                            queryDefinitionProvider.applyQueryDefinition(result);
-                                            queryRunner.run(result);
-                                        }
+                if (queryIdentifier != null) {
+                    if (Storage.isLocalStorageSupported()) {
+                        Storage store = Storage.getLocalStorageIfSupported();
+                        String storedElem = store.getItem(SailingSettingsConstants.DATAMINING_QUERY);
+                        JSONArray arr = JSONParser.parseStrict(storedElem).isArray();
+                        for (int i = 0; i < arr.size(); i++) {
+                            JSONObject json = arr.get(i).isObject();
+                            if (queryIdentifier.equals(json.get("uuid").isString().stringValue())) {
+                                String serializedQuery = json.get("payload").isString().stringValue();
+                                dataMiningService.getDeserializedQuery(serializedQuery,
+                                        new AsyncCallback<StatisticQueryDefinitionDTO>() {
+                                            @Override
+                                            public void onSuccess(StatisticQueryDefinitionDTO result) {
+                                                queryDefinitionProvider.applyQueryDefinition(result);
+                                                queryRunner.run(result);
+                                            }
 
-                                        @Override
-                                        public void onFailure(Throwable caught) {
-                                            LOG.log(Level.SEVERE, caught.getMessage(), caught);
-                                        }
-                                    });
-                            break;
+                                            @Override
+                                            public void onFailure(Throwable caught) {
+                                                LOG.log(Level.SEVERE, caught.getMessage(), caught);
+                                            }
+                                        });
+                                break;
+                            }
                         }
+                    } else {
+                        Notification.notify(StringMessages.INSTANCE.warningBrowserUnsupported(),
+                                NotificationType.ERROR);
                     }
-                } else {
-                    Notification.notify(StringMessages.INSTANCE.warningBrowserUnsupported(), NotificationType.ERROR);
                 }
                 return splitPanel;
             }
