@@ -14,22 +14,28 @@
     box-shadow: 0.1em 0.1em 1em #bbb;
 }
 
-@media (max-width: 400px) {
-  .dialog {
-    width: 90%;
-  }
+.buttonAdjustments {
+    margin-left: .5em;
+    margin-top: .5em;
+    min-width: 11em;
 }
 
-@media (min-width: 400px) {
-  .dialog {
-    width: 50%;
-  }
+@media ( max-width: 400px) {
+    .dialog {
+        width: 90%;
+    }
 }
 
-@media (min-width: 600px) {
-  .dialog {
-    width: 40%;
-  }
+@media ( min-width: 400px) {
+    .dialog {
+        width: 50%;
+    }
+}
+
+@media ( min-width: 600px) {
+    .dialog {
+        width: 40%;
+    }
 }
 
 .message {

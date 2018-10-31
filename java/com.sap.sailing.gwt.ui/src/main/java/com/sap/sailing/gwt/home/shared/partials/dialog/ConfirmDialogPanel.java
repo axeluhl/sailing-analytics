@@ -24,10 +24,10 @@ public class ConfirmDialogPanel extends Composite {
     }
 
     @UiField
-    Button yesButton;
+    Button firstButton;
 
     @UiField
-    Button noButton;
+    Button secondButton;
 
     @UiField
     DivElement messageField;
@@ -51,7 +51,16 @@ public class ConfirmDialogPanel extends Composite {
         titleField.setInnerText(title);
     }
 
-    @UiHandler("yesButton")
+    public void setButtonLabels(String firstButtonText, String secondButtonText) {
+        firstButton.setText(firstButtonText);
+        secondButton.setText(secondButtonText);
+    }
+
+    public void setFirstButtonDestructive() {
+        firstButton.addStyleName(DialogResources.INSTANCE.css().yesButton());
+    }
+
+    @UiHandler("firstButton")
     void onYesClick(ClickEvent e) {
         if (parent != null) {
             parent.hide();
@@ -59,7 +68,7 @@ public class ConfirmDialogPanel extends Composite {
         }
     }
 
-    @UiHandler("noButton")
+    @UiHandler("secondButton")
     void onNoClick(ClickEvent e) {
         if (parent != null) {
             parent.hide();

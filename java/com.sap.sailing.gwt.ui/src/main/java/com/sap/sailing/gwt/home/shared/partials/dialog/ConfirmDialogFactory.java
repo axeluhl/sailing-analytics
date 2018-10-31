@@ -3,6 +3,7 @@ package com.sap.sailing.gwt.home.shared.partials.dialog;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /** factory class for confirm dialog with yes/no button */
@@ -19,6 +20,8 @@ public final class ConfirmDialogFactory {
         ConfirmDialogPanel confirmDialogPanel = new ConfirmDialogPanel(message, title, callback, dialog);
         dialog.setWidget(confirmDialogPanel);
         confirmDialogPanel.addStyleName(DialogResources.INSTANCE.css().dialog());
+        confirmDialogPanel.setButtonLabels(StringMessages.INSTANCE.yes(), StringMessages.INSTANCE.no());
+        confirmDialogPanel.setFirstButtonDestructive();
         dialog.addStyleName(DialogResources.INSTANCE.css().backgroundPanel());
         dialog.show();
 

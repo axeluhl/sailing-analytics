@@ -28,5 +28,7 @@ public interface DialogResources extends ClientBundle {
         String backgroundPanel();
 
         String title();
+
+        String buttonAdjustments();
     }
 }

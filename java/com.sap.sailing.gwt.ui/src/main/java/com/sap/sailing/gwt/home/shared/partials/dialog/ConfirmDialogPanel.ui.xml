@@ -1,13 +1,19 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
 
+    <ui:with field="res2" type="com.sap.sailing.gwt.common.client.SharedResources" />
     <ui:with field="res" type="com.sap.sailing.gwt.home.shared.partials.dialog.DialogResources" />
     <g:HTMLPanel>
         <div class="{res.css.title}" ui:field="titleField" />
         <div class="{res.css.message}" ui:field="messageField" />
         <div class="{res.css.buttonPanel}">
-            <g:Button styleName="{res.css.yesButton} {res.css.button}" ui:field="yesButton">Yes</g:Button>
-            <g:Button styleName="{res.css.noButton} {res.css.button}" ui:field="noButton">No</g:Button>
+
+            <g:Button
+                styleName="{res2.mainCss.button} {res2.mainCss.buttonprimary} {res.css.buttonAdjustments}"
+                ui:field="firstButton" />
+            <g:Button
+                styleName="{res2.mainCss.button} {res2.mainCss.buttonprimaryoutlined} {res.css.buttonAdjustments}"
+                ui:field="secondButton" />
         </div>
     </g:HTMLPanel>
 </ui:UiBinder> 
