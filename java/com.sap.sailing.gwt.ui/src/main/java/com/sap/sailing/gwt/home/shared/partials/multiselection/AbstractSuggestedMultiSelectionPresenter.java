@@ -9,16 +9,16 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.view.client.ProvidesKey;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionDataProvider.Display;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionPresenter.Display;
 
-public abstract class AbstractSuggestedMultiSelectionDataProvider<T, D extends Display<T>> 
-        implements SuggestedMultiSelectionDataProvider<T, D> {
+public abstract class AbstractSuggestedMultiSelectionPresenter<T, D extends Display<T>> 
+        implements SuggestedMultiSelectionPresenter<T, D> {
     
     private final ProvidesKey<T> keyProvider;
     private final Map<Object, T> selectedItemsMap = new HashMap<>();
-    protected Set<D> displays = new HashSet<>();
+    protected final Set<D> displays = new HashSet<>();
     
-    protected AbstractSuggestedMultiSelectionDataProvider(ProvidesKey<T> keyProvider) {
+    protected AbstractSuggestedMultiSelectionPresenter(ProvidesKey<T> keyProvider) {
         this.keyProvider = keyProvider;
     }
     

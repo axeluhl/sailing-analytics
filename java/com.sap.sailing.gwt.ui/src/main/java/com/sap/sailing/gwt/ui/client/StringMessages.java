@@ -1864,6 +1864,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String moreLoginInformationSectionUserNotificationsHeading();
     String moreLoginInformationSectionUserNotificationsDescription();
     String moreLoginInformationRegisterControlText();
+    String moreLoginInformationSectionSailorProfilesDescription();
+    String moreLoginInformationSectionSailorProfilesHeading();
     String anniversaryUnitText(@Optional @PluralCount(DefaultRule_1_0n.class) int count);
     String anniversaryMajorCountdownTeaser(@PluralCount(DefaultRule_1_0n.class) int countdown, int anniversary);
     String anniversaryMajorCountdownDescription(int anniversary);
@@ -2176,4 +2178,23 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String cancel();
     String close();
     String username();
+    String boatClasses();
+    String sailorProfiles();
+    String unknownSailorProfile(String message);
+    String profileName();
+    String addSailorProfileMessage();
+    String badges();
+    String newSailorProfileName();
+    String maxSpeedTitle();
+    String maxStartLineSpeed();
+    String shortestDistanceToStartline();
+    String averageDistanceToStartLine();
+    String metersValue(Double value);
+    String showInRaceboard();
+    String couldNotDetermineStatistic();
+    String noEventsFoundForCompetitors();
+    String pleaseSelectCompetitorFirst();
+    String noStatisticsFoundForCompetitors();
+    String sailorProfileRemoveMessage();
+    String showInDataMining();
 }

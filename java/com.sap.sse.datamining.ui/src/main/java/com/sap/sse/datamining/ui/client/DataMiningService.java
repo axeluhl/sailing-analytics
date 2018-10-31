@@ -71,4 +71,6 @@ public interface DataMiningService extends RemoteService {
     StoredDataMiningQueryDTO updateOrCreateStoredQuery(StoredDataMiningQueryDTO query);
 
     StoredDataMiningQueryDTO removeStoredQuery(StoredDataMiningQueryDTO query);
+
+    StatisticQueryDefinitionDTO getDeserializedQuery(String serializedQuery);
 }

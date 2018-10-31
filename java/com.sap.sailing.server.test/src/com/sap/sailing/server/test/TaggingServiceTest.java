@@ -78,6 +78,7 @@ public class TaggingServiceTest {
     private static TaggingService taggingService;
     private static Subject subject;
 
+    @SuppressWarnings("restriction")
     @BeforeClass
     public static void setUpClass()
             throws MalformedURLException, IOException, InterruptedException, UserManagementException, MailException, UserGroupManagementException {

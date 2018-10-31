@@ -1,7 +1,6 @@
 package com.sap.sse.gwt.client.celltable;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -218,7 +217,7 @@ public class SortedCellTable<T> extends BaseCelltable<T> {
      * 
      * @param list
      */
-    public void setList(Collection<T> list) {
+    public void setList(Iterable<T> list) {
         dataProvider.getList().clear();
         if (list != null) {
             for (T element : list) {

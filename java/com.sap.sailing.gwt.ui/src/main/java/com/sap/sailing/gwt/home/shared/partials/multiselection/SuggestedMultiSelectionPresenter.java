@@ -3,9 +3,9 @@ package com.sap.sailing.gwt.home.shared.partials.multiselection;
 import java.util.Collection;
 
 import com.google.gwt.view.client.ProvidesKey;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionDataProvider.Display;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionPresenter.Display;
 
-public interface SuggestedMultiSelectionDataProvider<T, D extends Display<T>> extends ProvidesKey<T> {
+public interface SuggestedMultiSelectionPresenter<T, D extends Display<T>> extends ProvidesKey<T> {
     
     void addSelection(T item);
     
@@ -30,6 +30,6 @@ public interface SuggestedMultiSelectionDataProvider<T, D extends Display<T>> ex
     }
 
     interface Display<T> {
-        void setSelectedItems(Collection<T> selectedItems);
+        void setSelectedItems(Iterable<T> selectedItemsToSet);
     }
 }

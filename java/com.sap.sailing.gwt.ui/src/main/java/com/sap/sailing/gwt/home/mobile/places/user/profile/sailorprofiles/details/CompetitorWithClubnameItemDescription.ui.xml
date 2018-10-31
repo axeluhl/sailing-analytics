@@ -1,0 +1,19 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="i18n" type="com.sap.sailing.gwt.ui.client.StringMessages" />
+    <ui:with field="res" type="com.sap.sailing.gwt.common.client.SharedResources" />
+    <ui:with field="local_res"
+        type="com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionResources" />
+    <ui:with field="spr"
+        type="com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileResources" />
+    <ui:with field="spmr"
+        type="com.sap.sailing.gwt.home.mobile.places.user.profile.sailorprofiles.SailorProfileMobileResources" />
+
+    <div>
+        <div
+            class="{local_res.css.suggestionsItemDescriptionImage} {spr.css.competitorWithoutClubnameItemDescription} "
+            ui:field="flagImageUi"></div>
+        <span class="{spmr.css.competitorWithClubnameItemDescriptionClubname} " ui:field="sailIdUi"></span>
+        <span class=" {spmr.css.competitorWithClubnameItemDescriptionId}" ui:field="clubnameUi"></span>
+    </div>
+</ui:UiBinder> 

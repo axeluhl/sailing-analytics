@@ -86,4 +86,7 @@ public interface DataMiningServiceAsync {
 
     /** Removes the {@link StoredDataMiningQueryDTO} if it exists from the back end. */
     void removeStoredQuery(StoredDataMiningQueryDTO query, AsyncCallback<StoredDataMiningQueryDTO> callback);
+
+    /** Gets the {@link StatisticQueryDefinitionDTO} from the serialized String. */
+    void getDeserializedQuery(String serializedQuery, AsyncCallback<StatisticQueryDefinitionDTO> callback);
 }

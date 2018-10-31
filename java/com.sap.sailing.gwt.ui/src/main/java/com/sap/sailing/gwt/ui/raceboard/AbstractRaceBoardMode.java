@@ -1,7 +1,9 @@
 package com.sap.sailing.gwt.ui.raceboard;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.Map;
 
 import com.google.gwt.core.shared.GWT;
@@ -68,6 +70,7 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
     private LeaderboardDTO leaderboard;
     private LeaderboardDTO leaderboardForSpecificTimePoint;
     private RaceColumnDTO raceColumn;
+    private final Collection<Runnable> runnablesToRunAfterInitializationFinished = new LinkedList<>();
     
     @Override
     public void applyTo(RaceBoardPanel raceBoardPanel) {
@@ -90,6 +93,16 @@ public abstract class AbstractRaceBoardMode implements RaceBoardMode, RaceTimesI
         if (raceBoardPanel.getMap().isDataInitialized()) {
             trigger();
         }
+    }
+
+    @Override
+    public void addInitializationFinishedRunner(Runnable runnable) {
+        runnablesToRunAfterInitializationFinished.add(runnable);
+    }
+
+    /** called after initialization and trigger method is finished */
+    protected void onInitializationFinished() {
+        runnablesToRunAfterInitializationFinished.forEach(r -> r.run());
     }
 
     /**

@@ -36,6 +36,7 @@ public abstract class RaceBoardModeWithPerRaceCompetitors extends AbstractRaceBo
                 }
             }
             getRaceBoardPanel().getCompetitorSelectionProvider().setSelection(competitorsToSelect);
+            super.onInitializationFinished();
         }
     }
 
