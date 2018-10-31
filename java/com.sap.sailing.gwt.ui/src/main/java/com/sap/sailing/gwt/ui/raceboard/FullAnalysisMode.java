@@ -58,6 +58,7 @@ public class FullAnalysisMode extends AbstractRaceBoardMode {
             @Override
             public void onSettingsReloaded(SingleRaceLeaderboardSettings patchedSettings) {
                 leaderboardPanel.updateSettings(patchedSettings);
+                        FullAnalysisMode.super.onInitializationFinished();
             }
             
         });
