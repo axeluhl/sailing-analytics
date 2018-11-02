@@ -15,16 +15,16 @@ import com.sap.sse.gwt.client.IconResources;
 import com.sap.sse.gwt.client.controls.listedit.GenericStringListInlineEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.RoleDefinitionImpl;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
+import com.sap.sse.security.ui.shared.RoleDefinitionDTO;
 
-public abstract class AbstractRoleDefinitionDialog extends DataEntryDialog<RoleDefinition> {
-    private static class RoleValidator implements DataEntryDialog.Validator<RoleDefinition> {
+public abstract class AbstractRoleDefinitionDialog extends DataEntryDialog<RoleDefinitionDTO> {
+    private static class RoleValidator implements DataEntryDialog.Validator<RoleDefinitionDTO> {
         private final StringMessages stringMessages;
         private final Map<String, RoleDefinition> allOtherRoles;
 
-        public RoleValidator(StringMessages stringMessages, Iterable<RoleDefinition> allOtherRoles) {
+        public RoleValidator(StringMessages stringMessages, Iterable<RoleDefinitionDTO> allOtherRoles) {
             super();
             this.stringMessages = stringMessages;
             this.allOtherRoles = new HashMap<>();
@@ -34,7 +34,7 @@ public abstract class AbstractRoleDefinitionDialog extends DataEntryDialog<RoleD
         }
 
         @Override
-        public String getErrorMessage(RoleDefinition valueToValidate) {
+        public String getErrorMessage(RoleDefinitionDTO valueToValidate) {
             final String result;
             if (valueToValidate.getName() == null || valueToValidate.getName().isEmpty()) {
                 result = stringMessages.pleaseEnterARoleName();
@@ -52,8 +52,7 @@ public abstract class AbstractRoleDefinitionDialog extends DataEntryDialog<RoleD
     private final StringMessages stringMessages;
 
     public AbstractRoleDefinitionDialog(StringMessages stringMessages, Iterable<WildcardPermission> allExistingPermissions,
-            Iterable<RoleDefinition> allOtherRoles,
-            com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<RoleDefinition> callback) {
+            Iterable<RoleDefinitionDTO> allOtherRoles, DialogCallback<RoleDefinitionDTO> callback) {
         super(stringMessages.roles(), stringMessages.editRoles(), stringMessages.ok(), stringMessages.cancel(),
                 new RoleValidator(stringMessages, allOtherRoles), /* animationEnabled */ true, callback);
         this.stringMessages = stringMessages;
@@ -90,10 +89,10 @@ public abstract class AbstractRoleDefinitionDialog extends DataEntryDialog<RoleD
     }
 
     @Override
-    protected RoleDefinition getResult() {
+    protected RoleDefinitionDTO getResult() {
         final String newName = roleDefinitionNameField.getText();
         final List<WildcardPermission> permissions = permissionsList.getValue();
-        final RoleDefinition result = new RoleDefinitionImpl(getRoleDefinitionId(), newName);
+        final RoleDefinitionDTO result = new RoleDefinitionDTO(getRoleDefinitionId(), newName);
         result.setPermissions(permissions);
         return result;
     }

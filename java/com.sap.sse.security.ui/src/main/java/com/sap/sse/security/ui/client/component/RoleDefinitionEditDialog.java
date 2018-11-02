@@ -5,12 +5,14 @@ import java.util.UUID;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
+import com.sap.sse.security.ui.shared.RoleDefinitionDTO;
 
 public class RoleDefinitionEditDialog extends AbstractRoleDefinitionDialog {
     private final UUID roleDefinitionId;
     
     public RoleDefinitionEditDialog(RoleDefinition roleDefinition, StringMessages stringMessages,
-            Iterable<WildcardPermission> allExistingPermissions, Iterable<RoleDefinition> allOtherRoles, com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback<RoleDefinition> callback) {
+            Iterable<WildcardPermission> allExistingPermissions, Iterable<RoleDefinitionDTO> allOtherRoles,
+            DialogCallback<RoleDefinitionDTO> callback) {
         super(stringMessages, allExistingPermissions, allOtherRoles, callback);
         roleDefinitionId = roleDefinition.getId();
         roleDefinitionNameField.setText(roleDefinition.getName());

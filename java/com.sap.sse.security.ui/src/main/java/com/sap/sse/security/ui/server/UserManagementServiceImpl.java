@@ -42,7 +42,6 @@ import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.Role;
-import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleImpl;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.UnauthorizedException;
@@ -56,6 +55,7 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes.UserActions;
 import com.sap.sse.security.ui.client.UserManagementService;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
+import com.sap.sse.security.ui.shared.RoleDefinitionDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 
@@ -104,9 +104,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public RoleDefinition createRoleDefinition(String roleDefinitionIdAsString, String name) {
+    public RoleDefinitionDTO createRoleDefinition(String roleDefinitionIdAsString, String name) {
         SecurityUtils.getSubject().checkPermission(SecuredSecurityTypes.ROLE_DEFINITION.getStringPermissionForObjects(DefaultActions.CREATE, roleDefinitionIdAsString));
-        return getSecurityService().createRoleDefinition(UUID.fromString(roleDefinitionIdAsString), name);
+        return securityDTOFactory.createRoleDefinitionDTO(
+                getSecurityService().createRoleDefinition(UUID.fromString(roleDefinitionIdAsString), name),
+                getSecurityService());
     }
 
     @Override
@@ -116,7 +118,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public void updateRoleDefinition(RoleDefinition roleDefinitionWithNewProperties) {
+    public void updateRoleDefinition(RoleDefinitionDTO roleDefinitionWithNewProperties) {
         // FIXME an additional check is needed to verify that a user may only grant/revoke permissions that he owns
         // In case of role permissions this means the user needs to own an unqualified version of the permission because
         // any user may own the role with any qualification
@@ -125,9 +127,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public ArrayList<RoleDefinition> getRoleDefinitions() {
-        final ArrayList<RoleDefinition> result = new ArrayList<>();
-        Util.addAll(getSecurityService().getRoleDefinitions(), result);
+    public ArrayList<RoleDefinitionDTO> getRoleDefinitions() {
+        final ArrayList<RoleDefinitionDTO> result = new ArrayList<>();
+        Util.addAll(securityDTOFactory.createRoleDefinitionDTOs(getSecurityService().getRoleDefinitions(),
+                getSecurityService()), result);
         return result;
     }
 
