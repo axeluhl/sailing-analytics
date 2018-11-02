@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
 /**
  * Equality ({@link #equals(Object)} and {@link #hashCode()} are based solely on the {@link #getId() ID}.
@@ -15,14 +16,13 @@ import com.sap.sse.common.Util;
  */
 public class RoleDefinitionImpl implements RoleDefinition {
     private static final long serialVersionUID = -402472324567793082L;
-    
+
     private UUID id;
     private String name;
     private Set<WildcardPermission> permissions;
 
-    @Deprecated
-    RoleDefinitionImpl() {} // for GWT serialization only
-    
+    protected RoleDefinitionImpl() {} // for GWT serialization only
+
     public RoleDefinitionImpl(UUID id, String name) {
         this(id, name, new HashSet<WildcardPermission>());
     }
@@ -33,7 +33,7 @@ public class RoleDefinitionImpl implements RoleDefinition {
         this.permissions = new HashSet<>();
         Util.addAll(permissions, this.permissions);
     }
-    
+
     public static RoleDefinition create(UUID id, String name, Iterable<WildcardPermission> permissions) {
         final RoleDefinition result;
         if (Util.equalsWithNull(id, AdminRole.getInstance().getId())) {
@@ -45,7 +45,7 @@ public class RoleDefinitionImpl implements RoleDefinition {
         }
         return result;
     }
-    
+
     @Override
     public UUID getId() {
         return id;
@@ -60,7 +60,7 @@ public class RoleDefinitionImpl implements RoleDefinition {
     public void setName(String newName) {
         this.name = newName;
     }
-    
+
     @Override
     public Set<WildcardPermission> getPermissions() {
         return Collections.unmodifiableSet(permissions);
@@ -100,5 +100,15 @@ public class RoleDefinitionImpl implements RoleDefinition {
     @Override
     public String toString() {
         return name + " (permissions: " + permissions + ")";
+    }
+
+    @Override
+    public HasPermissions getType() {
+        return SecuredSecurityTypes.ROLE_DEFINITION;
+    }
+
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getType().getQualifiedObjectIdentifier(getId().toString());
     }
 }
