@@ -253,7 +253,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
             }
         });
         final DialogConfig<RegattaDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
-                idFactory, this::commitEditedRegatta, stringMessages);
+                idFactory, regatta -> regattaRefresher.fillRegattas(), stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 config::openDialog);
 
@@ -263,8 +263,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         table.addColumn(startEndDateColumn, stringMessages.from() + "/" + stringMessages.to());
         table.addColumn(regattaBoatClassColumn, stringMessages.boatClass());
         table.addColumn(rankingMetricColumn, stringMessages.rankingMetric());
-        SecuredObjectOwnerColumn.configureOwnerColumns(table, columnSortHandler,
-                com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE);
+        SecuredObjectOwnerColumn.configureOwnerColumns(table, columnSortHandler, stringMessages);
         table.addColumn(actionsColumn, stringMessages.actions());
         table.setSelectionModel(regattaSelectionCheckboxColumn.getSelectionModel(), regattaSelectionCheckboxColumn.getSelectionManager());
         return table;

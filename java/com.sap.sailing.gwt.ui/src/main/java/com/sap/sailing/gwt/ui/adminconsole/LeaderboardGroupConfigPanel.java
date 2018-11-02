@@ -623,14 +623,9 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                 removeLeaderboardGroup(group);
             }
         });
-        final DialogConfig<LeaderboardGroupDTO> config = EditOwnershipDialog
-                .create(userService.getUserManagementService(), type, idFactory, group -> {
-                    final LeaderboardGroupDescriptor descriptor = new LeaderboardGroupDescriptor(group.getName(),
-                            group.description, group.getDisplayName(), group.displayLeaderboardsInReverseOrder,
-                            group.isHasOverallLeaderboard(), group.getOverallLeaderboardDiscardThresholds(),
-                            group.getOverallLeaderboardScoringSchemeType());
-                    updateGroup(group.getName(), group, descriptor);
-                }, stringMessages);
+        final DialogConfig<LeaderboardGroupDTO> config = EditOwnershipDialog.create(
+                userService.getUserManagementService(), type, idFactory,
+                group -> leaderboardGroupsRefresher.fillLeaderboardGroups(), stringMessages);
         actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 config::openDialog);
 
@@ -656,8 +651,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         groupsTable.addColumn(groupDescriptionColumn, stringMessages.description());
         groupsTable.addColumn(groupDisplayNameColumn, stringMessages.displayName());
         groupsTable.addColumn(hasOverallLeaderboardColumn, stringMessages.useOverallLeaderboard());
-        SecuredObjectOwnerColumn.configureOwnerColumns(groupsTable, leaderboardGroupsListHandler,
-                com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE);
+        SecuredObjectOwnerColumn.configureOwnerColumns(groupsTable, leaderboardGroupsListHandler, stringMessages);
         groupsTable.addColumn(actionsColumn, stringMessages.actions());
         groupsTable.addColumnSortHandler(leaderboardGroupsListHandler);
 

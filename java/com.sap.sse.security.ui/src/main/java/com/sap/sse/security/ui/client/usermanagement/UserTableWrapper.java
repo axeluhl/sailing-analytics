@@ -186,7 +186,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
             }
         });
         final DialogConfig<UserDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
-                idFactory, user -> Window.alert("TODO Updating user ownership ..."), stringMessages);
+                idFactory, user -> refreshUserList((Callback<Iterable<UserDTO>, Throwable>) null), stringMessages);
         userActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openDialog);
         
         filterField = new LabeledAbstractFilterablePanel<UserDTO>(new Label(stringMessages.filterUsers()),
