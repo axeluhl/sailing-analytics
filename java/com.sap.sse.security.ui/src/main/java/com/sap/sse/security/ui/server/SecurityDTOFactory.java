@@ -17,6 +17,7 @@ import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleImpl;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.SocialUserAccount;
@@ -29,6 +30,7 @@ import com.sap.sse.security.shared.impl.SecurityUserImpl;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.security.ui.oauth.client.SocialUserDTO;
 import com.sap.sse.security.ui.shared.AccountDTO;
+import com.sap.sse.security.ui.shared.RoleDefinitionDTO;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UsernamePasswordAccountDTO;
 
@@ -98,6 +100,28 @@ public class SecurityDTOFactory {
                         fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
     }
 
+    private RoleDefinitionDTO createRoleDefinitionDTO(final RoleDefinition roleDefinition,
+            final SecurityService securityService, final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser,
+            final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup) {
+        final RoleDefinitionDTO roleDefDTO = new RoleDefinitionDTO(roleDefinition.getId(), roleDefinition.getName());
+        roleDefDTO.setPermissions(roleDefinition.getPermissions());
+        SecurityDTOUtil.addSecurityInformation(this, securityService, roleDefDTO, roleDefinition.getIdentifier());
+        return roleDefDTO;
+    }
+
+    public RoleDefinitionDTO createRoleDefinitionDTO(final RoleDefinition roleDefinition,
+            final SecurityService securityService) {
+        return createRoleDefinitionDTO(roleDefinition, securityService, new HashMap<>(), new HashMap<>());
+    }
+
+    public Iterable<RoleDefinitionDTO> createRoleDefinitionDTOs(final Iterable<RoleDefinition> roleDefinitions,
+            final SecurityService securityService) {
+        final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser = new HashMap<>();
+        final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup = new HashMap<>();
+        return Util.map(roleDefinitions, roleDefinition -> createRoleDefinitionDTO(roleDefinition, securityService,
+                fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
+    }
+
     public SocialUserDTO createSocialUserDTO(SocialUserAccount socialUser) {
         SocialUserDTO socialUserDTO = new SocialUserDTO(socialUser.getProperty(Social.PROVIDER.name()));
         socialUserDTO.setSessionId(socialUser.getSessionId());
@@ -152,6 +176,7 @@ public class SecurityDTOFactory {
         }
         return result;
     }
+
 
     public OwnershipAnnotation createOwnershipAnnotationDTO(OwnershipAnnotation ownershipAnnotation) {
         return new OwnershipAnnotation(createOwnershipDTO(ownershipAnnotation.getAnnotation()),
