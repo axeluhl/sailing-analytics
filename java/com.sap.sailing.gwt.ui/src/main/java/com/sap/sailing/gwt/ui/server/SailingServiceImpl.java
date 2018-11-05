@@ -4876,7 +4876,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     private void createRegattaFromRegattaDTO(String tenantOwnerName, RegattaDTO regatta) {
         this.createRegatta(tenantOwnerName, regatta.getName(), regatta.boatClass.getName(),
-                regatta.canBoatsOfCompetitorsChangePerRace, regatta.competitorRegistrationType, /* registrationLinkSecret */ null,
+                regatta.canBoatsOfCompetitorsChangePerRace, regatta.competitorRegistrationType, regatta.registrationLinkSecret,
                 regatta.startDate, regatta.endDate,
                 new RegattaCreationParametersDTO(getSeriesCreationParameters(regatta)), 
                 true, regatta.scoringScheme, regatta.defaultCourseAreaUuid, regatta.buoyZoneRadiusInHullLengths, regatta.useStartTimeInference,
