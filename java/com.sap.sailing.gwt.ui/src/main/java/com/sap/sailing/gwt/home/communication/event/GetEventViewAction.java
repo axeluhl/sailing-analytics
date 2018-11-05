@@ -61,6 +61,7 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
         if (event == null) {
             throw new RuntimeException("Event not found");
         }
+        context.getSecurityService().checkCurrentUserReadPermission(event);
 
         final EventViewDTO dto = new EventViewDTO();
         HomeServiceUtil.mapToMetadataDTO(event, dto, context.getRacingEventService());
@@ -89,16 +90,16 @@ public class GetEventViewAction implements SailingAction<EventViewDTO>, IsClient
         final Set<RegattaMetadataDTO> regattasOfEvent = new HashSet<>();
         final Set<LeaderboardGroup> relevantLeaderboardGroupsOfEvent = new HashSet<>();
         
-        EventActionUtil.forLeaderboardsOfEvent(context, event, new LeaderboardCallback() {
+        EventActionUtil.forLeaderboardsOfEventWithReadPermissions(context, event, new LeaderboardCallback() {
             @Override
-            public void doForLeaderboard(LeaderboardContext context) {
+            public void doForLeaderboard(LeaderboardContext lcontext) {
                 try {
-                    Util.addAll(context.getLeaderboardGroups(), relevantLeaderboardGroupsOfEvent);
-                    RegattaMetadataDTO regattaDTO = context.asRegattaMetadataDTO();
+                    Util.addAll(lcontext.getLeaderboardGroups(), relevantLeaderboardGroupsOfEvent);
+                    RegattaMetadataDTO regattaDTO = lcontext.asRegattaMetadataDTO();
                     regattasOfEvent.add(regattaDTO);
                     dto.getRegattas().add(regattaDTO);
                 } catch (Exception e) {
-                    logger.log(Level.SEVERE, "Catched exception while reading data for leaderboard " + context.getLeaderboardName(), e);
+                    logger.log(Level.SEVERE, "Catched exception while reading data for leaderboard " + lcontext.getLeaderboardName(), e);
                 }
             }
         });

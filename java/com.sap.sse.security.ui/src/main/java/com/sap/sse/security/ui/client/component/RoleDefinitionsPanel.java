@@ -1,13 +1,20 @@
 package com.sap.sse.security.ui.client.component;
 
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.DELETE;
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
+import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP;
+import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_DELETE;
+import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_UPDATE;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.function.Function;
 
-import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -29,16 +36,20 @@ import com.sap.sse.gwt.client.celltable.AbstractSortableTextColumn;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
 import com.sap.sse.gwt.client.celltable.FlushableCellTable;
-import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
+import com.sap.sse.security.ui.shared.RoleDefinitionDTO;
 
 /**
  * Displays and allows users to edit {@link Role}s. This includes creating and removing
@@ -54,32 +65,34 @@ public class RoleDefinitionsPanel extends VerticalPanel {
     private final Button addButton;
     private final Button removeButton;
     private final Button refreshButton;
-    private final FlushableCellTable<RoleDefinition> roleDefinitionsTable;
+    private final FlushableCellTable<RoleDefinitionDTO> roleDefinitionsTable;
     private final ErrorReporter errorReporter;
+    private final UserService userService;
     private final UserManagementServiceAsync userManagementService;
-    private final ListDataProvider<RoleDefinition> rolesListDataProvider;
+    private final ListDataProvider<RoleDefinitionDTO> rolesListDataProvider;
     private final StringMessages stringMessages;
-    private final LabeledAbstractFilterablePanel<RoleDefinition> filterablePanelRoleDefinitions;
-    private RefreshableMultiSelectionModel<? super RoleDefinition> refreshableRoleDefinitionMultiSelectionModel;
+    private final LabeledAbstractFilterablePanel<RoleDefinitionDTO> filterablePanelRoleDefinitions;
+    private RefreshableMultiSelectionModel<? super RoleDefinitionDTO> refreshableRoleDefinitionMultiSelectionModel;
     
-    public RoleDefinitionsPanel(StringMessages stringMessages, UserManagementServiceAsync userManagementService, CellTableWithCheckboxResources tableResources,
-            ErrorReporter errorReporter) {
+    public RoleDefinitionsPanel(StringMessages stringMessages, UserService userService,
+            CellTableWithCheckboxResources tableResources, ErrorReporter errorReporter) {
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
-        this.userManagementService = userManagementService;
+        this.userService = userService;
+        this.userManagementService = userService.getUserManagementService();
         this.addButton = new Button(stringMessages.add());
         this.removeButton = new Button(stringMessages.remove());
         this.refreshButton = new Button(stringMessages.refresh());
-        rolesListDataProvider = new ListDataProvider<RoleDefinition>();
-        filterablePanelRoleDefinitions = new LabeledAbstractFilterablePanel<RoleDefinition>(new Label(stringMessages.filterRoles()), new ArrayList<>(),
+        rolesListDataProvider = new ListDataProvider<>();
+        filterablePanelRoleDefinitions = new LabeledAbstractFilterablePanel<RoleDefinitionDTO>(new Label(stringMessages.filterRoles()), new ArrayList<>(),
                 rolesListDataProvider) {
             @Override
-            public Iterable<String> getSearchableStrings(RoleDefinition roleDefinition) {
+            public Iterable<String> getSearchableStrings(RoleDefinitionDTO roleDefinition) {
                 return Arrays.asList(roleDefinition.getName(), roleDefinition.getId().toString(), roleDefinition.getPermissions().toString());
             }
             
             @Override
-            public AbstractCellTable<RoleDefinition> getCellTable() {
+            public AbstractCellTable<RoleDefinitionDTO> getCellTable() {
                 return roleDefinitionsTable;
             }
         };
@@ -87,10 +100,10 @@ public class RoleDefinitionsPanel extends VerticalPanel {
         roleDefinitionsTable.ensureDebugId("RolesCellTable");
         filterablePanelRoleDefinitions.getTextBox().ensureDebugId("RolesFilterTextBox");
         addButton.addClickHandler(e->createRoleDefinition());
-        refreshableRoleDefinitionMultiSelectionModel = (RefreshableMultiSelectionModel<? super RoleDefinition>) roleDefinitionsTable.getSelectionModel();
+        refreshableRoleDefinitionMultiSelectionModel = (RefreshableMultiSelectionModel<? super RoleDefinitionDTO>) roleDefinitionsTable.getSelectionModel();
         removeButton.addClickHandler(e->{
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(String.join(", ", Util.map(getSelectedRoleDefinitions(), r->r.getName()))))) {
-                final Set<RoleDefinition> selectedRoles = new HashSet<>(getSelectedRoleDefinitions());
+                final Set<RoleDefinitionDTO> selectedRoles = new HashSet<>(getSelectedRoleDefinitions());
                 filterablePanelRoleDefinitions.removeAll(selectedRoles);
             }
         });
@@ -106,17 +119,17 @@ public class RoleDefinitionsPanel extends VerticalPanel {
     }
     
     private void createRoleDefinition() {
-        new RoleDefinitionCreationDialog(stringMessages, getAllPermissions(), getAllRoleDefinitions(), new DialogCallback<RoleDefinition>() {
+        new RoleDefinitionCreationDialog(stringMessages, getAllPermissions(), getAllRoleDefinitions(), new DialogCallback<RoleDefinitionDTO>() {
             @Override
-            public void ok(RoleDefinition editedObject) {
-                userManagementService.createRoleDefinition(editedObject.getId().toString(), editedObject.getName(), new AsyncCallback<RoleDefinition>() {
+            public void ok(RoleDefinitionDTO editedObject) {
+                userManagementService.createRoleDefinition(editedObject.getId().toString(), editedObject.getName(), new AsyncCallback<RoleDefinitionDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError(stringMessages.errorCreatingRole(editedObject.getName(), caught.getMessage()));
                     }
 
                     @Override
-                    public void onSuccess(RoleDefinition result) {
+                    public void onSuccess(RoleDefinitionDTO result) {
                         userManagementService.updateRoleDefinition(editedObject, new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -139,35 +152,35 @@ public class RoleDefinitionsPanel extends VerticalPanel {
         }).show();
     }
 
-    private Set<RoleDefinition> getSelectedRoleDefinitions() {
+    private Set<RoleDefinitionDTO> getSelectedRoleDefinitions() {
         @SuppressWarnings("unchecked")
-        final Set<RoleDefinition> result = (Set<RoleDefinition>) refreshableRoleDefinitionMultiSelectionModel.getSelectedSet();
+        final Set<RoleDefinitionDTO> result = (Set<RoleDefinitionDTO>) refreshableRoleDefinitionMultiSelectionModel.getSelectedSet();
         return result;
     }
     
-    private FlushableCellTable<RoleDefinition> createRoleDefinitionsTable(CellTableWithCheckboxResources tableResources) {
-        final FlushableCellTable<RoleDefinition> table = new FlushableCellTable<>(/* pageSize */ 50, tableResources);
+    private FlushableCellTable<RoleDefinitionDTO> createRoleDefinitionsTable(CellTableWithCheckboxResources tableResources) {
+        final FlushableCellTable<RoleDefinitionDTO> table = new FlushableCellTable<>(/* pageSize */ 50, tableResources);
         rolesListDataProvider.addDataDisplay(table);
-        SelectionCheckboxColumn<RoleDefinition> roleSelectionCheckboxColumn = new SelectionCheckboxColumn<RoleDefinition>(
+        SelectionCheckboxColumn<RoleDefinitionDTO> roleSelectionCheckboxColumn = new SelectionCheckboxColumn<RoleDefinitionDTO>(
                 tableResources.cellTableStyle().cellTableCheckboxSelected(),
                 tableResources.cellTableStyle().cellTableCheckboxDeselected(),
-                tableResources.cellTableStyle().cellTableCheckboxColumnCell(), new EntityIdentityComparator<RoleDefinition>() {
+                tableResources.cellTableStyle().cellTableCheckboxColumnCell(), new EntityIdentityComparator<RoleDefinitionDTO>() {
                     @Override
-                    public boolean representSameEntity(RoleDefinition roleDefinition1, RoleDefinition roleDefinition2) {
+                    public boolean representSameEntity(RoleDefinitionDTO roleDefinition1, RoleDefinitionDTO roleDefinition2) {
                         return roleDefinition1.getId().equals(roleDefinition2.getId());
                     }
                     @Override
-                    public int hashCode(RoleDefinition t) {
+                    public int hashCode(RoleDefinitionDTO t) {
                         return t.getId().hashCode();
                     }
                 }, filterablePanelRoleDefinitions.getAllListDataProvider(), table);
-        ListHandler<RoleDefinition> columnSortHandler = new ListHandler<>(rolesListDataProvider.getList());
+        ListHandler<RoleDefinitionDTO> columnSortHandler = new ListHandler<>(rolesListDataProvider.getList());
         table.addColumnSortHandler(columnSortHandler);
         columnSortHandler.setComparator(roleSelectionCheckboxColumn, roleSelectionCheckboxColumn.getComparator());
-        TextColumn<RoleDefinition> roleDefinitionNameColumn = new AbstractSortableTextColumn<RoleDefinition>(role->role.getName(), columnSortHandler);
-        Column<RoleDefinition, SafeHtml> permissionsColumn = new Column<RoleDefinition, SafeHtml>(new SafeHtmlCell()) {
+        TextColumn<RoleDefinitionDTO> roleDefinitionNameColumn = new AbstractSortableTextColumn<RoleDefinitionDTO>(role->role.getName(), columnSortHandler);
+        Column<RoleDefinitionDTO, SafeHtml> permissionsColumn = new Column<RoleDefinitionDTO, SafeHtml>(new SafeHtmlCell()) {
             @Override
-            public SafeHtml getValue(RoleDefinition role) {
+            public SafeHtml getValue(RoleDefinitionDTO role) {
                 SafeHtmlBuilder builder = new SafeHtmlBuilder();
                 for (Iterator<WildcardPermission> permissionIter=role.getPermissions().iterator(); permissionIter.hasNext(); ) {
                     final WildcardPermission permission = permissionIter.next();
@@ -180,31 +193,32 @@ public class RoleDefinitionsPanel extends VerticalPanel {
             }
         };
         permissionsColumn.setSortable(true);
-        columnSortHandler.setComparator(permissionsColumn, new Comparator<RoleDefinition>() {
+        columnSortHandler.setComparator(permissionsColumn, new Comparator<RoleDefinitionDTO>() {
             @Override
-            public int compare(RoleDefinition r1, RoleDefinition r2) {
+            public int compare(RoleDefinitionDTO r1, RoleDefinitionDTO r2) {
                 return new NaturalComparator().compare(r1.getPermissions().toString(), r2.getPermissions().toString());
             }
         });
-        final ImagesBarColumn<RoleDefinition, DefaultActionsImagesBarCell> roleActionColumn = new ImagesBarColumn<>(
-                new DefaultActionsImagesBarCell(stringMessages));
-        roleActionColumn.setFieldUpdater(new FieldUpdater<RoleDefinition, String>() {
-            @Override
-            public void update(int index, RoleDefinition roleDefinition, String value) {
-                if (DefaultActionsImagesBarCell.ACTION_UPDATE.equals(value)) {
-                    editRole(roleDefinition);
-                } else if (DefaultActionsImagesBarCell.ACTION_DELETE.equals(value)) {
-                    if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(roleDefinition.getName()))) {
-                        removeRole(roleDefinition);
-                    }
-                } else if (DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP.equals(value)) {
-                    Window.alert("TODO Implement SecuredObject interface!");
-                }
+        
+        final HasPermissions type = SecuredSecurityTypes.ROLE_DEFINITION;
+        final Function<RoleDefinitionDTO, String> idFactory = roleDef -> roleDef.getId().toString();
+        
+        final AccessControlledActionsColumn<RoleDefinitionDTO, DefaultActionsImagesBarCell> roleActionColumn = new AccessControlledActionsColumn<>(
+                new DefaultActionsImagesBarCell(stringMessages), userService, type, idFactory);
+        roleActionColumn.addAction(ACTION_UPDATE, UPDATE, this::editRole);
+        roleActionColumn.addAction(ACTION_DELETE, DELETE, roleDefinition -> {
+            if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(roleDefinition.getName()))) {
+                removeRole(roleDefinition);
             }
         });
+        final DialogConfig<RoleDefinitionDTO> config = EditOwnershipDialog.create(userManagementService, type,
+                idFactory, roleDefinition -> updateRoleDefinitions(), stringMessages);
+        roleActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openDialog);
+
         table.addColumn(roleSelectionCheckboxColumn, roleSelectionCheckboxColumn.getHeader());
         table.addColumn(roleDefinitionNameColumn, stringMessages.name());
         table.addColumn(permissionsColumn, stringMessages.permissions());
+        SecuredObjectOwnerColumn.configureOwnerColumns(table, columnSortHandler, stringMessages);
         table.addColumn(roleActionColumn, stringMessages.actions());
         table.setSelectionModel(roleSelectionCheckboxColumn.getSelectionModel(), roleSelectionCheckboxColumn.getSelectionManager());
         return table;
@@ -225,11 +239,12 @@ public class RoleDefinitionsPanel extends VerticalPanel {
     }
 
     private void editRole(RoleDefinition role) {
-        final Set<RoleDefinition> allOtherRoles = getAllOtherRoles(role);
+        final Set<RoleDefinitionDTO> allOtherRoles = getAllOtherRoles(role);
         Set<WildcardPermission> allPermissionsAsStrings = getAllPermissions();
-        new RoleDefinitionEditDialog(role, stringMessages, allPermissionsAsStrings, allOtherRoles, new DialogCallback<RoleDefinition>() {
+        new RoleDefinitionEditDialog(role, stringMessages, allPermissionsAsStrings, allOtherRoles,
+                new DialogCallback<RoleDefinitionDTO>() {
                     @Override
-                    public void ok(RoleDefinition editedObject) {
+                    public void ok(RoleDefinitionDTO editedObject) {
                         userManagementService.updateRoleDefinition(editedObject, new AsyncCallback<Void>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -257,22 +272,22 @@ public class RoleDefinitionsPanel extends VerticalPanel {
         return allPermissionsAsStrings;
     }
 
-    private Set<RoleDefinition> getAllOtherRoles(RoleDefinition role) {
-        final Set<RoleDefinition> allOtherRoles = getAllRoleDefinitions();
+    private Set<RoleDefinitionDTO> getAllOtherRoles(RoleDefinition role) {
+        final Set<RoleDefinitionDTO> allOtherRoles = getAllRoleDefinitions();
         allOtherRoles.remove(role);
         return allOtherRoles;
     }
 
-    private Set<RoleDefinition> getAllRoleDefinitions() {
-        final Set<RoleDefinition> allOtherRoles = new HashSet<>();
+    private Set<RoleDefinitionDTO> getAllRoleDefinitions() {
+        final Set<RoleDefinitionDTO> allOtherRoles = new HashSet<>();
         Util.addAll(filterablePanelRoleDefinitions.getAll(), allOtherRoles);
         return allOtherRoles;
     }
 
     public void updateRoleDefinitions() {
-        userManagementService.getRoleDefinitions(new AsyncCallback<ArrayList<RoleDefinition>>() {
+        userManagementService.getRoleDefinitions(new AsyncCallback<ArrayList<RoleDefinitionDTO>>() {
             @Override
-            public void onSuccess(ArrayList<RoleDefinition> allRoles) {
+            public void onSuccess(ArrayList<RoleDefinitionDTO> allRoles) {
                 filterablePanelRoleDefinitions.updateAll(allRoles);
             }
             

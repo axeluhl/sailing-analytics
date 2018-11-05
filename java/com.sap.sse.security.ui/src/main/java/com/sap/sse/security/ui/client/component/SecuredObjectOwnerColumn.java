@@ -58,14 +58,16 @@ public class SecuredObjectOwnerColumn<T extends SecuredObject> extends TextColum
      * @return {@link SecuredObjectOwnerColumn} instance showing the {@link Ownership#getTenantOwner() tenant owner}
      */
     public static <T extends SecuredObject> SecuredObjectOwnerColumn<T> getGroupOwnerColumn() {
-        return new SecuredObjectOwnerColumn<>(Ownership::getTenantOwner);
+        return new SecuredObjectOwnerColumn<>(
+                (Ownership t) -> Optional.ofNullable(t).map(x -> x.getTenantOwner()).orElse(null));
     }
 
     /**
      * @return {@link SecuredObjectOwnerColumn} instance showing the {@link Ownership#getUserOwner() user owner}
      */
     public static <T extends SecuredObject> SecuredObjectOwnerColumn<T> getUserOwnerColumn() {
-        return new SecuredObjectOwnerColumn<>(Ownership::getUserOwner);
+        return new SecuredObjectOwnerColumn<>(
+                (Ownership t) -> Optional.ofNullable(t).map(x -> x.getUserOwner()).orElse(null));
     }
 
     /**

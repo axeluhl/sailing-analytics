@@ -23,6 +23,7 @@ import com.sap.sailing.domain.leaderboard.FlexibleLeaderboard;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
+import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.event.EventSeriesReferenceDTO;
 import com.sap.sailing.gwt.home.communication.event.EventState;
@@ -44,6 +45,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.gwt.dispatch.shared.commands.DTO;
 import com.sap.sse.gwt.dispatch.shared.commands.ResultWithTTL;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
+import com.sap.sse.security.SecurityService;
 
 /**
  * This class aggregates {@link Leaderboard} information by preparing {@link DTO}s for different components representing
@@ -57,20 +59,26 @@ public class LeaderboardContext {
     private final Iterable<LeaderboardGroup> leaderboardGroups;
     private final Leaderboard leaderboard;
     private final RacingEventService service;
+    private SecurityService securityService;
     private Boolean hasMultipleFleets = null;
+
 
     public LeaderboardContext(SailingDispatchContext dispatchContext, Event event, Iterable<LeaderboardGroup> leaderboardGroup, Leaderboard leaderboard) {
         this.service = dispatchContext.getRacingEventService();
+        this.securityService = dispatchContext.getSecurityService();
         this.event = event;
         this.leaderboardGroups = leaderboardGroup;
         this.leaderboard = leaderboard;
     }
     
-    public void forRaces(RaceCallback callback) {
+    public void forRacesWithReadPermissions(RaceCallback callback) {
         for (RaceColumn raceColumn : leaderboard.getRaceColumns()) {
             if (!raceColumn.isCarryForward()) {
                 for (Fleet fleet : raceColumn.getFleets()) {
-                    callback.doForRace(new RaceContext(service, event, this, raceColumn, fleet, service));
+                    TrackedRace tRaceOrNull = raceColumn.getTrackedRace(fleet);
+                    if (tRaceOrNull == null || securityService.hasCurrentUserReadPermission(tRaceOrNull)) {
+                        callback.doForRace(new RaceContext(service, event, this, raceColumn, fleet, service));
+                    }
                 }
             }
         }
@@ -78,7 +86,7 @@ public class LeaderboardContext {
     
     public RegattaWithProgressDTO getRegattaWithProgress() {
         RegattaProgressCalculator regattaProgressCalculator = new RegattaProgressCalculator();
-        forRaces(regattaProgressCalculator);
+        forRacesWithReadPermissions(regattaProgressCalculator);
         RegattaWithProgressDTO regattaDTO = new RegattaWithProgressDTO(regattaProgressCalculator.getResult());
         fillRegattaFields(regattaDTO);
         return regattaDTO;
@@ -86,8 +94,6 @@ public class LeaderboardContext {
     
     public ResultWithTTL<GetMiniLeaderboardDTO> calculateMiniLeaderboard(RacingEventService service, int limit) {
         GetMiniLeaderboardDTO result = new GetMiniLeaderboardDTO();
-        if (leaderboard == null) {
-        }
         try {
             LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(null, Collections.<String> emptyList(), true,
                     service, service.getBaseDomainFactory(), false);
@@ -122,7 +128,7 @@ public class LeaderboardContext {
 
     private boolean hasLiveRace() {
         OverallRacesStateCalculator racesStateCalculator = new OverallRacesStateCalculator();
-        forRaces(racesStateCalculator);
+        forRacesWithReadPermissions(racesStateCalculator);
         return racesStateCalculator.hasLiveRace();
     }
     
@@ -149,7 +155,7 @@ public class LeaderboardContext {
         
         // Using the race states to calculate the real state for running events/regattas
         OverallRacesStateCalculator racesStateCalculator = new OverallRacesStateCalculator();
-        forRaces(racesStateCalculator);
+        forRacesWithReadPermissions(racesStateCalculator);
         if(racesStateCalculator.hasLiveRace()) {
             return RegattaState.RUNNING;
         }
@@ -268,7 +274,7 @@ public class LeaderboardContext {
         regattaDTO.setFlexibleLeaderboard(leaderboard instanceof FlexibleLeaderboard);
         
         RegattaRaceDataInfoCalculator regattaRaceDataInfoCalculator = new RegattaRaceDataInfoCalculator();
-        forRaces(regattaRaceDataInfoCalculator);
+        forRacesWithReadPermissions(regattaRaceDataInfoCalculator);
         regattaDTO.setRaceDataInfo(regattaRaceDataInfoCalculator.getRaceDataInfo());
         regattaDTO.setBuoyZoneRadius(getRegattaBuoyZoneRadius());
     }

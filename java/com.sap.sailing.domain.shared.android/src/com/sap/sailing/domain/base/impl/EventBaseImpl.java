@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.sap.sailing.domain.base.EventBase;
 import com.sap.sailing.domain.base.Venue;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
@@ -20,6 +21,8 @@ import com.sap.sse.common.media.ImageSize;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.concurrent.CopyOnWriteHashMap;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.MediaDescriptor;
 import com.sap.sse.shared.media.MediaUtils;
@@ -367,5 +370,15 @@ public abstract class EventBaseImpl implements EventBase {
             }
         }
         return false;
+    }
+
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getType().getQualifiedObjectIdentifier(getId().toString());
+    }
+
+    @Override
+    public HasPermissions getType() {
+        return SecuredDomainType.EVENT;
     }
 }

@@ -139,3 +139,6 @@
 .sectionheader_item_adjust_title_right {
   padding-right: 2.5em;
 }
+.sectionheader_element{
+    top: 0.666666666666em;
+}

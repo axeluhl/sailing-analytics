@@ -50,7 +50,7 @@ public class GetFinishedRacesAction implements SailingAction<ResultWithTTL<ListR
     @GwtIncompatible
     public ResultWithTTL<ListResult<RaceListRaceDTO>> execute(SailingDispatchContext context) {
         RaceListDataCalculator raceListDataCalculator = new RaceListDataCalculator();
-        EventActionUtil.forRacesOfRegatta(context, eventId, regattaId, raceListDataCalculator);
+        EventActionUtil.forRacesOfRegattaWithReadPermissions(context, eventId, regattaId, raceListDataCalculator);
         
         return new ResultWithTTL<>(EventActionUtil.getEventStateDependentTTL(context, eventId,
                 Duration.ONE_MINUTE.times(5)), new ListResult<>(raceListDataCalculator.getResult()));

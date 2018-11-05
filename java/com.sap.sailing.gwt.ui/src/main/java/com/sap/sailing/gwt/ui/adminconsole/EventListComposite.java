@@ -373,7 +373,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             }
         });
         final DialogConfig<EventDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
-                idFactory, event -> updateEvent(event, event), stringMessages);
+                idFactory, event -> fillEvents(), stringMessages);
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openDialog);
 
         eventNameColumn.setSortable(true);

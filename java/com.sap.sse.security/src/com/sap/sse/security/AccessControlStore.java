@@ -48,7 +48,15 @@ public interface AccessControlStore extends Named {
     void clear();
     void replaceContentsFrom(AccessControlStore newAccessControlStore);
 
+    /**
+     * This method should be directly followed by an deletion call for the given Object. Ít will unmap and destroy all
+     * references to it that are held internally. It will not modify the given argument!
+     */
     void removeAllOwnershipsFor(UserGroup userGroup);
 
+    /**
+     * This method should be directly followed by an deletion call for the given Object. Ít will unmap and destroy all
+     * references to it that are held internally. It will not modify the given argument!
+     */
     void removeAllOwnershipsFor(SecurityUser user);
 }

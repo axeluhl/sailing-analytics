@@ -9,6 +9,7 @@ import com.sap.sailing.news.EventNewsService;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
 import com.sap.sse.gwt.dispatch.client.system.DispatchContext;
+import com.sap.sse.security.SecurityService;
 
 /**
  * {@link DispatchContext} implementation, which is passed to backend-side {@link SailingAction} executions to provide
@@ -36,6 +37,9 @@ public interface SailingDispatchContext extends DispatchContext {
     @GwtIncompatible
     Date getCurrentClientTime();
     
+    @GwtIncompatible
+    SecurityService getSecurityService();
+
     <T> T getPreferenceForCurrentUser(String preferenceKey);
     
     void setPreferenceForCurrentUser(String preferenceKey, Object preference);

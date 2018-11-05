@@ -1,23 +1,20 @@
 package com.sap.sailing.gwt.home.shared.places.user.profile.preferences;
 
+import java.util.Collection;
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
-import com.sap.sailing.gwt.home.communication.user.profile.CompetitorSuggestionResult;
 import com.sap.sailing.gwt.home.communication.user.profile.FavoriteBoatClassesDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.FavoriteCompetitorsDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.FavoritesResult;
-import com.sap.sailing.gwt.home.communication.user.profile.GetCompetitorSuggestionAction;
 import com.sap.sailing.gwt.home.communication.user.profile.GetFavoritesAction;
 import com.sap.sailing.gwt.home.communication.user.profile.SaveFavoriteBoatClassesAction;
 import com.sap.sailing.gwt.home.communication.user.profile.SaveFavoriteCompetitorsAction;
 import com.sap.sailing.gwt.home.shared.app.ClientFactoryWithDispatch;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggestedMultiSelectionBoatClassDataProvider;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggestedMultiSelectionCompetitorDataProvider;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionBoatClassDataProvider;
-import com.sap.sailing.gwt.home.shared.partials.multiselection.SuggestedMultiSelectionCompetitorDataProvider;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggestedBoatClassMultiSelectionPresenter;
+import com.sap.sailing.gwt.home.shared.partials.multiselection.AbstractSuggestedCompetitorMultiSelectionPresenter;
 import com.sap.sailing.gwt.ui.client.refresh.ErrorAndBusyClientFactory;
-import com.sap.sse.gwt.client.Notification;
-import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.dispatch.shared.commands.VoidResult;
 
 /**
@@ -31,14 +28,13 @@ import com.sap.sse.gwt.dispatch.shared.commands.VoidResult;
 public class UserPreferencesPresenter<C extends ClientFactoryWithDispatch & ErrorAndBusyClientFactory>
         implements UserPreferencesView.Presenter {
 
-    private final SuggestedMultiSelectionCompetitorDataProvider competitorDataProvider = 
-            new SuggestedMultiSelectionCompetitorDataProviderImpl();
-    private final SuggestedMultiSelectionBoatClassDataProvider boatClassDataProvider = 
-            new SuggestedMultiSelectionBoatClassDataProviderImpl();
+    private final BoatClassSelectionPresenter boatClassSelectionPresenter = new BoatClassSelectionPresenterImpl();
+    private final CompetitorSelectionPresenter competitorSelectionPresenter;
     private final C clientFactory;
 
     public UserPreferencesPresenter(C clientFactory) {
         this.clientFactory = clientFactory;
+        this.competitorSelectionPresenter = new CompetitorSelectionPresenterImpl(clientFactory);
     }
 
     @Override
@@ -58,58 +54,91 @@ public class UserPreferencesPresenter<C extends ClientFactoryWithDispatch & Erro
     }
 
     @Override
-    public SuggestedMultiSelectionCompetitorDataProvider getFavoriteCompetitorsDataProvider() {
-        return competitorDataProvider;
+    public CompetitorSelectionPresenter getFavoriteCompetitorsDataProvider() {
+        return competitorSelectionPresenter;
     }
 
     @Override
-    public SuggestedMultiSelectionBoatClassDataProvider getFavoriteBoatClassesDataProvider() {
-        return boatClassDataProvider;
+    public BoatClassSelectionPresenter getFavoriteBoatClassesDataProvider() {
+        return boatClassSelectionPresenter;
     }
 
     private void initFavoriteCompetitors(FavoriteCompetitorsDTO favoriteCompetitors) {
-        competitorDataProvider.initNotifications(favoriteCompetitors.isNotifyAboutResults());
-        competitorDataProvider.initSelectedItems(favoriteCompetitors.getSelectedCompetitors());
+        competitorSelectionPresenter.initNotifications(favoriteCompetitors.isNotifyAboutResults());
+        competitorSelectionPresenter.initSelectedItems(favoriteCompetitors.getSelectedCompetitors());
     }
 
     private void initFavoriteBoatClasses(FavoriteBoatClassesDTO favoriteBoatClasses) {
-        boatClassDataProvider.initNotifications(favoriteBoatClasses.isNotifyAboutUpcomingRaces(),
+        boatClassSelectionPresenter.initNotifications(favoriteBoatClasses.isNotifyAboutUpcomingRaces(),
                 favoriteBoatClasses.isNotifyAboutResults());
-        boatClassDataProvider.initSelectedItems(favoriteBoatClasses.getSelectedBoatClasses());
+        boatClassSelectionPresenter.initSelectedItems(favoriteBoatClasses.getSelectedBoatClasses());
     }
 
-    private class SuggestedMultiSelectionBoatClassDataProviderImpl
-            extends AbstractSuggestedMultiSelectionBoatClassDataProvider {
+    private class BoatClassSelectionPresenterImpl
+            extends AbstractSuggestedBoatClassMultiSelectionPresenter<BoatClassSelectionPresenter.Display>
+            implements BoatClassSelectionPresenter {
+
+        private boolean notifyAboutUpcomingRaces;
+        private boolean notifyAboutResults;
+
         @Override
-        protected void persist(FavoriteBoatClassesDTO favorites) {
+        public void initNotifications(boolean notifyAboutUpcomingRaces, boolean notifyAboutResults) {
+            this.notifyAboutUpcomingRaces = notifyAboutUpcomingRaces;
+            this.notifyAboutResults = notifyAboutResults;
+            this.displays.forEach(display -> {
+                display.setNotifyAboutUpcomingRaces(notifyAboutUpcomingRaces);
+                display.setNotifyAboutResults(notifyAboutResults);
+            });
+        }
+
+        @Override
+        public void setNotifyAboutUpcomingRaces(boolean notifyAboutUpcomingRaces) {
+            this.notifyAboutUpcomingRaces = notifyAboutUpcomingRaces;
+            this.persist();
+        }
+
+        @Override
+        public void setNotifyAboutResults(boolean notifyAboutResults) {
+            this.notifyAboutResults = notifyAboutResults;
+            this.persist();
+        }
+
+        @Override
+        protected void persist(Collection<BoatClassDTO> selectedItem) {
+            final FavoriteBoatClassesDTO favorites = new FavoriteBoatClassesDTO(selectedItem, notifyAboutUpcomingRaces,
+                    notifyAboutResults);
             clientFactory.getDispatch().execute(new SaveFavoriteBoatClassesAction(favorites), new SaveAsyncCallback());
         }
     }
 
-    private class SuggestedMultiSelectionCompetitorDataProviderImpl
-            extends AbstractSuggestedMultiSelectionCompetitorDataProvider {
+    private class CompetitorSelectionPresenterImpl
+            extends AbstractSuggestedCompetitorMultiSelectionPresenter<CompetitorSelectionPresenter.Display>
+            implements CompetitorSelectionPresenter {
 
-        @Override
-        protected void getSuggestions(Iterable<String> queryTokens, int limit,
-                final SuggestionItemsCallback<SimpleCompetitorWithIdDTO> callback) {
-            clientFactory.getDispatch().execute(new GetCompetitorSuggestionAction(queryTokens, limit),
-                    new AsyncCallback<CompetitorSuggestionResult>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            Notification.notify("Error while loading competitor suggestion", NotificationType.ERROR);
-                        }
+        private boolean notifyAboutResults;
 
-                        @Override
-                        public void onSuccess(CompetitorSuggestionResult result) {
-                            callback.setSuggestionItems(result.getValues());
-                        }
-                    });
+        private CompetitorSelectionPresenterImpl(ClientFactoryWithDispatch clientFactory) {
+            super(clientFactory);
         }
 
         @Override
-        protected void persist(FavoriteCompetitorsDTO favorites) {
+        public void initNotifications(boolean notifyAboutResults) {
+            this.notifyAboutResults = notifyAboutResults;
+            this.displays.forEach(display -> display.setNotifyAboutResults(notifyAboutResults));
+        }
+
+        @Override
+        public void setNotifyAboutResults(boolean notifyAboutResults) {
+            this.notifyAboutResults = notifyAboutResults;
+            this.persist();
+        }
+
+        @Override
+        protected final void persist(Collection<SimpleCompetitorWithIdDTO> selectedItem) {
+            final FavoriteCompetitorsDTO favorites = new FavoriteCompetitorsDTO(selectedItem, notifyAboutResults);
             clientFactory.getDispatch().execute(new SaveFavoriteCompetitorsAction(favorites), new SaveAsyncCallback());
         }
+
     }
 
     private class SaveAsyncCallback implements AsyncCallback<VoidResult> {

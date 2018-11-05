@@ -166,11 +166,11 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
     }
 
     /**
-     * Creates a new {@link DialogConfig dialog configuration} instance which be (re-)used to
+     * Creates a new {@link DialogConfig dialog configuration} instance which can be (re-)used to
      * {@link DialogConfig#openDialog(Named) open} a {@link EditOwnershipDialog dialog}.
      * 
      * @param userManagementService
-     *            {@link UserManagementServiceAsync} to use to the secured object's ownership
+     *            {@link UserManagementServiceAsync} to use to set the secured object's ownership
      * @param type
      *            {@link SecuredDomainType} specifying the type of required permissions to modify the secured object
      * @param typeRelativeIdFactory

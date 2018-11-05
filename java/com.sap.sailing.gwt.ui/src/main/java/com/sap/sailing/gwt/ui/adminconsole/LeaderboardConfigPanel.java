@@ -402,8 +402,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         leaderboardTable.addColumn(leaderboardTypeColumn, stringMessages.type());
         leaderboardTable.addColumn(scoringSystemColumn, stringMessages.scoringSystem());
         leaderboardTable.addColumn(courseAreaColumn, stringMessages.courseArea());
-        SecuredObjectOwnerColumn.configureOwnerColumns(leaderboardTable, leaderboardColumnListHandler,
-                com.sap.sse.security.ui.client.i18n.StringMessages.INSTANCE);
+        SecuredObjectOwnerColumn.configureOwnerColumns(leaderboardTable, leaderboardColumnListHandler, stringMessages);
         leaderboardTable.addColumn(leaderboardActionColumn, stringMessages.actions());
         leaderboardTable.addColumnSortHandler(leaderboardColumnListHandler);
         leaderboardTable.setSelectionModel(selectionCheckboxColumn.getSelectionModel(), selectionCheckboxColumn.getSelectionManager());
@@ -1061,15 +1060,15 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
 
     private void refreshLeaderboardInTable(final String oldLeaderboardName, StrippedLeaderboardDTO updatedLeaderboard) {
         int indexOfLeaderboard = 0;
-                for (int i = 0; i < availableLeaderboardList.size(); i++) {
-                    StrippedLeaderboardDTO dao = availableLeaderboardList.get(i);
+        for (int i = 0; i < availableLeaderboardList.size(); i++) {
+            StrippedLeaderboardDTO dao = availableLeaderboardList.get(i);
             if (dao.getName().equals(oldLeaderboardName)) {
                 indexOfLeaderboard = i;
                 break;
             }
         }
-                availableLeaderboardList.set(indexOfLeaderboard, updatedLeaderboard);
-                filterLeaderboardPanel.updateAll(availableLeaderboardList);
+        availableLeaderboardList.set(indexOfLeaderboard, updatedLeaderboard);
+        filterLeaderboardPanel.updateAll(availableLeaderboardList);
     }
 
     private void removeLeaderboards(final Collection<StrippedLeaderboardDTO> leaderboards) {

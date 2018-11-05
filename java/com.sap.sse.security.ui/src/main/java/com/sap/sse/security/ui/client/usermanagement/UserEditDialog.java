@@ -45,6 +45,7 @@ import com.sap.sse.security.ui.client.component.ChangePasswordDialog;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.oauth.client.SocialUserDTO;
 import com.sap.sse.security.ui.shared.AccountDTO;
+import com.sap.sse.security.ui.shared.RoleDefinitionDTO;
 import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UsernamePasswordAccountDTO;
 
@@ -177,15 +178,15 @@ public class UserEditDialog extends DataEntryDialog<Pair<UserDTO, Iterable<Tripl
     }
 
     private void updateRolesAndInitializeRolesEditor(final UserDTO user) {
-        getUserManagementService().getRoleDefinitions(new AsyncCallback<ArrayList<RoleDefinition>>() {
+        getUserManagementService().getRoleDefinitions(new AsyncCallback<ArrayList<RoleDefinitionDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(caught.getMessage());
             }
             @Override
-            public void onSuccess(ArrayList<RoleDefinition> roleDefinitions) {
+            public void onSuccess(ArrayList<RoleDefinitionDTO> roleDefinitions) {
                 serverRoleDefinitionsByName.clear();
-                for (final RoleDefinition roleDefinition : roleDefinitions) {
+                for (final RoleDefinitionDTO roleDefinition : roleDefinitions) {
                     serverRoleDefinitionsByName.put(roleDefinition.getName(), roleDefinition);
                 }
                 setRolesEditor(user);

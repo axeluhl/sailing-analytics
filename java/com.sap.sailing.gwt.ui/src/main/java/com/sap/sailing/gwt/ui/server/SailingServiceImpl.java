@@ -588,8 +588,8 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
-import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
+import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.MediaUtils;
 import com.sap.sse.shared.media.VideoDescriptor;
@@ -879,7 +879,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             final Collection<String> namesOfRaceColumnsForWhichToLoadLegDetails, boolean addOverallDetails,
             String previousLeaderboardId, boolean fillTotalPointsUncorrected) throws NoWindException, InterruptedException, ExecutionException,
             IllegalArgumentException {
-        getSecurityService().checkCurrentUserReadPermission(getService().getLeaderboardByName(leaderboardName));
+        Leaderboard leaderBoard = getService().getLeaderboardByName(leaderboardName);
+        getSecurityService().checkCurrentUserReadPermission(leaderBoard);
+        if (leaderBoard instanceof RegattaLeaderboard) {
+            getSecurityService().checkCurrentUserReadPermission(((RegattaLeaderboard) leaderBoard).getRegatta());
+        }
         return getLeaderBoardByNameInternal(leaderboardName, date, namesOfRaceColumnsForWhichToLoadLegDetails,
                 addOverallDetails, previousLeaderboardId, fillTotalPointsUncorrected);
     }
@@ -2602,6 +2606,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         StrippedLeaderboardDTO result = null;
         Leaderboard leaderboard = leaderboards.get(leaderboardName);
         if (leaderboard != null) {
+            if (leaderboard instanceof RegattaLeaderboard) {
+                getSecurityService().checkCurrentUserReadPermission(((RegattaLeaderboard) leaderboard).getRegatta());
+            }
             getSecurityService().checkCurrentUserReadPermission(leaderboard);
             result = createStrippedLeaderboardDTO(leaderboard, false, false);
         }
@@ -5126,6 +5133,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public RaceLogDTO getRaceLog(String leaderboardName, RaceColumnDTO raceColumnDTO, FleetDTO fleet) {
+        Leaderboard lb = getService().getLeaderboardByName(leaderboardName);
+        getSecurityService().checkCurrentUserReadPermission(lb);
+        if (lb instanceof RegattaLeaderboard) {
+            getSecurityService().checkCurrentUserReadPermission(((RegattaLeaderboard) lb).getRegatta());
+        }
         RaceLogDTO result = null;
         RaceLog raceLog = getService().getRaceLog(leaderboardName, raceColumnDTO.getName(), fleet.getName());
         if(raceLog != null) {
@@ -7492,7 +7504,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (expeditionConnector != null) {
             for (final ExpeditionDeviceConfiguration config : expeditionConnector.getDeviceConfigurations()) {
                 if (subject.isPermitted(SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getStringPermissionForObjects(DefaultActions.READ,
-                        config.getDeviceUuid().toString()))) {
+                        WildcardPermissionEncoder.encode(getServerInfo().getServerName(), config.getName())))) {
                     result.add(config);
                 }
             }
@@ -7502,6 +7514,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void addOrReplaceExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
+        final Subject subject = SecurityUtils.getSubject();
+        subject.checkPermission(
+                SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getStringPermissionForObjects(DefaultActions.CREATE,
+                        WildcardPermissionEncoder.encode(getServerInfo().getServerName(),
+                                deviceConfiguration.getName())));
+
         // TODO consider replication
         final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
         if (expeditionConnector != null) {
@@ -7511,6 +7529,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
+        final Subject subject = SecurityUtils.getSubject();
+        subject.checkPermission(SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getStringPermissionForObjects(
+                DefaultActions.DELETE,
+                WildcardPermissionEncoder.encode(getServerInfo().getServerName(), deviceConfiguration.getName())));
+
         // TODO consider replication
         final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
         if (expeditionConnector != null) {
@@ -8263,9 +8286,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } catch (RaceLogNotFoundException e) {
             successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "raceLogNotFound"), null,
                     null);
-        } catch (ServiceNotFoundException e) {
-            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "securityServiceNotFound"),
-                    null, null);
         } catch (Exception e) {
             successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "unknownError"), null,
                     null);
@@ -8292,9 +8312,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         } catch (RaceLogNotFoundException e) {
             successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "raceLogNotFound"), null,
                     null);
-        } catch (ServiceNotFoundException e) {
-            successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "securityServiceNotFound"),
-                    null, null);
         } catch (TagAlreadyExistsException e) {
             successInfo = new SuccessInfo(false, serverStringMessages.get(getClientLocale(), "tagAlreadyExists"), null,
                     null);

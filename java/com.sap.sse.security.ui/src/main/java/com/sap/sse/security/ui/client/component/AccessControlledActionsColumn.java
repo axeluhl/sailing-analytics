@@ -12,10 +12,10 @@ import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.Action;
-import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.SecuredObject;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.ui.client.UserService;
 
 public class AccessControlledActionsColumn<T extends SecuredObject, S extends ImagesBarCell>
         extends ImagesBarColumn<T, S> {
@@ -38,9 +38,9 @@ public class AccessControlledActionsColumn<T extends SecuredObject, S extends Im
      * Adds an action identified by the provided name which will always be accessible.
      * 
      * @param name
-     *            {@link String} to identify the action
+     *            {@link String name} to identify the action
      * @param callback
-     *            {@link Consumer} to execute when the action is triggered
+     *            {@link Consumer callback} to execute when the action is triggered
      */
     public void addAction(final String name, final Consumer<T> callback) {
         this.nameToCallbackMap.put(name, callback);
@@ -51,11 +51,11 @@ public class AccessControlledActionsColumn<T extends SecuredObject, S extends Im
      * required permission specified by the provided {@link Action action}.
      * 
      * @param name
-     *            {@link String} to identify the action
+     *            {@link String name} to identify the action
      * @param action
-     *            {@link Action} specified the permission which is required to access the action
+     *            {@link Action action} specifying the permission which is required to access the action
      * @param callback
-     *            {@link Consumer} to execute when the action is triggered
+     *            {@link Consumer callback} to execute when the action is triggered
      */
     public void addAction(final String name, final Action action, final Consumer<T> callback) {
         this.nameToActionMap.put(name, action);

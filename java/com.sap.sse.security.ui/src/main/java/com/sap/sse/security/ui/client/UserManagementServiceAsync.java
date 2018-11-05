@@ -15,10 +15,10 @@ import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
+import com.sap.sse.security.ui.shared.RoleDefinitionDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 
@@ -78,13 +78,13 @@ public interface UserManagementServiceAsync {
     void updateUserProperties(String username, String fullName, String company, String localeName,
             AsyncCallback<UserDTO> callback);
 
-    void createRoleDefinition(String roleDefinitionIdAsString, String name, AsyncCallback<RoleDefinition> callback);
+    void createRoleDefinition(String roleDefinitionIdAsString, String name, AsyncCallback<RoleDefinitionDTO> callback);
 
     void deleteRoleDefinition(String roleDefinitionIdAsString, AsyncCallback<Void> callback);
 
-    void updateRoleDefinition(RoleDefinition roleWithNewProperties, AsyncCallback<Void> callback);
+    void updateRoleDefinition(RoleDefinitionDTO roleWithNewProperties, AsyncCallback<Void> callback);
 
-    void getRoleDefinitions(AsyncCallback<ArrayList<RoleDefinition>> callback);
+    void getRoleDefinitions(AsyncCallback<ArrayList<RoleDefinitionDTO>> callback);
 
     void setRolesForUser(String username, Iterable<Triple<UUID, String, String>> roleDefinitionIdAndTenantNameAndUsernames, AsyncCallback<SuccessInfo> callback);
 

@@ -16,7 +16,6 @@ import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.UnauthorizedException;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
@@ -24,6 +23,7 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
+import com.sap.sse.security.ui.shared.RoleDefinitionDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 
@@ -57,13 +57,13 @@ public interface UserManagementService extends RemoteService {
 
     UserDTO getUserByName(String username) throws UnauthorizedException;
 
-    RoleDefinition createRoleDefinition(String roleDefinitionIdAsString, String name);
+    RoleDefinitionDTO createRoleDefinition(String roleDefinitionIdAsString, String name);
     
-    void deleteRoleDefinition(String roleIdAsString);
+    void deleteRoleDefinition(String roleDefinitionIdAsString);
     
-    void updateRoleDefinition(RoleDefinition roleWithNewProperties);
+    void updateRoleDefinition(RoleDefinitionDTO roleWithNewProperties);
     
-    ArrayList<RoleDefinition> getRoleDefinitions();
+    ArrayList<RoleDefinitionDTO> getRoleDefinitions();
 
     Pair<UserDTO, UserDTO> getCurrentUser() throws UnauthorizedException;
 

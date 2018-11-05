@@ -313,8 +313,8 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
                     }
                 }, getStringMessages().userManagement(), SecuredSecurityTypes.USER.getPermission(DefaultActions.MUTATION_ACTIONS));
 
-        final RoleDefinitionsPanel roleManagementPanel = new RoleDefinitionsPanel(StringMessages.INSTANCE, getUserService().getUserManagementService(), 
-                tableResources, this);
+        final RoleDefinitionsPanel roleManagementPanel = new RoleDefinitionsPanel(StringMessages.INSTANCE,
+                getUserService(), tableResources, this);
         panel.addToTabPanel(advancedTabPanel,
                 new DefaultRefreshableAdminConsolePanel<RoleDefinitionsPanel>(roleManagementPanel) {
                     @Override

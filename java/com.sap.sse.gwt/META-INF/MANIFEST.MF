@@ -12,7 +12,8 @@ Require-Bundle: com.google.gwt.user;bundle-version="2.8.2";resolution:=optional,
  com.sap.sse.common,
  com.sap.sse.filestorage
 Bundle-ActivationPolicy: lazy
-Import-Package: javax.servlet;version="3.1.0",
+Import-Package: com.sap.sse.security,
+ javax.servlet;version="3.1.0",
  javax.servlet.descriptor;version="3.1.0",
  javax.servlet.http;version="3.1.0",
  org.apache.commons.io,

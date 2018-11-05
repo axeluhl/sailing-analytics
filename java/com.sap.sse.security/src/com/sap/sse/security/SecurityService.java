@@ -377,4 +377,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     boolean hasCurrentUserRoleForOwnedObject(HasPermissions type, String typeRelativeObjectIdentifier,
             RoleDefinition roleToCheck);
+
+    boolean hasCurrentUserMetaPermission(WildcardPermission permissionToCheck, Ownership ownership);
 }

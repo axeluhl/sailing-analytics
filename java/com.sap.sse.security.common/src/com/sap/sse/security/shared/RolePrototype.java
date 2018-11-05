@@ -5,21 +5,22 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 
-public abstract class RolePrototype implements RoleDefinition {    
+public abstract class RolePrototype implements RoleDefinition {
     private static final long serialVersionUID = 3291793984984443193L;
-    
+
     private final UUID id;
     private final String name;
     private final Set<WildcardPermission> permissions;
-    
+
     protected RolePrototype(String name, String uuidAsString, Iterable<? extends HasPermissions> permissions) {
         this(name, uuidAsString, getWildcardPermissions(permissions));
     }
-    
+
     private static WildcardPermission[] getWildcardPermissions(Iterable<? extends HasPermissions> permissions) {
         final WildcardPermission[] result = new WildcardPermission[Util.size(permissions)];
-        int i=0;
+        int i = 0;
         for (final HasPermissions p : permissions) {
             result[i++] = p.getPermission();
         }
@@ -34,7 +35,7 @@ public abstract class RolePrototype implements RoleDefinition {
             this.permissions.add(p);
         }
     }
-    
+
     @Override
     public String getName() {
         return name;
@@ -52,12 +53,12 @@ public abstract class RolePrototype implements RoleDefinition {
 
     @Override
     public void setName(String newName) {
-        throw new UnsupportedOperationException("Cannot change the name of role "+getName());
+        throw new UnsupportedOperationException("Cannot change the name of role " + getName());
     }
 
     @Override
     public void setPermissions(Iterable<WildcardPermission> permissions) {
-        throw new UnsupportedOperationException("Cannot change the permissions of role "+getName());
+        throw new UnsupportedOperationException("Cannot change the permissions of role " + getName());
     }
 
     @Override
@@ -83,5 +84,15 @@ public abstract class RolePrototype implements RoleDefinition {
         } else if (!id.equals(other.id))
             return false;
         return true;
+    }
+
+    @Override
+    public HasPermissions getType() {
+        return SecuredSecurityTypes.ROLE_DEFINITION;
+    }
+
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getType().getQualifiedObjectIdentifier(getId().toString());
     }
 }

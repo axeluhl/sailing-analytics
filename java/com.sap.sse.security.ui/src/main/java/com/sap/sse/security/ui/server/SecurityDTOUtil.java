@@ -13,6 +13,7 @@ import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.SecuredObject;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.ui.shared.UserDTO;
 
 public abstract class SecurityDTOUtil {
 
@@ -55,6 +56,40 @@ public abstract class SecurityDTOUtil {
             final QualifiedObjectIdentifier objectId) {
         final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser = new HashMap<>();
         final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup = new HashMap<>();
+        addSecurityInformation(securityDTOFactory, securityService, securedObject, objectId,
+                fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
+    }
+
+    /**
+     * Adds {@link AccessControlList access control list} and {@link Ownership ownership} information for the given
+     * {@link QualifiedObjectIdentifier qualified object identifier} to the provided {@link NamedSecuredObjectDTO
+     * secured object DTO} by using the provided mappings of {@link SecurityUser users} and {@link UserGroup user
+     * groups}.
+     * <p>
+     * <b>NOTE:</b> This method can be used to reuse already stripped down {@link SecurityUser users} or
+     * {@link UserGroup user groups} in order to avoid multiple mappings of the the same instances. However, it must be
+     * used with caution, especially in the context of one or more {@link UserDTO} instances, which themselves contain
+     * ownership information. Reusing an {@link UserDTO} as user owner object might cause infinite relation paths.
+     * </p>
+     * 
+     * @param securityService
+     *            the {@link SecurityService} to determine access control list and ownership
+     * @param securityDTOFactory
+     *            the {@link SecurityDTOFactory} to use for DTO creation
+     * @param securedObject
+     *            the {@link NamedSecuredObjectDTO} to add security information to
+     * @param objectId
+     *            the {@link QualifiedObjectIdentifier} to get security information for
+     * @param fromOriginalToStrippedDownUser
+     *            the {@link Map} to stripped down {@link SecurityUser user}s to use
+     * @param fromOriginalToStrippedDownUserGroup
+     *            the {@link Map} to stripped down {@link UserGroup user group}s to use
+     */
+    public static void addSecurityInformation(final SecurityDTOFactory securityDTOFactory,
+            final SecurityService securityService, final SecuredObject securedObject,
+            final QualifiedObjectIdentifier objectId,
+            final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser,
+            final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup) {
         final AccessControlListAnnotation accessControlList = securityService.getAccessControlList(objectId);
         securedObject.setAccessControlList(securityDTOFactory.createAccessControlListDTO(
                 accessControlList == null ? null : accessControlList.getAnnotation(), fromOriginalToStrippedDownUser,

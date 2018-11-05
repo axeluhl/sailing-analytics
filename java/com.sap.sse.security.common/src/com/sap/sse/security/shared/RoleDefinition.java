@@ -30,7 +30,7 @@ import com.sap.sse.common.Renamable;
  * @author Axel Uhl (d043530)
  *
  */
-public interface RoleDefinition extends NamedWithID, Renamable {
+public interface RoleDefinition extends NamedWithID, Renamable, WithQualifiedObjectIdentifier {
     Set<WildcardPermission> getPermissions();
     
     @Override
