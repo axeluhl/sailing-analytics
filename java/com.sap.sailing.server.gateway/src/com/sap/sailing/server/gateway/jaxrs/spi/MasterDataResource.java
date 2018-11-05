@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
@@ -22,15 +23,20 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.Event;
+import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.configuration.DeviceConfiguration;
 import com.sap.sailing.domain.base.configuration.DeviceConfigurationMatcher;
+import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sse.security.shared.User;
 
 @Path("/v1/masterdata/leaderboardgroups")
 public class MasterDataResource extends AbstractSailingServerResource {
@@ -39,9 +45,15 @@ public class MasterDataResource extends AbstractSailingServerResource {
     
     @GET
     @Produces("application/x-java-serialized-object")
-    public Response getMasterDataByLeaderboardGroups(@QueryParam("names[]") List<String> leaderboardGroupNames,
+    public Response getMasterDataByLeaderboardGroups(@QueryParam("names[]") List<String> requestedLeaderboardGroups,
             @QueryParam("compress") Boolean compress, @QueryParam("exportWind") Boolean exportWind, @QueryParam("exportDeviceConfigs") Boolean exportDeviceConfigs)
             throws UnsupportedEncodingException {
+
+        User user = getSecurityService().getCurrentUser();
+        if (user == null) {
+            return Response.status(Status.FORBIDDEN).build();
+        }
+
         final long startTime = System.currentTimeMillis();
         logger.info("Masterdataexport has started");
         if (compress == null) {
@@ -58,36 +70,67 @@ public class MasterDataResource extends AbstractSailingServerResource {
 
         Set<LeaderboardGroup> groupsToExport = new HashSet<LeaderboardGroup>();
 
-        if (leaderboardGroupNames.size() > 0) {
-            for (String name : leaderboardGroupNames) {
-                LeaderboardGroup group = allLeaderboardGroups.get(name);
-                if (group != null) {
+        if (requestedLeaderboardGroups.isEmpty()) {
+            // add all visible
+            for (LeaderboardGroup group : allLeaderboardGroups.values()) {
+                if (getSecurityService().hasCurrentUserReadPermission(group)) {
                     groupsToExport.add(group);
                 }
             }
         } else {
-            groupsToExport = new HashSet<LeaderboardGroup>();
-            groupsToExport.addAll(allLeaderboardGroups.values());
+            // add all requested, that are visible
+            for (String name : requestedLeaderboardGroups) {
+                LeaderboardGroup group = allLeaderboardGroups.get(name);
+                if (group != null) {
+                    if (getSecurityService().hasCurrentUserReadPermission(group)) {
+                        groupsToExport.add(group);
+                    }
+                }
+            }
         }
 
         final List<Serializable> competitorIds = new ArrayList<Serializable>();
 
         for (LeaderboardGroup lg : groupsToExport) {
             for (Leaderboard leaderboard : lg.getLeaderboards()) {
-                for (Competitor competitor : leaderboard.getAllCompetitors()) {
-                    competitorIds.add(competitor.getId());
+                if (getSecurityService().hasCurrentUserReadPermission(leaderboard)) {
+                    for (Competitor competitor : leaderboard.getAllCompetitors()) {
+                        competitorIds.add(competitor.getId());
+                    }
                 }
             }
         }
-        Map<DeviceConfigurationMatcher, DeviceConfiguration> deviceConfigurations;
+        Map<DeviceConfigurationMatcher, DeviceConfiguration> deviceConfigurations = new HashMap<>();
         if (exportDeviceConfigs) {
-            deviceConfigurations = getAllDeviceConfigs();
-        } else {
-            deviceConfigurations = new HashMap<>();
+            for (Entry<DeviceConfigurationMatcher, DeviceConfiguration> deviceconfig : getAllDeviceConfigs()
+                    .entrySet()) {
+                // FIXME here permission check?
+                deviceConfigurations.put(deviceconfig.getKey(), deviceconfig.getValue());
+            }
+        }
+
+        ArrayList<Event> events = new ArrayList<>();
+        for (Event event : getService().getAllEvents()) {
+            if (getSecurityService().hasCurrentUserReadPermission(event)) {
+                events.add(event);
+            }
+        }
+
+        ArrayList<MediaTrack> mediaTracks = new ArrayList<>();
+        for (MediaTrack mediaTrack : getService().getAllMediaTracks()) {
+            if (getSecurityService().hasCurrentUserReadPermission(mediaTrack)) {
+                mediaTracks.add(mediaTrack);
+            }
+        }
+
+        Map<String, Regatta> regattaRaceIds = new HashMap<>();
+        for (Entry<String, Regatta> regattaRaceMap : getService().getPersistentRegattasForRaceIDs().entrySet()) {
+            if (getSecurityService().hasCurrentUserReadPermission(regattaRaceMap.getValue())) {
+                regattaRaceIds.put(regattaRaceMap.getKey(), regattaRaceMap.getValue());
+            }
         }
         final TopLevelMasterData masterData = new TopLevelMasterData(groupsToExport,
-                getService().getAllEvents(), getService().getPersistentRegattasForRaceIDs(), getService()
-                        .getAllMediaTracks(),
+                events, regattaRaceIds, mediaTracks,
                 getService().getSensorFixStore(), exportWind, deviceConfigurations);
         final StreamingOutput streamingOutput;
         if (compress) {
