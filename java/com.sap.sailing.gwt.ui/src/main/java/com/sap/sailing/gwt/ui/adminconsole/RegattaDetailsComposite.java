@@ -1,11 +1,13 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
@@ -19,6 +21,7 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.sap.sailing.domain.common.BranchIOConstants;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
@@ -410,9 +413,12 @@ public class RegattaDetailsComposite extends Composite {
             controlTrackingFromStartAndFinishTimes.setText(regatta.controlTrackingFromStartAndFinishTimes ? stringMessages.yes() : stringMessages.no());
             canBoatsOfCompetitorsChangePerRace.setText(regatta.canBoatsOfCompetitorsChangePerRace ? stringMessages.yes() : stringMessages.no());
             competitorRegistrationType.setText(regatta.competitorRegistrationType.getLabel(stringMessages));
-            openRegattaRegistrationLink.setText(regatta.competitorRegistrationType.isOpen()
-                    ? "http://www.sapsailing.com?secret=" + regatta.registrationLinkSecret    //TODO: get correct URL for branch.io
-                    : "-");
+            openRegattaRegistrationLink.setText(
+                    regatta.competitorRegistrationType.isOpen()
+                            ? BranchIOConstants.OPEN_REGATTA_APP_BRANCHIO + "?reagttaName="
+                                    + URL.encodeQueryString(regatta.getName()) + "&secret="
+                                    + URL.encodeQueryString(regatta.registrationLinkSecret)
+                            : "-");
             buoyZoneRadiusInHullLengths.setText(String.valueOf(regatta.buoyZoneRadiusInHullLengths));
             
             if (regatta.configuration != null) {
