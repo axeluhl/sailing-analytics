@@ -36,20 +36,16 @@ import com.sap.sailing.server.operationaltransformation.CreateFlexibleLeaderboar
 import com.sap.sailing.server.tagging.TagDTODeSerializer;
 import com.sap.sailing.server.tagging.TaggingService;
 import com.sap.sailing.server.tagging.TaggingServiceImpl;
+import com.sap.sailing.server.testsupport.SecurityBundleTestWrapper;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.impl.Activator;
-import com.sap.sse.security.impl.SecurityServiceImpl;
-import com.sap.sse.security.shared.UserManagementException;
-import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.UserGroupManagementException;
-import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
-import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
-import com.sap.sse.util.ServiceTrackerFactory;
+import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.WildcardPermission;
 
 /**
  * Tests {@link TaggingService} which is used for all CRUD operations regarding {@link TagDTO tags}.
@@ -78,7 +74,6 @@ public class TaggingServiceTest {
     private static TaggingService taggingService;
     private static Subject subject;
 
-    @SuppressWarnings("restriction")
     @BeforeClass
     public static void setUpClass()
             throws MalformedURLException, IOException, InterruptedException, UserManagementException, MailException, UserGroupManagementException {
@@ -92,22 +87,7 @@ public class TaggingServiceTest {
                 leaderboardName, true);
         racingService.apply(addLeaderboardColumn);
         // setup security service
-        if (Activator.getContext() == null) {
-            logger.info("Setup for TaggingServiceTest in a non-OSGi environment");
-            final UserStoreImpl store = new UserStoreImpl("defaultTenant");
-            final AccessControlStoreImpl accessControlStoreImpl = new AccessControlStoreImpl(store);
-            Activator.setTestStores(store, accessControlStoreImpl);
-            securityService = new SecurityServiceImpl(store, accessControlStoreImpl);
-            SecurityUtils.setSecurityManager(securityService.getSecurityManager());
-            Activator.setSecurityService(securityService);
-        } else {
-            logger.info("Creating dummy UserStoreImpl to trigger loading of userstore mongodb bundle");
-            new UserStoreImpl("defaultTenant"); // only to trigger bundle loading and activation so that security service can find the bundle and its original user store
-            logger.info("Setup for TaggingServiceTest in an OSGi environment");
-            // TODO: This timeout of 2 minutes is just for debugging purposes and should not be used in production!
-            securityService = ServiceTrackerFactory.createAndOpen(Activator.getContext(), SecurityService.class)
-                    .waitForService(120 * 1000);
-        }
+        securityService = new SecurityBundleTestWrapper().initializeSecurityServiceForTesting();
         // create & login user
         securityService.createSimpleUser(username, email, password, fullName, company, null);
         subject = SecurityUtils.getSubject();
