@@ -378,6 +378,15 @@ public class UserService {
         return hasPermission(new WildcardPermission(permission));
     }
 
+    public boolean hasAllPermissions(WildcardPermission... permissions) {
+        for (WildcardPermission permission : permissions) {
+            if (!hasPermission(permission)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public boolean hasPermission(WildcardPermission permission) {
         return hasPermission(permission, /* ownership */ null, /* acl */ null);
     }

@@ -5322,7 +5322,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         inputStream = new TimeoutExtendingInputStream(connection.getInputStream(), connection);
                     }
 
-                    final MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, getService());
+                    final MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, getService(),
+                            getSecurityService());
                     importer.importFromStream(inputStream, importOperationId, override);
                 } catch (Throwable e) {
                     // do not assume that RuntimeException is logged properly
