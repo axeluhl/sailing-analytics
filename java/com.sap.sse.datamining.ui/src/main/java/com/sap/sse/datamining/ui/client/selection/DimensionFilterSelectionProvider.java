@@ -20,6 +20,7 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.TextAlign;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.i18n.client.LocaleInfo;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -118,10 +119,15 @@ public class DimensionFilterSelectionProvider extends AbstractDataMiningComponen
         
         availableData = new HashSet<>();
         filteredData = new ListDataProvider<Serializable>(this::elementAsString);
-        filterPanel = new AbstractFilterablePanel<Serializable>(null, dataGrid, filteredData) {
+        filterPanel = new AbstractFilterablePanel<Serializable>(null, filteredData) {
             @Override
             public Iterable<String> getSearchableStrings(Serializable element) {
                 return Collections.singleton(elementAsString(element));
+            }
+
+            @Override
+            public AbstractCellTable<Serializable> getCellTable() {
+                return dataGrid;
             }
         };
         filterPanel.setWidth("100%");

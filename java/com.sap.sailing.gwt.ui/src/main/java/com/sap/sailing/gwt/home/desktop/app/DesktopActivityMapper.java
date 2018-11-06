@@ -11,6 +11,8 @@ import com.sap.sailing.gwt.home.desktop.places.error.ErrorActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.event.EventActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.events.EventsActivity;
 import com.sap.sailing.gwt.home.desktop.places.morelogininformation.MoreLoginInformationActivityProxy;
+import com.sap.sailing.gwt.home.desktop.places.qrcode.QRCodeActivityProxy;
+import com.sap.sailing.gwt.home.desktop.places.qrcode.QRCodePlace;
 import com.sap.sailing.gwt.home.desktop.places.solutions.SolutionsActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringActivityProxy;
 import com.sap.sailing.gwt.home.desktop.places.sponsoring.SponsoringPlace;
@@ -62,6 +64,8 @@ public class DesktopActivityMapper implements ActivityMapper {
             return new ErrorActivityProxy((ErrorPlace) place, clientFactory);
         } else if (place instanceof ContactPlace) {
             return new ContactActivityProxy((ContactPlace) place, clientFactory);
+        } else if (place instanceof QRCodePlace) {
+            return new QRCodeActivityProxy((QRCodePlace) place, clientFactory);
         } else if (place instanceof AbstractEventPlace) {
             AbstractEventPlace eventPlace = (AbstractEventPlace) place;
             return new EventActivityProxy(eventPlace, clientFactory, clientFactory.getHomePlacesNavigator());

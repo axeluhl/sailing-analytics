@@ -12,6 +12,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -41,6 +42,7 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
     private final SailingServiceAsync sailingService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
+    private CellTable<RemoteSailingServerReferenceDTO> remoteServersTable; 
 
     private final AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
     private final ListDataProvider<RemoteSailingServerReferenceDTO> serverDataProvider;
@@ -67,7 +69,7 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
         serverDataProvider = new ListDataProvider<RemoteSailingServerReferenceDTO>();
         filteredServerTablePanel = new LabeledAbstractFilterablePanel<RemoteSailingServerReferenceDTO>(
                 new Label(stringMessages.filterBy() + ":"), Collections.<RemoteSailingServerReferenceDTO> emptyList(),
-                new CellTable<RemoteSailingServerReferenceDTO>(), serverDataProvider) {
+                serverDataProvider) {
             @Override
             public List<String> getSearchableStrings(RemoteSailingServerReferenceDTO t) {
                 List<String> strings = new ArrayList<String>();
@@ -80,9 +82,13 @@ public class RemoteServerInstancesManagementPanel extends SimplePanel {
                 }
                 return strings;
             }
+
+            @Override
+            public AbstractCellTable<RemoteSailingServerReferenceDTO> getCellTable() {
+                return remoteServersTable;
+            }
         };
-        CellTable<RemoteSailingServerReferenceDTO> remoteServersTable = createRemoteServersTable();
-        filteredServerTablePanel.setTable(remoteServersTable);
+        remoteServersTable = createRemoteServersTable();
         serverDataProvider.addDataDisplay(remoteServersTable);
 
         remoteServersContentPanel.add(filteredServerTablePanel);

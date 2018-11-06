@@ -187,9 +187,9 @@ public class TrackedRaceWithContext implements HasTrackedRaceContext {
     }
     
     @Override
-    public Double getRankAtFinishForCompetitor(Competitor competitor) {
+    public Integer getRankAtFinishForCompetitor(Competitor competitor) {
         int rank = getTrackedRace().getRank(competitor, getTrackedRace().getEndOfTracking());
-        return rank == 0 ? null : Double.valueOf(rank);
+        return rank == 0 ? null : rank;
     }
 
 }

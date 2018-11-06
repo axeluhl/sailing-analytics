@@ -11,6 +11,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.text.shared.SafeHtmlRenderer;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
@@ -89,11 +90,16 @@ public class IgtimiAccountsPanel extends FlowPanel {
         filteredAccounts.addDataDisplay(allAccounts);
         final List<String> emptyList = Collections.emptyList();
         filterAccountsPanel = new LabeledAbstractFilterablePanel<String>(new Label(stringMessages.igtimiAccounts()),
-                emptyList, allAccounts, filteredAccounts) {
+                emptyList, filteredAccounts) {
             @Override
             public Iterable<String> getSearchableStrings(String t) {
                 Set<String> strings = Collections.singleton(t);
                 return strings;
+            }
+
+            @Override
+            public AbstractCellTable<String> getCellTable() {
+                return allAccounts;
             }
         };
         refreshableAccountsSelectionModel = new RefreshableSingleSelectionModel<>(null,

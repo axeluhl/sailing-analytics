@@ -27,4 +27,10 @@ public interface RaceBoardMode {
      * {@link RaceBoardPanel#getTimer()}.
      */
     void applyTo(RaceBoardPanel raceBoardPanel);
+
+    /**
+     * Each runnable is called after the initialization of the RaceBoardPanel is finished and the trigger-method had
+     * been called.
+     */
+    void addInitializationFinishedRunner(Runnable runnable);
 }

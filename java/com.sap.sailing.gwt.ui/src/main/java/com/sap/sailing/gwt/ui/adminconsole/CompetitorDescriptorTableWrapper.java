@@ -11,6 +11,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -100,7 +101,7 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
         this.competitorImportMatcher = competitorImportMatcherParam;
         filterablePanelCompetitorDescriptor = new LabeledAbstractFilterablePanel<CompetitorDescriptor>(
                 new Label(stringMessages.filterImportedCompetitorsByNameSailRaceFleet()),
-                new ArrayList<CompetitorDescriptor>(), table, dataProvider) {
+                new ArrayList<CompetitorDescriptor>(), dataProvider) {
             @Override
             public Iterable<String> getSearchableStrings(CompetitorDescriptor competitorDescriptor) {
                 List<String> string = new ArrayList<String>();
@@ -110,6 +111,11 @@ public class CompetitorDescriptorTableWrapper<S extends RefreshableSelectionMode
                 string.add(competitorDescriptor.getRaceName());
                 string.add(competitorDescriptor.getFleetName());
                 return string;
+            }
+
+            @Override
+            public AbstractCellTable<CompetitorDescriptor> getCellTable() {
+                return CompetitorDescriptorTableWrapper.this.getTable();
             }
         };
         registerSelectionModelOnNewDataProvider(filterablePanelCompetitorDescriptor.getAllListDataProvider());
