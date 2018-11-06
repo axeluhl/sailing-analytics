@@ -69,38 +69,21 @@ if (new File(SIGN_DOCKER_FILE_PY).exists()){
   }
 }
 
-// artifacts builderVersion: "1.1", {
+artifacts builderVersion: "1.1", {
+  def groupdId = "com.sap.sailing.android"
 
-//   // export single file with hardcoded coordinates
-//   group "com.sap.mobile.android.validation", {
-//     artifact "validationapp", {
-//       file "$apkToDeploy"
-//     }
-//   }
+  apkExtension = /\.apk$/
+  repodir = new File(gendir, "src/java/com.sap.sailing.www/apps")
+  repodir.traverse(type : FILES, nameFilter: ~/unsigned*.*${apkExtension}/) { apkFile ->
+    def apkToDeploy = "$gendir/${apkFile.getName()}"
+    def artifactId = apkFile.getName().replace("com.sap.sailing.", "")
+    def startOfVersion = artifactId.indexOf("-")
+    artifactId = artifactId.substring(0, startOfVersion)
 
-//   // if the project creates a simple APK, remove code below
-//   // export all files matching a pattern
-//   // autodiscover coordinates
-//   aarExtension = /\.aar$/
-//   repodir = new File(gendir, "m2repo")
-//   repodir.traverse(type : FILES, nameFilter: ~/.*${aarExtension}/) { aarFile ->
-
-//     aarFilePath = aarFile.getAbsolutePath()
-//     artifactDir = aarFile.getParentFile().getParentFile()
-
-//     groupId = artifactDir.getParent().replace(repodir.getAbsolutePath() + File.separatorChar, "").replace(File.separatorChar, (char)'.')
-//     artifactId = artifactDir.getName()
-
-//     group groupId, {
-//       artifact artifactId, {
-//         file aarFilePath
-//         pom file: aarFilePath.replaceAll(~/${aarExtension}/,".pom")
-//         javadocFile = new File(aarFilePath.replaceAll(~/${aarExtension}/, "-javadoc.jar"))
-//         if (javadocFile.isFile()) {
-//           file javadocFile, classifier: "javadoc", extension: "jar"
-//         } 
-//       }
-//     }
-//   }
-
-// }
+    group "$groupId", {
+      artifact "$artifactId", {
+        file "$apkToDeploy"
+      }
+    }
+  }
+}
