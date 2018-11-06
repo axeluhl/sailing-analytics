@@ -57,10 +57,9 @@ if (new File(SIGN_DOCKER_FILE_PY).exists()){
   // snapshot and milestone builds are not eligible for central signing
   apkExtension = /\.apk$/
   repodir = new File(gendir, "src/java/com.sap.sailing.www/apps")
-  repodir.traverse(type : FILES, nameFilter: ~/unsigned*.*${apkExtension}/) { apkFile ->
+  repodir.traverse(type : FILES, nameFilter: ~/.*unsigned*.*${apkExtension}/) { apkFile ->
     def apkToDeploy = "$gendir/${apkFile.getName()}"
-    def apkFilePath = apkFile.getAbsolutePath()
-    def apkToSign = "${apkFilePath}/${apkFile.getName()}"
+    def apkToSign = apkFile.getAbsolutePath()
 
     println "Execute APK local signing ..."
     assert execute(apksigner.absolutePath, "sign", "--ks", "${CODESIGN_TOOL_DIR}/localSigningKeystore-1.0.0.jks", "--ks-pass", "pass:localSigningPassword", "-in", "${apkToSign}", "-out", "${apkToDeploy}" ) == 0 
@@ -74,7 +73,7 @@ artifacts builderVersion: "1.1", {
 
   apkExtension = /\.apk$/
   repodir = new File(gendir, "src/java/com.sap.sailing.www/apps")
-  repodir.traverse(type : FILES, nameFilter: ~/unsigned*.*${apkExtension}/) { apkFile ->
+  repodir.traverse(type : FILES, nameFilter: ~/.*unsigned*.*${apkExtension}/) { apkFile ->
     def apkToDeploy = "$gendir/${apkFile.getName()}"
     def artifactId = apkFile.getName().replace("com.sap.sailing.", "")
     def startOfVersion = artifactId.indexOf("-")
