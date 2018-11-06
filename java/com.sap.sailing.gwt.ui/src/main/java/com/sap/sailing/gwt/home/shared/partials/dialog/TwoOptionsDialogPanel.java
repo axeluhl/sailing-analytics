@@ -13,41 +13,56 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 
 /**
- * dialog panel for yes/no confirm dialog which contains a yes button, a no button and a message field with the message
+ * Dialog panel for yes/no confirm dialog which contains a yes button, a no button and a message field with the message
  * in it.
  */
-public class ConfirmDialogPanel extends Composite {
+public class TwoOptionsDialogPanel extends Composite {
 
     private static ConfirmDialogPanelUiBinder uiBinder = GWT.create(ConfirmDialogPanelUiBinder.class);
 
-    interface ConfirmDialogPanelUiBinder extends UiBinder<Widget, ConfirmDialogPanel> {
+    interface ConfirmDialogPanelUiBinder extends UiBinder<Widget, TwoOptionsDialogPanel> {
     }
 
     @UiField
-    Button yesButton;
+    Button firstButton;
 
     @UiField
-    Button noButton;
+    Button secondButton;
 
     @UiField
     DivElement messageField;
+
+    @UiField
+    DivElement titleField;
 
     private final DialogCallback<Void> callback;
 
     private final PopupPanel parent;
 
-    public ConfirmDialogPanel() {
-        this("", null, null);
+    public TwoOptionsDialogPanel() {
+        this("", "", null, null);
     }
 
-    public ConfirmDialogPanel(String message, DialogCallback<Void> callback, PopupPanel parent) {
+    public TwoOptionsDialogPanel(String message, String title, DialogCallback<Void> callback, PopupPanel parent) {
         initWidget(uiBinder.createAndBindUi(this));
         this.callback = callback;
         this.parent = parent;
         messageField.setInnerText(message);
+        titleField.setInnerText(title);
     }
 
-    @UiHandler("yesButton")
+    /** Sets the labels of the {@link #firstButton} and {@link #secondButton}. */
+    public void setButtonLabels(String firstButtonText, String secondButtonText) {
+        firstButton.setText(firstButtonText);
+        secondButton.setText(secondButtonText);
+    }
+
+    /** Changes the color of the {@link #firstButton} to red. */
+    public void setFirstButtonDestructive() {
+        firstButton.addStyleName(DialogResources.INSTANCE.css().destructiveButton());
+    }
+
+    @UiHandler("firstButton")
     void onYesClick(ClickEvent e) {
         if (parent != null) {
             parent.hide();
@@ -55,7 +70,7 @@ public class ConfirmDialogPanel extends Composite {
         }
     }
 
-    @UiHandler("noButton")
+    @UiHandler("secondButton")
     void onNoClick(ClickEvent e) {
         if (parent != null) {
             parent.hide();

@@ -17,14 +17,14 @@ public interface DialogResources extends ClientBundle {
 
         String message();
 
-        String yesButton();
-
-        String noButton();
-
-        String button();
+        String destructiveButton();
 
         String buttonPanel();
 
         String backgroundPanel();
+
+        String title();
+
+        String buttonAdjustments();
     }
 }
