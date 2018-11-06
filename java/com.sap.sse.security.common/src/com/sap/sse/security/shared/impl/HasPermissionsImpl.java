@@ -1,5 +1,8 @@
 package com.sap.sse.security.shared.impl;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import com.sap.sse.common.impl.NamedImpl;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
@@ -105,6 +108,16 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
     @Override
     public QualifiedObjectIdentifier getQualifiedObjectIdentifier(final String typeRelativeObjectIdentifier) {
         return new QualifiedObjectIdentifierImpl(getName(), typeRelativeObjectIdentifier);
+    }
+
+    @Override
+    public WildcardPermission[] getPermissionsForObjects(Action[] actions,
+            final String... objectIdentifiers) {
+        Collection<WildcardPermission> result = new ArrayList<>();
+        for(Action action : actions) {
+            result.add(getPermissionForObjects(action, objectIdentifiers));
+        }
+        return result.toArray(new WildcardPermission[result.size()]);
     }
 
     @Override

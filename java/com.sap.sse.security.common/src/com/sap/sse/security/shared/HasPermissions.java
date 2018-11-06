@@ -69,6 +69,12 @@ public interface HasPermissions {
      */
     WildcardPermission getPermissionForObjects(Action action, String... objectIdentifiers);
 
+    /**
+     * Same as {@link #getPermissionForObjects(Action, String...)}, only that this method gets the
+     * {@link WildcardPermission}s for all given actions
+     */
+    WildcardPermission[] getPermissionsForObjects(final Action[] actions, final String... objectIdentifiers);
+
     public static interface Action {
         /**
          * Returns the action as represented in the second part of a {@link WildcardPermission}. This shall be a string
@@ -89,6 +95,7 @@ public interface HasPermissions {
         
         public static final Action[] MUTATION_ACTIONS = new Action[] {CREATE, UPDATE, DELETE, CHANGE_OWNERSHIP};
         
+        public static final Action[] READ_AND_WRITE_ACTIONS = new Action[] { CREATE, READ, UPDATE, DELETE };
         /**
          * Returns all {@link DefaultActions} plus the {@code actions} passed, combined in one new array
          */
