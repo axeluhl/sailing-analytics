@@ -475,9 +475,10 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     RegattaLogDTO getRegattaLog(String leaderboardName) throws DoesNotHaveRegattaLogException;
 
-    List<String> getLeaderboardGroupNamesFromRemoteServer(String host);
+    List<String> getLeaderboardGroupNamesFromRemoteServer(String url, String username, String password);
 
-    UUID importMasterData(String host, String[] groupNames, boolean override, boolean compress, boolean exportWind, boolean exportDeviceConfigurations);
+    UUID importMasterData(String host, String[] groupNames, boolean override, boolean compress, boolean exportWind,
+            boolean exportDeviceConfigurations, String targetServerUsername, String targetServerPassword);
     
     DataImportProgress getImportOperationProgress(UUID id);
 

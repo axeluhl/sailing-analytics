@@ -22,6 +22,7 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -60,6 +61,8 @@ public class MasterDataImportPanel extends VerticalPanel {
     private CheckBox exportWindSwitch;
     private CheckBox exportDeviceConfigsSwitch;
     private TextBox filterBox;
+    private TextBox usernameBox;
+    private TextBox passwordBox;
 
     public MasterDataImportPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
             RegattaRefresher regattaRefresher, EventsRefresher eventsRefresher, LeaderboardsRefresher leaderboardsRefresher,
@@ -78,10 +81,26 @@ public class MasterDataImportPanel extends VerticalPanel {
         hostBox.setText("https://www.sapsailing.com/");
         hostBox.setWidth("300px");
         serverAddressPanel.add(hostBox);
+        HorizontalPanel usernamePanel = new HorizontalPanel();
+        usernamePanel.add(new Label(stringMessages.username()));
+        usernameBox = new TextBox();
+        usernameBox.setText("admin");
+        usernameBox.setWidth("300px");
+        usernamePanel.add(usernameBox);
+        HorizontalPanel passwordPanel = new HorizontalPanel();
+        passwordPanel.add(new Label(stringMessages.password()));
+        passwordBox = new PasswordTextBox();
+        passwordBox.setText("");
+        passwordBox.setWidth("300px");
+        passwordPanel.add(passwordBox);
         fetchIdsButton = new Button(stringMessages.importFetchRemoteLgs());
         fetchIdsButton.ensureDebugId("fetchLeaderboardGroupList");
-        serverAddressPanel.add(fetchIdsButton);
+
+
         this.add(serverAddressPanel);
+        this.add(usernamePanel);
+        this.add(passwordPanel);
+        this.add(fetchIdsButton);
 
         ScrollPanel scrollPanel = new ScrollPanel();
         this.add(scrollPanel);
@@ -140,7 +159,7 @@ public class MasterDataImportPanel extends VerticalPanel {
             boolean exportWind = exportWindSwitch.getValue();
             boolean exportDeviceConfigs = exportDeviceConfigsSwitch.getValue();
             sailingService.importMasterData(currentHost, groupNames, override, compress, exportWind,
-                    exportDeviceConfigs, new AsyncCallback<UUID>() {
+                    exportDeviceConfigs, usernameBox.getValue(), passwordBox.getValue(), new AsyncCallback<UUID>() {
 
                 @Override
                 public void onFailure(Throwable caught) {
@@ -293,7 +312,9 @@ public class MasterDataImportPanel extends VerticalPanel {
     private void fireLgIdRequestAndFillList(final String host) {
         currentHost = host;
         disableAllButtons();
-        sailingService.getLeaderboardGroupNamesFromRemoteServer(host, new AsyncCallback<List<String>>() {
+        // FIXME what about login here?
+        sailingService.getLeaderboardGroupNamesFromRemoteServer(host, usernameBox.getValue(), passwordBox.getValue(),
+                new AsyncCallback<List<String>>() {
 
             @Override
             public void onFailure(Throwable caught) {

@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.server;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilterInputStream;
@@ -22,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -66,6 +68,8 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.AuthorizationException;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.shiro.subject.Subject;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -5176,8 +5180,48 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
 
+    private String getTokenForServer(String hostname, String username, String password) {
+        String token = "";
+        try {
+            URL base = createBaseUrl(hostname);
+            String path = "/security/api/restsecurity/access_token";
+            URL serverAddress = createUrl(base, path, null);
+            URLConnection connection = HttpUrlConnectionHelper.redirectConnection(serverAddress, Duration.ONE_MINUTE,
+                    t -> {
+                        String auth = username + ":" + password;
+                        String base64 = Base64.getEncoder().encodeToString(auth.getBytes(StandardCharsets.UTF_8));
+                        t.setRequestProperty("Authorization", "Basic " + base64);
+                    });
+
+            ByteArrayOutputStream result = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = connection.getInputStream().read(buffer)) != -1) {
+                result.write(buffer, 0, length);
+            }
+            String jsonToken = result.toString("UTF-8");
+            Object requestBody = JSONValue.parseWithException(jsonToken);
+            if (requestBody instanceof JSONObject) {
+                JSONObject json = (JSONObject) requestBody;
+                Object tokenObj = json.get("access_token");
+                if (tokenObj instanceof String) {
+                    token = (String) tokenObj;
+                }
+                System.out.println(json);
+            } else {
+                throw new RuntimeException("Could not obtain token for server");
+            }
+            System.out.println(jsonToken);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return token;
+    }
+
     @Override
-    public List<String> getLeaderboardGroupNamesFromRemoteServer(String url) {
+    public List<String> getLeaderboardGroupNamesFromRemoteServer(String url, String username, String password) {
+        String token = getTokenForServer(url, username, password);
+        // FIXME: Add checks here that ensure that the current use is allowed to do MDI
         final String path = "/sailingserver/api/v1/leaderboardgroups";
         final String query = null;
         URL serverAddress = null;
@@ -5186,7 +5230,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         try {
             URL base = createBaseUrl(url);
             serverAddress = createUrl(base, path, query);
-            connection = HttpUrlConnectionHelper.redirectConnection(serverAddress);
+            connection = HttpUrlConnectionHelper.redirectConnection(serverAddress, Duration.ONE_MINUTE,
+                    t -> t.setRequestProperty("Authorization", "Bearer " + token));
             inputStream = connection.getInputStream();
             InputStreamReader in = new InputStreamReader(inputStream, "UTF-8");
             org.json.simple.parser.JSONParser parser = new org.json.simple.parser.JSONParser();
@@ -5197,7 +5242,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
             return names;
         } catch (Exception e) {
-            throw new RuntimeException(e); 
+            throw new RuntimeException(e);
         } finally {
             // close the connection
             if (connection != null && connection instanceof HttpURLConnection) {
@@ -5210,7 +5255,6 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             } catch (IOException e) {
             }
         }
-
     }
 
     /**
@@ -5236,9 +5280,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public UUID importMasterData(final String urlAsString, final String[] groupNames, final boolean override,
-            final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations) {
+            final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
+            String targetServerUsername, String targetServerPassword) {
+        // FIXME: Add checks here that ensure that the current use is allowed to do MDI
+        String token = getTokenForServer(urlAsString, targetServerUsername, targetServerPassword);
+
         final UUID importOperationId = UUID.randomUUID();
-        getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.0, DataImportSubProgress.INIT, 0.0);
+        getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.0, DataImportSubProgress.INIT,
+                0.0);
         // Create a progress indicator for as long as the server gets data from the other server.
         // As soon as the server starts the import operation, a progress object will be built on every server
         Runnable masterDataImportTask = new Runnable() {
@@ -5257,12 +5306,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 URL serverAddress = null;
                 InputStream inputStream = null;
                 try {
+                    String masterDataPath = "/sailingserver/spi/v1/masterdata/leaderboardgroups";
                     URL base = createBaseUrl(urlAsString);
-                    String path = "/sailingserver/spi/v1/masterdata/leaderboardgroups";
-                    serverAddress = createUrl(base, path, query);
+                    serverAddress = createUrl(base, masterDataPath, query);
                     // the response can take a very long time for MDI that include foiling data or such
-                    connection = HttpUrlConnectionHelper.redirectConnection(serverAddress, Duration.ONE_HOUR.times(2));
-                    getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.02, 
+                    connection = HttpUrlConnectionHelper.redirectConnection(serverAddress, Duration.ONE_HOUR.times(2),
+                            t -> t.setRequestProperty("Authorization", "Bearer " + token));
+                    getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.02,
                             DataImportSubProgress.CONNECTION_ESTABLISH, 0.5);
                     if (compress) {
                         InputStream timeoutExtendingInputStream = new TimeoutExtendingInputStream(
@@ -5277,13 +5327,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 } catch (Throwable e) {
                     // do not assume that RuntimeException is logged properly
                     logger.log(Level.SEVERE, e.getMessage(), e);
-                    getService()
-                            .setDataImportFailedWithReplication(
-                                    importOperationId,
-                                    e.getMessage()
-                                            + "\n\nHave you checked if the"
-                                            + " versions (commit-wise) of the importing and exporting servers are compatible with each other? "
-                                            + "If the error still occurs, when both servers are running the same version, please report the problem.");
+                    getService().setDataImportFailedWithReplication(importOperationId, e.getMessage()
+                            + "\n\nHave you checked if the"
+                            + " versions (commit-wise) of the importing and exporting servers are compatible with each other? "
+                            + "If the error still occurs, when both servers are running the same version, please report the problem.");
                     throw new RuntimeException(e);
                 } finally {
                     // close the connection, set all objects to null
