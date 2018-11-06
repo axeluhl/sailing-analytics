@@ -34,5 +34,6 @@ public interface SectionHeaderResources extends SharedHomeResources {
         String sectionheader_item_select();
         String accordion();
         String collapsed();
+        String sectionheader_element();
     }
 }

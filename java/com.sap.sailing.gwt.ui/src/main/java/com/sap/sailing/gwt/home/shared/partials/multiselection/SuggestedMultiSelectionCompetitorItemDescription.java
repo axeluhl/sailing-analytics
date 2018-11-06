@@ -10,7 +10,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorDTO;
 import com.sap.sailing.gwt.ui.client.FlagImageResolver;
 
-class SuggestedMultiSelectionCompetitorItemDescription extends Widget {
+public class SuggestedMultiSelectionCompetitorItemDescription extends Widget {
 
     private static LocalUiBinder uiBinder = GWT.create(LocalUiBinder.class);
 
@@ -21,7 +21,8 @@ class SuggestedMultiSelectionCompetitorItemDescription extends Widget {
     @UiField SpanElement sailIdUi;
     @UiField SpanElement nameUi;
     
-    SuggestedMultiSelectionCompetitorItemDescription(SimpleCompetitorDTO competitor, FlagImageResolver flagImageResolver) {
+    public SuggestedMultiSelectionCompetitorItemDescription(SimpleCompetitorDTO competitor,
+            FlagImageResolver flagImageResolver) {
         setElement(uiBinder.createAndBindUi(this));
         flagImageUi.getStyle().setBackgroundImage("url('" + flagImageResolver.getFlagImageUri(
                 competitor.getFlagImageURL(), competitor.getTwoLetterIsoCountryCode()).asString() + "')");

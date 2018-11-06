@@ -16,6 +16,7 @@ public class TestAuthenticationSignIn extends AbstractSeleniumTest {
     @Before
     public void setUp() {
         clearState(getContextRoot());
+        getWebDriver().manage().deleteCookieNamed("JSESSIONID");
     }
     
     @Test

@@ -121,19 +121,16 @@ public interface TrackedLegOfCompetitor extends Serializable {
     Iterable<Maneuver> getManeuvers(TimePoint timePoint, boolean waitForLatest) throws NoWindException;
     
     /**
-     * @param waitForLatest TODO
      * @return <code>null</code> if the competitor hasn't started this leg yet
      */
     Integer getNumberOfTacks(TimePoint timePoint, boolean waitForLatest) throws NoWindException;
 
     /**
-     * @param waitForLatest TODO
      * @return <code>null</code> if the competitor hasn't started this leg yet
      */
     Integer getNumberOfJibes(TimePoint timePoint, boolean waitForLatest) throws NoWindException;
 
     /**
-     * @param waitForLatest TODO
      * @return <code>null</code> if the competitor hasn't started this leg yet
      */
     Integer getNumberOfPenaltyCircles(TimePoint timePoint, boolean waitForLatest) throws NoWindException;
@@ -160,20 +157,17 @@ public interface TrackedLegOfCompetitor extends Serializable {
     /**
      * Computes the gap in seconds to the leader / winner of this leg. Returns <code>null</code> in case this leg's
      * competitor hasn't started the leg yet.
-     * @param rankingInfo TODO
      */
     Duration getGapToLeader(TimePoint timePoint, RankingInfo rankingInfo, WindPositionMode windPositionMode);
     
     /**
      * Same as {@link #getGapToLeader(TimePoint, RankingInfo, WindPositionMode)}, only that a cache for wind and leg type data is used.
-     * @param rankingInfo TODO
      */
     Duration getGapToLeader(TimePoint timePoint, WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache);
 
     /**
      * If a caller already went through the effort of computing the leg's leader at <code>timePoint</code>, it
      * can share this knowledge to speed up computation as compared to {@link #getGapToLeader(TimePoint, RankingInfo, WindPositionMode)}.
-     * @param rankingInfo TODO
      */
     Duration getGapToLeader(TimePoint timePoint, Competitor leaderInLegAtTimePoint, RankingInfo rankingInfo, WindPositionMode windPositionMode) throws NoWindException;
 
@@ -181,7 +175,6 @@ public interface TrackedLegOfCompetitor extends Serializable {
      * Same as {@link #getGapToLeader(TimePoint, Competitor, RankingInfo, WindPositionMode)}, only that an additional cache is used
      * to avoid redundant evaluations of leg types and wind field information across various calculations that
      * all can use the same basic information.
-     * @param rankingInfo TODO
      */
     Duration getGapToLeader(TimePoint timePoint, Competitor leaderInLegAtTimePoint,
             WindPositionMode windPositionMode, RankingInfo rankingInfo, WindLegTypeAndLegBearingCache cache);

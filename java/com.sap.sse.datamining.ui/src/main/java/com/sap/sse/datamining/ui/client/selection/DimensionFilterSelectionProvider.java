@@ -9,6 +9,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.Scheduler;
@@ -18,6 +20,7 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style.TextAlign;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.i18n.client.LocaleInfo;
+import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.DataGrid;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -45,6 +48,7 @@ import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
+import com.sap.sse.datamining.ui.client.AbstractDataMiningComponent;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.client.DataRetrieverChainDefinitionProvider;
 import com.sap.sse.datamining.ui.client.FilterSelectionChangedListener;
@@ -57,12 +61,11 @@ import com.sap.sse.datamining.ui.client.resources.DataMiningResources;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.panels.AbstractFilterablePanel;
-import com.sap.sse.gwt.client.shared.components.AbstractComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
 
-public class DimensionFilterSelectionProvider extends AbstractComponent<SerializableSettings> {
+public class DimensionFilterSelectionProvider extends AbstractDataMiningComponent<SerializableSettings> {
 
     private static final DataMiningResources resources = GWT.create(DataMiningResources.class);
     private static final NaturalComparator NaturalComparator = new NaturalComparator();
@@ -78,17 +81,20 @@ public class DimensionFilterSelectionProvider extends AbstractComponent<Serializ
     
     private final DataRetrieverLevelDTO retrieverLevel;
     private final FunctionDTO dimension;
-    private final Set<Serializable> selectionToBeApplied;
     
     private final DockLayoutPanel mainPanel;
     private final AbstractFilterablePanel<Serializable> filterPanel;
     private final LayoutPanel contentContainer;
     private final SimpleBusyIndicator busyIndicator;
 
+    private final Set<Serializable> availableData;
     private final ListDataProvider<Serializable> filteredData;
     private final MultiSelectionModel<Serializable> selectionModel;
     private final DataGrid<Serializable> dataGrid;
     private final Column<Serializable, Boolean> checkboxColumn;
+    
+    private Iterable<? extends Serializable> selectionToBeApplied;
+    private Consumer<Iterable<String>> selectionCallback;
 
     public DimensionFilterSelectionProvider(Component<?> parent, ComponentContext<?> componentContext, DataMiningServiceAsync dataMiningService,
             ErrorReporter errorReporter, DataMiningSession session, DataRetrieverChainDefinitionProvider retrieverChainProvider,
@@ -104,7 +110,6 @@ public class DimensionFilterSelectionProvider extends AbstractComponent<Serializ
 
         counter = new SimpleManagedDataMiningQueriesCounter();
         listeners = new HashSet<>();
-        selectionToBeApplied = new HashSet<>();
 
         DataMiningDataGridResources dataGridResources = GWT.create(DataMiningDataGridResources.class);
         dataGrid = new DataGrid<>(Integer.MAX_VALUE, dataGridResources);
@@ -112,11 +117,17 @@ public class DimensionFilterSelectionProvider extends AbstractComponent<Serializ
         dataGrid.setAutoFooterRefreshDisabled(true);
         dataGrid.addStyleName("dataMiningBorderTop");
         
+        availableData = new HashSet<>();
         filteredData = new ListDataProvider<Serializable>(this::elementAsString);
-        filterPanel = new AbstractFilterablePanel<Serializable>(null, dataGrid, filteredData) {
+        filterPanel = new AbstractFilterablePanel<Serializable>(null, filteredData) {
             @Override
             public Iterable<String> getSearchableStrings(Serializable element) {
                 return Collections.singleton(elementAsString(element));
+            }
+
+            @Override
+            public AbstractCellTable<Serializable> getCellTable() {
+                return dataGrid;
             }
         };
         filterPanel.setWidth("100%");
@@ -170,6 +181,7 @@ public class DimensionFilterSelectionProvider extends AbstractComponent<Serializ
         headerPanel.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
         
         Label headerLabel = new Label(dimension.getDisplayName());
+        headerLabel.addStyleName("emphasizedLabel");
         headerPanel.add(headerLabel);
         headerPanel.setCellWidth(headerLabel, "100%");
         headerPanel.setCellHorizontalAlignment(headerLabel, HasHorizontalAlignment.ALIGN_CENTER);
@@ -205,6 +217,7 @@ public class DimensionFilterSelectionProvider extends AbstractComponent<Serializ
         HashSet<FunctionDTO> dimensions = new HashSet<>();
         dimensions.add(dimension);
         
+        availableData.clear();
         counter.increase();
         contentContainer.remove(dataGrid);
         busyIndicator.setBusy(true);
@@ -214,20 +227,23 @@ public class DimensionFilterSelectionProvider extends AbstractComponent<Serializ
                     @Override
                     protected void handleSuccess(QueryResultDTO<HashSet<Object>> result) {
                         Map<GroupKey, HashSet<Object>> results = result.getResults();
-                        List<Serializable> content = new ArrayList<>();
+                        List<Serializable> sortedData = new ArrayList<>();
                         
                         if (!results.isEmpty()) {
                             GroupKey contentKey = new GenericGroupKey<FunctionDTO>(dimension);
-                            content.addAll((Collection<? extends Serializable>) results.get(contentKey));
-                            content.sort((o1, o2) -> NaturalComparator.compare(o1.toString(), o2.toString()));
+                            availableData.addAll((Collection<? extends Serializable>) results.get(contentKey));
+                            sortedData.addAll(availableData);
+                            sortedData.sort((o1, o2) -> NaturalComparator.compare(o1.toString(), o2.toString()));
                         }
                         
                         busyIndicator.setBusy(false);
-                        filterPanel.updateAll(content);
+                        filterPanel.updateAll(sortedData);
                         contentContainer.add(dataGrid);
                         
-                        internalSetSelection(!selectionToBeApplied.isEmpty() ? selectionToBeApplied : selectionModel.getSelectedSet());
-                        selectionToBeApplied.clear();
+                        internalSetSelection(selectionToBeApplied != null ? selectionToBeApplied : selectionModel.getSelectedSet(),
+                                             selectionCallback != null ? selectionCallback : m -> { });
+                        selectionToBeApplied = null;
+                        selectionCallback = null;
                         
                         if (callback != null) {
                             callback.run();
@@ -236,6 +252,8 @@ public class DimensionFilterSelectionProvider extends AbstractComponent<Serializ
                     @Override
                     protected void handleFailure(Throwable caught) {
                         errorReporter.reportError("Error fetching the dimension values of " + dimension + ": " + caught.getMessage());
+                        selectionToBeApplied = null;
+                        selectionCallback = null;
                     }
                 });
     }
@@ -252,26 +270,34 @@ public class DimensionFilterSelectionProvider extends AbstractComponent<Serializ
         return new HashSet<>(selectionModel.getSelectedSet());
     }
     
-    public void setSelection(Iterable<? extends Serializable> items) {
-        selectionToBeApplied.clear();
-        for (Serializable item : items) {
-            selectionToBeApplied.add(item);
-        }
+    public void setSelection(Iterable<? extends Serializable> selection, Consumer<Iterable<String>> callback) {
+        selectionToBeApplied = selection;
+        selectionCallback = callback;
         
         if (!busyIndicator.isBusy()) {
-            internalSetSelection(selectionToBeApplied);
-            selectionToBeApplied.clear();
+            internalSetSelection(selectionToBeApplied, selectionCallback);
+            selectionToBeApplied = null;;
+            selectionCallback = null;
         }
     }
 
-    private void internalSetSelection(Set<? extends Serializable> selection) {
+    private void internalSetSelection(Iterable<? extends Serializable> selection, Consumer<Iterable<String>> callback) {
         clearSelection();
-        if (!selection.isEmpty()) {
-            for (Serializable item : filterPanel.getAll()) {
-                if (selection.contains(item)) {
-                    selectionModel.setSelected(item, true);
-                }
+        Collection<Serializable> missingValues = new ArrayList<>();
+        for (Serializable value : selection) {
+            if (availableData.contains(value)) {
+                selectionModel.setSelected(value, true);
+            } else {
+                missingValues.add(value);
             }
+        }
+        
+        if (!missingValues.isEmpty()) {
+            String listedValues = missingValues.stream().map(this::elementAsString).collect(Collectors.joining(", "));
+            callback.accept(Collections.singleton(getDataMiningStringMessages()
+                    .filterValuesOfDimensionAreNotAvailable(dimension.getDisplayName(), listedValues)));
+        } else {
+            callback.accept(Collections.emptySet());
         }
     }
 

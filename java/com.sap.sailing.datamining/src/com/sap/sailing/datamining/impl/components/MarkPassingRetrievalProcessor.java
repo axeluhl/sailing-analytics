@@ -17,8 +17,10 @@ import com.sap.sse.datamining.impl.components.AbstractRetrievalProcessor;
 public class MarkPassingRetrievalProcessor extends AbstractRetrievalProcessor<HasTrackedLegOfCompetitorContext, HasMarkPassingContext> {
 
     public MarkPassingRetrievalProcessor(ExecutorService executor,
-            Collection<Processor<HasMarkPassingContext, ?>> resultReceivers, int retrievalLevel) {
-        super(HasTrackedLegOfCompetitorContext.class, HasMarkPassingContext.class, executor, resultReceivers, retrievalLevel);
+            Collection<Processor<HasMarkPassingContext, ?>> resultReceivers, int retrievalLevel,
+            String retrievedDataTypeMessageKey) {
+        super(HasTrackedLegOfCompetitorContext.class, HasMarkPassingContext.class, executor, resultReceivers,
+                retrievalLevel, retrievedDataTypeMessageKey);
     }
 
     @Override

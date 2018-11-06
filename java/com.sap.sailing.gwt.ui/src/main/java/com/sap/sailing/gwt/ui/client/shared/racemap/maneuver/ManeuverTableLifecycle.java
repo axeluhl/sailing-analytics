@@ -36,16 +36,4 @@ public class ManeuverTableLifecycle implements ComponentLifecycle<ManeuverTableS
     public String getComponentId() {
         return ID;
     }
-
-    @Override
-    public ManeuverTableSettings extractUserSettings(ManeuverTableSettings settings) {
-        //TODO
-        return settings;
-    }
-
-    @Override
-    public ManeuverTableSettings extractDocumentSettings(ManeuverTableSettings settings) {
-        //TODO
-        return settings;
-    }
 }

@@ -14,6 +14,7 @@
 <b>Description:</b>
 <p>Gets all maneuvers performed by all competitors of a race.<br/>
 All slashes contained within the {regattaname} and {racename} parameters must be replaced by "__" (double underscore).</p>
+Additionally it is possible to reduce the results to only contain one competitor, by 
 <br/>
 <table>
 	<tr>
@@ -30,8 +31,9 @@ All slashes contained within the {regattaname} and {racename} parameters must be
 	</tr>
 	<tr>
 		<td>Optional parameters:</td>
-		<td>None</td>
-	</tr>
+        <td> competitorId (UUID) , fromTime UnixTimestamp
+    </tr>
+	
 	<tr>
 		<td>Request method:</td>
 		<td>GET</td>
@@ -40,6 +42,10 @@ All slashes contained within the {regattaname} and {racename} parameters must be
 		<td>Example:</td>
 		<td><a href="http://www.sapsailing.com/sailingserver/api/v1/regattas/TW%202013%20(Finn)/races/Finn%20Race%204/maneuvers">http://www.sapsailing.com/sailingserver/api/v1/regattas/TW%202013%20(Finn)/races/Finn%20Race%204/maneuvers</a></td>
 	</tr>
+    <tr>
+        <td>Example with optional Parameters</td>
+        <td><a href="https://www.sapsailing.com/sailingserver/api/v1/regattas/ESS 2016 Cardiff/races/Race 2/maneuvers?competitorId=b9a8a600-c829-0133-a4ec-448a5b8481d8&fromTime=1466689117500">https://www.sapsailing.com/sailingserver/api/v1/regattas/ESS 2016 Cardiff/races/Race 2/maneuvers?competitorId=b9a8a600-c829-0133-a4ec-448a5b8481d8&fromTime=1466689117500 </a></td>
+     </tr>
 </table>
 <div style="height: 1em;"></div>
 <a href="index.html">Back to Web Service Overview</a> 

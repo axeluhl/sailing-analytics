@@ -16,6 +16,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.common.communication.routing.ProvidesLeaderboardRouting;
@@ -23,6 +24,7 @@ import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSett
 import com.sap.sailing.gwt.settings.client.raceboard.RaceboardContextDefinition;
 import com.sap.sailing.gwt.settings.client.utils.StoredSettingsLocationFactory;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
+import com.sap.sailing.gwt.ui.client.CompetitorSelectionChangeListener;
 import com.sap.sailing.gwt.ui.client.MediaService;
 import com.sap.sailing.gwt.ui.client.MediaServiceAsync;
 import com.sap.sailing.gwt.ui.client.RaceTimesInfoProvider;
@@ -221,9 +223,32 @@ public class RaceBoardEntryPoint extends AbstractSailingEntryPoint implements Pr
 
         if (raceBoardMode != null) {
             raceBoardMode.getMode().applyTo(raceBoardPerspective);
+            raceBoardMode.getMode().addInitializationFinishedRunner(
+                    () -> selectCompetitorFromPerspectiveOwnSetting(raceBoardPerspective));
+        } else {
+            selectCompetitorFromPerspectiveOwnSetting(raceBoardPerspective);
         }
     }  
     
+    protected void selectCompetitorFromPerspectiveOwnSetting(RaceBoardPanel raceBoardPanel) {
+        RaceBoardPerspectiveOwnSettings perspectiveOwnSettings = raceBoardPanel.getSettings()
+                .getPerspectiveOwnSettings();
+        if (perspectiveOwnSettings != null) {
+            String competitorId = perspectiveOwnSettings.getSelectedCompetitor();
+            if (competitorId != null && !"".equals(competitorId)) {
+                for (CompetitorDTO comp : raceBoardPanel.getCompetitorSelectionProvider().getAllCompetitors()) {
+                    if (competitorId.equals(comp.getIdAsString())) {
+                        raceBoardPanel.getCompetitorSelectionProvider().setSelected(comp, true,
+                                new CompetitorSelectionChangeListener[0]);
+                    } else {
+                        raceBoardPanel.getCompetitorSelectionProvider().setSelected(comp, false,
+                                new CompetitorSelectionChangeListener[0]);
+                    }
+                }
+            }
+        }
+    }
+
     @Override
     public String getLeaderboardName() {
         return raceboardContextDefinition.getLeaderboardName();

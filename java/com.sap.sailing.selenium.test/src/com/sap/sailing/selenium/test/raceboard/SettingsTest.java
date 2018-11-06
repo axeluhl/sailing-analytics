@@ -450,6 +450,8 @@ public class SettingsTest extends AbstractSeleniumTest {
         leaderboardSettingsPanel.selectDetailsAndDeselectOther(detailsToSelect);
         leaderboardSettingsPanel.setNumberOfRacesToDisplay(2);
 
+        // TODO the URL generated here is too long for IE11. IE has a URL size limit of 2083 chars. This causes the test to fail.
+
         // open settings dialog of configurated leaderboard and match the set values with forwarded values
         leaderboardPage = urlConfigurationDialog.openLeaderboard();
         leaderboardSettingsPanel = leaderboardPage.getLeaderboardSettings().getLeaderboardSettingsPanelPO();

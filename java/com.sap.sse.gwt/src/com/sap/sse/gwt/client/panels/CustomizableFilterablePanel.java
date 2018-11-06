@@ -1,6 +1,5 @@
 package com.sap.sse.gwt.client.panels;
 
-import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
@@ -20,8 +19,8 @@ public abstract class CustomizableFilterablePanel<T> extends AbstractFilterableP
      * Does not add the default filter text box yet; use {@link #addDefaultTextBox()} to do so; you may
      * add other widgets before the default text filter box.
      */
-    public CustomizableFilterablePanel(Iterable<T> all, AbstractCellTable<T> display, ListDataProvider<T> filtered) {
-        super(all, display, filtered, /* show default filter text box */ false);
+    public CustomizableFilterablePanel(Iterable<T> all, ListDataProvider<T> filtered) {
+        super(all, filtered, /* show default filter text box */ false);
     }
 
     public void add(Label label, Widget widget, Filter<T> filter) {

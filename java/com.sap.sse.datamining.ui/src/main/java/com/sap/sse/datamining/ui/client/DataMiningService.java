@@ -11,6 +11,7 @@ import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.SerializationDummy;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.dto.StoredDataMiningQueryDTO;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
@@ -23,10 +24,13 @@ public interface DataMiningService extends RemoteService {
 
     Date getComponentsChangedTimepoint();
 
+    FunctionDTO getIdentityFunction(String localeInfoName);
     HashSet<FunctionDTO> getAllStatistics(String localeInfoName);
 
     HashSet<FunctionDTO> getStatisticsFor(DataRetrieverChainDefinitionDTO retrieverChainDefinition,
             String localeInfoName);
+    
+    HashSet<AggregationProcessorDefinitionDTO> getAggregatorDefinitions(String localeInfoName);
 
     HashSet<AggregationProcessorDefinitionDTO> getAggregatorDefinitionsFor(FunctionDTO extractionFunction,
             String localeInfoName);
@@ -52,9 +56,21 @@ public interface DataMiningService extends RemoteService {
             StatisticQueryDefinitionDTO queryDefinition);
 
     HashSet<PredefinedQueryIdentifier> getPredefinedQueryIdentifiers();
+    
+    StatisticQueryDefinitionDTO getPredefinedQueryDefinition(PredefinedQueryIdentifier identifier, String localeInfoName);
 
     <ResultType extends Serializable> QueryResultDTO<ResultType> runPredefinedQuery(DataMiningSession session,
             PredefinedQueryIdentifier identifier, String localeInfoName);
+    
+    StatisticQueryDefinitionDTO localize(StatisticQueryDefinitionDTO queryDefinition, String localeInfoName);
 
     SerializationDummy pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy();
+
+    ArrayList<StoredDataMiningQueryDTO> retrieveStoredQueries();
+
+    StoredDataMiningQueryDTO updateOrCreateStoredQuery(StoredDataMiningQueryDTO query);
+
+    StoredDataMiningQueryDTO removeStoredQuery(StoredDataMiningQueryDTO query);
+
+    StatisticQueryDefinitionDTO getDeserializedQuery(String serializedQuery);
 }

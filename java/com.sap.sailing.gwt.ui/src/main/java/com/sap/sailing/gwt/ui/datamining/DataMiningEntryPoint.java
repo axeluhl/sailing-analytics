@@ -1,9 +1,17 @@
 package com.sap.sailing.gwt.ui.datamining;
 
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.http.client.UrlBuilder;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
@@ -15,18 +23,24 @@ import com.sap.sailing.gwt.common.authentication.FixedSailingAuthentication;
 import com.sap.sailing.gwt.common.authentication.SAPSailingHeaderWithAuthentication;
 import com.sap.sailing.gwt.ui.client.AbstractSailingEntryPoint;
 import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.datamining.presentation.TabbedSailingResultsPresenter;
+import com.sap.sailing.gwt.ui.shared.settings.SailingSettingsConstants;
 import com.sap.sse.datamining.shared.DataMiningSession;
+import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.UUIDDataMiningSession;
 import com.sap.sse.datamining.ui.client.AnchorDataMiningSettingsControl;
+import com.sap.sse.datamining.ui.client.CompositeResultsPresenter;
 import com.sap.sse.datamining.ui.client.DataMiningService;
 import com.sap.sse.datamining.ui.client.DataMiningServiceAsync;
 import com.sap.sse.datamining.ui.client.DataMiningSettingsControl;
 import com.sap.sse.datamining.ui.client.DataMiningSettingsInfoManager;
-import com.sap.sse.datamining.ui.client.ResultsPresenter;
 import com.sap.sse.datamining.ui.client.execution.SimpleQueryRunner;
 import com.sap.sse.datamining.ui.client.selection.QueryDefinitionProviderWithControls;
 import com.sap.sse.gwt.client.EntryPointHelper;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.Storage;
 import com.sap.sse.gwt.client.shared.components.ComponentResources;
 import com.sap.sse.gwt.resources.Highcharts;
 import com.sap.sse.security.ui.authentication.decorator.AuthorizedContentDecorator;
@@ -38,12 +52,10 @@ import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAut
 public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
 
     public static final ComponentResources resources = GWT.create(ComponentResources.class);
+    private static final Logger LOG = Logger.getLogger(DataMiningEntryPoint.class.getName());
 
     private final DataMiningServiceAsync dataMiningService = GWT.create(DataMiningService.class);
-
     private DataMiningSession session;
-
-    private QueryDefinitionProviderWithControls queryDefinitionProviderWithControls;
 
     @Override
     protected void doOnModuleLoad() {
@@ -52,10 +64,11 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         session = new UUIDDataMiningSession(UUID.randomUUID());
         EntryPointHelper.registerASyncService((ServiceDefTarget) dataMiningService,
                 RemoteServiceMappingConstants.dataMiningServiceRemotePath);
-        createDataminingPanel();
+        createDataminingPanel(Window.Location.getParameter("q"));
     }
 
-    private void createDataminingPanel() {
+    private void createDataminingPanel(final String queryIdentifier) {
+        removeUrlParameter();
         SAPHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(getStringMessages().dataMining());
         GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(),
                 header.getAuthenticationMenuView());
@@ -64,6 +77,8 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         authorizedContentDecorator.setPermissionToCheck(Permission.DATA_MINING,
                 SailingPermissionsForRoleProvider.INSTANCE);
         authorizedContentDecorator.setContentWidgetFactory(new WidgetFactory() {
+
+            private QueryDefinitionProviderWithControls queryDefinitionProvider;
             private SimpleQueryRunner queryRunner;
             private final DataMiningSettingsInfoManager settingsManager = new DataMiningSettingsInfoManagerImpl(
                     getStringMessages());
@@ -71,26 +86,71 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
             @Override
             public Widget get() {
                 DataMiningSettingsControl settingsControl = new AnchorDataMiningSettingsControl(null, null);
-                ResultsPresenter<?> resultsPresenter = new TabbedSailingResultsPresenter(/*parent*/ null, /*context*/ null, 
-                        /*drillDownCallback*/ groupKey -> queryDefinitionProviderWithControls.drillDown(groupKey, queryRunner::runQuery),
-                        getStringMessages());
-                DockLayoutPanel selectionDockPanel = new DockLayoutPanel(Unit.PX);
-                queryDefinitionProviderWithControls = new QueryDefinitionProviderWithControls(null, null, session,
+                CompositeResultsPresenter<?> resultsPresenter = new TabbedSailingResultsPresenter(/* parent */ null,
+                        /* context */ null, /* drillDownCallback */ groupKey -> {
+                            queryDefinitionProvider.drillDown(groupKey, () -> {
+                                queryRunner.run(queryDefinitionProvider.getQueryDefinition());
+                            });
+                        }, getStringMessages());
+                resultsPresenter.addCurrentPresenterChangedListener(presenterId -> {
+                    StatisticQueryDefinitionDTO queryDefinition = resultsPresenter.getQueryDefinition(presenterId);
+                    if (queryDefinition != null) {
+                        queryDefinitionProvider.applyQueryDefinition(queryDefinition);
+                    }
+                });
+
+                queryDefinitionProvider = new QueryDefinitionProviderWithControls(null, null, session,
                         dataMiningService, DataMiningEntryPoint.this, settingsControl, settingsManager,
-                        resultsPresenter);
-                selectionDockPanel.add(queryDefinitionProviderWithControls.getEntryWidget());
+                        queryDefinition -> queryRunner.run(queryDefinition));
+
                 queryRunner = new SimpleQueryRunner(null, null, session, dataMiningService, DataMiningEntryPoint.this,
-                        queryDefinitionProviderWithControls, resultsPresenter);
-                queryDefinitionProviderWithControls.addControl(queryRunner.getEntryWidget());
+                        queryDefinitionProvider, resultsPresenter);
+                queryDefinitionProvider.addControl(queryRunner.getEntryWidget());
+                StoredDataMiningQueryDataProvider dataProvider = new StoredDataMiningQueryDataProvider(
+                        queryDefinitionProvider, dataMiningService, queryRunner);
+                queryDefinitionProvider.addControl(new StoredDataMiningQueryPanel(dataProvider));
                 /*
                  * Running queries automatically when they've been changed is currently unnecessary, if not even
                  * counterproductive. This removes the query runner settings to prevent that the user can enable the
                  * automatic execution of queries. Re-enable this, when this functionality is desired again.
                  */
                 // settingsControl.addSettingsComponent(queryRunner);
+
                 SplitLayoutPanel splitPanel = new SplitLayoutPanel(10);
                 splitPanel.addSouth(resultsPresenter.getEntryWidget(), 350);
-                splitPanel.add(selectionDockPanel);
+                splitPanel.add(queryDefinitionProvider.getEntryWidget());
+
+                if (queryIdentifier != null) {
+                    if (Storage.isLocalStorageSupported()) {
+                        Storage store = Storage.getLocalStorageIfSupported();
+                        String storedElem = store.getItem(SailingSettingsConstants.DATAMINING_QUERY);
+                        JSONArray arr = JSONParser.parseStrict(storedElem).isArray();
+                        for (int i = 0; i < arr.size(); i++) {
+                            JSONObject json = arr.get(i).isObject();
+                            if (queryIdentifier.equals(json.get("uuid").isString().stringValue())) {
+                                String serializedQuery = json.get("payload").isString().stringValue();
+                                dataMiningService.getDeserializedQuery(serializedQuery,
+                                        new AsyncCallback<StatisticQueryDefinitionDTO>() {
+
+                                            @Override
+                                            public void onSuccess(StatisticQueryDefinitionDTO result) {
+                                                queryDefinitionProvider.applyQueryDefinition(result);
+                                                queryRunner.run(result);
+                                            }
+
+                                            @Override
+                                            public void onFailure(Throwable caught) {
+                                                LOG.log(Level.SEVERE, caught.getMessage(), caught);
+                                            }
+                                        });
+                                break;
+                            }
+                        }
+                    } else {
+                        Notification.notify(StringMessages.INSTANCE.warningBrowserUnsupported(),
+                                NotificationType.ERROR);
+                    }
+                }
                 return splitPanel;
             }
         });
@@ -101,5 +161,33 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         panel.add(authorizedContentDecorator);
         rootPanel.add(panel);
     }
+
+    private void removeUrlParameter() {
+        try {
+            UrlBuilder builder = Window.Location.createUrlBuilder().setHost(Window.Location.getHost())
+                    .setPath(Window.Location.getPath()).setProtocol(Window.Location.getProtocol());
+
+            String port = Window.Location.getPort();
+            if (port != null && !"".equals(port.trim()) && !"0".equals(port)) {
+                builder.setPort(Integer.parseInt(port));
+            }
+            String newUrl = builder.buildString();
+            newUrl = newUrl.replaceAll("\\?.*$", "");
+
+            updateUrl(Window.getTitle(), newUrl);
+        } catch (Exception e) {
+            LOG.severe("Could not update URL: " + e.getMessage());
+            // In the worst case, the URL is not updated. This should not impact the user experience of
+            // data mining.
+        }
+    }
+
+    /*
+     * using JSNI because GWT-History-Mapper does currently not support updating an URL in the history without reloading
+     * the page
+     */
+    private native void updateUrl(String title, String newUrl)/*-{
+        $wnd.history.replaceState(null, title, newUrl);
+    }-*/;
 
 }

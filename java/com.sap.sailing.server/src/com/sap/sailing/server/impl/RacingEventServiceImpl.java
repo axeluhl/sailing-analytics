@@ -257,6 +257,8 @@ import com.sap.sailing.server.simulation.SimulationServiceFactory;
 import com.sap.sailing.server.statistics.StatisticsAggregator;
 import com.sap.sailing.server.statistics.StatisticsCalculator;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
+import com.sap.sailing.server.tagging.TaggingService;
+import com.sap.sailing.server.tagging.TaggingServiceFactory;
 import com.sap.sailing.server.util.EventUtil;
 import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Distance;
@@ -437,6 +439,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     private PolarDataService polarDataService;
 
     private final SimulationService simulationService;
+
+    private final TaggingService taggingService;
 
     /**
      * A service that, if not {@code null}, must be called when certain events that the service can notify users about
@@ -763,6 +767,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         persistentRegattasForRaceIDs = new ConcurrentHashMap<>();
         final ScheduledExecutorService simulatorExecutor = ThreadPoolUtil.INSTANCE.createBackgroundTaskThreadPoolExecutor("Simulator Background Executor");
         simulationService = SimulationServiceFactory.INSTANCE.getService(simulatorExecutor, this);
+        taggingService = TaggingServiceFactory.INSTANCE.getService(this);
         this.raceLogReplicator = new RaceLogReplicatorAndNotifier(this);
         this.regattaLogReplicator = new RegattaLogReplicator(this);
         this.raceLogScoringReplicator = new RaceLogScoringReplicator(this);
@@ -849,6 +854,11 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     @Override
     public SimulationService getSimulationService() {
         return simulationService;
+    }
+    
+    @Override
+    public TaggingService getTaggingService() {
+        return taggingService;
     }
     
     @Override

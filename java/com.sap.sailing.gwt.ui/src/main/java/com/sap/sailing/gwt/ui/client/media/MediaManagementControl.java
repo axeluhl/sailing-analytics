@@ -16,7 +16,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -29,7 +28,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.media.MediaTrack;
 import com.sap.sailing.gwt.ui.client.StringMessages;
-import com.sap.sse.gwt.client.useragent.UserAgentDetails.AgentTypes;
 
 public class MediaManagementControl extends AbstractMediaSelectionControl implements CloseHandler<PopupPanel> {
 
@@ -46,13 +44,13 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
     }
 
     public void show() {
-        Collection<MediaTrack> reachableVideoTracks = new ArrayList<>();
-        Collection<MediaTrack> reachableAudioTracks = new ArrayList<>();
-        addAssignedMediaTracksTo(reachableVideoTracks, reachableAudioTracks);
-        addOverlappingMediaTracksTo(reachableVideoTracks, reachableAudioTracks);
+        Collection<MediaTrack> videoTracks = new ArrayList<>();
+        Collection<MediaTrack> audioTracks = new ArrayList<>();
+        filterGivenMediaTracksTo(videoTracks, audioTracks, mediaPlayerManager.getAssignedMediaTracks());
+        filterGivenMediaTracksTo(videoTracks, audioTracks, mediaPlayerManager.getOverlappingMediaTracks());
         Panel grid = new VerticalPanel();
-        addAudioTracksToGridPanel(reachableAudioTracks, grid);
-        addVideoTracksToGridPanel(reachableVideoTracks, grid);
+        addAudioTracksToGridPanel(audioTracks, grid);
+        addVideoTracksToGridPanel(videoTracks, grid);
         addNewMediaButtonsTo(grid);
         dialogControl.add(grid);
         dialogControl.showRelativeTo(popupLocation);
@@ -82,44 +80,37 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
         grid.add(controlButtons);
     }
 
-    private void addVideoTracksToGridPanel(Collection<MediaTrack> reachableVideoTracks, Panel grid) {
-        if (!reachableVideoTracks.isEmpty()) {
-            grid.add(createVideoHeader());
-            for (MediaTrack videoTrack : reachableVideoTracks) {
+    private void addVideoTracksToGridPanel(Collection<MediaTrack> videoTracks, Panel grid) {
+        if (!videoTracks.isEmpty()) {
+            grid.add(new Label(stringMessages.videos()));
+            for (MediaTrack videoTrack : videoTracks) {
                 grid.add(createVideoOptions(videoTrack, mediaPlayerManager.getPlayingVideoTracks()));
             }
         }
     }
 
-    private void addAudioTracksToGridPanel(Collection<MediaTrack> reachableAudioTracks, Panel grid) {
-        if (!reachableAudioTracks.isEmpty()) {
-            grid.add(createAudioHeader());
-            grid.add((RadioButton) createAudioButton(null, mediaPlayerManager.getPlayingAudioTrack()));
-            for (MediaTrack audioTrack : reachableAudioTracks) {
-                grid.add(createAudioButton(audioTrack, mediaPlayerManager.getPlayingAudioTrack()));
+    private void addAudioTracksToGridPanel(Collection<MediaTrack> audioTracks, Panel grid) {
+        if (!audioTracks.isEmpty()) {
+            grid.add(new Label(stringMessages.audioFiles()));
+            grid.add(createAudioButton(null));
+            for (MediaTrack audioTrack : audioTracks) {
+                grid.add(createAudioButton(audioTrack));
             }
         }
     }
 
-    private void addOverlappingMediaTracksTo(Collection<MediaTrack> reachableVideoTracks,
-            Collection<MediaTrack> reachableAudioTracks) {
-        for (MediaTrack mediaTrack : mediaPlayerManager.getOverlappingMediaTracks()) {
-            if (isPotentiallyPlayable(mediaTrack) && mediaTrack.mimeType != null) {
+    private void filterGivenMediaTracksTo(Collection<MediaTrack> videoTracks,
+            Collection<MediaTrack> audioTracks, Iterable<MediaTrack> source) {
+        for (MediaTrack mediaTrack : source) {
+            if (mediaTrack.mimeType == null) {
+                videoTracks.add(mediaTrack); // allow user to remove this strange artifact
+            } else {
                 switch (mediaTrack.mimeType.mediaType) {
                 case video:
-                    reachableVideoTracks.add(mediaTrack);
-                case audio: // intentional fall through
-                    if (mediaPlayerManager.getUserAgent().getType().equals(AgentTypes.FIREFOX)) {
-                        if (mediaTrack.isYoutube()) {
-                            // only youtube audio tracks work with firefox
-                            reachableAudioTracks.add(mediaTrack);
-                        }
-                    } else {
-                        reachableAudioTracks.add(mediaTrack);
-                    }
-                case image: // no image media tracks produced by an image
+                    videoTracks.add(mediaTrack);
                     break;
-                case unknown: // we won't overlay an unknown media source
+                case audio:
+                    audioTracks.add(mediaTrack);
                     break;
                 default:
                     break;
@@ -128,44 +119,27 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
         }
     }
 
-    private void addAssignedMediaTracksTo(Collection<MediaTrack> reachableVideoTracks,
-            Collection<MediaTrack> reachableAudioTracks) {
-        for (MediaTrack mediaTrack : mediaPlayerManager.getAssignedMediaTracks()) {
-            if (isPotentiallyPlayable(mediaTrack)) {
-                if (mediaTrack.mimeType == null) {
-                    reachableVideoTracks.add(mediaTrack); // allow user to remove this strange artifact
+    private Widget createVideoOptions(final MediaTrack videoTrack, Set<MediaTrack> selectedVideos) {
+        CheckBox videoCheckBox = new CheckBox(videoTrack.title);
+        videoCheckBoxes.put(videoTrack, videoCheckBox);
+        videoCheckBox.setTitle(videoTrack.toString());
+        videoCheckBox.setValue(selectedVideos.contains(videoTrack));
+        videoCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+        
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> changeEvent) {
+                if (changeEvent.getValue()) {
+                    mediaPlayerManager.playFloatingVideo(videoTrack);
                 } else {
-                    switch (mediaTrack.mimeType.mediaType) {
-                    case video:
-                        reachableVideoTracks.add(mediaTrack);
-                    case audio: // intentional fall through
-                        if (mediaPlayerManager.getUserAgent().getType().equals(AgentTypes.FIREFOX)) {
-                            if (mediaTrack.isYoutube()) {
-                                // only youtube audio tracks work with firefox
-                                reachableAudioTracks.add(mediaTrack);
-                            }
-                        } else {
-                            reachableAudioTracks.add(mediaTrack);
-                        }
-                    case image: // images don't play as video tracks
-                        break;
-                    case unknown: // unknown formats won't be played either
-                        break;
-                    default:
-                        break;
-                    }
+                    mediaPlayerManager.closeFloatingPlayer(videoTrack);
                 }
             }
-        }
-    }
-
-    private Widget createVideoOptions(final MediaTrack videoTrack, Set<MediaTrack> selectedVideos) {
-        CheckBox playCheckBox = createPlayCheckBox(videoTrack, selectedVideos);
+        });
 
         if (mediaPlayerManager.allowsEditing()) {
             HorizontalPanel panel = new HorizontalPanel();
             panel.setWidth("100%");
-            panel.add(playCheckBox);
+            panel.add(videoCheckBox);
 
             Button deleteButton = createDeleteButton(videoTrack);
             panel.add(deleteButton);
@@ -174,10 +148,10 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
             panel.add(connectButton);   
             panel.setCellHorizontalAlignment(connectButton, HasHorizontalAlignment.ALIGN_RIGHT);
             panel.setCellWidth(connectButton, "13");
-            setEnableOfVideoTrack(connectButton, connectButton.getValue());
+            setVideoPlayCheckboxEnabled(videoTrack, connectButton.getValue());
             return panel;
         } else {
-            return playCheckBox;
+            return videoCheckBox;
         }
 
     }
@@ -201,16 +175,9 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
         return connectButton;
     }
     
-    private void setEnableOfVideoTrack(ToggleButton connectButton, boolean enable) {
-        Panel videoTrack = (HorizontalPanel)connectButton.getParent();
-        for (Widget widget : videoTrack) {
-            if(widget != connectButton && widget instanceof FocusWidget){
-                ((FocusWidget)widget).setEnabled(enable);
-                if(widget instanceof CheckBox){
-                    ((CheckBox)widget).setValue(false);
-                }
-            }
-        }
+    private void setVideoPlayCheckboxEnabled(MediaTrack videoTrack, boolean enable) {
+        CheckBox videoCheckBox = videoCheckBoxes.get(videoTrack);
+        videoCheckBox.setEnabled(enable);
     }
     
     private void disconnectVideoFromRace(final MediaTrack videoTrack, final ToggleButton connectButton) {
@@ -224,8 +191,8 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
 
             @Override
             public void onSuccess(Void allMediaTracks) {
-                setEnableOfVideoTrack(connectButton, false);
-                mediaPlayerManager.closeFloatingVideo(videoTrack);
+                setVideoPlayCheckboxEnabled(videoTrack, false);
+                mediaPlayerManager.closeFloatingPlayer(videoTrack);
             }
         });
         
@@ -242,7 +209,7 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
 
             @Override
             public void onSuccess(Void allMediaTracks) {
-                setEnableOfVideoTrack(connectButton, true);
+                setVideoPlayCheckboxEnabled(videoTrack, true);
             }
         });
     }
@@ -259,65 +226,38 @@ public class MediaManagementControl extends AbstractMediaSelectionControl implem
         return deleteButton;
     }
 
-    private CheckBox createPlayCheckBox(final MediaTrack videoTrack, Set<MediaTrack> selectedVideos) {
-        CheckBox videoCheckBox = new CheckBox(videoTrack.title);
-        videoCheckBoxes.put(videoTrack, videoCheckBox);
-        videoCheckBox.setTitle(videoTrack.toString());
-        videoCheckBox.setValue(selectedVideos.contains(videoTrack));
-        videoCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-
-            @Override
-            public void onValueChange(ValueChangeEvent<Boolean> changeEvent) {
-                if (changeEvent.getValue()) {
-                    mediaPlayerManager.playFloatingVideo(videoTrack);
-                } else {
-                    mediaPlayerManager.closeFloatingVideo(videoTrack);
-                }
-            }
-        });
-        return videoCheckBox;
-    }
-
-    public void selectVideo(MediaTrack videoTrack) {
-        CheckBox videoCheckBox = videoCheckBoxes.get(videoTrack);
-        if (videoCheckBox != null) {
-            videoCheckBox.setValue(true);
-        }
-    }
-
-    public void unselectVideo(MediaTrack videoTrack) {
-        CheckBox videoCheckBox = videoCheckBoxes.get(videoTrack);
-        if (videoCheckBox != null) {
-            videoCheckBox.setValue(false);
-        }
-    }
-
-    private Widget createVideoHeader() {
-        Label audioHeader = new Label("Videos");
-        return audioHeader;
-    }
-
-    private Widget createAudioButton(final MediaTrack audioTrack, MediaTrack selectedAudioTrack) {
+    private Widget createAudioButton(final MediaTrack audioTrack) {
         String label = audioTrack != null ? audioTrack.title : "Sound off";
         String title = audioTrack != null ? audioTrack.toString() : "Turn off all sound channels.";
         RadioButton audioButton = new RadioButton("group-name", label);
         audioButton.setTitle(title);
-        audioButton.setValue(audioTrack == selectedAudioTrack);
+        audioButton.setValue(audioTrack == mediaPlayerManager.getPlayingAudioTrack());
         audioButton.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-
             @Override
             public void onValueChange(ValueChangeEvent<Boolean> changeEvent) {
                 if (changeEvent.getValue()) {
-                    mediaPlayerManager.playAudio(audioTrack);
+                    Set<MediaTrack> currentlyPlaying = mediaPlayerManager.getPlayingAudioTrack();
+                    if (audioTrack == null) {
+                        currentlyPlaying.forEach(mediaPlayerManager::closeFloatingPlayer);
+                    } else {
+                        mediaPlayerManager.playAudio(audioTrack);
+                    }
                 }
             }
         });
-        return audioButton;
-    }
 
-    private Widget createAudioHeader() {
-        Label audioHeader = new Label("Audio Tracks");
-        return audioHeader;
+        if (mediaPlayerManager.allowsEditing() && audioTrack != null) {
+            HorizontalPanel panel = new HorizontalPanel();
+            panel.setWidth("100%");
+            panel.add(audioButton);
+
+            Button deleteButton = createDeleteButton(audioTrack);
+            panel.add(deleteButton);
+            panel.setCellHorizontalAlignment(deleteButton, HasHorizontalAlignment.ALIGN_RIGHT);
+            return panel;
+        } else {
+            return audioButton;
+        }
     }
 
     @Override

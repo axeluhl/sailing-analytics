@@ -35,11 +35,13 @@ import com.sap.sse.datamining.functions.Function;
 import com.sap.sse.datamining.impl.components.DataRetrieverLevel;
 import com.sap.sse.datamining.impl.components.management.ReducedDimensions;
 import com.sap.sse.datamining.impl.data.QueryResultImpl;
+import com.sap.sse.datamining.shared.DataMiningQuerySerializer;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.GroupKey;
 import com.sap.sse.datamining.shared.SerializationDummy;
 import com.sap.sse.datamining.shared.data.QueryResultState;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.dto.StoredDataMiningQueryDTO;
 import com.sap.sse.datamining.shared.impl.GenericGroupKey;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
@@ -51,6 +53,9 @@ import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.datamining.shared.impl.dto.ReducedDimensionsDTO;
 import com.sap.sse.datamining.ui.client.DataMiningService;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.UserStore;
+import com.sap.sse.util.ServiceTrackerFactory;
 
 public class DataMiningServiceImpl extends RemoteServiceServlet implements DataMiningService {
     private static final long serialVersionUID = -7951930891674894528L;
@@ -58,12 +63,21 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     private final BundleContext context;
 
     private final ServiceTracker<DataMiningServer, DataMiningServer> dataMiningServerTracker;
+    private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
+    private final ServiceTracker<UserStore, UserStore> userStoreServiceTracker;
+
+    private final StoredDataMiningQueryPersister storedDataMiningQueryPersistor;
 
     private final DataMiningDTOFactory dtoFactory;
 
     public DataMiningServiceImpl() {
         context = Activator.getDefault();
         dataMiningServerTracker = createAndOpenDataMiningServerTracker(context);
+        securityServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
+        userStoreServiceTracker = ServiceTrackerFactory.createAndOpen(context, UserStore.class);
+
+        storedDataMiningQueryPersistor = new StoredDataMiningQueryPersisterImpl(securityServiceTracker.getService(),
+                userStoreServiceTracker.getService());
         dtoFactory = new DataMiningDTOFactory();
     }
 
@@ -84,6 +98,14 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ));
         return getDataMiningServer().getComponentsChangedTimepoint();
     }
+    
+    @Override
+    public FunctionDTO getIdentityFunction(String localeInfoName) {
+        SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ));
+        DataMiningServer server = getDataMiningServer();
+        Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
+        return dtoFactory.createFunctionDTO(server.getIdentityFunction(), server.getStringMessages(), locale);
+    }
 
     @Override
     public HashSet<FunctionDTO> getAllStatistics(String localeInfoName) {
@@ -101,6 +123,14 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
                 .getDataRetrieverChainDefinitionForDTO(retrieverChainDefinition).getRetrievedDataType();
         Iterable<Function<?>> statistics = getDataMiningServer().getStatisticsFor(retrievedDataType);
         return functionsAsDTOs(statistics, localeInfoName);
+    }
+
+    @Override
+    public HashSet<AggregationProcessorDefinitionDTO> getAggregatorDefinitions(String localeInfoName) {
+        SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ));
+        Iterable<AggregationProcessorDefinition<?, ?>> definitions = getDataMiningServer()
+                .getAllAggregationProcessorDefinitions();
+        return aggregatorDefinitionsAsDTOs(definitions, localeInfoName);
     }
 
     @Override
@@ -348,6 +378,13 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         }
         return predefinedQueryNames;
     }
+    
+    @Override
+    public StatisticQueryDefinitionDTO getPredefinedQueryDefinition(PredefinedQueryIdentifier identifier, String localeInfoName) {
+        SecurityUtils.getSubject().checkPermission(
+                Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ, identifier.getIdentifier()));
+        return localize(getDataMiningServer().getPredefinedQueryDefinitionDTO(identifier), localeInfoName);
+    }
 
     @Override
     public <ResultType extends Serializable> QueryResultDTO<ResultType> runPredefinedQuery(DataMiningSession session,
@@ -363,9 +400,43 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         }
         return null;
     }
+    
+    @Override
+    public StatisticQueryDefinitionDTO localize(StatisticQueryDefinitionDTO queryDefinitionDTO, String localeInfoName) {
+        SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ,
+                queryDefinitionDTO.getDataRetrieverChainDefinition().getName()));
+        DataMiningServer dataMiningServer = getDataMiningServer();
+        StatisticQueryDefinition<?, ?, ?, ?> queryDefinition = dataMiningServer.getQueryDefinitionForDTO(queryDefinitionDTO);
+        Locale locale = ResourceBundleStringMessages.Util.getLocaleFor(localeInfoName);
+        return dtoFactory.createQueryDefinitionDTO(queryDefinition, dataMiningServer.getStringMessages(), locale, localeInfoName);
+    }
 
     @Override
     public SerializationDummy pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy() {
         return null;
+    }
+
+    @Override
+    public ArrayList<StoredDataMiningQueryDTO> retrieveStoredQueries() {
+        SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.READ));
+        return storedDataMiningQueryPersistor.retrieveStoredQueries();
+    }
+
+    @Override
+    public StoredDataMiningQueryDTO updateOrCreateStoredQuery(StoredDataMiningQueryDTO query) {
+        SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.UPDATE));
+        SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.CREATE));
+        return storedDataMiningQueryPersistor.updateOrCreateStoredQuery(query);
+    }
+
+    @Override
+    public StoredDataMiningQueryDTO removeStoredQuery(StoredDataMiningQueryDTO query) {
+        SecurityUtils.getSubject().checkPermission(Permission.DATA_MINING.getStringPermissionForObjects(Mode.CREATE));
+        return storedDataMiningQueryPersistor.removeStoredQuery(query);
+    }
+
+    @Override
+    public StatisticQueryDefinitionDTO getDeserializedQuery(String serializedQuery) {
+        return DataMiningQuerySerializer.fromBase64String(serializedQuery);
     }
 }
