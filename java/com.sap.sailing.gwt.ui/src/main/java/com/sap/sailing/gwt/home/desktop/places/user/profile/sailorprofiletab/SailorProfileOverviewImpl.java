@@ -24,7 +24,7 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.BadgeDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.events.NavigatorColumn;
 import com.sap.sailing.gwt.home.shared.app.ApplicationHistoryMapper;
-import com.sap.sailing.gwt.home.shared.partials.dialog.ConfirmDialogFactory;
+import com.sap.sailing.gwt.home.shared.partials.dialog.confirm.ConfirmDialogFactory;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileResources;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.view.SailorProfileOverview;
@@ -97,16 +97,18 @@ public class SailorProfileOverviewImpl extends Composite implements SailorProfil
 
         removeColumn.setCellStyleNames(DesignedCellTableResources.INSTANCE.cellTableStyle().buttonCell());
         removeColumn.setFieldUpdater((int index, SailorProfileDTO dto, String value) -> ConfirmDialogFactory
-                .showConfirmDialog(StringMessages.INSTANCE.sailorProfileRemoveMessage(), new DialogCallback<Void>() {
-                    @Override
-                    public void ok(Void editedObject) {
-                        presenter.removeSailorProfile(dto.getKey());
-                    }
+                .showConfirmDialog(StringMessages.INSTANCE.sailorProfileRemoveMessage(),
+                        StringMessages.INSTANCE.confirmDeletion(), new DialogCallback<Void>() {
+                            @Override
+                            public void ok(Void editedObject) {
+                                presenter.removeSailorProfile(dto.getKey());
+                                presenter.getClientFactory().getPlaceController().goTo(new SailorProfilePlace());
+                            }
 
-                    @Override
-                    public void cancel() {
-                    }
-                }));
+                            @Override
+                            public void cancel() {
+                            }
+                        }));
 
         sailorProfilesTable.addCellPreviewHandler(e -> {
             /* no navigation for remove column */
