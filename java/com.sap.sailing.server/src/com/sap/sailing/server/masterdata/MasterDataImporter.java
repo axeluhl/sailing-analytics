@@ -20,14 +20,15 @@ import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.ImportMasterDataOperation;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
 public class MasterDataImporter {
     private final DomainFactory baseDomainFactory;
-
     private final RacingEventService racingEventService;
 
-    public MasterDataImporter(DomainFactory baseDomainFactory, RacingEventService racingEventService) {
+    public MasterDataImporter(DomainFactory baseDomainFactory, RacingEventService racingEventService,
+            SecurityService securityService) {
         this.baseDomainFactory = baseDomainFactory;
         this.racingEventService = racingEventService;
     }
