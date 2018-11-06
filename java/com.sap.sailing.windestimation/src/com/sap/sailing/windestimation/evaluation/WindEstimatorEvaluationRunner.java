@@ -19,14 +19,14 @@ public class WindEstimatorEvaluationRunner {
     private static final boolean ENABLE_SCALED_SPEED = true;
     private static final boolean ENABLE_POLARS = true;
     private static final double MIN_CORRECT_ESTIMATIONS_RATIO_FOR_CORRECT_RACE = 0.75;
-    private static final int MAX_TWS_DEVIATION_KNOTS = 2;
+    private static final double MAX_TWS_DEVIATION_PERCENT = 0.2;
     private static final int MAX_TWD_DEVIATION_DEG = 20;
     private static final Function<WindEstimatorFactories, WindEstimatorFactory<CompleteManeuverCurveWithEstimationData>> estimatorFactoryRetriever = factories -> factories
             .maneuverGraph();
 
     public static void main(String[] args) throws Exception {
         WindEstimatorEvaluator<CompleteManeuverCurveWithEstimationData> evaluator = new WindEstimationEvaluatorImpl<>(
-                MAX_TWD_DEVIATION_DEG, MAX_TWS_DEVIATION_KNOTS, MIN_CORRECT_ESTIMATIONS_RATIO_FOR_CORRECT_RACE);
+                MAX_TWD_DEVIATION_DEG, MAX_TWS_DEVIATION_PERCENT, MIN_CORRECT_ESTIMATIONS_RATIO_FOR_CORRECT_RACE);
         LoggingUtil.logInfo("Connecting to MongoDB");
         RaceWithCompleteManeuverCurvePersistenceManager persistenceManager = new RaceWithCompleteManeuverCurvePersistenceManager();
         LoggingUtil.logInfo("Loading polar data");
@@ -45,7 +45,6 @@ public class WindEstimatorEvaluationRunner {
                 new TargetWindFromCompleteManeuverCurveWithEstimationDataExtractor(), racesIterator,
                 racesIterator.getNumberOfElements());
         LoggingUtil.logInfo("Wind estimator evaluation finished");
-        BestPathCalculatorForConfidenceEvaluation.toCsv();
         evaluationResult.printEvaluationStatistics(true);
     }
 

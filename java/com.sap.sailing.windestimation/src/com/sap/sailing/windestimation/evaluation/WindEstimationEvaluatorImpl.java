@@ -24,13 +24,13 @@ import com.sap.sse.common.TimePoint;
 public class WindEstimationEvaluatorImpl<T> implements WindEstimatorEvaluator<T> {
 
     private final double maxWindCourseDeviationInDegrees;
-    private final double maxWindSpeedDeviationInKnots;
+    private final double maxWindSpeedDeviationInPercent;
     private final double minAccuracyPerRaceForCorrectEstimation;
 
-    public WindEstimationEvaluatorImpl(double maxWindCourseDeviationInDegrees, double maxWindSpeedDeviationInKnots,
+    public WindEstimationEvaluatorImpl(double maxWindCourseDeviationInDegrees, double maxWindSpeedDeviationInPercent,
             double minAccuracyPerRaceForCorrectEstimation) {
         this.maxWindCourseDeviationInDegrees = maxWindCourseDeviationInDegrees;
-        this.maxWindSpeedDeviationInKnots = maxWindSpeedDeviationInKnots;
+        this.maxWindSpeedDeviationInPercent = maxWindSpeedDeviationInPercent;
         this.minAccuracyPerRaceForCorrectEstimation = minAccuracyPerRaceForCorrectEstimation;
     }
 
@@ -73,11 +73,11 @@ public class WindEstimationEvaluatorImpl<T> implements WindEstimatorEvaluator<T>
                         .abs(windCourseDeviationInDegrees) <= maxWindCourseDeviationInDegrees;
                 double confidence = windWithConfidence.getConfidence();
                 if (targetWind.getKnots() > 2) {
-                    double windSpeedDeviationInKnots = targetWind.getKnots() - estimatedWind.getKnots();
-                    boolean windSpeedDeviationWithinTolerance = Math
-                            .abs(windSpeedDeviationInKnots) <= maxWindSpeedDeviationInKnots;
+                    double windSpeedDeviationInPercent = Math.abs(targetWind.getKnots() - estimatedWind.getKnots())
+                            / targetWind.getKnots();
+                    boolean windSpeedDeviationWithinTolerance = windSpeedDeviationInPercent <= maxWindSpeedDeviationInPercent;
                     result = result.mergeBySum(new WindEstimatorEvaluationResult(windCourseDeviationInDegrees,
-                            windCourseDeviationWithinTolerance, windSpeedDeviationInKnots,
+                            windCourseDeviationWithinTolerance, windSpeedDeviationInPercent,
                             windSpeedDeviationWithinTolerance, confidence));
                 } else {
                     result = result.mergeBySum(new WindEstimatorEvaluationResult(windCourseDeviationInDegrees,
