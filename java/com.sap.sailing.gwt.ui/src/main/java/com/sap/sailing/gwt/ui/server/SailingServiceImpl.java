@@ -1,6 +1,7 @@
 package com.sap.sailing.gwt.ui.server;
 
 import java.awt.image.BufferedImage;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilterInputStream;
@@ -534,6 +535,7 @@ import com.sap.sailing.xrr.structureimport.SeriesParameters;
 import com.sap.sailing.xrr.structureimport.StructureImporter;
 import com.sap.sailing.xrr.structureimport.buildstructure.SetRacenumberFromSeries;
 import com.sap.sse.ServerInfo;
+import com.sap.sse.common.Base64Utils;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.CountryCode;
 import com.sap.sse.common.Distance;
@@ -576,6 +578,7 @@ import com.sap.sse.i18n.impl.ResourceBundleStringMessagesImpl;
 import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.pairinglist.impl.PairingListTemplateImpl;
+import com.sap.sse.qrcode.QRCodeGenerationUtil;
 import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.replication.ReplicationFactory;
@@ -8376,5 +8379,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return raceTimesInfos;
+    }
+
+    @Override
+    public String openRegattaRegistrationQrCode(String url) {
+        String result = "";
+        try (DataInputStream imageIs = new DataInputStream(QRCodeGenerationUtil.create(url, 250))) {
+            byte[] targetArray = new byte[imageIs.available()];
+            imageIs.readFully(targetArray);
+            result = Base64Utils.toBase64(targetArray);
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Error while generating QR code for open regatta", e);
+        }
+        return result;
     }
 }

@@ -1036,4 +1036,11 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      * @param asyncCallback The callback called after finishing resizing, storing the returned ImageDTOs somewhere is proposed
      */
     void resizeImage(ImageResizingTaskDTO imageResizingTask, AsyncCallback<Set<ImageDTO>> asyncCallback);
+
+    /**
+     * @see SailingService#openRegattaRegistrationQrCode(String url)
+     * @param url
+     * @param asyncCallback
+     */
+    void openRegattaRegistrationQrCode(String url, AsyncCallback<String> asyncCallback);
 }

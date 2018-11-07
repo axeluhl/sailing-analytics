@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.io.DataInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -14,10 +16,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -45,6 +46,7 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.qrcode.QRCodeGenerationUtil;
 
 
 public class RegattaDetailsComposite extends Composite {
@@ -74,6 +76,7 @@ public class RegattaDetailsComposite extends Composite {
     private final Grid openRegattaRegistrationLinkPanel;
     private final Label openRegattaRegistrationLinkUrl;
     private final Anchor openRegattaRegistrationLink;
+    private final Image openRegattaRegistrationLinkQrCode;
     
     private final SelectionModel<SeriesDTO> seriesSelectionModel;
     private final CellTable<SeriesDTO> seriesTable;
@@ -114,6 +117,7 @@ public class RegattaDetailsComposite extends Composite {
         openRegattaRegistrationLinkPanel = createRegistrationLinkPanel(grid, currentRow++, stringMessages.registrationLink());
         openRegattaRegistrationLinkUrl = addRegistrationLinkUrlLabel(openRegattaRegistrationLinkPanel, "OpenRegattaRegistrationLinkLabel");
         openRegattaRegistrationLink = addRegistrationLinkAnchor(openRegattaRegistrationLinkPanel, "OpenRegattaRegistrationLinkAnchor");
+        openRegattaRegistrationLinkQrCode = addRegistrationLinkQrCode(openRegattaRegistrationLinkPanel, "OpenRegattaRegistrationLinkQrCode");
         seriesTable = createRegattaSeriesTable();
         seriesTable.ensureDebugId("SeriesCellTable");
         seriesSelectionModel = new SingleSelectionModel<SeriesDTO>();
@@ -155,8 +159,17 @@ public class RegattaDetailsComposite extends Composite {
         Anchor link = new Anchor();
         link.ensureDebugId(debugId);
         link.setText("open");
+        link.setTarget("_blank");
         panel.setWidget(0, 1, link);
         return link;
+    }
+
+    private Image addRegistrationLinkQrCode(Grid panel, String debugId) {
+        Image qrCodeImage = new Image();
+        qrCodeImage.ensureDebugId(debugId);
+        qrCodeImage.setVisible(false);
+        panel.setWidget(0, 2, qrCodeImage);
+        return qrCodeImage;
     }
 
     private CellTable<SeriesDTO> createRegattaSeriesTable() {
@@ -467,10 +480,27 @@ public class RegattaDetailsComposite extends Composite {
             openRegattaRegistrationLinkUrl.setText(url);
             openRegattaRegistrationLink.setHref(url);
             openRegattaRegistrationLink.setVisible(true);
+            sailingService.openRegattaRegistrationQrCode(url, new AsyncCallback<String>() {
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    GWT.log("Qrcde generation failed: " + caught.getMessage());
+                }
+
+                @Override
+                public void onSuccess(String result) {
+                    GWT.log("qr code generated for url: " + url);
+                    openRegattaRegistrationLinkQrCode.setUrl("data:image/png;base64, " + result);
+                }
+
+            });
+            openRegattaRegistrationLinkQrCode.setVisible(true);
         } else {
             openRegattaRegistrationLinkUrl.setText("-");
             openRegattaRegistrationLink.setHref("");
             openRegattaRegistrationLink.setVisible(false);
+            openRegattaRegistrationLinkQrCode.setUrl("");
+            openRegattaRegistrationLinkQrCode.setVisible(false);
         }
     }
 

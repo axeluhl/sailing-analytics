@@ -949,4 +949,13 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      * @throws Exception can throw different type of exceptions
      */
     Set<ImageDTO> resizeImage(ImageResizingTaskDTO imageResizingTask) throws Exception;
+
+    /**
+     * Generates a base64-encoded qrcode for the branch.io url used to allow registrations for open regattas.
+     * 
+     * @param url
+     *            complete deeplink url for registration on open regattas
+     * @return base64 encoded string containg a png-image of the genrated qrcode
+     */
+    String openRegattaRegistrationQrCode(String url);
 }
