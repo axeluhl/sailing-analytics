@@ -118,10 +118,25 @@ Tenant ownership has implications only for the application of roles that are qua
 
 ### Implementation of Sharing Data Objects with Public
 
-In general, sharing a data object with the public should just be granting the “view” permission to everyone. This in return allows everybody that knows the link where one can view the data object to view it.
+In general, sharing a data object with the public should just be granting the “view” permission to everyone.  For this purpose, the ``<ALL>`` user can be assigned the corresponding ``READ`` permission. This in return allows everybody that knows the link where one can view the data object to view it.
+
+Alternatively, an access control list (ACL) could be assigned to the object, using a ``null`` group assignment, thereby making this ACL applicable to all users, regardless of their group memberships. The ACL will also be checked for permission requests by not authenticated users.
+
+The remaining challenge is the application of the permissions necessary for *all* objects in the *scope* that is to be shared. A user it typically not interested in sharing only the bare *Event* object but would rather want to grant public access to everything *belonging to* the event, including all leaderboard groups, leaderboards, regattas and tracked races.
+
+The problem with this is that this object set is dynamic. It changes as users add object to or remove them from the scope of the event. For example, if another race is being added after the event has been shared, a reasonable behavior seems to be that the new race shall also be shared together with everything else belonging to the overarching event that has been shared before. This is similar to a "setgid" bit in a Unix file system.
+
+For this to work we will need observable object relationships which can trigger rules for permission propagation along the relationships. While we agreed that the permission checking mechanism must not need to analyze object relationships, changes in relationships may lead to updates in permissions.
+
+Examples: when a user links a leaderboard group to an event that is visible to a larger set of users than the leaderboard group, the user may receive a hint suggesting to update the leaderboard group's permissions to match those of the event into which it is just being linked. Similarly, if a leaderboard is added to a leaderboard group, the user may want to propagate the leaderboard group's visibility to that of the leaderboard just added to the group.
+
+Possible approach: make directed permission propagation a property on associations between domain types that users can configure. Such associations then need to be observed by the permission propagation mechanism, and when links are added (what if they are removed?) the permission propagation is triggered. Furthermore, permission propagation may need to be triggered when the permissions on a source object of a permission propagation change, in order to support transitive permission propagation, e.g., when a LeaderboardGroup is added to an Event, so that also all Leaderboards and Regattas and TrackedRaces reachable from that LeaderboardGroup receive the same permission update as the LeaderboardGroup itself.
+
+Propagation rule candidates: Event---LeaderboardGroup; LeaderboardGroup---Leaderboard; Leaderboard---Regatta; Leaderboard---TrackedRace.
+
 This is separated from promoting this public data object (e.g. event) on the official SAP site. This would have to be a separate list which can be edited by e.g. media admins. This would however only link to the source, because otherwise all promoted material would have to be imported to the archive.
 
-The ACL will also be checked for permission requests by not authenticated users. This will only apply to ACL entries that are valid for all users.
+
 
 ## Permissions in Frontend
 
