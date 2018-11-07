@@ -11,10 +11,13 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -68,7 +71,9 @@ public class RegattaDetailsComposite extends Composite {
     private final Label competitorRegistrationType;
     private final Label configuration;
     private final Label buoyZoneRadiusInHullLengths;
-    private final Label openRegattaRegistrationLink;
+    private final Grid openRegattaRegistrationLinkPanel;
+    private final Label openRegattaRegistrationLinkUrl;
+    private final Anchor openRegattaRegistrationLink;
     
     private final SelectionModel<SeriesDTO> seriesSelectionModel;
     private final CellTable<SeriesDTO> seriesTable;
@@ -106,8 +111,9 @@ public class RegattaDetailsComposite extends Composite {
         configuration = createLabelAndValueWidget(grid, currentRow++, stringMessages.racingProcedureConfiguration(), "RacingProcedureLabel");
         scoringSystem = createLabelAndValueWidget(grid, currentRow++, stringMessages.scoringSystem(), "ScoringSystemLabel");
         rankingMetric = createLabelAndValueWidget(grid, currentRow++, stringMessages.rankingMetric(), "RankingMetricLabel");
-        openRegattaRegistrationLink = createLabelAndValueWidget(grid, currentRow++, stringMessages.registrationLink(), "OpenRegattaRegistrationLinkLabel") ;
-        
+        openRegattaRegistrationLinkPanel = createRegistrationLinkPanel(grid, currentRow++, stringMessages.registrationLink());
+        openRegattaRegistrationLinkUrl = addRegistrationLinkUrlLabel(openRegattaRegistrationLinkPanel, "OpenRegattaRegistrationLinkLabel");
+        openRegattaRegistrationLink = addRegistrationLinkAnchor(openRegattaRegistrationLinkPanel, "OpenRegattaRegistrationLinkAnchor");
         seriesTable = createRegattaSeriesTable();
         seriesTable.ensureDebugId("SeriesCellTable");
         seriesSelectionModel = new SingleSelectionModel<SeriesDTO>();
@@ -129,6 +135,28 @@ public class RegattaDetailsComposite extends Composite {
         grid.setWidget(row , 0, new Label(label + ":"));
         grid.setWidget(row , 1, valueLabel);
         return valueLabel;
+    }
+
+    private Grid createRegistrationLinkPanel(Grid grid, int row, String label) {
+        Grid panel = new Grid(1, 3);
+        grid.setWidget(row, 0, new Label(label + ":"));
+        grid.setWidget(row, 1, panel);
+        return panel;
+    }
+
+    private Label addRegistrationLinkUrlLabel(Grid panel, String debugId) {
+        Label urlLabel = new Label();
+        urlLabel.ensureDebugId(debugId);
+        panel.setWidget(0, 0, urlLabel);
+        return urlLabel;
+    }
+
+    private Anchor addRegistrationLinkAnchor(Grid panel, String debugId) {
+        Anchor link = new Anchor();
+        link.ensureDebugId(debugId);
+        link.setText("open");
+        panel.setWidget(0, 1, link);
+        return link;
     }
 
     private CellTable<SeriesDTO> createRegattaSeriesTable() {
@@ -412,12 +440,7 @@ public class RegattaDetailsComposite extends Composite {
             controlTrackingFromStartAndFinishTimes.setText(regatta.controlTrackingFromStartAndFinishTimes ? stringMessages.yes() : stringMessages.no());
             canBoatsOfCompetitorsChangePerRace.setText(regatta.canBoatsOfCompetitorsChangePerRace ? stringMessages.yes() : stringMessages.no());
             competitorRegistrationType.setText(regatta.competitorRegistrationType.getLabel(stringMessages));
-            openRegattaRegistrationLink.setText(
-                    regatta.competitorRegistrationType.isOpen()
-                            ? BranchIOConstants.OPEN_REGATTA_APP_BRANCHIO + "?reagttaName="
-                                    + URL.encodeQueryString(regatta.getName()) + "&secret="
-                                    + URL.encodeQueryString(regatta.registrationLinkSecret)
-                            : "-");
+            updateOpenRegattaRegistrationLink();
             buoyZoneRadiusInHullLengths.setText(String.valueOf(regatta.buoyZoneRadiusInHullLengths));
             
             if (regatta.configuration != null) {
@@ -435,4 +458,20 @@ public class RegattaDetailsComposite extends Composite {
             seriesListDataProvider.getList().addAll(regatta.series);
         } 
     }
+
+    private void updateOpenRegattaRegistrationLink() {
+        if (regatta.competitorRegistrationType.isOpen()) {
+            String url = BranchIOConstants.OPEN_REGATTA_APP_BRANCHIO + "?reagttaName="
+                    + URL.encodeQueryString(regatta.getName()) + "&secret="
+                    + URL.encodeQueryString(regatta.registrationLinkSecret);
+            openRegattaRegistrationLinkUrl.setText(url);
+            openRegattaRegistrationLink.setHref(url);
+            openRegattaRegistrationLink.setVisible(true);
+        } else {
+            openRegattaRegistrationLinkUrl.setText("-");
+            openRegattaRegistrationLink.setHref("");
+            openRegattaRegistrationLink.setVisible(false);
+        }
+    }
+
 }
