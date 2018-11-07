@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
@@ -162,13 +163,29 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
     }
 
     private void removeUrlParameter() {
-        String newUrl = Window.Location.createUrlBuilder().setHost(Window.Location.getHost())
-                .setPort(Integer.parseInt(Window.Location.getPort())).setPath(Window.Location.getPath())
-                .setProtocol(Window.Location.getProtocol()).buildString();
-        newUrl = newUrl.replaceAll("\\?.*$", "");
-        updateUrl(Window.getTitle(), newUrl);
+        try {
+            UrlBuilder builder = Window.Location.createUrlBuilder().setHost(Window.Location.getHost())
+                    .setPath(Window.Location.getPath()).setProtocol(Window.Location.getProtocol());
+
+            String port = Window.Location.getPort();
+            if (port != null && !"".equals(port.trim()) && !"0".equals(port)) {
+                builder.setPort(Integer.parseInt(port));
+            }
+            String newUrl = builder.buildString();
+            newUrl = newUrl.replaceAll("\\?.*$", "");
+
+            updateUrl(Window.getTitle(), newUrl);
+        } catch (Exception e) {
+            LOG.severe("Could not update URL: " + e.getMessage());
+            // In the worst case, the URL is not updated. This should not impact the user experience of
+            // data mining.
+        }
     }
 
+    /*
+     * using JSNI because GWT-History-Mapper does currently not support updating an URL in the history without reloading
+     * the page
+     */
     private native void updateUrl(String title, String newUrl)/*-{
         $wnd.history.replaceState(null, title, newUrl);
     }-*/;
