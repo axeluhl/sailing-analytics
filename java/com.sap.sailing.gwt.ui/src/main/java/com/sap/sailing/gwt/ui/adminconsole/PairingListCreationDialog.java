@@ -218,7 +218,7 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
                 busyDialog.show();
                 try {
                     sailingService.calculatePairingListTemplate(template.getFlightCount(), template.getGroupCount(),
-                            template.getCompetitorCount(), template.getFlightMultiplier(), template.getTolerance(),
+                            template.getCompetitorCount(), template.getFlightMultiplier(), template.getBoatChangeFactor(),
                             new AsyncCallback<PairingListTemplateDTO>() {
 
                                 @Override
