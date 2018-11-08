@@ -77,20 +77,7 @@ ext {
     destinationFolder = new File("").absolutePath + "/java/com.sap.sailing.www/apps/"
 }
 
-if (!project.hasProperty("xmake")) {
-    spotless {
-        java {
-            importOrder "java", "javax", "org", "com", ""
-            removeUnusedImports()
-            eclipse().configFile("java/CodeFormatter.xml")
-            target project.fileTree(project.rootDir) {
-                include "mobile/com.sap.*/**/*.java"
-                exclude "**/generated*/**/*.*", "**/gen/**/*"
-            }
-        }
-    }
-}
-
+apply plugin: "org.ajoberstar.grgit"
 if (project.hasProperty("xmake")) {
     task wrapper(type: Wrapper) {
         distributionUrl "${sapGradleDistBaseUrl}/${sapGradleVersion}/gradle-${sapGradleVersion}-all.zip"
