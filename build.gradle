@@ -13,16 +13,17 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.2.1'
+        classpath "com.android.tools.build:gradle:3.2.1"
         classpath "com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.3"
     }
     repositories {
         google()
     }
 }
-// plugins {
+plugins {
 //     id "com.diffplug.gradle.spotless" version "3.14.0"
-// }
+    id "org.ajoberstar.grgit" version "2.3.0"
+}
 allprojects {
     if (project.hasProperty("xmake")) {
         repositories {

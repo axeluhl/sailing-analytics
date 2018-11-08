@@ -1,47 +1,22 @@
 preBuild.doLast {
     // get the current commit hash in git
-    def git_version = new ByteArrayOutputStream()
-    exec {
-        commandLine 'git', 'log', '-1', '--format=%h'
-        standardOutput = git_version
-    }
-    git_version = git_version.toString().trim()
+    def repo = grgit.open()
+//    "a83d45acc8"
+    def git_version = repo.head().abbreviatedId
 
     // get the current git branch, if any
-    def git_branch = new ByteArrayOutputStream()
-    exec {
-        commandLine 'git', 'symbolic-ref', '--short', '-q', 'HEAD'
-        standardOutput = git_branch
-        // ignore error output as we might not be on a branch
-        ignoreExitValue = true
-    }
-
     // if we are not on a branch, try to get a tag for the commit
     def git_branch_or_tag
-    if (git_branch.size() > 0) {
-        git_branch_or_tag = git_branch.toString().trim()
+    if (grgit.branch.current()) {
+        git_branch_or_tag = grgit.branch.current()
     } else {
-        def git_tag = new ByteArrayOutputStream()
-        exec {
-            commandLine 'git', 'describe', '--tags', '--exact-match'
-            standardOutput = git_tag
-            // ignore error output
-            errorOutput = new ByteArrayOutputStream()
-            ignoreExitValue = true
-        }
-
-        git_branch_or_tag = git_tag.toString().trim()
-    }
-
-    if (git_branch_or_tag.size() == 0) {
-        git_branch_or_tag = "HEAD"
+        git_branch_or_tag = grgit.tag.list()[0]
     }
 
     def build_time = new Date().toString()
 
     // save the combined build info into assets/build.info file
-    def result_line = git_branch_or_tag + "-" + git_version + " (" +
-            build_time + ")\n"
+    def result_line = "${git_branch_or_tag}-${git_version} (${build_time})\n"
     def assetsDir = android.sourceSets.main.assets.srcDirs.toArray()[1]
     delete(assetsDir)
     mkdir(assetsDir)
