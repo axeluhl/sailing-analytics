@@ -69,7 +69,7 @@ if (new File(SIGN_DOCKER_FILE_PY).exists()){
 }
 
 artifacts builderVersion: "1.1", {
-  def groupdId = "com.sap.sailing.android"
+  def groupId = "com.sap.sailing.android"
 
   apkExtension = /\.apk$/
   repodir = new File(gendir, "src/java/com.sap.sailing.www/apps")
