@@ -2,6 +2,7 @@ apply plugin: "com.android.application"
 if (!project.hasProperty("xmake")) {
     apply plugin: "com.getkeepsafe.dexcount"
 }
+apply plugin: "org.ajoberstar.grgit"
 apply from: "../git.gradle"
 
 def packageName="com.sap.sailing.racecommittee.app"

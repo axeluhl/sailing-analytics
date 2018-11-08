@@ -22,8 +22,7 @@ buildscript {
     }
 }
 plugins {
-//     id "com.diffplug.gradle.spotless" version "3.14.0"
-    id "org.ajoberstar.grgit" version "2.3.0"
+//    id "com.diffplug.gradle.spotless" version "3.14.0"
 }
 allprojects {
     if (project.hasProperty("xmake")) {
