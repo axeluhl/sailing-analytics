@@ -67,6 +67,7 @@ import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 
 public class ImportMasterDataOperation extends
         AbstractRacingEventServiceOperation<MasterDataImportObjectCreationCountImpl> {
@@ -159,6 +160,7 @@ public class ImportMasterDataOperation extends
                             key.getMatcherIdentifier()));
                     toState.removeDeviceConfiguration(key);
                     toState.createOrUpdateDeviceConfiguration(key, value);
+                    // FIXME ownership here!
                 } else {
                     logger.info(String
                             .format("Device configuration [%s] already exists. Not overwriting because override flag is not set.",
@@ -259,6 +261,7 @@ public class ImportMasterDataOperation extends
                 toState.addLeaderboard(leaderboard);
                 storeRaceLogEvents(leaderboard, toState.getMongoObjectFactory(), toState.getDomainObjectFactory(), override);
                 storeRegattaLogEvents(leaderboard, toState.getMongoObjectFactory(), toState.getDomainObjectFactory(), override);
+                ensureOwnership(leaderboard.getIdentifier());
                 creationCount.addOneLeaderboard(leaderboard.getName());
                 relinkTrackedRacesIfPossible(toState, leaderboard);
                 toState.updateStoredLeaderboard(leaderboard);
@@ -276,6 +279,7 @@ public class ImportMasterDataOperation extends
         if (existingLeaderboardGroup == null) {
             toState.addLeaderboardGroupWithoutReplication(leaderboardGroup);
             creationCount.addOneLeaderboardGroup(leaderboardGroup.getName());
+            ensureOwnership(leaderboardGroup.getIdentifier());
         } else {
             logger.info(String.format("Leaderboard Group with name %1$s already exists and hasn't been overridden.",
                     leaderboardGroup.getName()));
@@ -520,6 +524,7 @@ public class ImportMasterDataOperation extends
                         }
                     }
                 }
+                ensureOwnership(regatta.getIdentifier());
                 creationCount.addOneRegatta(regatta.getId().toString());
             }
         }
@@ -539,12 +544,17 @@ public class ImportMasterDataOperation extends
             }
             if (existingEvent == null) {
                 toState.addEventWithoutReplication(event);
+                ensureOwnership(event.getIdentifier());
                 creationCount.addOneEvent(event.getId().toString());
             } else {
                 logger.info(String.format("Event with name %1$s already exists and hasn't been overridden.",
                         event.getName()));
             }
         }
+    }
+
+    private void ensureOwnership(QualifiedObjectIdentifier identifier) {
+        System.out.println("Transfered object for ownership " + identifier);
     }
 
     @Override

@@ -609,13 +609,15 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void getRegattaLog(String leaderboardName, AsyncCallback<RegattaLogDTO> callback);
 
     void importMasterData(String host, String[] names, boolean override, boolean compress, boolean exportWind,
-            boolean exportDeviceConfigurations, AsyncCallback<UUID> asyncCallback);
+            boolean exportDeviceConfigurations, String targetServerUsername, String targetServerPassword,
+            AsyncCallback<UUID> asyncCallback);
 
     void getImportOperationProgress(UUID id, AsyncCallback<DataImportProgress> asyncCallback);
 
     void getStructureImportOperationProgress(AsyncCallback<Integer> asyncCallback);
 
-    void getLeaderboardGroupNamesFromRemoteServer(String host, AsyncCallback<List<String>> leaderboardGroupNames);
+    void getLeaderboardGroupNamesFromRemoteServer(String host, String username, String password,
+            AsyncCallback<List<String>> leaderboardGroupNames);
 
     void getCompetitors(boolean filterCompetitorsWithBoat, boolean filterCompetitorsWithoutBoat, AsyncCallback<Iterable<CompetitorDTO>> asyncCallback);
 

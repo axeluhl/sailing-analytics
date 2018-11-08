@@ -23,7 +23,7 @@ import com.sap.sailing.gwt.home.communication.user.profile.domain.BadgeDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.domain.SailorProfileDTO;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.SailingProfileOverviewPresenter;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
-import com.sap.sailing.gwt.home.shared.partials.dialog.ConfirmDialogFactory;
+import com.sap.sailing.gwt.home.shared.partials.dialog.confirm.ConfirmDialogFactory;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SharedSailorProfileResources;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -97,8 +97,7 @@ public class SailorProfileOverviewEntry extends Composite {
             e.getNativeEvent().preventDefault();
             e.getNativeEvent().stopPropagation();
             ConfirmDialogFactory.showConfirmDialog(StringMessages.INSTANCE.sailorProfileRemoveMessage(),
-                    new DialogCallback<Void>() {
-
+                    StringMessages.INSTANCE.confirmDeletion(), new DialogCallback<Void>() {
                         @Override
                         public void ok(Void v) {
                             presenter.removeSailorProfile(uuidRef);

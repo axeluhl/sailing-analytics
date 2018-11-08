@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style.Unit;
+import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
@@ -67,6 +68,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
     }
 
     private void createDataminingPanel(ServerInfoDTO serverInfo, String queryIdentifier) {
+        removeUrlParameter();
         SAPHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(getStringMessages().dataMining());
         GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(),
                 header.getAuthenticationMenuView());
@@ -104,9 +106,12 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                 queryRunner = new SimpleQueryRunner(null, null, session, dataMiningService, DataMiningEntryPoint.this,
                         queryDefinitionProvider, resultsPresenter);
                 queryDefinitionProvider.addControl(queryRunner.getEntryWidget());
-                StoredDataMiningQueryDataProvider dataProvider = new StoredDataMiningQueryDataProvider(
-                        queryDefinitionProvider, dataMiningService, queryRunner);
-                queryDefinitionProvider.addControl(new StoredDataMiningQueryPanel(dataProvider));
+                if (getUserService().hasAllPermissions(SecuredDomainType.DATA_MINING
+                        .getPermissionsForObjects(DefaultActions.READ_AND_WRITE_ACTIONS, serverInfo.getServerName()))) {
+                    StoredDataMiningQueryDataProvider dataProvider = new StoredDataMiningQueryDataProvider(
+                            queryDefinitionProvider, dataMiningService, queryRunner);
+                    queryDefinitionProvider.addControl(new StoredDataMiningQueryPanel(dataProvider));
+                }
                 /*
                  * Running queries automatically when they've been changed is currently unnecessary, if not even
                  * counterproductive. This removes the query runner settings to prevent that the user can enable the
@@ -160,13 +165,29 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
     }
 
     private void removeUrlParameter() {
-        String newUrl = Window.Location.createUrlBuilder().setHost(Window.Location.getHost())
-                .setPort(Integer.parseInt(Window.Location.getPort())).setPath(Window.Location.getPath())
-                .setProtocol(Window.Location.getProtocol()).buildString();
-        newUrl = newUrl.replaceAll("\\?.*$", "");
-        updateUrl(Window.getTitle(), newUrl);
+        try {
+            UrlBuilder builder = Window.Location.createUrlBuilder().setHost(Window.Location.getHost())
+                    .setPath(Window.Location.getPath()).setProtocol(Window.Location.getProtocol());
+
+            String port = Window.Location.getPort();
+            if (port != null && !"".equals(port.trim()) && !"0".equals(port)) {
+                builder.setPort(Integer.parseInt(port));
+            }
+            String newUrl = builder.buildString();
+            newUrl = newUrl.replaceAll("\\?.*$", "");
+
+            updateUrl(Window.getTitle(), newUrl);
+        } catch (Exception e) {
+            LOG.severe("Could not update URL: " + e.getMessage());
+            // In the worst case, the URL is not updated. This should not impact the user experience of
+            // data mining.
+        }
     }
 
+    /*
+     * using JSNI because GWT-History-Mapper does currently not support updating an URL in the history without reloading
+     * the page
+     */
     private native void updateUrl(String title, String newUrl)/*-{
         $wnd.history.replaceState(null, title, newUrl);
     }-*/;

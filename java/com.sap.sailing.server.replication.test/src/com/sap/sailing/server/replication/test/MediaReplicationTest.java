@@ -23,6 +23,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.base.Regatta;
@@ -47,6 +48,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
+import com.sap.sse.security.SecurityService;
 
 import junit.framework.Assert;
 
@@ -252,7 +254,8 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
             // expressions
             master.addMasterDataClassLoader(this.getClass().getClassLoader());
             inputStream = new ByteArrayInputStream(os.toByteArray());
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, master);
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, master,
+                    Mockito.mock(SecurityService.class));
             importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();

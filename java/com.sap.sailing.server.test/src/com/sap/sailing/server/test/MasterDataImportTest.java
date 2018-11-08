@@ -33,6 +33,7 @@ import javax.ws.rs.core.StreamingOutput;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.mongodb.DB;
 import com.mongodb.WriteConcern;
@@ -144,6 +145,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.media.MimeType;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 
@@ -160,6 +162,7 @@ public class MasterDataImportTest {
 
     private final UUID eventUUID = UUID.randomUUID();
     private AbstractLogEventAuthor author = new LogEventAuthorImpl("Test Author", 1);
+    protected SecurityService securityService;
 
     private final TimePoint eventStartDate = new MillisecondsTimePoint(new Date());
     private final TimePoint eventEndDate = new MillisecondsTimePoint(new Date());
@@ -178,6 +181,7 @@ public class MasterDataImportTest {
 
     @Before
     public void setUp() {
+        securityService = Mockito.mock(SecurityService.class);
         deleteAllDataFromDatabase();
     }
 
@@ -371,7 +375,7 @@ public class MasterDataImportTest {
             DB db = destService.getMongoObjectFactory().getDatabase();
             db.setWriteConcern(WriteConcern.SAFE);
             inputStream = new ByteArrayInputStream(os.toByteArray());
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService, securityService);
             importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
@@ -634,7 +638,7 @@ public class MasterDataImportTest {
             domainFactory = destService.getBaseDomainFactory();
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService, securityService);
             importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
@@ -782,7 +786,7 @@ public class MasterDataImportTest {
             domainFactory = destService.getBaseDomainFactory();
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService, securityService);
             importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
@@ -840,7 +844,7 @@ public class MasterDataImportTest {
             os.flush();
 
             inputStream = new ByteArrayInputStream(os.toByteArray());
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService, securityService);
             importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
@@ -965,7 +969,7 @@ public class MasterDataImportTest {
             domainFactory = destService.getBaseDomainFactory();
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService, securityService);
             importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
@@ -1171,7 +1175,7 @@ public class MasterDataImportTest {
                     null);
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService, securityService);
             importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
@@ -1393,7 +1397,7 @@ public class MasterDataImportTest {
             destService.addLeaderboard(leaderboardToOverride);
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService, securityService);
             importer.importFromStream(inputStream, randomUUID, true);
         } finally {
             os.close();
@@ -1505,7 +1509,7 @@ public class MasterDataImportTest {
             domainFactory = destService.getBaseDomainFactory();
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService, securityService);
             importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
@@ -1640,7 +1644,7 @@ public class MasterDataImportTest {
             domainFactory = destService.getBaseDomainFactory();
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService, securityService);
             importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
@@ -1778,7 +1782,7 @@ public class MasterDataImportTest {
             domainFactory = destService.getBaseDomainFactory();
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService, securityService);
             importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
@@ -1877,7 +1881,7 @@ public class MasterDataImportTest {
             domainFactory = destService.getBaseDomainFactory();
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService, securityService);
             importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
@@ -2003,7 +2007,7 @@ public class MasterDataImportTest {
             domainFactory = destService.getBaseDomainFactory();
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService, securityService);
             importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
@@ -2075,7 +2079,7 @@ public class MasterDataImportTest {
             domainFactory = destService.getBaseDomainFactory();
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService, securityService);
             importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
@@ -2263,7 +2267,7 @@ public class MasterDataImportTest {
             domainFactory = destService.getBaseDomainFactory();
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService);
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService, securityService);
             importer.importFromStream(inputStream, randomUUID, false);
         } catch (Exception e) {
             e.printStackTrace();

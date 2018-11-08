@@ -5,8 +5,8 @@
     background-color: #f2f2f2;
     padding: 1em;
     border: 1px solid #ccc;
-    border-radius: 1em;
-    width: 50%;
+    border-radius: 3px;
+    width: 25%;
     -webkit-transform: translate(-50%, -50%);
     -moz-transform: translate(-50%, -50%);
     -ms-transform: translate(-50%, -50%);
@@ -14,43 +14,27 @@
     box-shadow: 0.1em 0.1em 1em #bbb;
 }
 
-.message {
-    margin-bottom: .5em;
+.buttonAdjustments {
+    margin-left: .5em;
+    margin-top: .5em;
+    min-width: 11em;
 }
 
-.yesButton {
+.message {
+    margin-bottom: .5em;
+    text-align: center;
+}
+
+.destructiveButton {
     background-color: #e94a1b;
 }
 
-.yesButton:hover {
+.destructiveButton:hover {
     background-color: #cd3e14;
 }
 
-.yesButton:active {
+.destructiveButton:active {
     background-color: #a73210;
-}
-
-.noButton {
-    background-color: #008fcc;
-}
-
-.noButton:hover {
-    background-color: #00b3ff;
-}
-
-.noButton:active {
-    background-color: #0074a6;
-}
-
-.button {
-    font-size: 1.1111em;
-    display: inline;
-    width: 4em;
-    height: 2.5em;
-    border-radius: .25em;
-    border: none;
-    font-weight: 700;
-    color: #fff;
 }
 
 .buttonPanel {
@@ -64,4 +48,29 @@
     top: 0;
     left: 0;
     background-color: rgba(0, 0, 0, .33333333);
+}
+
+.title {
+    font-size: 1.5em;
+    color: #555;
+    font-weight: 600;
+    margin-bottom: .75em;
+}
+
+@media ( max-width: 400px) {
+    .dialog {
+        width: 90%;
+    }
+}
+
+@media ( min-width: 400px) {
+    .dialog {
+        width: 50%;
+    }
+}
+
+@media ( min-width: 600px) {
+    .dialog {
+        width: 40%;
+    }
 }
