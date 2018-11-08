@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.Named;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
@@ -37,34 +38,39 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
     private SecurityUser resolvedUser;
     private UserGroup resolvedUserGroup;
     
-    public static class OwnershipDialogResult {
+    static class OwnershipDialogResult {
         private final Ownership ownership;
         private final String username;
         private final String userGroupName;
         private final boolean resolvingUsername;
         private final boolean resolvingUserGroupName;
-        public OwnershipDialogResult(Ownership ownership, String username, String userGroupName,
-                boolean resolvingUsername, boolean resolvingUserGroupName) {
-            super();
+
+        private OwnershipDialogResult(final Ownership ownership, final String username, final String userGroupName,
+                final boolean resolvingUsername, final boolean resolvingUserGroupName) {
             this.ownership = ownership;
             this.username = username;
             this.userGroupName = userGroupName;
             this.resolvingUsername = resolvingUsername;
             this.resolvingUserGroupName = resolvingUserGroupName;
         }
-        public Ownership getOwnership() {
+
+        private Ownership getOwnership() {
             return ownership;
         }
-        public boolean isResolvingUsername() {
+
+        private boolean isResolvingUsername() {
             return resolvingUsername;
         }
-        public boolean isResolvingUserGroupName() {
+
+        private boolean isResolvingUserGroupName() {
             return resolvingUserGroupName;
         }
-        public String getUsername() {
+
+        private String getUsername() {
             return username;
         }
-        public String getUserGroupName() {
+
+        private String getUserGroupName() {
             return userGroupName;
         }
     }
@@ -95,7 +101,7 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
         }
     }
     
-    public EditOwnershipDialog(UserManagementServiceAsync userManagementService, Ownership ownership,
+    private EditOwnershipDialog(UserManagementServiceAsync userManagementService, Ownership ownership,
             StringMessages stringMessages, DialogCallback<OwnershipDialogResult> callback) {
         super(stringMessages.ownership(), stringMessages.editObjectOwnership(), stringMessages.ok(),
                 stringMessages.cancel(), new Validator(stringMessages), callback);
@@ -161,7 +167,8 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
 
     @Override
     protected OwnershipDialogResult getResult() {
-        return new OwnershipDialogResult(new OwnershipImpl(resolvedUser, resolvedUserGroup), usernameBox.getText(), groupnameBox.getText(), resolvingUsername, resolvingUserGroupName);
+        return new OwnershipDialogResult(new OwnershipImpl(resolvedUser, resolvedUserGroup), usernameBox.getText(),
+                groupnameBox.getText(), resolvingUsername, resolvingUserGroupName);
     }
 
     /**
