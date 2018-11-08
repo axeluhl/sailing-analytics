@@ -1,15 +1,15 @@
 preBuild.doLast {
     // get the current commit hash in git
-    def repo = grgit.open()
+    def repo = project.grgit.open()
     def git_version = repo.head().abbreviatedId
 
     // get the current git branch, if any
     // if we are not on a branch, try to get a tag for the commit
     def git_branch_or_tag
-    if (grgit.branch.current()) {
-        git_branch_or_tag = grgit.branch.current()
+    if (project.grgit.branch.current()) {
+        git_branch_or_tag = project.grgit.branch.current()
     } else {
-        git_branch_or_tag = grgit.tag.list()[0]
+        git_branch_or_tag = project.grgit.tag.list()[0]
     }
 
     def build_time = new Date().toString()
