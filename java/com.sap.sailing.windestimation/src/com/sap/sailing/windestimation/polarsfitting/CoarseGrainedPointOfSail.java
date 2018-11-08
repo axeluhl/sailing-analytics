@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.data;
+package com.sap.sailing.windestimation.polarsfitting;
 
 import java.util.Collection;
 import java.util.HashSet;

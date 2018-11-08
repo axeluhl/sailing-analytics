@@ -1,5 +1,6 @@
 package com.sap.sailing.windestimation.evaluation;
 
+import java.lang.reflect.Field;
 import java.util.function.Function;
 
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
@@ -9,13 +10,15 @@ import com.sap.sailing.windestimation.data.persistence.PersistedElementsIterator
 import com.sap.sailing.windestimation.data.persistence.PolarDataServiceAccessUtil;
 import com.sap.sailing.windestimation.data.persistence.RaceWithCompleteManeuverCurvePersistenceManager;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverFeatures;
-import com.sap.sailing.windestimation.maneuvergraph.BestPathCalculatorForConfidenceEvaluation;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
 public class WindEstimatorEvaluationRunner {
 
     private static final Integer MAX_RACES = null;
-    private static final boolean ENABLE_MARKS_INFORMATION = true;
+    private static final int FIXED_NUMBER_OF_MANEUVERS = 10;
+    private static final boolean RANDOM_CLIPPING_OF_COMPETITOR_TRACKS = true;
+    private static final boolean EVALUATE_PER_COMPETITOR_TRACK = true;
+    private static final boolean ENABLE_MARKS_INFORMATION = false;
     private static final boolean ENABLE_SCALED_SPEED = true;
     private static final boolean ENABLE_POLARS = true;
     private static final double MIN_CORRECT_ESTIMATIONS_RATIO_FOR_CORRECT_RACE = 0.75;
@@ -26,7 +29,8 @@ public class WindEstimatorEvaluationRunner {
 
     public static void main(String[] args) throws Exception {
         WindEstimatorEvaluator<CompleteManeuverCurveWithEstimationData> evaluator = new WindEstimationEvaluatorImpl<>(
-                MAX_TWD_DEVIATION_DEG, MAX_TWS_DEVIATION_PERCENT, MIN_CORRECT_ESTIMATIONS_RATIO_FOR_CORRECT_RACE);
+                MAX_TWD_DEVIATION_DEG, MAX_TWS_DEVIATION_PERCENT, MIN_CORRECT_ESTIMATIONS_RATIO_FOR_CORRECT_RACE,
+                EVALUATE_PER_COMPETITOR_TRACK, RANDOM_CLIPPING_OF_COMPETITOR_TRACKS, FIXED_NUMBER_OF_MANEUVERS);
         LoggingUtil.logInfo("Connecting to MongoDB");
         RaceWithCompleteManeuverCurvePersistenceManager persistenceManager = new RaceWithCompleteManeuverCurvePersistenceManager();
         LoggingUtil.logInfo("Loading polar data");
@@ -44,8 +48,22 @@ public class WindEstimatorEvaluationRunner {
                 estimatorFactoryRetriever.apply(estimatorFactories),
                 new TargetWindFromCompleteManeuverCurveWithEstimationDataExtractor(), racesIterator,
                 racesIterator.getNumberOfElements());
-        LoggingUtil.logInfo("Wind estimator evaluation finished");
+
+        LoggingUtil.logInfo("Wind estimator evaluation finished with the following provided arguments:\r\n"
+                + buildConfigurationString() + "\r\n");
+
         evaluationResult.printEvaluationStatistics(true);
+    }
+
+    private static String buildConfigurationString() throws IllegalArgumentException, IllegalAccessException {
+        StringBuilder str = new StringBuilder();
+        for (Field field : WindEstimatorEvaluationRunner.class.getFields()) {
+            str.append("\t- ");
+            str.append(field.getName());
+            str.append(": \t ");
+            str.append(field.get(null) + "\r\n");
+        }
+        return str.toString();
     }
 
 }

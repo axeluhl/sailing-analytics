@@ -9,19 +9,19 @@ import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
-import com.sap.sailing.windestimation.WindTrackEstimator;
-import com.sap.sailing.windestimation.data.CoarseGrainedManeuverType;
+import com.sap.sailing.windestimation.ManeuverClassificationsAggregator;
+import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverClassifiersCache;
-import com.sap.sailing.windestimation.maneuverclassifier.ManeuverEstimationResult;
+import com.sap.sailing.windestimation.maneuverclassifier.ManeuverClassification;
 import com.sap.sailing.windestimation.maneuverclassifier.ProbabilisticManeuverClassifier;
 import com.sap.sailing.windestimation.polarsfitting.PolarsFittingWindEstimation;
 import com.sap.sailing.windestimation.util.WindUtil;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Speed;
 
-public class NeighborBasedOutlierRemovalWindEstimator implements WindTrackEstimator {
+public class NeighborBasedOutlierRemovalWindEstimator implements ManeuverClassificationsAggregator {
 
     private static final double MAX_DEVIATON_FROM_AVG_WIND_COURSE = 30;
     private final List<WindWithConfidence<Void>> windTrackWithConfidence = new ArrayList<>();
@@ -34,20 +34,20 @@ public class NeighborBasedOutlierRemovalWindEstimator implements WindTrackEstima
                 if (maneuver.isClean() && (maneuver.getDeviationFromOptimalTackAngleInDegrees() == null
                         || Math.abs(maneuver.getDeviationFromOptimalTackAngleInDegrees()) < 6)) {
                     ProbabilisticManeuverClassifier classifier = maneuverClassifiersCache.getBestClassifier(maneuver);
-                    ManeuverEstimationResult estimationResult = classifier.classifyManeuver(maneuver);
+                    ManeuverClassification estimationResult = classifier.classifyManeuver(maneuver);
                     double highestLikelihood = 0;
-                    CoarseGrainedManeuverType maneuverTypeWithHighestLikelihood = null;
-                    CoarseGrainedManeuverType[] maneuverTypes = { CoarseGrainedManeuverType.TACK,
-                            CoarseGrainedManeuverType.JIBE, CoarseGrainedManeuverType.HEAD_UP,
-                            CoarseGrainedManeuverType.BEAR_AWAY };
-                    for (CoarseGrainedManeuverType maneuverType : maneuverTypes) {
+                    ManeuverTypeForClassification maneuverTypeWithHighestLikelihood = null;
+                    ManeuverTypeForClassification[] maneuverTypes = { ManeuverTypeForClassification.TACK,
+                            ManeuverTypeForClassification.JIBE, ManeuverTypeForClassification.HEAD_UP,
+                            ManeuverTypeForClassification.BEAR_AWAY };
+                    for (ManeuverTypeForClassification maneuverType : maneuverTypes) {
                         double likelihood = estimationResult.getManeuverTypeLikelihood(maneuverType);
                         if (highestLikelihood < likelihood) {
                             highestLikelihood = likelihood;
                             maneuverTypeWithHighestLikelihood = maneuverType;
                         }
                     }
-                    if (maneuverTypeWithHighestLikelihood == CoarseGrainedManeuverType.TACK) {
+                    if (maneuverTypeWithHighestLikelihood == ManeuverTypeForClassification.TACK) {
                         Bearing windCourse = maneuver.getMiddleCourse().reverse();
                         Speed windSpeed = polarsFitting == null ? new KnotSpeedImpl(0)
                                 : polarsFitting.getWindSpeed(maneuver, windCourse);

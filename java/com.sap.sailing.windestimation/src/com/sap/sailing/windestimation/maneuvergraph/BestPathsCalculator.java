@@ -17,8 +17,7 @@ import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
-import com.sap.sailing.windestimation.maneuverclassifier.ManeuverTypeForClassification;
-import com.sap.sailing.windestimation.polarsfitting.SailingStatistics;
+import com.sap.sailing.windestimation.maneuverclassifier.ManeuverTypeForInternalClassification;
 import com.sap.sailing.windestimation.util.WindUtil;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Speed;
@@ -116,7 +115,7 @@ public class BestPathsCalculator {
                         .getInitialWindRange(currentNode, currentLevel);
                 double probability = currentNode.getConfidence() / currentLevel.getLevelNodes().size();
                 BestManeuverNodeInfo currentNodeInfo = bestPathsUntilLevel.addBestPreviousNodeInfo(currentNode, null,
-                        probability, initialWindRange, null);
+                        probability, initialWindRange);
                 currentNodeInfo.setForwardProbability(probability);
             }
             bestPathsPerLevel.put(currentLevel, bestPathsUntilLevel);
@@ -128,15 +127,12 @@ public class BestPathsCalculator {
                 double forwardProbability = 0;
                 GraphNode bestPreviousNode = null;
                 IntersectedWindRange bestIntersectedWindRangeUntilCurrentNode = null;
-                SailingStatistics bestPreviousPathStats = null;
                 for (GraphNode previousNode : previousLevel.getLevelNodes()) {
                     BestManeuverNodeInfo previousNodeInfo = bestPathsUntilPreviousLevel
                             .getBestPreviousNodeInfo(previousNode);
                     Pair<IntersectedWindRange, Double> newWindRangeAndProbability = transitionProbabilitiesCalculator
                             .mergeWindRangeAndGetTransitionProbability(previousNode, previousLevel, previousNodeInfo,
                                     currentNode, currentLevel);
-                    SailingStatistics previousPathStats = previousNodeInfo
-                            .getPathSailingStatistics(previousLevel.getManeuver().getBoatClass());
                     double transitionObservationMultipliedProbability = newWindRangeAndProbability.getB()
                             * currentNode.getConfidence();
                     double probabilityFromStart = bestPathsUntilPreviousLevel.getNormalizedProbabilityToNodeFromStart(
@@ -147,12 +143,10 @@ public class BestPathsCalculator {
                         bestProbabilityFromStart = probabilityFromStart;
                         bestPreviousNode = previousNode;
                         bestIntersectedWindRangeUntilCurrentNode = newWindRangeAndProbability.getA();
-                        bestPreviousPathStats = previousPathStats;
                     }
                 }
                 BestManeuverNodeInfo currentNodeInfo = bestPathsUntilLevel.addBestPreviousNodeInfo(currentNode,
-                        bestPreviousNode, bestProbabilityFromStart, bestIntersectedWindRangeUntilCurrentNode,
-                        bestPreviousPathStats);
+                        bestPreviousNode, bestProbabilityFromStart, bestIntersectedWindRangeUntilCurrentNode);
                 currentNodeInfo.setForwardProbability(forwardProbability);
             }
             bestPathsPerLevel.put(currentLevel, bestPathsUntilLevel);
@@ -235,7 +229,7 @@ public class BestPathsCalculator {
                 globalWindRange = globalWindRange == null ? currentNodeInfo.getWindRange()
                         : globalWindRange.intersect(currentNodeInfo.getWindRange());
                 if (!globalWindRange.isViolation() && globalWindRange.getAngleTowardStarboard() <= 20
-                        && currentNode.getManeuverType() != ManeuverTypeForClassification.OTHER) {
+                        && currentNode.getManeuverType() != ManeuverTypeForInternalClassification.OTHER) {
                     DegreeBearingImpl windCourse = new DegreeBearingImpl(
                             currentNode.getValidWindRange().getAvgWindCourse());
                     Speed avgWindSpeed = getWindSpeed(currentLevel.getManeuver(), windCourse);

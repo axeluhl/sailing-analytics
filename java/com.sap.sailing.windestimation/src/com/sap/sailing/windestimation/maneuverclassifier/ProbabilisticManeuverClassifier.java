@@ -16,15 +16,15 @@ public interface ProbabilisticManeuverClassifier extends ManeuverClassifier {
 
     double getTestScore();
 
-    ManeuverTypeForClassification getManeuverTypeByMappingIndex(int mappingIndex);
+    ManeuverTypeForInternalClassification getManeuverTypeByMappingIndex(int mappingIndex);
 
-    List<ManeuverTypeForClassification> getSupportedManeuverTypes();
+    List<ManeuverTypeForInternalClassification> getSupportedManeuverTypes();
 
     int getSupportedManeuverTypesCount();
 
     int[] getSupportedManeuverTypesMapping();
 
-    boolean isSupportsManeuverType(ManeuverTypeForClassification maneuverType);
+    boolean isSupportsManeuverType(ManeuverTypeForInternalClassification maneuverType);
 
     ManeuverFeatures getManeuverFeatures();
 

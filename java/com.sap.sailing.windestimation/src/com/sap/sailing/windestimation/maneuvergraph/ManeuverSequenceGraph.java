@@ -1,18 +1,17 @@
 package com.sap.sailing.windestimation.maneuvergraph;
 
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
-import com.sap.sailing.windestimation.WindTrackEstimator;
+import com.sap.sailing.windestimation.ManeuverClassificationsAggregator;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.transformer.EstimationDataUtil;
+import com.sap.sailing.windestimation.maneuverclassifier.ManeuverClassification;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverClassifier;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverClassifiersCache;
-import com.sap.sailing.windestimation.maneuverclassifier.ManeuverEstimationResult;
 import com.sap.sse.common.Util.Triple;
 
 /**
@@ -20,7 +19,7 @@ import com.sap.sse.common.Util.Triple;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class ManeuverSequenceGraph implements WindTrackEstimator {
+public class ManeuverSequenceGraph implements ManeuverClassificationsAggregator {
 
     private GraphLevel firstGraphLevel = null;
     private GraphLevel lastGraphLevel = null;
@@ -34,52 +33,15 @@ public class ManeuverSequenceGraph implements WindTrackEstimator {
         this.maneuverClassifiersCache = maneuverClassifiersCache;
         this.bestPathsCalculator = bestPathsCalculator;
         List<ManeuverForEstimation> usefulManeuvers = EstimationDataUtil
-                .getUsefulManeuversSortedByTimePoint(competitorTracks);
+                .getManeuversSortedByTimePoint(competitorTracks);
         for (ManeuverForEstimation maneuver : usefulManeuvers) {
             appendManeuverAsGraphLevel(maneuver);
-        }
-        upgradeNodeConfidencesWithPenaltyCircleInfo(competitorTracks);
-    }
-
-    private void upgradeNodeConfidencesWithPenaltyCircleInfo(
-            List<CompetitorTrackWithEstimationData<ManeuverForEstimation>> competitorTracks) {
-        List<ManeuverForEstimation> penaltyCircles = EstimationDataUtil
-                .getUsefulPenaltyCirclesSortedByTimePoint(competitorTracks);
-        if (!penaltyCircles.isEmpty()) {
-            Iterator<ManeuverForEstimation> penaltyCirclesIterator = penaltyCircles.iterator();
-            ManeuverForEstimation currentPenaltyCircle = penaltyCirclesIterator.next();
-            GraphLevel previousLevel = null;
-            GraphLevel currentLevel = firstGraphLevel;
-            double closestSecondsToUsefulManeuver = Double.MAX_VALUE;
-            while (currentLevel != null) {
-                double secondsToNextUsefulManeuver = Math.abs(currentLevel.getManeuver().getManeuverTimePoint()
-                        .until(currentPenaltyCircle.getManeuverTimePoint()).asSeconds());
-                if (secondsToNextUsefulManeuver < closestSecondsToUsefulManeuver) {
-                    closestSecondsToUsefulManeuver = secondsToNextUsefulManeuver;
-                } else {
-                    GraphLevel levelToUpdate = previousLevel == null ? currentLevel : previousLevel;
-                    levelToUpdate.upgradeLevelNodesConsideringPenaltyCircle(currentPenaltyCircle);
-                    if (penaltyCirclesIterator.hasNext()) {
-                        currentPenaltyCircle = penaltyCirclesIterator.next();
-                        continue;
-                    } else {
-                        currentPenaltyCircle = null;
-                        break;
-                    }
-                }
-                previousLevel = currentLevel;
-                currentLevel = currentLevel.getNextLevel();
-            }
-            while (currentPenaltyCircle != null) {
-                lastGraphLevel.upgradeLevelNodesConsideringPenaltyCircle(currentPenaltyCircle);
-                currentPenaltyCircle = penaltyCirclesIterator.hasNext() ? penaltyCirclesIterator.next() : null;
-            }
         }
     }
 
     private void appendManeuverAsGraphLevel(ManeuverForEstimation maneuver) {
         ManeuverClassifier bestClassifier = maneuverClassifiersCache.getBestClassifier(maneuver);
-        ManeuverEstimationResult maneuverEstimationResult = bestClassifier.classifyManeuver(maneuver);
+        ManeuverClassification maneuverEstimationResult = bestClassifier.classifyManeuver(maneuver);
         GraphLevel newManeuverNodesLevel = new GraphLevel(maneuver, maneuverEstimationResult,
                 bestPathsCalculator.getTransitionProbabilitiesCalculator());
         if (firstGraphLevel == null) {

@@ -1,6 +1,6 @@
 package com.sap.sailing.windestimation.maneuvergraph;
 
-public class IntersectedWindRange extends WindCourseRange implements AssumedWindCourseWithTransition {
+public class IntersectedWindRange extends WindCourseRange {
 
     private static final double MAX_ABS_WIND_COURSE_DEVIATION_TOLERANCE_WITHIN_ANALYSIS_INTERVAL_IN_DEGREES = 40;
     private final double violationRange;

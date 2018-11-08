@@ -19,7 +19,6 @@ public abstract class AbstractManeuverForEstimationBasedWindEstimatorImpl
 
     private final ManeuverForEstimationTransformer maneuverForEstimationTransformer = new ManeuverForEstimationTransformer();
 
-
     @Override
     protected List<WindWithConfidence<Void>> estimateWindByFilteredCompetitorTracks(
             RaceWithEstimationData<CompleteManeuverCurveWithEstimationData> raceWithEstimationData) {

@@ -32,4 +32,9 @@ public class RaceWithEstimationData<T> {
         return regattaName;
     }
 
+    public <S> RaceWithEstimationData<S> constructWithElements(List<CompetitorTrackWithEstimationData<S>> elements) {
+        RaceWithEstimationData<S> newRace = new RaceWithEstimationData<>(getRegattaName(), getRaceName(), elements);
+        return newRace;
+    }
+
 }

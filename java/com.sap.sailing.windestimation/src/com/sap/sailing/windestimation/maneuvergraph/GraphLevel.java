@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.windestimation.data.CoarseGrainedManeuverType;
+import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
-import com.sap.sailing.windestimation.maneuverclassifier.ManeuverEstimationResult;
-import com.sap.sailing.windestimation.maneuverclassifier.ManeuverTypeForClassification;
+import com.sap.sailing.windestimation.maneuverclassifier.ManeuverClassification;
+import com.sap.sailing.windestimation.maneuverclassifier.ManeuverTypeForInternalClassification;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
@@ -20,7 +20,7 @@ public class GraphLevel {
 
     private static final double PENALTY_CIRCLE_PROBABILITY_BONUS = 0.3;
     private final ManeuverForEstimation maneuver;
-    private ManeuverEstimationResult maneuverEstimationResult;
+    private ManeuverClassification maneuverEstimationResult;
 
     private GraphLevel previousLevel = null;
     private GraphLevel nextLevel = null;
@@ -28,7 +28,7 @@ public class GraphLevel {
     private final List<GraphNode> levelNodes = new ArrayList<>();
     private final GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator;
 
-    public GraphLevel(ManeuverForEstimation maneuver, ManeuverEstimationResult maneuverEstimationResult,
+    public GraphLevel(ManeuverForEstimation maneuver, ManeuverClassification maneuverEstimationResult,
             GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
         this.maneuver = maneuver;
         this.maneuverEstimationResult = maneuverEstimationResult;
@@ -37,11 +37,11 @@ public class GraphLevel {
     }
 
     private void initNodes() {
-        maneuverEstimationResult.getManeuverTypeLikelihood(CoarseGrainedManeuverType.TACK);
-        maneuverEstimationResult.getManeuverTypeLikelihood(CoarseGrainedManeuverType.JIBE);
-        maneuverEstimationResult.getManeuverTypeLikelihood(CoarseGrainedManeuverType.BEAR_AWAY);
-        maneuverEstimationResult.getManeuverTypeLikelihood(CoarseGrainedManeuverType.HEAD_UP);
-        for (ManeuverTypeForClassification maneuverType : ManeuverTypeForClassification.values()) {
+        maneuverEstimationResult.getManeuverTypeLikelihood(ManeuverTypeForClassification.TACK);
+        maneuverEstimationResult.getManeuverTypeLikelihood(ManeuverTypeForClassification.JIBE);
+        maneuverEstimationResult.getManeuverTypeLikelihood(ManeuverTypeForClassification.BEAR_AWAY);
+        maneuverEstimationResult.getManeuverTypeLikelihood(ManeuverTypeForClassification.HEAD_UP);
+        for (ManeuverTypeForInternalClassification maneuverType : ManeuverTypeForInternalClassification.values()) {
             switch (maneuverType) {
             case TACK:
                 initTackNode();
@@ -58,7 +58,7 @@ public class GraphLevel {
         normalizeNodeConfidences();
     }
 
-    private void addManeuverNode(ManeuverTypeForClassification maneuverType, Tack tackAfter, WindCourseRange windRange,
+    private void addManeuverNode(ManeuverTypeForInternalClassification maneuverType, Tack tackAfter, WindCourseRange windRange,
             double confidence) {
         GraphNode maneuverNode = new GraphNode(maneuverType, tackAfter, windRange, confidence, levelNodes.size());
         levelNodes.add(maneuverNode);
@@ -72,9 +72,9 @@ public class GraphLevel {
             tackAfter = Tack.STARBOARD;
         }
         WindCourseRange windRange = transitionProbabilitiesCalculator.getWindCourseRangeForManeuverType(maneuver,
-                CoarseGrainedManeuverType.BEAR_AWAY);
-        double confidence = maneuverEstimationResult.getManeuverTypeLikelihood(CoarseGrainedManeuverType.BEAR_AWAY);
-        addManeuverNode(ManeuverTypeForClassification.OTHER, tackAfter, windRange, confidence);
+                ManeuverTypeForClassification.BEAR_AWAY);
+        double confidence = maneuverEstimationResult.getManeuverTypeLikelihood(ManeuverTypeForClassification.BEAR_AWAY);
+        addManeuverNode(ManeuverTypeForInternalClassification.OTHER, tackAfter, windRange, confidence);
     }
 
     private void initHeadUpNode() {
@@ -85,25 +85,25 @@ public class GraphLevel {
             tackAfter = Tack.PORT;
         }
         WindCourseRange windRange = transitionProbabilitiesCalculator.getWindCourseRangeForManeuverType(maneuver,
-                CoarseGrainedManeuverType.HEAD_UP);
-        double confidence = maneuverEstimationResult.getManeuverTypeLikelihood(CoarseGrainedManeuverType.HEAD_UP);
-        addManeuverNode(ManeuverTypeForClassification.OTHER, tackAfter, windRange, confidence);
+                ManeuverTypeForClassification.HEAD_UP);
+        double confidence = maneuverEstimationResult.getManeuverTypeLikelihood(ManeuverTypeForClassification.HEAD_UP);
+        addManeuverNode(ManeuverTypeForInternalClassification.OTHER, tackAfter, windRange, confidence);
     }
 
     private void initJibeNode() {
         WindCourseRange windRange = transitionProbabilitiesCalculator.getWindCourseRangeForManeuverType(maneuver,
-                CoarseGrainedManeuverType.JIBE);
-        double confidence = maneuverEstimationResult.getManeuverTypeLikelihood(CoarseGrainedManeuverType.JIBE);
+                ManeuverTypeForClassification.JIBE);
+        double confidence = maneuverEstimationResult.getManeuverTypeLikelihood(ManeuverTypeForClassification.JIBE);
         Tack tackAfter = maneuver.getCourseChangeWithinMainCurveInDegrees() < 0 ? Tack.STARBOARD : Tack.PORT;
-        addManeuverNode(ManeuverTypeForClassification.JIBE, tackAfter, windRange, confidence);
+        addManeuverNode(ManeuverTypeForInternalClassification.JIBE, tackAfter, windRange, confidence);
     }
 
     private void initTackNode() {
         WindCourseRange windRange = transitionProbabilitiesCalculator.getWindCourseRangeForManeuverType(maneuver,
-                CoarseGrainedManeuverType.TACK);
-        double confidence = maneuverEstimationResult.getManeuverTypeLikelihood(CoarseGrainedManeuverType.TACK);
+                ManeuverTypeForClassification.TACK);
+        double confidence = maneuverEstimationResult.getManeuverTypeLikelihood(ManeuverTypeForClassification.TACK);
         Tack tackAfter = maneuver.getCourseChangeWithinMainCurveInDegrees() < 0 ? Tack.PORT : Tack.STARBOARD;
-        addManeuverNode(ManeuverTypeForClassification.TACK, tackAfter, windRange, confidence);
+        addManeuverNode(ManeuverTypeForInternalClassification.TACK, tackAfter, windRange, confidence);
     }
 
     public ManeuverForEstimation getManeuver() {

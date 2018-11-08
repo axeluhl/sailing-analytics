@@ -9,7 +9,7 @@ import com.sap.sailing.windestimation.data.ManeuverForEstimation;
  */
 public interface ManeuverClassifier {
 
-    ManeuverEstimationResult classifyManeuver(ManeuverForEstimation maneuver);
+    ManeuverClassification classifyManeuver(ManeuverForEstimation maneuver);
 
     double getTestScore();
 

@@ -15,7 +15,7 @@ import com.sap.sailing.windestimation.maneuverclassifier.AbstractManeuverClassif
 import com.sap.sailing.windestimation.maneuverclassifier.ClassifierPersistenceException;
 import com.sap.sailing.windestimation.maneuverclassifier.MLUtil;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverFeatures;
-import com.sap.sailing.windestimation.maneuverclassifier.ManeuverTypeForClassification;
+import com.sap.sailing.windestimation.maneuverclassifier.ManeuverTypeForInternalClassification;
 import com.sap.sailing.windestimation.maneuverclassifier.PreprocessingConfig;
 import com.sap.sailing.windestimation.maneuverclassifier.TrainableSingleManeuverOfflineClassifier;
 
@@ -37,12 +37,12 @@ public abstract class AbstractSmileManeuverClassifier<T extends SoftClassifier<d
     private int fixesCountForBoatClass = 0;
 
     public AbstractSmileManeuverClassifier(ManeuverFeatures maneuverFeatures, PreprocessingConfig preprocessingConfig,
-            ManeuverTypeForClassification... supportedManeuverTypes) {
+            ManeuverTypeForInternalClassification... supportedManeuverTypes) {
         this(maneuverFeatures, null, preprocessingConfig, supportedManeuverTypes);
     }
 
     public AbstractSmileManeuverClassifier(ManeuverFeatures maneuverFeatures, BoatClass boatClass,
-            PreprocessingConfig preprocessingConfig, ManeuverTypeForClassification... supportedManeuverTypes) {
+            PreprocessingConfig preprocessingConfig, ManeuverTypeForInternalClassification... supportedManeuverTypes) {
         super(maneuverFeatures, boatClass, supportedManeuverTypes);
         this.preprocessingConfig = preprocessingConfig;
     }
@@ -136,7 +136,7 @@ public abstract class AbstractSmileManeuverClassifier<T extends SoftClassifier<d
         }
         double[] posteriori = new double[getSupportedManeuverTypesCount()];
         classifier.predict(x, posteriori);
-        double[] posterioriPerManeuverType = new double[ManeuverTypeForClassification.values().length];
+        double[] posterioriPerManeuverType = new double[ManeuverTypeForInternalClassification.values().length];
         int mappedI = 0;
         int[] supportedManeuverTypesMapping = getSupportedManeuverTypesMapping();
         for (int i = 0; i < posterioriPerManeuverType.length; i++) {

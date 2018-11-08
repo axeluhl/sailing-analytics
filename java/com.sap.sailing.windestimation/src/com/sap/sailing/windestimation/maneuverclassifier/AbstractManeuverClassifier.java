@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.windestimation.data.CoarseGrainedManeuverType;
+import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.data.ManeuverCategory;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 
@@ -18,44 +18,44 @@ public abstract class AbstractManeuverClassifier implements ProbabilisticManeuve
     private final int supportedManeuverTypesCount;
 
     public AbstractManeuverClassifier(ManeuverFeatures maneuverFeatures, BoatClass boatClass,
-            ManeuverTypeForClassification[] supportedManeuverTypes) {
+            ManeuverTypeForInternalClassification[] supportedManeuverTypes) {
         this.maneuverFeatures = maneuverFeatures;
         this.boatClass = boatClass;
-        this.supportedManeuverTypesMapping = new int[ManeuverTypeForClassification.values().length];
+        this.supportedManeuverTypesMapping = new int[ManeuverTypeForInternalClassification.values().length];
         for (int i = 0; i < supportedManeuverTypes.length; i++) {
             supportedManeuverTypesMapping[i] = -1;
         }
         int i = 0;
-        for (ManeuverTypeForClassification supportedManeuverType : supportedManeuverTypes) {
+        for (ManeuverTypeForInternalClassification supportedManeuverType : supportedManeuverTypes) {
             supportedManeuverTypesMapping[supportedManeuverType.ordinal()] = i++;
         }
         this.supportedManeuverTypesCount = i;
     }
 
     @Override
-    public ManeuverEstimationResult classifyManeuver(ManeuverForEstimation maneuver) {
+    public ManeuverClassification classifyManeuver(ManeuverForEstimation maneuver) {
         double[] likelihoodPerManeuverType = classifyManeuverWithProbabilities(maneuver);
         double[] likelihoodPerCoarseGrainedManeuverType = mapManeuverTypesToCoarseGrainedManeuverTypes(
                 likelihoodPerManeuverType, maneuver.getManeuverCategory());
-        ManeuverEstimationResult maneuverClassificationResult = new ManeuverEstimationResult(maneuver,
+        ManeuverClassification maneuverClassificationResult = new ManeuverClassification(maneuver,
                 likelihoodPerCoarseGrainedManeuverType);
         return maneuverClassificationResult;
     }
 
     private double[] mapManeuverTypesToCoarseGrainedManeuverTypes(double[] likelihoodPerManeuverType,
             ManeuverCategory maneuverCategory) {
-        double[] newLikelihoods = new double[CoarseGrainedManeuverType.values().length];
+        double[] newLikelihoods = new double[ManeuverTypeForClassification.values().length];
         switch (maneuverCategory) {
         case MARK_PASSING:
         case REGULAR:
-            newLikelihoods[CoarseGrainedManeuverType.TACK
-                    .ordinal()] = likelihoodPerManeuverType[ManeuverTypeForClassification.TACK.ordinal()];
-            newLikelihoods[CoarseGrainedManeuverType.JIBE
-                    .ordinal()] = likelihoodPerManeuverType[ManeuverTypeForClassification.JIBE.ordinal()];
-            newLikelihoods[CoarseGrainedManeuverType.BEAR_AWAY
-                    .ordinal()] = likelihoodPerManeuverType[ManeuverTypeForClassification.OTHER.ordinal()];
-            newLikelihoods[CoarseGrainedManeuverType.HEAD_UP
-                    .ordinal()] = likelihoodPerManeuverType[ManeuverTypeForClassification.OTHER.ordinal()];
+            newLikelihoods[ManeuverTypeForClassification.TACK
+                    .ordinal()] = likelihoodPerManeuverType[ManeuverTypeForInternalClassification.TACK.ordinal()];
+            newLikelihoods[ManeuverTypeForClassification.JIBE
+                    .ordinal()] = likelihoodPerManeuverType[ManeuverTypeForInternalClassification.JIBE.ordinal()];
+            newLikelihoods[ManeuverTypeForClassification.BEAR_AWAY
+                    .ordinal()] = likelihoodPerManeuverType[ManeuverTypeForInternalClassification.OTHER.ordinal()];
+            newLikelihoods[ManeuverTypeForClassification.HEAD_UP
+                    .ordinal()] = likelihoodPerManeuverType[ManeuverTypeForInternalClassification.OTHER.ordinal()];
             break;
         default:
             break;
@@ -74,7 +74,7 @@ public abstract class AbstractManeuverClassifier implements ProbabilisticManeuve
     }
 
     @Override
-    public boolean isSupportsManeuverType(ManeuverTypeForClassification maneuverType) {
+    public boolean isSupportsManeuverType(ManeuverTypeForInternalClassification maneuverType) {
         return supportedManeuverTypesMapping[maneuverType.ordinal()] >= 0;
     }
 
@@ -89,9 +89,9 @@ public abstract class AbstractManeuverClassifier implements ProbabilisticManeuve
     }
 
     @Override
-    public List<ManeuverTypeForClassification> getSupportedManeuverTypes() {
-        List<ManeuverTypeForClassification> supportedManeuverTypes = new ArrayList<>();
-        for (ManeuverTypeForClassification maneuverType : ManeuverTypeForClassification.values()) {
+    public List<ManeuverTypeForInternalClassification> getSupportedManeuverTypes() {
+        List<ManeuverTypeForInternalClassification> supportedManeuverTypes = new ArrayList<>();
+        for (ManeuverTypeForInternalClassification maneuverType : ManeuverTypeForInternalClassification.values()) {
             if (supportedManeuverTypesMapping[maneuverType.ordinal()] >= 0) {
                 supportedManeuverTypes.add(maneuverType);
             }
@@ -100,8 +100,8 @@ public abstract class AbstractManeuverClassifier implements ProbabilisticManeuve
     }
 
     @Override
-    public ManeuverTypeForClassification getManeuverTypeByMappingIndex(int mappingIndex) {
-        for (ManeuverTypeForClassification maneuverType : ManeuverTypeForClassification.values()) {
+    public ManeuverTypeForInternalClassification getManeuverTypeByMappingIndex(int mappingIndex) {
+        for (ManeuverTypeForInternalClassification maneuverType : ManeuverTypeForInternalClassification.values()) {
             if (supportedManeuverTypesMapping[maneuverType.ordinal()] == mappingIndex) {
                 return maneuverType;
             }

@@ -21,7 +21,7 @@ import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
 import com.sap.sailing.polars.windestimation.AbstractManeuverBasedWindEstimationTrackImpl;
 import com.sap.sailing.polars.windestimation.ManeuverClassification;
 import com.sap.sailing.polars.windestimation.ScalableBearingAndScalableDouble;
-import com.sap.sailing.windestimation.WindTrackEstimator;
+import com.sap.sailing.windestimation.ManeuverClassificationsAggregator;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
@@ -39,7 +39,7 @@ import com.sap.sse.util.kmeans.Cluster;
  *
  */
 public class ManeuverClusteringBasedWindEstimationTrackImpl extends AbstractManeuverBasedWindEstimationTrackImpl
-        implements WindTrackEstimator {
+        implements ManeuverClassificationsAggregator {
 
     private final RaceWithEstimationData<ManeuverForEstimation> raceWithManeuvers;
     private final ManeuverClassifiersCache maneuverClassifiersCache;

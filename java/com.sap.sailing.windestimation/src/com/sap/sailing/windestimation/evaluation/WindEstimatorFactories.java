@@ -4,9 +4,9 @@ import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimat
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.windestimation.ManeuverClusteringBasedWindEstimatorImpl;
 import com.sap.sailing.windestimation.ManeuverGraphBasedWindEstimatorImpl;
-import com.sap.sailing.windestimation.PolarsFittingBasedWindEstimatorImpl;
 import com.sap.sailing.windestimation.OutlierRemovalMeanBasedWindEstimatorImpl;
 import com.sap.sailing.windestimation.OutlierRemovalNeighborBasedWindEstimatorImpl;
+import com.sap.sailing.windestimation.PolarsFittingBasedWindEstimatorImpl;
 import com.sap.sailing.windestimation.WindEstimator;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverFeatures;
 
@@ -32,6 +32,11 @@ public class WindEstimatorFactories {
             public WindEstimator<CompleteManeuverCurveWithEstimationData> createNewEstimatorInstance() {
                 return new ManeuverGraphBasedWindEstimatorImpl(polarService, maneuverFeatures);
             }
+
+            @Override
+            public String toString() {
+                return "Maneuver Graph";
+            }
         };
     }
 
@@ -41,6 +46,11 @@ public class WindEstimatorFactories {
             @Override
             public WindEstimator<CompleteManeuverCurveWithEstimationData> createNewEstimatorInstance() {
                 return new ManeuverClusteringBasedWindEstimatorImpl(polarService, maneuverFeatures);
+            }
+
+            @Override
+            public String toString() {
+                return "Maneuver Clustering";
             }
         };
     }
@@ -52,6 +62,11 @@ public class WindEstimatorFactories {
             public WindEstimator<CompleteManeuverCurveWithEstimationData> createNewEstimatorInstance() {
                 return new PolarsFittingBasedWindEstimatorImpl(polarService);
             }
+
+            @Override
+            public String toString() {
+                return "Polars Fitting";
+            }
         };
     }
 
@@ -62,6 +77,11 @@ public class WindEstimatorFactories {
             public WindEstimator<CompleteManeuverCurveWithEstimationData> createNewEstimatorInstance() {
                 return new OutlierRemovalMeanBasedWindEstimatorImpl(polarService, maneuverFeatures);
             }
+
+            @Override
+            public String toString() {
+                return "Outlier Removal (Mean)";
+            }
         };
     }
 
@@ -71,6 +91,11 @@ public class WindEstimatorFactories {
             @Override
             public WindEstimator<CompleteManeuverCurveWithEstimationData> createNewEstimatorInstance() {
                 return new OutlierRemovalNeighborBasedWindEstimatorImpl(polarService, maneuverFeatures);
+            }
+
+            @Override
+            public String toString() {
+                return "Outlier Removal (Neighbor)";
             }
         };
     }

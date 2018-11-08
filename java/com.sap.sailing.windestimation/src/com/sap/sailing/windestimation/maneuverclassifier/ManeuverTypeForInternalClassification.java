@@ -1,5 +1,5 @@
 package com.sap.sailing.windestimation.maneuverclassifier;
 
-public enum ManeuverTypeForClassification {
+public enum ManeuverTypeForInternalClassification {
     TACK, JIBE, OTHER
 }

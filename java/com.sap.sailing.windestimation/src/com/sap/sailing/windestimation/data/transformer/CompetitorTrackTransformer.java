@@ -2,10 +2,12 @@ package com.sap.sailing.windestimation.data.transformer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 
-public interface CompetitorTrackTransformer<FromType, ToType> {
+public interface CompetitorTrackTransformer<FromType, ToType>
+        extends Function<CompetitorTrackWithEstimationData<FromType>, CompetitorTrackWithEstimationData<ToType>> {
 
     List<ToType> transformElements(CompetitorTrackWithEstimationData<FromType> competitorTrackWithElementsToTransform);
 
@@ -29,6 +31,12 @@ public interface CompetitorTrackTransformer<FromType, ToType> {
             competitorTracks.add(transformedCompetitorTrack);
         }
         return competitorTracks;
+    }
+
+    @Override
+    default CompetitorTrackWithEstimationData<ToType> apply(
+            CompetitorTrackWithEstimationData<FromType> competitorTrack) {
+        return transform(competitorTrack);
     }
 
 }

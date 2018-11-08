@@ -92,4 +92,10 @@ public class CompetitorTrackWithEstimationData<T> {
                         .getKnots() > 2;
     }
 
+    public <S> CompetitorTrackWithEstimationData<S> constructWithElements(List<S> elements) {
+        return new CompetitorTrackWithEstimationData<>(getCompetitorName(), getBoatClass(), elements,
+                getAvgIntervalBetweenFixesInSeconds(), getDistanceTravelled(), getTrackStartTimePoint(),
+                getTrackEndTimePoint(), getFixesCountForPolars(), getMarkPassingsCount(), getWaypointsCount());
+    }
+
 }

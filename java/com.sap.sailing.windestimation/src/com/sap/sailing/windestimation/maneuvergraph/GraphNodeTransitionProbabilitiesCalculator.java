@@ -1,6 +1,6 @@
 package com.sap.sailing.windestimation.maneuvergraph;
 
-import com.sap.sailing.windestimation.data.CoarseGrainedManeuverType;
+import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sse.common.Util.Pair;
 
@@ -13,6 +13,6 @@ public interface GraphNodeTransitionProbabilitiesCalculator {
             GraphLevel currentLevel);
 
     WindCourseRange getWindCourseRangeForManeuverType(ManeuverForEstimation maneuver,
-            CoarseGrainedManeuverType maneuverType);
+            ManeuverTypeForClassification maneuverType);
 
 }

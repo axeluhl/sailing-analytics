@@ -2,7 +2,7 @@ package com.sap.sailing.windestimation.maneuverclassifier.impl;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverFeatures;
-import com.sap.sailing.windestimation.maneuverclassifier.ManeuverTypeForClassification;
+import com.sap.sailing.windestimation.maneuverclassifier.ManeuverTypeForInternalClassification;
 import com.sap.sailing.windestimation.maneuverclassifier.PreprocessingConfig.PreprocessingConfigBuilder;
 
 import smile.classification.GradientTreeBoost;
@@ -12,7 +12,7 @@ public class GradientBoostingManeuverClassifier extends AbstractSmileManeuverCla
     private static final long serialVersionUID = -3364152319152090775L;
     
     public GradientBoostingManeuverClassifier(ManeuverFeatures maneuverFeatures, BoatClass boatClass,
-            ManeuverTypeForClassification[] supportedManeuverTypes) {
+            ManeuverTypeForInternalClassification[] supportedManeuverTypes) {
         super(maneuverFeatures, boatClass, new PreprocessingConfigBuilder().scaling().build(), supportedManeuverTypes);
     }
 

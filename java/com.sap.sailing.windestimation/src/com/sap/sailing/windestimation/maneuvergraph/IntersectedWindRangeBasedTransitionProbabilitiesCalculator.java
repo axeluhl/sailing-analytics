@@ -1,6 +1,6 @@
 package com.sap.sailing.windestimation.maneuvergraph;
 
-import com.sap.sailing.windestimation.data.CoarseGrainedManeuverType;
+import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Util.Pair;
@@ -55,7 +55,7 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
 //    }
 
     public WindCourseRange getWindCourseRangeForManeuverType(ManeuverForEstimation maneuver,
-            CoarseGrainedManeuverType maneuverType) {
+            ManeuverTypeForClassification maneuverType) {
         switch (maneuverType) {
         case TACK:
             return getTackWindRange(maneuver);

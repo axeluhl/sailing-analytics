@@ -12,7 +12,7 @@ import com.sap.sailing.server.gateway.deserialization.impl.DetailedBoatClassJson
 import com.sap.sailing.windestimation.data.LabelledManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverCategory;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
-import com.sap.sailing.windestimation.maneuverclassifier.ManeuverTypeForClassification;
+import com.sap.sailing.windestimation.maneuverclassifier.ManeuverTypeForInternalClassification;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 
@@ -78,7 +78,7 @@ public class ManeuverForEstimationJsonDeserializer implements JsonDeserializer<M
                 scaledSpeedBefore, scaledSpeedAfter, boatClass, markPassing, relativeBearingToNextMarkBeforeInDegrees,
                 relativeBearingToNextMarkAfterInDegrees, regattaName);
         if (object.containsKey(ManeuverForEstimationJsonSerializer.WIND_SPEED)) {
-            ManeuverTypeForClassification maneuverType = ManeuverTypeForClassification
+            ManeuverTypeForInternalClassification maneuverType = ManeuverTypeForInternalClassification
                     .valueOf((String) object.get(ManeuverForEstimationJsonSerializer.MANEUVER_TYPE));
             Double windSpeedInKnots = (Double) object.get(ManeuverForEstimationJsonSerializer.WIND_SPEED);
             Double windCourse = (Double) object.get(ManeuverForEstimationJsonSerializer.WIND_COURSE);

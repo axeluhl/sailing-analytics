@@ -4,13 +4,13 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.windestimation.maneuverclassifier.ManeuverTypeForClassification;
+import com.sap.sailing.windestimation.maneuverclassifier.ManeuverTypeForInternalClassification;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.TimePoint;
 
 public class LabelledManeuverForEstimation extends ManeuverForEstimation {
 
-    private final ManeuverTypeForClassification maneuverType;
+    private final ManeuverTypeForInternalClassification maneuverType;
     private final Wind wind;
 
     public LabelledManeuverForEstimation(TimePoint maneuverTimePoint, Position maneuverPosition, Bearing middleCourse,
@@ -22,7 +22,7 @@ public class LabelledManeuverForEstimation extends ManeuverForEstimation {
             double speedLossRatio, double speedGainRatio, double lowestSpeedVsExitingSpeedRatio, boolean clean,
             boolean cleanBefore, boolean cleanAfter, ManeuverCategory maneuverCategory, double scaledSpeedBefore,
             double scaledSpeedAfter, BoatClass boatClass, boolean markPassing, Double relativeBearingToNextMarkBefore,
-            Double relativeBearingToNextMarkAfter, String regattaName, ManeuverTypeForClassification maneuverType,
+            Double relativeBearingToNextMarkAfter, String regattaName, ManeuverTypeForInternalClassification maneuverType,
             Wind wind) {
         super(maneuverTimePoint, maneuverPosition, middleCourse, speedWithBearingBefore, speedWithBearingAfter,
                 courseAtLowestSpeed, averageSpeedWithBearingBefore, averageSpeedWithBearingAfter, courseChangeInDegrees,
@@ -35,7 +35,7 @@ public class LabelledManeuverForEstimation extends ManeuverForEstimation {
         this.wind = wind;
     }
 
-    public ManeuverTypeForClassification getManeuverType() {
+    public ManeuverTypeForInternalClassification getManeuverType() {
         return maneuverType;
     }
 

@@ -9,8 +9,8 @@ import com.sap.sailing.windestimation.maneuverclassifier.impl.NeuralNetworkManeu
 
 public class ManeuverClassifiersFactory {
 
-    public static final ManeuverTypeForClassification[] supportedManeuverTypes = { ManeuverTypeForClassification.TACK,
-            ManeuverTypeForClassification.JIBE, ManeuverTypeForClassification.OTHER };
+    public static final ManeuverTypeForInternalClassification[] supportedManeuverTypes = { ManeuverTypeForInternalClassification.TACK,
+            ManeuverTypeForInternalClassification.JIBE, ManeuverTypeForInternalClassification.OTHER };
 
     private ManeuverClassifiersFactory() {
     }

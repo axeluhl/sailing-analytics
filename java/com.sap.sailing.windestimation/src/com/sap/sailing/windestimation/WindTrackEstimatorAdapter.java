@@ -10,7 +10,7 @@ import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sse.common.Bearing;
 
-public class WindTrackEstimatorAdapter implements WindTrackEstimator {
+public class WindTrackEstimatorAdapter implements ManeuverClassificationsAggregator {
 
     private final AverageWindEstimator windEstimator;
     private List<ManeuverForEstimation> usefulManeuvers;

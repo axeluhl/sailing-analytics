@@ -4,8 +4,10 @@ import java.util.List;
 
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 
-public interface WindTrackEstimator {
+public interface ManeuverClassificationsAggregator {
 
     List<WindWithConfidence<Void>> estimateWindTrack();
+    
+//    List<ManeuverClassification> estimateWindTrack(RaceWithEstimationData<ManeuverClassification> race);
 
 }

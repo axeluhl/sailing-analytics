@@ -10,7 +10,7 @@ import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.LabelledManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverCategory;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
-import com.sap.sailing.windestimation.maneuverclassifier.ManeuverTypeForClassification;
+import com.sap.sailing.windestimation.maneuverclassifier.ManeuverTypeForInternalClassification;
 
 public class ManeuverForEstimationTransformer
         extends AbstractCompleteManeuverCurveWithEstimationDataTransformer<ManeuverForEstimation> {
@@ -48,7 +48,7 @@ public class ManeuverForEstimationTransformer
             CompleteManeuverCurveWithEstimationData previousManeuver,
             CompleteManeuverCurveWithEstimationData nextManeuver, double speedScalingDivisor, BoatClass boatClass, String regattaName) {
         ManeuverCategory maneuverCategory = getManeuverCategory(maneuver);
-        ManeuverTypeForClassification maneuverType = getManeuverTypeForClassification(maneuver, maneuverCategory);
+        ManeuverTypeForInternalClassification maneuverType = getManeuverTypeForClassification(maneuver, maneuverCategory);
         double speedLossRatio = maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getKnots() > 0
                 ? maneuver.getCurveWithUnstableCourseAndSpeed().getLowestSpeed().getKnots()
                         / maneuver.getCurveWithUnstableCourseAndSpeed().getSpeedWithBearingBefore().getKnots()
@@ -117,14 +117,14 @@ public class ManeuverForEstimationTransformer
         return maneuverForEstimation;
     }
 
-    protected ManeuverTypeForClassification getManeuverTypeForClassification(
+    protected ManeuverTypeForInternalClassification getManeuverTypeForClassification(
             CompleteManeuverCurveWithEstimationData maneuver, ManeuverCategory maneuverCategory) {
         switch (maneuverCategory) {
         case _180:
         case _360:
         case SMALL:
         case WIDE:
-            return ManeuverTypeForClassification.OTHER;
+            return ManeuverTypeForInternalClassification.OTHER;
         case MARK_PASSING:
         case REGULAR:
             ManeuverType maneuverType = maneuver.getManeuverTypeForCompleteManeuverCurve();
@@ -133,11 +133,11 @@ public class ManeuverForEstimationTransformer
             case HEAD_UP:
             case PENALTY_CIRCLE:
             case UNKNOWN:
-                return ManeuverTypeForClassification.OTHER;
+                return ManeuverTypeForInternalClassification.OTHER;
             case JIBE:
-                return ManeuverTypeForClassification.JIBE;
+                return ManeuverTypeForInternalClassification.JIBE;
             case TACK:
-                return ManeuverTypeForClassification.TACK;
+                return ManeuverTypeForInternalClassification.TACK;
             }
         }
         throw new IllegalStateException();

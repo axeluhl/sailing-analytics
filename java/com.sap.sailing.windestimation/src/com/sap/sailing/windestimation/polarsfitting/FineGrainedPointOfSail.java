@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.data;
+package com.sap.sailing.windestimation.polarsfitting;
 
 import com.sap.sailing.domain.common.LegType;
 import com.sap.sailing.domain.common.NauticalSide;
