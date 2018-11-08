@@ -143,6 +143,7 @@ public class RegattaDetailsComposite extends Composite {
 
     private Grid createRegistrationLinkPanel(Grid grid, int row, String label) {
         Grid panel = new Grid(1, 3);
+        panel.getColumnFormatter().setWidth(0, "200px");
         grid.setWidget(row, 0, new Label(label + ":"));
         grid.setWidget(row, 1, panel);
         return panel;
@@ -474,13 +475,19 @@ public class RegattaDetailsComposite extends Composite {
 
     private void updateOpenRegattaRegistrationLink() {
         if (regatta.competitorRegistrationType.isOpen()) {
-            String url = BranchIOConstants.OPEN_REGATTA_APP_BRANCHIO + "?reagttaName="
-                    + URL.encodeQueryString(regatta.getName()) + "&secret="
+            String baseUrl = GWT.getHostPageBaseURL();
+            if (baseUrl.endsWith("/")) {
+                baseUrl = baseUrl.substring(0, baseUrl.lastIndexOf("/"));
+            }
+            String url = baseUrl.substring(0, baseUrl.lastIndexOf("/")) + "/sailingserver/api/v1/regattas/"
+                    + URL.encodeQueryString(regatta.getName()) + "/competitors/createandadd?secret="
                     + URL.encodeQueryString(regatta.registrationLinkSecret);
-            openRegattaRegistrationLinkUrl.setText(url);
-            openRegattaRegistrationLink.setHref(url);
+            String deeplinkUrl = BranchIOConstants.OPEN_REGATTA_APP_BRANCHIO + "?"
+                    + BranchIOConstants.OPEN_REGATTA_APP_BRANCHIO_PATH + "=" + URL.encodeQueryString(url);
+            openRegattaRegistrationLinkUrl.setText(deeplinkUrl);
+            openRegattaRegistrationLink.setHref(deeplinkUrl);
             openRegattaRegistrationLink.setVisible(true);
-            sailingService.openRegattaRegistrationQrCode(url, new AsyncCallback<String>() {
+            sailingService.openRegattaRegistrationQrCode(deeplinkUrl, new AsyncCallback<String>() {
 
                 @Override
                 public void onFailure(Throwable caught) {
@@ -489,7 +496,7 @@ public class RegattaDetailsComposite extends Composite {
 
                 @Override
                 public void onSuccess(String result) {
-                    GWT.log("qr code generated for url: " + url);
+                    GWT.log("qr code generated for url: " + deeplinkUrl);
                     openRegattaRegistrationLinkQrCode.setUrl("data:image/png;base64, " + result);
                 }
 
