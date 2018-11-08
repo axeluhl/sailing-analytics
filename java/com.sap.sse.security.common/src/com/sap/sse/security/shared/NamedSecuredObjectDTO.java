@@ -5,10 +5,9 @@ package com.sap.sse.security.shared;
  */
 public class NamedSecuredObjectDTO extends NamedDTO implements SecuredObject {
 
-    private static final long serialVersionUID = 4448408121977185408L;
+    private static final long serialVersionUID = 2642220699434177353L;
 
-    private AccessControlList accessControlList;
-    private Ownership ownership;
+    private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
 
     protected NamedSecuredObjectDTO() {
     }
@@ -19,22 +18,21 @@ public class NamedSecuredObjectDTO extends NamedDTO implements SecuredObject {
 
     @Override
     public final AccessControlList getAccessControlList() {
-        return accessControlList;
+        return securityInformation.getAccessControlList();
     }
 
     @Override
     public final Ownership getOwnership() {
-        return ownership;
+        return securityInformation.getOwnership();
     }
 
     @Override
     public final void setAccessControlList(final AccessControlList accessControlList) {
-        this.accessControlList = accessControlList;
+        this.securityInformation.setAccessControlList(accessControlList);
     }
 
     @Override
     public final void setOwnership(final Ownership ownership) {
-        this.ownership = ownership;
+        this.securityInformation.setOwnership(ownership);
     }
-
 }
