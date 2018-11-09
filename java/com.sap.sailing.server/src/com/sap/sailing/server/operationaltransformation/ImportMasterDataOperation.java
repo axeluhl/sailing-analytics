@@ -67,6 +67,7 @@ import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
 import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.concurrent.LockUtil;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 
 public class ImportMasterDataOperation extends
@@ -100,6 +101,10 @@ public class ImportMasterDataOperation extends
     @Override
     public MasterDataImportObjectCreationCountImpl internalApplyTo(RacingEventService toState) throws Exception {
         final DataImportLockWithProgress dataImportLock = toState.getDataImportLock();
+        SecurityService securityService = toState.getSecurityService();
+        if (securityService == null) {
+            throw new IllegalStateException("Cannot import data, security service could not be resolved");
+        }
         this.progress = dataImportLock.getProgress(importOperationId);
         progress.setCurrentSubProgress(DataImportSubProgress.IMPORT_WAIT);
         LockUtil.lockForWrite(dataImportLock);
@@ -109,7 +114,7 @@ public class ImportMasterDataOperation extends
             int numOfGroupsToImport = masterData.getLeaderboardGroups().size();
             int i = 0;
             for (LeaderboardGroup leaderboardGroup : masterData.getLeaderboardGroups()) {
-                createLeaderboardGroupWithAllRelatedObjects(toState, leaderboardGroup);
+                createLeaderboardGroupWithAllRelatedObjects(toState, leaderboardGroup, securityService);
                 i++;
                 progress.setCurrentSubProgressPct((double) i / numOfGroupsToImport);
             }
@@ -226,11 +231,11 @@ public class ImportMasterDataOperation extends
     }
 
     private void createLeaderboardGroupWithAllRelatedObjects(final RacingEventService toState,
-            LeaderboardGroup leaderboardGroup) {
+            LeaderboardGroup leaderboardGroup, SecurityService securityService) {
         Map<String, Leaderboard> existingLeaderboards = toState.getLeaderboards();
         List<String> leaderboardNames = new ArrayList<String>();
-        createCourseAreasAndEvents(toState, leaderboardGroup);
-        createRegattas(toState, leaderboardGroup);
+        createCourseAreasAndEvents(toState, leaderboardGroup, securityService);
+        createRegattas(toState, leaderboardGroup, securityService);
         for (final Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
             leaderboardNames.add(leaderboard.getName());
             if (existingLeaderboards.containsKey(leaderboard.getName())) {
@@ -261,7 +266,7 @@ public class ImportMasterDataOperation extends
                 toState.addLeaderboard(leaderboard);
                 storeRaceLogEvents(leaderboard, toState.getMongoObjectFactory(), toState.getDomainObjectFactory(), override);
                 storeRegattaLogEvents(leaderboard, toState.getMongoObjectFactory(), toState.getDomainObjectFactory(), override);
-                ensureOwnership(leaderboard.getIdentifier());
+                ensureOwnership(leaderboard.getIdentifier(), securityService);
                 creationCount.addOneLeaderboard(leaderboard.getName());
                 relinkTrackedRacesIfPossible(toState, leaderboard);
                 toState.updateStoredLeaderboard(leaderboard);
@@ -279,7 +284,7 @@ public class ImportMasterDataOperation extends
         if (existingLeaderboardGroup == null) {
             toState.addLeaderboardGroupWithoutReplication(leaderboardGroup);
             creationCount.addOneLeaderboardGroup(leaderboardGroup.getName());
-            ensureOwnership(leaderboardGroup.getIdentifier());
+            ensureOwnership(leaderboardGroup.getIdentifier(), securityService);
         } else {
             logger.info(String.format("Leaderboard Group with name %1$s already exists and hasn't been overridden.",
                     leaderboardGroup.getName()));
@@ -453,7 +458,8 @@ public class ImportMasterDataOperation extends
         }
     }
 
-    private void createRegattas(RacingEventService toState, LeaderboardGroup leaderboardGroup) {
+    private void createRegattas(RacingEventService toState, LeaderboardGroup leaderboardGroup,
+            SecurityService securityService) {
         Iterable<Leaderboard> leaderboards = leaderboardGroup.getLeaderboards();
         for (Leaderboard leaderboard : leaderboards) {
             if (leaderboard instanceof RegattaLeaderboard) {
@@ -524,7 +530,7 @@ public class ImportMasterDataOperation extends
                         }
                     }
                 }
-                ensureOwnership(regatta.getIdentifier());
+                ensureOwnership(regatta.getIdentifier(), securityService);
                 creationCount.addOneRegatta(regatta.getId().toString());
             }
         }
@@ -532,7 +538,8 @@ public class ImportMasterDataOperation extends
     }
 
 
-    private void createCourseAreasAndEvents(RacingEventService toState, LeaderboardGroup leaderboardGroup) {
+    private void createCourseAreasAndEvents(RacingEventService toState, LeaderboardGroup leaderboardGroup,
+            SecurityService securityService) {
         for (Event event : masterData.getEventForLeaderboardGroup().get(leaderboardGroup)) {
             UUID id = event.getId();
             Event existingEvent = toState.getEvent(id);
@@ -544,7 +551,7 @@ public class ImportMasterDataOperation extends
             }
             if (existingEvent == null) {
                 toState.addEventWithoutReplication(event);
-                ensureOwnership(event.getIdentifier());
+                ensureOwnership(event.getIdentifier(), securityService);
                 creationCount.addOneEvent(event.getId().toString());
             } else {
                 logger.info(String.format("Event with name %1$s already exists and hasn't been overridden.",
@@ -553,8 +560,8 @@ public class ImportMasterDataOperation extends
         }
     }
 
-    private void ensureOwnership(QualifiedObjectIdentifier identifier) {
-        System.out.println("Transfered object for ownership " + identifier);
+    private void ensureOwnership(QualifiedObjectIdentifier identifier, SecurityService securityService) {
+        securityService.setOwnershipIfNotSet(identifier, securityService.getDefaultTenantForCurrentUser());
     }
 
     @Override

@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 
 import org.apache.shiro.crypto.hash.Sha256Hash;
@@ -15,6 +16,7 @@ import org.apache.shiro.crypto.hash.Sha256Hash;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
@@ -66,18 +68,23 @@ public class UserImpl extends SecurityUserImpl implements User {
 
     private transient UserGroupProvider userGroupProvider;
 
-    public UserImpl(String name, String email, UserGroup defaultTenant, UserGroupProvider userGroupProvider, Account... accounts) {
-        this(name, email, defaultTenant, Arrays.asList(accounts), userGroupProvider);
+    public UserImpl(String name, String email, Map<String, UserGroup> defaultTenantForServer,
+            UserGroupProvider userGroupProvider, Account... accounts) {
+        this(name, email, defaultTenantForServer, Arrays.asList(accounts), userGroupProvider);
     }
 
-    public UserImpl(String name, String email, UserGroup defaultTenant, Collection<Account> accounts, UserGroupProvider userGroupProvider) {
+    public UserImpl(String name, String email, Map<String, UserGroup> defaultTenantForServer,
+            Collection<Account> accounts, UserGroupProvider userGroupProvider) {
         this(name, email, /* fullName */ null, /* company */ null, /* locale */ null, /* is email validated */ false,
-             /* password reset secret */ null, /* validation secret */ null, defaultTenant, accounts, userGroupProvider);
+                /* password reset secret */ null, /* validation secret */ null, defaultTenantForServer, accounts,
+                userGroupProvider);
     }
 
     public UserImpl(String name, String email, String fullName, String company, Locale locale, Boolean emailValidated,
-            String passwordResetSecret, String validationSecret, UserGroup defaultTenant, Collection<Account> accounts, UserGroupProvider userGroupProvider) {
-        super(name, defaultTenant);
+            String passwordResetSecret, String validationSecret, Map<String, UserGroup> defaultTenantForServer,
+            Collection<Account> accounts, UserGroupProvider userGroupProvider) {
+        super(name);
+        this.defaultTenantForServer = defaultTenantForServer;
         this.fullName = fullName;
         this.company = company;
         this.locale = locale;
@@ -99,6 +106,11 @@ public class UserImpl extends SecurityUserImpl implements User {
     public void setUserGroupProvider(UserGroupProvider userGroupProvider) {
         this.userGroupProvider = userGroupProvider;
     }
+
+    /**
+     * The tenant to use as {@link Ownership#getTenantOwner() tenant owner} of new objects created by this user
+     */
+    private Map<String, UserGroup> defaultTenantForServer;
 
     /**
      * For the time being, the user {@link #getName() name} is used as ID
@@ -254,11 +266,47 @@ public class UserImpl extends SecurityUserImpl implements User {
 
     @Override
     public String toString() {
-        return "User [name=" + getName() + ", email=" + email + (isEmailValidated() ? " (validated)" : "")
-                + ", fullName=" + fullName + ", company=" + company + ", locale=" + locale + ", permissions="
-                + getPermissions() + ", roles=" + getRoles() + ", defaultTenant="
-                + (getDefaultTenant() == null ? "null" : getDefaultTenant().getName()) + ", accounts="
-                + Arrays.toString(accounts.keySet().toArray(new AccountType[accounts.size()])) + "]";
+        StringBuilder builder = new StringBuilder();
+        builder.append("UserImpl [");
+        if (defaultTenantForServer != null) {
+            builder.append("defaultTenantForServer=[");
+            for (Entry<String, UserGroup> entry : defaultTenantForServer.entrySet()) {
+                builder.append(entry.getValue().getName());
+                builder.append("@");
+                builder.append(entry.getKey());
+                builder.append(",");
+            }
+            builder.append("], ");
+        }
+        if (getFullName() != null) {
+            builder.append("getFullName()=");
+            builder.append(getFullName());
+            builder.append(", ");
+        }
+        if (getCompany() != null) {
+            builder.append("getCompany()=");
+            builder.append(getCompany());
+            builder.append(", ");
+        }
+        if (getLocale() != null) {
+            builder.append("getLocale()=");
+            builder.append(getLocale());
+            builder.append(", ");
+        }
+        if (getEmail() != null) {
+            builder.append("getEmail()=");
+            builder.append(getEmail());
+            builder.append(", ");
+        }
+        builder.append("isEmailValidated()=");
+        builder.append(isEmailValidated());
+        builder.append(", ");
+        if (getPermissions() != null) {
+            builder.append("getPermissions()=");
+            builder.append(getPermissions());
+        }
+        builder.append("]");
+        return builder.toString();
     }
 
     @Override
@@ -274,5 +322,19 @@ public class UserImpl extends SecurityUserImpl implements User {
     @Override
     public HasPermissions getType() {
         return SecuredSecurityTypes.USER;
+    }
+
+    @Override
+    public UserGroup getDefaultTenant(String serverName) {
+        return defaultTenantForServer.get(serverName);
+    }
+
+    public void setDefaultTenant(UserGroup newDefaultTenant, String serverName) {
+        this.defaultTenantForServer.put(serverName, newDefaultTenant);
+    }
+
+    @Override
+    public Map<String, UserGroup> getDefaultTenantMap() {
+        return defaultTenantForServer;
     }
 }

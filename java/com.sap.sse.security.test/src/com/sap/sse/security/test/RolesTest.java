@@ -20,7 +20,7 @@ public class RolesTest {
         final RoleDefinition roleDefinition = new RoleDefinitionImpl(UUID.randomUUID(), "role");
         final Role role = new RoleImpl(roleDefinition);
         final UserGroup tenant = new UserGroupImpl(UUID.randomUUID(), "tenant");
-        final SecurityUserImpl user = new SecurityUserImpl("user", tenant);
+        final SecurityUserImpl user = new SecurityUserImpl("user");
         assertEquals("role", role.toString());
         final Role role2 = new RoleImpl(roleDefinition, tenant, /* user qualification */ null);
         assertEquals("role:tenant", role2.toString());

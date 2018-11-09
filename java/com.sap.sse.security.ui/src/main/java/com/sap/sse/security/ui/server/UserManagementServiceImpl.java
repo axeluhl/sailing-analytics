@@ -242,8 +242,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public UserGroup createUserGroup(String name, String nameOfTenantOwner) throws UnauthorizedException, UserGroupManagementException {
-        return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(nameOfTenantOwner,
+    public UserGroup createUserGroup(String name) throws UnauthorizedException, UserGroupManagementException {
+        return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredSecurityTypes.USER_GROUP, name, name, () -> {
                     UUID newTenantId = UUID.randomUUID();
                     UserGroup userGroup;
@@ -255,7 +255,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                     getSecurityService().setOwnership(
                             SecuredSecurityTypes.USER_GROUP.getQualifiedObjectIdentifier(newTenantId.toString()),
                             getSecurityService().getCurrentUser(),
-                            getSecurityService().getUserGroupByName(nameOfTenantOwner), name);
+                            getSecurityService().getDefaultTenantForCurrentUser(), name);
                     final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser = new HashMap<>();
                     final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup = new HashMap<>();
                     return securityDTOFactory.createUserGroupDTOFromUserGroup(userGroup, fromOriginalToStrippedDownUser,
@@ -355,13 +355,13 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     public UserDTO createSimpleUser(String username, String email, String password, String fullName, String company,
-            String localeName, String validationBaseURL, String tenantOwnerName)
+            String localeName, String validationBaseURL)
             throws UserManagementException, MailException, UnauthorizedException {
-        final UserImpl u = getSecurityService().setOwnershipCheckCreatePermissionAndRevertOnError(tenantOwnerName,
+        final UserImpl u = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredSecurityTypes.USER, username, username, () -> {
                     try {
                         return getSecurityService().createSimpleUser(username, email, password, fullName, company,
-                                getLocaleFromLocaleName(localeName), validationBaseURL, tenantOwnerName);
+                                getLocaleFromLocaleName(localeName), validationBaseURL);
                     } catch (UserManagementException | UserGroupManagementException e) {
                         logger.log(Level.SEVERE, "Error creating user " + username, e);
                         throw new UserManagementException(e.getMessage());

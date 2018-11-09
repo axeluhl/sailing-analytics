@@ -5,7 +5,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.net.UnknownHostException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -20,7 +22,6 @@ import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
@@ -38,13 +39,13 @@ public class AccessControlStoreTest {
     private static final String DEFAULT_TENANT_NAME = "TestDefaultTenant";
     private final QualifiedObjectIdentifier testId = new QualifiedObjectIdentifierImpl("Test", "test");
     private final String testDisplayName = "testDN";
-    private final User testOwner = new UserImpl("admin", "admin@sapsailing.com", new UserGroupImpl(UUID.randomUUID(), "admin-tenant"),
-            /* userGroupProvider */ null);
+
     private final UserGroup testTenantOwner = new UserGroupImpl(UUID.randomUUID(), "test-tenant");
     private final UUID testRoleId = UUID.randomUUID();
 
     private UserStore userStore;
     private AccessControlStore accessControlStore;
+    private UserImpl testOwner;
 
     @Before
     public void setUp() throws UnknownHostException, MongoException, UserGroupManagementException {
@@ -55,6 +56,12 @@ public class AccessControlStoreTest {
         db.getCollection(CollectionNames.OWNERSHIPS.name()).drop();
         db.getCollection(CollectionNames.ROLES.name()).drop();
         newStores();
+        
+        UserGroupImpl adminTenant = new UserGroupImpl(UUID.randomUUID(), "admin-tenant");
+        Map<String, UserGroup> defaultTenantForUser = new HashMap<>();
+        defaultTenantForUser.put("dummyServer", adminTenant);
+        testOwner = new UserImpl("admin", "admin@sapsailing.com", defaultTenantForUser,
+                /* userGroupProvider */ null);
     }
 
     private void newStores() {

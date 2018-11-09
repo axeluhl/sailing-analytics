@@ -106,6 +106,7 @@ import com.sap.sse.filestorage.FileStorageManagementService;
 import com.sap.sse.pairinglist.PairingList;
 import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 
@@ -858,4 +859,9 @@ public interface RacingEventService extends TrackedRegattaRegistry, RegattaFetch
      * to be in the {@link CompetitorStore}.
      */
     DynamicCompetitorWithBoat convertCompetitorDescriptorToCompetitorWithBoat(CompetitorDescriptor competitorDescriptor, String searchTag);
+
+    /**
+     * Required for replicated operations, so they can obtain a valid instance of the SecurityService
+     */
+    SecurityService getSecurityService();
 }

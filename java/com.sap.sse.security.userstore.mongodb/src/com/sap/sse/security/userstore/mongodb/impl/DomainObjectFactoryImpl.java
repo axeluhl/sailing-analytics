@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -161,7 +162,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         BasicDBList usersO = (BasicDBList) groupDBObject.get(FieldNames.UserGroup.USERNAMES.name());
         if (usersO != null) {
             for (Object o : usersO) {
-                users.add(new SecurityUserImpl((String) o, /* default tenant */ null));
+                users.add(new SecurityUserImpl((String) o));
             }
         }
         UserGroup result = new UserGroupImpl(id, name, users);
@@ -293,12 +294,20 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 permissions.add((String) o);
             }
         }
-        final UUID defaultTenantId = (UUID) userDBObject.get(FieldNames.User.DEFAULT_TENANT_ID.name());
-        final UserGroup defaultTenant = defaultTenantId == null ? null : tenants.get(defaultTenantId);
-        if (defaultTenantId != null && defaultTenant == null) {
-            logger.warning(
-                    "Couldn't find default tenant for user " + name + ". The default tenant was identified by ID "
-                            + defaultTenantId + " but no tenant with that ID was found");
+
+        final Map<String, UserGroup> defaultTenant = new ConcurrentHashMap<>();
+        final BasicDBList defaultTenantIds = (BasicDBList) userDBObject.get(FieldNames.User.DEFAULT_TENANT_IDS.name());
+        for (Object singleDefaultTenant : defaultTenantIds) {
+            BasicDBObject singleDefaultTenantObj = (BasicDBObject) singleDefaultTenant;
+            String serverName = singleDefaultTenantObj.getString(FieldNames.User.DEFAULT_TENANT_SERVER.name());
+            UUID groupId = (UUID) singleDefaultTenantObj.get(FieldNames.User.DEFAULT_TENANT_GROUP.name());
+            UserGroup tenantOfGroup = tenants.get(groupId);
+            if (tenantOfGroup == null) {
+                logger.warning("Couldn't find tenant for user " + name + ". The tenant was identified by ID " + groupId
+                        + " but no tenant with that ID was found");
+            } else {
+                defaultTenant.put(serverName, tenantOfGroup);
+            }
         }
         DBObject accountsMap = (DBObject) userDBObject.get(FieldNames.User.ACCOUNTS.name());
         Map<AccountType, Account> accounts = createAccountMapFromdDBObject(accountsMap);
@@ -326,7 +335,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final UUID qualifyingTenantId = (UUID) rolesO.get(FieldNames.Role.QUALIFYING_TENANT_ID.name());
         final UserGroup qualifyingTenant = qualifyingTenantId == null ? null : userGroups.get(qualifyingTenantId);
         final SecurityUser proxyQualifyingUser = rolesO.get(FieldNames.Role.QUALIFYING_USERNAME.name()) == null ? null
-                : new SecurityUserImpl((String) rolesO.get(FieldNames.Role.QUALIFYING_USERNAME.name()), /* default tenant */ null);
+                : new SecurityUserImpl((String) rolesO.get(FieldNames.Role.QUALIFYING_USERNAME.name()));
         return new RoleImpl(roleDefinition, qualifyingTenant, proxyQualifyingUser);
     }
 
