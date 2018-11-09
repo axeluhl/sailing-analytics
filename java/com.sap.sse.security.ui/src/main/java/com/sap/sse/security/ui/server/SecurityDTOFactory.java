@@ -15,7 +15,6 @@ import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.Ownership;
-import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleImpl;
@@ -43,10 +42,9 @@ public class SecurityDTOFactory {
         } else {
             result = fromOriginalToStrippedDownUser.get(user);
             if (result == null) {
-                final SecurityUserImpl preResult = new SecurityUserImpl(user.getName(), /* default tenant to be set later: */ null);
+                final SecurityUserImpl preResult = new SecurityUserImpl(user.getName());
                 result = preResult;
                 fromOriginalToStrippedDownUser.put(user, result);
-                preResult.setDefaultTenant(createUserGroupDTOFromUserGroup(user.getDefaultTenant(), fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
             }
         }
         return result;
@@ -78,7 +76,9 @@ public class SecurityDTOFactory {
                 createUserGroupDTOsFromUserGroups(securityService.getUserGroupsOfUser(user), fromOriginalToStrippedDownTenant,
                         fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
         fromOriginalToStrippedDownUser.put(user, userDTO);
-        userDTO.setDefaultTenant(createUserGroupDTOFromUserGroup(user.getDefaultTenant(), fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
+        userDTO.setDefaultTenantForCurrentServer(createUserGroupDTOFromUserGroup(securityService.getDefaultTenantForCurrentUser(),
+                fromOriginalToStrippedDownUser,
+                fromOriginalToStrippedDownUserGroup));
         SecurityDTOUtil.addSecurityInformation(this, securityService, userDTO, user.getIdentifier());
         return userDTO;
     }
@@ -178,25 +178,26 @@ public class SecurityDTOFactory {
     }
 
 
-    public OwnershipAnnotation createOwnershipAnnotationDTO(OwnershipAnnotation ownershipAnnotation) {
-        return new OwnershipAnnotation(createOwnershipDTO(ownershipAnnotation.getAnnotation()),
-                ownershipAnnotation.getIdOfAnnotatedObject(),
-                ownershipAnnotation.getDisplayNameOfAnnotatedObject());
-    }
+    // public OwnershipAnnotation createOwnershipAnnotationDTO(OwnershipAnnotation ownershipAnnotation) {
+    // return new OwnershipAnnotation(createOwnershipDTO(ownershipAnnotation.getAnnotation()),
+    // ownershipAnnotation.getIdOfAnnotatedObject(),
+    // ownershipAnnotation.getDisplayNameOfAnnotatedObject());
+    // }
     
-    public OwnershipAnnotation createOwnershipAnnotationDTO(OwnershipAnnotation ownershipAnnotation,
-            Map<UserGroup, UserGroup> fromOriginalToStrippedDownTenant,
-            Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser,
-            Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup) {
-        return new OwnershipAnnotation(createOwnershipDTO(ownershipAnnotation.getAnnotation(), fromOriginalToStrippedDownUser,
-                fromOriginalToStrippedDownUserGroup),
-                ownershipAnnotation.getIdOfAnnotatedObject(),
-                ownershipAnnotation.getDisplayNameOfAnnotatedObject());
-    }
+    // public OwnershipAnnotation createOwnershipAnnotationDTO(OwnershipAnnotation ownershipAnnotation,
+    // Map<UserGroup, UserGroup> fromOriginalToStrippedDownTenant,
+    // Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser,
+    // Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup) {
+    // return new OwnershipAnnotation(createOwnershipDTO(ownershipAnnotation.getAnnotation(),
+    // fromOriginalToStrippedDownUser,
+    // fromOriginalToStrippedDownUserGroup),
+    // ownershipAnnotation.getIdOfAnnotatedObject(),
+    // ownershipAnnotation.getDisplayNameOfAnnotatedObject());
+    // }
     
-    public Ownership createOwnershipDTO(Ownership ownership) {
-        return createOwnershipDTO(ownership, new HashMap<>(), new HashMap<>());
-    }
+    // public Ownership createOwnershipDTO(Ownership ownership) {
+    // return createOwnershipDTO(ownership, new HashMap<>(), new HashMap<>());
+    // }
     
     public Ownership createOwnershipDTO(Ownership ownership, Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser,
             Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup) {

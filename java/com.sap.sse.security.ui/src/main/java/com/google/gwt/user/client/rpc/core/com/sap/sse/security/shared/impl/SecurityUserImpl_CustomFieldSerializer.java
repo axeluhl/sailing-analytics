@@ -8,7 +8,6 @@ import com.google.gwt.user.client.rpc.SerializationStreamReader;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.Role;
-import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.SecurityUserImpl;
 
@@ -26,7 +25,6 @@ public class SecurityUserImpl_CustomFieldSerializer extends CustomFieldSerialize
         final ArrayList<Role> rolesAsList = new ArrayList<>();
         Util.addAll(instance.getRoles(), rolesAsList);
         streamWriter.writeObject(rolesAsList);
-        streamWriter.writeObject(instance.getDefaultTenant());
         final ArrayList<WildcardPermission> permissionsAsList = new ArrayList<>();
         Util.addAll(instance.getPermissions(), permissionsAsList);
         streamWriter.writeObject(permissionsAsList);
@@ -46,10 +44,9 @@ public class SecurityUserImpl_CustomFieldSerializer extends CustomFieldSerialize
         final String name = streamReader.readString();
         @SuppressWarnings("unchecked")
         final ArrayList<Role> roles = (ArrayList<Role>) streamReader.readObject();
-        final UserGroup defaultTenant = (UserGroup) streamReader.readObject();
         @SuppressWarnings("unchecked")
         final ArrayList<WildcardPermission> permissions = (ArrayList<WildcardPermission>) streamReader.readObject();
-        return new SecurityUserImpl(name, roles, defaultTenant, permissions);
+        return new SecurityUserImpl(name, roles, permissions);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.sap.sse.security.userstore.mongodb.impl;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -175,7 +176,16 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             dbPermissions.add(permission.toString());
         }
         dbUser.put(FieldNames.User.PERMISSIONS.name(), dbPermissions);
-        dbUser.put(FieldNames.User.DEFAULT_TENANT_ID.name(), user.getDefaultTenant() == null ? null : user.getDefaultTenant().getId());
+
+        List<Object> defaultTennants = new BasicDBList();
+        for(Entry<String, UserGroup> entries:user.getDefaultTenantMap().entrySet()) {
+            BasicDBObject tenant = new BasicDBObject();
+            tenant.put(FieldNames.User.DEFAULT_TENANT_SERVER.name(), entries.getKey());
+            tenant.put(FieldNames.User.DEFAULT_TENANT_GROUP.name(), entries.getValue().getId());
+            defaultTennants.add(tenant);
+        }
+        defaultTennants.add(new BasicDBObject("milestone_id", "2333"));
+        dbUser.put(FieldNames.User.DEFAULT_TENANT_IDS.name(), defaultTennants);
         usersCollection.update(query, dbUser, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
     }
     

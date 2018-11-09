@@ -117,7 +117,7 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
         assertNotNull(securityService);
         {
             User admin = userStore.getUserByName("admin");
-            UserGroup adminTenant = admin.getDefaultTenant();
+            UserGroup adminTenant = admin.getDefaultTenant("testserver");
             assertTrue(adminTenant.contains(admin));
             assertTrue(Util.contains(admin.getUserGroups(), adminTenant));
         }
@@ -125,7 +125,7 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
         assertNotNull(deserializedUserStore);
         {
             User admin = deserializedUserStore.getUserByName("admin");
-            UserGroup adminTenant = admin.getDefaultTenant();
+            UserGroup adminTenant = admin.getDefaultTenant("testserver");
             assertTrue(adminTenant.contains(admin));
             assertTrue(Util.contains(admin.getUserGroups(), adminTenant));
         }

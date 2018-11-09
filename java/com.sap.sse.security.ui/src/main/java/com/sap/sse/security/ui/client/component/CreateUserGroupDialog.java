@@ -36,7 +36,7 @@ public class CreateUserGroupDialog extends DataEntryDialog<UserGroupData> {
         this(stringMessages, stringMessages.createUserGroup(), stringMessages.enterUserGroupName(), userManagementService, null, new DialogCallback<UserGroupData>() {
             @Override
             public void ok(UserGroupData userGroupData) {
-                userManagementService.createUserGroup(userGroupData.name, "tenant", new AsyncCallback<UserGroup>() {
+                        userManagementService.createUserGroup(userGroupData.name, new AsyncCallback<UserGroup>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         Window.alert("Error creating tenant.");

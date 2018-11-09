@@ -80,7 +80,7 @@ public class LoginPanel extends HorizontalPanel implements UserStatusEventHandle
                     public void ok(final UserData userData) {
                         userManagementService.createSimpleUser(userData.getUsername(), userData.getEmail(), userData.getPassword(),
                                 /* fullName */ null, /* company */ null, LocaleInfo.getCurrentLocale().getLocaleName(),
-                                EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()), "tenant",
+                                        EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()),
                                 new MarkedAsyncCallback<UserDTO>(new AsyncCallback<UserDTO>() {
                             @Override
                             public void onFailure(Throwable caught) {

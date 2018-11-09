@@ -25,6 +25,7 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable, Secured
     private List<UserGroup> groups;
     private AccessControlList accessControlList;
     private Ownership ownership;
+    private UserGroup defaultTenantForCurrentServer;
 
     /**
      * @param groups may be {@code null} which is equivalent to passing an empty groups collection
@@ -32,7 +33,8 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable, Secured
     public UserDTO(String name, String email, String fullName, String company, String locale, boolean emailValidated,
             List<AccountDTO> accounts, Iterable<Role> roles, UserGroup defaultTenant, Iterable<WildcardPermission> permissions,
             Iterable<UserGroup> groups) {
-        super(name, roles, defaultTenant, permissions);
+        super(name, roles, permissions);
+        this.defaultTenantForCurrentServer = defaultTenant;
         this.email = email;
         this.fullName = fullName;
         this.company = company;
@@ -41,6 +43,13 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable, Secured
         this.accounts = accounts;
         this.groups = new ArrayList<>();
         Util.addAll(groups, this.groups);
+    }
+
+    /**
+     * The tenant to use as {@link Ownership#getTenantOwner() tenant owner} of new objects created by this user
+     */
+    public UserGroup getDefaultTenant() {
+        return defaultTenantForCurrentServer;
     }
 
     public String getFullName() {
@@ -115,5 +124,9 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable, Secured
     @Override
     public final void setOwnership(final Ownership ownership) {
         this.ownership = ownership;
+    }
+    
+    public void setDefaultTenantForCurrentServer(UserGroup defaultTenant) {
+        this.defaultTenantForCurrentServer = defaultTenant;
     }
 }

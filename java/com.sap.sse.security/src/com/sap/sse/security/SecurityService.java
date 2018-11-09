@@ -93,7 +93,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * Same as {@link #setOwnership(String, UserImpl, Tenant, String)}, leaving the display name
      * of the object owned undefined.
      */
-    Ownership setOwnership(QualifiedObjectIdentifier idOfOwnedObject, SecurityUser userOwner, UserGroup tenantOwner);
+    Ownership setOwnership(QualifiedObjectIdentifier idOfOwnedObject, User userOwner, UserGroup tenantOwner);
 
     /**
      * @param idOfOwnedObject
@@ -109,7 +109,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      *            as the object identified by {@link idOfOwnedObject} may change its name without notifying this
      *            store
      */
-    Ownership setOwnership(QualifiedObjectIdentifier idOfOwnedObject, SecurityUser userOwner, UserGroup tenantOwner, String displayNameOfOwnedObject);
+    Ownership setOwnership(QualifiedObjectIdentifier idOfOwnedObject, User userOwner, UserGroup tenantOwner,
+            String displayNameOfOwnedObject);
 
     void deleteOwnership(QualifiedObjectIdentifier idOfOwnedObject);
 
@@ -157,7 +158,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * @param validationBaseURL if <code>null</code>, no validation will be attempted
      */
     UserImpl createSimpleUser(String username, String email, String password, String fullName, String company,
-            Locale locale, String validationBaseURL, String tenantOwner)
+            Locale locale, String validationBaseURL)
             throws UserManagementException, MailException, UserGroupManagementException;
 
     void updateSimpleUserPassword(String name, String newPassword) throws UserManagementException;
@@ -327,19 +328,12 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     UserGroup getDefaultTenant();
 
-    <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(UserGroup tenantOwner, HasPermissions type,
+    <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
             String typeRelativeObjectIdentifier,
             String securityDisplayName, ActionWithResult<T> createActionReturningCreatedObject);
 
-    <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(String tenantOwnerName, HasPermissions type,
-            String typeRelativeObjectIdentifier, String securityDisplayName,
-            ActionWithResult<T> createActionReturningCreatedObject);
-
-    void setOwnershipCheckPermissionForObjectCreationAndRevertOnError(UserGroup tenantOwner, HasPermissions type,
+    void setOwnershipCheckPermissionForObjectCreationAndRevertOnError(HasPermissions type,
             String typeRelativeObjectIdentifier, String securityDisplayName, Action actionToCreateObject);
-
-    <T> T setOwnershipCheckCreatePermissionAndRevertOnError(String tenantOwnerName, HasPermissions type,
-            String typeRelativeObjectIdentifier, String securityDisplayName, ActionWithResult<T> createActionReturningCreatedObject);
 
     User getAllUser();
 
@@ -379,4 +373,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
             RoleDefinition roleToCheck);
 
     boolean hasCurrentUserMetaPermission(WildcardPermission permissionToCheck, Ownership ownership);
+
+    void setOwnershipIfNotSet(QualifiedObjectIdentifier identifier, UserGroup defaultTenant);
+
+    UserGroup getDefaultTenantForCurrentUser();
 }

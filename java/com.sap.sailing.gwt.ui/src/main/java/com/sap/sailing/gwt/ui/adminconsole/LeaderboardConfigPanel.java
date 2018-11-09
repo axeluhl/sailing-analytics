@@ -923,7 +923,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             @Override
             public void ok(final LeaderboardDescriptor newLeaderboard) {
                         sailingService.createFlexibleLeaderboard(
-                                userService.getCurrentTenantName(), newLeaderboard.getName(),
+                                newLeaderboard.getName(),
                                 newLeaderboard.getDisplayName(),
                         newLeaderboard.getDiscardThresholds(), newLeaderboard.getScoringScheme(), newLeaderboard.getCourseAreaId(),
                         new MarkedAsyncCallback<StrippedLeaderboardDTO>(
@@ -955,8 +955,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             @Override
             public void ok(final LeaderboardDescriptor newLeaderboard) {
                 RegattaIdentifier regattaIdentifier = new RegattaName(newLeaderboard.getRegattaName());
-                        sailingService.createRegattaLeaderboard(
-                                userService.getCurrentTenantName(), regattaIdentifier,
+                        sailingService.createRegattaLeaderboard(regattaIdentifier,
                                 newLeaderboard.getDisplayName(), newLeaderboard.getDiscardThresholds(),
                         new AsyncCallback<StrippedLeaderboardDTO>() {
                     @Override
@@ -988,7 +987,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             @Override
             public void ok(final LeaderboardDescriptorWithEliminations newLeaderboard) {
                         sailingService.createRegattaLeaderboardWithEliminations(
-                                userService.getCurrentTenantName(), newLeaderboard.getName(),
+                                newLeaderboard.getName(),
                                 newLeaderboard.getDisplayName(),
                         newLeaderboard.getRegattaName(), new AsyncCallback<StrippedLeaderboardDTO>() {
                     @Override

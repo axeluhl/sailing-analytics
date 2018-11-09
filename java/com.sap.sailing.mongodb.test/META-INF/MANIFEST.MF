@@ -32,7 +32,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.tractracadapter.persistence,
  com.sap.sailing.domain.swisstimingadapter.persistence,
  com.sap.sailing.domain.racelogtrackingadapter,
- com.sap.sailing.domain.swisstimingreplayadapter
+ com.sap.sailing.domain.swisstimingreplayadapter,
+ com.sap.sse.security
 Import-Package: com.sap.sailing.domain.common,
  com.sap.sailing.domain.common.impl,
  com.sap.sailing.domain.common.racelog,

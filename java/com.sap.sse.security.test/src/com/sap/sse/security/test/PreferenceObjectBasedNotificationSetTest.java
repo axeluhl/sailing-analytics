@@ -5,8 +5,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 import org.junit.Before;
@@ -37,6 +39,7 @@ public class PreferenceObjectBasedNotificationSetTest {
 
     private UserStoreImpl store;
     
+    private static final String serverName = "dummyServer";
     private static final String user1 = "me";
     private static final String user2 = "somebody_else";
     private static final String mail = "anonymous@sapsailing.com";
@@ -266,9 +269,12 @@ public class PreferenceObjectBasedNotificationSetTest {
     }
     
     private void createUserWithVerifiedEmail(String username, String email) throws UserManagementException, UserGroupManagementException {
-        UserGroup defaultTenant = store.createUserGroup(UUID.randomUUID(), username+"-tenant");
-        store.createUser(username, email, defaultTenant);
-        store.updateUser(new UserImpl(username, email, null, null, null, true, null, null, defaultTenant, Collections.emptySet(), /* userGroupProvider */ null));
+        UserGroup defaultTenantForSingleServer = store.createUserGroup(UUID.randomUUID(), username + "-tenant");
+        Map<String, UserGroup> defaultTenantForServer = new ConcurrentHashMap<>();
+        defaultTenantForServer.put(serverName, defaultTenantForSingleServer);
+        store.createUser(username, email, defaultTenantForSingleServer);
+        store.updateUser(new UserImpl(username, email, null, null, null, true, null, null, defaultTenantForServer,
+                Collections.emptySet(), /* userGroupProvider */ null));
     }
     
     private static class PreferenceObjectBasedNotificationSetImpl extends PreferenceObjectBasedNotificationSet<HashSet<String>, String> {
