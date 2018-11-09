@@ -15,7 +15,11 @@ public interface PersistenceManager<T> {
 
     boolean collectionExists();
 
-    long countElements();
+    long countElements(String query);
+
+    default long countElements() {
+        return countElements(null);
+    }
 
     PersistedElementsIterator<T> getIterator(String query);
 

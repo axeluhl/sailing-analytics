@@ -50,8 +50,9 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
         return db.collectionExists(getCollectionName());
     }
 
-    public long countElements() {
-        return db.getCollection(getCollectionName()).count();
+    public long countElements(String query) {
+        DBObject dbQuery = query == null ? null : (DBObject) JSON.parse(query);
+        return db.getCollection(getCollectionName()).count(dbQuery);
     }
 
     @Override
@@ -138,7 +139,7 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
 
         public PersistedElementsIteratorImpl(String query) {
             this.query = query;
-            numberOfElements = countElements();
+            numberOfElements = countElements(query);
             LoggingUtil.logInfo(numberOfElements + " elements found in " + getCollectionName());
             prepareNext();
         }
