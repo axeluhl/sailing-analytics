@@ -136,6 +136,10 @@ public interface BoatClassImageResources extends ClientBundle {
     @ImageOptions(preventInlining = true)
     ImageResource FlyingJuniorIcon();
     
+    @Source("com/sap/sailing/gwt/ui/client/images/boatclass/FLYING_PHANTOM.png")
+    @ImageOptions(preventInlining = true)
+    ImageResource FlyingPhantomIcon();
+    
     @Source("com/sap/sailing/gwt/ui/client/images/boatclass/FLYING_DUTCHMAN.png")
     @ImageOptions(preventInlining = true)
     ImageResource FlyingDutchmanIcon();
