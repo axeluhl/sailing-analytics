@@ -184,7 +184,6 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
             tenant.put(FieldNames.User.DEFAULT_TENANT_GROUP.name(), entries.getValue().getId());
             defaultTennants.add(tenant);
         }
-        defaultTennants.add(new BasicDBObject("milestone_id", "2333"));
         dbUser.put(FieldNames.User.DEFAULT_TENANT_IDS.name(), defaultTennants);
         usersCollection.update(query, dbUser, /* upsrt */true, /* multi */false, WriteConcern.SAFE);
     }
