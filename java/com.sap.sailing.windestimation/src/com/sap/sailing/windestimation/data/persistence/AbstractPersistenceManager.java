@@ -131,7 +131,7 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
 
         private String lastDbId = null;
         private T nextElement = null;
-        private final long numberOfElements;
+        private long numberOfElements;
         private long currentElementNumber = 0;
         private int numberOfCharsDuringLastStatusLog = 0;
         private long limit = Long.MAX_VALUE;

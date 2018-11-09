@@ -274,11 +274,10 @@ public class WindEstimatorEvaluationResult {
                 + numberOfCorrectWindDirectionEstimations + "/"
                 + (numberOfCorrectWindDirectionEstimations + numberOfIncorrectWindDirectionEstimations) + " correct)");
         if (detailed) {
-            System.out.println(
-                    " Empty estimations: " + formatPercentage(getPercentageOfEmptyWindDirectionEstimations()) + " ("
-                            + numberOfEmptyWindDirectionEstimations + "/" + (numberOfCorrectWindDirectionEstimations
-                                    + numberOfIncorrectWindDirectionEstimations + numberOfEmptyWindDirectionEstimations)
-                            + " empty)");
+            System.out.println(" Empty estimations: " + formatPercentage(getPercentageOfEmptyWindDirectionEstimations())
+                    + " (" + numberOfEmptyWindDirectionEstimations + "/" + (numberOfCorrectWindDirectionEstimations
+                            + numberOfIncorrectWindDirectionEstimations + numberOfEmptyWindDirectionEstimations)
+                    + " empty)");
         }
         System.out.println(" Avg. wind course error : "
                 + formatDegrees(getAvgAbsWindCourseErrorInDegreesOfCorrectWindDirectionEstimations()));
@@ -372,7 +371,7 @@ public class WindEstimatorEvaluationResult {
 
     public WindEstimatorEvaluationResult getAvgAsSingleResult(double minAccuracyForCorrectEstimation) {
         if (getTotalNumberOfWindDirectionEstimations() == 0) {
-            return this;
+            return new WindEstimatorEvaluationResult(0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         }
         if (nullSafeDivision(getTotalNumberOfWindDirectionEstimations() - getTotalNumberOfWindSpeedEstimations(),
                 getTotalNumberOfWindDirectionEstimations() + getTotalNumberOfWindSpeedEstimations()) < 0.2) {
@@ -388,11 +387,13 @@ public class WindEstimatorEvaluationResult {
                     windSpeedCorrect ? getAvgAbsWindSpeedErrorInKnotsOfCorrectWindSpeedEstimations() : 0,
                     windSpeedCorrect ? 0 : getAvgAbsWindSpeedErrorInKnotsOfIncorrectWindSpeedEstimations(),
                     windCourseAndSpeedCorrect
-                            ? getAvgAbsWindCourseErrorInDegreesOfCorrectWindDirectionWithSpeedEstimations() : 0,
+                            ? getAvgAbsWindCourseErrorInDegreesOfCorrectWindDirectionWithSpeedEstimations()
+                            : 0,
                     windCourseAndSpeedCorrect ? 0
                             : getAvgAbsWindCourseErrorInDegreesOfIncorrectWindDirectionWithSpeedEstimations(),
                     windCourseAndSpeedCorrect
-                            ? getAvgAbsWindSpeedErrorInKnotsOfCorrectWindDirectionWithSpeedEstimations() : 0,
+                            ? getAvgAbsWindSpeedErrorInKnotsOfCorrectWindDirectionWithSpeedEstimations()
+                            : 0,
                     windCourseAndSpeedCorrect ? 0
                             : getAvgAbsWindSpeedErrorInKnotsOfIncorrectWindDirectionWithSpeedEstimations(),
                     windCourseCorrect ? getAvgConfidenceOfCorrectWindDirectionEstimations() : 0,

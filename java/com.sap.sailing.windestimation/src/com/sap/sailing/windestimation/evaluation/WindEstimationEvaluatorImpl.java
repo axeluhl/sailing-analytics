@@ -32,12 +32,12 @@ public class WindEstimationEvaluatorImpl<T> implements WindEstimatorEvaluator<T>
     private final double minAccuracyPerRaceForCorrectEstimation;
     private final boolean evaluationPerCompetitorTrack;
     private final boolean randomClippingOfCompetitorTracks;
-    private final int fixedNumberOfManeuvers;
+    private final Integer fixedNumberOfManeuvers;
 
     public WindEstimationEvaluatorImpl(double maxWindCourseDeviationInDegrees, double maxWindSpeedDeviationInPercent,
             double minAccuracyPerRaceForCorrectEstimation, boolean evaluationPerCompetitorTrack,
-            boolean randomClippingOfCompetitorTracks, int fixedNumberOfManeuversPerTrack) {
-        if (fixedNumberOfManeuversPerTrack > 0 && !randomClippingOfCompetitorTracks) {
+            boolean randomClippingOfCompetitorTracks, Integer fixedNumberOfManeuversPerTrack) {
+        if (fixedNumberOfManeuversPerTrack != null && !randomClippingOfCompetitorTracks) {
             throw new IllegalArgumentException(
                     "fixedNumberOfManeuversPerTrack requires randomClippingOfCompetitorTracks to be true");
         }
@@ -81,7 +81,7 @@ public class WindEstimationEvaluatorImpl<T> implements WindEstimatorEvaluator<T>
         WindEstimatorEvaluationResult mergedResult = new WindEstimatorEvaluationResult();
         for (RaceWithEstimationData<T> raceWithEstimationData : racesToEvaluate) {
             if (randomClippingOfCompetitorTracks) {
-                if (fixedNumberOfManeuvers == -1) {
+                if (fixedNumberOfManeuvers == null) {
                     raceWithEstimationData = new RaceWithRandomClippingPreprocessingPipelineImpl<T>(1,
                             Integer.MAX_VALUE).preprocessRace(raceWithEstimationData);
                 } else {
