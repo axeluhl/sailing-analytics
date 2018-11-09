@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import com.sap.sailing.domain.base.Competitor;
+import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.CourseArea;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
@@ -83,7 +84,15 @@ public class RegattaByKeywordSearchService {
                 leaderboardStrings.add(leaderboard.getDisplayName());
                 for (Competitor competitor : leaderboard.getCompetitors()) {
                     leaderboardStrings.add(competitor.getName());
-                    leaderboardStrings.add(competitor.getShortName());
+                    if (competitor.getShortName() != null) {
+                        leaderboardStrings.add(competitor.getShortName());
+                    }
+                    if (competitor.getSearchTag() != null) {
+                        leaderboardStrings.add(competitor.getSearchTag());
+                    }
+                    if (competitor.hasBoat() && ((CompetitorWithBoat) competitor).getBoat().getSailID() != null) {
+                        leaderboardStrings.add(((CompetitorWithBoat) competitor).getBoat().getSailID());
+                    }
                     String competitorDisplayName = leaderboard.getDisplayName(competitor);
                     if (competitorDisplayName != null) {
                         leaderboardStrings.add(competitorDisplayName);
