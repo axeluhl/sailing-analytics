@@ -117,13 +117,16 @@ dependencies {
 // Custom tasks
 preBuild.doLast {
     // save the combined build info into assets/build.info file
-    def result_line = "${grgit.branch.current()}-${grgit.head().abbreviatedId} (${new Date().toString()})\n"
+    def repo = org.ajoberstar.grgit.Grgit.open(dir: System.env.XMAKE_PROJECTDIR)
+    def result_line = "${repo.branch.current()}-${repo.head().abbreviatedId} (${new Date().toString()})\n"
     def assetsDir = android.sourceSets.main.assets.srcDirs.toArray()[1]
     delete(assetsDir)
     mkdir(assetsDir)
     def buildInfoFile = new File(assetsDir, 'build_gradle.info').getAbsolutePath()
     new File(buildInfoFile).write(result_line)
+    repo.close()
 }
+
 /**
  * Deletes apk and version from www apps directory
  */
