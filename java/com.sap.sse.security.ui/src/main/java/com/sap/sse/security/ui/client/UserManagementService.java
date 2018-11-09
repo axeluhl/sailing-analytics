@@ -61,7 +61,7 @@ public interface UserManagementService extends RemoteService {
     
     void deleteRoleDefinition(String roleDefinitionIdAsString);
     
-    void updateRoleDefinition(RoleDefinitionDTO roleWithNewProperties);
+    void updateRoleDefinition(RoleDefinitionDTO roleWithNewProperties) throws UnauthorizedException;
     
     ArrayList<RoleDefinitionDTO> getRoleDefinitions();
 
