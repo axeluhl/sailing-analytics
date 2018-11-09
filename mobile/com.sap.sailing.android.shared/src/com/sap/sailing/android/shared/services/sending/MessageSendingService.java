@@ -73,6 +73,8 @@ public class MessageSendingService extends Service implements MessageSendingList
 
     public static final String charsetName = "UTF-8";
 
+    public final static String CHANNEL_ID = "default";
+
     protected final static String TAG = MessageSendingService.class.getSimpleName();
 
     private ConnectivityManager connectivityManager;
@@ -233,7 +235,11 @@ public class MessageSendingService extends Service implements MessageSendingList
         if (persistenceManager.areIntentsDelayed()) {
             handleDelayedMessages();
         }
-        startForeground(NotificationHelper.getNotificationId(), NotificationHelper.getNotification(this));
+        // Starting in Android 8.0 (API level 26), all notifications must be assigned to a channel
+        CharSequence name = getString(R.string.service_info);
+        NotificationHelper.createNotificationChannel(this, CHANNEL_ID, name);
+
+        startForeground(NotificationHelper.getNotificationId(), NotificationHelper.getNotification(this, CHANNEL_ID));
         ExLog.i(this, TAG, "Sending Service on Create.");
     }
 
