@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import com.sap.sailing.domain.common.Wind;
@@ -80,13 +81,20 @@ public class WindEstimationEvaluatorImpl<T> implements WindEstimatorEvaluator<T>
         WindEstimatorEvaluationResult mergedResult = new WindEstimatorEvaluationResult();
         for (RaceWithEstimationData<T> raceWithEstimationData : racesToEvaluate) {
             if (randomClippingOfCompetitorTracks) {
-                raceWithEstimationData = new RaceWithRandomClippingPreprocessingPipelineImpl<T>(
-                        fixedNumberOfManeuvers == -1 ? 1 : fixedNumberOfManeuvers,
-                        fixedNumberOfManeuvers == -1 ? Integer.MAX_VALUE : fixedNumberOfManeuvers)
-                                .preprocessRace(raceWithEstimationData);
-                if (raceWithEstimationData.getCompetitorTracks().get(0).getElements()
-                        .size() != fixedNumberOfManeuvers) {
-                    continue;
+                if (fixedNumberOfManeuvers == -1) {
+                    raceWithEstimationData = new RaceWithRandomClippingPreprocessingPipelineImpl<T>(1,
+                            Integer.MAX_VALUE).preprocessRace(raceWithEstimationData);
+                } else {
+                    raceWithEstimationData = new RaceWithRandomClippingPreprocessingPipelineImpl<T>(
+                            fixedNumberOfManeuvers, fixedNumberOfManeuvers).preprocessRace(raceWithEstimationData);
+                    List<CompetitorTrackWithEstimationData<T>> newCompetitorTracks = raceWithEstimationData
+                            .getCompetitorTracks().stream()
+                            .filter(competitorTrack -> competitorTrack.getElements().size() == fixedNumberOfManeuvers)
+                            .collect(Collectors.toList());
+                    if (newCompetitorTracks.isEmpty()) {
+                        continue;
+                    }
+                    raceWithEstimationData = raceWithEstimationData.constructWithElements(newCompetitorTracks);
                 }
             }
             Map<TimePoint, Wind> targetWindPerTimePoint = new HashMap<>();

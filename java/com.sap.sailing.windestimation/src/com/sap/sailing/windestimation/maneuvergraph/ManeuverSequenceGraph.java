@@ -33,7 +33,7 @@ public class ManeuverSequenceGraph implements ManeuverClassificationsAggregator 
         this.maneuverClassifiersCache = maneuverClassifiersCache;
         this.bestPathsCalculator = bestPathsCalculator;
         List<ManeuverForEstimation> usefulManeuvers = EstimationDataUtil
-                .getManeuversSortedByTimePoint(competitorTracks);
+                .getUsefulManeuversSortedByTimePoint(competitorTracks);
         for (ManeuverForEstimation maneuver : usefulManeuvers) {
             appendManeuverAsGraphLevel(maneuver);
         }
