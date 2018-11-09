@@ -46,6 +46,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Pair;
 
+import static com.sap.sailing.android.shared.services.sending.MessageSendingService.CHANNEL_ID;
+
 public class RaceStateService extends Service {
 
     private final static String TAG = RaceStateService.class.getName();
@@ -89,6 +91,10 @@ public class RaceStateService extends Service {
     }
 
     private Notification setupNotification(String customContent) {
+        // Starting in Android 8.0 (API level 26), all notifications must be assigned to a channel
+        CharSequence name = getText(R.string.service_info);
+        NotificationHelper.createNotificationChannel(this, CHANNEL_ID, name);
+
         Intent launcherIntent = new Intent(this, LoginActivity.class);
         launcherIntent.setAction(Intent.ACTION_MAIN);
         launcherIntent.addCategory(Intent.CATEGORY_LAUNCHER);
@@ -96,7 +102,7 @@ public class RaceStateService extends Service {
         CharSequence title = getText(R.string.service_info);
         String content = customContent != null ? customContent : getString(R.string.service_text_no_races);
         int color = getResources().getColor(R.color.constant_sap_blue_1);
-        return NotificationHelper.getNotification(this, title, content, contentIntent, color);
+        return NotificationHelper.getNotification(this, CHANNEL_ID, title, content, contentIntent, color);
     }
 
     @Override

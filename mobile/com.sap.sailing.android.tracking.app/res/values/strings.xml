@@ -72,4 +72,5 @@
     <string name="content_description_flag_icon" translatable="false">flag icon</string>
     <string name="tracking_notification_text">Currently Tracking %s</string>
     <string name="waiting_for_gps">Waiting for GPS</string>
+    <string name="service_info" translatable="false">SAP Sail InSight Service</string>
 </resources>
