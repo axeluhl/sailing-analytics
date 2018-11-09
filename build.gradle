@@ -17,10 +17,7 @@ buildscript {
         classpath "com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.3"
         classpath "org.ajoberstar:grgit:2.3.0"
     }
-    repositories {
-        google()
     }
-}
 plugins {
 //    id "com.diffplug.gradle.spotless" version "3.14.0"
 }
