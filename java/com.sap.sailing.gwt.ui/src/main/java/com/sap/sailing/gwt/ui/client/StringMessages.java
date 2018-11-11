@@ -246,6 +246,8 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String numberOfFleets();
     String numberOfCompetitors();
     String quality();
+    String boatAssignmentQuality();
+    String boatChanges();
     String pairingListTemplate();
     String printHint();
     String blockedApplyButton();

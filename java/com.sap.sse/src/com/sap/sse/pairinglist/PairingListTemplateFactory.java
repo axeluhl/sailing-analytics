@@ -12,5 +12,5 @@ public interface PairingListTemplateFactory {
      * @param flightMultiplier specifies how often the flights will be repeated within a single {@link PairingList}
      * @return PairingListTemplate correlates with the new {@link PairingListTemplate}
      */
-    PairingListTemplate createPairingListTemplate(PairingFrameProvider pairingFrameProvider, int flightMultiplier, int tolerance);
+    PairingListTemplate createPairingListTemplate(PairingFrameProvider pairingFrameProvider, int flightMultiplier, int boatChangeFactor);
 }

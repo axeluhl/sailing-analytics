@@ -146,6 +146,6 @@ public class PairingListTemplateTest extends PairingListTemplateImpl {
                 { 17, 4, 5, 16, 8, 6 }, { 17, 4, 12, 15, 10, 7 }, { 3, 1, 11, 0, 8, 16 }, { 2, 9, 6, 5, 13, 14 },
                 { 0, 9, 17, 5, 3, 15 }, { 12, 7, 1, 13, 16, 6 }, { 10, 14, 2, 8, 11, 4 }, { 7, 14, 2, 17, 3, 16 },
                 { 15, 5, 10, 11, 1, 6 }, { 4, 12, 8, 9, 0, 13 } };
-    	Assert.assertEquals(56,this.getBoatchangesFromPairinglist(givenPairingList, 15, 3, 18));
+    	Assert.assertEquals(56,this.getBoatChangesFromPairingList(givenPairingList, 15, 3, 18));
     }
 }

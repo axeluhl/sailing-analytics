@@ -19,7 +19,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 	private final Random random = new Random();
 	private final int[][] pairingListTemplate;
 	private final double standardDev,assignmentQuality;
-	private final int flightMultiplier, tolerance,boatchanges;
+	private final int flightMultiplier, boatChangeFactor, boatchanges;
 	private final int dummies;
 	private final ExecutorService executorService = ThreadPoolUtil.INSTANCE
 			.getDefaultBackgroundTaskThreadPoolExecutor();
@@ -35,14 +35,14 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 		this(pairingFrameProvider, 100000, flightMultiplier, 0);
 	}
 	
-	public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider, int flighMultiplier, int tolerance) {
-	    this(pairingFrameProvider, 100000, flighMultiplier, tolerance);
+	public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider, int flighMultiplier, int boatChangeFactor) {
+	    this(pairingFrameProvider, 100000, flighMultiplier, boatChangeFactor);
 	}
 
-	public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider, int iterations, int flightMultiplier, int tolerance) {
+	public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider, int iterations, int flightMultiplier, int boatChangeFactor) {
 		this.iterations = iterations;
 		this.flightMultiplier = flightMultiplier;
-		this.tolerance = tolerance;
+		this.boatChangeFactor = boatChangeFactor;
 		if (this.checkValues(pairingFrameProvider.getFlightsCount(), pairingFrameProvider.getGroupsCount(),
 				pairingFrameProvider.getCompetitorsCount())) {
 			if (pairingFrameProvider.getCompetitorsCount() % pairingFrameProvider.getGroupsCount() != 0) {
@@ -54,14 +54,14 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 			if (flightMultiplier <= 1) {
 				this.pairingListTemplate = this.createPairingListTemplate(pairingFrameProvider.getFlightsCount(),
 						pairingFrameProvider.getGroupsCount(), pairingFrameProvider.getCompetitorsCount() + dummies);
-				this.boatchanges = this.getBoatchangesFromPairinglist(this.pairingListTemplate,
+				this.boatchanges = this.getBoatChangesFromPairingList(this.pairingListTemplate,
 						pairingFrameProvider.getFlightsCount(), pairingFrameProvider.getGroupsCount(),
 						pairingFrameProvider.getCompetitorsCount());
 			} else {
 				this.pairingListTemplate = this.createPairingListTemplate(
 						pairingFrameProvider.getFlightsCount() / flightMultiplier,
 						pairingFrameProvider.getGroupsCount(), pairingFrameProvider.getCompetitorsCount() + dummies);
-				this.boatchanges = this.getBoatchangesFromPairinglist(this.pairingListTemplate,
+				this.boatchanges = this.getBoatChangesFromPairingList(this.pairingListTemplate,
 						pairingFrameProvider.getFlightsCount(), pairingFrameProvider.getGroupsCount(),
 						pairingFrameProvider.getCompetitorsCount()) * flightMultiplier + flightMultiplier*(this.getMatches(this.pairingListTemplate[pairingListTemplate.length-1], this.pairingListTemplate[0]));
 			}
@@ -80,7 +80,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 	}
 
 	// Used to convert a TemplateDTO to PairingListTemplate
-	public PairingListTemplateImpl(int[][] template, int competitorsCount, int flightMultiplier, int tolerance) {
+	public PairingListTemplateImpl(int[][] template, int competitorsCount, int flightMultiplier, int boatChangeFactor) {
 		this.pairingListTemplate = template;
 		int groupCount = (int) (competitorsCount / this.pairingListTemplate[0].length);
 		if(groupCount!=(competitorsCount / this.pairingListTemplate[0].length))groupCount++;
@@ -105,12 +105,12 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 		this.assignmentQuality = this.calcStandardDev(getAssignmentAssociations(template,
 				new int[competitorsCount + this.dummies][(competitorsCount + this.dummies)
 						/ groupCount]));
-		this.boatchanges = this.getBoatchangesFromPairinglist(template,
+		this.boatchanges = this.getBoatChangesFromPairingList(template,
 				template.length / groupCount, groupCount, competitorsCount);
 		this.resetDummies(this.pairingListTemplate, competitorsCount + this.dummies);
 		this.iterations = 100000;
 		this.flightMultiplier = flightMultiplier;
-		this.tolerance = tolerance;
+		this.boatChangeFactor = boatChangeFactor;
 	}
 
 	@Override
@@ -585,7 +585,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                                             break;
                                     } else {
                                             int temp = 0;
-                                            int bestPosition = this.getBestPositionToChangeTo(groupAssignments[position[0]], prevPosition, this.tolerance);
+                                            int bestPosition = this.getBestPositionToChangeTo(groupAssignments[position[0]], prevPosition, this.boatChangeFactor);
                                             temp = pairingList[zGroup][bestPosition];
                                             pairingList[zGroup][bestPosition] = pairingList[zGroup][position[0]];
                                             pairingList[zGroup][position[0]] = temp;
@@ -729,11 +729,11 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 		return worstValuePos;
 	}
 	
-        private int getBestPositionToChangeTo(int[] arr, int previousPosition, int tolerance) {
+        private int getBestPositionToChangeTo(int[] arr, int previousPosition, int boatChangeFactor) {
             int[] temp = new int[arr.length];
             System.arraycopy(arr, 0, temp, 0, arr.length);
             Arrays.sort(temp);
-            for (int i = 0; i < tolerance; i++) {
+            for (int i = 0; i < boatChangeFactor; i++) {
                 for (int j = 0; j < arr.length; j++) {
                     if (temp[i] == arr[j] && j == previousPosition) {
                         return j;
@@ -880,7 +880,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 		return bestPLT;
 	}
 
-	protected int getBoatchangesFromPairinglist(int[][] pairinglist, int flightcount, int groupcount,
+	protected int getBoatChangesFromPairingList(int[][] pairinglist, int flightcount, int groupcount,
 			int competitorcount) {
 		int sumOfBoatchanges = 0;
 		for (int groupindex = groupcount-1; groupindex < flightcount * groupcount; groupindex += groupcount) {
