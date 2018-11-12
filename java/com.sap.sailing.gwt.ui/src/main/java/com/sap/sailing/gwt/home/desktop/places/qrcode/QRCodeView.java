@@ -58,6 +58,10 @@ public class QRCodeView extends Composite {
             subtitleDivUi.setInnerText(
                     StringMessages.INSTANCE.qrCodeSubtitle(event.getDisplayName(), event.getLocationAndVenue()));
             break;
+        case PUBLIC_INVITE:
+            titleDivUi.setInnerText("QrCodeTitle");
+            subtitleDivUi.setInnerText("QRCodeSubtitle");
+            break;
         case BOUY_TENDER:
             titleDivUi.setInnerText(StringMessages.INSTANCE.qrCodeTitleBouy(leaderboardName));
             subtitleDivUi.setInnerText(
@@ -82,9 +86,11 @@ public class QRCodeView extends Composite {
                     }
                 }).inject();
 
-        eventImageUi.getStyle().setBackgroundImage("url('" + event.getLogoImage().getSourceRef() + "')");
-        eventImageUi.getStyle().setWidth(event.getLogoImage().getWidthInPx(), Unit.PX);
-        eventImageUi.getStyle().setHeight(event.getLogoImage().getHeightInPx(), Unit.PX);
+        if (event != null) {
+            eventImageUi.getStyle().setBackgroundImage("url('" + event.getLogoImage().getSourceRef() + "')");
+            eventImageUi.getStyle().setWidth(event.getLogoImage().getWidthInPx(), Unit.PX);
+            eventImageUi.getStyle().setHeight(event.getLogoImage().getHeightInPx(), Unit.PX);
+        }
     }
 
     public void setError() {

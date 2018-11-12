@@ -34,6 +34,7 @@ public class QRCodePlace extends AbstractBasePlace {
 
     public enum InvitationMode {
         COMPETITOR,
+        PUBLIC_INVITE,
         BOUY_TENDER
     }
 

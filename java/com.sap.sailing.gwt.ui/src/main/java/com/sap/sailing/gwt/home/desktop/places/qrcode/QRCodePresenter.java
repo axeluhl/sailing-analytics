@@ -30,18 +30,23 @@ public class QRCodePresenter {
     }
 
     public void setView(QRCodeView view) {
-        if (eventId == null || invitationMode == InvitationMode.COMPETITOR && competitorId == null
-                || leaderboardNameFromUrl == null
-                || leaderboardNameFromUrl.equals("") || checkInUrl == null || checkInUrl.equals("")) {
-            view.setError();
-        } else {
+        if (invitationMode == InvitationMode.PUBLIC_INVITE) {
             dataCollector = new DataCollector(view);
-            if (competitorId != null) {
-                retrieveCompetitor(competitorId);
+            dataCollector.proceedIfFinished();
+        } else {
+            if (eventId == null || invitationMode == InvitationMode.COMPETITOR && competitorId == null
+                    || leaderboardNameFromUrl == null || leaderboardNameFromUrl.equals("") || checkInUrl == null
+                    || checkInUrl.equals("")) {
+                view.setError();
             } else {
-                dataCollector.setCompetitor(null);
+                dataCollector = new DataCollector(view);
+                if (competitorId != null) {
+                    retrieveCompetitor(competitorId);
+                } else {
+                    dataCollector.setCompetitor(null);
+                }
+                retrieveEvent(eventId);
             }
-            retrieveEvent(eventId);
         }
     }
 
@@ -104,30 +109,43 @@ public class QRCodePresenter {
         }
 
         private void proceedIfFinished() {
-            if (competitorIsSet && eventIsSet) {
-                if (checkInUrl != null && event != null) {
-                    String branchIoUrl = null;
-                    switch (invitationMode) {
-                    case BOUY_TENDER:
-                        branchIoUrl = BranchIOConstants.BUOYPINGER_APP_BRANCHIO + "?"
-                                + BranchIOConstants.BUOYPINGER_APP_BRANCHIO_PATH + "="
-                                + QRCodePresenter.this.checkInUrl;
-                        break;
-                    case COMPETITOR:
-                        branchIoUrl = BranchIOConstants.SAILINSIGHT_APP_BRANCHIO + "?"
-                                + BranchIOConstants.SAILINSIGHT_APP_BRANCHIO_PATH + "="
-                                + QRCodePresenter.this.checkInUrl;
-                        break;
-                    default:
-                        break;
+            if (invitationMode == InvitationMode.PUBLIC_INVITE) {
+                if (checkInUrl != null) {
+                    String branchIoUrl = BranchIOConstants.OPEN_REGATTA_APP_BRANCHIO + "?"
+                            + BranchIOConstants.OPEN_REGATTA_APP_BRANCHIO_PATH + "="
+                            + QRCodePresenter.this.checkInUrl;
+                    view.setData(null, null, "", branchIoUrl, invitationMode);
+                }
+            } else {
+                if (competitorIsSet && eventIsSet) {
+                    if (checkInUrl != null && event != null) {
+                        String branchIoUrl = null;
+                        switch (invitationMode) {
+                        case BOUY_TENDER:
+                            branchIoUrl = BranchIOConstants.BUOYPINGER_APP_BRANCHIO + "?"
+                                    + BranchIOConstants.BUOYPINGER_APP_BRANCHIO_PATH + "="
+                                    + QRCodePresenter.this.checkInUrl;
+                            break;
+                        case COMPETITOR:
+                            branchIoUrl = BranchIOConstants.SAILINSIGHT_APP_BRANCHIO + "?"
+                                    + BranchIOConstants.SAILINSIGHT_APP_BRANCHIO_PATH + "="
+                                    + QRCodePresenter.this.checkInUrl;
+                            break;
+                        case PUBLIC_INVITE:
+                            branchIoUrl = BranchIOConstants.OPEN_REGATTA_APP_BRANCHIO + "?"
+                                    + BranchIOConstants.OPEN_REGATTA_APP_BRANCHIO_PATH + "="
+                                    + QRCodePresenter.this.checkInUrl;
+                        default:
+                            break;
+                        }
+                        view.setData(event, competitor, leaderboardNameFromUrl, branchIoUrl, invitationMode);
+                    } else {
+                        view.setError();
+                        GWT.log("checkInUrl " + checkInUrl);
+                        GWT.log("competitorId " + competitorId);
+                        GWT.log("invitationMode " + invitationMode);
+                        GWT.log("eventId " + eventId);
                     }
-                    view.setData(event, competitor, leaderboardNameFromUrl, branchIoUrl, invitationMode);
-                } else {
-                    view.setError();
-                    GWT.log("checkInUrl " + checkInUrl);
-                    GWT.log("competitorId " + competitorId);
-                    GWT.log("invitationMode " + invitationMode);
-                    GWT.log("eventId " + eventId);
                 }
             }
         }
