@@ -590,6 +590,7 @@ import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
@@ -4689,7 +4690,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public ServerConfigurationDTO getServerConfiguration() {
         SailingServerConfiguration sailingServerConfiguration = getService().getSailingServerConfiguration();
-        ServerConfigurationDTO result = new ServerConfigurationDTO(sailingServerConfiguration.isStandaloneServer());
+        ServerConfigurationDTO result = new ServerConfigurationDTO(sailingServerConfiguration.isStandaloneServer(),
+                isPublicServer(), isSelfServiceServer());
         return result;
     }
     
@@ -8425,7 +8427,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void setDefaultTenantForCurrentServer(String tennant) {
-        // TODO Auto-generated method stub
+        User user = getSecurityService().getCurrentUser();
+        if (user != null) {
+            if (tennant == null) {
+                user.getDefaultTenantMap().remove(ServerInfo.getName());
+            } else {
+                UserGroup userGroupCandidate = getSecurityService().getUserGroupByName(tennant);
+                // FIXME allow admins to pose as any tenant?
+                if (Util.contains(user.getUserGroups(), userGroupCandidate)) {
+                    user.getDefaultTenantMap().put(ServerInfo.getName(), userGroupCandidate);
+                }
+            }
+        }
     }
 
     @Override
@@ -8436,5 +8449,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             tenants.add(group.getName());
         }
         return tenants;
+    }
+
+    private boolean isSelfServiceServer() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    private boolean isPublicServer() {
+        // TODO Auto-generated method stub
+        return false;
     }
 }

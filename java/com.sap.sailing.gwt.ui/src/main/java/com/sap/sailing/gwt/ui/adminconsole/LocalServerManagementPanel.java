@@ -25,6 +25,8 @@ public class LocalServerManagementPanel extends SimplePanel {
     private CheckBox isStandaloneServerCheckbox;
     private Label serverNameLabel;
     private Label buildVersionLabel;
+    private CheckBox isPublicServer;
+    private CheckBox isSelfServiceServer;
 
     public LocalServerManagementPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             StringMessages stringMessages) {
@@ -74,17 +76,30 @@ public class LocalServerManagementPanel extends SimplePanel {
                 serverConfigurationChanged();
             }
         });
+
+        isPublicServer = new CheckBox();
+        isPublicServer.setEnabled(false);
+        isSelfServiceServer = new CheckBox();
+        isSelfServiceServer.setEnabled(false);
     
-        Grid grid = new Grid(2, 2);
+        Grid grid = new Grid(3, 2);
         grid.setWidget(0, 0, new Label(stringMessages.standaloneServer() + ":"));
         grid.setWidget(0, 1, isStandaloneServerCheckbox);
+
+        grid.setWidget(1, 0, new Label(stringMessages.isPublic() + ":"));
+        grid.setWidget(1, 1, isPublicServer);
+
+        grid.setWidget(2, 0, new Label(stringMessages.selfServiceServer() + ":"));
+        grid.setWidget(2, 1, isSelfServiceServer);
+
         serverConfigurationContentPanel.add(grid);
         
         refreshServerConfiguration();
     }    
 
     private void serverConfigurationChanged() {
-        ServerConfigurationDTO serverConfig = new ServerConfigurationDTO(isStandaloneServerCheckbox.getValue());
+        ServerConfigurationDTO serverConfig = new ServerConfigurationDTO(isStandaloneServerCheckbox.getValue(),
+                isPublicServer.getValue(), isSelfServiceServer.getValue());
         
         sailingService.updateServerConfiguration(serverConfig, new AsyncCallback<Void>() {
             @Override
@@ -134,5 +149,7 @@ public class LocalServerManagementPanel extends SimplePanel {
     
     private void updateServerConfiguration(ServerConfigurationDTO result) {
         isStandaloneServerCheckbox.setValue(result.isStandaloneServer(), true); 
+        isPublicServer.setValue(result.isPublic(), true);
+        isSelfServiceServer.setValue(result.isSelfService(), true);
     }
 }
