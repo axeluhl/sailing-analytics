@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.net.Uri;
+import android.support.annotation.Nullable;
 import android.support.annotation.StyleRes;
 import android.support.v7.app.AlertDialog;
 import android.text.SpannableString;
@@ -25,6 +26,11 @@ import android.view.View;
 import android.widget.TextView;
 
 public class EulaHelper {
+
+    public interface OnEulaAcceptedListener {
+        void eulaAccepted();
+    }
+
     private static final String EULA_PREFERENCES = "eula.preferences";
     private static final String EULA_CONFIRMED = "confirmed";
 
@@ -40,11 +46,15 @@ public class EulaHelper {
         return new EulaHelper(context);
     }
 
-    public void showEulaDialog() {
-        showEulaDialog(NO_THEME);
+    public void showEulaDialogIfNotAccepted(OnEulaAcceptedListener acceptedHandler) {
+        if (!this.isEulaAccepted()) {
+            showEulaDialog(R.style.AppTheme_AlertDialog, acceptedHandler);
+            return;
+        }
+        acceptedHandler.eulaAccepted();
     }
 
-    public void showEulaDialog(@StyleRes int theme) {
+    public void showEulaDialog(@StyleRes int theme, @Nullable final OnEulaAcceptedListener acceptedHandler) {
         AlertDialog.Builder builder;
         switch (theme) {
         case NO_THEME:
@@ -62,9 +72,13 @@ public class EulaHelper {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 storeEulaAccepted();
+                if (acceptedHandler != null) {
+                    acceptedHandler.eulaAccepted();
+                }
             }
         });
         AlertDialog alertDialog = builder.show();
+        alertDialog.setCanceledOnTouchOutside(false);        
         ((TextView) alertDialog.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
     }
 

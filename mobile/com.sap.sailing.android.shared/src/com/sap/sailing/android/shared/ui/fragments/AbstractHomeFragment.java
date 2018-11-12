@@ -9,6 +9,7 @@ import com.sap.sailing.android.shared.ui.activities.AbstractStartActivity;
 import com.sap.sailing.android.shared.ui.activities.BarcodeCaptureActivity;
 import com.sap.sailing.android.shared.ui.adapters.AbstractRegattaAdapter;
 import com.sap.sailing.android.shared.util.BaseAppPreferences;
+import com.sap.sailing.domain.common.racelog.tracking.DeviceMappingConstants;
 
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
@@ -76,6 +77,13 @@ public abstract class AbstractHomeFragment extends BaseFragment {
     protected void handleQRCode(String qrCode) {
         ExLog.i(getActivity(), TAG, "Parsing URI: " + qrCode);
         Uri uri = Uri.parse(qrCode);
+        // if we use the app (and not an external QR code reader) to scan a QR code which contains
+        // a branch.io deeplink, we have to extract the checkin url from this deeplink here
+        String checkinUrl = uri.getQueryParameter(DeviceMappingConstants.URL_CHECKIN_URL);
+        if (checkinUrl != null) {
+            handleScannedOrUrlMatchedUri(Uri.parse(checkinUrl));
+            return;
+        }
         handleScannedOrUrlMatchedUri(uri);
     }
 

@@ -28,6 +28,7 @@
         <activity
             android:name=".ui.activities.StartActivity"
             android:label="@string/app_name"
+            android:launchMode="singleTask"
             android:theme="@style/launchScreenTheme"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -36,22 +37,30 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
+
+            <intent-filter>
+                <data android:scheme="comsapsailingtracker" />
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
-
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-
-                <data
-                    android:host="*"
-                    android:scheme="http"
-                    android:pathPattern="/tracking/checkin.*"/>
-
-                <data
-                    android:host="*"
-                    android:scheme="https"
-                    android:pathPattern="/tracking/checkin.*"/>
+                <data android:host="*" android:pathPattern="/tracking/checkin.*" android:scheme="http"/>
+                <data android:host="*" android:pathPattern="/tracking/checkin.*" android:scheme="https"/>
             </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="sailinsight-app.sapsailing.com" />
+                <data android:scheme="https" android:host="sapsailinsight-alternate.app.link" />
+            </intent-filter>
+
         </activity>
         <activity
             android:name=".ui.activities.LeaderboardWebViewActivity"
@@ -137,6 +146,9 @@
                     android:name="android.support.FILE_PROVIDER_PATHS"
                     android:resource="@xml/filepaths" />
         </provider>
+
+        <meta-data android:name="io.branch.sdk.BranchKey" android:value="key_live_ges90RzIjjgM0vg8wbTtYcdmtCeYJMAZ" />
+
     </application>
 
 </manifest>
