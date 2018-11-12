@@ -10,12 +10,8 @@ public class UserRole extends RolePrototype {
 
     UserRole() {
         super("user", "ad1d5148-b13d-4464-90c4-7c396e4d4e2e",
-                new WildcardPermission(SecuredSecurityTypes.USER.getStringPermission(DefaultActions.UPDATE)),
-                new WildcardPermission(SecuredSecurityTypes.USER.getStringPermission(DefaultActions.READ)),
-                new WildcardPermission("*:" + DefaultActions.CREATE.name() + ":*"),
-                new WildcardPermission("*:" + DefaultActions.READ.name() + ":*"),
-                new WildcardPermission("*:" + DefaultActions.UPDATE.name() + ":*"),
-                new WildcardPermission("*:" + DefaultActions.DELETE.name() + ":*"));
+                new WildcardPermission(SecuredSecurityTypes.USER.getStringPermission(DefaultActions.READ, DefaultActions.UPDATE)),
+                WildcardPermission.builder().withActions(DefaultActions.READ_AND_WRITE_ACTIONS).build());
     }
 
     public static UserRole getInstance() {
