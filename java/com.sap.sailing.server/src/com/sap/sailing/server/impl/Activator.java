@@ -54,6 +54,7 @@ import com.sap.sse.mail.queue.impl.ExecutorMailQueue;
 import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.security.PreferenceConverter;
+import com.sap.sse.security.RolePrototypeProvider;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissionsProvider;
 import com.sap.sse.util.ClearStateTestSupport;
@@ -120,8 +121,11 @@ public class Activator implements BundleActivator {
 
         trackedRegattaListener = new OSGiBasedTrackedRegattaListener(context);
         
-        registrations.add(context.registerService(HasPermissionsProvider.class.getName(),
+        registrations.add(context.registerService(HasPermissionsProvider.class,
                 (HasPermissionsProvider) SecuredDomainType::getAllInstances, null));
+        
+        registrations.add(context.registerService(RolePrototypeProvider.class,
+                (RolePrototypeProvider) SailingViewerRole::getInstance, null));
 
         final TrackedRaceStatisticsCache trackedRaceStatisticsCache = new TrackedRaceStatisticsCacheImpl();
         registrations.add(context.registerService(TrackedRaceStatisticsCache.class.getName(), trackedRaceStatisticsCache, null));
