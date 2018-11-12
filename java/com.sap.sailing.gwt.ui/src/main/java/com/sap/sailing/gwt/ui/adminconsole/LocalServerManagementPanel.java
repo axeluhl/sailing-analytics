@@ -86,7 +86,7 @@ public class LocalServerManagementPanel extends SimplePanel {
         grid.setWidget(0, 0, new Label(stringMessages.standaloneServer() + ":"));
         grid.setWidget(0, 1, isStandaloneServerCheckbox);
 
-        grid.setWidget(1, 0, new Label(stringMessages.isPublic() + ":"));
+        grid.setWidget(1, 0, new Label(stringMessages.publicServer() + ":"));
         grid.setWidget(1, 1, isPublicServer);
 
         grid.setWidget(2, 0, new Label(stringMessages.selfServiceServer() + ":"));
