@@ -37,9 +37,12 @@ public class Storage extends JavaScriptObject {
     }
 
     private static native void registerAsStorageEventHandlerImpl() /*-{
-        $wnd.addEventListener("storage", function(e) {
-            @com.sap.sse.gwt.client.Storage::onStorageEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(e);
-        });
+        $wnd
+                .addEventListener(
+                        "storage",
+                        function(e) {
+                            @com.sap.sse.gwt.client.Storage::onStorageEvent(Lcom/google/gwt/core/client/JavaScriptObject;)(e);
+                        });
     }-*/;
 
     public static HandlerRegistration addStorageEventHandler(final StorageEvent.Handler handler) {
@@ -133,5 +136,9 @@ public class Storage extends JavaScriptObject {
 
     public final native int getLength() /*-{
         return this.length;
+    }-*/;
+
+    public final native String[] getAllKeys()/*-{
+        return this.keys();
     }-*/;
 }

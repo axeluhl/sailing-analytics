@@ -1,8 +1,8 @@
 package com.sap.sse.gwt.client;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.i18n.client.Messages;
 import com.google.gwt.i18n.client.LocalizableResource.DefaultLocale;
+import com.google.gwt.i18n.client.Messages;
 
 /**
  * Defines the text strings for i18n that are used by the SSE GWT bundle. 
@@ -84,5 +84,17 @@ public interface StringMessages extends Messages {
     String centralAngleInRadian();
     String centralAngleInDegree();   
     String clearSelection();
+    String load();
+    String dataMiningStoredQueryPlaceholder();
+    String dataMiningStoredQueryUpdateSuccessful(String name);
+    String dataMiningStoredQueryCreationSuccessful(String name);
+    String dataMiningStoredQueryLoadedSuccessful(String name);
+    String dataMiningStoredQueryLoadedFailed(String name);
+    String dataMiningStoredQueryRemovedSuccessful(String name);
+    String dataMiningStoredQueryRemovedFailed(String name);
+    String loadOrSaveQueries();
+    String whatsNewDialogTitle();
+    String whatsNewDialogMessage();
+    String showChangelog();
 
 }

@@ -1,9 +1,12 @@
 package com.sap.sailing.gwt.home.shared.app;
 
+import java.util.UUID;
+
 import com.google.gwt.place.shared.PlaceController;
 import com.sap.sailing.gwt.home.desktop.places.aboutus.AboutUsPlace;
 import com.sap.sailing.gwt.home.desktop.places.contact.ContactPlace;
 import com.sap.sailing.gwt.home.desktop.places.event.regatta.overviewtab.RegattaOverviewPlace;
+import com.sap.sailing.gwt.home.desktop.places.qrcode.QRCodePlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace;
 import com.sap.sailing.gwt.home.desktop.places.whatsnew.WhatsNewPlace.WhatsNewNavigationTabs;
 import com.sap.sailing.gwt.home.shared.places.event.AbstractEventPlace;
@@ -23,6 +26,7 @@ import com.sap.sailing.gwt.home.shared.places.user.passwordreset.PasswordResetPl
 import com.sap.sailing.gwt.home.shared.places.user.profile.AbstractUserProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.UserProfileDefaultPlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.preferences.UserProfilePreferencesPlace;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.SailorProfilePlace;
 import com.sap.sailing.gwt.home.shared.places.user.profile.settings.UserProfileSettingsPlace;
 
 public class HomePlacesNavigator extends AbstractPlaceNavigator {
@@ -58,6 +62,11 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
 
     public PlaceNavigation<ContactPlace> getContactNavigation() {
         return createGlobalPlaceNavigation(new ContactPlace());
+    }
+
+    public PlaceNavigation<QRCodePlace> getQRCodeNavigation(UUID eventId, UUID competitorId, String leaderboardName,
+            String checkInUrl) {
+        return createGlobalPlaceNavigation(new QRCodePlace(eventId, competitorId, leaderboardName, checkInUrl));
     }
 
     public PlaceNavigation<ImprintPlace> getImprintNavigation() {
@@ -115,4 +124,9 @@ public class HomePlacesNavigator extends AbstractPlaceNavigator {
     public PlaceNavigation<? extends AbstractUserProfilePlace> getUserSettingsNavigation() {
         return createLocalPlaceNavigation(new UserProfileSettingsPlace());
     }
+
+    public PlaceNavigation<? extends AbstractUserProfilePlace> getSailorProfilesNavigation() {
+        return createLocalPlaceNavigation(new SailorProfilePlace());
+    }
+
 }

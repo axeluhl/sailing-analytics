@@ -109,26 +109,31 @@ public class ArrayListNavigableSet<E> implements NavigableSet<E>, Serializable {
 
     @Override
     public boolean add(E e) {
-        boolean result;
-        // assumed default case: e appends to the end
-        if (isEmpty() || compare(e, last()) > 0) {
-            list.add(e);
-            result = true;
+        final boolean result;
+        int pos = binarySearch(e);
+        if (pos >= 0) {
+            result = false;
         } else {
-            int pos = binarySearch(e);
-            if (pos >= 0) {
-                result = false;
-            } else {
-                list.add(-pos-1, e);
-                result = true;
-            }
+            list.add(-pos-1, e);
+            result = true;
         }
         return result;
     }
 
+    /**
+     * Special handling for searching for elements less than the first or greater than the last to
+     * speed up these probable cases in comparison to a binary search. Other than that, semantic-wise
+     * identical to {@link Collections#binarySearch(List, Object, Comparator)}.
+     */
     private int binarySearch(E e) {
-        int result;
-        result = Collections.binarySearch(list, e, comparator());
+        final int result;
+        if (list.isEmpty() || comparator().compare(e, first()) < 0) {
+            result = -1;
+        } else if (comparator().compare(e, last()) > 0) {
+            result = -size()-1;
+        } else {
+            result = Collections.binarySearch(list, e, comparator());
+        }
         return result;
     }
     
@@ -402,10 +407,6 @@ public class ArrayListNavigableSet<E> implements NavigableSet<E>, Serializable {
         return tailSet(fromElement, false);
     }
     
-    private int compare(E a, E b) {
-        return comparator().compare(a, b);
-    }
-
     @Override
     public String toString() {
         return list.toString();
