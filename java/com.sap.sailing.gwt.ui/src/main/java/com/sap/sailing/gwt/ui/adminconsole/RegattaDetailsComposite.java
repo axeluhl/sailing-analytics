@@ -1,7 +1,5 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
-import java.io.DataInputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -46,7 +44,6 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
-import com.sap.sse.qrcode.QRCodeGenerationUtil;
 
 
 public class RegattaDetailsComposite extends Composite {
