@@ -364,16 +364,21 @@ public class RegattasResource extends AbstractSailingServerResource {
         }
         boolean registerCompetitor = false;
         boolean checkInCompetitor = false;
-        final String eCompetitorName, eCompetitorShortName, eCompetitorEmail;
+        String eCompetitorName = null, eCompetitorShortName = null, eCompetitorEmail = null;
         if (subject.isAuthenticated() && getSecurityService().hasCurrentUserUpdatePermission(regatta)) {
-            // case 1: admin or regatta owner is registering a competitor
-            // TODO: this could be also a selfregistration? perhaps decide about deviceUuid
             registerCompetitor = true;
-            eCompetitorName = competitorName;
-            eCompetitorShortName = competitorShortName == null ? eCompetitorName : competitorShortName;
-            eCompetitorEmail = competitorEmail;
-        } else if (subject.isAuthenticated() && regatta.getCompetitorRegistrationType().isOpen()) {
-            // case 2: "unprivileged" authenticated user is registering
+            if (regatta.getCompetitorRegistrationType().isOpen() && registrationLinkSecret != null && registrationLinkSecret.length() > 0) {
+                // => case 2: aauthenticated user is registering himself for open regatta
+                checkInCompetitor = true;
+            } else {
+                // case 1: registering any competitor
+                eCompetitorName = competitorName;
+                eCompetitorShortName = competitorShortName == null ? eCompetitorName : competitorShortName;
+                eCompetitorEmail = competitorEmail;
+            }
+        }
+        if (checkInCompetitor && subject.isAuthenticated() && regatta.getCompetitorRegistrationType().isOpen()) {
+            // case 2: authenticated user is registering for open regatta
             if (!regatta.getRegistrationLinkSecret().equals(registrationLinkSecret)) {
                 return getBadRegattaRegistrationTypeErrorResponse(regattaName);
             }
@@ -387,7 +392,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             // case 2.1: with device
             checkInCompetitor = deviceUuid != null;
         } else if (deviceUuid != null && regatta.getCompetitorRegistrationType().isOpen()) {
-            // case 3: unauthorized with device (check secret)
+            // case 3: unauthorized user is registering for open regatta
             if (!regatta.getRegistrationLinkSecret().equals(registrationLinkSecret)) {
                 return getBadRegattaRegistrationTypeErrorResponse(regattaName);
             }
@@ -396,11 +401,12 @@ public class RegattasResource extends AbstractSailingServerResource {
             eCompetitorName = competitorName;
             eCompetitorShortName = competitorShortName == null ? eCompetitorName : competitorShortName;
             eCompetitorEmail = competitorEmail;
-        } else {
+        }
+        if (!registerCompetitor) {
             return getBadRegattaRegistrationTypeErrorResponse(regattaName);
         }
 
-        // Check regattalog if device has been registered to this regatta already
+        // Check regattalog if device has been already registered to this regatta
         boolean duplicateDeviceId = false;
         if (checkInCompetitor) {
             RegattaLog regattaLog = regatta.getRegattaLog();
