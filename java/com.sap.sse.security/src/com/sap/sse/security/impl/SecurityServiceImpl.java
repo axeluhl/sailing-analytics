@@ -1491,10 +1491,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
             HasPermissions type, String typeIdentifier, String securityDisplayName,
             ActionWithResult<T> actionWithResult) {
-        return setOwnershipCheckPermissionForObjectCreationAndRevertOnError(type,
-                typeIdentifier,
-                securityDisplayName,
-                actionWithResult);
+        return setOwnershipCheckPermissionForObjectCreationAndRevertOnError(getDefaultTenantForCurrentUser(), type,
+                typeIdentifier, securityDisplayName, actionWithResult, false);
     }
 
     @Override
