@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Locale;
 
 import org.junit.Test;
 
@@ -37,7 +38,8 @@ public class SecurityServiceInitialLoadTest extends AbstractServerWithSingleServ
                 final AccessControlStore accessControlStore = new AccessControlStoreImpl(PersistenceFactory.INSTANCE.getDefaultDomainObjectFactory(),
                         PersistenceFactory.INSTANCE.getDefaultMongoObjectFactory(), userStore);
                 final SecurityServiceImpl newMaster = new SecurityServiceImpl(userStore, accessControlStore);
-                newMaster.createSimpleUser(username, email, password, fullName, company, /* validationBaseURL */ null);
+                newMaster.createSimpleUser(username, email, password, fullName, company,
+                        /* validationBaseURL */ Locale.ENGLISH, null);
                 accessToken = newMaster.createAccessToken(username);
                 return newMaster;
             }

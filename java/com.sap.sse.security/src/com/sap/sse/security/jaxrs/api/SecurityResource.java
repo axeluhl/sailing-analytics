@@ -1,5 +1,7 @@
 package com.sap.sse.security.jaxrs.api;
 
+import java.util.Locale;
+
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -119,7 +121,8 @@ public class SecurityResource extends AbstractSecurityResource {
                 username, () -> {
                     try {
                         final String validationBaseURL = getEmailValidationBaseURL(uriInfo);
-                        getService().createSimpleUser(username, email, password, fullName, company, validationBaseURL);
+                        getService().createSimpleUser(username, email, password, fullName, company, Locale.ENGLISH,
+                                validationBaseURL);
                         SecurityUtils.getSubject().login(new UsernamePasswordToken(username, password));
                         return respondWithAccessTokenForUser(username);
                     } catch (UserManagementException | MailException | UserGroupManagementException e) {

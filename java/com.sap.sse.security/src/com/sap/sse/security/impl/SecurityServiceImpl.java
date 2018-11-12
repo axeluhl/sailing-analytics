@@ -264,8 +264,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 logger.info("No users found, creating default user \""+ADMIN_USERNAME+"\" with password \""+ADMIN_DEFAULT_PASSWORD+"\"");
                 final User adminUser = createSimpleUser(ADMIN_USERNAME, "nobody@sapsailing.com",
                         ADMIN_DEFAULT_PASSWORD,
-                        /* fullName */ null, /* company */ null, Locale.ENGLISH, /* validationBaseURL */ null,
-                        getDefaultTenant());
+                        /* fullName */ null, /* company */ null, Locale.ENGLISH, /* validationBaseURL */ null);
 
                 apply(s -> s.internalSetOwnership(
                         SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(ADMIN_USERNAME), ADMIN_USERNAME, null,
@@ -690,20 +689,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public UserImpl createSimpleUser(final String username, final String email, String password, String fullName,
-            String company, final String validationBaseURL) throws UserManagementException, MailException, UserGroupManagementException {
-        return createSimpleUser(username, email, password, fullName, company, null, validationBaseURL);
-    }
-
-    @Override
-    public UserImpl createSimpleUser(final String username, final String email, String password, String fullName,
             String company, Locale locale, final String validationBaseURL)
             throws UserManagementException, MailException, UserGroupManagementException {
-        return createSimpleUser(username, email, password, fullName, company, /* locale */ null, validationBaseURL,
-                getDefaultTenantForCurrentUser());
-    }
-    
-    private UserImpl createSimpleUser(final String username, final String email, String password, String fullName,
-            String company, Locale locale, final String validationBaseURL, UserGroup tenantOwner) throws UserManagementException, MailException, UserGroupManagementException {
         logger.info("Creating user "+username);
         if (userStore.getUserByName(username) != null) {
             logger.warning("User "+username+" already exists");
@@ -733,7 +720,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         
         // the new user becomes its owner to ensure the user role is correctly working
         // the default tenant is the owning tenant to allow users having admin role for a specific server tenant to also be able to delete users
-        accessControlStore.setOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(username), result, getDefaultTenant(), username);
+        accessControlStore.setOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(username), result,
+                getDefaultTenantForCurrentUser(), username);
         // the new user becomes the owning user of its own specific tenant which initially only contains the new user
         accessControlStore.setOwnership(SecuredSecurityTypes.USER_GROUP.getQualifiedObjectIdentifier(tenant.getId().toString()), result, tenant, tenant.getName());
         
