@@ -455,7 +455,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 .getStringPermissionForObjects(UserActions.REVOKE_PERMISSION, username));
         if (!isUserPermittedToGrantPermissionsForOtherUser
                 && !isUserPermittedToRevokePermissionsForOtherUser) {
-            throw new UnauthorizedException("Not permitted to grant or revoke permissions for user "+username);
+            return new SuccessInfo(false, "Not permitted to grant or revoke permissions for user " + username,
+                    /* redirectURL */null, null);
         } else {
             User u = getSecurityService().getUserByName(username);
             if (u == null) {
@@ -484,19 +485,22 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             Util.addAll(u.getRoles(), roleDefinitionsToRemove);
             Util.removeAll(rolesToSet, roleDefinitionsToRemove);
             if (!roleDefinitionsToRemove.isEmpty() && !isUserPermittedToRevokePermissionsForOtherUser) {
-                throw new UnauthorizedException("Not permitted to revoke permissions for user "+username);
+                return new SuccessInfo(false, "Not permitted to revoke permissions for user " + username,
+                        /* redirectURL */null, null);
             }
             Set<Role> rolesToAdd = new HashSet<>();
             Util.addAll(rolesToSet, rolesToAdd);
             Util.removeAll(u.getRoles(), rolesToAdd);
             if (!rolesToAdd.isEmpty() && !isUserPermittedToGrantPermissionsForOtherUser) {
-                throw new UnauthorizedException("Not permitted to grant permissions for user "+username);
+                return new SuccessInfo(false, "Not permitted to grant permissions for user " + username,
+                        /* redirectURL */null, null);
             }
             for (Role roleToAdd : rolesToAdd) {
                 for (WildcardPermission permissionOfRoleToAdd : roleToAdd.getPermissions()) {
                     if (!getSecurityService().hasCurrentUserMetaPermission(permissionOfRoleToAdd, roleToAdd.getQualificationAsOwnership())) {
-                        throw new UnauthorizedException(
-                                "Not permitted to grant role " + roleToAdd.getName() + " for user " + username);
+                        return new SuccessInfo(false,
+                                "Not permitted to grant role " + roleToAdd.getName() + " for user " + username,
+                                /* redirectURL */null, null);
                     }
                 }
             }
@@ -537,7 +541,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 .getStringPermissionForObjects(UserActions.REVOKE_PERMISSION, username));
         if (!isUserPermittedToGrantPermissionsForOtherUser
                 && !isUserPermittedToRevokePermissionsForOtherUser) {
-            throw new UnauthorizedException("Not permitted to grant or revoke permissions for user "+username);
+            return new SuccessInfo(false, "Not permitted to grant or revoke permissions for user " + username,
+                    /* redirectURL */null, null);
         } else {
             User u = getSecurityService().getUserByName(username);
             if (u == null) {
@@ -547,17 +552,21 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             Util.addAll(u.getPermissions(), permissionsToRemove);
             Util.removeAll(permissions, permissionsToRemove);
             if (!permissionsToRemove.isEmpty() && !isUserPermittedToRevokePermissionsForOtherUser) {
-                throw new UnauthorizedException("Not permitted to revoke permissions for user "+username);
+                return new SuccessInfo(false, "Not permitted to revoke permissions for user " + username,
+                        /* redirectURL */null, null);
             }
             Set<WildcardPermission> permissionsToAdd = new HashSet<>();
             Util.addAll(permissions, permissionsToAdd);
             Util.removeAll(u.getPermissions(), permissionsToAdd);
             if (!permissionsToAdd.isEmpty() && !isUserPermittedToGrantPermissionsForOtherUser) {
-                throw new UnauthorizedException("Not permitted to grant permissions for user "+username);
+                return new SuccessInfo(false, "Not permitted to grant permissions for user " + username,
+                        /* redirectURL */null, null);
             }
             for (WildcardPermission permissionToAdd : permissionsToAdd) {
                 if (!getSecurityService().hasCurrentUserMetaPermission(permissionToAdd, null)) {
-                    throw new UnauthorizedException("Not permitted to grant permission "+permissionToAdd+" for user "+username);
+                    return new SuccessInfo(false,
+                            "Not permitted to grant permission " + permissionToAdd + " for user " + username,
+                            /* redirectURL */null, null);
                 }
             }
             for (WildcardPermission permissionToRemove : permissionsToRemove) {
