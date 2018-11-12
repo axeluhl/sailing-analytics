@@ -36,14 +36,15 @@ android {
    }
 
     def versionPropertiesFile = file('project.properties')
-    if (versionPropertiesFile.canRead()) {
+    if (versionPropertiesFile.exists()) {
         def versionProps = new Properties()
         versionProps.load(new FileInputStream(versionPropertiesFile))
-        verCode = versionProps['VERSION_CODE'].toInteger()
+        verCode = (versionProps['VERSION_CODE'] ?: '0').toInteger()
         def runTasks = gradle.startParameter.taskNames
         if ('assemble' in runTasks || 'assembleRelease' in runTasks || 'aR' in runTasks) {
             verCode = verCode + 1
         }
+        versionProps['VERSION_CODE'] = verCode.toString()
         versionProps.store(versionPropertiesFile.newWriter(), null)
     }
 
