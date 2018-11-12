@@ -17,6 +17,23 @@ It contains also some files:
  - Manifest.txt -> manifest used to create the test.jar file
 
 ********************************************
+************* TracAPI 3.11.1 ***************
+********************************************
+This is a final version.It fixes bugs in the implementation.
+It keeps the backward compatibility:
+
+Release date: 19/10/2018
+Build number: 6c0010208212c2aad1016bd69708bc6859e371e9
+
+ 1) Bugs
+
+ - Validating null values for the methods of the IRaceSubscriber that accept an array of
+ Classes (Reported by Andre Borud, 05/09/2018)
+ - The IEventSubscriber is not able to connect to the server if the IEvent has been created
+  using the IEventFactory.createEvent(URL) method and the URL uses HTTPs. It only works using HTTP
+  (Reported by Thomas Scott, 19/10/2018)
+
+********************************************
 ************* TracAPI 3.11.0 ***************
 ********************************************
 This is a final version. It changes the implementation of the IRaceSubscriber interface,

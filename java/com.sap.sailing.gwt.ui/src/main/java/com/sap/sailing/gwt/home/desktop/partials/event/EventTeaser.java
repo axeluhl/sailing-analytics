@@ -86,7 +86,7 @@ public class EventTeaser extends Composite {
     
     public void setSeriesInformation(PlaceNavigation<?> seriesNavigation, EventListEventSeriesDTO eventSeries) {
         eventImage.appendChild(new EventTeaserSeriesInfoCorner(seriesNavigation, eventSeries).getElement());
-        eventName.setInnerSafeHtml(LongNamesUtil.breakLongName(eventSeries.getDisplayName()));
+        eventName.setInnerSafeHtml(LongNamesUtil.breakLongName(eventSeries.getSeriesDisplayName()));
         venue.setInnerText(StringMessages.INSTANCE.lastEvent(event.getLocationOrVenue()));
         eventImage.setTitle(StringMessages.INSTANCE.teaserOverallLinkToolTip());
     }

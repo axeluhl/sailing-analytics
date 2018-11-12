@@ -7,7 +7,6 @@ import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.sap.sailing.domain.common.dto.EventType;
 import com.sap.sailing.gwt.common.client.controls.tabbar.TabView;
 import com.sap.sailing.gwt.home.communication.event.GetLiveRacesForRegattaAction;
 import com.sap.sailing.gwt.home.communication.event.GetRegattaStatisticsAction;
@@ -101,7 +100,7 @@ public class RegattaOverviewTabView extends Composite implements RegattaTabView<
                     currentPresenter.getRegattaId()));
         }
 
-        if (currentPresenter.getEventDTO().getType() == EventType.MULTI_REGATTA) {
+        if (currentPresenter.getEventDTO().isMultiRegatta()) {
             stageUi.removeFromParent();
         } else {
             stageUi.setupRefresh(refreshManager);

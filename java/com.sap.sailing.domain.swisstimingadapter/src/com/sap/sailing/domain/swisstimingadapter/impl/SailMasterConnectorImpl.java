@@ -131,7 +131,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
 
     private Long numberOfStoredMessages;
     
-    public SailMasterConnectorImpl(String host, int port, String raceId, String raceName, String raceDescription, BoatClass boatClass) throws InterruptedException, ParseException {
+    public SailMasterConnectorImpl(String host, int port, String raceId, String raceName, String raceDescription, BoatClass boatClass, SwissTimingRaceTrackerImpl swissTimingRaceTracker) throws InterruptedException, ParseException {
         super();
         maxSequenceNumber = -1l;
         this.raceId = raceId; // from this time on, the connector interprets messages for raceID
@@ -143,6 +143,7 @@ public class SailMasterConnectorImpl extends SailMasterTransceiverImpl implement
         this.port = port;
         this.listeners = new HashSet<SailMasterListener>();
         this.unprocessedMessagesByType = new HashMap<MessageType, BlockingQueue<SailMasterMessage>>();
+        this.addSailMasterListener(swissTimingRaceTracker);
         receiverThread = new Thread(this, "SwissTiming SailMaster Receiver");
         receiverThread.start();
     }

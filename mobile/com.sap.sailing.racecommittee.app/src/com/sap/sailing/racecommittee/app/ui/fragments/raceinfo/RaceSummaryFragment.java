@@ -269,6 +269,12 @@ public class RaceSummaryFragment extends BaseFragment {
         public void onWindFixChanged(ReadonlyRaceState state) {
             showData();
         }
+
+
+        @Override
+        public void onTagEventsChanged(ReadonlyRaceState state) {
+            // TODO: add android support for tags
+        }
     }
 
 }

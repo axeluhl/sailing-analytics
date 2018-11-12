@@ -14,6 +14,8 @@ public interface RaceBoardResources extends CommonSharedResources, Authenticatio
     @Source({CommonSharedResources.MEDIA, "raceboard-media.gss"})
     RaceBoardMediaCss mediaCss();
     
+
+    
     public interface RaceBoardMainCss extends CommonMainCss {
         String button();
         String buttonprimary();

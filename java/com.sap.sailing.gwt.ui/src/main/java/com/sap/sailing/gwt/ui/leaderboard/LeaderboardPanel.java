@@ -1158,6 +1158,8 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
          */
         private final List<LegColumn> legColumns;
 
+        private BoatInfoColumn<LeaderboardRowDTO> boatInfoColumn;
+
         public TextRaceColumn(RaceColumnDTO race, boolean expandable, SortingOrder preferredSortingOrder,
                 String headerStyle, String columnStyle) {
             super(race, expandable, new TextCell(), preferredSortingOrder, headerStyle, columnStyle);
@@ -1492,6 +1494,16 @@ public abstract class LeaderboardPanel<LS extends LeaderboardSettings> extends A
             for (AbstractSortableColumnWithMinMax<LeaderboardRowDTO, ?> column : super.getDirectChildren()) {
                 result.add(column);
             }
+
+            if (isExpanded() && getLeaderboard().canBoatsOfCompetitorsChangePerRace && selectedRaceDetails.contains(DetailType.RACE_DISPLAY_BOATS)) {
+                if (boatInfoColumn == null) {
+                    BoatFetcher<LeaderboardRowDTO> boatFetcher = (LeaderboardRowDTO row) -> getLeaderboard()
+                            .getBoatOfCompetitor(getRaceColumnName(), row.competitor);
+                    boatInfoColumn = new BoatInfoColumn<LeaderboardRowDTO>(boatFetcher, style);
+                }
+                result.add(boatInfoColumn);
+            }
+
             if (isExpanded() && selectedRaceDetails.contains(DetailType.RACE_DISPLAY_LEGS)) {
                 // it is important to re-use existing LegColumn objects because
                 // removing the columns from the table
