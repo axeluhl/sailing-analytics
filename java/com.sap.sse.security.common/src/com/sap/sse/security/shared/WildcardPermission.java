@@ -21,10 +21,12 @@ package com.sap.sse.security.shared;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.impl.QualifiedObjectIdentifierImpl;
 import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 
@@ -126,26 +128,31 @@ public class WildcardPermission implements Serializable {
     WildcardPermission() {}
     
     public WildcardPermission(String wildcardString) {
-        setParts(wildcardString);
+        this(createPartsFromString(wildcardString));
     }
-
-    protected void setParts(String wildcardString) {
+    
+    private WildcardPermission(List<Set<String>> parts) {
+        this.parts = parts;
+    }
+    
+    protected static List<Set<String>> createPartsFromString(String wildcardString) {
         if (wildcardString == null || wildcardString.trim().length() == 0) {
             throw new IllegalArgumentException("Wildcard string cannot be null or empty. Make sure permission strings are properly formatted.");
         }
         wildcardString = wildcardString.trim();
-        List<String> parts = Arrays.asList(wildcardString.split(PART_DIVIDER_TOKEN));
-        this.parts = new ArrayList<Set<String>>();
-        for (String part : parts) {
+        List<String> rawParts = Arrays.asList(wildcardString.split(PART_DIVIDER_TOKEN));
+        List<Set<String>> parts = new ArrayList<>();
+        for (String part : rawParts) {
             Set<String> subparts = new HashSet<>(Arrays.asList(part.split(SUBPART_DIVIDER_TOKEN)));
             if (subparts.isEmpty()) {
                 throw new IllegalArgumentException("Wildcard string cannot contain parts with only dividers. Make sure permission strings are properly formatted.");
             }
-            this.parts.add(subparts);
+            parts.add(subparts);
         }
-        if (this.parts.isEmpty()) {
+        if (parts.isEmpty()) {
             throw new IllegalArgumentException("Wildcard string cannot contain only dividers. Make sure permission strings are properly formatted.");
         }
+        return parts;
     }
 
     /*--------------------------------------------
@@ -251,5 +258,55 @@ public class WildcardPermission implements Serializable {
         }
         return result;
     }
+    
+    public static WildcardPermissionBuilder builder() {
+        return new WildcardPermissionBuilder();
+    }
 
+    /**
+     * Builder to create non-primitive {@link WildcardPermission} instances. E.g. it is possible to use multiple types
+     * or wildcard for the type part.
+     */
+    public static class WildcardPermissionBuilder {
+        private Set<String> types = new HashSet<>();
+        private Set<String> actions = new HashSet<>();
+        private Set<String> ids = new HashSet<>();
+        
+        public WildcardPermissionBuilder withTypes(HasPermissions... types) {
+            for (HasPermissions hasPermissions : types) {
+                this.types.add(hasPermissions.getName());
+            }
+            return this;
+        }
+        
+        public WildcardPermissionBuilder withActions(Action... actions) {
+            for (Action action : actions) {
+                this.actions.add(action.name());
+            }
+            return this;
+        }
+        
+        public WildcardPermissionBuilder withIds(String... ids) {
+            this.ids.addAll(Arrays.asList(ids));
+            return this;
+        }
+        
+        public WildcardPermission build() {
+            final List<Set<String>> parts = new ArrayList<>(2);
+            if (types.isEmpty()) {
+                parts.add(new HashSet<>(Collections.singleton(WILDCARD_TOKEN)));
+            } else {
+                parts.add(types);
+            }
+            if (!actions.isEmpty()) {
+                parts.add(actions);
+            } else if (!ids.isEmpty()) {
+                parts.add(new HashSet<>(Collections.singleton(WILDCARD_TOKEN)));
+            }
+            if (!ids.isEmpty()) {
+                parts.add(ids);
+            }
+            return new WildcardPermission(parts);
+        }
+    }
 }

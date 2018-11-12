@@ -198,7 +198,7 @@ public class PermissionChecker {
         final boolean isTypePartWildcard;
         if (parts.size() >= 1) {
             typeParts = parts.get(0);
-            isTypePartWildcard = typeParts.contains(WildcardPermission.WILDCARD_TOKEN);
+            isTypePartWildcard = typeParts.isEmpty() || typeParts.contains(WildcardPermission.WILDCARD_TOKEN);
         } else {
             typeParts = null;
             isTypePartWildcard = true;
@@ -208,7 +208,7 @@ public class PermissionChecker {
         final boolean isActionPartWildcard;
         if (parts.size() >= 2) {
             actionParts = parts.get(1);
-            isActionPartWildcard = actionParts.contains(WildcardPermission.WILDCARD_TOKEN);
+            isActionPartWildcard = actionParts.isEmpty() || actionParts.contains(WildcardPermission.WILDCARD_TOKEN);
         } else {
             actionParts = null;
             isActionPartWildcard = true;
@@ -218,7 +218,7 @@ public class PermissionChecker {
         final boolean isIdPartWildcard;
         if (parts.size() >= 3) {
             idParts = parts.get(2);
-            isIdPartWildcard = idParts.contains(WildcardPermission.WILDCARD_TOKEN);
+            isIdPartWildcard = idParts.isEmpty() || idParts.contains(WildcardPermission.WILDCARD_TOKEN);
         } else {
             idParts = null;
             isIdPartWildcard = true;
