@@ -488,12 +488,12 @@ public class RegattaDetailsComposite extends Composite {
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    GWT.log("Qrcde generation failed: " + caught.getMessage());
+                    GWT.log("Qrcode generation failed: " + caught.getMessage());
                 }
 
                 @Override
                 public void onSuccess(String result) {
-                    GWT.log("qr code generated for url: " + deeplinkUrl);
+                    GWT.log("Qrcode generated for url: " + deeplinkUrl);
                     openRegattaRegistrationLinkQrCode.setUrl("data:image/png;base64, " + result);
                 }
 
