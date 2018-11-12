@@ -1,19 +1,19 @@
 {
     "ANDROID":[
         {
-            "version": "1.0.0",
+            "version": "1.4.54",
             "groupid": "com.sap.sailing.android",
             "file": "java/com.sap.sailing.www/apps/com.sap.sailing.racecommittee.app-unsigned.apk",
             "artifactid": "racecommitteeapp"
         },
         {
-            "version": "1.0.0",
+            "version": "1.4.54",
             "groupid": "com.sap.sailing.android",
             "file": "java/com.sap.sailing.www/apps/com.sap.sailing.tracking.app-unsigned.apk",
             "artifactid": "trackingapp"
         },
         {
-            "version": "1.0.0",
+            "version": "1.4.54",
             "groupid": "com.sap.sailing.android",
             "file": "java/com.sap.sailing.www/apps/com.sap.sailing.buoy.positioning.app-unsigned.apk",
             "artifactid": "buoypositioningapp"
