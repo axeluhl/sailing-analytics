@@ -84,7 +84,8 @@ public interface User extends SecurityUser, WithQualifiedObjectIdentifier {
     void setLocale(Locale locale);
 
     Locale getLocaleOrDefault();
-    
-    void setDefaultTenant(UserGroup newDefaultTenant);
-    
+
+    UserGroup getDefaultTenant(String serverName);
+
+    Map<String, UserGroup> getDefaultTenantMap();
 }

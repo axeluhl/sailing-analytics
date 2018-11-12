@@ -96,13 +96,13 @@ public class SlicingTest {
                 new SeriesCreationParametersDTO(fleets, false, false, true, false, new int[0], false, 0));
         final RegattaCreationParametersDTO regattaCreationParameters = new RegattaCreationParametersDTO(
                 seriesCreationParameters);
-        final RegattaDTO regatta = sailingService.createRegatta("default", regattaName, boatClassName, false,
+        final RegattaDTO regatta = sailingService.createRegatta(regattaName, boatClassName, false,
                 CompetitorRegistrationType.CLOSED, null, null, null, regattaCreationParameters, false,
                 ScoringSchemeType.HIGH_POINT, null, 3.0, false, false, RankingMetrics.ONE_DESIGN);
         final List<Pair<String, Integer>> columnNames = new ArrayList<>();
         columnNames.add(new Pair<>(columnNameOriginalRace, 0));
         sailingService.addRaceColumnsToSeries(regatta.getRegattaIdentifier(), seriesName, columnNames);
-        sailingService.createRegattaLeaderboard("default", regatta.getRegattaIdentifier(), regattaName, new int[0]);
+        sailingService.createRegattaLeaderboard(regatta.getRegattaIdentifier(), regattaName, new int[0]);
         final List<CompetitorWithBoatDTO> competitors = sailingService.addCompetitors(Arrays.asList(competitor), null);
         final CompetitorWithBoatDTO competitorDTO = competitors.iterator().next();
         sailingService.setCompetitorRegistrationsInRegattaLog(regattaName, new HashSet<>(competitors));

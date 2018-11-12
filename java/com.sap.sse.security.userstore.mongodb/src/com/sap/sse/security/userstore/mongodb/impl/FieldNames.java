@@ -47,10 +47,12 @@ public class FieldNames {
         EMAIL,
         ACCOUNTS,
         ROLE_IDS, PERMISSIONS,
-        DEFAULT_TENANT_ID,
+        DEFAULT_TENANT_IDS,
         EMAIL_VALIDATED,
         PASSWORD_RESET_SECRET,
-        VALIDATION_SECRET;
+        VALIDATION_SECRET,
+        DEFAULT_TENANT_SERVER,
+        DEFAULT_TENANT_GROUP;
     }
     
     public static enum Settings {

@@ -38,10 +38,10 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
+import com.sap.sse.security.Action;
 import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.User;
-import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
 
@@ -81,15 +81,15 @@ public abstract class AbstractJaxRsApiTest {
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 return invocation.getArgumentAt(4, ActionWithResult.class).run();
             }
-        }).when(securityService).setOwnershipCheckPermissionForObjectCreationAndRevertOnError(Mockito.anyString(),
-                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        }).when(securityService).setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(Action.class));
         Mockito.doAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 return invocation.getArgumentAt(4, ActionWithResult.class).run();
             }
         }).when(securityService).setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                Mockito.any(UserGroup.class), Mockito.any(), Mockito.any(), Mockito.any(),
+                Mockito.any(), Mockito.any(), Mockito.any(),
                 Mockito.any(ActionWithResult.class));
 
         Mockito.doReturn(true).when(securityService)

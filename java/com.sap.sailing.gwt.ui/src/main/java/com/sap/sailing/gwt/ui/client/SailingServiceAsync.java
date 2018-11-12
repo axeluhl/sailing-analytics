@@ -273,15 +273,15 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName,
             int[] newDiscardingThreasholds, UUID newCourseAreaId, AsyncCallback<StrippedLeaderboardDTO> callback);
 
-    void createFlexibleLeaderboard(String tenantOwnerName, String leaderboardName, String leaderboardDisplayName,
+    void createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName,
             int[] discardThresholds,
             ScoringSchemeType scoringSchemeType, UUID courseAreaId, AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
-    void createRegattaLeaderboard(String tenantOwnerName, RegattaIdentifier regattaIdentifier,
+    void createRegattaLeaderboard(RegattaIdentifier regattaIdentifier,
             String leaderboardDisplayName,
             int[] discardThresholds, AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
-    void createRegattaLeaderboardWithEliminations(String tenantOwnerName, String name, String displayName,
+    void createRegattaLeaderboardWithEliminations(String name, String displayName,
             String regattaName,
             AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
@@ -387,7 +387,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      * @param displayGroupsInReverseOrder
      *            TODO
      */
-    void createLeaderboardGroup(String tenantOwnerName, String groupName, String description, String displayName,
+    void createLeaderboardGroup(String groupName, String description, String displayName,
             boolean displayGroupsInReverseOrder, int[] overallLeaderboardDiscardThresholds,
             ScoringSchemeType overallLeaderboardScoringSchemeType, AsyncCallback<LeaderboardGroupDTO> callback);
 
@@ -449,7 +449,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
             boolean isPublic, List<String> courseAreaNames, String officialWebsiteURL, String baseURL,
             Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images,
-            Iterable<VideoDTO> videos, Iterable<UUID> leaderboardGroupIDs, String tenantOwnerName,
+            Iterable<VideoDTO> videos, Iterable<UUID> leaderboardGroupIDs,
             AsyncCallback<EventDTO> callback);
 
     void updateEvent(UUID eventId, String eventName, String eventDescription, Date startDate, Date endDate,
@@ -818,7 +818,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void updateSuppressedMarkPassings(String leaderboardName, String raceColumnName, String fleetName,
             Integer newZeroBasedIndexOfSuppressedMarkPassing, CompetitorDTO competitorDTO, AsyncCallback<Void> callback);
 
-    void createRegattaStructure(String tenantOwnerName, Iterable<RegattaDTO> regattaNames, EventDTO newEvent,
+    void createRegattaStructure(Iterable<RegattaDTO> regattaNames, EventDTO newEvent,
             AsyncCallback<Void> asyncCallback);
 
     void updateFixedMarkPassing(String leaderboardName, String raceColumnName, String fleetName,
@@ -1045,4 +1045,16 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      * @param asyncCallback
      */
     void openRegattaRegistrationQrCode(String url, AsyncCallback<String> asyncCallback);
+
+    /**
+     * Sets the tenant that is used for CREATE operations done on this server
+     * 
+     * @param tennant
+     */
+    void setDefaultTenantForCurrentServer(String tennant, AsyncCallback<Void> asyncCallback);
+
+    /**
+     * gets a (possibly imcomplete) list of available tennants to choose from.
+     */
+    void getPossibleTennants(AsyncCallback<List<String>> asyncCallback);
 }

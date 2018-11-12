@@ -14,11 +14,6 @@ import com.sap.sse.common.WithID;
  */
 public interface SecurityUser extends NamedWithID {
     /**
-     * The tenant to use as {@link Ownership#getTenantOwner() tenant owner} of new objects created by this user
-     */
-    UserGroup getDefaultTenant();
-
-    /**
      * Returns the "raw" permissions explicitly set for this user. This does not include permissions
      * inferred by any {@link PermissionsForRoleProvider} for the {@link #getRoles() roles} that this
      * user has. Use {@link #getAllPermissions(PermissionsForRoleProvider)} for that.

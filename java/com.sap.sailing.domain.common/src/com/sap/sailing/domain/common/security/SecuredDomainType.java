@@ -114,4 +114,10 @@ public class SecuredDomainType extends HasPermissionsImpl {
      * type-relative identifier is the device configuration name
      */
     public static final HasPermissions RACE_MANAGER_APP_DEVICE_CONFIGURATION = new SecuredDomainType("RACE_MANAGER_APP_DEVICE_CONFIGURATION");
+
+    /**
+     * Create required to do MasterDataImport, type-relative identifier is the servername
+     */
+    public static final HasPermissions CAN_IMPORT_MASTERDATA = new SecuredDomainType(
+            "CAN_REPLAY_DURING_LIVE_RACES");
 }

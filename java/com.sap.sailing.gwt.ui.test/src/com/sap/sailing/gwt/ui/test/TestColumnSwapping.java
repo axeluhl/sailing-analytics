@@ -46,7 +46,7 @@ public class TestColumnSwapping {
         service = new SailingServiceImplMock();
         int[] disc = { 5, 8, 9, 0, 7, 5, 43 };
         service.removeLeaderboard(LEADERBOARDNAME);
-        service.createFlexibleLeaderboard("default", LEADERBOARDNAME, null, disc, ScoringSchemeType.LOW_POINT, null);
+        service.createFlexibleLeaderboard(LEADERBOARDNAME, null, disc, ScoringSchemeType.LOW_POINT, null);
         service.addColumnToLeaderboard("Race1", LEADERBOARDNAME, true);
         service.addColumnToLeaderboard("Race2", LEADERBOARDNAME, true);
         service.addColumnToLeaderboard("Race3", LEADERBOARDNAME, true);
@@ -84,7 +84,7 @@ public class TestColumnSwapping {
         assertNotNull("Sailingservice != NULL", sailingService);
         int td[] = { 5, 8 };
         sailingService.removeLeaderboard(TEST_LEADERBOARD_NAME);
-        sailingService.createFlexibleLeaderboard("default", TEST_LEADERBOARD_NAME, null, td,
+        sailingService.createFlexibleLeaderboard(TEST_LEADERBOARD_NAME, null, td,
                 ScoringSchemeType.LOW_POINT, null);
         for (int i = 0; i < races.length; i++)
             sailingService.addColumnToLeaderboard(races[i], TEST_LEADERBOARD_NAME, isMedalRace[i]);

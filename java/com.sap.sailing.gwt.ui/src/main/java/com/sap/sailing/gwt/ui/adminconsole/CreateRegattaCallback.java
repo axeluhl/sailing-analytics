@@ -36,7 +36,6 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
     private final RegattaRefresher regattaRefresher;
     private final StringMessages stringMessages;
     private final List<EventDTO> existingEvents;
-    private UserService userService;
 
     public CreateRegattaCallback(UserService userService, SailingServiceAsync sailingService,
             StringMessages stringMessages, ErrorReporter errorReporter, RegattaRefresher regattaRefresher,
@@ -47,7 +46,6 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
         this.eventsRefresher = eventsRefresher;
         this.stringMessages = stringMessages;
         this.existingEvents = existingEvents;
-        this.userService = userService;
     }
     
     @Override
@@ -68,7 +66,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
                     seriesDTO.hasSplitFleetContiguousScoring(), seriesDTO.getMaximumNumberOfDiscards());
             seriesStructure.put(seriesDTO.getName(), seriesPair);
         }
-        sailingService.createRegatta(userService.getCurrentTenantName(), newRegatta.getName(),
+        sailingService.createRegatta(newRegatta.getName(),
                 newRegatta.boatClass == null ? null : newRegatta.boatClass.getName(),
                 newRegatta.canBoatsOfCompetitorsChangePerRace, newRegatta.competitorRegistrationType,
                 newRegatta.registrationLinkSecret, newRegatta.startDate, newRegatta.endDate, 
@@ -138,8 +136,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
         CreateDefaultRegattaLeaderboardDialog dialog = new CreateDefaultRegattaLeaderboardDialog(sailingService, stringMessages, errorReporter, newRegatta, new DialogCallback<RegattaIdentifier>() {
             @Override
             public void ok(RegattaIdentifier regattaIdentifier) {
-                        sailingService.createRegattaLeaderboard(
-                                userService.getCurrentTenantName(), regattaIdentifier,
+                        sailingService.createRegattaLeaderboard(regattaIdentifier,
                                 /* displayName */ null, new int[] {},
                         new AsyncCallback<StrippedLeaderboardDTO>() {
                     @Override

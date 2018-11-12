@@ -32,7 +32,7 @@ public class CreateUserDialog extends AbstractUserDialog {
                                         usernameEmailPassword.getEmail(), usernameEmailPassword.getPassword(),
                                         /* TOOD fullName */ null, /* TODO company */ null, /* TODO locale */ null,
                                         EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()),
-                                        userService.getCurrentTenantName(), new AsyncCallback<UserDTO>() {
+                                        new AsyncCallback<UserDTO>() {
                                             @Override
                                             public void onSuccess(UserDTO result) {
                                                 for (UserCreatedEventHandler handler : handlers) {

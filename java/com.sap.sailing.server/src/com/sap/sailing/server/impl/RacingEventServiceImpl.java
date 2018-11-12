@@ -28,7 +28,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -513,6 +512,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     private final PairingListTemplateFactory pairingListTemplateFactory = PairingListTemplateFactory.INSTANCE;
 
+    private ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
+
     /**
      * Providing the constructor parameters for a new {@link RacingEventServiceImpl} instance is a bit tricky
      * in some cases because containment and initialization order of some types is fairly tightly coupled.
@@ -571,7 +572,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
      * @param trackedRaceStatisticsCache
      *            a cache that gives access to detailed statistics about TrackedRaces. If <code>null</code>, no detailed
      *            statistics about TrackedRaces will be calculated.
-     * @param securityServiceAvailable
+     * @param securityServiceTracker
      *            will complete as soon as the securityServiceTracker is able to provide a SecurityService, NEVER hold a
      *            reference to the result of this, as it might become invalid if bundles are replaced/ restarted
      */
@@ -579,7 +580,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             final TypeBasedServiceFinderFactory serviceFinderFactory, TrackedRegattaListenerManager trackedRegattaListener,
             SailingNotificationService sailingNotificationService,
             TrackedRaceStatisticsCache trackedRaceStatisticsCache, boolean restoreTrackedRaces,
-            CompletableFuture<SecurityService> securityServiceAvailable) {
+            ServiceTracker<SecurityService, SecurityService> securityServiceTracker) {
         this((final RaceLogResolver raceLogResolver) -> {
             return new ConstructorParameters() {
                 private final MongoObjectFactory mongoObjectFactory = PersistenceFactory.INSTANCE
@@ -610,7 +611,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             };
         }, MediaDBFactory.INSTANCE.getDefaultMediaDB(), null, null, serviceFinderFactory, trackedRegattaListener,
                 sailingNotificationService, trackedRaceStatisticsCache, restoreTrackedRaces,
-                securityServiceAvailable);
+                securityServiceTracker);
     }
 
     private RacingEventServiceImpl(final boolean clearPersistentCompetitorStore, WindStore windStore,
@@ -707,8 +708,9 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
             TypeBasedServiceFinderFactory serviceFinderFactory, TrackedRegattaListenerManager trackedRegattaListener,
             SailingNotificationService sailingNotificationService,
             TrackedRaceStatisticsCache trackedRaceStatisticsCache, boolean restoreTrackedRaces,
-            CompletableFuture<SecurityService> securityServiceAvailable) {
+            ServiceTracker<SecurityService, SecurityService> securityServiceTracker) {
         logger.info("Created " + this);
+        this.securityServiceTracker = securityServiceTracker;
         this.numberOfTrackedRacesRestored = new AtomicInteger();
         this.scoreCorrectionListenersByLeaderboard = new ConcurrentHashMap<>();
         this.connectivityParametersByRace = new ConcurrentHashMap<>();
@@ -824,8 +826,18 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         raceChangeObserverForAnniversaryDetection = new RaceChangeObserverForAnniversaryDetection(anniversaryRaceDeterminator);
         this.trackedRegattaListener.addListener(raceChangeObserverForAnniversaryDetection);
         
-        if (securityServiceAvailable != null) {
-            securityServiceAvailable.thenAccept(t -> ensureOwnerships(t));
+        if (securityServiceTracker != null) {
+            new Thread("Racingevent wait for securityservice for migration thread") {
+                public void run() {
+                    SecurityService securityService;
+                    try {
+                        securityService = securityServiceTracker.waitForService(0);
+                        ensureOwnerships(securityService);
+                    } catch (InterruptedException e) {
+                        logger.warning("Could not obtain SecurityService " + e.getMessage());
+                    }
+                };
+            }.start();
         }
     }
 
@@ -4424,5 +4436,14 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 /* flag image */ null, team, competitorDescriptor.getTimeOnTimeFactor(),
                 competitorDescriptor.getTimeOnDistanceAllowancePerNauticalMile(), searchTag, boat);
         return competitorWithBoat;
+    }
+
+    @Override
+    /**
+     * This should only be used for replicable Operations that need access to the SecurityService, all other should
+     * obtain the SecurityService in another way.
+     */
+    public SecurityService getSecurityService() {
+        return securityServiceTracker.getService();
     }
 }

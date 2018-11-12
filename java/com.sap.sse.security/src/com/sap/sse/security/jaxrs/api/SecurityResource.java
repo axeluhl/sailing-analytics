@@ -114,7 +114,8 @@ public class SecurityResource extends AbstractSecurityResource {
     public Response createUser(@Context UriInfo uriInfo, @QueryParam("username") String username, @QueryParam("email") String email,
             @QueryParam("password") String password, @QueryParam("fullName") String fullName,
             @QueryParam("company") String company) {
-        return getService().setOwnershipCheckCreatePermissionAndRevertOnError(null, SecuredSecurityTypes.USER, username,
+        return getService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredSecurityTypes.USER,
+                username,
                 username, () -> {
                     try {
                         final String validationBaseURL = getEmailValidationBaseURL(uriInfo);

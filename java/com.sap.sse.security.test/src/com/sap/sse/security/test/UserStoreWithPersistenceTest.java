@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.net.UnknownHostException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -36,6 +37,7 @@ public class UserStoreWithPersistenceTest {
     private final String fullName = "Arno Nym";
     private final String company = "SAP SE";
     private final String email = "anonymous@sapsailing.com";
+    private final String serverName = "dummyServer";
     private final String prefKey = "pk";
     private final String prefValue = "pv";
     
@@ -44,6 +46,7 @@ public class UserStoreWithPersistenceTest {
     private UserGroup defaultTenant;
 
     private UserStoreImpl store;
+    private HashMap<String, UserGroup> defaultTenantForServers;
 
     @Before
     public void setUp() throws UnknownHostException, MongoException, UserGroupManagementException {
@@ -56,6 +59,8 @@ public class UserStoreWithPersistenceTest {
         db.getCollection(CollectionNames.PREFERENCES.name()).drop();
         newStore();
         defaultTenant = store.createUserGroup(userGroupId, userGroupName);
+        defaultTenantForServers = new HashMap<>();
+        defaultTenantForServers.put(serverName, defaultTenant);
     }
 
     private void newStore() {
@@ -81,7 +86,7 @@ public class UserStoreWithPersistenceTest {
     public void testMasterdataIsSaved() throws UserManagementException {
         store.createUser(username, email, defaultTenant);
         store.updateUser(new UserImpl(username, email, fullName, company, Locale.GERMAN, false, null, null,
-                defaultTenant, Collections.emptySet(), /* userGroupProvider */ null));
+                defaultTenantForServers, Collections.emptySet(), /* userGroupProvider */ null));
         newStore();
         User savedUser = store.getUserByName(username);
         assertEquals(username, savedUser.getName());
@@ -172,7 +177,7 @@ public class UserStoreWithPersistenceTest {
         final User user = store.createUser(username, email, defaultTenant);
         defaultTenant.add(user);
         store.updateUserGroup(defaultTenant);
-        assertSame(defaultTenant, user.getDefaultTenant());
+        assertSame(defaultTenant, user.getDefaultTenant(serverName));
         assertEquals(1, Util.size(defaultTenant.getUsers()));
         assertSame(user, defaultTenant.getUsers().iterator().next());
         assertEquals(1, Util.size(store.getUserGroupsOfUser(user)));
@@ -180,7 +185,7 @@ public class UserStoreWithPersistenceTest {
         newStore();
         final UserGroup loadedDefaultTenant = store.getUserGroupByName(defaultTenant.getName());
         final User loadedUser = store.getUserByName(username);
-        assertSame(loadedDefaultTenant, loadedUser.getDefaultTenant());
+        assertSame(loadedDefaultTenant, loadedUser.getDefaultTenant(serverName));
         assertEquals(1, Util.size(loadedDefaultTenant.getUsers()));
         assertSame(loadedUser, loadedDefaultTenant.getUsers().iterator().next());
         assertEquals(1, Util.size(store.getUserGroupsOfUser(loadedUser)));

@@ -45,7 +45,7 @@ public interface UserManagementService extends RemoteService {
 
     UserGroup getUserGroupByName(String userGroupName) throws UnauthorizedException;
 
-    UserGroup createUserGroup(String name, String tenantOwner) throws UserGroupManagementException, UnauthorizedException;
+    UserGroup createUserGroup(String name) throws UserGroupManagementException, UnauthorizedException;
 
     SuccessInfo deleteUserGroup(String userGroupIdAsString) throws UserGroupManagementException, UnauthorizedException;
     
@@ -69,7 +69,9 @@ public interface UserManagementService extends RemoteService {
 
     SuccessInfo login(String username, String password);
 
-    UserDTO createSimpleUser(String name, String email, String password, String fullName, String company, String localeName, String validationBaseURL, String tenantOwner) throws UserManagementException, MailException, UnauthorizedException;
+    UserDTO createSimpleUser(String name, String email, String password, String fullName, String company,
+            String localeName, String validationBaseURL)
+            throws UserManagementException, MailException, UnauthorizedException;
     
     /**
      * Either <code>oldPassword</code> or <code>passwordResetSecret</code> need to be provided, or the current user needs to have

@@ -346,7 +346,7 @@ public class EventsResource extends AbstractSailingServerResource {
                 createDefaultSeriesCreationParameters(regattaName, numberOfRaces));
         UUID regattaId = UUID.randomUUID();
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                getSecurityService().getDefaultTenant(), SecuredDomainType.REGATTA, regattaName, 
+                SecuredDomainType.REGATTA, regattaName, 
                 regattaName, new ActionWithResult<Regatta>() {
 
                     @Override
@@ -399,7 +399,7 @@ public class EventsResource extends AbstractSailingServerResource {
         Iterable<ImageDescriptor> images = Collections.<ImageDescriptor> emptyList();
         Iterable<VideoDescriptor> videos = Collections.<VideoDescriptor> emptyList();
         Event event = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                getSecurityService().getDefaultTenant(), SecuredDomainType.EVENT, eventId.toString(),
+                SecuredDomainType.EVENT, eventId.toString(),
                 eventName, new ActionWithResult<Event>() {
 
                     @Override
@@ -457,7 +457,7 @@ public class EventsResource extends AbstractSailingServerResource {
         UUID leaderboardGroupId = UUID.randomUUID();
         LeaderboardGroup leaderboardGroup = getSecurityService()
                 .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                getSecurityService().getDefaultTenant(), SecuredDomainType.LEADERBOARD_GROUP, leaderboardGroupName,
+                        SecuredDomainType.LEADERBOARD_GROUP, leaderboardGroupName,
                 leaderboardGroupName, new ActionWithResult<LeaderboardGroup>() {
 
             @Override
@@ -583,7 +583,6 @@ public class EventsResource extends AbstractSailingServerResource {
 
     private RegattaLeaderboard createRegattaLeaderboard(String regattaName, int[] discardThresholds) {
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                getSecurityService().getDefaultTenant(),
                 SecuredDomainType.LEADERBOARD, regattaName, regattaName,
                 new ActionWithResult<RegattaLeaderboard>() {
 

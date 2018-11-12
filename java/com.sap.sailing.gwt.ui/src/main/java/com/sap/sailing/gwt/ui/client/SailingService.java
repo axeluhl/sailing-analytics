@@ -240,14 +240,14 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     StrippedLeaderboardDTO updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThreasholds, UUID newCourseAreaId);
 
-    StrippedLeaderboardDTO createFlexibleLeaderboard(String tenantOwnerName, String leaderboardName,
+    StrippedLeaderboardDTO createFlexibleLeaderboard(String leaderboardName,
             String leaderboardDisplayName, int[] discardThresholds, ScoringSchemeType scoringSchemeType,
             UUID courseAreaId);
 
-    StrippedLeaderboardDTO createRegattaLeaderboard(String tenantOwnerName, RegattaIdentifier regattaIdentifier,
+    StrippedLeaderboardDTO createRegattaLeaderboard(RegattaIdentifier regattaIdentifier,
             String leaderboardDisplayName, int[] discardThresholds);
 
-    StrippedLeaderboardDTO createRegattaLeaderboardWithEliminations(String tenantOwnerName, String name,
+    StrippedLeaderboardDTO createRegattaLeaderboardWithEliminations(String name,
             String displayName, String regattaName);
 
     void removeLeaderboard(String leaderboardName);
@@ -346,7 +346,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     
     void removeLeaderboardGroups(Set<String> groupNames);
     
-    LeaderboardGroupDTO createLeaderboardGroup(String tenantOwnerName, String groupName, String description,
+    LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description,
             String displayName,
             boolean displayGroupsInReverseOrder, int[] overallLeaderboardDiscardThresholds,
             ScoringSchemeType overallLeaderboardScoringSchemeType);
@@ -375,8 +375,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     EventDTO createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
             boolean isPublic, List<String> courseAreaNames, String officialWebsiteURL,
             String baseURLAsString, Map<String, String> sailorsInfoWebsiteURLsByLocaleName,
-            Iterable<ImageDTO> images, Iterable<VideoDTO> videos, Iterable<UUID> leaderboardGroupIds,
-            String tenantOwnerName) throws Exception;
+            Iterable<ImageDTO> images, Iterable<VideoDTO> videos, Iterable<UUID> leaderboardGroupIds) throws Exception;
     
     void removeEvent(UUID eventId);
 
@@ -764,7 +763,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      */
     Iterable<RegattaDTO> getRegattas(String manage2SailJsonUrl);
 
-    void createRegattaStructure(String tenantOwnerName, Iterable<RegattaDTO> regattas, EventDTO newEvent)
+    void createRegattaStructure(Iterable<RegattaDTO> regattas, EventDTO newEvent)
             throws Exception;
 
     Integer getStructureImportOperationProgress();
@@ -959,4 +958,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
      * @return base64 encoded string containg a png-image of the genrated qrcode
      */
     String openRegattaRegistrationQrCode(String url);
+
+    void setDefaultTenantForCurrentServer(String tennant);
+
+    List<String> getPossibleTennants();
 }

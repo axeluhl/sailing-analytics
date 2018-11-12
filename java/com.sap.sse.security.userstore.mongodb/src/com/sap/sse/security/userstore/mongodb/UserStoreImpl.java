@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 
 import org.apache.shiro.SecurityUtils;
 
+import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Util;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
@@ -184,18 +185,20 @@ public class UserStoreImpl implements UserStore {
                 this.userGroups.put(group.getId(), group);
                 userGroupsByName.put(group.getName(), group);
             }
-            final boolean defaultTenantWasCreated = (defaultTenantName != null && getUserGroupByName(defaultTenantName) == null);
+            // final boolean defaultTenantWasCreated = (defaultTenantName != null &&
+            // getUserGroupByName(defaultTenantName) == null);
             // identify, create and/or set default tenant
             defaultTenant = getOrCreateDefaultTenant(defaultTenantName);
             for (User u : domainObjectFactory.loadAllUsers(roleDefinitions, defaultTenant, this.userGroups, this)) {
                 users.put(u.getName(), u);
-                if (defaultTenantWasCreated) {
-                    // if the default tenant was just created, add all users to it
-                    defaultTenant.add(u);
-                }
-                if (u.getDefaultTenant() == null) {
-                    u.setDefaultTenant(defaultTenant);
-                }
+                // FIXME for unified user store this is not valid?
+                // if (defaultTenantWasCreated) {
+                // // if the default tenant was just created, add all users to it
+                // defaultTenant.add(u);
+                // }
+                // if (u.getDefaultTenant(ServerInfo.getName()) == null) {
+                // u.setDefaultTenant(ServerInfo.getName(), defaultTenant);
+                // }
                 addToUsersByEmail(u);
             }
             // the users in the groups/tenants are still only proxies; now that the real users have been loaded,
@@ -628,7 +631,9 @@ public class UserStoreImpl implements UserStore {
         if (getUserByName(name) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
-        UserImpl user = new UserImpl(name, email, defaultTenant, /* user group provider */ this, accounts);
+        ConcurrentHashMap<String, UserGroup> tenantsForServer = new ConcurrentHashMap<>();
+        tenantsForServer.put(ServerInfo.getName(), defaultTenant);
+        UserImpl user = new UserImpl(name, email, tenantsForServer, /* user group provider */ this, accounts);
         logger.info("Creating user: " + user + " with e-mail "+email);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUser(user);
