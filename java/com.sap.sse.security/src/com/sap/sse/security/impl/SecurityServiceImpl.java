@@ -373,7 +373,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         UserGroup specificTenant = getCurrentUser().getDefaultTenant(ServerInfo.getName());
         if (specificTenant == null) {
-            // specificTenant = //FIXME determine some other suer here?
+            String defaultTenantName = getDefaultTenantNameForUsername(user.getName());
+            specificTenant = getUserGroupByName(defaultTenantName);
         }
         return specificTenant;
     }
