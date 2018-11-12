@@ -177,6 +177,8 @@ public class UserStoreWithPersistenceTest {
         final User user = store.createUser(username, email, defaultTenant);
         defaultTenant.add(user);
         store.updateUserGroup(defaultTenant);
+        user.getDefaultTenantMap().put(serverName, defaultTenant);
+        store.updateUser(user);
         assertSame(defaultTenant, user.getDefaultTenant(serverName));
         assertEquals(1, Util.size(defaultTenant.getUsers()));
         assertSame(user, defaultTenant.getUsers().iterator().next());
