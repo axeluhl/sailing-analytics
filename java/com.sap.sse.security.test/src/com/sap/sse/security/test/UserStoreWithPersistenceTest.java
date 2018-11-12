@@ -30,6 +30,7 @@ import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
 import com.sap.sse.security.shared.RoleImpl;
 import com.sap.sse.security.shared.SecurityUser;
@@ -257,7 +258,7 @@ public class UserStoreWithPersistenceTest {
         Iterable<Role> rolesFromUser = store.getRolesFromUser(user.getName());
         assertFalse(Util.size(rolesFromUser) == 0);
         assertTrue(Util.contains(rolesFromUser, role));
-        Pair<Boolean, Set<Ownership>> result = store.getOtherUsersHaveRole(role);
+        Pair<Boolean, Set<Ownership>> result = store.getOtherUsersHaveRole(roleDefinition);
         assertTrue(result.getA());
         assertNull(result.getB());
 
@@ -269,7 +270,7 @@ public class UserStoreWithPersistenceTest {
             throws UserManagementException {
         Role role = new RoleImpl(roleDefinition, userGroup, user);
         store.addRoleForUser(user.getName(), role);
-        assertThatNoUserHasWildcardRole(userGroup, user, role);
+        assertThatNoUserHasWildcardRole(userGroup, user, roleDefinition);
         store.removeRoleFromUser(user.getName(), role);
     }
 
@@ -278,7 +279,7 @@ public class UserStoreWithPersistenceTest {
             throws UserManagementException {
         Role role = new RoleImpl(roleDefinition, userGroup, null);
         store.addRoleForUser(user.getName(), role);
-        assertThatNoUserHasWildcardRole(userGroup, user, role);
+        assertThatNoUserHasWildcardRole(userGroup, user, roleDefinition);
         store.removeRoleFromUser(user.getName(), role);
     }
 
@@ -287,20 +288,24 @@ public class UserStoreWithPersistenceTest {
             throws UserManagementException {
         Role role = new RoleImpl(roleDefinition, null, user);
         store.addRoleForUser(user.getName(), role);
-        assertThatNoUserHasWildcardRole(userGroup, user, role);
+        assertThatNoUserHasWildcardRole(userGroup, user, roleDefinition);
         store.removeRoleFromUser(user.getName(), role);
     }
 
     /** assert that no user has a wildcard role checkIfOtherUsersHaveRole with both tenant and user not null. */
-    private void assertThatNoUserHasWildcardRole(UserGroup userGroup, User user, Role role)
+    private void assertThatNoUserHasWildcardRole(UserGroup userGroup, User user, RoleDefinition roleDefinition)
             throws UserManagementException {
         Iterable<Role> rolesFromUser = store.getRolesFromUser(user.getName());
         // check that role was added correctly
         assertFalse(Util.size(rolesFromUser) == 0);
-        assertTrue(Util.contains(rolesFromUser, role));
+        boolean containsRole = false;
+        for (Role role : rolesFromUser) {
+            containsRole |= role.getRoleDefinition().equals(roleDefinition);
+        }
+        assertTrue(containsRole);
 
         // check if other users have the role
-        Pair<Boolean, Set<Ownership>> result = store.getOtherUsersHaveRole(role);
+        Pair<Boolean, Set<Ownership>> result = store.getOtherUsersHaveRole(roleDefinition);
         assertFalse(result.getA());
         assertNotNull(result.getB());
 

@@ -706,12 +706,12 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public Pair<Boolean, Set<Ownership>> getOtherUsersHaveRole(Role roleToCheck) {
-        Set<Ownership> ownerships = new HashSet<>();
+    public Pair<Boolean, Set<Ownership>> getOtherUsersHaveRole(RoleDefinition roleToCheck) {
+        final Set<Ownership> ownerships = new HashSet<>();
         for (User user : getUsers()) {
             try {
                 for (Role role : getRolesFromUser(user.getName())) {
-                    if (!role.equals(roleToCheck)) {
+                    if (!role.getRoleDefinition().equals(roleToCheck)) {
                         // wrong role
                         continue;
                     }

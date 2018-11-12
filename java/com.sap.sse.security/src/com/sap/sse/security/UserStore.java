@@ -239,5 +239,5 @@ public interface UserStore extends UserGroupProvider, Named {
      *         user qualification). In this case, B is null.<br/>
      *         If A is false, B contains all the ownerships of {@link #roleToCheck}
      */
-    Pair<Boolean, Set<Ownership>> getOtherUsersHaveRole(Role roleToCheck);
+    Pair<Boolean, Set<Ownership>> getOtherUsersHaveRole(RoleDefinition roleToCheck);
 }
