@@ -30,21 +30,6 @@ def setup_android_tool(String toolname) {
 
 //tools required in the exploded build-tools dir
 def zipalign = setup_android_tool("zipalign")
-def apksigner = setup_android_tool("apksigner")
-
-if (new File(SIGN_DOCKER_FILE_PY).exists()){
-  // central signing available only during release builds
-  println "Execute APK central signing and alignment ..."
-
-  //calling xmake signing scrip
-  //paths are relative to gen/out in files2sign.json
-  assert execute("python", SIGN_DOCKER_FILE_PY, "${gendir}", "${cfgdir}/files2sign.json", "${importdir}") == 0
-
-  //align the already signed apk
-  def apkToDeploy = "$gendir/validationapp-release-centralsigned.apk" 
-  def apkToSign = "$gendir/src/validationapp/build/outputs/apk/release/validationapp-release-unsigned.apk"
-  assert execute(zipalign.absolutePath, "-v", "4", apkToSign, apkToDeploy) == 0
-
   // google play store checks the APK with this tool - below API level 18 only SHA1 digest algorithm allowed
   // 
   // if you see similar message:
@@ -52,11 +37,30 @@ if (new File(SIGN_DOCKER_FILE_PY).exists()){
   // 
   // for further info please check "Support of Android 4.2 will be dropped for new apps" here:
   //   https://wiki.wdf.sap.corp/wiki/display/NAAS/Mobile+Announcements#MobileAnnouncements-Android 
-  assert execute(apksigner.absolutePath, "verify", "--print-certs", apkToDeploy) == 0
+def apksigner = setup_android_tool("apksigner")
+
+def repodir = new File(gendir, "src/java/com.sap.sailing.www/apps")
+
+if (new File(SIGN_DOCKER_FILE_PY).exists()){
+  // central signing available only during release builds
+  println "Execute APK central signing and alignment ..."
+
+  //calling xmake signing script
+  //paths are relative to gen/out in files2sign.json
+  assert execute("python", SIGN_DOCKER_FILE_PY, "${gendir}", "${cfgdir}/files2sign.json", "${importdir}") == 0
+  repodir.traverse(type : FILES, nameFilter: ~/.*unsigned*.*${apkExtension}/) { apkFile ->
+    def apkUnsigned = apkFile.getAbsolutePath()
+    def name = apkFile.getName()
+    def index = name.indexOf("-")
+    def apkToDeploy = "$gendir/${name.substring(0 , index)}-release-centralsigned.apk"
+
+    //align the already signed apks
+    assert execute(zipalign.absolutePath, "-v", "4", apkUnsigned, apkToDeploy) == 0
+    assert execute(apksigner.absolutePath, "verify", "--print-certs", apkToDeploy) == 0
+  }
 } else {
   // snapshot and milestone builds are not eligible for central signing
   apkExtension = /\.apk$/
-  repodir = new File(gendir, "src/java/com.sap.sailing.www/apps")
   repodir.traverse(type : FILES, nameFilter: ~/.*unsigned*.*${apkExtension}/) { apkFile ->
     def apkToDeploy = "$gendir/${apkFile.getName()}"
     def apkToSign = apkFile.getAbsolutePath()
@@ -71,8 +75,7 @@ if (new File(SIGN_DOCKER_FILE_PY).exists()){
 artifacts builderVersion: "1.1", {
   def groupId = "com.sap.sailing.android"
 
-  apkExtension = /\.apk$/
-  repodir = new File(gendir, "src/java/com.sap.sailing.www/apps")
+  def apkExtension = /\.apk$/
   repodir.traverse(type : FILES, nameFilter: ~/.*unsigned*.*${apkExtension}/) { apkFile ->
     def apkToDeploy = "$gendir/${apkFile.getName()}"
     def artifactId = apkFile.getName().replace("com.sap.sailing.", "")
