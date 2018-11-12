@@ -75,8 +75,8 @@ public class PermissionCheckerTest {
         if (userStore.getUserByName("jonas") != null) {
             userStore.deleteUser("jonas");
         }
-        user = userStore.createUser("jonas", "jonas@dann.io", userTenant);
         userTenant = userStore.createUserGroup(userTenantId, "jonas-tenant");
+        user = userStore.createUser("jonas", "jonas@dann.io", userTenant);
         userTenant.add(user);
         ownership = new OwnershipImpl(user, userTenant);
         adminTenant.add(adminUser);
