@@ -8437,7 +8437,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public String openRegattaRegistrationQrCode(String url) {
         String result = "";
-        try (DataInputStream imageIs = new DataInputStream(QRCodeGenerationUtil.create(url, 250))) {
+        try (DataInputStream imageIs = new DataInputStream(QRCodeGenerationUtil.create(url, 600, "H"))) {
             byte[] targetArray = new byte[imageIs.available()];
             imageIs.readFully(targetArray);
             result = Base64Utils.toBase64(targetArray);
