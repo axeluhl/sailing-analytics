@@ -129,12 +129,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         }
         Set<WildcardPermission> addedPermissions = new HashSet<>(roleDefinitionWithNewProperties.getPermissions());
         addedPermissions.removeAll(existingRole.getPermissions());
-        for (WildcardPermission permissionToAdd : addedPermissions) {
-            // FIXME check based on actually existing qualifications
-            if (!getSecurityService().hasCurrentUserMetaPermission(permissionToAdd, null)) {
-                throw new UnauthorizedException("Not permitted to grant permission " + permissionToAdd + " for role "
-                        + roleDefinitionWithNewProperties.getName());
-            }
+        
+        if (!getSecurityService().hasUserAllWildcardPermissionsForAlreadyRealizedQualifications(existingRole, addedPermissions)) {
+            throw new UnauthorizedException("Not permitted to grant permissions for role "
+                    + roleDefinitionWithNewProperties.getName());
         }
         
         getSecurityService().updateRoleDefinition(roleDefinitionWithNewProperties);

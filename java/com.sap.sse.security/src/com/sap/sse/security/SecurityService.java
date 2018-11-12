@@ -372,4 +372,14 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void setOwnershipIfNotSet(QualifiedObjectIdentifier identifier, UserGroup defaultTenant);
 
     UserGroup getDefaultTenantForCurrentUser();
+
+    /**
+     * When a user adds permissions to a role, he needs to hold the permissions for all existing qualifications. This
+     * method checks all given permissions for all existing qualifications of the given role.
+     * 
+     * @return {@code true} if the current user holds all given meta permissions for all existing qualifications of the
+     *         given role.
+     */
+    boolean hasUserAllWildcardPermissionsForAlreadyRealizedQualifications(RoleDefinition role,
+            Iterable<WildcardPermission> permissionsToCheck);
 }

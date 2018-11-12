@@ -1858,4 +1858,21 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         final List<String> alreadyMigrated = getMigrationInfoForKey(permissions);
         alreadyMigrated.add(typeName);
     }
+    
+    @Override
+    public boolean hasUserAllWildcardPermissionsForAlreadyRealizedQualifications(RoleDefinition role,
+            Iterable<WildcardPermission> permissionsToCheck) {
+        Pair<Boolean, Set<Ownership>> qualificationsToCheck = userStore.getOtherUsersHaveRole(role);
+        final Iterable<Ownership> effectiveQualificationsToCheck = Boolean.TRUE.equals(qualificationsToCheck.getA())
+                ? Collections.singletonList(null)
+                : qualificationsToCheck.getB();
+        for (WildcardPermission permission : permissionsToCheck) {
+            for (Ownership ownership : effectiveQualificationsToCheck) {
+                if (!hasCurrentUserMetaPermission(permission, ownership)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 }
