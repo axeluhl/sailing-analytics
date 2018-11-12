@@ -7,16 +7,21 @@ import java.util.logging.Logger;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.sap.sse.mail.MailService;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.security.AccessControlStore;
+import com.sap.sse.security.RolePrototypeProvider;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.UsernamePasswordRealm;
 import com.sap.sse.security.shared.HasPermissionsProvider;
+import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.RolePrototype;
 import com.sap.sse.util.ClearStateTestSupport;
 import com.sap.sse.util.ServiceTrackerFactory;
 
@@ -37,6 +42,8 @@ public class Activator implements BundleActivator {
      */
     private static UserStore testUserStore;
     private static AccessControlStore testAccessControlStore;
+
+    private ServiceTracker<RolePrototypeProvider, RolePrototypeProvider> rolePrototypeProviderTracker;
     
     public static void setTestStores(UserStore theTestUserStore, AccessControlStore theTestAccessControlStore) {
         testUserStore = theTestUserStore;
@@ -84,6 +91,33 @@ public class Activator implements BundleActivator {
         context.registerService(ClearStateTestSupport.class.getName(), securityService, null);
         Logger.getLogger(Activator.class.getName()).info("Security Service registered.");
     }
+    
+    private void createRoleDefinitionsFromPrototypes(BundleContext bundleContext, UserStore userStore) {
+        rolePrototypeProviderTracker = new ServiceTracker<>(
+                bundleContext, RolePrototypeProvider.class, /* customizer */ new ServiceTrackerCustomizer<RolePrototypeProvider, RolePrototypeProvider>() {
+                    @Override
+                    public RolePrototypeProvider addingService(ServiceReference<RolePrototypeProvider> reference) {
+                        final RolePrototypeProvider service = context.getService(reference);
+                        final RolePrototype rolePrototype = service.getRolePrototype();
+                        final RoleDefinition potentiallyExistingRoleDefinition = userStore.getRoleDefinition(rolePrototype.getId());
+                        if (potentiallyExistingRoleDefinition == null) {
+                            userStore.createRoleDefinition(rolePrototype.getId(), rolePrototype.getName(), rolePrototype.getPermissions());
+                        }
+                        return service;
+                    }
+
+                    @Override
+                    public void modifiedService(ServiceReference<RolePrototypeProvider> reference,
+                            RolePrototypeProvider service) {
+                    }
+
+                    @Override
+                    public void removedService(ServiceReference<RolePrototypeProvider> reference,
+                            RolePrototypeProvider service) {
+                    }
+                });
+        rolePrototypeProviderTracker.open();
+    }
 
     private void waitForUserStoreService(BundleContext bundleContext) {
         context = bundleContext;
@@ -100,6 +134,7 @@ public class Activator implements BundleActivator {
                     final UserStore userStore = tracker.waitForService(0);
                     final AccessControlStore accessControlStore = accessControlStoreTracker.waitForService(0);
                     logger.info("Obtained UserStore service "+userStore);
+                    createRoleDefinitionsFromPrototypes(bundleContext, userStore);
                     createAndRegisterSecurityService(bundleContext, userStore, accessControlStore);
                 } catch (InterruptedException e) {
                     logger.log(Level.SEVERE, "Interrupted while waiting for UserStore service", e);
@@ -114,6 +149,10 @@ public class Activator implements BundleActivator {
      * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
      */
     public void stop(BundleContext bundleContext) throws Exception {
+        if (rolePrototypeProviderTracker != null) {
+            rolePrototypeProviderTracker.close();
+            rolePrototypeProviderTracker = null;
+        }
         if (registration != null) {
             registration.unregister();
         }
