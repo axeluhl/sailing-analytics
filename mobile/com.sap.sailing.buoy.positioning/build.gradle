@@ -119,7 +119,7 @@ dependencies {
 preBuild.doLast {
     // save the combined build info into assets/build.info file
     def repo = org.ajoberstar.grgit.Grgit.open(dir: System.env.XMAKE_PROJECTDIR)
-    def result_line = "${repo.branch.current()}-${repo.head().abbreviatedId} (${new Date().toString()})\n"
+    def result_line = "${repo.branch.current().getName()}-${repo.head().abbreviatedId} (${new Date().toString()})\n"
     def assetsDir = android.sourceSets.main.assets.srcDirs.toArray()[1]
     delete(assetsDir)
     mkdir(assetsDir)
