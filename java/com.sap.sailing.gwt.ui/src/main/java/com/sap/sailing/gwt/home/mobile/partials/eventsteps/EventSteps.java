@@ -8,11 +8,13 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.sap.sailing.gwt.common.client.BoatClassImageResolver;
+import com.sap.sailing.gwt.home.communication.eventview.HasRegattaMetadata.RegattaState;
 import com.sap.sailing.gwt.home.communication.eventview.RegattaMetadataDTO;
 import com.sap.sailing.gwt.home.communication.regatta.RegattaProgressSeriesDTO;
 import com.sap.sailing.gwt.home.communication.regatta.RegattaWithProgressDTO;
 import com.sap.sailing.gwt.home.mobile.partials.section.MobileSection;
 import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderContent;
+import com.sap.sailing.gwt.home.mobile.partials.sectionHeader.SectionHeaderDataIndicators;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.refresh.RefreshableWidget;
 
@@ -23,6 +25,7 @@ public class EventSteps extends Composite implements RefreshableWidget<RegattaWi
     interface EventStepsUiBinder extends UiBinder<MobileSection, EventSteps> {
     }
     
+    @UiField EventStepsResources local_res;
     @UiField SectionHeaderContent sectionHeaderUi;
     private final MobileSection regattaProgessUi;
     private final Function<String, PlaceNavigation<?>> racesNavigationFactory;
@@ -35,7 +38,10 @@ public class EventSteps extends Composite implements RefreshableWidget<RegattaWi
         sectionHeaderUi.setImageUrl(boatClassIcon.getSafeUri().asString());
         sectionHeaderUi.setSectionTitle(regatta.getDisplayName());
         regattaProgessUi.setEdgeToEdgeContent(true);
+        sectionHeaderUi.initCollapsibility(regattaProgessUi.getContentContainerElement(),
+                RegattaState.FINISHED != regatta.getState());
         sectionHeaderUi.initBoatClassPopup(regatta.getBoatClass());
+        sectionHeaderUi.initAdditionalWidget(new SectionHeaderDataIndicators(regatta.getRaceDataInfo()));
     }
     
     @Override
