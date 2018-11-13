@@ -366,10 +366,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     public UserGroup getDefaultTenantForUser(User user) {
-        if (getCurrentUser() == null) {
-            return null;
-        }
-        UserGroup specificTenant = getCurrentUser().getDefaultTenant(ServerInfo.getName());
+        UserGroup specificTenant = user.getDefaultTenant(ServerInfo.getName());
         if (specificTenant == null) {
             String defaultTenantName = getDefaultTenantNameForUsername(user.getName());
             specificTenant = getUserGroupByName(defaultTenantName);
@@ -379,6 +376,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public UserGroup getDefaultTenantForCurrentUser() {
+        if (getCurrentUser() == null) {
+            return null;
+        }
         return getDefaultTenantForUser(getCurrentUser());
     }
 
