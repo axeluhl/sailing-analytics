@@ -36,6 +36,7 @@ import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.User;
 
 @Path("/v1/masterdata/leaderboardgroups")
@@ -49,7 +50,8 @@ public class MasterDataResource extends AbstractSailingServerResource {
             @QueryParam("compress") Boolean compress, @QueryParam("exportWind") Boolean exportWind, @QueryParam("exportDeviceConfigs") Boolean exportDeviceConfigs)
             throws UnsupportedEncodingException {
 
-        User user = getSecurityService().getCurrentUser();
+        final SecurityService securityService = getSecurityService();
+        User user = securityService.getCurrentUser();
         if (user == null) {
             return Response.status(Status.FORBIDDEN).build();
         }
@@ -73,7 +75,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
         if (requestedLeaderboardGroups.isEmpty()) {
             // add all visible
             for (LeaderboardGroup group : allLeaderboardGroups.values()) {
-                if (getSecurityService().hasCurrentUserReadPermission(group)) {
+                if (securityService.hasCurrentUserReadPermission(group)) {
                     groupsToExport.add(group);
                 }
             }
@@ -82,7 +84,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
             for (String name : requestedLeaderboardGroups) {
                 LeaderboardGroup group = allLeaderboardGroups.get(name);
                 if (group != null) {
-                    if (getSecurityService().hasCurrentUserReadPermission(group)) {
+                    if (securityService.hasCurrentUserReadPermission(group)) {
                         groupsToExport.add(group);
                     }
                 }
@@ -93,7 +95,7 @@ public class MasterDataResource extends AbstractSailingServerResource {
 
         for (LeaderboardGroup lg : groupsToExport) {
             for (Leaderboard leaderboard : lg.getLeaderboards()) {
-                if (getSecurityService().hasCurrentUserReadPermission(leaderboard)) {
+                if (securityService.hasCurrentUserReadPermission(leaderboard)) {
                     for (Competitor competitor : leaderboard.getAllCompetitors()) {
                         competitorIds.add(competitor.getId());
                     }
@@ -111,21 +113,21 @@ public class MasterDataResource extends AbstractSailingServerResource {
 
         ArrayList<Event> events = new ArrayList<>();
         for (Event event : getService().getAllEvents()) {
-            if (getSecurityService().hasCurrentUserReadPermission(event)) {
+            if (securityService.hasCurrentUserReadPermission(event)) {
                 events.add(event);
             }
         }
 
         ArrayList<MediaTrack> mediaTracks = new ArrayList<>();
         for (MediaTrack mediaTrack : getService().getAllMediaTracks()) {
-            if (getSecurityService().hasCurrentUserReadPermission(mediaTrack)) {
+            if (securityService.hasCurrentUserReadPermission(mediaTrack)) {
                 mediaTracks.add(mediaTrack);
             }
         }
 
         Map<String, Regatta> regattaRaceIds = new HashMap<>();
         for (Entry<String, Regatta> regattaRaceMap : getService().getPersistentRegattasForRaceIDs().entrySet()) {
-            if (getSecurityService().hasCurrentUserReadPermission(regattaRaceMap.getValue())) {
+            if (securityService.hasCurrentUserReadPermission(regattaRaceMap.getValue())) {
                 regattaRaceIds.put(regattaRaceMap.getKey(), regattaRaceMap.getValue());
             }
         }
