@@ -179,7 +179,7 @@ public class MasterDataImportTest {
      * Log Events created when running test. Will be removed from db at teardown
      */
     private Set<Serializable> storedLogUUIDs = new HashSet<Serializable>();
-    private DummyRacingEventService sourceService;
+    private RacingEventService sourceService;
     private DummyMasterDataRessource masterDataResource;
 
     @After
@@ -217,7 +217,8 @@ public class MasterDataImportTest {
                 .getMongoObjectFactory(MongoDBService.INSTANCE);
 
         
-        sourceService = Mockito.spy(new DummyRacingEventService(dbFactory, mongoObjectFactory,
+        sourceService = Mockito
+                .spy(new RacingEventServiceImpl(dbFactory, mongoObjectFactory,
                 MediaDBFactory.INSTANCE.getDefaultMediaDB(), EmptyWindStore.INSTANCE, EmptySensorFixStore.INSTANCE,
                 false));
 
@@ -257,8 +258,8 @@ public class MasterDataImportTest {
             ClassNotFoundException {
         // Setup source service
         MockSmartphoneImeiServiceFinderFactory serviceFinderFactory = new MockSmartphoneImeiServiceFinderFactory();
-        DummyRacingEventService sourceService = Mockito
-                .spy(new DummyRacingEventService(null, null, serviceFinderFactory));
+        RacingEventServiceImpl sourceService = Mockito
+                .spy(new RacingEventServiceImpl(null, null, serviceFinderFactory));
         Mockito.doReturn(securityService).when(sourceService).getSecurityService();
 
         Event event = sourceService.addEvent(TEST_EVENT_NAME, /* eventDescription */null, eventStartDate, eventEndDate,
@@ -401,7 +402,7 @@ public class MasterDataImportTest {
         List<String> groupNamesToExport = new ArrayList<String>();
         groupNamesToExport.add(group.getName());
 
-        DummyRacingEventServiceImplMock destService;
+        RacingEventServiceImplMock destService;
         DomainFactory domainFactory;
         DummyMasterDataRessource spyResource = spyResource(new DummyMasterDataRessource(), sourceService);
         Mockito.doReturn(securityService).when(spyResource).getSecurityService();
@@ -417,7 +418,7 @@ public class MasterDataImportTest {
             deleteAllDataFromDatabase();
             // Import in new service
             destService = Mockito.spy(
-                    new DummyRacingEventServiceImplMock(new DataImportProgressImpl(randomUUID), serviceFinderFactory) {
+                    new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID), serviceFinderFactory) {
                     });
             Mockito.doReturn(securityService).when(destService).getSecurityService();
 
@@ -743,8 +744,8 @@ public class MasterDataImportTest {
     }
 
     private RacingEventService getDestService(UUID randomUUID) {
-        DummyRacingEventServiceImplMock destService = Mockito
-                .spy(new DummyRacingEventServiceImplMock(new DataImportProgressImpl(randomUUID)) {
+        RacingEventServiceImplMock destService = Mockito
+                .spy(new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID)) {
                 });
         Mockito.doReturn(securityService).when(destService).getSecurityService();
         return destService;
@@ -821,7 +822,7 @@ public class MasterDataImportTest {
         List<String> groupNamesToExport = new ArrayList<String>();
         groupNamesToExport.add(group.getName());
 
-        DummyRacingEventServiceImplMock destService;
+        RacingEventServiceImplMock destService;
         DomainFactory domainFactory;
         DummyMasterDataRessource spyResource = spyResource(new DummyMasterDataRessource(), sourceService);
         Mockito.doReturn(securityService).when(spyResource).getSecurityService();
@@ -836,7 +837,7 @@ public class MasterDataImportTest {
             // Delete all data above from the database, to allow recreating all of it on target server
             deleteAllDataFromDatabase();
             // Import in new service
-            destService = Mockito.spy(new DummyRacingEventServiceImplMock(new DataImportProgressImpl(randomUUID)) {
+            destService = Mockito.spy(new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID)) {
             });
             Mockito.doReturn(securityService).when(destService).getSecurityService();
             domainFactory = destService.getBaseDomainFactory();
@@ -1874,7 +1875,7 @@ public class MasterDataImportTest {
         // Serialize
         List<String> groupNamesToExport = Collections.singletonList(leaderboardGroup.getName());
 
-        DummyRacingEventServiceImplMock destService;
+        RacingEventServiceImplMock destService;
         DomainFactory domainFactory;
         DummyMasterDataRessource spyResource = spyResource(new DummyMasterDataRessource(), sourceService);
         Mockito.doReturn(securityService).when(spyResource).getSecurityService();
@@ -1889,7 +1890,7 @@ public class MasterDataImportTest {
             // Delete all data above from the database, to allow recreating all of it on target server
             deleteAllDataFromDatabase();
             // Import in new service
-            destService = Mockito.spy(new DummyRacingEventServiceImplMock(new DataImportProgressImpl(randomUUID)) {
+            destService = Mockito.spy(new RacingEventServiceImplMock(new DataImportProgressImpl(randomUUID)) {
             });
             Mockito.doReturn(securityService).when(destService).getSecurityService();
             domainFactory = destService.getBaseDomainFactory();
