@@ -29,7 +29,7 @@ public class WindUtil {
         return result;
     }
 
-    public static List<WindWithConfidence<Void>> getWindFixesWithAveragedWindSpeed(
+    public static List<WindWithConfidence<Void>> getWindFixesWithMedianTws(
             List<WindWithConfidence<Void>> windFixes) {
         if (windFixes.size() <= 1) {
             return windFixes;

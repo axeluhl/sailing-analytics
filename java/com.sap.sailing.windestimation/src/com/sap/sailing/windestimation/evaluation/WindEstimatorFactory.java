@@ -1,6 +1,6 @@
 package com.sap.sailing.windestimation.evaluation;
 
-import com.sap.sailing.windestimation.WindEstimator;
+import com.sap.sailing.windestimation.WindEstimationComponent;
 
 /**
  * 
@@ -8,7 +8,7 @@ import com.sap.sailing.windestimation.WindEstimator;
  *
  */
 public interface WindEstimatorFactory<T> {
-    
-    WindEstimator<T> createNewEstimatorInstance();
+
+    WindEstimationComponent<T> createNewEstimatorInstance();
 
 }

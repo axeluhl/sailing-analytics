@@ -2,13 +2,13 @@ package com.sap.sailing.windestimation.evaluation;
 
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.windestimation.ManeuverClusteringBasedWindEstimatorImpl;
-import com.sap.sailing.windestimation.ManeuverGraphBasedWindEstimatorImpl;
-import com.sap.sailing.windestimation.OutlierRemovalMeanBasedWindEstimatorImpl;
-import com.sap.sailing.windestimation.OutlierRemovalNeighborBasedWindEstimatorImpl;
-import com.sap.sailing.windestimation.PolarsFittingBasedWindEstimatorImpl;
-import com.sap.sailing.windestimation.WindEstimator;
+import com.sap.sailing.windestimation.PolarsFittingBasedWindEstimationComponentImpl;
+import com.sap.sailing.windestimation.SimpleConfigurableManeuverBasedWindEstimationComponentImpl;
+import com.sap.sailing.windestimation.SimpleConfigurableManeuverBasedWindEstimationComponentImpl.ManeuverClassificationsAggregatorImplementation;
+import com.sap.sailing.windestimation.WindEstimationComponent;
+import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.maneuverclassifier.ManeuverFeatures;
+import com.sap.sailing.windestimation.preprocessing.RaceElementsFilteringPreprocessingPipelineImpl;
 
 /**
  * 
@@ -25,27 +25,46 @@ public class WindEstimatorFactories {
         this.maneuverFeatures = maneuverFeatures;
     }
 
-    public WindEstimatorFactory<CompleteManeuverCurveWithEstimationData> maneuverGraph() {
-        return new WindEstimatorFactory<CompleteManeuverCurveWithEstimationData>() {
+    public WindEstimatorFactory<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> get(
+            EvaluatableWindEstimationImplementation windEstimationImplementation) {
+        switch (windEstimationImplementation) {
+        case HMM:
+            return hmm();
+        case CLUSTERING:
+            return maneuverClustering();
+        case MEAN_OUTLIER:
+            return meanOutlierRemoval();
+        case NEIGHBOR_OUTLIER:
+            return neighborOutlierRemoval();
+        case POLARS_FITTING:
+            return polarsFitting();
+        }
+        throw new IllegalArgumentException(windEstimationImplementation + " is unsupported");
+    }
+
+    public WindEstimatorFactory<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> hmm() {
+        return new WindEstimatorFactory<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>>() {
 
             @Override
-            public WindEstimator<CompleteManeuverCurveWithEstimationData> createNewEstimatorInstance() {
-                return new ManeuverGraphBasedWindEstimatorImpl(polarService, maneuverFeatures);
+            public WindEstimationComponent<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> createNewEstimatorInstance() {
+                return new SimpleConfigurableManeuverBasedWindEstimationComponentImpl(maneuverFeatures, polarService,
+                        ManeuverClassificationsAggregatorImplementation.HMM);
             }
 
             @Override
             public String toString() {
-                return "Maneuver Graph";
+                return "HMM";
             }
         };
     }
 
-    public WindEstimatorFactory<CompleteManeuverCurveWithEstimationData> maneuverClustering() {
-        return new WindEstimatorFactory<CompleteManeuverCurveWithEstimationData>() {
+    public WindEstimatorFactory<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> maneuverClustering() {
+        return new WindEstimatorFactory<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>>() {
 
             @Override
-            public WindEstimator<CompleteManeuverCurveWithEstimationData> createNewEstimatorInstance() {
-                return new ManeuverClusteringBasedWindEstimatorImpl(polarService, maneuverFeatures);
+            public WindEstimationComponent<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> createNewEstimatorInstance() {
+                return new SimpleConfigurableManeuverBasedWindEstimationComponentImpl(maneuverFeatures, polarService,
+                        ManeuverClassificationsAggregatorImplementation.CLUSTERING);
             }
 
             @Override
@@ -55,12 +74,13 @@ public class WindEstimatorFactories {
         };
     }
 
-    public WindEstimatorFactory<CompleteManeuverCurveWithEstimationData> polarsFitting() {
-        return new WindEstimatorFactory<CompleteManeuverCurveWithEstimationData>() {
+    public WindEstimatorFactory<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> polarsFitting() {
+        return new WindEstimatorFactory<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>>() {
 
             @Override
-            public WindEstimator<CompleteManeuverCurveWithEstimationData> createNewEstimatorInstance() {
-                return new PolarsFittingBasedWindEstimatorImpl(polarService);
+            public WindEstimationComponent<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> createNewEstimatorInstance() {
+                return new PolarsFittingBasedWindEstimationComponentImpl<>(
+                        new RaceElementsFilteringPreprocessingPipelineImpl(), polarService);
             }
 
             @Override
@@ -70,34 +90,35 @@ public class WindEstimatorFactories {
         };
     }
 
-    public WindEstimatorFactory<CompleteManeuverCurveWithEstimationData> outlierRemovalMean() {
-        return new WindEstimatorFactory<CompleteManeuverCurveWithEstimationData>() {
+    public WindEstimatorFactory<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> meanOutlierRemoval() {
+        return new WindEstimatorFactory<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>>() {
 
             @Override
-            public WindEstimator<CompleteManeuverCurveWithEstimationData> createNewEstimatorInstance() {
-                return new OutlierRemovalMeanBasedWindEstimatorImpl(polarService, maneuverFeatures);
+            public WindEstimationComponent<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> createNewEstimatorInstance() {
+                return new SimpleConfigurableManeuverBasedWindEstimationComponentImpl(maneuverFeatures, polarService,
+                        ManeuverClassificationsAggregatorImplementation.MEAN_OUTLIER);
             }
 
             @Override
             public String toString() {
-                return "Outlier Removal (Mean)";
+                return "Mean Outlier Removal";
             }
         };
     }
 
-    public WindEstimatorFactory<CompleteManeuverCurveWithEstimationData> outlierRemovalNeighbor() {
-        return new WindEstimatorFactory<CompleteManeuverCurveWithEstimationData>() {
+    public WindEstimatorFactory<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> neighborOutlierRemoval() {
+        return new WindEstimatorFactory<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>>() {
 
             @Override
-            public WindEstimator<CompleteManeuverCurveWithEstimationData> createNewEstimatorInstance() {
-                return new OutlierRemovalNeighborBasedWindEstimatorImpl(polarService, maneuverFeatures);
+            public WindEstimationComponent<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> createNewEstimatorInstance() {
+                return new SimpleConfigurableManeuverBasedWindEstimationComponentImpl(maneuverFeatures, polarService,
+                        ManeuverClassificationsAggregatorImplementation.NEIGHBOR_OUTLIER);
             }
 
             @Override
             public String toString() {
-                return "Outlier Removal (Neighbor)";
+                return "Neighbor Outlier Removal";
             }
         };
     }
-
 }

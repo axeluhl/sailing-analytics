@@ -2,12 +2,13 @@ package com.sap.sailing.windestimation;
 
 import java.util.List;
 
-import com.sap.sailing.domain.tracking.WindWithConfidence;
+import com.sap.sailing.windestimation.data.RaceWithEstimationData;
+import com.sap.sailing.windestimation.maneuverclassifier.ManeuverWithProbabilisticTypeClassification;
+import com.sap.sailing.windestimation.maneuverclassifier.ManeuverWithEstimatedType;
 
 public interface ManeuverClassificationsAggregator {
 
-    List<WindWithConfidence<Void>> estimateWindTrack();
-    
-//    List<ManeuverClassification> estimateWindTrack(RaceWithEstimationData<ManeuverClassification> race);
+    List<ManeuverWithEstimatedType> aggregateManeuverClassifications(
+            RaceWithEstimationData<ManeuverWithProbabilisticTypeClassification> raceWithManeuverClassifications);
 
 }

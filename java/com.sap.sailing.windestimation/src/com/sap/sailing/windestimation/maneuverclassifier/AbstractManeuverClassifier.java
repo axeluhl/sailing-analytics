@@ -33,11 +33,11 @@ public abstract class AbstractManeuverClassifier implements ProbabilisticManeuve
     }
 
     @Override
-    public ManeuverClassification classifyManeuver(ManeuverForEstimation maneuver) {
+    public ManeuverWithProbabilisticTypeClassification classifyManeuver(ManeuverForEstimation maneuver) {
         double[] likelihoodPerManeuverType = classifyManeuverWithProbabilities(maneuver);
         double[] likelihoodPerCoarseGrainedManeuverType = mapManeuverTypesToCoarseGrainedManeuverTypes(
                 likelihoodPerManeuverType, maneuver.getManeuverCategory());
-        ManeuverClassification maneuverClassificationResult = new ManeuverClassification(maneuver,
+        ManeuverWithProbabilisticTypeClassification maneuverClassificationResult = new ManeuverWithProbabilisticTypeClassification(maneuver,
                 likelihoodPerCoarseGrainedManeuverType);
         return maneuverClassificationResult;
     }

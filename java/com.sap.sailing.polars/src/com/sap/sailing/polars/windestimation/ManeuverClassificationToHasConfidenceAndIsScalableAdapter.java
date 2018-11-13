@@ -21,11 +21,10 @@ import com.sap.sse.common.scalablevalue.ScalableValue;
  * @author Axel Uhl (D043530)
  *
  */
-public class ManeuverClassificationToHasConfidenceAndIsScalableAdapter<ValueType, BaseType> implements
-        Function<ManeuverClassification, HasConfidenceAndIsScalable<ValueType, BaseType, Void>> {
+public class ManeuverClassificationToHasConfidenceAndIsScalableAdapter<ValueType, BaseType>
+        implements Function<ManeuverClassification, HasConfidenceAndIsScalable<ValueType, BaseType, Void>> {
     private final Function<ManeuverClassification, ScalableValue<ValueType, BaseType>> mapper;
     private final ManeuverType maneuverType;
-    private final PolarDataService polarService;
 
     /**
      * @param maneuverType
@@ -37,10 +36,9 @@ public class ManeuverClassificationToHasConfidenceAndIsScalableAdapter<ValueType
      *            averaged by a {@link ConfidenceBasedAverager}.
      */
     public ManeuverClassificationToHasConfidenceAndIsScalableAdapter(ManeuverType maneuverType,
-            Function<ManeuverClassification, ScalableValue<ValueType, BaseType>> mapper, PolarDataService polarService) {
+            Function<ManeuverClassification, ScalableValue<ValueType, BaseType>> mapper) {
         this.maneuverType = maneuverType;
         this.mapper = mapper;
-        this.polarService = polarService;
     }
 
     @Override
@@ -55,8 +53,7 @@ public class ManeuverClassificationToHasConfidenceAndIsScalableAdapter<ValueType
 
             @Override
             public double getConfidence() {
-                return polarService.getManeuverLikelihoodAndTwsTwa(t.getBoatClass(),
-                        t.getSpeedAtManeuverStart(), t.getManeuverAngleDeg(), maneuverType).getA();
+                return t.getLikelihoodForManeuverType(maneuverType);
             }
 
             @Override

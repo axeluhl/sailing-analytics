@@ -19,7 +19,6 @@ import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.domain.tracking.WindWithConfidence;
 import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
-import com.sap.sailing.windestimation.AverageWindEstimator;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sse.common.Bearing;
@@ -27,7 +26,7 @@ import com.sap.sse.common.Speed;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 
-public class PolarsFittingWindEstimation implements AverageWindEstimator {
+public class PolarsFittingWindEstimation {
 
     private static final int COURSE_CLUSTER_SIZE = 10;
 
@@ -204,7 +203,6 @@ public class PolarsFittingWindEstimation implements AverageWindEstimator {
         return minSpeed == 0 ? null : new WindSpeedRange(minSpeed, maxSpeed);
     }
 
-    @Override
     public WindWithConfidence<Void> estimateAverageWind() {
         SpeedWithBearingWithConfidence<Void> wind = estimateWind();
         WindWithConfidenceImpl<Void> windWithConfidence = null;

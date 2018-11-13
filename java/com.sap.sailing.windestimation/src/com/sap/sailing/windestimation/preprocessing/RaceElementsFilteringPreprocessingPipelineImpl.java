@@ -9,8 +9,8 @@ import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.transformer.ManeuverForEstimationTransformer;
 
-public class RacePreprocessingPipelineImpl implements
-        PreprocessingPipeline<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>, RaceWithEstimationData<ManeuverForEstimation>> {
+public class RaceElementsFilteringPreprocessingPipelineImpl
+        implements RacePreprocessingPipeline<CompleteManeuverCurveWithEstimationData, ManeuverForEstimation> {
 
     @Override
     public RaceWithEstimationData<ManeuverForEstimation> preprocessRace(

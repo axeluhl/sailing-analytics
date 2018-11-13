@@ -1,18 +1,18 @@
 package com.sap.sailing.windestimation.maneuvergraph;
 
 import com.sap.sailing.domain.common.Tack;
-import com.sap.sailing.windestimation.maneuverclassifier.ManeuverTypeForInternalClassification;
+import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 
 public class GraphNode {
 
     private final WindCourseRange validWindRange;
     private double confidence;
     private final int indexInLevel;
-    private final ManeuverTypeForInternalClassification maneuverType;
+    private final ManeuverTypeForClassification maneuverType;
     private final Tack tackAfter;
 
-    public GraphNode(ManeuverTypeForInternalClassification maneuverType, Tack tackAfter,
-            WindCourseRange validWindRange, double confidence, int indexInLevel) {
+    public GraphNode(ManeuverTypeForClassification maneuverType, Tack tackAfter, WindCourseRange validWindRange,
+            double confidence, int indexInLevel) {
         this.maneuverType = maneuverType;
         this.tackAfter = tackAfter;
         this.validWindRange = validWindRange;
@@ -20,7 +20,7 @@ public class GraphNode {
         this.indexInLevel = indexInLevel;
     }
 
-    public ManeuverTypeForInternalClassification getManeuverType() {
+    public ManeuverTypeForClassification getManeuverType() {
         return maneuverType;
     }
 

@@ -1,97 +1,44 @@
 package com.sap.sailing.windestimation.tackoutlierremoval;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
-import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
-import com.sap.sailing.domain.tracking.WindWithConfidence;
-import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
-import com.sap.sailing.windestimation.ManeuverClassificationsAggregator;
-import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
-import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
-import com.sap.sailing.windestimation.data.ManeuverForEstimation;
-import com.sap.sailing.windestimation.maneuverclassifier.ManeuverClassifiersCache;
-import com.sap.sailing.windestimation.maneuverclassifier.ManeuverClassification;
-import com.sap.sailing.windestimation.maneuverclassifier.ProbabilisticManeuverClassifier;
-import com.sap.sailing.windestimation.polarsfitting.PolarsFittingWindEstimation;
-import com.sap.sailing.windestimation.util.WindUtil;
+import com.sap.sailing.windestimation.maneuverclassifier.ManeuverWithEstimatedType;
+import com.sap.sailing.windestimation.windinference.TwdFromManeuverCalculator;
 import com.sap.sse.common.Bearing;
-import com.sap.sse.common.Speed;
+import com.sap.sse.common.Util.Pair;
 
-public class MeanBasedOutlierRemovalWindEstimator implements ManeuverClassificationsAggregator {
+public class MeanBasedOutlierRemovalWindEstimator extends AbstractOutlierRemovalWindEstimator {
 
-    private static final double MAX_DEVIATON_FROM_AVG_WIND_COURSE = 30;
-    private final List<WindWithConfidence<Void>> windTrackWithConfidence = new ArrayList<>();
-    private ScalableBearing windCourseSum = null;
-    private double likelihoodSum = 0;
-
-    public MeanBasedOutlierRemovalWindEstimator(
-            List<CompetitorTrackWithEstimationData<ManeuverForEstimation>> competitorTracks,
-            ManeuverClassifiersCache maneuverClassifiersCache, PolarsFittingWindEstimation polarsFitting) {
-        for (CompetitorTrackWithEstimationData<ManeuverForEstimation> competitorTrack : competitorTracks) {
-            for (ManeuverForEstimation maneuver : competitorTrack.getElements()) {
-                if (maneuver.isClean() && (maneuver.getDeviationFromOptimalTackAngleInDegrees() == null
-                        || Math.abs(maneuver.getDeviationFromOptimalTackAngleInDegrees()) < 6)) {
-                    ProbabilisticManeuverClassifier classifier = maneuverClassifiersCache.getBestClassifier(maneuver);
-                    ManeuverClassification estimationResult = classifier.classifyManeuver(maneuver);
-                    double highestLikelihood = 0;
-                    ManeuverTypeForClassification maneuverTypeWithHighestLikelihood = null;
-                    ManeuverTypeForClassification[] maneuverTypes = { ManeuverTypeForClassification.TACK,
-                            ManeuverTypeForClassification.JIBE, ManeuverTypeForClassification.HEAD_UP,
-                            ManeuverTypeForClassification.BEAR_AWAY };
-                    for (ManeuverTypeForClassification maneuverType : maneuverTypes) {
-                        double likelihood = estimationResult.getManeuverTypeLikelihood(maneuverType);
-                        if (highestLikelihood < likelihood) {
-                            highestLikelihood = likelihood;
-                            maneuverTypeWithHighestLikelihood = maneuverType;
-                        }
-                    }
-                    if (maneuverTypeWithHighestLikelihood == ManeuverTypeForClassification.TACK) {
-                        Bearing windCourse = maneuver.getMiddleCourse().reverse();
-                        Speed windSpeed = polarsFitting == null ? new KnotSpeedImpl(0)
-                                : polarsFitting.getWindSpeed(maneuver, windCourse);
-                        Wind wind = new WindImpl(maneuver.getManeuverPosition(), maneuver.getManeuverTimePoint(),
-                                new KnotSpeedWithBearingImpl(windSpeed.getKnots(), windCourse));
-                        windTrackWithConfidence.add(new WindWithConfidenceImpl<Void>(wind, highestLikelihood, null,
-                                windSpeed.getKnots() >= 2));
-                        ScalableBearing scalableWindCourse = new ScalableBearing(wind.getBearing())
-                                .multiply(highestLikelihood);
-                        likelihoodSum += highestLikelihood;
-                        windCourseSum = windCourseSum == null ? scalableWindCourse
-                                : windCourseSum.add(scalableWindCourse);
-                    }
-                }
-            }
-        }
+    public MeanBasedOutlierRemovalWindEstimator(TwdFromManeuverCalculator twdCalculator) {
+        super(twdCalculator);
     }
 
     @Override
-    public List<WindWithConfidence<Void>> estimateWindTrack() {
-        List<WindWithConfidence<Void>> windFixes = new ArrayList<>();
-        double sumOfConfidencesOfIncludedFixes = 0;
-        double sumOfConfidencesOfExcludedFixes = 0;
-        if (windCourseSum != null) {
-            Bearing averageWindCourse = windCourseSum.divide(likelihoodSum);
-            for (WindWithConfidence<Void> windWithConfidence : windTrackWithConfidence) {
-                Wind wind = windWithConfidence.getObject();
-                if (Math.abs(averageWindCourse.getDifferenceTo(wind.getBearing())
-                        .getDegrees()) <= MAX_DEVIATON_FROM_AVG_WIND_COURSE) {
-                    windFixes.add(windWithConfidence);
-                    sumOfConfidencesOfIncludedFixes += windWithConfidence.getConfidence();
+    protected OutlierAnalysisResult analyzeOutlier(List<Pair<Bearing, ManeuverWithEstimatedType>> twdsWithManeuvers) {
+        ScalableBearing twdSum = null;
+        double likelihoodSum = 0;
+        OutlierAnalysisResult outlierAnalysisResult = new OutlierAnalysisResult();
+        for (Pair<Bearing, ManeuverWithEstimatedType> twdWithManeuvers : twdsWithManeuvers) {
+            Bearing twd = twdWithManeuvers.getA();
+            double confidence = twdWithManeuvers.getB().getConfidence();
+            ScalableBearing scalableTwd = new ScalableBearing(twd).multiply(confidence);
+            likelihoodSum += confidence;
+            twdSum = twdSum == null ? scalableTwd : twdSum.add(scalableTwd);
+        }
+        if (twdSum != null) {
+            Bearing avgTwd = twdSum.divide(likelihoodSum);
+            for (Pair<Bearing, ManeuverWithEstimatedType> twdWithManeuver : twdsWithManeuvers) {
+                Bearing twd = twdWithManeuver.getA();
+                ManeuverWithEstimatedType maneuver = twdWithManeuver.getB();
+                if (Math.abs(avgTwd.getDifferenceTo(twd).getDegrees()) <= MAX_DEVIATON_FROM_AVG_WIND_COURSE) {
+                    outlierAnalysisResult.addIncludedManeuver(maneuver);
                 } else {
-                    sumOfConfidencesOfExcludedFixes += windWithConfidence.getConfidence();
+                    outlierAnalysisResult.addExcludedManeuver(maneuver);
                 }
             }
         }
-        double finalConfidence = sumOfConfidencesOfIncludedFixes
-                / (sumOfConfidencesOfIncludedFixes + sumOfConfidencesOfExcludedFixes);
-        windFixes = WindUtil.getWindFixesWithFixedConfidence(windFixes, finalConfidence);
-        windFixes = WindUtil.getWindFixesWithAveragedWindSpeed(windFixes);
-        return windFixes;
+        return outlierAnalysisResult;
     }
 
 }

@@ -1,33 +1,21 @@
 package com.sap.sailing.windestimation.maneuverclustering;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.OptionalDouble;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.SpeedWithBearingWithConfidence;
 import com.sap.sailing.domain.common.ManeuverType;
-import com.sap.sailing.domain.common.Wind;
 import com.sap.sailing.domain.common.confidence.impl.ScalableDouble;
-import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.domain.common.scalablevalue.impl.ScalableBearing;
 import com.sap.sailing.domain.polars.PolarDataService;
-import com.sap.sailing.domain.tracking.WindWithConfidence;
-import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
 import com.sap.sailing.polars.windestimation.AbstractManeuverBasedWindEstimationTrackImpl;
 import com.sap.sailing.polars.windestimation.ManeuverClassification;
 import com.sap.sailing.polars.windestimation.ScalableBearingAndScalableDouble;
-import com.sap.sailing.windestimation.ManeuverClassificationsAggregator;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
-import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
-import com.sap.sailing.windestimation.data.transformer.EstimationDataUtil;
-import com.sap.sailing.windestimation.maneuverclassifier.ManeuverClassifiersCache;
-import com.sap.sailing.windestimation.util.WindUtil;
+import com.sap.sailing.windestimation.maneuverclassifier.ManeuverWithProbabilisticTypeClassification;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Speed;
 import com.sap.sse.common.Util.Pair;
@@ -38,22 +26,19 @@ import com.sap.sse.util.kmeans.Cluster;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class ManeuverClusteringBasedWindEstimationTrackImpl extends AbstractManeuverBasedWindEstimationTrackImpl
-        implements ManeuverClassificationsAggregator {
-
-    private final RaceWithEstimationData<ManeuverForEstimation> raceWithManeuvers;
-    private final ManeuverClassifiersCache maneuverClassifiersCache;
-
-    public ManeuverClusteringBasedWindEstimationTrackImpl(
-            RaceWithEstimationData<ManeuverForEstimation> raceWithManeuvers, BoatClass boatClass,
-            ManeuverClassifiersCache maneuverClassifiersCache, long millisecondsOverWhichToAverage) {
-        super(maneuverClassifiersCache.getPolarDataService(), raceWithManeuvers.getRaceName(), boatClass,
-                millisecondsOverWhichToAverage);
-        this.maneuverClassifiersCache = maneuverClassifiersCache;
-        this.raceWithManeuvers = raceWithManeuvers;
-    }
+public class ManeuverClusteringBasedWindEstimationTrackImpl extends AbstractManeuverBasedWindEstimationTrackImpl {
 
     private static final long serialVersionUID = 3474387111725677525L;
+    private final RaceWithEstimationData<ManeuverWithProbabilisticTypeClassification> raceWithManeuvers;
+    private final PolarDataService polarService;
+
+    public ManeuverClusteringBasedWindEstimationTrackImpl(
+            RaceWithEstimationData<ManeuverWithProbabilisticTypeClassification> raceWithManeuvers, BoatClass boatClass,
+            PolarDataService polarService, long millisecondsOverWhichToAverage) {
+        super(raceWithManeuvers.getRaceName(), boatClass, millisecondsOverWhichToAverage);
+        this.raceWithManeuvers = raceWithManeuvers;
+        this.polarService = polarService;
+    }
 
     @Override
     protected double getLikelihoodOfBeingTackCluster(
@@ -141,73 +126,16 @@ public class ManeuverClusteringBasedWindEstimationTrackImpl extends AbstractMane
      */
     @Override
     protected Stream<ManeuverClassification> getManeuverClassifications() {
-        Map<ManeuverForEstimation, String> competitorNamesPerManeuver = new HashMap<>();
-        for (CompetitorTrackWithEstimationData<ManeuverForEstimation> competitorTrack : raceWithManeuvers
+        List<ManeuverClassification> maneuverClassifications = new ArrayList<>();
+        for (CompetitorTrackWithEstimationData<ManeuverWithProbabilisticTypeClassification> competitorTrack : raceWithManeuvers
                 .getCompetitorTracks()) {
-            for (ManeuverForEstimation maneuver : competitorTrack.getElements()) {
-                competitorNamesPerManeuver.put(maneuver, competitorTrack.getCompetitorName());
+            for (ManeuverWithProbabilisticTypeClassification maneuver : competitorTrack.getElements()) {
+                ManeuverClassificationForClusteringImpl maneuverClassification = new ManeuverClassificationForClusteringImpl(
+                        maneuver, competitorTrack.getCompetitorName(), polarService);
+                maneuverClassifications.add(maneuverClassification);
             }
         }
-        List<ManeuverForEstimation> maneuvers = EstimationDataUtil
-                .getUsefulManeuversSortedByTimePoint(raceWithManeuvers.getCompetitorTracks());
-        return maneuvers.stream()
-                .map((maneuver) -> new ManeuverClassificationForClusteringImpl(maneuver,
-                        competitorNamesPerManeuver.get(maneuver), polarService,
-                        maneuverClassifiersCache.getBestClassifier(maneuver)));
-    }
-
-    @Override
-    public List<WindWithConfidence<Void>> estimateWindTrack() {
-        List<WindWithConfidence<Void>> result = new ArrayList<>();
-        List<Bearing> tackMiddleCogs = new ArrayList<>();
-        List<Double> tackLikelihoods = new ArrayList<>();
-        getTackClusters().forEach((cluster) -> {
-            Pair<Bearing, Double> middleCog = getWeightedAverageMiddleManeuverCOGDegAndManeuverAngleDeg(cluster,
-                    ManeuverType.TACK);
-            if (middleCog != null && middleCog.getA() != null) {
-                tackMiddleCogs.add(middleCog.getA());
-            }
-            Double likelihoodForClusterOfBeingTackCluster = getLikelihoodForClusterOfBeingTackCluster(cluster);
-            tackLikelihoods.add(likelihoodForClusterOfBeingTackCluster);
-            for (ManeuverClassification mc : cluster) {
-                final SpeedWithBearingWithConfidence<Void> estimatedWindSpeedAndBearing = mc
-                        .getEstimatedWindSpeedAndBearing(ManeuverType.TACK);
-                if (estimatedWindSpeedAndBearing != null) {
-                    Wind windFromTack = new WindImpl(mc.getPosition(), mc.getTimePoint(),
-                            estimatedWindSpeedAndBearing.getObject());
-                    WindWithConfidence<Void> windWithConfidence = new WindWithConfidenceImpl<>(windFromTack,
-                            estimatedWindSpeedAndBearing.getConfidence(), null, true);
-                    result.add(windWithConfidence);
-                }
-            }
-        });
-        List<WindWithConfidence<Void>> resultWithAveragedSpeed = WindUtil.getWindFixesWithAveragedWindSpeed(result);
-        if (!tackMiddleCogs.isEmpty()) {
-            OptionalDouble optional = getClusters().stream().filter(cluster -> {
-                Pair<Bearing, Double> middleManeuverCOGDegAndManeuverAngleDeg = getWeightedAverageMiddleManeuverCOGDegAndManeuverAngleDeg(
-                        cluster, ManeuverType.JIBE);
-                if (middleManeuverCOGDegAndManeuverAngleDeg != null
-                        && middleManeuverCOGDegAndManeuverAngleDeg.getA() != null) {
-                    Bearing middleCog = middleManeuverCOGDegAndManeuverAngleDeg.getA();
-                    for (Bearing tackMiddleCog : tackMiddleCogs) {
-                        double diff = Math.abs(tackMiddleCog.getDifferenceTo(middleCog).getDegrees());
-                        if (diff <= 45) {
-                            return false;
-                        }
-                    }
-                    return true;
-                }
-                return false;
-            }).mapToDouble(cluster -> getLikelihoodForClusterOfBeingTackCluster(cluster)).max();
-            if (optional.isPresent()) {
-                double tackProbability = tackLikelihoods.stream().mapToDouble(value -> value).max().getAsDouble();
-                double challengingScore = optional.getAsDouble();
-                double finalConfidence = tackProbability / (challengingScore + tackProbability);
-                resultWithAveragedSpeed = WindUtil.getWindFixesWithFixedConfidence(resultWithAveragedSpeed,
-                        finalConfidence);
-            }
-        }
-        return resultWithAveragedSpeed;
+        return maneuverClassifications.stream();
     }
 
 }

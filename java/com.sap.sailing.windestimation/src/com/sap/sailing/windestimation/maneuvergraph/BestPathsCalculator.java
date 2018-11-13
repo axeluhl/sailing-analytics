@@ -1,29 +1,14 @@
 package com.sap.sailing.windestimation.maneuvergraph;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.domain.common.impl.KnotSpeedImpl;
-import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
-import com.sap.sailing.domain.common.impl.WindImpl;
-import com.sap.sailing.domain.tracking.WindWithConfidence;
-import com.sap.sailing.domain.tracking.impl.WindWithConfidenceImpl;
-import com.sap.sailing.windestimation.data.ManeuverForEstimation;
-import com.sap.sailing.windestimation.maneuverclassifier.ManeuverTypeForInternalClassification;
-import com.sap.sailing.windestimation.util.WindUtil;
-import com.sap.sse.common.Bearing;
-import com.sap.sse.common.Speed;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
-import com.sap.sse.common.impl.DegreeBearingImpl;
 
 /**
  * 
@@ -213,93 +198,6 @@ public class BestPathsCalculator {
             }
         }
         return getBestPath(lastLevel, bestLastNode);
-    }
-
-    public List<WindWithConfidence<Void>> getWindTrack(List<Triple<GraphLevel, GraphNode, Double>> bestPath) {
-        List<WindWithConfidence<Void>> windFixes = new ArrayList<>();
-        if (!bestPath.isEmpty()) {
-            IntersectedWindRange globalWindRange = null;
-            for (ListIterator<Triple<GraphLevel, GraphNode, Double>> iterator = bestPath
-                    .listIterator(bestPath.size()); iterator.hasPrevious();) {
-                Triple<GraphLevel, GraphNode, Double> entry = iterator.previous();
-                GraphLevel currentLevel = entry.getA();
-                GraphNode currentNode = entry.getB();
-                BestPathsPerLevel bestPathsUntilCurrentLevel = bestPathsPerLevel.get(currentLevel);
-                BestManeuverNodeInfo currentNodeInfo = bestPathsUntilCurrentLevel.getBestPreviousNodeInfo(currentNode);
-                globalWindRange = globalWindRange == null ? currentNodeInfo.getWindRange()
-                        : globalWindRange.intersect(currentNodeInfo.getWindRange());
-                if (!globalWindRange.isViolation() && globalWindRange.getAngleTowardStarboard() <= 20
-                        && currentNode.getManeuverType() != ManeuverTypeForInternalClassification.OTHER) {
-                    DegreeBearingImpl windCourse = new DegreeBearingImpl(
-                            currentNode.getValidWindRange().getAvgWindCourse());
-                    Speed avgWindSpeed = getWindSpeed(currentLevel.getManeuver(), windCourse);
-                    Wind wind = new WindImpl(currentLevel.getManeuver().getManeuverPosition(),
-                            currentLevel.getManeuver().getManeuverTimePoint(),
-                            new KnotSpeedWithBearingImpl(avgWindSpeed.getKnots(), windCourse));
-                    windFixes.add(
-                            new WindWithConfidenceImpl<Void>(wind, entry.getC(), null, avgWindSpeed.getKnots() > 0));
-                }
-            }
-        }
-        Collections.reverse(windFixes);
-        windFixes = WindUtil.getWindFixesWithAveragedWindSpeed(windFixes);
-        return windFixes;
-    }
-
-    // public List<WindWithConfidence<Void>> getWindTrack(List<Triple<GraphLevel, GraphNode, Double>> bestPath) {
-    // List<WindWithConfidence<Void>> windFixes = new ArrayList<>();
-    // if (!bestPath.isEmpty()) {
-    // Triple<GraphLevel, GraphNode, Double> lastEntry = bestPath.get(bestPath.size() - 1);
-    // double confidence = bestPathsPerLevel.get(lastEntry.getA())
-    // .getNormalizedProbabilityToNodeFromStart(lastEntry.getB());
-    // IntersectedWindRange globalWindRange = null;
-    // for (ListIterator<Triple<GraphLevel, GraphNode, Double>> iterator = bestPath
-    // .listIterator(bestPath.size()); iterator.hasPrevious();) {
-    // Triple<GraphLevel, GraphNode, Double> entry = iterator.previous();
-    // GraphLevel currentLevel = entry.getA();
-    // GraphNode currentNode = entry.getB();
-    // BestPathsPerLevel bestPathsUntilCurrentLevel = bestPathsPerLevel.get(currentLevel);
-    // BestManeuverNodeInfo currentNodeInfo = bestPathsUntilCurrentLevel.getBestPreviousNodeInfo(currentNode);
-    // globalWindRange = globalWindRange == null ? currentNodeInfo.getWindRange()
-    // : globalWindRange.intersect(currentNodeInfo.getWindRange());
-    // if (!globalWindRange.isViolation() && globalWindRange.getAngleTowardStarboard() <= 20
-    // && currentNode.getManeuverType() != ManeuverTypeForClassification.OTHER) {
-    // DegreeBearingImpl windCourse = new DegreeBearingImpl(globalWindRange.getAvgWindCourse());
-    // Speed avgWindSpeed = getWindSpeed(currentLevel.getManeuver(), windCourse);
-    // Wind wind = new WindImpl(currentLevel.getManeuver().getManeuverPosition(),
-    // currentLevel.getManeuver().getManeuverTimePoint(),
-    // new KnotSpeedWithBearingImpl(avgWindSpeed.getKnots(), windCourse));
-    // windFixes
-    // .add(new WindWithConfidenceImpl<Void>(wind, confidence, null, avgWindSpeed.getKnots() > 0));
-    // }
-    // }
-    // }
-    // Collections.reverse(windFixes);
-    // windFixes = getWindFixesWithAveragedWindSpeed(windFixes);
-    // return windFixes;
-    // }
-
-    // public List<WindWithConfidence<Void>> getWindTrack(List<Triple<GraphLevel, GraphNode, Double>> bestPath) {
-    // List<WindWithConfidence<Void>> windFixes = new ArrayList<>();
-    // for (Triple<GraphLevel, GraphNode, Double> entry : bestPath) {
-    // GraphLevel currentLevel = entry.getA();
-    // GraphNode currentNode = entry.getB();
-    // if (currentNode.getManeuverType() != ManeuverTypeForClassification.OTHER) {
-    // DegreeBearingImpl windCourse = new DegreeBearingImpl(
-    // currentNode.getValidWindRange().getAvgWindCourse());
-    // Speed avgWindSpeed = getWindSpeed(currentLevel.getManeuver(), windCourse);
-    // Wind wind = new WindImpl(currentLevel.getManeuver().getManeuverPosition(),
-    // currentLevel.getManeuver().getManeuverTimePoint(),
-    // new KnotSpeedWithBearingImpl(avgWindSpeed.getKnots(), windCourse));
-    // windFixes.add(new WindWithConfidenceImpl<Void>(wind, entry.getC(), null, avgWindSpeed.getKnots() > 0));
-    // }
-    // }
-    // windFixes = getWindFixesWithAveragedWindSpeed(windFixes);
-    // return windFixes;
-    // }
-
-    public Speed getWindSpeed(ManeuverForEstimation maneuver, Bearing windCourse) {
-        return new KnotSpeedImpl(0.0);
     }
 
     public boolean isPreciseConfidence() {

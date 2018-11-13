@@ -100,8 +100,6 @@ public abstract class AbstractManeuverBasedWindEstimationTrackImpl extends WindT
      */
     protected static final double BOOST_FACTOR_FOR_JIBE_TACK_SPEED_RATIO_LIKELIHOOD = 0;
 
-    protected final PolarDataService polarService;
-
     // protected final TrackedRace trackedRace;
 
     /**
@@ -136,11 +134,10 @@ public abstract class AbstractManeuverBasedWindEstimationTrackImpl extends WindT
 
     private Map<Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble>, Double> likelihoodOfBeingTackCluster = new HashMap<>();
 
-    public AbstractManeuverBasedWindEstimationTrackImpl(PolarDataService polarService, String raceName,
-            BoatClass boatClass, long millisecondsOverWhichToAverage) {
+    public AbstractManeuverBasedWindEstimationTrackImpl(String raceName, BoatClass boatClass,
+            long millisecondsOverWhichToAverage) {
         super(millisecondsOverWhichToAverage, DEFAULT_BASE_CONFIDENCE, /* useSpeed */false,
                 /* nameForReadWriteLock */AbstractManeuverBasedWindEstimationTrackImpl.class.getName());
-        this.polarService = polarService;
         this.raceName = raceName;
         this.boatClass = boatClass;
         this.weightedAverageMiddleCOGForManeuverType = new HashMap<>();
@@ -395,7 +392,7 @@ public abstract class AbstractManeuverBasedWindEstimationTrackImpl extends WindT
                 .createAverager(/* weigher */null);
         HasConfidence<Double, Speed, Void> average = averager.getAverage(
                 cluster.map(new ManeuverClassificationToHasConfidenceAndIsScalableAdapter<Double, Speed>(maneuverType,
-                        (mc) -> new ScalableSpeed(mc.getSpeedAtManeuverStart()), polarService)).iterator(), /* at */
+                        (mc) -> new ScalableSpeed(mc.getSpeedAtManeuverStart()))).iterator(), /* at */
                 null);
         return average == null ? null : average.getObject();
     }
@@ -426,15 +423,16 @@ public abstract class AbstractManeuverBasedWindEstimationTrackImpl extends WindT
                     .createAverager(/* weigher */null);
             HasConfidence<DoublePair, Bearing, Void> average = middleCOGAverager.getAverage(cluster.stream()
                     .map(new ManeuverClassificationToHasConfidenceAndIsScalableAdapter<DoublePair, Bearing>(
-                            maneuverType, (mc) -> new ScalableBearing(mc.getMiddleManeuverCourse()), polarService))
+                            maneuverType, (mc) -> new ScalableBearing(mc.getMiddleManeuverCourse())))
                     .iterator(), /* at */null);
             ConfidenceBasedAverager<Double, Double, Void> maneuverAngleAverager = ConfidenceFactory.INSTANCE
                     .createAverager(/* weigher */null);
-            HasConfidence<Double, Double, Void> maneuverAngleAverageDeg = maneuverAngleAverager.getAverage(cluster
-                    .stream()
-                    .map(new ManeuverClassificationToHasConfidenceAndIsScalableAdapter<Double, Double>(maneuverType,
-                            (mc) -> new ScalableDouble(mc.getManeuverAngleDeg()), polarService))
-                    .iterator(), /* at */null);
+            HasConfidence<Double, Double, Void> maneuverAngleAverageDeg = maneuverAngleAverager.getAverage(
+                    cluster.stream()
+                            .map(new ManeuverClassificationToHasConfidenceAndIsScalableAdapter<Double, Double>(
+                                    maneuverType, (mc) -> new ScalableDouble(mc.getManeuverAngleDeg())))
+                            .iterator(),
+                    /* at */null);
             result = new Pair<>(average.getObject(), maneuverAngleAverageDeg.getObject());
             weightedAverageMiddleCOGForManeuverType.put(key, result);
         }
@@ -487,7 +485,7 @@ public abstract class AbstractManeuverBasedWindEstimationTrackImpl extends WindT
     protected String getManeuverClassificationColumnTypes() {
         return "infoitem\tstring\tdate\tfloat\tfloat\tfloat\tfloat\tfloat\tfloat\tfloat";
     }
-    
+
     public Double getLikelihoodForClusterOfBeingTackCluster(
             Cluster<ManeuverClassification, Pair<ScalableBearing, ScalableDouble>, Pair<Bearing, Double>, ScalableBearingAndScalableDouble> cluster) {
         return likelihoodOfBeingTackCluster.get(cluster);

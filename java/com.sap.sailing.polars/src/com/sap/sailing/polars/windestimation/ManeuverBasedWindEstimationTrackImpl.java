@@ -41,10 +41,12 @@ public class ManeuverBasedWindEstimationTrackImpl extends AbstractManeuverBasedW
 
     private boolean waitForLatest;
 
+    private final PolarDataService polarService;
+
     public ManeuverBasedWindEstimationTrackImpl(PolarDataService polarService, TrackedRace trackedRace,
             long millisecondsOverWhichToAverage, boolean waitForLatest) throws NotEnoughDataHasBeenAddedException {
-        super(polarService, trackedRace.getRace().getName(), trackedRace.getRace().getBoatClass(),
-                millisecondsOverWhichToAverage);
+        super(trackedRace.getRace().getName(), trackedRace.getRace().getBoatClass(), millisecondsOverWhichToAverage);
+        this.polarService = polarService;
         this.trackedRace = trackedRace;
         this.waitForLatest = waitForLatest;
     }

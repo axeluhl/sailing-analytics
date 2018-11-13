@@ -9,12 +9,12 @@ import com.sap.sailing.windestimation.maneuvergraph.ProbabilityUtil;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class ManeuverClassification {
+public class ManeuverWithProbabilisticTypeClassification {
 
     private final double[] likelihoodPerManeuverType;
     private final ManeuverForEstimation maneuver;
 
-    public ManeuverClassification(ManeuverForEstimation maneuver, double[] likelihoodPerManeuverType) {
+    public ManeuverWithProbabilisticTypeClassification(ManeuverForEstimation maneuver, double[] likelihoodPerManeuverType) {
         this.maneuver = maneuver;
         for (int i = 0; i < likelihoodPerManeuverType.length; i++) {
             likelihoodPerManeuverType[i] += 0.1;

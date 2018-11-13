@@ -5,34 +5,34 @@ import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.polars.windestimation.ManeuverClassificationImpl;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
-import com.sap.sailing.windestimation.maneuverclassifier.ManeuverClassification;
-import com.sap.sailing.windestimation.maneuverclassifier.ProbabilisticManeuverClassifier;
+import com.sap.sailing.windestimation.maneuverclassifier.ManeuverWithProbabilisticTypeClassification;
 
 public class ManeuverClassificationForClusteringImpl extends ManeuverClassificationImpl {
 
-    private final ProbabilisticManeuverClassifier maneuverClassifier;
-    private final ManeuverForEstimation maneuver;
+    private final ManeuverWithProbabilisticTypeClassification maneuverWithProbabilisticTypeClassification;
 
-    public ManeuverClassificationForClusteringImpl(ManeuverForEstimation maneuver, String competitorName,
-            PolarDataService polarService, ProbabilisticManeuverClassifier maneuverClassifier) {
-        super(competitorName, maneuver.getBoatClass(), maneuver.getManeuverTimePoint(), maneuver.getManeuverPosition(),
-                maneuver.getCourseChangeInDegrees(), maneuver.getSpeedWithBearingBefore(), maneuver.getMiddleCourse(),
-                null, polarService);
-        this.maneuver = maneuver;
-        this.maneuverClassifier = maneuverClassifier;
+    public ManeuverClassificationForClusteringImpl(
+            ManeuverWithProbabilisticTypeClassification maneuverWithProbabilisticTypeClassification,
+            String competitorName, PolarDataService polarService) {
+        super(competitorName, maneuverWithProbabilisticTypeClassification.getManeuver().getBoatClass(),
+                maneuverWithProbabilisticTypeClassification.getManeuver().getManeuverTimePoint(),
+                maneuverWithProbabilisticTypeClassification.getManeuver().getManeuverPosition(),
+                maneuverWithProbabilisticTypeClassification.getManeuver().getCourseChangeInDegrees(),
+                maneuverWithProbabilisticTypeClassification.getManeuver().getSpeedWithBearingBefore(),
+                maneuverWithProbabilisticTypeClassification.getManeuver().getMiddleCourse(), null, polarService);
+        this.maneuverWithProbabilisticTypeClassification = maneuverWithProbabilisticTypeClassification;
     }
 
     @Override
     public double getLikelihoodForManeuverType(ManeuverType maneuverType) {
         if (likelihoodPerManeuverType[maneuverType.ordinal()] == null) {
-            ManeuverClassification maneuverEstimationResult = maneuverClassifier.classifyManeuver(maneuver);
-            likelihoodPerManeuverType[ManeuverType.TACK.ordinal()] = maneuverEstimationResult
+            likelihoodPerManeuverType[ManeuverType.TACK.ordinal()] = maneuverWithProbabilisticTypeClassification
                     .getManeuverTypeLikelihood(ManeuverTypeForClassification.TACK);
-            likelihoodPerManeuverType[ManeuverType.JIBE.ordinal()] = maneuverEstimationResult
+            likelihoodPerManeuverType[ManeuverType.JIBE.ordinal()] = maneuverWithProbabilisticTypeClassification
                     .getManeuverTypeLikelihood(ManeuverTypeForClassification.JIBE);
-            likelihoodPerManeuverType[ManeuverType.HEAD_UP.ordinal()] = maneuverEstimationResult
+            likelihoodPerManeuverType[ManeuverType.HEAD_UP.ordinal()] = maneuverWithProbabilisticTypeClassification
                     .getManeuverTypeLikelihood(ManeuverTypeForClassification.HEAD_UP);
-            likelihoodPerManeuverType[ManeuverType.BEAR_AWAY.ordinal()] = maneuverEstimationResult
+            likelihoodPerManeuverType[ManeuverType.BEAR_AWAY.ordinal()] = maneuverWithProbabilisticTypeClassification
                     .getManeuverTypeLikelihood(ManeuverTypeForClassification.BEAR_AWAY);
             likelihoodPerManeuverType[ManeuverType.PENALTY_CIRCLE.ordinal()] = 0.0;
             likelihoodPerManeuverType[ManeuverType.UNKNOWN.ordinal()] = 0.0;
@@ -41,7 +41,7 @@ public class ManeuverClassificationForClusteringImpl extends ManeuverClassificat
     }
 
     public ManeuverForEstimation getManeuver() {
-        return maneuver;
+        return maneuverWithProbabilisticTypeClassification.getManeuver();
     }
 
 }
