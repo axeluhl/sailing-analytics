@@ -4,14 +4,14 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class ServerConfigurationDTO implements IsSerializable {
     private boolean isStandaloneServer;
-    private boolean isPublic;
-    private boolean isSelfService;
+    private Boolean isPublic;
+    private Boolean isSelfService;
 
     // for GWT
     ServerConfigurationDTO() {
     }
 
-    public ServerConfigurationDTO(boolean isStandaloneServer, boolean isPublic, boolean isSelfService) {
+    public ServerConfigurationDTO(boolean isStandaloneServer, Boolean isPublic, Boolean isSelfService) {
         this.isStandaloneServer = isStandaloneServer;
         this.isPublic = isPublic;
         this.isSelfService = isSelfService;
@@ -21,11 +21,11 @@ public class ServerConfigurationDTO implements IsSerializable {
         return isStandaloneServer;
     }
 
-    public boolean isPublic() {
+    public Boolean isPublic() {
         return isPublic;
     }
 
-    public boolean isSelfService() {
+    public Boolean isSelfService() {
         return isSelfService;
     }
 }

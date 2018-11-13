@@ -4700,30 +4700,43 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 isPublicServer(), isSelfServiceServer());
         return result;
     }
-    
+
     @Override
     public void updateServerConfiguration(ServerConfigurationDTO serverConfiguration) {
-        getService().apply(new UpdateServerConfiguration(new SailingServerConfigurationImpl(serverConfiguration.isStandaloneServer())));
-        
-        final User allUser = getSecurityService().getAllUser();
-        if (allUser != null) {
-            final WildcardPermission createObjectOnCurrentServerPermission = SecuredSecurityTypes.SERVER
-                    .getPermissionForObjects(ServerActions.CREATE_OBJECT, ServerInfo.getName());
-            if (serverConfiguration.isSelfService()) {
-                getSecurityService().addPermissionForUser(allUser.getName(), createObjectOnCurrentServerPermission);
-            } else {
-                getSecurityService().removePermissionFromUser(allUser.getName(), createObjectOnCurrentServerPermission);
-            }
-            final RoleDefinition viewerRole = getSecurityService()
-                    .getRoleDefinition(SailingViewerRole.getInstance().getId());
-            final UserGroup defaultServerTenant = getSecurityService().getDefaultTenant();
-            if (viewerRole != null && defaultServerTenant != null) {
-                final RoleImpl publicAccessForServerRole = new RoleImpl(viewerRole, defaultServerTenant, null);
-                if (serverConfiguration.isPublic()) {
-                    getSecurityService().addRoleForUser(allUser.getName(), publicAccessForServerRole);
-                } else {
-                    getSecurityService().removeRoleFromUser(allUser.getName(), publicAccessForServerRole);
+        getService().apply(new UpdateServerConfiguration(
+                new SailingServerConfigurationImpl(serverConfiguration.isStandaloneServer())));
+        if (serverConfiguration.isPublic() != null || serverConfiguration.isSelfService() != null) {
+            final User allUser = getSecurityService().getAllUser();
+            if (allUser != null) {
+                final WildcardPermission createObjectOnCurrentServerPermission = SecuredSecurityTypes.SERVER
+                        .getPermissionForObjects(ServerActions.CREATE_OBJECT, ServerInfo.getName());
+                if (serverConfiguration.isSelfService() != null) {
+                    if (serverConfiguration.isSelfService()) {
+                        getSecurityService().addPermissionForUser(allUser.getName(),
+                                createObjectOnCurrentServerPermission);
+                    } else {
+                        getSecurityService().removePermissionFromUser(allUser.getName(),
+                                createObjectOnCurrentServerPermission);
+                    }
                 }
+                if (serverConfiguration.isPublic() != null) {
+                    final RoleDefinition viewerRole = getSecurityService()
+                            .getRoleDefinition(SailingViewerRole.getInstance().getId());
+                    final UserGroup defaultServerTenant = getSecurityService().getDefaultTenant();
+                    if (viewerRole != null && defaultServerTenant != null) {
+                        final RoleImpl publicAccessForServerRole = new RoleImpl(viewerRole, defaultServerTenant, null);
+                        if (serverConfiguration.isPublic()) {
+                            getSecurityService().addRoleForUser(allUser.getName(), publicAccessForServerRole);
+                        } else {
+                            getSecurityService().removeRoleFromUser(allUser.getName(), publicAccessForServerRole);
+                        }
+                    } else {
+                        throw new IllegalArgumentException("Viewerrole or defaultServerTenant is not existing");
+                    }
+
+                }
+            } else {
+                throw new IllegalArgumentException("Alluser is not exiting");
             }
         }
     }
@@ -8478,18 +8491,29 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return tenants;
     }
 
-    private boolean isSelfServiceServer() {
+    private Boolean isSelfServiceServer() {
+        final Boolean result;
         final User allUser = getSecurityService().getAllUser();
-        return allUser != null && Util.contains(allUser.getPermissions(), SecuredSecurityTypes.SERVER
-                .getPermissionForObjects(ServerActions.CREATE_OBJECT, ServerInfo.getName()));
+        if (allUser != null) {
+            result = Util.contains(allUser.getPermissions(), SecuredSecurityTypes.SERVER
+                    .getPermissionForObjects(ServerActions.CREATE_OBJECT, ServerInfo.getName()));
+        } else {
+            result = null;
+        }
+        return result;
     }
 
-    private boolean isPublicServer() {
+    private Boolean isPublicServer() {
+        final Boolean result;
         final User allUser = getSecurityService().getAllUser();
         final RoleDefinition viewerRole = getSecurityService()
                 .getRoleDefinition(SailingViewerRole.getInstance().getId());
         final UserGroup defaultServerTenant = getSecurityService().getDefaultTenant();
-        return allUser != null && viewerRole != null && defaultServerTenant != null
-                && allUser.hasRole(new RoleImpl(viewerRole, defaultServerTenant, null));
+        if (allUser != null && viewerRole != null && defaultServerTenant != null) {
+            result = allUser.hasRole(new RoleImpl(viewerRole, defaultServerTenant, null));
+        } else {
+            result = null;
+        }
+        return result;
     }
 }

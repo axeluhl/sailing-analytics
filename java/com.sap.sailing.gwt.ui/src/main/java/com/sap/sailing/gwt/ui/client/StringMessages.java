@@ -2200,4 +2200,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String confirmDeletion();
     String selfServiceServer();
     String publicServer();
+    String updatedServerSetupError();
+    String updatedServerSetup();
 }
