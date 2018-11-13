@@ -81,7 +81,7 @@ public class TaggingServiceTest {
             throws MalformedURLException, IOException, InterruptedException, UserManagementException, MailException, UserGroupManagementException {
         MongoDBService.INSTANCE.getDB().dropDatabase();
         // setup racing service and racelog
-        racingService = new RacingEventServiceImpl();
+        racingService = Mockito.spy(new RacingEventServiceImpl());
         RacingEventServiceOperation<FlexibleLeaderboard> addLeaderboardOp = new CreateFlexibleLeaderboard(
                 leaderboardName, leaderboardName, new int[] { 5 }, new LowPoint(), null);
         racingService.apply(addLeaderboardOp);
@@ -98,6 +98,7 @@ public class TaggingServiceTest {
         // setup tagging service
         taggingService = Mockito.spy(new TaggingServiceImpl(racingService));
 
+        Mockito.doReturn(securityService).when(racingService).getSecurityService();
         Mockito.doReturn(taggingService).when(racingService).getTaggingService();
     }
 
@@ -218,13 +219,12 @@ public class TaggingServiceTest {
     }
 
     @Test
-    public void testGetTags() {
+    public void testGetTags() throws Exception {
         logger.entering(getClass().getName(), "testGetTags");
         final String tag = "TagToLoad";
         final String comment = "Comment To Load";
         final String imageURL = "localhost";
         final TimePoint raceTimepoint = new MillisecondsTimePoint(1000);
-        try {
             logger.info("Adding tags which should be loaded via getTags() afterwards.");
             taggingService.addTag(leaderboardName, raceColumnName, fleetName, tag, comment, imageURL, imageURL, false,
                     raceTimepoint);
@@ -241,10 +241,6 @@ public class TaggingServiceTest {
             assertEquals("Public tags do not contain added tag with non-matching creation date filter", 0,
                     taggingService.getPublicTags(leaderboardName, raceColumnName, fleetName,
                             MillisecondsTimePoint.now(), false).size());
-        } catch (Exception e) {
-            fail("Caught unexpected exception while loading tags which were previously added! " + e.getClass().getName()
-                    + ", message: " + e.getMessage());
-        }
         logger.exiting(getClass().getName(), "testGetTags");
     }
 
