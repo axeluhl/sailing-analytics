@@ -7,6 +7,7 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 import org.apache.shiro.SecurityUtils;
@@ -89,7 +90,7 @@ public class TaggingServiceTest {
         // setup security service
         securityService = new SecurityBundleTestWrapper().initializeSecurityServiceForTesting();
         // create & login user
-        securityService.createSimpleUser(username, email, password, fullName, company, null);
+        securityService.createSimpleUser(username, email, password, fullName, company, Locale.ENGLISH, null);
         subject = SecurityUtils.getSubject();
         subject.login(new UsernamePasswordToken(username, password));
         // setup tagging service

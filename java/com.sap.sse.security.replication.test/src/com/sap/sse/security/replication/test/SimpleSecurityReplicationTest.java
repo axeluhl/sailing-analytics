@@ -7,6 +7,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Locale;
+
 import org.junit.Test;
 
 import com.sap.sse.common.mail.MailException;
@@ -25,7 +27,8 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         final String company = "Ernie's Company";
         final String validationBaseURL = "http://me.to.back.com";
         assertNull(master.getUserByName(username));
-        UserImpl user = master.createSimpleUser(username, email, password, fullName, company, validationBaseURL);
+        UserImpl user = master.createSimpleUser(username, email, password, fullName, company, Locale.ENGLISH,
+                validationBaseURL);
         assertNotNull(user);
         assertSame(user, master.getUserByName(username));
         assertTrue(master.checkPassword(username, password));
@@ -59,7 +62,8 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         final String validationBaseURL = "http://me.to.back.com";
         final String fullName = "Ernie's Full Name";
         final String company = "Ernie's Company";
-        UserImpl user = master.createSimpleUser(username, email, password, fullName, company, validationBaseURL);
+        UserImpl user = master.createSimpleUser(username, email, password, fullName, company, Locale.ENGLISH,
+                validationBaseURL);
         user.setFullName(fullName);
         user.setCompany(company);
         final String emailValidationSecretAfterCreation = user.getValidationSecret();
@@ -88,7 +92,7 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         final String newPassword = "ErnieAndBert";
         final String validationBaseURL = "http://me.to.back.com";
         master.createSimpleUser(username, email, password,
-                /* fullName */ null, /* company */ null, validationBaseURL);
+                /* fullName */ null, /* company */ null, Locale.ENGLISH, validationBaseURL);
         master.updateSimpleUserPassword(username, newPassword);
         assertTrue(master.checkPassword(username, newPassword));
         
@@ -110,7 +114,7 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         final String validationBaseURL = "http://me.to.back.com/validateemail";
         final String passwordResetBaseURL = "http://me.to.back.com/passwordreset";
         UserImpl user = master.createSimpleUser(username, email, password,
-                /* fullName */ null, /* company */ null, validationBaseURL);
+                /* fullName */ null, /* company */ null, Locale.ENGLISH, validationBaseURL);
         master.validateEmail(username, user.getValidationSecret());
         assertTrue(user.isEmailValidated());
         master.resetPassword(username, passwordResetBaseURL);

@@ -16,7 +16,9 @@ import java.util.logging.Logger;
 
 import org.apache.shiro.SecurityUtils;
 
+import com.sap.sse.ServerInfo;
 import com.sap.sse.common.Util;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
 import com.sap.sse.security.PreferenceConverter;
@@ -26,6 +28,7 @@ import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.AdminRole;
+import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.PredefinedRoles;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
@@ -37,6 +40,7 @@ import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UserRole;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.OwnershipImpl;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.security.userstore.mongodb.impl.FieldNames.Tenant;
 
@@ -184,18 +188,20 @@ public class UserStoreImpl implements UserStore {
                 this.userGroups.put(group.getId(), group);
                 userGroupsByName.put(group.getName(), group);
             }
-            final boolean defaultTenantWasCreated = (defaultTenantName != null && getUserGroupByName(defaultTenantName) == null);
+            // final boolean defaultTenantWasCreated = (defaultTenantName != null &&
+            // getUserGroupByName(defaultTenantName) == null);
             // identify, create and/or set default tenant
             defaultTenant = getOrCreateDefaultTenant(defaultTenantName);
             for (User u : domainObjectFactory.loadAllUsers(roleDefinitions, defaultTenant, this.userGroups, this)) {
                 users.put(u.getName(), u);
-                if (defaultTenantWasCreated) {
-                    // if the default tenant was just created, add all users to it
-                    defaultTenant.add(u);
-                }
-                if (u.getDefaultTenant() == null) {
-                    u.setDefaultTenant(defaultTenant);
-                }
+                // FIXME for unified user store this is not valid?
+                // if (defaultTenantWasCreated) {
+                // // if the default tenant was just created, add all users to it
+                // defaultTenant.add(u);
+                // }
+                // if (u.getDefaultTenant(ServerInfo.getName()) == null) {
+                // u.setDefaultTenant(ServerInfo.getName(), defaultTenant);
+                // }
                 addToUsersByEmail(u);
             }
             // the users in the groups/tenants are still only proxies; now that the real users have been loaded,
@@ -628,7 +634,9 @@ public class UserStoreImpl implements UserStore {
         if (getUserByName(name) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
-        UserImpl user = new UserImpl(name, email, defaultTenant, /* user group provider */ this, accounts);
+        ConcurrentHashMap<String, UserGroup> tenantsForServer = new ConcurrentHashMap<>();
+        tenantsForServer.put(ServerInfo.getName(), defaultTenant);
+        UserImpl user = new UserImpl(name, email, tenantsForServer, /* user group provider */ this, accounts);
         logger.info("Creating user: " + user + " with e-mail "+email);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUser(user);
@@ -695,6 +703,31 @@ public class UserStoreImpl implements UserStore {
             }
         }
         return result;
+    }
+
+    @Override
+    public Pair<Boolean, Set<Ownership>> getExistingQualificationsForRoleDefinition(RoleDefinition roleToCheck) {
+        final Set<Ownership> ownerships = new HashSet<>();
+        for (User user : getUsers()) {
+            try {
+                for (Role role : getRolesFromUser(user.getName())) {
+                    if (!role.getRoleDefinition().equals(roleToCheck)) {
+                        // wrong role
+                        continue;
+                    }
+                    if (role.getQualifiedForTenant() == null && role.getQualifiedForUser() == null) {
+                        // wildcard rule exists -> return A=true
+                        return new Pair<>(true, null);
+                    } else {
+                        ownerships.add(new OwnershipImpl(role.getQualifiedForUser(), role.getQualifiedForTenant()));
+                    }
+                }
+            } catch (UserManagementException e) {
+                // user did not exist -> should not happen
+                logger.log(Level.SEVERE, e.getMessage(), e);
+            }
+        }
+        return new Pair<>(false, ownerships);
     }
 
     @Override

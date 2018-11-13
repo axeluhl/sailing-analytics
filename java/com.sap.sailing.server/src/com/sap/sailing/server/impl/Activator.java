@@ -6,7 +6,6 @@ import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,9 +40,10 @@ import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.RacingEventServiceMXBean;
 import com.sap.sailing.server.impl.preferences.model.BoatClassNotificationPreferences;
 import com.sap.sailing.server.impl.preferences.model.CompetitorNotificationPreferences;
-import com.sap.sailing.server.impl.preferences.model.StoredDataMiningQueryPreferences;
 import com.sap.sailing.server.impl.preferences.model.SailorProfilePreferences;
+import com.sap.sailing.server.impl.preferences.model.StoredDataMiningQueryPreferences;
 import com.sap.sailing.server.notification.impl.SailingNotificationServiceImpl;
+import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
 import com.sap.sailing.server.statistics.TrackedRaceStatisticsCacheImpl;
 import com.sap.sse.MasterDataImportClassLoaderService;
@@ -55,6 +55,7 @@ import com.sap.sse.mail.queue.impl.ExecutorMailQueue;
 import com.sap.sse.osgi.CachedOsgiTypeBasedServiceFinderFactory;
 import com.sap.sse.replication.Replicable;
 import com.sap.sse.security.PreferenceConverter;
+import com.sap.sse.security.RolePrototypeProvider;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissionsProvider;
 import com.sap.sse.util.ClearStateTestSupport;
@@ -115,13 +116,17 @@ public class Activator implements BundleActivator {
         extenderBundleTracker.open();
 
         mailServiceTracker = ServiceTrackerFactory.createAndOpen(context, MailService.class);
+        securityServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
         mailQueue = new ExecutorMailQueue(mailServiceTracker);
         notificationService = new SailingNotificationServiceImpl(context, mailQueue);
 
         trackedRegattaListener = new OSGiBasedTrackedRegattaListener(context);
         
-        registrations.add(context.registerService(HasPermissionsProvider.class.getName(),
+        registrations.add(context.registerService(HasPermissionsProvider.class,
                 (HasPermissionsProvider) SecuredDomainType::getAllInstances, null));
+        
+        registrations.add(context.registerService(RolePrototypeProvider.class,
+                (RolePrototypeProvider) SailingViewerRole::getInstance, null));
 
         final TrackedRaceStatisticsCache trackedRaceStatisticsCache = new TrackedRaceStatisticsCacheImpl();
         registrations.add(context.registerService(TrackedRaceStatisticsCache.class.getName(), trackedRaceStatisticsCache, null));
@@ -134,35 +139,11 @@ public class Activator implements BundleActivator {
         serviceFinderFactory = new CachedOsgiTypeBasedServiceFinderFactory(context);
 
         
-        // We use a tracker for this, as else we would assume that the SecurityService cannot be started before this
-        // bundle, this way open() will fire instantly if the SecurityService already exists
-        final CompletableFuture<SecurityService> securityServiceAvailable = new CompletableFuture<>();
-        securityServiceTracker = new ServiceTracker<>(context, SecurityService.class,
-                new ServiceTrackerCustomizer<SecurityService, SecurityService>() {
-
-                    @Override
-                    public SecurityService addingService(ServiceReference<SecurityService> reference) {
-                        SecurityService securityService = context.getService(reference);
-                        securityServiceAvailable.complete(securityService);
-                        return securityService;
-                    }
-
-                    @Override
-                    public void modifiedService(ServiceReference<SecurityService> reference, SecurityService service) {
-                    }
-
-            @Override
-                    public void removedService(ServiceReference<SecurityService> reference, SecurityService service) {
-            }
-        });
-
         racingEventService = new RacingEventServiceImpl(clearPersistentCompetitors, serviceFinderFactory,
                 trackedRegattaListener, notificationService, trackedRaceStatisticsCache, restoreTrackedRaces,
-                securityServiceAvailable);
+                securityServiceTracker);
         notificationService.setRacingEventService(racingEventService);
         
-        securityServiceTracker.open();
-
         masterDataImportClassLoaderServiceTracker = new ServiceTracker<MasterDataImportClassLoaderService, MasterDataImportClassLoaderService>(
                 context, MasterDataImportClassLoaderService.class,
                 new MasterDataImportClassLoaderServiceTrackerCustomizer(context, racingEventService));

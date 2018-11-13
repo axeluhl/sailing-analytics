@@ -1,5 +1,7 @@
 package com.sap.sse.security.jaxrs.api;
 
+import java.util.Locale;
+
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -114,11 +116,13 @@ public class SecurityResource extends AbstractSecurityResource {
     public Response createUser(@Context UriInfo uriInfo, @QueryParam("username") String username, @QueryParam("email") String email,
             @QueryParam("password") String password, @QueryParam("fullName") String fullName,
             @QueryParam("company") String company) {
-        return getService().setOwnershipCheckCreatePermissionAndRevertOnError(null, SecuredSecurityTypes.USER, username,
+        return getService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredSecurityTypes.USER,
+                username,
                 username, () -> {
                     try {
                         final String validationBaseURL = getEmailValidationBaseURL(uriInfo);
-                        getService().createSimpleUser(username, email, password, fullName, company, validationBaseURL);
+                        getService().createSimpleUser(username, email, password, fullName, company, Locale.ENGLISH,
+                                validationBaseURL);
                         SecurityUtils.getSubject().login(new UsernamePasswordToken(username, password));
                         return respondWithAccessTokenForUser(username);
                     } catch (UserManagementException | MailException | UserGroupManagementException e) {

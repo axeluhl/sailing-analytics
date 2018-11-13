@@ -8,7 +8,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.sap.sse.ServerStartupConstants;
+import com.sap.sse.ServerInfo;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.PreferenceConverterRegistrationManager;
@@ -39,7 +39,7 @@ public class Activator implements BundleActivator {
     public void start(BundleContext bundleContext) throws Exception {
         Activator.context = bundleContext;
         logger.info("Creating user store");
-        final String defaultTenantName = System.getProperty(UserStore.DEFAULT_TENANT_NAME_PROPERTY_NAME, ServerStartupConstants.SERVER_NAME);
+        final String defaultTenantName = System.getProperty(UserStore.DEFAULT_TENANT_NAME_PROPERTY_NAME, ServerInfo.getName());
         final UserStoreImpl userStore = new UserStoreImpl(defaultTenantName);
         AccessControlStoreImpl accessControlStore = new AccessControlStoreImpl(userStore);
         accessControlStoreRegistration = context.registerService(AccessControlStore.class.getName(),

@@ -44,4 +44,9 @@ public interface Role extends Named {
      *         qualified by a user argument}.
      */
     SecurityUser getQualifiedForUser();
+
+    /**
+     * @return the {@link #getQualifiedForTenant()} and {@link #getQualificationAsOwnership()} as {@link Ownership}
+     */
+    Ownership getQualificationAsOwnership();
 }

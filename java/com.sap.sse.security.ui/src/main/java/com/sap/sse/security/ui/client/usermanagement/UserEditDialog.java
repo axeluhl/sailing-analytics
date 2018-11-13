@@ -230,10 +230,35 @@ public class UserEditDialog extends DataEntryDialog<Pair<UserDTO, Iterable<Tripl
             roles = Util.map(rolesEditor.getValue(), roleName->{
                 final Triple<String, String, String> roleDefinitionNameAndTenantQualifierNameAndUserQualifierName = RoleImpl
                         .getRoleDefinitionNameAndTenantQualifierNameAndUserQualifierName(roleName);
-                RoleDefinition roleDefinition = serverRoleDefinitionsByName.get(roleDefinitionNameAndTenantQualifierNameAndUserQualifierName.getA());
+                
+                final String roleNameToAdd = roleDefinitionNameAndTenantQualifierNameAndUserQualifierName.getA();
+                final String roleTenantNameToAdd = roleDefinitionNameAndTenantQualifierNameAndUserQualifierName.getB();
+                final String roleUsernameToAdd = roleDefinitionNameAndTenantQualifierNameAndUserQualifierName.getC();
+                
+                RoleDefinition roleDefinition = null;
+                for (Role role : userToEdit.getRoles()) {
+                    final String existingRoleName = role.getName();
+                    final String existingTenantName = role.getQualifiedForTenant() == null ? null : role.getQualifiedForTenant().getName();
+                    final String existingUsername = role.getQualifiedForUser() == null ? null : role.getQualifiedForUser().getName();
+                    
+                    // handles unchanged role associations to not rely on the current user to see all roles already associated
+                    if (Util.equalsWithNull(existingRoleName, roleNameToAdd)
+                            && Util.equalStringsWithEmptyIsNull(existingTenantName, roleTenantNameToAdd)
+                            && Util.equalStringsWithEmptyIsNull(existingUsername, roleUsernameToAdd)) {
+                        roleDefinition =role.getRoleDefinition();
+                        break;
+                    }
+                }
+                if (roleDefinition == null) {
+                    roleDefinition = serverRoleDefinitionsByName.get(roleDefinitionNameAndTenantQualifierNameAndUserQualifierName.getA());
+                }
+                if (roleDefinition == null) {
+                    // FIXME how to handle this case? Use null as role definition ID and validate afterwards
+                    return null;
+                }
                 return new Triple<>(
-                    roleDefinition.getId(), /* qualifying tenant name */ roleDefinitionNameAndTenantQualifierNameAndUserQualifierName.getB(),
-                    /* qualifying user name */ roleDefinitionNameAndTenantQualifierNameAndUserQualifierName.getC());
+                    roleDefinition.getId(), /* qualifying tenant name */ roleTenantNameToAdd,
+                    /* qualifying user name */ roleUsernameToAdd);
             });
         } else {
             roles = Collections.emptyList();

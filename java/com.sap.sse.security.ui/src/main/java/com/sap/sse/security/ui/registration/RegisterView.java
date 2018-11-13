@@ -80,7 +80,8 @@ public class RegisterView extends Composite {
     void signUpButtonClicked(ClickEvent e) {
         userManagementService.createSimpleUser(usernameTextBox.getText(), emailTextBox.getText(), passwordTextBox.getText(),
                 /* fullName */ null, /* company */ null, LocaleInfo.getCurrentLocale().getLocaleName(),
-                EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()), "tenant", new AsyncCallback<UserDTO>() {
+                EntryPointLinkFactory.createEmailValidationLink(new HashMap<String, String>()),
+                new AsyncCallback<UserDTO>() {
             @Override
             public void onFailure(Throwable caught) {
                 if (caught instanceof UserManagementException) {

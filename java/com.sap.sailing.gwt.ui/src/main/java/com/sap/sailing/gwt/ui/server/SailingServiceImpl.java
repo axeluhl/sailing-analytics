@@ -523,6 +523,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateRaceDelayToLive;
 import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.operationaltransformation.UpdateServerConfiguration;
 import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
+import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.server.simulation.SimulationService;
 import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
 import com.sap.sailing.simulator.Path;
@@ -590,6 +591,13 @@ import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.RoleImpl;
+import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -1365,7 +1373,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             String courseDesignUpdateURI, String tracTracUsername, String tracTracPassword) throws Exception {
 
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                getSecurityService().getDefaultTenant(), SecuredDomainType.TRACTRAC_ACCOUNT, jsonURL, name,
+                SecuredDomainType.TRACTRAC_ACCOUNT, jsonURL, name,
                 () -> tractracMongoObjectFactory.storeTracTracConfiguration(
                         getTracTracAdapter().createTracTracConfiguration(name, jsonURL, liveDataURI, storedDataURI,
                                 courseDesignUpdateURI, tracTracUsername, tracTracPassword)));
@@ -2574,20 +2582,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public StrippedLeaderboardDTO createFlexibleLeaderboard(String tenantOwnerName, String leaderboardName,
+    public StrippedLeaderboardDTO createFlexibleLeaderboard(String leaderboardName,
             String leaderboardDisplayName, int[] discardThresholds, ScoringSchemeType scoringSchemeType,
             UUID courseAreaId) {
         return createStrippedLeaderboardDTO(getService().apply(new CreateFlexibleLeaderboard(leaderboardName, leaderboardDisplayName, discardThresholds,
                 baseDomainFactory.createScoringScheme(scoringSchemeType), courseAreaId)), false, false);
     }
 
-    public StrippedLeaderboardDTO createRegattaLeaderboard(String tenantOwnerName, RegattaIdentifier regattaIdentifier,
+    @Override
+    public StrippedLeaderboardDTO createRegattaLeaderboard(RegattaIdentifier regattaIdentifier,
             String leaderboardDisplayName, int[] discardThresholds) {
         return createStrippedLeaderboardDTO(getService().apply(new CreateRegattaLeaderboard(regattaIdentifier, leaderboardDisplayName, discardThresholds)), false, false);
     }
 
     @Override
-    public StrippedLeaderboardDTO createRegattaLeaderboardWithEliminations(String tenantOwnerName, String name,
+    public StrippedLeaderboardDTO createRegattaLeaderboardWithEliminations(String name,
             String displayName,
             String fullRegattaLeaderboardName) {
         return createStrippedLeaderboardDTO(getService().apply(new CreateRegattaLeaderboardWithEliminations(name, displayName, fullRegattaLeaderboardName)), false, false);
@@ -2970,7 +2979,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             String updateURL, String updateUsername, String updatePassword) throws Exception {
         if (!jsonURL.equalsIgnoreCase("test")) {
             getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    getSecurityService().getDefaultTenant(), SecuredDomainType.SWISS_TIMING_ACCOUNT, configName,
+                    SecuredDomainType.SWISS_TIMING_ACCOUNT, configName,
                     configName,
                     () -> swissTimingAdapterPersistence
                             .storeSwissTimingConfiguration(swissTimingFactory.createSwissTimingConfiguration(configName,
@@ -3871,22 +3880,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public LeaderboardGroupDTO createLeaderboardGroup(String tenantOwnerName, String groupName, String description,
+    public LeaderboardGroupDTO createLeaderboardGroup(String groupName, String description,
             String displayName,
             boolean displayGroupsInReverseOrder,
             int[] overallLeaderboardDiscardThresholds, ScoringSchemeType overallLeaderboardScoringSchemeType) {
         List<String> leaderBoards = new ArrayList<>();
 
-        return doCreateLeaderboardGroup(tenantOwnerName, groupName, description, displayName,
+        return doCreateLeaderboardGroup(groupName, description, displayName,
                 displayGroupsInReverseOrder, overallLeaderboardDiscardThresholds, overallLeaderboardScoringSchemeType,
                 leaderBoards);
     }
 
-    private LeaderboardGroupDTO doCreateLeaderboardGroup(String tenantOwnerName, String groupName, String description,
+    private LeaderboardGroupDTO doCreateLeaderboardGroup(String groupName, String description,
             String displayName, boolean displayGroupsInReverseOrder, int[] overallLeaderboardDiscardThresholds,
             ScoringSchemeType overallLeaderboardScoringSchemeType, List<String> leaderBoards) {
         UUID newLeaderboardGroupId = UUID.randomUUID();
-        return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(tenantOwnerName,
+        return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.LEADERBOARD_GROUP, newLeaderboardGroupId.toString(), displayName,
                 new ActionWithResult<LeaderboardGroupDTO>() {
                     @Override
@@ -4067,11 +4076,11 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public EventDTO createEvent(String eventName, String eventDescription, Date startDate, Date endDate, String venue,
             boolean isPublic, List<String> courseAreaNames, String officialWebsiteURLAsString, String baseURLAsString,
             Map<String, String> sailorsInfoWebsiteURLsByLocaleName, Iterable<ImageDTO> images, Iterable<VideoDTO> videos, 
-            Iterable<UUID> leaderboardGroupIds, String tenantOwnerName)
+            Iterable<UUID> leaderboardGroupIds)
             throws MalformedURLException, UnauthorizedException {
         final UUID eventUuid = UUID.randomUUID();
 
-        return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(tenantOwnerName,
+        return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.EVENT,
                 eventUuid.toString(), eventName, new ActionWithResult<EventDTO>() {
                     @Override
@@ -4598,13 +4607,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public RegattaDTO createRegatta(String tenantOwnerName, String regattaName, String boatClassName,
+    public RegattaDTO createRegatta(String regattaName, String boatClassName,
             boolean canBoatsOfCompetitorsChangePerRace, Date startDate, Date endDate,
             RegattaCreationParametersDTO seriesNamesWithFleetNamesAndFleetOrderingAndMedal,
             boolean persistent, ScoringSchemeType scoringSchemeType, UUID defaultCourseAreaId, Double buoyZoneRadiusInHullLengths, boolean useStartTimeInference,
             boolean controlTrackingFromStartAndFinishTimes, RankingMetrics rankingMetricType) {
 
-        return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(tenantOwnerName,
+        return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.REGATTA,
                 regattaName, regattaName, new ActionWithResult<RegattaDTO>() {
 
@@ -4687,14 +4696,36 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public ServerConfigurationDTO getServerConfiguration() {
         SailingServerConfiguration sailingServerConfiguration = getService().getSailingServerConfiguration();
-        ServerConfigurationDTO result = new ServerConfigurationDTO(sailingServerConfiguration.isStandaloneServer());
+        ServerConfigurationDTO result = new ServerConfigurationDTO(sailingServerConfiguration.isStandaloneServer(),
+                isPublicServer(), isSelfServiceServer());
         return result;
     }
     
     @Override
     public void updateServerConfiguration(ServerConfigurationDTO serverConfiguration) {
-        SailingServerConfiguration newServerConfiguration = new SailingServerConfigurationImpl(serverConfiguration.isStandaloneServer());
-        getService().apply(new UpdateServerConfiguration(newServerConfiguration));
+        getService().apply(new UpdateServerConfiguration(new SailingServerConfigurationImpl(serverConfiguration.isStandaloneServer())));
+        
+        final User allUser = getSecurityService().getAllUser();
+        if (allUser != null) {
+            final WildcardPermission createObjectOnCurrentServerPermission = SecuredSecurityTypes.SERVER
+                    .getPermissionForObjects(ServerActions.CREATE_OBJECT, ServerInfo.getName());
+            if (serverConfiguration.isSelfService()) {
+                getSecurityService().addPermissionForUser(allUser.getName(), createObjectOnCurrentServerPermission);
+            } else {
+                getSecurityService().removePermissionFromUser(allUser.getName(), createObjectOnCurrentServerPermission);
+            }
+            final RoleDefinition viewerRole = getSecurityService()
+                    .getRoleDefinition(SailingViewerRole.getInstance().getId());
+            final UserGroup defaultServerTenant = getSecurityService().getDefaultTenant();
+            if (viewerRole != null && defaultServerTenant != null) {
+                final RoleImpl publicAccessForServerRole = new RoleImpl(viewerRole, defaultServerTenant, null);
+                if (serverConfiguration.isPublic()) {
+                    getSecurityService().addRoleForUser(allUser.getName(), publicAccessForServerRole);
+                } else {
+                    getSecurityService().removeRoleFromUser(allUser.getName(), publicAccessForServerRole);
+                }
+            }
+        }
     }
 
     @Override
@@ -4805,7 +4836,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public void storeSwissTimingArchiveConfiguration(String swissTimingJsonUrl) throws Exception {
         getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                getSecurityService().getDefaultTenant(), SecuredDomainType.SWISS_TIMING_ACCOUNT, swissTimingJsonUrl,
+                SecuredDomainType.SWISS_TIMING_ACCOUNT, swissTimingJsonUrl,
                 swissTimingJsonUrl, () -> swissTimingAdapterPersistence.storeSwissTimingArchiveConfiguration(
                         swissTimingFactory.createSwissTimingArchiveConfiguration(swissTimingJsonUrl)));
     }
@@ -4871,8 +4902,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return result;
     }
     
-    private void createRegattaFromRegattaDTO(String tenantOwnerName, RegattaDTO regatta) {
-        this.createRegatta(tenantOwnerName, regatta.getName(), regatta.boatClass.getName(),
+    private void createRegattaFromRegattaDTO(RegattaDTO regatta) {
+        this.createRegatta(regatta.getName(), regatta.boatClass.getName(),
                 regatta.canBoatsOfCompetitorsChangePerRace, regatta.startDate, regatta.endDate,
                         new RegattaCreationParametersDTO(getSeriesCreationParameters(regatta)), 
                         true, regatta.scoringScheme, regatta.defaultCourseAreaUuid, regatta.buoyZoneRadiusInHullLengths, regatta.useStartTimeInference,
@@ -4932,24 +4963,24 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public void createRegattaStructure(String tenantOwnerName, final Iterable<RegattaDTO> regattas,
+    public void createRegattaStructure(final Iterable<RegattaDTO> regattas,
             final EventDTO newEvent) throws MalformedURLException {
         final List<String> leaderboardNames = new ArrayList<String>();
         for (RegattaDTO regatta : regattas) {
-            createRegattaFromRegattaDTO(tenantOwnerName, regatta);
+            createRegattaFromRegattaDTO(regatta);
             addRaceColumnsToRegattaSeries(regatta);
             if (getLeaderboard(regatta.getName()) == null) {
                 leaderboardNames.add(regatta.getName());
-                createRegattaLeaderboard(tenantOwnerName, regatta.getRegattaIdentifier(), regatta.boatClass.toString(),
+                createRegattaLeaderboard(regatta.getRegattaIdentifier(), regatta.boatClass.toString(),
                         new int[0]);
             }
         }
-        createAndAddLeaderboardGroup(tenantOwnerName, newEvent, leaderboardNames);
+        createAndAddLeaderboardGroup(newEvent, leaderboardNames);
         // TODO find a way to import the competitors for the selected regattas. You'll need the regattas as Iterable<RegattaResults>
         // structureImporter.setCompetitors(regattas, "");
     }
 
-    private void createAndAddLeaderboardGroup(String tenantOwnerName, final EventDTO newEvent,
+    private void createAndAddLeaderboardGroup(final EventDTO newEvent,
             List<String> leaderboardNames) throws MalformedURLException {
         LeaderboardGroupDTO leaderboardGroupDTO = null;
         String description = "";
@@ -4961,7 +4992,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
         // create Leaderboard Group
         if (getService().getLeaderboardGroupByName(eventName) == null) {
-            leaderboardGroupDTO = doCreateLeaderboardGroup(tenantOwnerName, eventName, description, eventName, false,
+            leaderboardGroupDTO = doCreateLeaderboardGroup(eventName, description, eventName, false,
                     null, null,
                     leaderboardNames);
             eventLeaderboardGroupUUIDs.add(leaderboardGroupDTO.getId());
@@ -5282,7 +5313,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public UUID importMasterData(final String urlAsString, final String[] groupNames, final boolean override,
             final boolean compress, final boolean exportWind, final boolean exportDeviceConfigurations,
             String targetServerUsername, String targetServerPassword) {
-        // FIXME: Add checks here that ensure that the current use is allowed to do MDI
+        // FIXME should the targetserver also check this?
+        SecurityUtils.getSubject().isPermitted(SecuredDomainType.CAN_IMPORT_MASTERDATA
+                .getStringPermissionForObjects(DefaultActions.CREATE, ServerInfo.getName()));
+
         String token = getTokenForServer(urlAsString, targetServerUsername, targetServerPassword);
 
         final UUID importOperationId = UUID.randomUUID();
@@ -5939,7 +5973,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final Account account;
         if (existingAccount == null) {
             account = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    getSecurityService().getDefaultTenant(), SecuredDomainType.IGTIMI_ACCOUNT, eMailAddress,
+                    SecuredDomainType.IGTIMI_ACCOUNT, eMailAddress,
                     eMailAddress,
                     () -> getIgtimiConnectionFactory()
                             .createAccountToAccessUserData(eMailAddress, password));
@@ -8416,5 +8450,46 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             }
         }
         return raceTimesInfos;
+    }
+
+    @Override
+    public void setDefaultTenantForCurrentServer(String tennant) {
+        User user = getSecurityService().getCurrentUser();
+        if (user != null) {
+            if (tennant == null) {
+                user.getDefaultTenantMap().remove(ServerInfo.getName());
+            } else {
+                UserGroup userGroupCandidate = getSecurityService().getUserGroupByName(tennant);
+                // FIXME allow admins to pose as any tenant?
+                if (Util.contains(user.getUserGroups(), userGroupCandidate)) {
+                    user.getDefaultTenantMap().put(ServerInfo.getName(), userGroupCandidate);
+                }
+            }
+        }
+    }
+
+    @Override
+    public List<String> getPossibleTennants() {
+        // FIXME this is most likely greatly oversimplified and needs to be improved
+        ArrayList<String> tenants = new ArrayList<>();
+        for (UserGroup group : getSecurityService().getCurrentUser().getUserGroups()) {
+            tenants.add(group.getName());
+        }
+        return tenants;
+    }
+
+    private boolean isSelfServiceServer() {
+        final User allUser = getSecurityService().getAllUser();
+        return allUser != null && Util.contains(allUser.getPermissions(), SecuredSecurityTypes.SERVER
+                .getPermissionForObjects(ServerActions.CREATE_OBJECT, ServerInfo.getName()));
+    }
+
+    private boolean isPublicServer() {
+        final User allUser = getSecurityService().getAllUser();
+        final RoleDefinition viewerRole = getSecurityService()
+                .getRoleDefinition(SailingViewerRole.getInstance().getId());
+        final UserGroup defaultServerTenant = getSecurityService().getDefaultTenant();
+        return allUser != null && viewerRole != null && defaultServerTenant != null
+                && allUser.hasRole(new RoleImpl(viewerRole, defaultServerTenant, null));
     }
 }

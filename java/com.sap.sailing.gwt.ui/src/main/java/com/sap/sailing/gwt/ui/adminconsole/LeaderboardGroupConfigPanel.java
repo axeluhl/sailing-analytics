@@ -124,13 +124,11 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
     private final LeaderboardGroupsRefresher leaderboardGroupsRefresher;
     private final LeaderboardsRefresher leaderboardsRefresher;
 
-    private final UserService userService;
 
     public LeaderboardGroupConfigPanel(SailingServiceAsync sailingService, UserService userService,
             RegattaRefresher regattaRefresher, LeaderboardGroupsRefresher leaderboardGroupsRefresher,
             LeaderboardsRefresher leaderboardsRefresher, ErrorReporter errorReporter, StringMessages stringMessages) {
         super(sailingService, regattaRefresher, errorReporter, stringMessages);
-        this.userService = userService;
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         availableLeaderboardGroups = new ArrayList<LeaderboardGroupDTO>();
@@ -756,8 +754,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
     }
 
     private void createNewGroup(final LeaderboardGroupDescriptor newGroup) {
-        sailingService.createLeaderboardGroup(userService.getCurrentTenantName(),
-                newGroup.getName(), newGroup.getDescription(),
+        sailingService.createLeaderboardGroup(newGroup.getName(), newGroup.getDescription(),
                 newGroup.getDisplayName(), newGroup.isDisplayLeaderboardsInReverseOrder(),
                 newGroup.getOverallLeaderboardDiscardThresholds(), newGroup.getOverallLeaderboardScoringSchemeType(), new MarkedAsyncCallback<LeaderboardGroupDTO>(
                         new AsyncCallback<LeaderboardGroupDTO>() {

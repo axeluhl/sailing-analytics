@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Locale;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -106,7 +107,7 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
         final String password = "BertMyFriend";
         final String validationBaseURL = null; //so that validation email is not sent        
         masterSecurityService.createSimpleUser(username, email, password, 
-                /* fullName */ null, /* company */ null, validationBaseURL);
+                /* fullName */ null, /* company */ null, Locale.ENGLISH, validationBaseURL);
         masterSecurityService.sendMail(username, "subject", "body");
         securitySetUp.getReplicaReplicator().waitUntilQueueIsEmpty();
         mailSetUp.getReplicaReplicator().waitUntilQueueIsEmpty();
@@ -132,7 +133,7 @@ public class SecurityReplicationLeadingToEmailReplicationTest extends AbstractSe
         final String password = "BertMyFriend";
         final String validationBaseURL = null; //so that validation email is not sent        
         replicaSecurityService.createSimpleUser(username, email, password,
-                /* fullName */ null, /* company */ null, validationBaseURL);
+                /* fullName */ null, /* company */ null, Locale.ENGLISH, validationBaseURL);
         replicaSecurityService.sendMail(username, "subject", "body");
         securitySetUp.getReplicaReplicator().waitUntilQueueIsEmpty();
         mailSetUp.getReplicaReplicator().waitUntilQueueIsEmpty();

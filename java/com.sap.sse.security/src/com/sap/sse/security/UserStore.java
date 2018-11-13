@@ -5,7 +5,9 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sse.common.Named;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.Account;
+import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
@@ -230,4 +232,12 @@ public interface UserStore extends UserGroupProvider, Named {
      * Ensures that the predefined role definitions, particularly the "admin" and the "user" role, exist.
      */
     void ensureDefaultRolesExist();
+
+    /**
+     * @return a pair with: <br/>
+     *         If A is true, at least one user has an unqualified version of the {@link #roleToCheck} (without tenant or
+     *         user qualification). In this case, B is null.<br/>
+     *         If A is false, B contains all the ownerships of {@link #roleToCheck}
+     */
+    Pair<Boolean, Set<Ownership>> getExistingQualificationsForRoleDefinition(RoleDefinition roleToCheck);
 }

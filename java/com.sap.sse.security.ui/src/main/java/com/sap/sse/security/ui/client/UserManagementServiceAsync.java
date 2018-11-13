@@ -44,7 +44,7 @@ public interface UserManagementServiceAsync {
     
     void getUserGroupByName(String userGroupName, AsyncCallback<UserGroup> callback);
 
-    void createUserGroup(String name, String nameOfTenantOwner, AsyncCallback<UserGroup> callback);
+    void createUserGroup(String name, AsyncCallback<UserGroup> callback);
     
     void deleteUserGroup(String userGroupIdAsString, AsyncCallback<SuccessInfo> asyncCallback);
 
@@ -65,7 +65,8 @@ public interface UserManagementServiceAsync {
 
     void logout(AsyncCallback<SuccessInfo> callback);
 
-    void createSimpleUser(String name, String email, String password, String fullName, String company, String localeName, String validationBaseURL, String tenantOwner, AsyncCallback<UserDTO> callback);
+    void createSimpleUser(String name, String email, String password, String fullName, String company,
+            String localeName, String validationBaseURL, AsyncCallback<UserDTO> callback);
 
     void updateSimpleUserPassword(String name, String oldPassword, String passwordResetSecret, String newPassword, AsyncCallback<Void> callback);
 

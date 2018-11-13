@@ -14,6 +14,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Image;
@@ -29,6 +30,8 @@ import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.Sai
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.ShowAndEditSailorProfile;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.events.CompetitorWithoutClubnameItemDescription;
 import com.sap.sailing.gwt.home.desktop.places.user.profile.sailorprofiletab.details.events.NavigatorColumn;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileDetailsView;
+import com.sap.sailing.gwt.home.shared.places.user.profile.sailorprofile.EditSailorProfileDetailsView.Presenter;
 import com.sap.sailing.gwt.home.shared.resources.SharedHomeResources;
 import com.sap.sailing.gwt.settings.client.EntryPointWithSettingsLinkFactory;
 import com.sap.sailing.gwt.settings.client.raceboard.RaceBoardPerspectiveOwnSettings;
@@ -41,8 +44,10 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.InvertibleComparatorAdapter;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.settings.Settings;
+import com.sap.sse.gwt.client.ServerInfoDTO;
 import com.sap.sse.gwt.client.celltable.SortedCellTable;
 import com.sap.sse.gwt.client.shared.perspective.PerspectiveCompositeSettings;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 
 /**
@@ -83,12 +88,15 @@ public class SailorProfileStatisticTable extends Composite {
 
     private UserService userService;
 
+    private Presenter presenter;
+
     public SailorProfileStatisticTable(FlagImageResolver flagImageResolver, SailorProfileNumericStatisticType type,
-            StringMessages stringMessages, UserService userService) {
+            StringMessages stringMessages, UserService userService, EditSailorProfileDetailsView.Presenter presenter) {
         this.userService = userService;
         this.flagImageResolver = flagImageResolver;
         this.type = type;
         this.stringMessages = stringMessages;
+        this.presenter = presenter;
 
         SailorProfileDesktopResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
@@ -131,9 +139,22 @@ public class SailorProfileStatisticTable extends Composite {
             dataMiningUrl = navigationTarget.apply(data.get(0));
             anchor.setHref(dataMiningUrl);
         }
-        if (!userService.hasPermission(SecuredDomainType.DATA_MINING.getStringPermission())) {
-            anchor.setVisible(false);
-        }
+        presenter.getServerInfo(new AsyncCallback<ServerInfoDTO>() {
+
+            @Override
+            public void onSuccess(ServerInfoDTO serverInfo) {
+                if (!userService.hasPermission(
+                        SecuredDomainType.DATA_MINING.getPermissionForObjects(DefaultActions.READ,
+                                serverInfo.getServerName()))) {
+                    anchor.setVisible(false);
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+                GWT.log(caught.getMessage(), caught);
+            }
+        });
         sailorProfilesTable.setList(data);
     }
 

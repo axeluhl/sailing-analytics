@@ -47,15 +47,12 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.security.AccessControlStore;
-import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
-import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
-import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
 public class OfflineSerializationTest extends AbstractSerializationTest {
@@ -112,12 +109,16 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
         DomainFactory receiverDomainFactory = new DomainFactoryImpl((srlid)->null);
         UserStore userStore = new UserStoreImpl("defaultTenant");
         userStore.clear();
-        AccessControlStore aclStore = new AccessControlStoreImpl(userStore);
-        SecurityService securityService = new SecurityServiceImpl(userStore, aclStore);
-        assertNotNull(securityService);
+        UserGroup defaultTenant = userStore.createUserGroup(UUID.randomUUID(), "admin-tenant");
+        UserImpl user = userStore.createUser("admin", "", defaultTenant);
+        defaultTenant.add(user);
+        userStore.updateUserGroup(defaultTenant);
+        user.getDefaultTenantMap().put("testserver", defaultTenant);
+        userStore.updateUser(user);
+
         {
             User admin = userStore.getUserByName("admin");
-            UserGroup adminTenant = admin.getDefaultTenant();
+            UserGroup adminTenant = admin.getDefaultTenant("testserver");
             assertTrue(adminTenant.contains(admin));
             assertTrue(Util.contains(admin.getUserGroups(), adminTenant));
         }
@@ -125,7 +126,7 @@ public class OfflineSerializationTest extends AbstractSerializationTest {
         assertNotNull(deserializedUserStore);
         {
             User admin = deserializedUserStore.getUserByName("admin");
-            UserGroup adminTenant = admin.getDefaultTenant();
+            UserGroup adminTenant = admin.getDefaultTenant("testserver");
             assertTrue(adminTenant.contains(admin));
             assertTrue(Util.contains(admin.getUserGroups(), adminTenant));
         }
