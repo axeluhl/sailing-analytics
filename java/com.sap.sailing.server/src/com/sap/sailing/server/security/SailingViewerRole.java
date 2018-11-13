@@ -1,4 +1,4 @@
-package com.sap.sailing.server.impl;
+package com.sap.sailing.server.security;
 
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
