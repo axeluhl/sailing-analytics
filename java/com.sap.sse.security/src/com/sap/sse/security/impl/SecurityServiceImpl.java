@@ -75,7 +75,6 @@ import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
 import com.sap.sse.ServerInfo;
-import com.sap.sse.ServerStartupConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.mail.MailException;
@@ -1529,7 +1528,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             }
             if (checkCreateObjectOnServer) {
                 SecurityUtils.getSubject().checkPermission(SecuredSecurityTypes.SERVER
-                        .getStringPermissionForObjects(ServerActions.CREATE_OBJECT, ServerStartupConstants.SERVER_NAME));
+                        .getStringPermissionForObjects(ServerActions.CREATE_OBJECT, ServerInfo.getName()));
             }
             SecurityUtils.getSubject()
                     .checkPermission(identifier.getStringPermission(DefaultActions.CREATE));
