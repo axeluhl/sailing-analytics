@@ -230,7 +230,8 @@ public class UserStoreWithPersistenceTest {
     }
 
     @Test
-    public void testGetOtherUsersHaveRole() throws UserManagementException, UserGroupManagementException {
+    public void testGetExistingQualificationsForRoleDefinition()
+            throws UserManagementException, UserGroupManagementException {
         User user = store.createUser("def", "d@test.de", store.createUserGroup(UUID.randomUUID(), "def-tentant"));
         RoleDefinitionImpl roleDefinition = new RoleDefinitionImpl(UUID.randomUUID(), "My-Test-Role");
         store.createRoleDefinition(roleDefinition.getId(), roleDefinition.getName(), new ArrayList<>());
@@ -249,7 +250,7 @@ public class UserStoreWithPersistenceTest {
         testWithTenantAndUserNull(user, roleDefinition);
     }
 
-    /** Test getOtherUsersHaveRole with both tenant and user null. */
+    /** Test getExistingQualificationsForRoleDefinition with both tenant and user null. */
     private void testWithTenantAndUserNull(User user, RoleDefinitionImpl roleDefinition)
             throws UserManagementException {
         Role role = new RoleImpl(roleDefinition, null, null);
@@ -258,14 +259,14 @@ public class UserStoreWithPersistenceTest {
         Iterable<Role> rolesFromUser = store.getRolesFromUser(user.getName());
         assertFalse(Util.size(rolesFromUser) == 0);
         assertTrue(Util.contains(rolesFromUser, role));
-        Pair<Boolean, Set<Ownership>> result = store.getOtherUsersHaveRole(roleDefinition);
+        Pair<Boolean, Set<Ownership>> result = store.getExistingQualificationsForRoleDefinition(roleDefinition);
         assertTrue(result.getA());
         assertNull(result.getB());
 
         store.removeRoleFromUser(user.getName(), role);
     }
 
-    /** Test checkIfOtherUsersHaveRole with both tenant and user not null. */
+    /** Test getExistingQualificationsForRoleDefinition with both tenant and user not null. */
     private void testWithTenantAndUserNotNull(User user, RoleDefinitionImpl roleDefinition, UserGroup userGroup)
             throws UserManagementException {
         Role role = new RoleImpl(roleDefinition, userGroup, user);
@@ -274,7 +275,7 @@ public class UserStoreWithPersistenceTest {
         store.removeRoleFromUser(user.getName(), role);
     }
 
-    /** Test checkIfOtherUsersHaveRole with user null. */
+    /** Test getExistingQualificationsForRoleDefinition with user null. */
     private void testWithUserNull(User user, RoleDefinitionImpl roleDefinition, UserGroup userGroup)
             throws UserManagementException {
         Role role = new RoleImpl(roleDefinition, userGroup, null);
@@ -283,7 +284,7 @@ public class UserStoreWithPersistenceTest {
         store.removeRoleFromUser(user.getName(), role);
     }
 
-    /** Test checkIfOtherUsersHaveRole with tenant null. */
+    /** Test getExistingQualificationsForRoleDefinition with tenant null. */
     private void testWithTenantNull(User user, RoleDefinitionImpl roleDefinition, UserGroup userGroup)
             throws UserManagementException {
         Role role = new RoleImpl(roleDefinition, null, user);
@@ -292,7 +293,10 @@ public class UserStoreWithPersistenceTest {
         store.removeRoleFromUser(user.getName(), role);
     }
 
-    /** assert that no user has a wildcard role checkIfOtherUsersHaveRole with both tenant and user not null. */
+    /**
+     * assert that no user has a wildcard role getExistingQualificationsForRoleDefinition with both tenant and user not
+     * null.
+     */
     private void assertThatNoUserHasWildcardRole(UserGroup userGroup, User user, RoleDefinition roleDefinition)
             throws UserManagementException {
         Iterable<Role> rolesFromUser = store.getRolesFromUser(user.getName());
@@ -305,7 +309,7 @@ public class UserStoreWithPersistenceTest {
         assertTrue(containsRole);
 
         // check if other users have the role
-        Pair<Boolean, Set<Ownership>> result = store.getOtherUsersHaveRole(roleDefinition);
+        Pair<Boolean, Set<Ownership>> result = store.getExistingQualificationsForRoleDefinition(roleDefinition);
         assertFalse(result.getA());
         assertNotNull(result.getB());
 

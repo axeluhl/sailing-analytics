@@ -706,7 +706,7 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public Pair<Boolean, Set<Ownership>> getOtherUsersHaveRole(RoleDefinition roleToCheck) {
+    public Pair<Boolean, Set<Ownership>> getExistingQualificationsForRoleDefinition(RoleDefinition roleToCheck) {
         final Set<Ownership> ownerships = new HashSet<>();
         for (User user : getUsers()) {
             try {
