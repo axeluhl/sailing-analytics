@@ -18,6 +18,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogEvent;
@@ -91,10 +92,13 @@ public class TaggingServiceTest {
         securityService = new SecurityBundleTestWrapper().initializeSecurityServiceForTesting();
         // create & login user
         securityService.createSimpleUser(username, email, password, fullName, company, Locale.ENGLISH, null);
+
         subject = SecurityUtils.getSubject();
         subject.login(new UsernamePasswordToken(username, password));
         // setup tagging service
-        taggingService = new TaggingServiceImpl(racingService);
+        taggingService = Mockito.spy(new TaggingServiceImpl(racingService));
+
+        Mockito.doReturn(taggingService).when(racingService).getTaggingService();
     }
 
     @AfterClass
