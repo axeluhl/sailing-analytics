@@ -40,6 +40,7 @@ import org.json.simple.parser.ParseException;
 import com.sap.sailing.datamining.SailingPredefinedQueries;
 import com.sap.sailing.domain.abstractlog.impl.LogEventAuthorImpl;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
+import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceCompetitorMappingEvent;
 import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogDeviceMappingEventImpl;
 import com.sap.sailing.domain.abstractlog.regatta.events.impl.RegattaLogDeviceCompetitorMappingEventImpl;
@@ -56,6 +57,7 @@ import com.sap.sailing.domain.base.impl.BoatImpl;
 import com.sap.sailing.domain.base.impl.DynamicBoat;
 import com.sap.sailing.domain.base.impl.PersonImpl;
 import com.sap.sailing.domain.base.impl.TeamImpl;
+import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.DeviceIdentifier;
 import com.sap.sailing.domain.common.NoWindException;
 import com.sap.sailing.domain.common.RegattaName;
@@ -63,6 +65,7 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Tack;
 import com.sap.sailing.domain.common.TargetTimeInfo;
 import com.sap.sailing.domain.common.WindSource;
+import com.sap.sailing.domain.common.abstractlog.NotRevokableException;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.tracking.GPSFix;
@@ -167,6 +170,13 @@ public class RegattasResource extends AbstractSailingServerResource {
 
     private Response getAlreadyRegisteredDeviceErrorResponse(String regattaName, String deviceId) {
         return Response.status(Status.FORBIDDEN).entity("Device is already registered to regatta '" + StringEscapeUtils.escapeHtml(regattaName) + "'.")
+                .type(MediaType.TEXT_PLAIN).build();
+    }
+    
+    private Response getDeregisterCompetitorErrorResponse(String regattaName, String competitorId, String errorText) {
+        return Response.status(Status.BAD_REQUEST)
+                .entity("Deregistering competitor " + StringEscapeUtils.escapeHtml(competitorId) + " from regatta "
+                        + StringEscapeUtils.escapeHtml(regattaName) + " failed: " + errorText)
                 .type(MediaType.TEXT_PLAIN).build();
     }
 
@@ -545,11 +555,33 @@ public class RegattasResource extends AbstractSailingServerResource {
     @Produces("application/json;charset=UTF-8")
     @Path("{regattaname}/competitors/{competitorid}/remove")
     public Response removeCompetitor(@PathParam("regattaname") String regattaName,
-            @PathParam("competitorid") String competitorIdAsString) {
+            @PathParam("competitorid") String competitorIdAsString,
+            @QueryParam("secret") String registrationLinkSecret) {
         final Subject subject = SecurityUtils.getSubject();
-        subject.checkPermission(SecuredDomainType.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regattaName));
+        final User user = getSecurityService().getCurrentUser();
         Response response;
-        Regatta regatta = findRegattaByName(regattaName);
+        final Regatta regatta = findRegattaByName(regattaName);
+        if (registrationLinkSecret != null && registrationLinkSecret.length() > 0
+                && !CompetitorRegistrationType.CLOSED.equals(regatta.getCompetitorRegistrationType())) {
+            if (!regatta.getRegistrationLinkSecret().equals(registrationLinkSecret)) {
+                return getBadRegattaRegistrationTypeErrorResponse(regattaName);
+            }
+            for (RegattaLogEvent event : regatta.getRegattaLog().getUnrevokedEvents()) {
+                if (event instanceof RegattaLogDeviceCompetitorMappingEvent) {
+                    try {
+                        regatta.getRegattaLog().revokeEvent(
+                                new LogEventAuthorImpl(user == null ? "anonymous" : user.getFullName(), 0), event,
+                                "deregister device " + ((RegattaLogDeviceCompetitorMappingEvent) event).getDevice()
+                                        .getStringRepresentation());
+                    } catch (NotRevokableException e) {
+                        return getDeregisterCompetitorErrorResponse(regattaName, competitorIdAsString, e.getMessage());
+                    }
+                }
+            };
+        } else {
+            subject.checkPermission(
+                    SecuredDomainType.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regattaName));
+        }
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {

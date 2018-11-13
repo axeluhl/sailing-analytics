@@ -168,6 +168,12 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         assertNotNull(readCompetitor);
         assertTrue(
                 competitorName1.equals(readCompetitor.getName()) || competitorName2.equals(readCompetitor.getName()));
+
+        Iterator<Competitor> citForRemove = regatta.getAllCompetitors().iterator();
+        citForRemove.forEachRemaining(competitor -> regattasResource.removeCompetitor(closedRegattaName,
+                competitor.getId().toString(), null));
+        Iterator<Competitor> citAfterRemove = regatta.getAllCompetitors().iterator();
+        assertTrue("Competitors still exist after remove.", !citAfterRemove.hasNext());
     }
 
     @Test
@@ -191,7 +197,8 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         setUser(null);
 
         Response response = regattasResource.createAndAddCompetitor(openRegattaName, boatClassName, null, "GER", "#F00",
-                flagImageUri, teamImageUri, null, null, null, competitorName1, competitorShortName1, null, deviceUuid, "WRONGSECRET");
+                flagImageUri, teamImageUri, null, null, null, competitorName1, competitorShortName1, null, deviceUuid,
+                "WRONGSECRET");
         assertTrue(response.getStatus() + ": " + response.getEntity().toString(),
                 response.getStatus() == Status.FORBIDDEN.getStatusCode());
     }
@@ -201,7 +208,6 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         doReturn(securityService).when(regattasResource).getService(SecurityService.class);
 
         User user = new UserImpl("max", "noreply@sapsailing.com", null, new ArrayList<Account>(0), null);
-        // when(securityService.getCurrentUser()).thenReturn(user);
         setUser(user);
         Regatta regatta = racingEventService.getRegattaByName(openRegattaName);
 
@@ -238,7 +244,12 @@ public class RegattasResourceTest extends AbstractJaxRsApiTest {
         // Same deviceUuid for registration should fail
         Response response = regattasResource.createAndAddCompetitor(regatta.getName(), boatClassName, null, "GER",
                 "#F00", flagImageUri, teamImageUri, null, null, null, "XXX", "XXX", null, deviceUuid, secret);
-        assertTrue("Reponse http status should be forbidden (403) but is " + response.getStatus(),
-                response.getStatus() == Status.FORBIDDEN.getStatusCode());
+        assertTrue("Reponse http status for duplicate competitor device should be forbidden (403) but is "
+                + response.getStatus(), response.getStatus() == Status.FORBIDDEN.getStatusCode());
+
+        // Remove competitor registration
+        Response removeResponse = regattasResource.removeCompetitor(regatta.getName(),
+                readCompetitor.getId().toString(), secret);
+        assertEquals("Remove of competitor failed", 200, removeResponse.getStatus());
     }
 }
