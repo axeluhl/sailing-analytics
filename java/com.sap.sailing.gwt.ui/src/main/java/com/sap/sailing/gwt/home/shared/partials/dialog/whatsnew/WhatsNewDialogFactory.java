@@ -24,6 +24,8 @@ public final class WhatsNewDialogFactory {
     private static final long THRESHOLD_WHATS_NEW = 10;
     private static final Logger LOG = Logger.getLogger(WhatsNewDialogFactory.class.getName());
 
+    private static boolean isUserNotified = false;
+
     private WhatsNewDialogFactory() {
     }
 
@@ -38,10 +40,10 @@ public final class WhatsNewDialogFactory {
 
     /** Shows a What's New Dialog. */
     private static void showWhatsNewDialog(PlaceController placeController, DialogCallback<Void> dialogCallback) {
-
-        PopupPanel dialog = DialogFactory.createDialog(StringMessages.INSTANCE.whatsNewDialogMessage(),
+        final PopupPanel dialog = DialogFactory.createDialog(StringMessages.INSTANCE.whatsNewDialogMessage(),
                 StringMessages.INSTANCE.whatsNewDialogTitle(), false, StringMessages.INSTANCE.showChangelog(),
                 StringMessages.INSTANCE.cancel(), dialogCallback);
+        isUserNotified = true;
         dialog.show();
     }
 
@@ -51,6 +53,9 @@ public final class WhatsNewDialogFactory {
      */
     private static void showWhatsNewDialogIfNecessaryAndUpdatePreference(UserService userService,
             PlaceController placeController) {
+        if (isUserNotified) {
+            return;
+        }
         final long charactersInWhatsChangedDocument = WhatsNewResources.INSTANCE.getSailingAnalyticsNotesHtml()
                 .getText().length();
         userService.getPreference(WhatsNewSettings.PREF_NAME, new AsyncCallback<String>() {
