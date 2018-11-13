@@ -81,9 +81,15 @@ public abstract class AbstractJaxRsApiTest {
         }).when(securityService).setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(Action.class));
         Mockito.doAnswer(new Answer<Object>() {
+            @SuppressWarnings("rawtypes")
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
-                return invocation.getArgumentAt(4, ActionWithResult.class).run();
+                for (Object arg : invocation.getArguments()) {
+                    if (arg instanceof ActionWithResult) {
+                        return ((ActionWithResult) arg).run();
+                    }
+                }
+                return null;
             }
         }).when(securityService).setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 Mockito.any(), Mockito.any(), Mockito.any(),
