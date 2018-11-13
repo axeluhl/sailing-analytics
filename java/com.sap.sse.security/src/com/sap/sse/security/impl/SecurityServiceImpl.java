@@ -1861,7 +1861,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public boolean hasUserAllWildcardPermissionsForAlreadyRealizedQualifications(RoleDefinition role,
             Iterable<WildcardPermission> permissionsToCheck) {
-        Pair<Boolean, Set<Ownership>> qualificationsToCheck = userStore.getOtherUsersHaveRole(role);
+        Pair<Boolean, Set<Ownership>> qualificationsToCheck = userStore.getExistingQualificationsForRoleDefinition(role);
         final Iterable<Ownership> effectiveQualificationsToCheck = Boolean.TRUE.equals(qualificationsToCheck.getA())
                 ? Collections.singletonList(null)
                 : qualificationsToCheck.getB();
