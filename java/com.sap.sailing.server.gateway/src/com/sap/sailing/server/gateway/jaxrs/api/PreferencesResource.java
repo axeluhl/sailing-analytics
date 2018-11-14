@@ -15,7 +15,7 @@ import org.json.simple.parser.ParseException;
 
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
-import com.sap.sse.security.UserStore;
+import com.sap.sse.security.SecurityService;
 
 @Path("/v1/preferences")
 public class PreferencesResource extends AbstractSailingServerResource {
@@ -27,8 +27,8 @@ public class PreferencesResource extends AbstractSailingServerResource {
         Response response = null;
         if (SecurityUtils.getSubject().isAuthenticated()) {
             String username = SecurityUtils.getSubject().getPrincipal().toString();
-            UserStore userStore = getService(UserStore.class);
-            String settings = userStore.getPreference(username, settingsKey);
+            SecurityService securityService = getService(SecurityService.class);
+            String settings = securityService.getPreference(username, settingsKey);
             if (settings == null) {
                 response = Response.noContent().build();
             } else {
@@ -48,8 +48,8 @@ public class PreferencesResource extends AbstractSailingServerResource {
         Response response = null;
         if (SecurityUtils.getSubject().isAuthenticated()) {
             String username = SecurityUtils.getSubject().getPrincipal().toString();
-            UserStore userStore = getService(UserStore.class);
-            userStore.setPreference(username, settingsKey, json);
+            SecurityService securityService = getService(SecurityService.class);
+            securityService.setPreference(username, settingsKey, json);
             response = Response.ok().build();
         } else {
             response = Response.status(401).build();
@@ -65,8 +65,8 @@ public class PreferencesResource extends AbstractSailingServerResource {
         Response response = null;
         if (SecurityUtils.getSubject().isAuthenticated()) {
             String username = SecurityUtils.getSubject().getPrincipal().toString();
-            UserStore userStore = getService(UserStore.class);
-            userStore.unsetPreference(username, settingsKey);
+            SecurityService securityService = getService(SecurityService.class);
+            securityService.unsetPreference(username, settingsKey);
             response = Response.ok().build();
         } else {
             response = Response.status(401).build();
