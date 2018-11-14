@@ -1882,4 +1882,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         return true;
     }
+
+    @Override
+    public <T> T getPreferenceObject(String username, String key) {
+        return userStore.getPreferenceObject(username, key);
+    }
 }
