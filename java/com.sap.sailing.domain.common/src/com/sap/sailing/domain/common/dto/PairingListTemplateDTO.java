@@ -1,6 +1,8 @@
 package com.sap.sailing.domain.common.dto;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
 
 public class PairingListTemplateDTO implements Serializable {
     
@@ -53,7 +55,7 @@ public class PairingListTemplateDTO implements Serializable {
         this.selectedFlightNames = selectedFlightNames;
     }
     
-    public void setFlightCount(int flightCount){
+    public void setFlightCount(int flightCount) {
         this.flightCount=flightCount;
     }
     
@@ -111,6 +113,14 @@ public class PairingListTemplateDTO implements Serializable {
     
     public Iterable<String> getSelectedFlightNames() {
         return selectedFlightNames;
+    }
+    
+    public void swapColumns(final int indexA, final int indexB) {
+        for(int row = 0; row < this.pairingListTemplate.length; row++) {
+            int tmpField = this.pairingListTemplate[row][indexA];
+            this.pairingListTemplate[row][indexA] = this.pairingListTemplate[row][indexB];
+            this.pairingListTemplate[row][indexB] = tmpField;
+        }
     }
 
 }
