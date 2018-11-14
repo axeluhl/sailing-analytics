@@ -57,7 +57,7 @@ public abstract class SecurityDTOUtil {
         final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser = new HashMap<>();
         final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup = new HashMap<>();
         addSecurityInformation(securityDTOFactory, securityService, securedObject, objectId,
-                fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
+                fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup, false);
     }
 
     /**
@@ -89,11 +89,18 @@ public abstract class SecurityDTOUtil {
             final SecurityService securityService, final SecuredObject securedObject,
             final QualifiedObjectIdentifier objectId,
             final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser,
-            final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup) {
+            final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup,
+            final boolean disablePruningForCurrentUser) {
         final AccessControlListAnnotation accessControlList = securityService.getAccessControlList(objectId);
-        securedObject.setAccessControlList(securityDTOFactory.createAccessControlListDTO(
+        AccessControlList accessControlListDTO = securityDTOFactory.createAccessControlListDTO(
                 accessControlList == null ? null : accessControlList.getAnnotation(), fromOriginalToStrippedDownUser,
-                fromOriginalToStrippedDownUserGroup));
+                fromOriginalToStrippedDownUserGroup);
+        if (disablePruningForCurrentUser) {
+            securedObject.setAccessControlList(accessControlListDTO);
+        } else {
+            securedObject.setAccessControlList(securityDTOFactory.pruneAccessControlListForUser(accessControlListDTO,
+                    securityService.getCurrentUser()));
+        }
         final OwnershipAnnotation ownership = securityService.getOwnership(objectId);
         securedObject.setOwnership(
                 securityDTOFactory.createOwnershipDTO(ownership == null ? null : ownership.getAnnotation(),
