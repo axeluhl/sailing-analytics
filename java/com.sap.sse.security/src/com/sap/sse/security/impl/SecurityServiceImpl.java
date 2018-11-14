@@ -1096,4 +1096,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             ((ReplicatingCacheManager) cm).clear();
         }
     }
+
+    @Override
+    public <T> T getPreferenceObject(String username, String key) {
+        ensureThatUserInQuestionIsLoggedInOrCurrentUserIsAdmin(username);
+        return store.getPreferenceObject(username, key);
+    }
 }

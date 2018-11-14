@@ -18,18 +18,14 @@ import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningQueryDTOImpl;
 import com.sap.sse.gwt.dispatch.shared.exceptions.ServerDispatchException;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.User;
-import com.sap.sse.security.UserStore;
 
 /** Implementation of {@link StoredDataMiningQueryPersister}. */
 public class StoredDataMiningQueryPersisterImpl implements StoredDataMiningQueryPersister {
 
     private final SecurityService securityService;
-    private final UserStore userStore;
 
-    public StoredDataMiningQueryPersisterImpl(SecurityService securityService, UserStore userStore) {
+    public StoredDataMiningQueryPersisterImpl(SecurityService securityService) {
         this.securityService = securityService;
-        this.userStore = userStore;
-
     }
 
     /** @return all {@link StoredDataMiningQueryDTO}s the user has stored in his user store. */
@@ -101,7 +97,7 @@ public class StoredDataMiningQueryPersisterImpl implements StoredDataMiningQuery
         User currentUser = securityService.getCurrentUser();
         if (currentUser != null) {
             try {
-                userStore.setPreferenceObject(currentUser.getName(), preferenceKey, preference);
+                securityService.setPreferenceObject(currentUser.getName(), preferenceKey, preference);
             } catch (AuthorizationException e) {
                 throw new ServerDispatchException(e);
             }
@@ -124,9 +120,8 @@ public class StoredDataMiningQueryPersisterImpl implements StoredDataMiningQuery
     private <T> T getPreferenceForCurrentUser(String preferenceKey) {
         User currentUser = securityService.getCurrentUser();
         if (currentUser != null) {
-            return userStore.getPreferenceObject(currentUser.getName(), preferenceKey);
+            return securityService.getPreferenceObject(currentUser.getName(), preferenceKey);
         }
         return null;
     }
-
 }
