@@ -166,9 +166,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public Collection<AccessControlListAnnotation> getAccessControlLists() throws UnauthorizedException {
+        // TODO decide whether a global getAccessControlList functionality is needed
         List<AccessControlListAnnotation> acls = new ArrayList<>();
         for (AccessControlListAnnotation acl : getSecurityService().getAccessControlLists()) {
-            if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.ACCESS_CONTROL_LIST.getStringPermissionForObjects(DefaultActions.READ, acl.getIdOfAnnotatedObject().toString()))) {
+            if (SecurityUtils.getSubject()
+                    .isPermitted(acl.getIdOfAnnotatedObject().getStringPermission(DefaultActions.CHANGE_ACL))) {
                 acls.add(securityDTOFactory.createAccessControlListAnnotationDTO(acl));
             }
         }
@@ -177,13 +179,15 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public AccessControlListAnnotation getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject) {
-        SecurityUtils.getSubject().checkPermission(SecuredSecurityTypes.ACCESS_CONTROL_LIST.getStringPermissionForObjects(DefaultActions.READ, idOfAccessControlledObject.toString()));
+        SecurityUtils.getSubject()
+                .checkPermission(idOfAccessControlledObject.getStringPermission(DefaultActions.CHANGE_ACL));
         return securityDTOFactory.createAccessControlListAnnotationDTO(getSecurityService().getAccessControlList(idOfAccessControlledObject));
     }
 
     @Override
     public AccessControlList updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, Map<String, Set<String>> permissionStrings) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.ACCESS_CONTROL_LIST.getStringPermissionForObjects(DefaultActions.UPDATE, idOfAccessControlledObject.toString()))) {
+        if (SecurityUtils.getSubject()
+                .isPermitted(idOfAccessControlledObject.getStringPermission(DefaultActions.CHANGE_ACL))) {
             Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
             for (String group : permissionStrings.keySet()) {
                 permissionMap.put(getSecurityService().getUserGroupByName(group), permissionStrings.get(group));
@@ -196,7 +200,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public AccessControlList addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String groupIdAsString, String action) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.ACCESS_CONTROL_LIST.getStringPermissionForObjects(DefaultActions.UPDATE, idOfAccessControlledObject.toString()))) {
+        if (SecurityUtils.getSubject()
+                .isPermitted(idOfAccessControlledObject.getStringPermission(DefaultActions.CHANGE_ACL))) {
             UserGroup userGroup = getUserGroup(groupIdAsString);
             return securityDTOFactory.createAccessControlListDTO(getSecurityService().addToAccessControlList(idOfAccessControlledObject, userGroup, action));
         } else {

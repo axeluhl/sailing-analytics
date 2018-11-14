@@ -65,8 +65,6 @@ public class Activator implements BundleActivator {
                     for (UserGroup group : userStore.getUserGroups()) {
                         securityService.migrateOwnership(group, SecuredSecurityTypes.getAllInstances());
                     }
-                    securityService.assumeOwnershipMigrated(SecuredSecurityTypes.ACCESS_CONTROL_LIST.getName(),
-                            SecuredSecurityTypes.getAllInstances());
                     securityService.assumeOwnershipMigrated(SecuredSecurityTypes.ROLE_DEFINITION.getName(),
                             SecuredSecurityTypes.getAllInstances());
                     securityService.assumeOwnershipMigrated(SecuredSecurityTypes.SERVER.getName(),
