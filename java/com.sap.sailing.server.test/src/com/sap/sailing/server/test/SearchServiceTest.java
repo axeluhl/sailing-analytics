@@ -17,8 +17,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.mgt.SecurityManager;
+import org.apache.shiro.subject.Subject;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.sap.sailing.domain.base.CompetitorWithBoat;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -71,12 +75,17 @@ import com.sap.sailing.server.operationaltransformation.RemoveEvent;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboard;
 import com.sap.sailing.server.operationaltransformation.RemoveLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.RemoveRegatta;
+import com.sap.sailing.server.tagging.TaggingServiceImpl;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
+import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 
@@ -101,10 +110,32 @@ public class SearchServiceTest {
     private DynamicTrackedRace pfingstbusch470TrackedR2;
     private DynamicTrackedRace aalOrcTrackedR1;
     private DynamicTrackedRace aalOrcTrackedR2;
+    private SecurityService securityService;
 
     @Before
     public void setUp() {
-        server = new RacingEventServiceImpl();
+        UserGroupImpl defaultTenant = new UserGroupImpl(new UUID(0, 1), "defaultTenant");
+        User currentUser = Mockito.mock(User.class);
+
+        securityService = Mockito.mock(SecurityService.class);
+        SecurityManager securityManager = Mockito.mock(org.apache.shiro.mgt.SecurityManager.class);
+        Subject fakeSubject = Mockito.mock(Subject.class);
+
+        SecurityUtils.setSecurityManager(securityManager);
+        Mockito.doReturn(fakeSubject).when(securityManager).createSubject(Mockito.any());
+        Mockito.doReturn(defaultTenant).when(securityService).getDefaultTenant();
+        Mockito.doReturn(currentUser).when(securityService).getCurrentUser();
+        Mockito.doReturn(true).when(securityService).hasCurrentUserReadPermission(Mockito.any());
+        Mockito.doNothing().when(securityService).checkCurrentUserReadPermission(Mockito.any());
+
+        Mockito.doReturn(true).when(securityService)
+                .hasCurrentUserReadPermission(Mockito.any(WithQualifiedObjectIdentifier.class));
+        Mockito.doReturn(true).when(fakeSubject).isAuthenticated();
+
+        server = Mockito.spy(new RacingEventServiceImpl());
+        Mockito.doReturn(securityService).when(server).getSecurityService();
+        TaggingServiceImpl taggingServer = Mockito.spy(new TaggingServiceImpl(server));
+        Mockito.doReturn(taggingServer).when(server).getTaggingService();
         List<Event> allEvents = new ArrayList<>();
         Util.addAll(server.getAllEvents(), allEvents);
         for (final Event e : allEvents) {

@@ -2,11 +2,11 @@
     left: 50% !important;
     top: 50% !important;
     position: absolute !important;
-    background-color: #f2f2f2;
+    background-color: #ffffff;
     padding: 1em;
     border: 1px solid #ccc;
     border-radius: 3px;
-    width: 25%;
+    width: 30em;
     -webkit-transform: translate(-50%, -50%);
     -moz-transform: translate(-50%, -50%);
     -ms-transform: translate(-50%, -50%);
@@ -15,8 +15,7 @@
 }
 
 .buttonAdjustments {
-    margin-left: .5em;
-    margin-top: .5em;
+    margin: .5em .25em 0;
     min-width: 11em;
 }
 
@@ -39,6 +38,7 @@
 
 .buttonPanel {
     text-align: center;
+    font-size: 0;
 }
 
 .backgroundPanel {
@@ -48,6 +48,7 @@
     top: 0;
     left: 0;
     background-color: rgba(0, 0, 0, .33333333);
+    z-index: 9999;
 }
 
 .title {
@@ -57,20 +58,13 @@
     margin-bottom: .75em;
 }
 
-@media ( max-width: 400px) {
+@media (max-width: 425px) {
     .dialog {
-        width: 90%;
+        width: calc(100% - 1em);
     }
-}
-
-@media ( min-width: 400px) {
-    .dialog {
-        width: 50%;
-    }
-}
-
-@media ( min-width: 600px) {
-    .dialog {
-        width: 40%;
+    
+    .buttonAdjustments {
+        min-width: 100%;
+        margin: .5em 0 0;
     }
 }

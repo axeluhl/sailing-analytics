@@ -13,6 +13,8 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.ServerInfoDTO;
 
 public class LocalServerManagementPanel extends SimplePanel {
@@ -25,6 +27,8 @@ public class LocalServerManagementPanel extends SimplePanel {
     private CheckBox isStandaloneServerCheckbox;
     private Label serverNameLabel;
     private Label buildVersionLabel;
+    private CheckBox isPublicServerCheckbox;
+    private CheckBox isSelfServiceServerCheckbox;
 
     public LocalServerManagementPanel(SailingServiceAsync sailingService, ErrorReporter errorReporter,
             StringMessages stringMessages) {
@@ -74,26 +78,59 @@ public class LocalServerManagementPanel extends SimplePanel {
                 serverConfigurationChanged();
             }
         });
+
+        isPublicServerCheckbox = new CheckBox();
+        isPublicServerCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                serverConfigurationChanged();
+            }
+        });
+        isPublicServerCheckbox.setEnabled(false);
+
+        isSelfServiceServerCheckbox = new CheckBox();
+        isSelfServiceServerCheckbox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+            @Override
+            public void onValueChange(ValueChangeEvent<Boolean> event) {
+                serverConfigurationChanged();
+            }
+        });
+        isSelfServiceServerCheckbox.setEnabled(false);
     
-        Grid grid = new Grid(2, 2);
+        Grid grid = new Grid(3, 2);
         grid.setWidget(0, 0, new Label(stringMessages.standaloneServer() + ":"));
         grid.setWidget(0, 1, isStandaloneServerCheckbox);
+
+        grid.setWidget(1, 0, new Label(stringMessages.publicServer() + ":"));
+        grid.setWidget(1, 1, isPublicServerCheckbox);
+
+        grid.setWidget(2, 0, new Label(stringMessages.selfServiceServer() + ":"));
+        grid.setWidget(2, 1, isSelfServiceServerCheckbox);
+
         serverConfigurationContentPanel.add(grid);
         
         refreshServerConfiguration();
     }    
 
     private void serverConfigurationChanged() {
-        ServerConfigurationDTO serverConfig = new ServerConfigurationDTO(isStandaloneServerCheckbox.getValue());
-        
+        Boolean publicServer = isPublicServerCheckbox.isEnabled() ? isPublicServerCheckbox.getValue() : null;
+        // FIXME self service not yet supported
+        Boolean selfServiceServer = isSelfServiceServerCheckbox.isEnabled() ? isSelfServiceServerCheckbox.getValue()
+                : null;
+        ServerConfigurationDTO serverConfig = new ServerConfigurationDTO(isStandaloneServerCheckbox.getValue(),
+                publicServer, selfServiceServer);
+
         sailingService.updateServerConfiguration(serverConfig, new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
+                Notification.notify(stringMessages.updatedServerSetupError(), NotificationType.ERROR);
                 errorReporter.reportError(caught.getMessage());
+                refreshServerConfiguration();
             }
 
             @Override
             public void onSuccess(Void result) {
+                Notification.notify(stringMessages.updatedServerSetup(), NotificationType.SUCCESS);
                 refreshServerConfiguration();
             }
         });
@@ -133,6 +170,19 @@ public class LocalServerManagementPanel extends SimplePanel {
     }
     
     private void updateServerConfiguration(ServerConfigurationDTO result) {
-        isStandaloneServerCheckbox.setValue(result.isStandaloneServer(), true); 
+        isStandaloneServerCheckbox.setValue(result.isStandaloneServer(), false);
+        if (result.isPublic() != null) {
+            isPublicServerCheckbox.setEnabled(true);
+            isPublicServerCheckbox.setValue(result.isPublic(), false);
+        } else {
+            isPublicServerCheckbox.setEnabled(false);
+        }
+        if (result.isSelfService() != null) {
+            // isSelfServiceServerCheckbox.setEnabled(true);
+            isSelfServiceServerCheckbox.setValue(result.isSelfService(), false);
+        } else {
+            isSelfServiceServerCheckbox.setEnabled(false);
+        }
+
     }
 }

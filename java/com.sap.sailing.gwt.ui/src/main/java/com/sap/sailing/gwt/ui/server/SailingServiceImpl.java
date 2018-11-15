@@ -525,6 +525,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateRaceDelayToLive;
 import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.operationaltransformation.UpdateServerConfiguration;
 import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
+import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.server.simulation.SimulationService;
 import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
 import com.sap.sailing.simulator.Path;
@@ -594,7 +595,13 @@ import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.RoleImpl;
+import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 import com.sap.sse.security.ui.server.SecurityDTOUtil;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -4699,14 +4706,49 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public ServerConfigurationDTO getServerConfiguration() {
         SailingServerConfiguration sailingServerConfiguration = getService().getSailingServerConfiguration();
-        ServerConfigurationDTO result = new ServerConfigurationDTO(sailingServerConfiguration.isStandaloneServer());
+        ServerConfigurationDTO result = new ServerConfigurationDTO(sailingServerConfiguration.isStandaloneServer(),
+                isPublicServer(), isSelfServiceServer());
         return result;
     }
-    
+
     @Override
     public void updateServerConfiguration(ServerConfigurationDTO serverConfiguration) {
-        SailingServerConfiguration newServerConfiguration = new SailingServerConfigurationImpl(serverConfiguration.isStandaloneServer());
-        getService().apply(new UpdateServerConfiguration(newServerConfiguration));
+        getService().apply(new UpdateServerConfiguration(
+                new SailingServerConfigurationImpl(serverConfiguration.isStandaloneServer())));
+        if (serverConfiguration.isPublic() != null || serverConfiguration.isSelfService() != null) {
+            final User allUser = getSecurityService().getAllUser();
+            if (allUser != null) {
+                final WildcardPermission createObjectOnCurrentServerPermission = SecuredSecurityTypes.SERVER
+                        .getPermissionForObjects(ServerActions.CREATE_OBJECT, ServerInfo.getName());
+                if (serverConfiguration.isSelfService() != null) {
+                    if (serverConfiguration.isSelfService()) {
+                        getSecurityService().addPermissionForUser(allUser.getName(),
+                                createObjectOnCurrentServerPermission);
+                    } else {
+                        getSecurityService().removePermissionFromUser(allUser.getName(),
+                                createObjectOnCurrentServerPermission);
+                    }
+                }
+                if (serverConfiguration.isPublic() != null) {
+                    final RoleDefinition viewerRole = getSecurityService()
+                            .getRoleDefinition(SailingViewerRole.getInstance().getId());
+                    final UserGroup defaultServerTenant = getSecurityService().getDefaultTenant();
+                    if (viewerRole != null && defaultServerTenant != null) {
+                        final RoleImpl publicAccessForServerRole = new RoleImpl(viewerRole, defaultServerTenant, null);
+                        if (serverConfiguration.isPublic()) {
+                            getSecurityService().addRoleForUser(allUser.getName(), publicAccessForServerRole);
+                        } else {
+                            getSecurityService().removeRoleFromUser(allUser.getName(), publicAccessForServerRole);
+                        }
+                    } else {
+                        throw new IllegalArgumentException("Viewerrole or defaultServerTenant is not existing");
+                    }
+
+                }
+            } else {
+                throw new IllegalArgumentException("Alluser is not exiting");
+            }
+        }
     }
 
     @Override
@@ -8449,7 +8491,18 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void setDefaultTenantForCurrentServer(String tennant) {
-        // TODO Auto-generated method stub
+        User user = getSecurityService().getCurrentUser();
+        if (user != null) {
+            if (tennant == null) {
+                user.getDefaultTenantMap().remove(ServerInfo.getName());
+            } else {
+                UserGroup userGroupCandidate = getSecurityService().getUserGroupByName(tennant);
+                // FIXME allow admins to pose as any tenant?
+                if (Util.contains(user.getUserGroups(), userGroupCandidate)) {
+                    user.getDefaultTenantMap().put(ServerInfo.getName(), userGroupCandidate);
+                }
+            }
+        }
     }
 
     @Override
@@ -8460,5 +8513,31 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             tenants.add(group.getName());
         }
         return tenants;
+    }
+
+    private Boolean isSelfServiceServer() {
+        final Boolean result;
+        final User allUser = getSecurityService().getAllUser();
+        if (allUser != null) {
+            result = Util.contains(allUser.getPermissions(), SecuredSecurityTypes.SERVER
+                    .getPermissionForObjects(ServerActions.CREATE_OBJECT, ServerInfo.getName()));
+        } else {
+            result = null;
+        }
+        return result;
+    }
+
+    private Boolean isPublicServer() {
+        final Boolean result;
+        final User allUser = getSecurityService().getAllUser();
+        final RoleDefinition viewerRole = getSecurityService()
+                .getRoleDefinition(SailingViewerRole.getInstance().getId());
+        final UserGroup defaultServerTenant = getSecurityService().getDefaultTenant();
+        if (allUser != null && viewerRole != null && defaultServerTenant != null) {
+            result = allUser.hasRole(new RoleImpl(viewerRole, defaultServerTenant, null));
+        } else {
+            result = null;
+        }
+        return result;
     }
 }

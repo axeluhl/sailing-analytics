@@ -6,13 +6,13 @@ import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
 import com.sap.sse.security.shared.SecuredObject;
+import com.sap.sse.security.shared.SecurityInformationDTO;
 
 public class RoleDefinitionDTO extends RoleDefinitionImpl implements SecuredObject {
     
-    private static final long serialVersionUID = -2580755958300866126L;
-    
-    private AccessControlList accessControlList;
-    private Ownership ownership;
+    private static final long serialVersionUID = -3340211553071045099L;
+
+    private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
 
     @Deprecated
     RoleDefinitionDTO() {} // for GWT serialization only
@@ -23,22 +23,22 @@ public class RoleDefinitionDTO extends RoleDefinitionImpl implements SecuredObje
 
     @Override
     public final AccessControlList getAccessControlList() {
-        return accessControlList;
+        return securityInformation.getAccessControlList();
     }
 
     @Override
     public final Ownership getOwnership() {
-        return ownership;
+        return securityInformation.getOwnership();
     }
 
     @Override
     public final void setAccessControlList(final AccessControlList accessControlList) {
-        this.accessControlList = accessControlList;
+        this.securityInformation.setAccessControlList(accessControlList);
     }
 
     @Override
     public final void setOwnership(final Ownership ownership) {
-        this.ownership = ownership;
+        this.securityInformation.setOwnership(ownership);
     }
 
 }

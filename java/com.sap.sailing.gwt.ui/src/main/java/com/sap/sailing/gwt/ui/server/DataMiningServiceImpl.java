@@ -53,7 +53,6 @@ import com.sap.sse.datamining.shared.impl.dto.ReducedDimensionsDTO;
 import com.sap.sse.datamining.ui.client.DataMiningService;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.util.ServiceTrackerFactory;
 
@@ -64,7 +63,6 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
 
     private final ServiceTracker<DataMiningServer, DataMiningServer> dataMiningServerTracker;
     private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
-    private final ServiceTracker<UserStore, UserStore> userStoreServiceTracker;
 
     private final StoredDataMiningQueryPersister storedDataMiningQueryPersistor;
 
@@ -74,10 +72,8 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
         context = Activator.getDefault();
         dataMiningServerTracker = createAndOpenDataMiningServerTracker(context);
         securityServiceTracker = ServiceTrackerFactory.createAndOpen(context, SecurityService.class);
-        userStoreServiceTracker = ServiceTrackerFactory.createAndOpen(context, UserStore.class);
 
-        storedDataMiningQueryPersistor = new StoredDataMiningQueryPersisterImpl(securityServiceTracker.getService(),
-                userStoreServiceTracker.getService());
+        storedDataMiningQueryPersistor = new StoredDataMiningQueryPersisterImpl(securityServiceTracker.getService());
         dtoFactory = new DataMiningDTOFactory();
     }
 

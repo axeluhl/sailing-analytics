@@ -6,6 +6,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Locale;
+
 import javax.ws.rs.core.Response;
 
 import org.apache.shiro.SecurityUtils;
@@ -55,7 +57,8 @@ public class SecurityResourceTest {
                     store, accessControlStore, /* hasPermissionsProvider */null,
                     /* setAsActivatorSecurityService */ true);
             SecurityUtils.setSecurityManager(service.getSecurityManager());
-            service.createSimpleUser(USERNAME, "a@b.c", PASSWORD, "The User", "SAP SE", /* validation URL */ null);
+            service.createSimpleUser(USERNAME, "a@b.c", PASSWORD, "The User", "SAP SE",
+                    /* validation URL */ Locale.ENGLISH, null);
             authenticatedAdmin = SecurityUtils.getSubject();
             authenticatedAdmin.login(new UsernamePasswordToken(USERNAME, PASSWORD));
             Session session = authenticatedAdmin.getSession();

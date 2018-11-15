@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.AuthorizationException;
-import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
 import com.sap.sailing.domain.abstractlog.race.RaceLogTagEvent;
@@ -23,23 +22,19 @@ import com.sap.sailing.domain.common.tagging.TagAlreadyExistsException;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
-import com.sap.sailing.server.impl.Activator;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.util.ServiceTrackerFactory;
 
 public class TaggingServiceImpl implements TaggingService {
 
-    private final ServiceTracker<SecurityService, SecurityService> securityServiceTracker;
     private final RacingEventService racingService;
     private final TagDTODeSerializer serializer;
 
     public TaggingServiceImpl(RacingEventService racingService) {
         this.racingService = racingService;
         serializer = new TagDTODeSerializer();
-        securityServiceTracker = ServiceTrackerFactory.createAndOpen(Activator.getContext(), SecurityService.class);
     }
 
     /**
@@ -62,14 +57,7 @@ public class TaggingServiceImpl implements TaggingService {
      * @return instance of {@link SecurityService}
      */
     private SecurityService getSecurityService() {
-        SecurityService securityService = null;
-        if (securityServiceTracker != null) {
-            securityService = securityServiceTracker.getService();
-        }
-        if (securityService == null) {
-            throw new RuntimeException("Security service not found!");
-        }
-        return securityService;
+        return racingService.getSecurityService();
     }
 
     private void addPublicTag(String leaderboardName, String raceColumnName, String fleetName, String tag,

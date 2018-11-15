@@ -42,6 +42,7 @@ import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleImpl;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.UnauthorizedException;
@@ -118,11 +119,22 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public void updateRoleDefinition(RoleDefinitionDTO roleDefinitionWithNewProperties) {
-        // FIXME an additional check is needed to verify that a user may only grant/revoke permissions that he owns
-        // In case of role permissions this means the user needs to own an unqualified version of the permission because
-        // any user may own the role with any qualification
-        SecurityUtils.getSubject().checkPermission(SecuredSecurityTypes.ROLE_DEFINITION.getStringPermissionForObjects(DefaultActions.UPDATE, roleDefinitionWithNewProperties.getId().toString()));
+    public void updateRoleDefinition(RoleDefinitionDTO roleDefinitionWithNewProperties) throws UnauthorizedException {
+        SecurityUtils.getSubject().checkPermission(SecuredSecurityTypes.ROLE_DEFINITION.getStringPermissionForObjects(
+                DefaultActions.UPDATE, roleDefinitionWithNewProperties.getId().toString()));
+        
+        RoleDefinition existingRole = getSecurityService().getRoleDefinition(roleDefinitionWithNewProperties.getId());
+        if (existingRole == null) {
+            throw new UnauthorizedException("Role does not exist");
+        }
+        Set<WildcardPermission> addedPermissions = new HashSet<>(roleDefinitionWithNewProperties.getPermissions());
+        addedPermissions.removeAll(existingRole.getPermissions());
+        
+        if (!getSecurityService().hasUserAllWildcardPermissionsForAlreadyRealizedQualifications(existingRole, addedPermissions)) {
+            throw new UnauthorizedException("Not permitted to grant permissions for role "
+                    + roleDefinitionWithNewProperties.getName());
+        }
+        
         getSecurityService().updateRoleDefinition(roleDefinitionWithNewProperties);
     }
 
@@ -154,9 +166,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public Collection<AccessControlListAnnotation> getAccessControlLists() throws UnauthorizedException {
+        // TODO decide whether a global getAccessControlList functionality is needed
         List<AccessControlListAnnotation> acls = new ArrayList<>();
         for (AccessControlListAnnotation acl : getSecurityService().getAccessControlLists()) {
-            if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.ACCESS_CONTROL_LIST.getStringPermissionForObjects(DefaultActions.READ, acl.getIdOfAnnotatedObject().toString()))) {
+            if (SecurityUtils.getSubject()
+                    .isPermitted(acl.getIdOfAnnotatedObject().getStringPermission(DefaultActions.CHANGE_ACL))) {
                 acls.add(securityDTOFactory.createAccessControlListAnnotationDTO(acl));
             }
         }
@@ -165,13 +179,15 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public AccessControlListAnnotation getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject) {
-        SecurityUtils.getSubject().checkPermission(SecuredSecurityTypes.ACCESS_CONTROL_LIST.getStringPermissionForObjects(DefaultActions.READ, idOfAccessControlledObject.toString()));
+        SecurityUtils.getSubject()
+                .checkPermission(idOfAccessControlledObject.getStringPermission(DefaultActions.CHANGE_ACL));
         return securityDTOFactory.createAccessControlListAnnotationDTO(getSecurityService().getAccessControlList(idOfAccessControlledObject));
     }
 
     @Override
     public AccessControlList updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, Map<String, Set<String>> permissionStrings) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.ACCESS_CONTROL_LIST.getStringPermissionForObjects(DefaultActions.UPDATE, idOfAccessControlledObject.toString()))) {
+        if (SecurityUtils.getSubject()
+                .isPermitted(idOfAccessControlledObject.getStringPermission(DefaultActions.CHANGE_ACL))) {
             Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
             for (String group : permissionStrings.keySet()) {
                 permissionMap.put(getSecurityService().getUserGroupByName(group), permissionStrings.get(group));
@@ -184,7 +200,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public AccessControlList addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String groupIdAsString, String action) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.ACCESS_CONTROL_LIST.getStringPermissionForObjects(DefaultActions.UPDATE, idOfAccessControlledObject.toString()))) {
+        if (SecurityUtils.getSubject()
+                .isPermitted(idOfAccessControlledObject.getStringPermission(DefaultActions.CHANGE_ACL))) {
             UserGroup userGroup = getUserGroup(groupIdAsString);
             return securityDTOFactory.createAccessControlListDTO(getSecurityService().addToAccessControlList(idOfAccessControlledObject, userGroup, action));
         } else {
@@ -435,12 +452,15 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public SuccessInfo setRolesForUser(String username,
             Iterable<Triple<UUID, String, String>> roleDefinitionIdAndTenantQualifierNameAndUsernames)
             throws UnauthorizedException {
-        // FIXME an additional check is needed to verify that a user may only grant/revoke permissions that he owns
-        // The current user needs to have all permissions of a role for the specific tenant qualification or an unqualified version
-        if (SecurityUtils.getSubject().isPermitted(
-                SecuredSecurityTypes.USER.getStringPermissionForObjects(UserActions.GRANT_PERMISSION, username))
-                && SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER
-                        .getStringPermissionForObjects(UserActions.REVOKE_PERMISSION, username))) {
+        final boolean isUserPermittedToGrantPermissionsForOtherUser = SecurityUtils.getSubject().isPermitted(
+                SecuredSecurityTypes.USER.getStringPermissionForObjects(UserActions.GRANT_PERMISSION, username));
+        final boolean isUserPermittedToRevokePermissionsForOtherUser = SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER
+                .getStringPermissionForObjects(UserActions.REVOKE_PERMISSION, username));
+        if (!isUserPermittedToGrantPermissionsForOtherUser
+                && !isUserPermittedToRevokePermissionsForOtherUser) {
+            return new SuccessInfo(false, "Not permitted to grant or revoke permissions for user " + username,
+                    /* redirectURL */null, null);
+        } else {
             User u = getSecurityService().getUserByName(username);
             if (u == null) {
                 return new SuccessInfo(false, "User does not exist.", /* redirectURL */ null, null);
@@ -467,12 +487,29 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             Set<Role> roleDefinitionsToRemove = new HashSet<>();
             Util.addAll(u.getRoles(), roleDefinitionsToRemove);
             Util.removeAll(rolesToSet, roleDefinitionsToRemove);
-            for (Role roleToRemove : roleDefinitionsToRemove) {
-                getSecurityService().removeRoleFromUser(u, roleToRemove);
+            if (!roleDefinitionsToRemove.isEmpty() && !isUserPermittedToRevokePermissionsForOtherUser) {
+                return new SuccessInfo(false, "Not permitted to revoke permissions for user " + username,
+                        /* redirectURL */null, null);
             }
             Set<Role> rolesToAdd = new HashSet<>();
             Util.addAll(rolesToSet, rolesToAdd);
             Util.removeAll(u.getRoles(), rolesToAdd);
+            if (!rolesToAdd.isEmpty() && !isUserPermittedToGrantPermissionsForOtherUser) {
+                return new SuccessInfo(false, "Not permitted to grant permissions for user " + username,
+                        /* redirectURL */null, null);
+            }
+            for (Role roleToAdd : rolesToAdd) {
+                for (WildcardPermission permissionOfRoleToAdd : roleToAdd.getPermissions()) {
+                    if (!getSecurityService().hasCurrentUserMetaPermission(permissionOfRoleToAdd, roleToAdd.getQualificationAsOwnership())) {
+                        return new SuccessInfo(false,
+                                "Not permitted to grant role " + roleToAdd.getName() + " for user " + username,
+                                /* redirectURL */null, null);
+                    }
+                }
+            }
+            for (Role roleToRemove : roleDefinitionsToRemove) {
+                getSecurityService().removeRoleFromUser(u, roleToRemove);
+            }
             for (Role roleToAdd : rolesToAdd) {
                 getSecurityService().addRoleForUser(u, roleToAdd);
             }
@@ -481,8 +518,6 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(u, getSecurityService());
             return new SuccessInfo(true, message, /* redirectURL */null,
                     new Pair<UserDTO, UserDTO>(userDTO, getAllUser()));
-        } else {
-            throw new UnauthorizedException("Not permitted to grant permissions to user");
         }
     }
     
@@ -503,10 +538,15 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public SuccessInfo setPermissionsForUser(String username, Iterable<WildcardPermission> permissions) throws UnauthorizedException {
-        if (SecurityUtils.getSubject().isPermitted(
-                SecuredSecurityTypes.USER.getStringPermissionForObjects(UserActions.GRANT_PERMISSION, username))
-                && SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER
-                        .getStringPermissionForObjects(UserActions.REVOKE_PERMISSION, username))) {
+        final boolean isUserPermittedToGrantPermissionsForOtherUser = SecurityUtils.getSubject().isPermitted(
+                SecuredSecurityTypes.USER.getStringPermissionForObjects(UserActions.GRANT_PERMISSION, username));
+        final boolean isUserPermittedToRevokePermissionsForOtherUser = SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER
+                .getStringPermissionForObjects(UserActions.REVOKE_PERMISSION, username));
+        if (!isUserPermittedToGrantPermissionsForOtherUser
+                && !isUserPermittedToRevokePermissionsForOtherUser) {
+            return new SuccessInfo(false, "Not permitted to grant or revoke permissions for user " + username,
+                    /* redirectURL */null, null);
+        } else {
             User u = getSecurityService().getUserByName(username);
             if (u == null) {
                 return new SuccessInfo(false, "User does not exist.", /* redirectURL */null, null);
@@ -514,26 +554,34 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             Set<WildcardPermission> permissionsToRemove = new HashSet<>();
             Util.addAll(u.getPermissions(), permissionsToRemove);
             Util.removeAll(permissions, permissionsToRemove);
-            for (WildcardPermission permissionToRemove : permissionsToRemove) {
-                getSecurityService().removePermissionFromUser(username, permissionToRemove);
+            if (!permissionsToRemove.isEmpty() && !isUserPermittedToRevokePermissionsForOtherUser) {
+                return new SuccessInfo(false, "Not permitted to revoke permissions for user " + username,
+                        /* redirectURL */null, null);
             }
             Set<WildcardPermission> permissionsToAdd = new HashSet<>();
             Util.addAll(permissions, permissionsToAdd);
             Util.removeAll(u.getPermissions(), permissionsToAdd);
+            if (!permissionsToAdd.isEmpty() && !isUserPermittedToGrantPermissionsForOtherUser) {
+                return new SuccessInfo(false, "Not permitted to grant permissions for user " + username,
+                        /* redirectURL */null, null);
+            }
             for (WildcardPermission permissionToAdd : permissionsToAdd) {
-                OwnershipAnnotation currentUsersOwnerShip = getSecurityService()
-                        .getOwnership(getSecurityService().getCurrentUser().getIdentifier());
-                if (getSecurityService().hasCurrentUserMetaPermission(permissionToAdd,
-                        currentUsersOwnerShip.getAnnotation())) {
-                    getSecurityService().addPermissionForUser(username, permissionToAdd);
+                if (!getSecurityService().hasCurrentUserMetaPermission(permissionToAdd, null)) {
+                    return new SuccessInfo(false,
+                            "Not permitted to grant permission " + permissionToAdd + " for user " + username,
+                            /* redirectURL */null, null);
                 }
+            }
+            for (WildcardPermission permissionToRemove : permissionsToRemove) {
+                getSecurityService().removePermissionFromUser(username, permissionToRemove);
+            }
+            for (WildcardPermission permissionToAdd : permissionsToAdd) {
+                getSecurityService().addPermissionForUser(username, permissionToAdd);
             }
             final String message = "Set roles " + permissions + " for user " + username;
             final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(u, getSecurityService());
             return new SuccessInfo(true, message, /* redirectURL */null,
                     new Pair<UserDTO, UserDTO>(userDTO, getAllUser()));
-        } else {
-            throw new UnauthorizedException("Not permitted to grant or revoke permissions for user "+username);
         }
     }
 

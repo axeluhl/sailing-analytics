@@ -75,7 +75,6 @@ import org.scribe.model.Token;
 import org.scribe.oauth.OAuthService;
 
 import com.sap.sse.ServerInfo;
-import com.sap.sse.ServerStartupConstants;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.mail.MailException;
@@ -265,7 +264,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 final User adminUser = createSimpleUser(ADMIN_USERNAME, "nobody@sapsailing.com",
                         ADMIN_DEFAULT_PASSWORD,
                         /* fullName */ null, /* company */ null, Locale.ENGLISH, /* validationBaseURL */ null,
-                        getDefaultTenant());
+                        null);
 
                 apply(s -> s.internalSetOwnership(
                         SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(ADMIN_USERNAME), ADMIN_USERNAME, null,
@@ -368,10 +367,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     public UserGroup getDefaultTenantForUser(User user) {
-        if (getCurrentUser() == null) {
-            return null;
-        }
-        UserGroup specificTenant = getCurrentUser().getDefaultTenant(ServerInfo.getName());
+        UserGroup specificTenant = user.getDefaultTenant(ServerInfo.getName());
         if (specificTenant == null) {
             String defaultTenantName = getDefaultTenantNameForUsername(user.getName());
             specificTenant = getUserGroupByName(defaultTenantName);
@@ -381,6 +377,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public UserGroup getDefaultTenantForCurrentUser() {
+        if (SecurityUtils.getSecurityManager() != null && getCurrentUser() == null) {
+            return null;
+        }
         return getDefaultTenantForUser(getCurrentUser());
     }
 
@@ -690,20 +689,15 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public UserImpl createSimpleUser(final String username, final String email, String password, String fullName,
-            String company, final String validationBaseURL) throws UserManagementException, MailException, UserGroupManagementException {
-        return createSimpleUser(username, email, password, fullName, company, null, validationBaseURL);
-    }
-
-    @Override
-    public UserImpl createSimpleUser(final String username, final String email, String password, String fullName,
             String company, Locale locale, final String validationBaseURL)
             throws UserManagementException, MailException, UserGroupManagementException {
-        return createSimpleUser(username, email, password, fullName, company, /* locale */ null, validationBaseURL,
+        return createSimpleUser(username, email, password, fullName, company, locale, validationBaseURL,
                 getDefaultTenantForCurrentUser());
     }
-    
+
     private UserImpl createSimpleUser(final String username, final String email, String password, String fullName,
-            String company, Locale locale, final String validationBaseURL, UserGroup tenantOwner) throws UserManagementException, MailException, UserGroupManagementException {
+            String company, Locale locale, final String validationBaseURL, UserGroup userOwner)
+            throws UserManagementException, MailException, UserGroupManagementException {
         logger.info("Creating user "+username);
         if (userStore.getUserByName(username) != null) {
             logger.warning("User "+username+" already exists");
@@ -733,7 +727,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         
         // the new user becomes its owner to ensure the user role is correctly working
         // the default tenant is the owning tenant to allow users having admin role for a specific server tenant to also be able to delete users
-        accessControlStore.setOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(username), result, getDefaultTenant(), username);
+        accessControlStore.setOwnership(SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(username), result,
+                userOwner, username);
         // the new user becomes the owning user of its own specific tenant which initially only contains the new user
         accessControlStore.setOwnership(SecuredSecurityTypes.USER_GROUP.getQualifiedObjectIdentifier(tenant.getId().toString()), result, tenant, tenant.getName());
         
@@ -1541,7 +1536,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             }
             if (checkCreateObjectOnServer) {
                 SecurityUtils.getSubject().checkPermission(SecuredSecurityTypes.SERVER
-                        .getStringPermissionForObjects(ServerActions.CREATE_OBJECT, ServerStartupConstants.SERVER_NAME));
+                        .getStringPermissionForObjects(ServerActions.CREATE_OBJECT, ServerInfo.getName()));
             }
             SecurityUtils.getSubject()
                     .checkPermission(identifier.getStringPermission(DefaultActions.CREATE));
@@ -1869,5 +1864,27 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public void assumeOwnershipMigrated(String typeName, Iterable<HasPermissions> permissions) {
         final List<String> alreadyMigrated = getMigrationInfoForKey(permissions);
         alreadyMigrated.add(typeName);
+    }
+    
+    @Override
+    public boolean hasUserAllWildcardPermissionsForAlreadyRealizedQualifications(RoleDefinition role,
+            Iterable<WildcardPermission> permissionsToCheck) {
+        Pair<Boolean, Set<Ownership>> qualificationsToCheck = userStore.getExistingQualificationsForRoleDefinition(role);
+        final Iterable<Ownership> effectiveQualificationsToCheck = Boolean.TRUE.equals(qualificationsToCheck.getA())
+                ? Collections.singletonList(null)
+                : qualificationsToCheck.getB();
+        for (WildcardPermission permission : permissionsToCheck) {
+            for (Ownership ownership : effectiveQualificationsToCheck) {
+                if (!hasCurrentUserMetaPermission(permission, ownership)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public <T> T getPreferenceObject(String username, String key) {
+        return userStore.getPreferenceObject(username, key);
     }
 }

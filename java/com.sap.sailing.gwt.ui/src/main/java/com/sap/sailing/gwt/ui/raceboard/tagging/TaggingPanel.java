@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.gwt.core.shared.GWT;
+import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -16,6 +17,8 @@ import com.google.gwt.user.client.ui.HeaderPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.CellPreviewEvent;
+import com.google.gwt.view.client.CellPreviewEvent.Handler;
 import com.google.gwt.view.client.NoSelectionModel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
@@ -115,8 +118,8 @@ public class TaggingPanel extends ComponentWithoutSettings
      * 3) another user adds/deletes/changes any tag between the latest received tag and the current timer position<br/>
      * consecutively, the timer would jump to this new tag as the selection would change automatically as the latest tag
      * changed. This selection change would also trigger the timer to jump to the latest tag, which is not intended in
-     * this case. Therefor any received changes on any tags will set this boolen to true which will ignore the time jump
-     * at the selection change event and prevent this wrong behaviour.
+     * this case. Therefor any received changes on any tags will set this boolean to true which will ignore the time jump
+     * at the selection change event and prevent this wrong behavior.
      * 
      * @see #raceTimesInfosReceived(Map, long, Date, long)
      */
@@ -180,26 +183,31 @@ public class TaggingPanel extends ComponentWithoutSettings
         tagCellList.setEmptyListWidget(new Label(stringMessages.tagNoTagsFound()));
         tagCellList.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.DISABLED);
         tagCellList.setSelectionModel(tagSelectionModel);
-        tagSelectionModel.addSelectionChangeHandler(event -> {
-            // set time slider to corresponding position
-            TagDTO selectedTag = tagSelectionModel.getSelectedObject();
-            if (selectedTag != null) {
-                /**
-                 * Do not set time of timer when {@link #preventTimeJumpAtSelectionChangeForOnce} is set to
-                 * <code>true</code>. In this case set {@link #preventTimeJumpAtSelectionChangeForOnce} to
-                 * <code>false</code> as selection change is ignored once.
-                 * 
-                 * @see #preventTimeJumpAtSelectionChangeForOnce
-                 */
-                if (preventTimeJumpAtSelectionChangeForOnce) {
-                    preventTimeJumpAtSelectionChangeForOnce = false;
-                } else {
-                    // remove time change listener when manual selecting tag cells as this could end in an infinite loop
-                    // of timer change -> automatic selection change -> timer change -> ...
-                    timer.removeTimeListener(this);
-                    timer.setTime(selectedTag.getRaceTimepoint().asMillis());
-                    // adding time change listener again
-                    timer.addTimeListener(this);
+        tagCellList.addCellPreviewHandler(new Handler<TagDTO>() {
+            @Override
+            public void onCellPreview(CellPreviewEvent<TagDTO> event) {
+                if (BrowserEvents.CLICK.equals(event.getNativeEvent().getType())) {
+                    // set time slider to corresponding position
+                    TagDTO selectedTag = event.getValue();
+                    if (selectedTag != null) {
+                        /**
+                         * Do not set time of timer when {@link #preventTimeJumpAtSelectionChangeForOnce} is set to
+                         * <code>true</code>. In this case set {@link #preventTimeJumpAtSelectionChangeForOnce} to
+                         * <code>false</code> as selection change is ignored once.
+                         * 
+                         * @see #preventTimeJumpAtSelectionChangeForOnce
+                         */
+                        if (preventTimeJumpAtSelectionChangeForOnce) {
+                            preventTimeJumpAtSelectionChangeForOnce = false;
+                        } else {
+                            // remove time change listener when manually selecting tag cells as this could end in an infinite loop
+                            // of timer change -> automatic selection change -> timer change -> ...
+                            timer.removeTimeListener(TaggingPanel.this);
+                            timer.setTime(selectedTag.getRaceTimepoint().asMillis());
+                            // adding time change listener again
+                            timer.addTimeListener(TaggingPanel.this);
+                        }
+                    }
                 }
             }
         });
@@ -209,7 +217,6 @@ public class TaggingPanel extends ComponentWithoutSettings
         createTagsButton.addClickHandler(event -> {
             setCurrentState(State.CREATE_TAG);
         });
-
         taggingPanel.setContentWidget(contentPanel);
         updateContent();
     }

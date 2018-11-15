@@ -1,6 +1,7 @@
 package com.sap.sse.security.ui.server;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -247,6 +248,28 @@ public class SecurityDTOFactory {
                         actionForGroup.getValue());
             }
             result = new AccessControlListImpl(permissionMapDTO);
+        }
+        return result;
+    }
+
+    /**
+     * prunes the {@link AccessControlList} for the given {@link SecurityUser filterForUser} by removing all user groups
+     * the user is not in from the resulting ACL.
+     */
+    public AccessControlList pruneAccessControlListForUser(AccessControlList acl, SecurityUser filterForUser) {
+        final AccessControlList result;
+        if (acl == null || filterForUser == null) {
+            result = acl;
+        } else {
+            final Collection<UserGroup> userGroups = Util.createSet(filterForUser.getUserGroups());
+
+            final Map<UserGroup, Set<String>> actionsByUserGroup = new HashMap<>();
+            for (final Entry<UserGroup, Set<String>> entry : acl.getActionsByUserGroup().entrySet()) {
+                if (userGroups.contains(entry.getKey())) {
+                    actionsByUserGroup.put(entry.getKey(), entry.getValue());
+                }
+            }
+            result = new AccessControlListImpl(actionsByUserGroup);
         }
         return result;
     }

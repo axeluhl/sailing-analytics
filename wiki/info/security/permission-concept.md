@@ -91,11 +91,13 @@ This role implies the "*" permission. It should ideally be used with a tenant qu
 
 ### User "admin"
 
-### Role for Anonymous Users
+On fresh instances that do not use a shared UserStore, the user "admin" is automatically created if no users exist yet on this instance. This user has the unqualified "admin" permission associated, which means this user has the permission to do everything. On event servers, this user is typically used to give permissions to specific event admin user.
+
+### User "<all>"
 
 When a user has not yet been authenticated, certain actions still need to be allowed for such users, in particular viewing public events or creating a new user during a sign-up activity. One approach may be to simply not request permissions for such actions. This way, all sessions would be able to perform such actions. The downside: in no server configuration would it be possible to limit access to those actions. For example, if one wanted to set up a private server instance where user sign-up is to be allowed only for administrators of that server then this could not be solved by role and permission configuration.
 
-It would be more flexible if there was a role that all anonymous users implicitly have. This role could then by default imply the permissions that we want anonymous users to have. If a special server set-up demands changes then this could easily be solved by modifying the permissions of this role.
+To allow specific permissions to get associated on specific servers, a user named "<all>" has been introduced. Any permissions/roles associated with this user are evaluated for any user (including non-authenticated ones).
 
 ## Administration of Authorization
 
@@ -118,25 +120,25 @@ Tenant ownership has implications only for the application of roles that are qua
 
 ### Implementation of Sharing Data Objects with Public
 
-In general, sharing a data object with the public should just be granting the “view” permission to everyone.  For this purpose, the ``<ALL>`` user can be assigned the corresponding ``READ`` permission. This in return allows everybody that knows the link where one can view the data object to view it.
+To make sharing as convenient as possible it was decided to use groups and their owned objects as basic unit of sharing. This means all domain objects of specific types owned by a common group (e.g. an event specific group) are visible to all users having a specific "viewer" role for that group.
 
-Alternatively, an access control list (ACL) could be assigned to the object, using a ``null`` group assignment, thereby making this ACL applicable to all users, regardless of their group memberships. The ACL will also be checked for permission requests by not authenticated users.
+A domain specific "viewer" role needs to be defined, having the required "READ" permissions for all object types that are open to a broader audience (e.g. events, but no advanced data). For Sailing Analytics, this role is named "sailing_viewer". The definition of a generic "viewer" role (e.g. having the permission "*:READ") is impracticabledue to the fact that this also allows read access to internal configuration objects and other administrative data. This means the associated permissions need to be explicitly enumerated.
 
-The remaining challenge is the application of the permissions necessary for *all* objects in the *scope* that is to be shared. A user it typically not interested in sharing only the bare *Event* object but would rather want to grant public access to everything *belonging to* the event, including all leaderboard groups, leaderboards, regattas and tracked races.
+To share the domain objects being owned by a group, you need to to associate the specific "viewer" role to a user with a qualification by the owning group. To make an event public, you can instead give the qualified "viewer" role to the "<all>" user.
 
-The problem with this is that this object set is dynamic. It changes as users add object to or remove them from the scope of the event. For example, if another race is being added after the event has been shared, a reasonable behavior seems to be that the new race shall also be shared together with everything else belonging to the overarching event that has been shared before. This is similar to a "setgid" bit in a Unix file system.
+To make the role work as intended, the domain objects of an event to be shared need to be consistently owned by a specific group. To make this as convenient as possible and to be able to fix wrong ownerships, batch-changing the group owner of related domain objects needs to be able. For Sailing Analytics, this means batch-changing needs to be possible under the following conditions:
+* Batch-changing the ownership of a LeaderboardGroup in general includes Leaderboards/Regattas and their associated TrackedRaces.
+* For event series defined by a LeaderboardGroup having an overall leaderboard, a batch change will also catch all events associated to the series.
+* Batch-changing the ownership of an event means, all LeaderboardGroups not having an overall leaderboard are included with their included Leaderboards/Regattas and associated TrackedRaces.
+* Such a batch change in general does not include Competitors/Boats that are used by a regatta. This is explicitly intended because Competitors/Boats are typically used on different event/regatta contexts that are not directly related. In some cases this could in fact be useful which means a user needs to have the choice of optionally include Competitors/Boats.
 
-For this to work we will need observable object relationships which can trigger rules for permission propagation along the relationships. While we agreed that the permission checking mechanism must not need to analyze object relationships, changes in relationships may lead to updates in permissions.
+In addition we need to detect object associations with inconsistent group ownerships. In most cases domain objects getting associated in one of the hierarchies mentioned above, also need to inherit the group ownership if the associated "higher level" object is the first. For Sailing analytics, this means a leaderboard being added to a leaderboard group will inherit the leaderboard group's group owner if the leaderboard is not yet associated to another leaderboard group (assumed the current user is permitted to change the leaderboard's ownership). This ensures that e.g. leaderboards being created in the personal group of a user will get "fixed" when adding them to an event-context. The user needs to be informed when auto-adjusting group ownerships on association as well as cases where such an auto update is not performed. It needs to be discussed how the REST APIs can do this properly.
 
-Examples: when a user links a leaderboard group to an event that is visible to a larger set of users than the leaderboard group, the user may receive a hint suggesting to update the leaderboard group's permissions to match those of the event into which it is just being linked. Similarly, if a leaderboard is added to a leaderboard group, the user may want to propagate the leaderboard group's visibility to that of the leaderboard just added to the group.
+An additional requirement is the possibility to extract an event/series from a bigger sharing context (e.g. club group). This means a new group needs to be created and the domain objects's group owner need to be changed to this new group by following the structure explained above. In addition, all role associations that exist for the source group need to be copied as equivalent role associations for the newly created group to ensure that all users having specific permissions for the source group will keep their respective permissions. ACLs do not need to be adjusted due to the fact that those are directly associated to the respective objects that will keep their object IDs.
 
-Possible approach: make directed permission propagation a property on associations between domain types that users can configure. Such associations then need to be observed by the permission propagation mechanism, and when links are added (what if they are removed?) the permission propagation is triggered. Furthermore, permission propagation may need to be triggered when the permissions on a source object of a permission propagation change, in order to support transitive permission propagation, e.g., when a LeaderboardGroup is added to an Event, so that also all Leaderboards and Regattas and TrackedRaces reachable from that LeaderboardGroup receive the same permission update as the LeaderboardGroup itself.
+The downside of a role-based approach for sharing is that sharing domain objects requires every single user to have the specific role associated for the owning group. It is currently not possible to give roles to all users of a group. In contrast to this, sharing domain object with the public is easy.
 
-Propagation rule candidates: Event---LeaderboardGroup; LeaderboardGroup---Leaderboard; Leaderboard---Regatta; Leaderboard---TrackedRace.
-
-This is separated from promoting this public data object (e.g. event) on the official SAP site. This would have to be a separate list which can be edited by e.g. media admins. This would however only link to the source, because otherwise all promoted material would have to be imported to the archive.
-
-
+In addition of sharing domain objects of a whole event, there is also the need to share single races. This can easily solved by using ACLs on the respective TrackedRace instance. Be aware that this approach is not conveniently usable for a hierarchy of domain objects due to the fact that this would require ACL rules to be implicitly batch-updated for all objects of a hierarchy. In addition, a consistent view of ACLs  in a hierarchy can not easily created in contrast of just finding differences in the group ownerships of domain objects.
 
 ## Permissions in Frontend
 

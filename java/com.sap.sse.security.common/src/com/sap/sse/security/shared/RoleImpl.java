@@ -3,6 +3,7 @@ package com.sap.sse.security.shared;
 import java.util.Set;
 
 import com.sap.sse.common.Util.Triple;
+import com.sap.sse.security.shared.impl.OwnershipImpl;
 
 /**
  * For equality and hash code, the {@link RoleDefinition#getId() role definition ID}, the {@link Tenant#getId() tenant ID} of a
@@ -116,5 +117,13 @@ public class RoleImpl implements Role {
         } else if (!roleDefinition.equals(other.roleDefinition))
             return false;
         return true;
+    }
+
+    @Override
+    public Ownership getQualificationAsOwnership() {
+        if (qualifiedForTenant != null || qualifiedForUser != null) {
+            return new OwnershipImpl(qualifiedForUser, qualifiedForTenant);
+        }
+        return null;
     }
 }

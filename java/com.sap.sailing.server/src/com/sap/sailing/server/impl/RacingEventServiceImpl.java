@@ -254,6 +254,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateStartTimeReceived;
 import com.sap.sailing.server.operationaltransformation.UpdateTrackedRaceStatus;
 import com.sap.sailing.server.operationaltransformation.UpdateWindAveragingTime;
 import com.sap.sailing.server.operationaltransformation.UpdateWindSourcesToExclude;
+import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.server.simulation.SimulationService;
 import com.sap.sailing.server.simulation.SimulationServiceFactory;
 import com.sap.sailing.server.statistics.StatisticsAggregator;
@@ -289,6 +290,10 @@ import com.sap.sse.replication.OperationWithResult;
 import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.RoleImpl;
+import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.util.ClearStateTestSupport;
@@ -825,19 +830,23 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 new QuarterChecker(), new SameDigitChecker());
         raceChangeObserverForAnniversaryDetection = new RaceChangeObserverForAnniversaryDetection(anniversaryRaceDeterminator);
         this.trackedRegattaListener.addListener(raceChangeObserverForAnniversaryDetection);
-        
-        if (securityServiceTracker != null) {
-            new Thread("Racingevent wait for securityservice for migration thread") {
-                public void run() {
-                    SecurityService securityService;
-                    try {
-                        securityService = securityServiceTracker.waitForService(0);
-                        ensureOwnerships(securityService);
-                    } catch (InterruptedException e) {
-                        logger.warning("Could not obtain SecurityService " + e.getMessage());
-                    }
-                };
-            }.start();
+    }
+
+    public void ensureServerIsInitiallyPublic() {
+        try {
+            final User allUser = getSecurityService().getAllUser();
+            String initializedKey = ("serverInitialized " + ServerInfo.getName()).replaceAll("[\\W]|_", "");
+            if (!Boolean.TRUE.equals(getSecurityService().getSetting(initializedKey, Boolean.class))) {
+                getSecurityService().addSetting(initializedKey, Boolean.class);
+                final RoleDefinition viewerRole = getSecurityService()
+                        .getRoleDefinition(SailingViewerRole.getInstance().getId());
+                final UserGroup defaultServerTenant = getSecurityService().getDefaultTenant();
+                final RoleImpl publicAccessForServerRole = new RoleImpl(viewerRole, defaultServerTenant, null);
+                getSecurityService().addRoleForUser(allUser.getName(), publicAccessForServerRole);
+                getSecurityService().setSetting(initializedKey, true);
+            }
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Error determining Server initialisation state", e);
         }
     }
 
@@ -934,7 +943,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         return domainObjectFactory;
     }
 
-    private void ensureOwnerships(SecurityService securityService) {
+    public void ensureOwnerships() {
+        SecurityService securityService = getSecurityService();
         securityService.assumeOwnershipMigrated(SecuredDomainType.MANAGE_MARK_PASSINGS.getName(),
                 SecuredDomainType.getAllInstances());
         securityService.assumeOwnershipMigrated(SecuredDomainType.MANAGE_MARK_POSITIONS.getName(),

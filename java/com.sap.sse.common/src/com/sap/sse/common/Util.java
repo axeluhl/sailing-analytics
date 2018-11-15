@@ -821,6 +821,12 @@ public class Util {
         return toStringOrNull.toString();
     }
     
+    public static boolean equalStringsWithEmptyIsNull(String o1, String o2) {
+        String effectiveO1 = o1 == null || o1.isEmpty() ? null : o1;
+        String effectiveO2 = o2 == null || o2.isEmpty() ? null : o2;
+        return equalsWithNull(effectiveO1, effectiveO2);
+    }
+    
     /**
      * Pads a numerical value with '0' characters up to a number of digits left and right of the decimal point. If the
      * number of digits right of the decimal point is zero, no decimal point will be rendered in the result. The sum of

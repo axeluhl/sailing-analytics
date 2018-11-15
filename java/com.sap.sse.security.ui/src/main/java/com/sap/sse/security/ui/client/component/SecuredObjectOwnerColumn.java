@@ -28,7 +28,7 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
  */
 public class SecuredObjectOwnerColumn<T extends SecuredObject> extends TextColumn<T> {
 
-    private final Function<T, Named> ownerResolver;
+    private final Function<T, Optional<Named>> ownerResolver;
 
     /**
      * Creates a new {@link SecuredObjectOwnerColumn} instance used the provided {@link Function resolver} to determine
@@ -39,12 +39,12 @@ public class SecuredObjectOwnerColumn<T extends SecuredObject> extends TextColum
      */
     public SecuredObjectOwnerColumn(final Function<Ownership, Named> ownerResolver) {
         final Function<T, Ownership> ownershipResolver = SecuredObject::getOwnership;
-        this.ownerResolver = ownershipResolver.andThen(ownerResolver);
+        this.ownerResolver = ownershipResolver.andThen(ownership -> Optional.ofNullable(ownership).map(ownerResolver));
     }
 
     @Override
     public final String getValue(final T object) {
-        return Optional.ofNullable(ownerResolver.apply(object)).map(Named::getName).orElse("");
+        return ownerResolver.apply(object).map(Named::getName).orElse("");
     }
 
     /**
@@ -58,16 +58,14 @@ public class SecuredObjectOwnerColumn<T extends SecuredObject> extends TextColum
      * @return {@link SecuredObjectOwnerColumn} instance showing the {@link Ownership#getTenantOwner() tenant owner}
      */
     public static <T extends SecuredObject> SecuredObjectOwnerColumn<T> getGroupOwnerColumn() {
-        return new SecuredObjectOwnerColumn<>(
-                (Ownership t) -> Optional.ofNullable(t).map(x -> x.getTenantOwner()).orElse(null));
+        return new SecuredObjectOwnerColumn<>(Ownership::getTenantOwner);
     }
 
     /**
      * @return {@link SecuredObjectOwnerColumn} instance showing the {@link Ownership#getUserOwner() user owner}
      */
     public static <T extends SecuredObject> SecuredObjectOwnerColumn<T> getUserOwnerColumn() {
-        return new SecuredObjectOwnerColumn<>(
-                (Ownership t) -> Optional.ofNullable(t).map(x -> x.getUserOwner()).orElse(null));
+        return new SecuredObjectOwnerColumn<>(Ownership::getUserOwner);
     }
 
     /**

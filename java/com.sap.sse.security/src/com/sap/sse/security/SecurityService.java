@@ -152,11 +152,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     /**
      * @param validationBaseURL if <code>null</code>, no validation will be attempted
      */
-    SecurityUser createSimpleUser(String username, String email, String password, String fullName, String company, String validationBaseURL) throws UserManagementException, MailException, UserGroupManagementException;
-
-    /**
-     * @param validationBaseURL if <code>null</code>, no validation will be attempted
-     */
     UserImpl createSimpleUser(String username, String email, String password, String fullName, String company,
             Locale locale, String validationBaseURL)
             throws UserManagementException, MailException, UserGroupManagementException;
@@ -286,6 +281,12 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     String getPreference(String username, String key);
     
     /**
+     * Gets a preference object. Always returns null if there is no converter associated with the given key -> see
+     * {@link #registerPreferenceConverter(String, PreferenceConverter)}.
+     */
+    <T> T getPreferenceObject(String username, String key);
+
+    /**
      * @return all preferences of the given user
      */
     Map<String, String> getAllPreferences(String username);
@@ -377,4 +378,14 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void setOwnershipIfNotSet(QualifiedObjectIdentifier identifier, UserGroup defaultTenant);
 
     UserGroup getDefaultTenantForCurrentUser();
+
+    /**
+     * When a user adds permissions to a role, he needs to hold the permissions for all existing qualifications. This
+     * method checks all given permissions for all existing qualifications of the given role.
+     * 
+     * @return {@code true} if the current user holds all given meta permissions for all existing qualifications of the
+     *         given role.
+     */
+    boolean hasUserAllWildcardPermissionsForAlreadyRealizedQualifications(RoleDefinition role,
+            Iterable<WildcardPermission> permissionsToCheck);
 }

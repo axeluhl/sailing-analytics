@@ -36,29 +36,24 @@ public class TwoOptionsDialogPanel extends Composite {
     DivElement titleField;
 
     private final DialogCallback<Void> callback;
-
     private final PopupPanel parent;
 
-    public TwoOptionsDialogPanel() {
-        this("", "", null, null);
-    }
-
-    public TwoOptionsDialogPanel(String message, String title, DialogCallback<Void> callback, PopupPanel parent) {
+    TwoOptionsDialogPanel(String message, String title, DialogCallback<Void> callback, PopupPanel parent) {
         initWidget(uiBinder.createAndBindUi(this));
         this.callback = callback;
         this.parent = parent;
-        messageField.setInnerText(message);
-        titleField.setInnerText(title);
+        this.messageField.setInnerText(message);
+        this.titleField.setInnerText(title);
     }
 
     /** Sets the labels of the {@link #firstButton} and {@link #secondButton}. */
-    public void setButtonLabels(String firstButtonText, String secondButtonText) {
+    void setButtonLabels(String firstButtonText, String secondButtonText) {
         firstButton.setText(firstButtonText);
         secondButton.setText(secondButtonText);
     }
 
     /** Changes the color of the {@link #firstButton} to red. */
-    public void setFirstButtonDestructive() {
+    void setFirstButtonDestructive() {
         firstButton.addStyleName(DialogResources.INSTANCE.css().destructiveButton());
     }
 
