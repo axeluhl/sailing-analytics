@@ -1147,11 +1147,16 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (subject == null || !subject.isAuthenticated()) {
             result = null;
         } else {
-            String username = subject.getPrincipal().toString();
-            if (username == null || username.length() <= 0) {
+            Object principal = subject.getPrincipal();
+            if (principal == null) {
                 result = null;
             } else {
-                result = userStore.getUserByName(username);
+                String username = principal.toString();
+                if (username == null || username.length() <= 0) {
+                    result = null;
+                } else {
+                    result = userStore.getUserByName(username);
+                }
             }
         }
         return result;
