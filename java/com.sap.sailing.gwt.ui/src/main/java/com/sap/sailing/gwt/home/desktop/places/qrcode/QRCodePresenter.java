@@ -8,23 +8,29 @@ import com.sap.sailing.domain.common.BranchIOConstants;
 import com.sap.sailing.gwt.home.communication.event.GetEventViewAction;
 import com.sap.sailing.gwt.home.communication.event.SimpleCompetitorWithIdDTO;
 import com.sap.sailing.gwt.home.communication.eventview.EventViewDTO;
+import com.sap.sailing.gwt.home.communication.regatta.GetOpenRegattaByRegattaNameAction;
+import com.sap.sailing.gwt.home.communication.regatta.SimpleRegattaDTO;
 import com.sap.sailing.gwt.home.communication.user.profile.GetCompetitorAction;
 import com.sap.sailing.gwt.home.desktop.places.qrcode.QRCodePlace.InvitationMode;
 
 public class QRCodePresenter {
 
     private UUID eventId, competitorId;
+    private String regattaName, regattaRegistrationLinkSecret;
     private String leaderboardNameFromUrl, checkInUrl;
     private final QRCodeClientFactory clientFactory;
     private DataCollector dataCollector;
     private InvitationMode invitationMode;
 
     public QRCodePresenter(UUID eventId, UUID competitorId, String leaderboardName,
+            String regattaName, String regattaRegistrationLinkSecret,
             String checkInUrl, QRCodeClientFactory clientFactory, InvitationMode invitationMode) {
         this.eventId = eventId;
         this.checkInUrl = checkInUrl;
         this.competitorId = competitorId;
         this.leaderboardNameFromUrl = leaderboardName;
+        this.regattaName = regattaName;
+        this.regattaRegistrationLinkSecret = regattaRegistrationLinkSecret;
         this.clientFactory = clientFactory;
         this.invitationMode = invitationMode;
     }
@@ -32,7 +38,7 @@ public class QRCodePresenter {
     public void setView(QRCodeView view) {
         if (invitationMode == InvitationMode.PUBLIC_INVITE) {
             dataCollector = new DataCollector(view);
-            dataCollector.proceedIfFinished();
+            retrieveRegatta(regattaName, regattaRegistrationLinkSecret);
         } else {
             if (eventId == null || invitationMode == InvitationMode.COMPETITOR && competitorId == null
                     || leaderboardNameFromUrl == null || leaderboardNameFromUrl.equals("") || checkInUrl == null
@@ -83,12 +89,33 @@ public class QRCodePresenter {
                 });
     }
 
+    private void retrieveRegatta(String regattaName, String secret) {
+        GWT.log("retrieving regatta: " + regattaName);
+        clientFactory.getDispatch().execute(new GetOpenRegattaByRegattaNameAction(regattaName, secret),
+                new AsyncCallback<SimpleRegattaDTO>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        GWT.log("Error on loading regatta ", caught);
+                        dataCollector.setRegatta(null);
+                    }
+
+                    @Override
+                    public void onSuccess(SimpleRegattaDTO result) {
+                        GWT.log("FOUND REGATTA  " + result.getName());
+                        dataCollector.setRegatta(result);
+                    }
+
+                });
+    }
+
     private final class DataCollector {
         private boolean eventIsSet = false;
         private boolean competitorIsSet = false;
 
         private SimpleCompetitorWithIdDTO competitor;
         private EventViewDTO event;
+        private SimpleRegattaDTO regatta;
 
         private final QRCodeView view;
 
@@ -108,13 +135,18 @@ public class QRCodePresenter {
             proceedIfFinished();
         }
 
+        public void setRegatta(SimpleRegattaDTO regatta) {
+            this.regatta = regatta;
+            this.proceedIfFinished();
+        }
+
         private void proceedIfFinished() {
             if (invitationMode == InvitationMode.PUBLIC_INVITE) {
                 if (checkInUrl != null) {
                     String branchIoUrl = BranchIOConstants.OPEN_REGATTA_APP_BRANCHIO + "?"
                             + BranchIOConstants.OPEN_REGATTA_APP_BRANCHIO_PATH + "="
                             + QRCodePresenter.this.checkInUrl;
-                    view.setData(null, null, "", branchIoUrl, invitationMode);
+                    view.setData(null, null, "", regatta, branchIoUrl, invitationMode);
                 }
             } else {
                 if (competitorIsSet && eventIsSet) {
@@ -138,7 +170,7 @@ public class QRCodePresenter {
                         default:
                             break;
                         }
-                        view.setData(event, competitor, leaderboardNameFromUrl, branchIoUrl, invitationMode);
+                        view.setData(event, competitor, leaderboardNameFromUrl, null, branchIoUrl, invitationMode);
                     } else {
                         view.setError();
                         GWT.log("checkInUrl " + checkInUrl);

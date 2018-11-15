@@ -477,7 +477,8 @@ public class RegattaDetailsComposite extends Composite {
                 baseUrl = baseUrl.substring(0, baseUrl.lastIndexOf("/"));
             }
             String url = baseUrl.substring(0, baseUrl.lastIndexOf("/")) + "/sailingserver/api/v1/regattas/"
-                    + URL.encodeQueryString(regatta.getName()) + "/competitors/createandadd?secret="
+                    + URL.encodeQueryString(regatta.getName()) + "/competitors/createandadd?" + "regatta_name="
+                    + URL.encodeQueryString(regatta.getName()) + "&secret="
                     + URL.encodeQueryString(regatta.registrationLinkSecret);
             String deeplinkUrl = BranchIOConstants.OPEN_REGATTA_APP_BRANCHIO + "?"
                     + BranchIOConstants.OPEN_REGATTA_APP_BRANCHIO_PATH + "=" + URL.encodeQueryString(url);
