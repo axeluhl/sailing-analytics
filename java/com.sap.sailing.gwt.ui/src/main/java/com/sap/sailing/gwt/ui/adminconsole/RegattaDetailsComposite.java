@@ -489,7 +489,7 @@ public class RegattaDetailsComposite extends Composite {
 
                 @Override
                 public void onFailure(Throwable caught) {
-                    GWT.log("Qrcode generation failed: " + caught.getMessage());
+                    GWT.log("Qrcode generation failed: ", caught);
                 }
 
                 @Override
