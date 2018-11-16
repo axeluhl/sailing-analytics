@@ -213,7 +213,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                 logger.log(Level.WARNING, "Caught exception waiting for the seed creation", e);
             }
         }
-        bestPLT = this.improveCompetitorAllocations(bestPLT, flightCount, groupCount, competitorCount);
+        this.improveCompetitorAllocations(bestPLT, flightCount, groupCount, competitorCount);
         bestPLT = this.improveAssignmentChanges(bestPLT, flightCount, groupCount, competitorCount);
         if (flightMultiplier > 1) {
             bestPLT = this.multiplyFlights(bestPLT, flightCount, groupCount, competitorCount);
@@ -514,16 +514,15 @@ public class PairingListTemplateImpl implements PairingListTemplate {
      * the method the assignment should be well distributed.
      * 
      * @param pairingList
-     *            current pairing list
+     *            current pairing list, improved in place by this method
      * @param flights
      *            count of flights
      * @param groups
      *            count of groups
      * @param competitors
      *            count of competitors
-     * @return improved pairing list template
      */
-    protected int[][] improveCompetitorAllocations(int[][] pairingList, int flights, int groups, int competitors) {
+    private void improveCompetitorAllocations(int[][] pairingList, int flights, int groups, int competitors) {
         int[][] assignments = this.getAssignmentAssociations(pairingList, new int[competitors][competitors / groups]);
         double averageAssignments = flights / (competitors / groups);
         for (int iteration = 0; iteration < 10; iteration++) {
@@ -565,7 +564,6 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                 }
             }
         }
-        return pairingList;
     }
 
     /**
@@ -613,7 +611,6 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             if (bestMatchesIndex > 0) {
                 int[] temp = new int[pairingList[0].length];
                 System.arraycopy(pairingList[i * pairingList.length / flights], 0, temp, 0, temp.length);
-
                 System.arraycopy(pairingList[i * pairingList.length / flights + bestMatchesIndex], 0,
                         pairingList[i * pairingList.length / flights], 0, groupNext.length);
                 System.arraycopy(temp, 0, pairingList[i * pairingList.length / flights + bestMatchesIndex], 0,
