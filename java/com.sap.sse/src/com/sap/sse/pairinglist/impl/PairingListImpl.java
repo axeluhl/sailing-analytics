@@ -34,10 +34,9 @@ public class PairingListImpl<Flight, Group, Competitor,CompetitorAllocation> imp
     @Override
     public Iterable<Pair<Competitor, CompetitorAllocation>> getCompetitors(Flight flight, Group group) throws PairingListCreationException{
         if (competitors.isEmpty()) {
-        	throw new PairingListCreationException();
+            throw new PairingListCreationException();
         }
-    	
-    	final int[][] competitorIndices = pairingListTemplate.getPairingListTemplate();
+        final int[][] competitorIndices = pairingListTemplate.getPairingListTemplate();
         final int flightIndex = Util.indexOf(competitionFormat.getFlights(), flight);
         final int groupIndex = Util.indexOf(competitionFormat.getGroups(flight), group);
         final int groupCount = Util.size(competitionFormat.getGroups(flight));
