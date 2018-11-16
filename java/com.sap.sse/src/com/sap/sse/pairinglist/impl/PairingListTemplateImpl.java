@@ -409,7 +409,6 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                 for (int assignmentIndex = 1; assignmentIndex < (competitorCount / groupCount); assignmentIndex++) {
                     int associationSum = Integer.MAX_VALUE;
                     associationHigh[groupIndex] = Integer.MAX_VALUE;
-
                     for (int competitorIndex = 0; competitorIndex < competitorCount; competitorIndex++) {
                         if (sumsOf3rdDemension[competitorIndex] <= associationSum && !contains[competitorIndex]
                                 && maxValues[competitorIndex] <= associationHigh[groupIndex]) {
