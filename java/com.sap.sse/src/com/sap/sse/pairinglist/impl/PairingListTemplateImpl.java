@@ -38,8 +38,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         this(pairingFrameProvider, 100000, flightMultiplier, 0);
     }
 
-    public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider, int flighMultiplier,
-            int boatChangeFactor) {
+    public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider, int flighMultiplier, int boatChangeFactor) {
         this(pairingFrameProvider, 100000, flighMultiplier, boatChangeFactor);
     }
 
@@ -359,7 +358,6 @@ public class PairingListTemplateImpl implements PairingListTemplate {
      */
     protected int[][] createFlight(int groupCount, int competitorCount, int[][] currentAssociations, int seed) {
         int[][] flightColumn = new int[groupCount][competitorCount / groupCount];
-
         // filling the array with -1, because our competitor number starts at 0.
         // So if we later ask, whether the
         // competitor number 0 is already in our actual flight, it would say,
@@ -386,7 +384,6 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                         flightColumn[0][assignmentIndex] = competitorIndex;
                         associationSum = sumsOf3rdDemension[competitorIndex];
                         associationHigh[0] = maxValues[competitorIndex];
-
                     }
                 }
                 contains[flightColumn[0][assignmentIndex]] = true;
@@ -404,14 +401,11 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                     if (!contains[competitorIndex]) {
                         flightColumn[groupIndex][0] = competitorIndex;
                         contains[flightColumn[groupIndex][0]] = true;
-                        System.arraycopy(currentAssociations[flightColumn[groupIndex][0]], 0, sumsOf3rdDemension, 0,
-                                competitorCount);
-                        System.arraycopy(currentAssociations[flightColumn[groupIndex][0]], 0, maxValues, 0,
-                                competitorCount);
+                        System.arraycopy(currentAssociations[flightColumn[groupIndex][0]], 0, sumsOf3rdDemension, 0, competitorCount);
+                        System.arraycopy(currentAssociations[flightColumn[groupIndex][0]], 0, maxValues, 0, competitorCount);
                         break;
                     }
                 }
-
                 for (int assignmentIndex = 1; assignmentIndex < (competitorCount / groupCount); assignmentIndex++) {
                     int associationSum = Integer.MAX_VALUE;
                     associationHigh[groupIndex] = Integer.MAX_VALUE;
@@ -597,8 +591,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                     if (counter >= flights * groups) {
                         break;
                     } else {
-                        System.arraycopy(pairingList[i + j + groupIndex], 0, resultPLT[counter], 0,
-                                pairingList[0].length);
+                        System.arraycopy(pairingList[i + j + groupIndex], 0, resultPLT[counter], 0, pairingList[0].length);
                         counter++;
                     }
                 }
@@ -798,7 +791,6 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         int k = associations[0][0], // first value of association array
                 n = 0, // count of elements in association array
                 exp = 0, exp2 = 0;
-
         for (int i = 0; i < associations.length; i++) {
             for (int j = 0; j < associations[0].length; j++) {
                 if (associations[i][j] < 0) {
