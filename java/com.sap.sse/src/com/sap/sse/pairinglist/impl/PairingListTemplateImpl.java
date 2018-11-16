@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.sap.sse.common.PairingListCreationException;
 import com.sap.sse.pairinglist.CompetitionFormat;
@@ -15,14 +18,14 @@ import com.sap.sse.pairinglist.PairingListTemplate;
 import com.sap.sse.util.ThreadPoolUtil;
 
 public class PairingListTemplateImpl implements PairingListTemplate {
-
+    private static final Logger logger = Logger.getLogger(PairingListTemplateImpl.class.getName());
+    
     private final Random random = new Random();
     private final int[][] pairingListTemplate;
     private final double standardDev, assignmentQuality;
     private final int flightMultiplier, boatChangeFactor, boatchanges;
     private final int dummies;
-    private final ExecutorService executorService = ThreadPoolUtil.INSTANCE
-            .getDefaultBackgroundTaskThreadPoolExecutor();
+    private final ExecutorService executorService = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor();
     private final int iterations;
 
     public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider) {
@@ -40,8 +43,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         this(pairingFrameProvider, 100000, flighMultiplier, boatChangeFactor);
     }
 
-    public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider, int iterations, int flightMultiplier,
-            int boatChangeFactor) {
+    public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider, int iterations, int flightMultiplier, int boatChangeFactor) {
         this.iterations = iterations;
         this.flightMultiplier = flightMultiplier;
         this.boatChangeFactor = boatChangeFactor;
@@ -88,11 +90,11 @@ public class PairingListTemplateImpl implements PairingListTemplate {
     public PairingListTemplateImpl(int[][] template, int competitorsCount, int flightMultiplier, int boatChangeFactor) {
         this.pairingListTemplate = template;
         int groupCount = (int) (competitorsCount / this.pairingListTemplate[0].length);
-        if (groupCount != (competitorsCount / this.pairingListTemplate[0].length))
+        if (groupCount != (competitorsCount / this.pairingListTemplate[0].length)) {
             groupCount++;
+        }
         this.dummies = groupCount - (competitorsCount % groupCount);
         int dummyIndex = 0;
-
         for (int[] group : this.pairingListTemplate) {
             for (int competitorNumber = 0; competitorNumber < group.length; competitorNumber++) {
                 if (group[competitorNumber] < 0) {
@@ -102,16 +104,13 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                         dummyIndex = 0;
                     }
                 }
-
             }
         }
-
         this.standardDev = this.calcStandardDev(incrementAssociations(this.pairingListTemplate,
                 new int[competitorsCount + this.dummies][competitorsCount + this.dummies]));
         this.assignmentQuality = this.calcStandardDev(getAssignmentAssociations(template,
                 new int[competitorsCount + this.dummies][(competitorsCount + this.dummies) / groupCount]));
-        this.boatchanges = this.getBoatChangesFromPairingList(template, template.length / groupCount, groupCount,
-                competitorsCount);
+        this.boatchanges = this.getBoatChangesFromPairingList(template, template.length / groupCount, groupCount, competitorsCount);
         this.resetDummies(this.pairingListTemplate, competitorsCount + this.dummies);
         this.iterations = 100000;
         this.flightMultiplier = flightMultiplier;
@@ -211,8 +210,8 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                     bestPLT = currentPLT;
                     bestDev = currentStandardDev;
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (InterruptedException | ExecutionException e) {
+                logger.log(Level.WARNING, "Caught exception waiting for the seed creation", e);
             }
         }
         bestPLT = this.improveCompetitorAllocations(bestPLT, flightCount, groupCount, competitorCount);
@@ -221,7 +220,6 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             bestPLT = this.multiplyFlights(bestPLT, flightCount, groupCount, competitorCount);
         }
         futures.clear();
-
         return bestPLT;
     }
 
@@ -277,18 +275,14 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         for (int z = 1; z < count.length; z++) {
             count[z] += count[z - 1];
         }
-        // TODO change to for each
-        for (int z = allSeeds.length - 1; z >= 0; z--) {
-            output[--count[allSeeds[z][i]]] = allSeeds[z];
+        for (int[] seed : allSeeds) {
+            output[--count[seed[i]]] = seed;
         }
         return output;
     }
 
     private boolean checkValues(int flights, int groups, int competitors) {
-        if ((flights > 0) && (groups > 0) && (competitors > 1) && (competitors >= groups)) {
-            return true;
-        }
-        return false;
+        return ((flights > 0) && (groups > 0) && (competitors > 1) && (competitors >= groups));
     }
 
     /**
@@ -471,14 +465,12 @@ public class PairingListTemplateImpl implements PairingListTemplate {
      *            current matrix that describes how often a competitor competed against another competitor.
      * @return best complete pairing list out of given iterations
      */
-    private int[][] createSinglePariringListTemplate(int flightCount, int groupCount, int competitorCount,
-            int[][] seeds) {
+    private int[][] createSinglePariringListTemplate(int flightCount, int groupCount, int competitorCount, int[][] seeds) {
         int[][] bestPLT = new int[flightCount * groupCount][competitorCount / groupCount];
         double bestDev = Double.POSITIVE_INFINITY;
         int[][] bestAssociations = new int[competitorCount][competitorCount];
         for (int x = 0; x < seeds[0].length; x++) {
-            int[][] flightColumn = this.createFlight(groupCount, competitorCount, bestAssociations,
-                    seeds[seeds.length - 1][x]);
+            int[][] flightColumn = this.createFlight(groupCount, competitorCount, bestAssociations, seeds[seeds.length - 1][x]);
             for (int z = 0; z < flightColumn.length; z++) {
                 System.arraycopy(flightColumn[z], 0, bestPLT[x * groupCount + z], 0, flightColumn[0].length);
             }
@@ -638,7 +630,6 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             }
             boatChanges[i - 1] = groupNext.length - bestMatch;
         }
-        System.out.println(Arrays.toString(boatChanges));
         return pairingList;
     }
 

@@ -103,7 +103,6 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         HorizontalPanel panel = new HorizontalPanel();
 
         /* DATA PANEL */
-
         CaptionPanel dataPanel = new CaptionPanel();
         dataPanel.setCaptionText(stringMessages.parameters());
         Grid formGrid = new Grid(8, 2);
@@ -161,7 +160,6 @@ public class PairingListCreationDialog extends DataEntryDialog<PairingListTempla
         pairingListTemplatePanel.add(pairingListTemplateScrollPanel);
         panel.add(pairingListTemplatePanel);
         configButtons();
-
         return panel;
     }
 
