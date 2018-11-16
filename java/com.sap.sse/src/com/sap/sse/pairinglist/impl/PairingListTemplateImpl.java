@@ -249,35 +249,48 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 
     /**
      * Fast sorting algorithm to sort a huge amount of seeds in max <code>n*log(n)</code> time. Uses counting sort.
+     * Steps through the flights of all seeds in reverse order, starting with the seeds' last flight and uses counting
+     * sort to sort by that flight. Counting sort is stable, so the sort order of flights already sorted is preserved
+     * for equal keys for the next flight. Counting sort works by storing the counts of each element in order to produce
+     * an array of insert indices into the output array for each distinct seed value. The values range from
+     * {@code 0..competitorCount-1}. The insert indices are obtained by aggregating across the counts. Element 0 always
+     * starts at index 0; subsequent elements start at the index of the previous element plus the count of the previous
+     * element. As the seeds are inserted into the output array, the insert indices keep getting incremented.
      * 
      * @param allSeeds
-     *            array of seeds, that should be sorted
+     *            array of seeds that should be sorted; the contents of the array may be altered by this method in an
+     *            undefined way; always use the array returned by this method.
      * @param competitorCount
      *            highest value inside the complete array. Needed for counting sort.
-     * @return sorted array with seed combinations
+     * @return sorted array with seed combinations; may be identical to {@code allSeeds} but with element order possibly
+     *         changed, but may also be a different array
      */
     protected int[][] radixSort(int[][] allSeeds, int competitorCount) {
-        int m = allSeeds[0].length;
-        for (int i = m - 1; i > -1; i--) {
-            allSeeds = this.countSort(allSeeds, i, competitorCount);
-        }
-        return allSeeds;
-    }
-
-    // TODO use comparator
-    private int[][] countSort(int[][] allSeeds, int i, int competitorCount) {
+        int lengthOfASeed = allSeeds[0].length;
         int[][] output = new int[allSeeds.length][allSeeds[0].length];
         int[] count = new int[competitorCount];
-        for (int[] j : allSeeds) {
-            count[j[i]]++;
+        int[] writeIndexInOutput = new int[competitorCount];
+        for (int i = lengthOfASeed - 1; i >= 0; i--) { // go backwards for "LSD" radix sort (least significant digit)
+            Arrays.fill(count, 0); // quicker than re-allocating a new array each loop
+            for (int[] seed : allSeeds) {
+                count[seed[i]]++;
+            }
+            writeIndexInOutput[0] = 0;
+            for (int z = 1; z < count.length; z++) {
+                writeIndexInOutput[z] = writeIndexInOutput[z - 1] + count[z-1];
+            }
+            // now count[x-1] represents the first insert position in output for the seeds that have value x at their position i;
+            // count[x]-1 represents the last insert position in output for the seeds with value x at their position i;
+            // It is important now to keep the element order stable within the same "bucket" (seeds with same value at position i),
+            // so the placement of seeds in output needs to match the iteration order in allSeeds
+            for (int[] seed : allSeeds) {
+                output[writeIndexInOutput[seed[i]]++] = seed;
+            }
+            int[][] tmp = allSeeds;
+            allSeeds = output;
+            output = tmp; // re-use array of same dimensions for next loop, avoiding expensive allocation with value filling
         }
-        for (int z = 1; z < count.length; z++) {
-            count[z] += count[z - 1];
-        }
-        for (int[] seed : allSeeds) {
-            output[--count[seed[i]]] = seed;
-        }
-        return output;
+        return allSeeds;
     }
 
     private boolean checkValues(int flights, int groups, int competitors) {
