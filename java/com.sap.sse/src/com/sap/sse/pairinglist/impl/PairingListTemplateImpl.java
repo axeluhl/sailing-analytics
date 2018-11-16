@@ -55,19 +55,14 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             } else {
                 dummies = 0;
             }
+            this.pairingListTemplate = createPairingListTemplate(flightMultiplier, pairingFrameProvider);
+            final int boatChangesFromPairingList = this.getBoatChangesFromPairingList(this.pairingListTemplate,
+                    pairingFrameProvider.getFlightsCount(), pairingFrameProvider.getGroupsCount(),
+                    pairingFrameProvider.getCompetitorsCount());
             if (flightMultiplier <= 1) {
-                this.pairingListTemplate = this.createPairingListTemplate(pairingFrameProvider.getFlightsCount(),
-                        pairingFrameProvider.getGroupsCount(), pairingFrameProvider.getCompetitorsCount() + dummies);
-                this.boatchanges = this.getBoatChangesFromPairingList(this.pairingListTemplate,
-                        pairingFrameProvider.getFlightsCount(), pairingFrameProvider.getGroupsCount(),
-                        pairingFrameProvider.getCompetitorsCount());
+                this.boatchanges = boatChangesFromPairingList;
             } else {
-                this.pairingListTemplate = this.createPairingListTemplate(
-                        pairingFrameProvider.getFlightsCount() / flightMultiplier,
-                        pairingFrameProvider.getGroupsCount(), pairingFrameProvider.getCompetitorsCount() + dummies);
-                this.boatchanges = this.getBoatChangesFromPairingList(this.pairingListTemplate,
-                        pairingFrameProvider.getFlightsCount(), pairingFrameProvider.getGroupsCount(),
-                        pairingFrameProvider.getCompetitorsCount()) * flightMultiplier
+                this.boatchanges = boatChangesFromPairingList * flightMultiplier
                         + flightMultiplier * (this.getMatches(this.pairingListTemplate[pairingListTemplate.length - 1],
                                 this.pairingListTemplate[0]));
             }
@@ -84,6 +79,11 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                     + "has to be greater than 0; count of groups has to be greater than 1; count of competitors has to "
                     + "be greater than 1; count of competitors has to be greater than count of groups");
         }
+    }
+
+    private int[][] createPairingListTemplate(int flightMultiplier, PairingFrameProvider pairingFrameProvider) {
+        return this.createPairingListTemplate(pairingFrameProvider.getFlightsCount() / flightMultiplier,
+                pairingFrameProvider.getGroupsCount(), pairingFrameProvider.getCompetitorsCount() + dummies);
     }
 
     // Used to convert a TemplateDTO to PairingListTemplate
@@ -558,8 +558,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                         break;
                     } else {
                         int temp = 0;
-                        int bestPosition = this.getBestPositionToChangeTo(groupAssignments[position[0]], prevPosition,
-                                this.boatChangeFactor);
+                        int bestPosition = this.getBestPositionToChangeTo(groupAssignments[position[0]], prevPosition);
                         temp = pairingList[zGroup][bestPosition];
                         pairingList[zGroup][bestPosition] = pairingList[zGroup][position[0]];
                         pairingList[zGroup][position[0]] = temp;
@@ -698,7 +697,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
         return worstValuePos;
     }
 
-    private int getBestPositionToChangeTo(int[] arr, int previousPosition, int boatChangeFactor) {
+    private int getBestPositionToChangeTo(int[] arr, int previousPosition) {
         int[] temp = new int[arr.length];
         System.arraycopy(arr, 0, temp, 0, arr.length);
         Arrays.sort(temp);
