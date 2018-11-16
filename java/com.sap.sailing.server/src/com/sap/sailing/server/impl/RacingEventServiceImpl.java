@@ -4316,11 +4316,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     }
     
     /**
-     * This comparator for competitors is based on the natural comparator principle and uses the competitors short name.
+     * This comparator for competitors produces a stable ordering. It is based on the string representation
+     * of the competitors' {@link Competitor#getId() ID}.
      */
     private Comparator<Competitor> getCompetitorsComparator() {
         final Comparator<String> naturalComparator = new NaturalComparator();
-        return (c1, c2) -> naturalComparator.compare(c1.getShortName(), c2.getShortName());
+        return (c1, c2) -> naturalComparator.compare(c1.getId().toString(), c2.getId().toString());
     }
 
     @Override
