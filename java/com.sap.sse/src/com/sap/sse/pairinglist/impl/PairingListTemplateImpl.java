@@ -30,16 +30,16 @@ public class PairingListTemplateImpl implements PairingListTemplate {
 
     public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider) {
         // setting iterations to default of 100.000
-        this(pairingFrameProvider, 100000, 0, 0);
+        this(pairingFrameProvider, /* iterations */ 100000, /* flight multiplier */ 1, /* boat change factor */ 0);
     }
 
     public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider, int flightMultiplier) {
         // setting iterations to default of 100.000
-        this(pairingFrameProvider, 100000, flightMultiplier, 0);
+        this(pairingFrameProvider, /* iterations */ 100000, flightMultiplier, /* boat change factor */ 0);
     }
 
     public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider, int flighMultiplier, int boatChangeFactor) {
-        this(pairingFrameProvider, 100000, flighMultiplier, boatChangeFactor);
+        this(pairingFrameProvider, /* iterations */ 100000, flighMultiplier, boatChangeFactor);
     }
 
     public PairingListTemplateImpl(PairingFrameProvider pairingFrameProvider, int iterations, int flightMultiplier, int boatChangeFactor) {
@@ -214,7 +214,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             }
         }
         this.improveCompetitorAllocations(bestPLT, flightCount, groupCount, competitorCount);
-        bestPLT = this.improveAssignmentChanges(bestPLT, flightCount, groupCount, competitorCount);
+        this.improveAssignmentChanges(bestPLT, flightCount, groupCount, competitorCount);
         if (flightMultiplier > 1) {
             bestPLT = this.multiplyFlights(bestPLT, flightCount, groupCount, competitorCount);
         }
@@ -571,7 +571,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
      * there assignment will not be changed.
      * 
      * @param pairingList
-     *            complete pairingListTemplate which needs to be improved
+     *            complete pairingListTemplate which needs to be improved and which is modified in place by this method
      * @param flights
      *            number of flights which was used to generate the pairingListTemplate
      * @param competitors
@@ -579,21 +579,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
      * 
      * @return the improved pairingListTemplate
      */
-    private int[][] improveAssignmentChanges(int[][] pairingList, int flights, int groups, int competitors) {
-        int[][] resultPLT = new int[flights * groups][competitors / groups];
-        int counter = 0;
-        for (int i = 0; i < flights / groups; i++) {
-            for (int j = 0; j < flights; j = j + competitors / groups) {
-                for (int groupIndex = 0; groupIndex < groups; groupIndex++) {
-                    if (counter >= flights * groups) {
-                        break;
-                    } else {
-                        System.arraycopy(pairingList[i + j + groupIndex], 0, resultPLT[counter], 0, pairingList[0].length);
-                        counter++;
-                    }
-                }
-            }
-        }
+    private void improveAssignmentChanges(int[][] pairingList, int flights, int groups, int competitors) {
         int boatChanges[] = new int[flights - 1];
         for (int i = 1; i < flights; i++) {
             int[] groupPrev = pairingList[i * pairingList.length / flights - 1];
@@ -618,7 +604,6 @@ public class PairingListTemplateImpl implements PairingListTemplate {
             }
             boatChanges[i - 1] = groupNext.length - bestMatch;
         }
-        return pairingList;
     }
 
     private int getMatches(int[] arr1, int[] arr2) {

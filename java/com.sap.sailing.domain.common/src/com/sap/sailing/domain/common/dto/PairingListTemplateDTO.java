@@ -14,7 +14,7 @@ public class PairingListTemplateDTO implements Serializable {
     private int boatChanges;
     private int[][] pairingListTemplate;
     private double quality;
-    private double boatAssignmentQualitiy;
+    private double boatAssignmentQuality;
     private Iterable<String> selectedFlightNames;
     
     public PairingListTemplateDTO() { }
@@ -24,30 +24,30 @@ public class PairingListTemplateDTO implements Serializable {
     }
     
     public PairingListTemplateDTO(int competitorCount, int flightMultiplier, int[][] pairingListTemplate, double quality) {
-        this(0, 0, competitorCount, flightMultiplier, 0, 0, pairingListTemplate, quality, 0.0, /* selected flight names */ null);
+        this(/* flight count */ 0, /* group count */ 0, competitorCount, flightMultiplier, /* boat change factor */ 0, /* boat changes */ 0, pairingListTemplate, quality, /* boat assignment quality */ 0.0, /* selected flight names */ null);
     }
     
     public PairingListTemplateDTO(int competitorCount, int[][] pairingListTemplate, double quality) {
-        this(0, 0, competitorCount, 0, 0, 0, pairingListTemplate, quality, 0.0, /* selected flight names */ null);
+        this(/* flight count */ 0, /* group count */ 0, competitorCount, /* flight multiplier */ 1, /* boat change factor */ 0, /* boat changes */ 0, pairingListTemplate, quality, /* boat assignment quality */ 0.0, /* selected flight names */ null);
     }
     
     public PairingListTemplateDTO(int flightCount, int groupCount, int competitorCount, int flightMultiplier, int boatChangeFactor, int[][] pairingListTemplate, double quality) {
-        this(flightCount, groupCount, competitorCount, flightMultiplier, boatChangeFactor, 0, pairingListTemplate, quality, 0.0, /* selected flight names */ null);
+        this(flightCount, groupCount, competitorCount, flightMultiplier, boatChangeFactor, /* boat Changes */ 0, pairingListTemplate, quality, /* boat assignment quality */ 0.0, /* selected flight names */ null);
     }
     
-    public PairingListTemplateDTO(int flightCount, int groupCount, int competitorCount, int flightMultiplier, int boatChangeFactor, int boatChanges, int[][] pairingListTemplate, double quality, double boatassignmentqualitiy) {
-        this(flightCount, groupCount, competitorCount, flightMultiplier, boatChangeFactor, boatChanges, pairingListTemplate, quality, boatassignmentqualitiy, /* selected flight names */ null);
+    public PairingListTemplateDTO(int flightCount, int groupCount, int competitorCount, int flightMultiplier, int boatChangeFactor, int boatChanges, int[][] pairingListTemplate, double quality, double boatAssignmentQuality) {
+        this(flightCount, groupCount, competitorCount, flightMultiplier, boatChangeFactor, boatChanges, pairingListTemplate, quality, boatAssignmentQuality, /* selected flight names */ null);
     }
     
     public PairingListTemplateDTO(int flightCount, int groupCount, int competitorCount, int flightMultiplier, int boatChangeFactor,
-            int boatChanges, int[][] pairingListTemplate, double quality, double boatAssigmentQualitiy, Iterable<String> selectedFlightNames) {
+            int boatChanges, int[][] pairingListTemplate, double quality, double boatAssigmentQuality, Iterable<String> selectedFlightNames) {
         this.flightCount = flightCount;
         this.groupCount = groupCount;
         this.competitorCount = competitorCount;
         this.flightMultiplier = flightMultiplier;
         this.boatChangeFactor = boatChangeFactor;
         this.boatChanges = boatChanges;
-        this.boatAssignmentQualitiy = boatAssigmentQualitiy;
+        this.boatAssignmentQuality = boatAssigmentQuality;
         this.quality = quality;
         this.pairingListTemplate = pairingListTemplate;
         this.selectedFlightNames = selectedFlightNames;
@@ -82,7 +82,7 @@ public class PairingListTemplateDTO implements Serializable {
     }
     
     public double getBoatAssignmentQuality(){
-    	return this.boatAssignmentQualitiy;
+    	return this.boatAssignmentQuality;
     }
     
     public int getBoatChanges(){
