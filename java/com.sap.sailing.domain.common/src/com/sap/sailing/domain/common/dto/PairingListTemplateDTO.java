@@ -1,8 +1,6 @@
 package com.sap.sailing.domain.common.dto;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.List;
 
 public class PairingListTemplateDTO implements Serializable {
     
