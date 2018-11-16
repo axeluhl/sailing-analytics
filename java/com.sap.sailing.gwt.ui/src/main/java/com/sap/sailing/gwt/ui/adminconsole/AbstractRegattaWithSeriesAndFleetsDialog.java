@@ -136,8 +136,8 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         registrationLinkWithQRCodeOpenButton = new Button(stringMessages.registrationLinkConfig(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                RegistrationLinkWithQRCodeDialog dialog = new RegistrationLinkWithQRCodeDialog(stringMessages,
-                        registrationLinkWithQRCode, new DialogCallback<RegistrationLinkWithQRCode>() {
+                RegistrationLinkWithQRCodeDialog dialog = new RegistrationLinkWithQRCodeDialog(stringMessages, regatta.getName(),
+                        registrationLinkWithQRCode, /* editMode */ true, new DialogCallback<RegistrationLinkWithQRCode>() {
                             @Override
                             public void ok(RegistrationLinkWithQRCode result) {
                                 registrationLinkWithQRCode = result;

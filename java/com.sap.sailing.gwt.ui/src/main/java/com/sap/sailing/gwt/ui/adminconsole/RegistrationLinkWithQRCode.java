@@ -17,6 +17,7 @@ public class RegistrationLinkWithQRCode {
 
     /**
      * Get entered secrect.
+     * 
      * @return Secret or null, if not set
      */
     public String getSecret() {
@@ -25,6 +26,7 @@ public class RegistrationLinkWithQRCode {
 
     /**
      * Set secret.
+     * 
      * @param secret
      */
     public void setSecret(String secret) {

@@ -6,12 +6,15 @@ import java.util.List;
 
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CaptionPanel;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Grid;
@@ -70,10 +73,11 @@ public class RegattaDetailsComposite extends Composite {
     private final Label competitorRegistrationType;
     private final Label configuration;
     private final Label buoyZoneRadiusInHullLengths;
-    private final Grid openRegattaRegistrationLinkPanel;
-    private final Label openRegattaRegistrationLinkUrl;
-    private final Anchor openRegattaRegistrationLink;
-    private final Image openRegattaRegistrationLinkQrCode;
+    protected final Button registrationLinkWithQRCodeOpenButton;
+    //private final Grid openRegattaRegistrationLinkPanel;
+    //private final Label openRegattaRegistrationLinkUrl;
+    //private final Anchor openRegattaRegistrationLink;
+    //private final Image openRegattaRegistrationLinkQrCode;
     
     private final SelectionModel<SeriesDTO> seriesSelectionModel;
     private final CellTable<SeriesDTO> seriesTable;
@@ -111,10 +115,11 @@ public class RegattaDetailsComposite extends Composite {
         configuration = createLabelAndValueWidget(grid, currentRow++, stringMessages.racingProcedureConfiguration(), "RacingProcedureLabel");
         scoringSystem = createLabelAndValueWidget(grid, currentRow++, stringMessages.scoringSystem(), "ScoringSystemLabel");
         rankingMetric = createLabelAndValueWidget(grid, currentRow++, stringMessages.rankingMetric(), "RankingMetricLabel");
-        openRegattaRegistrationLinkPanel = createRegistrationLinkPanel(grid, currentRow++, stringMessages.registrationLink());
-        openRegattaRegistrationLinkUrl = addRegistrationLinkUrlLabel(openRegattaRegistrationLinkPanel, "OpenRegattaRegistrationLinkLabel");
-        openRegattaRegistrationLink = addRegistrationLinkAnchor(openRegattaRegistrationLinkPanel, "OpenRegattaRegistrationLinkAnchor");
-        openRegattaRegistrationLinkQrCode = addRegistrationLinkQrCode(openRegattaRegistrationLinkPanel, "OpenRegattaRegistrationLinkQrCode");
+        registrationLinkWithQRCodeOpenButton = addRegistrationLinkOpenButton(grid, currentRow++, stringMessages.registrationLink(), "RegistrationLinkWithQRCodeDialog");
+        //openRegattaRegistrationLinkPanel = createRegistrationLinkPanel(grid, currentRow++, stringMessages.registrationLink());
+        //openRegattaRegistrationLinkUrl = addRegistrationLinkUrlLabel(openRegattaRegistrationLinkPanel, "OpenRegattaRegistrationLinkLabel");
+        //openRegattaRegistrationLink = addRegistrationLinkAnchor(openRegattaRegistrationLinkPanel, "OpenRegattaRegistrationLinkAnchor");
+        //openRegattaRegistrationLinkQrCode = addRegistrationLinkQrCode(openRegattaRegistrationLinkPanel, "OpenRegattaRegistrationLinkQrCode");
         seriesTable = createRegattaSeriesTable();
         seriesTable.ensureDebugId("SeriesCellTable");
         seriesSelectionModel = new SingleSelectionModel<SeriesDTO>();
@@ -138,7 +143,32 @@ public class RegattaDetailsComposite extends Composite {
         return valueLabel;
     }
 
-    private Grid createRegistrationLinkPanel(Grid grid, int row, String label) {
+    private Button addRegistrationLinkOpenButton(Grid grid, int row, String label, String debugId) {
+        grid.setWidget(row , 0, new Label(label + ":"));
+        Button button = new Button(stringMessages.registrationLinkShare(), new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                RegistrationLinkWithQRCode registrationLinkWithQRCode = new RegistrationLinkWithQRCode();
+                registrationLinkWithQRCode.setSecret(regatta.registrationLinkSecret);
+                RegistrationLinkWithQRCodeDialog dialog = new RegistrationLinkWithQRCodeDialog(stringMessages, regatta.getName(),
+                        registrationLinkWithQRCode, /* editMode */ false, new DialogCallback<RegistrationLinkWithQRCode>() {
+                            @Override
+                            public void ok(RegistrationLinkWithQRCode result) {
+                            }
+
+                            @Override
+                            public void cancel() {
+                            }
+                        });
+                dialog.ensureDebugId(debugId);
+                dialog.show();
+
+            }
+        });
+        grid.setWidget(row , 1, button);
+        return button;
+    }
+    /*private Grid createRegistrationLinkPanel(Grid grid, int row, String label) {
         Grid panel = new Grid(1, 3);
         panel.getColumnFormatter().setWidth(0, "200px");
         grid.setWidget(row, 0, new Label(label + ":"));
@@ -168,7 +198,7 @@ public class RegattaDetailsComposite extends Composite {
         qrCodeImage.setVisible(false);
         panel.setWidget(0, 2, qrCodeImage);
         return qrCodeImage;
-    }
+    }*/
 
     private CellTable<SeriesDTO> createRegattaSeriesTable() {
         CellTable<SeriesDTO> table = new BaseCelltable<SeriesDTO>(/* pageSize */10000, tableRes);
@@ -451,7 +481,7 @@ public class RegattaDetailsComposite extends Composite {
             controlTrackingFromStartAndFinishTimes.setText(regatta.controlTrackingFromStartAndFinishTimes ? stringMessages.yes() : stringMessages.no());
             canBoatsOfCompetitorsChangePerRace.setText(regatta.canBoatsOfCompetitorsChangePerRace ? stringMessages.yes() : stringMessages.no());
             competitorRegistrationType.setText(regatta.competitorRegistrationType.getLabel(stringMessages));
-            updateOpenRegattaRegistrationLink();
+            registrationLinkWithQRCodeOpenButton.setVisible(regatta.competitorRegistrationType.isOpen());
             buoyZoneRadiusInHullLengths.setText(String.valueOf(regatta.buoyZoneRadiusInHullLengths));
             
             if (regatta.configuration != null) {
@@ -470,7 +500,7 @@ public class RegattaDetailsComposite extends Composite {
         } 
     }
 
-    private void updateOpenRegattaRegistrationLink() {
+    /*private void updateOpenRegattaRegistrationLink() {
         if (regatta.competitorRegistrationType.isOpen()) {
             String baseUrl = GWT.getHostPageBaseURL();
             if (baseUrl.endsWith("/")) {
@@ -507,6 +537,6 @@ public class RegattaDetailsComposite extends Composite {
             openRegattaRegistrationLinkQrCode.setUrl("");
             openRegattaRegistrationLinkQrCode.setVisible(false);
         }
-    }
+    }*/
 
 }
