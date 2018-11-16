@@ -67,6 +67,16 @@ public class SecuredDomainType extends HasPermissionsImpl {
     public static final HasPermissions TRACKED_RACE = new SecuredDomainType("TRACKED_RACE");
     
     /**
+     * type relative identifier is the competitor ID's string representation
+     */
+    public static final HasPermissions COMPETITOR = new SecuredDomainType("COMPETITOR");
+    
+    /**
+     * type relative identifier is the boat ID's string representation
+     */
+    public static final HasPermissions BOAT = new SecuredDomainType("BOAT");
+    
+    /**
      * type-relative identifier is the media track's "DB ID"
      */
     public static final HasPermissions MEDIA_TRACK = new SecuredDomainType("MEDIA_TRACK");
