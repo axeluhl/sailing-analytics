@@ -1,9 +1,9 @@
 package com.sap.sailing.windestimation.preprocessing;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
@@ -30,7 +30,7 @@ public class RaceWithRandomClippingPreprocessingPipelineImpl<FromElements, ToEle
     @Override
     public RaceWithEstimationData<ToElements> preprocessRace(RaceWithEstimationData<FromElements> race) {
         RaceWithEstimationData<ToElements> preprocessedRace = preprocessingPipeline.preprocessRace(race);
-        Random random = new Random(1234);
+        SecureRandom random = new SecureRandom();
         List<CompetitorTrackWithEstimationData<ToElements>> competitorTracks = preprocessedRace.getCompetitorTracks()
                 .stream().map(competitorTrack -> {
                     int elementsNumber = competitorTrack.getElements().size();
