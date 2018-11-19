@@ -26,6 +26,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.User;
 
 public class TaggingServiceImpl implements TaggingService {
 
@@ -44,11 +45,11 @@ public class TaggingServiceImpl implements TaggingService {
      * @return username of current user
      */
     private String getCurrentUsername() throws AuthorizationException {
-        Object principal = SecurityUtils.getSubject().getPrincipal();
-        if (principal == null) {
+        User user = getSecurityService().getCurrentUser();
+        if (user == null) {
             throw new AuthorizationException();
         }
-        return principal.toString();
+        return user.getName();
     }
 
     /**
