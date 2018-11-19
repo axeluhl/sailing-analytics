@@ -546,7 +546,7 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                             (competitors / groups));
                 }
                 for (int zPlace = 0; zPlace < competitors * 50; zPlace++) {
-                    int[] position = this.findWorstValuePosition(groupAssignments, (int) averageAssignments);
+                    int[] position = findWorstValuePosition(groupAssignments, (int) averageAssignments);
                     int prevFlight = (int) (zGroup / groups) - 1;
                     int prevPosition = -1;
                     if (prevFlight >= 0) {
@@ -563,15 +563,13 @@ public class PairingListTemplateImpl implements PairingListTemplate {
                         break;
                     } else {
                         int temp = 0;
-                        int bestPosition = this.getBestPositionToChangeTo(groupAssignments[position[0]], prevPosition);
+                        int bestPosition = getBestPositionToChangeTo(groupAssignments[position[0]], prevPosition);
                         temp = pairingList[zGroup][bestPosition];
                         pairingList[zGroup][bestPosition] = pairingList[zGroup][position[0]];
                         pairingList[zGroup][position[0]] = temp;
-                        assignments = this.getAssignmentAssociations(pairingList,
-                                new int[competitors][competitors / groups]);
+                        assignments = getAssignmentAssociations(pairingList, new int[competitors][competitors / groups]);
                         for (int x = 0; x < (competitors / groups); x++) {
-                            System.arraycopy(assignments[pairingList[zGroup][x]], 0, groupAssignments[x], 0,
-                                    (competitors / groups));
+                            System.arraycopy(assignments[pairingList[zGroup][x]], 0, groupAssignments[x], 0, (competitors / groups));
                         }
                     }
                 }
