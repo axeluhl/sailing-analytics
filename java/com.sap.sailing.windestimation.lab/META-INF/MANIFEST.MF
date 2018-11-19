@@ -1,11 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Wind estimation test
-Bundle-SymbolicName: com.sap.sailing.windestimation.test
+Bundle-Name: Windestimation Lab
+Bundle-SymbolicName: com.sap.sailing.windestimation.lab
 Fragment-Host: com.sap.sailing.windestimation
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: SAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.junit;bundle-version="4.8.2"
-Automatic-Module-Name: com.sap.sailing.windestimation.test
+Automatic-Module-Name: com.sap.sailing.windestimation.lab

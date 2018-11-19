@@ -35,3 +35,4 @@ git.xml
 mobile/github-advrecyclerview_lib/bin
 captures
 /.recommenders/
+/java/.recommenders/

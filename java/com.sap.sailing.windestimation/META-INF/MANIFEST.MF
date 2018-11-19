@@ -29,3 +29,4 @@ Bundle-ClassPath: lib/com.github.haifengl.smile-core-1.5.1.jar,
  lib/com.github.haifengl.smile-graph-1.5.1.jar,
  lib/com.github.haifengl.smile-math-1.5.1.jar,
  .
+Automatic-Module-Name: com.sap.sailing.windestimation
