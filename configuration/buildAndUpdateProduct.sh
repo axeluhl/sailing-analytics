@@ -191,7 +191,7 @@ echo TMP will be used for java.io.tmpdir and is $TMP
 if [ "$TMP" = "" ]; then
   export TMP=/tmp
 fi
-extra="${extra} -Dgwt.workers=${GWT_WORKERS} -Djava.io.tmpdir=$TMP"
+extra="${extra} -Dgwt.workers=${GWT_WORKERS} -Djava.io.tmpdir=$TMP -Dgwt.watchFileChanges=false"
 
 shift $((OPTIND-1))
 
