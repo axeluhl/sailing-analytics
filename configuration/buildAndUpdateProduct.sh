@@ -97,6 +97,9 @@ extra=''
 parallelexecution=0
 p2local=0
 
+export max_user_watches=`cat /proc/sys/fs/inotify/max_user_watches`
+echo "max User Watches: $max_user_watches"
+
 if [ $# -eq 0 ]; then
     echo "buildAndUpdateProduct [-b -u -g -t -a -r -o -c -p -v -m <config> -n <package> -l <port> -x <gwt-workers> -j <test-package>] [build|install|all|hot-deploy|remote-deploy|local-deploy|release]"
     echo ""
