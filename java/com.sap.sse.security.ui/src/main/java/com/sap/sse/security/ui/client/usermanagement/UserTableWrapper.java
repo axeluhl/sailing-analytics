@@ -272,7 +272,10 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                 final List<UserDTO> users = new ArrayList<>();
                 final UserDTO user = userAndRoles.getA();
                 users.add(user);
-                getUserManagementService().updateUserProperties(user.getName(), user.getFullName(), user.getCompany(), user.getLocale(), new AsyncCallback<UserDTO>() {
+                        getUserManagementService().updateUserProperties(user.getName(), user.getFullName(),
+                                user.getCompany(), user.getLocale(),
+                                user.getDefaultTenant() != null ? user.getDefaultTenant().getName() : null,
+                                new AsyncCallback<UserDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         errorReporter.reportError(getStringMessages().errorTryingToUpdateUser(user.getName(), caught.getMessage()));

@@ -88,4 +88,6 @@ public interface User extends SecurityUser, WithQualifiedObjectIdentifier {
     UserGroup getDefaultTenant(String serverName);
 
     Map<String, UserGroup> getDefaultTenantMap();
+
+    void setDefaultTenant(UserGroup newDefaultTenant, String serverName);
 }

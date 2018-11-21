@@ -5335,6 +5335,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         final UUID importOperationId = UUID.randomUUID();
         getService().createOrUpdateDataImportProgressWithReplication(importOperationId, 0.0, DataImportSubProgress.INIT,
                 0.0);
+        final User user = getSecurityService().getCurrentUser();
+        final UserGroup tenant = getSecurityService().getDefaultTenantForCurrentUser();
+        
         // Create a progress indicator for as long as the server gets data from the other server.
         // As soon as the server starts the import operation, a progress object will be built on every server
         Runnable masterDataImportTask = new Runnable() {
@@ -5368,9 +5371,9 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     } else {
                         inputStream = new TimeoutExtendingInputStream(connection.getInputStream(), connection);
                     }
-
                     final MasterDataImporter importer = new MasterDataImporter(baseDomainFactory, getService(),
-                            getSecurityService());
+                            user,
+                            tenant);
                     importer.importFromStream(inputStream, importOperationId, override);
                 } catch (Throwable e) {
                     // do not assume that RuntimeException is logged properly

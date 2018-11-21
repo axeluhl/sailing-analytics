@@ -411,11 +411,14 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public UserDTO updateUserProperties(final String username, String fullName, String company, String localeName) throws UserManagementException {
+    public UserDTO updateUserProperties(final String username, String fullName, String company, String localeName,
+            String defaultTenant) throws UserManagementException {
         getSecurityService().checkCurrentUserUpdatePermission(getSecurityService().getCurrentUser());
         getSecurityService().updateUserProperties(username, fullName, company,
                 getLocaleFromLocaleName(localeName));
-        return securityDTOFactory.createUserDTOFromUser(getSecurityService().getUserByName(username), getSecurityService());
+        getSecurityService().setDefaultTenantForCurrentServerForUser(username, defaultTenant);
+        return securityDTOFactory.createUserDTOFromUser(getSecurityService().getUserByName(username),
+                getSecurityService());
     }
 
     private Locale getLocaleFromLocaleName(String localeName) {
@@ -784,5 +787,4 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public String getOrCreateAccessToken(String username) {
         return getSecurityService().getOrCreateAccessToken(username);
     }
-
 }

@@ -1506,10 +1506,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void setOwnershipIfNotSet(QualifiedObjectIdentifier identifier, UserGroup tenantOwner) {
+    public void setOwnershipIfNotSet(QualifiedObjectIdentifier identifier, User user, UserGroup tenantOwner) {
         final OwnershipAnnotation preexistingOwnership = getOwnership(identifier);
         if (preexistingOwnership == null) {
-            final User user = getCurrentUser();
             setOwnership(identifier, user, tenantOwner, identifier.toString());
         }
     }
@@ -1890,5 +1889,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public <T> T getPreferenceObject(String username, String key) {
         return userStore.getPreferenceObject(username, key);
+    }
+
+    @Override
+    public void setDefaultTenantForCurrentServerForUser(String username, String defaultTenant) {
+        User user = getUserByName(username);
+        UserGroup newDefaultTenant = getUserGroup(UUID.fromString(defaultTenant));
+        user.setDefaultTenant(newDefaultTenant, ServerInfo.getName());
+        userStore.updateUser(user);
     }
 }

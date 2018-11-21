@@ -424,7 +424,8 @@ public class MasterDataImportTest {
             DB db = destService.getMongoObjectFactory().getDatabase();
             db.setWriteConcern(WriteConcern.SAFE);
             inputStream = new ByteArrayInputStream(os.toByteArray());
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService, securityService);
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService,
+                    securityService.getCurrentUser(), securityService.getDefaultTenantForCurrentUser());
             importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
@@ -685,7 +686,8 @@ public class MasterDataImportTest {
             domainFactory = destService.getBaseDomainFactory();
             ByteArrayInputStream inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService, securityService);
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService,
+                    securityService.getCurrentUser(), securityService.getDefaultTenantForCurrentUser());
             importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
@@ -857,7 +859,8 @@ public class MasterDataImportTest {
             domainFactory = destService.getBaseDomainFactory();
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService, securityService);
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService,
+                    securityService.getCurrentUser(), securityService.getDefaultTenantForCurrentUser());
             importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
@@ -915,7 +918,8 @@ public class MasterDataImportTest {
             os.flush();
 
             inputStream = new ByteArrayInputStream(os.toByteArray());
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService, securityService);
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService,
+                    securityService.getCurrentUser(), securityService.getDefaultTenantForCurrentUser());
             importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
@@ -1032,7 +1036,8 @@ public class MasterDataImportTest {
             domainFactory = destService.getBaseDomainFactory();
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService, securityService);
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService,
+                    securityService.getCurrentUser(), securityService.getDefaultTenantForCurrentUser());
             importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
@@ -1233,7 +1238,8 @@ public class MasterDataImportTest {
                     null);
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService, securityService);
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService,
+                    securityService.getCurrentUser(), securityService.getDefaultTenantForCurrentUser());
             importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
@@ -1446,7 +1452,8 @@ public class MasterDataImportTest {
             destService.addLeaderboard(leaderboardToOverride);
             ByteArrayInputStream inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService, securityService);
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService,
+                    securityService.getCurrentUser(), securityService.getDefaultTenantForCurrentUser());
             importer.importFromStream(inputStream, randomUUID, true);
         } finally {
             os.close();
@@ -1551,7 +1558,8 @@ public class MasterDataImportTest {
             domainFactory = destService.getBaseDomainFactory();
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService, securityService);
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService,
+                    securityService.getCurrentUser(), securityService.getDefaultTenantForCurrentUser());
             importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
@@ -1679,7 +1687,8 @@ public class MasterDataImportTest {
             domainFactory = destService.getBaseDomainFactory();
             ByteArrayInputStream inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService, securityService);
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService,
+                    securityService.getCurrentUser(), securityService.getDefaultTenantForCurrentUser());
             importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
@@ -1810,7 +1819,8 @@ public class MasterDataImportTest {
             domainFactory = destService.getBaseDomainFactory();
             ByteArrayInputStream inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService, securityService);
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService,
+                    securityService.getCurrentUser(), securityService.getDefaultTenantForCurrentUser());
             importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
@@ -1908,7 +1918,8 @@ public class MasterDataImportTest {
             domainFactory = destService.getBaseDomainFactory();
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService, securityService);
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService,
+                    securityService.getCurrentUser(), securityService.getDefaultTenantForCurrentUser());
             importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
@@ -2029,7 +2040,8 @@ public class MasterDataImportTest {
             domainFactory = destService.getBaseDomainFactory();
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService, securityService);
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService,
+                    securityService.getCurrentUser(), securityService.getDefaultTenantForCurrentUser());
             importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
@@ -2095,7 +2107,8 @@ public class MasterDataImportTest {
             domainFactory = destService.getBaseDomainFactory();
             ByteArrayInputStream inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService, securityService);
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService,
+                    securityService.getCurrentUser(), securityService.getDefaultTenantForCurrentUser());
             importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
@@ -2276,7 +2289,8 @@ public class MasterDataImportTest {
             domainFactory = destService.getBaseDomainFactory();
             inputStream = new ByteArrayInputStream(os.toByteArray());
 
-            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService, securityService);
+            MasterDataImporter importer = new MasterDataImporter(domainFactory, destService,
+                    securityService.getCurrentUser(), securityService.getDefaultTenantForCurrentUser());
             importer.importFromStream(inputStream, randomUUID, false);
         } catch (Exception e) {
             e.printStackTrace();

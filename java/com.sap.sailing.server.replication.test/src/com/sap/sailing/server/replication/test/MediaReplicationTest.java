@@ -272,7 +272,7 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
             fmaster.addMasterDataClassLoader(this.getClass().getClassLoader());
             ByteArrayInputStream inputStream = new ByteArrayInputStream(os.toByteArray());
             MasterDataImporter importer = new MasterDataImporter(domainFactory, fmaster,
-                    Mockito.mock(SecurityService.class));
+                    null, null);
             importer.importFromStream(inputStream, randomUUID, false);
         } finally {
             os.close();
