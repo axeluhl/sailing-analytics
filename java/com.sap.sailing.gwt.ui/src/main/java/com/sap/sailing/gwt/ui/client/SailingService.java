@@ -950,4 +950,10 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void setDefaultTenantForCurrentServer(String tennant);
 
     List<String> getPossibleTennants();
+
+    void updateGroupOwnerForEventHierarchy(UUID eventId, UUID newGroupOwnerId, String newGroupNameToCreate,
+            boolean updateCompetitors, boolean updateBoats);
+
+    void updateGroupOwnerForLeaderboardGroupHierarchy(UUID leaderboardGroupId, UUID newGroupOwnerId,
+            String newGroupNameToCreate, boolean updateCompetitors, boolean updateBoats);
 }

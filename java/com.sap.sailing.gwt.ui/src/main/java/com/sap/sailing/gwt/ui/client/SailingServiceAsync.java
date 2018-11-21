@@ -1049,4 +1049,10 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      * gets a (possibly imcomplete) list of available tennants to choose from.
      */
     void getPossibleTennants(AsyncCallback<List<String>> asyncCallback);
+
+    void updateGroupOwnerForEventHierarchy(UUID eventId, UUID newGroupOwnerId, String newGroupNameToCreate,
+            boolean updateCompetitors, boolean updateBoats, AsyncCallback<Void> callback);
+
+    void updateGroupOwnerForLeaderboardGroupHierarchy(UUID leaderboardGroupId, UUID newGroupOwnerId,
+            String newGroupNameToCreate, boolean updateCompetitors, boolean updateBoats, AsyncCallback<Void> callback);
 }

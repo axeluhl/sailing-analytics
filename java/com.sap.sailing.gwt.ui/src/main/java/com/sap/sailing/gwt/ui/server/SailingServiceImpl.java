@@ -469,6 +469,8 @@ import com.sap.sailing.manage2sail.RegattaResultDescriptor;
 import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.hierarchy.SailingHierarchyOwnershipUpdater;
+import com.sap.sailing.server.hierarchy.SailingHierarchyOwnershipUpdater.GroupOwnerUpdateStrategy;
 import com.sap.sailing.server.masterdata.MasterDataImporter;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
@@ -591,10 +593,13 @@ import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleImpl;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
@@ -8546,5 +8551,74 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             result = null;
         }
         return result;
+    }
+
+    @Override
+    public void updateGroupOwnerForEventHierarchy(UUID eventId, UUID newGroupOwnerId, String newGroupNameToCreate, boolean updateCompetitors,
+            boolean updateBoats) {
+        Event event = getService().getEvent(eventId);
+        UserGroup groupOwnerToSet = getSecurityService().getUserGroup(newGroupOwnerId);
+        if (event != null && groupOwnerToSet != null) {
+            createOwnershipUpdater(newGroupOwnerId, newGroupNameToCreate, updateCompetitors,
+                    updateBoats).updateGroupOwnershipForEventHierarchy(event);
+        }
+    }
+
+    @Override
+    public void updateGroupOwnerForLeaderboardGroupHierarchy(UUID leaderboardGroupId, UUID newGroupOwnerId, String newGroupNameToCreate,
+            boolean updateCompetitors, boolean updateBoats) {
+        LeaderboardGroup leaderboardGroup = getService().getLeaderboardGroupByID(leaderboardGroupId);
+        UserGroup groupOwnerToSet = getSecurityService().getUserGroup(newGroupOwnerId);
+        if (leaderboardGroup != null && groupOwnerToSet != null) {
+            createOwnershipUpdater(newGroupOwnerId, newGroupNameToCreate, updateCompetitors,
+                    updateBoats).updateGroupOwnershipForLeaderboardGroupHierarchy(leaderboardGroup);
+        }
+    }
+    
+    private SailingHierarchyOwnershipUpdater createOwnershipUpdater( UUID newGroupOwnerId, String newGroupNameToCreate, boolean updateCompetitors,
+            boolean updateBoats) {
+        final GroupOwnerUpdateStrategy updateStrategy;
+        if (newGroupOwnerId != null) {
+            final UserGroup groupOwnerToSet = getSecurityService().getUserGroup(newGroupOwnerId);
+            if (groupOwnerToSet == null) {
+                throw new RuntimeException("User group does not exist");
+            }
+            updateStrategy = new GroupOwnerUpdateStrategy() {
+                @Override
+                public boolean needsUpdate(QualifiedObjectIdentifier identifier, OwnershipAnnotation currentOwnership) {
+                    return currentOwnership == null || !groupOwnerToSet.equals(currentOwnership.getAnnotation().getTenantOwner());
+                }
+                
+                @Override
+                public UserGroup getNewGroupOwner() {
+                    return groupOwnerToSet;
+                }
+            };
+        } else if (newGroupNameToCreate != null && ! newGroupNameToCreate.isEmpty()) {
+            updateStrategy = new GroupOwnerUpdateStrategy() {
+                private UserGroup groupOwnerToSet;
+
+                @Override
+                public boolean needsUpdate(QualifiedObjectIdentifier identifier, OwnershipAnnotation currentOwnership) {
+                    return true;
+                }
+                
+                @Override
+                public UserGroup getNewGroupOwner() {
+                    if (groupOwnerToSet != null) {
+                        try {
+                            groupOwnerToSet = getSecurityService().createUserGroup(UUID.randomUUID(), newGroupNameToCreate);
+                        } catch (UserGroupManagementException e) {
+                            throw new RuntimeException("Could not create user group");
+                        }
+                    }
+                    return groupOwnerToSet;
+                }
+            };
+        } else {
+            throw new RuntimeException("No user group given");
+        }
+        return new SailingHierarchyOwnershipUpdater(getService(), getSecurityService(), updateStrategy, updateCompetitors,
+                updateBoats);
     }
 }
