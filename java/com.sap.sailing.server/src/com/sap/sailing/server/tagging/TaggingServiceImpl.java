@@ -3,7 +3,6 @@ package com.sap.sailing.server.tagging;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.AuthorizationException;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
