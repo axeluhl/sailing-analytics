@@ -124,6 +124,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.common.impl.RGBColor;
 import com.sap.sse.common.util.RoundingUtil;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
+import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.User;
@@ -357,12 +358,22 @@ public class RegattasResource extends AbstractSailingServerResource {
                             getService().getBaseDomainFactory().getOrCreateNationality(nationalityThreeLetterIOCCode),
                             /* dateOfBirth */ null, /* description */ null)),
                     /* coach */ null);
-            final CompetitorWithBoat competitor = getService().getCompetitorAndBoatStore()
-                    .getOrCreateCompetitorWithBoat(UUID.randomUUID(), name, /* shortName */ null,
-                            /* displayColor */ null, email, /* flagImageURI */ null, team, timeOnTimeFactor,
-                            timeOnDistanceAllowancePerNauticalMileAsMillis == null ? null
-                                    : new MillisecondsDurationImpl(timeOnDistanceAllowancePerNauticalMileAsMillis),
-                            searchTag, boat);
+            final UUID competitorUuid = UUID.randomUUID();
+            final CompetitorWithBoat competitor = getSecurityService()
+                    .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.COMPETITOR,
+                            competitorUuid.toString(), name, new ActionWithResult<CompetitorWithBoat>() {
+                                @Override
+                                public CompetitorWithBoat run() throws Exception {
+                                    return getService().getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(
+                                            UUID.randomUUID(), name, /* shortName */ null, /* displayColor */ null,
+                                            email, /* flagImageURI */ null, team, timeOnTimeFactor,
+                                            timeOnDistanceAllowancePerNauticalMileAsMillis == null ? null
+                                                    : new MillisecondsDurationImpl(
+                                                            timeOnDistanceAllowancePerNauticalMileAsMillis),
+                                            searchTag, boat);
+                                }
+                            });
+
             regatta.registerCompetitor(competitor);
             response = Response.ok(CompetitorJsonSerializer.create().serialize(competitor).toJSONString())
                     .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
@@ -386,10 +397,23 @@ public class RegattasResource extends AbstractSailingServerResource {
         } else {
             response = createAndAddCompetitor(regattaName, nationalityThreeLetterIOCCode, timeOnTimeFactor,
                     timeOnDistanceAllowancePerNauticalMileAsMillis, searchTag, competitorName, competitorEmail,
-                    shortName -> new BoatImpl(UUID.randomUUID(), shortName, getService().getBaseDomainFactory()
-                            .getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */ true), sailId));
+                    shortName -> createBoat(shortName, boatClassName, sailId));
         }
         return response;
+    }
+
+    private DynamicBoat createBoat(String name, String boatClassName, String sailId) {
+        final UUID boatUUID = UUID.randomUUID();
+        DynamicBoat boat = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                SecuredDomainType.BOAT, boatUUID.toString(), name, new ActionWithResult<DynamicBoat>() {
+
+                    @Override
+                    public DynamicBoat run() throws Exception {
+                        return new BoatImpl(boatUUID, name, getService().getBaseDomainFactory()
+                                .getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */ true), sailId);
+                    }
+                });
+        return boat;
     }
 
     @POST
