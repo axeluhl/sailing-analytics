@@ -4,9 +4,9 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.sap.sailing.windestimation"/>
-	<classpathentry kind="lib" path="/com.sap.sailing.windestimation/lib/com.github.haifengl.smile-core-1.5.1.jar"/>
-	<classpathentry kind="lib" path="/com.sap.sailing.windestimation/lib/com.github.haifengl.smile-data-1.5.1.jar"/>
-	<classpathentry kind="lib" path="/com.sap.sailing.windestimation/lib/com.github.haifengl.smile-graph-1.5.1.jar"/>
-	<classpathentry kind="lib" path="/com.sap.sailing.windestimation/lib/com.github.haifengl.smile-math-1.5.1.jar"/>
+	<classpathentry kind="lib" path="/com.sap.sailing.windestimation/lib/smile-core-1.5.2.jar"/>
+	<classpathentry kind="lib" path="/com.sap.sailing.windestimation/lib/smile-data-1.5.2.jar"/>
+	<classpathentry kind="lib" path="/com.sap.sailing.windestimation/lib/smile-graph-1.5.2.jar"/>
+	<classpathentry kind="lib" path="/com.sap.sailing.windestimation/lib/smile-math-1.5.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
