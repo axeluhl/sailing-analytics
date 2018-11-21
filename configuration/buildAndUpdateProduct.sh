@@ -97,12 +97,6 @@ extra=''
 parallelexecution=0
 p2local=0
 
-export max_user_watches=`cat /proc/sys/fs/inotify/max_user_watches`
-echo "max User Watches: $max_user_watches"
-echo "trying to set max User Watches to 16384"
-sysctl fs.inotify.max_user_watches=16384
-sysctl -p
-
 if [ $# -eq 0 ]; then
     echo "buildAndUpdateProduct [-b -u -g -t -a -r -o -c -p -v -m <config> -n <package> -l <port> -x <gwt-workers> -j <test-package>] [build|install|all|hot-deploy|remote-deploy|local-deploy|release]"
     echo ""
@@ -197,7 +191,7 @@ echo TMP will be used for java.io.tmpdir and is $TMP
 if [ "$TMP" = "" ]; then
   export TMP=/tmp
 fi
-extra="${extra} -Dgwt.workers=${GWT_WORKERS} -Djava.io.tmpdir=$TMP -Dgwt.watchFileChanges=false"
+extra="${extra} -Dgwt.workers=${GWT_WORKERS} -Djava.io.tmpdir=$TMP"
 
 shift $((OPTIND-1))
 
