@@ -1,6 +1,7 @@
 package com.sap.sse.util.impl;
 
 import java.io.Serializable;
+import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -38,7 +39,7 @@ import com.sap.sse.common.ReverseRandomAccessList;
  * 
  * @author Axel Uhl (d043530)
  */
-public class ArrayListNavigableSet<E> implements NavigableSet<E>, Serializable {
+public class ArrayListNavigableSet<E> extends AbstractSet<E> implements NavigableSet<E>, Serializable {
     private static final long serialVersionUID = 6923963699509907975L;
     private final List<E> list;
     private final Comparator<? super E> comparator;
