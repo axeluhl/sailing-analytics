@@ -3,12 +3,13 @@ package com.sap.sailing.windestimation.data.deserializer;
 import org.json.simple.JSONObject;
 
 import com.sap.sailing.domain.base.BoatClass;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.impl.DegreePosition;
 import com.sap.sailing.domain.common.impl.KnotSpeedWithBearingImpl;
 import com.sap.sailing.domain.common.impl.WindImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.DetailedBoatClassJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
 import com.sap.sailing.windestimation.classifier.maneuver.ManeuverTypeForInternalClassification;
 import com.sap.sailing.windestimation.data.LabelledManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverCategory;
@@ -18,7 +19,7 @@ import com.sap.sse.common.impl.MillisecondsTimePoint;
 
 public class ManeuverForEstimationJsonDeserializer implements JsonDeserializer<ManeuverForEstimation> {
 
-    private final DetailedBoatClassJsonDeserializer boatClassDeserializer = new DetailedBoatClassJsonDeserializer();
+    private final BoatClassJsonDeserializer boatClassDeserializer = new BoatClassJsonDeserializer(DomainFactory.INSTANCE);
 
     @Override
     public ManeuverForEstimation deserialize(JSONObject object) throws JsonDeserializationException {

@@ -12,7 +12,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.impl.MeterDistance;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.DetailedBoatClassJsonDeserializer;
+import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
 import com.sap.sailing.server.gateway.serialization.impl.CompetitorTrackWithEstimationDataJsonSerializer;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sse.common.Distance;
@@ -22,11 +22,10 @@ public class CompetitorTrackWithEstimationDataJsonDeserializer<T>
         implements JsonDeserializer<CompetitorTrackWithEstimationData<T>> {
 
     private final JSONParser jsonParser = new JSONParser();
-    private final DetailedBoatClassJsonDeserializer boatClassJsonDeserializer;
+    private final BoatClassJsonDeserializer boatClassJsonDeserializer;
     private final JsonDeserializer<T> competitorTrackElementsJsonDeserializer;
 
-    public CompetitorTrackWithEstimationDataJsonDeserializer(
-            DetailedBoatClassJsonDeserializer boatClassJsonDeserializer,
+    public CompetitorTrackWithEstimationDataJsonDeserializer(BoatClassJsonDeserializer boatClassJsonDeserializer,
             JsonDeserializer<T> competitorTrackElementsJsonDeserializer) {
         this.boatClassJsonDeserializer = boatClassJsonDeserializer;
         this.competitorTrackElementsJsonDeserializer = competitorTrackElementsJsonDeserializer;

@@ -2,9 +2,10 @@ package com.sap.sailing.windestimation.data.persistence.maneuver;
 
 import java.net.UnknownHostException;
 
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
+import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CompleteManeuverCurveWithEstimationDataJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.DetailedBoatClassJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.ManeuverMainCurveWithEstimationDataJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.ManeuverWindJsonDeserializer;
@@ -33,7 +34,7 @@ public class RaceWithCompleteManeuverCurvePersistenceManager
                 new ManeuverMainCurveWithEstimationDataJsonDeserializer(),
                 new ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonDeserializer(),
                 new ManeuverWindJsonDeserializer(), new PositionJsonDeserializer());
-        DetailedBoatClassJsonDeserializer boatClassDeserializer = new DetailedBoatClassJsonDeserializer();
+        BoatClassJsonDeserializer boatClassDeserializer = new BoatClassJsonDeserializer(DomainFactory.INSTANCE);
         return new CompetitorTrackWithEstimationDataJsonDeserializer<>(boatClassDeserializer,
                 completeManeuverCurveDeserializer);
     }

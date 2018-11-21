@@ -7,6 +7,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.windestimation.classifier.AbstractManeuverClassificationModel;
 import com.sap.sailing.windestimation.classifier.ClassifierPersistenceException;
 import com.sap.sailing.windestimation.classifier.ContextSpecificModelMetadata;
@@ -104,7 +105,8 @@ public abstract class AbstractSmileManeuverClassificationModel<InstanceType, T e
 
         @Override
         public ModelMetadata<?, ?> loadFromStream(InputStream input) throws ClassifierPersistenceException {
-            try (ObjectInputStream deserializer = new ObjectInputStream(input)) {
+            try (ObjectInputStream deserializer = DomainFactory.INSTANCE
+                    .createObjectInputStreamResolvingAgainstThisFactory(input)) {
                 @SuppressWarnings("unchecked")
                 AbstractSmileManeuverClassificationModel<InstanceType, ContextSpecificModelMetadata<InstanceType>> loadedModel = (AbstractSmileManeuverClassificationModel<InstanceType, ContextSpecificModelMetadata<InstanceType>>) deserializer
                         .readObject();

@@ -9,7 +9,7 @@ import org.json.simple.JSONObject;
 import org.junit.Test;
 
 import com.sap.sailing.domain.base.BoatClass;
-import com.sap.sailing.domain.base.impl.BoatClassImpl;
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.common.BoatHullType;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
@@ -24,8 +24,8 @@ import com.sap.sailing.domain.maneuverdetection.impl.CompleteManeuverCurveWithEs
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataImpl;
 import com.sap.sailing.domain.maneuverdetection.impl.ManeuverMainCurveWithEstimationDataImpl;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
+import com.sap.sailing.server.gateway.deserialization.impl.BoatClassJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.CompleteManeuverCurveWithEstimationDataJsonDeserializer;
-import com.sap.sailing.server.gateway.deserialization.impl.DetailedBoatClassJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.ManeuverCurveWithUnstableCourseAndSpeedWithEstimationDataJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.ManeuverMainCurveWithEstimationDataJsonDeserializer;
 import com.sap.sailing.server.gateway.deserialization.impl.ManeuverWindJsonDeserializer;
@@ -408,17 +408,16 @@ public class EstimationDataSerializationDeserializationTest {
 
     @Test
     public void testDetailedBoatClass() throws JsonDeserializationException {
-        String name = "bla";
-        boolean typicallyStartsUpwind = true;
-        String displayName = "A bla";
-        Distance hullLength = new MeterDistance(11);
-        Distance hullBeam = new MeterDistance(4.01);
-        BoatHullType hullType = BoatHullType.SURFERBOARD;
-        BoatClass boatClass = new BoatClassImpl(name, typicallyStartsUpwind, displayName, hullLength, hullBeam,
-                hullType);
+        BoatClass boatClass = DomainFactory.INSTANCE.getOrCreateBoatClass("49er", /* typicallyStartsUpwind */true);
+        String name = boatClass.getName();
+        boolean typicallyStartsUpwind = boatClass.typicallyStartsUpwind();
+        String displayName = boatClass.getDisplayName();
+        Distance hullLength = boatClass.getHullLength();
+        Distance hullBeam = boatClass.getHullBeam();
+        BoatHullType hullType = boatClass.getHullType();
         DetailedBoatClassJsonSerializer serializer = new DetailedBoatClassJsonSerializer();
         JSONObject json = serializer.serialize(boatClass);
-        DetailedBoatClassJsonDeserializer deserializer = new DetailedBoatClassJsonDeserializer();
+        BoatClassJsonDeserializer deserializer = new BoatClassJsonDeserializer(DomainFactory.INSTANCE);
         BoatClass deserialized = deserializer.deserialize(json);
         assertEquals(name, deserialized.getName());
         assertEquals(typicallyStartsUpwind, deserialized.typicallyStartsUpwind());
@@ -426,6 +425,7 @@ public class EstimationDataSerializationDeserializationTest {
         assertEquals(hullLength, deserialized.getHullLength());
         assertEquals(hullBeam, deserialized.getHullBeam());
         assertEquals(hullType, deserialized.getHullType());
+        assertEquals(boatClass, deserialized);
     }
 
 }

@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
+import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.polars.impl.PolarDataServiceImpl;
 import com.sap.sailing.windestimation.data.importer.PolarDataImporter;
@@ -17,6 +18,7 @@ public class PolarDataServiceAccessUtil {
     public static PolarDataService getPersistedPolarService()
             throws MalformedURLException, IOException, InterruptedException, ClassNotFoundException {
         PolarDataServiceImpl polarService = new PolarDataServiceImpl();
+        polarService.registerDomainFactory(DomainFactory.INSTANCE);
         polarService.clearReplicaState();
         FileInputStream fileInputStream = new FileInputStream(new File(PolarDataImporter.polarDataFilePath));
         polarService.initiallyFillFrom(fileInputStream);
