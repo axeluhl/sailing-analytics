@@ -297,16 +297,18 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
 
         final Map<String, UserGroup> defaultTenant = new ConcurrentHashMap<>();
         final BasicDBList defaultTenantIds = (BasicDBList) userDBObject.get(FieldNames.User.DEFAULT_TENANT_IDS.name());
-        for (Object singleDefaultTenant : defaultTenantIds) {
-            BasicDBObject singleDefaultTenantObj = (BasicDBObject) singleDefaultTenant;
-            String serverName = singleDefaultTenantObj.getString(FieldNames.User.DEFAULT_TENANT_SERVER.name());
-            UUID groupId = (UUID) singleDefaultTenantObj.get(FieldNames.User.DEFAULT_TENANT_GROUP.name());
-            UserGroup tenantOfGroup = tenants.get(groupId);
-            if (tenantOfGroup == null) {
-                logger.warning("Couldn't find tenant for user " + name + ". The tenant was identified by ID " + groupId
-                        + " but no tenant with that ID was found");
-            } else {
-                defaultTenant.put(serverName, tenantOfGroup);
+        if (defaultTenantIds != null) {
+            for (Object singleDefaultTenant : defaultTenantIds) {
+                BasicDBObject singleDefaultTenantObj = (BasicDBObject) singleDefaultTenant;
+                String serverName = singleDefaultTenantObj.getString(FieldNames.User.DEFAULT_TENANT_SERVER.name());
+                UUID groupId = (UUID) singleDefaultTenantObj.get(FieldNames.User.DEFAULT_TENANT_GROUP.name());
+                UserGroup tenantOfGroup = tenants.get(groupId);
+                if (tenantOfGroup == null) {
+                    logger.warning("Couldn't find tenant for user " + name + ". The tenant was identified by ID "
+                            + groupId + " but no tenant with that ID was found");
+                } else {
+                    defaultTenant.put(serverName, tenantOfGroup);
+                }
             }
         }
         DBObject accountsMap = (DBObject) userDBObject.get(FieldNames.User.ACCOUNTS.name());
