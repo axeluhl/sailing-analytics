@@ -289,7 +289,7 @@ public class CandidateFinderImpl implements CandidateFinder {
 
     @Override
     public Util.Pair<Iterable<Candidate>, Iterable<Candidate>> getAllCandidates(Competitor c) {
-        Set<GPSFixMoving> fixes = getAllFixes(c);
+        Iterable<GPSFixMoving> fixes = getAllFixes(c);
         distanceCache.get(c).clear();
         xteCache.get(c).clear();
         synchronized (xteCandidates) {
@@ -565,7 +565,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                     fixIsValid = track.isValid(fix);
                     if (fixIsValid) {
                         TimePoint t = fix.getTimePoint();
-                        fixBefore = track.getLastFixBefore(t);
+                        fixBefore = track.getLastFixBefore(t); // TODO bug4221 try to avoid this expensive search in case the fixes are already more or less contiguous
                         fixAfter = track.getFirstFixAfter(t);
                     }
                 } finally {
@@ -587,7 +587,7 @@ public class CandidateFinderImpl implements CandidateFinder {
             try {
                 track.lockForRead();
                 TimePoint timePoint = fix.getTimePoint();
-                fixBefore = track.getLastFixBefore(timePoint);
+                fixBefore = track.getLastFixBefore(timePoint); // TODO bug4221 try to avoid this expensive search in case the fixes are already more or less contiguous
                 fixAfter = track.getFirstFixAfter(timePoint);
             } finally {
                 track.unlockAfterRead();
@@ -723,7 +723,7 @@ public class CandidateFinderImpl implements CandidateFinder {
                 try {
                     fixIsValid = track.isValid(fix);
                     if (fixIsValid) {
-                        fixBefore = track.getLastFixBefore(t);
+                        fixBefore = track.getLastFixBefore(t); // TODO bug4221 try to avoid this expensive search in case the fixes are already more or less contiguous
                         fixAfter = track.getFirstFixAfter(t);
                     }
                 } finally {
