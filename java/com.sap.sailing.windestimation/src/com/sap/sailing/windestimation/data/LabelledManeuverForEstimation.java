@@ -4,7 +4,7 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.Position;
 import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sailing.domain.common.Wind;
-import com.sap.sailing.windestimation.maneuverclassifier.ManeuverTypeForInternalClassification;
+import com.sap.sailing.windestimation.classifier.maneuver.ManeuverTypeForInternalClassification;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.TimePoint;
 

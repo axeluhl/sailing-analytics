@@ -7,11 +7,13 @@ import java.lang.reflect.Field;
 
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.windestimation.classifier.maneuver.ManeuverFeatures;
+import com.sap.sailing.windestimation.classifier.store.ClassifierModelStore;
+import com.sap.sailing.windestimation.classifier.store.MongoDbClassifierModelStore;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
 import com.sap.sailing.windestimation.data.persistence.maneuver.PersistedElementsIterator;
 import com.sap.sailing.windestimation.data.persistence.maneuver.RaceWithCompleteManeuverCurvePersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.polars.PolarDataServiceAccessUtil;
-import com.sap.sailing.windestimation.maneuverclassifier.ManeuverFeatures;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
 public class WindEstimatorManeuverNumberDependentEvaluationRunner {
@@ -36,8 +38,10 @@ public class WindEstimatorManeuverNumberDependentEvaluationRunner {
         LoggingUtil.logInfo("Loading polar data");
         PolarDataService polarService = PolarDataServiceAccessUtil.getPersistedPolarService();
         LoggingUtil.logInfo("Wind estimator evaluation started...");
+        ClassifierModelStore classifierModelStore = new MongoDbClassifierModelStore(persistenceManager.getDb());
         WindEstimatorFactories estimatorFactories = new WindEstimatorFactories(polarService,
-                new ManeuverFeatures(ENABLE_POLARS, ENABLE_SCALED_SPEED, ENABLE_MARKS_INFORMATION));
+                new ManeuverFeatures(ENABLE_POLARS, ENABLE_SCALED_SPEED, ENABLE_MARKS_INFORMATION),
+                classifierModelStore);
 
         double[] avgErrorDegreesPerManeuverCount = new double[MAX_MANEUVERS];
         double[] avgConfidencePerManeuverCount = new double[MAX_MANEUVERS];

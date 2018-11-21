@@ -1,46 +1,38 @@
-package com.sap.sailing.windestimation.maneuverclassifier;
+package com.sap.sailing.windestimation.classifier.maneuver;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.maneuverdetection.ShortTimeAfterLastHitCache;
-import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 
 public class ManeuverClassifiersCache {
 
     public static final int MIN_FIXES_FOR_POLARS_INFORMATION = 10000;
 
-    private final ShortTimeAfterLastHitCache<ClassifierType, ProbabilisticManeuverClassifier> classifierCache;
-    private final PolarDataService polarDataService;
+    private final ShortTimeAfterLastHitCache<ClassifierType, ManeuverClassifier> classifierCache;
     private final ManeuverFeatures maneuverFeatures;
 
-    public ManeuverClassifiersCache(long preserveLoadedClassifiersMillis, ManeuverFeatures maneuverFeatures,
-            PolarDataService polarDataService) {
-        this.maneuverFeatures = maneuverFeatures;
-        this.polarDataService = polarDataService;
-        this.classifierCache = new ShortTimeAfterLastHitCache<ClassifierType, ProbabilisticManeuverClassifier>(
-                preserveLoadedClassifiersMillis, classifierType -> ManeuverClassifierLoader
+    public ManeuverClassifiersCache(ManeuverClassifierLoader classifierLoader, long preserveLoadedClassifiersMillis,
+            ManeuverFeatures maxManeuverFeatures) {
+        this.maneuverFeatures = maxManeuverFeatures;
+        this.classifierCache = new ShortTimeAfterLastHitCache<ClassifierType, ManeuverClassifier>(
+                preserveLoadedClassifiersMillis, classifierType -> classifierLoader
                         .loadBestClassifier(classifierType.maneuverFeatures, classifierType.boatClass));
+
     }
 
-    public ProbabilisticManeuverClassifier getBestClassifier(ManeuverForEstimation maneuver) {
+    public ManeuverClassifier getBestClassifier(ManeuverForEstimation maneuver) {
         ManeuverFeatures maneuverFeatures = determineFinalManeuverFeatures(maneuver);
         return classifierCache.getValue(new ClassifierType(maneuverFeatures,
                 maneuverFeatures.isPolarsInformation() ? maneuver.getBoatClass() : null));
     }
 
     private ManeuverFeatures determineFinalManeuverFeatures(ManeuverForEstimation maneuver) {
-        Long fixesCountForBoatClass = polarDataService.getFixCountPerBoatClass().get(maneuver.getBoatClass());
-        boolean polars = maneuverFeatures.isPolarsInformation() && fixesCountForBoatClass != null
-                && fixesCountForBoatClass >= MIN_FIXES_FOR_POLARS_INFORMATION
+        boolean polars = maneuverFeatures.isPolarsInformation()
                 && maneuver.getDeviationFromOptimalJibeAngleInDegrees() != null
                 && maneuver.getDeviationFromOptimalTackAngleInDegrees() != null;
         boolean marks = maneuverFeatures.isMarksInformation() && maneuver.getRelativeBearingToNextMarkAfter() != null
                 && maneuver.getRelativeBearingToNextMarkBefore() != null;
         return new ManeuverFeatures(polars, maneuverFeatures.isScaledSpeed(), marks);
-    }
-
-    public PolarDataService getPolarDataService() {
-        return polarDataService;
     }
 
     public ManeuverFeatures getManeuverFeatures() {

@@ -4,10 +4,13 @@ import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimat
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.windestimation.PolarsFittingBasedWindEstimationComponentImpl;
 import com.sap.sailing.windestimation.SimpleConfigurableManeuverBasedWindEstimationComponentImpl;
-import com.sap.sailing.windestimation.WindEstimationComponent;
 import com.sap.sailing.windestimation.SimpleConfigurableManeuverBasedWindEstimationComponentImpl.ManeuverClassificationsAggregatorImplementation;
+import com.sap.sailing.windestimation.classifier.maneuver.ManeuverClassifierLoader;
+import com.sap.sailing.windestimation.classifier.maneuver.ManeuverClassifiersCache;
+import com.sap.sailing.windestimation.classifier.maneuver.ManeuverFeatures;
+import com.sap.sailing.windestimation.classifier.store.ClassifierModelStore;
+import com.sap.sailing.windestimation.WindEstimationComponent;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
-import com.sap.sailing.windestimation.maneuverclassifier.ManeuverFeatures;
 import com.sap.sailing.windestimation.preprocessing.RaceElementsFilteringPreprocessingPipelineImpl;
 
 /**
@@ -19,10 +22,14 @@ public class WindEstimatorFactories {
 
     private final PolarDataService polarService;
     private final ManeuverFeatures maneuverFeatures;
+    private final ManeuverClassifiersCache maneuverClassifiersCache;
 
-    public WindEstimatorFactories(PolarDataService polarService, ManeuverFeatures maneuverFeatures) {
+    public WindEstimatorFactories(PolarDataService polarService, ManeuverFeatures maneuverFeatures,
+            ClassifierModelStore classifierModelStore) {
         this.polarService = polarService;
         this.maneuverFeatures = maneuverFeatures;
+        this.maneuverClassifiersCache = new ManeuverClassifiersCache(new ManeuverClassifierLoader(classifierModelStore),
+                3600000, maneuverFeatures);
     }
 
     public WindEstimatorFactory<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> get(
@@ -47,8 +54,8 @@ public class WindEstimatorFactories {
 
             @Override
             public WindEstimationComponent<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> createNewEstimatorInstance() {
-                return new SimpleConfigurableManeuverBasedWindEstimationComponentImpl(maneuverFeatures, polarService,
-                        ManeuverClassificationsAggregatorImplementation.HMM);
+                return new SimpleConfigurableManeuverBasedWindEstimationComponentImpl(maneuverFeatures,
+                        maneuverClassifiersCache, polarService, ManeuverClassificationsAggregatorImplementation.HMM);
             }
 
             @Override
@@ -63,7 +70,8 @@ public class WindEstimatorFactories {
 
             @Override
             public WindEstimationComponent<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> createNewEstimatorInstance() {
-                return new SimpleConfigurableManeuverBasedWindEstimationComponentImpl(maneuverFeatures, polarService,
+                return new SimpleConfigurableManeuverBasedWindEstimationComponentImpl(maneuverFeatures,
+                        maneuverClassifiersCache, polarService,
                         ManeuverClassificationsAggregatorImplementation.CLUSTERING);
             }
 
@@ -95,7 +103,8 @@ public class WindEstimatorFactories {
 
             @Override
             public WindEstimationComponent<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> createNewEstimatorInstance() {
-                return new SimpleConfigurableManeuverBasedWindEstimationComponentImpl(maneuverFeatures, polarService,
+                return new SimpleConfigurableManeuverBasedWindEstimationComponentImpl(maneuverFeatures,
+                        maneuverClassifiersCache, polarService,
                         ManeuverClassificationsAggregatorImplementation.MEAN_OUTLIER);
             }
 
@@ -111,7 +120,8 @@ public class WindEstimatorFactories {
 
             @Override
             public WindEstimationComponent<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> createNewEstimatorInstance() {
-                return new SimpleConfigurableManeuverBasedWindEstimationComponentImpl(maneuverFeatures, polarService,
+                return new SimpleConfigurableManeuverBasedWindEstimationComponentImpl(maneuverFeatures,
+                        maneuverClassifiersCache, polarService,
                         ManeuverClassificationsAggregatorImplementation.NEIGHBOR_OUTLIER);
             }
 

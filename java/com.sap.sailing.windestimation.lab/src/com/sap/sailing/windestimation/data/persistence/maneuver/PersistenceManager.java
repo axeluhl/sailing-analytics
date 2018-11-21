@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.json.simple.parser.ParseException;
 
+import com.mongodb.DB;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sse.common.Util.Pair;
 
@@ -30,5 +31,7 @@ public interface PersistenceManager<T> {
     Pair<String, T> getNextElement(String lastId, String query) throws JsonDeserializationException, ParseException;
 
     String getFilterQueryForYear(int year, boolean exclude);
+    
+    DB getDb();
 
 }

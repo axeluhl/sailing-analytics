@@ -2,10 +2,10 @@ package com.sap.sailing.windestimation;
 
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.windestimation.classifier.maneuver.ManeuverClassifiersCache;
+import com.sap.sailing.windestimation.classifier.maneuver.ManeuverFeatures;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
-import com.sap.sailing.windestimation.maneuverclassifier.ManeuverClassifiersCache;
-import com.sap.sailing.windestimation.maneuverclassifier.ManeuverFeatures;
 import com.sap.sailing.windestimation.preprocessing.RaceElementsFilteringPreprocessingPipelineImpl;
 import com.sap.sailing.windestimation.preprocessing.RacePreprocessingPipeline;
 import com.sap.sailing.windestimation.windinference.DummyBasedTwsCalculatorImpl;
@@ -17,31 +17,35 @@ public class SimpleConfigurableManeuverBasedWindEstimationComponentImpl extends
         ManeuverBasedWindEstimationComponentImpl<RaceWithEstimationData<CompleteManeuverCurveWithEstimationData>> {
 
     public SimpleConfigurableManeuverBasedWindEstimationComponentImpl(ManeuverFeatures maneuverFeatures,
-            PolarDataService polarService,
+            ManeuverClassifiersCache maneuverClassifiersCache, PolarDataService polarService,
             RacePreprocessingPipeline<CompleteManeuverCurveWithEstimationData, ManeuverForEstimation> preprocessingPipeline,
             ManeuverClassificationsAggregatorImplementation aggregatorImplementation) {
-        super(preprocessingPipeline, new ManeuverClassifiersCache(60000, maneuverFeatures, polarService),
-                aggregatorImplementation.createNewInstance(maneuverFeatures, polarService),
+        super(preprocessingPipeline, maneuverClassifiersCache, aggregatorImplementation.createNewInstance(polarService),
                 new WindTrackCalculatorImpl(new MiddleCourseBasedTwdCalculatorImpl(),
                         maneuverFeatures.isPolarsInformation() ? new PolarsBasedTwsCalculatorImpl(polarService)
                                 : new DummyBasedTwsCalculatorImpl()));
     }
 
     public SimpleConfigurableManeuverBasedWindEstimationComponentImpl(ManeuverFeatures maneuverFeatures,
-            PolarDataService polarService, ManeuverClassificationsAggregatorImplementation aggregatorImplementation) {
-        this(maneuverFeatures, polarService, new RaceElementsFilteringPreprocessingPipelineImpl(),
-                aggregatorImplementation);
+            ManeuverClassifiersCache maneuverClassifiersCache, PolarDataService polarService,
+            ManeuverClassificationsAggregatorImplementation aggregatorImplementation) {
+        this(maneuverFeatures, maneuverClassifiersCache, polarService,
+                new RaceElementsFilteringPreprocessingPipelineImpl(), aggregatorImplementation);
+    }
+
+    public SimpleConfigurableManeuverBasedWindEstimationComponentImpl(ManeuverFeatures maneuverFeatures,
+            ManeuverClassifiersCache maneuverClassifiersCache, PolarDataService polarService) {
+        this(maneuverFeatures, maneuverClassifiersCache, polarService,
+                new RaceElementsFilteringPreprocessingPipelineImpl(),
+                ManeuverClassificationsAggregatorImplementation.HMM);
     }
 
     public enum ManeuverClassificationsAggregatorImplementation {
         HMM, CLUSTERING, MEAN_OUTLIER, NEIGHBOR_OUTLIER;
 
-        ManeuverClassificationsAggregator createNewInstance(ManeuverFeatures maneuverFeatures,
-                PolarDataService polarService) {
-            ManeuverClassifiersCache maneuverClassifiersCache = new ManeuverClassifiersCache(30000, maneuverFeatures,
-                    polarService);
+        ManeuverClassificationsAggregator createNewInstance(PolarDataService polarService) {
             ManeuverClassificationsAggregatorFactory factory = new ManeuverClassificationsAggregatorFactory(
-                    maneuverClassifiersCache);
+                    polarService);
             switch (this) {
             case HMM:
                 return factory.hmm();

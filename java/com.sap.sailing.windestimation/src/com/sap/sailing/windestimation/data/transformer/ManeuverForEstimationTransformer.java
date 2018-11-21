@@ -6,11 +6,11 @@ import java.util.List;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.maneuverdetection.CompleteManeuverCurveWithEstimationData;
+import com.sap.sailing.windestimation.classifier.maneuver.ManeuverTypeForInternalClassification;
 import com.sap.sailing.windestimation.data.CompetitorTrackWithEstimationData;
 import com.sap.sailing.windestimation.data.LabelledManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverCategory;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
-import com.sap.sailing.windestimation.maneuverclassifier.ManeuverTypeForInternalClassification;
 
 public class ManeuverForEstimationTransformer
         extends AbstractCompleteManeuverCurveWithEstimationDataTransformer<ManeuverForEstimation> {

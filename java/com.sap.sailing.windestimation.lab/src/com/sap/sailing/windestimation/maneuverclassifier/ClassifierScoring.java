@@ -2,6 +2,8 @@ package com.sap.sailing.windestimation.maneuverclassifier;
 
 import java.util.List;
 
+import com.sap.sailing.windestimation.classifier.TrainableManeuverClassificationModel;
+import com.sap.sailing.windestimation.classifier.maneuver.ManeuverModelMetadata;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 
 import smile.validation.ConfusionMatrix;
@@ -13,25 +15,28 @@ import smile.validation.ConfusionMatrix;
  */
 public class ClassifierScoring {
 
-    private TrainableSingleManeuverOfflineClassifier trainedClassifier;
+    private TrainableManeuverClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> trainedClassifier;
     private double lastAvgF1Score = 0;
     private double lastAvgPrecision = 0;
     private double lastAvgRecall = 0;
 
-    public ClassifierScoring(TrainableSingleManeuverOfflineClassifier trainedClassifier) {
-        this.trainedClassifier = trainedClassifier;
+    public ClassifierScoring(
+            TrainableManeuverClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> trainedClassifierModel) {
+        this.trainedClassifier = trainedClassifierModel;
     }
 
     public String printScoring(List<ManeuverForEstimation> maneuvers) {
-        int[] target = MLUtil.getOutputAsIntArray(maneuvers, trainedClassifier.getSupportedManeuverTypesMapping());
+        ManeuverModelMetadata modelMetadata = trainedClassifier.getModelMetadata().getContextSpecificModelMetadata();
+        int[] target = modelMetadata.getYVector(maneuvers);
         int[] predicted = new int[maneuvers.size()];
         int i = 0;
         for (ManeuverForEstimation maneuver : maneuvers) {
-            double[] classificationResult = trainedClassifier.classifyManeuverWithProbabilities(maneuver);
+            double[] x = modelMetadata.getX(maneuver);
+            double[] classificationResult = trainedClassifier.classifyWithProbabilities(x);
             predicted[i++] = argmax(classificationResult);
         }
         int[][] confusionMatrix = new ConfusionMatrix(target, predicted).getMatrix();
-        int supportedManeuverTypesCount = trainedClassifier.getSupportedManeuverTypesCount();
+        int supportedManeuverTypesCount = modelMetadata.getNumberOfPossibleTargetValues();
         double[] precisionPerClass = new double[supportedManeuverTypesCount];
         double[] recallPerClass = new double[supportedManeuverTypesCount];
         double[] f1ScorePerClass = new double[supportedManeuverTypesCount];
@@ -50,26 +55,26 @@ public class ClassifierScoring {
             f1ScorePerClass[i] = f1score(tp, fp, fn);
         }
         StringBuilder str = new StringBuilder(trainedClassifier.getClass().getName());
-        lastAvgPrecision = appendStatistic("Precision", precisionPerClass, supportedManeuverTypesCount, str);
-        lastAvgRecall = appendStatistic("Recall", recallPerClass, supportedManeuverTypesCount, str);
-        lastAvgF1Score = appendStatistic("F1-Score", f1ScorePerClass, supportedManeuverTypesCount, str);
+        lastAvgPrecision = appendStatistic("Precision", precisionPerClass, str);
+        lastAvgRecall = appendStatistic("Recall", recallPerClass, str);
+        lastAvgF1Score = appendStatistic("F1-Score", f1ScorePerClass, str);
         return str.toString();
     }
 
-    private double appendStatistic(String statisticName, double[] statisticPerClass, int supportedManeuverTypesCount,
-            StringBuilder str) {
+    private double appendStatistic(String statisticName, double[] statisticPerClass, StringBuilder str) {
         str.append(":\n - ");
         str.append(statisticName);
         str.append("\n   | ");
         double statisticValueSum = 0;
-        for (int i = 0; i < supportedManeuverTypesCount; i++) {
-            str.append(trainedClassifier.getManeuverTypeByMappingIndex(i).toString());
+        for (int i = 0; i < statisticPerClass.length; i++) {
+            str.append(trainedClassifier.getModelMetadata().getContextSpecificModelMetadata()
+                    .getManeuverTypeByMappingIndex(i).toString());
             double statisticValue = statisticPerClass[i];
             statisticValueSum += statisticValue;
             str.append(String.format(" %.03f | ", statisticValue));
         }
         str.append("AVG");
-        double avgStatisticValue = statisticValueSum / supportedManeuverTypesCount;
+        double avgStatisticValue = statisticValueSum / statisticPerClass.length;
         str.append(String.format(" %.03f | ", avgStatisticValue));
         return avgStatisticValue;
     }

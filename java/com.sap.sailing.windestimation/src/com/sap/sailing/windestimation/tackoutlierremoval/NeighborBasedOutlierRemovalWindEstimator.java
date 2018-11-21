@@ -2,7 +2,7 @@ package com.sap.sailing.windestimation.tackoutlierremoval;
 
 import java.util.List;
 
-import com.sap.sailing.windestimation.maneuverclassifier.ManeuverWithEstimatedType;
+import com.sap.sailing.windestimation.classifier.maneuver.ManeuverWithEstimatedType;
 import com.sap.sailing.windestimation.windinference.TwdFromManeuverCalculator;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Util.Pair;

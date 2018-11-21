@@ -8,11 +8,11 @@ import java.util.stream.Collectors;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
+import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.windestimation.classifier.maneuver.ManeuverWithEstimatedType;
+import com.sap.sailing.windestimation.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
-import com.sap.sailing.windestimation.maneuverclassifier.ManeuverClassifiersCache;
-import com.sap.sailing.windestimation.maneuverclassifier.ManeuverWithEstimatedType;
-import com.sap.sailing.windestimation.maneuverclassifier.ManeuverWithProbabilisticTypeClassification;
 import com.sap.sailing.windestimation.maneuverclustering.ManeuverClassificationForClusteringImpl;
 import com.sap.sailing.windestimation.maneuverclustering.ManeuverClusteringBasedWindEstimationTrackImpl;
 import com.sap.sailing.windestimation.maneuvergraph.BestPathsCalculator;
@@ -24,10 +24,10 @@ import com.sap.sailing.windestimation.windinference.MiddleCourseBasedTwdCalculat
 
 public class ManeuverClassificationsAggregatorFactory {
 
-    private final ManeuverClassifiersCache maneuverClassifiersCache;
+    private final PolarDataService polarDataService;
 
-    public ManeuverClassificationsAggregatorFactory(ManeuverClassifiersCache maneuverClassifiersCache) {
-        this.maneuverClassifiersCache = maneuverClassifiersCache;
+    public ManeuverClassificationsAggregatorFactory(PolarDataService polarDataService) {
+        this.polarDataService = polarDataService;
     }
 
     public ManeuverClassificationsAggregator hmm() {
@@ -44,7 +44,7 @@ public class ManeuverClassificationsAggregatorFactory {
                 BoatClass boatClass = race.getCompetitorTracks().isEmpty() ? null
                         : race.getCompetitorTracks().get(0).getBoatClass();
                 ManeuverClusteringBasedWindEstimationTrackImpl windEstimator = new ManeuverClusteringBasedWindEstimationTrackImpl(
-                        race, boatClass, maneuverClassifiersCache.getPolarDataService(), 30000);
+                        race, boatClass, polarDataService, 30000);
                 try {
                     windEstimator.initialize();
                     List<ManeuverWithEstimatedType> tackManeuvers = windEstimator.getTackClusters().stream()

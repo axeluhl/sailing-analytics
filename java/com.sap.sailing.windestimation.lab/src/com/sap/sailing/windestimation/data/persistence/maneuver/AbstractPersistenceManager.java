@@ -123,7 +123,8 @@ public abstract class AbstractPersistenceManager<T> implements PersistenceManage
         return (JSONObject) jsonParser.parse(json);
     }
 
-    protected DB getDb() {
+    @Override
+    public DB getDb() {
         return db;
     }
 

@@ -12,6 +12,15 @@ import java.util.regex.Pattern;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.windestimation.classifier.ClassifierPersistenceException;
+import com.sap.sailing.windestimation.classifier.TrainableManeuverClassificationModel;
+import com.sap.sailing.windestimation.classifier.maneuver.ManeuverClassifierModelFactory;
+import com.sap.sailing.windestimation.classifier.maneuver.ManeuverFeatures;
+import com.sap.sailing.windestimation.classifier.maneuver.ManeuverModelMetadata;
+import com.sap.sailing.windestimation.classifier.store.ClassifierModelStore;
+import com.sap.sailing.windestimation.classifier.store.MongoDbClassifierModelStore;
+import com.sap.sailing.windestimation.data.ManeuverForEstimation;
+import com.sap.sailing.windestimation.data.persistence.maneuver.RegularManeuversForEstimationPersistenceManager;
 import com.sap.sailing.windestimation.data.persistence.polars.PolarDataServiceAccessUtil;
 import com.sap.sailing.windestimation.util.LoggingUtil;
 
@@ -25,37 +34,42 @@ public class PersistedManeuverClassifiersScorePrinter {
             throws MalformedURLException, ClassNotFoundException, IOException, InterruptedException {
         PolarDataService polarService = PolarDataServiceAccessUtil.getPersistedPolarService();
         Set<BoatClass> allBoatClasses = polarService.getAllBoatClassesWithPolarSheetsAvailable();
-        List<TrainableSingleManeuverOfflineClassifier> allBoatClassesClassifiers = new ArrayList<>();
+        RegularManeuversForEstimationPersistenceManager persistenceManager = new RegularManeuversForEstimationPersistenceManager();
+        ClassifierModelStore classifierModelStore = new MongoDbClassifierModelStore(persistenceManager.getDb());
+        List<TrainableManeuverClassificationModel<ManeuverForEstimation, ManeuverModelMetadata>> allClassifierModels = new ArrayList<>();
         LoggingUtil.logInfo("### Loading all boat class classifiers:");
         for (ManeuverFeatures maneuverFeatures : ManeuverFeatures.values()) {
-            List<TrainableSingleManeuverOfflineClassifier> classifiers = ManeuverClassifiersFactory
-                    .getAllTrainableClassifierInstances(maneuverFeatures, null);
-            for (TrainableSingleManeuverOfflineClassifier classifier : classifiers) {
+            List<TrainableManeuverClassificationModel<ManeuverForEstimation, ManeuverModelMetadata>> classifierModels = ManeuverClassifierModelFactory
+                    .getAllTrainableClassifierModels(maneuverFeatures, null);
+            for (TrainableManeuverClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> classifierModel : classifierModels) {
                 try {
-                    classifier.loadPersistedModel();
-                    allBoatClassesClassifiers.add(classifier);
+                    if (classifierModelStore.loadPersistedState(classifierModel)) {
+                        allClassifierModels.add(classifierModel);
+                    }
                 } catch (ClassifierPersistenceException e) {
                     e.printStackTrace();
                 }
             }
             for (BoatClass boatClass : allBoatClasses) {
-                classifiers = ManeuverClassifiersFactory.getAllTrainableClassifierInstances(maneuverFeatures,
+                classifierModels = ManeuverClassifierModelFactory.getAllTrainableClassifierModels(maneuverFeatures,
                         boatClass);
-                for (TrainableSingleManeuverOfflineClassifier classifier : classifiers) {
+                for (TrainableManeuverClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> classifierModel : classifierModels) {
                     try {
-                        classifier.loadPersistedModel();
-                        allBoatClassesClassifiers.add(classifier);
+                        if (classifierModelStore.loadPersistedState(classifierModel)) {
+                            allClassifierModels.add(classifierModel);
+                        }
                     } catch (ClassifierPersistenceException e) {
                     }
                 }
             }
         }
         StringBuilder str = new StringBuilder("Classifier name \t| Maneuver features \t| Boat class \t| Test score");
-        Collections.sort(allBoatClassesClassifiers, (a, b) -> Double.compare(a.getTestScore(), b.getTestScore()));
-        for (TrainableSingleManeuverOfflineClassifier classifier : allBoatClassesClassifiers) {
-            str.append("\r\n" + classifier.getClass().getSimpleName() + ": \t| " + classifier.getManeuverFeatures()
-                    + " \t| " + classifier.getBoatClass() + " \t| "
-                    + String.format(" %.03f", classifier.getTestScore()));
+        Collections.sort(allClassifierModels, (a, b) -> Double.compare(a.getTestScore(), b.getTestScore()));
+        for (TrainableManeuverClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> classifierModel : allClassifierModels) {
+            ManeuverModelMetadata modelMetadata = classifierModel.getModelMetadata().getContextSpecificModelMetadata();
+            str.append("\r\n" + classifierModel.getClass().getSimpleName() + ": \t| "
+                    + modelMetadata.getManeuverFeatures() + " \t| " + modelMetadata.getBoatClass() + " \t| "
+                    + String.format(" %.03f", classifierModel.getTestScore()));
         }
         String outputStr = str.toString();
         LoggingUtil.logInfo(outputStr);

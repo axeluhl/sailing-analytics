@@ -1,7 +1,7 @@
-package com.sap.sailing.windestimation.maneuverclassifier;
+package com.sap.sailing.windestimation.classifier.maneuver;
 
-import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
+import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.maneuvergraph.ProbabilityUtil;
 
 /**
@@ -14,10 +14,11 @@ public class ManeuverWithProbabilisticTypeClassification {
     private final double[] likelihoodPerManeuverType;
     private final ManeuverForEstimation maneuver;
 
-    public ManeuverWithProbabilisticTypeClassification(ManeuverForEstimation maneuver, double[] likelihoodPerManeuverType) {
+    public ManeuverWithProbabilisticTypeClassification(ManeuverForEstimation maneuver,
+            double[] likelihoodPerManeuverType) {
         this.maneuver = maneuver;
         for (int i = 0; i < likelihoodPerManeuverType.length; i++) {
-            likelihoodPerManeuverType[i] += 0.1;
+            likelihoodPerManeuverType[i] += 0.05;
         }
         ProbabilityUtil.normalizeLikelihoodArray(likelihoodPerManeuverType);
         this.likelihoodPerManeuverType = likelihoodPerManeuverType;

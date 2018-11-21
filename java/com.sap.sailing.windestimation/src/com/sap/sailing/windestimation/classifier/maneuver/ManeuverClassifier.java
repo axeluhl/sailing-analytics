@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.maneuverclassifier;
+package com.sap.sailing.windestimation.classifier.maneuver;
 
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 
@@ -12,5 +12,7 @@ public interface ManeuverClassifier {
     ManeuverWithProbabilisticTypeClassification classifyManeuver(ManeuverForEstimation maneuver);
 
     double getTestScore();
+    
+    boolean hasSupportForProvidedFeatures();
 
 }
