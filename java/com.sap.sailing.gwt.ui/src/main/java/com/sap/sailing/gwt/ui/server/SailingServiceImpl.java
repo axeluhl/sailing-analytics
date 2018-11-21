@@ -469,6 +469,8 @@ import com.sap.sailing.manage2sail.RegattaResultDescriptor;
 import com.sap.sailing.resultimport.ResultUrlProvider;
 import com.sap.sailing.resultimport.ResultUrlRegistry;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sailing.server.hierarchy.SailingHierarchyOwnershipUpdater;
+import com.sap.sailing.server.hierarchy.SailingHierarchyOwnershipUpdater.GroupOwnerUpdateStrategy;
 import com.sap.sailing.server.masterdata.MasterDataImporter;
 import com.sap.sailing.server.operationaltransformation.AddColumnToLeaderboard;
 import com.sap.sailing.server.operationaltransformation.AddColumnToSeries;
@@ -591,10 +593,13 @@ import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleImpl;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
@@ -1245,6 +1250,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         List<CompetitorDTO> result = new ArrayList<>();
         for (Competitor c : iterable) {
             CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(c);
+            SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorDTO, c.getIdentifier());
             result.add(competitorDTO);
         }
         return result;
@@ -5479,7 +5485,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private CompetitorWithBoat addOrUpdateCompetitorWithBoatInternal(CompetitorWithBoatDTO competitor) throws URISyntaxException {
-        CompetitorWithBoat result;
+        final CompetitorWithBoat result;
         CompetitorWithBoat existingCompetitor = getService().getCompetitorAndBoatStore().getExistingCompetitorWithBoatByIdAsString(competitor.getIdAsString());
         Nationality nationality = (competitor.getThreeLetterIocCountryCode() == null || competitor.getThreeLetterIocCountryCode().isEmpty()) ? null :
             getBaseDomainFactory().getOrCreateNationality(competitor.getThreeLetterIocCountryCode());
@@ -5490,13 +5496,23 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             DynamicTeam team = new TeamImpl(competitor.getName() + " team", Collections.singleton(sailor), null);
             // new boat
             DynamicBoat boat = (DynamicBoat) addOrUpdateBoatInternal(competitor.getBoat());
-            result = getBaseDomainFactory().getOrCreateCompetitorWithBoat(competitorUUID, competitor.getName(), competitor.getShortName(),
-                            competitor.getColor(), competitor.getEmail(), 
-                            competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()), team,
-                                    competitor.getTimeOnTimeFactor(),
-                                    competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag(), boat);
-            
+            final UUID competitorUuid = UUID.randomUUID();
+            result = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                    SecuredDomainType.COMPETITOR, competitorUuid.toString(), competitor.getName(),
+                    new ActionWithResult<CompetitorWithBoat>() {
+                        @Override
+                        public CompetitorWithBoat run() throws Exception {
+                            return getBaseDomainFactory().getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(
+                                    competitorUUID, competitor.getName(), competitor.getShortName(),
+                                    competitor.getColor(), competitor.getEmail(),
+                                    competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()),
+                                    team, competitor.getTimeOnTimeFactor(),
+                                    competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag(),
+                                    boat);
+                        }
+                    });
         } else {
+            SecurityUtils.getSubject().checkPermission(SecuredDomainType.COMPETITOR.getStringPermissionForObjects(DefaultActions.UPDATE, competitor.getIdAsString()));
             Competitor updatedCompetitor  = getService().apply(
                             new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(), competitor.getShortName(),
                                     competitor.getColor(), competitor.getEmail(), nationality,
@@ -5513,29 +5529,39 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     
     private Competitor addOrUpdateCompetitorWithoutBoatInternal(CompetitorDTO competitor) throws URISyntaxException {
-        Competitor result;
-        Competitor existingCompetitor = getService().getCompetitorAndBoatStore().getExistingCompetitorByIdAsString(competitor.getIdAsString());
-        Nationality nationality = (competitor.getThreeLetterIocCountryCode() == null || competitor.getThreeLetterIocCountryCode().isEmpty()) ? null :
-            getBaseDomainFactory().getOrCreateNationality(competitor.getThreeLetterIocCountryCode());
+        final Competitor result;
+        Competitor existingCompetitor = getService().getCompetitorAndBoatStore()
+                .getExistingCompetitorByIdAsString(competitor.getIdAsString());
+        Nationality nationality = (competitor.getThreeLetterIocCountryCode() == null
+                || competitor.getThreeLetterIocCountryCode().isEmpty()) ? null
+                        : getBaseDomainFactory().getOrCreateNationality(competitor.getThreeLetterIocCountryCode());
         if (competitor.getIdAsString() == null || competitor.getIdAsString().isEmpty() || existingCompetitor == null) {
             // new competitor
             UUID competitorUUID = UUID.randomUUID();
             DynamicPerson sailor = new PersonImpl(competitor.getName(), nationality, null, null);
             DynamicTeam team = new TeamImpl(competitor.getName() + " team", Collections.singleton(sailor), null);
-            result = getBaseDomainFactory().getOrCreateCompetitor(competitorUUID, competitor.getName(), competitor.getShortName(),
-                            competitor.getColor(), competitor.getEmail(), 
-                            competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()), team,
-                                    competitor.getTimeOnTimeFactor(),
-                                    competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag());
-        } else {
-            result = getService().apply(
-                            new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(), competitor.getShortName(),
-                                    competitor.getColor(), competitor.getEmail(), nationality,
-                                    competitor.getImageURL() == null ? null : new URI(competitor.getImageURL()),
+            result = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                    SecuredDomainType.COMPETITOR, competitorUUID.toString(), competitor.getName(),
+                    new ActionWithResult<Competitor>() {
+
+                        @Override
+                        public Competitor run() throws Exception {
+                            return getBaseDomainFactory().getOrCreateCompetitor(competitorUUID, competitor.getName(),
+                                    competitor.getShortName(), competitor.getColor(), competitor.getEmail(),
                                     competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()),
-                                    competitor.getTimeOnTimeFactor(),
-                                    competitor.getTimeOnDistanceAllowancePerNauticalMile(), 
-                                    competitor.getSearchTag()));
+                                    team, competitor.getTimeOnTimeFactor(),
+                                    competitor.getTimeOnDistanceAllowancePerNauticalMile(), competitor.getSearchTag());
+                        }
+                    });
+        } else {
+            SecurityUtils.getSubject().checkPermission(SecuredDomainType.COMPETITOR
+                    .getStringPermissionForObjects(DefaultActions.UPDATE, competitor.getIdAsString()));
+            result = getService().apply(new UpdateCompetitor(competitor.getIdAsString(), competitor.getName(),
+                    competitor.getShortName(), competitor.getColor(), competitor.getEmail(), nationality,
+                    competitor.getImageURL() == null ? null : new URI(competitor.getImageURL()),
+                    competitor.getFlagImageURL() == null ? null : new URI(competitor.getFlagImageURL()),
+                    competitor.getTimeOnTimeFactor(), competitor.getTimeOnDistanceAllowancePerNauticalMile(),
+                    competitor.getSearchTag()));
         }
         return result;
     }
@@ -5593,10 +5619,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             // new boat
             UUID boatUUID = UUID.randomUUID();
             BoatClass boatClass = getBaseDomainFactory().getOrCreateBoatClass(boat.getBoatClass().getName());
-            result = getBaseDomainFactory().getOrCreateBoat(boatUUID, boat.getName(), boatClass, boat.getSailId(), boat.getColor());
+            result = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                    SecuredDomainType.BOAT, boatUUID.toString(), boat.getName(), new ActionWithResult<Boat>() {
+
+                        @Override
+                        public Boat run() throws Exception {
+                            return getBaseDomainFactory().getOrCreateBoat(boatUUID, boat.getName(), boatClass,
+                                    boat.getSailId(), boat.getColor());
+                        }
+                    });
         } else {
-            result = getService().apply(
-                            new UpdateBoat(boat.getIdAsString(), boat.getName(), boat.getColor(), boat.getSailId()));
+            SecurityUtils.getSubject().checkPermission(
+                    SecuredDomainType.BOAT.getStringPermissionForObjects(DefaultActions.UPDATE, boat.getIdAsString()));
+            result = getService()
+                    .apply(new UpdateBoat(boat.getIdAsString(), boat.getName(), boat.getColor(), boat.getSailId()));
         }
         return result;
     }
@@ -8518,5 +8554,74 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             result = null;
         }
         return result;
+    }
+
+    @Override
+    public void updateGroupOwnerForEventHierarchy(UUID eventId, UUID newGroupOwnerId, String newGroupNameToCreate, boolean updateCompetitors,
+            boolean updateBoats) {
+        Event event = getService().getEvent(eventId);
+        UserGroup groupOwnerToSet = getSecurityService().getUserGroup(newGroupOwnerId);
+        if (event != null && groupOwnerToSet != null) {
+            createOwnershipUpdater(newGroupOwnerId, newGroupNameToCreate, updateCompetitors,
+                    updateBoats).updateGroupOwnershipForEventHierarchy(event);
+        }
+    }
+
+    @Override
+    public void updateGroupOwnerForLeaderboardGroupHierarchy(UUID leaderboardGroupId, UUID newGroupOwnerId, String newGroupNameToCreate,
+            boolean updateCompetitors, boolean updateBoats) {
+        LeaderboardGroup leaderboardGroup = getService().getLeaderboardGroupByID(leaderboardGroupId);
+        UserGroup groupOwnerToSet = getSecurityService().getUserGroup(newGroupOwnerId);
+        if (leaderboardGroup != null && groupOwnerToSet != null) {
+            createOwnershipUpdater(newGroupOwnerId, newGroupNameToCreate, updateCompetitors,
+                    updateBoats).updateGroupOwnershipForLeaderboardGroupHierarchy(leaderboardGroup);
+        }
+    }
+    
+    private SailingHierarchyOwnershipUpdater createOwnershipUpdater( UUID newGroupOwnerId, String newGroupNameToCreate, boolean updateCompetitors,
+            boolean updateBoats) {
+        final GroupOwnerUpdateStrategy updateStrategy;
+        if (newGroupOwnerId != null) {
+            final UserGroup groupOwnerToSet = getSecurityService().getUserGroup(newGroupOwnerId);
+            if (groupOwnerToSet == null) {
+                throw new RuntimeException("User group does not exist");
+            }
+            updateStrategy = new GroupOwnerUpdateStrategy() {
+                @Override
+                public boolean needsUpdate(QualifiedObjectIdentifier identifier, OwnershipAnnotation currentOwnership) {
+                    return currentOwnership == null || !groupOwnerToSet.equals(currentOwnership.getAnnotation().getTenantOwner());
+                }
+                
+                @Override
+                public UserGroup getNewGroupOwner() {
+                    return groupOwnerToSet;
+                }
+            };
+        } else if (newGroupNameToCreate != null && ! newGroupNameToCreate.isEmpty()) {
+            updateStrategy = new GroupOwnerUpdateStrategy() {
+                private UserGroup groupOwnerToSet;
+
+                @Override
+                public boolean needsUpdate(QualifiedObjectIdentifier identifier, OwnershipAnnotation currentOwnership) {
+                    return true;
+                }
+                
+                @Override
+                public UserGroup getNewGroupOwner() {
+                    if (groupOwnerToSet != null) {
+                        try {
+                            groupOwnerToSet = getSecurityService().createUserGroup(UUID.randomUUID(), newGroupNameToCreate);
+                        } catch (UserGroupManagementException e) {
+                            throw new RuntimeException("Could not create user group");
+                        }
+                    }
+                    return groupOwnerToSet;
+                }
+            };
+        } else {
+            throw new RuntimeException("No user group given");
+        }
+        return new SailingHierarchyOwnershipUpdater(getService(), getSecurityService(), updateStrategy, updateCompetitors,
+                updateBoats);
     }
 }

@@ -163,7 +163,6 @@
               <warSourceDirectory>${basedir}/src/main/resources</warSourceDirectory>
               <!-- Uncomment the following to obtain details split-point reports
 								<compileReport>true</compileReport> <detailedSoyc>true</detailedSoyc> -->
-               <extraJvmArgs>-Dgwt.watchFileChanges=false -Xmx8192m</extraJvmArgs>
             </configuration>
             <goals>
               <goal>compile</goal>

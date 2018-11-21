@@ -66,15 +66,23 @@ public class SecuredDomainType extends HasPermissionsImpl {
      */
     public static final HasPermissions TRACKED_RACE = new SecuredDomainType("TRACKED_RACE");
     
+    public static enum CompetitorAndBoatActions implements Action {
+        READ_PUBLIC, READ_PRIVATE, LIST;
+        
+        private static final Action[] ALL_ACTIONS = new Action[] { READ_PUBLIC, READ_PRIVATE, LIST,
+                DefaultActions.CREATE, DefaultActions.UPDATE, DefaultActions.CHANGE_OWNERSHIP,
+                DefaultActions.CHANGE_ACL };
+    };
+    
     /**
      * type relative identifier is the competitor ID's string representation
      */
-    public static final HasPermissions COMPETITOR = new SecuredDomainType("COMPETITOR");
+    public static final HasPermissions COMPETITOR = new SecuredDomainType("COMPETITOR", CompetitorAndBoatActions.ALL_ACTIONS);
     
     /**
      * type relative identifier is the boat ID's string representation
      */
-    public static final HasPermissions BOAT = new SecuredDomainType("BOAT");
+    public static final HasPermissions BOAT = new SecuredDomainType("BOAT", CompetitorAndBoatActions.ALL_ACTIONS);
     
     /**
      * type-relative identifier is the media track's "DB ID"

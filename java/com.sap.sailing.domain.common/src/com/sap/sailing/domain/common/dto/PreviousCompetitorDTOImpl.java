@@ -2,6 +2,7 @@ package com.sap.sailing.domain.common.dto;
 
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
+import com.sap.sse.security.shared.NamedSecuredObjectDTO;
 
 /**
  * Equality and hash code are based on the index pointing into a previous leaderboard's competitors list.
@@ -9,7 +10,7 @@ import com.sap.sse.common.Duration;
  * @author Axel Uhl (d043530)
  * 
  */
-public class PreviousCompetitorDTOImpl implements CompetitorDTO {
+public class PreviousCompetitorDTOImpl extends NamedSecuredObjectDTO implements CompetitorDTO {
     private static final long serialVersionUID = 8820028699103040805L;
     private int indexInPreviousCompetitorList;
 

@@ -505,7 +505,7 @@
         <!-- GWT version detected from dependencyManagement -->
         <execution>
           <configuration>
-            <extraJvmArgs>-Dgwt.persistentunitcache=false -Xmx2560m -Djava.io.tmpdir=${env.TMP}</extraJvmArgs>
+            <extraJvmArgs>-Dgwt.persistentunitcache=false -Xmx2560m -Djava.io.tmpdir=${env.TMP} -Dgwt.watchFileChanges=false</extraJvmArgs>
              <fragmentCount>4</fragmentCount>
             <!--
             <userAgents>chrome</userAgents>
