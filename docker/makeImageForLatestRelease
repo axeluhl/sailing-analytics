@@ -1,0 +1,12 @@
+#!/bin/bash
+release=$1
+if [ "$release" = "" ]; then
+  INDEX=`mktemp index_XXXX.html`
+  echo Tempfile for index.html is $INDEX
+  wget -O $INDEX http://releases.sapsailing.com/
+  release=$(cat $INDEX | grep build- | tail -1 | sed -e 's/^.*\(build-[0-9]*\).*$/\1/')
+  rm $INDEX
+  echo Latest release is $release
+fi
+cat Dockerfile.tpl | sed -e "s/RELEASE/${release}/g" >Dockerfile
+docker build -t sapsailing:$release .
