@@ -13,5 +13,6 @@ Require-Bundle: com.sap.sailing.domain.common,
  com.sap.sailing.resultimport,
  com.sap.sailing.xrr.resultimport,
  com.sap.sse.common,
- com.sap.sailing.xrr.schema
+ com.sap.sailing.xrr.schema,
+ javax.xml.bind;bundle-version="2.2.0"
 Automatic-Module-Name: com.sap.sailing.yachtscoring.resultimport

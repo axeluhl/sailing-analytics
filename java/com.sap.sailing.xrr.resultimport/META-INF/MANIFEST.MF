@@ -18,5 +18,6 @@ Import-Package: com.sap.sailing.server,
 Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.common,
  com.sap.sailing.resultimport,
- com.sap.sse.common
+ com.sap.sse.common,
+ javax.xml.bind;bundle-version="2.2.0"
 Bundle-Activator: com.sap.sailing.xrr.resultimport.impl.Activator

@@ -17,5 +17,6 @@ Require-Bundle: com.sap.sailing.manage2sail,
  com.sap.sailing.xrr.schema,
  com.sap.sailing.domain.shared.android,
  com.sap.sailing.competitorimport,
- com.sap.sse
+ com.sap.sse,
+ javax.xml.bind;bundle-version="2.2.0"
 Automatic-Module-Name: com.sap.sailing.manage2sail.resultimport
