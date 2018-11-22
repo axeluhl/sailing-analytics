@@ -29,7 +29,7 @@ public class Activator implements BundleActivator {
             } catch (BundleException e) {
                 logger.log(Level.WARNING, "Exception while trying to gracefully stop the OSGi framework", e);
             }
-        }));
+        }, "com.sap.sse shutdown hook"));
     }
 
     @Override
