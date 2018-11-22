@@ -84,6 +84,7 @@ import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
+import com.sap.sailing.gwt.ui.shared.MigrateGroupOwnerForHierarchyDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
@@ -952,9 +953,9 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
 
     List<String> getPossibleTennants();
 
-    void updateGroupOwnerForEventHierarchy(UUID eventId, UUID newGroupOwnerId, String newGroupNameToCreate,
-            boolean updateCompetitors, boolean updateBoats);
+    void updateGroupOwnerForEventHierarchy(UUID eventId,
+            MigrateGroupOwnerForHierarchyDTO migrateGroupOwnerForHierarchyDTO);
 
-    void updateGroupOwnerForLeaderboardGroupHierarchy(UUID leaderboardGroupId, UUID newGroupOwnerId,
-            String newGroupNameToCreate, boolean updateCompetitors, boolean updateBoats);
+    void updateGroupOwnerForLeaderboardGroupHierarchy(UUID leaderboardGroupId,
+            MigrateGroupOwnerForHierarchyDTO migrateGroupOwnerForHierarchyDTO);
 }
