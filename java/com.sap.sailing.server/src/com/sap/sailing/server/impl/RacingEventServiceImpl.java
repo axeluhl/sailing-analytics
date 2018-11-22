@@ -4155,20 +4155,28 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
     public Map<Integer, Statistics> getLocalStatisticsByYear() {
         final Map<Integer, StatisticsCalculator> calculators = new HashMap<>();
         getAllEvents().forEach((event) -> {
-            final Integer eventYear = EventUtil.getYearOfEvent(event);
-            // The year may be null if the event has no start date set
-            // In this case the event is ignored for the yearly 
-            if (eventYear != null) {
-                final StatisticsCalculator calculator;
-                if (calculators.containsKey(eventYear)) {
-                    calculator = calculators.get(eventYear);
-                } else {
-                    calculator = new StatisticsCalculator(trackedRaceStatisticsCache);
-                    calculators.put(eventYear, calculator);
+            if (getSecurityService().hasCurrentUserReadPermission(event)) {
+                final Integer eventYear = EventUtil.getYearOfEvent(event);
+                // The year may be null if the event has no start date set
+                // In this case the event is ignored for the yearly
+                if (eventYear != null) {
+                    final StatisticsCalculator calculator;
+                    if (calculators.containsKey(eventYear)) {
+                        calculator = calculators.get(eventYear);
+                    } else {
+                        calculator = new StatisticsCalculator(trackedRaceStatisticsCache);
+                        calculators.put(eventYear, calculator);
+                    }
+                    event.getLeaderboardGroups().forEach((lg) -> {
+                        if (getSecurityService().hasCurrentUserReadPermission(lg)) {
+                            lg.getLeaderboards().forEach(t -> {
+                                if (getSecurityService().hasCurrentUserReadPermission(t)) {
+                                    calculator.addLeaderboard(t);
+                                }
+                            });
+                        }
+                    });
                 }
-                event.getLeaderboardGroups().forEach((lg) -> {
-                    lg.getLeaderboards().forEach(calculator::addLeaderboard);
-                });
             }
         });
         Map<Integer, Statistics> result = new HashMap<>();
