@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.SerializationDummy;
@@ -18,8 +19,10 @@ import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.datamining.shared.impl.dto.ReducedDimensionsDTO;
+import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningQueryDTOImpl;
 
 public interface DataMiningServiceAsync {
 
@@ -89,4 +92,7 @@ public interface DataMiningServiceAsync {
 
     /** Gets the {@link StatisticQueryDefinitionDTO} from the serialized String. */
     void getDeserializedQuery(String serializedQuery, AsyncCallback<StatisticQueryDefinitionDTO> callback);
+
+    void serializationDummy(ModifiableStatisticQueryDefinitionDTO query, StoredDataMiningQueryDTOImpl storedQuery,
+            AsyncCallback<Pair<ModifiableStatisticQueryDefinitionDTO, StoredDataMiningQueryDTOImpl>> callback);
 }
