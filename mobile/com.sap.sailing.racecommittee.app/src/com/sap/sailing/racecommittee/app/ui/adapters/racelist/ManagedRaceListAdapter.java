@@ -173,7 +173,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                     holder.fleet_series.setVisibility(View.VISIBLE);
                 }
                 holder.protest_image.setImageDrawable(FlagsResources.getFlagDrawable(getContext(), Flags.BRAVO.name(), flag_size));
-                holder.protest_image.setOnClickListener(new View.OnClickListener() {
+                holder.protest_layout.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         Intent intent = new Intent(AppConstants.INTENT_ACTION_SHOW_PROTEST);
@@ -523,6 +523,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
         /* package */ LinearLayout race_scheduled;
         /* package */ TextView race_unscheduled;
         /* package */ TextView flag_timer;
+        /* package */ View protest_layout;
         /* package */ ImageView protest_image;
         /* package */ ImageView protest_warning_image;
         /* package */ TextView boat_class;
