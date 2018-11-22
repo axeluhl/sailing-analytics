@@ -4169,11 +4169,17 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                     }
                     event.getLeaderboardGroups().forEach((lg) -> {
                         if (getSecurityService().hasCurrentUserReadPermission(lg)) {
-                            lg.getLeaderboards().forEach(t -> {
+                            for (Leaderboard t : lg.getLeaderboards()) {
+                                if (t instanceof RegattaLeaderboard) {
+                                    if (!getSecurityService()
+                                            .hasCurrentUserReadPermission(((RegattaLeaderboard) t).getRegatta())) {
+                                        continue;
+                                    }
+                                }
                                 if (getSecurityService().hasCurrentUserReadPermission(t)) {
                                     calculator.addLeaderboard(t);
                                 }
-                            });
+                            }
                         }
                     });
                 }
