@@ -30,6 +30,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.ServiceException;
 import com.sap.sailing.domain.common.UnableToCloseDeviceMappingException;
@@ -243,7 +244,7 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             String leaderboardDisplayName, int[] discardThresholds, ScoringSchemeType scoringSchemeType,
             UUID courseAreaId);
 
-    StrippedLeaderboardDTO createRegattaLeaderboard(RegattaIdentifier regattaIdentifier,
+    StrippedLeaderboardDTO createRegattaLeaderboard(RegattaName regattaIdentifier,
             String leaderboardDisplayName, int[] discardThresholds);
 
     StrippedLeaderboardDTO createRegattaLeaderboardWithEliminations(String name,

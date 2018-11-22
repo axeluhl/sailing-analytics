@@ -25,6 +25,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSource;
@@ -276,7 +277,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             int[] discardThresholds,
             ScoringSchemeType scoringSchemeType, UUID courseAreaId, AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
-    void createRegattaLeaderboard(RegattaIdentifier regattaIdentifier,
+    void createRegattaLeaderboard(RegattaName regattaIdentifier,
             String leaderboardDisplayName,
             int[] discardThresholds, AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
