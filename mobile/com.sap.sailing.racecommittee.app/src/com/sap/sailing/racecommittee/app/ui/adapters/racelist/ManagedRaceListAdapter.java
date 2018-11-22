@@ -33,6 +33,7 @@ import com.sap.sailing.racecommittee.app.data.DataManager;
 import com.sap.sailing.racecommittee.app.domain.ManagedRace;
 import com.sap.sailing.racecommittee.app.ui.adapters.racelist.RaceFilter.FilterSubscriber;
 import com.sap.sailing.racecommittee.app.ui.utils.FlagsResources;
+import com.sap.sailing.racecommittee.app.ui.views.RaceTimeView;
 import com.sap.sailing.racecommittee.app.utils.RaceHelper;
 import com.sap.sailing.racecommittee.app.utils.ThemeHelper;
 import com.sap.sailing.racecommittee.app.utils.TimeUtils;
@@ -202,6 +203,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             }
             holder.race_name.setText(RaceHelper.getReverseRaceFleetName(race.getRace()));
             RaceState state = race.getRace().getState();
+            holder.time.setRaceState(state);
             if (state != null) {
                 CompetitorResults draft = state.getFinishPositioningList();
                 CompetitorResults confirmed = state.getConfirmedFinishPositioningList();
@@ -213,15 +215,15 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
                     }
                     String startTime = mResources.getString(startRes, dateFormat.format(state.getStartTime().asDate()));
                     holder.race_started.setText(startTime);
-                    if (state.getFinishedTime() == null) {
-                        String duration = TimeUtils.formatDuration(now, state.getStartTime());
-                        holder.time.setText(duration);
-                        float textSize = getContext().getResources().getDimension(R.dimen.textSize_40);
-                        if (!TextUtils.isEmpty(duration) && duration.length() >= 6) {
-                            textSize = getContext().getResources().getDimension(R.dimen.textSize_32);
-                        }
-                        holder.time.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
-                    }
+//                    if (state.getFinishedTime() == null) {
+//                        String duration = TimeUtils.formatDuration(now, state.getStartTime());
+//                        holder.time.setText(duration);
+//                        float textSize = getContext().getResources().getDimension(R.dimen.textSize_40);
+//                        if (!TextUtils.isEmpty(duration) && duration.length() >= 6) {
+//                            textSize = getContext().getResources().getDimension(R.dimen.textSize_32);
+//                        }
+//                        holder.time.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
+//                    }
                 }
                 if (state.getFinishedTime() != null) {
                     holder.time.setVisibility(View.GONE);
@@ -511,7 +513,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
     private static class ViewHolder {
 
         public ImageView marker;
-        public TextView time;
+        public RaceTimeView time;
         public TextView race_finished;
         /* package */ ViewGroup panel_left;
         /* package */ ViewGroup panel_right;
@@ -547,6 +549,7 @@ public class ManagedRaceListAdapter extends ArrayAdapter<RaceListDataType> imple
             race_scheduled = ViewHelper.get(layout, R.id.race_scheduled);
             race_unscheduled = ViewHelper.get(layout, R.id.race_unscheduled);
             flag_timer = ViewHelper.get(layout, R.id.flag_timer);
+            protest_layout = ViewHelper.get(layout, R.id.protest_layout);
             protest_image = ViewHelper.get(layout, R.id.protest_image);
             protest_warning_image = ViewHelper.get(layout, R.id.protest_warning_image);
             boat_class = ViewHelper.get(layout, R.id.boat_class);
