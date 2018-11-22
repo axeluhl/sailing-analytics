@@ -83,7 +83,9 @@ INSTALL_FROM_RELEASE=
 USE_ENVIRONMENT=
 
 INSTANCE_ID="$SERVER_NAME:$SERVER_PORT"
-ADDITIONAL_JAVA_ARGS="-Dpersistentcompetitors.clear=false -XX:ThreadPriorityPolicy=2 -XX:+UseG1GC -verbose:gc -XX:MaxGCPauseMillis=500 -XX:+PrintAdaptiveSizePolicy -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -Xloggc:logs/gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M -XX:MaxGCPauseMillis=500 -XX:+PrintAdaptiveSizePolicy"
+ADDITIONAL_JAVA_ARGS="--add-modules=ALL-SYSTEM -Dpersistentcompetitors.clear=false -XX:ThreadPriorityPolicy=1 -XX:+UseG1GC -verbose:gc -XX:MaxGCPauseMillis=500 -Xlog:gc+ergo*=trace:file=logs/gc_ergo.log:time:filecount=10,filesize=100000 -Xlog:gc*:file=logs/gc.log:time:filecount=10,filesize=100000 -XX:MaxGCPauseMillis=500"
+
+echo ADDITIONAL_JAVA_ARGS=${ADDITIONAL_JAVA_ARGS}
 
 # Uncomment for use with SAP JVM only:
 #ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -XX:+GCHistory -XX:GCHistoryFilename=logs/sapjvm_gc@PID.prf"
