@@ -7,4 +7,6 @@ RUN apt-get update \
  && wget -O /tmp/RELEASE.tar.gz http://releases.sapsailing.com/RELEASE/RELEASE.tar.gz \
  && tar xzvpf /tmp/RELEASE.tar.gz \
  && rm /tmp/RELEASE.tar.gz
+RUN apt-get install -y vim
+COPY vimrc /root/.vimrc
 EXPOSE 8888
