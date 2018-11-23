@@ -28,8 +28,7 @@ public abstract class AbstractSmileClassificationModel<InstanceType, T extends C
     private PCA pca = null;
     private SoftClassifier<double[]> internalModel = null;
 
-    public AbstractSmileClassificationModel(PreprocessingConfig preprocessingConfig,
-            T contextSpecificModelMetadata) {
+    public AbstractSmileClassificationModel(PreprocessingConfig preprocessingConfig, T contextSpecificModelMetadata) {
         super(new ModelMetadata<>(preprocessingConfig, contextSpecificModelMetadata));
     }
 
@@ -115,7 +114,6 @@ public abstract class AbstractSmileClassificationModel<InstanceType, T extends C
                 internalModel = loadedModel.internalModel;
                 return loadedModel.getModelMetadata();
             } catch (ClassNotFoundException | IOException e) {
-                e.printStackTrace();
                 throw new ClassifierPersistenceException(e);
             }
         };

@@ -47,7 +47,6 @@ public class PersistedManeuverClassifiersScorePrinter {
                         allClassifierModels.add(classifierModel);
                     }
                 } catch (ClassifierPersistenceException e) {
-                    e.printStackTrace();
                 }
             }
             for (BoatClass boatClass : allBoatClasses) {
