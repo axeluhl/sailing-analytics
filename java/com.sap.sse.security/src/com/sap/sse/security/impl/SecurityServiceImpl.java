@@ -509,13 +509,23 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public Ownership setOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString, User userOwner,
             UserGroup tenantOwner, String displayNameOfOwnedObject) {
-        final UUID tenantId;
-        if (tenantOwner == null || userOwner != null && !tenantOwner.contains(userOwner)) {
-            tenantId = userOwner == null || getDefaultTenantForUser(userOwner) == null ? null
-                    : getDefaultTenantForUser(userOwner).getId();
-        } else {
-            tenantId = tenantOwner.getId();
+        if (userOwner == null && tenantOwner == null) {
+            throw new IllegalArgumentException("No owner is not valid, would create non changeable object");
         }
+        final UUID tenantId;
+        if (userOwner == null) {
+            tenantId = tenantOwner.getId();
+        } else {
+            if(tenantOwner == null) {
+                tenantOwner = getDefaultTenantForUser(userOwner);
+            }
+            if (tenantOwner.contains(userOwner)) {
+                tenantId = tenantOwner.getId();
+            } else {
+                throw new IllegalArgumentException("User is not part of Tenant Owner " + tenantOwner + " " + userOwner);
+            }
+        }
+        
         final String userOwnerName = userOwner == null ? null : userOwner.getName();
         return apply(s -> s.internalSetOwnership(idOfOwnedObjectAsString, userOwnerName, tenantId,
                 displayNameOfOwnedObject));
