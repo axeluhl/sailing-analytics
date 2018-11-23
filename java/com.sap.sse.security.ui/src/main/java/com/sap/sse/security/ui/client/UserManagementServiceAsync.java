@@ -77,7 +77,7 @@ public interface UserManagementServiceAsync {
     void updateSimpleUserEmail(String username, String newEmail, String validationBaseURL, AsyncCallback<Void> callback);
 
     void updateUserProperties(String username, String fullName, String company, String localeName,
-            AsyncCallback<UserDTO> callback);
+            String defaultTenantIdAsString, AsyncCallback<UserDTO> callback);
 
     void createRoleDefinition(String roleDefinitionIdAsString, String name, AsyncCallback<RoleDefinitionDTO> callback);
 
@@ -134,5 +134,4 @@ public interface UserManagementServiceAsync {
     void getAuthorizationUrl(CredentialDTO credential, AsyncCallback<String> callback);
 
     void verifySocialUser(CredentialDTO credential, AsyncCallback<Pair<UserDTO, UserDTO>> markedAsyncCallback);
-
 }

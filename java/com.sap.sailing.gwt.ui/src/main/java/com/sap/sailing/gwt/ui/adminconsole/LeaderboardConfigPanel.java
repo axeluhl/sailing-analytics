@@ -41,7 +41,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
-import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
@@ -954,7 +953,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
 
             @Override
             public void ok(final LeaderboardDescriptor newLeaderboard) {
-                RegattaIdentifier regattaIdentifier = new RegattaName(newLeaderboard.getRegattaName());
+                        RegattaName regattaIdentifier = new RegattaName(newLeaderboard.getRegattaName());
                         sailingService.createRegattaLeaderboard(regattaIdentifier,
                                 newLeaderboard.getDisplayName(), newLeaderboard.getDiscardThresholds(),
                         new AsyncCallback<StrippedLeaderboardDTO>() {

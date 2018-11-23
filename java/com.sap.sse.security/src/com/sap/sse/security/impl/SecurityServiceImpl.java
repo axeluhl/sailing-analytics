@@ -509,13 +509,25 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public Ownership setOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString, User userOwner,
             UserGroup tenantOwner, String displayNameOfOwnedObject) {
-        final UUID tenantId;
-        if (tenantOwner == null || userOwner != null && !tenantOwner.contains(userOwner)) {
-            tenantId = userOwner == null || getDefaultTenantForUser(userOwner) == null ? null
-                    : getDefaultTenantForUser(userOwner).getId();
-        } else {
-            tenantId = tenantOwner.getId();
+        if (userOwner == null && tenantOwner == null) {
+            throw new IllegalArgumentException("No owner is not valid, would create non changeable object");
         }
+        final UUID tenantId;
+        if (userOwner == null) {
+            tenantId = tenantOwner.getId();
+        } else {
+            // ensure the correct type
+            userOwner = getUserByName(userOwner.getName());
+            if(tenantOwner == null) {
+                tenantOwner = getDefaultTenantForUser(userOwner);
+            }
+            if (tenantOwner.contains(userOwner)) {
+                tenantId = tenantOwner.getId();
+            } else {
+                throw new IllegalArgumentException("User is not part of Tenant Owner " + tenantOwner + " " + userOwner);
+            }
+        }
+        
         final String userOwnerName = userOwner == null ? null : userOwner.getName();
         return apply(s -> s.internalSetOwnership(idOfOwnedObjectAsString, userOwnerName, tenantId,
                 displayNameOfOwnedObject));
@@ -1506,10 +1518,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void setOwnershipIfNotSet(QualifiedObjectIdentifier identifier, UserGroup tenantOwner) {
+    public void setOwnershipIfNotSet(QualifiedObjectIdentifier identifier, User user, UserGroup tenantOwner) {
         final OwnershipAnnotation preexistingOwnership = getOwnership(identifier);
         if (preexistingOwnership == null) {
-            final User user = getCurrentUser();
             setOwnership(identifier, user, tenantOwner, identifier.toString());
         }
     }
@@ -1890,5 +1901,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public <T> T getPreferenceObject(String username, String key) {
         return userStore.getPreferenceObject(username, key);
+    }
+
+    @Override
+    public void setDefaultTenantForCurrentServerForUser(String username, String defaultTenant) {
+        User user = getUserByName(username);
+        UserGroup newDefaultTenant = getUserGroup(UUID.fromString(defaultTenant));
+        user.setDefaultTenant(newDefaultTenant, ServerInfo.getName());
+        userStore.updateUser(user);
     }
 }

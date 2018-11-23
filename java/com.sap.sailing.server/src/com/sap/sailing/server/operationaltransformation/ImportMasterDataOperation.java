@@ -69,6 +69,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.UserGroup;
 
 public class ImportMasterDataOperation extends
         AbstractRacingEventServiceOperation<MasterDataImportObjectCreationCountImpl> {
@@ -89,13 +91,19 @@ public class ImportMasterDataOperation extends
 
     private DataImportProgress progress;
 
+    private User user;
+
+    private UserGroup tenant;
+
     public ImportMasterDataOperation(TopLevelMasterData topLevelMasterData, UUID importOperationId, boolean override,
-            MasterDataImportObjectCreationCountImpl existingCreationCount) {
+            MasterDataImportObjectCreationCountImpl existingCreationCount, User user, UserGroup tenant) {
         this.creationCount = new MasterDataImportObjectCreationCountImpl();
         this.creationCount.add(existingCreationCount);
         this.masterData = topLevelMasterData;
         this.override = override;
         this.importOperationId = importOperationId;
+        this.user = user;
+        this.tenant = tenant;
     }
 
     @Override
@@ -561,7 +569,7 @@ public class ImportMasterDataOperation extends
     }
 
     private void ensureOwnership(QualifiedObjectIdentifier identifier, SecurityService securityService) {
-        securityService.setOwnershipIfNotSet(identifier, securityService.getDefaultTenantForCurrentUser());
+        securityService.setOwnershipIfNotSet(identifier, user, tenant);
     }
 
     @Override

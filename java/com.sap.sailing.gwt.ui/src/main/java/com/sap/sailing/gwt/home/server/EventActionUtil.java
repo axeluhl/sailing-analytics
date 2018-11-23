@@ -11,6 +11,7 @@ import com.google.gwt.core.shared.GwtIncompatible;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
+import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.gwt.home.communication.SailingDispatchContext;
 import com.sap.sailing.gwt.home.communication.event.EventState;
 import com.sap.sailing.gwt.server.HomeServiceUtil;
@@ -188,6 +189,12 @@ public final class EventActionUtil {
         for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
             if (context.getSecurityService().hasCurrentUserReadPermission(leaderboardGroup)) {
                 for (Leaderboard leaderboard : leaderboardGroup.getLeaderboards()) {
+                    if (leaderboard instanceof RegattaLeaderboard) {
+                        if (!context.getSecurityService()
+                                .hasCurrentUserReadPermission(((RegattaLeaderboard) leaderboard).getRegatta())) {
+                            continue;
+                        }
+                    }
                     if (context.getSecurityService().hasCurrentUserReadPermission(leaderboard)) {
                         LinkedHashSet<LeaderboardGroup> set = leaderboardGroupsForLeaderboard.get(leaderboard);
                         if (set == null) {

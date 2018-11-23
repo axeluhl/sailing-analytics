@@ -7,7 +7,7 @@ import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sailing.domain.base.Series;
-import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
 import com.sap.sailing.domain.common.dto.RegattaCreationParametersDTO;
@@ -132,9 +132,10 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
     }
     
     private void openCreateDefaultRegattaLeaderboardDialog(final RegattaDTO newRegatta, final List<EventDTO> existingEvents) {
-        CreateDefaultRegattaLeaderboardDialog dialog = new CreateDefaultRegattaLeaderboardDialog(sailingService, stringMessages, errorReporter, newRegatta, new DialogCallback<RegattaIdentifier>() {
+        CreateDefaultRegattaLeaderboardDialog dialog = new CreateDefaultRegattaLeaderboardDialog(sailingService,
+                stringMessages, errorReporter, newRegatta, new DialogCallback<RegattaName>() {
             @Override
-            public void ok(RegattaIdentifier regattaIdentifier) {
+                    public void ok(RegattaName regattaIdentifier) {
                         sailingService.createRegattaLeaderboard(regattaIdentifier,
                                 /* displayName */ null, new int[] {},
                         new AsyncCallback<StrippedLeaderboardDTO>() {

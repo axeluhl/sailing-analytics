@@ -12,6 +12,7 @@ public class DefaultActionsImagesBarCell extends ImagesBarCell {
     public static final String ACTION_DELETE = DefaultActions.DELETE.name();
     public static final String ACTION_UPDATE = DefaultActions.UPDATE.name();
     public static final String ACTION_CHANGE_OWNERSHIP = DefaultActions.CHANGE_OWNERSHIP.name();
+    public static final String ACTION_MIGRATE_GROUP_OWNERSHIP_HIERARCHY = "MIGRATE_GROUP_OWNERSHIP_HIERARCHY";
     public static final String ACTION_CHANGE_ACL = DefaultActions.CHANGE_ACL.name();
 
     protected final StringMessages stringMessages;
@@ -44,6 +45,14 @@ public class DefaultActionsImagesBarCell extends ImagesBarCell {
      */
     protected ImageSpec getChangeOwnershipImageSpec() {
         return new ImageSpec(ACTION_CHANGE_OWNERSHIP, stringMessages.actionChangeOwnership(),
+                IconResources.INSTANCE.changeOwnershipIcon());
+    }
+    
+    /**
+     * @return {@link ImageSpec} for {@link DefaultActions#CHANGE_OWNERSHIP change ownership} action
+     */
+    protected ImageSpec getMigrateGroupOwnershipForHierarchyImageSpec() {
+        return new ImageSpec(ACTION_MIGRATE_GROUP_OWNERSHIP_HIERARCHY, "TODO migrate group Owner for hierarchy",
                 IconResources.INSTANCE.changeOwnershipIcon());
     }
 

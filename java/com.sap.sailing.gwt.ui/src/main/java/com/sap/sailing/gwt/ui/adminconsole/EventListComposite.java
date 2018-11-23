@@ -375,6 +375,25 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         final DialogConfig<EventDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
                 idFactory, event -> fillEvents(), stringMessages);
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openDialog);
+        
+        final MigrateGroupOwnershipDialog.DialogConfig<EventDTO> migrateDialogConfig = MigrateGroupOwnershipDialog
+                .create(userService.getUserManagementService(), (event, dto) -> {
+                    sailingService.updateGroupOwnerForEventHierarchy(event.id, dto, new AsyncCallback<Void>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                            // TODO Auto-generated method stub
+
+                        }
+
+                        @Override
+                        public void onSuccess(Void result) {
+                            // TODO Auto-generated method stub
+
+                        }
+                    });
+                });
+        actionsColumn.addAction(EventConfigImagesBarCell.ACTION_MIGRATE_GROUP_OWNERSHIP_HIERARCHY, CHANGE_OWNERSHIP,
+                migrateDialogConfig::openDialog);
 
         eventNameColumn.setSortable(true);
         venueNameColumn.setSortable(true);
