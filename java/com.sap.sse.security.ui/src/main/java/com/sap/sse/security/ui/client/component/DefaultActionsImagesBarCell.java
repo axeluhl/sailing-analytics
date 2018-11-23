@@ -14,7 +14,7 @@ public class DefaultActionsImagesBarCell extends ImagesBarCell {
     public static final String ACTION_CHANGE_OWNERSHIP = DefaultActions.CHANGE_OWNERSHIP.name();
     public static final String ACTION_CHANGE_ACL = DefaultActions.CHANGE_ACL.name();
 
-    private final StringMessages stringMessages;
+    protected final StringMessages stringMessages;
 
     public DefaultActionsImagesBarCell(final StringMessages stringMessages) {
         this.stringMessages = stringMessages;

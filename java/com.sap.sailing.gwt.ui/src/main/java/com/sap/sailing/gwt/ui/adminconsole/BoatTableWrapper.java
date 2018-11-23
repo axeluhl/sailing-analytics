@@ -1,11 +1,13 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Function;
 
-import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -17,6 +19,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.sap.sailing.domain.common.dto.BoatDTO;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.ColorColumn.ColorRetriever;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -27,21 +30,26 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.EntityIdentityComparator;
-import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
+import com.sap.sse.security.ui.client.component.SecuredObjectOwnerColumn;
 
 public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> extends TableWrapper<BoatDTO, S> {
     private final LabeledAbstractFilterablePanel<BoatDTO> filterField;
     
-    public BoatTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages,
+    public BoatTableWrapper(SailingServiceAsync sailingService, final UserService userService, StringMessages stringMessages,
             ErrorReporter errorReporter, boolean multiSelection, boolean enablePager, boolean allowActions) {
-        this(sailingService, stringMessages, errorReporter, multiSelection, enablePager, DEFAULT_PAGING_SIZE,
+        this(sailingService, userService, stringMessages, errorReporter, multiSelection, enablePager, DEFAULT_PAGING_SIZE,
                 allowActions);
     }
 
-    public BoatTableWrapper(SailingServiceAsync sailingService, StringMessages stringMessages, ErrorReporter errorReporter,
+    public BoatTableWrapper(SailingServiceAsync sailingService, final UserService userService, StringMessages stringMessages, ErrorReporter errorReporter,
             boolean multiSelection, boolean enablePager, int pagingSize, boolean allowActions) {
         super(sailingService, stringMessages, errorReporter, multiSelection, enablePager, pagingSize,
                 new EntityIdentityComparator<BoatDTO>() {
@@ -160,20 +168,18 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
         registerSelectionModelOnNewDataProvider(filterField.getAllListDataProvider());
         
         // BoatTable edit features
-        ImagesBarColumn<BoatDTO, BoatConfigImagesBarCell> boatActionColumn = new ImagesBarColumn<BoatDTO, BoatConfigImagesBarCell>(
-                new BoatConfigImagesBarCell(stringMessages));
-        boatActionColumn.setFieldUpdater(new FieldUpdater<BoatDTO, String>() {
-            @Override
-            public void update(int index, final BoatDTO boat, String value) {
-                if (BoatConfigImagesBarCell.ACTION_EDIT.equals(value)) {
-                    openEditBoatDialog(boat, /* boatClassName */ null);
-                } else if (BoatConfigImagesBarCell.ACTION_REFRESH.equals(value)) {
-                    allowUpdate(Collections.singleton(boat));
-                }
-            }
+        final HasPermissions type = SecuredDomainType.BOAT;
+        final Function<BoatDTO, String> idFactory = BoatDTO::getIdAsString;
+        AccessControlledActionsColumn<BoatDTO, BoatConfigImagesBarCell> boatActionColumn = new AccessControlledActionsColumn<BoatDTO, BoatConfigImagesBarCell>(
+                new BoatConfigImagesBarCell(getStringMessages()), userService, type, idFactory);
+        boatActionColumn.addAction(BoatConfigImagesBarCell.ACTION_UPDATE, HasPermissions.DefaultActions.UPDATE,
+                this::openEditBoatDialog);
+        boatActionColumn.addAction(BoatConfigImagesBarCell.ACTION_REFRESH, this::allowUpdate);
+        final DialogConfig<BoatDTO> editOwnerShipDialog = EditOwnershipDialog.create(
+                userService.getUserManagementService(), SecuredDomainType.BOAT, idFactory, null, stringMessages);
+        boatActionColumn.addAction(BoatConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
+                editOwnerShipDialog::openDialog);
 
-        });
-        
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(boatColumnListHandler);
         table.addColumn(boatNameColumn, stringMessages.name());
@@ -181,6 +187,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
         table.addColumn(boatClassColumn, stringMessages.boatClass());
         table.addColumn(boatColorColumn, stringMessages.color());
         table.addColumn(boatIdColumn, stringMessages.id());
+        SecuredObjectOwnerColumn.configureOwnerColumns(table, getColumnSortHandler(), stringMessages);
         if (allowActions) {
             table.addColumn(boatActionColumn, stringMessages.actions());
         }
@@ -244,7 +251,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
     private void getFilteredBoats(Iterable<BoatDTO> result) {
         filterField.updateAll(result);
     }
-    
+
     void openEditBoatDialog(final BoatDTO originalBoat, String boatClassName) {
         final BoatEditDialog dialog = new BoatEditDialog(getStringMessages(), originalBoat, boatClassName, new DialogCallback<BoatDTO>() {
             @Override
@@ -278,6 +285,10 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
         dialog.show();
     }
 
+    void openEditBoatDialog(final BoatDTO originalBoat) {
+        openEditBoatDialog(originalBoat, null);
+    }
+
     public void allowUpdate(final Iterable<BoatDTO> boats) {
         List<BoatDTO> serializableSingletonList = new ArrayList<BoatDTO>();
         Util.addAll(boats, serializableSingletonList);
@@ -293,5 +304,9 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
                 Notification.notify(getStringMessages().successfullyAllowedBoatReset(boats.toString()), NotificationType.SUCCESS);
             }
         });
+    }
+
+    private void allowUpdate(final BoatDTO boat) {
+        allowUpdate(Collections.singleton(boat));
     }
 }

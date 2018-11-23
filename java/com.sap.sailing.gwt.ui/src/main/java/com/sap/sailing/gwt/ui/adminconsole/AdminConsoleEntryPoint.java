@@ -170,7 +170,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         }, getStringMessages().trackedRaces(), SecuredDomainType.TRACKED_RACE.getPermission(DefaultActions.MUTATION_ACTIONS));
         regattasDisplayers.add(trackedRacesManagementPanel);
 
-        final CompetitorPanel competitorPanel = new CompetitorPanel(getSailingService(), getStringMessages(), this);
+        final CompetitorPanel competitorPanel = new CompetitorPanel(getSailingService(), getUserService(), getStringMessages(), this);
         competitorPanel.ensureDebugId("CompetitorPanel");
         panel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<CompetitorPanel>(competitorPanel) {
             @Override
@@ -179,7 +179,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
             }
         }, getStringMessages().competitors()); // no permissions required; we show those competitors the user may read
 
-        final BoatPanel boatPanel = new BoatPanel(getSailingService(), getStringMessages(), this);
+        final BoatPanel boatPanel = new BoatPanel(getSailingService(), getUserService(), getStringMessages(), this);
         boatPanel.ensureDebugId("BoatPanel");
         panel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<BoatPanel>(boatPanel) {
             @Override
@@ -194,7 +194,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
 
         final AsyncActionsExecutor asyncActionsExecutor = new AsyncActionsExecutor();
 
-        WindPanel windPanel = new WindPanel(getSailingService(), asyncActionsExecutor, this, this, getStringMessages());
+        WindPanel windPanel = new WindPanel(getSailingService(), getUserService(), asyncActionsExecutor, this, this, getStringMessages());
         panel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<WindPanel>(windPanel), getStringMessages().wind()); // no permissions required; we show those wind the user may read
         regattasDisplayers.add(windPanel);
 
