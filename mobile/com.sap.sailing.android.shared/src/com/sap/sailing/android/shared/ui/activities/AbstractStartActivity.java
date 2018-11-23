@@ -59,6 +59,10 @@ public abstract class AbstractStartActivity<C extends BaseCheckinData> extends C
                     @Override
                     public void onInitFinished(JSONObject referringParams, BranchError error) {
                         if (error == null) {
+                            if (referringParams.length() == 0) {
+                                AbstractStartActivity.this.handleLegacyStart();
+                                return;
+                            }
                             try {
                                 Boolean clickedBranchLink = referringParams.getBoolean(Clicked_Branch_Link.getKey());
                                 if (!clickedBranchLink) {
