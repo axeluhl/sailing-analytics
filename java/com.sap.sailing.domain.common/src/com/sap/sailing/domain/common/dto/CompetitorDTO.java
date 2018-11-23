@@ -5,11 +5,13 @@ import java.io.Serializable;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
+import com.sap.sse.common.Named;
+import com.sap.sse.security.shared.SecuredObject;
 
 /**
  * Equality and hash code are based on the {@link #getIdAsString() ID} and all contained attributes like name, shortName, email, etc.
  */
-public interface CompetitorDTO extends Serializable, MappableToDevice {
+public interface CompetitorDTO extends Named, SecuredObject, Serializable, MappableToDevice {
     
     String getTwoLetterIsoCountryCode();
 

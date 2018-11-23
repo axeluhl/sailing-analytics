@@ -21,6 +21,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.server.RacingEventService;
+import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.DataMiningServer;
 import com.sap.sse.datamining.Query;
@@ -50,6 +51,7 @@ import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
 import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.datamining.shared.impl.dto.ReducedDimensionsDTO;
+import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningQueryDTOImpl;
 import com.sap.sse.datamining.ui.client.DataMiningService;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
 import com.sap.sse.security.SecurityService;
@@ -436,5 +438,11 @@ public class DataMiningServiceImpl extends RemoteServiceServlet implements DataM
     @Override
     public StatisticQueryDefinitionDTO getDeserializedQuery(String serializedQuery) {
         return DataMiningQuerySerializer.fromBase64String(serializedQuery);
+    }
+
+    @Override
+    public Pair<ModifiableStatisticQueryDefinitionDTO, StoredDataMiningQueryDTOImpl> serializationDummy(
+            ModifiableStatisticQueryDefinitionDTO query, StoredDataMiningQueryDTOImpl storedQuery) {
+        return null;
     }
 }

@@ -13,6 +13,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Allows an administrator to view and edit the set of boats currently maintained by the server.
@@ -24,9 +25,9 @@ public class BoatPanel extends SimplePanel {
     private final BoatTableWrapper<RefreshableMultiSelectionModel<BoatDTO>> boatTable;
     private final RefreshableMultiSelectionModel<BoatDTO> refreshableBoatSelectionModel;
 
-    public BoatPanel(final SailingServiceAsync sailingService, final StringMessages stringMessages, final ErrorReporter errorReporter) {
+    public BoatPanel(final SailingServiceAsync sailingService, final UserService userService, final StringMessages stringMessages, final ErrorReporter errorReporter) {
         super();
-        this.boatTable = new BoatTableWrapper<>(sailingService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ true, 100, true);
+        this.boatTable = new BoatTableWrapper<>(sailingService, userService, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ true, 100, true);
         this.refreshableBoatSelectionModel = (RefreshableMultiSelectionModel<BoatDTO>) boatTable.getSelectionModel();
         VerticalPanel mainPanel = new VerticalPanel();
         this.setWidget(mainPanel);

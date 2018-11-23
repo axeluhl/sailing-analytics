@@ -22,6 +22,7 @@ import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
+import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.abstractlog.TimePointSpecificationFoundInLogImpl;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTO;
@@ -102,7 +103,7 @@ public class SlicingTest {
         final List<Pair<String, Integer>> columnNames = new ArrayList<>();
         columnNames.add(new Pair<>(columnNameOriginalRace, 0));
         sailingService.addRaceColumnsToSeries(regatta.getRegattaIdentifier(), seriesName, columnNames);
-        sailingService.createRegattaLeaderboard(regatta.getRegattaIdentifier(), regattaName, new int[0]);
+        sailingService.createRegattaLeaderboard(new RegattaName(regatta.getName()), regattaName, new int[0]);
         final List<CompetitorWithBoatDTO> competitors = sailingService.addCompetitors(Arrays.asList(competitor), null);
         final CompetitorWithBoatDTO competitorDTO = competitors.iterator().next();
         sailingService.setCompetitorRegistrationsInRegattaLog(regattaName, new HashSet<>(competitors));

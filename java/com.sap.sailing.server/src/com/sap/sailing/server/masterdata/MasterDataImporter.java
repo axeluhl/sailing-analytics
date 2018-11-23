@@ -20,20 +20,27 @@ import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.ImportMasterDataOperation;
-import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
 public class MasterDataImporter {
     private final DomainFactory baseDomainFactory;
     private final RacingEventService racingEventService;
+    private final User user;
+    private final UserGroup tenant;
 
     public MasterDataImporter(DomainFactory baseDomainFactory, RacingEventService racingEventService,
-            SecurityService securityService) {
+            User user, UserGroup tenant) {
         this.baseDomainFactory = baseDomainFactory;
         this.racingEventService = racingEventService;
+        this.user = user;
+        this.tenant = tenant;
+
     }
 
-    public void importFromStream(InputStream inputStream, UUID importOperationId, boolean override) throws IOException,
+    public void importFromStream(InputStream inputStream, UUID importOperationId, boolean override)
+            throws IOException,
             ClassNotFoundException {
         ObjectInputStreamResolvingAgainstCache<DomainFactory> objectInputStream = racingEventService.getBaseDomainFactory()
                 .createObjectInputStreamResolvingAgainstThisFactory(inputStream);
@@ -78,7 +85,8 @@ public class MasterDataImporter {
     private MasterDataImportObjectCreationCount applyMasterDataImportOperation(TopLevelMasterData topLevelMasterData,
             UUID importOperationId, boolean override) {
         MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
-        ImportMasterDataOperation op = new ImportMasterDataOperation(topLevelMasterData, importOperationId, override, creationCount);
+        ImportMasterDataOperation op = new ImportMasterDataOperation(topLevelMasterData, importOperationId, override,
+                creationCount, user, tenant);
         creationCount = racingEventService.apply(op);
         return creationCount;
     }

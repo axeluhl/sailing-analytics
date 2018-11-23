@@ -16,6 +16,7 @@ Require-Bundle: com.sap.sailing.domain,
  org.mongodb.mongo-java-driver;bundle-version="2.13.0",
  com.sap.sse.common,
  com.sap.sse.replication,
+ com.sap.sse.security.common,
  com.sap.sse,
  com.sap.sailing.server.gateway.serialization.shared.android,
  com.sap.sse.mail

@@ -375,7 +375,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     boolean hasCurrentUserMetaPermission(WildcardPermission permissionToCheck, Ownership ownership);
 
-    void setOwnershipIfNotSet(QualifiedObjectIdentifier identifier, UserGroup defaultTenant);
+    void setOwnershipIfNotSet(QualifiedObjectIdentifier identifier, User userOwner, UserGroup defaultTenant);
 
     UserGroup getDefaultTenantForCurrentUser();
 
@@ -388,4 +388,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     boolean hasUserAllWildcardPermissionsForAlreadyRealizedQualifications(RoleDefinition role,
             Iterable<WildcardPermission> permissionsToCheck);
+
+    void setDefaultTenantForCurrentServerForUser(String username, String defaultTenant);
 }

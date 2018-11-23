@@ -1,13 +1,9 @@
 package com.sap.sse.security.ui.userprofile.shared.userdetails;
 
-import java.util.Collection;
-
-import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.ListBox;
-import com.sap.sse.common.Util;
-import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.ui.authentication.AuthenticationManager;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
@@ -15,8 +11,6 @@ import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.component.NewAccountValidator;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.UserDTO;
-import com.sap.sse.gwt.client.Notification;
-import com.sap.sse.gwt.client.Notification.NotificationType;
 
 /**
  * Default Presenter implementation for {@link UserDetailsView}.
@@ -50,7 +44,8 @@ public class UserDetailsPresenter implements AbstractUserDetails.Presenter {
 
     @Override
     public void handleSaveChangesRequest(String fullName, String company, String locale, String defaultTenantIdAsString) {
-        authenticationManager.updateUserProperties(fullName, company, locale, new AsyncCallback<UserDTO>() {
+        authenticationManager.updateUserProperties(fullName, company, locale, defaultTenantIdAsString,
+                new AsyncCallback<UserDTO>() {
             @Override
             public void onSuccess(UserDTO result) {
                 Notification.notify(i18n_sec.successfullyUpdatedUserProperties(
@@ -117,27 +112,4 @@ public class UserDetailsPresenter implements AbstractUserDetails.Presenter {
                     }
                 });
     }
-
-    @Override
-    public void fillTenants(ListBox tenantListBox) {
-        userManagementService.getUserGroups(new AsyncCallback<Collection<UserGroup>>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                GWT.log("Error fetching tenants: "+caught.getMessage());
-            }
-
-            @Override
-            public void onSuccess(Collection<UserGroup> result) {
-                final String oldSelectedTenantIdAsString = tenantListBox.getSelectedValue();
-                tenantListBox.clear();
-                for (final UserGroup tenant : result) {
-                    tenantListBox.addItem(tenant.getName(), tenant.getId().toString());
-                    if (Util.equalsWithNull(tenant.getId().toString(), oldSelectedTenantIdAsString)) {
-                        tenantListBox.setSelectedIndex(tenantListBox.getItemCount()-1);
-                    }
-                }
-            }
-        });
-    }
-
 }

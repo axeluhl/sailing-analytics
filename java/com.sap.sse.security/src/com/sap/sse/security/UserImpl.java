@@ -329,6 +329,7 @@ public class UserImpl extends SecurityUserImpl implements User {
         return defaultTenantForServer.get(serverName);
     }
 
+    @Override
     public void setDefaultTenant(UserGroup newDefaultTenant, String serverName) {
         this.defaultTenantForServer.put(serverName, newDefaultTenant);
     }

@@ -43,6 +43,7 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sse.security.common
 Bundle-ClassPath: .
 Export-Package: com.sap.sailing.server,
+ com.sap.sailing.server.hierarchy,
  com.sap.sailing.server.impl;
   x-friends:="com.sap.sailing.mongodb.test,
    com.sap.sailing.server.test,

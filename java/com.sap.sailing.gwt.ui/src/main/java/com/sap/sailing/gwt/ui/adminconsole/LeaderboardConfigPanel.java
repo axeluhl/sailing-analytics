@@ -41,7 +41,6 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.sap.sailing.domain.common.DetailType;
 import com.sap.sailing.domain.common.LeaderboardNameConstants;
-import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.dto.AbstractLeaderboardDTO;
@@ -351,7 +350,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             Window.open(leaderboardEditingUrl, "_blank", null);
         });
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_EDIT_COMPETITORS, UPDATE, leaderboardDTO -> {
-            EditCompetitorsDialog editCompetitorsDialog = new EditCompetitorsDialog(sailingService, leaderboardDTO.getName(), stringMessages, 
+            EditCompetitorsDialog editCompetitorsDialog = new EditCompetitorsDialog(sailingService, userService, leaderboardDTO.getName(), stringMessages, 
                     errorReporter, new DialogCallback<List<CompetitorWithBoatDTO>>() {
                 @Override
                 public void cancel() {
@@ -436,7 +435,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 dialog.show();
                 break;
             case RegattaLeaderboardWithEliminations:
-                dialog = new RegattaLeaderboardWithEliminationsEditDialog(sailingService, Collections
+                dialog = new RegattaLeaderboardWithEliminationsEditDialog(sailingService, userService, Collections
                                 .unmodifiableCollection(otherExistingLeaderboard),
                         Collections.unmodifiableCollection(allRegattas),
                         new LeaderboardDescriptorWithEliminations(
@@ -954,7 +953,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
 
             @Override
             public void ok(final LeaderboardDescriptor newLeaderboard) {
-                RegattaIdentifier regattaIdentifier = new RegattaName(newLeaderboard.getRegattaName());
+                        RegattaName regattaIdentifier = new RegattaName(newLeaderboard.getRegattaName());
                         sailingService.createRegattaLeaderboard(regattaIdentifier,
                                 newLeaderboard.getDisplayName(), newLeaderboard.getDiscardThresholds(),
                         new AsyncCallback<StrippedLeaderboardDTO>() {
@@ -977,7 +976,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
 
     private void createRegattaLeaderboardWithEliminations() {
         RegattaLeaderboardWithEliminationsCreateDialog dialog = new RegattaLeaderboardWithEliminationsCreateDialog(
-                sailingService, Collections.unmodifiableCollection(availableLeaderboardList),
+                sailingService, userService, Collections.unmodifiableCollection(availableLeaderboardList),
                 Collections.unmodifiableCollection(allRegattas), stringMessages, errorReporter,
                 new DialogCallback<LeaderboardDescriptorWithEliminations>() {
             @Override

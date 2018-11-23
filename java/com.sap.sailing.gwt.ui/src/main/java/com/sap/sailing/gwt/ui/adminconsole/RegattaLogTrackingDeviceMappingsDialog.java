@@ -49,6 +49,7 @@ import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
+import com.sap.sse.security.ui.client.UserService;
 
 public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void> {
     private static final int HOURS_TO_EXPAND_FOR_OPEN_END = 2;
@@ -62,6 +63,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
     
     private final  ErrorReporter errorReporter;
     private final SailingServiceAsync sailingService;
+    private final UserService userService;
     private final StringMessages stringMessages;
     private List<DeviceMappingDTO> mappings = new ArrayList<>();
     private DeviceMappingTableWrapper deviceMappingTable;
@@ -75,11 +77,12 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
     private Date earliest;
     private Chart chart;
     
-    public RegattaLogTrackingDeviceMappingsDialog(final SailingServiceAsync sailingService,
+    public RegattaLogTrackingDeviceMappingsDialog(final SailingServiceAsync sailingService, final UserService userService,
             final StringMessages stringMessages, final ErrorReporter errorReporter, final String leaderboardName, DialogCallback<Void> callback) {
         super(stringMessages.mapDevices(), /*message*/ null, stringMessages.ok(), stringMessages.cancel(), /*validator*/ null, callback);
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
+        this.userService = userService;
         this.errorReporter = errorReporter;
         this.leaderboardName = leaderboardName;
         this.busyIndicator = new SimpleBusyIndicator();
@@ -296,7 +299,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
     }
 
     private void showAddMappingDialog(DeviceMappingDTO mapping) {
-        new RegattaLogAddDeviceMappingDialog(sailingService, errorReporter, stringMessages, leaderboardName,
+        new RegattaLogAddDeviceMappingDialog(sailingService, userService, errorReporter, stringMessages, leaderboardName,
                 new DataEntryDialog.DialogCallback<DeviceMappingDTO>() {
                     @Override
                     public void ok(final DeviceMappingDTO mapping) {
@@ -323,7 +326,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
     }
 
     private void importFixes() {
-        new RegattaLogImportFixesAndAddMappingsDialog(sailingService, errorReporter, stringMessages, leaderboardName,
+        new RegattaLogImportFixesAndAddMappingsDialog(sailingService, userService, errorReporter, stringMessages, leaderboardName,
                 new DialogCallback<Collection<DeviceMappingDTO>>() {
                     @Override
                     public void ok(Collection<DeviceMappingDTO> editedObject) {
@@ -350,7 +353,7 @@ public class RegattaLogTrackingDeviceMappingsDialog extends DataEntryDialog<Void
     }
     
     private void importFoiling() {
-        new RegattaLogImportSensorDataAndAddMappingsDialog(sailingService, errorReporter, stringMessages, leaderboardName,
+        new RegattaLogImportSensorDataAndAddMappingsDialog(sailingService, userService, errorReporter, stringMessages, leaderboardName,
                 new DialogCallback<Collection<TypedDeviceMappingDTO>>() {
             @Override
             public void ok(Collection<TypedDeviceMappingDTO> editedObject) {

@@ -26,6 +26,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaIdentifier;
+import com.sap.sailing.domain.common.RegattaName;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.domain.common.WindSource;
@@ -70,6 +71,7 @@ import com.sap.sailing.gwt.ui.shared.GPSFixDTOWithSpeedWindTackAndLegType;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.ManeuverDTO;
 import com.sap.sailing.gwt.ui.shared.MarkDTO;
+import com.sap.sailing.gwt.ui.shared.MigrateGroupOwnerForHierarchyDTO;
 import com.sap.sailing.gwt.ui.shared.RaceCourseDTO;
 import com.sap.sailing.gwt.ui.shared.RaceGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogDTO;
@@ -277,7 +279,7 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
             int[] discardThresholds,
             ScoringSchemeType scoringSchemeType, UUID courseAreaId, AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
-    void createRegattaLeaderboard(RegattaIdentifier regattaIdentifier,
+    void createRegattaLeaderboard(RegattaName regattaIdentifier,
             String leaderboardDisplayName,
             int[] discardThresholds, AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
 
@@ -1057,4 +1059,10 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
      * gets a (possibly imcomplete) list of available tennants to choose from.
      */
     void getPossibleTennants(AsyncCallback<List<String>> asyncCallback);
+
+    void updateGroupOwnerForEventHierarchy(UUID eventId,
+            MigrateGroupOwnerForHierarchyDTO migrateGroupOwnerForHierarchyDTO, AsyncCallback<Void> callback);
+
+    void updateGroupOwnerForLeaderboardGroupHierarchy(UUID leaderboardGroupId,
+            MigrateGroupOwnerForHierarchyDTO migrateGroupOwnerForHierarchyDTO, AsyncCallback<Void> callback);
 }

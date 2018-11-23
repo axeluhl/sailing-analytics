@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
-import com.sap.sse.security.shared.NamedDTO;
+import com.sap.sse.security.shared.NamedSecuredObjectDTO;
 
 /**
  * Equality and hash code are based on the {@link #getIdAsString() ID}, the {@link #getSailID() sail number}, the
@@ -15,7 +15,7 @@ import com.sap.sse.security.shared.NamedDTO;
  * @author Axel Uhl (d043530)
  * 
  */
-public class CompetitorDTOImpl extends NamedDTO implements CompetitorDTO, Serializable {
+public class CompetitorDTOImpl extends NamedSecuredObjectDTO implements CompetitorDTO, Serializable {
     private static final long serialVersionUID = 3019126418065082622L;
     private String countryName;
     private String twoLetterIsoCountryCode;

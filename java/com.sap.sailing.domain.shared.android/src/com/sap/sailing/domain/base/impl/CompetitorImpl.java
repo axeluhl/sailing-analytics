@@ -11,9 +11,12 @@ import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorChangeListener;
 import com.sap.sailing.domain.base.Nationality;
 import com.sap.sailing.domain.base.SharedDomainFactory;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.Util;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 
 public class CompetitorImpl implements DynamicCompetitor {
     private static final long serialVersionUID = 294603681016643157L;
@@ -241,6 +244,16 @@ public class CompetitorImpl implements DynamicCompetitor {
                 listener.timeOnDistanceAllowancePerNauticalMileChanged(oldTimeOnDistanceAllowancePerNauticalMile, timeOnDistanceAllowancePerNauticalMile);
             }
         }
+    }
+
+    @Override
+    public QualifiedObjectIdentifier getIdentifier() {
+        return getType().getQualifiedObjectIdentifier(getId().toString());
+    }
+
+    @Override
+    public HasPermissions getType() {
+        return SecuredDomainType.COMPETITOR;
     }
 
 }

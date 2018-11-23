@@ -184,7 +184,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                     RegattaDTO regatta = getSelectedRegatta();
                     String boatClassName = regatta.boatClass.getName();
 
-                    new RegattaLogCompetitorRegistrationDialog(boatClassName, sailingService, stringMessages,
+                    new RegattaLogCompetitorRegistrationDialog(boatClassName, sailingService, userService, stringMessages,
                             errorReporter, /* editable */true, leaderboardName, canBoatsOfCompetitorsChangePerRace,
                             new DialogCallback<Set<CompetitorDTO>>() {
                                 @Override
@@ -214,7 +214,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                         RegattaDTO regatta = getSelectedRegatta();
                         String boatClassName = regatta.boatClass.getName();
                         
-                        new RegattaLogBoatRegistrationDialog(boatClassName, sailingService, stringMessages,
+                        new RegattaLogBoatRegistrationDialog(boatClassName, sailingService, userService, stringMessages,
                                 errorReporter, /* editable */true, leaderboardName, canBoatsOfCompetitorsChangePerRace,
                                 new DialogCallback<Set<BoatDTO>>() {
                                     @Override
@@ -241,7 +241,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                         Notification.notify(stringMessages.canNotRegisterBoats(), NotificationType.ERROR);
                     }
                 } else if (RaceLogTrackingEventManagementImagesBarCell.ACTION_MAP_DEVICES.equals(value)) {
-                    new RegattaLogTrackingDeviceMappingsDialog(sailingService, stringMessages, errorReporter,
+                    new RegattaLogTrackingDeviceMappingsDialog(sailingService, userService, stringMessages, errorReporter,
                             leaderboardName, new DialogCallback<Void>() {
                                 @Override
                                 public void ok(Void editedObject) {
@@ -419,7 +419,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
             RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleetDTO) {
         RegattaDTO regatta = getSelectedRegatta();
         String boatClassName = regatta.boatClass.getName();
-        RaceLogCompetitorRegistrationDialog dialog = new RaceLogCompetitorRegistrationDialog(boatClassName, sailingService, stringMessages,
+        RaceLogCompetitorRegistrationDialog dialog = new RaceLogCompetitorRegistrationDialog(boatClassName, sailingService, userService, stringMessages,
             errorReporter, editable, leaderboardName, canBoatsOfCompetitorsChangePerRace, raceColumnName, fleetName,
             raceColumnDTOAndFleetDTO.getA().getFleets(), new DialogCallback<Set<CompetitorDTO>>() {
                 @Override

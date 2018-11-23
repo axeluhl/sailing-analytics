@@ -626,6 +626,26 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                 group -> leaderboardGroupsRefresher.fillLeaderboardGroups(), stringMessages);
         actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 config::openDialog);
+        
+        final MigrateGroupOwnershipDialog.DialogConfig<LeaderboardGroupDTO> migrateDialogConfig = MigrateGroupOwnershipDialog
+                .create(userService.getUserManagementService(), (lg, dto) -> {
+                    sailingService.updateGroupOwnerForLeaderboardGroupHierarchy(lg.getId(), dto,
+                            new AsyncCallback<Void>() {
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    // TODO Auto-generated method stub
+
+                                }
+
+                                @Override
+                                public void onSuccess(Void result) {
+                                    // TODO Auto-generated method stub
+
+                                }
+                            });
+                });
+        actionsColumn.addAction(EventConfigImagesBarCell.ACTION_MIGRATE_GROUP_OWNERSHIP_HIERARCHY, CHANGE_OWNERSHIP,
+                migrateDialogConfig::openDialog);
 
         SelectionCheckboxColumn<LeaderboardGroupDTO> leaderboardTableSelectionColumn =
                 new SelectionCheckboxColumn<LeaderboardGroupDTO>(

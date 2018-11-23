@@ -19,8 +19,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -138,11 +136,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     private static final String ADMIN_DEFAULT_PASSWORD = "admin";
 
-    private static final long MIGRATION_CHECK_DELAY = 20000;
+    // private static final long MIGRATION_CHECK_DELAY = 20000;
     
     private final Map<Pair<Class<? extends HasPermissions>, List<String>>, List<String>> migratedHasPermissionTypes = new ConcurrentHashMap<>();
 
-    private final Timer migrationTimer;
+    // private final Timer migrationTimer;
 
     private CachingSecurityManager securityManager;
     
@@ -170,7 +168,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     private ThreadLocal<Boolean> currentlyFillingFromInitialLoadOrApplyingOperationReceivedFromMaster = ThreadLocal.withInitial(() -> false);
 
-    private TimerTask migrationCompleteCheckTask;
+    // private TimerTask migrationCompleteCheckTask;
 
     private static Ini shiroConfiguration;
 
@@ -206,7 +204,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (setAsActivatorSecurityService) {
             Activator.setSecurityService(this);
         }
-        migrationTimer = new Timer();
+        // migrationTimer = new Timer();
 
         operationsSentToMasterForReplication = new HashSet<>();
         cacheManager = new ReplicatingCacheManager();
@@ -511,13 +509,25 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public Ownership setOwnership(QualifiedObjectIdentifier idOfOwnedObjectAsString, User userOwner,
             UserGroup tenantOwner, String displayNameOfOwnedObject) {
-        final UUID tenantId;
-        if (tenantOwner == null || userOwner != null && !tenantOwner.contains(userOwner)) {
-            tenantId = userOwner == null || getDefaultTenantForUser(userOwner) == null ? null
-                    : getDefaultTenantForUser(userOwner).getId();
-        } else {
-            tenantId = tenantOwner.getId();
+        if (userOwner == null && tenantOwner == null) {
+            throw new IllegalArgumentException("No owner is not valid, would create non changeable object");
         }
+        final UUID tenantId;
+        if (userOwner == null) {
+            tenantId = tenantOwner.getId();
+        } else {
+            // ensure the correct type
+            userOwner = getUserByName(userOwner.getName());
+            if(tenantOwner == null) {
+                tenantOwner = getDefaultTenantForUser(userOwner);
+            }
+            if (tenantOwner.contains(userOwner)) {
+                tenantId = tenantOwner.getId();
+            } else {
+                throw new IllegalArgumentException("User is not part of Tenant Owner " + tenantOwner + " " + userOwner);
+            }
+        }
+        
         final String userOwnerName = userOwner == null ? null : userOwner.getName();
         return apply(s -> s.internalSetOwnership(idOfOwnedObjectAsString, userOwnerName, tenantId,
                 displayNameOfOwnedObject));
@@ -1508,10 +1518,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void setOwnershipIfNotSet(QualifiedObjectIdentifier identifier, UserGroup tenantOwner) {
+    public void setOwnershipIfNotSet(QualifiedObjectIdentifier identifier, User user, UserGroup tenantOwner) {
         final OwnershipAnnotation preexistingOwnership = getOwnership(identifier);
         if (preexistingOwnership == null) {
-            final User user = getCurrentUser();
             setOwnership(identifier, user, tenantOwner, identifier.toString());
         }
     }
@@ -1751,17 +1760,17 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             final Iterable<HasPermissions> permissions) {
         
         final List<String> alreadyMigrated = getMigrationInfoForKey(permissions);
-        if (migrationCompleteCheckTask != null) {
-            // java util timer cannot be rescheduled, so cancel and create a new one
-            migrationCompleteCheckTask.cancel();
-        }
-        migrationCompleteCheckTask = new TimerTask() {
-            @Override
-            public void run() {
-                checkMigration();
-            }
-        };
-        migrationTimer.schedule(migrationCompleteCheckTask, MIGRATION_CHECK_DELAY, MIGRATION_CHECK_DELAY);
+        // if (migrationCompleteCheckTask != null) {
+        // // java util timer cannot be rescheduled, so cancel and create a new one
+        // migrationCompleteCheckTask.cancel();
+        // }
+        // migrationCompleteCheckTask = new TimerTask() {
+        // @Override
+        // public void run() {
+        // checkMigration();
+        // }
+        // };
+        // migrationTimer.schedule(migrationCompleteCheckTask, MIGRATION_CHECK_DELAY, MIGRATION_CHECK_DELAY);
 
         final OwnershipAnnotation owner = this.getOwnership(identifier);
         final UserGroup defaultTenant = this.getDefaultTenant();
@@ -1794,31 +1803,32 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return alreadyMigrated;
     }
 
-    protected void checkMigration() {
-        boolean allChecksSucessfull = true;
-        for (Entry<Pair<Class<? extends HasPermissions>, List<String>>, List<String>> migrationTypeEntry : migratedHasPermissionTypes
-                .entrySet()) {
-            Class<? extends HasPermissions> clazz = migrationTypeEntry.getKey().getA();
-            List<String> shouldHave = migrationTypeEntry.getKey().getB();
-            List<String> didMigrate = migrationTypeEntry.getValue();
-            if (didMigrate.containsAll(shouldHave)) {
-                logger.info("Permission-Vertical Migration: Sucessfully migrated all types in "
-                        + clazz.getName());
-            } else {
-                List<String> notMigrated = new ArrayList<>(shouldHave);
-                notMigrated.removeAll(didMigrate);
-                logger.severe("Permission-Vertical Migration: Did not migrate all Types for " + clazz.getName()
-                        + " missing: "
-                        + notMigrated);
-                logger.severe(
-                        "Permission-Vertical Migration: Check will be retried in " + MIGRATION_CHECK_DELAY + "ms");
-                allChecksSucessfull = false;
-            }
-        }
-        if (allChecksSucessfull) {
-            migrationTimer.cancel();
-        }
-    }
+    // protected void checkMigration() {
+    // boolean allChecksSucessfull = true;
+    // for (Entry<Pair<Class<? extends HasPermissions>, List<String>>, List<String>> migrationTypeEntry :
+    // migratedHasPermissionTypes
+    // .entrySet()) {
+    // Class<? extends HasPermissions> clazz = migrationTypeEntry.getKey().getA();
+    // List<String> shouldHave = migrationTypeEntry.getKey().getB();
+    // List<String> didMigrate = migrationTypeEntry.getValue();
+    // if (didMigrate.containsAll(shouldHave)) {
+    // logger.info("Permission-Vertical Migration: Sucessfully migrated all types in "
+    // + clazz.getName());
+    // } else {
+    // List<String> notMigrated = new ArrayList<>(shouldHave);
+    // notMigrated.removeAll(didMigrate);
+    // logger.severe("Permission-Vertical Migration: Did not migrate all Types for " + clazz.getName()
+    // + " missing: "
+    // + notMigrated);
+    // logger.severe(
+    // "Permission-Vertical Migration: Check will be retried in " + MIGRATION_CHECK_DELAY + "ms");
+    // allChecksSucessfull = false;
+    // }
+    // }
+    // if (allChecksSucessfull) {
+    // migrationTimer.cancel();
+    // }
+    // }
 
     @Override
     public boolean hasCurrentUserReadPermission(WithQualifiedObjectIdentifier object) {
@@ -1891,5 +1901,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public <T> T getPreferenceObject(String username, String key) {
         return userStore.getPreferenceObject(username, key);
+    }
+
+    @Override
+    public void setDefaultTenantForCurrentServerForUser(String username, String defaultTenant) {
+        User user = getUserByName(username);
+        UserGroup newDefaultTenant = getUserGroup(UUID.fromString(defaultTenant));
+        user.setDefaultTenant(newDefaultTenant, ServerInfo.getName());
+        userStore.updateUser(user);
     }
 }

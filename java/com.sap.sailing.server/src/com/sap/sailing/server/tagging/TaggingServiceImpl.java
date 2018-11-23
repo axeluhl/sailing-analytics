@@ -3,7 +3,6 @@ package com.sap.sailing.server.tagging;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.AuthorizationException;
 
 import com.sap.sailing.domain.abstractlog.race.RaceLog;
@@ -26,6 +25,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.User;
 
 public class TaggingServiceImpl implements TaggingService {
 
@@ -44,11 +44,11 @@ public class TaggingServiceImpl implements TaggingService {
      * @return username of current user
      */
     private String getCurrentUsername() throws AuthorizationException {
-        Object principal = SecurityUtils.getSubject().getPrincipal();
-        if (principal == null) {
+        User user = getSecurityService().getCurrentUser();
+        if (user == null) {
             throw new AuthorizationException();
         }
-        return principal.toString();
+        return user.getName();
     }
 
     /**

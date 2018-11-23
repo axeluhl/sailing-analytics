@@ -73,7 +73,6 @@ public class AbstractUserDetails extends Composite implements UserDetailsView {
         setPlaceholder(oldPasswordUi, i18n.oldPasswordPlaceholder());
         setPlaceholder(newPasswordUi, i18n.newPasswordPlaceholder());
         setPlaceholder(newPasswordConfirmationUi, i18n.passwordRepeatPlaceholder());
-        presenter.fillTenants(defaultTenantUi);
     }
 
     public void setUser(UserDTO currentUser) {
@@ -81,27 +80,23 @@ public class AbstractUserDetails extends Composite implements UserDetailsView {
         companyUi.setValue(currentUser.getCompany());
         usernameUi.setValue(currentUser.getName());
         emailUi.setValue(currentUser.getEmail());
-        updateDefaultTenantSelection(currentUser.getDefaultTenant());
+        updateDefaultTenantSelection(currentUser);
         String currentLocale = currentUser.getLocale();
         localeUi.setValue(currentLocale);
         localeUi.setAcceptableValues(GWTLocaleUtil.getAvailableLocalesAndDefault());
         clearPasswordFields();
     }
 
-    private void updateDefaultTenantSelection(UserGroup defaultTenant) {
-        boolean found = false;
-        for (int i=0; i<defaultTenantUi.getItemCount(); i++) {
-            final String idOfTenantFromListBoxAsString = defaultTenantUi.getValue(i);
-            if (Util.equalsWithNull(defaultTenant.getId().toString(), idOfTenantFromListBoxAsString)) {
+    private void updateDefaultTenantSelection(UserDTO currentUser) {
+        UserGroup defaultTennant = currentUser.getDefaultTenant();
+        defaultTenantUi.clear();
+        int i = 0;
+        for (UserGroup group : currentUser.getUserGroups()) {
+            defaultTenantUi.addItem(group.getName(), group.getId().toString());
+            if (Util.equalsWithNull(group, defaultTennant)) {
                 defaultTenantUi.setSelectedIndex(i);
-                found = true;
-                break;
             }
-        }
-        if (!found) {
-            // add the missing tenant to the list
-            defaultTenantUi.addItem(defaultTenant.getName(), defaultTenant.getId().toString());
-            defaultTenantUi.setSelectedIndex(defaultTenantUi.getItemCount()-1);
+            i++;
         }
     }
 
