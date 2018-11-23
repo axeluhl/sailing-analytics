@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import com.mongodb.DB;
 import com.mongodb.DBObject;
@@ -60,8 +59,7 @@ public class MongoDbClassifierModelStore implements ClassifierModelStore {
     }
 
     @Override
-    public void persistState(TrainableClassificationModel<?, ?> trainedModel)
-            throws ClassifierPersistenceException {
+    public void persistState(TrainableClassificationModel<?, ?> trainedModel) throws ClassifierPersistenceException {
         PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(trainedModel);
         String newFileName = getFileName(persistenceSupport);
         GridFS gridFs = null;
@@ -85,19 +83,12 @@ public class MongoDbClassifierModelStore implements ClassifierModelStore {
     }
 
     @Override
-    public boolean delete(TrainableClassificationModel<?, ?> newModel) throws ClassifierPersistenceException {
+    public void delete(TrainableClassificationModel<?, ?> newModel) throws ClassifierPersistenceException {
         PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(newModel);
         String fileName = getFileName(persistenceSupport);
         try {
             GridFS gridFs = new GridFS(db, COLLECTION_NAME);
-            List<GridFSDBFile> mongoFiles = gridFs.find(fileName);
-            if (!mongoFiles.isEmpty()) {
-                for (GridFSDBFile mongoFile : mongoFiles) {
-                    gridFs.remove(mongoFile);
-                }
-                return true;
-            }
-            return false;
+            gridFs.remove(fileName);
         } catch (Exception e) {
             throw new ClassifierPersistenceException(e);
         }
@@ -107,12 +98,9 @@ public class MongoDbClassifierModelStore implements ClassifierModelStore {
     public void deleteAll() throws ClassifierPersistenceException {
         try {
             GridFS gridFs = new GridFS(db, COLLECTION_NAME);
-            String query = "{'" + FIELD_FILENAME + "': {$regex: '^.*" + Pattern.quote(FILE_EXT) + "$'}}";
+            String query = "{'" + FIELD_FILENAME + "': {$regex: '^.*\\" + FILE_EXT + "$'}}";
             DBObject dbQuery = (DBObject) JSON.parse(query.toString());
-            List<GridFSDBFile> mongoFiles = gridFs.find(dbQuery);
-            for (GridFSDBFile mongoFile : mongoFiles) {
-                gridFs.remove(mongoFile);
-            }
+            gridFs.remove(dbQuery);
         } catch (Exception e) {
             throw new ClassifierPersistenceException(e);
         }

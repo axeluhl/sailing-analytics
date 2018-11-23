@@ -9,7 +9,7 @@ public interface ClassifierModelStore {
     boolean loadPersistedState(TrainableClassificationModel<?, ?> newModel)
             throws ClassifierPersistenceException;
     
-    boolean delete(TrainableClassificationModel<?, ?> newModel) throws ClassifierPersistenceException;
+    void delete(TrainableClassificationModel<?, ?> newModel) throws ClassifierPersistenceException;
     
     void deleteAll() throws ClassifierPersistenceException;
 

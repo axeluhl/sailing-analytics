@@ -55,8 +55,7 @@ public class FileSystemClassifierModelStore implements ClassifierModelStore {
     }
 
     @Override
-    public void persistState(TrainableClassificationModel<?, ?> trainedModel)
-            throws ClassifierPersistenceException {
+    public void persistState(TrainableClassificationModel<?, ?> trainedModel) throws ClassifierPersistenceException {
         PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(trainedModel);
         try (FileOutputStream output = new FileOutputStream(getFileForClassifier(persistenceSupport))) {
             persistenceSupport.saveToStream(output);
@@ -66,11 +65,11 @@ public class FileSystemClassifierModelStore implements ClassifierModelStore {
     }
 
     @Override
-    public boolean delete(TrainableClassificationModel<?, ?> newModel) throws ClassifierPersistenceException {
+    public void delete(TrainableClassificationModel<?, ?> newModel) throws ClassifierPersistenceException {
         PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(newModel);
         File classifierFile = getFileForClassifier(persistenceSupport);
         try {
-            return Files.deleteIfExists(classifierFile.toPath());
+            Files.deleteIfExists(classifierFile.toPath());
         } catch (IOException e) {
             throw new ClassifierPersistenceException(e);
         }
