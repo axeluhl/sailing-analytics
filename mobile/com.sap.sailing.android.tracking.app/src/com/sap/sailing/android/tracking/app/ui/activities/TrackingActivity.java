@@ -24,14 +24,17 @@ import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Speed;
 import com.viewpagerindicator.CirclePageIndicator;
 
+import android.Manifest;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -55,6 +58,8 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
     private final static String SIS_LAST_VIEWPAGER_ITEM = "lastViewPagerItem";
     private final static String SIS_LAST_SPEED_TEXT = "lastSpeedText";
     private final static String SIS_LAST_COMPASS_TEXT = "lastCompassText";
+
+    private final static int REQUEST_PERMISSIONS_REQUEST_CODE = 1119;
 
     private ViewPager mPager;
     private ScreenSlidePagerAdapter mPagerAdapter;
@@ -163,6 +168,11 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         });
 
         replaceFragment(R.id.tracking_linear_layout, trackingFragment);
+        if (!hasPermissions()) {
+            ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION }, REQUEST_PERMISSIONS_REQUEST_CODE);
+            return;
+        }
         ServiceHelper.getInstance().startTrackingService(this, checkinDigest);
     }
 
@@ -378,6 +388,14 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
             } else
                 return null;
         }
+    }
+
+    private boolean hasPermissions() {
+        boolean fine = ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        boolean coarse = ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        return fine && coarse;
     }
 
     public void showStopTrackingConfirmationDialog() {
