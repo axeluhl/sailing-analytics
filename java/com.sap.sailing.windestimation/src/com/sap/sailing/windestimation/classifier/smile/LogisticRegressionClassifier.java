@@ -5,12 +5,12 @@ import com.sap.sailing.windestimation.classifier.PreprocessingConfig.Preprocessi
 
 import smile.classification.LogisticRegression;
 
-public class LogisticRegressionManeuverClassifier<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
-        extends AbstractSmileManeuverClassificationModel<InstanceType, T> {
+public class LogisticRegressionClassifier<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
+        extends AbstractSmileClassificationModel<InstanceType, T> {
 
     private static final long serialVersionUID = -3364152319152090775L;
 
-    public LogisticRegressionManeuverClassifier(T contextSpecificModelMetadata) {
+    public LogisticRegressionClassifier(T contextSpecificModelMetadata) {
         super(new PreprocessingConfigBuilder().scaling().build(), contextSpecificModelMetadata);
     }
 

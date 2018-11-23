@@ -19,7 +19,7 @@ public class WindEstimatorEvaluationRunner {
     private static final Integer FIXED_NUMBER_OF_MANEUVERS = null;
     private static final boolean RANDOM_CLIPPING_OF_COMPETITOR_TRACKS = false;
     private static final boolean EVALUATE_PER_COMPETITOR_TRACK = false;
-    private static final boolean ENABLE_MARKS_INFORMATION = true;
+    private static final boolean ENABLE_MARKS_INFORMATION = false;
     private static final boolean ENABLE_SCALED_SPEED = true;
     private static final boolean ENABLE_POLARS = true;
     private static final double MIN_CORRECT_ESTIMATIONS_RATIO_FOR_CORRECT_RACE = 0.75;

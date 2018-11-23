@@ -1,7 +1,7 @@
 package com.sap.sailing.windestimation.classifier;
 
-public abstract class AbstractManeuverClassificationModel<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
-        implements TrainableManeuverClassificationModel<InstanceType, T> {
+public abstract class AbstractClassificationModel<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
+        implements TrainableClassificationModel<InstanceType, T> {
 
     private final ModelMetadata<InstanceType, T> modelMetadata;
     private boolean trainingFinished = false;
@@ -9,7 +9,7 @@ public abstract class AbstractManeuverClassificationModel<InstanceType, T extend
     private double trainScore = 0;
     private int numberOfTrainingInstances;
 
-    public AbstractManeuverClassificationModel(ModelMetadata<InstanceType, T> modelMetadata) {
+    public AbstractClassificationModel(ModelMetadata<InstanceType, T> modelMetadata) {
         this.modelMetadata = modelMetadata;
     }
 

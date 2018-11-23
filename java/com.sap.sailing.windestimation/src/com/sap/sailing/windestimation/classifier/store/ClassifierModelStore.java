@@ -1,19 +1,19 @@
 package com.sap.sailing.windestimation.classifier.store;
 
 import com.sap.sailing.windestimation.classifier.ClassifierPersistenceException;
-import com.sap.sailing.windestimation.classifier.TrainableManeuverClassificationModel;
+import com.sap.sailing.windestimation.classifier.TrainableClassificationModel;
 
 public interface ClassifierModelStore {
-    void persistState(TrainableManeuverClassificationModel<?, ?> trainedModel) throws ClassifierPersistenceException;
+    void persistState(TrainableClassificationModel<?, ?> trainedModel) throws ClassifierPersistenceException;
 
-    boolean loadPersistedState(TrainableManeuverClassificationModel<?, ?> newModel)
+    boolean loadPersistedState(TrainableClassificationModel<?, ?> newModel)
             throws ClassifierPersistenceException;
     
-    boolean delete(TrainableManeuverClassificationModel<?, ?> newModel) throws ClassifierPersistenceException;
+    boolean delete(TrainableClassificationModel<?, ?> newModel) throws ClassifierPersistenceException;
     
     void deleteAll() throws ClassifierPersistenceException;
 
-    default PersistenceSupport checkAndGetPersistenceSupport(TrainableManeuverClassificationModel<?, ?> trainedModel)
+    default PersistenceSupport checkAndGetPersistenceSupport(TrainableClassificationModel<?, ?> trainedModel)
             throws ClassifierPersistenceException {
         PersistenceSupport persistenceSupport = trainedModel.getPersistenceSupport();
         if (persistenceSupport == null) {

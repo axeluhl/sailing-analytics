@@ -8,12 +8,12 @@ import smile.classification.SVM;
 import smile.classification.SVM.Multiclass;
 import smile.math.kernel.GaussianKernel;
 
-public class SVMManeuverClassifier<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
-        extends AbstractSmileManeuverClassificationModel<InstanceType, T> {
+public class SVMClassifier<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
+        extends AbstractSmileClassificationModel<InstanceType, T> {
 
     private static final long serialVersionUID = -3364152319152090775L;
 
-    public SVMManeuverClassifier(T contextSpecificModelMetadata) {
+    public SVMClassifier(T contextSpecificModelMetadata) {
         super(new PreprocessingConfigBuilder().scaling().build(), contextSpecificModelMetadata);
     }
 

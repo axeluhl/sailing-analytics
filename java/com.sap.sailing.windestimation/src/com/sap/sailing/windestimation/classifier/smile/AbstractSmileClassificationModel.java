@@ -8,7 +8,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 
 import com.sap.sailing.domain.base.DomainFactory;
-import com.sap.sailing.windestimation.classifier.AbstractManeuverClassificationModel;
+import com.sap.sailing.windestimation.classifier.AbstractClassificationModel;
 import com.sap.sailing.windestimation.classifier.ClassifierPersistenceException;
 import com.sap.sailing.windestimation.classifier.ContextSpecificModelMetadata;
 import com.sap.sailing.windestimation.classifier.ModelMetadata;
@@ -19,8 +19,8 @@ import smile.classification.SoftClassifier;
 import smile.feature.Standardizer;
 import smile.projection.PCA;
 
-public abstract class AbstractSmileManeuverClassificationModel<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
-        extends AbstractManeuverClassificationModel<InstanceType, T> implements Serializable {
+public abstract class AbstractSmileClassificationModel<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
+        extends AbstractClassificationModel<InstanceType, T> implements Serializable {
 
     private static final long serialVersionUID = 1037686504611915506L;
 
@@ -28,7 +28,7 @@ public abstract class AbstractSmileManeuverClassificationModel<InstanceType, T e
     private PCA pca = null;
     private SoftClassifier<double[]> internalModel = null;
 
-    public AbstractSmileManeuverClassificationModel(PreprocessingConfig preprocessingConfig,
+    public AbstractSmileClassificationModel(PreprocessingConfig preprocessingConfig,
             T contextSpecificModelMetadata) {
         super(new ModelMetadata<>(preprocessingConfig, contextSpecificModelMetadata));
     }
@@ -88,7 +88,7 @@ public abstract class AbstractSmileManeuverClassificationModel<InstanceType, T e
         public String getPersistenceKey() {
             StringBuilder key = new StringBuilder();
             key.append("classifier_smile_");
-            key.append(AbstractSmileManeuverClassificationModel.this.getClass().getSimpleName());
+            key.append(AbstractSmileClassificationModel.this.getClass().getSimpleName());
             key.append("-");
             key.append(getModelMetadata().getContextSpecificModelMetadata().getId());
             return key.toString();
@@ -97,7 +97,7 @@ public abstract class AbstractSmileManeuverClassificationModel<InstanceType, T e
         @Override
         public void saveToStream(OutputStream output) throws ClassifierPersistenceException {
             try (ObjectOutputStream serializer = new ObjectOutputStream(output)) {
-                serializer.writeObject(AbstractSmileManeuverClassificationModel.this);
+                serializer.writeObject(AbstractSmileClassificationModel.this);
             } catch (IOException e) {
                 throw new ClassifierPersistenceException(e);
             }
@@ -108,13 +108,14 @@ public abstract class AbstractSmileManeuverClassificationModel<InstanceType, T e
             try (ObjectInputStream deserializer = DomainFactory.INSTANCE
                     .createObjectInputStreamResolvingAgainstThisFactory(input)) {
                 @SuppressWarnings("unchecked")
-                AbstractSmileManeuverClassificationModel<InstanceType, ContextSpecificModelMetadata<InstanceType>> loadedModel = (AbstractSmileManeuverClassificationModel<InstanceType, ContextSpecificModelMetadata<InstanceType>>) deserializer
+                AbstractSmileClassificationModel<InstanceType, ContextSpecificModelMetadata<InstanceType>> loadedModel = (AbstractSmileClassificationModel<InstanceType, ContextSpecificModelMetadata<InstanceType>>) deserializer
                         .readObject();
                 scaler = loadedModel.scaler;
                 pca = loadedModel.pca;
                 internalModel = loadedModel.internalModel;
                 return loadedModel.getModelMetadata();
             } catch (ClassNotFoundException | IOException e) {
+                e.printStackTrace();
                 throw new ClassifierPersistenceException(e);
             }
         };

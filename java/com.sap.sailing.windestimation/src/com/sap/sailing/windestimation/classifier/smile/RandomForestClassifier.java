@@ -5,12 +5,12 @@ import com.sap.sailing.windestimation.classifier.PreprocessingConfig.Preprocessi
 
 import smile.classification.RandomForest;
 
-public class RandomForestManeuverClassifier<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
-        extends AbstractSmileManeuverClassificationModel<InstanceType, T> {
+public class RandomForestClassifier<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
+        extends AbstractSmileClassificationModel<InstanceType, T> {
 
     private static final long serialVersionUID = -3364152319152090775L;
 
-    public RandomForestManeuverClassifier(T contextSpecificModelMetadata) {
+    public RandomForestClassifier(T contextSpecificModelMetadata) {
         super(new PreprocessingConfigBuilder().build(), contextSpecificModelMetadata);
     }
 

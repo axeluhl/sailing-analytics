@@ -15,7 +15,7 @@ import com.mongodb.gridfs.GridFSInputFile;
 import com.mongodb.util.JSON;
 import com.sap.sailing.windestimation.classifier.ClassifierPersistenceException;
 import com.sap.sailing.windestimation.classifier.ModelMetadata;
-import com.sap.sailing.windestimation.classifier.TrainableManeuverClassificationModel;
+import com.sap.sailing.windestimation.classifier.TrainableClassificationModel;
 
 public class MongoDbClassifierModelStore implements ClassifierModelStore {
 
@@ -33,7 +33,7 @@ public class MongoDbClassifierModelStore implements ClassifierModelStore {
     }
 
     @Override
-    public boolean loadPersistedState(TrainableManeuverClassificationModel<?, ?> newModel)
+    public boolean loadPersistedState(TrainableClassificationModel<?, ?> newModel)
             throws ClassifierPersistenceException {
         PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(newModel);
         String fileName = getFileName(persistenceSupport);
@@ -60,7 +60,7 @@ public class MongoDbClassifierModelStore implements ClassifierModelStore {
     }
 
     @Override
-    public void persistState(TrainableManeuverClassificationModel<?, ?> trainedModel)
+    public void persistState(TrainableClassificationModel<?, ?> trainedModel)
             throws ClassifierPersistenceException {
         PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(trainedModel);
         String newFileName = getFileName(persistenceSupport);
@@ -85,7 +85,7 @@ public class MongoDbClassifierModelStore implements ClassifierModelStore {
     }
 
     @Override
-    public boolean delete(TrainableManeuverClassificationModel<?, ?> newModel) throws ClassifierPersistenceException {
+    public boolean delete(TrainableClassificationModel<?, ?> newModel) throws ClassifierPersistenceException {
         PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(newModel);
         String fileName = getFileName(persistenceSupport);
         try {

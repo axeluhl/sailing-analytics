@@ -6,12 +6,12 @@ import com.sap.sailing.windestimation.classifier.PreprocessingConfig.Preprocessi
 
 import smile.classification.NeuralNetwork;
 
-public class NeuralNetworkManeuverClassifier<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
-        extends AbstractSmileManeuverClassificationModel<InstanceType, T> {
+public class NeuralNetworkClassifier<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
+        extends AbstractSmileClassificationModel<InstanceType, T> {
 
     private static final long serialVersionUID = -3364152319152090775L;
 
-    public NeuralNetworkManeuverClassifier(T contextSpecificModelMetadata) {
+    public NeuralNetworkClassifier(T contextSpecificModelMetadata) {
         super(new PreprocessingConfigBuilder().scaling().build(), contextSpecificModelMetadata);
     }
 

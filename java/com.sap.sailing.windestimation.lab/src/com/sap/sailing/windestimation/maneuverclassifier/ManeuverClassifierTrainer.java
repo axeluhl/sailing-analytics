@@ -12,7 +12,7 @@ import org.json.simple.parser.ParseException;
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.polars.PolarDataService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
-import com.sap.sailing.windestimation.classifier.TrainableManeuverClassificationModel;
+import com.sap.sailing.windestimation.classifier.TrainableClassificationModel;
 import com.sap.sailing.windestimation.classifier.maneuver.ManeuverClassifierModelFactory;
 import com.sap.sailing.windestimation.classifier.maneuver.ManeuverFeatures;
 import com.sap.sailing.windestimation.classifier.maneuver.ManeuverModelMetadata;
@@ -42,7 +42,7 @@ public class ManeuverClassifierTrainer {
     }
 
     public void trainClassifier(
-            TrainableManeuverClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> classifierModel)
+            TrainableClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> classifierModel)
             throws Exception {
         ManeuverModelMetadata modelMetadata = classifierModel.getModelMetadata().getContextSpecificModelMetadata();
         List<ManeuverForEstimation> maneuvers = getSuitableManeuvers(modelMetadata);
@@ -112,14 +112,15 @@ public class ManeuverClassifierTrainer {
         PolarDataService polarService = PolarDataServiceAccessUtil.getPersistedPolarService();
         RegularManeuversForEstimationPersistenceManager persistenceManager = new RegularManeuversForEstimationPersistenceManager();
         ClassifierModelStore classifierModelStore = new MongoDbClassifierModelStore(persistenceManager.getDb());
+        classifierModelStore.deleteAll();
         ManeuverClassifierTrainer classifierTrainer = new ManeuverClassifierTrainer(persistenceManager,
                 classifierModelStore);
         for (ManeuverFeatures maneuverFeatures : ManeuverFeatures.values()) {
             LoggingUtil.logInfo(
                     "### Training classifier for all boat classes with maneuver features: " + maneuverFeatures);
-            List<TrainableManeuverClassificationModel<ManeuverForEstimation, ManeuverModelMetadata>> allTrainableModels = ManeuverClassifierModelFactory
+            List<TrainableClassificationModel<ManeuverForEstimation, ManeuverModelMetadata>> allTrainableModels = ManeuverClassifierModelFactory
                     .getAllTrainableClassifierModels(maneuverFeatures, null);
-            for (TrainableManeuverClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> classifierModel : allTrainableModels) {
+            for (TrainableClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> classifierModel : allTrainableModels) {
                 LoggingUtil.logInfo("## Classifier: " + classifierModel.getClass().getName());
                 classifierTrainer.trainClassifier(classifierModel);
             }
@@ -130,9 +131,9 @@ public class ManeuverClassifierTrainer {
             for (BoatClass boatClass : allBoatClasses) {
                 LoggingUtil.logInfo("### Training classifier for boat class " + boatClass + " with maneuver features: "
                         + maneuverFeatures);
-                List<TrainableManeuverClassificationModel<ManeuverForEstimation, ManeuverModelMetadata>> allTrainableClassifierModels = ManeuverClassifierModelFactory
+                List<TrainableClassificationModel<ManeuverForEstimation, ManeuverModelMetadata>> allTrainableClassifierModels = ManeuverClassifierModelFactory
                         .getAllTrainableClassifierModels(maneuverFeatures, boatClass);
-                for (TrainableManeuverClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> classifierModel : allTrainableClassifierModels) {
+                for (TrainableClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> classifierModel : allTrainableClassifierModels) {
                     LoggingUtil.logInfo("## Classifier: " + classifierModel.getClass().getName());
                     classifierTrainer.trainClassifier(classifierModel);
                 }

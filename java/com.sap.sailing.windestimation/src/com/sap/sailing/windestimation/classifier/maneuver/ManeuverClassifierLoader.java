@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.windestimation.classifier.ClassifierPersistenceException;
-import com.sap.sailing.windestimation.classifier.TrainableManeuverClassificationModel;
+import com.sap.sailing.windestimation.classifier.TrainableClassificationModel;
 import com.sap.sailing.windestimation.classifier.store.ClassifierModelStore;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 
@@ -19,22 +19,22 @@ public class ManeuverClassifierLoader {
     }
 
     public ManeuverClassifier loadBestClassifier(ManeuverFeatures maneuverFeatures, BoatClass boatClass) {
-        List<TrainableManeuverClassificationModel<ManeuverForEstimation, ManeuverModelMetadata>> models = new ArrayList<>();
+        List<TrainableClassificationModel<ManeuverForEstimation, ManeuverModelMetadata>> models = new ArrayList<>();
         for (ManeuverFeatures possibleFeatures : ManeuverFeatures.values()) {
             if (possibleFeatures.isSubset(maneuverFeatures)) {
-                TrainableManeuverClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> model = ManeuverClassifierModelFactory
+                TrainableClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> model = ManeuverClassifierModelFactory
                         .getNewClassifierModel(possibleFeatures, null);
                 models.add(model);
                 if (boatClass != null) {
-                    TrainableManeuverClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> modelForBoatClass = ManeuverClassifierModelFactory
+                    TrainableClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> modelForBoatClass = ManeuverClassifierModelFactory
                             .getNewClassifierModel(possibleFeatures, boatClass);
                     models.add(modelForBoatClass);
                 }
             }
         }
 
-        List<TrainableManeuverClassificationModel<ManeuverForEstimation, ManeuverModelMetadata>> loadedModels = new ArrayList<>();
-        for (TrainableManeuverClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> model : models) {
+        List<TrainableClassificationModel<ManeuverForEstimation, ManeuverModelMetadata>> loadedModels = new ArrayList<>();
+        for (TrainableClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> model : models) {
             try {
                 boolean loaded = classifierModelStore.loadPersistedState(model);
                 if (loaded
@@ -50,12 +50,13 @@ public class ManeuverClassifierLoader {
         if (loadedModels.isEmpty()) {
             return null;
         }
-        Iterator<TrainableManeuverClassificationModel<ManeuverForEstimation, ManeuverModelMetadata>> loadedClassifiersIterator = loadedModels
+
+        Iterator<TrainableClassificationModel<ManeuverForEstimation, ManeuverModelMetadata>> loadedClassifiersIterator = loadedModels
                 .iterator();
-        TrainableManeuverClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> bestModel = loadedClassifiersIterator
+        TrainableClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> bestModel = loadedClassifiersIterator
                 .next();
         while (loadedClassifiersIterator.hasNext()) {
-            TrainableManeuverClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> otherModel = loadedClassifiersIterator
+            TrainableClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> otherModel = loadedClassifiersIterator
                     .next();
             if (bestModel.getTestScore() < otherModel.getTestScore()) {
                 bestModel = otherModel;

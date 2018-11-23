@@ -139,7 +139,7 @@ public class ShortTimeAfterLastHitCache<K, V> {
      * Must be called while owning the {@link #cache} monitor (synchronized)
      */
     private void ensureTimerIsRunning() {
-        if (invalidatorHandle == null) {
+        if (preserveHowManyMilliseconds != Long.MAX_VALUE && invalidatorHandle == null) {
             invalidatorHandle = ThreadPoolUtil.INSTANCE.getDefaultBackgroundTaskThreadPoolExecutor()
                     .scheduleAtFixedRate(new CacheInvalidator(), /* delay */ preserveHowManyMilliseconds,
                             preserveHowManyMilliseconds, TimeUnit.MILLISECONDS);

@@ -5,12 +5,12 @@ import com.sap.sailing.windestimation.classifier.PreprocessingConfig.Preprocessi
 
 import smile.classification.NaiveBayes;
 
-public class NaiveBayesManeuverClassifier<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
-        extends AbstractSmileManeuverClassificationModel<InstanceType, T> {
+public class NaiveBayesClassifier<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
+        extends AbstractSmileClassificationModel<InstanceType, T> {
 
     private static final long serialVersionUID = -3364152319152090775L;
 
-    public NaiveBayesManeuverClassifier(T contextSpecificModelMetadata) {
+    public NaiveBayesClassifier(T contextSpecificModelMetadata) {
         super(new PreprocessingConfigBuilder().scaling().build(), contextSpecificModelMetadata);
     }
 

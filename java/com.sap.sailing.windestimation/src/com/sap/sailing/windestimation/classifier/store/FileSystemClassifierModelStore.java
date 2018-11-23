@@ -8,7 +8,7 @@ import java.nio.file.Files;
 
 import com.sap.sailing.windestimation.classifier.ClassifierPersistenceException;
 import com.sap.sailing.windestimation.classifier.ModelMetadata;
-import com.sap.sailing.windestimation.classifier.TrainableManeuverClassificationModel;
+import com.sap.sailing.windestimation.classifier.TrainableClassificationModel;
 
 public class FileSystemClassifierModelStore implements ClassifierModelStore {
 
@@ -35,7 +35,7 @@ public class FileSystemClassifierModelStore implements ClassifierModelStore {
     }
 
     @Override
-    public boolean loadPersistedState(TrainableManeuverClassificationModel<?, ?> newModel)
+    public boolean loadPersistedState(TrainableClassificationModel<?, ?> newModel)
             throws ClassifierPersistenceException {
         PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(newModel);
         File classifierFile = getFileForClassifier(persistenceSupport);
@@ -55,7 +55,7 @@ public class FileSystemClassifierModelStore implements ClassifierModelStore {
     }
 
     @Override
-    public void persistState(TrainableManeuverClassificationModel<?, ?> trainedModel)
+    public void persistState(TrainableClassificationModel<?, ?> trainedModel)
             throws ClassifierPersistenceException {
         PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(trainedModel);
         try (FileOutputStream output = new FileOutputStream(getFileForClassifier(persistenceSupport))) {
@@ -66,7 +66,7 @@ public class FileSystemClassifierModelStore implements ClassifierModelStore {
     }
 
     @Override
-    public boolean delete(TrainableManeuverClassificationModel<?, ?> newModel) throws ClassifierPersistenceException {
+    public boolean delete(TrainableClassificationModel<?, ?> newModel) throws ClassifierPersistenceException {
         PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(newModel);
         File classifierFile = getFileForClassifier(persistenceSupport);
         try {

@@ -2,7 +2,7 @@ package com.sap.sailing.windestimation.maneuverclassifier;
 
 import java.util.List;
 
-import com.sap.sailing.windestimation.classifier.TrainableManeuverClassificationModel;
+import com.sap.sailing.windestimation.classifier.TrainableClassificationModel;
 import com.sap.sailing.windestimation.classifier.maneuver.ManeuverModelMetadata;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 
@@ -15,13 +15,13 @@ import smile.validation.ConfusionMatrix;
  */
 public class ClassifierScoring {
 
-    private TrainableManeuverClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> trainedClassifier;
+    private TrainableClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> trainedClassifier;
     private double lastAvgF1Score = 0;
     private double lastAvgPrecision = 0;
     private double lastAvgRecall = 0;
 
     public ClassifierScoring(
-            TrainableManeuverClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> trainedClassifierModel) {
+            TrainableClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> trainedClassifierModel) {
         this.trainedClassifier = trainedClassifierModel;
     }
 
