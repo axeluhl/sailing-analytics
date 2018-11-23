@@ -49,7 +49,15 @@ public class AutoUpdaterVersionDownloader extends AutoUpdaterDownloader<Util.Pai
         String[] map = contents.split("=");
         if (map.length == 2) {
             String apkFileName = map[0];
-            String versionCode = map[1];
+            String versionInfo = map[1];
+            String versionCode;
+            if (versionInfo.contains("-")) {
+                String[] version = versionInfo.split("-");
+                versionCode = version[0];
+                String versionVariant = version[1];
+            } else {
+                versionCode = versionInfo;
+            }
             try {
                 Integer code = Integer.parseInt(versionCode);
                 return new Util.Pair<Integer, String>(code, apkFileName);
