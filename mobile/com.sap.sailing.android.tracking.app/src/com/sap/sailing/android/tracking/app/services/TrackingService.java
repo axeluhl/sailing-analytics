@@ -1,6 +1,7 @@
 package com.sap.sailing.android.tracking.app.services;
 
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
+import static com.sap.sailing.android.shared.services.sending.MessageSendingService.CHANNEL_ID;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -49,8 +50,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.widget.Toast;
-
-import static com.sap.sailing.android.shared.services.sending.MessageSendingService.CHANNEL_ID;
 
 public class TrackingService extends Service implements LocationListener {
 
@@ -160,6 +159,8 @@ public class TrackingService extends Service implements LocationListener {
 
     @SuppressWarnings("MissingPermission")
     private void startTracking() {
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, UPDATE_INTERVAL_IN_MILLIS_DEFAULT,
+                minLocationUpdateDistanceInMeters, this);
         ExLog.i(this, TAG, "Started Tracking");
         showNotification();
 
