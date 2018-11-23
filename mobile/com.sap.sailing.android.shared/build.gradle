@@ -59,7 +59,7 @@ dependencies {
     api "de.psdev.licensesdialog:licensesdialog:${rootProject.ext.license_dialog}"
 
     /* Branch.io */
-    api group: 'io.branch.sdk.android', name: 'library', version: '2.19.2'
+    api group: "io.branch.sdk.android", name: "library", version: "2.19.2"
 
     /* JVM tests */
     testImplementation "junit:junit:${rootProject.ext.junit}"

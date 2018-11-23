@@ -20,19 +20,17 @@ android {
      */
     applicationVariants.all { variant ->
         variant.outputs.all { output ->
-            def newName = outputFileName.replace(".apk", "-v" + variant.versionName + ".apk");
-            newName = newName.replace("-" + variant.buildType.name, "");
-            outputFileName = new File(newName)
+            outputFileName = new File(outputFileName.replace("-$variant.buildType.name", ""))
         }
         variant.assemble.doLast { assemble ->
-            // Create version file
-            def versionFile = new File(rootProject.ext.destinationFolder, "$packageName." + "version")
-            versionFile.text = "$packageName" + ".apk=$verCode"
-            copy {
-                from variant.outputs*.outputFile
-                into rootProject.ext.destinationFolder
-            }
-        }
+           // Create version file
+           def versionFile = new File(rootProject.ext.destinationFolder, packageName + ".version")
+           versionFile.text = packageName + ".apk=$verCode-$variant.buildType.name"
+           copy {
+               from variant.outputs*.outputFile
+               into rootProject.ext.destinationFolder
+           }
+       }
     }
 
     def versionPropertiesFile = file('project.properties')
