@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="Race Analysis Target" sequenceNumber="122">
+<?pde version="3.8"?><target name="Race Analysis Target" sequenceNumber="130">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="com.sap.sailing.target.base.feature.group" version="1.0.0"/>
@@ -54,10 +54,13 @@
 <unit id="com.fasterxml.jackson.core.jackson-databind" version="2.5.0.v201504151636"/>
 <unit id="com.sun.jersey" version="1.17.0.v201503170330"/>
 <unit id="com.sun.jersey.source" version="1.17.0.v201503170330"/>
+<unit id="javax.activation" version="1.1.0.v201211130549"/>
+<unit id="javax.activation.source" version="1.1.0.v201211130549"/>
 <unit id="javax.servlet" version="3.1.0.v201410161800"/>
 <unit id="javax.servlet.source" version="3.1.0.v201410161800"/>
 <unit id="javax.validation" version="1.0.0.GA_v201205091237"/>
 <unit id="javax.validation.source" version="1.0.0.GA_v201205091237"/>
+<unit id="javax.xml" version="1.3.4.v201005080400"/>
 <unit id="javax.xml.bind" version="2.2.0.v201105210648"/>
 <unit id="javax.xml.bind.source" version="2.2.0.v201105210648"/>
 <unit id="javax.xml.ws" version="2.1.0.v200902101523"/>
@@ -106,6 +109,8 @@
 <plugin id="jackson-core-asl"/>
 <plugin id="jackson-jaxrs"/>
 <plugin id="jackson-mapper-asl"/>
+<plugin id="javax.activation"/>
+<plugin id="javax.activation.source"/>
 <plugin id="javax.security.auth.message"/>
 <plugin id="javax.security.auth.message.source"/>
 <plugin id="javax.servlet"/>
@@ -114,6 +119,7 @@
 <plugin id="javax.validation.source"/>
 <plugin id="javax.ws.rs"/>
 <plugin id="javax.ws.rs.source"/>
+<plugin id="javax.xml"/>
 <plugin id="javax.xml.bind"/>
 <plugin id="javax.xml.bind.source"/>
 <plugin id="javax.xml.ws"/>

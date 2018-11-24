@@ -14,7 +14,8 @@ Require-Bundle:
  com.sap.sailing.domain.common,
  routeconverter,
  com.sap.sse.common,
- com.sap.sse
+ com.sap.sse,
+ javax.xml.bind;bundle-version="2.2.0"
 Import-Package: com.sap.sailing.domain.abstractlog,
  com.sap.sailing.domain.abstractlog.regatta.events,
  com.sap.sailing.domain.abstractlog.regatta.events.impl,
