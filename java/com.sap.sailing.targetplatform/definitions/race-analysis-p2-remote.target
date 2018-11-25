@@ -83,6 +83,7 @@
 <unit id="javax.xml" version="1.3.4.v201005080400"/>
 <unit id="javax.xml.bind" version="2.2.0.v201105210648"/>
 <unit id="javax.xml.bind.source" version="2.2.0.v201105210648"/>
+<unit id="javax.xml.stream" version="1.0.1.v201004272200"/>
 <unit id="javax.xml.ws" version="2.1.0.v200902101523"/>
 <unit id="org.apache.commons.beanutils" version="1.8.0.v201205091237"/>
 <unit id="org.apache.commons.beanutils.source" version="1.8.0.v201205091237"/>
@@ -146,6 +147,7 @@
 <plugin id="javax.xml"/>
 <plugin id="javax.xml.bind"/>
 <plugin id="javax.xml.bind.source"/>
+<plugin id="javax.xml.stream"/>
 <plugin id="javax.xml.ws"/>
 <plugin id="jcl.over.slf4j"/>
 <plugin id="jul.to.slf4j"/>
