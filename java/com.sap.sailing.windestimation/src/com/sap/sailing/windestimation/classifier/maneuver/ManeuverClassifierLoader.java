@@ -36,8 +36,8 @@ public class ManeuverClassifierLoader {
         List<TrainableClassificationModel<ManeuverForEstimation, ManeuverModelMetadata>> loadedModels = new ArrayList<>();
         for (TrainableClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> model : models) {
             try {
-                boolean loaded = classifierModelStore.loadPersistedState(model);
-                if (loaded
+                model = classifierModelStore.loadPersistedState(model);
+                if (model != null
                         && !model.getModelMetadata().getContextSpecificModelMetadata().getManeuverFeatures()
                                 .isPolarsInformation()
                         || model.getNumberOfTrainingInstances() >= ManeuverClassifiersCache.MIN_FIXES_FOR_POLARS_INFORMATION) {

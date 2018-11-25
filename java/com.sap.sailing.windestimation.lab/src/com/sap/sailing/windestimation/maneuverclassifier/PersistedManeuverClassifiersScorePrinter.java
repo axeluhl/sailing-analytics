@@ -43,7 +43,8 @@ public class PersistedManeuverClassifiersScorePrinter {
                     .getAllTrainableClassifierModels(maneuverFeatures, null);
             for (TrainableClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> classifierModel : classifierModels) {
                 try {
-                    if (classifierModelStore.loadPersistedState(classifierModel)) {
+                    classifierModel = classifierModelStore.loadPersistedState(classifierModel);
+                    if (classifierModel != null) {
                         allClassifierModels.add(classifierModel);
                     }
                 } catch (ClassifierPersistenceException e) {
@@ -54,7 +55,8 @@ public class PersistedManeuverClassifiersScorePrinter {
                         boatClass);
                 for (TrainableClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> classifierModel : classifierModels) {
                     try {
-                        if (classifierModelStore.loadPersistedState(classifierModel)) {
+                        classifierModel = classifierModelStore.loadPersistedState(classifierModel);
+                        if (classifierModel != null) {
                             allClassifierModels.add(classifierModel);
                         }
                     } catch (ClassifierPersistenceException e) {

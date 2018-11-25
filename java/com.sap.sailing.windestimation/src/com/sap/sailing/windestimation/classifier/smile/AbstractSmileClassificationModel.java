@@ -12,6 +12,7 @@ import com.sap.sailing.windestimation.classifier.ClassifierPersistenceException;
 import com.sap.sailing.windestimation.classifier.ContextSpecificModelMetadata;
 import com.sap.sailing.windestimation.classifier.ModelMetadata;
 import com.sap.sailing.windestimation.classifier.PreprocessingConfig;
+import com.sap.sailing.windestimation.classifier.TrainableClassificationModel;
 import com.sap.sailing.windestimation.classifier.store.PersistenceSupport;
 
 import smile.classification.SoftClassifier;
@@ -77,11 +78,11 @@ public abstract class AbstractSmileClassificationModel<InstanceType, T extends C
     }
 
     @Override
-    public PersistenceSupport getPersistenceSupport() {
+    public SmilePersistenceSupport getPersistenceSupport() {
         return new SmilePersistenceSupport();
     }
 
-    private class SmilePersistenceSupport implements PersistenceSupport {
+    private class SmilePersistenceSupport implements PersistenceSupport<TrainableClassificationModel<InstanceType, T>> {
         @Override
         public String getPersistenceKey() {
             StringBuilder key = new StringBuilder();
@@ -102,16 +103,14 @@ public abstract class AbstractSmileClassificationModel<InstanceType, T extends C
         }
 
         @Override
-        public ModelMetadata<?, ?> loadFromStream(InputStream input) throws ClassifierPersistenceException {
+        public AbstractSmileClassificationModel<InstanceType, T> loadFromStream(InputStream input)
+                throws ClassifierPersistenceException {
             try (ObjectInputStream deserializer = DomainFactory.INSTANCE
                     .createObjectInputStreamResolvingAgainstThisFactory(input)) {
                 @SuppressWarnings("unchecked")
-                AbstractSmileClassificationModel<InstanceType, ContextSpecificModelMetadata<InstanceType>> loadedModel = (AbstractSmileClassificationModel<InstanceType, ContextSpecificModelMetadata<InstanceType>>) deserializer
+                AbstractSmileClassificationModel<InstanceType, T> loadedModel = (AbstractSmileClassificationModel<InstanceType, T>) deserializer
                         .readObject();
-                scaler = loadedModel.scaler;
-                pca = loadedModel.pca;
-                internalModel = loadedModel.internalModel;
-                return loadedModel.getModelMetadata();
+                return loadedModel;
             } catch (ClassNotFoundException | IOException e) {
                 throw new ClassifierPersistenceException(e);
             }

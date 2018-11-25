@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 import com.sap.sailing.windestimation.classifier.ClassifierPersistenceException;
-import com.sap.sailing.windestimation.classifier.ModelMetadata;
+import com.sap.sailing.windestimation.classifier.ContextSpecificModelMetadata;
 import com.sap.sailing.windestimation.classifier.TrainableClassificationModel;
 
 public class FileSystemClassifierModelStore implements ClassifierModelStore {
@@ -19,7 +19,7 @@ public class FileSystemClassifierModelStore implements ClassifierModelStore {
         this.destinationFolder = destinationFolder;
     }
 
-    private File getFileForClassifier(PersistenceSupport trainedModel) {
+    private File getFileForClassifier(PersistenceSupport<?> trainedModel) {
         StringBuilder filePath = new StringBuilder();
         filePath.append(destinationFolder);
         filePath.append(File.separator);
@@ -35,28 +35,29 @@ public class FileSystemClassifierModelStore implements ClassifierModelStore {
     }
 
     @Override
-    public boolean loadPersistedState(TrainableClassificationModel<?, ?> newModel)
-            throws ClassifierPersistenceException {
-        PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(newModel);
+    public <InstanceType, T extends ContextSpecificModelMetadata<InstanceType>, ModelType extends TrainableClassificationModel<InstanceType, T>> ModelType loadPersistedState(
+            ModelType newModel) throws ClassifierPersistenceException {
+        PersistenceSupport<?> persistenceSupport = checkAndGetPersistenceSupport(newModel);
         File classifierFile = getFileForClassifier(persistenceSupport);
         if (classifierFile.exists()) {
             try (FileInputStream input = new FileInputStream(classifierFile)) {
-                ModelMetadata<?, ?> loadedModelMetadata = persistenceSupport.loadFromStream(input);
-                if (!newModel.getModelMetadata().equals(loadedModelMetadata)) {
+                @SuppressWarnings("unchecked")
+                ModelType loadedModel = (ModelType) persistenceSupport.loadFromStream(input);
+                if (!newModel.getModelMetadata().equals(loadedModel.getModelMetadata())) {
                     throw new ClassifierPersistenceException("The configuration of the loaded classifier is: "
-                            + loadedModelMetadata + ". \nExpected: " + newModel.getModelMetadata());
+                            + loadedModel.getModelMetadata() + ". \nExpected: " + newModel.getModelMetadata());
                 }
-                return true;
+                return loadedModel;
             } catch (IOException e) {
                 throw new ClassifierPersistenceException(e);
             }
         }
-        return false;
+        return null;
     }
 
     @Override
     public void persistState(TrainableClassificationModel<?, ?> trainedModel) throws ClassifierPersistenceException {
-        PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(trainedModel);
+        PersistenceSupport<?> persistenceSupport = checkAndGetPersistenceSupport(trainedModel);
         try (FileOutputStream output = new FileOutputStream(getFileForClassifier(persistenceSupport))) {
             persistenceSupport.saveToStream(output);
         } catch (IOException e) {
@@ -66,7 +67,7 @@ public class FileSystemClassifierModelStore implements ClassifierModelStore {
 
     @Override
     public void delete(TrainableClassificationModel<?, ?> newModel) throws ClassifierPersistenceException {
-        PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(newModel);
+        PersistenceSupport<?> persistenceSupport = checkAndGetPersistenceSupport(newModel);
         File classifierFile = getFileForClassifier(persistenceSupport);
         try {
             Files.deleteIfExists(classifierFile.toPath());

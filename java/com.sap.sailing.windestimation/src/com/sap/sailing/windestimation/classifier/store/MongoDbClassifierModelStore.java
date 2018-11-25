@@ -13,6 +13,7 @@ import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSInputFile;
 import com.mongodb.util.JSON;
 import com.sap.sailing.windestimation.classifier.ClassifierPersistenceException;
+import com.sap.sailing.windestimation.classifier.ContextSpecificModelMetadata;
 import com.sap.sailing.windestimation.classifier.ModelMetadata;
 import com.sap.sailing.windestimation.classifier.TrainableClassificationModel;
 
@@ -27,14 +28,14 @@ public class MongoDbClassifierModelStore implements ClassifierModelStore {
         this.db = db;
     }
 
-    private String getFileName(PersistenceSupport persistenceSupport) {
+    private String getFileName(PersistenceSupport<?> persistenceSupport) {
         return persistenceSupport.getPersistenceKey() + FILE_EXT;
     }
 
     @Override
-    public boolean loadPersistedState(TrainableClassificationModel<?, ?> newModel)
-            throws ClassifierPersistenceException {
-        PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(newModel);
+    public <InstanceType, T extends ContextSpecificModelMetadata<InstanceType>, ModelType extends TrainableClassificationModel<InstanceType, T>> ModelType loadPersistedState(
+            ModelType newModel) throws ClassifierPersistenceException {
+        PersistenceSupport<?> persistenceSupport = checkAndGetPersistenceSupport(newModel);
         String fileName = getFileName(persistenceSupport);
         GridFS gridFs = null;
         try {
@@ -44,15 +45,17 @@ public class MongoDbClassifierModelStore implements ClassifierModelStore {
                 GridFSDBFile mongoFile = mongoFiles.get(0);
                 ModelMetadata<?, ?> requestedModelMetadata = newModel.getModelMetadata();
                 try (InputStream inputStream = mongoFile.getInputStream()) {
-                    ModelMetadata<?, ?> loadedModelMetadata = persistenceSupport.loadFromStream(inputStream);
+                    @SuppressWarnings("unchecked")
+                    ModelType loadedModel = (ModelType) persistenceSupport.loadFromStream(inputStream);
+                    ModelMetadata<InstanceType, T> loadedModelMetadata = loadedModel.getModelMetadata();
                     if (!requestedModelMetadata.equals(loadedModelMetadata)) {
                         throw new ClassifierPersistenceException("The configuration of the loaded classifier is: "
                                 + loadedModelMetadata + ". \nExpected: " + requestedModelMetadata);
                     }
+                    return loadedModel;
                 }
-                return true;
             }
-            return false;
+            return null;
         } catch (IOException e) {
             throw new ClassifierPersistenceException(e);
         }
@@ -60,7 +63,7 @@ public class MongoDbClassifierModelStore implements ClassifierModelStore {
 
     @Override
     public void persistState(TrainableClassificationModel<?, ?> trainedModel) throws ClassifierPersistenceException {
-        PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(trainedModel);
+        PersistenceSupport<?> persistenceSupport = checkAndGetPersistenceSupport(trainedModel);
         String newFileName = getFileName(persistenceSupport);
         GridFS gridFs = null;
         GridFSInputFile mongoFile = null;
@@ -84,7 +87,7 @@ public class MongoDbClassifierModelStore implements ClassifierModelStore {
 
     @Override
     public void delete(TrainableClassificationModel<?, ?> newModel) throws ClassifierPersistenceException {
-        PersistenceSupport persistenceSupport = checkAndGetPersistenceSupport(newModel);
+        PersistenceSupport<?> persistenceSupport = checkAndGetPersistenceSupport(newModel);
         String fileName = getFileName(persistenceSupport);
         try {
             GridFS gridFs = new GridFS(db, COLLECTION_NAME);

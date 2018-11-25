@@ -13,6 +13,6 @@ public interface TrainableClassificationModel<InstanceType, T extends ContextSpe
 
     void setTrainingStats(double trainScore, double testScore, int numberOfTrainingInstances);
 
-    PersistenceSupport getPersistenceSupport();
+    PersistenceSupport<TrainableClassificationModel<InstanceType, T>> getPersistenceSupport();
 
 }
