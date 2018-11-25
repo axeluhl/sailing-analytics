@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.io.Serializable;
 
 import com.sap.sailing.domain.base.DomainFactory;
 import com.sap.sailing.windestimation.classifier.AbstractClassificationModel;
@@ -20,7 +19,7 @@ import smile.feature.Standardizer;
 import smile.projection.PCA;
 
 public abstract class AbstractSmileClassificationModel<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
-        extends AbstractClassificationModel<InstanceType, T> implements Serializable {
+        extends AbstractClassificationModel<InstanceType, T> {
 
     private static final long serialVersionUID = 1037686504611915506L;
 

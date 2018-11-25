@@ -3,6 +3,7 @@ package com.sap.sailing.windestimation.classifier;
 public abstract class AbstractClassificationModel<InstanceType, T extends ContextSpecificModelMetadata<InstanceType>>
         implements TrainableClassificationModel<InstanceType, T> {
 
+    private static final long serialVersionUID = -3283338628850173316L;
     private final ModelMetadata<InstanceType, T> modelMetadata;
     private boolean trainingFinished = false;
     private double testScore = 0;
