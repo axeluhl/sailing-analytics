@@ -187,6 +187,8 @@
 <plugin id="org.apache.xmlbeans"/>
 <plugin id="org.codehaus.jettison.jettison"/>
 <plugin id="org.dom4j"/>
+<plugin id="org.eclipse.equinox.cm"/>
+<plugin id="org.eclipse.equinox.cm.source"/>
 <plugin id="org.eclipse.equinox.common"/>
 <plugin id="org.eclipse.equinox.common.source"/>
 <plugin id="org.eclipse.equinox.console"/>

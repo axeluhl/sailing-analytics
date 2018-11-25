@@ -421,7 +421,7 @@
          id="org.eclipse.equinox.cm"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.2.0.v20170105-1446"
          unpack="false"/>
 
 </feature>
