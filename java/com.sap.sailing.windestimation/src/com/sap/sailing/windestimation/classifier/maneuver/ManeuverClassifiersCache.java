@@ -6,8 +6,6 @@ import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 
 public class ManeuverClassifiersCache {
 
-    public static final int MIN_FIXES_FOR_POLARS_INFORMATION = 10000;
-
     private final ShortTimeAfterLastHitCache<ClassifierType, ManeuverClassifier> classifierCache;
     private final ManeuverFeatures maneuverFeatures;
 

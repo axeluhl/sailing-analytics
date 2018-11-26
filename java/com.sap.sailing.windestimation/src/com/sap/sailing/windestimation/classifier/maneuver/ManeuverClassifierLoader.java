@@ -37,10 +37,7 @@ public class ManeuverClassifierLoader {
         for (TrainableClassificationModel<ManeuverForEstimation, ManeuverModelMetadata> model : models) {
             try {
                 model = classifierModelStore.loadPersistedState(model);
-                if (model != null
-                        && !model.getModelMetadata().getContextSpecificModelMetadata().getManeuverFeatures()
-                                .isPolarsInformation()
-                        || model.getNumberOfTrainingInstances() >= ManeuverClassifiersCache.MIN_FIXES_FOR_POLARS_INFORMATION) {
+                if (model != null) {
                     loadedModels.add(model);
                 }
             } catch (ClassifierPersistenceException e) {
