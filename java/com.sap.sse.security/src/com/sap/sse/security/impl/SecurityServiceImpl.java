@@ -585,7 +585,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public void addUserToUserGroup(UserGroup userGroup, SecurityUser user) {
         logger.info("Adding user "+user.getName()+" to group "+userGroup.getName());
-        userGroup.add(user);
         final UUID groupId = userGroup.getId();
         final String username = user.getName();
         apply(s->s.internalAddUserToUserGroup(groupId, username));

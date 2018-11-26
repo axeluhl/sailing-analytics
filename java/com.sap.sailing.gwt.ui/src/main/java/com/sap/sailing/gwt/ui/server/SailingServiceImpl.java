@@ -3653,6 +3653,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (leaderboard == null) {
             throw new IllegalArgumentException("Couldn't find leaderboard named " + metaLeaderboardName);
         }
+        getSecurityService().checkCurrentUserReadPermission(leaderboard);
+        if (leaderboard instanceof RegattaLeaderboard) {
+            getSecurityService().checkCurrentUserReadPermission(((RegattaLeaderboard) leaderboard).getRegatta());
+        }
         if (!(leaderboard instanceof MetaLeaderboard)) {
             throw new IllegalArgumentException("The leaderboard " + metaLeaderboardName + " is not a metaleaderboard");
         }
@@ -3660,18 +3664,33 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         LeaderboardGroup groupOrNull = null;
         for (LeaderboardGroup lg : getService().getLeaderboardGroups().values()) {
             if (metaLeaderboard.equals(lg.getOverallLeaderboard())) {
-                groupOrNull = lg;
-                break;
+                if (getSecurityService().hasCurrentUserReadPermission(lg)) {
+                    groupOrNull = lg;
+                    break;
+                }
             }
         }
         // If we could identify the associated LeaderboardGroup the Leaderboards can be sorted based on that group
         Iterable<Leaderboard> leaderBoards = groupOrNull != null
-                ? HomeServiceUtil.getLeaderboardsForSeriesInOrder(groupOrNull) : metaLeaderboard.getLeaderboards();
+                ? HomeServiceUtil.getLeaderboardsForSeriesInOrderWithReadPermissions(groupOrNull, getService())
+                : metaLeaderboard.getLeaderboards();
         List<com.sap.sse.common.Util.Pair<String, String>> result = new ArrayList<com.sap.sse.common.Util.Pair<String, String>>();
         for (Leaderboard containedLeaderboard : leaderBoards) {
-            result.add(new com.sap.sse.common.Util.Pair<String, String>(containedLeaderboard.getName(),
-                    containedLeaderboard.getDisplayName() != null ? containedLeaderboard.getDisplayName()
-                            : containedLeaderboard.getName()));
+            // we need to filter because metaLeaderboard.getLeaderboards might return non visible ones
+            if (getSecurityService().hasCurrentUserReadPermission(containedLeaderboard)) {
+                if (containedLeaderboard instanceof RegattaLeaderboard) {
+                    Regatta regatta = ((RegattaLeaderboard) containedLeaderboard).getRegatta();
+                    if (getSecurityService().hasCurrentUserReadPermission(regatta)) {
+                        result.add(new com.sap.sse.common.Util.Pair<String, String>(containedLeaderboard.getName(),
+                                containedLeaderboard.getDisplayName() != null ? containedLeaderboard.getDisplayName()
+                                        : containedLeaderboard.getName()));
+                    }
+                } else {
+                    result.add(new com.sap.sse.common.Util.Pair<String, String>(containedLeaderboard.getName(),
+                            containedLeaderboard.getDisplayName() != null ? containedLeaderboard.getDisplayName()
+                                    : containedLeaderboard.getName()));
+                }
+            }
         }
         return result;
     }
