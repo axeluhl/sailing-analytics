@@ -22,6 +22,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.client.ErrorReporter;
+import com.sap.sse.security.ui.client.UserService;
 
 
 public abstract class RegattaLeaderboardWithEliminationsDialog extends AbstractLeaderboardDialog<LeaderboardDescriptorWithEliminations> {
@@ -29,6 +30,7 @@ public abstract class RegattaLeaderboardWithEliminationsDialog extends AbstractL
     protected final Collection<RegattaDTO> existingRegattas;
     protected final FlowPanel competitorEliminationPanelHolder;
     protected final SailingServiceAsync sailingService;
+    protected final UserService userService;
     private final Collection<StrippedLeaderboardDTO> existingLeaderboards;
     protected final ErrorReporter errorReporter;
     protected final StringMessages stringMessages;
@@ -78,13 +80,14 @@ public abstract class RegattaLeaderboardWithEliminationsDialog extends AbstractL
         }
     }
 
-    public RegattaLeaderboardWithEliminationsDialog(SailingServiceAsync sailingService, String title,
+    public RegattaLeaderboardWithEliminationsDialog(SailingServiceAsync sailingService, UserService userService, String title,
             LeaderboardDescriptorWithEliminations leaderboardDTO, Collection<RegattaDTO> existingRegattas,
             final Collection<StrippedLeaderboardDTO> existingLeaderboards, final StringMessages stringMessages,
             final ErrorReporter errorReporter, LeaderboardParameterValidator validator,
             DialogCallback<LeaderboardDescriptorWithEliminations> callback) {
         super(title, leaderboardDTO, stringMessages, validator, callback);
         this.sailingService = sailingService;
+        this.userService = userService;
         this.stringMessages = stringMessages;
         this.errorReporter = errorReporter;
         this.existingRegattas = existingRegattas;
@@ -122,7 +125,7 @@ public abstract class RegattaLeaderboardWithEliminationsDialog extends AbstractL
         competitorEliminationPanelHolder.clear();
         StrippedLeaderboardDTO selectedRegattaLeaderboard = getSelectedLeaderboard();
         final CompetitorRegistrationsPanel[] competitorEliminationPanel = new CompetitorRegistrationsPanel[1];
-        competitorEliminationPanel[0] = new CompetitorRegistrationsPanel(sailingService, stringMessages,
+        competitorEliminationPanel[0] = new CompetitorRegistrationsPanel(sailingService, userService, stringMessages,
                 errorReporter, /* editable */ true, regattaLeaderboardsListBox.getValue(regattaLeaderboardsListBox.getSelectedIndex()),
                 selectedRegattaLeaderboard.canBoatsOfCompetitorsChangePerRace, selectedRegattaLeaderboard.boatClassName,
                 /* "validator" updates eliminatedCompetitors */ ()->eliminatedCompetitors = competitorEliminationPanel[0].getResult(),

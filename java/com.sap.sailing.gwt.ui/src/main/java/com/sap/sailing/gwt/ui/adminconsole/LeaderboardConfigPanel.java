@@ -350,7 +350,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
             Window.open(leaderboardEditingUrl, "_blank", null);
         });
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_EDIT_COMPETITORS, UPDATE, leaderboardDTO -> {
-            EditCompetitorsDialog editCompetitorsDialog = new EditCompetitorsDialog(sailingService, leaderboardDTO.getName(), stringMessages, 
+            EditCompetitorsDialog editCompetitorsDialog = new EditCompetitorsDialog(sailingService, userService, leaderboardDTO.getName(), stringMessages, 
                     errorReporter, new DialogCallback<List<CompetitorWithBoatDTO>>() {
                 @Override
                 public void cancel() {
@@ -435,7 +435,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                 dialog.show();
                 break;
             case RegattaLeaderboardWithEliminations:
-                dialog = new RegattaLeaderboardWithEliminationsEditDialog(sailingService, Collections
+                dialog = new RegattaLeaderboardWithEliminationsEditDialog(sailingService, userService, Collections
                                 .unmodifiableCollection(otherExistingLeaderboard),
                         Collections.unmodifiableCollection(allRegattas),
                         new LeaderboardDescriptorWithEliminations(
@@ -976,7 +976,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
 
     private void createRegattaLeaderboardWithEliminations() {
         RegattaLeaderboardWithEliminationsCreateDialog dialog = new RegattaLeaderboardWithEliminationsCreateDialog(
-                sailingService, Collections.unmodifiableCollection(availableLeaderboardList),
+                sailingService, userService, Collections.unmodifiableCollection(availableLeaderboardList),
                 Collections.unmodifiableCollection(allRegattas), stringMessages, errorReporter,
                 new DialogCallback<LeaderboardDescriptorWithEliminations>() {
             @Override

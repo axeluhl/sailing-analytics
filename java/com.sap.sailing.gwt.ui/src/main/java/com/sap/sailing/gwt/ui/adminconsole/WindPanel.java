@@ -74,6 +74,7 @@ import com.sap.sse.gwt.client.async.AsyncActionsExecutor;
 import com.sap.sse.gwt.client.celltable.BaseCelltable;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Displays a table of currently tracked races. The user can configure whether a race
@@ -94,6 +95,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
     private static final String URL_SAILINGSERVER_BRAVO_IMPORT = "/../../sailingserver/bravo-wind-import";
 
     private final SailingServiceAsync sailingService;
+    private final UserService userService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
     private final IdentityColumn<WindDTO> removeColumn;
@@ -118,10 +120,11 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
      */
     private final Set<RegattasDisplayer> containedRegattaDisplayers;
     
-    public WindPanel(final SailingServiceAsync sailingService, AsyncActionsExecutor asyncActionsExecutor, 
+    public WindPanel(final SailingServiceAsync sailingService, UserService userService, AsyncActionsExecutor asyncActionsExecutor, 
             ErrorReporter errorReporter, RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
         ensureDebugId("WindPanel");
         this.sailingService = sailingService;
+        this.userService = userService;
         this.containedRegattaDisplayers = new HashSet<>();
         this.errorReporter = errorReporter;
         this.stringMessages = stringMessages;
@@ -440,7 +443,7 @@ public class WindPanel extends FormPanel implements RegattasDisplayer, WindShowe
 
     private Pair<CaptionPanel, ExpeditionAllInOneImportPanel> createExpeditionAllInOneImportPanel(RegattaRefresher regattaRefresher) {
         final CaptionPanel rootPanel = new CaptionPanel(stringMessages.importFullExpeditionData());
-        final ExpeditionAllInOneImportPanel expeditionAllInOneImportPanel = new ExpeditionAllInOneImportPanel(stringMessages, sailingService, errorReporter, regattaRefresher);
+        final ExpeditionAllInOneImportPanel expeditionAllInOneImportPanel = new ExpeditionAllInOneImportPanel(stringMessages, sailingService, userService, errorReporter, regattaRefresher);
         rootPanel.add(expeditionAllInOneImportPanel);
         return new Pair<>(rootPanel, expeditionAllInOneImportPanel);
     }

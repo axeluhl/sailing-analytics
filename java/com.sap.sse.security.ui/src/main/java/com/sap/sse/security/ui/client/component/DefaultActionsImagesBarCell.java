@@ -15,7 +15,7 @@ public class DefaultActionsImagesBarCell extends ImagesBarCell {
     public static final String ACTION_MIGRATE_GROUP_OWNERSHIP_HIERARCHY = "MIGRATE_GROUP_OWNERSHIP_HIERARCHY";
     public static final String ACTION_CHANGE_ACL = DefaultActions.CHANGE_ACL.name();
 
-    private final StringMessages stringMessages;
+    protected final StringMessages stringMessages;
 
     public DefaultActionsImagesBarCell(final StringMessages stringMessages) {
         this.stringMessages = stringMessages;

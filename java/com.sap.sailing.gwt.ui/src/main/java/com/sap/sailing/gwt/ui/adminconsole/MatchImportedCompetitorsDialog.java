@@ -26,6 +26,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.celltable.RefreshableSingleSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Defines dialog where we can match and choose imported competitors. It mainly consists of two tables: one showing
@@ -63,6 +64,7 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Pair<Map<Com
 
     private final StringMessages stringMessages;
     private final SailingServiceAsync sailingService;
+    private final UserService userService;
     private final ErrorReporter errorReporter;
 
     private final Iterable<CompetitorDescriptor> CompetitorDescriptors;
@@ -72,12 +74,13 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Pair<Map<Com
 
     public MatchImportedCompetitorsDialog(final Iterable<CompetitorDescriptor> CompetitorDescriptors,
             final Iterable<CompetitorDTO> existingCompetitor, StringMessages stringMessages,
-            SailingServiceAsync sailingService, ErrorReporter errorReporter,
+            SailingServiceAsync sailingService, final UserService userService, ErrorReporter errorReporter,
             DialogCallback<Pair<Map<CompetitorDescriptor, CompetitorDTO>, String>> callback) {
         super(stringMessages.importCompetitors(), stringMessages.chooseWhichCompetitorsShouldBeImported(),
                 stringMessages.ok(), stringMessages.cancel(), /* validator */ null, callback);
         this.stringMessages = stringMessages;
         this.sailingService = sailingService;
+        this.userService = userService;
         this.errorReporter = errorReporter;
         this.CompetitorDescriptors = CompetitorDescriptors;
         competitorImportMatcher = new CompetitorImportMatcher(existingCompetitor);
@@ -90,7 +93,7 @@ public class MatchImportedCompetitorsDialog extends DataEntryDialog<Pair<Map<Com
 
     @Override
     protected Widget getAdditionalWidget() {
-        existingCompetitorsTable = new CompetitorTableWrapper<>(sailingService, stringMessages,
+        existingCompetitorsTable = new CompetitorTableWrapper<>(sailingService, userService, stringMessages,
                 errorReporter, /* multiSelection */
                 false, /* enablePager */true, /* filterCompetitorWithBoat */ false, /* filterCompetitorsWithoutBoat */ false);
         final CompetitorsToImportToExistingLinking linker = new CompetitorsToImportToExistingLinking() {

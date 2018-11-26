@@ -35,6 +35,7 @@ import com.sap.sse.gwt.client.controls.GenericListBox.ValueBuilder;
 import com.sap.sse.gwt.client.controls.datetime.DateAndTimeInput;
 import com.sap.sse.gwt.client.controls.datetime.DateTimeInput.Accuracy;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.security.ui.client.UserService;
 
 public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTimeBox<DeviceMappingDTO> {
     private final String leaderboardName;
@@ -51,7 +52,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
     protected final SailingServiceAsync sailingService;
     protected Grid entryGrid;
 
-    public RegattaLogAddDeviceMappingDialog(SailingServiceAsync sailingService, final ErrorReporter errorReporter,
+    public RegattaLogAddDeviceMappingDialog(SailingServiceAsync sailingService, final UserService userService, final ErrorReporter errorReporter,
             final StringMessages stringMessages, String leaderboardName, DialogCallback<DeviceMappingDTO> callback,
             final DeviceMappingDTO mapping) {
         super(stringMessages.add(stringMessages.deviceMappings()), stringMessages.add(stringMessages.deviceMappings()),
@@ -112,7 +113,7 @@ public class RegattaLogAddDeviceMappingDialog extends DataEntryDialogWithDateTim
             }
         });
         deviceId = createTextBox("");
-        itemSelectionPanel = new ItemToMapToDeviceSelectionPanel(sailingService, stringMessages, errorReporter,
+        itemSelectionPanel = new ItemToMapToDeviceSelectionPanel(sailingService, userService, stringMessages, errorReporter,
                 new SelectionChangedHandler() {
                     @Override
                     public void onSelectionChange(MarkDTO mark) {
