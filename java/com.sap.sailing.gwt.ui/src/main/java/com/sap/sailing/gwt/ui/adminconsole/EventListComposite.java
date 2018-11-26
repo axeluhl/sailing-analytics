@@ -587,7 +587,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
     
     private void openCreateRegattaDialog(List<RegattaDTO> existingRegattas,
             List<EventDTO> existingEvents, EventDTO createdEvent) {
-        RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas, existingEvents, createdEvent, stringMessages,
+        RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas, existingEvents, createdEvent, sailingService, stringMessages,
                 new CreateRegattaCallback(userService, sailingService, stringMessages, errorReporter, regattaRefresher,
                         eventsRefresher, existingEvents));
         dialog.ensureDebugId("RegattaCreateDialog");

@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.sap.sailing.domain.common.dto.BoatClassDTO;
 import com.sap.sailing.gwt.common.client.suggestion.BoatClassMasterdataSuggestOracle;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -23,9 +24,9 @@ public abstract class RegattaWithSeriesAndFleetsDialog extends AbstractRegattaWi
     protected SuggestBox boatClassEntryField;
     protected CheckBox canBoatsOfCompetitorsChangePerRaceCheckBox;
     public RegattaWithSeriesAndFleetsDialog(RegattaDTO regatta, Iterable<SeriesDTO> series, List<EventDTO> existingEvents, EventDTO defaultEvent,
-            String title, String okButton, StringMessages stringMessages,
+            String title, String okButton, final SailingServiceAsync sailingService, StringMessages stringMessages,
             Validator<RegattaDTO> validator, DialogCallback<RegattaDTO> callback) {
-        super(regatta, series, existingEvents, defaultEvent, title, okButton, stringMessages, validator, callback);
+        super(sailingService, regatta, series, existingEvents, defaultEvent, title, okButton, stringMessages, validator, callback);
         this.stringMessages = stringMessages;
         nameEntryField = createTextBox(null);
         nameEntryField.ensureDebugId("NameTextBox");

@@ -1200,7 +1200,14 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String registrationLink();
     String registrationLinkConfig();
     String registrationLinkDialog();
+    String registrationLinkDialogQrcode();
+    String registrationLinkDialogQrcodeExplain();
     String registrationLinkSecret();
+    String registrationLinkSecretExplain();
+    String registrationLinkSecretGenerate();
+    String registrationLinkUrl();
+    String registrationLinkUrlCopy();
+    String registrationLinkUrlExplain();
     String registrationLinkShare();
     String explainRegistrationLinkDialog();
     String numberOfQueueMessagesSent();

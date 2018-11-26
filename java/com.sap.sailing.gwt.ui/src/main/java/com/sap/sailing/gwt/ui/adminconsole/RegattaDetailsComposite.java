@@ -74,11 +74,7 @@ public class RegattaDetailsComposite extends Composite {
     private final Label configuration;
     private final Label buoyZoneRadiusInHullLengths;
     protected final Button registrationLinkWithQRCodeOpenButton;
-    //private final Grid openRegattaRegistrationLinkPanel;
-    //private final Label openRegattaRegistrationLinkUrl;
-    //private final Anchor openRegattaRegistrationLink;
-    //private final Image openRegattaRegistrationLinkQrCode;
-    
+
     private final SelectionModel<SeriesDTO> seriesSelectionModel;
     private final CellTable<SeriesDTO> seriesTable;
     private ListDataProvider<SeriesDTO> seriesListDataProvider;
@@ -116,10 +112,6 @@ public class RegattaDetailsComposite extends Composite {
         scoringSystem = createLabelAndValueWidget(grid, currentRow++, stringMessages.scoringSystem(), "ScoringSystemLabel");
         rankingMetric = createLabelAndValueWidget(grid, currentRow++, stringMessages.rankingMetric(), "RankingMetricLabel");
         registrationLinkWithQRCodeOpenButton = addRegistrationLinkOpenButton(grid, currentRow++, stringMessages.registrationLink(), "RegistrationLinkWithQRCodeDialog");
-        //openRegattaRegistrationLinkPanel = createRegistrationLinkPanel(grid, currentRow++, stringMessages.registrationLink());
-        //openRegattaRegistrationLinkUrl = addRegistrationLinkUrlLabel(openRegattaRegistrationLinkPanel, "OpenRegattaRegistrationLinkLabel");
-        //openRegattaRegistrationLink = addRegistrationLinkAnchor(openRegattaRegistrationLinkPanel, "OpenRegattaRegistrationLinkAnchor");
-        //openRegattaRegistrationLinkQrCode = addRegistrationLinkQrCode(openRegattaRegistrationLinkPanel, "OpenRegattaRegistrationLinkQrCode");
         seriesTable = createRegattaSeriesTable();
         seriesTable.ensureDebugId("SeriesCellTable");
         seriesSelectionModel = new SingleSelectionModel<SeriesDTO>();
@@ -150,7 +142,7 @@ public class RegattaDetailsComposite extends Composite {
             public void onClick(ClickEvent event) {
                 RegistrationLinkWithQRCode registrationLinkWithQRCode = new RegistrationLinkWithQRCode();
                 registrationLinkWithQRCode.setSecret(regatta.registrationLinkSecret);
-                RegistrationLinkWithQRCodeDialog dialog = new RegistrationLinkWithQRCodeDialog(stringMessages, regatta.getName(),
+                RegistrationLinkWithQRCodeDialog dialog = new RegistrationLinkWithQRCodeDialog(sailingService, stringMessages, regatta.getName(),
                         registrationLinkWithQRCode, /* editMode */ false, new DialogCallback<RegistrationLinkWithQRCode>() {
                             @Override
                             public void ok(RegistrationLinkWithQRCode result) {
@@ -168,37 +160,6 @@ public class RegattaDetailsComposite extends Composite {
         grid.setWidget(row , 1, button);
         return button;
     }
-    /*private Grid createRegistrationLinkPanel(Grid grid, int row, String label) {
-        Grid panel = new Grid(1, 3);
-        panel.getColumnFormatter().setWidth(0, "200px");
-        grid.setWidget(row, 0, new Label(label + ":"));
-        grid.setWidget(row, 1, panel);
-        return panel;
-    }
-
-    private Label addRegistrationLinkUrlLabel(Grid panel, String debugId) {
-        Label urlLabel = new Label();
-        urlLabel.ensureDebugId(debugId);
-        panel.setWidget(0, 0, urlLabel);
-        return urlLabel;
-    }
-
-    private Anchor addRegistrationLinkAnchor(Grid panel, String debugId) {
-        Anchor link = new Anchor();
-        link.ensureDebugId(debugId);
-        link.setText("open");
-        link.setTarget("_blank");
-        panel.setWidget(0, 1, link);
-        return link;
-    }
-
-    private Image addRegistrationLinkQrCode(Grid panel, String debugId) {
-        Image qrCodeImage = new Image();
-        qrCodeImage.ensureDebugId(debugId);
-        qrCodeImage.setVisible(false);
-        panel.setWidget(0, 2, qrCodeImage);
-        return qrCodeImage;
-    }*/
 
     private CellTable<SeriesDTO> createRegattaSeriesTable() {
         CellTable<SeriesDTO> table = new BaseCelltable<SeriesDTO>(/* pageSize */10000, tableRes);
@@ -499,44 +460,5 @@ public class RegattaDetailsComposite extends Composite {
             seriesListDataProvider.getList().addAll(regatta.series);
         } 
     }
-
-    /*private void updateOpenRegattaRegistrationLink() {
-        if (regatta.competitorRegistrationType.isOpen()) {
-            String baseUrl = GWT.getHostPageBaseURL();
-            if (baseUrl.endsWith("/")) {
-                baseUrl = baseUrl.substring(0, baseUrl.lastIndexOf("/"));
-            }
-            String url = baseUrl.substring(0, baseUrl.lastIndexOf("/")) + "/sailingserver/api/v1/regattas/"
-                    + URL.encodeQueryString(regatta.getName()) + "/competitors/createandadd?" + "regatta_name="
-                    + URL.encodeQueryString(regatta.getName()) + "&secret="
-                    + URL.encodeQueryString(regatta.registrationLinkSecret);
-            String deeplinkUrl = BranchIOConstants.OPEN_REGATTA_APP_BRANCHIO + "?"
-                    + BranchIOConstants.OPEN_REGATTA_APP_BRANCHIO_PATH + "=" + URL.encodeQueryString(url);
-            openRegattaRegistrationLinkUrl.setText(deeplinkUrl);
-            openRegattaRegistrationLink.setHref(deeplinkUrl);
-            openRegattaRegistrationLink.setVisible(true);
-            sailingService.openRegattaRegistrationQrCode(deeplinkUrl, new AsyncCallback<String>() {
-
-                @Override
-                public void onFailure(Throwable caught) {
-                    GWT.log("Qrcode generation failed: ", caught);
-                }
-
-                @Override
-                public void onSuccess(String result) {
-                    GWT.log("Qrcode generated for url: " + deeplinkUrl);
-                    openRegattaRegistrationLinkQrCode.setUrl("data:image/png;base64, " + result);
-                }
-
-            });
-            openRegattaRegistrationLinkQrCode.setVisible(true);
-        } else {
-            openRegattaRegistrationLinkUrl.setText("-");
-            openRegattaRegistrationLink.setHref("");
-            openRegattaRegistrationLink.setVisible(false);
-            openRegattaRegistrationLinkQrCode.setUrl("");
-            openRegattaRegistrationLinkQrCode.setVisible(false);
-        }
-    }*/
 
 }

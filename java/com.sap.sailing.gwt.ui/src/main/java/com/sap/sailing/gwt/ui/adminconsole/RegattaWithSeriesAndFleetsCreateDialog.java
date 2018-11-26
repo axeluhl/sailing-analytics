@@ -18,6 +18,7 @@ import com.sap.sailing.domain.common.LeaderboardNameConstants;
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnInSeriesDTO;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
@@ -107,9 +108,11 @@ public class RegattaWithSeriesAndFleetsCreateDialog extends RegattaWithSeriesAnd
     }
 
     public RegattaWithSeriesAndFleetsCreateDialog(Collection<RegattaDTO> existingRegattas,
-            List<EventDTO> existingEvents, EventDTO correspondingEvent, StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
-        super(new RegattaDTO(), Collections.<SeriesDTO>emptySet(), existingEvents, correspondingEvent, stringMessages.addRegatta(), stringMessages.ok(),
-                stringMessages, new RegattaParameterValidator(stringMessages, existingRegattas), callback);
+            List<EventDTO> existingEvents, EventDTO correspondingEvent, final SailingServiceAsync sailingService,
+            StringMessages stringMessages, DialogCallback<RegattaDTO> callback) {
+        super(new RegattaDTO(), Collections.<SeriesDTO> emptySet(), existingEvents, correspondingEvent,
+                stringMessages.addRegatta(), stringMessages.ok(), sailingService, stringMessages,
+                new RegattaParameterValidator(stringMessages, existingRegattas), callback);
         buoyZoneRadiusInHullLengthsDoubleBox.setValue(Regatta.DEFAULT_BUOY_ZONE_RADIUS_IN_HULL_LENGTHS);
         SeriesDTO series = new SeriesDTO();
         series.setName(Series.DEFAULT_NAME);

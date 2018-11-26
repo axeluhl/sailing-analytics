@@ -23,6 +23,7 @@ import com.sap.sailing.domain.common.CompetitorRegistrationType;
 import com.sap.sailing.domain.common.RankingMetrics;
 import com.sap.sailing.domain.common.ScoringSchemeType;
 import com.sap.sailing.gwt.ui.client.DataEntryDialogWithDateTimeBox;
+import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.common.client.DateAndTimeFormatterUtil;
 import com.sap.sailing.gwt.ui.common.client.RandomString;
@@ -48,6 +49,7 @@ import com.sap.sse.gwt.client.controls.listedit.ListEditorComposite;
  */
 public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEntryDialogWithDateTimeBox<T> {
 
+    protected final SailingServiceAsync sailingService; 
     protected StringMessages stringMessages;
     private final RegattaDTO regatta;
 
@@ -68,9 +70,11 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
     private EventDTO defaultEvent;
     private RegistrationLinkWithQRCode registrationLinkWithQRCode;
 
-    public AbstractRegattaWithSeriesAndFleetsDialog(RegattaDTO regatta, Iterable<SeriesDTO> series, List<EventDTO> existingEvents, EventDTO correspondingEvent, 
-            String title, String okButton, StringMessages stringMessages, Validator<T> validator, DialogCallback<T> callback) {
+    public AbstractRegattaWithSeriesAndFleetsDialog(final SailingServiceAsync sailingService, RegattaDTO regatta,
+            Iterable<SeriesDTO> series, List<EventDTO> existingEvents, EventDTO correspondingEvent, String title,
+            String okButton, StringMessages stringMessages, Validator<T> validator, DialogCallback<T> callback) {
         super(title, null, okButton, stringMessages.cancel(), validator, callback);
+        this.sailingService = sailingService;
         this.stringMessages = stringMessages;
         this.regatta = regatta;
         this.defaultEvent = correspondingEvent;
@@ -136,7 +140,7 @@ public abstract class AbstractRegattaWithSeriesAndFleetsDialog<T> extends DataEn
         registrationLinkWithQRCodeOpenButton = new Button(stringMessages.registrationLinkConfig(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                RegistrationLinkWithQRCodeDialog dialog = new RegistrationLinkWithQRCodeDialog(stringMessages, regatta.getName(),
+                RegistrationLinkWithQRCodeDialog dialog = new RegistrationLinkWithQRCodeDialog(sailingService, stringMessages, regatta.getName(),
                         registrationLinkWithQRCode, /* editMode */ true, new DialogCallback<RegistrationLinkWithQRCode>() {
                             @Override
                             public void ok(RegistrationLinkWithQRCode result) {

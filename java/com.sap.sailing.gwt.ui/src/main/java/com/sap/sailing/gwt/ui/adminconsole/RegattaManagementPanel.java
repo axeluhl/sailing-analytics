@@ -184,7 +184,7 @@ public class RegattaManagementPanel extends SimplePanel implements RegattasDispl
     }
 
     private void openCreateRegattaDialog(Collection<RegattaDTO> existingRegattas, final List<EventDTO> existingEvents) {
-        RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas, existingEvents, /*eventToSelect*/ null, stringMessages,
+        RegattaWithSeriesAndFleetsCreateDialog dialog = new RegattaWithSeriesAndFleetsCreateDialog(existingRegattas, existingEvents, /*eventToSelect*/ null, sailingService, stringMessages,
                 new CreateRegattaCallback(userService, sailingService, stringMessages, errorReporter, regattaRefresher,
                         eventsRefresher, existingEvents));
         dialog.ensureDebugId("RegattaCreateDialog");
