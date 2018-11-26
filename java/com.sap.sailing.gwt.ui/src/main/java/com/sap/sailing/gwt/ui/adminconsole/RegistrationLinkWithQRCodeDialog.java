@@ -1,5 +1,8 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -14,6 +17,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.sap.sailing.domain.common.BranchIO;
 import com.sap.sailing.domain.common.BranchIOConstants;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
@@ -150,13 +154,12 @@ public class RegistrationLinkWithQRCodeDialog extends DataEntryDialog<Registrati
         if (baseUrl.endsWith("/")) {
             baseUrl = baseUrl.substring(0, baseUrl.lastIndexOf("/"));
         }
-        String url = baseUrl.substring(0, baseUrl.lastIndexOf("/")) + "/sailingserver/api/v1/regattas/"
-                + URL.encodeQueryString(regattaName) + "/competitors/createandadd?" + "regatta_name="
-                + URL.encodeQueryString(regattaName) + "&secret=" + URL.encodeQueryString(secretTextBox.getValue());
-        String deeplinkUrl = BranchIOConstants.OPEN_REGATTA_APP_BRANCHIO + "?"
-                + BranchIOConstants.OPEN_REGATTA_APP_BRANCHIO_PATH + "=" + URL.encodeQueryString(url);
+        Map<String, String> parameters = new HashMap<String, String>();
+        parameters.put("regatta_name", regattaName);
+        parameters.put("secret", secretTextBox.getValue());
+        String deeplinkUrl = BranchIO.generateLink(BranchIOConstants.OPEN_REGATTA_APP_BRANCHIO, parameters,
+                URL::encodeQueryString);
         urlTextBox.setText(deeplinkUrl);
-
         sailingService.openRegattaRegistrationQrCode(deeplinkUrl, new AsyncCallback<String>() {
 
             @Override
