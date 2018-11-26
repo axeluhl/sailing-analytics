@@ -58,6 +58,9 @@ public final class SailingHierarchyWalker {
         for (Leaderboard lb : leaderboardGroup.getLeaderboards()) {
             visitor.visit(lb);
         }
+        if (leaderboardGroup.hasOverallLeaderboard()) {
+            visitor.visit(leaderboardGroup.getOverallLeaderboard());
+        }
     }
 
     public static void walkFromLeaderboard(final Leaderboard leaderboard, final LeaderboardHierarchyVisitor visitor) {
