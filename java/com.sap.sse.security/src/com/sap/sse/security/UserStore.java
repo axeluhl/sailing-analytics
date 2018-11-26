@@ -240,4 +240,6 @@ public interface UserStore extends UserGroupProvider, Named {
      *         If A is false, B contains all the ownerships of {@link #roleToCheck}
      */
     Pair<Boolean, Set<Ownership>> getExistingQualificationsForRoleDefinition(RoleDefinition roleToCheck);
+
+    Set<Pair<User, Role>> getRolesQualifiedByUserGroup(UserGroup groupQualification);
 }

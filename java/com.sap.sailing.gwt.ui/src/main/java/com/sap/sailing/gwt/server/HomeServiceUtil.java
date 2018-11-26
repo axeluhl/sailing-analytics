@@ -572,7 +572,8 @@ public final class HomeServiceUtil {
     public static List<Pair<Event, Leaderboard>> getEventsAndLeaderboardsForSeriesOrdered(LeaderboardGroup overallLeaderboardGroup,
             RacingEventService service) {
         final Iterable<Event> eventsInSeries = getEventsInSeries(overallLeaderboardGroup, service);
-        final Iterable<Leaderboard> orderedLeaderboards = getLeaderboardsForSeriesInOrder(overallLeaderboardGroup);
+        final Iterable<Leaderboard> orderedLeaderboards = getLeaderboardsForSeriesInOrderWithReadPermissions(overallLeaderboardGroup,
+                service);
         final List<Pair<Event, Leaderboard>> orderedEventsInSeries = new ArrayList<>();
         for (Leaderboard leaderboard : orderedLeaderboards) {
             final Event associatedEvent = getAssociatedEventForLeaderboardInSeries(leaderboard, eventsInSeries);
@@ -587,11 +588,23 @@ public final class HomeServiceUtil {
      * The {@link Leaderboard Leaderboards} referenced in the given {@link LeaderboardGroup} have a defined order. If
      * the displayGroupsInReverseOrder flag is set for the {@link LeaderboardGroup}, the order needs to change in the
      * UI. This methods sorts the {@link Leaderboard Leaderboards} using this flag.
+     * @param service 
      */
-    public static Iterable<Leaderboard> getLeaderboardsForSeriesInOrder(LeaderboardGroup overallLeaderboardGroup) {
+    public static Iterable<Leaderboard> getLeaderboardsForSeriesInOrderWithReadPermissions(LeaderboardGroup overallLeaderboardGroup, RacingEventService service) {
         if (overallLeaderboardGroup.isDisplayGroupsInReverseOrder()) {
             List<Leaderboard> leaderboardsInSeries = new ArrayList<>();
-            Util.addAll(overallLeaderboardGroup.getLeaderboards(), leaderboardsInSeries);
+            for(Leaderboard leaderboard: overallLeaderboardGroup.getLeaderboards()) {
+                if (service.getSecurityService().hasCurrentUserReadPermission(leaderboard)) {
+                    if (leaderboard instanceof RegattaLeaderboard) {
+                        if (service.getSecurityService()
+                                .hasCurrentUserReadPermission(((RegattaLeaderboard) leaderboard).getRegatta())) {
+                            leaderboardsInSeries.add(leaderboard);
+                        }
+                    } else {
+                        leaderboardsInSeries.add(leaderboard);
+                    }
+                }
+            }
             Collections.reverse(leaderboardsInSeries);
             return leaderboardsInSeries;
         }
@@ -638,9 +651,13 @@ public final class HomeServiceUtil {
             RacingEventService service) {
         Set<Event> eventsInSeries = new HashSet<>();
         for (Event event : service.getAllEvents()) {
-            for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
-                if (overallLeaderboardGroup.equals(leaderboardGroup)) {
-                    eventsInSeries.add(event);
+            if (service.getSecurityService().hasCurrentUserReadPermission(event)) {
+                for (LeaderboardGroup leaderboardGroup : event.getLeaderboardGroups()) {
+                    if (service.getSecurityService().hasCurrentUserReadPermission(leaderboardGroup)) {
+                        if (overallLeaderboardGroup.equals(leaderboardGroup)) {
+                            eventsInSeries.add(event);
+                        }
+                    }
                 }
             }
         }

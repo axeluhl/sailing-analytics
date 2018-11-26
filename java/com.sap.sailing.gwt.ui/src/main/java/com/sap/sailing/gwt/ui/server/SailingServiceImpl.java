@@ -3659,6 +3659,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         if (leaderboard == null) {
             throw new IllegalArgumentException("Couldn't find leaderboard named " + metaLeaderboardName);
         }
+        getSecurityService().checkCurrentUserReadPermission(leaderboard);
+        if (leaderboard instanceof RegattaLeaderboard) {
+            getSecurityService().checkCurrentUserReadPermission(((RegattaLeaderboard) leaderboard).getRegatta());
+        }
         if (!(leaderboard instanceof MetaLeaderboard)) {
             throw new IllegalArgumentException("The leaderboard " + metaLeaderboardName + " is not a metaleaderboard");
         }
@@ -3666,18 +3670,33 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         LeaderboardGroup groupOrNull = null;
         for (LeaderboardGroup lg : getService().getLeaderboardGroups().values()) {
             if (metaLeaderboard.equals(lg.getOverallLeaderboard())) {
-                groupOrNull = lg;
-                break;
+                if (getSecurityService().hasCurrentUserReadPermission(lg)) {
+                    groupOrNull = lg;
+                    break;
+                }
             }
         }
         // If we could identify the associated LeaderboardGroup the Leaderboards can be sorted based on that group
         Iterable<Leaderboard> leaderBoards = groupOrNull != null
-                ? HomeServiceUtil.getLeaderboardsForSeriesInOrder(groupOrNull) : metaLeaderboard.getLeaderboards();
+                ? HomeServiceUtil.getLeaderboardsForSeriesInOrderWithReadPermissions(groupOrNull, getService())
+                : metaLeaderboard.getLeaderboards();
         List<com.sap.sse.common.Util.Pair<String, String>> result = new ArrayList<com.sap.sse.common.Util.Pair<String, String>>();
         for (Leaderboard containedLeaderboard : leaderBoards) {
-            result.add(new com.sap.sse.common.Util.Pair<String, String>(containedLeaderboard.getName(),
-                    containedLeaderboard.getDisplayName() != null ? containedLeaderboard.getDisplayName()
-                            : containedLeaderboard.getName()));
+            // we need to filter because metaLeaderboard.getLeaderboards might return non visible ones
+            if (getSecurityService().hasCurrentUserReadPermission(containedLeaderboard)) {
+                if (containedLeaderboard instanceof RegattaLeaderboard) {
+                    Regatta regatta = ((RegattaLeaderboard) containedLeaderboard).getRegatta();
+                    if (getSecurityService().hasCurrentUserReadPermission(regatta)) {
+                        result.add(new com.sap.sse.common.Util.Pair<String, String>(containedLeaderboard.getName(),
+                                containedLeaderboard.getDisplayName() != null ? containedLeaderboard.getDisplayName()
+                                        : containedLeaderboard.getName()));
+                    }
+                } else {
+                    result.add(new com.sap.sse.common.Util.Pair<String, String>(containedLeaderboard.getName(),
+                            containedLeaderboard.getDisplayName() != null ? containedLeaderboard.getDisplayName()
+                                    : containedLeaderboard.getName()));
+                }
+            }
         }
         return result;
     }
@@ -8657,10 +8676,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
                 @Override
                 public UserGroup getNewGroupOwner() {
-                    if (groupOwnerToSet != null) {
+                    if (groupOwnerToSet == null) {
                         try {
-                            groupOwnerToSet = getSecurityService().createUserGroup(UUID.randomUUID(),
-                                    migrateGroupOwnerForHierarchyDTO.getGroupName());
+                            final UserGroup existingUserGroup = migrateGroupOwnerForHierarchyDTO.getExistingUserGroup();
+                            if (existingUserGroup != null) {
+                                // When migrating from an existing user group -> copy as much as possible from the
+                                // existing group to make the migrated objects to be visible for most people as before
+                                groupOwnerToSet = copyUserGroup(existingUserGroup,
+                                        migrateGroupOwnerForHierarchyDTO.getGroupName());
+                            } else {
+                                // The migration may start at an object that currently has no group owner (e.g. in case
+                                // this owner was just deleted) -> in this case we just create a new group
+                                groupOwnerToSet = getSecurityService().createUserGroup(UUID.randomUUID(),
+                                        migrateGroupOwnerForHierarchyDTO.getGroupName());
+                            }
                         } catch (UserGroupManagementException e) {
                             throw new RuntimeException("Could not create user group");
                         }
@@ -8674,5 +8703,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return new SailingHierarchyOwnershipUpdater(getService(), getSecurityService(), updateStrategy,
                 migrateGroupOwnerForHierarchyDTO.isUpdateCompetitors(),
                 migrateGroupOwnerForHierarchyDTO.isUpdateBoats());
+    }
+
+    private UserGroup copyUserGroup(UserGroup userGroup, String name) throws UserGroupManagementException {
+        // explicitly loading the current version of the group in case the given instance e.g. originates from the UI
+        // and is possible out of date.
+        final UserGroup userGroupToCopy = getSecurityService().getUserGroup(userGroup.getId());
+        if (userGroupToCopy == null) {
+            throw new IllegalArgumentException("User group does not exist");
+        }
+        final UUID newGroupId = UUID.randomUUID();
+        return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                SecuredSecurityTypes.USER_GROUP, newGroupId.toString(), name, () -> {
+                    final UserGroup createdUserGroup = getSecurityService().createUserGroup(newGroupId, name);
+                    getSecurityService().copyUsersAndRoleAssociations(userGroupToCopy, createdUserGroup);
+                    return createdUserGroup;
+                });
     }
 }
