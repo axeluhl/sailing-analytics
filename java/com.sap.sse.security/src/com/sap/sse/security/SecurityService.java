@@ -390,4 +390,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
             Iterable<WildcardPermission> permissionsToCheck);
 
     void setDefaultTenantForCurrentServerForUser(String username, String defaultTenant);
+    
+    void copyUsersAndRoleAssociations(UserGroup source, UserGroup destination);
 }

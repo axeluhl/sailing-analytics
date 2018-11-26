@@ -729,6 +729,24 @@ public class UserStoreImpl implements UserStore {
         }
         return new Pair<>(false, ownerships);
     }
+    
+    @Override
+    public Set<Pair<User, Role>> getRolesQualifiedByUserGroup(UserGroup groupQualification) {
+        final Set<Pair<User, Role>> result = new HashSet<>();
+        for (User user : getUsers()) {
+            try {
+                for (Role role : getRolesFromUser(user.getName())) {
+                    if (groupQualification.equals(role.getQualifiedForTenant())) {
+                        result.add(new Pair<>(user, role));
+                    }
+                }
+            } catch (UserManagementException e) {
+                // user did not exist -> should not happen
+                logger.log(Level.SEVERE, e.getMessage(), e);
+            }
+        }
+        return result;
+    }
 
     @Override
     public Iterable<Role> getRolesFromUser(String username) throws UserManagementException {

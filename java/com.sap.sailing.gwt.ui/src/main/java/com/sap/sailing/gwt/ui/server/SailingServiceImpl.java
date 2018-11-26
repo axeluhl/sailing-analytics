@@ -8652,10 +8652,20 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
                 @Override
                 public UserGroup getNewGroupOwner() {
-                    if (groupOwnerToSet != null) {
+                    if (groupOwnerToSet == null) {
                         try {
-                            groupOwnerToSet = getSecurityService().createUserGroup(UUID.randomUUID(),
-                                    migrateGroupOwnerForHierarchyDTO.getGroupName());
+                            final UserGroup existingUserGroup = migrateGroupOwnerForHierarchyDTO.getExistingUserGroup();
+                            if (existingUserGroup != null) {
+                                // When migrating from an existing user group -> copy as much as possible from the
+                                // existing group to make the migrated objects to be visible for most people as before
+                                groupOwnerToSet = copyUserGroup(existingUserGroup,
+                                        migrateGroupOwnerForHierarchyDTO.getGroupName());
+                            } else {
+                                // The migration may start at an object that currently has no group owner (e.g. in case
+                                // this owner was just deleted) -> in this case we just create a new group
+                                groupOwnerToSet = getSecurityService().createUserGroup(UUID.randomUUID(),
+                                        migrateGroupOwnerForHierarchyDTO.getGroupName());
+                            }
                         } catch (UserGroupManagementException e) {
                             throw new RuntimeException("Could not create user group");
                         }
@@ -8669,5 +8679,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         return new SailingHierarchyOwnershipUpdater(getService(), getSecurityService(), updateStrategy,
                 migrateGroupOwnerForHierarchyDTO.isUpdateCompetitors(),
                 migrateGroupOwnerForHierarchyDTO.isUpdateBoats());
+    }
+
+    private UserGroup copyUserGroup(UserGroup userGroup, String name) throws UserGroupManagementException {
+        // explicitly loading the current version of the group in case the given instance e.g. originates from the UI
+        // and is possible out of date.
+        final UserGroup userGroupToCopy = getSecurityService().getUserGroup(userGroup.getId());
+        if (userGroupToCopy == null) {
+            throw new IllegalArgumentException("User group does not exist");
+        }
+        final UUID newGroupId = UUID.randomUUID();
+        return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                SecuredSecurityTypes.USER_GROUP, newGroupId.toString(), name, () -> {
+                    final UserGroup createdUserGroup = getSecurityService().createUserGroup(newGroupId, name);
+                    getSecurityService().copyUsersAndRoleAssociations(userGroupToCopy, createdUserGroup);
+                    return createdUserGroup;
+                });
     }
 }

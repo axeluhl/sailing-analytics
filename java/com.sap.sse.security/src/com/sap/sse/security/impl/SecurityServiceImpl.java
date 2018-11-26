@@ -1910,4 +1910,17 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         user.setDefaultTenant(newDefaultTenant, ServerInfo.getName());
         userStore.updateUser(user);
     }
+    
+    @Override
+    public void copyUsersAndRoleAssociations(UserGroup source, UserGroup destination) {
+        for (SecurityUser user : source.getUsers()) {
+            addUserToUserGroup(destination, user);
+        }
+
+        for (Pair<User, Role> userAndRole : userStore.getRolesQualifiedByUserGroup(source)) {
+            final Role existingRole = userAndRole.getB();
+            addRoleForUser(userAndRole.getA(),
+                    new RoleImpl(existingRole.getRoleDefinition(), destination, existingRole.getQualifiedForUser()));
+        }
+    }
 }
