@@ -74,7 +74,6 @@
 <unit id="com.fasterxml.jackson.core.jackson-databind" version="2.5.0.v201504151636"/>
 <unit id="com.sun.jersey" version="1.17.0.v201503170330"/>
 <unit id="com.sun.jersey.source" version="1.17.0.v201503170330"/>
-<unit id="com.sun.activation.javax.activation" version="1.2.0"/>
 <unit id="javax.servlet" version="3.1.0.v201410161800"/>
 <unit id="javax.servlet.source" version="3.1.0.v201410161800"/>
 <unit id="javax.validation" version="1.0.0.GA_v201205091237"/>
@@ -126,6 +125,7 @@
 <plugin id="com.fasterxml.jackson.core.jackson-core"/>
 <plugin id="com.fasterxml.jackson.core.jackson-databind"/>
 <plugin id="com.rabbitmq.client"/>
+<plugin id="com.sun.activation.javax.activation"/>
 <plugin id="com.sun.jersey"/>
 <plugin id="com.sun.jersey.contribs.jersey-multipart"/>
 <plugin id="com.sun.jersey.source"/>
