@@ -429,8 +429,6 @@
          id="com.sun.istack.commons-runtime"
          download-size="0"
          install-size="0"
-         version="3.0.7"
-         fragment="true"
-         unpack="false"/>
+         version="3.0.7"/>
 
 </feature>

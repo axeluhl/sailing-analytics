@@ -126,6 +126,7 @@
 <plugin id="com.fasterxml.jackson.core.jackson-databind"/>
 <plugin id="com.rabbitmq.client"/>
 <plugin id="com.sun.activation.javax.activation"/>
+<plugin id="com.sun.istack.commons-runtime"/>
 <plugin id="com.sun.jersey"/>
 <plugin id="com.sun.jersey.contribs.jersey-multipart"/>
 <plugin id="com.sun.jersey.source"/>

@@ -146,7 +146,7 @@
          unpack="false"/>
 
    <plugin
-         id="com.sun.istack"
+         id="com.sun.istack.commons-runtime"
          download-size="0"
          install-size="0"
          version="3.0.7"
