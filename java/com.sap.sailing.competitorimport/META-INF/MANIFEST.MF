@@ -9,6 +9,6 @@ Export-Package: com.sap.sailing.competitorimport
 Require-Bundle: com.sap.sse.common,
  com.sap.sailing.domain.shared.android,
  com.sap.sailing.domain.common,
- com.sun.xml.bind.jaxb-impl;bundle-version="2.4.0",
- jaxb-api;bundle-version="2.4.0"
+ com.sun.xml.bind.jaxb-impl;bundle-version="2.4.0"
 Automatic-Module-Name: com.sap.sailing.competitorimport
+Import-Package: javax.xml.bind

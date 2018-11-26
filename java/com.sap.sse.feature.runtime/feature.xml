@@ -417,4 +417,20 @@
          version="1.2.0.v20170105-1446"
          unpack="false"/>
 
+   <plugin
+         id="com.sap.sse.jersey.jaxbdependencyfragment"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="com.sun.istack"
+         download-size="0"
+         install-size="0"
+         version="2.2.0"
+         fragment="true"
+         unpack="false"/>
+
 </feature>

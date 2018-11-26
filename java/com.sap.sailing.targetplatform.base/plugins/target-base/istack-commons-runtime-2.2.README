@@ -1,0 +1,3 @@
+Obtained from https://mvnrepository.com/artifact/com.sun.istack/istack-commons-runtime/2.2
+by patching the META-INF/MANIFEST.MF file so that it's an OSGi bundle exporting the
+com.sun.istack package, required in particular by the JAXB implementation bundle
