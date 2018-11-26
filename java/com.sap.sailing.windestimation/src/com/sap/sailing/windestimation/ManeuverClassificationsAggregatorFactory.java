@@ -9,17 +9,17 @@ import com.sap.sailing.domain.base.BoatClass;
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.polars.NotEnoughDataHasBeenAddedException;
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.windestimation.aggregator.clustering.ManeuverClassificationForClusteringImpl;
+import com.sap.sailing.windestimation.aggregator.clustering.ManeuverClusteringBasedWindEstimationTrackImpl;
+import com.sap.sailing.windestimation.aggregator.hmm.BestPathsCalculator;
+import com.sap.sailing.windestimation.aggregator.hmm.IntersectedWindRangeBasedTransitionProbabilitiesCalculator;
+import com.sap.sailing.windestimation.aggregator.hmm.ManeuverSequenceGraph;
+import com.sap.sailing.windestimation.aggregator.outlierremoval.MeanBasedOutlierRemovalWindEstimator;
+import com.sap.sailing.windestimation.aggregator.outlierremoval.NeighborBasedOutlierRemovalWindEstimator;
 import com.sap.sailing.windestimation.classifier.maneuver.ManeuverWithEstimatedType;
 import com.sap.sailing.windestimation.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
-import com.sap.sailing.windestimation.maneuverclustering.ManeuverClassificationForClusteringImpl;
-import com.sap.sailing.windestimation.maneuverclustering.ManeuverClusteringBasedWindEstimationTrackImpl;
-import com.sap.sailing.windestimation.maneuvergraph.BestPathsCalculator;
-import com.sap.sailing.windestimation.maneuvergraph.IntersectedWindRangeBasedTransitionProbabilitiesCalculator;
-import com.sap.sailing.windestimation.maneuvergraph.ManeuverSequenceGraph;
-import com.sap.sailing.windestimation.tackoutlierremoval.MeanBasedOutlierRemovalWindEstimator;
-import com.sap.sailing.windestimation.tackoutlierremoval.NeighborBasedOutlierRemovalWindEstimator;
 import com.sap.sailing.windestimation.windinference.MiddleCourseBasedTwdCalculatorImpl;
 
 public class ManeuverClassificationsAggregatorFactory {

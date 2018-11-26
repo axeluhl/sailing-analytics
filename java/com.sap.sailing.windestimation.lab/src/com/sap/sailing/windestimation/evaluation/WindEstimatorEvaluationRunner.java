@@ -19,13 +19,13 @@ public class WindEstimatorEvaluationRunner {
     private static final Integer FIXED_NUMBER_OF_MANEUVERS = null;
     private static final boolean RANDOM_CLIPPING_OF_COMPETITOR_TRACKS = false;
     private static final boolean EVALUATE_PER_COMPETITOR_TRACK = false;
-    private static final boolean ENABLE_MARKS_INFORMATION = true;
-    private static final boolean ENABLE_SCALED_SPEED = true;
-    private static final boolean ENABLE_POLARS = true;
+    private static final boolean ENABLE_MARKS_INFORMATION = false;
+    private static final boolean ENABLE_SCALED_SPEED = false;
+    private static final boolean ENABLE_POLARS = false;
     private static final double MIN_CORRECT_ESTIMATIONS_RATIO_FOR_CORRECT_RACE = 0.75;
     private static final double MAX_TWS_DEVIATION_PERCENT = 0.2;
     private static final int MAX_TWD_DEVIATION_DEG = 20;
-    private static final EvaluatableWindEstimationImplementation WIND_ESTIMATION_IMPLEMENTATION = EvaluatableWindEstimationImplementation.HMM;
+    private static final EvaluatableWindEstimationImplementation WIND_ESTIMATION_IMPLEMENTATION = EvaluatableWindEstimationImplementation.CLUSTERING;
 
     public static void main(String[] args) throws Exception {
         WindEstimatorEvaluator<CompleteManeuverCurveWithEstimationData> evaluator = new WindEstimationEvaluatorImpl<>(

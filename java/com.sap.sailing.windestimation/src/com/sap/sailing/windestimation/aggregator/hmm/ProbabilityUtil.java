@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.maneuvergraph;
+package com.sap.sailing.windestimation.aggregator.hmm;
 
 /**
  * 

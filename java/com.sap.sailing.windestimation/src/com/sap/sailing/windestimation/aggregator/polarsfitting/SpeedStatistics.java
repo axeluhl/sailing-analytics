@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.polarsfitting;
+package com.sap.sailing.windestimation.aggregator.polarsfitting;
 
 public class SpeedStatistics {
 

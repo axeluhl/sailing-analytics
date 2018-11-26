@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.tackoutlierremoval;
+package com.sap.sailing.windestimation.aggregator.outlierremoval;
 
 import java.util.List;
 

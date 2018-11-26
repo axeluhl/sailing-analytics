@@ -1,8 +1,8 @@
 package com.sap.sailing.windestimation.windinference;
 
 import com.sap.sailing.domain.polars.PolarDataService;
+import com.sap.sailing.windestimation.aggregator.polarsfitting.PolarsFittingWindEstimation;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
-import com.sap.sailing.windestimation.polarsfitting.PolarsFittingWindEstimation;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Speed;
 

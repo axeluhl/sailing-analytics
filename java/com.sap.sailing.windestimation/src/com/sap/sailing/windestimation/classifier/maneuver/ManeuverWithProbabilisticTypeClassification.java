@@ -1,8 +1,8 @@
 package com.sap.sailing.windestimation.classifier.maneuver;
 
+import com.sap.sailing.windestimation.aggregator.hmm.ProbabilityUtil;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
 import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
-import com.sap.sailing.windestimation.maneuvergraph.ProbabilityUtil;
 
 /**
  * 

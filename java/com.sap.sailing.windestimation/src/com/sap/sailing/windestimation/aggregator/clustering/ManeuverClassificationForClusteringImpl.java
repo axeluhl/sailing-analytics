@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.maneuverclustering;
+package com.sap.sailing.windestimation.aggregator.clustering;
 
 import com.sap.sailing.domain.common.ManeuverType;
 import com.sap.sailing.domain.polars.PolarDataService;

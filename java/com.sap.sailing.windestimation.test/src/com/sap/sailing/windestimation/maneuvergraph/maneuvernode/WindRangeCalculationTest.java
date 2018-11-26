@@ -5,8 +5,8 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.sap.sailing.windestimation.maneuvergraph.IntersectedWindRange;
-import com.sap.sailing.windestimation.maneuvergraph.WindCourseRange;
+import com.sap.sailing.windestimation.aggregator.hmm.IntersectedWindRange;
+import com.sap.sailing.windestimation.aggregator.hmm.WindCourseRange;
 
 public class WindRangeCalculationTest {
 

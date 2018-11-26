@@ -1,4 +1,4 @@
-package com.sap.sailing.windestimation.maneuverclustering;
+package com.sap.sailing.windestimation.aggregator.clustering;
 
 import java.util.ArrayList;
 import java.util.List;
