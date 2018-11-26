@@ -124,4 +124,25 @@
          version="3.1.0.1"
          unpack="false"/>
 
+   <plugin
+         id="jaxb-api"
+         download-size="0"
+         install-size="0"
+         version="2.4.0.b1808300359"
+         unpack="false"/>
+
+   <plugin
+         id="com.sun.xml.bind.jaxb-impl"
+         download-size="0"
+         install-size="0"
+         version="2.4.0.b180830_0438"
+         unpack="false"/>
+
+   <plugin
+         id="com.sun.activation.javax.activation"
+         download-size="0"
+         install-size="0"
+         version="1.2.0"
+         unpack="false"/>
+
 </feature>
