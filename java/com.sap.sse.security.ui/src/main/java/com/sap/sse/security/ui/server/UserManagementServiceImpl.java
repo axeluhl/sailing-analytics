@@ -787,4 +787,29 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public String getOrCreateAccessToken(String username) {
         return getSecurityService().getOrCreateAccessToken(username);
     }
+
+    @Override
+    public AccessControlList overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
+            AccessControlList acl) throws UnauthorizedException {
+        if (SecurityUtils.getSubject()
+                .isPermitted(idOfAccessControlledObject.getStringPermission(DefaultActions.CHANGE_ACL))) {
+
+            return securityDTOFactory.createAccessControlListDTO(getSecurityService()
+                    .overrideAccessControlList(idOfAccessControlledObject, acl.getActionsByUserGroup()));
+        } else {
+            throw new UnauthorizedException("Not permitted to update the ACL for a user");
+        }
+    }
+
+    @Override
+    public AccessControlList getAccessControlListWithoutPruning(QualifiedObjectIdentifier idOfAccessControlledObject) throws UnauthorizedException {
+        if (SecurityUtils.getSubject()
+                .isPermitted(idOfAccessControlledObject.getStringPermission(DefaultActions.CHANGE_ACL))) {
+            return securityDTOFactory.createAccessControlListDTO(
+                    getSecurityService().getAccessControlList(idOfAccessControlledObject).getAnnotation());
+        } else {
+            throw new UnauthorizedException("Not permitted to get the unpruned ACL for a user");
+        }
+    }
+
 }

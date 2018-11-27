@@ -8,6 +8,9 @@ public interface IconResources extends ClientBundle {
     
     public static final IconResources INSTANCE = GWT.create(IconResources.class);
 
+    @Source("images/change-acl.png")
+    ImageResource changeACLIcon();
+
     @Source("images/change-ownership.png")
     ImageResource changeOwnershipIcon();
 
