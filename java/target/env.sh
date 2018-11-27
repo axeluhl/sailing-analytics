@@ -35,16 +35,16 @@ fi
 if [ -z $SERVER_PORT ]; then
   SERVER_PORT=8888
 fi
-if [ -z MONGODB_HOST ]; then
+if [ -z $MONGODB_HOST ]; then
   MONGODB_HOST=10.0.75.1
 fi
-if [ -z MONGODB_PORT ]; then
+if [ -z $MONGODB_PORT ]; then
   MONGODB_PORT=27017
 fi
-if [ -z MONGODB_NAME ]; then
+if [ -z $MONGODB_NAME ]; then
   MONGODB_NAME=winddb
 fi
-if [ -z EXPEDITION_PORT ]; then
+if [ -z $EXPEDITION_PORT ]; then
   EXPEDITION_PORT=2010
 fi
 
@@ -65,7 +65,7 @@ fi
 # Host where RabbitMQ is running 
 # REPLICATE_MASTER_QUEUE_HOST=
 # Port that RabbitMQ is listening on (normally something like 5672); use 0 to connect to RabbitMQ's default port
-if [ -z REPLICATE_MASTER_QUEUE_PORT ]; then
+if [ -z $REPLICATE_MASTER_QUEUE_PORT ]; then
   REPLICATE_MASTER_QUEUE_PORT=0
 fi
 
