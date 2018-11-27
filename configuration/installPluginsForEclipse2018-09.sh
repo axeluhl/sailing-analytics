@@ -61,4 +61,7 @@ installPlugins https://tools.hana.ondemand.com/oxygen com.sap.jvm.profiling.feat
 echo "Installing javax.xml.bind for news feed polling (see https://stackoverflow.com/questions/52528693/eclipse-internal-error-polling-news-feeds)..."
 installPlugins http://download.eclipse.org/tools/orbit/downloads/drops/R20180905201904/repository javax.xml.bind
 
+echo "Installing Java11 Patches..."
+installPlugins http://download.eclipse.org/eclipse/updates/4.9-P-builds/ org.eclipse.jdt.java11patch.feature.group
+
 echo "Installation completed!"
