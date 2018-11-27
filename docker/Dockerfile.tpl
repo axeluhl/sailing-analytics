@@ -9,4 +9,5 @@ RUN apt-get update \
  && rm /tmp/RELEASE.tar.gz
 RUN apt-get install -y vim
 COPY vimrc /root/.vimrc
-EXPOSE 8888
+RUN apt-get install -y telnet
+EXPOSE 8888 14888 8000
