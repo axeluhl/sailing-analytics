@@ -2202,4 +2202,10 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages,
     String publicServer();
     String updatedServerSetupError();
     String updatedServerSetup();
+    String useExistingUserGroup();
+    String useNewUserGroup();
+    String currentGroupOwner();
+    String migrateCompetitors();
+    String migrateBoats();
+    String migrateHierarchyToGroupOwner();
 }
