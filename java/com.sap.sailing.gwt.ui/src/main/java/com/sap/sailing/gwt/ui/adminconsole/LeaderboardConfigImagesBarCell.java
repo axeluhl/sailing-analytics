@@ -32,7 +32,7 @@ public class LeaderboardConfigImagesBarCell extends DefaultActionsImagesBarCell 
                         resources.competitorsIcon()),
                 new ImageSpec(ACTION_CONFIGURE_URL, stringMessages.actionConfigureUrl(),
                         resources.settingsActionIcon()),
-                getDeleteImageSpec(), getChangeOwnershipImageSpec(),
+                getDeleteImageSpec(), getChangeOwnershipImageSpec(), getChangeACLImageSpec(),
                 new ImageSpec(ACTION_EXPORT_XML, stringMessages.actionExportXML(), resources.exportXMLIcon()),
                 new ImageSpec(ACTION_OPEN_COACH_DASHBOARD, stringMessages.actionOpenDashboard(),
                         resources.openCoachDashboard()),
