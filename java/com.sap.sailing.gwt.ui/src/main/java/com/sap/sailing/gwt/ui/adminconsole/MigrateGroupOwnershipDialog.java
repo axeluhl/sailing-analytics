@@ -1,8 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -11,8 +9,8 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.MigrateGroupOwnershipDialog.MigrateGroupOwnerForHierarchyDialogDTO;
+import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.shared.MigrateGroupOwnerForHierarchyDTO;
 import com.sap.sse.common.Named;
 import com.sap.sse.gwt.client.Notification;
@@ -22,7 +20,6 @@ import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.SecuredObject;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
-import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class MigrateGroupOwnershipDialog extends DataEntryDialog<MigrateGroupOwnerForHierarchyDialogDTO> {
 
@@ -73,7 +70,7 @@ public class MigrateGroupOwnershipDialog extends DataEntryDialog<MigrateGroupOwn
                     errorMessage = null;
                 }
             } else if (valueToValidate.getGroupName() == null || valueToValidate.getGroupName().isEmpty()) {
-                errorMessage = "TODO no userGroup name given";
+                errorMessage = stringMessages.enterUserGroupName();
             } else {
                 errorMessage = null;
             }
@@ -83,17 +80,17 @@ public class MigrateGroupOwnershipDialog extends DataEntryDialog<MigrateGroupOwn
 
     private MigrateGroupOwnershipDialog(UserManagementServiceAsync userManagementService, UserGroup currentGroupOwner,
             StringMessages stringMessages, DialogCallback<MigrateGroupOwnerForHierarchyDialogDTO> callback) {
-        super(stringMessages.ownership(), stringMessages.editObjectOwnership(), stringMessages.ok(),
+        super(stringMessages.ownership(), stringMessages.migrateHierarchyToGroupOwner(), stringMessages.ok(),
                 stringMessages.cancel(), new Validator(stringMessages), callback);
         this.userManagementService = userManagementService;
-        this.currentGroupLabel = createLabel(currentGroupOwner == null ? "n/a" : currentGroupOwner.getName());
+        this.currentGroupLabel = new Label(currentGroupOwner == null ? "n/a" : currentGroupOwner.getName());
         this.groupnameBox = createTextBox(currentGroupOwner == null ? "" : currentGroupOwner.getName(),
                 /* visibileLength */ 20);
         this.groupnameBox.addChangeHandler(e -> resolveUserGroup());
 
         final String radioGroupName = "mode";
-        toExistingGroup = createRadioButton(radioGroupName, "TOOD use existing group");
-        toNewGroup = createRadioButton(radioGroupName, "TOOD create new group");
+        toExistingGroup = createRadioButton(radioGroupName, stringMessages.useExistingUserGroup());
+        toNewGroup = createRadioButton(radioGroupName, stringMessages.useNewUserGroup());
         toExistingGroup.setValue(true);
 
         migrateCompetitors = createCheckbox("");
@@ -105,15 +102,15 @@ public class MigrateGroupOwnershipDialog extends DataEntryDialog<MigrateGroupOwn
     @Override
     protected Widget getAdditionalWidget() {
         final Grid result = new Grid(5, 2);
-        result.setWidget(0, 0, new Label("TODO current group"));
+        result.setWidget(0, 0, new Label(stringMessages.currentGroupOwner()));
         result.setWidget(0, 1, currentGroupLabel);
         result.setWidget(1, 0, toExistingGroup);
         result.setWidget(1, 1, toNewGroup);
         result.setWidget(2, 0, new Label(stringMessages.group()));
         result.setWidget(2, 1, groupnameBox);
-        result.setWidget(3, 0, new Label("TODO migrate competitors"));
+        result.setWidget(3, 0, new Label(stringMessages.migrateCompetitors()));
         result.setWidget(3, 1, migrateCompetitors);
-        result.setWidget(4, 0, new Label("TODO migrate boats"));
+        result.setWidget(4, 0, new Label(stringMessages.migrateBoats()));
         result.setWidget(4, 1, migrateBoats);
         return result;
     }
@@ -148,17 +145,6 @@ public class MigrateGroupOwnershipDialog extends DataEntryDialog<MigrateGroupOwn
     /**
      * Creates a new {@link DialogConfig dialog configuration} instance which can be (re-)used to
      * {@link DialogConfig#openDialog(Named) open} a {@link MigrateGroupOwnershipDialog dialog}.
-     * 
-     * @param userManagementService
-     *            {@link UserManagementServiceAsync} to use to set the secured object's ownership
-     * @param type
-     *            {@link SecuredDomainType} specifying the type of required permissions to modify the secured object
-     * @param typeRelativeIdFactory
-     *            {@link Function factory} to get a {@link String type relative identifier} for the secured object
-     * @param updateCallback
-     *            {@link Consumer callback} to execute when the dialog is confirmed and ownership update succeeded
-     * @param errorCallback
-     *            {@link Consumer callback} to execute when the dialog is confirmed and ownership update fails
      */
     public static <T extends Named & SecuredObject> DialogConfig<T> create(
             final UserManagementServiceAsync userManagementService,
@@ -182,7 +168,7 @@ public class MigrateGroupOwnershipDialog extends DataEntryDialog<MigrateGroupOwn
          * instance.
          * 
          * @param securedObject
-         *            {@link Named} {@link SecuredObject} instance to edit ownerships for
+         *            {@link Named} {@link SecuredObject} instance to migrate group owner for
          */
         public void openDialog(final T securedObject) {
             Ownership ownership = securedObject.getOwnership();
