@@ -23,6 +23,7 @@ public class Activator implements BundleActivator {
         Runtime.getRuntime().addShutdownHook(new Thread(()->{
             logger.info("Executing shutdown hook, gracefully shutting down OSGi framework");
             try {
+                // TODO figure out if we're in the middle of a graceful shutdown already and then skip this...
                 final Bundle systemBundle = context.getBundle(0);
                 logger.info("Found system bundle "+systemBundle.getSymbolicName());
                 systemBundle.stop();
