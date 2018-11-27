@@ -592,6 +592,9 @@ public class CandidateFinderImpl implements CandidateFinder {
                 }
             }
         }
+        lastIterationFix = null;
+        lastIterationAfterFix = null;
+        
         for (GPSFixMoving fix : affectedFixes) {
             TimePoint t = null;
             Position p = null;
