@@ -668,6 +668,15 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         ANDROID_ABI=armeabi-v7a
         AVD_NAME="androidTest-${NOW}"
         echo "Updating Android SDK..." | tee -a $START_DIR/build.log
+	OLD_JAVA_HOME=$JAVA_HOME
+	if [ -z "$JAVA8_HOME" ]; then
+	  if [ -d /opt/sapjvm_8 ]; then
+	    JAVA8_HOME=/opt/sapjvm_8
+	  else
+	    JAVA8_HOME=$JAVA_HOME
+	  fi
+	fi
+	export JAVA_HOME=$JAVA8_HOME
         "$SDK_MANAGER" --update $ANDROID_OPTIONS
         echo "Updating Android SDK (build-tools-${BUILD_TOOLS})..." | tee -a $START_DIR/build.log
         "$SDK_MANAGER" $ANDROID_OPTIONS "build-tools;${BUILD_TOOLS}"
@@ -677,6 +686,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
         "$SDK_MANAGER" $ANDROID_OPTIONS "extras;android;m2repository"
         echo "Updating Android SDK (extra-google-m2repository)..." | tee -a $START_DIR/build.log
         "$SDK_MANAGER" $ANDROID_OPTIONS "extras;google;m2repository"
+	export JAVA_HOME=$OLD_JAVA_HOME
 
         echo "Using following command for apps build: mvn $mobile_extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
         echo "Maven version used: `mvn --version`"
