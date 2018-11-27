@@ -103,7 +103,7 @@ SERVER_STARTUP_NOTIFY=
 # USE_ENVIRONMENT=
 
 INSTANCE_ID="$SERVER_NAME:$SERVER_PORT"
-ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS --add-modules=ALL-SYSTEM -Dpersistentcompetitors.clear=false -XX:ThreadPriorityPolicy=1 -XX:+UseG1GC -verbose:gc -XX:MaxGCPauseMillis=500 -Xlog:gc+ergo*=trace:file=logs/gc_ergo.log:time:filecount=10,filesize=100000 -Xlog:gc*:file=logs/gc.log:time:filecount=10,filesize=100000 -XX:MaxGCPauseMillis=500"
+ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dosgi.java.profile=file://`pwd`/JavaSE-11.profile --add-modules=ALL-SYSTEM -Dpersistentcompetitors.clear=false -XX:ThreadPriorityPolicy=1 -XX:+UseG1GC -verbose:gc -XX:MaxGCPauseMillis=500 -Xlog:gc+ergo*=trace:file=logs/gc_ergo.log:time:filecount=10,filesize=100000 -Xlog:gc*:file=logs/gc.log:time:filecount=10,filesize=100000 -XX:MaxGCPauseMillis=500"
 
 echo ADDITIONAL_JAVA_ARGS=${ADDITIONAL_JAVA_ARGS}
 
