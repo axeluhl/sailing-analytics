@@ -17,6 +17,7 @@
          These are the module that are needed for both backend and Android builds.
          To add additional modules for the backend build, there is a specific profile. -->
     <module>com.sap.sse.common</module>
+    <module>com.sap.sse.jersey.jaxbdependencyfragment</module>
     <module>com.sap.sse.shared.android</module>
     <module>com.sap.sse.datamining.annotations</module>
     <module>com.sap.sse.security.common</module>
