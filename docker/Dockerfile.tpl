@@ -12,4 +12,6 @@ COPY vimrc /root/.vimrc
 RUN apt-get install -y telnet
 COPY env.sh .
 COPY start .
+COPY JavaSE-11.profile .
 EXPOSE 8888 14888 8000
+CMD [ "/home/sailing/servers/server/start", "fg" ]

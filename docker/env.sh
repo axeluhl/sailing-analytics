@@ -1,1 +1,0 @@
-../java/target/env.sh
