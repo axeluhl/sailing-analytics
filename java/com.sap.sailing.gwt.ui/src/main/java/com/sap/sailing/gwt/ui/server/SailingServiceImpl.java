@@ -1297,6 +1297,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         List<BoatDTO> result = new ArrayList<BoatDTO>();
         for (Boat b : iterable) {
             BoatDTO boatDTO = baseDomainFactory.convertToBoatDTO(b);
+            SecurityDTOUtil.addSecurityInformation(getSecurityService(), boatDTO, b.getIdentifier());
             result.add(boatDTO);
         }
         return result;
