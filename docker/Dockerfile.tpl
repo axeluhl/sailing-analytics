@@ -10,4 +10,6 @@ RUN apt-get update \
 RUN apt-get install -y vim
 COPY vimrc /root/.vimrc
 RUN apt-get install -y telnet
+COPY env.sh .
+COPY start .
 EXPOSE 8888 14888 8000
