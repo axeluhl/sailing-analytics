@@ -274,7 +274,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                 users.add(user);
                         getUserManagementService().updateUserProperties(user.getName(), user.getFullName(),
                                 user.getCompany(), user.getLocale(),
-                                user.getDefaultTenant() != null ? user.getDefaultTenant().getName() : null,
+                                user.getDefaultTenant() != null ? user.getDefaultTenant().getId().toString() : null,
                                 new AsyncCallback<UserDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
