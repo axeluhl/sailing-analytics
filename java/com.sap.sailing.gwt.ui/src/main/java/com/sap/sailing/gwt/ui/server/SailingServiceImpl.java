@@ -5655,12 +5655,24 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public Iterable<BoatDTO> getAllBoats() {
-        return convertToBoatDTOs(getService().getBaseDomainFactory().getCompetitorAndBoatStore().getBoats());
+        List<BoatDTO> result = new ArrayList<>();
+        getSecurityService().filterObjectsWithPermissionForCurrentUser(SecuredDomainType.BOAT,
+                SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC,
+                getService().getBaseDomainFactory().getCompetitorAndBoatStore().getBoats(),
+                boat -> boat.getIdentifier().toString(),
+                filteredObject -> result.add(baseDomainFactory.convertToBoatDTO(filteredObject)));
+        return result;
     }
 
     @Override
     public Iterable<BoatDTO> getStandaloneBoats() {
-        return convertToBoatDTOs(getService().getBaseDomainFactory().getCompetitorAndBoatStore().getStandaloneBoats());
+        List<BoatDTO> result = new ArrayList<>();
+        getSecurityService().filterObjectsWithPermissionForCurrentUser(SecuredDomainType.BOAT,
+                SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC,
+                getService().getBaseDomainFactory().getCompetitorAndBoatStore().getStandaloneBoats(),
+                boat -> boat.getIdentifier().toString(),
+                filteredObject -> result.add(baseDomainFactory.convertToBoatDTO(filteredObject)));
+        return result;
     }
 
     @Override
