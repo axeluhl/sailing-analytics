@@ -78,9 +78,9 @@ public class AclEditPanel extends Composite {
     public AclEditPanel(UserManagementServiceAsync userManagementService, StringMessages stringMessages) {
         this.userManagementService = userManagementService;
         setupUserGroupSuggest(userManagementService);
-        setupPermissionSuggest();
+        setupPermissionSuggest(stringMessages);
         initWidget(uiBinder.createAndBindUi(this));
-        setupCellList(stringMessages);
+        setupCellLists(stringMessages);
 
         permissionsSingleSelectionModel.addSelectionChangeHandler(h -> {
             removePermissionButtonUi.setEnabled(permissionsSingleSelectionModel.getSelectedObject() != null);
@@ -97,7 +97,7 @@ public class AclEditPanel extends Composite {
         removeUserGroupButtonUi.setEnabled(userGroupSingleSelectionModel.getSelectedObject() != null);
     }
 
-    private void setupPermissionSuggest() {
+    private void setupPermissionSuggest(StringMessages stringMessages) {
         final MultiWordSuggestOracle permissionOracle = new MultiWordSuggestOracle();
 
         final List<String> stringPermissions = new ArrayList<>();
@@ -147,7 +147,7 @@ public class AclEditPanel extends Composite {
         suggestUserGroupUi = new SuggestBox(userGroupOracle, new TextBox());
     }
 
-    private void setupCellList(StringMessages stringMessages) {
+    private void setupCellLists(StringMessages stringMessages) {
         userGroupList = new CellList<UserGroup>(new AbstractCell<UserGroup>() {
             @Override
             public void render(Context context, UserGroup value, SafeHtmlBuilder sb) {

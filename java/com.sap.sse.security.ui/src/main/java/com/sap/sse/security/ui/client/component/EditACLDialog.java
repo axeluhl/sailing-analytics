@@ -45,10 +45,10 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
     }
 
     private EditACLDialog(UserManagementServiceAsync userManagementService,
-            QualifiedObjectIdentifier qualifiedObjectIdentifier,
-            StringMessages stringMessages, DialogCallback<AclDialogResult> callback) {
-        super("ACL", stringMessages.editACL(), stringMessages.ok(), stringMessages.cancel(), new Validator(), callback);
-        // TODO: ^ i18n ^
+            QualifiedObjectIdentifier qualifiedObjectIdentifier, StringMessages stringMessages,
+            DialogCallback<AclDialogResult> callback) {
+        super(stringMessages.acl(), stringMessages.editACLForObject(qualifiedObjectIdentifier.toString()),
+                stringMessages.ok(), stringMessages.cancel(), new Validator(), callback);
         aclEditPanel = new AclEditPanel(userManagementService, stringMessages);
         userManagementService.getAccessControlListWithoutPruning(qualifiedObjectIdentifier,
                 new AsyncCallback<AccessControlList>() {
@@ -146,7 +146,7 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
                             @Override
                             public final void onFailure(Throwable caught) {
                                 // TODO: v i18n v
-                                Notification.notify(stringMessages.errorUpdatingOwnership(securedObject.getName()),
+                                Notification.notify(stringMessages.errorUpdatingAcl(securedObject.getName()),
                                         ERROR);
                             }
                         });

@@ -805,8 +805,12 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public AccessControlList getAccessControlListWithoutPruning(QualifiedObjectIdentifier idOfAccessControlledObject) throws UnauthorizedException {
         if (SecurityUtils.getSubject()
                 .isPermitted(idOfAccessControlledObject.getStringPermission(DefaultActions.CHANGE_ACL))) {
+            AccessControlListAnnotation accessControlList = getSecurityService().getAccessControlList(idOfAccessControlledObject);
+            if (accessControlList == null) {
+                return null;
+            }
             return securityDTOFactory.createAccessControlListDTO(
-                    getSecurityService().getAccessControlList(idOfAccessControlledObject).getAnnotation());
+                    accessControlList.getAnnotation());
         } else {
             throw new UnauthorizedException("Not permitted to get the unpruned ACL for a user");
         }
