@@ -107,7 +107,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         List<DetailType> raceDetailsToShow = calculateRaceDetailTypesToShow(raceDetailNames);
         LeaderboardDTO leaderboardDTO = leaderboard.getLeaderboardDTO(
                 resultTimePoint, raceColumnsToShow, /* addOverallDetails */
-                hasOverallDetail(raceDetailNames),
+                hasOverallDetail(raceDetailsToShow),
                 getService(), getService().getBaseDomainFactory(),
                 /* fillTotalPointsUncorrected */false);
         JSONObject jsonLeaderboard = new JSONObject();
@@ -219,11 +219,11 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         return jsonLeaderboard;
     }
 
-    private boolean hasOverallDetail(List<String> raceDetailNames) {
-        final HashSet<String> availableOverallDetailTypeNames = new HashSet<>(
-                Arrays.asList(getAvailableOverallDetailColumnTypes()).stream().map(dt->dt.name()).collect(Collectors.toSet()));
+    private boolean hasOverallDetail(List<DetailType> raceDetailsToShow) {
+        final HashSet<DetailType> availableOverallDetailTypeNames = new HashSet<>(
+                Arrays.asList(getAvailableOverallDetailColumnTypes()).stream().collect(Collectors.toSet()));
         // returns true if the set changed, meaning there was an overall detail type in the raceDetailNames
-        return availableOverallDetailTypeNames.removeAll(raceDetailNames);
+        return availableOverallDetailTypeNames.removeAll(raceDetailsToShow);
     }
 
     private List<DetailType> calculateRaceDetailTypesToShow(List<String> raceDetailTypesNames) {
