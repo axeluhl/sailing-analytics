@@ -50,6 +50,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.widget.Toast;
 
+import static com.sap.sailing.android.shared.services.sending.MessageSendingService.CHANNEL_ID;
+
 public class TrackingService extends Service implements LocationListener {
 
     private static final String TAG = TrackingService.class.getName();
@@ -377,12 +379,17 @@ public class TrackingService extends Service implements LocationListener {
     }
 
      private void showNotification() {
+         // Starting in Android 8.0 (API level 26), all notifications must be assigned to a channel
+         CharSequence name = getText(R.string.service_info);
+         NotificationHelper.createNotificationChannel(this, CHANNEL_ID, name);
+
          Intent intent = new Intent(this, TrackingActivity.class);
          intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
          PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
          Notification notification = NotificationHelper.getNotification(
              this,
+             CHANNEL_ID,
              getText(R.string.app_name),
              getString(R.string.tracking_notification_text, event.name),
              pendingIntent
