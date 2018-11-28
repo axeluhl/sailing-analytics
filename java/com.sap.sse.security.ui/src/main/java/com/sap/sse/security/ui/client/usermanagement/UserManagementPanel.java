@@ -1,5 +1,7 @@
 package com.sap.sse.security.ui.client.usermanagement;
 
+import static com.sap.sse.security.shared.impl.SecuredSecurityTypes.USER;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -7,8 +9,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.gwt.core.client.Callback;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.SimplePager;
@@ -18,7 +18,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -30,10 +29,10 @@ import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.HasPermissions;
-import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlListListDataProvider;
+import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 import com.sap.sse.security.ui.client.component.CreateUserDialog;
 import com.sap.sse.security.ui.client.component.EditAccessControlListDialog;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -43,12 +42,9 @@ import com.sap.sse.security.ui.shared.UserDTO;
 public class UserManagementPanel<TR extends CellTableWithCheckboxResources> extends DockPanel {
     
     private final List<UserCreatedEventHandler> userCreatedHandlers = new ArrayList<>();
-    
     private final List<UserDeletedEventHandler> userDeletedHandlers = new ArrayList<>();
-    
     private final SingleSelectionModel<AccessControlListAnnotation> aclSingleSelectionModel;
     private final AccessControlListListDataProvider aclListDataProvider;
-    
     private final UserTableWrapper<RefreshableMultiSelectionModel<UserDTO>, TR> userList;
     private final RefreshableMultiSelectionModel<UserDTO> userSelectionModel;
 
@@ -60,75 +56,65 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
     public UserManagementPanel(final UserService userService, final StringMessages stringMessages,
             Iterable<HasPermissions> additionalPermissions, ErrorReporter errorReporter, TR tableResources) {
         final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
-        VerticalPanel west = new VerticalPanel();
-        HorizontalPanel buttonPanel = new HorizontalPanel();
+        final VerticalPanel west = new VerticalPanel();
+        final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, USER);
         west.add(buttonPanel);
-        buttonPanel.add(new Button(stringMessages.refresh(), new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                updateUsersAndACLs();
-            }
-        }));
-        Button createButton = new Button(stringMessages.createUser(), new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                new CreateUserDialog(stringMessages, userManagementService, userCreatedHandlers, userService).show();
-            }
-        });
-        if (!userService.hasCurrentUserPermissionToCreateObjectOfType(SecuredSecurityTypes.USER)) {
-            createButton.setVisible(false);
-        }
-        
-        buttonPanel.add(createButton);
-        final Button deleteButton = new Button(stringMessages.remove(), new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                assert userSelectionModel.getSelectedSet().size() > 0;
-                final Set<UserDTO> usersToDelete = new HashSet<>();
-                final Set<String> usernamesToDelete = new HashSet<>();
-                for (UserDTO userToDelete : userSelectionModel.getSelectedSet()) {
-                    usersToDelete.add(userToDelete);
-                    usernamesToDelete.add(userToDelete.getName());
-                }
-                if (Window.confirm(usernamesToDelete.size() == 1
-                        ? stringMessages.doYouReallyWantToDeleteUser(usernamesToDelete.iterator().next())
-                        : stringMessages.doYouReallyWantToDeleteNUsers(usernamesToDelete.size()))) {
-                    userManagementService.deleteUsers(usernamesToDelete, new AsyncCallback<Set<SuccessInfo>>() {
-                        @Override
-                        public void onSuccess(Set<SuccessInfo> result) {
-                            for (UserDTO userToDelete : usersToDelete) {
-                                for (UserDeletedEventHandler userDeletedHandler : userDeletedHandlers) {
-                                    userDeletedHandler.onUserDeleted(userToDelete);
-                                }
-                            }
-                            for (SuccessInfo successInfo : result) {
-                                Notification.notify(successInfo.getMessage(), NotificationType.SUCCESS);
-                            }
-                        }
+        buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::updateUsersAndACLs);
+        buttonPanel.addCreateAction(stringMessages.createUser(),
+                () -> new CreateUserDialog(stringMessages, userManagementService, userCreatedHandlers, userService)
+                        .show());
 
-                        @Override
-                        public void onFailure(Throwable caught) {
-                            errorReporter.reportError(stringMessages
-                                    .errorDeletingUser(usernamesToDelete.iterator().next(), caught.getMessage()));
-                        }
-                    });
-                }
-            }
-        });
-        if (!userService.hasCurrentUserPermissionToDeleteAnyObjectOfType(SecuredSecurityTypes.USER)) {
-            deleteButton.setVisible(false);
-        }
-        // TODO: find the right place for the acl controls
-        Button editACLButton = new Button(stringMessages.editACL(), new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                new EditAccessControlListDialog(stringMessages, userManagementService, aclListDataProvider, aclSingleSelectionModel.getSelectedObject()).show();
-            }
-        });
-        editACLButton.setEnabled(false);
-        buttonPanel.add(editACLButton);
+        aclListDataProvider = new AccessControlListListDataProvider(userManagementService);
         aclSingleSelectionModel = new SingleSelectionModel<>();
-        aclSingleSelectionModel.addSelectionChangeHandler(e->editACLButton.setEnabled(aclSingleSelectionModel.getSelectedObject() != null));
+        // TODO: find the right place for the acl controls
+        final Button editACLButton = buttonPanel.addUnsecuredAction(stringMessages.editACL(),
+                () -> new EditAccessControlListDialog(stringMessages, userManagementService, aclListDataProvider,
+                        aclSingleSelectionModel.getSelectedObject()).show());
+        editACLButton.setEnabled(false);
+        aclSingleSelectionModel.addSelectionChangeHandler(
+                event -> editACLButton.setEnabled(aclSingleSelectionModel.getSelectedObject() != null));
+
+        userList = new UserTableWrapper<>(userService, additionalPermissions, stringMessages, errorReporter,
+                /* multiSelection */ true, /* enablePager */ true, tableResources);
+        userSelectionModel = userList.getSelectionModel();
+        final Button deleteButton = buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
+            assert userSelectionModel.getSelectedSet().size() > 0;
+            final Set<UserDTO> usersToDelete = new HashSet<>();
+            final Set<String> usernamesToDelete = new HashSet<>();
+            for (UserDTO userToDelete : userSelectionModel.getSelectedSet()) {
+                usersToDelete.add(userToDelete);
+                usernamesToDelete.add(userToDelete.getName());
+            }
+            if (Window.confirm(usernamesToDelete.size() == 1
+                    ? stringMessages.doYouReallyWantToDeleteUser(usernamesToDelete.iterator().next())
+                    : stringMessages.doYouReallyWantToDeleteNUsers(usernamesToDelete.size()))) {
+                userManagementService.deleteUsers(usernamesToDelete, new AsyncCallback<Set<SuccessInfo>>() {
+                    @Override
+                    public void onSuccess(Set<SuccessInfo> result) {
+                        for (UserDTO userToDelete : usersToDelete) {
+                            for (UserDeletedEventHandler userDeletedHandler : userDeletedHandlers) {
+                                userDeletedHandler.onUserDeleted(userToDelete);
+                            }
+                        }
+                        for (SuccessInfo successInfo : result) {
+                            Notification.notify(successInfo.getMessage(), NotificationType.SUCCESS);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        errorReporter.reportError(stringMessages.errorDeletingUser(usernamesToDelete.iterator().next(),
+                                caught.getMessage()));
+                    }
+                });
+            }
+        });
+        deleteButton.setEnabled(userSelectionModel.getSelectedSet().size() >= 1);
+        userSelectionModel.addSelectionChangeHandler(event -> {
+            deleteButton.setText(stringMessages.remove() + " (" + userSelectionModel.getSelectedSet().size() + ")");
+            deleteButton.setEnabled(userSelectionModel.getSelectedSet().size() >= 1);
+        });
+
         final CellTable<AccessControlListAnnotation> aclTable = new CellTable<>();
         TextColumn<AccessControlListAnnotation> idColumn = new TextColumn<AccessControlListAnnotation>() {
             @Override
@@ -145,7 +131,6 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         aclTable.addColumn(idColumn, stringMessages.id());
         aclTable.addColumn(displayNameColumn, stringMessages.displayName());
         aclTable.setSelectionModel(aclSingleSelectionModel);
-        aclListDataProvider = new AccessControlListListDataProvider(userManagementService);
         aclTable.setPageSize(20);
         aclListDataProvider.addDataDisplay(aclTable);
         SimplePager aclPager = new SimplePager(TextLocation.CENTER, false, /* fast forward step size */ 50, true);
@@ -154,15 +139,6 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         west.add(aclPager);
         west.add(aclPanel);
         
-        userList = new UserTableWrapper<>(
-                userService, additionalPermissions, stringMessages, errorReporter, /* multiSelection */ true, /* enablePager */ true, tableResources);
-        userSelectionModel = userList.getSelectionModel();
-        buttonPanel.add(deleteButton);
-        deleteButton.setEnabled(userSelectionModel.getSelectedSet().size() >= 1);
-        userSelectionModel.addSelectionChangeHandler(e->{
-            deleteButton.setText(stringMessages.remove()+" ("+userSelectionModel.getSelectedSet().size()+")");
-            deleteButton.setEnabled(userSelectionModel.getSelectedSet().size() >= 1);
-        });
         ScrollPanel scrollPanel = new ScrollPanel(userList.asWidget());
         LabeledAbstractFilterablePanel<UserDTO> filterBox = userList.getFilterField();
         filterBox.getElement().setPropertyString("placeholder", stringMessages.filterUsers());
