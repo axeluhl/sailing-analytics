@@ -1,16 +1,13 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import static com.sap.sailing.domain.common.security.SecuredDomainType.COMPETITOR;
+
 import java.util.Set;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.sap.sailing.domain.common.CompetitorDescriptor;
 import com.sap.sailing.domain.common.dto.CompetitorDTO;
 import com.sap.sailing.domain.common.dto.CompetitorWithBoatDTOImpl;
@@ -23,6 +20,7 @@ import com.sap.sse.gwt.client.controls.busyindicator.BusyDisplay;
 import com.sap.sse.gwt.client.controls.busyindicator.BusyIndicator;
 import com.sap.sse.gwt.client.controls.busyindicator.SimpleBusyIndicator;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 
 /**
  * Allows an administrator to view and edit the set of competitors currently maintained by the server.
@@ -51,102 +49,64 @@ public class CompetitorPanel extends SimplePanel implements BusyDisplay {
         this.refreshableCompetitorSelectionModel = (RefreshableMultiSelectionModel<CompetitorDTO>) competitorTable.getSelectionModel();
         busyIndicator = new SimpleBusyIndicator(false, 0.8f);
         VerticalPanel mainPanel = new VerticalPanel();
-        this.setWidget(mainPanel);
         mainPanel.setWidth("100%");
-        HorizontalPanel competitorsPanel = new HorizontalPanel();
-        competitorsPanel.setSpacing(5);
-        mainPanel.add(competitorsPanel);
-        HorizontalPanel buttonPanel = new HorizontalPanel();
-        buttonPanel.setSpacing(5);
-        Button refreshButton = new Button(stringMessages.refresh());
-        refreshButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                refreshCompetitorList();
-            }
-        });
+        this.setWidget(mainPanel);
+        final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, COMPETITOR);
+        mainPanel.add(buttonPanel);
+
+        final Button refreshButton = buttonPanel.addUnsecuredAction(stringMessages.refresh(),
+                this::refreshCompetitorList);
         refreshButton.ensureDebugId("RefreshButton");
-        buttonPanel.add(refreshButton);
-        final Button allowReloadButton = new Button(stringMessages.allowReload());
-        allowReloadButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                competitorTable.allowUpdate(refreshableCompetitorSelectionModel.getSelectedSet());
-            }
-        });
-        buttonPanel.add(allowReloadButton);
-        Button addCompetitorButton = new Button(stringMessages.add());
+
+        final Button allowReloadButton = buttonPanel.addUnsecuredAction(stringMessages.allowReload(),
+                () -> competitorTable.allowUpdate(refreshableCompetitorSelectionModel.getSelectedSet()));
+        refreshableCompetitorSelectionModel.addSelectionChangeHandler(
+                event -> allowReloadButton.setEnabled(!refreshableCompetitorSelectionModel.getSelectedSet().isEmpty()));
+        allowReloadButton.setEnabled(!refreshableCompetitorSelectionModel.getSelectedSet().isEmpty());
+
+        final Button addCompetitorButton = buttonPanel.addCreateAction(stringMessages.add(),
+                this::openAddCompetitorDialog);
         addCompetitorButton.ensureDebugId("AddCompetitorButton");
-        addCompetitorButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                openAddCompetitorDialog();
-            }
-        });
-        buttonPanel.add(addCompetitorButton);
         
-        Button selectAllButton = new Button(stringMessages.selectAll());
-        selectAllButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                for (CompetitorDTO c : competitorTable.getDataProvider().getList()) {
-                    refreshableCompetitorSelectionModel.setSelected(c, true);
-                }
+        buttonPanel.addUnsecuredAction(stringMessages.selectAll(), () -> {
+            for (CompetitorDTO c : competitorTable.getDataProvider().getList()) {
+                refreshableCompetitorSelectionModel.setSelected(c, true);
             }
         });
-        buttonPanel.add(selectAllButton);
 
-        Button competitorImportButton = new Button(stringMessages.importCompetitors());
-        competitorImportButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                sailingService.getCompetitorProviderNames(new AsyncCallback<Iterable<String>>() {
-                    @Override
-                    public void onSuccess(Iterable<String> providerNames) {
-                        MatchImportedCompetitorsDialogFactory matchCompetitorsDialogFactory = getMatchCompetitorsDialogFactory(
-                                sailingService, userService, stringMessages, errorReporter);
-                        CompetitorImportProviderSelectionDialog dialog = new CompetitorImportProviderSelectionDialog(
-                                matchCompetitorsDialogFactory, CompetitorPanel.this, providerNames, sailingService,
-                                stringMessages, errorReporter);
-                        dialog.show();
-                    }
-
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        errorReporter
-                                .reportError(stringMessages.errorLoadingCompetitorImportProviders(caught.getMessage()));
-                    }
-                });
-            }
-        });
-        buttonPanel.add(competitorImportButton);
-
-        //only if this competitor panel is connected to a leaderboard, we want to enable invitations
-        if (leaderboardName != null) {
-            final Button inviteCompetitorsButton = new Button(stringMessages.inviteSelectedCompetitors());
-            inviteCompetitorsButton.addClickHandler(new ClickHandler() {
+        buttonPanel.addCreateAction(stringMessages.importCompetitors(), () -> {
+            sailingService.getCompetitorProviderNames(new AsyncCallback<Iterable<String>>() {
                 @Override
-                public void onClick(ClickEvent event) {
-                    Set<CompetitorDTO> competitors = refreshableCompetitorSelectionModel.getSelectedSet();
-                    CompetitorInvitationHelper helper = new CompetitorInvitationHelper(sailingService, stringMessages, errorReporter);
-                    helper.inviteCompetitors(competitors, leaderboardName);
+                public void onSuccess(Iterable<String> providerNames) {
+                    MatchImportedCompetitorsDialogFactory matchCompetitorsDialogFactory = getMatchCompetitorsDialogFactory(
+                            sailingService, userService, stringMessages, errorReporter);
+                    CompetitorImportProviderSelectionDialog dialog = new CompetitorImportProviderSelectionDialog(
+                            matchCompetitorsDialogFactory, CompetitorPanel.this, providerNames, sailingService,
+                            stringMessages, errorReporter);
+                    dialog.show();
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                    errorReporter
+                            .reportError(stringMessages.errorLoadingCompetitorImportProviders(caught.getMessage()));
                 }
             });
-            buttonPanel.add(inviteCompetitorsButton);
+        });
+
+        // only if this competitor panel is connected to a leaderboard, we want to enable invitations
+        if (leaderboardName != null) {
+            buttonPanel.addCreateAction(stringMessages.inviteSelectedCompetitors(), () -> {
+                final Set<CompetitorDTO> competitors = refreshableCompetitorSelectionModel.getSelectedSet();
+                final CompetitorInvitationHelper helper = new CompetitorInvitationHelper(sailingService, stringMessages,
+                        errorReporter);
+                helper.inviteCompetitors(competitors, leaderboardName);
+            });
         }
 
-        competitorsPanel.add(buttonPanel);
         mainPanel.add(busyIndicator);
         mainPanel.add(competitorTable);
         
-        refreshableCompetitorSelectionModel.addSelectionChangeHandler(new Handler() {
-            @Override
-            public void onSelectionChange(SelectionChangeEvent event) {
-                allowReloadButton.setEnabled(!refreshableCompetitorSelectionModel.getSelectedSet().isEmpty());
-            }
-        });
-        allowReloadButton.setEnabled(!refreshableCompetitorSelectionModel.getSelectedSet().isEmpty());
-
         if (leaderboardName != null) {
             refreshCompetitorList();
         }
