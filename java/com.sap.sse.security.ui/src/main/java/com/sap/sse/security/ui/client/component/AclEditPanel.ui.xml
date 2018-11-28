@@ -6,8 +6,5 @@
         <g:Button ui:field="addUserGroupButtonUi" text="+ User Group" />
         <g:Button ui:field="removeUserGroupButtonUi" text="- User Group" />
         <g:FlowPanel ui:field="permissionsCellListPanelUi" />
-        <g:SuggestBox ui:field="suggestPermissionUi" />
-        <g:Button ui:field="addPermissionButtonUi" text="+ Permission" />
-        <g:Button ui:field="removePermissionButtonUi" text="- Permission" />
     </g:HTMLPanel>
 </ui:UiBinder> 

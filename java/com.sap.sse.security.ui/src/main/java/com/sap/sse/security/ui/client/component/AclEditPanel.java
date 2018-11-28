@@ -28,16 +28,14 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SuggestBox;
-import com.google.gwt.user.client.ui.SuggestBox.DefaultSuggestionDisplay;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.security.shared.AccessControlList;
-import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
@@ -60,71 +58,71 @@ public class AclEditPanel extends Composite {
     FlowPanel userGroupCellListPanelUi;
     @UiField
     FlowPanel permissionsCellListPanelUi;
-    @UiField(provided = true)
-    SuggestBox suggestPermissionUi;
-    @UiField
-    Button removePermissionButtonUi;
-    @UiField
-    Button addPermissionButtonUi;
+
+    private final StringListEditorComposite allowedActionsEditor;
+    private final StringListEditorComposite deniedActionsEditor;
 
     private final SingleSelectionModel<UserGroup> userGroupSingleSelectionModel = new SingleSelectionModel<>();
-    private final SingleSelectionModel<String> permissionsSingleSelectionModel = new SingleSelectionModel<>();
     private CellList<UserGroup> userGroupList;
-    private CellList<String> permissionsList;
 
-    private Map<UserGroup, Set<String>> userGroupsWithPermissions = new HashMap<>();
+    // denied actions start with '!'
+    private Map<UserGroup, Set<String>> userGroupsWithAllowedActions = new HashMap<>();
+    private Map<UserGroup, Set<String>> userGroupsWithDeniedActions = new HashMap<>();
     private UserManagementServiceAsync userManagementService;
 
-    public AclEditPanel(UserManagementServiceAsync userManagementService, StringMessages stringMessages) {
+    public AclEditPanel(UserManagementServiceAsync userManagementService, Action[] availableActions,
+            StringMessages stringMessages) {
         this.userManagementService = userManagementService;
+
+        final Collection<String> actionNames = new ArrayList<>();
+        for (Action a : availableActions) {
+            actionNames.add(a.name());
+        }
+
         setupUserGroupSuggest(userManagementService);
-        setupPermissionSuggest(stringMessages);
         initWidget(uiBinder.createAndBindUi(this));
         setupCellLists(stringMessages);
-
-        permissionsSingleSelectionModel.addSelectionChangeHandler(h -> {
-            removePermissionButtonUi.setEnabled(permissionsSingleSelectionModel.getSelectedObject() != null);
-        });
 
         userGroupSingleSelectionModel.addSelectionChangeHandler(h -> {
             onUserGroupsChange();
         });
 
-        addPermissionButtonUi.setEnabled(false);
+        // create action editor for allowed actions
+        allowedActionsEditor = new StringListEditorComposite(new ArrayList<>(), stringMessages,
+                com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), actionNames, "Allowed action name");
+        // TODO: i18n ^v^v
+
+        allowedActionsEditor.addValueChangeHandler(e -> userGroupsWithAllowedActions
+                .put(userGroupSingleSelectionModel.getSelectedObject(), toSet(e.getValue())));
+        permissionsCellListPanelUi.add(allowedActionsEditor);
+
+        // create action editor for denied actions
+        deniedActionsEditor = new StringListEditorComposite(new ArrayList<>(), stringMessages,
+                com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), actionNames, "Denied action name");
+
+        deniedActionsEditor.addValueChangeHandler(e -> userGroupsWithDeniedActions
+                .put(userGroupSingleSelectionModel.getSelectedObject(), toDeniedSet(e.getValue())));
+        permissionsCellListPanelUi.add(deniedActionsEditor);
+    }
+
+    private <T> Set<T> toSet(Iterable<T> iter) {
+        final Set<T> set = new HashSet<>();
+        for (T t : iter) {
+            set.add(t);
+        }
+        return set;
+    }
+
+    private Set<String> toDeniedSet(Iterable<String> iter) {
+        final Set<String> set = new HashSet<>();
+        for (String s : iter) {
+            set.add(s.startsWith("!") ? s : "!" + s);
+        }
+        return set;
     }
 
     private void onUserGroupsChange() {
         removeUserGroupButtonUi.setEnabled(userGroupSingleSelectionModel.getSelectedObject() != null);
-    }
-
-    private void setupPermissionSuggest(StringMessages stringMessages) {
-        final MultiWordSuggestOracle permissionOracle = new MultiWordSuggestOracle();
-
-        final List<String> stringPermissions = new ArrayList<>();
-        for (final HasPermissions permission : SecuredDomainType.getAllInstances()) {
-            for (final Action action : permission.getAvailableActions()) {
-                stringPermissions.add(permission.getStringPermission(action));
-            }
-        }
-        permissionOracle.addAll(stringPermissions);
-        permissionOracle.setDefaultSuggestionsFromText(stringPermissions);
-        suggestPermissionUi = new SuggestBox(permissionOracle, new TextBox(), new DefaultSuggestionDisplay() {
-            @Override
-            public void hideSuggestions() {
-                updatePermissionButtonIfNecessary();
-                super.hideSuggestions();
-            }
-        });
-        suggestPermissionUi.addKeyUpHandler(e -> updatePermissionButtonIfNecessary());
-    }
-
-    private void updatePermissionButtonIfNecessary() {
-        final Set<String> permissionsForSelectedUG = userGroupsWithPermissions
-                .get(userGroupSingleSelectionModel.getSelectedObject());
-        final String valueToCheck = suggestPermissionUi.getValue();
-        final boolean valid = !"".equals(valueToCheck)
-                && (permissionsForSelectedUG == null || !permissionsForSelectedUG.contains(valueToCheck));
-        addPermissionButtonUi.setEnabled(valid);
     }
 
     private void setupUserGroupSuggest(UserManagementServiceAsync userManagementService) {
@@ -159,28 +157,15 @@ public class AclEditPanel extends Composite {
 
         userGroupList.setSelectionModel(userGroupSingleSelectionModel);
         userGroupCellListPanelUi.add(wrapListUi(userGroupList, stringMessages.userGroups()));
-        userGroupSingleSelectionModel.addSelectionChangeHandler(
-                e -> updatePermissionsListUi(userGroupSingleSelectionModel.getSelectedObject()));
+        userGroupSingleSelectionModel
+                .addSelectionChangeHandler(e -> updateActionsUi(userGroupSingleSelectionModel.getSelectedObject()));
 
-        permissionsList = new CellList<String>(new AbstractCell<String>() {
-            @Override
-            public void render(Context context, String value, SafeHtmlBuilder sb) {
-                if (value != null) {
-                    sb.appendEscaped(value);
-                }
-            }
-        });
-
-        permissionsList.setSelectionModel(permissionsSingleSelectionModel);
-        permissionsCellListPanelUi.add(wrapListUi(permissionsList, stringMessages.permissions()));
     }
 
-    private void updatePermissionsListUi(UserGroup selectedUserGroup) {
-        final Set<String> permissions = userGroupsWithPermissions.get(selectedUserGroup);
-        permissionsList.setRowCount(permissions.size());
-        permissionsList.setRowData(0, new ArrayList<>(permissions));
+    private void updateActionsUi(UserGroup selectedUserGroup) {
         onUserGroupsChange();
-        updatePermissionButtonIfNecessary();
+        allowedActionsEditor.setValue(userGroupsWithAllowedActions.get(selectedUserGroup), false);
+        deniedActionsEditor.setValue(userGroupsWithDeniedActions.get(selectedUserGroup), false);
     }
 
     private CaptionPanel wrapListUi(CellList<?> cellList, String title) {
@@ -198,49 +183,37 @@ public class AclEditPanel extends Composite {
     }
 
     public void updateAcl(AccessControlList acl) {
-        userGroupsWithPermissions = (acl != null)
+        final Map<UserGroup, Set<String>> combinedActions = (acl != null)
                 ? acl.getActionsByUserGroup() != null ? new HashMap<>(acl.getActionsByUserGroup()) : new HashMap<>()
                 : new HashMap<>();
+
+        for (Map.Entry<UserGroup, Set<String>> combinedAction : combinedActions.entrySet()) {
+            final Set<String> allowedActions = new HashSet<>();
+            final Set<String> deniedActions = new HashSet<>();
+            for (String action : combinedAction.getValue()) {
+                if (action.startsWith("!")) {
+                    deniedActions.add(action);
+                } else {
+                    allowedActions.add(action);
+                }
+            }
+            userGroupsWithAllowedActions.put(combinedAction.getKey(), allowedActions);
+            userGroupsWithDeniedActions.put(combinedAction.getKey(), deniedActions);
+        }
+
         refreshUi();
     }
 
     private void refreshUi() {
-        userGroupList.setRowCount(userGroupsWithPermissions.size(), true);
-        userGroupList.setRowData(0, new ArrayList<>(userGroupsWithPermissions.keySet()));
+        final Set<UserGroup> combinedKeySet = new HashSet<>();
+        combinedKeySet.addAll(userGroupsWithAllowedActions.keySet());
+        combinedKeySet.addAll(userGroupsWithDeniedActions.keySet());
+        userGroupList.setRowCount(combinedKeySet.size(), true);
+        userGroupList.setRowData(0, new ArrayList<>(combinedKeySet));
 
         // select an element
-        if (userGroupsWithPermissions.size() > 0) {
-            userGroupSingleSelectionModel.setSelected(userGroupsWithPermissions.keySet().iterator().next(), true);
-        }
-    }
-
-    @UiHandler("addPermissionButtonUi")
-    void onPermissionAdd(ClickEvent e) {
-        final UserGroup selectedUserGroup = userGroupSingleSelectionModel.getSelectedObject();
-        if (selectedUserGroup != null && !"".equals(suggestPermissionUi.getText())) {
-            Set<String> permissions = userGroupsWithPermissions.get(selectedUserGroup);
-            if (permissions == null) {
-                permissions = new HashSet<>();
-            }
-            permissions.add(suggestPermissionUi.getText());
-            userGroupsWithPermissions.put(selectedUserGroup, permissions);
-            updatePermissionsListUi(selectedUserGroup);
-            suggestPermissionUi.setText("");
-        }
-    }
-
-    @UiHandler("removePermissionButtonUi")
-    void onPermissionRemove(ClickEvent e) {
-        final UserGroup selectedUserGroup = userGroupSingleSelectionModel.getSelectedObject();
-        if (selectedUserGroup != null) {
-            Set<String> permissions = userGroupsWithPermissions.get(selectedUserGroup);
-            if (permissions == null) {
-                permissions = new HashSet<>();
-            }
-            final String selectedPermission = permissionsSingleSelectionModel.getSelectedObject();
-            permissions.remove(selectedPermission);
-            userGroupsWithPermissions.put(selectedUserGroup, permissions);
-            updatePermissionsListUi(selectedUserGroup);
+        if (combinedKeySet.size() > 0) {
+            userGroupSingleSelectionModel.setSelected(combinedKeySet.iterator().next(), true);
         }
     }
 
@@ -260,7 +233,8 @@ public class AclEditPanel extends Composite {
                     Notification.notify("Did not find user group by name x" + userGroupName, NotificationType.ERROR);
                 } else {
                     Notification.notify("Added usergroup x" + userGroupName, NotificationType.SUCCESS);
-                    userGroupsWithPermissions.put(result, new HashSet<>());
+                    userGroupsWithAllowedActions.put(result, new HashSet<>());
+                    userGroupsWithDeniedActions.put(result, new HashSet<>());
                     refreshUi();
                     suggestUserGroupUi.setText("");
                     userGroupSingleSelectionModel.setSelected(result, true);
@@ -271,12 +245,22 @@ public class AclEditPanel extends Composite {
 
     @UiHandler("removeUserGroupButtonUi")
     void onUserGroupRemove(ClickEvent e) {
-        userGroupsWithPermissions.remove(userGroupSingleSelectionModel.getSelectedObject());
+        userGroupsWithAllowedActions.remove(userGroupSingleSelectionModel.getSelectedObject());
+        userGroupsWithDeniedActions.remove(userGroupSingleSelectionModel.getSelectedObject());
         refreshUi();
     }
 
     public Map<UserGroup, Set<String>> getUserGroupsWithPermissions() {
-        return userGroupsWithPermissions;
+        final Map<UserGroup, Set<String>> combinedActions = new HashMap<>(userGroupsWithAllowedActions);
+        for (Map.Entry<UserGroup, Set<String>> actionEntry : userGroupsWithDeniedActions.entrySet()) {
+            if (combinedActions.containsKey(actionEntry.getKey())) {
+                final Set<String> set = combinedActions.get(actionEntry.getKey());
+                set.addAll(actionEntry.getValue());
+            } else {
+                combinedActions.put(actionEntry.getKey(), actionEntry.getValue());
+            }
+        }
+        return combinedActions;
     }
 
 }
