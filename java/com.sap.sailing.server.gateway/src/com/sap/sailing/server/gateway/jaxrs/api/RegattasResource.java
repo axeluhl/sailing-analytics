@@ -139,6 +139,7 @@ import com.sap.sse.common.util.RoundingUtil;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.impl.User;
 
 @Path("/v1/regattas")
@@ -370,7 +371,8 @@ public class RegattasResource extends AbstractSailingServerResource {
         final User user = getSecurityService().getCurrentUser();
         Response response;
         final Regatta regatta = findRegattaByName(regattaName);
-        if (regatta == null) {
+        OwnershipAnnotation regattaOwnerShipAnnotation = getSecurityService().getOwnership(regatta.getIdentifier());
+        if (regatta == null || regattaOwnerShipAnnotation == null) {
             return getBadRegattaErrorResponse(regattaName);
         }
         boolean registerCompetitor = false;
@@ -478,20 +480,37 @@ public class RegattasResource extends AbstractSailingServerResource {
             final String name = eCompetitorName;
             final String shortName = eCompetitorShortName;
             final String email = eCompetitorEmail;
-            final CompetitorWithBoat competitor = getSecurityService()
-                    .setOwnershipCheckPermissionForObjectCreationAndRevertOnError(SecuredDomainType.COMPETITOR,
-                            competitorUuid.toString(), name, new ActionWithResult<CompetitorWithBoat>() {
+            final CompetitorWithBoat competitor;
+            if (subject.isAuthenticated()) {
+                competitor = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                        SecuredDomainType.COMPETITOR, competitorUuid.toString(), name,
+                        new ActionWithResult<CompetitorWithBoat>() {
                                 @Override
                                 public CompetitorWithBoat run() throws Exception {
                                     return getService().getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(
-                                            competitorUuid, name, shortName, color,
-                                            email, flagImageURI, team, timeOnTimeFactor,
+                                        competitorUuid, name, shortName, color, email, flagImageURI, team,
+                                        timeOnTimeFactor,
                                             timeOnDistanceAllowancePerNauticalMileAsMillis == null ? null
                                                     : new MillisecondsDurationImpl(
                                                             timeOnDistanceAllowancePerNauticalMileAsMillis),
                                             searchTag, boat);
                                 }
                             });
+            } else {
+                competitor = getService().getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(competitorUuid,
+                        name, shortName, color, email, flagImageURI, team, timeOnTimeFactor,
+                        timeOnDistanceAllowancePerNauticalMileAsMillis == null ? null
+                                : new MillisecondsDurationImpl(timeOnDistanceAllowancePerNauticalMileAsMillis),
+                        searchTag, boat);
+                getSecurityService().setOwnership(competitor.getIdentifier(),
+                        (User) regattaOwnerShipAnnotation.getAnnotation().getUserOwner(),
+                        regattaOwnerShipAnnotation.getAnnotation().getTenantOwner(), name);
+                if (getSecurityService().getOwnership(boat.getIdentifier()) == null) {
+                    getSecurityService().setOwnership(boat.getIdentifier(),
+                        (User) regattaOwnerShipAnnotation.getAnnotation().getUserOwner(),
+                        regattaOwnerShipAnnotation.getAnnotation().getTenantOwner(), name);
+                }
+            }
             regatta.registerCompetitor(competitor);
             response = Response.ok(CompetitorJsonSerializer.create().serialize(competitor).toJSONString())
                     .header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
@@ -538,7 +557,9 @@ public class RegattasResource extends AbstractSailingServerResource {
 
     private DynamicBoat createBoat(String name, String boatClassName, String sailId) {
         final UUID boatUUID = UUID.randomUUID();
-        DynamicBoat boat = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+        final DynamicBoat boat;
+        if (SecurityUtils.getSubject().isAuthenticated()) {
+            boat = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.BOAT, boatUUID.toString(), name, new ActionWithResult<DynamicBoat>() {
 
                     @Override
@@ -547,6 +568,10 @@ public class RegattasResource extends AbstractSailingServerResource {
                                 .getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */ true), sailId);
                     }
                 });
+        } else {
+            boat = new BoatImpl(boatUUID, name, getService().getBaseDomainFactory().getOrCreateBoatClass(boatClassName,
+                    /* typicallyStartsUpwind */ true), sailId);
+        }
         return boat;
     }
 

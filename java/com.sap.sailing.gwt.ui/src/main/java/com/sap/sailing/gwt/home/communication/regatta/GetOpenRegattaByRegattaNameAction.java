@@ -38,7 +38,7 @@ public class GetOpenRegattaByRegattaNameAction implements SailingAction<SimpleRe
         Regatta regatta = ctx.getRacingEventService().getRegattaByName(regattaName);
         if (regatta == null || !regatta.getCompetitorRegistrationType().isOpen()
                 || secret.equals(regatta.getRegistrationLinkSecret())) {
-            // throw new DispatchException("Regatta not found or not allowed for this action");
+            throw new DispatchException("Regatta \"" + regattaName + "\" not found or not allowed for this action");
         }
         return new SimpleRegattaDTO(regatta.getName());
     }

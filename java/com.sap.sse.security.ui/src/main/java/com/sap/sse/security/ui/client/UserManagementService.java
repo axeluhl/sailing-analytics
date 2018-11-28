@@ -149,4 +149,10 @@ public interface UserManagementService extends RemoteService {
     public Pair<UserDTO, UserDTO> verifySocialUser(CredentialDTO credential) throws OAuthException;
 
     OwnershipAnnotationDTO getOwnership(QualifiedObjectIdentifier idOfOwnedObject);
+
+    AccessControlListDTO overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
+            AccessControlListDTO acl) throws UnauthorizedException;
+
+    AccessControlListDTO getAccessControlListWithoutPruning(QualifiedObjectIdentifier idOfAccessControlledObject)
+            throws UnauthorizedException;
 }

@@ -163,10 +163,6 @@ public class QRCodePresenter {
                                     + BranchIOConstants.SAILINSIGHT_APP_BRANCHIO_PATH + "="
                                     + QRCodePresenter.this.checkInUrl;
                             break;
-                        case PUBLIC_INVITE:
-                            branchIoUrl = BranchIOConstants.OPEN_REGATTA_APP_BRANCHIO + "?"
-                                    + BranchIOConstants.OPEN_REGATTA_APP_BRANCHIO_PATH + "="
-                                    + QRCodePresenter.this.checkInUrl;
                         default:
                             break;
                         }

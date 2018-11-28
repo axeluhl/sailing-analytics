@@ -35,6 +35,12 @@ public interface UserManagementServiceAsync {
     void updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
             Map<String, Set<String>> permissionStrings, AsyncCallback<AccessControlListDTO> callback);
 
+    void getAccessControlListWithoutPruning(QualifiedObjectIdentifier idOfAccessControlledObject,
+            AsyncCallback<AccessControlListDTO> updateAclAsyncCallback);
+
+    void overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, AccessControlListDTO acl,
+            AsyncCallback<AccessControlListDTO> updateAclAsyncCallback);
+
     void addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String permission, String name,
             AsyncCallback<AccessControlListDTO> callback);
 

@@ -800,4 +800,45 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public String getOrCreateAccessToken(String username) {
         return getSecurityService().getOrCreateAccessToken(username);
     }
+
+    @Override
+    public AccessControlListDTO overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
+            AccessControlListDTO acl) throws UnauthorizedException {
+        if (SecurityUtils.getSubject()
+                .isPermitted(idOfAccessControlledObject.getStringPermission(DefaultActions.CHANGE_ACL))) {
+            
+            Map<UserGroup,Set<String>> aclActionsByGroup = new HashMap<>();
+            for (Map.Entry<UserGroupDTO, Set<String>> entry : acl.getActionsByUserGroup().entrySet()) {
+                final UserGroupDTO groupDTO = entry.getKey();
+                final UserGroup userGroup;
+                if (groupDTO == null) {
+                    userGroup = null;
+                } else {
+                    userGroup = getSecurityService().getUserGroup(groupDTO.getId());
+                }
+                aclActionsByGroup.put(userGroup, entry.getValue());
+            }
+
+            return securityDTOFactory.createAccessControlListDTO(getSecurityService()
+                    .overrideAccessControlList(idOfAccessControlledObject, aclActionsByGroup));
+        } else {
+            throw new UnauthorizedException("Not permitted to update the ACL for a user");
+        }
+    }
+
+    @Override
+    public AccessControlListDTO getAccessControlListWithoutPruning(QualifiedObjectIdentifier idOfAccessControlledObject) throws UnauthorizedException {
+        if (SecurityUtils.getSubject()
+                .isPermitted(idOfAccessControlledObject.getStringPermission(DefaultActions.CHANGE_ACL))) {
+            AccessControlListAnnotation accessControlList = getSecurityService().getAccessControlList(idOfAccessControlledObject);
+            if (accessControlList == null) {
+                return null;
+            }
+            return securityDTOFactory.createAccessControlListDTO(
+                    accessControlList.getAnnotation());
+        } else {
+            throw new UnauthorizedException("Not permitted to get the unpruned ACL for a user");
+        }
+    }
+
 }

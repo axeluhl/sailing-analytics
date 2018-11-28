@@ -40,6 +40,7 @@ import com.sap.sse.gwt.client.celltable.TableWrapper;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.RoleDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
@@ -50,8 +51,8 @@ import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
-import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
 import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
+import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
@@ -186,9 +187,16 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                 });
             }
         });
-        final DialogConfig<UserDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
+        final EditOwnershipDialog.DialogConfig<UserDTO> configOwnership = EditOwnershipDialog.create(
+                userService.getUserManagementService(), type,
                 idFactory, user -> refreshUserList((Callback<Iterable<UserDTO>, Throwable>) null), stringMessages);
-        userActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openDialog);
+        
+        final EditACLDialog.DialogConfig<UserDTO> configACL = EditACLDialog.create(
+                userService.getUserManagementService(), type,
+                idFactory, user -> user.getAccessControlList(), stringMessages);
+        userActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, configOwnership::openDialog);
+        userActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
+                u -> configACL.openDialog(u));
         
         filterField = new LabeledAbstractFilterablePanel<UserDTO>(new Label(stringMessages.filterUsers()),
                 new ArrayList<UserDTO>(), dataProvider) {
@@ -275,7 +283,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
                 users.add(user);
                         getUserManagementService().updateUserProperties(user.getName(), user.getFullName(),
                                 user.getCompany(), user.getLocale(),
-                                user.getDefaultTenant() != null ? user.getDefaultTenant().getName() : null,
+                                user.getDefaultTenant() != null ? user.getDefaultTenant().getId().toString() : null,
                                 new AsyncCallback<UserDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
