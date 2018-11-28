@@ -175,7 +175,9 @@ public class AclEditPanel extends Composite {
     private void updateActionEditors(UserGroup selectedUserGroup) {
         onUserGroupsChange();
         allowedActionsEditor.setValue(userGroupsWithAllowedActions.get(selectedUserGroup), false);
-        deniedActionsEditor.setValue(userGroupsWithDeniedActions.get(selectedUserGroup), false);
+        deniedActionsEditor
+                .setValue(removeExclamationMarkFromStrings(userGroupsWithDeniedActions.get(selectedUserGroup)), false);
+
     }
 
     /**
@@ -327,6 +329,14 @@ public class AclEditPanel extends Composite {
         final Set<String> set = new HashSet<>();
         for (String s : iter) {
             set.add(s.startsWith("!") ? s : "!" + s);
+        }
+        return set;
+    }
+
+    private Set<String> removeExclamationMarkFromStrings(Iterable<String> iter) {
+        final Set<String> set = new HashSet<>();
+        for (String s : iter) {
+            set.add(s.startsWith("!") ? s.substring(1) : s);
         }
         return set;
     }
