@@ -611,7 +611,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                 userService.getUserManagementService(), type, idFactory,
                 group -> leaderboardGroupsRefresher.fillLeaderboardGroups(), stringMessages);
         actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
-                config::openDialog);
+                e -> config.openDialog(e));
         
         final EditACLDialog.DialogConfig<LeaderboardGroupDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, idFactory,
@@ -637,7 +637,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                             });
                 });
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_MIGRATE_GROUP_OWNERSHIP_HIERARCHY, CHANGE_OWNERSHIP,
-                migrateDialogConfig::openDialog);
+                e -> migrateDialogConfig.openDialog(e));
 
         SelectionCheckboxColumn<LeaderboardGroupDTO> leaderboardTableSelectionColumn =
                 new SelectionCheckboxColumn<LeaderboardGroupDTO>(
