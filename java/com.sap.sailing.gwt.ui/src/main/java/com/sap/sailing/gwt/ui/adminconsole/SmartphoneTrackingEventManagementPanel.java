@@ -75,6 +75,7 @@ import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 
 /**
  * Allows the user to start and stop tracking of races using the RaceLog-tracking connector.
@@ -493,7 +494,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
     }
     
     @Override
-    protected void addLeaderboardControls(Panel controlsPanel) {}
+    protected void addLeaderboardControls(final AccessControlledButtonPanel buttonPanel) {}
 
     @Override
     protected void addSelectedLeaderboardRacesControls(Panel racesPanel) {
