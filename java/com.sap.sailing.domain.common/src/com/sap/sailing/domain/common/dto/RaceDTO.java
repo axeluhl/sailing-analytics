@@ -30,10 +30,6 @@ public class RaceDTO extends BasicRaceDTO {
     
     public RaceDTO() {}
 
-    public RaceDTO(RegattaAndRaceIdentifier raceIdentifier) {
-        this(raceIdentifier, null, false);
-    }
-
     public RaceDTO(RegattaAndRaceIdentifier raceIdentifier, TrackedRaceDTO trackedRace, boolean isCurrentlyTracked) {
         super(raceIdentifier, trackedRace);
         this.regattaName = raceIdentifier.getRegattaName();
