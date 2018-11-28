@@ -3,6 +3,7 @@ package com.sap.sse.security.shared.dto;
 import java.util.UUID;
 
 import com.sap.sse.security.shared.RoleDefinitionImpl;
+import com.sap.sse.security.shared.WildcardPermission;
 
 public class RoleDefinitionDTO extends RoleDefinitionImpl implements SecuredDTO {
     
@@ -13,8 +14,8 @@ public class RoleDefinitionDTO extends RoleDefinitionImpl implements SecuredDTO 
     @Deprecated
     RoleDefinitionDTO() {} // for GWT serialization only
     
-    public RoleDefinitionDTO(final UUID id, final String name) {
-        super(id, name);
+    public RoleDefinitionDTO(UUID id, String name, Iterable<WildcardPermission> permissions) {
+        super(id, name, permissions);
     }
 
     @Override

@@ -103,10 +103,13 @@ public abstract class SecurityDTOUtil {
             securedObject.setAccessControlList(accessControlListDTO);
         } else {
             User user = securityService.getCurrentUser();
-            StrippedUserDTO userDTO = new SecurityDTOFactory().createStrippedUserFromUser(user, securityService,
-                    fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
-            securedObject.setAccessControlList(securityDTOFactory.pruneAccessControlListForUser(accessControlListDTO,
-                    userDTO));
+            if (user != null) {
+                // TODO also prune for all user
+                StrippedUserDTO userDTO = new SecurityDTOFactory().createStrippedUserFromUser(user, securityService,
+                        fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
+                securedObject.setAccessControlList(
+                        securityDTOFactory.pruneAccessControlListForUser(accessControlListDTO, userDTO));
+            }
         }
         final OwnershipAnnotation ownership = securityService.getOwnership(objectId);
         securedObject.setOwnership(

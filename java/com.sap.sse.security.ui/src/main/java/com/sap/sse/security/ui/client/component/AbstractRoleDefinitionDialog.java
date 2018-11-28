@@ -92,9 +92,7 @@ public abstract class AbstractRoleDefinitionDialog extends DataEntryDialog<RoleD
     protected RoleDefinitionDTO getResult() {
         final String newName = roleDefinitionNameField.getText();
         final List<WildcardPermission> permissions = permissionsList.getValue();
-        final RoleDefinitionDTO result = new RoleDefinitionDTO(getRoleDefinitionId(), newName);
-        result.setPermissions(permissions);
-        return result;
+        return new RoleDefinitionDTO(getRoleDefinitionId(), newName, permissions);
     }
     
     protected abstract UUID getRoleDefinitionId();

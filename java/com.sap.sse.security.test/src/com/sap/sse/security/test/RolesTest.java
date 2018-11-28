@@ -2,6 +2,7 @@ package com.sap.sse.security.test;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 import org.junit.Test;
@@ -16,7 +17,7 @@ import com.sap.sse.security.shared.impl.UserGroup;
 public class RolesTest {
     @Test
     public void testRoleToString() {
-        final RoleDefinitionDTO roleDefinition = new RoleDefinitionDTO(UUID.randomUUID(), "role");
+        final RoleDefinitionDTO roleDefinition = new RoleDefinitionDTO(UUID.randomUUID(), "role", new ArrayList<>());
         final Role role = new Role(roleDefinition);
         final UserGroup tenant = new UserGroup(UUID.randomUUID(), "tenant");
         final UserGroupDTO tenantDTO = new UserGroupDTO(UUID.randomUUID(), "tenant");

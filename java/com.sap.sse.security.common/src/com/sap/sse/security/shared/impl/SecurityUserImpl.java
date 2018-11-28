@@ -1,16 +1,11 @@
 package com.sap.sse.security.shared.impl;
 
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import com.sap.sse.common.Util;
-import com.sap.sse.common.settings.GwtIncompatible;
 import com.sap.sse.security.shared.AbstractRole;
 import com.sap.sse.security.shared.AbstractUserGroup;
 import com.sap.sse.security.shared.RoleDefinition;
@@ -32,9 +27,9 @@ public abstract class SecurityUserImpl<RD extends RoleDefinition, R extends Abst
      * @see #writeObject
      * @see #readResolve
      */
-    private transient Set<R> roles;
+    private Set<R> roles;
     
-    private List<R> roleListForSerialization;
+    // private List<R> roleListForSerialization;
     
     private Set<WildcardPermission> permissions;
     
@@ -55,19 +50,19 @@ public abstract class SecurityUserImpl<RD extends RoleDefinition, R extends Abst
         }
     }
     
-    @GwtIncompatible
-    private void writeObject(ObjectOutputStream oos) throws IOException {
-        roleListForSerialization = new ArrayList<>(roles);
-        oos.defaultWriteObject();
-        roleListForSerialization = null;
-    }
-
-    @GwtIncompatible
-    protected Object readResolve() {
-        roles = new HashSet<>(roleListForSerialization);
-        roleListForSerialization = null;
-        return this;
-    }
+    // @GwtIncompatible
+    // private void writeObject(ObjectOutputStream oos) throws IOException {
+    // roleListForSerialization = new ArrayList<>(roles);
+    // oos.defaultWriteObject();
+    // roleListForSerialization = null;
+    // }
+    //
+    // @GwtIncompatible
+    // protected Object readResolve() {
+    // roles = new HashSet<>(roleListForSerialization);
+    // roleListForSerialization = null;
+    // return this;
+    // }
     
     @Override
     public String getName() {

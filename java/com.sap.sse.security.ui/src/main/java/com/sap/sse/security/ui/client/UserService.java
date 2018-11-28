@@ -24,12 +24,12 @@ import com.sap.sse.gwt.client.StorageEvent.Handler;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.PermissionChecker;
+import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
-import com.sap.sse.security.shared.PermissionChecker;
-import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -142,6 +142,7 @@ public class UserService {
                 new MarkedAsyncCallback<Pair<UserDTO, UserDTO>>(new AsyncCallback<Pair<UserDTO, UserDTO>>() {
             @Override
                     public void onSuccess(Pair<UserDTO, UserDTO> result) {
+                        GWT.debugger();
                 setCurrentUser(result, notifyOtherInstances);
             }
 
@@ -223,6 +224,10 @@ public class UserService {
         if (resultAndAnomynous.getA() == null) {
             currentUser = null;
         } else {
+            GWT.log("Current user permissions: " + resultAndAnomynous.getB().getPermissions() + " + "
+                    + resultAndAnomynous.getA().getPermissions());
+            GWT.log("Current user roles: " + resultAndAnomynous.getB().getRoles() + " + "
+                    + resultAndAnomynous.getA().getRoles());
             // we remember that a user was authenticated to suppress the hint for some time
             setUserLoginHintToStorage();
             currentUser = resultAndAnomynous.getA();
