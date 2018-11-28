@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.security.SecurityService;
@@ -14,6 +15,11 @@ import com.sap.sse.security.Social;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
+import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.SecurityUser;
+import com.sap.sse.security.shared.SocialUserAccount;
+import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.AccountDTO;
@@ -24,11 +30,6 @@ import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.StrippedUserDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
-import com.sap.sse.security.shared.OwnershipAnnotation;
-import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.SecurityUser;
-import com.sap.sse.security.shared.SocialUserAccount;
-import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.impl.AccessControlList;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
@@ -275,14 +276,18 @@ public class SecurityDTOFactory {
         final AccessControlListDTO result;
         final Collection<UserGroupDTO> userGroups = Util.createSet(filterForUser.getUserGroups());
 
-        final Map<UserGroupDTO, Set<String>> actionsByUserGroup = new HashMap<>();
-        for (final Entry<UserGroupDTO, Set<String>> entry : acl.getActionsByUserGroup().entrySet()) {
-            if (userGroups.contains(entry.getKey())) {
-                UserGroupDTO key = entry.getKey();
-                actionsByUserGroup.put(key, entry.getValue());
+        if (acl != null) {
+            final Map<UserGroupDTO, Set<String>> actionsByUserGroup = new HashMap<>();
+            for (final Entry<UserGroupDTO, Set<String>> entry : acl.getActionsByUserGroup().entrySet()) {
+                if (userGroups.contains(entry.getKey())) {
+                    UserGroupDTO key = entry.getKey();
+                    actionsByUserGroup.put(key, entry.getValue());
+                }
             }
+            result = new AccessControlListDTO(actionsByUserGroup);
+        } else {
+            result = null;
         }
-        result = new AccessControlListDTO(actionsByUserGroup);
         return result;
     }
 
@@ -302,5 +307,20 @@ public class SecurityDTOFactory {
         OwnershipDTO ownerShipDTO = createOwnershipDTO(annotation.getAnnotation(), new HashMap<>(), new HashMap<>());
         return new OwnershipAnnotationDTO(ownerShipDTO, annotation.getIdOfAnnotatedObject(),
                 annotation.getDisplayNameOfAnnotatedObject());
+    }
+
+    public StrippedUserDTO createStrippedUserFromUser(User user, SecurityService securityService,
+            Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser,
+            Map<UserGroup, UserGroupDTO> fromOriginalToStrippedDownUserGroup) {
+        return fromOriginalToStrippedDownUser.computeIfAbsent(user, new Function<User, StrippedUserDTO>() {
+
+            @Override
+            public StrippedUserDTO apply(User t) {
+                Iterable<Role> roles = t.getRoles();
+                Iterable<RoleDTO> rolesDTO = createRolesDTOs(roles, fromOriginalToStrippedDownUserGroup,
+                        fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
+                return new StrippedUserDTO(t.getName(), rolesDTO, t.getPermissions());
+            }
+        });
     }
 }

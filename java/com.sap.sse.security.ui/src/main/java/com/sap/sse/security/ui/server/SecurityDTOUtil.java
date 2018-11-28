@@ -103,7 +103,8 @@ public abstract class SecurityDTOUtil {
             securedObject.setAccessControlList(accessControlListDTO);
         } else {
             User user = securityService.getCurrentUser();
-            UserDTO userDTO = new SecurityDTOFactory().createUserDTOFromUser(user, securityService);
+            StrippedUserDTO userDTO = new SecurityDTOFactory().createStrippedUserFromUser(user, securityService,
+                    fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
             securedObject.setAccessControlList(securityDTOFactory.pruneAccessControlListForUser(accessControlListDTO,
                     userDTO));
         }
