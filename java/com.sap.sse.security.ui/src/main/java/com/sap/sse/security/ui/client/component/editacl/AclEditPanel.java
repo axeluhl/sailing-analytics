@@ -1,4 +1,4 @@
-package com.sap.sse.security.ui.client.component;
+package com.sap.sse.security.ui.client.component.editacl;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -73,6 +73,7 @@ public class AclEditPanel extends Composite {
     public AclEditPanel(UserManagementServiceAsync userManagementService, Action[] availableActions,
             StringMessages stringMessages) {
         this.userManagementService = userManagementService;
+        AclDialogResources.INSTANCE.css().ensureInjected();
 
         final Collection<String> actionNames = new ArrayList<>();
         for (Action a : availableActions) {
@@ -90,6 +91,7 @@ public class AclEditPanel extends Composite {
         // create action editor for allowed actions
         allowedActionsEditor = new StringListEditorComposite(new ArrayList<>(), stringMessages,
                 com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), actionNames, "Allowed action name");
+        allowedActionsEditor.addStyleName(AclDialogResources.INSTANCE.css().allowedActionsTable());
         // TODO: i18n ^v^v
 
         allowedActionsEditor.addValueChangeHandler(e -> userGroupsWithAllowedActions
@@ -102,6 +104,7 @@ public class AclEditPanel extends Composite {
 
         deniedActionsEditor.addValueChangeHandler(e -> userGroupsWithDeniedActions
                 .put(userGroupSingleSelectionModel.getSelectedObject(), toDeniedSet(e.getValue())));
+        deniedActionsEditor.addStyleName(AclDialogResources.INSTANCE.css().deniedActionsTable());
         permissionsCellListPanelUi.add(deniedActionsEditor);
     }
 

@@ -1,4 +1,4 @@
-package com.sap.sse.security.ui.client.component;
+package com.sap.sse.security.ui.client.component.editacl;
 
 import static com.sap.sse.gwt.client.Notification.NotificationType.ERROR;
 
@@ -18,7 +18,7 @@ import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.SecuredObject;
 import com.sap.sse.security.shared.impl.AccessControlListImpl;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
-import com.sap.sse.security.ui.client.component.EditACLDialog.AclDialogResult;
+import com.sap.sse.security.ui.client.component.editacl.EditACLDialog.AclDialogResult;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
