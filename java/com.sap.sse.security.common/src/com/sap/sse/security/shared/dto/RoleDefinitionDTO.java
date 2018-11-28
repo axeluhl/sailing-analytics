@@ -1,12 +1,8 @@
-package com.sap.sse.security.ui.shared;
+package com.sap.sse.security.shared.dto;
 
 import java.util.UUID;
 
 import com.sap.sse.security.shared.RoleDefinitionImpl;
-import com.sap.sse.security.shared.SecuredDTO;
-import com.sap.sse.security.shared.SecurityInformationDTO;
-import com.sap.sse.security.shared.impl.AccessControlListDTO;
-import com.sap.sse.security.shared.impl.OwnershipDTO;
 
 public class RoleDefinitionDTO extends RoleDefinitionImpl implements SecuredDTO {
     

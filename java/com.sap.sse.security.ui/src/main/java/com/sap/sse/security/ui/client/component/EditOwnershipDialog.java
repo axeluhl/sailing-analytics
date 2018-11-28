@@ -17,14 +17,14 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.SecuredDTO;
-import com.sap.sse.security.shared.UserGroupDTO;
-import com.sap.sse.security.shared.impl.OwnershipDTO;
-import com.sap.sse.security.shared.impl.StrippedUserDTO;
+import com.sap.sse.security.shared.dto.OwnershipDTO;
+import com.sap.sse.security.shared.dto.SecuredDTO;
+import com.sap.sse.security.shared.dto.StrippedUserDTO;
+import com.sap.sse.security.shared.dto.UserDTO;
+import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.OwnershipDialogResult;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> {
 

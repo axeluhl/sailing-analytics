@@ -139,7 +139,7 @@ import com.sap.sse.common.util.RoundingUtil;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.impl.User;
 
 @Path("/v1/regattas")
 public class RegattasResource extends AbstractSailingServerResource {

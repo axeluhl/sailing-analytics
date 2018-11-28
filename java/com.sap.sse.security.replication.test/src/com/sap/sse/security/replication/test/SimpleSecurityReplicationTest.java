@@ -13,9 +13,9 @@ import org.junit.Test;
 
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.security.UserImpl;
-import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.impl.User;
 
 public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTest {
     @Test

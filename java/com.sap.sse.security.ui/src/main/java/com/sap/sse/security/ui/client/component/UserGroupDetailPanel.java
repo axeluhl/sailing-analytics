@@ -33,12 +33,12 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SelectionChangeEvent.Handler;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sse.common.Util;
-import com.sap.sse.security.shared.UserGroupDTO;
-import com.sap.sse.security.shared.impl.StrippedUserDTO;
+import com.sap.sse.security.shared.dto.StrippedUserDTO;
+import com.sap.sse.security.shared.dto.UserDTO;
+import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.component.UserGroupListDataProvider.UserGroupListDataProviderChangeHandler;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 public class UserGroupDetailPanel extends HorizontalPanel implements Handler, ChangeHandler, KeyUpHandler, UserGroupListDataProviderChangeHandler {
     private final TextBox filterBox;

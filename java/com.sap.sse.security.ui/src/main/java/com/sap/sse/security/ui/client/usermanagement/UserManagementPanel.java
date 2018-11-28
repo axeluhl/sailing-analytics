@@ -28,8 +28,9 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
-import com.sap.sse.security.shared.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
@@ -38,7 +39,6 @@ import com.sap.sse.security.ui.client.component.CreateUserDialog;
 import com.sap.sse.security.ui.client.component.EditAccessControlListDialog;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 public class UserManagementPanel<TR extends CellTableWithCheckboxResources> extends DockPanel {
     

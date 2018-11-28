@@ -1,4 +1,4 @@
-package com.sap.sse.security.shared;
+package com.sap.sse.security.shared.dto;
 
 import java.io.Serializable;
 

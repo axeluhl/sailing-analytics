@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.io.Serializable;
 
-import com.sap.sse.security.shared.UserGroupDTO;
+import com.sap.sse.security.shared.dto.UserGroupDTO;
 
 public class MigrateGroupOwnerForHierarchyDTO implements Serializable {
 

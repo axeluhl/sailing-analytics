@@ -13,8 +13,8 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 public class DeviceConfigurationUserDetailComposite extends DeviceConfigurationDetailComposite {
 

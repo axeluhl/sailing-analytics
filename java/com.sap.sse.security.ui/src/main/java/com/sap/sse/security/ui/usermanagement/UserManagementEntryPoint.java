@@ -8,13 +8,13 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.AbstractSecurityEntryPoint;
 import com.sap.sse.security.ui.client.Resources;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.component.SettingsPanel;
 import com.sap.sse.security.ui.client.usermanagement.UserManagementPanel;
 import com.sap.sse.security.ui.loginpanel.LoginPanel;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 public class UserManagementEntryPoint extends AbstractSecurityEntryPoint {
     private final CellTableWithCheckboxResources tableResources = GWT.create(CellTableWithCheckboxResources.class);

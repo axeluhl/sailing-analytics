@@ -1,7 +1,7 @@
 package com.sap.sailing.domain.common.dto;
 
 import com.sap.sailing.domain.common.Position;
-import com.sap.sse.security.shared.NamedDTO;
+import com.sap.sse.security.shared.dto.NamedDTO;
 
 public class PlacemarkDTO extends NamedDTO {
     private static final long serialVersionUID = -6734956459060435983L;

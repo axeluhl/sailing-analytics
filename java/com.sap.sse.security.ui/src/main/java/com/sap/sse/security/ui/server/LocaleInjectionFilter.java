@@ -18,7 +18,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.impl.User;
 
 /**
  * {@link Filter ServletFilter} implementation that sets a short living {@link Cookie} that carries a user's preferred

@@ -34,19 +34,19 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.AbstractRole;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.Action;
+import com.sap.sse.security.shared.dto.AccountDTO;
+import com.sap.sse.security.shared.dto.RoleDTO;
+import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.shared.impl.RoleDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AbstractUserDialog.UserData;
 import com.sap.sse.security.ui.client.component.ChangePasswordDialog;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.oauth.client.SocialUserDTO;
-import com.sap.sse.security.ui.shared.AccountDTO;
-import com.sap.sse.security.ui.shared.RoleDefinitionDTO;
-import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UsernamePasswordAccountDTO;
 
 /**

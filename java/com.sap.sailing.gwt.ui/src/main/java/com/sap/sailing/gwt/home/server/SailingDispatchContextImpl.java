@@ -18,7 +18,7 @@ import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 import com.sap.sse.gwt.dispatch.shared.exceptions.ServerDispatchException;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.impl.User;
 
 @GwtIncompatible
 public class SailingDispatchContextImpl implements SailingDispatchContext {

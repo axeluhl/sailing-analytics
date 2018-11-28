@@ -8,13 +8,13 @@ import com.sap.sse.common.Named;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.User;
-import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 
 /**
  * Keeps track of all {@link User}, {@link UserGroup} and {@link Role}

@@ -16,9 +16,9 @@ import com.sap.sse.common.Named;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
-import com.sap.sse.security.shared.SecuredDTO;
-import com.sap.sse.security.shared.UserGroupDTO;
-import com.sap.sse.security.shared.impl.OwnershipDTO;
+import com.sap.sse.security.shared.dto.OwnershipDTO;
+import com.sap.sse.security.shared.dto.SecuredDTO;
+import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 
 public class MigrateGroupOwnershipDialog extends DataEntryDialog<MigrateGroupOwnerForHierarchyDialogDTO> {

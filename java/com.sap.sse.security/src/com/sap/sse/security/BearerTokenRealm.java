@@ -5,7 +5,7 @@ import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.SaltedAuthenticationInfo;
 
-import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.impl.User;
 
 /**
  * A realm that authenticates users by an access token which has previously been obtained through

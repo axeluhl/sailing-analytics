@@ -3,10 +3,10 @@ package com.sap.sse.security.ui.authentication.app;
 import java.util.ArrayList;
 
 import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.shared.impl.RoleDTO;
+import com.sap.sse.security.shared.dto.AccountDTO;
+import com.sap.sse.security.shared.dto.RoleDTO;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.shared.AccountDTO;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * Default implementation of {@link AuthenticationContext}.

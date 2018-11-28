@@ -12,7 +12,7 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
  * @author Axel Uhl (d043530)
  *
  */
-public abstract class AbstractUserGroup<U extends SecurityUser<?, ?>>
+public abstract class AbstractUserGroup<U extends SecurityUser<?, ?, ?>>
         implements NamedWithID, WithQualifiedObjectIdentifier {
     private static final long serialVersionUID = 1L;
 

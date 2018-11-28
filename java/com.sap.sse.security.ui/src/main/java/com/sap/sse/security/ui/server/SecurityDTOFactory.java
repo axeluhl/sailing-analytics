@@ -12,29 +12,29 @@ import com.sap.sse.common.Util;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.Social;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
-import com.sap.sse.security.shared.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
+import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
+import com.sap.sse.security.shared.dto.AccessControlListDTO;
+import com.sap.sse.security.shared.dto.AccountDTO;
+import com.sap.sse.security.shared.dto.OwnershipAnnotationDTO;
+import com.sap.sse.security.shared.dto.OwnershipDTO;
+import com.sap.sse.security.shared.dto.RoleDTO;
+import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
+import com.sap.sse.security.shared.dto.StrippedUserDTO;
+import com.sap.sse.security.shared.dto.UserDTO;
+import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.shared.OwnershipAnnotation;
-import com.sap.sse.security.shared.OwnershipAnnotationDTO;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.SocialUserAccount;
-import com.sap.sse.security.shared.User;
-import com.sap.sse.security.shared.UserGroup;
-import com.sap.sse.security.shared.UserGroupDTO;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.impl.AccessControlList;
-import com.sap.sse.security.shared.impl.AccessControlListDTO;
 import com.sap.sse.security.shared.impl.Ownership;
-import com.sap.sse.security.shared.impl.OwnershipDTO;
 import com.sap.sse.security.shared.impl.Role;
-import com.sap.sse.security.shared.impl.RoleDTO;
-import com.sap.sse.security.shared.impl.StrippedUserDTO;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.ui.oauth.client.SocialUserDTO;
-import com.sap.sse.security.ui.shared.AccountDTO;
-import com.sap.sse.security.ui.shared.RoleDefinitionDTO;
-import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UsernamePasswordAccountDTO;
 
 public class SecurityDTOFactory {
@@ -100,7 +100,9 @@ public class SecurityDTOFactory {
     private RoleDTO createRoleDTO(Role role, Map<UserGroup, UserGroupDTO> fromOriginalToStrippedDownTenant,
             Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser,
             Map<UserGroup, UserGroupDTO> fromOriginalToStrippedDownUserGroup) {
-        return new RoleDTO(role.getRoleDefinition(),
+        RoleDefinition rdef = role.getRoleDefinition();
+        RoleDefinitionDTO rdefDTO = new RoleDefinitionDTO(rdef.getId(), rdef.getName());
+        return new RoleDTO(rdefDTO,
                 createUserGroupDTOFromUserGroup(role.getQualifiedForTenant(),
                 fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup),
                 createUserDTOFromUser(role.getQualifiedForUser(),

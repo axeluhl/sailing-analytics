@@ -17,7 +17,7 @@ import com.sap.sse.datamining.shared.dto.StoredDataMiningQueryDTO;
 import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningQueryDTOImpl;
 import com.sap.sse.gwt.dispatch.shared.exceptions.ServerDispatchException;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.impl.User;
 
 /** Implementation of {@link StoredDataMiningQueryPersister}. */
 public class StoredDataMiningQueryPersisterImpl implements StoredDataMiningQueryPersister {

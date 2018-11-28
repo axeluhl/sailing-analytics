@@ -1,7 +1,7 @@
-package com.sap.sse.security.shared;
+package com.sap.sse.security.shared.dto;
 
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.ObjectAnnotationImpl;
-import com.sap.sse.security.shared.impl.OwnershipDTO;
 
 public class OwnershipAnnotationDTO extends ObjectAnnotationImpl<OwnershipDTO> {
     private static final long serialVersionUID = 7242600656125139931L;

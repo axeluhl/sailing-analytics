@@ -1,6 +1,6 @@
-package com.sap.sse.security.shared;
+package com.sap.sse.security.shared.dto;
 
-import com.sap.sse.security.shared.impl.AccessControlListDTO;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.ObjectAnnotationImpl;
 
 public class AccessControlListAnnotationDTO extends ObjectAnnotationImpl<AccessControlListDTO> {

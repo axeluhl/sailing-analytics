@@ -6,8 +6,6 @@ import java.util.Set;
 
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.User;
-import com.sap.sse.security.shared.UserGroup;
 
 /**
  * The basic types of logical objects provided by the security bundle that themselves have permissions governing how

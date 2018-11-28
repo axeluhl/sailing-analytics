@@ -1,8 +1,10 @@
-package com.sap.sse.security.shared;
+package com.sap.sse.security.shared.impl;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+
+import com.sap.sse.security.shared.AbstractUserGroup;
 
 public class UserGroup extends AbstractUserGroup<User> {
     private static final long serialVersionUID = 1L;

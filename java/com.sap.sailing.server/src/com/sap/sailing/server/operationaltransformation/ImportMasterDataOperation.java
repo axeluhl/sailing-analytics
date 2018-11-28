@@ -69,8 +69,8 @@ import com.sap.sse.common.Util;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.User;
-import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 
 public class ImportMasterDataOperation extends
         AbstractRacingEventServiceOperation<MasterDataImportObjectCreationCountImpl> {

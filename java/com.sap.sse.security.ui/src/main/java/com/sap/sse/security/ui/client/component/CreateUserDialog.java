@@ -5,12 +5,12 @@ import java.util.HashMap;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.EntryPointLinkFactory;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.client.usermanagement.UserManagementPanel.UserCreatedEventHandler;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * Produces username, e-mail and password as the dialog's result.

@@ -34,12 +34,12 @@ import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
 
 import com.sap.sse.security.shared.SocialUserAccount;
-import com.sap.sse.security.shared.User;
-import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 // GWT has similar class. 
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 
 public class OAuthRealm extends AbstractCompositeAuthorizingRealm {
     private static final Logger logger = Logger.getLogger(OAuthRealm.class.getName());

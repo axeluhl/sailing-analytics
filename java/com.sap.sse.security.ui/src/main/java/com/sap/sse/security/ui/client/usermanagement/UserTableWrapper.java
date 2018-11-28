@@ -40,9 +40,10 @@ import com.sap.sse.gwt.client.celltable.TableWrapper;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
-import com.sap.sse.security.shared.UserGroupDTO;
 import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.shared.impl.RoleDTO;
+import com.sap.sse.security.shared.dto.RoleDTO;
+import com.sap.sse.security.shared.dto.UserDTO;
+import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
@@ -53,7 +54,6 @@ import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig
 import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * A filterable user table. The data model is managed by the {@link #getFilterField() filter field}. In order to set an

@@ -3,8 +3,8 @@ package com.sap.sse.security.ui.client.component;
 import java.util.UUID;
 
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
-import com.sap.sse.security.ui.shared.RoleDefinitionDTO;
 
 public class RoleDefinitionCreationDialog extends AbstractRoleDefinitionDialog {
     private final UUID newRoleDefinitionId;

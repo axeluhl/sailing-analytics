@@ -3,7 +3,7 @@ package com.sap.sse.security;
 import org.apache.shiro.authc.AuthenticationToken;
 
 import com.sap.sse.security.impl.Activator;
-import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.impl.User;
 
 /**
  * An access token as issued by {@link SecurityService#createAccessToken(String)}. The user name which is returned

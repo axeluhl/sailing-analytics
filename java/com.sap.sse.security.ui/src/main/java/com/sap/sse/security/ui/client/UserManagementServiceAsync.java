@@ -10,17 +10,17 @@ import java.util.UUID;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
-import com.sap.sse.security.shared.AccessControlListAnnotationDTO;
-import com.sap.sse.security.shared.OwnershipAnnotationDTO;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.UserGroupDTO;
 import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.shared.impl.AccessControlListDTO;
-import com.sap.sse.security.shared.impl.OwnershipDTO;
+import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
+import com.sap.sse.security.shared.dto.AccessControlListDTO;
+import com.sap.sse.security.shared.dto.OwnershipAnnotationDTO;
+import com.sap.sse.security.shared.dto.OwnershipDTO;
+import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
+import com.sap.sse.security.shared.dto.UserDTO;
+import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
-import com.sap.sse.security.ui.shared.RoleDefinitionDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 public interface UserManagementServiceAsync {
     void setOwnership(OwnershipDTO ownership, QualifiedObjectIdentifier idOfOwnedObject,

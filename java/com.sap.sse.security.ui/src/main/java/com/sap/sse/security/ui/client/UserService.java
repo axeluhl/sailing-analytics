@@ -24,17 +24,17 @@ import com.sap.sse.gwt.client.StorageEvent.Handler;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.dto.AccessControlListDTO;
+import com.sap.sse.security.shared.dto.OwnershipDTO;
+import com.sap.sse.security.shared.dto.UserDTO;
+import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.shared.PermissionChecker;
-import com.sap.sse.security.shared.UserGroupDTO;
 import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.shared.impl.AccessControlListDTO;
 import com.sap.sse.security.shared.impl.Ownership;
-import com.sap.sse.security.shared.impl.OwnershipDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.oauth.client.util.ClientUtils;
 import com.sap.sse.security.ui.shared.SuccessInfo;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * Encapsulates the current user, remembered as a {@link UserDTO} object. The current user is determined by a call to

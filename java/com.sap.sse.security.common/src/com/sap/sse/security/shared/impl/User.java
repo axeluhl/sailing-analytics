@@ -1,12 +1,16 @@
-package com.sap.sse.security.shared;
+package com.sap.sse.security.shared.impl;
 
 import java.util.Locale;
 import java.util.Map;
 
 import com.sap.sse.common.Named;
 import com.sap.sse.common.WithID;
+import com.sap.sse.security.shared.Account;
+import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.SecurityUser;
+import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.Account.AccountType;
-import com.sap.sse.security.shared.impl.Role;
 
 /**
  * The {@link Named#getName() name} is the ID for this user; usually a nickname or short name. Implements the
@@ -15,7 +19,7 @@ import com.sap.sse.security.shared.impl.Role;
  * @author Axel Uhl (d043530)
  *
  */
-public interface User extends SecurityUser<Role, UserGroup>, WithQualifiedObjectIdentifier {
+public interface User extends SecurityUser<RoleDefinition, Role, UserGroup>, WithQualifiedObjectIdentifier {
     /**
      * An optional clear-text user name, used to address the user, e.g., in the UI ("Hello ...")
      */

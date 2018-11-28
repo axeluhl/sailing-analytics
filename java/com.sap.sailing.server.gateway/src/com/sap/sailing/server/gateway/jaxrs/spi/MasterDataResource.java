@@ -37,7 +37,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroup;
 import com.sap.sailing.domain.masterdataimport.TopLevelMasterData;
 import com.sap.sailing.server.gateway.jaxrs.AbstractSailingServerResource;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.impl.User;
 
 @Path("/v1/masterdata/leaderboardgroups")
 public class MasterDataResource extends AbstractSailingServerResource {

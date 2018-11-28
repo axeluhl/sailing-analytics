@@ -16,8 +16,8 @@ import com.sap.sse.gwt.client.controls.listedit.GenericStringListInlineEditorCom
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
-import com.sap.sse.security.ui.shared.RoleDefinitionDTO;
 
 public abstract class AbstractRoleDefinitionDialog extends DataEntryDialog<RoleDefinitionDTO> {
     private static class RoleValidator implements DataEntryDialog.Validator<RoleDefinitionDTO> {

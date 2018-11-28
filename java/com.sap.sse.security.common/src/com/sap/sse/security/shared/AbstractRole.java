@@ -12,10 +12,11 @@ import com.sap.sse.common.Util.Triple;
  * 
  * @author Axel Uhl (D043530)
  */
-public abstract class AbstractRole<G extends AbstractUserGroup<?>, U extends SecurityUser<?, ?>> implements Named {
+public abstract class AbstractRole<RD extends RoleDefinition, G extends AbstractUserGroup<?>, U extends SecurityUser<RD, ?, G>>
+        implements Named {
     private static final String QUALIFIER_SEPARATOR = WildcardPermission.PART_DIVIDER_TOKEN;
     private static final long serialVersionUID = 1243342091492822614L;
-    private RoleDefinition roleDefinition;
+    private RD roleDefinition;
     protected G qualifiedForTenant;
     protected U qualifiedForUser;
     
@@ -27,11 +28,11 @@ public abstract class AbstractRole<G extends AbstractUserGroup<?>, U extends Sec
     @Deprecated
     AbstractRole() {} // for GWT serialization only
     
-    public AbstractRole(RoleDefinition roleDefinition) {
+    public AbstractRole(RD roleDefinition) {
         this(roleDefinition, /* tenant owner */ null, /* user owner */ null);
     }
     
-    public AbstractRole(RoleDefinition roleDefinition, G qualifiedForTenant, U qualifiedForUser) {
+    public AbstractRole(RD roleDefinition, G qualifiedForTenant, U qualifiedForUser) {
         if (roleDefinition == null) {
             throw new NullPointerException("A role's definition must not be null");
         }
@@ -45,7 +46,7 @@ public abstract class AbstractRole<G extends AbstractUserGroup<?>, U extends Sec
         return roleDefinition.getName();
     }
 
-    public RoleDefinition getRoleDefinition() {
+    public RD getRoleDefinition() {
         return roleDefinition;
     }
 

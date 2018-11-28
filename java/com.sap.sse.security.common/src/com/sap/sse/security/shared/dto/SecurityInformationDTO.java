@@ -1,11 +1,9 @@
-package com.sap.sse.security.shared;
+package com.sap.sse.security.shared.dto;
 
 import java.io.Serializable;
 
 import com.sap.sse.security.shared.impl.AccessControlList;
-import com.sap.sse.security.shared.impl.AccessControlListDTO;
 import com.sap.sse.security.shared.impl.Ownership;
-import com.sap.sse.security.shared.impl.OwnershipDTO;
 
 /**
  * Data transfer object wrapping security information such as {@link AccessControlList access control list} and

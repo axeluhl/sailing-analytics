@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 
+import com.sap.sse.security.shared.impl.UserGroup;
+
 /**
  * Grants and revokes permissions to a set of actions for an object on a per-{@link UserGroup} basis. This way, there
  * should usually be at most one instance of this type defined for one object to which access is controlled. The sets of

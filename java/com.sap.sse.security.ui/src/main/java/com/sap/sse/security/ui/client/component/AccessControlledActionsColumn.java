@@ -11,10 +11,10 @@ import com.sap.sse.gwt.client.celltable.ImagesBarCell;
 import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.Action;
-import com.sap.sse.security.shared.SecuredDTO;
+import com.sap.sse.security.shared.dto.AccessControlListDTO;
+import com.sap.sse.security.shared.dto.OwnershipDTO;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.shared.impl.AccessControlListDTO;
-import com.sap.sse.security.shared.impl.OwnershipDTO;
 import com.sap.sse.security.ui.client.UserService;
 
 public class AccessControlledActionsColumn<T extends SecuredDTO, S extends ImagesBarCell>

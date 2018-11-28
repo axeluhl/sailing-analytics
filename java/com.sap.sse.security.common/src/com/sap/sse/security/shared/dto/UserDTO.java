@@ -1,22 +1,15 @@
-package com.sap.sse.security.ui.shared;
+package com.sap.sse.security.shared.dto;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.common.Util;
-import com.sap.sse.security.shared.SecuredDTO;
-import com.sap.sse.security.shared.SecurityInformationDTO;
-import com.sap.sse.security.shared.UserGroupDTO;
 import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.shared.impl.AccessControlListDTO;
 import com.sap.sse.security.shared.impl.Ownership;
-import com.sap.sse.security.shared.impl.OwnershipDTO;
-import com.sap.sse.security.shared.impl.RoleDTO;
-import com.sap.sse.security.shared.impl.StrippedUserDTO;
 
 public class UserDTO extends StrippedUserDTO
-        implements IsSerializable, SecuredDTO {
+        implements Serializable, SecuredDTO {
 
     private static final long serialVersionUID = 7556217539893146187L;
 

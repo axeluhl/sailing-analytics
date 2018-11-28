@@ -40,7 +40,7 @@ import com.sap.sse.common.Color;
 import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.impl.DegreeBearingImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
-import com.sap.sse.security.shared.NamedDTO;
+import com.sap.sse.security.shared.dto.NamedDTO;
 
 public abstract class StoredTrackBasedTest extends TrackBasedTest {
     private static final String RESOURCES = "resources/";

@@ -9,7 +9,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
-import com.sap.sse.security.shared.AccessControlListAnnotationDTO;
+import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 
 public class AccessControlListListDataProvider extends AbstractDataProvider<AccessControlListAnnotationDTO> {

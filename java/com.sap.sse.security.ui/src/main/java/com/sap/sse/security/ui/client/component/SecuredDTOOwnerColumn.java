@@ -9,9 +9,9 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.sap.sse.common.Named;
-import com.sap.sse.security.shared.SecuredDTO;
+import com.sap.sse.security.shared.dto.OwnershipDTO;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.impl.Ownership;
-import com.sap.sse.security.shared.impl.OwnershipDTO;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 /**

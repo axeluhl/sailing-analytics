@@ -19,7 +19,7 @@ import com.sap.sse.common.Stoppable;
 import com.sap.sse.common.Util;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.concurrent.NamedReentrantReadWriteLock;
-import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.impl.User;
 
 /**
  * <p>

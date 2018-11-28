@@ -1,7 +1,6 @@
-package com.sap.sse.security.shared.impl;
+package com.sap.sse.security.shared.dto;
 
 import com.sap.sse.security.shared.AbstractOwnership;
-import com.sap.sse.security.shared.UserGroupDTO;
 
 public class OwnershipDTO extends AbstractOwnership<UserGroupDTO, StrippedUserDTO> {
     private static final long serialVersionUID = -6379054499434958440L;

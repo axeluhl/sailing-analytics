@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
-import com.sap.sse.security.shared.UserGroupDTO;
+import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 
 public class UserGroupListDataProvider extends AbstractDataProvider<UserGroupDTO> {

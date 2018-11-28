@@ -1,7 +1,4 @@
-package com.sap.sse.security.shared;
-
-import com.sap.sse.security.shared.impl.AccessControlListDTO;
-import com.sap.sse.security.shared.impl.OwnershipDTO;
+package com.sap.sse.security.shared.dto;
 
 /**
  * {@link NamedDTO} extension which also implements {@link SecuredObject} interface.

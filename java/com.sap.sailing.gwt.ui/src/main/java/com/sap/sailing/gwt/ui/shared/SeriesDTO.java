@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.sap.sailing.domain.common.dto.FleetDTO;
 import com.sap.sailing.domain.common.dto.RaceColumnDTO;
-import com.sap.sse.security.shared.NamedDTO;
+import com.sap.sse.security.shared.dto.NamedDTO;
 
 public class SeriesDTO extends NamedDTO {
     private static final long serialVersionUID = -3813445377426310687L;

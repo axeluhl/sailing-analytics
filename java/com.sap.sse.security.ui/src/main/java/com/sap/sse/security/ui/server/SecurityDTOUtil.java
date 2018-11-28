@@ -5,19 +5,19 @@ import java.util.Map;
 
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
-import com.sap.sse.security.shared.NamedSecuredObjectDTO;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.SecuredDTO;
 import com.sap.sse.security.shared.SecurityUser;
-import com.sap.sse.security.shared.User;
-import com.sap.sse.security.shared.UserGroup;
-import com.sap.sse.security.shared.UserGroupDTO;
+import com.sap.sse.security.shared.dto.AccessControlListDTO;
+import com.sap.sse.security.shared.dto.NamedSecuredObjectDTO;
+import com.sap.sse.security.shared.dto.SecuredDTO;
+import com.sap.sse.security.shared.dto.StrippedUserDTO;
+import com.sap.sse.security.shared.dto.UserDTO;
+import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.shared.impl.AccessControlList;
-import com.sap.sse.security.shared.impl.AccessControlListDTO;
 import com.sap.sse.security.shared.impl.Ownership;
-import com.sap.sse.security.shared.impl.StrippedUserDTO;
-import com.sap.sse.security.ui.shared.UserDTO;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 
 public abstract class SecurityDTOUtil {
 
