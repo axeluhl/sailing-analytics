@@ -1,4 +1,4 @@
-package com.sap.sse.security.ui.client.component;
+package com.sap.sse.security.ui.client.component.editacl;
 
 import static com.sap.sse.gwt.client.Notification.NotificationType.ERROR;
 
@@ -13,11 +13,12 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.SecuredObject;
 import com.sap.sse.security.shared.impl.AccessControlListImpl;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
-import com.sap.sse.security.ui.client.component.EditACLDialog.AclDialogResult;
+import com.sap.sse.security.ui.client.component.editacl.EditACLDialog.AclDialogResult;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
@@ -45,11 +46,12 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
     }
 
     private EditACLDialog(UserManagementServiceAsync userManagementService,
-            QualifiedObjectIdentifier qualifiedObjectIdentifier,
-            StringMessages stringMessages, DialogCallback<AclDialogResult> callback) {
-        super("ACL", stringMessages.editACL(), stringMessages.ok(), stringMessages.cancel(), new Validator(), callback);
-        // TODO: ^ i18n ^
-        aclEditPanel = new AclEditPanel(userManagementService, stringMessages);
+            QualifiedObjectIdentifier qualifiedObjectIdentifier, Action[] availableActions,
+            StringMessages stringMessages,
+            DialogCallback<AclDialogResult> callback) {
+        super(stringMessages.acl(), stringMessages.editACLForObject(qualifiedObjectIdentifier.toString()),
+                stringMessages.ok(), stringMessages.cancel(), new Validator(), callback);
+        aclEditPanel = new AclEditPanel(userManagementService, availableActions, stringMessages);
         userManagementService.getAccessControlListWithoutPruning(qualifiedObjectIdentifier,
                 new AsyncCallback<AccessControlList>() {
 
@@ -102,6 +104,7 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
         private final UserManagementServiceAsync userManagementService;
         private final Consumer<T> updateCallback;
         private final Function<T, QualifiedObjectIdentifier> identifierFactory;
+        private final Function<T, Action[]> availableActionsFactory;
         private final StringMessages stringMessages;
 
         private DialogConfig(final UserManagementServiceAsync userManagementService, final HasPermissions type,
@@ -109,6 +112,7 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
                 final StringMessages stringMessages) {
             this.userManagementService = userManagementService;
             this.identifierFactory = idFactory.andThen(type::getQualifiedObjectIdentifier);
+            this.availableActionsFactory = idFactory.andThen(t -> type.getAvailableActions());
             this.updateCallback = updateCallback;
             this.stringMessages = stringMessages;
         }
@@ -120,7 +124,8 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
          *            {@link Named} {@link SecuredObject} instance to edit ownerships for
          */
         public void openDialog(final T securedObject) {
-            new EditACLDialog(userManagementService, identifierFactory.apply(securedObject), StringMessages.INSTANCE,
+            new EditACLDialog(userManagementService, identifierFactory.apply(securedObject),
+                    availableActionsFactory.apply(securedObject), StringMessages.INSTANCE,
                     new EditAclDialogCallback(securedObject)).show();
         }
 
@@ -146,7 +151,7 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
                             @Override
                             public final void onFailure(Throwable caught) {
                                 // TODO: v i18n v
-                                Notification.notify(stringMessages.errorUpdatingOwnership(securedObject.getName()),
+                                Notification.notify(stringMessages.errorUpdatingAcl(securedObject.getName()),
                                         ERROR);
                             }
                         });
