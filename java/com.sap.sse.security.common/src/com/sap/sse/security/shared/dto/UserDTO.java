@@ -23,6 +23,11 @@ public class UserDTO extends StrippedUserDTO
     private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
     private UserGroupDTO defaultTenantForCurrentServer;
 
+    @Deprecated // gwt only
+    UserDTO() {
+        super(null);
+    }
+
     /**
      * @param groups may be {@code null} which is equivalent to passing an empty groups collection
      */
