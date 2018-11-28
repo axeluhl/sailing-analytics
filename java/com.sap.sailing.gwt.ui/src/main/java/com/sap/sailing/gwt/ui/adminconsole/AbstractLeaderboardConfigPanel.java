@@ -1,5 +1,7 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import static com.sap.sailing.domain.common.security.SecuredDomainType.LEADERBOARD;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -62,6 +64,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.dto.NamedDTO;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 
 public abstract class AbstractLeaderboardConfigPanel extends FormPanel implements SelectedLeaderboardProvider,
         RegattasDisplayer, TrackedRaceChangedListener, LeaderboardsDisplayer {
@@ -164,11 +167,10 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         VerticalPanel leaderboardsPanel = new VerticalPanel();
         leaderboardsCaptionPanel.add(leaderboardsPanel);
 
-        HorizontalPanel leaderboardControlsPanel = new HorizontalPanel();
+        final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, LEADERBOARD);
         Label lblFilterEvents = new Label(stringMessages.filterLeaderboardsByName() + ": ");
-        leaderboardControlsPanel.setSpacing(5);
-        addLeaderboardControls(leaderboardControlsPanel);
-        leaderboardsPanel.add(leaderboardControlsPanel);
+        addLeaderboardControls(buttonPanel);
+        leaderboardsPanel.add(buttonPanel);
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
         leaderboardTable = new FlushableCellTable<StrippedLeaderboardDTO>(/* pageSize */10000, tableRes);
@@ -329,7 +331,7 @@ public abstract class AbstractLeaderboardConfigPanel extends FormPanel implement
         return /* actionButtonsEnabled */ false;
     }
     
-    protected abstract void addLeaderboardControls(Panel controlsPanel);
+    protected abstract void addLeaderboardControls(final AccessControlledButtonPanel buttonPanel);
     protected abstract void addSelectedLeaderboardRacesControls(Panel racesPanel);
     protected abstract void addColumnsToLeaderboardTableAndSetSelectionModel(UserService userService, FlushableCellTable<StrippedLeaderboardDTO> leaderboardTable, 
             AdminConsoleTableResources tableRes, ListDataProvider<StrippedLeaderboardDTO> listDataProvider);

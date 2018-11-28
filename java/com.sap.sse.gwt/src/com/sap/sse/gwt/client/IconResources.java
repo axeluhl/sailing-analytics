@@ -14,6 +14,9 @@ public interface IconResources extends ClientBundle {
     @Source("images/change-ownership.png")
     ImageResource changeOwnershipIcon();
 
+    @Source("images/migrate-change-ownership.png")
+    ImageResource changeMigrateOwnershipIcon();
+
     @Source("images/remove.png")
     ImageResource removeIcon();
     

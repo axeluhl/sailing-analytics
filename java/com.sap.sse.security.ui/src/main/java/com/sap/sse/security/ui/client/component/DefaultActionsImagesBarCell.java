@@ -53,8 +53,8 @@ public class DefaultActionsImagesBarCell extends ImagesBarCell {
      * @return {@link ImageSpec} for {@link DefaultActions#CHANGE_OWNERSHIP change ownership} action
      */
     protected ImageSpec getMigrateGroupOwnershipForHierarchyImageSpec() {
-        return new ImageSpec(ACTION_MIGRATE_GROUP_OWNERSHIP_HIERARCHY, "TODO migrate group Owner for hierarchy",
-                IconResources.INSTANCE.changeOwnershipIcon());
+        return new ImageSpec(ACTION_MIGRATE_GROUP_OWNERSHIP_HIERARCHY, stringMessages.migrateGroupOwner(),
+                IconResources.INSTANCE.changeMigrateOwnershipIcon());
     }
 
     /**

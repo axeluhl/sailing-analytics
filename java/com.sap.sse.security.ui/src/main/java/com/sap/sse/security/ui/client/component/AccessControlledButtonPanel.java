@@ -58,7 +58,7 @@ public class AccessControlledButtonPanel extends Composite {
     }
 
     /**
-     * Adds an secured action button, which is only visible if the current user has the
+     * Adds a secured action button, which is only visible if the current user has the
      * {@link UserService#hasCurrentUserPermissionToCreateObjectOfType(HasPermissions) create permission} for the
      * {@link HasPermissions type} provided in this {@link AccessControlledButtonPanel}'s constructor.
      * 
@@ -73,7 +73,7 @@ public class AccessControlledButtonPanel extends Composite {
     }
 
     /**
-     * Adds an secured action button, which is only visible if the current user has any
+     * Adds a secured action button, which is only visible if the current user has any
      * {@link UserService#hasCurrentUserPermissionToDeleteAnyObjectOfType(HasPermissions) delete permission} for the
      * {@link HasPermissions type} provided in this {@link AccessControlledButtonPanel}'s constructor.
      * 
@@ -87,7 +87,18 @@ public class AccessControlledButtonPanel extends Composite {
         return addAction(text, removePermissionCheck, callback);
     }
 
-    private Button addAction(final String text, final Supplier<Boolean> permissionCheck, final Command callback) {
+    /**
+     * Adds an action button, which's visibility depends on the provided {@link Supplier permission check}.
+     * 
+     * @param text
+     *            the {@link String text} to show on the button
+     * @param permissionCheck
+     *            the {@link Supplier permission check} to decide if the action button is visible or not
+     * @param callback
+     *            the {@link Command callback} to execute on button click, if permission is granted
+     * @return the created {@link Button} instance
+     */
+    public Button addAction(final String text, final Supplier<Boolean> permissionCheck, final Command callback) {
         final Button button = new Button(text, (ClickHandler) event -> {
             if (permissionCheck.get()) {
                 callback.execute();

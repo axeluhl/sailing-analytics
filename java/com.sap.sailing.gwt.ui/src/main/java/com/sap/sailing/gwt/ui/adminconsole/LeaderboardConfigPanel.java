@@ -1,7 +1,10 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import static com.sap.sailing.domain.common.security.SecuredDomainType.LEADERBOARD;
+import static com.sap.sailing.domain.common.security.SecuredDomainType.REGATTA;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.DELETE;
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.READ;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
 
 import java.util.ArrayList;
@@ -14,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -33,6 +37,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -90,9 +95,12 @@ import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
+import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
+import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
 import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
+import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel implements SelectedLeaderboardProvider, RegattasDisplayer,
 TrackedRaceChangedListener, LeaderboardsDisplayer {
@@ -128,51 +136,27 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
     }
     
     @Override
-    protected void addLeaderboardControls(Panel controlsPanel) {
-        Button createFlexibleLeaderboardBtn = new Button(stringMessages.createFlexibleLeaderboard() + "...");
+    protected void addLeaderboardControls(AccessControlledButtonPanel buttonPanel) {
+        final Button createFlexibleLeaderboardBtn = buttonPanel
+                .addCreateAction(stringMessages.createFlexibleLeaderboard() + " ...", this::createFlexibleLeaderboard);
         createFlexibleLeaderboardBtn.ensureDebugId("CreateFlexibleLeaderboardButton");
-        controlsPanel.add(createFlexibleLeaderboardBtn);
-        createFlexibleLeaderboardBtn.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-                createFlexibleLeaderboard();
-            }
-        });
-        if (!userService.hasCurrentUserPermissionToCreateObjectOfType(SecuredDomainType.LEADERBOARD)) {
-            createFlexibleLeaderboardBtn.setVisible(false);
-        }
 
-        Button createRegattaLeaderboardBtn = new Button(stringMessages.createRegattaLeaderboard() + "...");
+        final Supplier<Boolean> leaderboardCreateAndRegattaReadPermission = () -> userService
+                .hasCurrentUserPermissionToCreateObjectOfType(LEADERBOARD)
+                && userService.hasCurrentUserAnyPermission(REGATTA.getPermission(READ), null);
+        final Button createRegattaLeaderboardBtn = buttonPanel.addAction(
+                stringMessages.createRegattaLeaderboard() + " ...", leaderboardCreateAndRegattaReadPermission,
+                this::createRegattaLeaderboard);
         createRegattaLeaderboardBtn.ensureDebugId("CreateRegattaLeaderboardButton");
-        controlsPanel.add(createRegattaLeaderboardBtn);
-        createRegattaLeaderboardBtn.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-                createRegattaLeaderboard();
-            }
-        });
-        
-        Button createRegattaLeaderboardWithEliminationsBtn = new Button(stringMessages.createRegattaLeaderboardWithEliminations() + "...");
+        final Button createRegattaLeaderboardWithEliminationsBtn = buttonPanel.addAction(
+                stringMessages.createRegattaLeaderboardWithEliminations() + " ...",
+                leaderboardCreateAndRegattaReadPermission, this::createRegattaLeaderboardWithEliminations);
         createRegattaLeaderboardWithEliminationsBtn.ensureDebugId("CreateRegattaLeaderboardWithEliminationsButton");
-        controlsPanel.add(createRegattaLeaderboardWithEliminationsBtn);
-        createRegattaLeaderboardWithEliminationsBtn.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent clickEvent) {
-                createRegattaLeaderboardWithEliminations();
-            }
-        });
-        if (!userService.hasCurrentUserPermissionToCreateObjectOfType(SecuredDomainType.LEADERBOARD) || !userService
-                .hasCurrentUserAnyPermission(SecuredDomainType.REGATTA.getPermission(DefaultActions.READ), null)) {
-            createRegattaLeaderboardBtn.setVisible(false);
-            createRegattaLeaderboardWithEliminationsBtn.setVisible(false);
-        }
         
-        leaderboardRemoveButton = new Button(stringMessages.remove());
-        leaderboardRemoveButton.ensureDebugId("LeaderboardsRemoveButton");
-        leaderboardRemoveButton.setEnabled(false);
-        leaderboardRemoveButton.addClickHandler(new ClickHandler() {
+        leaderboardRemoveButton = buttonPanel.addRemoveAction(stringMessages.remove(), new Command() {
+        
             @Override
-            public void onClick(ClickEvent event) {
+            public void execute() {
                 if(askUserForConfirmation()){
                     removeLeaderboards(leaderboardSelectionModel.getSelectedSet());
                 }
@@ -180,17 +164,17 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
 
             private boolean askUserForConfirmation() {
                 if (leaderboardSelectionModel.itemIsSelectedButNotVisible(leaderboardTable.getVisibleItems())) {
-                    final String leaderboardNames = leaderboardSelectionModel.getSelectedSet().stream().map(e -> e.getName()).collect(Collectors.joining("\n"));
-                    return Window.confirm(stringMessages.doYouReallyWantToRemoveNonVisibleLeaderboards(leaderboardNames));
+                    final String leaderboardNames = leaderboardSelectionModel.getSelectedSet().stream()
+                            .map(StrippedLeaderboardDTO::getName).collect(Collectors.joining("\n"));
+                    return Window
+                            .confirm(stringMessages.doYouReallyWantToRemoveNonVisibleLeaderboards(leaderboardNames));
                 } 
                 return Window.confirm(stringMessages.doYouReallyWantToRemoveLeaderboards());
             }
         });
-        controlsPanel.add(leaderboardRemoveButton);
-        if (!userService.hasCurrentUserPermissionToDeleteAnyObjectOfType(SecuredDomainType.LEADERBOARD)) {
-            leaderboardRemoveButton.setVisible(false);
+        leaderboardRemoveButton.ensureDebugId("LeaderboardsRemoveButton");
+        leaderboardRemoveButton.setEnabled(false);
         }
-    }
     
     @Override
     protected void addColumnsToLeaderboardTableAndSetSelectionModel(final UserService userService, final FlushableCellTable<StrippedLeaderboardDTO> leaderboardTable,
@@ -393,6 +377,12 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 config::openDialog);
         
+        final EditACLDialog.DialogConfig<StrippedLeaderboardDTO> configACL = EditACLDialog.create(
+                userService.getUserManagementService(), type, idFactory,
+                leaderboardDTO -> reloadLeaderboardForTable(leaderboardDTO.getName()), stringMessages);
+        leaderboardActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
+                configACL::openDialog);
+
         leaderboardTable.addColumn(selectionCheckboxColumn, selectionCheckboxColumn.getHeader());
         leaderboardTable.addColumn(linkColumn, stringMessages.name());
         leaderboardTable.addColumn(leaderboardDisplayNameColumn, stringMessages.displayName());
