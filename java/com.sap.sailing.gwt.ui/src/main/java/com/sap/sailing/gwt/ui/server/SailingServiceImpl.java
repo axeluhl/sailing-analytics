@@ -5515,23 +5515,27 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     @Override
     public Iterable<CompetitorDTO> getCompetitors(boolean filterCompetitorsWithBoat,
             boolean filterCompetitorsWithoutBoat) {
-        final List<CompetitorDTO> result = new ArrayList<>();
+        Iterable<CompetitorDTO> result;
         CompetitorAndBoatStore competitorStore = getService().getBaseDomainFactory().getCompetitorAndBoatStore();
+        final com.sap.sse.security.shared.HasPermissions.Action[] requiredActionsForRead = new com.sap.sse.security.shared.HasPermissions.Action[] {
+                SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC,
+                SecuredDomainType.CompetitorAndBoatActions.LIST };
         if (filterCompetitorsWithBoat == false && filterCompetitorsWithoutBoat == false) {
-            getSecurityService().filterObjectsWithPermissionForCurrentUser(SecuredDomainType.COMPETITOR,
-                    SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC, competitorStore.getAllCompetitors(),
-                    boat -> boat.getIdentifier().toString(),
-                    filteredObject -> result.add(convertToCompetitorDTO(filteredObject)));
+            @SuppressWarnings("unchecked")
+            Iterable<Competitor> competitors = (Iterable<Competitor>) competitorStore.getAllCompetitors();
+            result = getSecurityService().mapAndFilterByExplicitPermissionForCurrentUser(SecuredDomainType.COMPETITOR,
+                    requiredActionsForRead, competitors, competitor -> competitor.getIdentifier().toString(),
+                    this::convertToCompetitorDTO);
         } else if (filterCompetitorsWithBoat == true && filterCompetitorsWithoutBoat == false) {
-            getSecurityService().filterObjectsWithPermissionForCurrentUser(SecuredDomainType.COMPETITOR,
-                    SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC, competitorStore.getCompetitorsWithoutBoat(),
-                    boat -> boat.getIdentifier().toString(),
-                    filteredObject -> result.add(convertToCompetitorDTO(filteredObject)));
+            result = getSecurityService().mapAndFilterByExplicitPermissionForCurrentUser(SecuredDomainType.COMPETITOR,
+                    requiredActionsForRead, competitorStore.getCompetitorsWithoutBoat(),
+                    competitor -> competitor.getIdentifier().toString(), this::convertToCompetitorDTO);
         } else if (filterCompetitorsWithBoat == false && filterCompetitorsWithoutBoat == true) {
-            getSecurityService().filterObjectsWithPermissionForCurrentUser(SecuredDomainType.COMPETITOR,
-                    SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC, competitorStore.getCompetitorsWithBoat(),
-                    boat -> boat.getIdentifier().toString(),
-                    filteredObject -> result.add(convertToCompetitorDTO(filteredObject)));
+            result = getSecurityService().mapAndFilterByExplicitPermissionForCurrentUser(SecuredDomainType.COMPETITOR,
+                    requiredActionsForRead, competitorStore.getCompetitorsWithBoat(),
+                    competitor -> competitor.getIdentifier().toString(), this::convertToCompetitorDTO);
+        } else {
+            result = Collections.emptyList();
         }
         return result;
     }
@@ -5676,12 +5680,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public Iterable<BoatDTO> getAllBoats() {
-        List<BoatDTO> result = new ArrayList<>();
-        getSecurityService().filterObjectsWithPermissionForCurrentUser(SecuredDomainType.BOAT,
+        final com.sap.sse.security.shared.HasPermissions.Action[] requiredActionsForRead = new com.sap.sse.security.shared.HasPermissions.Action[] {
                 SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC,
+                SecuredDomainType.CompetitorAndBoatActions.LIST };
+        Iterable<BoatDTO> result = getSecurityService().mapAndFilterByExplicitPermissionForCurrentUser(
+                SecuredDomainType.BOAT, requiredActionsForRead,
                 getService().getBaseDomainFactory().getCompetitorAndBoatStore().getBoats(),
-                boat -> boat.getIdentifier().toString(),
-                filteredObject -> result.add(convertToBoatDTO(filteredObject)));
+                boat -> boat.getIdentifier().toString(), this::convertToBoatDTO);
         return result;
     }
 
