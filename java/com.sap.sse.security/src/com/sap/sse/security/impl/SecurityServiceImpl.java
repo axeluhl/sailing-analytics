@@ -1611,11 +1611,38 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
+    public <T> void filterObjectsWithPermissionForCurrentUser(HasPermissions permittedObject,
+            HasPermissions.Action[] actions, Iterable<T> objectsToFilter, Function<T, String> objectIdExtractor,
+            Consumer<T> filteredObjectsConsumer) {
+        objectsToFilter.forEach(objectToCheck -> {
+            String typeRelativeObjectIdentifier = objectIdExtractor.apply(objectToCheck);
+            boolean isPermitted = actions.length > 0;
+            for (int i = 0; i < actions.length; i++) {
+                isPermitted &= SecurityUtils.getSubject().isPermitted(
+                        permittedObject.getStringPermissionForObjects(actions[i], typeRelativeObjectIdentifier));
+            }
+            if (isPermitted) {
+                filteredObjectsConsumer.accept(objectToCheck);
+            }
+        });
+    }
+
+    @Override
     public <T, R> List<R> mapAndFilterByReadPermissionForCurrentUser(HasPermissions permittedObject,
             Iterable<T> objectsToFilter, Function<T, String> objectIdExtractor, Function<T, R> filteredObjectsMapper) {
         final List<R> result = new ArrayList<>();
         filterObjectsWithPermissionForCurrentUser(permittedObject, DefaultActions.READ, objectsToFilter,
                 objectIdExtractor, filteredObject -> result.add(filteredObjectsMapper.apply(filteredObject)));
+        return result;
+    }
+    
+    @Override
+    public <T, R> List<R> mapAndFilterByExplicitPermissionForCurrentUser(HasPermissions permittedObject,
+            HasPermissions.Action[] actions, Iterable<T> objectsToFilter, Function<T, String> objectIdExtractor,
+            Function<T, R> filteredObjectsMapper) {
+        final List<R> result = new ArrayList<>();
+        filterObjectsWithPermissionForCurrentUser(permittedObject, actions, objectsToFilter, objectIdExtractor,
+                filteredObject -> result.add(filteredObjectsMapper.apply(filteredObject)));
         return result;
     }
 
