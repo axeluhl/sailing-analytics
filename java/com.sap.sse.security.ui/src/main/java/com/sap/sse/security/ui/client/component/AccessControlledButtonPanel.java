@@ -17,8 +17,8 @@ import com.sap.sse.security.ui.client.UserService;
 /**
  * Panel where several buttons can be added which are either {@link #addUnsecuredAction(String, Command) unsecured} or
  * restricted for users with {@link #addCreateAction(String, Command) create} and /or
- * {@link #addRemoveAction(String, Command) remove} permissions. The visibility of secured buttons depend on the
- * permissions of the currently logged-in user and changes dynamically.
+ * {@link #addRemoveAction(String, Command) remove} permissions. The {@link Button#setVisible(boolean) visibility} of
+ * secured buttons depend on the permissions of the currently logged-in user and changes dynamically.
  */
 public class AccessControlledButtonPanel extends Composite {
 
