@@ -625,14 +625,12 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                             new AsyncCallback<Void>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
-                                    // TODO Auto-generated method stub
-
+                                    errorReporter.reportError(stringMessages.errorUpdatingOwnership(lg.getName()));
                                 }
 
                                 @Override
                                 public void onSuccess(Void result) {
-                                    // TODO Auto-generated method stub
-
+                                    leaderboardGroupsRefresher.fillLeaderboardGroups();
                                 }
                             });
                 });

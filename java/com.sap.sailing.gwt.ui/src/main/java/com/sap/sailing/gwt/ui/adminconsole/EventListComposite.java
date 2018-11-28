@@ -354,14 +354,12 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
                     sailingService.updateGroupOwnerForEventHierarchy(event.id, dto, new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            // TODO Auto-generated method stub
-
+                            errorReporter.reportError(stringMessages.errorUpdatingOwnership(event.getName()));
                         }
 
                         @Override
                         public void onSuccess(Void result) {
-                            // TODO Auto-generated method stub
-
+                            fillEvents();
                         }
                     });
                 });
