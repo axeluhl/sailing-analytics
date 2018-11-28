@@ -1,10 +1,21 @@
 .allowedActionsTable {
-    margin-right: 10px;
+    margin-right: 5px;
+    margin-left: 5px;
     margin-top: 10px;
-    display: inline-block;
+    display: inline;
 }
 
 .deniedActionsTable {
     margin-top: 10px;
-    display: inline-block;
+    display: inline;
+}
+
+.additionalWidget {
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.userGroupTextBox {
+    min-width: 200px;
+    margin-bottom: 5px;
 }

@@ -18,5 +18,9 @@ public interface AclDialogResources extends ClientBundle {
         String allowedActionsTable();
 
         String deniedActionsTable();
+
+        String additionalWidget();
+
+        String userGroupTextBox();
     }
 }

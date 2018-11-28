@@ -156,4 +156,9 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String editACLForObject(String objectName);
     String acl();
     String errorUpdatingAcl(String name);
+    String allowedActionName();
+    String deniedActionName();
+    String errorMessageUserGroupNameNotFound(String name);
+    String successMessageAddedUserGroup(String name);
+    String successMessageRemovedUserGroup(String name);
 }
