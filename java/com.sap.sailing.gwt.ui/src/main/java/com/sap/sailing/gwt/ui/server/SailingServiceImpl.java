@@ -1256,11 +1256,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private List<CompetitorDTO> convertToCompetitorDTOs(Iterable<? extends Competitor> iterable) {
         List<CompetitorDTO> result = new ArrayList<>();
         for (Competitor c : iterable) {
-            CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(c);
-            SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorDTO, c.getIdentifier());
+            CompetitorDTO competitorDTO = convertToCompetitorDTO(c);
             result.add(competitorDTO);
         }
         return result;
+    }
+    
+    private CompetitorDTO convertToCompetitorDTO(Competitor competitor) {
+        CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorDTO, competitor.getIdentifier());
+        return competitorDTO;
     }
 
     /**
@@ -1301,6 +1306,12 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             result.add(boatDTO);
         }
         return result;
+    }
+    
+    private BoatDTO convertToBoatDTO(Boat boat) {
+        BoatDTO boatDTO = baseDomainFactory.convertToBoatDTO(boat);
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), boatDTO, boat.getIdentifier());
+        return boatDTO;
     }
 
     @Override
@@ -5508,17 +5519,17 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             getSecurityService().filterObjectsWithPermissionForCurrentUser(SecuredDomainType.COMPETITOR,
                     SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC, competitorStore.getAllCompetitors(),
                     boat -> boat.getIdentifier().toString(),
-                    filteredObject -> result.add(baseDomainFactory.convertToCompetitorDTO(filteredObject)));
+                    filteredObject -> result.add(convertToCompetitorDTO(filteredObject)));
         } else if (filterCompetitorsWithBoat == true && filterCompetitorsWithoutBoat == false) {
             getSecurityService().filterObjectsWithPermissionForCurrentUser(SecuredDomainType.COMPETITOR,
                     SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC, competitorStore.getCompetitorsWithoutBoat(),
                     boat -> boat.getIdentifier().toString(),
-                    filteredObject -> result.add(baseDomainFactory.convertToCompetitorDTO(filteredObject)));
+                    filteredObject -> result.add(convertToCompetitorDTO(filteredObject)));
         } else if (filterCompetitorsWithBoat == false && filterCompetitorsWithoutBoat == true) {
             getSecurityService().filterObjectsWithPermissionForCurrentUser(SecuredDomainType.COMPETITOR,
                     SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC, competitorStore.getCompetitorsWithBoat(),
                     boat -> boat.getIdentifier().toString(),
-                    filteredObject -> result.add(baseDomainFactory.convertToCompetitorDTO(filteredObject)));
+                    filteredObject -> result.add(convertToCompetitorDTO(filteredObject)));
         }
         return result;
     }
@@ -5668,7 +5679,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC,
                 getService().getBaseDomainFactory().getCompetitorAndBoatStore().getBoats(),
                 boat -> boat.getIdentifier().toString(),
-                filteredObject -> result.add(baseDomainFactory.convertToBoatDTO(filteredObject)));
+                filteredObject -> result.add(convertToBoatDTO(filteredObject)));
         return result;
     }
 
@@ -5679,7 +5690,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC,
                 getService().getBaseDomainFactory().getCompetitorAndBoatStore().getStandaloneBoats(),
                 boat -> boat.getIdentifier().toString(),
-                filteredObject -> result.add(baseDomainFactory.convertToBoatDTO(filteredObject)));
+                filteredObject -> result.add(convertToBoatDTO(filteredObject)));
         return result;
     }
 
