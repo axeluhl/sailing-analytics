@@ -601,11 +601,12 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.RoleImpl;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.UserGroupDTO;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
@@ -4784,7 +4785,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                             .getRoleDefinition(SailingViewerRole.getInstance().getId());
                     final UserGroup defaultServerTenant = getSecurityService().getDefaultTenant();
                     if (viewerRole != null && defaultServerTenant != null) {
-                        final RoleImpl publicAccessForServerRole = new RoleImpl(viewerRole, defaultServerTenant, null);
+                        final Role publicAccessForServerRole = new Role(viewerRole, defaultServerTenant, null);
                         if (serverConfiguration.isPublic()) {
                             getSecurityService().addRoleForUser(allUser.getName(), publicAccessForServerRole);
                         } else {
@@ -8617,7 +8618,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 .getRoleDefinition(SailingViewerRole.getInstance().getId());
         final UserGroup defaultServerTenant = getSecurityService().getDefaultTenant();
         if (allUser != null && viewerRole != null && defaultServerTenant != null) {
-            result = allUser.hasRole(new RoleImpl(viewerRole, defaultServerTenant, null));
+            result = allUser.hasRole(new Role(viewerRole, defaultServerTenant, null));
         } else {
             result = null;
         }
@@ -8678,7 +8679,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 public UserGroup getNewGroupOwner() {
                     if (groupOwnerToSet == null) {
                         try {
-                            final UserGroup existingUserGroup = migrateGroupOwnerForHierarchyDTO.getExistingUserGroup();
+                            final UserGroupDTO existingUserGroup = migrateGroupOwnerForHierarchyDTO
+                                    .getExistingUserGroup();
                             if (existingUserGroup != null) {
                                 // When migrating from an existing user group -> copy as much as possible from the
                                 // existing group to make the migrated objects to be visible for most people as before
@@ -8705,10 +8707,10 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 migrateGroupOwnerForHierarchyDTO.isUpdateBoats());
     }
 
-    private UserGroup copyUserGroup(UserGroup userGroup, String name) throws UserGroupManagementException {
+    private UserGroup copyUserGroup(UserGroupDTO existingUserGroup, String name) throws UserGroupManagementException {
         // explicitly loading the current version of the group in case the given instance e.g. originates from the UI
         // and is possible out of date.
-        final UserGroup userGroupToCopy = getSecurityService().getUserGroup(userGroup.getId());
+        final UserGroup userGroupToCopy = getSecurityService().getUserGroup(existingUserGroup.getId());
         if (userGroupToCopy == null) {
             throw new IllegalArgumentException("User group does not exist");
         }

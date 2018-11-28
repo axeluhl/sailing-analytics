@@ -13,21 +13,20 @@ import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.WriteConcern;
 import com.sap.sse.security.Social;
-import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
-import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.AccessControlList;
+import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.userstore.mongodb.MongoObjectFactory;
 
 public class MongoObjectFactoryImpl implements MongoObjectFactory {
@@ -136,7 +135,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
         dbUserGroup.put(FieldNames.UserGroup.ID.name(), group.getId());
         dbUserGroup.put(FieldNames.UserGroup.NAME.name(), group.getName());
         BasicDBList dbUsernames = new BasicDBList();
-        for (SecurityUser user : group.getUsers()) {
+        for (User user : group.getUsers()) {
             dbUsernames.add(user.getName());
         }
         dbUserGroup.put(FieldNames.UserGroup.USERNAMES.name(), dbUsernames);
@@ -189,7 +188,7 @@ public class MongoObjectFactoryImpl implements MongoObjectFactory {
     }
     
     @Override
-    public void deleteUser(SecurityUser user) {
+    public void deleteUser(User user) {
         DBCollection usersCollection = db.getCollection(CollectionNames.USERS.name());
         DBObject dbUser = new BasicDBObject();
         dbUser.put(FieldNames.User.NAME.name(), user.getName());

@@ -17,14 +17,14 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SingleSelectionModel;
-import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.UserGroupDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 public class UserGroupManagementPanel extends DockPanel {
-    private SingleSelectionModel<UserGroup> userGroupSingleSelectionModel;
+    private SingleSelectionModel<UserGroupDTO> userGroupSingleSelectionModel;
     private UserGroupListDataProvider userGroupListDataProvider;
     private UserGroupDetailPanel userGroupDetailPanel;
     
@@ -49,7 +49,7 @@ public class UserGroupManagementPanel extends DockPanel {
         buttonPanel.add(new Button(stringMessages.removeUserGroup(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                UserGroup userGroup = userGroupSingleSelectionModel.getSelectedObject();
+                UserGroupDTO userGroup = userGroupSingleSelectionModel.getSelectedObject();
                 if (userGroup == null) {
                     Window.alert(stringMessages.youHaveToSelectAUserGroup());
                 } else if (Window.confirm(stringMessages.doYouReallyWantToRemoveUserGroup(userGroup.getName()))) {
@@ -71,9 +71,9 @@ public class UserGroupManagementPanel extends DockPanel {
         userGroupSingleSelectionModel = new SingleSelectionModel<>();
         TextBox filterBox = new TextBox();
         filterBox.getElement().setPropertyString("placeholder", stringMessages.filterUserGroups());
-        final CellList<UserGroup> userGroupList = new CellList<UserGroup>(new AbstractCell<UserGroup>() {
+        final CellList<UserGroupDTO> userGroupList = new CellList<UserGroupDTO>(new AbstractCell<UserGroupDTO>() {
             @Override
-            public void render(Context context, UserGroup value, SafeHtmlBuilder sb) {
+            public void render(Context context, UserGroupDTO value, SafeHtmlBuilder sb) {
                 if (value != null) {
                     sb.appendEscaped(value.getName());
                 }

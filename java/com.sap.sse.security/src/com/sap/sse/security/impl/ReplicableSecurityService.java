@@ -4,22 +4,21 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.Ownership;
 
 /**
  * Publishes those methods of {@link SecurityServiceImpl} that are required by operations implemented as lambda
  * expressions to fulfill their tasks. These operations should not be invoked by external service clients.
- * {@link SecurityService} is the one registered with the OSGi registry and thus the publicly-visible
- * interface.
+ * {@link SecurityService} is the one registered with the OSGi registry and thus the publicly-visible interface.
  * 
  * @author Axel Uhl (D043530)
- *
+ * 
  */
 public interface ReplicableSecurityService extends SecurityService {
     Void internalSetEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String displayName);

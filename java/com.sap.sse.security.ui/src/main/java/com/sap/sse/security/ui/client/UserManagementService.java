@@ -11,16 +11,16 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.mail.MailException;
-import com.sap.sse.security.shared.AccessControlList;
-import com.sap.sse.security.shared.AccessControlListAnnotation;
-import com.sap.sse.security.shared.Ownership;
-import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.AccessControlListAnnotationDTO;
+import com.sap.sse.security.shared.OwnershipAnnotationDTO;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.UnauthorizedException;
-import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.UserGroupDTO;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.AccessControlListDTO;
+import com.sap.sse.security.shared.impl.OwnershipDTO;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
 import com.sap.sse.security.ui.shared.RoleDefinitionDTO;
@@ -28,24 +28,27 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 public interface UserManagementService extends RemoteService {
-    QualifiedObjectIdentifier setOwnership(Ownership ownership, QualifiedObjectIdentifier idOfOwnedObject,
+    QualifiedObjectIdentifier setOwnership(OwnershipDTO ownership, QualifiedObjectIdentifier idOfOwnedObject,
             String displayNameOfOwnedObject);
     
-    Collection<AccessControlListAnnotation> getAccessControlLists() throws UnauthorizedException;
+    Collection<AccessControlListAnnotationDTO> getAccessControlLists() throws UnauthorizedException;
 
-    AccessControlListAnnotation getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject);
+    AccessControlListAnnotationDTO getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject);
 
-    AccessControlList updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, Map<String, Set<String>> permissionStrings) throws UnauthorizedException;
+    AccessControlListDTO updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
+            Map<String, Set<String>> permissionStrings) throws UnauthorizedException;
 
-    AccessControlList addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String groupOrTenantIdAsString, String action) throws UnauthorizedException;
+    AccessControlListDTO addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
+            String groupOrTenantIdAsString, String action) throws UnauthorizedException;
 
-    AccessControlList removeFromAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String groupOrTenantIdAsString, String action) throws UnauthorizedException;
+    AccessControlListDTO removeFromAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
+            String groupOrTenantIdAsString, String action) throws UnauthorizedException;
 
-    Collection<UserGroup> getUserGroups();
+    Collection<UserGroupDTO> getUserGroups();
 
-    UserGroup getUserGroupByName(String userGroupName) throws UnauthorizedException;
+    UserGroupDTO getUserGroupByName(String userGroupName) throws UnauthorizedException;
 
-    UserGroup createUserGroup(String name) throws UserGroupManagementException, UnauthorizedException;
+    UserGroupDTO createUserGroup(String name) throws UserGroupManagementException, UnauthorizedException;
 
     SuccessInfo deleteUserGroup(String userGroupIdAsString) throws UserGroupManagementException, UnauthorizedException;
     
@@ -145,5 +148,5 @@ public interface UserManagementService extends RemoteService {
 
     public Pair<UserDTO, UserDTO> verifySocialUser(CredentialDTO credential) throws OAuthException;
 
-    OwnershipAnnotation getOwnership(QualifiedObjectIdentifier idOfOwnedObject);
+    OwnershipAnnotationDTO getOwnership(QualifiedObjectIdentifier idOfOwnedObject);
 }

@@ -5,9 +5,9 @@ import java.io.Serializable;
 import com.sap.sailing.domain.common.racelog.tracking.MappableToDevice;
 import com.sap.sse.common.Color;
 import com.sap.sse.security.shared.NamedSecuredObjectDTO;
-import com.sap.sse.security.shared.SecuredObject;
+import com.sap.sse.security.shared.SecuredDTO;
 
-public class BoatDTO extends NamedSecuredObjectDTO implements Serializable, MappableToDevice, SecuredObject {
+public class BoatDTO extends NamedSecuredObjectDTO implements Serializable, MappableToDevice, SecuredDTO {
     private static final long serialVersionUID = -4076992788294272162L;
 
     private String idAsString;

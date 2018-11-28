@@ -29,23 +29,24 @@ import java.util.Set;
  * @author Axel Uhl (d043530)
  *
  */
-public interface AccessControlList extends Serializable {
+public interface SecurityAccessControlList<G extends AbstractUserGroup<?>> extends Serializable {
     /**
      * Checks whether this access control list grants the {@code user} the permission to execute {@code action} on the
      * object to which this ACL pertains.
+     * 
      * @param action
      *            the action to check permission for
      * @param groupsOfWhichUserIsMember
      *            must not be {@code null} but may be empty
      */
-    PermissionChecker.PermissionState hasPermission(String action, Iterable<? extends UserGroup> groupsOfWhichUserIsMember);
+    PermissionChecker.PermissionState hasPermission(String action, Iterable<G> groupsOfWhichUserIsMember);
 
     /**
      * @return allowed actions are represented simply as strings and may contain the wildcard string {@code "*"} to
-     * represent "all actions;" action strings starting with an exclamation mark {@code '!'} represent actions
-     * the key user group is denied.
+     *         represent "all actions;" action strings starting with an exclamation mark {@code '!'} represent actions
+     *         the key user group is denied.
      */
-    Map<UserGroup, Set<String>> getActionsByUserGroup();
+    Map<G, Set<String>> getActionsByUserGroup();
 
     /**
      * @param actionToAllow
@@ -56,8 +57,8 @@ public interface AccessControlList extends Serializable {
      *         therefore didn't need to be added
      * @see #denyPermission(UserGroup, String)
      */
-    boolean addPermission(UserGroup userGroup, String actionToAllow);
-   
+    boolean addPermission(G userGroup, String actionToAllow);
+
     /**
      * @param actionToDeny
      *            the action to be denied. The wildcard string {@code "*"} can be used to deny permission for all
@@ -68,17 +69,17 @@ public interface AccessControlList extends Serializable {
      *         didn't need to be added
      * @see #addPermission(UserGroup, String)
      */
-    boolean denyPermission(UserGroup userGroup, String actionToDeny);
+    boolean denyPermission(G userGroup, String actionToDeny);
 
     /**
-     * Removes a permission denial from those permissions denied for the user group. If the action starts with an {@code "!"}
-     * exclamation mark, the exclamation mark is stripped, and {@link #removePermission(UserGroup, String)} is invoked with
-     * the remaining string.
+     * Removes a permission denial from those permissions denied for the user group. If the action starts with an
+     * {@code "!"} exclamation mark, the exclamation mark is stripped, and {@link #removePermission(UserGroup, String)}
+     * is invoked with the remaining string.
      * 
      * @return {@code true} if the permission was removed; {@code false} if the permission was not in this ACL and
      *         therefore didn't need to be removed
      */
-    boolean removeDenial(UserGroup userGroup, String substring);
+    boolean removeDenial(G userGroup, String substring);
 
     /**
      * Removes a permission from those permissions granted to the user group. If the action starts with an {@code "!"}
@@ -88,8 +89,8 @@ public interface AccessControlList extends Serializable {
      * @return {@code true} if the permission was removed; {@code false} if the permission was not in this ACL and
      *         therefore didn't need to be removed
      */
-    boolean removePermission(UserGroup userGroup, String action);
+    boolean removePermission(G userGroup, String action);
 
-    void setPermissions(UserGroup userGroup, Set<String> actions);
+    void setPermissions(G userGroup, Set<String> actions);
 
 }

@@ -12,7 +12,7 @@ import com.sap.sse.common.WithID;
  * @author Axel Uhl (d043530)
  *
  */
-public interface SecurityUser extends NamedWithID {
+public interface SecurityUser<R extends AbstractRole<?, ?>, G extends AbstractUserGroup<?>> extends NamedWithID {
     /**
      * Returns the "raw" permissions explicitly set for this user. This does not include permissions
      * inferred by any {@link PermissionsForRoleProvider} for the {@link #getRoles() roles} that this
@@ -20,9 +20,9 @@ public interface SecurityUser extends NamedWithID {
      */
     Iterable<WildcardPermission> getPermissions();
 
-    boolean hasRole(Role role);
+    boolean hasRole(R role);
 
-    Iterable<Role> getRoles();
+    Iterable<R> getRoles();
 
     /**
      * @return the groups this user is a member of; an implementation may not be able to reliably determine this, e.g.,
@@ -30,5 +30,5 @@ public interface SecurityUser extends NamedWithID {
      *         implementations may provide a "static" view on this data as it was when the object was created. Yet
      *         others may be able to dynamically query the user store for this information.
      */
-    Iterable<UserGroup> getUserGroups();
+    Iterable<G> getUserGroups();
 }

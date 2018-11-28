@@ -28,7 +28,7 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
-import com.sap.sse.security.shared.AccessControlListAnnotation;
+import com.sap.sse.security.shared.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
@@ -46,7 +46,7 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
     
     private final List<UserDeletedEventHandler> userDeletedHandlers = new ArrayList<>();
     
-    private final SingleSelectionModel<AccessControlListAnnotation> aclSingleSelectionModel;
+    private final SingleSelectionModel<AccessControlListAnnotationDTO> aclSingleSelectionModel;
     private final AccessControlListListDataProvider aclListDataProvider;
     
     private final UserTableWrapper<RefreshableMultiSelectionModel<UserDTO>, TR> userList;
@@ -129,16 +129,16 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         buttonPanel.add(editACLButton);
         aclSingleSelectionModel = new SingleSelectionModel<>();
         aclSingleSelectionModel.addSelectionChangeHandler(e->editACLButton.setEnabled(aclSingleSelectionModel.getSelectedObject() != null));
-        final CellTable<AccessControlListAnnotation> aclTable = new CellTable<>();
-        TextColumn<AccessControlListAnnotation> idColumn = new TextColumn<AccessControlListAnnotation>() {
+        final CellTable<AccessControlListAnnotationDTO> aclTable = new CellTable<>();
+        TextColumn<AccessControlListAnnotationDTO> idColumn = new TextColumn<AccessControlListAnnotationDTO>() {
             @Override
-            public String getValue(AccessControlListAnnotation acl) {
+            public String getValue(AccessControlListAnnotationDTO acl) {
                 return acl.getIdOfAnnotatedObject().toString();
             }
         };
-        TextColumn<AccessControlListAnnotation> displayNameColumn = new TextColumn<AccessControlListAnnotation>() {
+        TextColumn<AccessControlListAnnotationDTO> displayNameColumn = new TextColumn<AccessControlListAnnotationDTO>() {
             @Override
-            public String getValue(AccessControlListAnnotation acl) {
+            public String getValue(AccessControlListAnnotationDTO acl) {
                 return acl.getDisplayNameOfAnnotatedObject()==null?"":acl.getDisplayNameOfAnnotatedObject();
             }
         };

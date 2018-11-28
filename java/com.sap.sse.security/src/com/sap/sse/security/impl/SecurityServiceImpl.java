@@ -98,7 +98,6 @@ import com.sap.sse.security.Social;
 import com.sap.sse.security.SocialSettingsKeys;
 import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
-import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
@@ -106,14 +105,10 @@ import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.HasPermissionsProvider;
-import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.RoleImpl;
-import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
@@ -123,7 +118,9 @@ import com.sap.sse.security.shared.UserRole;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
-import com.sap.sse.security.shared.impl.OwnershipImpl;
+import com.sap.sse.security.shared.impl.AccessControlList;
+import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.util.ClearStateTestSupport;
@@ -267,7 +264,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 apply(s -> s.internalSetOwnership(
                         SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(ADMIN_USERNAME), ADMIN_USERNAME, null,
                         ADMIN_USERNAME));
-                addRoleForUser(adminUser, new RoleImpl(adminRoleDefinition));
+                addRoleForUser(adminUser, new Role(adminRoleDefinition));
             }
             
             if (userStore.getUserByName(SecurityService.ALL_USERNAME) == null) {
@@ -360,7 +357,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public OwnershipAnnotation createDefaultOwnershipForNewObject(QualifiedObjectIdentifier idOfNewObject) {
-        return new OwnershipAnnotation(new OwnershipImpl(getCurrentUser(), getDefaultTenantForCurrentUser()),
+        return new OwnershipAnnotation(new Ownership(getCurrentUser(), getDefaultTenantForCurrentUser()),
                 idOfNewObject, /* display name */ idOfNewObject.toString());
     }
     
@@ -383,7 +380,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public void setOwnership(OwnershipAnnotation ownershipAnnotation) {
-        SecurityUser securityUser = ownershipAnnotation.getAnnotation().getUserOwner();
+        User securityUser = ownershipAnnotation.getAnnotation().getUserOwner();
         User user = getUserByName(securityUser.getName());
         setOwnership(ownershipAnnotation.getIdOfAnnotatedObject(), user,
                 ownershipAnnotation.getAnnotation().getTenantOwner(),
@@ -567,7 +564,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public Iterable<UserGroup> getUserGroupsOfUser(SecurityUser user) {
+    public Iterable<UserGroup> getUserGroupsOfUser(User user) {
         return userStore.getUserGroupsOfUser(user);
     }
 
@@ -585,7 +582,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void addUserToUserGroup(UserGroup userGroup, SecurityUser user) {
+    public void addUserToUserGroup(UserGroup userGroup, User user) {
         logger.info("Adding user "+user.getName()+" to group "+userGroup.getName());
         userGroup.add(user);
         final UUID groupId = userGroup.getId();
@@ -610,7 +607,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public void removeUserFromUserGroup(UserGroup userGroup, SecurityUser user) {
+    public void removeUserFromUserGroup(UserGroup userGroup, User user) {
         logger.info("Removing user "+user.getName()+" from group "+userGroup.getName());
         userGroup.remove(user);
         final UUID userGroupId = userGroup.getId();
@@ -661,7 +658,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public SecurityUser loginByAccessToken(String accessToken) {
+    public User loginByAccessToken(String accessToken) {
         BearerAuthenticationToken token = new BearerAuthenticationToken(accessToken);
         logger.info("Trying to login with access token");
         Subject subject = SecurityUtils.getSubject();
@@ -693,7 +690,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public SecurityUser getUserByEmail(String email) {
+    public User getUserByEmail(String email) {
         return userStore.getUserByEmail(email);
     }
 
@@ -732,7 +729,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         String hashedPasswordBase64 = hashPassword(password, salt);
         UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
         final UserImpl result = createUserInternal(username, email, tenant, upa);
-        addRoleForUser(result, new RoleImpl(UserRole.getInstance(), /* tenant qualifier */ null, /* user qualifier */ result));
+        addRoleForUser(result,
+                new Role(UserRole.getInstance(), /* tenant qualifier */ null, /* user qualifier */ result));
         addUserToUserGroup(tenant, result);
         
         // the new user becomes its owner to ensure the user role is correctly working
@@ -970,7 +968,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void addRoleForUser(SecurityUser user, Role role) {
+    public void addRoleForUser(User user, Role role) {
         addRoleForUser(user.getName(), role);
     }
 
@@ -985,13 +983,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public Void internalAddRoleForUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole,
             String nameOfUserQualifyingRole) throws UserManagementException {
-        userStore.addRoleForUser(username, new RoleImpl(getRoleDefinition(roleDefinitionId),
+        userStore.addRoleForUser(username, new Role(getRoleDefinition(roleDefinitionId),
                 getUserGroup(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole)));
         return null;
     }
 
     @Override
-    public void removeRoleFromUser(SecurityUser user, Role role) {
+    public void removeRoleFromUser(User user, Role role) {
         removeRoleFromUser(user.getName(), role);
     }
     
@@ -1006,7 +1004,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     @Override
     public Void internalRemoveRoleFromUser(String username, UUID roleDefinitionId, UUID idOfTenantQualifyingRole,
             String nameOfUserQualifyingRole) throws UserManagementException {
-        userStore.removeRoleFromUser(username, new RoleImpl(getRoleDefinition(roleDefinitionId),
+        userStore.removeRoleFromUser(username, new Role(getRoleDefinition(roleDefinitionId),
                 getUserGroup(idOfTenantQualifyingRole), getUserByName(nameOfUserQualifyingRole)));
         return null;
     }
@@ -1057,7 +1055,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             final String defaultTenantNameForUsername = getDefaultTenantNameForUsername(username);
             UserGroup defaultTenantUserGroup = getUserGroupByName(defaultTenantNameForUsername);
             if (defaultTenantUserGroup != null) {
-                List<SecurityUser> usersInGroupList = Util.asList(defaultTenantUserGroup.getUsers());
+                List<User> usersInGroupList = Util.asList(defaultTenantUserGroup.getUsers());
                 if (usersInGroupList.size() == 1 && usersInGroupList.contains(userToDelete)) {
                     // no other user is in group, delete it as well
                     try {
@@ -1102,12 +1100,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public SecurityUser createSocialUser(String name, SocialUserAccount socialUserAccount) throws UserManagementException, UserGroupManagementException {
+    public User createSocialUser(String name, SocialUserAccount socialUserAccount)
+            throws UserManagementException, UserGroupManagementException {
         if (userStore.getUserByName(name) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
         UserGroup tenant = createUserGroup(UUID.randomUUID(), getDefaultTenantNameForUsername(name));
-        SecurityUser result = userStore.createUser(name, socialUserAccount.getProperty(Social.EMAIL.name()), tenant, socialUserAccount);
+        User result = userStore.createUser(name, socialUserAccount.getProperty(Social.EMAIL.name()), tenant,
+                socialUserAccount);
         accessControlStore.setOwnership(SecuredSecurityTypes.USER_GROUP.getQualifiedObjectIdentifier(tenant.getId().toString()), result, tenant, tenant.getName());
         addUserToUserGroup(tenant, result);
         return result;
@@ -1469,7 +1469,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public String createAccessToken(String username) {
-        SecurityUser user = getUserByName(username);
+        User user = getUserByName(username);
         final String token;
         if (user != null) {
             RandomNumberGenerator rng = new SecureRandomNumberGenerator();
@@ -1913,14 +1913,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public void copyUsersAndRoleAssociations(UserGroup source, UserGroup destination) {
-        for (SecurityUser user : source.getUsers()) {
+        for (User user : source.getUsers()) {
             addUserToUserGroup(destination, user);
         }
 
         for (Pair<User, Role> userAndRole : userStore.getRolesQualifiedByUserGroup(source)) {
             final Role existingRole = userAndRole.getB();
             addRoleForUser(userAndRole.getA(),
-                    new RoleImpl(existingRole.getRoleDefinition(), destination, existingRole.getQualifiedForUser()));
+                    new Role(existingRole.getRoleDefinition(), destination, existingRole.getQualifiedForUser()));
         }
     }
 }

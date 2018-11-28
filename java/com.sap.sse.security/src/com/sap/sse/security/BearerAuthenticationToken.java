@@ -3,7 +3,7 @@ package com.sap.sse.security;
 import org.apache.shiro.authc.AuthenticationToken;
 
 import com.sap.sse.security.impl.Activator;
-import com.sap.sse.security.shared.SecurityUser;
+import com.sap.sse.security.shared.User;
 
 /**
  * An access token as issued by {@link SecurityService#createAccessToken(String)}. The user name which is returned
@@ -24,7 +24,7 @@ public class BearerAuthenticationToken implements AuthenticationToken {
     @Override
     public Object getPrincipal() {
         SecurityService securityService = Activator.getSecurityService();
-        SecurityUser user = securityService.getUserByAccessToken(token);
+        User user = securityService.getUserByAccessToken(token);
         return user == null ? null : user.getName();
     }
 

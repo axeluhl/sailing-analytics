@@ -9,8 +9,9 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.sap.sse.common.Named;
-import com.sap.sse.security.shared.Ownership;
-import com.sap.sse.security.shared.SecuredObject;
+import com.sap.sse.security.shared.SecuredDTO;
+import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.OwnershipDTO;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 /**
@@ -26,19 +27,19 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
  * @param <T>
  *            the actual {@link SecuredObject} sub-type
  */
-public class SecuredObjectOwnerColumn<T extends SecuredObject> extends TextColumn<T> {
+public class SecuredDTOOwnerColumn<T extends SecuredDTO> extends TextColumn<T> {
 
     private final Function<T, Optional<Named>> ownerResolver;
 
     /**
-     * Creates a new {@link SecuredObjectOwnerColumn} instance used the provided {@link Function resolver} to determine
+     * Creates a new {@link SecuredDTOOwnerColumn} instance used the provided {@link Function resolver} to determine
      * the {@link Named owner reference} who's name will be shown in this column.
      * 
      * @param ownerResolver
      *            {@link Function} to resolve the owner reference
      */
-    public SecuredObjectOwnerColumn(final Function<Ownership, Named> ownerResolver) {
-        final Function<T, Ownership> ownershipResolver = SecuredObject::getOwnership;
+    public SecuredDTOOwnerColumn(final Function<OwnershipDTO, Named> ownerResolver) {
+        final Function<T, OwnershipDTO> ownershipResolver = SecuredDTO::getOwnership;
         this.ownerResolver = ownershipResolver.andThen(ownership -> Optional.ofNullable(ownership).map(ownerResolver));
     }
 
@@ -55,17 +56,17 @@ public class SecuredObjectOwnerColumn<T extends SecuredObject> extends TextColum
     }
 
     /**
-     * @return {@link SecuredObjectOwnerColumn} instance showing the {@link Ownership#getTenantOwner() tenant owner}
+     * @return {@link SecuredDTOOwnerColumn} instance showing the {@link Ownership#getTenantOwner() tenant owner}
      */
-    public static <T extends SecuredObject> SecuredObjectOwnerColumn<T> getGroupOwnerColumn() {
-        return new SecuredObjectOwnerColumn<>(Ownership::getTenantOwner);
+    public static <T extends SecuredDTO> SecuredDTOOwnerColumn<T> getGroupOwnerColumn() {
+        return new SecuredDTOOwnerColumn<>(OwnershipDTO::getTenantOwner);
     }
 
     /**
-     * @return {@link SecuredObjectOwnerColumn} instance showing the {@link Ownership#getUserOwner() user owner}
+     * @return {@link SecuredDTOOwnerColumn} instance showing the {@link Ownership#getUserOwner() user owner}
      */
-    public static <T extends SecuredObject> SecuredObjectOwnerColumn<T> getUserOwnerColumn() {
-        return new SecuredObjectOwnerColumn<>(Ownership::getUserOwner);
+    public static <T extends SecuredDTO> SecuredDTOOwnerColumn<T> getUserOwnerColumn() {
+        return new SecuredDTOOwnerColumn<>(OwnershipDTO::getUserOwner);
     }
 
     /**
@@ -80,12 +81,12 @@ public class SecuredObjectOwnerColumn<T extends SecuredObject> extends TextColum
      * @param stringMessages
      *            {@link StringMessages} to use for the column header texts
      */
-    public static <T extends SecuredObject> void configureOwnerColumns(final AbstractCellTable<T> table,
+    public static <T extends SecuredDTO> void configureOwnerColumns(final AbstractCellTable<T> table,
             final ListHandler<T> columnSortHandler, final StringMessages stringMessages) {
-        final SecuredObjectOwnerColumn<T> groupColumn = getGroupOwnerColumn();
+        final SecuredDTOOwnerColumn<T> groupColumn = getGroupOwnerColumn();
         table.addColumn(groupColumn, stringMessages.group());
         columnSortHandler.setComparator(groupColumn, groupColumn.getComparator());
-        final SecuredObjectOwnerColumn<T> userColumn = getUserOwnerColumn();
+        final SecuredDTOOwnerColumn<T> userColumn = getUserOwnerColumn();
         table.addColumn(userColumn, stringMessages.user());
         columnSortHandler.setComparator(userColumn, userColumn.getComparator());
     }

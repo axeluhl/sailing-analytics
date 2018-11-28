@@ -20,9 +20,9 @@ import com.sap.sailing.gwt.ui.client.shared.racemap.RaceMapSettings;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.NamedSecuredObjectDTO;
-import com.sap.sse.security.shared.SecuredObject;
+import com.sap.sse.security.shared.SecuredDTO;
 
-public class RegattaDTO extends NamedSecuredObjectDTO implements SecuredObject {
+public class RegattaDTO extends NamedSecuredObjectDTO implements SecuredDTO {
     private static final long serialVersionUID = -4594784946348402759L;
     /**
      * May be <code>null</code> in case the boat class is not known

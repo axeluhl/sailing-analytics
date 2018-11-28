@@ -11,12 +11,13 @@ import java.util.Set;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.common.settings.GwtIncompatible;
-import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.AbstractRole;
+import com.sap.sse.security.shared.AbstractUserGroup;
 import com.sap.sse.security.shared.SecurityUser;
-import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
 
-public class SecurityUserImpl implements SecurityUser {
+public abstract class SecurityUserImpl<R extends AbstractRole<?, ?>, G extends AbstractUserGroup<?>>
+        implements SecurityUser<R, G> {
     private static final long serialVersionUID = -3639860207453072248L;
 
     private String name;
@@ -30,9 +31,9 @@ public class SecurityUserImpl implements SecurityUser {
      * @see #writeObject
      * @see #readResolve
      */
-    private transient Set<Role> roles;
+    private transient Set<R> roles;
     
-    private List<Role> roleListForSerialization;
+    private List<R> roleListForSerialization;
     
     private Set<WildcardPermission> permissions;
     
@@ -40,10 +41,10 @@ public class SecurityUserImpl implements SecurityUser {
      * Creates a user with empty permission set and empty role set
      */
     public SecurityUserImpl(String name) {
-        this(name, new HashSet<Role>(), new HashSet<WildcardPermission>());
+        this(name, new HashSet<R>(), new HashSet<WildcardPermission>());
     }
     
-    public SecurityUserImpl(String name, Iterable<Role> roles, Iterable<WildcardPermission> permissions) {
+    public SecurityUserImpl(String name, Iterable<R> roles, Iterable<WildcardPermission> permissions) {
         this.name = name;
         this.roles = new HashSet<>();
         Util.addAll(roles, this.roles);
@@ -78,12 +79,12 @@ public class SecurityUserImpl implements SecurityUser {
     }
 
     @Override
-    public Iterable<Role> getRoles() {
+    public Iterable<R> getRoles() {
         return roles;
     }
 
     @Override
-    public boolean hasRole(Role role) {
+    public boolean hasRole(R role) {
         return roles.contains(role);
     }
     
@@ -92,11 +93,11 @@ public class SecurityUserImpl implements SecurityUser {
         return permissions;
     }
     
-    public void addRole(Role role) {
+    public void addRole(R role) {
         roles.add(role);
     }
 
-    public void removeRole(Role role) {
+    public void removeRole(R role) {
         roles.remove(role);
     }
 
@@ -118,7 +119,7 @@ public class SecurityUserImpl implements SecurityUser {
      * therefore returns an empty collection.
      */
     @Override
-    public Iterable<UserGroup> getUserGroups() {
+    public Iterable<G> getUserGroups() {
         return Collections.emptyList();
     }
 }

@@ -7,15 +7,14 @@ import java.util.UUID;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.Account;
-import com.sap.sse.security.shared.Ownership;
-import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.Role;
 
 /**
  * Keeps track of all {@link User}, {@link UserGroup} and {@link Role}
@@ -57,7 +56,7 @@ public interface UserStore extends UserGroupProvider, Named {
     /**
      * The user with that {@link UserImpl#getEmail() email} or {@code null} if no such user exists
      */
-    SecurityUser getUserByEmail(String email);
+    User getUserByEmail(String email);
     
     User getUserByAccessToken(String accessToken);
 

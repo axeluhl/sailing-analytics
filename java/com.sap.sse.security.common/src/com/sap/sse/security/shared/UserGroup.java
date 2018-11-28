@@ -1,22 +1,18 @@
 package com.sap.sse.security.shared;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
-import com.sap.sse.common.NamedWithID;
+public class UserGroup extends AbstractUserGroup<User> {
+    private static final long serialVersionUID = 1L;
 
-/**
- * A group of users; equality and hash code are based solely on the {@link #getId() ID}.
- * 
- * @author Axel Uhl (d043530)
- *
- */
-public interface UserGroup extends NamedWithID, WithQualifiedObjectIdentifier {
-    public Iterable<SecurityUser> getUsers();
-    
-    public void add(SecurityUser user);
-    public void remove(SecurityUser user);
-    public boolean contains(SecurityUser user);
+    public UserGroup(Set<User> users, UUID id, String name) {
+        super(users, id, name);
+    }
 
-    @Override
-    UUID getId();
+    public UserGroup(UUID id, String name) {
+        super(new HashSet<User>(), id, name);
+    }
+
 }

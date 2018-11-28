@@ -84,8 +84,8 @@ import com.sap.sse.common.search.KeywordQuery;
 import com.sap.sse.common.search.Result;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
-import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 
@@ -114,7 +114,7 @@ public class SearchServiceTest {
 
     @Before
     public void setUp() {
-        UserGroupImpl defaultTenant = new UserGroupImpl(new UUID(0, 1), "defaultTenant");
+        UserGroup defaultTenant = new UserGroup(new UUID(0, 1), "defaultTenant");
         User currentUser = Mockito.mock(User.class);
 
         securityService = Mockito.mock(SecurityService.class);

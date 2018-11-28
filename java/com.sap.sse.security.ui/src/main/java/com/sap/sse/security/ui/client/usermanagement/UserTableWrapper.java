@@ -40,9 +40,9 @@ import com.sap.sse.gwt.client.celltable.TableWrapper;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
-import com.sap.sse.security.shared.Role;
-import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.UserGroupDTO;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.RoleDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
@@ -50,7 +50,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
-import com.sap.sse.security.ui.client.component.SecuredObjectOwnerColumn;
+import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 import com.sap.sse.security.ui.shared.UserDTO;
@@ -97,8 +97,9 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
             @Override
             public SafeHtml getValue(UserDTO user) {
                 SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                for (Iterator<UserGroup> groupsIter=user.getUserGroups().iterator(); groupsIter.hasNext(); ) {
-                    final UserGroup group = groupsIter.next();
+                for (Iterator<UserGroupDTO> groupsIter = user.getUserGroups()
+                        .iterator(); groupsIter.hasNext();) {
+                    final UserGroupDTO group = groupsIter.next();
                     builder.appendEscaped(group.getName());
                     if (groupsIter.hasNext()) {
                         builder.appendHtmlConstant("<br>");
@@ -139,8 +140,8 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
             @Override
             public SafeHtml getValue(UserDTO user) {
                 SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                for (Iterator<Role> roleIter=user.getRoles().iterator(); roleIter.hasNext(); ) {
-                    final Role role = roleIter.next();
+                for (Iterator<RoleDTO> roleIter = user.getRoles().iterator(); roleIter.hasNext();) {
+                    final RoleDTO role = roleIter.next();
                     builder.appendEscaped(role.toString());
                     if (roleIter.hasNext()) {
                         builder.appendHtmlConstant("<br>");
@@ -219,7 +220,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
         table.addColumn(groupsColumn, stringMessages.groups());
         table.addColumn(rolesColumn, stringMessages.roles());
         table.addColumn(permissionsColumn, stringMessages.permissions());
-        SecuredObjectOwnerColumn.configureOwnerColumns(table, userColumnListHandler, stringMessages);
+        SecuredDTOOwnerColumn.configureOwnerColumns(table, userColumnListHandler, stringMessages);
         table.addColumn(userActionColumn, stringMessages.actions());
         table.ensureDebugId("UsersTable");
     }

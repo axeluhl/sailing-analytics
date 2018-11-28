@@ -90,7 +90,7 @@ import com.sap.sse.common.impl.MillisecondsDurationImpl;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.shared.SecurityUser;
+import com.sap.sse.security.shared.User;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 
@@ -481,9 +481,8 @@ public class EventsResource extends AbstractSailingServerResource {
         return "Session "+username+" "+dateTimeFormat.format(new Date());
     }
 
-    private SecurityUser getCurrentUser() {
-        SecurityUser user = getSecurityService().getCurrentUser();
-        return user;
+    private User getCurrentUser() {
+        return getSecurityService().getCurrentUser();
     }
 
     private String getDefaultVenueName(String lat, String lng) throws NumberFormatException, IOException, org.json.simple.parser.ParseException {

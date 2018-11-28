@@ -17,7 +17,7 @@ import com.sap.sse.datamining.shared.dto.StoredDataMiningQueryDTO;
 import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningQueryDTOImpl;
 import com.sap.sse.gwt.dispatch.shared.exceptions.ServerDispatchException;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.shared.SecurityUser;
+import com.sap.sse.security.shared.User;
 
 /** Implementation of {@link StoredDataMiningQueryPersister}. */
 public class StoredDataMiningQueryPersisterImpl implements StoredDataMiningQueryPersister {
@@ -94,7 +94,7 @@ public class StoredDataMiningQueryPersisterImpl implements StoredDataMiningQuery
 
     /** Sets a preference for the current user. */
     private void setPreferenceForCurrentUser(String preferenceKey, Object preference) {
-        SecurityUser currentUser = securityService.getCurrentUser();
+        User currentUser = securityService.getCurrentUser();
         if (currentUser != null) {
             try {
                 securityService.setPreferenceObject(currentUser.getName(), preferenceKey, preference);
@@ -118,7 +118,7 @@ public class StoredDataMiningQueryPersisterImpl implements StoredDataMiningQuery
 
     /** @return the preference for the current user associated with {@link preferenceKey} */
     private <T> T getPreferenceForCurrentUser(String preferenceKey) {
-        SecurityUser currentUser = securityService.getCurrentUser();
+        User currentUser = securityService.getCurrentUser();
         if (currentUser != null) {
             return securityService.getPreferenceObject(currentUser.getName(), preferenceKey);
         }

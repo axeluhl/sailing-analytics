@@ -34,25 +34,28 @@ import com.sap.sse.common.mail.MailException;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.UserImpl;
-import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
+import com.sap.sse.security.shared.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
+import com.sap.sse.security.shared.OwnershipAnnotationDTO;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.RoleImpl;
-import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.UnauthorizedException;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.UserGroupDTO;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.AccessControlListDTO;
+import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.OwnershipDTO;
+import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes.UserActions;
+import com.sap.sse.security.shared.impl.StrippedUserDTO;
 import com.sap.sse.security.ui.client.UserManagementService;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
@@ -147,11 +150,14 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public QualifiedObjectIdentifier setOwnership(Ownership ownership, QualifiedObjectIdentifier idOfOwnedObject,
+    public QualifiedObjectIdentifier setOwnership(OwnershipDTO ownershipDTO, QualifiedObjectIdentifier idOfOwnedObject,
             String displayNameOfOwnedObject) {
         final QualifiedObjectIdentifier result;
         if (SecurityUtils.getSubject().isPermitted(idOfOwnedObject.getStringPermission(DefaultActions.CHANGE_OWNERSHIP))) {
-            getSecurityService().setOwnership(new OwnershipAnnotation(ownership, idOfOwnedObject, displayNameOfOwnedObject));
+            Ownership ownerShip = SecurityDTOFactory.ownerFromDTO(ownershipDTO, getSecurityService());
+            getSecurityService()
+                    .setOwnership(new OwnershipAnnotation(ownerShip,
+                    idOfOwnedObject, displayNameOfOwnedObject));
             result = idOfOwnedObject;
         } else {
             result = null;
@@ -160,14 +166,15 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public OwnershipAnnotation getOwnership(QualifiedObjectIdentifier idOfOwnedObject) {
-        return getSecurityService().getOwnership(idOfOwnedObject);
+    public OwnershipAnnotationDTO getOwnership(QualifiedObjectIdentifier idOfOwnedObject) {
+        OwnershipAnnotation annotation = getSecurityService().getOwnership(idOfOwnedObject);
+        return securityDTOFactory.createOwnerShipAnnotationDTO(annotation);
     }
 
     @Override
-    public Collection<AccessControlListAnnotation> getAccessControlLists() throws UnauthorizedException {
+    public Collection<AccessControlListAnnotationDTO> getAccessControlLists() throws UnauthorizedException {
         // TODO decide whether a global getAccessControlList functionality is needed
-        List<AccessControlListAnnotation> acls = new ArrayList<>();
+        List<AccessControlListAnnotationDTO> acls = new ArrayList<>();
         for (AccessControlListAnnotation acl : getSecurityService().getAccessControlLists()) {
             if (SecurityUtils.getSubject()
                     .isPermitted(acl.getIdOfAnnotatedObject().getStringPermission(DefaultActions.CHANGE_ACL))) {
@@ -178,14 +185,15 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public AccessControlListAnnotation getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject) {
+    public AccessControlListAnnotationDTO getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject) {
         SecurityUtils.getSubject()
                 .checkPermission(idOfAccessControlledObject.getStringPermission(DefaultActions.CHANGE_ACL));
         return securityDTOFactory.createAccessControlListAnnotationDTO(getSecurityService().getAccessControlList(idOfAccessControlledObject));
     }
 
     @Override
-    public AccessControlList updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, Map<String, Set<String>> permissionStrings) throws UnauthorizedException {
+    public AccessControlListDTO updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
+            Map<String, Set<String>> permissionStrings) throws UnauthorizedException {
         if (SecurityUtils.getSubject()
                 .isPermitted(idOfAccessControlledObject.getStringPermission(DefaultActions.CHANGE_ACL))) {
             Map<UserGroup, Set<String>> permissionMap = new HashMap<>();
@@ -199,7 +207,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public AccessControlList addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String groupIdAsString, String action) throws UnauthorizedException {
+    public AccessControlListDTO addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
+            String groupIdAsString, String action) throws UnauthorizedException {
         if (SecurityUtils.getSubject()
                 .isPermitted(idOfAccessControlledObject.getStringPermission(DefaultActions.CHANGE_ACL))) {
             UserGroup userGroup = getUserGroup(groupIdAsString);
@@ -216,7 +225,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public AccessControlList removeFromAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String groupOrTenantIdAsString, String permission) throws UnauthorizedException {
+    public AccessControlListDTO removeFromAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
+            String groupOrTenantIdAsString, String permission) throws UnauthorizedException {
         // FIXME replace permission check with a valid one
         if (SecurityUtils.getSubject().isPermitted("tenant:revoke_permission:" + groupOrTenantIdAsString)) {
             UserGroup userGroup = getUserGroup(groupOrTenantIdAsString);
@@ -227,9 +237,9 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public Collection<UserGroup> getUserGroups() {
-        final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser = new HashMap<>();
-        final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup = new HashMap<>();
+    public Collection<UserGroupDTO> getUserGroups() {
+        Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser = new HashMap<>();
+        Map<UserGroup, UserGroupDTO> fromOriginalToStrippedDownUserGroup = new HashMap<>();
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredSecurityTypes.USER_GROUP,
                 getSecurityService().getUserGroupList(), ug -> ug.getId().toString(),
                 ug -> securityDTOFactory.createUserGroupDTOFromUserGroup(ug, fromOriginalToStrippedDownUser,
@@ -237,12 +247,13 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public UserGroup getUserGroupByName(String userGroupName) throws UnauthorizedException {
+    public UserGroupDTO getUserGroupByName(String userGroupName) throws UnauthorizedException {
         final UserGroup userGroup = getSecurityService().getUserGroupByName(userGroupName);
         if (userGroup == null || SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER_GROUP.getStringPermissionForObjects(DefaultActions.READ, userGroup.getId().toString()))) {
-            final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser = new HashMap<>();
-            final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup = new HashMap<>();
-            return userGroup==null?null:securityDTOFactory.createUserGroupDTOFromUserGroup(userGroup, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
+            Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser = new HashMap<>();
+            Map<UserGroup, UserGroupDTO> fromOriginalToStrippedDownUserGroup = new HashMap<>();
+            return securityDTOFactory.createUserGroupDTOFromUserGroup(userGroup, fromOriginalToStrippedDownUser,
+                    fromOriginalToStrippedDownUserGroup);
         } else {
             throw new UnauthorizedException("Not permitted to read user group "+userGroupName);
         }
@@ -259,8 +270,8 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     }
 
     @Override
-    public UserGroup createUserGroup(String name) throws UnauthorizedException, UserGroupManagementException {
-        return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+    public UserGroupDTO createUserGroup(String name) throws UnauthorizedException, UserGroupManagementException {
+        UserGroup group = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredSecurityTypes.USER_GROUP, name, name, () -> {
                     UUID newTenantId = UUID.randomUUID();
                     UserGroup userGroup;
@@ -273,11 +284,13 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                             SecuredSecurityTypes.USER_GROUP.getQualifiedObjectIdentifier(newTenantId.toString()),
                             getSecurityService().getCurrentUser(),
                             getSecurityService().getDefaultTenantForCurrentUser(), name);
-                    final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser = new HashMap<>();
-                    final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup = new HashMap<>();
-                    return securityDTOFactory.createUserGroupDTOFromUserGroup(userGroup, fromOriginalToStrippedDownUser,
-                            fromOriginalToStrippedDownUserGroup);
+                    return userGroup;
                 });
+
+        Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser = new HashMap<>();
+        Map<UserGroup, UserGroupDTO> fromOriginalToStrippedDownUserGroup = new HashMap<>();
+        return securityDTOFactory.createUserGroupDTOFromUserGroup(group, fromOriginalToStrippedDownUser,
+                fromOriginalToStrippedDownUserGroup);
     }
 
     @Override
@@ -534,7 +547,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 throw new UserManagementException("User "+qualifyingUsername+" not found for role qualification");
             }
         }
-        return new RoleImpl(
+        return new Role(
                 getSecurityService().getRoleDefinition(roleDefinitionId),
                 qualifyingTenantId == null ? null : getSecurityService().getUserGroup(qualifyingTenantId), user);
     }

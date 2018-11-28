@@ -2,13 +2,13 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.io.Serializable;
 
-import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.UserGroupDTO;
 
 public class MigrateGroupOwnerForHierarchyDTO implements Serializable {
 
     private static final long serialVersionUID = -8300235710577973351L;
     
-    private UserGroup existingUserGroup;
+    private UserGroupDTO existingUserGroup;
     private boolean createNewGroup;
     private String newGroupName;
     private boolean updateCompetitors;
@@ -18,7 +18,7 @@ public class MigrateGroupOwnerForHierarchyDTO implements Serializable {
     protected MigrateGroupOwnerForHierarchyDTO() {
     }
 
-    public MigrateGroupOwnerForHierarchyDTO(UserGroup existingUserGroup, boolean createNewGroup, String newGroupName,
+    public MigrateGroupOwnerForHierarchyDTO(UserGroupDTO existingUserGroup, boolean createNewGroup, String newGroupName,
             boolean updateCompetitors, boolean updateBoats) {
         this.existingUserGroup = existingUserGroup;
         this.createNewGroup = createNewGroup;
@@ -27,7 +27,7 @@ public class MigrateGroupOwnerForHierarchyDTO implements Serializable {
         this.updateBoats = updateBoats;
     }
 
-    public UserGroup getExistingUserGroup() {
+    public UserGroupDTO getExistingUserGroup() {
         return existingUserGroup;
     }
 

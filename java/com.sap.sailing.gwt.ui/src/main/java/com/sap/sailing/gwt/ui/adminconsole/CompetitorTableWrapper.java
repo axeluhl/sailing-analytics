@@ -46,7 +46,7 @@ import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
-import com.sap.sse.security.ui.client.component.SecuredObjectOwnerColumn;
+import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 
 /**
  * A filterable competitor table. The data model is managed by the {@link #getFilterField() filter field}. In
@@ -344,7 +344,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         table.addColumn(competitorEMailColumn, getStringMessages().email());
         table.addColumn(competitorSearchTagColumn, getStringMessages().searchTag());
         table.addColumn(competitorIdColumn, getStringMessages().id());
-        SecuredObjectOwnerColumn.configureOwnerColumns(table, getColumnSortHandler(), stringMessages);
+        SecuredDTOOwnerColumn.configureOwnerColumns(table, getColumnSortHandler(), stringMessages);
         table.addColumn(competitorActionColumn, getStringMessages().actions());
         table.addColumn(sailIdColumn, getStringMessages().sailNumber());
         table.addColumn(boatClassColumn, getStringMessages().boatClass());

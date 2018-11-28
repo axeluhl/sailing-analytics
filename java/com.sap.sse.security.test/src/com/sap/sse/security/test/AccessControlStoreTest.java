@@ -27,7 +27,6 @@ import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.QualifiedObjectIdentifierImpl;
-import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
@@ -40,7 +39,7 @@ public class AccessControlStoreTest {
     private final QualifiedObjectIdentifier testId = new QualifiedObjectIdentifierImpl("Test", "test");
     private final String testDisplayName = "testDN";
 
-    private final UserGroup testTenantOwner = new UserGroupImpl(UUID.randomUUID(), "test-tenant");
+    private final UserGroup testTenantOwner = new UserGroup(UUID.randomUUID(), "test-tenant");
     private final UUID testRoleId = UUID.randomUUID();
 
     private UserStore userStore;
@@ -57,7 +56,7 @@ public class AccessControlStoreTest {
         db.getCollection(CollectionNames.ROLES.name()).drop();
         newStores();
         
-        UserGroupImpl adminTenant = new UserGroupImpl(UUID.randomUUID(), "admin-tenant");
+        UserGroup adminTenant = new UserGroup(UUID.randomUUID(), "admin-tenant");
         Map<String, UserGroup> defaultTenantForUser = new HashMap<>();
         defaultTenantForUser.put("dummyServer", adminTenant);
         testOwner = new UserImpl("admin", "admin@sapsailing.com", defaultTenantForUser,

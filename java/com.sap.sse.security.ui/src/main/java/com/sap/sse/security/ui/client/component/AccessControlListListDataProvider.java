@@ -9,10 +9,10 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
-import com.sap.sse.security.shared.AccessControlListAnnotation;
+import com.sap.sse.security.shared.AccessControlListAnnotationDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 
-public class AccessControlListListDataProvider extends AbstractDataProvider<AccessControlListAnnotation> {
+public class AccessControlListListDataProvider extends AbstractDataProvider<AccessControlListAnnotationDTO> {
     private UserManagementServiceAsync userManagementService;
     
     public AccessControlListListDataProvider(UserManagementServiceAsync userManagementService) {
@@ -20,22 +20,22 @@ public class AccessControlListListDataProvider extends AbstractDataProvider<Acce
     }
    
     @Override
-    protected void onRangeChanged(final HasData<AccessControlListAnnotation> display) {
+    protected void onRangeChanged(final HasData<AccessControlListAnnotationDTO> display) {
         final Range range = display.getVisibleRange();
-        userManagementService.getAccessControlLists(new AsyncCallback<Collection<AccessControlListAnnotation>>() {
+        userManagementService.getAccessControlLists(new AsyncCallback<Collection<AccessControlListAnnotationDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());
             }
    
             @Override
-            public void onSuccess(Collection<AccessControlListAnnotation> result) {
-                List<AccessControlListAnnotation> resultList = new ArrayList<>(result);
-                List<AccessControlListAnnotation> show = new ArrayList<>();
+            public void onSuccess(Collection<AccessControlListAnnotationDTO> result) {
+                List<AccessControlListAnnotationDTO> resultList = new ArrayList<>(result);
+                List<AccessControlListAnnotationDTO> show = new ArrayList<>();
                 int start = range.getStart();
                 int end = range.getStart() + range.getLength();
                 for (int i = start; i < end && i < resultList.size(); i++) {
-                    final AccessControlListAnnotation e = resultList.get(i);
+                    final AccessControlListAnnotationDTO e = resultList.get(i);
                     show.add(e);
                 }
                 updateRowData(start, show);
@@ -45,7 +45,7 @@ public class AccessControlListListDataProvider extends AbstractDataProvider<Acce
     }
    
     public void updateDisplays() {
-        for (HasData<AccessControlListAnnotation> hd : getDataDisplays()) {
+        for (HasData<AccessControlListAnnotationDTO> hd : getDataDisplays()) {
             onRangeChanged(hd);
         }
     }

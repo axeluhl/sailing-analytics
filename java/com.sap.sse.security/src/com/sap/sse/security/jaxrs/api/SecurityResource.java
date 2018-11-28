@@ -24,7 +24,6 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.security.jaxrs.AbstractSecurityResource;
 import com.sap.sse.security.shared.AdminRole;
-import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
@@ -91,7 +90,7 @@ public class SecurityResource extends AbstractSecurityResource {
     @Produces("text/plain;charset=UTF-8")
     public Response forgotPassword(@Context UriInfo uriInfo, @QueryParam("username") String username, @QueryParam("email") String email) {
         try {
-            final SecurityUser user;
+            final User user;
             if (username != null) {
                 user = getService().getUserByName(username);
             } else if (email != null) {

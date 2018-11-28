@@ -33,8 +33,8 @@ import org.scribe.model.Verb;
 import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
 
-import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.SocialUserAccount;
+import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
@@ -181,7 +181,7 @@ public class OAuthRealm extends AbstractCompositeAuthorizingRealm {
         
         String socialname = authProviderName + "*" + socialUser.getProperty(Social.NAME.name());
 
-        SecurityUser user = getUserStore().getUserByName(socialname);
+        User user = getUserStore().getUserByName(socialname);
         if (user == null) {
             try {
                 UserGroup tenant = getUserStore().createUserGroup(UUID.randomUUID(), socialname + "-tenant");

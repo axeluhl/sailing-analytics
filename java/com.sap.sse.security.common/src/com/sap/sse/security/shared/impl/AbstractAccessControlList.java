@@ -6,13 +6,16 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.sap.sse.common.Util;
-import com.sap.sse.security.shared.AccessControlList;
+import com.sap.sse.security.shared.AbstractUserGroup;
 import com.sap.sse.security.shared.PermissionChecker;
+import com.sap.sse.security.shared.PermissionChecker.PermissionState;
+import com.sap.sse.security.shared.SecurityAccessControlList;
+import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.shared.PermissionChecker.PermissionState;
 
-public class AccessControlListImpl implements AccessControlList {
+public abstract class AbstractAccessControlList<G extends AbstractUserGroup<?>, U extends SecurityUser<?, ?>>
+        implements SecurityAccessControlList<G> {
     private static final long serialVersionUID = -8587238587604749862L;
 
     /**
@@ -31,7 +34,7 @@ public class AccessControlListImpl implements AccessControlList {
      * 
      * Note that no negated actions are part of this map. See also {@link #deniedActionsByUserGroup}.
      */
-    private Map<UserGroup, Set<WildcardPermission>> allowedActionsByUserGroup;
+    private Map<G, Set<WildcardPermission>> allowedActionsByUserGroup;
     
     /**
      * Maps from {@link UserGroup} to the actions denied for this group on the
@@ -49,22 +52,18 @@ public class AccessControlListImpl implements AccessControlList {
      * 
      * Note that no negated actions are part of this map. See also {@link #allowedActionsByUserGroup}.
      */
-    private Map<UserGroup, Set<WildcardPermission>> deniedActionsByUserGroup;
+    private Map<G, Set<WildcardPermission>> deniedActionsByUserGroup;
 
-    public AccessControlListImpl() {
-        this(new HashMap<UserGroup, Set<String>>());
-    }
-    
-    public AccessControlListImpl(Map<UserGroup, Set<String>> permissionMap) {
+    public AbstractAccessControlList(Map<G, Set<String>> permissionMap) {
         this.allowedActionsByUserGroup = new HashMap<>();
         this.deniedActionsByUserGroup = new HashMap<>();
-        for (final Entry<UserGroup, Set<String>> permissionMapEntry : permissionMap.entrySet()) {
+        for (final Entry<G, Set<String>> permissionMapEntry : permissionMap.entrySet()) {
             setPermissions(permissionMapEntry.getKey(), permissionMapEntry.getValue());
         }
     }
 
     @Override
-    public PermissionChecker.PermissionState hasPermission(String action, Iterable<? extends UserGroup> groupsOfWhichUserIsMember) {
+    public PermissionChecker.PermissionState hasPermission(String action, Iterable<G> groupsOfWhichUserIsMember) {
         PermissionState result = PermissionState.NONE;
         final WildcardPermission requestedAction = new WildcardPermission(action);
         // special handling for the "null" group key which implies the permissions granted/denied to all users regardless their group memberships:
@@ -74,7 +73,7 @@ public class AccessControlListImpl implements AccessControlList {
         if (deniedActionsByUserGroup.containsKey(null) && doesAnyPermissionImplyRequestedAction(deniedActionsByUserGroup.get(null), requestedAction)) {
             result = PermissionState.REVOKED;
         } else { // no need for further checks if already revoked
-            for (final UserGroup userGroupOfWhichUserIsMember : groupsOfWhichUserIsMember) {
+            for (final G userGroupOfWhichUserIsMember : groupsOfWhichUserIsMember) {
                 if (result == PermissionState.NONE && doesAnyPermissionImplyRequestedAction(
                         allowedActionsByUserGroup.get(userGroupOfWhichUserIsMember), requestedAction)) {
                     result = PermissionState.GRANTED;
@@ -100,14 +99,14 @@ public class AccessControlListImpl implements AccessControlList {
     }
     
     @Override
-    public Map<UserGroup, Set<String>> getActionsByUserGroup() {
-        final Map<UserGroup, Set<String>> result = new HashMap<>();
-        for (final Entry<UserGroup, Set<WildcardPermission>> allowedEntry : allowedActionsByUserGroup.entrySet()) {
+    public Map<G, Set<String>> getActionsByUserGroup() {
+        final Map<G, Set<String>> result = new HashMap<>();
+        for (final Entry<G, Set<WildcardPermission>> allowedEntry : allowedActionsByUserGroup.entrySet()) {
             for (final WildcardPermission permission : allowedEntry.getValue()) {
                 Util.addToValueSet(result, allowedEntry.getKey(), permission.toString());
             }
         }
-        for (final Entry<UserGroup, Set<WildcardPermission>> allowedEntry : deniedActionsByUserGroup.entrySet()) {
+        for (final Entry<G, Set<WildcardPermission>> allowedEntry : deniedActionsByUserGroup.entrySet()) {
             for (final WildcardPermission permission : allowedEntry.getValue()) {
                 Util.addToValueSet(result, allowedEntry.getKey(), "!"+permission.toString());
             }
@@ -116,7 +115,7 @@ public class AccessControlListImpl implements AccessControlList {
     }
     
     @Override
-    public boolean denyPermission(UserGroup userGroup, String action) {
+    public boolean denyPermission(G userGroup, String action) {
         final boolean result;
         if (action.startsWith("!")) {
             result = addPermission(userGroup, action.substring(1));
@@ -127,7 +126,7 @@ public class AccessControlListImpl implements AccessControlList {
     }
     
     @Override
-    public boolean addPermission(UserGroup userGroup, String action) {
+    public boolean addPermission(G userGroup, String action) {
         final boolean result;
         if (action.startsWith("!")) {
             result = denyPermission(userGroup, action.substring(1));
@@ -138,7 +137,7 @@ public class AccessControlListImpl implements AccessControlList {
     }
 
     @Override
-    public boolean removePermission(UserGroup userGroup, String action) {
+    public boolean removePermission(G userGroup, String action) {
         final boolean result;
         if (action.startsWith("!")) {
             result = removeDenial(userGroup, action.substring(1));
@@ -149,7 +148,7 @@ public class AccessControlListImpl implements AccessControlList {
     }
 
     @Override
-    public boolean removeDenial(UserGroup userGroup, String action) {
+    public boolean removeDenial(G userGroup, String action) {
         final boolean result;
         if (action.startsWith("!")) {
             result = removeDenial(userGroup, action.substring(1));
@@ -160,7 +159,7 @@ public class AccessControlListImpl implements AccessControlList {
     }
 
     @Override
-    public void setPermissions(UserGroup userGroup, Set<String> actions) {
+    public void setPermissions(G userGroup, Set<String> actions) {
         allowedActionsByUserGroup.remove(userGroup);
         deniedActionsByUserGroup.remove(userGroup);
         for (final String actionAsString : actions) {

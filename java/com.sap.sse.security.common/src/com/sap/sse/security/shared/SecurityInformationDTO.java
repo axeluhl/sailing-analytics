@@ -2,38 +2,39 @@ package com.sap.sse.security.shared;
 
 import java.io.Serializable;
 
-import com.sap.sse.security.shared.AccessControlList;
-import com.sap.sse.security.shared.Ownership;
-import com.sap.sse.security.shared.SecuredObject;
+import com.sap.sse.security.shared.impl.AccessControlList;
+import com.sap.sse.security.shared.impl.AccessControlListDTO;
+import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.OwnershipDTO;
 
 /**
  * Data transfer object wrapping security information such as {@link AccessControlList access control list} and
  * {@link Ownership ownership} of and {@link SecuredObject secured object}.
  */
-public class SecurityInformationDTO implements SecuredObject, Serializable {
+public class SecurityInformationDTO implements SecuredDTO, Serializable {
 
     private static final long serialVersionUID = -292250850983164293L;
 
-    private AccessControlList accessControlList;
-    private Ownership ownership;
+    private AccessControlListDTO accessControlList;
+    private OwnershipDTO ownership;
 
     @Override
-    public final AccessControlList getAccessControlList() {
+    public final AccessControlListDTO getAccessControlList() {
         return accessControlList;
     }
 
     @Override
-    public final Ownership getOwnership() {
+    public final OwnershipDTO getOwnership() {
         return ownership;
     }
 
     @Override
-    public final void setAccessControlList(final AccessControlList accessControlList) {
+    public final void setAccessControlList(final AccessControlListDTO accessControlList) {
         this.accessControlList = accessControlList;
     }
 
     @Override
-    public final void setOwnership(final Ownership ownership) {
+    public final void setOwnership(final OwnershipDTO ownership) {
         this.ownership = ownership;
     }
 

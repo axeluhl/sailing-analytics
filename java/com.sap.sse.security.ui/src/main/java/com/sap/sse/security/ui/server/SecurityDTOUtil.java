@@ -4,15 +4,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.NamedSecuredObjectDTO;
-import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.SecuredObject;
+import com.sap.sse.security.shared.SecuredDTO;
 import com.sap.sse.security.shared.SecurityUser;
+import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.UserGroupDTO;
+import com.sap.sse.security.shared.impl.AccessControlList;
+import com.sap.sse.security.shared.impl.AccessControlListDTO;
+import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.StrippedUserDTO;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 public abstract class SecurityDTOUtil {
@@ -32,7 +36,7 @@ public abstract class SecurityDTOUtil {
      * @param objectId
      *            the {@link QualifiedObjectIdentifier} to get security information for
      */
-    public static void addSecurityInformation(final SecurityService securityService, final SecuredObject securedObject,
+    public static void addSecurityInformation(final SecurityService securityService, final SecuredDTO securedObject,
             final QualifiedObjectIdentifier objectId) {
         addSecurityInformation(new SecurityDTOFactory(), securityService, securedObject, objectId);
     }
@@ -52,10 +56,10 @@ public abstract class SecurityDTOUtil {
      *            the {@link QualifiedObjectIdentifier} to get security information for
      */
     public static void addSecurityInformation(final SecurityDTOFactory securityDTOFactory,
-            final SecurityService securityService, final SecuredObject securedObject,
+            final SecurityService securityService, final SecuredDTO securedObject,
             final QualifiedObjectIdentifier objectId) {
-        final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser = new HashMap<>();
-        final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup = new HashMap<>();
+        final Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser = new HashMap<>();
+        final Map<UserGroup, UserGroupDTO> fromOriginalToStrippedDownUserGroup = new HashMap<>();
         addSecurityInformation(securityDTOFactory, securityService, securedObject, objectId,
                 fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup, false);
     }
@@ -86,20 +90,22 @@ public abstract class SecurityDTOUtil {
      *            the {@link Map} to stripped down {@link UserGroup user group}s to use
      */
     public static void addSecurityInformation(final SecurityDTOFactory securityDTOFactory,
-            final SecurityService securityService, final SecuredObject securedObject,
+            final SecurityService securityService, final SecuredDTO securedObject,
             final QualifiedObjectIdentifier objectId,
-            final Map<SecurityUser, SecurityUser> fromOriginalToStrippedDownUser,
-            final Map<UserGroup, UserGroup> fromOriginalToStrippedDownUserGroup,
+            final Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser,
+            final Map<UserGroup, UserGroupDTO> fromOriginalToStrippedDownUserGroup,
             final boolean disablePruningForCurrentUser) {
         final AccessControlListAnnotation accessControlList = securityService.getAccessControlList(objectId);
-        AccessControlList accessControlListDTO = securityDTOFactory.createAccessControlListDTO(
+        AccessControlListDTO accessControlListDTO = securityDTOFactory.createAccessControlListDTO(
                 accessControlList == null ? null : accessControlList.getAnnotation(), fromOriginalToStrippedDownUser,
                 fromOriginalToStrippedDownUserGroup);
         if (disablePruningForCurrentUser) {
             securedObject.setAccessControlList(accessControlListDTO);
         } else {
+            User user = securityService.getCurrentUser();
+            UserDTO userDTO = new SecurityDTOFactory().createUserDTOFromUser(user, securityService);
             securedObject.setAccessControlList(securityDTOFactory.pruneAccessControlListForUser(accessControlListDTO,
-                    securityService.getCurrentUser()));
+                    userDTO));
         }
         final OwnershipAnnotation ownership = securityService.getOwnership(objectId);
         securedObject.setOwnership(

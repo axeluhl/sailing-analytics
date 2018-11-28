@@ -1,5 +1,6 @@
 package com.sap.sse.security.shared;
 
+import com.sap.sse.security.shared.impl.AccessControlList;
 import com.sap.sse.security.shared.impl.ObjectAnnotationImpl;
 
 public class AccessControlListAnnotation extends ObjectAnnotationImpl<AccessControlList> {

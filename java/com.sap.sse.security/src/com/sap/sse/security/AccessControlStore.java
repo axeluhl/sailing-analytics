@@ -4,11 +4,11 @@ import java.util.Set;
 
 import com.sap.sse.common.Named;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
-import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.SecurityUser;
+import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.impl.Ownership;
 
 public interface AccessControlStore extends Named {
     Iterable<AccessControlListAnnotation> getAccessControlLists();
@@ -42,7 +42,8 @@ public interface AccessControlStore extends Named {
      */
     OwnershipAnnotation getOwnership(QualifiedObjectIdentifier idOfOwnedObject);
     
-    OwnershipAnnotation setOwnership(QualifiedObjectIdentifier idOfOwnedObject, SecurityUser userOwner, UserGroup tenantOwner, String displayNameOfOwnedObject);
+    OwnershipAnnotation setOwnership(QualifiedObjectIdentifier idOfOwnedObject, User userOwner, UserGroup tenantOwner,
+            String displayNameOfOwnedObject);
     void removeOwnership(QualifiedObjectIdentifier idOfOwnedObject);
     
     void clear();
@@ -58,5 +59,5 @@ public interface AccessControlStore extends Named {
      * This method should be directly followed by an deletion call for the given Object. Ít will unmap and destroy all
      * references to it that are held internally. It will not modify the given argument!
      */
-    void removeAllOwnershipsFor(SecurityUser user);
+    void removeAllOwnershipsFor(User user);
 }

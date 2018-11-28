@@ -76,7 +76,7 @@ import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
-import com.sap.sse.security.ui.client.component.SecuredObjectOwnerColumn;
+import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
@@ -359,8 +359,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             }
         };
         
-        final SecuredObjectOwnerColumn<EventDTO> groupColumn = SecuredObjectOwnerColumn.getGroupOwnerColumn();
-        final SecuredObjectOwnerColumn<EventDTO> userColumn = SecuredObjectOwnerColumn.getUserOwnerColumn();
+        final SecuredDTOOwnerColumn<EventDTO> groupColumn = SecuredDTOOwnerColumn.getGroupOwnerColumn();
+        final SecuredDTOOwnerColumn<EventDTO> userColumn = SecuredDTOOwnerColumn.getUserOwnerColumn();
 
         final HasPermissions type = SecuredDomainType.EVENT;
         final Function<EventDTO, String> idFactory = event -> event.id.toString();
@@ -433,7 +433,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             TextColumn<EventDTO> venueNameColumn, TextColumn<EventDTO> startEndDateColumn,
             TextColumn<EventDTO> isPublicColumn, Column<EventDTO, SafeHtml> courseAreasColumn,
             Column<EventDTO, List<MultipleLinkCell.CellLink>> leaderboardGroupsColumn,
-            SecuredObjectOwnerColumn<EventDTO> groupColumn, SecuredObjectOwnerColumn<EventDTO> userColumn) {
+            SecuredDTOOwnerColumn<EventDTO> groupColumn, SecuredDTOOwnerColumn<EventDTO> userColumn) {
         ListHandler<EventDTO> result = new ListHandler<EventDTO>(eventRecords);
         result.setComparator(eventSelectionCheckboxColumn, eventSelectionCheckboxColumn.getComparator());
         result.setComparator(eventNameColumn, new Comparator<EventDTO>() {

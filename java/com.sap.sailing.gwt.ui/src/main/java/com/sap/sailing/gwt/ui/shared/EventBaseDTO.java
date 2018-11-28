@@ -13,9 +13,9 @@ import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
 import com.sap.sse.security.shared.NamedSecuredObjectDTO;
-import com.sap.sse.security.shared.SecuredObject;
+import com.sap.sse.security.shared.SecuredDTO;
 
-public class EventBaseDTO extends NamedSecuredObjectDTO implements IsSerializable, SecuredObject {
+public class EventBaseDTO extends NamedSecuredObjectDTO implements IsSerializable, SecuredDTO {
     private static final long serialVersionUID = 818666323178097939L;
 
     public VenueDTO venue;

@@ -16,9 +16,9 @@ import com.sap.sse.common.Named;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
-import com.sap.sse.security.shared.Ownership;
-import com.sap.sse.security.shared.SecuredObject;
-import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.SecuredDTO;
+import com.sap.sse.security.shared.UserGroupDTO;
+import com.sap.sse.security.shared.impl.OwnershipDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 
 public class MigrateGroupOwnershipDialog extends DataEntryDialog<MigrateGroupOwnerForHierarchyDialogDTO> {
@@ -28,7 +28,7 @@ public class MigrateGroupOwnershipDialog extends DataEntryDialog<MigrateGroupOwn
     private final Label currentGroupLabel;
     private final TextBox groupnameBox;
     private boolean resolvingUserGroupName;
-    private UserGroup resolvedUserGroup;
+    private UserGroupDTO resolvedUserGroup;
     private final RadioButton toExistingGroup;
     private final RadioButton toNewGroup;
     private final CheckBox migrateCompetitors;
@@ -39,7 +39,7 @@ public class MigrateGroupOwnershipDialog extends DataEntryDialog<MigrateGroupOwn
 
         private boolean resolvingUserGroupName;
 
-        public MigrateGroupOwnerForHierarchyDialogDTO(UserGroup existingUserGroup, boolean resolvingUserGroupName,
+        public MigrateGroupOwnerForHierarchyDialogDTO(UserGroupDTO existingUserGroup, boolean resolvingUserGroupName,
                 boolean createNewGroup, String newGroupName, boolean updateCompetitors, boolean updateBoats) {
             super(existingUserGroup, createNewGroup, newGroupName, updateCompetitors, updateBoats);
             this.resolvingUserGroupName = resolvingUserGroupName;
@@ -78,7 +78,8 @@ public class MigrateGroupOwnershipDialog extends DataEntryDialog<MigrateGroupOwn
         }
     }
 
-    private MigrateGroupOwnershipDialog(UserManagementServiceAsync userManagementService, UserGroup currentGroupOwner,
+    private MigrateGroupOwnershipDialog(UserManagementServiceAsync userManagementService,
+            UserGroupDTO currentGroupOwner,
             StringMessages stringMessages, DialogCallback<MigrateGroupOwnerForHierarchyDialogDTO> callback) {
         super(stringMessages.ownership(), stringMessages.migrateHierarchyToGroupOwner(), stringMessages.ok(),
                 stringMessages.cancel(), new Validator(stringMessages), callback);
@@ -118,9 +119,9 @@ public class MigrateGroupOwnershipDialog extends DataEntryDialog<MigrateGroupOwn
     private void resolveUserGroup() {
         resolvedUserGroup = null;
         resolvingUserGroupName = true;
-        userManagementService.getUserGroupByName(groupnameBox.getText(), new AsyncCallback<UserGroup>() {
+        userManagementService.getUserGroupByName(groupnameBox.getText(), new AsyncCallback<UserGroupDTO>() {
             @Override
-            public void onSuccess(UserGroup result) {
+            public void onSuccess(UserGroupDTO result) {
                 resolvedUserGroup = result;
                 resolvingUserGroupName = false;
                 validateAndUpdate();
@@ -146,13 +147,13 @@ public class MigrateGroupOwnershipDialog extends DataEntryDialog<MigrateGroupOwn
      * Creates a new {@link DialogConfig dialog configuration} instance which can be (re-)used to
      * {@link DialogConfig#openDialog(Named) open} a {@link MigrateGroupOwnershipDialog dialog}.
      */
-    public static <T extends Named & SecuredObject> DialogConfig<T> create(
+    public static <T extends Named & SecuredDTO> DialogConfig<T> create(
             final UserManagementServiceAsync userManagementService,
             final BiConsumer<T, MigrateGroupOwnerForHierarchyDTO> updateCallback) {
         return new DialogConfig<>(userManagementService, updateCallback);
     }
 
-    public static class DialogConfig<T extends Named & SecuredObject> {
+    public static class DialogConfig<T extends Named & SecuredDTO> {
 
         private final UserManagementServiceAsync userManagementService;
         private final BiConsumer<T, MigrateGroupOwnerForHierarchyDTO> updateCallback;
@@ -171,9 +172,10 @@ public class MigrateGroupOwnershipDialog extends DataEntryDialog<MigrateGroupOwn
          *            {@link Named} {@link SecuredObject} instance to migrate group owner for
          */
         public void openDialog(final T securedObject) {
-            Ownership ownership = securedObject.getOwnership();
+            OwnershipDTO ownership = securedObject.getOwnership();
+            UserGroupDTO tenant = ownership == null ? null : ownership.getTenantOwner();
             new MigrateGroupOwnershipDialog(userManagementService,
-                    ownership == null ? null : ownership.getTenantOwner(), StringMessages.INSTANCE,
+                    tenant, StringMessages.INSTANCE,
                     new EditOwnershipDialogCallback(securedObject)).show();
         }
 

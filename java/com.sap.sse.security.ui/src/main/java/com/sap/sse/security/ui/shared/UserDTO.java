@@ -5,16 +5,18 @@ import java.util.List;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.common.Util;
-import com.sap.sse.security.shared.AccessControlList;
-import com.sap.sse.security.shared.Ownership;
-import com.sap.sse.security.shared.Role;
-import com.sap.sse.security.shared.SecuredObject;
+import com.sap.sse.security.shared.SecuredDTO;
 import com.sap.sse.security.shared.SecurityInformationDTO;
-import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.UserGroupDTO;
 import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.shared.impl.SecurityUserImpl;
+import com.sap.sse.security.shared.impl.AccessControlListDTO;
+import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.OwnershipDTO;
+import com.sap.sse.security.shared.impl.RoleDTO;
+import com.sap.sse.security.shared.impl.StrippedUserDTO;
 
-public class UserDTO extends SecurityUserImpl implements IsSerializable, SecuredObject {
+public class UserDTO extends StrippedUserDTO
+        implements IsSerializable, SecuredDTO {
 
     private static final long serialVersionUID = 7556217539893146187L;
 
@@ -24,16 +26,17 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable, Secured
     private String locale;
     private List<AccountDTO> accounts;
     private boolean emailValidated;
-    private List<UserGroup> groups;
+    private List<UserGroupDTO> groups;
     private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
-    private UserGroup defaultTenantForCurrentServer;
+    private UserGroupDTO defaultTenantForCurrentServer;
 
     /**
      * @param groups may be {@code null} which is equivalent to passing an empty groups collection
      */
     public UserDTO(String name, String email, String fullName, String company, String locale, boolean emailValidated,
-            List<AccountDTO> accounts, Iterable<Role> roles, UserGroup defaultTenant, Iterable<WildcardPermission> permissions,
-            Iterable<UserGroup> groups) {
+            List<AccountDTO> accounts, Iterable<RoleDTO> roles, UserGroupDTO defaultTenant,
+            Iterable<WildcardPermission> permissions,
+            Iterable<UserGroupDTO> groups) {
         super(name, roles, permissions);
         this.defaultTenantForCurrentServer = defaultTenant;
         this.email = email;
@@ -49,7 +52,7 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable, Secured
     /**
      * The tenant to use as {@link Ownership#getTenantOwner() tenant owner} of new objects created by this user
      */
-    public UserGroup getDefaultTenant() {
+    public UserGroupDTO getDefaultTenant() {
         return defaultTenantForCurrentServer;
     }
 
@@ -67,7 +70,7 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable, Secured
 
     public Iterable<String> getStringRoles() {
         ArrayList<String> result = new ArrayList<>();
-        for (Role role : getRoles()) {
+        for (RoleDTO role : getRoles()) {
             result.add(role.toString());
         }
         return result;
@@ -84,17 +87,16 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable, Secured
         }
         return result;
     }
-    
+
     /**
-     * Objects of this type have a copy of their user groups embedded and can respond to this
-     * call with the data embedded. Note, however, that the response is not "live," so there is
-     * no round-trip to the server involved.
+     * Objects of this type have a copy of their user groups embedded and can respond to this call with the data
+     * embedded. Note, however, that the response is not "live," so there is no round-trip to the server involved.
      */
     @Override
-    public Iterable<UserGroup> getUserGroups() {
+    public List<UserGroupDTO> getUserGroups() {
         return groups;
     }
-
+    
     public List<AccountDTO> getAccounts() {
         return accounts;
     }
@@ -108,26 +110,26 @@ public class UserDTO extends SecurityUserImpl implements IsSerializable, Secured
     }
 
     @Override
-    public final AccessControlList getAccessControlList() {
+    public final AccessControlListDTO getAccessControlList() {
         return securityInformation.getAccessControlList();
     }
 
     @Override
-    public final Ownership getOwnership() {
+    public final OwnershipDTO getOwnership() {
         return securityInformation.getOwnership();
     }
 
     @Override
-    public final void setAccessControlList(final AccessControlList accessControlList) {
+    public final void setAccessControlList(final AccessControlListDTO accessControlList) {
         this.securityInformation.setAccessControlList(accessControlList);
     }
 
     @Override
-    public final void setOwnership(final Ownership ownership) {
+    public final void setOwnership(final OwnershipDTO ownership) {
         this.securityInformation.setOwnership(ownership);
     }
     
-    public void setDefaultTenantForCurrentServer(UserGroup defaultTenant) {
+    public void setDefaultTenantForCurrentServer(UserGroupDTO defaultTenant) {
         this.defaultTenantForCurrentServer = defaultTenant;
     }
 }

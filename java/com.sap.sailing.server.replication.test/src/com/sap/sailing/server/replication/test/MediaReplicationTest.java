@@ -49,8 +49,8 @@ import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
-import com.sap.sse.security.shared.impl.UserGroupImpl;
 
 import junit.framework.Assert;
 
@@ -191,7 +191,7 @@ public class MediaReplicationTest extends AbstractServerReplicationTest {
     public void testMasterDataImportForMediaTracks() throws MalformedURLException, IOException, InterruptedException,
             ClassNotFoundException {
 
-        UserGroupImpl defaultTenant = new UserGroupImpl(new UUID(0, 1), "defaultTenant");
+        UserGroup defaultTenant = new UserGroup(new UUID(0, 1), "defaultTenant");
         User currentUser = Mockito.mock(User.class);
 
         SecurityService securityService = Mockito.mock(SecurityService.class);

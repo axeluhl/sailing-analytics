@@ -28,16 +28,15 @@ import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
-import com.sap.sse.security.shared.Ownership;
-import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
-import com.sap.sse.security.shared.RoleImpl;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
 
@@ -253,7 +252,7 @@ public class UserStoreWithPersistenceTest {
     /** Test getExistingQualificationsForRoleDefinition with both tenant and user null. */
     private void testWithTenantAndUserNull(User user, RoleDefinitionImpl roleDefinition)
             throws UserManagementException {
-        Role role = new RoleImpl(roleDefinition, null, null);
+        Role role = new Role(roleDefinition, null, null);
         store.addRoleForUser(user.getName(), role);
 
         Iterable<Role> rolesFromUser = store.getRolesFromUser(user.getName());
@@ -269,7 +268,7 @@ public class UserStoreWithPersistenceTest {
     /** Test getExistingQualificationsForRoleDefinition with both tenant and user not null. */
     private void testWithTenantAndUserNotNull(User user, RoleDefinitionImpl roleDefinition, UserGroup userGroup)
             throws UserManagementException {
-        Role role = new RoleImpl(roleDefinition, userGroup, user);
+        Role role = new Role(roleDefinition, userGroup, user);
         store.addRoleForUser(user.getName(), role);
         assertThatNoUserHasWildcardRole(userGroup, user, roleDefinition);
         store.removeRoleFromUser(user.getName(), role);
@@ -278,7 +277,7 @@ public class UserStoreWithPersistenceTest {
     /** Test getExistingQualificationsForRoleDefinition with user null. */
     private void testWithUserNull(User user, RoleDefinitionImpl roleDefinition, UserGroup userGroup)
             throws UserManagementException {
-        Role role = new RoleImpl(roleDefinition, userGroup, null);
+        Role role = new Role(roleDefinition, userGroup, null);
         store.addRoleForUser(user.getName(), role);
         assertThatNoUserHasWildcardRole(userGroup, user, roleDefinition);
         store.removeRoleFromUser(user.getName(), role);
@@ -287,7 +286,7 @@ public class UserStoreWithPersistenceTest {
     /** Test getExistingQualificationsForRoleDefinition with tenant null. */
     private void testWithTenantNull(User user, RoleDefinitionImpl roleDefinition, UserGroup userGroup)
             throws UserManagementException {
-        Role role = new RoleImpl(roleDefinition, null, user);
+        Role role = new Role(roleDefinition, null, user);
         store.addRoleForUser(user.getName(), role);
         assertThatNoUserHasWildcardRole(userGroup, user, roleDefinition);
         store.removeRoleFromUser(user.getName(), role);

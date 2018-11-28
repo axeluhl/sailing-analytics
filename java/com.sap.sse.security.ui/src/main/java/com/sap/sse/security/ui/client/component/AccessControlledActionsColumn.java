@@ -9,15 +9,15 @@ import java.util.function.Function;
 
 import com.sap.sse.gwt.client.celltable.ImagesBarCell;
 import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
-import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.Action;
-import com.sap.sse.security.shared.Ownership;
-import com.sap.sse.security.shared.SecuredObject;
+import com.sap.sse.security.shared.SecuredDTO;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.AccessControlListDTO;
+import com.sap.sse.security.shared.impl.OwnershipDTO;
 import com.sap.sse.security.ui.client.UserService;
 
-public class AccessControlledActionsColumn<T extends SecuredObject, S extends ImagesBarCell>
+public class AccessControlledActionsColumn<T extends SecuredDTO, S extends ImagesBarCell>
         extends ImagesBarColumn<T, S> {
 
     private final Map<String, Consumer<T>> nameToCallbackMap = new HashMap<>();
@@ -80,8 +80,8 @@ public class AccessControlledActionsColumn<T extends SecuredObject, S extends Im
         if (action == null) {
             result = true;
         } else {
-            final Ownership ownership = object.getOwnership();
-            final AccessControlList accessControlList = object.getAccessControlList();
+            final OwnershipDTO ownership = object.getOwnership();
+            final AccessControlListDTO accessControlList = object.getAccessControlList();
             result = userService.hasPermission(permissionFactory.apply(action, object), ownership, accessControlList);
         }
         return result;

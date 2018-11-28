@@ -38,7 +38,7 @@ import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
-import com.sap.sse.security.ui.client.component.SecuredObjectOwnerColumn;
+import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 
 public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> extends TableWrapper<BoatDTO, S> {
     private final LabeledAbstractFilterablePanel<BoatDTO> filterField;
@@ -187,7 +187,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
         table.addColumn(boatClassColumn, stringMessages.boatClass());
         table.addColumn(boatColorColumn, stringMessages.color());
         table.addColumn(boatIdColumn, stringMessages.id());
-        SecuredObjectOwnerColumn.configureOwnerColumns(table, getColumnSortHandler(), stringMessages);
+        SecuredDTOOwnerColumn.configureOwnerColumns(table, getColumnSortHandler(), stringMessages);
         if (allowActions) {
             table.addColumn(boatActionColumn, stringMessages.actions());
         }
