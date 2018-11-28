@@ -5,9 +5,8 @@ import com.sap.sse.security.shared.AbstractRole;
 public class RoleDTO extends AbstractRole<RoleDefinitionDTO, UserGroupDTO, StrippedUserDTO> {
     private static final long serialVersionUID = 1L;
 
-    @Deprecated
-    private RoleDTO() {
-        super(null);
+    @Deprecated // gwt serialisation only
+    RoleDTO() {
     }
 
     public RoleDTO(RoleDefinitionDTO roleDefinition, UserGroupDTO qualifiedForTenant,

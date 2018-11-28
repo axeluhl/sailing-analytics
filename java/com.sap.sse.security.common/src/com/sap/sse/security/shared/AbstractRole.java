@@ -26,7 +26,8 @@ public abstract class AbstractRole<RD extends RoleDefinition, G extends Abstract
     }
     
     @Deprecated
-    AbstractRole() {} // for GWT serialization only
+    protected AbstractRole() {
+    } // for GWT serialization only
     
     public AbstractRole(RD roleDefinition) {
         this(roleDefinition, /* tenant owner */ null, /* user owner */ null);
