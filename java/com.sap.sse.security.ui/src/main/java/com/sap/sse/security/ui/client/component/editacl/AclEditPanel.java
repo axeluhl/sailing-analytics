@@ -75,11 +75,6 @@ public class AclEditPanel extends Composite {
         this.userManagementService = userManagementService;
         AclDialogResources.INSTANCE.css().ensureInjected();
 
-        final Collection<String> actionNames = new ArrayList<>();
-        for (Action a : availableActions) {
-            actionNames.add(a.name());
-        }
-
         suggestUserGroupUi = createUserGroupSuggest(userManagementService);
         addUserGroupButtonUi = new Button(stringMessages.add());
         removeUserGroupButtonUi = new Button(stringMessages.remove());
@@ -87,20 +82,25 @@ public class AclEditPanel extends Composite {
         removeUserGroupButtonUi.addClickHandler(e -> onUserGroupRemove(e));
 
         initWidget(uiBinder.createAndBindUi(this));
-        userGroupList = createUserGroupCellList(stringMessages);
-        userGroupCellListPanelUi.add(wrapListUi(userGroupList, stringMessages.userGroups(), suggestUserGroupUi,
-                addUserGroupButtonUi, removeUserGroupButtonUi));
+        userGroupList = createUserGroupCellList();
+        userGroupCellListPanelUi.add(wrapIntoCaptionPanel(userGroupList, stringMessages.userGroups(),
+                suggestUserGroupUi, addUserGroupButtonUi, removeUserGroupButtonUi));
 
         userGroupSingleSelectionModel.addSelectionChangeHandler(h -> {
             onUserGroupsChange();
         });
+
+        // retrieve set of available action names
+        final Collection<String> actionNames = new ArrayList<>();
+        for (Action a : availableActions) {
+            actionNames.add(a.name());
+        }
 
         // create action editor for allowed actions
         allowedActionsEditor = new StringListEditorComposite(new ArrayList<>(), stringMessages,
                 com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), actionNames,
                 stringMessages.allowedActionName());
         allowedActionsEditor.addStyleName(AclDialogResources.INSTANCE.css().allowedActionsTable());
-
         allowedActionsEditor.addValueChangeHandler(e -> userGroupsWithAllowedActions
                 .put(userGroupSingleSelectionModel.getSelectedObject(), toSet(e.getValue())));
         permissionsCellListPanelUi.add(allowedActionsEditor);
@@ -109,33 +109,18 @@ public class AclEditPanel extends Composite {
         deniedActionsEditor = new StringListEditorComposite(new ArrayList<>(), stringMessages,
                 com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), actionNames,
                 stringMessages.deniedActionName());
-
         deniedActionsEditor.addValueChangeHandler(e -> userGroupsWithDeniedActions
-                .put(userGroupSingleSelectionModel.getSelectedObject(), toDeniedSet(e.getValue())));
+                .put(userGroupSingleSelectionModel.getSelectedObject(), toDeniedActionSet(e.getValue())));
         deniedActionsEditor.addStyleName(AclDialogResources.INSTANCE.css().deniedActionsTable());
         permissionsCellListPanelUi.add(deniedActionsEditor);
     }
 
-    private <T> Set<T> toSet(Iterable<T> iter) {
-        final Set<T> set = new HashSet<>();
-        for (T t : iter) {
-            set.add(t);
-        }
-        return set;
-    }
-
-    private Set<String> toDeniedSet(Iterable<String> iter) {
-        final Set<String> set = new HashSet<>();
-        for (String s : iter) {
-            set.add(s.startsWith("!") ? s : "!" + s);
-        }
-        return set;
-    }
-
+    /** Called when the selected {@link UserGroup} changes. */
     private void onUserGroupsChange() {
         removeUserGroupButtonUi.setEnabled(userGroupSingleSelectionModel.getSelectedObject() != null);
     }
 
+    /** @return UI element for selection of {@link UserGroup} elements. */
     private SuggestBox createUserGroupSuggest(UserManagementServiceAsync userManagementService) {
         final MultiWordSuggestOracle userGroupOracle = new MultiWordSuggestOracle();
         userManagementService.getUserGroups(new AsyncCallback<Collection<UserGroup>>() {
@@ -156,7 +141,8 @@ public class AclEditPanel extends Composite {
         return new SuggestBox(userGroupOracle, new TextBox());
     }
 
-    private CellList<UserGroup> createUserGroupCellList(StringMessages stringMessages) {
+    /** @return the UI element for visualizing {@link UserGroup} elements. */
+    private CellList<UserGroup> createUserGroupCellList() {
         final CellList<UserGroup> userGroupCellList = new CellList<>(new AbstractCell<UserGroup>() {
             @Override
             public void render(Context context, UserGroup value, SafeHtmlBuilder sb) {
@@ -168,17 +154,24 @@ public class AclEditPanel extends Composite {
 
         userGroupCellList.setSelectionModel(userGroupSingleSelectionModel);
         userGroupSingleSelectionModel
-                .addSelectionChangeHandler(e -> updateActionsUi(userGroupSingleSelectionModel.getSelectedObject()));
+                .addSelectionChangeHandler(e -> updateActionEditors(userGroupSingleSelectionModel.getSelectedObject()));
         return userGroupCellList;
     }
 
-    private void updateActionsUi(UserGroup selectedUserGroup) {
+    /**
+     * Updates the {@link #allowedActionsEditor} and {@link #deniedActionsEditor} when the selected UserGroup changed.
+     */
+    private void updateActionEditors(UserGroup selectedUserGroup) {
         onUserGroupsChange();
         allowedActionsEditor.setValue(userGroupsWithAllowedActions.get(selectedUserGroup), false);
         deniedActionsEditor.setValue(userGroupsWithDeniedActions.get(selectedUserGroup), false);
     }
 
-    private CaptionPanel wrapListUi(CellList<?> cellList, String title, Widget... additionalWidgets) {
+    /**
+     * Wraps the CellList together with a title and additional widgets (e.g. add/remove buttons) into a
+     * {@link CaptionPanel}.
+     */
+    private CaptionPanel wrapIntoCaptionPanel(CellList<?> cellList, String title, Widget... additionalWidgets) {
         cellList.setPageSize(10);
         final SimplePager tenantPager = new SimplePager(TextLocation.CENTER, false, /* fast forward step size */ 50,
                 true);
@@ -201,6 +194,11 @@ public class AclEditPanel extends Composite {
         return tenantListCaption;
     }
 
+    /**
+     * Updates the ACL edited in the EditAclDialog. Splits combinedActions retrieved by
+     * {@link AccessControlList#getActionsByUserGroup()} into {@link #allowedActionsEditor} and
+     * {@link #deniedActionsEditor}.
+     */
     public void updateAcl(AccessControlList acl) {
         final Map<UserGroup, Set<String>> combinedActions = (acl != null)
                 ? acl.getActionsByUserGroup() != null ? new HashMap<>(acl.getActionsByUserGroup()) : new HashMap<>()
@@ -223,6 +221,10 @@ public class AclEditPanel extends Composite {
         refreshUi();
     }
 
+    /**
+     * Updates the UI by refreshing the {@link #userGroupList} and selects an element to trigger the update of
+     * {@link #allowedActionsEditor} and {@link #deniedActionsEditor}.
+     */
     private void refreshUi() {
         final Set<UserGroup> combinedKeySet = new HashSet<>();
         combinedKeySet.addAll(userGroupsWithAllowedActions.keySet());
@@ -236,8 +238,11 @@ public class AclEditPanel extends Composite {
         }
     }
 
-    void onUserGroupAdd(ClickEvent e) {
+    /** Called when the user clicks on the 'Add' button */
+    private void onUserGroupAdd(ClickEvent e) {
         final String userGroupName = suggestUserGroupUi.getValue();
+
+        // get UserGroup object corresponding to user group name
         userManagementService.getUserGroupByName(userGroupName, new AsyncCallback<UserGroup>() {
             @Override
             public void onFailure(Throwable caught) {
@@ -263,7 +268,8 @@ public class AclEditPanel extends Composite {
         });
     }
 
-    void onUserGroupRemove(ClickEvent e) {
+    /** Called when the user clicks on the 'Remove' button */
+    private void onUserGroupRemove(ClickEvent e) {
         UserGroup selectedObject = userGroupSingleSelectionModel.getSelectedObject();
         if (selectedObject != null) {
             userGroupsWithAllowedActions.remove(selectedObject);
@@ -274,7 +280,8 @@ public class AclEditPanel extends Composite {
         }
     }
 
-    public Map<UserGroup, Set<String>> getUserGroupsWithPermissions() {
+    /** Merges {@link #userGroupsWithAllowedActions} and {@link #userGroupsWithDeniedActions}. */
+    public Map<UserGroup, Set<String>> getUserGroupsWithCombinedActions() {
         final Map<UserGroup, Set<String>> combinedActions = new HashMap<>(userGroupsWithAllowedActions);
         for (Map.Entry<UserGroup, Set<String>> actionEntry : userGroupsWithDeniedActions.entrySet()) {
             if (combinedActions.containsKey(actionEntry.getKey())) {
@@ -285,6 +292,32 @@ public class AclEditPanel extends Composite {
             }
         }
         return combinedActions;
+    }
+
+    /** Converts an {@link Iterable} into a {@link Set}. */
+    private <T> Set<T> toSet(Iterable<T> iter) {
+        Set<T> resultSet;
+        if (iter instanceof Set) {
+            resultSet = (Set<T>) iter;
+        } else {
+            resultSet = new HashSet<>();
+            for (T t : iter) {
+                resultSet.add(t);
+            }
+        }
+        return resultSet;
+    }
+
+    /**
+     * Converts an {@link Iterable} into a {@link Set} and adds a '!' in front of each String to mark the action as
+     * denied.
+     */
+    private Set<String> toDeniedActionSet(Iterable<String> iter) {
+        final Set<String> set = new HashSet<>();
+        for (String s : iter) {
+            set.add(s.startsWith("!") ? s : "!" + s);
+        }
+        return set;
     }
 
 }

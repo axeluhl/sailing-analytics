@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sse.common.Named;
 import com.sap.sse.gwt.client.Notification;
+import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.HasPermissions;
@@ -47,8 +48,7 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
 
     private EditACLDialog(UserManagementServiceAsync userManagementService,
             QualifiedObjectIdentifier qualifiedObjectIdentifier, Action[] availableActions,
-            StringMessages stringMessages,
-            DialogCallback<AclDialogResult> callback) {
+            StringMessages stringMessages, DialogCallback<AclDialogResult> callback) {
         super(stringMessages.acl(), stringMessages.editACLForObject(qualifiedObjectIdentifier.toString()),
                 stringMessages.ok(), stringMessages.cancel(), new Validator(), callback);
         aclEditPanel = new AclEditPanel(userManagementService, availableActions, stringMessages);
@@ -57,8 +57,7 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
 
                     @Override
                     public void onFailure(Throwable caught) {
-                        // TODO Auto-generated method stub
-
+                        Notification.notify(caught.getMessage(), NotificationType.ERROR);
                     }
 
                     @Override
@@ -75,7 +74,7 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
 
     @Override
     protected AclDialogResult getResult() {
-        return new AclDialogResult(new AccessControlListImpl(aclEditPanel.getUserGroupsWithPermissions()));
+        return new AclDialogResult(new AccessControlListImpl(aclEditPanel.getUserGroupsWithCombinedActions()));
     }
 
     /**
@@ -150,9 +149,7 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
 
                             @Override
                             public final void onFailure(Throwable caught) {
-                                // TODO: v i18n v
-                                Notification.notify(stringMessages.errorUpdatingAcl(securedObject.getName()),
-                                        ERROR);
+                                Notification.notify(stringMessages.errorUpdatingAcl(securedObject.getName()), ERROR);
                             }
                         });
             }
