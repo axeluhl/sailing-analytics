@@ -72,12 +72,14 @@ import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
 import com.sap.sse.security.ui.client.component.SecuredObjectOwnerColumn;
+import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements LeaderboardGroupsDisplayer, LeaderboardsDisplayer {
 
@@ -609,27 +611,31 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                 userService.getUserManagementService(), type, idFactory,
                 group -> leaderboardGroupsRefresher.fillLeaderboardGroups(), stringMessages);
         actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
-                config::openDialog);
+                e -> config.openDialog(e));
         
+        final EditACLDialog.DialogConfig<LeaderboardGroupDTO> configACL = EditACLDialog.create(
+                userService.getUserManagementService(), type, idFactory,
+                group -> leaderboardGroupsRefresher.fillLeaderboardGroups(), stringMessages);
+        actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
+                e -> configACL.openDialog(e));
+
         final MigrateGroupOwnershipDialog.DialogConfig<LeaderboardGroupDTO> migrateDialogConfig = MigrateGroupOwnershipDialog
                 .create(userService.getUserManagementService(), (lg, dto) -> {
                     sailingService.updateGroupOwnerForLeaderboardGroupHierarchy(lg.getId(), dto,
                             new AsyncCallback<Void>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
-                                    // TODO Auto-generated method stub
-
+                                    errorReporter.reportError(stringMessages.errorUpdatingOwnership(lg.getName()));
                                 }
 
                                 @Override
                                 public void onSuccess(Void result) {
-                                    // TODO Auto-generated method stub
-
+                                    leaderboardGroupsRefresher.fillLeaderboardGroups();
                                 }
                             });
                 });
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_MIGRATE_GROUP_OWNERSHIP_HIERARCHY, CHANGE_OWNERSHIP,
-                migrateDialogConfig::openDialog);
+                e -> migrateDialogConfig.openDialog(e));
 
         SelectionCheckboxColumn<LeaderboardGroupDTO> leaderboardTableSelectionColumn =
                 new SelectionCheckboxColumn<LeaderboardGroupDTO>(

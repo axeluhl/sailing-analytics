@@ -42,11 +42,13 @@ import com.sap.sse.gwt.client.celltable.RefreshableSelectionModel;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
 import com.sap.sse.security.ui.client.component.SecuredObjectOwnerColumn;
+import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 /**
  * A filterable competitor table. The data model is managed by the {@link #getFilterField() filter field}. In
@@ -332,6 +334,11 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 idFactory, null, stringMessages);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 editOwnerShipDialog::openDialog);
+
+        final EditACLDialog.DialogConfig<CompetitorDTO> configACL = EditACLDialog
+                .create(userService.getUserManagementService(), type, idFactory, null, stringMessages);
+        competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
+                configACL::openDialog);
         
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(competitorColumnListHandler);

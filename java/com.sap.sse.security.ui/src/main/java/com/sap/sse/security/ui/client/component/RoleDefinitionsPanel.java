@@ -3,6 +3,7 @@ package com.sap.sse.security.ui.client.component;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.DELETE;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
+import static com.sap.sse.security.shared.impl.SecuredSecurityTypes.ROLE_DEFINITION;
 import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP;
 import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_DELETE;
 import static com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell.ACTION_UPDATE;
@@ -24,8 +25,6 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
@@ -41,6 +40,7 @@ import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.WildcardPermission;
@@ -48,6 +48,7 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
+import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.RoleDefinitionDTO;
 
@@ -62,9 +63,6 @@ import com.sap.sse.security.ui.shared.RoleDefinitionDTO;
  *
  */
 public class RoleDefinitionsPanel extends VerticalPanel {
-    private final Button addButton;
-    private final Button removeButton;
-    private final Button refreshButton;
     private final FlushableCellTable<RoleDefinitionDTO> roleDefinitionsTable;
     private final ErrorReporter errorReporter;
     private final UserService userService;
@@ -72,7 +70,7 @@ public class RoleDefinitionsPanel extends VerticalPanel {
     private final ListDataProvider<RoleDefinitionDTO> rolesListDataProvider;
     private final StringMessages stringMessages;
     private final LabeledAbstractFilterablePanel<RoleDefinitionDTO> filterablePanelRoleDefinitions;
-    private RefreshableMultiSelectionModel<? super RoleDefinitionDTO> refreshableRoleDefinitionMultiSelectionModel;
+    private final RefreshableMultiSelectionModel<? super RoleDefinitionDTO> refreshableRoleDefinitionMultiSelectionModel;
     
     public RoleDefinitionsPanel(StringMessages stringMessages, UserService userService,
             CellTableWithCheckboxResources tableResources, ErrorReporter errorReporter) {
@@ -80,9 +78,6 @@ public class RoleDefinitionsPanel extends VerticalPanel {
         this.stringMessages = stringMessages;
         this.userService = userService;
         this.userManagementService = userService.getUserManagementService();
-        this.addButton = new Button(stringMessages.add());
-        this.removeButton = new Button(stringMessages.remove());
-        this.refreshButton = new Button(stringMessages.refresh());
         rolesListDataProvider = new ListDataProvider<>();
         filterablePanelRoleDefinitions = new LabeledAbstractFilterablePanel<RoleDefinitionDTO>(new Label(stringMessages.filterRoles()), new ArrayList<>(),
                 rolesListDataProvider) {
@@ -99,19 +94,19 @@ public class RoleDefinitionsPanel extends VerticalPanel {
         roleDefinitionsTable = createRoleDefinitionsTable(tableResources);
         roleDefinitionsTable.ensureDebugId("RolesCellTable");
         filterablePanelRoleDefinitions.getTextBox().ensureDebugId("RolesFilterTextBox");
-        addButton.addClickHandler(e->createRoleDefinition());
         refreshableRoleDefinitionMultiSelectionModel = (RefreshableMultiSelectionModel<? super RoleDefinitionDTO>) roleDefinitionsTable.getSelectionModel();
-        removeButton.addClickHandler(e->{
-            if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(String.join(", ", Util.map(getSelectedRoleDefinitions(), r->r.getName()))))) {
+
+        final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, ROLE_DEFINITION);
+        buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::updateRoleDefinitions);
+        buttonPanel.addCreateAction(stringMessages.add(), this::createRoleDefinition);
+        buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
+            final String roles = String.join(", ", Util.map(getSelectedRoleDefinitions(), RoleDefinitionDTO::getName));
+            if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(roles))) {
                 final Set<RoleDefinitionDTO> selectedRoles = new HashSet<>(getSelectedRoleDefinitions());
                 filterablePanelRoleDefinitions.removeAll(selectedRoles);
             }
         });
-        refreshButton.addClickHandler(e->updateRoleDefinitions());
-        final HorizontalPanel buttonPanel = new HorizontalPanel();
-        buttonPanel.add(refreshButton);
-        buttonPanel.add(addButton);
-        buttonPanel.add(removeButton);
+
         add(buttonPanel);
         add(filterablePanelRoleDefinitions);
         add(roleDefinitionsTable);
@@ -214,6 +209,11 @@ public class RoleDefinitionsPanel extends VerticalPanel {
         final DialogConfig<RoleDefinitionDTO> config = EditOwnershipDialog.create(userManagementService, type,
                 idFactory, roleDefinition -> updateRoleDefinitions(), stringMessages);
         roleActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openDialog);
+        final EditACLDialog.DialogConfig<RoleDefinitionDTO> configACL = EditACLDialog.create(
+                userService.getUserManagementService(), type, idFactory, roleDefinition -> updateRoleDefinitions(),
+                stringMessages);
+        roleActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
+                configACL::openDialog);
 
         table.addColumn(roleSelectionCheckboxColumn, roleSelectionCheckboxColumn.getHeader());
         table.addColumn(roleDefinitionNameColumn, stringMessages.name());

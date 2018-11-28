@@ -14,6 +14,6 @@ public class EventConfigImagesBarCell extends DefaultActionsImagesBarCell {
     @Override
     protected Iterable<ImageSpec> getImageSpecs() {
         return Arrays.asList(getUpdateImageSpec(), getDeleteImageSpec(), getChangeOwnershipImageSpec(),
-                getMigrateGroupOwnershipForHierarchyImageSpec());
+                getChangeACLImageSpec(), getMigrateGroupOwnershipForHierarchyImageSpec());
     }
 }
