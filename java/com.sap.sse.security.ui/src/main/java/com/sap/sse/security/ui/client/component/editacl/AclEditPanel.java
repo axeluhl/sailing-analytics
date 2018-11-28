@@ -100,10 +100,13 @@ public class AclEditPanel extends Composite {
         allowedActionsEditor = new StringListEditorComposite(new ArrayList<>(), stringMessages,
                 com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), actionNames,
                 stringMessages.allowedActionName());
-        allowedActionsEditor.addStyleName(AclDialogResources.INSTANCE.css().allowedActionsTable());
         allowedActionsEditor.addValueChangeHandler(e -> userGroupsWithAllowedActions
                 .put(userGroupSingleSelectionModel.getSelectedObject(), toSet(e.getValue())));
-        permissionsCellListPanelUi.add(allowedActionsEditor);
+
+        CaptionPanel allowedActionsPanel = new CaptionPanel(stringMessages.allowedActions());
+        allowedActionsPanel.add(allowedActionsEditor);
+        allowedActionsPanel.addStyleName(AclDialogResources.INSTANCE.css().allowedActionsTable());
+        permissionsCellListPanelUi.add(allowedActionsPanel);
 
         // create action editor for denied actions
         deniedActionsEditor = new StringListEditorComposite(new ArrayList<>(), stringMessages,
@@ -111,8 +114,11 @@ public class AclEditPanel extends Composite {
                 stringMessages.deniedActionName());
         deniedActionsEditor.addValueChangeHandler(e -> userGroupsWithDeniedActions
                 .put(userGroupSingleSelectionModel.getSelectedObject(), toDeniedActionSet(e.getValue())));
-        deniedActionsEditor.addStyleName(AclDialogResources.INSTANCE.css().deniedActionsTable());
-        permissionsCellListPanelUi.add(deniedActionsEditor);
+
+        CaptionPanel deniedActionsPanel = new CaptionPanel(stringMessages.deniedActions());
+        deniedActionsPanel.add(deniedActionsEditor);
+        deniedActionsPanel.addStyleName(AclDialogResources.INSTANCE.css().deniedActionsTable());
+        permissionsCellListPanelUi.add(deniedActionsPanel);
     }
 
     /** Called when the selected {@link UserGroup} changes. */

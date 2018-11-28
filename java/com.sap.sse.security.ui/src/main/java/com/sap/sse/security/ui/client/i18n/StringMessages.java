@@ -2,6 +2,7 @@ package com.sap.sse.security.ui.client.i18n;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.LocalizableResource.DefaultLocale;
+import com.google.gwt.safehtml.shared.SafeHtml;
 
 @DefaultLocale("en")
 public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
@@ -161,4 +162,6 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     String errorMessageUserGroupNameNotFound(String name);
     String successMessageAddedUserGroup(String name);
     String successMessageRemovedUserGroup(String name);
+    SafeHtml allowedActions();
+    SafeHtml deniedActions();
 }
