@@ -142,7 +142,6 @@ public class UserService {
                 new MarkedAsyncCallback<Pair<UserDTO, UserDTO>>(new AsyncCallback<Pair<UserDTO, UserDTO>>() {
             @Override
                     public void onSuccess(Pair<UserDTO, UserDTO> result) {
-                        GWT.debugger();
                 setCurrentUser(result, notifyOtherInstances);
             }
 
@@ -224,10 +223,6 @@ public class UserService {
         if (resultAndAnomynous.getA() == null) {
             currentUser = null;
         } else {
-            GWT.log("Current user permissions: " + resultAndAnomynous.getB().getPermissions() + " + "
-                    + resultAndAnomynous.getA().getPermissions());
-            GWT.log("Current user roles: " + resultAndAnomynous.getB().getRoles() + " + "
-                    + resultAndAnomynous.getA().getRoles());
             // we remember that a user was authenticated to suppress the hint for some time
             setUserLoginHintToStorage();
             currentUser = resultAndAnomynous.getA();
