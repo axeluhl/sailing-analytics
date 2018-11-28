@@ -23,7 +23,8 @@ public class DefaultActionsImagesBarCell extends ImagesBarCell {
 
     @Override
     protected Iterable<ImageSpec> getImageSpecs() {
-        return Arrays.asList(getUpdateImageSpec(), getDeleteImageSpec(), getChangeOwnershipImageSpec());
+        return Arrays.asList(getUpdateImageSpec(), getDeleteImageSpec(), getChangeOwnershipImageSpec(),
+                getChangeACLImageSpec());
     }
 
     /**
@@ -52,16 +53,16 @@ public class DefaultActionsImagesBarCell extends ImagesBarCell {
      * @return {@link ImageSpec} for {@link DefaultActions#CHANGE_OWNERSHIP change ownership} action
      */
     protected ImageSpec getMigrateGroupOwnershipForHierarchyImageSpec() {
-        return new ImageSpec(ACTION_MIGRATE_GROUP_OWNERSHIP_HIERARCHY, "TODO migrate group Owner for hierarchy",
-                IconResources.INSTANCE.changeOwnershipIcon());
+        return new ImageSpec(ACTION_MIGRATE_GROUP_OWNERSHIP_HIERARCHY, stringMessages.migrateGroupOwner(),
+                IconResources.INSTANCE.changeMigrateOwnershipIcon());
     }
 
     /**
      * @return {@link ImageSpec} for {@link DefaultActions#CHANGE_ACL change acl} action
      */
     protected ImageSpec getChangeACLImageSpec() {
-        return new ImageSpec(ACTION_CHANGE_OWNERSHIP, stringMessages.actionChangeOwnership(),
-                IconResources.INSTANCE.changeOwnershipIcon());
+        return new ImageSpec(ACTION_CHANGE_ACL, stringMessages.actionChangeACL(),
+                IconResources.INSTANCE.changeACLIcon());
     }
 
 }

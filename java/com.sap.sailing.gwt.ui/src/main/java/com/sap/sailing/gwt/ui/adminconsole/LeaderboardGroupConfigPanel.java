@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import static com.sap.sailing.domain.common.security.SecuredDomainType.LEADERBOARD_GROUP;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.DELETE;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
@@ -27,6 +28,7 @@ import com.google.gwt.user.cellview.client.CellTable.Resources;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -70,11 +72,14 @@ import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
+import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
 import com.sap.sse.security.ui.client.component.SecuredObjectOwnerColumn;
+import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements LeaderboardGroupsDisplayer, LeaderboardsDisplayer {
 
@@ -460,15 +465,13 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
     }
 
     private Widget createLeaderboardGroupsGUI(final Resources tableRes, final UserService userService) {
-        CaptionPanel leaderboardGroupsCaptionPanel = new CaptionPanel(stringMessages.leaderboardGroups());
-
-        VerticalPanel leaderboardGroupsContentPanel = new VerticalPanel();
+        final CaptionPanel leaderboardGroupsCaptionPanel = new CaptionPanel(stringMessages.leaderboardGroups());
+        final VerticalPanel leaderboardGroupsContentPanel = new VerticalPanel();
         leaderboardGroupsCaptionPanel.add(leaderboardGroupsContentPanel);
 
         // Create functional elements for the leaderboard groups
-        HorizontalPanel leaderboardGroupsControlsPanel = new HorizontalPanel();
-        leaderboardGroupsControlsPanel.setSpacing(5);
-        leaderboardGroupsContentPanel.add(leaderboardGroupsControlsPanel);
+        final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, LEADERBOARD_GROUP);
+        leaderboardGroupsContentPanel.add(buttonPanel);
 
         Label filterLeaderboardGroupsLbl = new Label(stringMessages.filterLeaderboardGroupsByName() + ":");
 
@@ -493,67 +496,50 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         };
         groupsFilterablePanel.getTextBox().ensureDebugId("LeaderboardGroupsFilterTextBox");
         leaderboardGroupsContentPanel.add(groupsFilterablePanel);
+
+        final Button createButton = buttonPanel.addCreateAction(stringMessages.createNewLeaderboardGroup(),
+                this::addNewGroup);
+        createButton.ensureDebugId("CreateLeaderboardGroupButton");
         
-        Button createGroupButton = new Button(stringMessages.createNewLeaderboardGroup());
-        createGroupButton.ensureDebugId("CreateLeaderboardGroupButton");
-        createGroupButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                addNewGroup();
-            }
+        final Button refreshButton = buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> {
+            leaderboardsRefresher.fillLeaderboards();
+            leaderboardGroupsRefresher.fillLeaderboardGroups();
         });
-        leaderboardGroupsControlsPanel.add(createGroupButton);
-        if (!userService.hasCurrentUserPermissionToCreateObjectOfType(SecuredDomainType.LEADERBOARD_GROUP)) {
-            createGroupButton.setVisible(false);
-        }
-        
-        Button refreshButton = new Button(stringMessages.refresh());
         refreshButton.ensureDebugId("RefreshLeaderboardGroupsButton");
-        refreshButton.addClickHandler(new ClickHandler() {
+
+        removeButton = buttonPanel.addRemoveAction(stringMessages.remove(), new Command() {
+
             @Override
-            public void onClick(ClickEvent event) {
-                leaderboardsRefresher.fillLeaderboards();
-                leaderboardGroupsRefresher.fillLeaderboardGroups();
+            public void execute() {
+                if (askUserForConfirmation()) {
+                    removeLeaderboardGroups(refreshableGroupsSelectionModel.getSelectedSet());
+                }
+            }
+
+            private boolean askUserForConfirmation() {
+                if (refreshableGroupsSelectionModel.itemIsSelectedButNotVisible(groupsTable.getVisibleItems())) {
+                    final String leaderboardGroupNames = refreshableGroupsSelectionModel.getSelectedSet().stream()
+                            .map(LeaderboardGroupDTO::getName).collect(Collectors.joining("\n"));
+                    return Window.confirm(
+                            stringMessages.doYouReallyWantToRemoveNonVisibleLeaderboardGroups(leaderboardGroupNames));
+                }
+                return Window.confirm(stringMessages.doYouReallyWantToRemoveLeaderboardGroups());
             }
         });
-        leaderboardGroupsControlsPanel.add(refreshButton);
+        removeButton.ensureDebugId("RemoveLeaderboardButton");
+        removeButton.setEnabled(false);
+
         AnchorCell anchorCell = new AnchorCell();
         Column<LeaderboardGroupDTO, SafeHtml> groupNameColumn = new Column<LeaderboardGroupDTO, SafeHtml>(anchorCell) {
             @Override
             public SafeHtml getValue(LeaderboardGroupDTO group) {
                 String debugParam = Window.Location.getParameter("gwt.codesvr");
                 String link = URLEncoder.encode("/gwt/Spectator.html?leaderboardGroupName=" + group.getName()
-                        + "&showRaceDetails=true&"+RaceBoardPerspectiveOwnSettings.PARAM_CAN_REPLAY_DURING_LIVE_RACES+"=true"
-                        + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
+                        + "&showRaceDetails=true&" + RaceBoardPerspectiveOwnSettings.PARAM_CAN_REPLAY_DURING_LIVE_RACES
+                        + "=true" + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 return ANCHORTEMPLATE.cell(UriUtils.fromString(link), group.getName());
             }
         };
-        
-        
-        removeButton = new Button(stringMessages.remove());
-        removeButton.ensureDebugId("RemoveLeaderboardButton");
-        removeButton.setEnabled(false);
-        removeButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                if(askUserForConfirmation()){
-                    removeLeaderboardGroups(refreshableGroupsSelectionModel.getSelectedSet()); 
-                }
-            }
-
-            private boolean askUserForConfirmation() {
-                if (refreshableGroupsSelectionModel.itemIsSelectedButNotVisible(groupsTable.getVisibleItems())) {
-                    final String leaderboardGroupNames = refreshableGroupsSelectionModel.getSelectedSet().stream().map(e -> e.getName()).collect(Collectors.joining("\n"));
-                    return Window.confirm(stringMessages.doYouReallyWantToRemoveNonVisibleLeaderboardGroups(leaderboardGroupNames));
-                } 
-                return Window.confirm(stringMessages.doYouReallyWantToRemoveLeaderboardGroups());
-            }
-        });
-        leaderboardGroupsControlsPanel.add(removeButton);
-        if (!userService.hasCurrentUserPermissionToDeleteAnyObjectOfType(SecuredDomainType.LEADERBOARD_GROUP)) {
-            removeButton.setVisible(false);
-        }
-       
         groupNameColumn.setSortable(true);
         leaderboardGroupsListHandler.setComparator(groupNameColumn, new Comparator<LeaderboardGroupDTO>() {
             @Override
@@ -625,27 +611,31 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                 userService.getUserManagementService(), type, idFactory,
                 group -> leaderboardGroupsRefresher.fillLeaderboardGroups(), stringMessages);
         actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
-                config::openDialog);
+                e -> config.openDialog(e));
         
+        final EditACLDialog.DialogConfig<LeaderboardGroupDTO> configACL = EditACLDialog.create(
+                userService.getUserManagementService(), type, idFactory,
+                group -> leaderboardGroupsRefresher.fillLeaderboardGroups(), stringMessages);
+        actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
+                e -> configACL.openDialog(e));
+
         final MigrateGroupOwnershipDialog.DialogConfig<LeaderboardGroupDTO> migrateDialogConfig = MigrateGroupOwnershipDialog
                 .create(userService.getUserManagementService(), (lg, dto) -> {
                     sailingService.updateGroupOwnerForLeaderboardGroupHierarchy(lg.getId(), dto,
                             new AsyncCallback<Void>() {
                                 @Override
                                 public void onFailure(Throwable caught) {
-                                    // TODO Auto-generated method stub
-
+                                    errorReporter.reportError(stringMessages.errorUpdatingOwnership(lg.getName()));
                                 }
 
                                 @Override
                                 public void onSuccess(Void result) {
-                                    // TODO Auto-generated method stub
-
+                                    leaderboardGroupsRefresher.fillLeaderboardGroups();
                                 }
                             });
                 });
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_MIGRATE_GROUP_OWNERSHIP_HIERARCHY, CHANGE_OWNERSHIP,
-                migrateDialogConfig::openDialog);
+                e -> migrateDialogConfig.openDialog(e));
 
         SelectionCheckboxColumn<LeaderboardGroupDTO> leaderboardTableSelectionColumn =
                 new SelectionCheckboxColumn<LeaderboardGroupDTO>(

@@ -24,6 +24,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
+import com.sap.sse.security.ui.client.UserService;
 
 public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel {
     protected final TrackedRacesListComposite trackedRacesListComposite;
@@ -31,8 +32,14 @@ public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel 
     private final ListBox availableRegattasListBox;
     
     public AbstractEventManagementPanel(SailingServiceAsync sailingService,
-            RegattaRefresher regattaRefresher,
-            ErrorReporter errorReporter, boolean actionButtonsEnabled, StringMessages stringMessages) {
+            RegattaRefresher regattaRefresher, ErrorReporter errorReporter, boolean actionButtonsEnabled,
+            StringMessages stringMessages) {
+        this(sailingService, null, regattaRefresher, errorReporter, actionButtonsEnabled, stringMessages);
+    }
+    
+    public AbstractEventManagementPanel(SailingServiceAsync sailingService, UserService userService,
+            RegattaRefresher regattaRefresher, ErrorReporter errorReporter, boolean actionButtonsEnabled,
+            StringMessages stringMessages) {
         super(sailingService, regattaRefresher, errorReporter, stringMessages);
         this.availableRegattas = new ArrayList<RegattaDTO>();
         
@@ -40,9 +47,8 @@ public abstract class AbstractEventManagementPanel extends AbstractRegattaPanel 
         this.availableRegattasListBox.ensureDebugId("AvailableRegattasListBox");
         
         // TrackedEventsComposite should exist in every *ManagementPanel. 
-        trackedRacesListComposite = new TrackedRacesListComposite(null, null, sailingService, errorReporter,
-                regattaRefresher,
-                stringMessages, /* multiselection */ true, actionButtonsEnabled);
+        trackedRacesListComposite = new TrackedRacesListComposite(null, null, sailingService, userService,
+                errorReporter, regattaRefresher, stringMessages, /* multiselection */ true, actionButtonsEnabled);
         trackedRacesListComposite.ensureDebugId("TrackedRacesListComposite");
     }
     

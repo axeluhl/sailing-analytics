@@ -1,9 +1,12 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.dom.client.Document;
@@ -37,6 +40,7 @@ import com.sap.sailing.domain.common.RaceIdentifier;
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.TrackedRaceStatusEnum;
 import com.sap.sailing.domain.common.dto.RaceDTO;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.RegattasDisplayer;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
@@ -54,6 +58,15 @@ import com.sap.sse.gwt.client.shared.components.AbstractCompositeComponent;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialogComponent;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
+import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
+import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
+import com.sap.sse.security.ui.client.component.SecuredObjectOwnerColumn;
+import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 public abstract class AbstractTrackedRacesListComposite extends AbstractCompositeComponent<TrackedRacesSettings> implements
         RegattasDisplayer {
@@ -85,6 +98,8 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
 
     private ListBox listBoxRegattas;
 
+    private final UserService userService;
+
     public static class AnchorCell extends AbstractCell<SafeHtml> {
         @Override
         public void render(com.google.gwt.cell.client.Cell.Context context, SafeHtml safeHtml, SafeHtmlBuilder sb) {
@@ -95,13 +110,14 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
     public AbstractTrackedRacesListComposite(Component<?> parent, ComponentContext<?> context,
             final SailingServiceAsync sailingService,
             final ErrorReporter errorReporter, final RegattaRefresher regattaRefresher,
-            final StringMessages stringMessages, boolean hasMultiSelection) {
+            final StringMessages stringMessages, boolean hasMultiSelection, UserService userService) {
         super(parent, context);
         this.sailingService = sailingService;
         this.errorReporter = errorReporter;
         this.regattaRefresher = regattaRefresher;
         this.multiSelection = hasMultiSelection;
         this.stringMessages = stringMessages;
+        this.userService = userService;
     }
 
     public void setRegattaFilterValue(String regattaName) {
@@ -395,6 +411,31 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         raceTable.addColumn(hasGPSDataColumn, stringMessages.gpsData());
         raceTable.addColumn(raceStatusColumn, stringMessages.status());
         raceTable.addColumn(raceLiveDelayColumn, stringMessages.delayInSeconds());
+        
+        if (userService != null) {
+            final SecuredObjectOwnerColumn<RaceDTO> groupColumn = SecuredObjectOwnerColumn.getGroupOwnerColumn();
+            groupColumn.setSortable(true);
+            final SecuredObjectOwnerColumn<RaceDTO> userColumn = SecuredObjectOwnerColumn.getUserOwnerColumn();
+            userColumn.setSortable(true);
+
+            final HasPermissions type = SecuredDomainType.TRACKED_RACE;
+            final Function<RaceDTO, String> idFactory = race -> race.getTypeRelativeIdentifierAsString();
+            final AccessControlledActionsColumn<RaceDTO, DefaultActionsImagesBarCell> actionsColumn = new AccessControlledActionsColumn<>(
+                    new DefaultActionsImagesBarCell(stringMessages), userService, type, idFactory);
+            final DialogConfig<RaceDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
+                    idFactory, race -> regattaRefresher.fillRegattas(), stringMessages);
+            actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openDialog);
+
+            final EditACLDialog.DialogConfig<RaceDTO> configACL = EditACLDialog.create(
+                    userService.getUserManagementService(), type, idFactory, regatta -> regattaRefresher.fillRegattas(),
+                    stringMessages);
+            actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
+                    configACL::openDialog);
+            
+            raceTable.addColumn(groupColumn, stringMessages.group());
+            raceTable.addColumn(userColumn, stringMessages.user());
+            raceTable.addColumn(actionsColumn, stringMessages.actions());
+        }
     }
 
     @Override

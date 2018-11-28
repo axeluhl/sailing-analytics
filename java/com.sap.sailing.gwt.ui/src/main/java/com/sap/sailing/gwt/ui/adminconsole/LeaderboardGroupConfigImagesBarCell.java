@@ -14,6 +14,6 @@ public class LeaderboardGroupConfigImagesBarCell extends DefaultActionsImagesBar
     @Override
     protected Iterable<ImageSpec> getImageSpecs() {
         return Arrays.asList(getUpdateImageSpec(), getDeleteImageSpec(), getChangeOwnershipImageSpec(),
-                getMigrateGroupOwnershipForHierarchyImageSpec());
+                getChangeACLImageSpec(), getMigrateGroupOwnershipForHierarchyImageSpec());
     }
 }

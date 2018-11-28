@@ -25,7 +25,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -53,33 +52,32 @@ import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
 import com.sap.sse.security.ui.client.component.SecuredObjectOwnerColumn;
+import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 /**
  * A composite showing the list of all regattas 
  * @author Frank
- *
  */
 public class RegattaListComposite extends Composite implements RegattasDisplayer {
-    protected final CellTable<RegattaDTO> regattaTable;
+
     protected final ListDataProvider<RegattaDTO> regattaListDataProvider;
-    private List<RegattaDTO> allRegattas;
-    private final SimplePanel mainPanel;
-    private final VerticalPanel panel;
-
-    private final Label noRegattasLabel;
-
-    private final SailingServiceAsync sailingService;
-    protected final RefreshableMultiSelectionModel<RegattaDTO> refreshableRegattaMultiSelectionModel;
-    private final ErrorReporter errorReporter;
-    private final RegattaRefresher regattaRefresher;
     protected final StringMessages stringMessages;
 
+    private final CellTable<RegattaDTO> regattaTable;
+    private final Label noRegattasLabel;
+    private final SailingServiceAsync sailingService;
+    private final RefreshableMultiSelectionModel<RegattaDTO> refreshableRegattaMultiSelectionModel;
+    private final ErrorReporter errorReporter;
+    private final RegattaRefresher regattaRefresher;
     private final LabeledAbstractFilterablePanel<RegattaDTO> filterablePanelRegattas;
+
+    private List<RegattaDTO> allRegattas;
 
     protected static AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
 
@@ -99,9 +97,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         this.stringMessages = stringMessages;
         allRegattas = new ArrayList<RegattaDTO>();
         
-        mainPanel = new SimplePanel();
-        panel = new VerticalPanel();
-        mainPanel.setWidget(panel);
+        final VerticalPanel panel = new VerticalPanel();
         Label filterRegattasLabel = new Label(stringMessages.filterRegattasByName() + ":");
         filterRegattasLabel.setWordWrap(false);
         noRegattasLabel = new Label(stringMessages.noRegattasYet());
@@ -136,7 +132,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         panel.add(filterablePanelRegattas);
 
         panel.add(regattaTable);
-        initWidget(mainPanel);
+        initWidget(panel);
     }
     
     public HandlerRegistration addSelectionChangeHandler(SelectionChangeEvent.Handler handler) {
@@ -265,6 +261,12 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
                 idFactory, regatta -> regattaRefresher.fillRegattas(), stringMessages);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 config::openDialog);
+
+        final EditACLDialog.DialogConfig<RegattaDTO> configACL = EditACLDialog.create(
+                userService.getUserManagementService(), type, idFactory, regatta -> regattaRefresher.fillRegattas(),
+                stringMessages);
+        actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
+                configACL::openDialog);
 
         table.addColumn(regattaSelectionCheckboxColumn, regattaSelectionCheckboxColumn.getHeader());
         table.addColumn(regattaNameColumn, stringMessages.regattaName());

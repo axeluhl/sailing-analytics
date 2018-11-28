@@ -995,6 +995,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         }
         securityService.assumeOwnershipMigrated(SecuredDomainType.MEDIA_TRACK.getName(),
                 SecuredDomainType.getAllInstances());
+        for (Competitor competitor : getCompetitorAndBoatStore().getAllCompetitors()) {
+            securityService.migrateOwnership(competitor, SecuredDomainType.getAllInstances());
+        }
+        for (Boat boat : getCompetitorAndBoatStore().getBoats()) {
+            securityService.migrateOwnership(boat, SecuredDomainType.getAllInstances());
+        }
     }
 
     private void loadRaceIDToRegattaAssociations() {

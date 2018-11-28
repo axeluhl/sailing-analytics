@@ -41,6 +41,8 @@ import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.Action;
 import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.Ownership;
+import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
@@ -94,9 +96,8 @@ public abstract class AbstractJaxRsApiTest {
                 }
                 return null;
             }
-        }).when(securityService).setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                Mockito.any(), Mockito.any(), Mockito.any(),
-                Mockito.any(ActionWithResult.class));
+        }).when(securityService).setOwnershipCheckPermissionForObjectCreationAndRevertOnError(Mockito.any(),
+                Mockito.any(), Mockito.any(), Mockito.any(ActionWithResult.class));
 
         Mockito.doReturn(true).when(securityService)
                 .hasCurrentUserReadPermission(Mockito.any(WithQualifiedObjectIdentifier.class));
@@ -104,6 +105,11 @@ public abstract class AbstractJaxRsApiTest {
         Mockito.doNothing().when(securityService).checkCurrentUserReadPermission(Mockito.any());
 
         Mockito.doReturn(true).when(fakeSubject).isAuthenticated();
+
+        OwnershipAnnotation mockedOwnership = Mockito.mock(OwnershipAnnotation.class);
+        Ownership ownership = Mockito.mock(Ownership.class);
+        Mockito.doReturn(mockedOwnership).when(securityService).getOwnership(Mockito.any());
+        Mockito.doReturn(ownership).when(mockedOwnership).getAnnotation();
 
         eventsResource = spyResource(new DummyEventsRessource());
         doReturn(getSecurityService()).when(eventsResource).getSecurityService();

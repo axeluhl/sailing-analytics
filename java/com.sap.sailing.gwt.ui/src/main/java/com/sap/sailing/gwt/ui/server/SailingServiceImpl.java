@@ -1240,6 +1240,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Map<CompetitorDTO, BoatDTO> competitorAndBoatDTOs = baseDomainFactory.convertToCompetitorAndBoatDTOs(r.getCompetitorsAndTheirBoats());
             RaceWithCompetitorsAndBoatsDTO raceDTO = new RaceWithCompetitorsAndBoatsDTO(raceIdentifier, competitorAndBoatDTOs,
                     trackedRaceDTO, getService().isRaceBeingTracked(regatta, r));
+            SecurityDTOUtil.addSecurityInformation(getSecurityService(), raceDTO, trackedRace.getIdentifier());
             if (trackedRace != null) {
                 getBaseDomainFactory().updateRaceDTOWithTrackedRaceData(trackedRace, raceDTO);
             }
@@ -1256,11 +1257,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     private List<CompetitorDTO> convertToCompetitorDTOs(Iterable<? extends Competitor> iterable) {
         List<CompetitorDTO> result = new ArrayList<>();
         for (Competitor c : iterable) {
-            CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(c);
-            SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorDTO, c.getIdentifier());
+            CompetitorDTO competitorDTO = convertToCompetitorDTO(c);
             result.add(competitorDTO);
         }
         return result;
+    }
+    
+    private CompetitorDTO convertToCompetitorDTO(Competitor competitor) {
+        CompetitorDTO competitorDTO = baseDomainFactory.convertToCompetitorDTO(competitor);
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), competitorDTO, competitor.getIdentifier());
+        return competitorDTO;
     }
 
     /**
@@ -1297,9 +1303,16 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         List<BoatDTO> result = new ArrayList<BoatDTO>();
         for (Boat b : iterable) {
             BoatDTO boatDTO = baseDomainFactory.convertToBoatDTO(b);
+            SecurityDTOUtil.addSecurityInformation(getSecurityService(), boatDTO, b.getIdentifier());
             result.add(boatDTO);
         }
         return result;
+    }
+    
+    private BoatDTO convertToBoatDTO(Boat boat) {
+        BoatDTO boatDTO = baseDomainFactory.convertToBoatDTO(boat);
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), boatDTO, boat.getIdentifier());
+        return boatDTO;
     }
 
     @Override
@@ -5499,17 +5512,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Iterable<CompetitorDTO> getCompetitors(boolean filterCompetitorsWithBoat, boolean filterCompetitorsWithoutBoat) {
-        Iterable<CompetitorDTO> result;
+    public Iterable<CompetitorDTO> getCompetitors(boolean filterCompetitorsWithBoat,
+            boolean filterCompetitorsWithoutBoat) {
+        final List<CompetitorDTO> result = new ArrayList<>();
         CompetitorAndBoatStore competitorStore = getService().getBaseDomainFactory().getCompetitorAndBoatStore();
         if (filterCompetitorsWithBoat == false && filterCompetitorsWithoutBoat == false) {
-            result = convertToCompetitorDTOs(competitorStore.getAllCompetitors());
+            getSecurityService().filterObjectsWithPermissionForCurrentUser(SecuredDomainType.COMPETITOR,
+                    SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC, competitorStore.getAllCompetitors(),
+                    boat -> boat.getIdentifier().toString(),
+                    filteredObject -> result.add(convertToCompetitorDTO(filteredObject)));
         } else if (filterCompetitorsWithBoat == true && filterCompetitorsWithoutBoat == false) {
-            result = convertToCompetitorDTOs(competitorStore.getCompetitorsWithoutBoat());
+            getSecurityService().filterObjectsWithPermissionForCurrentUser(SecuredDomainType.COMPETITOR,
+                    SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC, competitorStore.getCompetitorsWithoutBoat(),
+                    boat -> boat.getIdentifier().toString(),
+                    filteredObject -> result.add(convertToCompetitorDTO(filteredObject)));
         } else if (filterCompetitorsWithBoat == false && filterCompetitorsWithoutBoat == true) {
-            result = convertToCompetitorDTOs(competitorStore.getCompetitorsWithBoat());
-        } else {
-            result = Collections.emptyList();
+            getSecurityService().filterObjectsWithPermissionForCurrentUser(SecuredDomainType.COMPETITOR,
+                    SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC, competitorStore.getCompetitorsWithBoat(),
+                    boat -> boat.getIdentifier().toString(),
+                    filteredObject -> result.add(convertToCompetitorDTO(filteredObject)));
         }
         return result;
     }
@@ -5654,12 +5675,24 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public Iterable<BoatDTO> getAllBoats() {
-        return convertToBoatDTOs(getService().getBaseDomainFactory().getCompetitorAndBoatStore().getBoats());
+        List<BoatDTO> result = new ArrayList<>();
+        getSecurityService().filterObjectsWithPermissionForCurrentUser(SecuredDomainType.BOAT,
+                SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC,
+                getService().getBaseDomainFactory().getCompetitorAndBoatStore().getBoats(),
+                boat -> boat.getIdentifier().toString(),
+                filteredObject -> result.add(convertToBoatDTO(filteredObject)));
+        return result;
     }
 
     @Override
     public Iterable<BoatDTO> getStandaloneBoats() {
-        return convertToBoatDTOs(getService().getBaseDomainFactory().getCompetitorAndBoatStore().getStandaloneBoats());
+        List<BoatDTO> result = new ArrayList<>();
+        getSecurityService().filterObjectsWithPermissionForCurrentUser(SecuredDomainType.BOAT,
+                SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC,
+                getService().getBaseDomainFactory().getCompetitorAndBoatStore().getStandaloneBoats(),
+                boat -> boat.getIdentifier().toString(),
+                filteredObject -> result.add(convertToBoatDTO(filteredObject)));
+        return result;
     }
 
     @Override

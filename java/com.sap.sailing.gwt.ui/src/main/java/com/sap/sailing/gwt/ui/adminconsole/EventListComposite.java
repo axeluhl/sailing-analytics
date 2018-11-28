@@ -1,5 +1,6 @@
 package com.sap.sailing.gwt.ui.adminconsole;
 
+import static com.sap.sailing.domain.common.security.SecuredDomainType.EVENT;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.CHANGE_OWNERSHIP;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.DELETE;
 import static com.sap.sse.security.shared.HasPermissions.DefaultActions.UPDATE;
@@ -20,8 +21,6 @@ import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -32,17 +31,15 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.gwt.ui.adminconsole.LeaderboardGroupDialog.LeaderboardGroupDescriptor;
 import com.sap.sailing.gwt.ui.client.EntryPointLinkFactory;
 import com.sap.sailing.gwt.ui.client.EventsRefresher;
@@ -71,12 +68,14 @@ import com.sap.sse.gwt.client.celltable.SelectionCheckboxColumn;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
-import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
+import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
 import com.sap.sse.security.ui.client.component.SecuredObjectOwnerColumn;
+import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
@@ -89,17 +88,12 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
     private final UserService userService;
     private final ErrorReporter errorReporter;
     private final StringMessages stringMessages;
-
-    private CellTable<EventDTO> eventTable;
+    private final CellTable<EventDTO> eventTable;
     private final RefreshableMultiSelectionModel<EventDTO> refreshableEventSelectionModel;
-    private ListDataProvider<EventDTO> eventListDataProvider;
-    private List<EventDTO> allEvents;
-    private LabeledAbstractFilterablePanel<EventDTO> filterTextbox;
-    private Button removeEventsButton;
+    private final ListDataProvider<EventDTO> eventListDataProvider;
+    private final List<EventDTO> allEvents;
+    private final LabeledAbstractFilterablePanel<EventDTO> filterTextbox;
     private final Label noEventsLabel;
-
-    private final SimplePanel mainPanel;
-    private final VerticalPanel panel;
 
     private Iterable<LeaderboardGroupDTO> availableLeaderboardGroups;
 
@@ -132,63 +126,38 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         this.regattaRefresher = regattaRefresher;
         this.eventsRefresher = eventsRefresher;
         this.handleTabSelectable = handleTabSelectable;
-        availableLeaderboardGroups = Collections.emptyList();
-        allEvents = new ArrayList<EventDTO>();
+        this.availableLeaderboardGroups = Collections.emptyList();
+        this.allEvents = new ArrayList<EventDTO>();
 
-        mainPanel = new SimplePanel();
-        panel = new VerticalPanel();
-        mainPanel.setWidget(panel);
+        final VerticalPanel panel = new VerticalPanel();
+        final AccessControlledButtonPanel buttonPanel = new AccessControlledButtonPanel(userService, EVENT);
+        panel.add(buttonPanel);
 
-        HorizontalPanel eventControlsPanel = new HorizontalPanel();
-        eventControlsPanel.setSpacing(5);
-        panel.add(eventControlsPanel);
+        final Button refresh = buttonPanel.addUnsecuredAction(stringMessages.refresh(), this::fillEvents);
+        refresh.ensureDebugId("RefreshEventsButton");
         
-        Button refreshButton = new Button(stringMessages.refresh());
-        refreshButton.ensureDebugId("RefreshEventsButton");
-        refreshButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {
-                fillEvents();
-            }
-        });
-        eventControlsPanel.add(refreshButton);
+        final Button create = buttonPanel.addCreateAction(stringMessages.actionAddEvent(), this::openCreateEventDialog);
+        create.ensureDebugId("CreateEventButton");
 
-        Button createEventBtn = new Button(stringMessages.actionAddEvent());
-        createEventBtn.ensureDebugId("CreateEventButton");
-        createEventBtn.addClickHandler(new ClickHandler() {
+        final Button remove = buttonPanel.addRemoveAction(stringMessages.remove(), new Command() {
             @Override
-            public void onClick(ClickEvent event) {
-                openCreateEventDialog();
-            }
-        });
-        eventControlsPanel.add(createEventBtn);
-        if (!userService.hasCurrentUserPermissionToCreateObjectOfType(SecuredDomainType.EVENT)) {
-            createEventBtn.setVisible(false);
-        }
-
-        removeEventsButton = new Button(stringMessages.remove());
-        removeEventsButton.ensureDebugId("RemoveEventsButton");
-        removeEventsButton.setEnabled(false);
-        removeEventsButton.addClickHandler(new ClickHandler() {
-            @Override
-            public void onClick(ClickEvent event) {  
-                if(askUserForConfirmation()){
+            public void execute() {
+                if (askUserForConfirmation()) {
                     removeEvents(refreshableEventSelectionModel.getSelectedSet());
                 }
             }
 
             private boolean askUserForConfirmation() {
-                if(refreshableEventSelectionModel.itemIsSelectedButNotVisible(eventTable.getVisibleItems())){
-                    final String eventNames = refreshableEventSelectionModel.getSelectedSet().stream().map(e -> e.getName()).collect(Collectors.joining("\n"));
+                if (refreshableEventSelectionModel.itemIsSelectedButNotVisible(eventTable.getVisibleItems())) {
+                    final String eventNames = refreshableEventSelectionModel.getSelectedSet().stream()
+                            .map(EventDTO::getName).collect(Collectors.joining("\n"));
                     return Window.confirm(stringMessages.doYouReallyWantToRemoveNonVisibleEvents(eventNames));
                 }
                 return Window.confirm(stringMessages.doYouReallyWantToRemoveEvents());
             }
         });
-        eventControlsPanel.add(removeEventsButton);
-        if (!userService.hasCurrentUserPermissionToDeleteAnyObjectOfType(SecuredDomainType.EVENT)) {
-            removeEventsButton.setVisible(false);
-        }
+        remove.setEnabled(false);
+        remove.ensureDebugId("RemoveEventsButton");
 
         eventListDataProvider = new ListDataProvider<EventDTO>();
         filterTextbox = new LabeledAbstractFilterablePanel<EventDTO>(new Label(stringMessages.filterEventsByName()),
@@ -222,10 +191,10 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         this.refreshableEventSelectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
             @Override
             public void onSelectionChange(SelectionChangeEvent event) {
-                final boolean somethingSelected = !refreshableEventSelectionModel.getSelectedSet().isEmpty();
-                removeEventsButton.setEnabled(somethingSelected);
+                remove.setEnabled(!refreshableEventSelectionModel.getSelectedSet().isEmpty());
                 final int numberOfItemsSelected = refreshableEventSelectionModel.getSelectedSet().size();
-                removeEventsButton.setText(numberOfItemsSelected <= 1 ? stringMessages.remove() : stringMessages.removeNumber(numberOfItemsSelected));
+                remove.setText(numberOfItemsSelected <= 1 ? stringMessages.remove()
+                        : stringMessages.removeNumber(numberOfItemsSelected));
             }
         });
         panel.add(filterTextbox);
@@ -235,7 +204,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         noEventsLabel.setWordWrap(false);
         panel.add(noEventsLabel);
         fillEvents();
-        initWidget(mainPanel);
+        initWidget(panel);
     }
 
     private CellTable<EventDTO> createEventTable(UserDTO user) {
@@ -362,33 +331,35 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         final SecuredObjectOwnerColumn<EventDTO> groupColumn = SecuredObjectOwnerColumn.getGroupOwnerColumn();
         final SecuredObjectOwnerColumn<EventDTO> userColumn = SecuredObjectOwnerColumn.getUserOwnerColumn();
 
-        final HasPermissions type = SecuredDomainType.EVENT;
         final Function<EventDTO, String> idFactory = event -> event.id.toString();
         final AccessControlledActionsColumn<EventDTO, EventConfigImagesBarCell> actionsColumn = new AccessControlledActionsColumn<>(
-                new EventConfigImagesBarCell(stringMessages), userService, type, idFactory);
+                new EventConfigImagesBarCell(stringMessages), userService, EVENT, idFactory);
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_UPDATE, UPDATE, this::openEditEventDialog);
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_DELETE, DELETE, event -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveEvent(event.getName()))) {
                 removeEvent(event);
             }
         });
-        final DialogConfig<EventDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
+        final DialogConfig<EventDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), EVENT,
                 idFactory, event -> fillEvents(), stringMessages);
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openDialog);
         
+        final EditACLDialog.DialogConfig<EventDTO> configACL = EditACLDialog.create(
+                userService.getUserManagementService(), EVENT, idFactory, event -> fillEvents(), stringMessages);
+        actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
+                e -> configACL.openDialog(e));
+
         final MigrateGroupOwnershipDialog.DialogConfig<EventDTO> migrateDialogConfig = MigrateGroupOwnershipDialog
                 .create(userService.getUserManagementService(), (event, dto) -> {
                     sailingService.updateGroupOwnerForEventHierarchy(event.id, dto, new AsyncCallback<Void>() {
                         @Override
                         public void onFailure(Throwable caught) {
-                            // TODO Auto-generated method stub
-
+                            errorReporter.reportError(stringMessages.errorUpdatingOwnership(event.getName()));
                         }
 
                         @Override
                         public void onSuccess(Void result) {
-                            // TODO Auto-generated method stub
-
+                            fillEvents();
                         }
                     });
                 });

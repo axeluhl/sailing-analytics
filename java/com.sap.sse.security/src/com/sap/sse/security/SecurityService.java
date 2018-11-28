@@ -77,6 +77,9 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     AccessControlList updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, Map<UserGroup, Set<String>> permissionMap);
 
+    AccessControlList overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
+            Map<UserGroup, Set<String>> permissionMap);
+
     /**
      * @param name The name of the user group to add
      */
