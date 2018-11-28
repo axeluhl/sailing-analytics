@@ -5500,17 +5500,25 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public Iterable<CompetitorDTO> getCompetitors(boolean filterCompetitorsWithBoat, boolean filterCompetitorsWithoutBoat) {
-        Iterable<CompetitorDTO> result;
+    public Iterable<CompetitorDTO> getCompetitors(boolean filterCompetitorsWithBoat,
+            boolean filterCompetitorsWithoutBoat) {
+        final List<CompetitorDTO> result = new ArrayList<>();
         CompetitorAndBoatStore competitorStore = getService().getBaseDomainFactory().getCompetitorAndBoatStore();
         if (filterCompetitorsWithBoat == false && filterCompetitorsWithoutBoat == false) {
-            result = convertToCompetitorDTOs(competitorStore.getAllCompetitors());
+            getSecurityService().filterObjectsWithPermissionForCurrentUser(SecuredDomainType.COMPETITOR,
+                    SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC, competitorStore.getAllCompetitors(),
+                    boat -> boat.getIdentifier().toString(),
+                    filteredObject -> result.add(baseDomainFactory.convertToCompetitorDTO(filteredObject)));
         } else if (filterCompetitorsWithBoat == true && filterCompetitorsWithoutBoat == false) {
-            result = convertToCompetitorDTOs(competitorStore.getCompetitorsWithoutBoat());
+            getSecurityService().filterObjectsWithPermissionForCurrentUser(SecuredDomainType.COMPETITOR,
+                    SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC, competitorStore.getCompetitorsWithoutBoat(),
+                    boat -> boat.getIdentifier().toString(),
+                    filteredObject -> result.add(baseDomainFactory.convertToCompetitorDTO(filteredObject)));
         } else if (filterCompetitorsWithBoat == false && filterCompetitorsWithoutBoat == true) {
-            result = convertToCompetitorDTOs(competitorStore.getCompetitorsWithBoat());
-        } else {
-            result = Collections.emptyList();
+            getSecurityService().filterObjectsWithPermissionForCurrentUser(SecuredDomainType.COMPETITOR,
+                    SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC, competitorStore.getCompetitorsWithBoat(),
+                    boat -> boat.getIdentifier().toString(),
+                    filteredObject -> result.add(baseDomainFactory.convertToCompetitorDTO(filteredObject)));
         }
         return result;
     }
