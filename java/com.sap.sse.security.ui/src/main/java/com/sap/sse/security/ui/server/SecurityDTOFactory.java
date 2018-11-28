@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.function.Function;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.security.SecurityService;
@@ -20,6 +19,7 @@ import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.SocialUserAccount;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
+import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.AccountDTO;
@@ -85,7 +85,8 @@ public class SecurityDTOFactory {
         userDTO.setDefaultTenantForCurrentServer(createUserGroupDTOFromUserGroup(securityService.getDefaultTenantForCurrentUser(),
                 fromOriginalToStrippedDownUser,
                 fromOriginalToStrippedDownUserGroup));
-        SecurityDTOUtil.addSecurityInformation(this, securityService, userDTO, user.getIdentifier());
+        SecurityDTOUtil.addSecurityInformation(this, securityService, userDTO, user.getIdentifier(),
+                fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
         return userDTO;
     }
 
@@ -102,11 +103,12 @@ public class SecurityDTOFactory {
         RoleDefinition rdef = role.getRoleDefinition();
         RoleDefinitionDTO rdefDTO = createRoleDefinitionDTO(rdef, securityService, fromOriginalToStrippedDownUser,
                 fromOriginalToStrippedDownUserGroup);
-        return new RoleDTO(rdefDTO,
+        RoleDTO mappedRole = new RoleDTO(rdefDTO,
                 createUserGroupDTOFromUserGroup(role.getQualifiedForTenant(),
                 fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup),
                 createUserDTOFromUser(role.getQualifiedForUser(),
                         fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
+        return mappedRole;
     }
 
     private RoleDefinitionDTO createRoleDefinitionDTO(final RoleDefinition roleDefinition,
@@ -114,7 +116,8 @@ public class SecurityDTOFactory {
             final Map<UserGroup, UserGroupDTO> fromOriginalToStrippedDownUserGroup) {
         final RoleDefinitionDTO roleDefDTO = new RoleDefinitionDTO(roleDefinition.getId(), roleDefinition.getName(),
                 roleDefinition.getPermissions());
-        // SecurityDTOUtil.addSecurityInformation(this, securityService, roleDefDTO, roleDefinition.getIdentifier());
+        SecurityDTOUtil.addSecurityInformation(this, securityService, roleDefDTO, roleDefinition.getIdentifier(),
+                fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
         return roleDefDTO;
     }
 
@@ -288,15 +291,21 @@ public class SecurityDTOFactory {
     public StrippedUserDTO createStrippedUserFromUser(User user, SecurityService securityService,
             Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser,
             Map<UserGroup, UserGroupDTO> fromOriginalToStrippedDownUserGroup) {
-        return fromOriginalToStrippedDownUser.computeIfAbsent(user, new Function<User, StrippedUserDTO>() {
-
-            @Override
-            public StrippedUserDTO apply(User t) {
-                Iterable<Role> roles = t.getRoles();
-                Iterable<RoleDTO> rolesDTO = createRolesDTOs(roles, fromOriginalToStrippedDownUser,
-                        fromOriginalToStrippedDownUserGroup, securityService);
-                return new StrippedUserDTO(t.getName(), rolesDTO, t.getPermissions());
+        StrippedUserDTO mappedUser = fromOriginalToStrippedDownUser.get(user);
+        if (mappedUser == null) {
+            Iterable<Role> roles = user.getRoles();
+            mappedUser = new StrippedUserDTO(user.getName());
+            fromOriginalToStrippedDownUser.put(user, mappedUser);
+            Iterable<RoleDTO> rolesDTO = createRolesDTOs(roles, fromOriginalToStrippedDownUser,
+                    fromOriginalToStrippedDownUserGroup, securityService);
+            for (RoleDTO r : rolesDTO) {
+                mappedUser.addRole(r);
             }
-        });
+            for (WildcardPermission p : user.getPermissions()) {
+                mappedUser.addPermission(p);
+            }
+            fromOriginalToStrippedDownUser.put(user, mappedUser);
+        }
+        return mappedUser;
     }
 }

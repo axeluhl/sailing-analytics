@@ -18,5 +18,4 @@ public class StrippedUserDTO extends SecurityUserImpl<RoleDefinitionDTO, RoleDTO
     public StrippedUserDTO(String name) {
         super(name);
     }
-
 }

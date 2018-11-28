@@ -38,7 +38,8 @@ public abstract class SecurityDTOUtil {
      */
     public static void addSecurityInformation(final SecurityService securityService, final SecuredDTO securedObject,
             final QualifiedObjectIdentifier objectId) {
-        addSecurityInformation(new SecurityDTOFactory(), securityService, securedObject, objectId);
+        addSecurityInformation(new SecurityDTOFactory(), securityService, securedObject, objectId, new HashMap<>(),
+                new HashMap<>());
     }
 
     /**
@@ -54,12 +55,13 @@ public abstract class SecurityDTOUtil {
      *            the {@link NamedSecuredObjectDTO} to add security information to
      * @param objectId
      *            the {@link QualifiedObjectIdentifier} to get security information for
+     * @param fromOriginalToStrippedDownUserGroup2
+     * @param fromOriginalToStrippedDownUser2
      */
     public static void addSecurityInformation(final SecurityDTOFactory securityDTOFactory,
             final SecurityService securityService, final SecuredDTO securedObject,
-            final QualifiedObjectIdentifier objectId) {
-        final Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser = new HashMap<>();
-        final Map<UserGroup, UserGroupDTO> fromOriginalToStrippedDownUserGroup = new HashMap<>();
+            final QualifiedObjectIdentifier objectId, Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser,
+            Map<UserGroup, UserGroupDTO> fromOriginalToStrippedDownUserGroup) {
         addSecurityInformation(securityDTOFactory, securityService, securedObject, objectId,
                 fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup, false);
     }
