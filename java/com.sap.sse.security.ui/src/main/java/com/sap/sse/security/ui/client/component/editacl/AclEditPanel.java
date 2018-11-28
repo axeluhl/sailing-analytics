@@ -138,7 +138,12 @@ public class AclEditPanel extends Composite {
                 userGroupOracle.setDefaultSuggestionsFromText(suggestionList);
             }
         });
-        return new SuggestBox(userGroupOracle, new TextBox());
+        TextBox textBox = new TextBox();
+        textBox.getElement().setPropertyString("placeholder", stringMessages.enterUserGroupName());
+
+        SuggestBox suggestBox = new SuggestBox(userGroupOracle, textBox);
+        suggestBox.addStyleName(AclDialogResources.INSTANCE.css().userGroupTextBox());
+        return suggestBox;
     }
 
     /** @return the UI element for visualizing {@link UserGroup} elements. */
@@ -178,8 +183,6 @@ public class AclEditPanel extends Composite {
         tenantPager.setDisplay(cellList);
         final ScrollPanel tenantPanel = new ScrollPanel(cellList);
         final VerticalPanel tenantListWrapper = new VerticalPanel();
-        tenantListWrapper.add(tenantPanel);
-        tenantListWrapper.add(tenantPager);
 
         // add additional widgets
         final FlowPanel additionalWidgetsPanel = new FlowPanel();
@@ -188,6 +191,8 @@ public class AclEditPanel extends Composite {
             additionalWidget.addStyleName(AclDialogResources.INSTANCE.css().additionalWidget());
         }
         tenantListWrapper.add(additionalWidgetsPanel);
+        tenantListWrapper.add(tenantPanel);
+        tenantListWrapper.add(tenantPager);
 
         final CaptionPanel tenantListCaption = new CaptionPanel(title);
         tenantListCaption.add(tenantListWrapper);
