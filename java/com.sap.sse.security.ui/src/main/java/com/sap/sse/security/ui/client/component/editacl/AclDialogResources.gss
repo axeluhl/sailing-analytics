@@ -1,5 +1,6 @@
 .allowedActionsTable {
-    margin-right: 10px;
+    margin-right: 5px;
+    margin-left: 5px;
     margin-top: 10px;
     display: inline-block;
 }
@@ -7,4 +8,8 @@
 .deniedActionsTable {
     margin-top: 10px;
     display: inline-block;
+}
+.additionalWidget {
+    margin-left: 5px;
+    margin-right: 5px;
 }

@@ -15,7 +15,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.CellList;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.SimplePager.TextLocation;
@@ -49,15 +48,15 @@ public class AclEditPanel extends Composite {
     }
 
     @UiField
-    Button removeUserGroupButtonUi;
-    @UiField
-    Button addUserGroupButtonUi;
-    @UiField(provided = true)
-    SuggestBox suggestUserGroupUi;
-    @UiField
     FlowPanel userGroupCellListPanelUi;
     @UiField
     FlowPanel permissionsCellListPanelUi;
+
+    private final Button removeUserGroupButtonUi;
+    private final Button addUserGroupButtonUi;
+    private final SuggestBox suggestUserGroupUi;
+
+    private final StringMessages stringMessages;
 
     private final StringListEditorComposite allowedActionsEditor;
     private final StringListEditorComposite deniedActionsEditor;
@@ -72,6 +71,7 @@ public class AclEditPanel extends Composite {
 
     public AclEditPanel(UserManagementServiceAsync userManagementService, Action[] availableActions,
             StringMessages stringMessages) {
+        this.stringMessages = stringMessages;
         this.userManagementService = userManagementService;
         AclDialogResources.INSTANCE.css().ensureInjected();
 
@@ -80,9 +80,16 @@ public class AclEditPanel extends Composite {
             actionNames.add(a.name());
         }
 
-        setupUserGroupSuggest(userManagementService);
+        suggestUserGroupUi = createUserGroupSuggest(userManagementService);
+        addUserGroupButtonUi = new Button(stringMessages.add());
+        removeUserGroupButtonUi = new Button(stringMessages.remove());
+        addUserGroupButtonUi.addClickHandler(e -> onUserGroupAdd(e));
+        removeUserGroupButtonUi.addClickHandler(e -> onUserGroupRemove(e));
+
         initWidget(uiBinder.createAndBindUi(this));
-        setupCellLists(stringMessages);
+        userGroupList = createUserGroupCellList(stringMessages);
+        userGroupCellListPanelUi.add(wrapListUi(userGroupList, stringMessages.userGroups(), suggestUserGroupUi,
+                addUserGroupButtonUi, removeUserGroupButtonUi));
 
         userGroupSingleSelectionModel.addSelectionChangeHandler(h -> {
             onUserGroupsChange();
@@ -90,9 +97,9 @@ public class AclEditPanel extends Composite {
 
         // create action editor for allowed actions
         allowedActionsEditor = new StringListEditorComposite(new ArrayList<>(), stringMessages,
-                com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), actionNames, "Allowed action name");
+                com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), actionNames,
+                stringMessages.allowedActionName());
         allowedActionsEditor.addStyleName(AclDialogResources.INSTANCE.css().allowedActionsTable());
-        // TODO: i18n ^v^v
 
         allowedActionsEditor.addValueChangeHandler(e -> userGroupsWithAllowedActions
                 .put(userGroupSingleSelectionModel.getSelectedObject(), toSet(e.getValue())));
@@ -100,7 +107,8 @@ public class AclEditPanel extends Composite {
 
         // create action editor for denied actions
         deniedActionsEditor = new StringListEditorComposite(new ArrayList<>(), stringMessages,
-                com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), actionNames, "Denied action name");
+                com.sap.sse.gwt.client.IconResources.INSTANCE.removeIcon(), actionNames,
+                stringMessages.deniedActionName());
 
         deniedActionsEditor.addValueChangeHandler(e -> userGroupsWithDeniedActions
                 .put(userGroupSingleSelectionModel.getSelectedObject(), toDeniedSet(e.getValue())));
@@ -128,7 +136,7 @@ public class AclEditPanel extends Composite {
         removeUserGroupButtonUi.setEnabled(userGroupSingleSelectionModel.getSelectedObject() != null);
     }
 
-    private void setupUserGroupSuggest(UserManagementServiceAsync userManagementService) {
+    private SuggestBox createUserGroupSuggest(UserManagementServiceAsync userManagementService) {
         final MultiWordSuggestOracle userGroupOracle = new MultiWordSuggestOracle();
         userManagementService.getUserGroups(new AsyncCallback<Collection<UserGroup>>() {
             @Override
@@ -145,11 +153,11 @@ public class AclEditPanel extends Composite {
                 userGroupOracle.setDefaultSuggestionsFromText(suggestionList);
             }
         });
-        suggestUserGroupUi = new SuggestBox(userGroupOracle, new TextBox());
+        return new SuggestBox(userGroupOracle, new TextBox());
     }
 
-    private void setupCellLists(StringMessages stringMessages) {
-        userGroupList = new CellList<UserGroup>(new AbstractCell<UserGroup>() {
+    private CellList<UserGroup> createUserGroupCellList(StringMessages stringMessages) {
+        final CellList<UserGroup> userGroupCellList = new CellList<>(new AbstractCell<UserGroup>() {
             @Override
             public void render(Context context, UserGroup value, SafeHtmlBuilder sb) {
                 if (value != null) {
@@ -158,11 +166,10 @@ public class AclEditPanel extends Composite {
             }
         });
 
-        userGroupList.setSelectionModel(userGroupSingleSelectionModel);
-        userGroupCellListPanelUi.add(wrapListUi(userGroupList, stringMessages.userGroups()));
+        userGroupCellList.setSelectionModel(userGroupSingleSelectionModel);
         userGroupSingleSelectionModel
                 .addSelectionChangeHandler(e -> updateActionsUi(userGroupSingleSelectionModel.getSelectedObject()));
-
+        return userGroupCellList;
     }
 
     private void updateActionsUi(UserGroup selectedUserGroup) {
@@ -171,7 +178,7 @@ public class AclEditPanel extends Composite {
         deniedActionsEditor.setValue(userGroupsWithDeniedActions.get(selectedUserGroup), false);
     }
 
-    private CaptionPanel wrapListUi(CellList<?> cellList, String title) {
+    private CaptionPanel wrapListUi(CellList<?> cellList, String title, Widget... additionalWidgets) {
         cellList.setPageSize(10);
         final SimplePager tenantPager = new SimplePager(TextLocation.CENTER, false, /* fast forward step size */ 50,
                 true);
@@ -180,6 +187,15 @@ public class AclEditPanel extends Composite {
         final VerticalPanel tenantListWrapper = new VerticalPanel();
         tenantListWrapper.add(tenantPanel);
         tenantListWrapper.add(tenantPager);
+
+        // add additional widgets
+        final FlowPanel additionalWidgetsPanel = new FlowPanel();
+        for (Widget additionalWidget : additionalWidgets) {
+            additionalWidgetsPanel.add(additionalWidget);
+            additionalWidget.addStyleName(AclDialogResources.INSTANCE.css().additionalWidget());
+        }
+        tenantListWrapper.add(additionalWidgetsPanel);
+
         final CaptionPanel tenantListCaption = new CaptionPanel(title);
         tenantListCaption.add(tenantListWrapper);
         return tenantListCaption;
@@ -220,22 +236,23 @@ public class AclEditPanel extends Composite {
         }
     }
 
-    @UiHandler("addUserGroupButtonUi")
     void onUserGroupAdd(ClickEvent e) {
         final String userGroupName = suggestUserGroupUi.getValue();
         userManagementService.getUserGroupByName(userGroupName, new AsyncCallback<UserGroup>() {
             @Override
             public void onFailure(Throwable caught) {
-                // TODO: i18n
-                Notification.notify("Did not find user group by name x" + userGroupName, NotificationType.ERROR);
+                Notification.notify(stringMessages.errorMessageUserGroupNameNotFound(userGroupName),
+                        NotificationType.ERROR);
             }
 
             @Override
             public void onSuccess(UserGroup result) {
                 if (result == null) {
-                    Notification.notify("Did not find user group by name x" + userGroupName, NotificationType.ERROR);
+                    Notification.notify(stringMessages.errorMessageUserGroupNameNotFound(userGroupName),
+                            NotificationType.ERROR);
                 } else {
-                    Notification.notify("Added usergroup x" + userGroupName, NotificationType.SUCCESS);
+                    Notification.notify(stringMessages.successMessageAddedUserGroup(userGroupName),
+                            NotificationType.SUCCESS);
                     userGroupsWithAllowedActions.put(result, new HashSet<>());
                     userGroupsWithDeniedActions.put(result, new HashSet<>());
                     refreshUi();
@@ -246,11 +263,15 @@ public class AclEditPanel extends Composite {
         });
     }
 
-    @UiHandler("removeUserGroupButtonUi")
     void onUserGroupRemove(ClickEvent e) {
-        userGroupsWithAllowedActions.remove(userGroupSingleSelectionModel.getSelectedObject());
-        userGroupsWithDeniedActions.remove(userGroupSingleSelectionModel.getSelectedObject());
-        refreshUi();
+        UserGroup selectedObject = userGroupSingleSelectionModel.getSelectedObject();
+        if (selectedObject != null) {
+            userGroupsWithAllowedActions.remove(selectedObject);
+            userGroupsWithDeniedActions.remove(selectedObject);
+            Notification.notify(stringMessages.successMessageRemovedUserGroup(selectedObject.getName()),
+                    NotificationType.SUCCESS);
+            refreshUi();
+        }
     }
 
     public Map<UserGroup, Set<String>> getUserGroupsWithPermissions() {
