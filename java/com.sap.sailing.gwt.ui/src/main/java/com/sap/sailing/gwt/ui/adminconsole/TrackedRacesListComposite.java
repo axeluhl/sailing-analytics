@@ -26,6 +26,7 @@ import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.shared.components.Component;
 import com.sap.sse.gwt.client.shared.components.SettingsDialog;
 import com.sap.sse.gwt.client.shared.settings.ComponentContext;
+import com.sap.sse.security.ui.client.UserService;
 
 /**
  * Shows the currently tracked events/races in a table. Updated if subscribed as an {@link RegattasDisplayer}, e.g., with
@@ -41,10 +42,18 @@ public class TrackedRacesListComposite extends AbstractTrackedRacesListComposite
     private boolean actionButtonsEnabled;
 
     public TrackedRacesListComposite(Component<?> parent, ComponentContext<?> context,
-            final SailingServiceAsync sailingService,
+            final SailingServiceAsync sailingService, final ErrorReporter errorReporter,
+            final RegattaRefresher regattaRefresher, final StringMessages stringMessages, boolean hasMultiSelection,
+            boolean actionButtonsEnabled) {
+        this(parent, context, sailingService, null, errorReporter, regattaRefresher, stringMessages, hasMultiSelection,
+                actionButtonsEnabled);
+    }
+    
+    public TrackedRacesListComposite(Component<?> parent, ComponentContext<?> context,
+            final SailingServiceAsync sailingService, UserService userService,
             final ErrorReporter errorReporter,
             final RegattaRefresher regattaRefresher, final StringMessages stringMessages, boolean hasMultiSelection, boolean actionButtonsEnabled) {
-        super(parent, context, sailingService, errorReporter, regattaRefresher, stringMessages, hasMultiSelection);
+        super(parent, context, sailingService, errorReporter, regattaRefresher, stringMessages, hasMultiSelection, userService);
         this.raceIsTrackedRaceChangeListener = new HashSet<TrackedRaceChangedListener>();
         this.actionButtonsEnabled = actionButtonsEnabled;
         createUI();

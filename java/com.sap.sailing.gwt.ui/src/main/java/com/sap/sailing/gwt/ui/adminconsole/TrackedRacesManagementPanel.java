@@ -18,6 +18,7 @@ import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
+import com.sap.sse.security.ui.client.UserService;
 
 public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
     private final DateTimeFormatRenderer dateFormatter = new DateTimeFormatRenderer(
@@ -29,9 +30,10 @@ public class TrackedRacesManagementPanel extends AbstractRaceManagementPanel {
 
     private final Grid raceDataGrid;
     
-    public TrackedRacesManagementPanel(final SailingServiceAsync sailingService, ErrorReporter errorReporter,
-            RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
-        super(sailingService, errorReporter, regattaRefresher, /* actionButtonsEnabled */ true, stringMessages);
+    public TrackedRacesManagementPanel(final SailingServiceAsync sailingService, UserService userService,
+            ErrorReporter errorReporter, RegattaRefresher regattaRefresher, final StringMessages stringMessages) {
+        super(sailingService, userService, errorReporter, regattaRefresher, /* actionButtonsEnabled */ true,
+                stringMessages);
         
         HorizontalPanel controlsPanel = new HorizontalPanel();
         Button setStartTimeButton = new Button(stringMessages.setStartTimeReceived(), new ClickHandler() {

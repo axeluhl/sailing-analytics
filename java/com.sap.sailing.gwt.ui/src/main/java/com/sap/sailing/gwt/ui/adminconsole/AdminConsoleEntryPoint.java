@@ -159,8 +159,8 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
         final HorizontalTabLayoutPanel racesTabPanel = panel.addVerticalTab(getStringMessages().trackedRaces(), "RacesPanel");
         racesTabPanel.ensureDebugId("RacesPanel");
 
-        final TrackedRacesManagementPanel trackedRacesManagementPanel = new TrackedRacesManagementPanel(getSailingService(), this,
-                this, getStringMessages());
+        final TrackedRacesManagementPanel trackedRacesManagementPanel = new TrackedRacesManagementPanel(
+                getSailingService(), getUserService(), this, this, getStringMessages());
         trackedRacesManagementPanel.ensureDebugId("TrackedRacesManagement");
         panel.addToTabPanel(racesTabPanel, new DefaultRefreshableAdminConsolePanel<TrackedRacesManagementPanel>(trackedRacesManagementPanel) {
             @Override
