@@ -1794,17 +1794,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             final Iterable<HasPermissions> permissions) {
         
         final List<String> alreadyMigrated = getMigrationInfoForKey(permissions);
-        // if (migrationCompleteCheckTask != null) {
-        // // java util timer cannot be rescheduled, so cancel and create a new one
-        // migrationCompleteCheckTask.cancel();
-        // }
-        // migrationCompleteCheckTask = new TimerTask() {
-        // @Override
-        // public void run() {
-        // checkMigration();
-        // }
-        // };
-        // migrationTimer.schedule(migrationCompleteCheckTask, MIGRATION_CHECK_DELAY, MIGRATION_CHECK_DELAY);
 
         final OwnershipAnnotation owner = this.getOwnership(identifier);
         final UserGroup defaultTenant = this.getDefaultTenant();
@@ -1837,32 +1826,22 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return alreadyMigrated;
     }
 
-    // protected void checkMigration() {
-    // boolean allChecksSucessfull = true;
-    // for (Entry<Pair<Class<? extends HasPermissions>, List<String>>, List<String>> migrationTypeEntry :
-    // migratedHasPermissionTypes
-    // .entrySet()) {
-    // Class<? extends HasPermissions> clazz = migrationTypeEntry.getKey().getA();
-    // List<String> shouldHave = migrationTypeEntry.getKey().getB();
-    // List<String> didMigrate = migrationTypeEntry.getValue();
-    // if (didMigrate.containsAll(shouldHave)) {
-    // logger.info("Permission-Vertical Migration: Sucessfully migrated all types in "
-    // + clazz.getName());
-    // } else {
-    // List<String> notMigrated = new ArrayList<>(shouldHave);
-    // notMigrated.removeAll(didMigrate);
-    // logger.severe("Permission-Vertical Migration: Did not migrate all Types for " + clazz.getName()
-    // + " missing: "
-    // + notMigrated);
-    // logger.severe(
-    // "Permission-Vertical Migration: Check will be retried in " + MIGRATION_CHECK_DELAY + "ms");
-    // allChecksSucessfull = false;
-    // }
-    // }
-    // if (allChecksSucessfull) {
-    // migrationTimer.cancel();
-    // }
-    // }
+    @Override
+    public void checkMigration(Iterable<HasPermissions> allInstances) {
+        Class<? extends HasPermissions> clazz = Util.first(allInstances).getClass();
+        List<String> alreadyMigrated = getMigrationInfoForKey(allInstances);
+        boolean allChecksSucessfull = true;
+        for (HasPermissions shouldBeMigrated : allInstances) {
+            if (!alreadyMigrated.contains(shouldBeMigrated.getName())) {
+                logger.severe("Permission-Vertical Migration: Did not migrate all Types for " + clazz.getName()
+                        + " missing: " + shouldBeMigrated);
+                allChecksSucessfull = false;
+            }
+        }
+        if (allChecksSucessfull) {
+            logger.info("Permission-Vertical Migration: Sucessfully migrated all types in " + clazz.getName());
+        }
+    }
 
     @Override
     public boolean hasCurrentUserReadPermission(WithQualifiedObjectIdentifier object) {
