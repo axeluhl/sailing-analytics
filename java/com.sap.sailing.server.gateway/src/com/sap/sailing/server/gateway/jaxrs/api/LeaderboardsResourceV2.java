@@ -242,14 +242,12 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         } else if (raceDetailTypesNames.size() == 1 && raceDetailTypesNames.get(0).equals("ALL")) {
             result = Arrays.asList(getAvailableRaceDetailColumnTypes());
         } else {
-            Map<String, DetailType> typeMap = new HashMap<>();
-            for (DetailType detailType : getAvailableRaceDetailColumnTypes()) {
-                typeMap.put(detailType.name(), detailType);
-            }
             for (String raceDetailTypeName : raceDetailTypesNames) {
-                if (typeMap.containsKey(raceDetailTypeName)) {
-                    result.add(typeMap.get(raceDetailTypeName));
+                DetailType value = DetailType.valueOf(raceDetailTypeName);
+                if (!Arrays.asList(getAvailableRaceDetailColumnTypes()).contains(value)) {
+                    throw new IllegalArgumentException(raceDetailTypeName + " is not a supported DetailType");
                 }
+                result.add(value);
             }
         }
         return result;
