@@ -9,7 +9,7 @@ RUN apt-get update \
  && rm /tmp/RELEASE.tar.gz
 RUN apt-get install -y vim
 COPY vimrc /root/.vimrc
-RUN apt-get install -y telnet
+RUN apt-get install -y telnet dnsutils net-tools
 COPY env.sh .
 COPY start .
 COPY JavaSE-11.profile .
