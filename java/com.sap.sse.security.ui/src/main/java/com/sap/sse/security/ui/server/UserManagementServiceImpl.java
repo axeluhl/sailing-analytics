@@ -31,6 +31,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.UserImpl;
@@ -106,10 +107,17 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public RoleDefinitionDTO createRoleDefinition(String roleDefinitionIdAsString, String name) {
-        SecurityUtils.getSubject().checkPermission(SecuredSecurityTypes.ROLE_DEFINITION.getStringPermissionForObjects(DefaultActions.CREATE, roleDefinitionIdAsString));
-        return securityDTOFactory.createRoleDefinitionDTO(
-                getSecurityService().createRoleDefinition(UUID.fromString(roleDefinitionIdAsString), name),
-                getSecurityService());
+        RoleDefinition role = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+                SecuredSecurityTypes.ROLE_DEFINITION, roleDefinitionIdAsString, name,
+                new ActionWithResult<RoleDefinition>() {
+
+                    @Override
+                    public RoleDefinition run() throws Exception {
+                        return getSecurityService().createRoleDefinition(UUID.fromString(roleDefinitionIdAsString),
+                                name);
+                    }
+                });
+        return securityDTOFactory.createRoleDefinitionDTO(role, getSecurityService());
     }
 
     @Override
