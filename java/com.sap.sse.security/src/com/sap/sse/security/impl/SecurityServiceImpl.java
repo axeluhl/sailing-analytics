@@ -1923,6 +1923,17 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
+    public void checkCurrentUserExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions) {
+        if (object == null || actions.length == 0) {
+            throw new AuthorizationException();
+        }
+        for (int i = 0; i < actions.length; i++) {
+            SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObjects(actions[i],
+                    object.getIdentifier().getTypeRelativeObjectIdentifier()));
+        }
+    }
+
+    @Override
     public void assumeOwnershipMigrated(String typeName, Iterable<HasPermissions> permissions) {
         final List<String> alreadyMigrated = getMigrationInfoForKey(permissions);
         alreadyMigrated.add(typeName);
