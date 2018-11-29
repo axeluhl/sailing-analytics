@@ -358,6 +358,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             if (competitor == null) {
                 response = getBadCompetitorIdResponse(competitorId);
             } else {
+                getSecurityService().checkCurrentUserExplicitPermissions(competitor, SecuredDomainType.CompetitorAndBoatActions.LIST, SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC);
                 regatta.registerCompetitor(competitor);
                 response = Response.ok().build();
             }
@@ -597,6 +598,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (boat == null) {
             response = Response.status(Status.NOT_FOUND).entity("Boat is not valid").type(MediaType.TEXT_PLAIN).build();
         } else {
+            getSecurityService().checkCurrentUserExplicitPermissions(boat, SecuredDomainType.CompetitorAndBoatActions.LIST, SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC);
             response = createAndAddCompetitor(regattaName, nationalityThreeLetterIOCCode, displayColor,
                     timeOnTimeFactor, timeOnDistanceAllowancePerNauticalMileAsMillis, searchTag, competitorName,
                     competitorShortName, competitorEmail, flagImageURI, teamImageURI, t -> boat, deviceUuid,
