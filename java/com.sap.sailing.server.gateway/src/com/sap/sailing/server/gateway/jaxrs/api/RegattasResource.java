@@ -219,7 +219,7 @@ public class RegattasResource extends AbstractSailingServerResource {
     @GET
     @Produces("application/json;charset=UTF-8")
     public Response getRegattas() {
-        RegattaJsonSerializer regattaJsonSerializer = new RegattaJsonSerializer();
+        RegattaJsonSerializer regattaJsonSerializer = new RegattaJsonSerializer(getSecurityService());
 
         JSONArray regattasJson = new JSONArray();
         for (Regatta regatta : getService().getAllRegattas()) {
@@ -243,7 +243,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             getSecurityService().checkCurrentUserReadPermission(regatta);
             SeriesJsonSerializer seriesJsonSerializer = new SeriesJsonSerializer(new FleetJsonSerializer(
                     new ColorJsonSerializer()));
-            JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(seriesJsonSerializer, null, null);
+            JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(seriesJsonSerializer, null, null, getSecurityService());
             JSONObject serializedRegatta = regattaSerializer.serialize(regatta);
             String json = serializedRegatta.toJSONString();
             response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
@@ -272,7 +272,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             BoatJsonSerializer boatJsonSerializer = new BoatJsonSerializer(new BoatClassJsonSerializer());
             CompetitorJsonSerializer competitorJsonSerializer = new CompetitorJsonSerializer(new TeamJsonSerializer(
                     new PersonJsonSerializer(nationalityJsonSerializer)), boatJsonSerializer);
-            JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(null, competitorJsonSerializer, boatJsonSerializer);
+            JsonSerializer<Regatta> regattaSerializer = new RegattaJsonSerializer(null, competitorJsonSerializer, boatJsonSerializer, getSecurityService());
             JSONObject serializedRegatta = regattaSerializer.serialize(regatta);
             String json = serializedRegatta.toJSONString();
             response = Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
