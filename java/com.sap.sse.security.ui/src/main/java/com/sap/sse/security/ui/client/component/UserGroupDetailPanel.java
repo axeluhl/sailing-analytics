@@ -35,7 +35,6 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.dto.StrippedUserDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
-import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.shared.dto.UserGroupWithSecurityDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.component.UserGroupListDataProvider.UserGroupListDataProviderChangeHandler;
@@ -76,7 +75,7 @@ public class UserGroupDetailPanel extends HorizontalPanel implements Handler, Ch
     private class TenantUsersListDataProvider extends AbstractDataProvider<String> {
         @Override
         protected void onRangeChanged(HasData<String> display) {
-            UserGroupDTO tenant = userGroupSelectionModel.getSelectedObject();
+            UserGroupWithSecurityDTO tenant = userGroupSelectionModel.getSelectedObject();
             List<String> result = new ArrayList<>();
             List<String> show = new ArrayList<>();
             final Range range = display.getVisibleRange();
@@ -108,7 +107,7 @@ public class UserGroupDetailPanel extends HorizontalPanel implements Handler, Ch
     private class AllUsersListDataProvider extends AbstractDataProvider<UserDTO> {
         @Override
         protected void onRangeChanged(HasData<UserDTO> display) {
-            UserGroupDTO tenant = userGroupSelectionModel.getSelectedObject();
+            UserGroupWithSecurityDTO tenant = userGroupSelectionModel.getSelectedObject();
             final List<String> namesOfAlreadyAddedUsers = new ArrayList<>();
             if (tenant != null) {
                 for (final StrippedUserDTO tenantUser : tenant.getUsers()) {
@@ -198,7 +197,7 @@ public class UserGroupDetailPanel extends HorizontalPanel implements Handler, Ch
         addBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                UserGroupDTO tenant = userGroupSelectionModel.getSelectedObject();
+                UserGroupWithSecurityDTO tenant = userGroupSelectionModel.getSelectedObject();
                 Set<UserDTO> users = allUsersSelectionModel.getSelectedSet();
                 if (tenant == null) {
                     Window.alert(stringMessages.youHaveToSelectAUserGroup());
@@ -223,7 +222,7 @@ public class UserGroupDetailPanel extends HorizontalPanel implements Handler, Ch
         removeBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                UserGroupDTO tenant = userGroupSelectionModel.getSelectedObject();
+                UserGroupWithSecurityDTO tenant = userGroupSelectionModel.getSelectedObject();
                 Set<String> users = tenantUsersSelectionModel.getSelectedSet();
                 if (tenant == null) {
                     Window.alert(stringMessages.youHaveToSelectAUserGroup());

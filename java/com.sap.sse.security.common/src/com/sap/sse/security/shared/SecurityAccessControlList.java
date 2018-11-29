@@ -4,12 +4,12 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 
-import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.shared.impl.UserGroupImpl;
 
 /**
- * Grants and revokes permissions to a set of actions for an object on a per-{@link UserGroup} basis. This way, there
+ * Grants and revokes permissions to a set of actions for an object on a per-{@link UserGroupImpl} basis. This way, there
  * should usually be at most one instance of this type defined for one object to which access is controlled. The sets of
- * actions are keyed by the {@link UserGroup} to which they are granted/revoked. An action would, e.g., be something
+ * actions are keyed by the {@link UserGroupImpl} to which they are granted/revoked. An action would, e.g., be something
  * like "UPDATE" in the permission EVENT:UPDATE:84730-74837-47384-ab987f9. Note that nothing but the action is required
  * for each group because the ACL pertains to a single object such that the type (e.g., "EVENT") as well as the object
  * ID are known and don't need to and make no sense to be specified.
@@ -31,7 +31,7 @@ import com.sap.sse.security.shared.impl.UserGroup;
  * @author Axel Uhl (d043530)
  *
  */
-public interface SecurityAccessControlList<G extends AbstractUserGroup<?>> extends Serializable {
+public interface SecurityAccessControlList<G extends SecurityUserGroup> extends Serializable {
     /**
      * Checks whether this access control list grants the {@code user} the permission to execute {@code action} on the
      * object to which this ACL pertains.
@@ -57,7 +57,7 @@ public interface SecurityAccessControlList<G extends AbstractUserGroup<?>> exten
      *            {@code '!'} denies the action that follows. Multiple leading exclamation marks toggle accordingly.
      * @return {@code true} if the permission was added; {@code false} if the permission was already in this ACL and
      *         therefore didn't need to be added
-     * @see #denyPermission(UserGroup, String)
+     * @see #denyPermission(UserGroupImpl, String)
      */
     boolean addPermission(G userGroup, String actionToAllow);
 
@@ -69,13 +69,13 @@ public interface SecurityAccessControlList<G extends AbstractUserGroup<?>> exten
      *            accordingly.
      * @return {@code true} if the denial was added; {@code false} if the denial was already in this ACL and therefore
      *         didn't need to be added
-     * @see #addPermission(UserGroup, String)
+     * @see #addPermission(UserGroupImpl, String)
      */
     boolean denyPermission(G userGroup, String actionToDeny);
 
     /**
      * Removes a permission denial from those permissions denied for the user group. If the action starts with an
-     * {@code "!"} exclamation mark, the exclamation mark is stripped, and {@link #removePermission(UserGroup, String)}
+     * {@code "!"} exclamation mark, the exclamation mark is stripped, and {@link #removePermission(UserGroupImpl, String)}
      * is invoked with the remaining string.
      * 
      * @return {@code true} if the permission was removed; {@code false} if the permission was not in this ACL and
@@ -85,7 +85,7 @@ public interface SecurityAccessControlList<G extends AbstractUserGroup<?>> exten
 
     /**
      * Removes a permission from those permissions granted to the user group. If the action starts with an {@code "!"}
-     * exclamation mark, the exclamation mark is stripped, and {@link #removeDenial(UserGroup, String)} is invoked with
+     * exclamation mark, the exclamation mark is stripped, and {@link #removeDenial(UserGroupImpl, String)} is invoked with
      * the remaining string.
      * 
      * @return {@code true} if the permission was removed; {@code false} if the permission was not in this ACL and

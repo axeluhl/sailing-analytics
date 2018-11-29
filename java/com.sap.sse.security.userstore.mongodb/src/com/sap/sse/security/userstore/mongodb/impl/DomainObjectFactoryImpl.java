@@ -39,6 +39,7 @@ import com.sap.sse.security.shared.impl.QualifiedObjectIdentifierImpl;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.security.userstore.mongodb.DomainObjectFactory;
 import com.sap.sse.security.userstore.mongodb.impl.FieldNames.Tenant;
 
@@ -162,8 +163,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                 users.add(new UserProxy((String) o));
             }
         }
-        UserGroup result = new UserGroup(users, id, name);
-        return result;
+        return new UserGroupImpl(users, id, name);
     }
 
     /**
@@ -231,8 +231,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      *         {@link Role#getQualifiedForUser() user qualifier} where only the username is set properly to identify the
      *         user in the calling method where ultimately all users will be known.
      */
-    private UserImpl loadUserWithProxyRoleUserQualifiers(DBObject userDBObject,
-            Map<UUID, RoleDefinition> roleDefinitionsById, UserGroup defaultTenantForRoleMigration, Map<UUID, UserGroup> tenants, UserGroupProvider userGroupProvider) {
+    private User loadUserWithProxyRoleUserQualifiers(DBObject userDBObject,
+            Map<UUID, RoleDefinition> roleDefinitionsById, UserGroup defaultTenantForRoleMigration,
+            Map<UUID, UserGroup> tenants, UserGroupProvider userGroupProvider) {
         final String name = (String) userDBObject.get(FieldNames.User.NAME.name());
         final String email = (String) userDBObject.get(FieldNames.User.EMAIL.name());
         final String fullName = (String) userDBObject.get(FieldNames.User.FULLNAME.name());
@@ -311,7 +312,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         DBObject accountsMap = (DBObject) userDBObject.get(FieldNames.User.ACCOUNTS.name());
         Map<AccountType, Account> accounts = createAccountMapFromdDBObject(accountsMap);
-        UserImpl result = new UserImpl(name, email, fullName, company, locale,
+        User result = new UserImpl(name, email, fullName, company, locale,
                 emailValidated == null ? false : emailValidated, passwordResetSecret, validationSecret, defaultTenant,
                 accounts.values(), userGroupProvider);
         for (final Role role : roles) {
@@ -330,7 +331,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private Role loadRoleWithProxyUserQualifier(DBObject rolesO, Map<UUID, RoleDefinition> roleDefinitionsById, Map<UUID, UserGroup> userGroups) {
+    private Role loadRoleWithProxyUserQualifier(DBObject rolesO, Map<UUID, RoleDefinition> roleDefinitionsById,
+            Map<UUID, UserGroup> userGroups) {
         final RoleDefinition roleDefinition = roleDefinitionsById.get(rolesO.get(FieldNames.Role.ID.name()));
         final UUID qualifyingTenantId = (UUID) rolesO.get(FieldNames.Role.QUALIFYING_TENANT_ID.name());
         final UserGroup qualifyingTenant = qualifyingTenantId == null ? null : userGroups.get(qualifyingTenantId);

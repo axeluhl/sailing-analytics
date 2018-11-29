@@ -3,7 +3,7 @@ package com.sap.sse.security.shared.dto;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.SecurityUserImpl;
 
-public class StrippedUserDTO extends SecurityUserImpl<RoleDefinitionDTO, RoleDTO, UserGroupDTO> {
+public class StrippedUserDTO extends SecurityUserImpl<RoleDefinitionDTO, RoleDTO, StrippedUserGroupDTO> {
     private static final long serialVersionUID = 1L;
 
     @Deprecated

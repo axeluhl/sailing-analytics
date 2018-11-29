@@ -1,6 +1,5 @@
 package com.sap.sse.security.shared;
 
-import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sse.common.NamedWithID;
@@ -12,42 +11,29 @@ import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
  * @author Axel Uhl (d043530)
  *
  */
-public abstract class AbstractUserGroup<U extends SecurityUser<?, ?, ?>>
-        implements NamedWithID, WithQualifiedObjectIdentifier {
+public abstract class SecurityUserGroupImpl implements NamedWithID, WithQualifiedObjectIdentifier, SecurityUserGroup {
     private static final long serialVersionUID = 1L;
 
-    private Set<U> users;
     private UUID id;
     private String name;
 
-    public AbstractUserGroup(Set<U> users, UUID id, String name) {
+    public SecurityUserGroupImpl(UUID id, String name) {
         super();
-        this.users = users;
         this.id = id;
         this.name = name;
     }
 
+    /* (non-Javadoc)
+     * @see com.sap.sse.security.shared.SecurityUserGroup#getName()
+     */
     @Override
     public String getName() {
         return name;
     }
 
-    public Iterable<U> getUsers() {
-        return users;
-    }
-
-    public void add(U user) {
-        users.add(user);
-    }
-
-    public void remove(U user) {
-        users.remove(user);
-    }
-
-    public boolean contains(U user) {
-        return users.contains(user);
-    }
-
+    /* (non-Javadoc)
+     * @see com.sap.sse.security.shared.SecurityUserGroup#getId()
+     */
     @Override
     public UUID getId() {
         return id;

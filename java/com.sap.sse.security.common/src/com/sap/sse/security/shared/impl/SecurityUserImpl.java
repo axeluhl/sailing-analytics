@@ -7,12 +7,12 @@ import java.util.Set;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.AbstractRole;
-import com.sap.sse.security.shared.AbstractUserGroup;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
+import com.sap.sse.security.shared.SecurityUserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
 
-public abstract class SecurityUserImpl<RD extends RoleDefinition, R extends AbstractRole<RD, G, ?>, G extends AbstractUserGroup<?>>
+public abstract class SecurityUserImpl<RD extends RoleDefinition, R extends AbstractRole<RD, G, ?>, G extends SecurityUserGroup>
         implements SecurityUser<RD, R, G> {
     private static final long serialVersionUID = -3639860207453072248L;
 

@@ -21,6 +21,7 @@ import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.OwnershipAnnotationDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
+import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.shared.dto.UserGroupWithSecurityDTO;
@@ -48,6 +49,8 @@ public interface UserManagementService extends RemoteService {
     Collection<UserGroupDTO> getUserGroups();
 
     UserGroupDTO getUserGroupByName(String userGroupName) throws UnauthorizedException;
+    
+    StrippedUserGroupDTO getStrippedUserGroupByName(String userGroupName) throws UnauthorizedException;
 
     UserGroupDTO createUserGroup(String name) throws UserGroupManagementException, UnauthorizedException;
 

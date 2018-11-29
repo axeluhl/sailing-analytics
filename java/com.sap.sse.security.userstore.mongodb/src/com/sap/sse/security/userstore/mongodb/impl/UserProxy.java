@@ -12,6 +12,7 @@ import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.shared.impl.UserGroupImpl;
 
 public class UserProxy implements User {
     private static final long serialVersionUID = 1L;
@@ -177,7 +178,7 @@ public class UserProxy implements User {
     }
 
     @Override
-    public UserGroup getDefaultTenant(String serverName) {
+    public UserGroupImpl getDefaultTenant(String serverName) {
         throw new UnsupportedOperationException();
     }
 

@@ -40,6 +40,7 @@ import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.security.userstore.mongodb.impl.FieldNames.Tenant;
 
 /**
@@ -48,8 +49,8 @@ import com.sap.sse.security.userstore.mongodb.impl.FieldNames.Tenant;
  * therefore not perform any changes to the database. This is also the reason why all access to the
  * {@link #mongoObjectFactory} field needs to be <code>null</code>-safe.<p>
  * 
- * The storage pattern for {@link UserGroup} and {@link Tenant} objects deserves some explanation. As a {@link Tenant}
- * is a specialized {@link UserGroup}, this store mainly needs to keep track of the users in that {@link Tenant}. Hence,
+ * The storage pattern for {@link UserGroupImpl} and {@link Tenant} objects deserves some explanation. As a {@link Tenant}
+ * is a specialized {@link UserGroupImpl}, this store mainly needs to keep track of the users in that {@link Tenant}. Hence,
  * the same collection is used for the storage of these user lists, and hence the same methods can be used for
  * maintaining this collection. Additionally, the tenant ID is stored in a separate collection as a "marker" which
  * entries in the user groups collection are actually tenants and not only user groups.
@@ -68,7 +69,7 @@ public class UserStoreImpl implements UserStore {
     
     /**
      * If a valid default tenant name was passed to the constructor, this field will contain a valid
-     * {@link UserGroup} object whose name equals that of the default tenant name. It will have been used
+     * {@link UserGroupImpl} object whose name equals that of the default tenant name. It will have been used
      * during role migration where string-based roles are mapped to a corresponding {@link RoleDefinition}
      * and the users with the original role will obtain a corresponding {@link Role} with this default
      * tenant as the {@link Role#getQualifiedForTenant() tenant qualifier}.
@@ -80,14 +81,14 @@ public class UserStoreImpl implements UserStore {
     
     /**
      * Protects access to the two maps {@link #userGroupsContainingUser} and {@link #usersInUserGroups} which implement
-     * an efficient lookup for the m:n association between {@link UserGroup#getUsers()} and {@link SecurityUser}. The
+     * an efficient lookup for the m:n association between {@link UserGroupImpl#getUsers()} and {@link SecurityUser}. The
      * collections also contain the relationships for the specialized {@link Tenant} objects which are not part of
      * {@link #userGroups} but of {@link #tenants}.
      */
     private final NamedReentrantReadWriteLock userGroupsUserCacheLock = new NamedReentrantReadWriteLock("User Groups Cache", /* fair */ false);
     private final ConcurrentHashMap<User, Set<UserGroup>> userGroupsContainingUser;
     /**
-     * This collection is important in particular to detect changes when {@link #updateUserGroup(UserGroup)} is called.
+     * This collection is important in particular to detect changes when {@link #updateUserGroup(UserGroupImpl)} is called.
      */
     private final ConcurrentHashMap<UserGroup, Set<User>> usersInUserGroups;
     
@@ -211,6 +212,9 @@ public class UserStoreImpl implements UserStore {
                     Util.addToValueSet(userGroupsContainingUser, userInGroup, group);
                 }
             }
+            // FIXME check for non migrated users, those are leftovers that are in some groups but have no user object
+            // anymore, remove them from the groups!
+
             for (Entry<String, Map<String, String>> e : preferences.entrySet()) {
                 if (e.getValue() != null) {
                     final String accessToken = e.getValue().get(ACCESS_TOKEN_KEY);
@@ -546,12 +550,12 @@ public class UserStoreImpl implements UserStore {
     }
     
     @Override
-    public UserGroup createUserGroup(UUID groupId, String name) throws UserGroupManagementException {
+    public UserGroupImpl createUserGroup(UUID groupId, String name) throws UserGroupManagementException {
         if (userGroups.contains(groupId)) {
             throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
         }
         logger.info("Creating user group: " + groupId + " with name "+name);
-        UserGroup group = new UserGroup(new HashSet<User>(), groupId, name);
+        UserGroupImpl group = new UserGroupImpl(new HashSet<User>(), groupId, name);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUserGroup(group);
         }
@@ -598,7 +602,7 @@ public class UserStoreImpl implements UserStore {
         } finally {
             LockUtil.unlockAfterRead(userGroupsUserCacheLock);
         }
-        return preResult == null ? Collections.<UserGroup>emptySet() : preResult;
+        return preResult == null ? Collections.<UserGroup> emptySet() : preResult;
     }
 
     @Override
@@ -628,13 +632,14 @@ public class UserStoreImpl implements UserStore {
     }
     
     @Override
-    public UserImpl createUser(String name, String email, UserGroup defaultTenant, Account... accounts) throws UserManagementException {
+    public User createUser(String name, String email, UserGroup defaultTenant, Account... accounts)
+            throws UserManagementException {
         if (getUserByName(name) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
         ConcurrentHashMap<String, UserGroup> tenantsForServer = new ConcurrentHashMap<>();
         tenantsForServer.put(ServerInfo.getName(), defaultTenant);
-        UserImpl user = new UserImpl(name, email, tenantsForServer, /* user group provider */ this, accounts);
+        User user = new UserImpl(name, email, tenantsForServer, /* user group provider */ this, accounts);
         logger.info("Creating user: " + user + " with e-mail "+email);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUser(user);

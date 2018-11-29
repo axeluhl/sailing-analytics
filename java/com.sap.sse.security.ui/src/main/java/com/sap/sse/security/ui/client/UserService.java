@@ -28,8 +28,8 @@ import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
+import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
-import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -415,12 +415,12 @@ public class UserService {
                 new OwnershipDTO(currentUser, getCurrentTenant()));
     }
 
-    public UserGroupDTO getCurrentTenant() {
+    public StrippedUserGroupDTO getCurrentTenant() {
         return currentUser == null ? null : currentUser.getDefaultTenant();
     }
 
     public String getCurrentTenantName() {
-        final UserGroupDTO defaultTenant = getCurrentTenant();
+        final StrippedUserGroupDTO defaultTenant = getCurrentTenant();
         return defaultTenant == null ? null : defaultTenant.getName();
     }
 

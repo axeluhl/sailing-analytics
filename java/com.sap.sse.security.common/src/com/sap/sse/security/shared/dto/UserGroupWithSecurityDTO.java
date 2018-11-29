@@ -1,12 +1,15 @@
 package com.sap.sse.security.shared.dto;
 
 import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
-public class UserGroupWithSecurityDTO extends UserGroupDTO implements SecuredDTO {
+public class UserGroupWithSecurityDTO extends StrippedUserGroupDTO implements SecuredDTO {
     private static final long serialVersionUID = 1L;
-    
+
     private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
+
+    private Set<StrippedUserDTO> users = new HashSet<>();
 
     @Deprecated
     // GWT serializer only
@@ -15,13 +18,14 @@ public class UserGroupWithSecurityDTO extends UserGroupDTO implements SecuredDTO
     }
 
     public UserGroupWithSecurityDTO(HashSet<StrippedUserDTO> users, UUID id, String name) {
-        super(users, id, name);
+        super(id, name);
+        this.users.addAll(users);
     }
 
     public UserGroupWithSecurityDTO(UUID id, String name) {
-        super(new HashSet<StrippedUserDTO>(), id, name);
+        super(id, name);
     }
-    
+
     @Override
     public final AccessControlListDTO getAccessControlList() {
         return securityInformation.getAccessControlList();
@@ -40,5 +44,17 @@ public class UserGroupWithSecurityDTO extends UserGroupDTO implements SecuredDTO
     @Override
     public final void setOwnership(final OwnershipDTO ownership) {
         this.securityInformation.setOwnership(ownership);
+    }
+
+    public Set<StrippedUserDTO> getUsers() {
+        return users;
+    }
+
+    public void add(StrippedUserDTO user) {
+        users.add(user);
+    }
+
+    public void remove(StrippedUserDTO userToRemoveFromTenant) {
+        users.remove(userToRemoveFromTenant);
     }
 }

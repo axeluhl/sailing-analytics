@@ -5,7 +5,7 @@ import java.util.Set;
 
 import com.sap.sse.security.shared.impl.AbstractAccessControlList;
 
-public class AccessControlListDTO extends AbstractAccessControlList<UserGroupDTO, StrippedUserDTO> {
+public class AccessControlListDTO extends AbstractAccessControlList<StrippedUserGroupDTO, StrippedUserDTO> {
     private static final long serialVersionUID = 1L;
 
     @Deprecated
@@ -14,7 +14,7 @@ public class AccessControlListDTO extends AbstractAccessControlList<UserGroupDTO
         super(null);
     }
 
-    public AccessControlListDTO(Map<UserGroupDTO, Set<String>> permissionMap) {
+    public AccessControlListDTO(Map<StrippedUserGroupDTO, Set<String>> permissionMap) {
         super(permissionMap);
     }
 

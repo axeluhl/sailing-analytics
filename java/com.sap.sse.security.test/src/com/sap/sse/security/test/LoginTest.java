@@ -30,7 +30,7 @@ import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.User;
-import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 import com.sap.sse.security.userstore.mongodb.impl.CollectionNames;
@@ -80,7 +80,7 @@ public class LoginTest {
 
     @Test
     public void rolesTest() throws UserManagementException, UserGroupManagementException {
-        userStore.createUser("me", "me@sap.com", new UserGroup(UUID.randomUUID(), "me-tenant"));
+        userStore.createUser("me", "me@sap.com", new UserGroupImpl(UUID.randomUUID(), "me-tenant"));
         RoleDefinition testRoleDefinition = userStore.createRoleDefinition(UUID.randomUUID(), "testRole", Collections.emptySet());
         final Role testRole = new Role(testRoleDefinition);
         userStore.addRoleForUser("me", testRole);
@@ -90,7 +90,7 @@ public class LoginTest {
 
     @Test
     public void roleWithQualifiersTest() throws UserManagementException, UserGroupManagementException {
-        UserGroup userDefaultTenant = userStore.createUserGroup(UUID.randomUUID(), "me-tenant");
+        UserGroupImpl userDefaultTenant = userStore.createUserGroup(UUID.randomUUID(), "me-tenant");
         User meUser = userStore.createUser("me", "me@sap.com", userDefaultTenant);
         RoleDefinition testRoleDefinition = userStore.createRoleDefinition(UUID.randomUUID(), "testRole", Collections.emptySet());
         final Role testRole = new Role(testRoleDefinition, userDefaultTenant, meUser);
@@ -104,7 +104,7 @@ public class LoginTest {
 
     @Test
     public void permissionsTest() throws UserManagementException, UserGroupManagementException {
-        userStore.createUser("me", "me@sap.com", new UserGroup(UUID.randomUUID(), "me-tenant"));
+        userStore.createUser("me", "me@sap.com", new UserGroupImpl(UUID.randomUUID(), "me-tenant"));
         userStore.addPermissionForUser("me", new WildcardPermission("a:b:c"));
         UserStoreImpl store2 = new UserStoreImpl(DEFAULT_TENANT_NAME);
         User allUser = userStore.getUserByName(SecurityService.ALL_USERNAME);

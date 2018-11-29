@@ -43,8 +43,8 @@ import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.RoleDTO;
+import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
-import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
@@ -98,9 +98,9 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
             @Override
             public SafeHtml getValue(UserDTO user) {
                 SafeHtmlBuilder builder = new SafeHtmlBuilder();
-                for (Iterator<UserGroupDTO> groupsIter = user.getUserGroups()
+                for (Iterator<StrippedUserGroupDTO> groupsIter = user.getUserGroups()
                         .iterator(); groupsIter.hasNext();) {
-                    final UserGroupDTO group = groupsIter.next();
+                    final StrippedUserGroupDTO group = groupsIter.next();
                     builder.appendEscaped(group.getName());
                     if (groupsIter.hasNext()) {
                         builder.appendHtmlConstant("<br>");
