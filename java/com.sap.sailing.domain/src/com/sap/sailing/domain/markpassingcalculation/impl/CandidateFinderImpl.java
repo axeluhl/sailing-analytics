@@ -557,6 +557,7 @@ public class CandidateFinderImpl implements CandidateFinder {
         // remember last fixes to avoid expensive searches (bug4221)
         GPSFixMoving lastIterationFix = null;
         GPSFixMoving lastIterationAfterFix = null;
+        Iterator<GPSFixMoving> firstFixAfterIterator = null;
         for (GPSFixMoving fix : fixes) {
             if (timeRangeForValidCandidates.getTimeRangeOrNull() != null && timeRangeForValidCandidates.getTimeRangeOrNull().includes(fix.getTimePoint())) {
                 affectedFixes.add(fix);
@@ -573,9 +574,17 @@ public class CandidateFinderImpl implements CandidateFinder {
                             fixBefore = lastIterationFix;
                         } else {
                             fixBefore = track.getLastFixBefore(t);
+                            // bug4221: searching with getFixesIterator is about as expensive, especially in large tracks,
+                            // as searching with getFirstFixAfter; but with getFixesIterator we have an iterator at hand
+                            // that we can use in case it happens to deliver as fixAfter the next fix from fixes. In this
+                            // case we can quickly obtain the next "firstFixAfter" by simply calling next() on the iterator.
+                            firstFixAfterIterator = track.getFixesIterator(t, /* inclusive */ false);
                         }
-                        fixAfter = track.getFirstFixAfter(t);
-                        
+                        if (firstFixAfterIterator.hasNext()) {
+                            fixAfter = firstFixAfterIterator.next();
+                        } else {
+                            fixAfter = null;
+                        }
                         lastIterationFix = fix;
                         lastIterationAfterFix = fixAfter;
                     }
@@ -592,8 +601,8 @@ public class CandidateFinderImpl implements CandidateFinder {
         }
         lastIterationFix = null;
         lastIterationAfterFix = null;
+        firstFixAfterIterator = null;
         for (GPSFixMoving fix : affectedFixes) {
-            TimePoint t = null;
             Position p = null;
             GPSFixMoving fixBefore;
             GPSFixMoving fixAfter;
@@ -605,15 +614,24 @@ public class CandidateFinderImpl implements CandidateFinder {
                     fixBefore = lastIterationFix;
                 } else {
                     fixBefore = track.getLastFixBefore(timePoint);
+                    // bug4221: searching with getFixesIterator is about as expensive, especially in large tracks,
+                    // as searching with getFirstFixAfter; but with getFixesIterator we have an iterator at hand
+                    // that we can use in case it happens to deliver as fixAfter the next fix from fixes. In this
+                    // case we can quickly obtain the next "firstFixAfter" by simply calling next() on the iterator.
+                    firstFixAfterIterator = track.getFixesIterator(timePoint, /* inclusive */ false);
                 }
-                fixAfter = track.getFirstFixAfter(timePoint);
-
+                if (firstFixAfterIterator.hasNext()) {
+                    fixAfter = firstFixAfterIterator.next();
+                } else {
+                    fixAfter = null;
+                }
                 lastIterationFix = fix;
                 lastIterationAfterFix = fixAfter;
             } finally {
                 track.unlockAfterRead();
             }
             if (fixBefore != null && fixAfter != null) {
+                TimePoint t = null;
                 Map<Waypoint, List<Distance>> fixDistances = getDistances(c, fix);
                 Map<Waypoint, List<Distance>> fixDistancesBefore = getDistances(c, fixBefore);
                 Map<Waypoint, List<Distance>> fixDistancesAfter = getDistances(c, fixAfter);
@@ -737,6 +755,7 @@ public class CandidateFinderImpl implements CandidateFinder {
         // remember last fixes to avoid expensive searches (bug4221)
         GPSFixMoving lastIterationFix = null;
         GPSFixMoving lastIterationAfterFix = null;
+        Iterator<GPSFixMoving> firstFixAfterIterator = null;
         for (GPSFixMoving fix : fixes) {
             if (timeRangeForValidCandidates.getTimeRangeOrNull() != null && timeRangeForValidCandidates.getTimeRangeOrNull().includes(fix.getTimePoint())) {
                 TimePoint t = fix.getTimePoint();
@@ -752,9 +771,17 @@ public class CandidateFinderImpl implements CandidateFinder {
                             fixBefore = lastIterationFix;
                         } else {
                             fixBefore = track.getLastFixBefore(t);
+                            // bug4221: searching with getFixesIterator is about as expensive, especially in large tracks,
+                            // as searching with getFirstFixAfter; but with getFixesIterator we have an iterator at hand
+                            // that we can use in case it happens to deliver as fixAfter the next fix from fixes. In this
+                            // case we can quickly obtain the next "firstFixAfter" by simply calling next() on the iterator.
+                            firstFixAfterIterator = track.getFixesIterator(t, /* inclusive */ false);
                         }
-                        fixAfter = track.getFirstFixAfter(t);
-                        
+                        if (firstFixAfterIterator.hasNext()) {
+                            fixAfter = firstFixAfterIterator.next();
+                        } else {
+                            fixAfter = null;
+                        }
                         lastIterationFix = fix;
                         lastIterationAfterFix = fixAfter;
                     }
