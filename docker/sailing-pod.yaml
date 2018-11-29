@@ -13,7 +13,7 @@ spec:
       name: telnet-port
     env:
     - name: MONGODB_HOST
-      value: mongo.default.svc.cluster.local
+      value: mongo-0.mongo
     livenessProbe:
       httpGet:
         path: /
