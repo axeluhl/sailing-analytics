@@ -1882,6 +1882,19 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 DefaultActions.UPDATE, object.getIdentifier().getTypeRelativeObjectIdentifier()));
     }
 
+    public boolean hasCurrentUserExplictPermissions(WithQualifiedObjectIdentifier object,
+            HasPermissions.Action... actions) {
+        if (object == null || actions.length == 0) {
+            return false;
+        }
+        boolean isPermitted = true;
+        for (int i = 0; i < actions.length; i++) {
+            isPermitted &= SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObjects(
+                    actions[i], object.getIdentifier().getTypeRelativeObjectIdentifier()));
+        }
+        return isPermitted;
+    }
+
     @Override
     public void checkCurrentUserReadPermission(WithQualifiedObjectIdentifier object) {
         if (object == null) {

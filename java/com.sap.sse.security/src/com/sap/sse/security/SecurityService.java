@@ -366,6 +366,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     boolean hasCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object);
 
+    boolean hasCurrentUserExplictPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions);
+
     void checkCurrentUserReadPermission(WithQualifiedObjectIdentifier object);
 
     void checkCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object);

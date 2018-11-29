@@ -597,6 +597,7 @@ import com.sap.sse.security.Action;
 import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.SessionUtils;
+import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
@@ -5516,7 +5517,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             boolean filterCompetitorsWithoutBoat) {
         Iterable<CompetitorDTO> result;
         CompetitorAndBoatStore competitorStore = getService().getBaseDomainFactory().getCompetitorAndBoatStore();
-        final com.sap.sse.security.shared.HasPermissions.Action[] requiredActionsForRead = new com.sap.sse.security.shared.HasPermissions.Action[] {
+        final HasPermissions.Action[] requiredActionsForRead = new HasPermissions.Action[] {
                 SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC,
                 SecuredDomainType.CompetitorAndBoatActions.LIST };
         if (filterCompetitorsWithBoat == false && filterCompetitorsWithoutBoat == false) {
@@ -5679,7 +5680,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public Iterable<BoatDTO> getAllBoats() {
-        final com.sap.sse.security.shared.HasPermissions.Action[] requiredActionsForRead = new com.sap.sse.security.shared.HasPermissions.Action[] {
+        final HasPermissions.Action[] requiredActionsForRead = new HasPermissions.Action[] {
                 SecuredDomainType.CompetitorAndBoatActions.READ_PUBLIC,
                 SecuredDomainType.CompetitorAndBoatActions.LIST };
         Iterable<BoatDTO> result = getSecurityService().mapAndFilterByExplicitPermissionForCurrentUser(
