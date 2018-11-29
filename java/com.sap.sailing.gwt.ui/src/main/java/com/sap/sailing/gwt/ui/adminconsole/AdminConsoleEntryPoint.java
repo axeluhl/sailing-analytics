@@ -323,7 +323,8 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
                     }
                 }, getStringMessages().roles(), SecuredSecurityTypes.ROLE_DEFINITION.getPermission(DefaultActions.MUTATION_ACTIONS));
 
-        final UserGroupManagementPanel userGroupManagementPanel = new UserGroupManagementPanel(getUserService(), StringMessages.INSTANCE);
+        final UserGroupManagementPanel userGroupManagementPanel = new UserGroupManagementPanel(getUserService(),
+                StringMessages.INSTANCE, SecuredDomainType.getAllInstances(), this, tableResources);
         panel.addToTabPanel(advancedTabPanel,
                 new DefaultRefreshableAdminConsolePanel<UserGroupManagementPanel>(userGroupManagementPanel) {
                     @Override

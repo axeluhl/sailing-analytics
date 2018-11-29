@@ -19,6 +19,7 @@ import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
+import com.sap.sse.security.shared.dto.UserGroupWithSecurityDTO;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
@@ -144,4 +145,6 @@ public interface UserManagementServiceAsync {
     void getAuthorizationUrl(CredentialDTO credential, AsyncCallback<String> callback);
 
     void verifySocialUser(CredentialDTO credential, AsyncCallback<Pair<UserDTO, UserDTO>> markedAsyncCallback);
+
+    void getSecuredUserGroups(AsyncCallback<Collection<UserGroupWithSecurityDTO>> callback);
 }

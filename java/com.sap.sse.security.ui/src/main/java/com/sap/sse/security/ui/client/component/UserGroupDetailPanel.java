@@ -36,13 +36,14 @@ import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.dto.StrippedUserDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
+import com.sap.sse.security.shared.dto.UserGroupWithSecurityDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.component.UserGroupListDataProvider.UserGroupListDataProviderChangeHandler;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 public class UserGroupDetailPanel extends HorizontalPanel implements Handler, ChangeHandler, KeyUpHandler, UserGroupListDataProviderChangeHandler {
     private final TextBox filterBox;
-    private final SingleSelectionModel<UserGroupDTO> userGroupSelectionModel;
+    private final SingleSelectionModel<UserGroupWithSecurityDTO> userGroupSelectionModel;
     
     private final CellList<String> tenantUsersList;
     private final MultiSelectionModel<String> tenantUsersSelectionModel;
@@ -150,14 +151,15 @@ public class UserGroupDetailPanel extends HorizontalPanel implements Handler, Ch
         }
     }
     
-    public UserGroupDetailPanel(TextBox filterBox, SingleSelectionModel<UserGroupDTO> tenantSelectionModel,
+    public UserGroupDetailPanel(TextBox filterBox,
+            SingleSelectionModel<UserGroupWithSecurityDTO> refreshableSelectionModel,
             UserGroupListDataProvider tenantListDataProvider, UserManagementServiceAsync userManagementService,
             StringMessages stringMessages) {
         this.filterBox = filterBox;
         filterBox.addChangeHandler(this);
         filterBox.addKeyUpHandler(this);
-        tenantSelectionModel.addSelectionChangeHandler(this);
-        this.userGroupSelectionModel = tenantSelectionModel;
+        refreshableSelectionModel.addSelectionChangeHandler(this);
+        this.userGroupSelectionModel = refreshableSelectionModel;
         tenantListDataProvider.addChangeHandler(this);
         this.userManagementService = userManagementService;
         
@@ -196,7 +198,7 @@ public class UserGroupDetailPanel extends HorizontalPanel implements Handler, Ch
         addBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                UserGroupDTO tenant = tenantSelectionModel.getSelectedObject();
+                UserGroupDTO tenant = userGroupSelectionModel.getSelectedObject();
                 Set<UserDTO> users = allUsersSelectionModel.getSelectedSet();
                 if (tenant == null) {
                     Window.alert(stringMessages.youHaveToSelectAUserGroup());
@@ -221,7 +223,7 @@ public class UserGroupDetailPanel extends HorizontalPanel implements Handler, Ch
         removeBtn.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                UserGroupDTO tenant = tenantSelectionModel.getSelectedObject();
+                UserGroupDTO tenant = userGroupSelectionModel.getSelectedObject();
                 Set<String> users = tenantUsersSelectionModel.getSelectedSet();
                 if (tenant == null) {
                     Window.alert(stringMessages.youHaveToSelectAUserGroup());

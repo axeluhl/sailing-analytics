@@ -30,6 +30,7 @@ import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.StrippedUserDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
+import com.sap.sse.security.shared.dto.UserGroupWithSecurityDTO;
 import com.sap.sse.security.shared.impl.AccessControlList;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
@@ -183,6 +184,35 @@ public class SecurityDTOFactory {
                 fromOriginalToStrippedDownUserGroup.put(userGroup, result);
                 for (final User user : userGroup.getUsers()) {
                     result.add(createUserDTOFromUser(user, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
+                }
+            }
+        }
+        return result;
+    }
+
+    UserGroupWithSecurityDTO createUserGroupWithSecurityDTOFromUserGroup(UserGroup userGroup,
+            Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser,
+            Map<UserGroup, UserGroupDTO> fromOriginalToStrippedDownUserGroup, final SecurityService securityService) {
+        UserGroupWithSecurityDTO result = null;
+        if (userGroup == null) {
+            result = null;
+        } else {
+            if (fromOriginalToStrippedDownUserGroup.containsKey(userGroup)) {
+                UserGroupDTO userGroupDTO = fromOriginalToStrippedDownUserGroup.get(userGroup);
+                if (userGroupDTO instanceof UserGroupWithSecurityDTO) {
+                    result = (UserGroupWithSecurityDTO) userGroupDTO;
+                }
+            }
+            if (result == null) {
+                result = new UserGroupWithSecurityDTO(userGroup.getId(), userGroup.getName());
+
+                SecurityDTOUtil.addSecurityInformation(this, securityService, result, userGroup.getIdentifier(),
+                        fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
+
+                fromOriginalToStrippedDownUserGroup.put(userGroup, result);
+                for (final User user : userGroup.getUsers()) {
+                    result.add(createUserDTOFromUser(user, fromOriginalToStrippedDownUser,
+                            fromOriginalToStrippedDownUserGroup));
                 }
             }
         }
