@@ -554,11 +554,9 @@ public class CandidateFinderImpl implements CandidateFinder {
                 new ArrayList<Candidate>(), new ArrayList<Candidate>());
         TreeSet<GPSFixMoving> affectedFixes = new TreeSet<GPSFixMoving>(comp);
         GPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
-
         // remember last fixes to avoid expensive searches (bug4221)
         GPSFixMoving lastIterationFix = null;
         GPSFixMoving lastIterationAfterFix = null;
-
         for (GPSFixMoving fix : fixes) {
             if (timeRangeForValidCandidates.getTimeRangeOrNull() != null && timeRangeForValidCandidates.getTimeRangeOrNull().includes(fix.getTimePoint())) {
                 affectedFixes.add(fix);
@@ -594,7 +592,6 @@ public class CandidateFinderImpl implements CandidateFinder {
         }
         lastIterationFix = null;
         lastIterationAfterFix = null;
-        
         for (GPSFixMoving fix : affectedFixes) {
             TimePoint t = null;
             Position p = null;
@@ -737,11 +734,9 @@ public class CandidateFinderImpl implements CandidateFinder {
         Util.Pair<List<Candidate>, List<Candidate>> result = new Util.Pair<List<Candidate>, List<Candidate>>(
                 new ArrayList<Candidate>(), new ArrayList<Candidate>());
         DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
-        
         // remember last fixes to avoid expensive searches (bug4221)
         GPSFixMoving lastIterationFix = null;
         GPSFixMoving lastIterationAfterFix = null;
-        
         for (GPSFixMoving fix : fixes) {
             if (timeRangeForValidCandidates.getTimeRangeOrNull() != null && timeRangeForValidCandidates.getTimeRangeOrNull().includes(fix.getTimePoint())) {
                 TimePoint t = fix.getTimePoint();
