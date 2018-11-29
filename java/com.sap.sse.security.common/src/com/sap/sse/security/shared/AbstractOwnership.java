@@ -2,7 +2,7 @@ package com.sap.sse.security.shared;
 
 import java.io.Serializable;
 
-public abstract class AbstractOwnership<G extends AbstractUserGroup<?>, U extends SecurityUser<?, ?, ?>>
+public abstract class AbstractOwnership<G extends SecurityUserGroup, U extends SecurityUser<?, ?, ?>>
         implements Serializable {
     private static final long serialVersionUID = 1L;
 

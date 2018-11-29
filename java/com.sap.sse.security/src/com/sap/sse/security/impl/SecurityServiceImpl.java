@@ -120,9 +120,9 @@ import com.sap.sse.security.shared.impl.AccessControlList;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
-import com.sap.sse.security.shared.impl.SecuredSecurityTypes.ServerActions;
 import com.sap.sse.util.ClearStateTestSupport;
 
 public class SecurityServiceImpl implements ReplicableSecurityService, ClearStateTestSupport {
@@ -431,7 +431,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public AccessControlList updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, Map<UserGroup, Set<String>> permissionMap) {
+    public AccessControlList updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
+            Map<UserGroup, Set<String>> permissionMap) {
         if (getAccessControlList(idOfAccessControlledObject) == null) {
             setEmptyAccessControlList(idOfAccessControlledObject);
         }
@@ -454,7 +455,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      * @param name The name of the user group to add
      */
     @Override
-    public AccessControlList addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup group, String action) {
+    public AccessControlList addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
+            UserGroup group, String action) {
         if (getAccessControlList(idOfAccessControlledObject) == null) {
             setEmptyAccessControlList(idOfAccessControlledObject);
         }
@@ -473,7 +475,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
      * @param name The name of the user group to remove
      */
     @Override
-    public AccessControlList removeFromAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString, UserGroup group, String permission) {
+    public AccessControlList removeFromAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObjectAsString,
+            UserGroup group, String permission) {
         final AccessControlList result;
         if (getAccessControlList(idOfAccessControlledObjectAsString) != null) {
             final UUID groupId = group.getId();
@@ -702,14 +705,14 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public UserImpl createSimpleUser(final String username, final String email, String password, String fullName,
+    public User createSimpleUser(final String username, final String email, String password, String fullName,
             String company, Locale locale, final String validationBaseURL)
             throws UserManagementException, MailException, UserGroupManagementException {
         return createSimpleUser(username, email, password, fullName, company, locale, validationBaseURL,
                 getDefaultTenantForCurrentUser());
     }
 
-    private UserImpl createSimpleUser(final String username, final String email, String password, String fullName,
+    private User createSimpleUser(final String username, final String email, String password, String fullName,
             String company, Locale locale, final String validationBaseURL, UserGroup userOwner)
             throws UserManagementException, MailException, UserGroupManagementException {
         logger.info("Creating user "+username);
@@ -735,7 +738,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         byte[] salt = rng.nextBytes().getBytes();
         String hashedPasswordBase64 = hashPassword(password, salt);
         UsernamePasswordAccount upa = new UsernamePasswordAccount(username, hashedPasswordBase64, salt);
-        final UserImpl result = createUserInternal(username, email, tenant, upa);
+        final User result = createUserInternal(username, email, tenant, upa);
         addRoleForUser(result,
                 new Role(UserRole.getInstance(), /* tenant qualifier */ null, /* user qualifier */ result));
         addUserToUserGroup(tenant, result);
@@ -769,8 +772,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return result;
     }
 
-    private UserImpl createUserInternal(String username, String email, UserGroup defaultTenant, Account... accounts) throws UserManagementException {
-        final UserImpl result = userStore.createUser(username, email, defaultTenant, accounts); // TODO: get the principal as owner
+    private User createUserInternal(String username, String email, UserGroup defaultTenant, Account... accounts)
+            throws UserManagementException {
+        final User result = userStore.createUser(username, email, defaultTenant, accounts); // TODO: get the principal
+                                                                                            // as owner
         // now the user creation needs to be replicated so that when replicating role addition and group assignment
         // the replica will be able to resolve the user correctly
         apply(s -> s.internalStoreUser(result));

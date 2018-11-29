@@ -2,7 +2,7 @@ package com.sap.sse.security.shared.dto;
 
 import com.sap.sse.security.shared.AbstractOwnership;
 
-public class OwnershipDTO extends AbstractOwnership<UserGroupDTO, StrippedUserDTO> {
+public class OwnershipDTO extends AbstractOwnership<StrippedUserGroupDTO, StrippedUserDTO> {
     private static final long serialVersionUID = -6379054499434958440L;
 
     @Deprecated // for GWT serialization only
@@ -10,7 +10,7 @@ public class OwnershipDTO extends AbstractOwnership<UserGroupDTO, StrippedUserDT
         super(null, null);
     }
 
-    public OwnershipDTO(StrippedUserDTO userOwner, UserGroupDTO tenantOwner) {
+    public OwnershipDTO(StrippedUserDTO userOwner, StrippedUserGroupDTO tenantOwner) {
         super(userOwner, tenantOwner);
     }
 

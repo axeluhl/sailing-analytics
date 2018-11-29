@@ -6,11 +6,11 @@ import java.util.Map;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.WithID;
 import com.sap.sse.security.shared.Account;
+import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
-import com.sap.sse.security.shared.Account.AccountType;
 
 /**
  * The {@link Named#getName() name} is the ID for this user; usually a nickname or short name. Implements the

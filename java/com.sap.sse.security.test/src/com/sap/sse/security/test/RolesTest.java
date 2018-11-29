@@ -10,17 +10,17 @@ import org.junit.Test;
 import com.sap.sse.security.shared.dto.RoleDTO;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.StrippedUserDTO;
-import com.sap.sse.security.shared.dto.UserGroupDTO;
+import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.impl.Role;
-import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.shared.impl.UserGroupImpl;
 
 public class RolesTest {
     @Test
     public void testRoleToString() {
         final RoleDefinitionDTO roleDefinition = new RoleDefinitionDTO(UUID.randomUUID(), "role", new ArrayList<>());
         final Role role = new Role(roleDefinition);
-        final UserGroup tenant = new UserGroup(UUID.randomUUID(), "tenant");
-        final UserGroupDTO tenantDTO = new UserGroupDTO(UUID.randomUUID(), "tenant");
+        final UserGroupImpl tenant = new UserGroupImpl(UUID.randomUUID(), "tenant");
+        final StrippedUserGroupDTO tenantDTO = new StrippedUserGroupDTO(UUID.randomUUID(), "tenant");
         final StrippedUserDTO user = new StrippedUserDTO("user");
         assertEquals("role", role.toString());
         final Role role2 = new Role(roleDefinition, tenant, /* user qualification */ null);

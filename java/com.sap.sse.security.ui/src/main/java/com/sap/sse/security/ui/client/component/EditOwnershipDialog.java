@@ -20,8 +20,8 @@ import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.shared.dto.StrippedUserDTO;
+import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
-import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.OwnershipDialogResult;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -35,7 +35,7 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
     private boolean resolvingUsername;
     private boolean resolvingUserGroupName;
     private StrippedUserDTO resolvedUser;
-    private UserGroupDTO resolvedUserGroup;
+    private StrippedUserGroupDTO resolvedUserGroup;
     
     static class OwnershipDialogResult {
         private final OwnershipDTO ownership;
@@ -131,9 +131,9 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
     private void resolveUserGroup() {
         resolvedUserGroup = null;
         resolvingUserGroupName = true;
-        userManagementService.getUserGroupByName(groupnameBox.getText(), new AsyncCallback<UserGroupDTO>() {
+        userManagementService.getStrippedUserGroupByName(groupnameBox.getText(), new AsyncCallback<StrippedUserGroupDTO>() {
             @Override
-            public void onSuccess(UserGroupDTO result) {
+            public void onSuccess(StrippedUserGroupDTO result) {
                 resolvedUserGroup = result;
                 resolvingUserGroupName = false;
                 validateAndUpdate();

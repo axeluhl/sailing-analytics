@@ -6,19 +6,19 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.sap.sse.common.Util;
-import com.sap.sse.security.shared.AbstractUserGroup;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.PermissionChecker.PermissionState;
 import com.sap.sse.security.shared.SecurityAccessControlList;
 import com.sap.sse.security.shared.SecurityUser;
+import com.sap.sse.security.shared.SecurityUserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
 
-public abstract class AbstractAccessControlList<G extends AbstractUserGroup<U>, U extends SecurityUser<?, ?, G>>
+public abstract class AbstractAccessControlList<G extends SecurityUserGroup, U extends SecurityUser<?, ?, G>>
         implements SecurityAccessControlList<G> {
     private static final long serialVersionUID = -8587238587604749862L;
 
     /**
-     * Maps from {@link UserGroup} to the actions allowed for this group on the
+     * Maps from {@link UserGroupImpl} to the actions allowed for this group on the
      * {@link #idOfAccessControlledObjectAsString object to which this ACL belongs}. The {@link WildcardPermission}
      * objects stored in the value sets represent only the action part, not the type or instance part. The
      * {@link WildcardPermission} abstraction is used for its wildcard implication logic. The
@@ -36,7 +36,7 @@ public abstract class AbstractAccessControlList<G extends AbstractUserGroup<U>, 
     private Map<G, Set<WildcardPermission>> allowedActionsByUserGroup;
     
     /**
-     * Maps from {@link UserGroup} to the actions denied for this group on the
+     * Maps from {@link UserGroupImpl} to the actions denied for this group on the
      * {@link #idOfAccessControlledObjectAsString object to which this ACL belongs}. The {@link WildcardPermission}
      * objects stored in the value sets represent only the action part, not the type or instance part. The
      * {@link WildcardPermission} abstraction is used for its wildcard implication logic. The

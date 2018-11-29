@@ -12,6 +12,7 @@ import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.security.userstore.mongodb.impl.FieldNames.Tenant;
 
 public interface DomainObjectFactory {
@@ -22,11 +23,11 @@ public interface DomainObjectFactory {
     Iterable<RoleDefinition> loadAllRoleDefinitions();
     
     /**
-     * Loads user groups and tenants from the persistent store. The users {@link UserGroup#getUsers() contained} therein
+     * Loads user groups and tenants from the persistent store. The users {@link UserGroupImpl#getUsers() contained} therein
      * are proxies and must be replaced by the caller once the real {@link SecurityUser} objects have been loaded from
      * the store. The proxies only have the correct {@link SecurityUser#getName() name} field set which also acts as the
-     * {@link SecurityUser#getId() user ID}. {@link UserGroup#remove(SecurityUser)} and
-     * {@link UserGroup#add(SecurityUser)} have to be used for this process.
+     * {@link SecurityUser#getId() user ID}. {@link UserGroupImpl#remove(SecurityUser)} and
+     * {@link UserGroupImpl#add(SecurityUser)} have to be used for this process.
      * <p>
      */
     Iterable<UserGroup> loadAllUserGroupsAndTenantsWithProxyUsers();

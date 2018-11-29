@@ -19,9 +19,9 @@ public class UserDTO extends StrippedUserDTO
     private String locale;
     private List<AccountDTO> accounts;
     private boolean emailValidated;
-    private List<UserGroupDTO> groups;
+    private List<StrippedUserGroupDTO> groups;
     private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
-    private UserGroupDTO defaultTenantForCurrentServer;
+    private StrippedUserGroupDTO defaultTenantForCurrentServer;
 
     @Deprecated // gwt only
     UserDTO() {
@@ -32,9 +32,9 @@ public class UserDTO extends StrippedUserDTO
      * @param groups may be {@code null} which is equivalent to passing an empty groups collection
      */
     public UserDTO(String name, String email, String fullName, String company, String locale, boolean emailValidated,
-            List<AccountDTO> accounts, Iterable<RoleDTO> roles, UserGroupDTO defaultTenant,
+            List<AccountDTO> accounts, Iterable<RoleDTO> roles, StrippedUserGroupDTO defaultTenant,
             Iterable<WildcardPermission> permissions,
-            Iterable<UserGroupDTO> groups) {
+            Iterable<StrippedUserGroupDTO> groups) {
         super(name, roles, permissions);
         this.defaultTenantForCurrentServer = defaultTenant;
         this.email = email;
@@ -50,7 +50,7 @@ public class UserDTO extends StrippedUserDTO
     /**
      * The tenant to use as {@link Ownership#getTenantOwner() tenant owner} of new objects created by this user
      */
-    public UserGroupDTO getDefaultTenant() {
+    public StrippedUserGroupDTO getDefaultTenant() {
         return defaultTenantForCurrentServer;
     }
 
@@ -91,7 +91,7 @@ public class UserDTO extends StrippedUserDTO
      * embedded. Note, however, that the response is not "live," so there is no round-trip to the server involved.
      */
     @Override
-    public List<UserGroupDTO> getUserGroups() {
+    public List<StrippedUserGroupDTO> getUserGroups() {
         return groups;
     }
     
@@ -127,7 +127,7 @@ public class UserDTO extends StrippedUserDTO
         this.securityInformation.setOwnership(ownership);
     }
     
-    public void setDefaultTenantForCurrentServer(UserGroupDTO defaultTenant) {
+    public void setDefaultTenantForCurrentServer(StrippedUserGroupDTO defaultTenant) {
         this.defaultTenantForCurrentServer = defaultTenant;
     }
 }

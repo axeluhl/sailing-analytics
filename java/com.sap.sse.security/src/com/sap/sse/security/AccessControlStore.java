@@ -24,10 +24,16 @@ public interface AccessControlStore extends Named {
      * @param displayNameOfAccessControlledObject the display name of the object the ACL is attached to
      */
     AccessControlListAnnotation setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String displayNameOfAccessControlledObject);
-    void setAclPermissions(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup, Set<String> actions);
+
+    void setAclPermissions(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup,
+            Set<String> actions);
+
     void addAclPermission(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup, String action);
+
     void removeAclPermission(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup, String action);
+
     void removeAclDenial(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup, String action);
+
     void denyAclPermission(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup, String action);
     void removeAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject);
     

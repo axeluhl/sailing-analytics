@@ -1,20 +1,16 @@
 package com.sap.sse.security.shared.impl;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import com.sap.sse.security.shared.SecurityUserGroup;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 
-import com.sap.sse.security.shared.AbstractUserGroup;
+public interface UserGroup extends SecurityUserGroup, WithQualifiedObjectIdentifier {
 
-public class UserGroup extends AbstractUserGroup<User> {
-    private static final long serialVersionUID = 1L;
+    Iterable<User> getUsers();
 
-    public UserGroup(Set<User> users, UUID id, String name) {
-        super(users, id, name);
-    }
+    void add(User user);
 
-    public UserGroup(UUID id, String name) {
-        super(new HashSet<User>(), id, name);
-    }
+    void remove(User user);
+
+    boolean contains(User user);
 
 }

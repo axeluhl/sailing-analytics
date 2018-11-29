@@ -23,7 +23,7 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
-import com.sap.sse.security.shared.dto.UserGroupDTO;
+import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.component.EditAccessControlListDialog.AccessControlListData;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -104,7 +104,7 @@ public class EditAccessControlListDialog extends DataEntryDialog<AccessControlLi
             }
         });
         accessControlledObjectId = acl.getIdOfAnnotatedObject();
-        for (Entry<UserGroupDTO, Set<String>> entry : acl.getAnnotation().getActionsByUserGroup().entrySet()) {
+        for (Entry<StrippedUserGroupDTO, Set<String>> entry : acl.getAnnotation().getActionsByUserGroup().entrySet()) {
             Label label = new Label(entry.getKey().getName());
             labels.add(label);
             String concatenated = "";

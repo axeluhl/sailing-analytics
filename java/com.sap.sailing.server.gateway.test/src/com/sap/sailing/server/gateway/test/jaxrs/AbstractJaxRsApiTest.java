@@ -45,7 +45,7 @@ import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.User;
-import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.shared.impl.UserGroupImpl;
 
 public abstract class AbstractJaxRsApiTest {
     protected RacingEventService racingEventService;
@@ -67,7 +67,7 @@ public abstract class AbstractJaxRsApiTest {
         racingEventService = Mockito.spy(new RacingEventServiceImpl(/* clearPersistentCompetitorStore */ true,
                 new MockSmartphoneUuidServiceFinderFactory(), /* restoreTrackedRaces */ false));
 
-        UserGroup defaultTenant = new UserGroup(new UUID(0, 1), "defaultTenant");
+        UserGroupImpl defaultTenant = new UserGroupImpl(new UUID(0, 1), "defaultTenant");
 
         securityService = Mockito.mock(SecurityService.class);
         SecurityManager securityManager = Mockito.mock(org.apache.shiro.mgt.SecurityManager.class);

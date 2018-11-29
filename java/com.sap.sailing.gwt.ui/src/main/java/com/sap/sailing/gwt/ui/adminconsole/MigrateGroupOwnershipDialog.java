@@ -18,6 +18,7 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.SecuredDTO;
+import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 
@@ -79,13 +80,13 @@ public class MigrateGroupOwnershipDialog extends DataEntryDialog<MigrateGroupOwn
     }
 
     private MigrateGroupOwnershipDialog(UserManagementServiceAsync userManagementService,
-            UserGroupDTO currentGroupOwner,
+            StrippedUserGroupDTO tenant,
             StringMessages stringMessages, DialogCallback<MigrateGroupOwnerForHierarchyDialogDTO> callback) {
         super(stringMessages.ownership(), stringMessages.migrateHierarchyToGroupOwner(), stringMessages.ok(),
                 stringMessages.cancel(), new Validator(stringMessages), callback);
         this.userManagementService = userManagementService;
-        this.currentGroupLabel = new Label(currentGroupOwner == null ? "n/a" : currentGroupOwner.getName());
-        this.groupnameBox = createTextBox(currentGroupOwner == null ? "" : currentGroupOwner.getName(),
+        this.currentGroupLabel = new Label(tenant == null ? "n/a" : tenant.getName());
+        this.groupnameBox = createTextBox(tenant == null ? "" : tenant.getName(),
                 /* visibileLength */ 20);
         this.groupnameBox.addChangeHandler(e -> resolveUserGroup());
 
@@ -173,7 +174,7 @@ public class MigrateGroupOwnershipDialog extends DataEntryDialog<MigrateGroupOwn
          */
         public void openDialog(final T securedObject) {
             OwnershipDTO ownership = securedObject.getOwnership();
-            UserGroupDTO tenant = ownership == null ? null : ownership.getTenantOwner();
+            StrippedUserGroupDTO tenant = ownership == null ? null : ownership.getTenantOwner();
             new MigrateGroupOwnershipDialog(userManagementService,
                     tenant, StringMessages.INSTANCE,
                     new EditOwnershipDialogCallback(securedObject)).show();

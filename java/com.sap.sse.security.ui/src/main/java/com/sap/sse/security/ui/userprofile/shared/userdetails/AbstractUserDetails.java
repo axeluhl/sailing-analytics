@@ -15,8 +15,8 @@ import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.GWTLocaleUtil;
+import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
-import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
 /**
@@ -88,10 +88,10 @@ public class AbstractUserDetails extends Composite implements UserDetailsView {
     }
 
     private void updateDefaultTenantSelection(UserDTO currentUser) {
-        UserGroupDTO defaultTennant = currentUser.getDefaultTenant();
+        StrippedUserGroupDTO defaultTennant = currentUser.getDefaultTenant();
         defaultTenantUi.clear();
         int i = 0;
-        for (UserGroupDTO group : currentUser.getUserGroups()) {
+        for (StrippedUserGroupDTO group : currentUser.getUserGroups()) {
             defaultTenantUi.addItem(group.getName(), group.getId().toString());
             if (Util.equalsWithNull(group, defaultTennant)) {
                 defaultTenantUi.setSelectedIndex(i);

@@ -74,7 +74,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     SecurityService setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String displayNameOfAccessControlledObject);
 
-    AccessControlList updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, Map<UserGroup, Set<String>> permissionMap);
+    AccessControlList updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
+            Map<UserGroup, Set<String>> permissionMap);
 
     AccessControlList overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
             Map<UserGroup, Set<String>> permissionMap);
@@ -82,12 +83,14 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     /**
      * @param name The name of the user group to add
      */
-    AccessControlList addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup, String action);
+    AccessControlList addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup,
+            String action);
 
     /**
      * @param name The name of the user group to remove
      */ 
-    AccessControlList removeFromAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup group, String action);
+    AccessControlList removeFromAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup group,
+            String action);
 
     void deleteAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject);
 
@@ -154,7 +157,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     /**
      * @param validationBaseURL if <code>null</code>, no validation will be attempted
      */
-    UserImpl createSimpleUser(String username, String email, String password, String fullName, String company,
+    User createSimpleUser(String username, String email, String password, String fullName, String company,
             Locale locale, String validationBaseURL)
             throws UserManagementException, MailException, UserGroupManagementException;
 

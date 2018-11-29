@@ -33,18 +33,9 @@ import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.mail.MailException;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
-import com.sap.sse.security.shared.dto.AccessControlListDTO;
-import com.sap.sse.security.shared.dto.OwnershipAnnotationDTO;
-import com.sap.sse.security.shared.dto.OwnershipDTO;
-import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
-import com.sap.sse.security.shared.dto.StrippedUserDTO;
-import com.sap.sse.security.shared.dto.UserDTO;
-import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
@@ -52,12 +43,21 @@ import com.sap.sse.security.shared.UnauthorizedException;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
+import com.sap.sse.security.shared.dto.AccessControlListDTO;
+import com.sap.sse.security.shared.dto.OwnershipAnnotationDTO;
+import com.sap.sse.security.shared.dto.OwnershipDTO;
+import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
+import com.sap.sse.security.shared.dto.StrippedUserDTO;
+import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
+import com.sap.sse.security.shared.dto.UserDTO;
+import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes.UserActions;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
-import com.sap.sse.security.shared.impl.SecuredSecurityTypes.UserActions;
 import com.sap.sse.security.ui.client.UserManagementService;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
@@ -220,8 +220,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     private UserGroup getUserGroup(String groupIdAsString) {
         UUID groupId = UUID.fromString(groupIdAsString);
-        UserGroup userGroup = getSecurityService().getUserGroup(groupId);
-        return userGroup;
+        return getSecurityService().getUserGroup(groupId);
     }
 
     @Override
@@ -256,6 +255,19 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                     fromOriginalToStrippedDownUserGroup);
         } else {
             throw new UnauthorizedException("Not permitted to read user group "+userGroupName);
+        }
+    }
+
+    @Override
+    public StrippedUserGroupDTO getStrippedUserGroupByName(String userGroupName) throws UnauthorizedException {
+        final UserGroup userGroup = getSecurityService().getUserGroupByName(userGroupName);
+        if (userGroup == null || SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER_GROUP
+                .getStringPermissionForObjects(DefaultActions.READ, userGroup.getId().toString()))) {
+            Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGroup = new HashMap<>();
+            return securityDTOFactory.createStrippedUserGroupDTOFromUserGroup(userGroup,
+                    fromOriginalToStrippedDownUserGroup);
+        } else {
+            throw new UnauthorizedException("Not permitted to read user group " + userGroupName);
         }
     }
 
@@ -387,7 +399,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public UserDTO createSimpleUser(String username, String email, String password, String fullName, String company,
             String localeName, String validationBaseURL)
             throws UserManagementException, MailException, UnauthorizedException {
-        final UserImpl u = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
+        final User u = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredSecurityTypes.USER, username, username, () -> {
                     try {
                         return getSecurityService().createSimpleUser(username, email, password, fullName, company,
@@ -807,9 +819,9 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         if (SecurityUtils.getSubject()
                 .isPermitted(idOfAccessControlledObject.getStringPermission(DefaultActions.CHANGE_ACL))) {
             
-            Map<UserGroup,Set<String>> aclActionsByGroup = new HashMap<>();
-            for (Map.Entry<UserGroupDTO, Set<String>> entry : acl.getActionsByUserGroup().entrySet()) {
-                final UserGroupDTO groupDTO = entry.getKey();
+            Map<UserGroup, Set<String>> aclActionsByGroup = new HashMap<>();
+            for (Entry<StrippedUserGroupDTO, Set<String>> entry : acl.getActionsByUserGroup().entrySet()) {
+                final StrippedUserGroupDTO groupDTO = entry.getKey();
                 final UserGroup userGroup;
                 if (groupDTO == null) {
                     userGroup = null;
@@ -840,5 +852,4 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             throw new UnauthorizedException("Not permitted to get the unpruned ACL for a user");
         }
     }
-
 }

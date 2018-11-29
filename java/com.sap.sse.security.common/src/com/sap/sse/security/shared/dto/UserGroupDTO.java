@@ -3,9 +3,9 @@ package com.sap.sse.security.shared.dto;
 import java.util.HashSet;
 import java.util.UUID;
 
-import com.sap.sse.security.shared.AbstractUserGroup;
+import com.sap.sse.security.shared.AbstractUserGroupImpl;
 
-public class UserGroupDTO extends AbstractUserGroup<StrippedUserDTO> {
+public class UserGroupDTO extends AbstractUserGroupImpl<StrippedUserDTO> {
     private static final long serialVersionUID = 1L;
 
     @Deprecated
