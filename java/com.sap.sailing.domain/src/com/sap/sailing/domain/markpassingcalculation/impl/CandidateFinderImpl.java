@@ -552,21 +552,34 @@ public class CandidateFinderImpl implements CandidateFinder {
             Iterable<GPSFixMoving> fixes, Iterable<Waypoint> waypoints) {
         Util.Pair<List<Candidate>, List<Candidate>> result = new Util.Pair<List<Candidate>, List<Candidate>>(
                 new ArrayList<Candidate>(), new ArrayList<Candidate>());
-        TreeSet<GPSFix> affectedFixes = new TreeSet<GPSFix>(comp);
+        TreeSet<GPSFixMoving> affectedFixes = new TreeSet<GPSFixMoving>(comp);
         GPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
+
+        // remember last fixes to avoid expensive searches (bug4221)
+        GPSFixMoving lastIterationFix = null;
+        GPSFixMoving lastIterationAfterFix = null;
+
         for (GPSFixMoving fix : fixes) {
             if (timeRangeForValidCandidates.getTimeRangeOrNull() != null && timeRangeForValidCandidates.getTimeRangeOrNull().includes(fix.getTimePoint())) {
                 affectedFixes.add(fix);
-                GPSFix fixBefore = null;
-                GPSFix fixAfter = null;
+                GPSFixMoving fixBefore = null;
+                GPSFixMoving fixAfter = null;
                 final boolean fixIsValid;
                 track.lockForRead();
                 try {
                     fixIsValid = track.isValid(fix);
                     if (fixIsValid) {
                         TimePoint t = fix.getTimePoint();
-                        fixBefore = track.getLastFixBefore(t); // TODO bug4221 try to avoid this expensive search in case the fixes are already more or less contiguous
+                        if (fix == lastIterationAfterFix) {
+                            // bug4221 try to avoid this expensive search in case the fixes are already more or less contiguous
+                            fixBefore = lastIterationFix;
+                        } else {
+                            fixBefore = track.getLastFixBefore(t);
+                        }
                         fixAfter = track.getFirstFixAfter(t);
+                        
+                        lastIterationFix = fix;
+                        lastIterationAfterFix = fixAfter;
                     }
                 } finally {
                     track.unlockAfterRead();
@@ -579,16 +592,27 @@ public class CandidateFinderImpl implements CandidateFinder {
                 }
             }
         }
-        for (GPSFix fix : affectedFixes) {
+        lastIterationFix = null;
+        lastIterationAfterFix = null;
+        
+        for (GPSFixMoving fix : affectedFixes) {
             TimePoint t = null;
             Position p = null;
-            GPSFix fixBefore;
-            GPSFix fixAfter;
+            GPSFixMoving fixBefore;
+            GPSFixMoving fixAfter;
             try {
                 track.lockForRead();
                 TimePoint timePoint = fix.getTimePoint();
-                fixBefore = track.getLastFixBefore(timePoint); // TODO bug4221 try to avoid this expensive search in case the fixes are already more or less contiguous
+                if (fix == lastIterationAfterFix) {
+                    // bug4221 try to avoid this expensive search in case the fixes are already more or less contiguous
+                    fixBefore = lastIterationFix;
+                } else {
+                    fixBefore = track.getLastFixBefore(timePoint);
+                }
                 fixAfter = track.getFirstFixAfter(timePoint);
+
+                lastIterationFix = fix;
+                lastIterationAfterFix = fixAfter;
             } finally {
                 track.unlockAfterRead();
             }
@@ -713,18 +737,31 @@ public class CandidateFinderImpl implements CandidateFinder {
         Util.Pair<List<Candidate>, List<Candidate>> result = new Util.Pair<List<Candidate>, List<Candidate>>(
                 new ArrayList<Candidate>(), new ArrayList<Candidate>());
         DynamicGPSFixTrack<Competitor, GPSFixMoving> track = race.getTrack(c);
+        
+        // remember last fixes to avoid expensive searches (bug4221)
+        GPSFixMoving lastIterationFix = null;
+        GPSFixMoving lastIterationAfterFix = null;
+        
         for (GPSFixMoving fix : fixes) {
             if (timeRangeForValidCandidates.getTimeRangeOrNull() != null && timeRangeForValidCandidates.getTimeRangeOrNull().includes(fix.getTimePoint())) {
                 TimePoint t = fix.getTimePoint();
-                GPSFix fixBefore = null;
-                GPSFix fixAfter = null;
+                GPSFixMoving fixBefore = null;
+                GPSFixMoving fixAfter = null;
                 final boolean fixIsValid;
                 track.lockForRead();
                 try {
                     fixIsValid = track.isValid(fix);
                     if (fixIsValid) {
-                        fixBefore = track.getLastFixBefore(t); // TODO bug4221 try to avoid this expensive search in case the fixes are already more or less contiguous
+                        if (fix == lastIterationAfterFix) {
+                            // bug4221 try to avoid this expensive search in case the fixes are already more or less contiguous
+                            fixBefore = lastIterationFix;
+                        } else {
+                            fixBefore = track.getLastFixBefore(t);
+                        }
                         fixAfter = track.getFirstFixAfter(t);
+                        
+                        lastIterationFix = fix;
+                        lastIterationAfterFix = fixAfter;
                     }
                 } finally {
                     track.unlockAfterRead();
