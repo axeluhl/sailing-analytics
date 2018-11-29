@@ -653,6 +653,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             if (competitor == null) {
                 response = getBadCompetitorIdResponse(competitorId);
             } else {
+                getSecurityService().checkCurrentUserExplicitPermissions(competitor, SecuredDomainType.CompetitorAndBoatActions.LIST);
                 regatta.deregisterCompetitor(competitor);
                 response = Response.ok().build();
             }
@@ -840,6 +841,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (regatta == null) {
             return getBadRegattaErrorResponse(regattaName);
         }
+        getSecurityService().checkCurrentUserReadPermission(regatta);
 
         RaceDefinition race = findRaceByName(regatta, raceName);
         if (race == null) {
@@ -960,6 +962,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             RaceDefinition race = findRaceByName(regatta, raceName);
             if (race == null) {
                 response = getBadRaceErrorResponse(regattaName, raceName);
@@ -999,6 +1002,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             RaceDefinition race = findRaceByName(regatta, raceName);
             if (race == null) {
                 response = getBadRaceErrorResponse(regattaName, raceName);
@@ -1040,6 +1044,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             RaceDefinition race = findRaceByName(regatta, raceName);
             if (race == null) {
                 response = getBadRaceErrorResponse(regattaName, raceName);
@@ -1143,6 +1148,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     .entity("Could not find a regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.").type(MediaType.TEXT_PLAIN)
                     .build();
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             RaceDefinition race = findRaceByName(regatta, raceName);
             if (race == null) {
                 response = Response.status(Status.NOT_FOUND)
@@ -1177,47 +1183,55 @@ public class RegattasResource extends AbstractSailingServerResource {
         Regatta regatta = findRegattaByName(regattaName);
         if (regatta == null) {
             response = Response.status(Status.NOT_FOUND)
-                .entity("Could not find a regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.").type(MediaType.TEXT_PLAIN)
-                .build();
-        } else if (!((fromtime != null && totime != null) || (fromtimeasmillis != null && totimeasmillis != null))) {
-            response = Response.status(Status.NOT_FOUND)
-                .entity("Either the 'fromtime' and 'totime' or the 'fromtimeasmillis' and 'totimeasmillis' parameter must be set.").type(MediaType.TEXT_PLAIN)
-                .build();
+                    .entity("Could not find a regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.")
+                    .type(MediaType.TEXT_PLAIN).build();
         } else {
-            RaceDefinition race = findRaceByName(regatta, raceName);
-            if (race == null) {
-                response = Response.status(Status.NOT_FOUND)
-                        .entity("Could not find a race with name '" + StringEscapeUtils.escapeHtml(raceName) + "'.").type(MediaType.TEXT_PLAIN)
-                        .build();
+            getSecurityService().checkCurrentUserReadPermission(regatta);
+            if (!((fromtime != null && totime != null) || (fromtimeasmillis != null && totimeasmillis != null))) {
+
+                response = Response.status(Status.NOT_FOUND).entity(
+                        "Either the 'fromtime' and 'totime' or the 'fromtimeasmillis' and 'totimeasmillis' parameter must be set.")
+                        .type(MediaType.TEXT_PLAIN).build();
             } else {
-                TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
-
-                TimePoint from;
-                TimePoint to;
-                try {
-                    from = parseTimePoint(fromtime, fromtimeasmillis,
-                            trackedRace.getStartOfRace() == null ? new MillisecondsTimePoint(0) :
-                            /* 24h before race start */new MillisecondsTimePoint(trackedRace.getStartOfRace()
-                                    .asMillis() - 24 * 3600 * 1000));
-                } catch (InvalidDateException e1) {
-                    return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Could not parse the 'from' time.")
+                RaceDefinition race = findRaceByName(regatta, raceName);
+                if (race == null) {
+                    response = Response.status(Status.NOT_FOUND)
+                            .entity("Could not find a race with name '" + StringEscapeUtils.escapeHtml(raceName) + "'.")
                             .type(MediaType.TEXT_PLAIN).build();
-                }
-                try {
-                    to = parseTimePoint(totime, totimeasmillis, MillisecondsTimePoint.now());
-                } catch (InvalidDateException e1) {
-                    return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Could not parse the 'to' time.")
-                            .type(MediaType.TEXT_PLAIN).build();
-                }
-                // Crop request interval to startOfTracking / [endOfTracking|timePointOfLastEvent]
-                final TimePoint finalFrom = Util.getLatestOfTimePoints(from, trackedRace.getStartOfTracking());
-                final TimePoint finalTo = Util.getEarliestOfTimePoints(to, Util.getEarliestOfTimePoints(trackedRace.getEndOfTracking(), trackedRace.getTimePointOfNewestEvent()));
-                TrackedRaceJsonSerializer serializer = new TrackedRaceJsonSerializer(
-                        ws->new DefaultWindTrackJsonSerializer(/* maxNumberOfFixes */ 10000, finalFrom, finalTo, ws), windSource, windSourceId);
+                } else {
+                    TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
 
-                JSONObject jsonWindTracks = serializer.serialize(trackedRace);
-                String json = jsonWindTracks.toJSONString();
-                return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8").build();
+                    TimePoint from;
+                    TimePoint to;
+                    try {
+                        from = parseTimePoint(fromtime, fromtimeasmillis,
+                                trackedRace.getStartOfRace() == null ? new MillisecondsTimePoint(0) :
+                                /* 24h before race start */new MillisecondsTimePoint(
+                                        trackedRace.getStartOfRace().asMillis() - 24 * 3600 * 1000));
+                    } catch (InvalidDateException e1) {
+                        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Could not parse the 'from' time.")
+                                .type(MediaType.TEXT_PLAIN).build();
+                    }
+                    try {
+                        to = parseTimePoint(totime, totimeasmillis, MillisecondsTimePoint.now());
+                    } catch (InvalidDateException e1) {
+                        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Could not parse the 'to' time.")
+                                .type(MediaType.TEXT_PLAIN).build();
+                    }
+                    // Crop request interval to startOfTracking / [endOfTracking|timePointOfLastEvent]
+                    final TimePoint finalFrom = Util.getLatestOfTimePoints(from, trackedRace.getStartOfTracking());
+                    final TimePoint finalTo = Util.getEarliestOfTimePoints(to, Util.getEarliestOfTimePoints(
+                            trackedRace.getEndOfTracking(), trackedRace.getTimePointOfNewestEvent()));
+                    TrackedRaceJsonSerializer serializer = new TrackedRaceJsonSerializer(
+                            ws -> new DefaultWindTrackJsonSerializer(/* maxNumberOfFixes */ 10000, finalFrom, finalTo,
+                                    ws),
+                            windSource, windSourceId);
+
+                    JSONObject jsonWindTracks = serializer.serialize(trackedRace);
+                    String json = jsonWindTracks.toJSONString();
+                    return Response.ok(json).header("Content-Type", MediaType.APPLICATION_JSON + ";charset=UTF-8")
+                            .build();
+                }
             }
         }
         return response;
@@ -1236,6 +1250,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     .entity("Could not find a regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.").type(MediaType.TEXT_PLAIN)
                     .build();
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             RaceDefinition race = findRaceByName(regatta, raceName);
             if (race == null) {
                 response = Response.status(Status.NOT_FOUND)
@@ -1276,6 +1291,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     .entity("Could not find a regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.").type(MediaType.TEXT_PLAIN)
                     .build();
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             RaceDefinition race = findRaceByName(regatta, raceName);
             if (race == null) {
                 response = Response.status(Status.NOT_FOUND)
@@ -1320,6 +1336,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     .entity("Could not find a regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             RaceDefinition race = findRaceByName(regatta, raceName);
             if (race == null) {
                 response = Response.status(Status.NOT_FOUND)
@@ -1390,6 +1407,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     .entity("Could not find a regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             RaceDefinition race = findRaceByName(regatta, raceName);
             if (race == null) {
                 response = Response.status(Status.NOT_FOUND)
@@ -1398,7 +1416,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             } else {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
                 CompetitorTrackWithEstimationDataJsonSerializer serializer = new CompetitorTrackWithEstimationDataJsonSerializer(
-                        getService().getPolarDataService(), new DetailedBoatClassJsonSerializer(),
+                        getService().getPolarDataService(), getSecurityService(), new DetailedBoatClassJsonSerializer(),
                         new CompleteManeuverCurvesWithEstimationDataJsonSerializer(getService().getPolarDataService(),
                                 new CompleteManeuverCurveWithEstimationDataJsonSerializer(
                                         new ManeuverMainCurveWithEstimationDataJsonSerializer(),
@@ -1438,6 +1456,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     .entity("Could not find a regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.")
                     .type(MediaType.TEXT_PLAIN).build();
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             RaceDefinition race = findRaceByName(regatta, raceName);
             if (race == null) {
                 response = Response.status(Status.NOT_FOUND)
@@ -1446,7 +1465,7 @@ public class RegattasResource extends AbstractSailingServerResource {
             } else {
                 TrackedRace trackedRace = findTrackedRace(regattaName, raceName);
                 CompetitorTrackWithEstimationDataJsonSerializer serializer = new CompetitorTrackWithEstimationDataJsonSerializer(
-                        getService().getPolarDataService(), new DetailedBoatClassJsonSerializer(),
+                        getService().getPolarDataService(), getSecurityService(), new DetailedBoatClassJsonSerializer(),
                         new GpsFixesWithEstimationDataJsonSerializer(new GPSFixMovingJsonSerializer(),
                                 new ManeuverWindJsonSerializer(), addWind, addNextWaypoint, smoothFixes),
                         getNullableValueFromDefault(startBeforeStartLineInSeconds),
@@ -1476,6 +1495,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     .entity("Could not find a regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.").type(MediaType.TEXT_PLAIN)
                     .build();
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             JSONObject jsonRaceResults = new JSONObject();
             jsonRaceResults.put("regatta", regatta.getName());
             JSONArray jsonRaces = new JSONArray();
@@ -1504,6 +1524,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     .entity("Could not find a regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.").type(MediaType.TEXT_PLAIN)
                     .build();
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             RaceDefinition race = findRaceByName(regatta, raceName);
             if (race == null) {
                 response = Response.status(Status.NOT_FOUND)
@@ -1671,6 +1692,7 @@ public class RegattasResource extends AbstractSailingServerResource {
                     .entity("Could not find a regatta with name '" + StringEscapeUtils.escapeHtml(regattaName) + "'.").type(MediaType.TEXT_PLAIN)
                     .build();
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             RaceDefinition race = findRaceByName(regatta, raceName);
             if (race == null) {
                 response = Response.status(Status.NOT_FOUND)
@@ -1811,6 +1833,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             response = getDataMiningResource().avgSpeedPerCompetitorAndLegType(regattaName);
         }
         return response;
@@ -1826,6 +1849,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             RaceDefinition race = findRaceByName(regatta, raceName);
             if (race == null) {
                 response = getBadRaceErrorResponse(regattaName, raceName);
@@ -1846,6 +1870,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             response = getDataMiningResource().sumDistanceTraveledPerCompetitorAndLegType(regattaName);
         }
         return response;
@@ -1861,6 +1886,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             RaceDefinition race = findRaceByName(regatta, raceName);
             if (race == null) {
                 response = getBadRaceErrorResponse(regattaName, raceName);
@@ -1881,6 +1907,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             response = getDataMiningResource().sumManeuversPerCompetitor(regattaName);
         }
         return response;
@@ -1896,6 +1923,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             RaceDefinition race = findRaceByName(regatta, raceName);
             if (race == null) {
                 response = getBadRaceErrorResponse(regattaName, raceName);
@@ -1916,6 +1944,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             response = getDataMiningResource().avgSpeedPerCompetitor(regattaName);
         }
         return response;
@@ -1930,6 +1959,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             RaceDefinition race = findRaceByName(regatta, raceName);
             if (race == null) {
                 response = getBadRaceErrorResponse(regattaName, raceName);
@@ -1949,6 +1979,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             response = getDataMiningResource().sumDistanceTraveledPerCompetitor(regattaName);
         }
         return response;
@@ -1963,6 +1994,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             RaceDefinition race = findRaceByName(regatta, raceName);
             if (race == null) {
                 response = getBadRaceErrorResponse(regattaName, raceName);
@@ -1984,6 +2016,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             final JSONArray jsonResponse = new JSONArray();
             final Series series = getSeriesUsingLastAsDefault(regatta, toSeries);
             if (series == null) {
@@ -2017,6 +2050,7 @@ public class RegattasResource extends AbstractSailingServerResource {
         if (regatta == null) {
             response = getBadRegattaErrorResponse(regattaName);
         } else {
+            getSecurityService().checkCurrentUserReadPermission(regatta);
             boolean found = false;
             for (final Series series : regatta.getSeries()) {
                 if (series.getRaceColumnByName(raceColumnName) != null) {
