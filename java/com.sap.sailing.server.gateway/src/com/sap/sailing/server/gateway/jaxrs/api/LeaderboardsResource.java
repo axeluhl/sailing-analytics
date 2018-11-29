@@ -744,32 +744,38 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
         final Waypoint result;
         if (when != null) {
             final Iterable<Pair<Position, SpeedWithBearing>> positionsAndCogsAndSogs = getPositionsAndCogsAndSogs(trackedRace, when, extrapolate); 
-            final Bearing averageCourse = getAverageCourse(positionsAndCogsAndSogs);
-            final Bearing fromStartBoatToPinEnd = averageCourse.add(new DegreeBearingImpl(-90));
-            final Pair<Position, Position> leftmostAndRightmostPositionsAtStart = getPositionsFarthestAheadAndFurthestBack(positionsAndCogsAndSogs,
-                    averageCourse.add(new DegreeBearingImpl(90)));
-            final Position farthestAhead = getPositionsFarthestAheadAndFurthestBack(positionsAndCogsAndSogs, averageCourse).getA();
-            if (leftmostAndRightmostPositionsAtStart.getA() != null && leftmostAndRightmostPositionsAtStart.getB() != null &&
-                    farthestAhead != null) {
-                final Position startBoatPosition = leftmostAndRightmostPositionsAtStart.getB().translateGreatCircle(
-                        fromStartBoatToPinEnd.reverse(), LINE_MARGIN);
-                final Position pinEndPosition = leftmostAndRightmostPositionsAtStart.getA().translateGreatCircle(
-                        fromStartBoatToPinEnd, LINE_MARGIN);
-                final Mark startBoat = getService().getBaseDomainFactory().getOrCreateMark(UUID.randomUUID(), "Auto "+waypointName+" Boat");
-                RegattaLogDefineMarkEventImpl defineStartBoatEvent = new RegattaLogDefineMarkEventImpl(MillisecondsTimePoint.now(),
-                        getService().getServerAuthor(), when, UUID.randomUUID(), startBoat);
-                regattaLog.add(defineStartBoatEvent);
-                final Mark pinEnd = getService().getBaseDomainFactory().getOrCreateMark(UUID.randomUUID(), "Auto "+waypointName+" Pin End");
-                RegattaLogDefineMarkEventImpl definePinEndEvent = new RegattaLogDefineMarkEventImpl(MillisecondsTimePoint.now(),
-                        getService().getServerAuthor(), when, UUID.randomUUID(), pinEnd);
-                regattaLog.add(definePinEndEvent);
-                getRaceLogTrackingAdapter().pingMark(regattaLog, startBoat, new GPSFixImpl(startBoatPosition, when), getService());
-                getRaceLogTrackingAdapter().pingMark(regattaLog, pinEnd, new GPSFixImpl(pinEndPosition, when), getService());
-                final ControlPoint startLineControlPoint = getService().getBaseDomainFactory().getOrCreateControlPointWithTwoMarks(
-                        UUID.randomUUID(), "Auto "+waypointName+" Line", pinEnd, startBoat);
-                result = getService().getBaseDomainFactory().createWaypoint(startLineControlPoint, PassingInstruction.Line);
+            final Bearing averageCourse = getAverageCourse(positionsAndCogsAndSogs); // may return null, e.g., if COG/SOG information is missing
+            if (averageCourse != null) {
+                final Bearing fromStartBoatToPinEnd = averageCourse.add(new DegreeBearingImpl(-90));
+                final Pair<Position, Position> leftmostAndRightmostPositionsAtStart = getPositionsFarthestAheadAndFurthestBack(positionsAndCogsAndSogs,
+                        averageCourse.add(new DegreeBearingImpl(90)));
+                final Position farthestAhead = getPositionsFarthestAheadAndFurthestBack(positionsAndCogsAndSogs, averageCourse).getA();
+                if (leftmostAndRightmostPositionsAtStart.getA() != null && leftmostAndRightmostPositionsAtStart.getB() != null &&
+                        farthestAhead != null) {
+                    final Position startBoatPosition = leftmostAndRightmostPositionsAtStart.getB().translateGreatCircle(
+                            fromStartBoatToPinEnd.reverse(), LINE_MARGIN);
+                    final Position pinEndPosition = leftmostAndRightmostPositionsAtStart.getA().translateGreatCircle(
+                            fromStartBoatToPinEnd, LINE_MARGIN);
+                    final Mark startBoat = getService().getBaseDomainFactory().getOrCreateMark(UUID.randomUUID(), "Auto "+waypointName+" Boat");
+                    RegattaLogDefineMarkEventImpl defineStartBoatEvent = new RegattaLogDefineMarkEventImpl(MillisecondsTimePoint.now(),
+                            getService().getServerAuthor(), when, UUID.randomUUID(), startBoat);
+                    regattaLog.add(defineStartBoatEvent);
+                    final Mark pinEnd = getService().getBaseDomainFactory().getOrCreateMark(UUID.randomUUID(), "Auto "+waypointName+" Pin End");
+                    RegattaLogDefineMarkEventImpl definePinEndEvent = new RegattaLogDefineMarkEventImpl(MillisecondsTimePoint.now(),
+                            getService().getServerAuthor(), when, UUID.randomUUID(), pinEnd);
+                    regattaLog.add(definePinEndEvent);
+                    getRaceLogTrackingAdapter().pingMark(regattaLog, startBoat, new GPSFixImpl(startBoatPosition, when), getService());
+                    getRaceLogTrackingAdapter().pingMark(regattaLog, pinEnd, new GPSFixImpl(pinEndPosition, when), getService());
+                    final ControlPoint startLineControlPoint = getService().getBaseDomainFactory().getOrCreateControlPointWithTwoMarks(
+                            UUID.randomUUID(), "Auto "+waypointName+" Line", pinEnd, startBoat);
+                    result = getService().getBaseDomainFactory().createWaypoint(startLineControlPoint, PassingInstruction.Line);
+                } else {
+                    result = null;
+                }
             } else {
                 result = null;
+                logger.warning(()->"COG/SOG information for race "+trackedRace.getRace().getName()+" at "+when+
+                        " missing. Cannot construct a line for waypoint "+waypointName+" enclosing tracks with unknown course.");
             }
         } else {
             result = null;
