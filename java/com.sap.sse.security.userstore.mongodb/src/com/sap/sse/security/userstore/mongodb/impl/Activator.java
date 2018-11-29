@@ -14,6 +14,7 @@ import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.PreferenceConverterRegistrationManager;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.UserStore;
+import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
@@ -66,10 +67,12 @@ public class Activator implements BundleActivator {
                     for (UserGroup group : userStore.getUserGroups()) {
                         securityService.migrateOwnership(group, SecuredSecurityTypes.getAllInstances());
                     }
-                    securityService.assumeOwnershipMigrated(SecuredSecurityTypes.ROLE_DEFINITION.getName(),
-                            SecuredSecurityTypes.getAllInstances());
+                    for (RoleDefinition role : userStore.getRoleDefinitions()) {
+                        securityService.migrateOwnership(role, SecuredSecurityTypes.getAllInstances());
+                    }
                     securityService.assumeOwnershipMigrated(SecuredSecurityTypes.SERVER.getName(),
                             SecuredSecurityTypes.getAllInstances());
+                    securityService.checkMigration(SecuredSecurityTypes.getAllInstances());
                 } catch (InterruptedException e) {
                     logger.log(Level.SEVERE, "Error in migration", e);
                 }

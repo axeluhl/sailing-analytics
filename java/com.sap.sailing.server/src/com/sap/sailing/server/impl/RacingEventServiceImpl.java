@@ -947,6 +947,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         SecurityService securityService = getSecurityService();
         securityService.assumeOwnershipMigrated(SecuredDomainType.MANAGE_MARK_PASSINGS.getName(),
                 SecuredDomainType.getAllInstances());
+        securityService.assumeOwnershipMigrated(SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getName(),
+                SecuredDomainType.getAllInstances());
+        securityService.assumeOwnershipMigrated(SecuredDomainType.RACE_MANAGER_APP_DEVICE_CONFIGURATION.getName(),
+                SecuredDomainType.getAllInstances());
+        securityService.assumeOwnershipMigrated(SecuredDomainType.RESULT_IMPORT_URL.getName(),
+                SecuredDomainType.getAllInstances());
         securityService.assumeOwnershipMigrated(SecuredDomainType.MANAGE_MARK_POSITIONS.getName(),
                 SecuredDomainType.getAllInstances());
         securityService.assumeOwnershipMigrated(SecuredDomainType.CAN_REPLAY_DURING_LIVE_RACES.getName(),
@@ -964,6 +970,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         securityService.assumeOwnershipMigrated(SecuredDomainType.EVENT.getName(), SecuredDomainType.getAllInstances());
         for (Regatta regatta : getAllRegattas()) {
             securityService.migrateOwnership(regatta, SecuredDomainType.getAllInstances());
+            // FIXME add listener for all TrackedRaces here and migrate them as they become available!
             DynamicTrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
             if (trackedRegatta != null) {
                 trackedRegatta.lockTrackedRacesForRead();
@@ -1001,6 +1008,8 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         for (Boat boat : getCompetitorAndBoatStore().getBoats()) {
             securityService.migrateOwnership(boat, SecuredDomainType.getAllInstances());
         }
+
+        securityService.checkMigration(SecuredDomainType.getAllInstances());
     }
 
     private void loadRaceIDToRegattaAssociations() {
