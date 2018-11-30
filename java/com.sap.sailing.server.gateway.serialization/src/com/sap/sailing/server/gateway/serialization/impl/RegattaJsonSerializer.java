@@ -7,7 +7,9 @@ import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Regatta;
 import com.sap.sailing.domain.base.Series;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.server.gateway.serialization.JsonSerializer;
+import com.sap.sse.security.SecurityService;
 
 public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
     public static final String FIELD_NAME = "name";
@@ -26,16 +28,19 @@ public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
     private final JsonSerializer<Series> seriesSerializer;
     private final JsonSerializer<Competitor> competitorSerializer;
     private final JsonSerializer<Boat> boatSerializer;
+    private final SecurityService securityService;
 
-    public RegattaJsonSerializer() {
-        this(null, null, null);
+    public RegattaJsonSerializer(final SecurityService securityService) {
+        this(null, null, null, securityService);
     }
 
     public RegattaJsonSerializer(JsonSerializer<Series> seriesSerializer,
-            JsonSerializer<Competitor> competitorSerializer, JsonSerializer<Boat> boatSerializer) {
+            JsonSerializer<Competitor> competitorSerializer, JsonSerializer<Boat> boatSerializer,
+            final SecurityService securityService) {
         this.seriesSerializer = seriesSerializer;
         this.competitorSerializer = competitorSerializer;
         this.boatSerializer = boatSerializer;
+        this.securityService = securityService;
     }
 
     public JSONObject serialize(Regatta regatta) {
@@ -59,14 +64,18 @@ public class RegattaJsonSerializer implements JsonSerializer<Regatta> {
         if (competitorSerializer != null) {
             JSONArray competitorsJson = new JSONArray();
             for (Competitor competitor : regatta.getAllCompetitors()) {
-                competitorsJson.add(competitorSerializer.serialize(competitor));
+                if (securityService.hasCurrentUserExplictPermissions(competitor, SecuredDomainType.CompetitorAndBoatActions.LIST)) {
+                    competitorsJson.add(competitorSerializer.serialize(competitor));
+                }
             }
             result.put(FIELD_COMPETITORS, competitorsJson);
         }
         if (regatta.canBoatsOfCompetitorsChangePerRace() && boatSerializer != null) {
             JSONArray boatsJson = new JSONArray();
             for (Boat boat : regatta.getAllBoats()) {
-                boatsJson.add(boatSerializer.serialize(boat));
+                if (securityService.hasCurrentUserExplictPermissions(boat, SecuredDomainType.CompetitorAndBoatActions.LIST)) {
+                    boatsJson.add(boatSerializer.serialize(boat));
+                }
             }
             result.put(FIELD_BOATS, boatsJson);
         }

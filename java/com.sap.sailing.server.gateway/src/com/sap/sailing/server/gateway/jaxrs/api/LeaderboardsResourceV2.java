@@ -38,6 +38,7 @@ import com.sap.sailing.domain.common.dto.LeaderboardDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardEntryDTO;
 import com.sap.sailing.domain.common.dto.LeaderboardRowDTO;
 import com.sap.sailing.domain.common.dto.LegEntryDTO;
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.common.sharding.ShardingType;
 import com.sap.sailing.domain.leaderboard.Leaderboard;
 import com.sap.sailing.domain.sharding.ShardingContext;
@@ -116,7 +117,11 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         for (String raceColumnName : raceColumnsToShow) {
             List<CompetitorDTO> competitorsFromBestToWorst = leaderboardDTO.getCompetitorsFromBestToWorst(raceColumnName);
             Map<String, Map<CompetitorDTO, Integer>> competitorsOrderedByFleets = new HashMap<>();
-            for (CompetitorDTO competitor: competitorsFromBestToWorst) {
+            List<CompetitorDTO> filteredCompetitorsFromBestToWorst = new ArrayList<>();
+            getSecurityService().filterObjectsWithPermissionForCurrentUser(SecuredDomainType.COMPETITOR,
+                    SecuredDomainType.CompetitorAndBoatActions.LIST, competitorsFromBestToWorst,
+                    competitor -> competitor.getIdAsString(), filteredCompetitorsFromBestToWorst::add);
+            for (CompetitorDTO competitor: filteredCompetitorsFromBestToWorst) {
                 LeaderboardRowDTO row = leaderboardDTO.rows.get(competitor);
                 LeaderboardEntryDTO leaderboardEntry = row.fieldsByRaceColumnName.get(raceColumnName);                
                 FleetDTO fleetOfCompetitor = leaderboardEntry.fleet;
@@ -136,7 +141,11 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         jsonLeaderboard.put("ShardingLeaderboardName", ShardingType.LEADERBOARDNAME.encodeIfNeeded(leaderboard.getName()));
         int competitorCounter = 1;
         // Remark: leaderboardDTO.competitors are ordered by total rank
-        for (CompetitorDTO competitor : leaderboardDTO.competitors) {
+        List<CompetitorDTO> filteredCompetitors = new ArrayList<>();
+        getSecurityService().filterObjectsWithPermissionForCurrentUser(SecuredDomainType.COMPETITOR,
+                SecuredDomainType.CompetitorAndBoatActions.LIST, leaderboardDTO.competitors,
+                competitor -> competitor.getIdAsString(), filteredCompetitors::add);
+        for (CompetitorDTO competitor : filteredCompetitors) {
             LeaderboardRowDTO leaderboardRowDTO = leaderboardDTO.rows.get(competitor);
             if (maxCompetitorsCount != null && competitorCounter > maxCompetitorsCount) {
                 break;
@@ -233,14 +242,12 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         } else if (raceDetailTypesNames.size() == 1 && raceDetailTypesNames.get(0).equals("ALL")) {
             result = Arrays.asList(getAvailableRaceDetailColumnTypes());
         } else {
-            Map<String, DetailType> typeMap = new HashMap<>();
-            for (DetailType detailType : getAvailableRaceDetailColumnTypes()) {
-                typeMap.put(detailType.name(), detailType);
-            }
             for (String raceDetailTypeName : raceDetailTypesNames) {
-                if (typeMap.containsKey(raceDetailTypeName)) {
-                    result.add(typeMap.get(raceDetailTypeName));
+                DetailType value = DetailType.valueOf(raceDetailTypeName);
+                if (!Arrays.asList(getAvailableRaceDetailColumnTypes()).contains(value)) {
+                    throw new IllegalArgumentException(raceDetailTypeName + " is not a supported DetailType");
                 }
+                result.add(value);
             }
         }
         return result;

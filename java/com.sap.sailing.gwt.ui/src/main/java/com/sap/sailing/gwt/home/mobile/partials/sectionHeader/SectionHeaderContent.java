@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.AnchorElement;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Element;
@@ -17,13 +18,13 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sailing.gwt.home.communication.event.LabelType;
 import com.sap.sailing.gwt.home.shared.app.PlaceNavigation;
 import com.sap.sailing.gwt.home.shared.partials.bubble.Bubble;
 import com.sap.sailing.gwt.home.shared.partials.bubble.Bubble.Direction;
 import com.sap.sailing.gwt.home.shared.partials.bubble.BubbleContentBoatClass;
-import com.sap.sailing.gwt.home.shared.partials.filter.AbstractSelectionFilter;
 import com.sap.sailing.gwt.home.shared.utils.CollapseAnimation;
 import com.sap.sailing.gwt.home.shared.utils.LabelTypeUtil;
 import com.sap.sse.gwt.client.LinkUtil;
@@ -36,32 +37,19 @@ public class SectionHeaderContent extends Composite {
     interface MyBinder extends UiBinder<Widget, SectionHeaderContent> {
     }
 
-    @UiField
-    SectionHeaderResources local_res;
-    @UiField
-    AnchorElement headerMainUi;
-    @UiField
-    DivElement headerLeftUi;
-    @UiField
-    DivElement titleAndLabelContainerUi;
-    @UiField
-    HeadingElement titleUi;
-    @UiField
-    DivElement labelUi;
-    @UiField
-    DivElement imageUi;
-    @UiField
-    DivElement subtitleUi;
-    @UiField
-    HTMLPanel headerRightUi;
-    @UiField
-    DivElement infoTextUi;
-    @UiField
-    DivElement actionArrowUi;
-    @UiField
-    SimplePanel filterSelectContainerUi;
-    @UiField
-    HTMLPanel headerContentUi;
+    @UiField SectionHeaderResources local_res;
+    @UiField AnchorElement headerMainUi;
+    @UiField DivElement headerLeftUi; 
+    @UiField DivElement titleAndLabelContainerUi;
+    @UiField HeadingElement titleUi;
+    @UiField DivElement labelUi;
+    @UiField DivElement imageUi;
+    @UiField DivElement subtitleUi;
+    @UiField HTMLPanel headerRightUi;
+    @UiField DivElement infoTextUi;
+    @UiField DivElement actionArrowUi;
+    @UiField SimplePanel widgetContainerUi;
+    @UiField HTMLPanel headerContentUi;
 
     private boolean expanded = false;;
 
@@ -75,7 +63,7 @@ public class SectionHeaderContent extends Composite {
         SectionHeaderResources.INSTANCE.css().ensureInjected();
         initWidget(uiBinder.createAndBindUi(this));
         headerRightUi.setVisible(false);
-        filterSelectContainerUi.setVisible(false);
+        widgetContainerUi.setVisible(false);
     }
 
     public void setSectionTitle(String sectionHeaderTitle) {
@@ -85,7 +73,7 @@ public class SectionHeaderContent extends Composite {
     public void setSubtitle(String subtitle) {
         subtitleUi.getStyle().clearDisplay();
         subtitleUi.setInnerText(subtitle);
-        headerLeftUi.addClassName(SectionHeaderResources.INSTANCE.css().sectionheader_itemdoublerow());
+        headerLeftUi.addClassName(local_res.css().sectionheader_itemdoublerow());
     }
 
     public void setLabelType(LabelType labelType) {
@@ -100,8 +88,7 @@ public class SectionHeaderContent extends Composite {
     public void setImageUrl(String imageUrl) {
         imageUi.getStyle().clearDisplay();
         imageUi.getStyle().setBackgroundImage("url(" + imageUrl + ")");
-        titleAndLabelContainerUi
-                .addClassName(SectionHeaderResources.INSTANCE.css().sectionheader_item_adjust_title_left());
+        titleAndLabelContainerUi.addClassName(local_res.css().sectionheader_item_adjust_title_left());
     }
 
     public void setInfoText(String infoText) {
@@ -112,20 +99,19 @@ public class SectionHeaderContent extends Composite {
 
     public void initCollapsibility(Element content, boolean showInitial) {
         final CollapseAnimation animation = new CollapseAnimation(content, showInitial);
-        setClassName(actionArrowUi, ACCORDION_COLLAPSED_STYLE, !showInitial);
+        UIObject.setStyleName(actionArrowUi, ACCORDION_COLLAPSED_STYLE, !showInitial);
         LinkUtil.configureForAction(headerMainUi, new Runnable() {
             @Override
             public void run() {
                 boolean collapsed = actionArrowUi.hasClassName(ACCORDION_COLLAPSED_STYLE);
                 expanded = collapsed;
-                setClassName(actionArrowUi, ACCORDION_COLLAPSED_STYLE, !collapsed);
+                UIObject.setStyleName(actionArrowUi, ACCORDION_COLLAPSED_STYLE, !collapsed);
                 animation.animate(collapsed);
                 accordionListeners.forEach(l -> l.onExpansionChange(!collapsed));
             }
         });
         actionArrowUi.addClassName(SectionHeaderResources.INSTANCE.css().accordion());
-        titleAndLabelContainerUi
-                .addClassName(SectionHeaderResources.INSTANCE.css().sectionheader_item_adjust_title_right());
+        titleAndLabelContainerUi.addClassName(local_res.css().sectionheader_item_adjust_title_right());
         actionArrowUi.getStyle().clearDisplay();
         headerRightUi.setVisible(true);
     }
@@ -133,8 +119,7 @@ public class SectionHeaderContent extends Composite {
     public void setClickAction(final PlaceNavigation<?> placeNavigation) {
         placeNavigation.configureAnchorElement(headerMainUi);
         this.adjustedActionStyles();
-        titleAndLabelContainerUi
-                .addClassName(SectionHeaderResources.INSTANCE.css().sectionheader_item_adjust_title_right());
+        titleAndLabelContainerUi.addClassName(local_res.css().sectionheader_item_adjust_title_right());
         headerRightUi.setVisible(true);
         actionArrowUi.getStyle().clearDisplay();
     }
@@ -147,8 +132,7 @@ public class SectionHeaderContent extends Composite {
     }
 
     private void adjustedActionStyles() {
-        titleAndLabelContainerUi
-                .addClassName(SectionHeaderResources.INSTANCE.css().sectionheader_item_adjust_title_right());
+        titleAndLabelContainerUi.addClassName(local_res.css().sectionheader_item_adjust_title_right());
         headerRightUi.setVisible(true);
         actionArrowUi.getStyle().clearDisplay();
     }
@@ -158,14 +142,6 @@ public class SectionHeaderContent extends Composite {
         headerRightUi.setVisible(true);
         actionArrowUi.getStyle().clearDisplay();
         LinkUtil.configureForAction(headerMainUi, commandToExecute);
-    }
-
-    private void setClassName(Element element, String className, boolean set) {
-        if (set) {
-            element.addClassName(className);
-        } else {
-            element.removeClassName(className);
-        }
     }
 
     public void appendHeaderElement(Widget widget) {
@@ -181,12 +157,13 @@ public class SectionHeaderContent extends Composite {
         titleAndLabelContainerUi.getStyle().setPaddingRight(4.1, Unit.EM);
     }
 
-    public void initFilterSelectUi(AbstractSelectionFilter<?, ?> selectionFilter) {
+    public void initAdditionalWidget(final Widget additionalWidget) {
         headerRightUi.setVisible(true);
-        filterSelectContainerUi.setVisible(true);
-        filterSelectContainerUi.setWidget(selectionFilter);
-        selectionFilter.addStyleName(local_res.css().sectionheader_item_select());
-        selectionFilter.getElement().setAttribute("dir", "rtl");
+        widgetContainerUi.setVisible(true);
+        widgetContainerUi.setWidget(additionalWidget);
+        additionalWidget.getElement().setAttribute("dir", "rtl");
+        Scheduler.get().scheduleDeferred(
+                () -> titleAndLabelContainerUi.getStyle().setMarginRight(widgetContainerUi.getOffsetWidth(), Unit.PX));
     }
 
     public void initBoatClassPopup(String boatClassName) {

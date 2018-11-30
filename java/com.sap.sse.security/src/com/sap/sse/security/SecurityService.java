@@ -369,11 +369,15 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     boolean hasCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object);
 
+    boolean hasCurrentUserExplictPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions);
+
     void checkCurrentUserReadPermission(WithQualifiedObjectIdentifier object);
 
     void checkCurrentUserUpdatePermission(WithQualifiedObjectIdentifier object);
 
     void checkCurrentUserDeletePermission(WithQualifiedObjectIdentifier object);
+
+    void checkCurrentUserExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions);
 
     /**
      * Since there are some HasPermission objects, that have no Ownership, this method is used to explicitly mention
@@ -383,6 +387,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void migrateOwnership(WithQualifiedObjectIdentifier object, Iterable<HasPermissions> permissions);
 
     void migrateOwnership(QualifiedObjectIdentifier object, String displayName, Iterable<HasPermissions> permissions);
+
+    void checkMigration(Iterable<HasPermissions> allInstances);
 
     boolean hasCurrentUserRoleForOwnedObject(HasPermissions type, String typeRelativeObjectIdentifier,
             RoleDefinition roleToCheck);
@@ -406,4 +412,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void setDefaultTenantForCurrentServerForUser(String username, String defaultTenant);
     
     void copyUsersAndRoleAssociations(UserGroup source, UserGroup destination);
+
+    User checkPermissionForObjectCreationAndRevertOnErrorForUserCreation(String username,
+            ActionWithResult<User> createActionReturningCreatedObject);
 }

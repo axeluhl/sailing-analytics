@@ -519,22 +519,23 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (userOwner == null && tenantOwner == null) {
             throw new IllegalArgumentException("No owner is not valid, would create non changeable object");
         }
-        final UUID tenantId;
+        UUID tenantId;
         if (userOwner == null) {
             tenantId = tenantOwner.getId();
         } else {
-            // ensure the correct type
-            userOwner = getUserByName(userOwner.getName());
-            if(tenantOwner == null) {
+            // check if a default owner is existing
+            if (tenantOwner == null) {
                 tenantOwner = getDefaultTenantForUser(userOwner);
             }
-            if (tenantOwner.contains(userOwner)) {
-                tenantId = tenantOwner.getId();
-            } else {
-                throw new IllegalArgumentException("User is not part of Tenant Owner " + tenantOwner + " " + userOwner);
-            }
+            // FIXME define what is expected behaviour
+            // if (tenantOwner.contains(userOwner)) {
+            tenantId = tenantOwner.getId();
+            // } else {
+            // throw new IllegalArgumentException("User is not part of Tenant Owner " + tenantOwner + " " +
+            // userOwner);
+            // }
         }
-        
+
         final String userOwnerName = userOwner == null ? null : userOwner.getName();
         return apply(s -> s.internalSetOwnership(idOfOwnedObjectAsString, userOwnerName, tenantId,
                 displayNameOfOwnedObject));
@@ -1545,6 +1546,33 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                 securityDisplayName, createActionReturningCreatedObject, false);
     }
     
+    /**
+     * Special case for user creation, as no currentUser might exist when registering anonymous, and since a user always
+     * should own itself as userOwner
+     * 
+     * @return
+     */
+    @Override
+    public User checkPermissionForObjectCreationAndRevertOnErrorForUserCreation(String username,
+            ActionWithResult<User> createActionReturningCreatedObject) {
+        QualifiedObjectIdentifier identifier = SecuredSecurityTypes.USER.getQualifiedObjectIdentifier(username);
+        User result = null;
+        boolean didSetOwnerShip = false;
+        try {
+            SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.CREATE));
+            result = createActionReturningCreatedObject.run();
+            setOwnership(identifier, result, getDefaultTenantForCurrentUser());
+        } catch (AuthorizationException e) {
+            if (didSetOwnerShip) {
+                deleteOwnership(identifier);
+            }
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return result;
+    }
+
     private <T> T setOwnershipCheckPermissionForObjectCreationAndRevertOnError(UserGroup tenantOwner,
             HasPermissions type, String typeRelativeObjectIdentifier, String securityDisplayName,
             ActionWithResult<T> createActionReturningCreatedObject, boolean checkCreateObjectOnServer) {
@@ -1799,17 +1827,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
             final Iterable<HasPermissions> permissions) {
         
         final List<String> alreadyMigrated = getMigrationInfoForKey(permissions);
-        // if (migrationCompleteCheckTask != null) {
-        // // java util timer cannot be rescheduled, so cancel and create a new one
-        // migrationCompleteCheckTask.cancel();
-        // }
-        // migrationCompleteCheckTask = new TimerTask() {
-        // @Override
-        // public void run() {
-        // checkMigration();
-        // }
-        // };
-        // migrationTimer.schedule(migrationCompleteCheckTask, MIGRATION_CHECK_DELAY, MIGRATION_CHECK_DELAY);
 
         final OwnershipAnnotation owner = this.getOwnership(identifier);
         final UserGroup defaultTenant = this.getDefaultTenant();
@@ -1842,32 +1859,22 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return alreadyMigrated;
     }
 
-    // protected void checkMigration() {
-    // boolean allChecksSucessfull = true;
-    // for (Entry<Pair<Class<? extends HasPermissions>, List<String>>, List<String>> migrationTypeEntry :
-    // migratedHasPermissionTypes
-    // .entrySet()) {
-    // Class<? extends HasPermissions> clazz = migrationTypeEntry.getKey().getA();
-    // List<String> shouldHave = migrationTypeEntry.getKey().getB();
-    // List<String> didMigrate = migrationTypeEntry.getValue();
-    // if (didMigrate.containsAll(shouldHave)) {
-    // logger.info("Permission-Vertical Migration: Sucessfully migrated all types in "
-    // + clazz.getName());
-    // } else {
-    // List<String> notMigrated = new ArrayList<>(shouldHave);
-    // notMigrated.removeAll(didMigrate);
-    // logger.severe("Permission-Vertical Migration: Did not migrate all Types for " + clazz.getName()
-    // + " missing: "
-    // + notMigrated);
-    // logger.severe(
-    // "Permission-Vertical Migration: Check will be retried in " + MIGRATION_CHECK_DELAY + "ms");
-    // allChecksSucessfull = false;
-    // }
-    // }
-    // if (allChecksSucessfull) {
-    // migrationTimer.cancel();
-    // }
-    // }
+    @Override
+    public void checkMigration(Iterable<HasPermissions> allInstances) {
+        Class<? extends HasPermissions> clazz = Util.first(allInstances).getClass();
+        List<String> alreadyMigrated = getMigrationInfoForKey(allInstances);
+        boolean allChecksSucessfull = true;
+        for (HasPermissions shouldBeMigrated : allInstances) {
+            if (!alreadyMigrated.contains(shouldBeMigrated.getName())) {
+                logger.severe("Permission-Vertical Migration: Did not migrate all Types for " + clazz.getName()
+                        + " missing: " + shouldBeMigrated);
+                allChecksSucessfull = false;
+            }
+        }
+        if (allChecksSucessfull) {
+            logger.info("Permission-Vertical Migration: Sucessfully migrated all types in " + clazz.getName());
+        }
+    }
 
     @Override
     public boolean hasCurrentUserReadPermission(WithQualifiedObjectIdentifier object) {
@@ -1885,6 +1892,19 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         return SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObjects(
                 DefaultActions.UPDATE, object.getIdentifier().getTypeRelativeObjectIdentifier()));
+    }
+
+    public boolean hasCurrentUserExplictPermissions(WithQualifiedObjectIdentifier object,
+            HasPermissions.Action... actions) {
+        if (object == null || actions.length == 0) {
+            return false;
+        }
+        boolean isPermitted = true;
+        for (int i = 0; i < actions.length; i++) {
+            isPermitted &= SecurityUtils.getSubject().isPermitted(object.getType().getStringPermissionForObjects(
+                    actions[i], object.getIdentifier().getTypeRelativeObjectIdentifier()));
+        }
+        return isPermitted;
     }
 
     @Override
@@ -1912,6 +1932,17 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         }
         SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObjects(DefaultActions.DELETE,
                 object.getIdentifier().getTypeRelativeObjectIdentifier()));
+    }
+
+    @Override
+    public void checkCurrentUserExplicitPermissions(WithQualifiedObjectIdentifier object, HasPermissions.Action... actions) {
+        if (object == null || actions.length == 0) {
+            throw new AuthorizationException();
+        }
+        for (int i = 0; i < actions.length; i++) {
+            SecurityUtils.getSubject().checkPermission(object.getType().getStringPermissionForObjects(actions[i],
+                    object.getIdentifier().getTypeRelativeObjectIdentifier()));
+        }
     }
 
     @Override
