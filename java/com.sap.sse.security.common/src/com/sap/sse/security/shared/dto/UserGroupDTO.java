@@ -1,6 +1,7 @@
 package com.sap.sse.security.shared.dto;
 
 import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import com.sap.sse.security.shared.AbstractUserGroupImpl;
@@ -16,7 +17,7 @@ public class UserGroupDTO extends AbstractUserGroupImpl<StrippedUserDTO> impleme
         super(null, null, null);
     }
 
-    public UserGroupDTO(HashSet<StrippedUserDTO> users, UUID id, String name) {
+    public UserGroupDTO(Set<StrippedUserDTO> users, UUID id, String name) {
         super(users, id, name);
     }
 

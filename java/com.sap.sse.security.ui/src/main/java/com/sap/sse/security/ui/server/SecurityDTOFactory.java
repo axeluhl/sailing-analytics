@@ -3,6 +3,7 @@ package com.sap.sse.security.ui.server;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -184,14 +185,7 @@ public class SecurityDTOFactory {
         if (userGroup == null) {
             result = null;
         } else {
-            // we do not cache this, as they are only valid as root type of objects, so they cannot be already be in the
-            // map at this point
-            if (fromOriginalToStrippedDownUserGroup.get(userGroup) != null) {
-                throw new IllegalArgumentException(
-                        "A stripped mapping does already exist for this usergroup, this should never be the case");
-            }
-            // FIXME can this generic cast be made better?
-            result = new UserGroupDTO(userGroup.getId(), userGroup.getName());
+            result = new UserGroupDTO(createStrippedUsersFromUsers(userGroup.getUsers(), securityService, fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup),userGroup.getId(), userGroup.getName());
             SecurityDTOUtil.addSecurityInformation(this, securityService, result, userGroup.getIdentifier(),
                     fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
         }
@@ -311,6 +305,15 @@ public class SecurityDTOFactory {
         OwnershipDTO ownerShipDTO = createOwnershipDTO(annotation.getAnnotation(), new HashMap<>(), new HashMap<>());
         return new OwnershipAnnotationDTO(ownerShipDTO, annotation.getIdOfAnnotatedObject(),
                 annotation.getDisplayNameOfAnnotatedObject());
+    }
+
+    public Set<StrippedUserDTO> createStrippedUsersFromUsers(Iterable<User> users, SecurityService securityService,
+            Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser,
+            Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGroup) {
+        Set<StrippedUserDTO> result = new HashSet<>();
+        users.forEach(user -> result.add(createStrippedUserFromUser(user, securityService,
+                fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup)));
+        return result;
     }
 
     public StrippedUserDTO createStrippedUserFromUser(User user, SecurityService securityService,
