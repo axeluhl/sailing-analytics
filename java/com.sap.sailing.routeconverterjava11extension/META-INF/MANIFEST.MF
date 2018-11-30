@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Routeconverterjava11extension
+Bundle-SymbolicName: com.sap.sailing.routeconverterjava11extension
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SAP
+Fragment-Host: routeconverter;bundle-version="2.12.2"
+Automatic-Module-Name: com.sap.sailing.routeconverterjava11extension
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: javax.xml.bind,
+ javax.xml.bind.annotation

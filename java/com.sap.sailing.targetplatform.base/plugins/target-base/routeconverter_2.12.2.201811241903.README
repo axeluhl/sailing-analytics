@@ -1,5 +1,0 @@
-The file routeconverter_2.12.2.201811241903 was obtained from routeconverter_2.12.2.201406032322.jar by
-patching the META-INF/MANIFEST.MF file so that it includes a dependency on javax.xml.bind;version="2.2.0".
-This is required for running under Java 11 (and probably already starting with Java 9) because the
-"Enterprise" features of Java have been removed with the Java Modules system in Java 9 and are now
-added here as part of our target platform.
