@@ -165,4 +165,5 @@ public interface StringMessages extends com.sap.sse.gwt.client.StringMessages {
     SafeHtml allowedActions();
     SafeHtml deniedActions();
     String migrateGroupOwner();
+    String errorDeletingUserGroup(String usergroup, String message);
 }
