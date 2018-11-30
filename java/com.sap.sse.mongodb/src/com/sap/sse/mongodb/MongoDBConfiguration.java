@@ -1,5 +1,10 @@
 package com.sap.sse.mongodb;
 
+import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoClientOptions.Builder;
+import com.mongodb.MongoClientURI;
+import com.mongodb.ReadPreference;
+import com.mongodb.ServerAddress;
 import com.sap.sse.mongodb.internal.MongoDBServiceImpl;
 
 /**
@@ -9,38 +14,49 @@ import com.sap.sse.mongodb.internal.MongoDBServiceImpl;
  */
 public class MongoDBConfiguration {
 
-    public static final String MONGO_PORT = "mongo.port";
-    public static final String MONGO_HOSTNAME = "mongo.host";
-    public static final String MONGO_DB_NAME = "mongo.dbName";
-
+    static final String MONGO_PORT = "mongo.port";
+    static final String MONGO_HOSTNAME = "mongo.host";
+    static final String MONGO_DB_NAME = "mongo.dbName";
+    
+    /**
+     * The system property by this name may contain a MongoClientURI in its string representation:
+     * <pre>
+     *   mongodb://[username:password@]host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[database[.collection]][?options]]
+     * </pre>
+     * See also {@link MongoClientURI}.
+     */
+    static final String MONGO_URI = "mongo.uri";
+    
     private static String DEFAULT_DB_NAME = "winddb"; 
     private static String DEFAULT_TEST_DB_NAME = "winddbTest"; 
 
-    private String hostName;
-    private int port;
-    private String databaseName;
+    private final MongoClientURI mongoClientURI;
 
     public static MongoDBConfiguration getDefaultConfiguration() {
-        String defaultHostName = "127.0.0.1";
-        if (System.getProperty(MONGO_HOSTNAME) != null) {
-            defaultHostName = System.getProperty(MONGO_HOSTNAME);
+        final MongoDBConfiguration result;
+        if (System.getProperty(MONGO_URI) != null) {
+            result = new MongoDBConfiguration(new MongoClientURI(System.getProperty(MONGO_URI)));
         } else {
-            if (System.getenv("MONGODB_HOST") != null) {
-                defaultHostName = System.getenv("MONGODB_HOST");
+            String defaultHostName = "127.0.0.1";
+            if (System.getProperty(MONGO_HOSTNAME) != null) {
+                defaultHostName = System.getProperty(MONGO_HOSTNAME);
+            } else {
+                if (System.getenv("MONGODB_HOST") != null) {
+                    defaultHostName = System.getenv("MONGODB_HOST");
+                }
+            }
+            String defaultDatabaseName = System.getProperty(MONGO_DB_NAME, DEFAULT_DB_NAME);
+            if (System.getProperty(MONGO_PORT) != null) {
+                result = new MongoDBConfiguration(defaultHostName, Integer.valueOf(System.getProperty(MONGO_PORT).trim()), defaultDatabaseName);
+            } else {
+                if (System.getenv("MONGODB_PORT") != null) {
+                    result = new MongoDBConfiguration(defaultHostName, Integer.valueOf(System.getenv("MONGODB_PORT").trim()), defaultDatabaseName);
+                } else {
+                    result = new MongoDBConfiguration(defaultHostName, defaultDatabaseName);
+                }
             }
         }
-        
-        int defaultPort = 27017;
-        if (System.getProperty(MONGO_PORT) != null) {
-            defaultPort = Integer.valueOf(System.getProperty(MONGO_PORT).trim());
-        } else {
-            if (System.getenv("MONGODB_PORT") != null) {
-                defaultPort = Integer.valueOf(System.getenv("MONGODB_PORT").trim());
-            }
-        }
-        String defaultDatabaseName = System.getProperty(MONGO_DB_NAME, DEFAULT_DB_NAME);
-                
-        return new MongoDBConfiguration(defaultHostName, defaultPort, defaultDatabaseName);
+        return result;
     }
 
     public static MongoDBConfiguration getDefaultTestConfiguration() {
@@ -52,24 +68,30 @@ public class MongoDBConfiguration {
                 defaultHostName = System.getenv("MONGODB_HOST");
             }
         }
-        
-        int defaultPort = 27017;
+        String defaultDatabaseName = System.getProperty(MONGO_DB_NAME, DEFAULT_TEST_DB_NAME);
+        final MongoDBConfiguration result;
         if (System.getProperty(MONGO_PORT) != null) {
-            defaultPort = Integer.valueOf(System.getProperty(MONGO_PORT).trim());
+            result = new MongoDBConfiguration(defaultHostName, Integer.valueOf(System.getProperty(MONGO_PORT).trim()), defaultDatabaseName);
         } else {
             if (System.getenv("MONGODB_PORT") != null) {
-                defaultPort = Integer.valueOf(System.getenv("MONGODB_PORT").trim());
+                result = new MongoDBConfiguration(defaultHostName, Integer.valueOf(System.getenv("MONGODB_PORT").trim()), defaultDatabaseName);
+            } else {
+                result = new MongoDBConfiguration(defaultHostName, defaultDatabaseName);
             }
         }
-        String defaultDatabaseName = System.getProperty(MONGO_DB_NAME, DEFAULT_TEST_DB_NAME);
-                
-        return new MongoDBConfiguration(defaultHostName, defaultPort, defaultDatabaseName);
+        return result;
     }
 
+    public MongoDBConfiguration(MongoClientURI mongoClientURI) {
+        this.mongoClientURI = mongoClientURI;
+    }
+    
+    public MongoDBConfiguration(String hostName, String databaseName) {
+        this.mongoClientURI = new MongoClientURI("mongodb://"+hostName+"/"+databaseName);
+    }
+    
     public MongoDBConfiguration(String hostName, int port, String databaseName) {
-        this.hostName = hostName;
-        this.port = port;
-        this.databaseName = databaseName;
+        this.mongoClientURI = new MongoClientURI("mongodb://"+hostName+":"+port+"/"+databaseName);
     }
     
     /**
@@ -79,16 +101,23 @@ public class MongoDBConfiguration {
         return new MongoDBServiceImpl(this);
     }
 
-    public String getHostName() {
-        return hostName;
+    public MongoClientURI getMongoClientURI() {
+        return mongoClientURI;
     }
 
-    public int getPort() {
-        return port;
+    public static MongoClientOptions.Builder getDefaultOptionsBuilder() {
+        return new Builder().readPreference(ReadPreference.primaryPreferred());
     }
 
     public String getDatabaseName() {
-        return databaseName;
+        return getMongoClientURI().getDatabase();
     }
 
+    public int getPort() {
+        int result = ServerAddress.defaultPort();
+        if (!getMongoClientURI().getHosts().isEmpty() && getMongoClientURI().getHosts().get(0).split(":").length > 1) {
+            result = Integer.valueOf(getMongoClientURI().getHosts().get(0).split(":")[1]);
+        }
+        return result;
+    }
 }

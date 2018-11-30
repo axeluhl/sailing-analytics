@@ -32,7 +32,7 @@ public abstract class AbstractMongoDBTest {
     }
     
     protected Mongo newMongo() throws UnknownHostException, MongoException {
-        return new MongoClient(dbConfiguration.getHostName(), dbConfiguration.getPort());
+        return new MongoClient(dbConfiguration.getMongoClientURI());
     }
     
     @Before
