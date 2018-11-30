@@ -409,4 +409,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     void setDefaultTenantForCurrentServerForUser(String username, String defaultTenant);
     
     void copyUsersAndRoleAssociations(UserGroup source, UserGroup destination);
+
+    User checkPermissionForObjectCreationAndRevertOnErrorForUserCreation(String username,
+            ActionWithResult<User> createActionReturningCreatedObject);
 }

@@ -34,7 +34,6 @@ import com.sap.sse.common.mail.MailException;
 import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.AdminRole;
@@ -382,17 +381,21 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     public UserDTO createSimpleUser(String username, String email, String password, String fullName, String company,
             String localeName, String validationBaseURL)
             throws UserManagementException, MailException, UnauthorizedException {
-        final UserImpl u = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredSecurityTypes.USER, username, username, () -> {
-                    try {
-                        return getSecurityService().createSimpleUser(username, email, password, fullName, company,
-                                getLocaleFromLocaleName(localeName), validationBaseURL);
-                    } catch (UserManagementException | UserGroupManagementException e) {
-                        logger.log(Level.SEVERE, "Error creating user " + username, e);
-                        throw new UserManagementException(e.getMessage());
-                    }
+        
+        User user = getSecurityService().checkPermissionForObjectCreationAndRevertOnErrorForUserCreation(username,
+                new ActionWithResult<User>() {
+            @Override
+            public User run() throws Exception {
+                try {
+                    return getSecurityService().createSimpleUser(username, email, password, fullName, company,
+                            getLocaleFromLocaleName(localeName), validationBaseURL);
+                } catch (UserManagementException | UserGroupManagementException e) {
+                    logger.log(Level.SEVERE, "Error creating user " + username, e);
+                    throw new UserManagementException(e.getMessage());
+                }
+            }
                 });
-        return securityDTOFactory.createUserDTOFromUser(u, getSecurityService());
+        return securityDTOFactory.createUserDTOFromUser(user, getSecurityService());
     }
 
 
