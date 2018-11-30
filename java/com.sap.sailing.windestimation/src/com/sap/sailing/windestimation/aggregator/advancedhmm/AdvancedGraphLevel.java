@@ -3,30 +3,35 @@ package com.sap.sailing.windestimation.aggregator.advancedhmm;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sap.sailing.polars.windestimation.ManeuverClassification;
+import com.sap.sailing.windestimation.aggregator.hmm.GraphLevelBase;
+import com.sap.sailing.windestimation.aggregator.hmm.GraphNodeTransitionProbabilitiesCalculator;
+import com.sap.sailing.windestimation.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 
-public class AdvancedGraphLevel {
+public class AdvancedGraphLevel extends GraphLevelBase {
 
     private final AdvancedGraphLevel parent;
     private final List<AdvancedGraphLevel> children = new ArrayList<>();
     private final double distanceToParent;
-    private final ManeuverClassification maneuverClassification;
 
-    public AdvancedGraphLevel(ManeuverClassification maneuverClassification) {
-        this.maneuverClassification = maneuverClassification;
+    public AdvancedGraphLevel(ManeuverWithProbabilisticTypeClassification observation,
+            GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
+        super(observation, transitionProbabilitiesCalculator);
         parent = null;
         distanceToParent = 0;
     }
 
     private AdvancedGraphLevel(AdvancedGraphLevel parent, double distanceToParent,
-            ManeuverClassification maneuverClassification) {
+            ManeuverWithProbabilisticTypeClassification observation,
+            GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
+        super(observation, transitionProbabilitiesCalculator);
         this.parent = parent;
         this.distanceToParent = distanceToParent;
-        this.maneuverClassification = maneuverClassification;
     }
 
-    public AdvancedGraphLevel addChild(double distanceToParent, ManeuverClassification maneuverClassification) {
-        AdvancedGraphLevel child = new AdvancedGraphLevel(this, distanceToParent, maneuverClassification);
+    public AdvancedGraphLevel addChild(double distanceToParent, ManeuverWithProbabilisticTypeClassification observation,
+            GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
+        AdvancedGraphLevel child = new AdvancedGraphLevel(this, distanceToParent, observation,
+                transitionProbabilitiesCalculator);
         children.add(child);
         return child;
     }
@@ -37,10 +42,6 @@ public class AdvancedGraphLevel {
 
     public double getDistanceToParent() {
         return distanceToParent;
-    }
-
-    public ManeuverClassification getManeuverClassification() {
-        return maneuverClassification;
     }
 
     public List<AdvancedGraphLevel> getChildren() {

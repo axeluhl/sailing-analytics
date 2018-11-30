@@ -9,7 +9,8 @@ import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
  * @author Vladislav Chumak (D069712)
  *
  */
-public class ManeuverWithProbabilisticTypeClassification {
+public class ManeuverWithProbabilisticTypeClassification
+        implements Comparable<ManeuverWithProbabilisticTypeClassification> {
 
     private final double[] likelihoodPerManeuverType;
     private final ManeuverForEstimation maneuver;
@@ -30,6 +31,11 @@ public class ManeuverWithProbabilisticTypeClassification {
 
     public double getManeuverTypeLikelihood(ManeuverTypeForClassification maneuverType) {
         return likelihoodPerManeuverType[maneuverType.ordinal()];
+    }
+
+    @Override
+    public int compareTo(ManeuverWithProbabilisticTypeClassification o) {
+        return maneuver.compareTo(o.maneuver);
     }
 
 }

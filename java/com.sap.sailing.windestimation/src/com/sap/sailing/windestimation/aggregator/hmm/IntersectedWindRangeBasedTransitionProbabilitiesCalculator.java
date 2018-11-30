@@ -1,7 +1,7 @@
 package com.sap.sailing.windestimation.aggregator.hmm;
 
-import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sailing.windestimation.data.ManeuverForEstimation;
+import com.sap.sailing.windestimation.data.ManeuverTypeForClassification;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.impl.DegreeBearingImpl;
@@ -11,13 +11,12 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
 
     private static final int MIN_BEATING_ANGLE_PLUS_MIN_RUNNING_ANGLE = 40;
 
-    public IntersectedWindRange getInitialWindRange(GraphNode currentNode, GraphLevel currentLevel) {
+    public IntersectedWindRange getInitialWindRange(GraphNode currentNode) {
         return currentNode.getValidWindRange().toIntersected();
     }
 
     public Pair<IntersectedWindRange, Double> mergeWindRangeAndGetTransitionProbability(GraphNode previousNode,
-            GraphLevel previousLevel, BestManeuverNodeInfo previousNodeInfo, GraphNode currentNode,
-            GraphLevel currentLevel) {
+            GraphLevelBase previousLevel, GraphNode currentNode, GraphLevelBase currentLevel) {
         double secondsPassedSincePreviousWindRange = Math.abs(previousLevel.getManeuver().getManeuverTimePoint()
                 .until(currentLevel.getManeuver().getManeuverTimePoint()).asSeconds());
         double transitionProbabilitySum = 0;
@@ -41,18 +40,18 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
                 / transitionProbabilitySum;
         return new Pair<>(intersectedWindRangeUntilCurrentNode, normalizedTransitionProbabilityUntilCurrentNode);
     }
-    
-//    public Pair<IntersectedWindRange, Double> mergeWindRangeAndGetTransitionProbability(GraphNode previousNode,
-//            GraphLevel previousLevel, BestManeuverNodeInfo previousNodeInfo, GraphNode currentNode,
-//            GraphLevel currentLevel) {
-//        IntersectedWindRange intersectedWindRangeUntilCurrentNode = previousNodeInfo.getWindRange()
-//                .intersect(currentNode.getValidWindRange());
-//        double secondsPassedSincePreviousWindRange = Math.abs(previousLevel.getManeuver().getManeuverTimePoint()
-//                .until(currentLevel.getManeuver().getManeuverTimePoint()).asSeconds());
-//        double transitionProbability = intersectedWindRangeUntilCurrentNode
-//                .getPenaltyFactorForTransition(secondsPassedSincePreviousWindRange);
-//        return new Pair<>(intersectedWindRangeUntilCurrentNode, transitionProbability);
-//    }
+
+    // public Pair<IntersectedWindRange, Double> mergeWindRangeAndGetTransitionProbability(GraphNode previousNode,
+    // GraphLevel previousLevel, BestManeuverNodeInfo previousNodeInfo, GraphNode currentNode,
+    // GraphLevel currentLevel) {
+    // IntersectedWindRange intersectedWindRangeUntilCurrentNode = previousNodeInfo.getWindRange()
+    // .intersect(currentNode.getValidWindRange());
+    // double secondsPassedSincePreviousWindRange = Math.abs(previousLevel.getManeuver().getManeuverTimePoint()
+    // .until(currentLevel.getManeuver().getManeuverTimePoint()).asSeconds());
+    // double transitionProbability = intersectedWindRangeUntilCurrentNode
+    // .getPenaltyFactorForTransition(secondsPassedSincePreviousWindRange);
+    // return new Pair<>(intersectedWindRangeUntilCurrentNode, transitionProbability);
+    // }
 
     public WindCourseRange getWindCourseRangeForManeuverType(ManeuverForEstimation maneuver,
             ManeuverTypeForClassification maneuverType) {
@@ -106,8 +105,9 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
         Bearing middleCourse = maneuver.getMiddleCourse();
         double absCourseChangeDeg = Math.abs(maneuver.getCourseChangeInDegrees());
         double middleAngleRange = maneuver.getDeviationFromOptimalJibeAngleInDegrees() == null
-                ? absCourseChangeDeg * 0.2 : Math.abs(maneuver.getDeviationFromOptimalJibeAngleInDegrees());
-        if(middleAngleRange < 10) {
+                ? absCourseChangeDeg * 0.2
+                : Math.abs(maneuver.getDeviationFromOptimalJibeAngleInDegrees());
+        if (middleAngleRange < 10) {
             middleAngleRange = 10;
         }
         Bearing from = middleCourse.add(new DegreeBearingImpl(-middleAngleRange / 2.0));
@@ -119,7 +119,8 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
         Bearing middleCourse = maneuver.getMiddleCourse();
         double absCourseChangeDeg = Math.abs(maneuver.getCourseChangeInDegrees());
         double middleAngleRange = maneuver.getDeviationFromOptimalTackAngleInDegrees() == null
-                ? absCourseChangeDeg * 0.1 : Math.abs(maneuver.getDeviationFromOptimalTackAngleInDegrees());
+                ? absCourseChangeDeg * 0.1
+                : Math.abs(maneuver.getDeviationFromOptimalTackAngleInDegrees());
         Bearing from = middleCourse.add(new DegreeBearingImpl(-middleAngleRange / 2.0));
         from = from.reverse();
         WindCourseRange windRange = new WindCourseRange(from.getDegrees(), middleAngleRange);

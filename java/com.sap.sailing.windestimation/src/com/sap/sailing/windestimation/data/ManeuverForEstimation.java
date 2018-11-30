@@ -6,7 +6,7 @@ import com.sap.sailing.domain.common.SpeedWithBearing;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.TimePoint;
 
-public class ManeuverForEstimation {
+public class ManeuverForEstimation implements Comparable<ManeuverForEstimation> {
 
     private final TimePoint maneuverTimePoint;
     private final Position maneuverPosition;
@@ -181,6 +181,11 @@ public class ManeuverForEstimation {
 
     public String getRegattaName() {
         return regattaName;
+    }
+
+    @Override
+    public int compareTo(ManeuverForEstimation o) {
+        return maneuverTimePoint.compareTo(o.maneuverTimePoint);
     }
 
 }

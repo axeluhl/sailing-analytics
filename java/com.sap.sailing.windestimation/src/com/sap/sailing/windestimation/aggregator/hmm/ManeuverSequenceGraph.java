@@ -9,7 +9,6 @@ import com.sap.sailing.windestimation.ManeuverClassificationsAggregator;
 import com.sap.sailing.windestimation.classifier.maneuver.ManeuverWithEstimatedType;
 import com.sap.sailing.windestimation.classifier.maneuver.ManeuverWithProbabilisticTypeClassification;
 import com.sap.sailing.windestimation.data.RaceWithEstimationData;
-import com.sap.sse.common.Util.Triple;
 
 /**
  * 
@@ -59,19 +58,17 @@ public class ManeuverSequenceGraph implements ManeuverClassificationsAggregator 
         reset();
         List<ManeuverWithProbabilisticTypeClassification> sortedManeuverClassifications = raceWithManeuverClassifications
                 .getCompetitorTracks().stream().flatMap(competitorTrack -> competitorTrack.getElements().stream())
-                .sorted((one, two) -> one.getManeuver().getManeuverTimePoint()
-                        .compareTo(two.getManeuver().getManeuverTimePoint()))
-                .collect(Collectors.toList());
+                .sorted().collect(Collectors.toList());
         for (ManeuverWithProbabilisticTypeClassification maneuverClassification : sortedManeuverClassifications) {
             appendManeuverAsGraphLevel(maneuverClassification);
         }
         List<ManeuverWithEstimatedType> maneuversWithEstimatedType = new ArrayList<>();
-        List<Triple<GraphLevel, GraphNode, Double>> bestPath = bestPathsCalculator.getBestPath(lastGraphLevel);
-        for (ListIterator<Triple<GraphLevel, GraphNode, Double>> iterator = bestPath
-                .listIterator(bestPath.size()); iterator.hasPrevious();) {
-            Triple<GraphLevel, GraphNode, Double> entry = iterator.previous();
+        List<GraphLevelInference> bestPath = bestPathsCalculator.getBestPath(lastGraphLevel);
+        for (ListIterator<GraphLevelInference> iterator = bestPath.listIterator(bestPath.size()); iterator
+                .hasPrevious();) {
+            GraphLevelInference entry = iterator.previous();
             ManeuverWithEstimatedType maneuverWithEstimatedType = new ManeuverWithEstimatedType(
-                    entry.getA().getManeuver(), entry.getB().getManeuverType(), entry.getC());
+                    entry.getGraphLevel().getManeuver(), entry.getGraphNode().getManeuverType(), entry.getConfidence());
             maneuversWithEstimatedType.add(maneuverWithEstimatedType);
         }
         return maneuversWithEstimatedType;
