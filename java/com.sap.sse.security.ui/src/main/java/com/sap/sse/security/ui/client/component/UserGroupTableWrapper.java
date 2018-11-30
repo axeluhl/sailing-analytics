@@ -24,7 +24,7 @@ import com.sap.sse.gwt.client.celltable.TableWrapper;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.shared.dto.UserGroupWithSecurityDTO;
+import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
@@ -36,56 +36,56 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
  * @param <S>
  */
 public class UserGroupTableWrapper extends
-        TableWrapper<UserGroupWithSecurityDTO, RefreshableSingleSelectionModel<UserGroupWithSecurityDTO>, StringMessages, CellTableWithCheckboxResources> {
-    private final LabeledAbstractFilterablePanel<UserGroupWithSecurityDTO> filterField;
+        TableWrapper<UserGroupDTO, RefreshableSingleSelectionModel<UserGroupDTO>, StringMessages, CellTableWithCheckboxResources> {
+    private final LabeledAbstractFilterablePanel<UserGroupDTO> filterField;
     private final UserService userService;
 
     public UserGroupTableWrapper(UserService userService, Iterable<HasPermissions> additionalPermissions,
             StringMessages stringMessages, ErrorReporter errorReporter, boolean enablePager,
             CellTableWithCheckboxResources tableResources) {
         super(stringMessages, errorReporter, false, enablePager,
-                new EntityIdentityComparator<UserGroupWithSecurityDTO>() {
+                new EntityIdentityComparator<UserGroupDTO>() {
                     @Override
-                    public boolean representSameEntity(UserGroupWithSecurityDTO dto1, UserGroupWithSecurityDTO dto2) {
+                    public boolean representSameEntity(UserGroupDTO dto1, UserGroupDTO dto2) {
                         return dto1.getId().toString().equals(dto2.getId().toString());
                     }
 
                     @Override
-                    public int hashCode(UserGroupWithSecurityDTO t) {
+                    public int hashCode(UserGroupDTO t) {
                         return t.getId().hashCode();
                     }
                 }, tableResources);
         this.userService = userService;
-        ListHandler<UserGroupWithSecurityDTO> userColumnListHandler = getColumnSortHandler();
+        ListHandler<UserGroupDTO> userColumnListHandler = getColumnSortHandler();
 
         // users table
-        TextColumn<UserGroupWithSecurityDTO> UserGroupWithSecurityDTONameColumn = new AbstractSortableTextColumn<UserGroupWithSecurityDTO>(
-                UserGroupWithSecurityDTO -> UserGroupWithSecurityDTO.getName(), userColumnListHandler);
+        TextColumn<UserGroupDTO> UserGroupWithSecurityDTONameColumn = new AbstractSortableTextColumn<UserGroupDTO>(
+                UserGroupDTO -> UserGroupDTO.getName(), userColumnListHandler);
 
         final HasPermissions type = SecuredSecurityTypes.USER_GROUP;
-        final Function<UserGroupWithSecurityDTO, String> idFactory = UserGroupWithSecurityDTO::getName;
-        final AccessControlledActionsColumn<UserGroupWithSecurityDTO, DefaultActionsImagesBarCell> actionColumn = new AccessControlledActionsColumn<>(
+        final Function<UserGroupDTO, String> idFactory = UserGroupDTO::getName;
+        final AccessControlledActionsColumn<UserGroupDTO, DefaultActionsImagesBarCell> actionColumn = new AccessControlledActionsColumn<>(
                 new DefaultActionsImagesBarCell(stringMessages), userService, type, idFactory);
-        actionColumn.addAction(ACTION_DELETE, DELETE, UserGroupWithSecurityDTO -> {
-            if (Window.confirm(stringMessages.doYouReallyWantToRemoveUserGroup(UserGroupWithSecurityDTO.getName()))) {
-                getUserManagementService().deleteUserGroup(UserGroupWithSecurityDTO.getId().toString(),
+        actionColumn.addAction(ACTION_DELETE, DELETE, userGroupDTO -> {
+            if (Window.confirm(stringMessages.doYouReallyWantToRemoveUserGroup(userGroupDTO.getName()))) {
+                getUserManagementService().deleteUserGroup(userGroupDTO.getId().toString(),
                         new AsyncCallback<SuccessInfo>() {
                             @Override
                             public void onFailure(Throwable caught) {
-                                deletingUserGroupWithSecurityDTOFailed(UserGroupWithSecurityDTO, caught.getMessage());
+                                deletingUserGroupWithSecurityDTOFailed(userGroupDTO, caught.getMessage());
                             }
 
                             @Override
                             public void onSuccess(SuccessInfo result) {
                                 if (result.isSuccessful()) {
-                                    filterField.remove(UserGroupWithSecurityDTO);
+                                    filterField.remove(userGroupDTO);
                                 } else {
-                                    deletingUserGroupWithSecurityDTOFailed(UserGroupWithSecurityDTO,
+                                    deletingUserGroupWithSecurityDTOFailed(userGroupDTO,
                                             result.getMessage());
                                 }
                             }
 
-                            private void deletingUserGroupWithSecurityDTOFailed(UserGroupWithSecurityDTO user,
+                            private void deletingUserGroupWithSecurityDTOFailed(UserGroupDTO user,
                                     String message) {
                                 // TODO: v i18n v
                                 errorReporter.reportError(stringMessages.errorDeletingUser(user.getName(), message));
@@ -94,12 +94,12 @@ public class UserGroupTableWrapper extends
             }
         });
 
-        final EditOwnershipDialog.DialogConfig<UserGroupWithSecurityDTO> configOwnership = EditOwnershipDialog.create(
+        final EditOwnershipDialog.DialogConfig<UserGroupDTO> configOwnership = EditOwnershipDialog.create(
                 userService.getUserManagementService(), type, idFactory,
-                user -> refreshUserList((Callback<Iterable<UserGroupWithSecurityDTO>, Throwable>) null),
+                user -> refreshUserList((Callback<Iterable<UserGroupDTO>, Throwable>) null),
                 stringMessages);
 
-        final EditACLDialog.DialogConfig<UserGroupWithSecurityDTO> configACL = EditACLDialog.create(
+        final EditACLDialog.DialogConfig<UserGroupDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, idFactory, user -> user.getAccessControlList(),
                 stringMessages);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.CHANGE_OWNERSHIP,
@@ -107,17 +107,17 @@ public class UserGroupTableWrapper extends
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 u -> configACL.openDialog(u));
 
-        filterField = new LabeledAbstractFilterablePanel<UserGroupWithSecurityDTO>(
-                new Label(stringMessages.filterUserGroups()), new ArrayList<UserGroupWithSecurityDTO>(), dataProvider) {
+        filterField = new LabeledAbstractFilterablePanel<UserGroupDTO>(new Label(stringMessages.filterUserGroups()),
+                new ArrayList<UserGroupDTO>(), dataProvider) {
             @Override
-            public Iterable<String> getSearchableStrings(UserGroupWithSecurityDTO t) {
+            public Iterable<String> getSearchableStrings(UserGroupDTO t) {
                 List<String> string = new ArrayList<String>();
                 string.add(t.getName());
                 return string;
             }
 
             @Override
-            public AbstractCellTable<UserGroupWithSecurityDTO> getCellTable() {
+            public AbstractCellTable<UserGroupDTO> getCellTable() {
                 return table;
             }
         };
@@ -130,15 +130,15 @@ public class UserGroupTableWrapper extends
         table.ensureDebugId("UserGroupWithSecurityDTOTable");
     }
 
-    public Iterable<UserGroupWithSecurityDTO> getAllUsers() {
+    public Iterable<UserGroupDTO> getAllUsers() {
         return filterField.getAll();
     }
 
-    public LabeledAbstractFilterablePanel<UserGroupWithSecurityDTO> getFilterField() {
+    public LabeledAbstractFilterablePanel<UserGroupDTO> getFilterField() {
         return filterField;
     }
 
-    public void refreshUserGroups(Iterable<UserGroupWithSecurityDTO> UserGroupWithSecurityDTOs) {
+    public void refreshUserGroups(Iterable<UserGroupDTO> UserGroupWithSecurityDTOs) {
         getFilteredUserGroups(UserGroupWithSecurityDTOs);
     }
 
@@ -146,8 +146,8 @@ public class UserGroupTableWrapper extends
      * @param callback
      *            optional; may be {@code null}
      */
-    public void refreshUserList(final Callback<Iterable<UserGroupWithSecurityDTO>, Throwable> callback) {
-        final AsyncCallback<Collection<UserGroupWithSecurityDTO>> myCallback = new AsyncCallback<Collection<UserGroupWithSecurityDTO>>() {
+    public void refreshUserList(final Callback<Iterable<UserGroupDTO>, Throwable> callback) {
+        final AsyncCallback<Collection<UserGroupDTO>> myCallback = new AsyncCallback<Collection<UserGroupDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 errorReporter.reportError(
@@ -158,7 +158,7 @@ public class UserGroupTableWrapper extends
             }
 
             @Override
-            public void onSuccess(Collection<UserGroupWithSecurityDTO> result) {
+            public void onSuccess(Collection<UserGroupDTO> result) {
                 getFilteredUserGroups(result);
                 refreshUserGroups(result);
                 if (callback != null) {
@@ -166,10 +166,10 @@ public class UserGroupTableWrapper extends
                 }
             }
         };
-        getUserManagementService().getSecuredUserGroups(myCallback);
+        getUserManagementService().getUserGroups(myCallback);
     }
 
-    private void getFilteredUserGroups(Iterable<UserGroupWithSecurityDTO> result) {
+    private void getFilteredUserGroups(Iterable<UserGroupDTO> result) {
         filterField.updateAll(result);
     }
 

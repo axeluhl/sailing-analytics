@@ -52,7 +52,6 @@ import com.sap.sse.security.shared.dto.StrippedUserDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
-import com.sap.sse.security.shared.dto.UserGroupWithSecurityDTO;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
@@ -239,20 +238,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
     @Override
     public Collection<UserGroupDTO> getUserGroups() {
         Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser = new HashMap<>();
-        Map<UserGroup, UserGroupDTO> fromOriginalToStrippedDownUserGroup = new HashMap<>();
+        Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGroup = new HashMap<>();
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredSecurityTypes.USER_GROUP,
                 getSecurityService().getUserGroupList(), ug -> ug.getId().toString(),
                 ug -> securityDTOFactory.createUserGroupDTOFromUserGroup(ug, fromOriginalToStrippedDownUser,
-                        fromOriginalToStrippedDownUserGroup));
-    }
-
-    @Override
-    public Collection<UserGroupWithSecurityDTO> getSecuredUserGroups() {
-        Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser = new HashMap<>();
-        Map<UserGroup, UserGroupWithSecurityDTO> fromOriginalToStrippedDownUserGroup = new HashMap<>();
-        return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredSecurityTypes.USER_GROUP,
-                getSecurityService().getUserGroupList(), ug -> ug.getId().toString(),
-                ug -> securityDTOFactory.createUserGroupWithSecurityDTOFromUserGroup(ug, fromOriginalToStrippedDownUser,
                         fromOriginalToStrippedDownUserGroup, getSecurityService()));
     }
 
@@ -261,9 +250,9 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         final UserGroup userGroup = getSecurityService().getUserGroupByName(userGroupName);
         if (userGroup == null || SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER_GROUP.getStringPermissionForObjects(DefaultActions.READ, userGroup.getId().toString()))) {
             Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser = new HashMap<>();
-            Map<UserGroup, UserGroupDTO> fromOriginalToStrippedDownUserGroup = new HashMap<>();
+            Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGroup = new HashMap<>();
             return securityDTOFactory.createUserGroupDTOFromUserGroup(userGroup, fromOriginalToStrippedDownUser,
-                    fromOriginalToStrippedDownUserGroup);
+                    fromOriginalToStrippedDownUserGroup, getSecurityService());
         } else {
             throw new UnauthorizedException("Not permitted to read user group "+userGroupName);
         }
@@ -311,9 +300,9 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
                 });
 
         Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser = new HashMap<>();
-        Map<UserGroup, UserGroupDTO> fromOriginalToStrippedDownUserGroup = new HashMap<>();
+        Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGroup = new HashMap<>();
         return securityDTOFactory.createUserGroupDTOFromUserGroup(group, fromOriginalToStrippedDownUser,
-                fromOriginalToStrippedDownUserGroup);
+                fromOriginalToStrippedDownUserGroup, getSecurityService());
     }
 
     @Override

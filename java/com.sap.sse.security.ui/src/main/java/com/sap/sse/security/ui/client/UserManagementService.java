@@ -24,7 +24,6 @@ import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
-import com.sap.sse.security.shared.dto.UserGroupWithSecurityDTO;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
 import com.sap.sse.security.ui.oauth.shared.OAuthException;
 import com.sap.sse.security.ui.shared.SuccessInfo;
@@ -159,6 +158,4 @@ public interface UserManagementService extends RemoteService {
 
     AccessControlListDTO getAccessControlListWithoutPruning(QualifiedObjectIdentifier idOfAccessControlledObject)
             throws UnauthorizedException;
-
-    Collection<UserGroupWithSecurityDTO> getSecuredUserGroups() throws UnauthorizedException;
 }

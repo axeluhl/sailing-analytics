@@ -31,7 +31,6 @@ import com.sap.sse.security.shared.dto.StrippedUserDTO;
 import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
-import com.sap.sse.security.shared.dto.UserGroupWithSecurityDTO;
 import com.sap.sse.security.shared.impl.AccessControlList;
 import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.Role;
@@ -172,24 +171,29 @@ public class SecurityDTOFactory {
     }
 
     /**
-     * Produces a stripped-down {@link UserGroupImpl} object that has stripped-down {@link User} objects
-     * with their default tenants stripped down and mapped by this same method recursively where
-     * for a single {@link User} object only a single stripped-down user object will be created,
-     * as will for tenants.
+     * Produces a full {@link UserGroupImpl} object that has stripped-down {@link User} objects with their default
+     * tenants stripped down and mapped by this same method recursively where for a single {@link User} object only a
+     * single stripped-down user object will be created, as will for tenants.
+     * 
+     * @param securityService
      */
     UserGroupDTO createUserGroupDTOFromUserGroup(UserGroup userGroup,
             Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser,
-            Map<UserGroup, UserGroupDTO> fromOriginalToStrippedDownUserGroup) {
+            Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGroup, SecurityService securityService) {
         final UserGroupDTO result;
         if (userGroup == null) {
             result = null;
         } else {
-            if (fromOriginalToStrippedDownUserGroup.containsKey(userGroup)) {
-                result = fromOriginalToStrippedDownUserGroup.get(userGroup);
-            } else {
-                result = new UserGroupDTO(userGroup.getId(), userGroup.getName());
-                fromOriginalToStrippedDownUserGroup.put(userGroup, result);
+            // we do not cache this, as they are only valid as root type of objects, so they cannot be already be in the
+            // map at this point
+            if (fromOriginalToStrippedDownUserGroup.get(userGroup) != null) {
+                throw new IllegalArgumentException(
+                        "A stripped mapping does already exist for this usergroup, this should never be the case");
             }
+            // FIXME can this generic cast be made better?
+            result = new UserGroupDTO(userGroup.getId(), userGroup.getName());
+            SecurityDTOUtil.addSecurityInformation(this, securityService, result, userGroup.getIdentifier(),
+                    fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
         }
         return result;
     }
@@ -208,40 +212,6 @@ public class SecurityDTOFactory {
             }
         }
         return result;
-    }
-
-    UserGroupWithSecurityDTO createUserGroupWithSecurityDTOFromUserGroup(UserGroup userGroup,
-            Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser,
-            Map<UserGroup, UserGroupWithSecurityDTO> fromOriginalToStrippedDownUserGroup,
-            final SecurityService securityService) {
-
-        UserGroupWithSecurityDTO result = null;
-        if (userGroup == null) {
-            result = null;
-        } else {
-            if (fromOriginalToStrippedDownUserGroup.containsKey(userGroup)) {
-                result = fromOriginalToStrippedDownUserGroup.get(userGroup);
-            }
-            if (result == null) {
-                result = new UserGroupWithSecurityDTO(userGroup.getId(), userGroup.getName());
-
-                SecurityDTOUtil.addSecurityInformation(this, securityService, result, userGroup.getIdentifier(),
-                        fromOriginalToStrippedDownUser, convert(fromOriginalToStrippedDownUserGroup));
-
-                fromOriginalToStrippedDownUserGroup.put(userGroup, result);
-                for (final User user : userGroup.getUsers()) {
-                    result.add(createStrippedUserFromUser(user, securityService, fromOriginalToStrippedDownUser,
-                            convert(fromOriginalToStrippedDownUserGroup)));
-                }
-            }
-        }
-        return result;
-    }
-
-    // FIXME: find better way to solve warning
-    @SuppressWarnings("unchecked")
-    private <T extends StrippedUserGroupDTO> Map<UserGroup, StrippedUserGroupDTO> convert(Map<UserGroup, T> map) {
-        return (Map<UserGroup, StrippedUserGroupDTO>) map;
     }
 
     public OwnershipDTO createOwnershipDTO(Ownership ownership,

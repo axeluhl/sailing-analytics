@@ -17,7 +17,7 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
-import com.sap.sse.security.shared.dto.UserGroupWithSecurityDTO;
+import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -57,7 +57,7 @@ public class UserGroupManagementPanel extends DockPanel {
         buttonPanel.add(new Button(stringMessages.removeUserGroup(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                UserGroupWithSecurityDTO userGroup = userGroupTableWrapper.getSelectionModel().getSelectedObject();
+                UserGroupDTO userGroup = userGroupTableWrapper.getSelectionModel().getSelectedObject();
                 if (userGroup == null) {
                     Window.alert(stringMessages.youHaveToSelectAUserGroup());
                 } else if (Window.confirm(stringMessages.doYouReallyWantToRemoveUserGroup(userGroup.getName()))) {
@@ -89,7 +89,7 @@ public class UserGroupManagementPanel extends DockPanel {
                 errorReporter, /* enablePager */ true, tableResources);
 
         ScrollPanel scrollPanel = new ScrollPanel(userGroupTableWrapper.asWidget());
-        LabeledAbstractFilterablePanel<UserGroupWithSecurityDTO> usergroupfilterBox = userGroupTableWrapper
+        LabeledAbstractFilterablePanel<UserGroupDTO> usergroupfilterBox = userGroupTableWrapper
                 .getFilterField();
         usergroupfilterBox.getElement().setPropertyString("placeholder", stringMessages.filterUserGroups());
         west.add(usergroupfilterBox);
@@ -117,7 +117,7 @@ public class UserGroupManagementPanel extends DockPanel {
 
     public void updateUserGroupsAndUsers() {
         userService.getUserManagementService()
-                .getSecuredUserGroups(new AsyncCallback<Collection<UserGroupWithSecurityDTO>>() {
+                .getUserGroups(new AsyncCallback<Collection<UserGroupDTO>>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
@@ -125,7 +125,7 @@ public class UserGroupManagementPanel extends DockPanel {
                     }
 
                     @Override
-                    public void onSuccess(Collection<UserGroupWithSecurityDTO> result) {
+                    public void onSuccess(Collection<UserGroupDTO> result) {
                         userGroupTableWrapper.refreshUserGroups(result);
                     }
                 });
