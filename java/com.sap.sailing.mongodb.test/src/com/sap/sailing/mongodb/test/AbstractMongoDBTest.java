@@ -18,13 +18,13 @@ public abstract class AbstractMongoDBTest {
     protected Mongo mongo;
     protected DB db;
     private final MongoDBConfiguration dbConfiguration;
-    private MongoDBService racingEventService;
+    private MongoDBService mongoDBService;
     
     public AbstractMongoDBTest() throws UnknownHostException, MongoException {
         dbConfiguration = MongoDBConfiguration.getDefaultTestConfiguration();
-        racingEventService = getDBConfiguration().getService();
+        mongoDBService = getDBConfiguration().getService();
         mongo = newMongo();
-        db = racingEventService.getDB();
+        db = mongoDBService.getDB();
     }
     
     protected MongoDBConfiguration getDBConfiguration() {
@@ -51,6 +51,6 @@ public abstract class AbstractMongoDBTest {
     }
 
     protected MongoDBService getMongoService() {
-        return racingEventService;
+        return mongoDBService;
     }
 }

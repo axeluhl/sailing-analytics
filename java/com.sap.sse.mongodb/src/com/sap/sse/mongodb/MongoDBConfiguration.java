@@ -82,18 +82,22 @@ public class MongoDBConfiguration {
         return result;
     }
 
+    public MongoDBConfiguration(String mongoClientURIAsString) {
+        this.mongoClientURI = new MongoClientURI(mongoClientURIAsString, getDefaultOptionsBuilder());
+    }
+
     public MongoDBConfiguration(MongoClientURI mongoClientURI) {
         this.mongoClientURI = mongoClientURI;
     }
-    
+
     public MongoDBConfiguration(String hostName, String databaseName) {
-        this.mongoClientURI = new MongoClientURI("mongodb://"+hostName+"/"+databaseName);
+        this.mongoClientURI = new MongoClientURI("mongodb://"+hostName+"/"+databaseName, getDefaultOptionsBuilder());
     }
-    
+
     public MongoDBConfiguration(String hostName, int port, String databaseName) {
         this.mongoClientURI = new MongoClientURI("mongodb://"+hostName+":"+port+"/"+databaseName);
     }
-    
+
     /**
      * Creates and returns a DB service for this configuration
      */
@@ -111,6 +115,10 @@ public class MongoDBConfiguration {
 
     public String getDatabaseName() {
         return getMongoClientURI().getDatabase();
+    }
+
+    public String getHostname() {
+        return getMongoClientURI().getHosts().get(0).split(":")[0];
     }
 
     public int getPort() {
