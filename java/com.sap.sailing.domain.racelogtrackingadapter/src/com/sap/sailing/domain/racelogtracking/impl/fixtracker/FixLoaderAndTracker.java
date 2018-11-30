@@ -1,10 +1,13 @@
 package com.sap.sailing.domain.racelogtracking.impl.fixtracker;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -51,6 +54,7 @@ import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackingDataLoader;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
+import com.sap.sailing.domain.tracking.impl.TimedComparator;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceStatusImpl;
 import com.sap.sse.common.MultiTimeRange;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
@@ -384,9 +388,10 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
                         || firstFixAfterStartOfTracking.getTimePoint().after(trackingTimeRange.to())) {
                     // There is no fix in the tracking interval -> looking for better fixes before start of tracking and
                     // after end of tracking
-                    newlyCoveredTimeRanges.forEach((event, timeRange) -> {
-                        loadBetterFixesIfAvailable(trackingTimeRange, timeRange, event);
-                    });
+                    Iterable<GPSFix> betterFixesBeforeAndAfter = loadBetterFixesIfAvailable(trackingTimeRange, newlyCoveredTimeRanges);
+                    for (GPSFix betterFixBeforeAndAfter : betterFixesBeforeAndAfter) {
+                        track.add(betterFixBeforeAndAfter, true);
+                    }
                 }
             }
         }
@@ -550,78 +555,106 @@ public class FixLoaderAndTracker implements TrackingDataLoader {
     }
 
     /**
-     * Loads better fallback fixes if there is no fix in the tracking interval found.
+     * Loads better fallback fixes if there is no fix in the tracking interval found. Returns the best (latest) fix
+     * before the tracking interval found through any of the mappings (if any), and the best (earliest) fix after
+     * the tracking interval found through any of the mappings (if any).
+     * 
+     * @param newlyCoveredTimeRanges mappings that are all mapping to the same item, such as a single Mark
      */
-    private void loadBetterFixesIfAvailable(TimeRange trackingTimeRange, MultiTimeRange coveredTimeRanges,
-            RegattaLogDeviceMappingEvent<? extends WithID> mappingEvent) {
+    private Iterable<GPSFix> loadBetterFixesIfAvailable(TimeRange trackingTimeRange,
+            Map<RegattaLogDeviceMappingEvent<WithID>, MultiTimeRange> newlyCoveredTimeRanges) {
+        SortedSet<GPSFix> fixesBefore = new TreeSet<>(TimedComparator.INSTANCE);
+        SortedSet<GPSFix> fixesAfter = new TreeSet<>(TimedComparator.INSTANCE);
+        // coveredTimeRanges
         if (!preemptiveStopRequested.get()) {
-            mappingEvent.accept(new MappingEventVisitor() {
-                @Override
-                public void visit(RegattaLogDeviceCompetitorSensorDataMappingEvent event) {
-                    throw new UnsupportedOperationException();
-                }
-                
-                @Override
-                public void visit(RegattaLogDeviceBoatSensorDataMappingEvent event) {
-                    throw new UnsupportedOperationException();
-                }
-                
-                @Override
-                public void visit(RegattaLogDeviceCompetitorMappingEvent event) {
-                    throw new UnsupportedOperationException();
-                }
-                
-                @Override
-                public void visit(RegattaLogDeviceBoatMappingEvent event) {
-                    throw new UnsupportedOperationException();
-                }
-                
-                @Override
-                public void visit(RegattaLogDeviceMarkMappingEvent event) {
-                    DynamicGPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(event.getMappedTo());
-                    final GPSFix lastFixAtOrBeforeStartOfTracking = track.getLastFixAtOrBefore(trackingTimeRange.from());
-                    // A better fix before start of tracking must be after the current best fix
-                    final MultiTimeRange beforeRange = coveredTimeRanges
-                            .intersection(new TimeRangeImpl(
-                                    lastFixAtOrBeforeStartOfTracking != null
-                                    ? lastFixAtOrBeforeStartOfTracking.getTimePoint() : TimePoint.BeginningOfTime,
-                                            trackingTimeRange.from()));
-                    // starting to load newer ranges to make the first found fix the best available fix
-                    Collection<TimeRange> inverseTimeRanges = Util.addAll(beforeRange,
-                            new TreeSet<>((timeRange1, timeRange2) -> -timeRange1.from().compareTo(timeRange2.from())));
-                    for (TimeRange timeRange : inverseTimeRanges) {
-                        try {
-                            if (sensorFixStore.<GPSFix> loadYoungestFix(fix -> track.add(fix, true),
-                                    event.getDevice(), timeRange)) {
-                                // new best fix before start of tracking found
-                                break;
-                            }
-                        } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
-                            logger.log(Level.WARNING, "Could not load better fix for mark track " + event.getMappedTo());
-                        }
-                        
+            newlyCoveredTimeRanges.forEach((mappingEvent, coveredTimeRanges) -> {
+                mappingEvent.accept(new MappingEventVisitor() {
+                    @Override
+                    public void visit(RegattaLogDeviceCompetitorSensorDataMappingEvent event) {
+                        throw new UnsupportedOperationException();
                     }
                     
-                    final GPSFix firstFixAtOrAfterEndOfTracking = track.getFirstFixAtOrAfter(trackingTimeRange.to());
-                    // A better fix after end of tracking must be before the current best fix
-                    MultiTimeRange afterRange = coveredTimeRanges.intersection(new TimeRangeImpl(trackingTimeRange.to(), 
-                            firstFixAtOrAfterEndOfTracking != null ? firstFixAtOrAfterEndOfTracking.getTimePoint()
-                                    : TimePoint.EndOfTime));
-                    for (TimeRange timeRange : afterRange) {
-                        try {
-                            if (sensorFixStore.<GPSFix> loadOldestFix(fix -> track.add(fix, true), event.getDevice(),
-                                    timeRange)) {
-                                // new best fix after end of tracking found
-                                break;
-                            }
-                        } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
-                            logger.log(Level.WARNING, "Could not load better fix for mark track " + event.getMappedTo());
-                        }
-                        
+                    @Override
+                    public void visit(RegattaLogDeviceBoatSensorDataMappingEvent event) {
+                        throw new UnsupportedOperationException();
                     }
-                }
+                    
+                    @Override
+                    public void visit(RegattaLogDeviceCompetitorMappingEvent event) {
+                        throw new UnsupportedOperationException();
+                    }
+                    
+                    @Override
+                    public void visit(RegattaLogDeviceBoatMappingEvent event) {
+                        throw new UnsupportedOperationException();
+                    }
+                    
+                    @Override
+                    public void visit(RegattaLogDeviceMarkMappingEvent event) {
+                        DynamicGPSFixTrack<Mark, GPSFix> track = trackedRace.getOrCreateTrack(event.getMappedTo());
+                        final TimePoint lastFixTimePointAtOrBeforeStartOfTracking;
+                        if (!fixesBefore.isEmpty()) {
+                            lastFixTimePointAtOrBeforeStartOfTracking = fixesBefore.last().getTimePoint();
+                        } else {
+                            final GPSFix lastFixAtOrBeforeStartOfTracking = track.getLastFixAtOrBefore(trackingTimeRange.from());
+                            lastFixTimePointAtOrBeforeStartOfTracking = lastFixAtOrBeforeStartOfTracking == null ? null : lastFixAtOrBeforeStartOfTracking.getTimePoint();
+                        }
+                        // A better fix before start of tracking must be after the current best fix
+                        final TimePoint from = lastFixTimePointAtOrBeforeStartOfTracking != null
+                                ? lastFixTimePointAtOrBeforeStartOfTracking
+                                : TimePoint.BeginningOfTime;
+                        if (from.before(trackingTimeRange.from())) { // otherwise we'd be intersecting with an empty time range
+                            final MultiTimeRange beforeRange = coveredTimeRanges
+                                    .intersection(new TimeRangeImpl(from, trackingTimeRange.from()));
+                            // starting to load newer ranges to make the first found fix the best available fix
+                            Collection<TimeRange> inverseTimeRanges = Util.addAll(beforeRange,
+                                    new TreeSet<>((timeRange1, timeRange2) -> -timeRange1.from().compareTo(timeRange2.from())));
+                            for (TimeRange timeRange : inverseTimeRanges) {
+                                try {
+                                    if (sensorFixStore.<GPSFix> loadYoungestFix(fix -> fixesBefore.add(fix), event.getDevice(), timeRange)) {
+                                        // new best fix before start of tracking found
+                                        break;
+                                    }
+                                } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+                                    logger.log(Level.WARNING, "Could not load better fix for mark track " + event.getMappedTo());
+                                }
+                            }
+                        }
+                        final TimePoint firstFixTimePointAfterEndOfTracking;
+                        if (!fixesAfter.isEmpty()) {
+                            firstFixTimePointAfterEndOfTracking = fixesAfter.first().getTimePoint();
+                        } else {
+                            final GPSFix firstFixAtOrAfterEndOfTracking = track.getFirstFixAtOrAfter(trackingTimeRange.to());
+                            firstFixTimePointAfterEndOfTracking = firstFixAtOrAfterEndOfTracking == null ? null : firstFixAtOrAfterEndOfTracking.getTimePoint();
+                        }
+                        // A better fix after end of tracking must be before the current best fix
+                        final TimePoint to = firstFixTimePointAfterEndOfTracking != null ? firstFixTimePointAfterEndOfTracking : TimePoint.EndOfTime;
+                        if (to.after(trackingTimeRange.to())) { // otherwise we'd be intersecting with an empty time range
+                            MultiTimeRange afterRange = coveredTimeRanges.intersection(new TimeRangeImpl(trackingTimeRange.to(), to));
+                            for (TimeRange timeRange : afterRange) {
+                                try {
+                                    if (sensorFixStore.<GPSFix> loadOldestFix(fix -> fixesAfter.add(fix), event.getDevice(), timeRange)) {
+                                        // new best fix after end of tracking found
+                                        break;
+                                    }
+                                } catch (TransformationException | NoCorrespondingServiceRegisteredException e) {
+                                    logger.log(Level.WARNING, "Could not load better fix for mark track " + event.getMappedTo());
+                                }
+                                
+                            }
+                        }
+                    }
+                });
             });
         }
+        final List<GPSFix> result = new ArrayList<>();
+        if (!fixesBefore.isEmpty()) {
+            result.add(fixesBefore.last());
+        }
+        if (!fixesAfter.isEmpty()) {
+            result.add(fixesAfter.first());
+        }
+        return result;
     }
 
     private TimeRange getTrackingTimeRange() {

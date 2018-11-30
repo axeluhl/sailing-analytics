@@ -158,6 +158,10 @@ public class RegattaMetadataDTO extends RegattaReferenceDTO implements HasRegatt
             this.hasAudioData = hasAudioData;
         }
 
+        public boolean hasData() {
+            return hasGPSData || hasWindData || hasVideoData || hasAudioData;
+        }
+
         public boolean hasGPSData() {
             return hasGPSData;
         }

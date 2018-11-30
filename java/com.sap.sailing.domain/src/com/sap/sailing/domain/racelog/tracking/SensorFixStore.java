@@ -20,7 +20,7 @@ import com.sap.sse.common.Timed;
 public interface SensorFixStore {
     
     /**
-     * Loads fixes for a device in a given time range.
+     * Loads fixes for a device in a given time range in ascending order.
      * 
      * @param consumer
      *            will be called for each loaded fix. Must not be <code>null</code>.
@@ -41,7 +41,7 @@ public interface SensorFixStore {
     TransformationException;
     
     /**
-     * Loads fixes for a device in a given time range.
+     * Loads fixes for a device in a given time range in ascending order.
      * 
      * @param consumer will be called for each loaded fix. Must not be <code>null</code>.
      * @param deviceIdentifier the device to load the fixes for. Must not be <code>null</code>.
@@ -104,7 +104,7 @@ public interface SensorFixStore {
     <FixT extends Timed> Map<DeviceIdentifier, FixT> getLastFix(Iterable<DeviceIdentifier> forDevices) throws TransformationException, NoCorrespondingServiceRegisteredException;
 
     /**
-     * Loads the youngest fix for the given device in the specified {@link TimeRange}.
+     * Loads the oldest fix for the given device in the specified {@link TimeRange}.
      * 
      * @return true if a fix was loaded, false otherwise
      */
@@ -113,7 +113,7 @@ public interface SensorFixStore {
             throws NoCorrespondingServiceRegisteredException, TransformationException;
 
     /**
-     * Loads the oldest fix for the given device in the specified {@link TimeRange}.
+     * Loads the youngest fix for the given device in the specified {@link TimeRange}.
      * 
      * @return true if a fix was loaded, false otherwise
      */
