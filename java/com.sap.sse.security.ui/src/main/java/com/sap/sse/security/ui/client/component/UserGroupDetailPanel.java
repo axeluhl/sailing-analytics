@@ -213,7 +213,7 @@ public class UserGroupDetailPanel extends HorizontalPanel implements Handler, Ch
                         public void onSuccess(Void result) {
                             tenant.add(user);
                             allUsersListDataProvider.updateDisplays();
-                            tenantListDataProvider.updateDisplays();
+                                    tenantUsersListDataProvider.updateDisplays();
                         }
                     });
                 }
@@ -247,7 +247,7 @@ public class UserGroupDetailPanel extends HorizontalPanel implements Handler, Ch
                                 tenant.remove(userToRemoveFromTenant);
                             }
                             allUsersListDataProvider.updateDisplays();
-                            tenantListDataProvider.updateDisplays();
+                                    tenantUsersListDataProvider.updateDisplays();
                         }
                     });
                 }
