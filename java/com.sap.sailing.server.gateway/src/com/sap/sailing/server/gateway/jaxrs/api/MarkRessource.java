@@ -114,6 +114,7 @@ public class MarkRessource extends AbstractSailingServerResource {
                 .getAdapter(getService().getBaseDomainFactory());
         final Leaderboard leaderboard = getService().getLeaderboardByName(leaderboardName);
         if (leaderboard != null) {
+            getSecurityService().checkCurrentUserUpdatePermission(leaderboard);
             final RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
             if (raceColumn != null) {
                 final RegattaLog regattaLog = raceColumn.getRegattaLog();
