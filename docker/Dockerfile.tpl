@@ -13,5 +13,11 @@ RUN apt-get install -y telnet dnsutils net-tools
 COPY env.sh .
 COPY start .
 COPY JavaSE-11.profile .
-EXPOSE 8888 14888 8000
+# Workaround for https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=910804
+RUN mkdir -p /docker-java-home/lib/jfr && \
+    wget https://hg.openjdk.java.net/jdk/jdk11/raw-file/76072a077ee1/src/jdk.jfr/share/conf/jfr/default.jfc \
+      -O /docker-java-home/lib/jfr/default.jfc && \
+    wget https://hg.openjdk.java.net/jdk/jdk11/raw-file/76072a077ee1/src/jdk.jfr/share/conf/jfr/profile.jfc \
+      -O /docker-java-home/lib/jfr/profile.jfc
+EXPOSE 8888 14888 8000 7091 6666
 CMD [ "/home/sailing/servers/server/start", "fg" ]

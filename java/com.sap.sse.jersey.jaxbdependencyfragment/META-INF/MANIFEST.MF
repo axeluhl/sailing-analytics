@@ -7,4 +7,4 @@ Bundle-Vendor: SAP
 Fragment-Host: com.sun.jersey
 Automatic-Module-Name: com.sap.sse.jersey.jaxbdependencyfragment
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: com.sun.xml.bind.jaxb-impl;bundle-version="2.4.0"
+Require-Bundle: com.sun.xml.bind.jaxb-impl;bundle-version="2.3.0"

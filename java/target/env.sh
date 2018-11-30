@@ -103,18 +103,33 @@ SERVER_STARTUP_NOTIFY=
 # USE_ENVIRONMENT=
 
 INSTANCE_ID="$SERVER_NAME:$SERVER_PORT"
-ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -Dosgi.java.profile=file://`pwd`/JavaSE-11.profile --add-modules=ALL-SYSTEM -Dpersistentcompetitors.clear=false -XX:ThreadPriorityPolicy=1 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC -verbose:gc -XX:MaxGCPauseMillis=500 -Xlog:gc+ergo*=trace:file=logs/gc_ergo.log:time:filecount=10,filesize=100000 -Xlog:gc*:file=logs/gc.log:time:filecount=10,filesize=100000 -XX:MaxGCPauseMillis=500"
-
-echo ADDITIONAL_JAVA_ARGS=${ADDITIONAL_JAVA_ARGS}
-
-# Uncomment for use with SAP JVM only:
-#ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -XX:+GCHistory -XX:GCHistoryFilename=logs/sapjvm_gc@PID.prf"
-
 if [[ ! -d $JAVA_HOME ]] && [[ -f "/usr/libexec/java_home" ]]; then
     JAVA_HOME=`/usr/libexec/java_home`
 fi
-
+JAVA_BINARY="$JAVA_HOME/bin/java"
+JAVA_VERSION=$("$JAVA_BINARY" -version 2>&1 | sed 's/^.* version "\(.*\)\.\(.*\)\..*".*$/\1.\2/; 1q')
+export JAVA_11_ARGS="-Dosgi.java.profile=file://`pwd`/JavaSE-11.profile --add-modules=ALL-SYSTEM -Djavax.xml.bind.JAXBContextFactory=com.sun.xml.bind.v2.ContextFactory -XX:ThreadPriorityPolicy=1 -XX:+UnlockExperimentalVMOptions -XX:+UseZGC -Xlog:gc+ergo*=trace:file=logs/gc_ergo.log:time:filecount=10,filesize=100000 -Xlog:gc*:file=logs/gc.log:time:filecount=10,filesize=100000"
+echo JAVA_11_ARGS is $JAVA_11_ARGS
+export JAVA_8_ARGS="-XX:ThreadPriorityPolicy=2 -XX:+UseG1GC -XX:+PrintAdaptiveSizePolicy -XX:+PrintGCTimeStamps -XX:+PrintGCDetails -Xloggc:logs/gc.log -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M"
+echo JAVA_8_ARGS is $JAVA_8_ARGS
+echo JAVA_VERSION detected: $JAVA_VERSION
+if echo $JAVA_VERSION | grep -q "^11\."; then
+  echo Java 11 detected
+  echo JAVA_11_ARGS are $JAVA_11_ARGS
+  JAVA_VERSION_SPECIFIC_ARGS=$JAVA_11_ARGS
+else
+  echo Java other than 11 detected
+  echo JAVA_8_ARGS are $JAVA_8_ARGS
+  JAVA_VERSION_SPECIFIC_ARGS=$JAVA_8_ARGS
+fi
+echo JAVA_VERSION_SPECIFIC_ARGS are: $JAVA_VERSION_SPECIFIC_ARGS
+ADDITIONAL_JAVA_ARGS="$JAVA_VERSION_SPECIFIC_ARGS $ADDITIONAL_JAVA_ARGS -Dpersistentcompetitors.clear=false -XX:MaxGCPauseMillis=500"
+# options for use with SAP JVM only:
+if "$JAVA_BINARY" -version 2>&1 | grep -q "SAP Java"; then
+  echo SAP JVM detected
+  ADDITIONAL_JAVA_ARGS="$ADDITIONAL_JAVA_ARGS -XX:+GCHistory -XX:GCHistoryFilename=logs/sapjvm_gc@PID.prf"
+fi
+echo ADDITIONAL_JAVA_ARGS=${ADDITIONAL_JAVA_ARGS}
 ON_AMAZON=`command -v ec2-metadata`
 
 # **** Overwritten environment variables ****
-

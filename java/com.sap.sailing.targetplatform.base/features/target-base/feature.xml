@@ -128,14 +128,14 @@
          id="jaxb-api"
          download-size="0"
          install-size="0"
-         version="2.4.0.b1808300359"
+         version="2.3.1"
          unpack="false"/>
 
    <plugin
          id="com.sun.xml.bind.jaxb-impl"
          download-size="0"
          install-size="0"
-         version="2.4.0.b180830_0438"
+         version="2.3.1"
          unpack="false"/>
 
    <plugin
