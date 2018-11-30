@@ -1,5 +1,7 @@
 package com.sap.sailing.racecommittee.app.services;
 
+import static com.sap.sailing.android.shared.services.sending.MessageSendingService.CHANNEL_ID;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,8 +47,6 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Pair;
-
-import static com.sap.sailing.android.shared.services.sending.MessageSendingService.CHANNEL_ID;
 
 public class RaceStateService extends Service {
 

@@ -237,7 +237,7 @@ public class HomeFragment extends AbstractHomeFragment implements LoaderCallback
             String message1 = getString(R.string.confirm_data_hello_name).replace("{full_name}",
                     checkinData.competitorName);
             String message2 = getString(R.string.confirm_data_you_are_signed_in_as_sail_id).replace("{sail_id}",
-                    checkinData.competitorSailId.isEmpty() ? checkinData.competitorName : checkinData.competitorSailId );
+                    checkinData.competitorSailId.isEmpty() ? checkinData.competitorName : checkinData.competitorSailId);
 
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(), R.style.AppTheme_AlertDialog);
             builder.setMessage(message1 + "\n\n" + message2);

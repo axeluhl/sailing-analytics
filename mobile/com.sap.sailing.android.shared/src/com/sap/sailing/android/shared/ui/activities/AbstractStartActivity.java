@@ -1,5 +1,10 @@
 package com.sap.sailing.android.shared.ui.activities;
 
+import static io.branch.referral.Defines.Jsonkey.Clicked_Branch_Link;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.sap.sailing.android.shared.R;
@@ -14,14 +19,8 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
-
-import static io.branch.referral.Defines.Jsonkey.Clicked_Branch_Link;
 
 public abstract class AbstractStartActivity<C extends BaseCheckinData> extends CheckinDataActivity<C> {
 

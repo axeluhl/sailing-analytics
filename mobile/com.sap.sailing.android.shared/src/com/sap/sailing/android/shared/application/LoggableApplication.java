@@ -12,7 +12,6 @@ import com.sap.sailing.android.shared.util.PrefUtils;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
-
 import io.branch.referral.Branch;
 
 /**

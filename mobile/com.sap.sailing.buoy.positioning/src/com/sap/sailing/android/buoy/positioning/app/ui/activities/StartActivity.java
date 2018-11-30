@@ -6,7 +6,6 @@ import com.sap.sailing.android.buoy.positioning.app.util.AboutHelper;
 import com.sap.sailing.android.buoy.positioning.app.valueobjects.CheckinData;
 import com.sap.sailing.android.shared.ui.activities.AbstractStartActivity;
 import com.sap.sailing.android.shared.ui.fragments.AbstractHomeFragment;
-import com.sap.sailing.android.shared.util.EulaHelper;
 
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;

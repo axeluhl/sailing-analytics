@@ -397,13 +397,8 @@ public class TrackingService extends Service implements LocationListener {
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
-        Notification notification = NotificationHelper.getNotification(
-            this,
-            CHANNEL_ID,
-            getText(R.string.app_name),
-            getString(R.string.tracking_notification_text, event.name),
-            pendingIntent
-        );
+        Notification notification = NotificationHelper.getNotification(this, CHANNEL_ID, getText(R.string.app_name),
+                getString(R.string.tracking_notification_text, event.name), pendingIntent);
         startForeground(NotificationHelper.getNotificationId(), notification);
     }
 

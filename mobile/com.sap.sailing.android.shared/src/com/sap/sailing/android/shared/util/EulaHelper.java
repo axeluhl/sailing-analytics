@@ -78,7 +78,7 @@ public class EulaHelper {
             }
         });
         AlertDialog alertDialog = builder.show();
-        alertDialog.setCanceledOnTouchOutside(false);        
+        alertDialog.setCanceledOnTouchOutside(false);
         ((TextView) alertDialog.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
     }
 
