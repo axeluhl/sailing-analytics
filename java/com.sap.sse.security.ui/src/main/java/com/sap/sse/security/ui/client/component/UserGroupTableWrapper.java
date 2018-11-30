@@ -126,6 +126,7 @@ public class UserGroupTableWrapper extends
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(userColumnListHandler);
         table.addColumn(UserGroupWithSecurityDTONameColumn, getStringMessages().groupName());
+        SecuredDTOOwnerColumn.configureOwnerColumns(table, userColumnListHandler, stringMessages);
         table.addColumn(actionColumn, stringMessages.actions());
         table.ensureDebugId("UserGroupWithSecurityDTOTable");
     }
