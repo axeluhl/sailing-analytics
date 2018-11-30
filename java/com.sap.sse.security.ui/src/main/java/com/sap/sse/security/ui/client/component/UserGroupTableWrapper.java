@@ -42,19 +42,18 @@ public class UserGroupTableWrapper extends
 
     public UserGroupTableWrapper(UserService userService, Iterable<HasPermissions> additionalPermissions,
             StringMessages stringMessages, ErrorReporter errorReporter, boolean enablePager,
-            CellTableWithCheckboxResources tableResources) {
-        super(stringMessages, errorReporter, false, enablePager,
-                new EntityIdentityComparator<UserGroupDTO>() {
-                    @Override
-                    public boolean representSameEntity(UserGroupDTO dto1, UserGroupDTO dto2) {
-                        return dto1.getId().toString().equals(dto2.getId().toString());
-                    }
+            CellTableWithCheckboxResources tableResources, Runnable refresher) {
+        super(stringMessages, errorReporter, false, enablePager, new EntityIdentityComparator<UserGroupDTO>() {
+            @Override
+            public boolean representSameEntity(UserGroupDTO dto1, UserGroupDTO dto2) {
+                return dto1.getId().toString().equals(dto2.getId().toString());
+            }
 
-                    @Override
-                    public int hashCode(UserGroupDTO t) {
-                        return t.getId().hashCode();
-                    }
-                }, tableResources);
+            @Override
+            public int hashCode(UserGroupDTO t) {
+                return t.getId().hashCode();
+            }
+        }, tableResources);
         this.userService = userService;
         ListHandler<UserGroupDTO> userColumnListHandler = getColumnSortHandler();
 
@@ -79,16 +78,15 @@ public class UserGroupTableWrapper extends
                             public void onSuccess(SuccessInfo result) {
                                 if (result.isSuccessful()) {
                                     filterField.remove(userGroupDTO);
+                                    refresher.run();
                                 } else {
-                                    deletingUserGroupWithSecurityDTOFailed(userGroupDTO,
-                                            result.getMessage());
+                                    deletingUserGroupWithSecurityDTOFailed(userGroupDTO, result.getMessage());
                                 }
                             }
 
-                            private void deletingUserGroupWithSecurityDTOFailed(UserGroupDTO user,
-                                    String message) {
-                                // TODO: v i18n v
-                                errorReporter.reportError(stringMessages.errorDeletingUser(user.getName(), message));
+                            private void deletingUserGroupWithSecurityDTOFailed(UserGroupDTO user, String message) {
+                                errorReporter
+                                        .reportError(stringMessages.errorDeletingUserGroup(user.getName(), message));
                             }
                         });
             }
@@ -96,8 +94,7 @@ public class UserGroupTableWrapper extends
 
         final EditOwnershipDialog.DialogConfig<UserGroupDTO> configOwnership = EditOwnershipDialog.create(
                 userService.getUserManagementService(), type, idFactory,
-                user -> refreshUserList((Callback<Iterable<UserGroupDTO>, Throwable>) null),
-                stringMessages);
+                user -> refreshUserList((Callback<Iterable<UserGroupDTO>, Throwable>) null), stringMessages);
 
         final EditACLDialog.DialogConfig<UserGroupDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, idFactory, user -> user.getAccessControlList(),
@@ -126,6 +123,7 @@ public class UserGroupTableWrapper extends
         mainPanel.insert(filterField, 0);
         table.addColumnSortHandler(userColumnListHandler);
         table.addColumn(UserGroupWithSecurityDTONameColumn, getStringMessages().groupName());
+        SecuredDTOOwnerColumn.configureOwnerColumns(table, userColumnListHandler, stringMessages);
         table.addColumn(actionColumn, stringMessages.actions());
         table.ensureDebugId("UserGroupWithSecurityDTOTable");
     }

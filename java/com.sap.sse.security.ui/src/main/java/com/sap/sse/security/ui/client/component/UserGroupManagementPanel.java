@@ -86,7 +86,7 @@ public class UserGroupManagementPanel extends DockPanel {
 
         // User Group Table
         userGroupTableWrapper = new UserGroupTableWrapper(userService, additionalPermissions, stringMessages,
-                errorReporter, /* enablePager */ true, tableResources);
+                errorReporter, /* enablePager */ true, tableResources, () -> updateUserGroupsAndUsers());
 
         ScrollPanel scrollPanel = new ScrollPanel(userGroupTableWrapper.asWidget());
         LabeledAbstractFilterablePanel<UserGroupDTO> usergroupfilterBox = userGroupTableWrapper
