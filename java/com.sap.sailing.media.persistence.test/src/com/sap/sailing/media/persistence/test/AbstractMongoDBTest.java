@@ -14,8 +14,8 @@ import com.sap.sse.mongodb.MongoDBConfiguration;
 import com.sap.sse.mongodb.MongoDBService;
 
 public abstract class AbstractMongoDBTest {
-    protected Mongo mongo;
-    protected DB db;
+    protected final Mongo mongo;
+    protected final DB db;
     private final MongoDBConfiguration dbConfiguration;
     private MongoDBService service;
     
