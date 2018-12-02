@@ -80,7 +80,7 @@
         <module>com.sap.sse</module>
         <module>com.sap.sse.test</module>
         <module>com.sap.sse.jersey.jaxbdependencyfragment</module>
-        <module>com.sap.sse.routeconverterjava11extension</module>
+        <module>com.sap.sailing.routeconverterjava11extension</module>
         <module>com.sap.sse.mail</module>
         <module>com.sap.sse.mail.replication.test</module>
         <module>com.sap.sse.mail.replication.testsupport</module>
