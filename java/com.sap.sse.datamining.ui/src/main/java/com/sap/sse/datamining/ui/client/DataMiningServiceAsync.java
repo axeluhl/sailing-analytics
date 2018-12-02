@@ -57,19 +57,19 @@ public interface DataMiningServiceAsync {
             String localeInfoName, AsyncCallback<QueryResultDTO<HashSet<Object>>> callback);
 
     <ResultType extends Serializable> void runQuery(DataMiningSession session,
-            StatisticQueryDefinitionDTO queryDefinition, AsyncCallback<QueryResultDTO<ResultType>> callback);
+            ModifiableStatisticQueryDefinitionDTO queryDefinition, AsyncCallback<QueryResultDTO<ResultType>> callback);
 
     void getPredefinedQueryIdentifiers(AsyncCallback<HashSet<PredefinedQueryIdentifier>> callback);
     
     void getPredefinedQueryDefinition(PredefinedQueryIdentifier identifier, String localeInfoName,
-            AsyncCallback<StatisticQueryDefinitionDTO> callback);
+            AsyncCallback<ModifiableStatisticQueryDefinitionDTO> callback);
 
     <ResultType extends Serializable> void runPredefinedQuery(DataMiningSession session,
             PredefinedQueryIdentifier identifier, String localeInfoName,
             AsyncCallback<QueryResultDTO<ResultType>> callback);
     
-    void localize(StatisticQueryDefinitionDTO queryDefinition, String localeInfoName,
-            AsyncCallback<StatisticQueryDefinitionDTO> callback);
+    void localize(ModifiableStatisticQueryDefinitionDTO queryDefinition, String localeInfoName,
+            AsyncCallback<ModifiableStatisticQueryDefinitionDTO> callback);
 
     /**
      * This method does nothing, but is needed to ensure, that some classes for the data mining (like
@@ -79,14 +79,15 @@ public interface DataMiningServiceAsync {
     void pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy(AsyncCallback<SerializationDummy> callback);
 
     /** Retrieves the {@link StoredDataMiningQueryDTO}s from the back end. */
-    void retrieveStoredQueries(AsyncCallback<ArrayList<StoredDataMiningQueryDTO>> callback);
+    void retrieveStoredQueries(AsyncCallback<ArrayList<StoredDataMiningQueryDTOImpl>> callback);
 
     /** Updates or creates a {@link StoredDataMiningQueryDTO} in the back end. */
-    void updateOrCreateStoredQuery(StoredDataMiningQueryDTO query, AsyncCallback<StoredDataMiningQueryDTO> callback);
+    void updateOrCreateStoredQuery(StoredDataMiningQueryDTOImpl query,
+            AsyncCallback<StoredDataMiningQueryDTOImpl> callback);
 
     /** Removes the {@link StoredDataMiningQueryDTO} if it exists from the back end. */
-    void removeStoredQuery(StoredDataMiningQueryDTO query, AsyncCallback<StoredDataMiningQueryDTO> callback);
+    void removeStoredQuery(StoredDataMiningQueryDTOImpl query, AsyncCallback<StoredDataMiningQueryDTOImpl> callback);
 
     /** Gets the {@link StatisticQueryDefinitionDTO} from the serialized String. */
-    void getDeserializedQuery(String serializedQuery, AsyncCallback<StatisticQueryDefinitionDTO> callback);
+    void getDeserializedQuery(String serializedQuery, AsyncCallback<ModifiableStatisticQueryDefinitionDTO> callback);
 }
