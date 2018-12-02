@@ -12,8 +12,6 @@ Import-Package: com.sap.sailing.domain.common,
  com.sap.sailing.server,
  com.sap.sailing.server.impl,
  com.sap.sailing.xrr.schema,
- com.sun.istack;version="3.0.7",
- javax.xml.bind,
  org.osgi.framework;version="1.5.0"
 Fragment-Host: com.sap.sailing.yachtscoring.resultimport
 Require-Bundle: org.junit;bundle-version="4.8.2",
