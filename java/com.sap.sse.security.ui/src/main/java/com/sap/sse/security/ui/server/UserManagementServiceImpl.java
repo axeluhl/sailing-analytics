@@ -194,8 +194,11 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public AccessControlListAnnotationDTO getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject) {
+        // skip permission check for ACL linked to null object since it is public anyway
+        if (idOfAccessControlledObject != null) {
         SecurityUtils.getSubject()
                 .checkPermission(idOfAccessControlledObject.getStringPermission(DefaultActions.CHANGE_ACL));
+        }
         return securityDTOFactory.createAccessControlListAnnotationDTO(getSecurityService().getAccessControlList(idOfAccessControlledObject));
     }
 
