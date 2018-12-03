@@ -10,5 +10,11 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.sun.istack,
  com.sun.istack.localization,
  com.sun.istack.logging,
+ javax.xml,
  javax.xml.bind,
- javax.xml.bind.annotation
+ javax.xml.bind.annotation,
+ javax.xml.bind.annotation.adapters,
+ javax.xml.bind.attachment,
+ javax.xml.bind.helpers,
+ javax.xml.bind.util,
+ javax.xml.datatype

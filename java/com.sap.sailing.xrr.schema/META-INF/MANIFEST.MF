@@ -9,6 +9,7 @@ Export-Package: com.sap.sailing.xrr.schema
 Import-Package: com.sap.sailing.server,
  com.sap.sailing.server.impl,
  com.sap.sailing.server.operationaltransformation,
+ javax.xml.bind,
  org.json.simple,
  org.json.simple.parser,
  org.osgi.framework;version="1.6.0"
