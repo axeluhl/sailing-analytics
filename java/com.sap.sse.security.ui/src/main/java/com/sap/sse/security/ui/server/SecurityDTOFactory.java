@@ -282,10 +282,14 @@ public class SecurityDTOFactory {
     public AccessControlListDTO pruneAccessControlListForUser(AccessControlListDTO acl, StrippedUserDTO filterForUser,
             Iterable<StrippedUserGroupDTO> allUserGroups) {
         final AccessControlListDTO result;
+        // add user groups of filterForUser user
         final Collection<StrippedUserGroupDTO> userGroups = Util.createSet(filterForUser.getUserGroups());
+        // add user groups of alluser
         if (allUserGroups != null) {
             userGroups.addAll(Util.createSet(allUserGroups));
         }
+        // add null user group
+        userGroups.add(null);
 
         if (acl != null) {
             final Map<StrippedUserGroupDTO, Set<String>> actionsByUserGroup = new HashMap<>();
