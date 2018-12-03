@@ -26,7 +26,6 @@ import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
-import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -57,10 +56,10 @@ public class UserGroupTableWrapper extends
             }
         }, tableResources);
         this.userService = userService;
-        ListHandler<UserGroupDTO> userColumnListHandler = getColumnSortHandler();
+        final ListHandler<UserGroupDTO> userColumnListHandler = getColumnSortHandler();
 
         // users table
-        TextColumn<UserGroupDTO> UserGroupWithSecurityDTONameColumn = new AbstractSortableTextColumn<UserGroupDTO>(
+        final TextColumn<UserGroupDTO> UserGroupWithSecurityDTONameColumn = new AbstractSortableTextColumn<UserGroupDTO>(
                 UserGroupDTO -> UserGroupDTO.getName(), userColumnListHandler);
 
         final HasPermissions type = SecuredSecurityTypes.USER_GROUP;
@@ -69,7 +68,7 @@ public class UserGroupTableWrapper extends
                 new DefaultActionsImagesBarCell(stringMessages), userService, type, idFactory);
         actionColumn.addAction(ACTION_DELETE, DELETE, userGroupDTO -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveUserGroup(userGroupDTO.getName()))) {
-                getUserManagementService().deleteUserGroup(userGroupDTO.getId().toString(),
+                userService.getUserManagementService().deleteUserGroup(userGroupDTO.getId().toString(),
                         new AsyncCallback<SuccessInfo>() {
                             @Override
                             public void onFailure(Throwable caught) {
@@ -101,6 +100,7 @@ public class UserGroupTableWrapper extends
         final EditACLDialog.DialogConfig<UserGroupDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, idFactory, user -> user.getAccessControlList(),
                 stringMessages);
+
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_OWNERSHIP, DefaultActions.CHANGE_OWNERSHIP,
                 configOwnership::openDialog);
         actionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
@@ -130,16 +130,8 @@ public class UserGroupTableWrapper extends
         table.ensureDebugId("UserGroupWithSecurityDTOTable");
     }
 
-    public Iterable<UserGroupDTO> getAllUsers() {
-        return filterField.getAll();
-    }
-
     public LabeledAbstractFilterablePanel<UserGroupDTO> getFilterField() {
         return filterField;
-    }
-
-    public void refreshUserGroups(Iterable<UserGroupDTO> UserGroupWithSecurityDTOs) {
-        getFilteredUserGroups(UserGroupWithSecurityDTOs);
     }
 
     /**
@@ -159,21 +151,12 @@ public class UserGroupTableWrapper extends
 
             @Override
             public void onSuccess(Collection<UserGroupDTO> result) {
-                getFilteredUserGroups(result);
-                refreshUserGroups(result);
+                filterField.updateAll(result);
                 if (callback != null) {
                     callback.onSuccess(result);
                 }
             }
         };
-        getUserManagementService().getUserGroups(myCallback);
-    }
-
-    private void getFilteredUserGroups(Iterable<UserGroupDTO> result) {
-        filterField.updateAll(result);
-    }
-
-    private UserManagementServiceAsync getUserManagementService() {
-        return userService.getUserManagementService();
+        userService.getUserManagementService().getUserGroups(myCallback);
     }
 }

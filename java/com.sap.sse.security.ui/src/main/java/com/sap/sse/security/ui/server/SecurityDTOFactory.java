@@ -192,6 +192,15 @@ public class SecurityDTOFactory {
         return result;
     }
     
+    public Iterable<StrippedUserGroupDTO> createStrippedUserGroupDTOFromUserGroups(Iterable<UserGroup> userGroups,
+            Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGrou) {
+        Collection<StrippedUserGroupDTO> result = new ArrayList<>();
+        for (UserGroup userGroup : userGroups) {
+            result.add(createStrippedUserGroupDTOFromUserGroup(userGroup, fromOriginalToStrippedDownUserGrou));
+        }
+        return result;
+    }
+
     public StrippedUserGroupDTO createStrippedUserGroupDTOFromUserGroup(UserGroup userGroup,
             Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGroup) {
         final StrippedUserGroupDTO result;
@@ -270,9 +279,17 @@ public class SecurityDTOFactory {
      * @param fromOriginalToStrippedDownUser 
      * @param fromOriginalToStrippedDownUserGroup 
      */
-    public AccessControlListDTO pruneAccessControlListForUser(AccessControlListDTO acl, StrippedUserDTO filterForUser) {
+    public AccessControlListDTO pruneAccessControlListForUser(AccessControlListDTO acl, StrippedUserDTO filterForUser,
+            Iterable<StrippedUserGroupDTO> allUserGroups) {
         final AccessControlListDTO result;
+        // add user groups of filterForUser user
         final Collection<StrippedUserGroupDTO> userGroups = Util.createSet(filterForUser.getUserGroups());
+        // add user groups of alluser
+        if (allUserGroups != null) {
+            userGroups.addAll(Util.createSet(allUserGroups));
+        }
+        // add null user group
+        userGroups.add(null);
 
         if (acl != null) {
             final Map<StrippedUserGroupDTO, Set<String>> actionsByUserGroup = new HashMap<>();

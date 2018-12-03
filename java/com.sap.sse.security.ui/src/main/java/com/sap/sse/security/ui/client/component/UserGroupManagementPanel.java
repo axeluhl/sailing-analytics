@@ -1,7 +1,5 @@
 package com.sap.sse.security.ui.client.component;
 
-import java.util.Collection;
-
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
@@ -33,12 +31,10 @@ public class UserGroupManagementPanel extends DockPanel {
 
     private final UserGroupTableWrapper userGroupTableWrapper;
 
-    private final UserManagementServiceAsync userManagementService;
-
     public UserGroupManagementPanel(final UserService userService, final StringMessages stringMessages,
             Iterable<HasPermissions> additionalPermissions, ErrorReporter errorReporter,
             CellTableWithCheckboxResources tableResources) {
-        userManagementService = userService.getUserManagementService();
+        final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
         final VerticalPanel west = new VerticalPanel();
 
         // create button bar
@@ -133,18 +129,7 @@ public class UserGroupManagementPanel extends DockPanel {
 
     /** Updates the UserGroups. */
     public void updateUserGroups() {
-        userManagementService.getUserGroups(new AsyncCallback<Collection<UserGroupDTO>>() {
-
-            @Override
-            public void onFailure(Throwable caught) {
-                Window.alert(caught.getMessage());
-            }
-
-            @Override
-            public void onSuccess(Collection<UserGroupDTO> result) {
-                userGroupTableWrapper.refreshUserGroups(result);
-            }
-        });
+        userGroupTableWrapper.refreshUserList(null);
         userGroupListDataProvider.updateDisplays();
         userGroupDetailPanel.updateLists();
     }
