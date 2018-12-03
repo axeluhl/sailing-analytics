@@ -25,6 +25,8 @@ public abstract class SecurityDTOUtil {
     private SecurityDTOUtil() {
     }
 
+    private static Iterable<StrippedUserGroupDTO> allUserGroups;
+
     /**
      * Adds {@link AccessControlList access control list} and {@link Ownership ownership} information for the given
      * {@link QualifiedObjectIdentifier qualified object identifier} to the provided {@link NamedSecuredObjectDTO
@@ -107,16 +109,28 @@ public abstract class SecurityDTOUtil {
         } else {
             User user = securityService.getCurrentUser();
             if (user != null) {
-                // TODO also prune for all user
                 StrippedUserDTO userDTO = new SecurityDTOFactory().createStrippedUserFromUser(user, securityService,
                         fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
+                final Iterable<StrippedUserGroupDTO> allUserGroups2 = getAlluserGroups(securityService,
+                        securityDTOFactory);
                 securedObject.setAccessControlList(
-                        securityDTOFactory.pruneAccessControlListForUser(accessControlListDTO, userDTO));
+                        securityDTOFactory.pruneAccessControlListForUser(accessControlListDTO, userDTO,
+                                allUserGroups2));
             }
         }
         final OwnershipAnnotation ownership = securityService.getOwnership(objectId);
         securedObject.setOwnership(
                 securityDTOFactory.createOwnershipDTO(ownership == null ? null : ownership.getAnnotation(),
                         fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
+    }
+
+    /** Get groups for the user alluser. */
+    private static Iterable<StrippedUserGroupDTO> getAlluserGroups(SecurityService securityService,
+            SecurityDTOFactory securityDTOFactory) {
+        if (allUserGroups == null) {
+            allUserGroups = securityDTOFactory.createStrippedUserGroupDTOFromUserGroups(
+                    securityService.getAllUser().getUserGroups(), new HashMap<>());
+        }
+        return allUserGroups;
     }
 }
