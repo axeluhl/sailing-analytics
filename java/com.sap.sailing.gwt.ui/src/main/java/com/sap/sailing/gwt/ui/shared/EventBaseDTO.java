@@ -12,10 +12,9 @@ import com.sap.sse.common.media.ImageSize;
 import com.sap.sse.common.media.MediaTagConstants;
 import com.sap.sse.gwt.client.media.ImageDTO;
 import com.sap.sse.gwt.client.media.VideoDTO;
-import com.sap.sse.security.shared.dto.NamedSecuredObjectDTO;
-import com.sap.sse.security.shared.dto.SecuredDTO;
+import com.sap.sse.security.shared.dto.NamedDTO;
 
-public class EventBaseDTO extends NamedSecuredObjectDTO implements IsSerializable, SecuredDTO {
+public class EventBaseDTO extends NamedDTO implements IsSerializable {
     private static final long serialVersionUID = 818666323178097939L;
 
     public VenueDTO venue;
