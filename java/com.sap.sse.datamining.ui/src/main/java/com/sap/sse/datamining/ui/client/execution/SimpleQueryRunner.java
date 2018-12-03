@@ -11,6 +11,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Util;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
+import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.datamining.ui.client.AbstractDataMiningComponent;
 import com.sap.sse.datamining.ui.client.CompositeResultsPresenter;
@@ -92,7 +93,7 @@ public class SimpleQueryRunner extends AbstractDataMiningComponent<QueryRunnerSe
         if (errorMessages == null || !errorMessages.iterator().hasNext()) {
             counter.increase();
             resultsPresenter.showBusyIndicator(presenterId);
-            dataMiningService.runQuery(session, queryDefinition,
+            dataMiningService.runQuery(session, (ModifiableStatisticQueryDefinitionDTO) queryDefinition,
                     new ManagedDataMiningQueryCallback<Serializable>(counter) {
                         @Override
                         protected void handleSuccess(QueryResultDTO<Serializable> result) {

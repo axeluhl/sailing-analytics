@@ -30,15 +30,18 @@ public class StoredDataMiningQueryPersisterImpl implements StoredDataMiningQuery
     }
 
     /** @return all {@link StoredDataMiningQueryDTO}s the user has stored in his user store. */
+    @SuppressWarnings("unchecked")
     @Override
-    public ArrayList<StoredDataMiningQueryDTO> retrieveStoredQueries() {
+    public ArrayList<StoredDataMiningQueryDTOImpl> retrieveStoredQueries() {
 
         StoredDataMiningQueryPreferences prefs = getPreferenceForCurrentUser(
                 SailingPreferences.STORED_DATAMINING_QUERY_PREFERENCES);
         if (prefs == null) {
             return new ArrayList<>();
         }
-        return new ArrayList<>(StreamSupport.stream(prefs.getStoredQueries().spliterator(), false).map(this::transform)
+        return new ArrayList<StoredDataMiningQueryDTOImpl>(
+                (Collection<? extends StoredDataMiningQueryDTOImpl>) StreamSupport
+                        .stream(prefs.getStoredQueries().spliterator(), false).map(this::transform)
                 .collect(Collectors.toList()));
     }
 
