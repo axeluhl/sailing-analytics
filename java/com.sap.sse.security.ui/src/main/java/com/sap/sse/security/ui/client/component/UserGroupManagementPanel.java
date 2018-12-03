@@ -15,9 +15,12 @@ import com.sap.sse.gwt.client.ErrorReporter;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
 import com.sap.sse.security.shared.dto.UserGroupDTO;
+import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
+import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
@@ -28,6 +31,7 @@ import com.sap.sse.security.ui.shared.SuccessInfo;
 public class UserGroupManagementPanel extends DockPanel {
     private final UserGroupListDataProvider userGroupListDataProvider;
     private UserGroupDetailPanel userGroupDetailPanel;
+    private Button editACLForNullUsergroup = null;
 
     private final UserGroupTableWrapper userGroupTableWrapper;
 
@@ -79,6 +83,28 @@ public class UserGroupManagementPanel extends DockPanel {
                         .show();
             }
         }));
+        editACLForNullUsergroup = new Button("Edit ACL for Null Usergroup", new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+                userManagementService.getAccessControlList(null, new AsyncCallback<AccessControlListAnnotationDTO>() {
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                        // TODO Auto-generated method stub
+
+                    }
+
+                    @Override
+                    public void onSuccess(AccessControlListAnnotationDTO result) {
+                        final EditACLDialog.DialogConfig<UserGroupDTO> configACL = EditACLDialog.create(
+                                userService.getUserManagementService(), SecuredSecurityTypes.USER_GROUP, null,
+                                user -> result.getAnnotation(), stringMessages);
+                        configACL.openDialog(null);
+                    }
+                });
+            }
+        });
+        buttonPanel.add(editACLForNullUsergroup);
         buttonPanel.add(new Button(stringMessages.removeUserGroup(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
