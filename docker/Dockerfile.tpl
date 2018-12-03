@@ -19,5 +19,6 @@ RUN mkdir -p /docker-java-home/lib/jfr && \
       -O /docker-java-home/lib/jfr/default.jfc && \
     wget https://hg.openjdk.java.net/jdk/jdk11/raw-file/76072a077ee1/src/jdk.jfr/share/conf/jfr/profile.jfc \
       -O /docker-java-home/lib/jfr/profile.jfc
+RUN echo "alias tailf=\"tail -f\"" >>/root/.bashrc
 EXPOSE 8888 14888 8000 7091 6666
 CMD [ "/home/sailing/servers/server/start", "fg" ]
