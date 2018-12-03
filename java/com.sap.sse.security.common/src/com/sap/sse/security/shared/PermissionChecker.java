@@ -8,6 +8,7 @@ import java.util.Set;
 
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.HasPermissions.Action;
+import com.sap.sse.security.shared.impl.Ownership;
 
 /**
  * The {@link PermissionChecker} is an implementation of the permission checking algorithm also described in <a href=
@@ -60,10 +61,11 @@ public class PermissionChecker {
      * @param acl
      *            may be {@code null} in which case no ACL-specific checks are performed
      */
-    public static boolean isPermitted(WildcardPermission permission, SecurityUser user, SecurityUser allUser,
-            Ownership ownership, AccessControlList acl) {
-        return isPermitted(permission, user, user == null ? null : user.getUserGroups(),
-                allUser, allUser == null ? null : allUser.getUserGroups(), ownership, acl);
+    public static <RD extends RoleDefinition, R extends AbstractRole<RD, G, U>, O extends AbstractOwnership<G, U>, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup, A extends SecurityAccessControlList<G>> boolean isPermitted(
+            WildcardPermission permission, U user, U allUser,
+            O ownership, A acl) {
+        return isPermitted(permission, user, (Iterable<G>) (user == null ? null : user.getUserGroups()), allUser,
+                (Iterable<G>) (allUser == null ? null : allUser.getUserGroups()), ownership, acl);
     }
 
     /**
@@ -78,9 +80,10 @@ public class PermissionChecker {
      * @param acl
      *            may be {@code null} in which case no ACL-specific checks are performed
      */
-    public static boolean isPermitted(WildcardPermission permission, SecurityUser user,
-            Iterable<UserGroup> groupsOfWhichUserIsMember, SecurityUser allUser,
-            Iterable<UserGroup> allUserGroupsOfWhichUserIsMember, Ownership ownership, AccessControlList acl) {
+    public static <RD extends RoleDefinition, R extends AbstractRole<RD, G, U>, O extends AbstractOwnership<G, U>, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup, A extends SecurityAccessControlList<G>> boolean isPermitted(
+            WildcardPermission permission, U user,
+            Iterable<G> groupsOfWhichUserIsMember, U allUser,
+            Iterable<G> allUserGroupsOfWhichUserIsMember, O ownership, A acl) {
         List<Set<String>> parts = permission.getParts();
         // permission has at least data object type and action as parts
         // and data object part only has one sub-part
@@ -101,7 +104,7 @@ public class PermissionChecker {
                 }
                 action = (String) parts.get(1).toArray()[0];
             }
-            Set<UserGroup> allGroups = new HashSet<>();
+            Set<G> allGroups = new HashSet<>();
             Util.addAll(groupsOfWhichUserIsMember, allGroups);
             Util.addAll(allUserGroupsOfWhichUserIsMember, allGroups);
             result = acl.hasPermission(action, allGroups);
@@ -123,7 +126,8 @@ public class PermissionChecker {
     /**
      * Checks if a user has a specific role either for a given ownership or globally if no ownership exists.
      */
-    public static boolean ownsUserASpecificRole(SecurityUser user, SecurityUser allUser, Ownership ownership,
+    public static <RD extends RoleDefinition, R extends AbstractRole<RD, G, U>, O extends AbstractOwnership<G, U>, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup, A extends SecurityAccessControlList<G>> boolean ownsUserASpecificRole(
+            U user, U allUser, O ownership,
             String requiredRoleName) {
         assert requiredRoleName != null;
         return ownsUserASpecificRole(user, ownership, requiredRoleName)
@@ -131,11 +135,12 @@ public class PermissionChecker {
 
     }
 
-    private static boolean ownsUserASpecificRole(SecurityUser user, Ownership ownership, String requiredRoleName) {
+    private static <RD extends RoleDefinition, R extends AbstractRole<RD, G, U>, O extends AbstractOwnership<G, U>, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup, A extends SecurityAccessControlList<G>> boolean ownsUserASpecificRole(
+            U user, O ownership, String requiredRoleName) {
         if (user == null) {
             return false;
         }
-        for (Role roleOwnedByUser : user.getRoles()) {
+        for (R roleOwnedByUser : user.getRoles()) {
             if (roleOwnedByUser.getName().equals(requiredRoleName)) {
                 if (roleOwnedByUser.getQualifiedForTenant() == null && roleOwnedByUser.getQualifiedForUser() == null) {
                     // the role is not qualified by a user or group which means it counts for any ownership
@@ -175,8 +180,9 @@ public class PermissionChecker {
      * complete list for the running system. Otherwise we potentially do not check for all required types if the given
      * {@link WildcardPermission} has a wildcard as type part.
      */
-    public static boolean checkMetaPermission(WildcardPermission permission,
-            Iterable<HasPermissions> allPermissionTypes, SecurityUser user, SecurityUser allUser, Ownership ownership) {
+    public static <RD extends RoleDefinition, R extends AbstractRole<RD, G, U>, O extends AbstractOwnership<G, U>, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup, A extends SecurityAccessControlList<G>> boolean checkMetaPermission(
+            WildcardPermission permission,
+            Iterable<HasPermissions> allPermissionTypes, U user, U allUser, O ownership) {
         assert permission != null;
         assert allPermissionTypes != null;
         final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleToPermissions(permission, allPermissionTypes);
@@ -269,8 +275,9 @@ public class PermissionChecker {
      * because only users that have an unqualified version of a permission would pass that permission check. This means
      * we need to check the permission for any possibly existing object ID.
      */
-    public static boolean hasUserAnyPermission(WildcardPermission permission,
-            Iterable<HasPermissions> allPermissionTypes, SecurityUser user, SecurityUser allUser, Ownership ownership) {
+    public static <RD extends RoleDefinition, R extends AbstractRole<RD, G, U>, O extends AbstractOwnership<G, U>, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup, A extends SecurityAccessControlList<G>> boolean hasUserAnyPermission(
+            WildcardPermission permission,
+            Iterable<HasPermissions> allPermissionTypes, U user, U allUser, O ownership) {
         assert permission != null;
         assert allPermissionTypes != null;
         final Set<WildcardPermission> effectivePermissionsToCheck = expandSingleToPermissions(permission, allPermissionTypes);
@@ -286,8 +293,9 @@ public class PermissionChecker {
         return false;
     }
     
-    private static PermissionState checkUserPermissions(WildcardPermission permission, SecurityUser user,
-            Ownership ownership, WildcardPermissionChecker permissionChecker,
+    private static <RD extends RoleDefinition, R extends AbstractRole<RD, G, U>, O extends AbstractOwnership<G, U>, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup, A extends SecurityAccessControlList<G>> PermissionState checkUserPermissions(
+            WildcardPermission permission, U user,
+            O ownership, WildcardPermissionChecker permissionChecker,
             boolean matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven) {
         PermissionState result = PermissionState.NONE;
         // 2. check direct permissions
@@ -301,7 +309,7 @@ public class PermissionChecker {
         }
         // 3. check role permissions
         if (result == PermissionState.NONE && user != null) { // an anonymous user does not have any roles
-            for (Role role : user.getRoles()) {
+            for (R role : user.getRoles()) {
                 if (implies(role, permission, ownership, permissionChecker,
                         matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven)) {
                     result = PermissionState.GRANTED;
@@ -328,7 +336,9 @@ public class PermissionChecker {
      * @param ownership
      *            Ownership of the data object for which the {@code permission} is requested
      */
-   private static boolean implies(Role role, WildcardPermission permission, Ownership ownership, WildcardPermissionChecker permissionChecker,
+    private static <RD extends RoleDefinition, R extends AbstractRole<RD, G, U>, O extends AbstractOwnership<G, U>, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup, A extends SecurityAccessControlList<G>> boolean implies(
+            R role, WildcardPermission permission, O ownership,
+            WildcardPermissionChecker permissionChecker,
            boolean matchOnlyNonQualifiedRolesIfNoOwnershipIsGiven) {
        final boolean roleIsTenantQualified = role.getQualifiedForTenant() != null;
        final boolean roleIsUserQualified = role.getQualifiedForUser() != null;
@@ -363,7 +373,8 @@ public class PermissionChecker {
     /**
      * There are cases where need to check instances of different implementations if they represent the same user.
      */
-    public static boolean isSameUser(SecurityUser user1, SecurityUser user2) {
+    public static <RD extends RoleDefinition, R extends AbstractRole<RD, G, U>, O extends AbstractOwnership<G, U>, U extends SecurityUser<RD, R, G>, G extends SecurityUserGroup, A extends SecurityAccessControlList<G>> boolean isSameUser(
+            U user1, U user2) {
         if (user1 == user2) {
             return true;
         }

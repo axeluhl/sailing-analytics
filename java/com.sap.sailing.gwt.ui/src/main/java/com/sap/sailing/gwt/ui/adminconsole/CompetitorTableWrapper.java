@@ -47,7 +47,7 @@ import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
-import com.sap.sse.security.ui.client.component.SecuredObjectOwnerColumn;
+import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 /**
@@ -334,7 +334,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
                 idFactory, null, stringMessages);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 editOwnerShipDialog::openDialog);
-
+        
         final EditACLDialog.DialogConfig<CompetitorDTO> configACL = EditACLDialog
                 .create(userService.getUserManagementService(), type, idFactory, null, stringMessages);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
@@ -351,7 +351,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         table.addColumn(competitorEMailColumn, getStringMessages().email());
         table.addColumn(competitorSearchTagColumn, getStringMessages().searchTag());
         table.addColumn(competitorIdColumn, getStringMessages().id());
-        SecuredObjectOwnerColumn.configureOwnerColumns(table, getColumnSortHandler(), stringMessages);
+        SecuredDTOOwnerColumn.configureOwnerColumns(table, getColumnSortHandler(), stringMessages);
         table.addColumn(competitorActionColumn, getStringMessages().actions());
         table.addColumn(sailIdColumn, getStringMessages().sailNumber());
         table.addColumn(boatClassColumn, getStringMessages().boatClass());

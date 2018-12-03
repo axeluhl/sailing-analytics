@@ -13,6 +13,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContext;
 import com.sap.sse.security.ui.authentication.app.AuthenticationContextImpl;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
@@ -21,7 +22,6 @@ import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.client.WithSecurity;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * Default implementation of {@link AuthenticationManager} interface, which delegates to the respective methods of 

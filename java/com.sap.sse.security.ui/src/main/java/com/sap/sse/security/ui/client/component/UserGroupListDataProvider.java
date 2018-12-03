@@ -14,10 +14,10 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.view.client.AbstractDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
-import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 
-public class UserGroupListDataProvider extends AbstractDataProvider<UserGroup> {
+public class UserGroupListDataProvider extends AbstractDataProvider<UserGroupDTO> {
     private UserManagementServiceAsync userManagementService;
     private TextBox filterBox;
     
@@ -47,27 +47,27 @@ public class UserGroupListDataProvider extends AbstractDataProvider<UserGroup> {
     }
    
     @Override
-    protected void onRangeChanged(final HasData<UserGroup> display) {
+    protected void onRangeChanged(final HasData<UserGroupDTO> display) {
         final Range range = display.getVisibleRange();
-        userManagementService.getUserGroups(new AsyncCallback<Collection<UserGroup>>() {
+        userManagementService.getUserGroups(new AsyncCallback<Collection<UserGroupDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());
             }
    
             @Override
-            public void onSuccess(Collection<UserGroup> result) {
-                List<UserGroup> resultList = new ArrayList<>();
-                for (UserGroup userGroup : result) {
+            public void onSuccess(Collection<UserGroupDTO> result) {
+                List<UserGroupDTO> resultList = new ArrayList<>();
+                for (UserGroupDTO userGroup : result) {
                     if (userGroup.getName().contains(filterBox.getText())) {
                         resultList.add(userGroup);
                     }
                 }
-                List<UserGroup> show = new ArrayList<>();
+                List<UserGroupDTO> show = new ArrayList<>();
                 int start = range.getStart();
                 int end = range.getStart() + range.getLength();
                 for (int i = start; show.size() < end && i < resultList.size(); i++) {
-                    final UserGroup e = resultList.get(i);
+                    final UserGroupDTO e = resultList.get(i);
                     show.add(e);
                 }
                 updateRowData(start, show);
@@ -80,7 +80,7 @@ public class UserGroupListDataProvider extends AbstractDataProvider<UserGroup> {
     }
    
     public void updateDisplays() {
-        for (HasData<UserGroup> hd : getDataDisplays()) {
+        for (HasData<UserGroupDTO> hd : getDataDisplays()) {
             onRangeChanged(hd);
         }
     }

@@ -2,11 +2,11 @@ package com.sap.sse.security.ui.authentication.app;
 
 import java.util.ArrayList;
 
-import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.dto.AccountDTO;
+import com.sap.sse.security.shared.dto.RoleDTO;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
-import com.sap.sse.security.ui.shared.AccountDTO;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * Default implementation of {@link AuthenticationContext}.
@@ -15,7 +15,8 @@ public class AuthenticationContextImpl implements AuthenticationContext {
 
     private final UserDTO currentUser;
     private final static UserDTO ANONYMOUS = new UserDTO("Anonymous", "", "", "", null, false, new ArrayList<AccountDTO>(),
-            new ArrayList<Role>(), /* default tenant */ null, new ArrayList<WildcardPermission>(), /* groups */ null);
+            new ArrayList<RoleDTO>(), /* default tenant */ null, new ArrayList<WildcardPermission>(),
+            /* groups */ null);
     private final UserService userService;
 
     /**

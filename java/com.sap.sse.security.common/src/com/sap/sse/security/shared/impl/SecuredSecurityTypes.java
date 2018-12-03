@@ -6,8 +6,6 @@ import java.util.Set;
 
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.User;
-import com.sap.sse.security.shared.UserGroup;
 
 /**
  * The basic types of logical objects provided by the security bundle that themselves have permissions governing how
@@ -45,7 +43,7 @@ public class SecuredSecurityTypes extends HasPermissionsImpl {
     public static final HasPermissions ROLE_DEFINITION = new SecuredSecurityTypes("ROLE_DEFINITION");
     
     /**
-     * type-relative identifier is the {@link UserGroup#getId() group ID's} string representation
+     * type-relative identifier is the {@link UserGroupImpl#getId() group ID's} string representation
      */
     public static final HasPermissions USER_GROUP = new SecuredSecurityTypes("USER_GROUP");
 

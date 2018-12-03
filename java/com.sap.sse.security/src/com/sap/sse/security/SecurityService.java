@@ -18,22 +18,21 @@ import com.sap.sse.common.mail.MailException;
 import com.sap.sse.replication.impl.ReplicableWithObjectInputStream;
 import com.sap.sse.security.impl.ReplicableSecurityService;
 import com.sap.sse.security.operations.SecurityOperation;
-import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.HasPermissions;
-import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.SocialUserAccount;
-import com.sap.sse.security.shared.User;
-import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
+import com.sap.sse.security.shared.impl.AccessControlList;
+import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.Role;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 
 /**
  * A service interface for security management. Intended to be used as an OSGi service that can be registered, e.g., by
@@ -75,7 +74,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      */
     SecurityService setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String displayNameOfAccessControlledObject);
 
-    AccessControlList updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, Map<UserGroup, Set<String>> permissionMap);
+    AccessControlList updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
+            Map<UserGroup, Set<String>> permissionMap);
 
     AccessControlList overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
             Map<UserGroup, Set<String>> permissionMap);
@@ -83,12 +83,14 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     /**
      * @param name The name of the user group to add
      */
-    AccessControlList addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup, String action);
+    AccessControlList addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup,
+            String action);
 
     /**
      * @param name The name of the user group to remove
-     */
-    AccessControlList removeFromAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup group, String action);
+     */ 
+    AccessControlList removeFromAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup group,
+            String action);
 
     void deleteAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject);
 
@@ -123,13 +125,13 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     UserGroup getUserGroupByName(String name);
     
-    Iterable<UserGroup> getUserGroupsOfUser(SecurityUser user);
+    Iterable<UserGroup> getUserGroupsOfUser(User user);
 
     UserGroup createUserGroup(UUID id, String name) throws UserGroupManagementException;
 
-    void addUserToUserGroup(UserGroup group, SecurityUser user);
+    void addUserToUserGroup(UserGroup group, User user);
     
-    void removeUserFromUserGroup(UserGroup group, SecurityUser user);
+    void removeUserFromUserGroup(UserGroup group, User user);
 
     void deleteUserGroup(UserGroup userGroup) throws UserGroupManagementException;
 
@@ -137,7 +139,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     User getUserByName(String username);
 
-    SecurityUser getUserByEmail(String email);
+    User getUserByEmail(String email);
 
     User getCurrentUser();
 
@@ -155,7 +157,7 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     /**
      * @param validationBaseURL if <code>null</code>, no validation will be attempted
      */
-    UserImpl createSimpleUser(String username, String email, String password, String fullName, String company,
+    User createSimpleUser(String username, String email, String password, String fullName, String company,
             Locale locale, String validationBaseURL)
             throws UserManagementException, MailException, UserGroupManagementException;
 
@@ -165,7 +167,8 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     
     void updateUserProperties(String username, String fullName, String company, Locale locale) throws UserManagementException;
 
-    SecurityUser createSocialUser(String username, SocialUserAccount socialUserAccount) throws UserManagementException, UserGroupManagementException;
+    User createSocialUser(String username, SocialUserAccount socialUserAccount)
+            throws UserManagementException, UserGroupManagementException;
 
     void deleteUser(String username) throws UserManagementException;
 
@@ -192,11 +195,11 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     RoleDefinition getRoleDefinition(UUID idOfRoleDefinition);
     
-    void addRoleForUser(SecurityUser user, Role role);
+    void addRoleForUser(User user, Role role);
 
     void addRoleForUser(String username, Role role);
 
-    void removeRoleFromUser(SecurityUser user, Role role);
+    void removeRoleFromUser(User user, Role role);
     
     void removeRoleFromUser(String username, Role role);
 
@@ -321,11 +324,11 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
      * 
      * @return <code>null</code> in case the access token is unknown or was deleted / invalidated
      */
-    SecurityUser getUserByAccessToken(String accessToken);
+    User getUserByAccessToken(String accessToken);
 
     void removeAccessToken(String username);
 
-    SecurityUser loginByAccessToken(String accessToken);
+    User loginByAccessToken(String accessToken);
 
     /**
      * Returns the default tenant of the underlying {@link UserStore#getDefaultTenant()}

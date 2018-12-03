@@ -2,8 +2,8 @@ package com.sap.sse.security.shared;
 
 import java.util.Set;
 
+import com.sap.sse.common.Named;
 import com.sap.sse.common.Util.Triple;
-import com.sap.sse.security.shared.impl.OwnershipImpl;
 
 /**
  * For equality and hash code, the {@link RoleDefinition#getId() role definition ID}, the {@link Tenant#getId() tenant ID} of a
@@ -12,12 +12,13 @@ import com.sap.sse.security.shared.impl.OwnershipImpl;
  * 
  * @author Axel Uhl (D043530)
  */
-public class RoleImpl implements Role {
+public abstract class AbstractRole<RD extends RoleDefinition, G extends SecurityUserGroup, U extends SecurityUser<RD, ?, G>>
+        implements Named {
     private static final String QUALIFIER_SEPARATOR = WildcardPermission.PART_DIVIDER_TOKEN;
     private static final long serialVersionUID = 1243342091492822614L;
-    private RoleDefinition roleDefinition;
-    private UserGroup qualifiedForTenant;
-    private SecurityUser qualifiedForUser;
+    private RD roleDefinition;
+    protected G qualifiedForTenant;
+    protected U qualifiedForUser;
     
     public static Triple<String, String, String> getRoleDefinitionNameAndTenantQualifierNameAndUserQualifierName(String roleAsString) {
         final String[] split = roleAsString.split(QUALIFIER_SEPARATOR);
@@ -25,13 +26,14 @@ public class RoleImpl implements Role {
     }
     
     @Deprecated
-    RoleImpl() {} // for GWT serialization only
+    protected AbstractRole() {
+    } // for GWT serialization only
     
-    public RoleImpl(RoleDefinition roleDefinition) {
+    public AbstractRole(RD roleDefinition) {
         this(roleDefinition, /* tenant owner */ null, /* user owner */ null);
     }
     
-    public RoleImpl(RoleDefinition roleDefinition, UserGroup qualifiedForTenant, SecurityUser qualifiedForUser) {
+    public AbstractRole(RD roleDefinition, G qualifiedForTenant, U qualifiedForUser) {
         if (roleDefinition == null) {
             throw new NullPointerException("A role's definition must not be null");
         }
@@ -45,23 +47,19 @@ public class RoleImpl implements Role {
         return roleDefinition.getName();
     }
 
-    @Override
-    public RoleDefinition getRoleDefinition() {
+    public RD getRoleDefinition() {
         return roleDefinition;
     }
 
-    @Override
     public Set<WildcardPermission> getPermissions() {
         return roleDefinition.getPermissions();
     }
 
-    @Override
-    public UserGroup getQualifiedForTenant() {
+    public G getQualifiedForTenant() {
         return qualifiedForTenant;
     }
 
-    @Override
-    public SecurityUser getQualifiedForUser() {
+    public U getQualifiedForUser() {
         return qualifiedForUser;
     }
     
@@ -92,6 +90,7 @@ public class RoleImpl implements Role {
      * possible tenant qualifier as well as the {@link SecurityUser#getName() user name} of a possible user qualifier
      * are compared.
      */
+    @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -100,7 +99,7 @@ public class RoleImpl implements Role {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        RoleImpl other = (RoleImpl) obj;
+        AbstractRole other = (AbstractRole) obj;
         if (qualifiedForTenant == null) {
             if (other.qualifiedForTenant != null)
                 return false;
@@ -117,13 +116,5 @@ public class RoleImpl implements Role {
         } else if (!roleDefinition.equals(other.roleDefinition))
             return false;
         return true;
-    }
-
-    @Override
-    public Ownership getQualificationAsOwnership() {
-        if (qualifiedForTenant != null || qualifiedForUser != null) {
-            return new OwnershipImpl(qualifiedForUser, qualifiedForTenant);
-        }
-        return null;
     }
 }

@@ -20,24 +20,21 @@ import com.sap.sse.security.AbstractCompositeAuthorizingRealm;
 import com.sap.sse.security.AccessControlStore;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.UsernamePasswordRealm;
-import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
-import com.sap.sse.security.shared.RoleImpl;
-import com.sap.sse.security.shared.SecurityUser;
-import com.sap.sse.security.shared.User;
-import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.shared.impl.AccessControlListImpl;
+import com.sap.sse.security.shared.impl.AccessControlList;
 import com.sap.sse.security.shared.impl.HasPermissionsImpl;
-import com.sap.sse.security.shared.impl.OwnershipImpl;
+import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.Role;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
 
@@ -46,7 +43,7 @@ public class PermissionCheckerTest {
     private final WildcardPermission eventReadPermission = SecuredDomainType.EVENT.getPermissionForObjects(DefaultActions.READ, eventId.toString());
     private final UUID userTenantId = UUID.randomUUID();
     private UserGroup adminTenant;
-    private SecurityUser adminUser;
+    private User adminUser;
     private UserGroup userTenant;
     private User user;
     private ArrayList<UserGroup> tenants;
@@ -78,13 +75,13 @@ public class PermissionCheckerTest {
         userTenant = userStore.createUserGroup(userTenantId, "jonas-tenant");
         user = userStore.createUser("jonas", "jonas@dann.io", userTenant);
         userTenant.add(user);
-        ownership = new OwnershipImpl(user, userTenant);
+        ownership = new Ownership(user, userTenant);
         adminTenant.add(adminUser);
-        adminOwnership = new OwnershipImpl(adminUser, adminTenant);
+        adminOwnership = new Ownership(adminUser, adminTenant);
         tenants = new ArrayList<>();
         tenants.add(userTenant);
         tenants.add(adminTenant);
-        acl = new AccessControlListImpl();
+        acl = new AccessControlList();
         Set<WildcardPermission> permissionSet = new HashSet<>();
         permissionSet.add(eventReadPermission);
         globalRoleDefinition = new RoleDefinitionImpl(globalRoleId, "event", permissionSet);
@@ -101,7 +98,8 @@ public class PermissionCheckerTest {
         // being the owning user does not imply any permissions per se
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 ownership, acl));
-        userStore.addRoleForUser(user.getName(), new RoleImpl(AdminRole.getInstance(), /* qualified for userTenant */ null, /* qualified for user */ user));
+        userStore.addRoleForUser(user.getName(),
+                new Role(AdminRole.getInstance(), /* qualified for userTenant */ null, /* qualified for user */ user));
         // having the admin role qualified for objects owned by user should help
         assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 ownership, acl));
@@ -132,7 +130,8 @@ public class PermissionCheckerTest {
         accessControlStore.setOwnership(SecuredDomainType.REGATTA.getQualifiedObjectIdentifier(regattaName), adminUser,
                 /* tenantOwner */ null, regattaName);
         // grant user the admin role, but only for objects owned by the user (leaderboard, but not regatta)
-        userStore.addRoleForUser(user.getName(), new RoleImpl(AdminRole.getInstance(), /* qualifiedForTenant */ null, /* qualifiedForUser */ user));
+        userStore.addRoleForUser(user.getName(),
+                new Role(AdminRole.getInstance(), /* qualifiedForTenant */ null, /* qualifiedForUser */ user));
         assertTrue(realm.isPermitted(principalCollection, leaderboardPermission.toString()));
         assertFalse(realm.isPermitted(principalCollection, regattaPermission.toString()));
         accessControlStore.setOwnership(SecuredDomainType.REGATTA.getQualifiedObjectIdentifier(regattaName), /* userOwner */ null,
@@ -141,7 +140,8 @@ public class PermissionCheckerTest {
         // only adding the group owner doesn't grant permission yet:
         assertFalse(realm.isPermitted(principalCollection, regattaPermission.toString()));
         // but now we assign the admin role to the user, qualified for objects owned by the group owner:
-        userStore.addRoleForUser(user.getName(), new RoleImpl(AdminRole.getInstance(), /* qualifiedForTenant */ userTenant, /* qualifiedForUser */ null));
+        userStore.addRoleForUser(user.getName(),
+                new Role(AdminRole.getInstance(), /* qualifiedForTenant */ userTenant, /* qualifiedForUser */ null));
         assertTrue(realm.isPermitted(principalCollection, leaderboardPermission.toString()));
         // now the user should be granted permission because admin gets *, and the user gets admin on all objects owned by userTenant
         assertTrue(realm.isPermitted(principalCollection, regattaPermission.toString()));
@@ -193,15 +193,15 @@ public class PermissionCheckerTest {
     public void testRole() {
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 adminOwnership, acl));
-        final RoleImpl globalRole = new RoleImpl(globalRoleDefinition);
+        final Role globalRole = new Role(globalRoleDefinition);
         user.addRole(globalRole);
         assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 adminOwnership, acl));
         user.removeRole(globalRole);
-        user.addRole(new RoleImpl(globalRoleDefinition, this.userTenant, /* user qualifier */ null));
+        user.addRole(new Role(globalRoleDefinition, this.userTenant, /* user qualifier */ null));
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 adminOwnership, acl));
-        Ownership testOwnership = new OwnershipImpl(adminUser, userTenant);
+        Ownership testOwnership = new Ownership(adminUser, userTenant);
         assertTrue(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,
                 testOwnership, acl));
         assertFalse(PermissionChecker.isPermitted(eventReadPermission, user, tenants, null, null,

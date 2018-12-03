@@ -3,7 +3,7 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.sap.sse.security.shared.NamedDTO;
+import com.sap.sse.security.shared.dto.NamedDTO;
 
 /**
  * Equality and hash code are based on the course area's {@link #id}.

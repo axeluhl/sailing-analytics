@@ -34,9 +34,12 @@ import com.google.gwt.view.client.SingleSelectionModel;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
-import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.HasPermissions.Action;
-import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.dto.AccessControlListDTO;
+import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
+import com.sap.sse.security.shared.dto.UserGroupDTO;
+import com.sap.sse.security.shared.impl.AccessControlList;
+import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 
@@ -61,12 +64,12 @@ public class AclEditPanel extends Composite {
     private final StringListEditorComposite allowedActionsEditor;
     private final StringListEditorComposite deniedActionsEditor;
 
-    private final SingleSelectionModel<UserGroup> userGroupSingleSelectionModel = new SingleSelectionModel<>();
-    private CellList<UserGroup> userGroupList;
+    private final SingleSelectionModel<StrippedUserGroupDTO> userGroupSingleSelectionModel = new SingleSelectionModel<>();
+    private CellList<StrippedUserGroupDTO> userGroupList;
 
     // denied actions start with '!'
-    private Map<UserGroup, Set<String>> userGroupsWithAllowedActions = new HashMap<>();
-    private Map<UserGroup, Set<String>> userGroupsWithDeniedActions = new HashMap<>();
+    private Map<StrippedUserGroupDTO, Set<String>> userGroupsWithAllowedActions = new HashMap<>();
+    private Map<StrippedUserGroupDTO, Set<String>> userGroupsWithDeniedActions = new HashMap<>();
     private UserManagementServiceAsync userManagementService;
 
     public AclEditPanel(UserManagementServiceAsync userManagementService, Action[] availableActions,
@@ -121,23 +124,23 @@ public class AclEditPanel extends Composite {
         permissionsCellListPanelUi.add(deniedActionsPanel);
     }
 
-    /** Called when the selected {@link UserGroup} changes. */
+    /** Called when the selected {@link UserGroupImpl} changes. */
     private void onUserGroupsChange() {
         removeUserGroupButtonUi.setEnabled(userGroupSingleSelectionModel.getSelectedObject() != null);
     }
 
-    /** @return UI element for selection of {@link UserGroup} elements. */
+    /** @return UI element for selection of {@link UserGroupImpl} elements. */
     private SuggestBox createUserGroupSuggest(UserManagementServiceAsync userManagementService) {
         final MultiWordSuggestOracle userGroupOracle = new MultiWordSuggestOracle();
-        userManagementService.getUserGroups(new AsyncCallback<Collection<UserGroup>>() {
+        userManagementService.getUserGroups(new AsyncCallback<Collection<UserGroupDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
                 Window.alert(caught.getMessage());
             }
 
             @Override
-            public void onSuccess(Collection<UserGroup> result) {
-                final List<String> suggestionList = result.stream().map(UserGroup::getName)
+            public void onSuccess(Collection<UserGroupDTO> result) {
+                final List<String> suggestionList = result.stream().map(UserGroupDTO::getName)
                         .collect(Collectors.toList());
                 userGroupOracle.clear();
                 userGroupOracle.addAll(suggestionList);
@@ -152,11 +155,11 @@ public class AclEditPanel extends Composite {
         return suggestBox;
     }
 
-    /** @return the UI element for visualizing {@link UserGroup} elements. */
-    private CellList<UserGroup> createUserGroupCellList() {
-        final CellList<UserGroup> userGroupCellList = new CellList<>(new AbstractCell<UserGroup>() {
+    /** @return the UI element for visualizing {@link UserGroupImpl} elements. */
+    private CellList<StrippedUserGroupDTO> createUserGroupCellList() {
+        final CellList<StrippedUserGroupDTO> userGroupCellList = new CellList<>(new AbstractCell<StrippedUserGroupDTO>() {
             @Override
-            public void render(Context context, UserGroup value, SafeHtmlBuilder sb) {
+            public void render(Context context, StrippedUserGroupDTO value, SafeHtmlBuilder sb) {
                 if (value != null) {
                     sb.appendEscaped(value.getName());
                 }
@@ -172,7 +175,7 @@ public class AclEditPanel extends Composite {
     /**
      * Updates the {@link #allowedActionsEditor} and {@link #deniedActionsEditor} when the selected UserGroup changed.
      */
-    private void updateActionEditors(UserGroup selectedUserGroup) {
+    private void updateActionEditors(StrippedUserGroupDTO selectedUserGroup) {
         onUserGroupsChange();
         allowedActionsEditor.setValue(userGroupsWithAllowedActions.get(selectedUserGroup), false);
         deniedActionsEditor
@@ -212,12 +215,12 @@ public class AclEditPanel extends Composite {
      * {@link AccessControlList#getActionsByUserGroup()} into {@link #allowedActionsEditor} and
      * {@link #deniedActionsEditor}.
      */
-    public void updateAcl(AccessControlList acl) {
-        final Map<UserGroup, Set<String>> combinedActions = (acl != null)
+    public void updateAcl(AccessControlListDTO acl) {
+        final Map<StrippedUserGroupDTO, Set<String>> combinedActions = (acl != null)
                 ? acl.getActionsByUserGroup() != null ? new HashMap<>(acl.getActionsByUserGroup()) : new HashMap<>()
                 : new HashMap<>();
 
-        for (Map.Entry<UserGroup, Set<String>> combinedAction : combinedActions.entrySet()) {
+        for (Map.Entry<StrippedUserGroupDTO, Set<String>> combinedAction : combinedActions.entrySet()) {
             final Set<String> allowedActions = new HashSet<>();
             final Set<String> deniedActions = new HashSet<>();
             for (String action : combinedAction.getValue()) {
@@ -239,7 +242,7 @@ public class AclEditPanel extends Composite {
      * {@link #allowedActionsEditor} and {@link #deniedActionsEditor}.
      */
     private void refreshUi() {
-        final Set<UserGroup> combinedKeySet = new HashSet<>();
+        final Set<StrippedUserGroupDTO> combinedKeySet = new HashSet<>();
         combinedKeySet.addAll(userGroupsWithAllowedActions.keySet());
         combinedKeySet.addAll(userGroupsWithDeniedActions.keySet());
         userGroupList.setRowCount(combinedKeySet.size(), true);
@@ -256,7 +259,7 @@ public class AclEditPanel extends Composite {
         final String userGroupName = suggestUserGroupUi.getValue();
 
         // get UserGroup object corresponding to user group name
-        userManagementService.getUserGroupByName(userGroupName, new AsyncCallback<UserGroup>() {
+        userManagementService.getStrippedUserGroupByName(userGroupName, new AsyncCallback<StrippedUserGroupDTO>() {
             @Override
             public void onFailure(Throwable caught) {
                 Notification.notify(stringMessages.errorMessageUserGroupNameNotFound(userGroupName),
@@ -264,7 +267,7 @@ public class AclEditPanel extends Composite {
             }
 
             @Override
-            public void onSuccess(UserGroup result) {
+            public void onSuccess(StrippedUserGroupDTO result) {
                 if (result == null) {
                     Notification.notify(stringMessages.errorMessageUserGroupNameNotFound(userGroupName),
                             NotificationType.ERROR);
@@ -283,7 +286,7 @@ public class AclEditPanel extends Composite {
 
     /** Called when the user clicks on the 'Remove' button */
     private void onUserGroupRemove(ClickEvent e) {
-        UserGroup selectedObject = userGroupSingleSelectionModel.getSelectedObject();
+        StrippedUserGroupDTO selectedObject = userGroupSingleSelectionModel.getSelectedObject();
         if (selectedObject != null) {
             userGroupsWithAllowedActions.remove(selectedObject);
             userGroupsWithDeniedActions.remove(selectedObject);
@@ -294,9 +297,9 @@ public class AclEditPanel extends Composite {
     }
 
     /** Merges {@link #userGroupsWithAllowedActions} and {@link #userGroupsWithDeniedActions}. */
-    public Map<UserGroup, Set<String>> getUserGroupsWithCombinedActions() {
-        final Map<UserGroup, Set<String>> combinedActions = new HashMap<>(userGroupsWithAllowedActions);
-        for (Map.Entry<UserGroup, Set<String>> actionEntry : userGroupsWithDeniedActions.entrySet()) {
+    public Map<StrippedUserGroupDTO, Set<String>> getUserGroupsWithCombinedActions() {
+        final Map<StrippedUserGroupDTO, Set<String>> combinedActions = new HashMap<>(userGroupsWithAllowedActions);
+        for (Map.Entry<StrippedUserGroupDTO, Set<String>> actionEntry : userGroupsWithDeniedActions.entrySet()) {
             if (combinedActions.containsKey(actionEntry.getKey())) {
                 final Set<String> set = combinedActions.get(actionEntry.getKey());
                 set.addAll(actionEntry.getValue());

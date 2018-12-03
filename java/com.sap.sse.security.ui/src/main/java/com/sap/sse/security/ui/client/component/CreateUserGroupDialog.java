@@ -8,7 +8,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
-import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.CreateUserGroupDialog.UserGroupData;
@@ -36,13 +36,13 @@ public class CreateUserGroupDialog extends DataEntryDialog<UserGroupData> {
         this(stringMessages, stringMessages.createUserGroup(), stringMessages.enterUserGroupName(), userManagementService, null, new DialogCallback<UserGroupData>() {
             @Override
             public void ok(UserGroupData userGroupData) {
-                        userManagementService.createUserGroup(userGroupData.name, new AsyncCallback<UserGroup>() {
+                        userManagementService.createUserGroup(userGroupData.name, new AsyncCallback<UserGroupDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         Window.alert("Error creating tenant.");
                     }
                     @Override
-                    public void onSuccess(UserGroup result) {
+                            public void onSuccess(UserGroupDTO result) {
                         userGroupListDataProvider.updateDisplays();
                     }
                 });
@@ -54,7 +54,7 @@ public class CreateUserGroupDialog extends DataEntryDialog<UserGroupData> {
     }
     
     private CreateUserGroupDialog(final StringMessages stringMessages, final String title, final String message,
-                final UserManagementServiceAsync userManagementService, final UserGroup tenant
+            final UserManagementServiceAsync userManagementService, final UserGroupDTO tenant
                 , final DialogCallback<UserGroupData> callback) {
         super(title, message, stringMessages.ok(), stringMessages.cancel(),
                 new DataEntryDialog.Validator<UserGroupData>() {

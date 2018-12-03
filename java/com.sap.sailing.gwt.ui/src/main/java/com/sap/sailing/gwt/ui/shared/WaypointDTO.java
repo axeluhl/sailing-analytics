@@ -1,7 +1,7 @@
 package com.sap.sailing.gwt.ui.shared;
 
 import com.sap.sailing.domain.common.PassingInstruction;
-import com.sap.sse.security.shared.NamedDTO;
+import com.sap.sse.security.shared.dto.NamedDTO;
 
 /**
  * Equality and hashcode based on object identity

@@ -31,11 +31,14 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
 import com.sap.sse.gwt.client.controls.listedit.StringListEditorComposite;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
+import com.sap.sse.security.shared.AbstractRole;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.Action;
-import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.dto.AccountDTO;
+import com.sap.sse.security.shared.dto.RoleDTO;
+import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.RoleImpl;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
@@ -44,9 +47,6 @@ import com.sap.sse.security.ui.client.component.AbstractUserDialog.UserData;
 import com.sap.sse.security.ui.client.component.ChangePasswordDialog;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.oauth.client.SocialUserDTO;
-import com.sap.sse.security.ui.shared.AccountDTO;
-import com.sap.sse.security.ui.shared.RoleDefinitionDTO;
-import com.sap.sse.security.ui.shared.UserDTO;
 import com.sap.sse.security.ui.shared.UsernamePasswordAccountDTO;
 
 /**
@@ -220,7 +220,7 @@ public class UserEditDialog extends DataEntryDialog<Pair<UserDTO, Iterable<Tripl
         if (rolesEditor != null) {
             final ArrayList<UUID> newRoleDefinitionIds = new ArrayList<>();
             for (String roleName : rolesEditor.getValue()) {
-                final Triple<String, String, String> roleDefinitionNameAndTenantQualifierNameAndUserQualifierName = RoleImpl
+                final Triple<String, String, String> roleDefinitionNameAndTenantQualifierNameAndUserQualifierName = AbstractRole
                         .getRoleDefinitionNameAndTenantQualifierNameAndUserQualifierName(roleName);
                 RoleDefinition roleDefinition = serverRoleDefinitionsByName.get(roleDefinitionNameAndTenantQualifierNameAndUserQualifierName.getA());
                 if (roleDefinition != null) {
@@ -228,7 +228,7 @@ public class UserEditDialog extends DataEntryDialog<Pair<UserDTO, Iterable<Tripl
                 }    
             }
             roles = Util.map(rolesEditor.getValue(), roleName->{
-                final Triple<String, String, String> roleDefinitionNameAndTenantQualifierNameAndUserQualifierName = RoleImpl
+                final Triple<String, String, String> roleDefinitionNameAndTenantQualifierNameAndUserQualifierName = AbstractRole
                         .getRoleDefinitionNameAndTenantQualifierNameAndUserQualifierName(roleName);
                 
                 final String roleNameToAdd = roleDefinitionNameAndTenantQualifierNameAndUserQualifierName.getA();
@@ -236,7 +236,7 @@ public class UserEditDialog extends DataEntryDialog<Pair<UserDTO, Iterable<Tripl
                 final String roleUsernameToAdd = roleDefinitionNameAndTenantQualifierNameAndUserQualifierName.getC();
                 
                 RoleDefinition roleDefinition = null;
-                for (Role role : userToEdit.getRoles()) {
+                for (RoleDTO role : userToEdit.getRoles()) {
                     final String existingRoleName = role.getName();
                     final String existingTenantName = role.getQualifiedForTenant() == null ? null : role.getQualifiedForTenant().getName();
                     final String existingUsername = role.getQualifiedForUser() == null ? null : role.getQualifiedForUser().getName();

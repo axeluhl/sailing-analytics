@@ -27,21 +27,18 @@ import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
-import com.sap.sse.security.shared.RoleImpl;
-import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.SocialUserAccount;
-import com.sap.sse.security.shared.User;
-import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UsernamePasswordAccount;
 import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.shared.impl.AccessControlListImpl;
-import com.sap.sse.security.shared.impl.OwnershipImpl;
+import com.sap.sse.security.shared.impl.AccessControlList;
+import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.QualifiedObjectIdentifierImpl;
-import com.sap.sse.security.shared.impl.SecurityUserImpl;
+import com.sap.sse.security.shared.impl.Role;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.security.userstore.mongodb.DomainObjectFactory;
 import com.sap.sse.security.userstore.mongodb.impl.FieldNames.Tenant;
@@ -85,7 +82,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             }
             permissionMap.put(userGroup, actions);
         }
-        AccessControlListAnnotation result = new AccessControlListAnnotation(new AccessControlListImpl(permissionMap), id, displayName);
+        AccessControlListAnnotation result = new AccessControlListAnnotation(new AccessControlList(permissionMap), id,
+                displayName);
         return result;
     }
     
@@ -109,9 +107,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         final String displayNameOfOwnedObject = (String) ownershipDBObject.get(FieldNames.Ownership.OBJECT_DISPLAY_NAME.name());
         final String userOwnerName = (String) ownershipDBObject.get(FieldNames.Ownership.OWNER_USERNAME.name());
         final UUID tenantOwnerId = (UUID) ownershipDBObject.get(FieldNames.Ownership.TENANT_OWNER_ID.name());
-        final SecurityUser userOwner = userStore.getUserByName(userOwnerName);
+        final User userOwner = userStore.getUserByName(userOwnerName);
         final UserGroup tenantOwner = userStore.getUserGroup(tenantOwnerId);
-        return new OwnershipAnnotation(new OwnershipImpl(userOwner, tenantOwner), idOfOwnedObject, displayNameOfOwnedObject);
+        return new OwnershipAnnotation(new Ownership(userOwner, tenantOwner), idOfOwnedObject, displayNameOfOwnedObject);
     }
     
     @Override
@@ -158,15 +156,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
     private UserGroup loadUserGroupWithProxyUsers(DBObject groupDBObject) {
         final UUID id = (UUID) groupDBObject.get(FieldNames.UserGroup.ID.name());
         final String name = (String) groupDBObject.get(FieldNames.UserGroup.NAME.name());
-        Set<SecurityUser> users = new HashSet<>();
+        Set<User> users = new HashSet<>();
         BasicDBList usersO = (BasicDBList) groupDBObject.get(FieldNames.UserGroup.USERNAMES.name());
         if (usersO != null) {
             for (Object o : usersO) {
-                users.add(new SecurityUserImpl((String) o));
+                users.add(new UserProxy((String) o));
             }
         }
-        UserGroup result = new UserGroupImpl(id, name, users);
-        return result;
+        return new UserGroupImpl(users, id, name);
     }
 
     /**
@@ -206,7 +203,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
             final Set<Role> userRoles = new HashSet<>();
             Util.addAll(user.getRoles(), userRoles); // avoid concurrent modification exception
             for (final Role roleWithUserQualifierProxy : userRoles) {
-                final SecurityUser userQualifierProxy = roleWithUserQualifierProxy.getQualifiedForUser();
+                final User userQualifierProxy = roleWithUserQualifierProxy.getQualifiedForUser();
                 if (userQualifierProxy != null) {
                     final User resolvedUserQualifier = users.get(userQualifierProxy.getName());
                     if (resolvedUserQualifier == null) {
@@ -215,7 +212,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                                 " for user "+user.getName());
                     }
                     user.removeRole(roleWithUserQualifierProxy);
-                    user.addRole(new RoleImpl(roleWithUserQualifierProxy.getRoleDefinition(),
+                    user.addRole(new Role(roleWithUserQualifierProxy.getRoleDefinition(),
                             roleWithUserQualifierProxy.getQualifiedForTenant(), resolvedUserQualifier));
                 }
             }
@@ -234,8 +231,9 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
      *         {@link Role#getQualifiedForUser() user qualifier} where only the username is set properly to identify the
      *         user in the calling method where ultimately all users will be known.
      */
-    private UserImpl loadUserWithProxyRoleUserQualifiers(DBObject userDBObject,
-            Map<UUID, RoleDefinition> roleDefinitionsById, UserGroup defaultTenantForRoleMigration, Map<UUID, UserGroup> tenants, UserGroupProvider userGroupProvider) {
+    private User loadUserWithProxyRoleUserQualifiers(DBObject userDBObject,
+            Map<UUID, RoleDefinition> roleDefinitionsById, UserGroup defaultTenantForRoleMigration,
+            Map<UUID, UserGroup> tenants, UserGroupProvider userGroupProvider) {
         final String name = (String) userDBObject.get(FieldNames.User.NAME.name());
         final String email = (String) userDBObject.get(FieldNames.User.EMAIL.name());
         final String fullName = (String) userDBObject.get(FieldNames.User.FULLNAME.name());
@@ -277,7 +275,8 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
                     for (final RoleDefinition roleDefinition : roleDefinitionsById.values()) {
                         if (roleDefinition.getName().equals(o.toString())) {
                             logger.info("Found role "+roleDefinition+" for old role "+o.toString()+" for user "+name);
-                            roles.add(new RoleImpl(roleDefinition, defaultTenantForRoleMigration, /* user qualification */ null));
+                            roles.add(new Role(roleDefinition, defaultTenantForRoleMigration,
+                                    /* user qualification */ null));
                             rolesMigrated = true;
                             break;
                         }
@@ -313,7 +312,7 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         }
         DBObject accountsMap = (DBObject) userDBObject.get(FieldNames.User.ACCOUNTS.name());
         Map<AccountType, Account> accounts = createAccountMapFromdDBObject(accountsMap);
-        UserImpl result = new UserImpl(name, email, fullName, company, locale,
+        User result = new UserImpl(name, email, fullName, company, locale,
                 emailValidated == null ? false : emailValidated, passwordResetSecret, validationSecret, defaultTenant,
                 accounts.values(), userGroupProvider);
         for (final Role role : roles) {
@@ -332,13 +331,14 @@ public class DomainObjectFactoryImpl implements DomainObjectFactory {
         return result;
     }
 
-    private Role loadRoleWithProxyUserQualifier(DBObject rolesO, Map<UUID, RoleDefinition> roleDefinitionsById, Map<UUID, UserGroup> userGroups) {
+    private Role loadRoleWithProxyUserQualifier(DBObject rolesO, Map<UUID, RoleDefinition> roleDefinitionsById,
+            Map<UUID, UserGroup> userGroups) {
         final RoleDefinition roleDefinition = roleDefinitionsById.get(rolesO.get(FieldNames.Role.ID.name()));
         final UUID qualifyingTenantId = (UUID) rolesO.get(FieldNames.Role.QUALIFYING_TENANT_ID.name());
         final UserGroup qualifyingTenant = qualifyingTenantId == null ? null : userGroups.get(qualifyingTenantId);
-        final SecurityUser proxyQualifyingUser = rolesO.get(FieldNames.Role.QUALIFYING_USERNAME.name()) == null ? null
-                : new SecurityUserImpl((String) rolesO.get(FieldNames.Role.QUALIFYING_USERNAME.name()));
-        return new RoleImpl(roleDefinition, qualifyingTenant, proxyQualifyingUser);
+        final User proxyQualifyingUser = rolesO.get(FieldNames.Role.QUALIFYING_USERNAME.name()) == null ? null
+                : new UserProxy((String) rolesO.get(FieldNames.Role.QUALIFYING_USERNAME.name()));
+        return new Role(roleDefinition, qualifyingTenant, proxyQualifyingUser);
     }
 
     private Map<AccountType, Account> createAccountMapFromdDBObject(DBObject accountsMap) {

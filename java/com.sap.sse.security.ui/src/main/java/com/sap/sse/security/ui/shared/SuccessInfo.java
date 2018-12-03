@@ -2,6 +2,7 @@ package com.sap.sse.security.ui.shared;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.sap.sse.common.Util.Pair;
+import com.sap.sse.security.shared.dto.UserDTO;
 
 public class SuccessInfo implements IsSerializable {
 

@@ -1,22 +1,19 @@
 package com.sap.sse.security.shared.impl;
 
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import com.sap.sse.common.Util;
-import com.sap.sse.common.settings.GwtIncompatible;
-import com.sap.sse.security.shared.Role;
+import com.sap.sse.security.shared.AbstractRole;
+import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.SecurityUser;
-import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.SecurityUserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
 
-public class SecurityUserImpl implements SecurityUser {
+public abstract class SecurityUserImpl<RD extends RoleDefinition, R extends AbstractRole<RD, G, ?>, G extends SecurityUserGroup>
+        implements SecurityUser<RD, R, G> {
     private static final long serialVersionUID = -3639860207453072248L;
 
     private String name;
@@ -30,9 +27,9 @@ public class SecurityUserImpl implements SecurityUser {
      * @see #writeObject
      * @see #readResolve
      */
-    private transient Set<Role> roles;
+    private Set<R> roles;
     
-    private List<Role> roleListForSerialization;
+    // private List<R> roleListForSerialization;
     
     private Set<WildcardPermission> permissions;
     
@@ -40,10 +37,10 @@ public class SecurityUserImpl implements SecurityUser {
      * Creates a user with empty permission set and empty role set
      */
     public SecurityUserImpl(String name) {
-        this(name, new HashSet<Role>(), new HashSet<WildcardPermission>());
+        this(name, new HashSet<R>(), new HashSet<WildcardPermission>());
     }
     
-    public SecurityUserImpl(String name, Iterable<Role> roles, Iterable<WildcardPermission> permissions) {
+    public SecurityUserImpl(String name, Iterable<R> roles, Iterable<WildcardPermission> permissions) {
         this.name = name;
         this.roles = new HashSet<>();
         Util.addAll(roles, this.roles);
@@ -53,19 +50,19 @@ public class SecurityUserImpl implements SecurityUser {
         }
     }
     
-    @GwtIncompatible
-    private void writeObject(ObjectOutputStream oos) throws IOException {
-        roleListForSerialization = new ArrayList<>(roles);
-        oos.defaultWriteObject();
-        roleListForSerialization = null;
-    }
-
-    @GwtIncompatible
-    protected Object readResolve() {
-        roles = new HashSet<>(roleListForSerialization);
-        roleListForSerialization = null;
-        return this;
-    }
+    // @GwtIncompatible
+    // private void writeObject(ObjectOutputStream oos) throws IOException {
+    // roleListForSerialization = new ArrayList<>(roles);
+    // oos.defaultWriteObject();
+    // roleListForSerialization = null;
+    // }
+    //
+    // @GwtIncompatible
+    // protected Object readResolve() {
+    // roles = new HashSet<>(roleListForSerialization);
+    // roleListForSerialization = null;
+    // return this;
+    // }
     
     @Override
     public String getName() {
@@ -78,12 +75,12 @@ public class SecurityUserImpl implements SecurityUser {
     }
 
     @Override
-    public Iterable<Role> getRoles() {
+    public Iterable<R> getRoles() {
         return roles;
     }
 
     @Override
-    public boolean hasRole(Role role) {
+    public boolean hasRole(R role) {
         return roles.contains(role);
     }
     
@@ -92,11 +89,11 @@ public class SecurityUserImpl implements SecurityUser {
         return permissions;
     }
     
-    public void addRole(Role role) {
+    public void addRole(R role) {
         roles.add(role);
     }
 
-    public void removeRole(Role role) {
+    public void removeRole(R role) {
         roles.remove(role);
     }
 
@@ -118,7 +115,7 @@ public class SecurityUserImpl implements SecurityUser {
      * therefore returns an empty collection.
      */
     @Override
-    public Iterable<UserGroup> getUserGroups() {
+    public Iterable<G> getUserGroups() {
         return Collections.emptyList();
     }
 }

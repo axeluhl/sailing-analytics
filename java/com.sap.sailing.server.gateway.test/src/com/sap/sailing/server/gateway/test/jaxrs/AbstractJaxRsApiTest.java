@@ -41,10 +41,10 @@ import com.sap.sse.mongodb.MongoDBService;
 import com.sap.sse.security.Action;
 import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
-import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
+import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
 
 public abstract class AbstractJaxRsApiTest {

@@ -69,14 +69,14 @@ import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
-import com.sap.sse.security.ui.client.component.SecuredObjectOwnerColumn;
+import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
 /**
@@ -142,13 +142,13 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         final Button remove = buttonPanel.addRemoveAction(stringMessages.remove(), new Command() {
             @Override
             public void execute() {
-                if (askUserForConfirmation()) {
+                if(askUserForConfirmation()){
                     removeEvents(refreshableEventSelectionModel.getSelectedSet());
                 }
             }
 
             private boolean askUserForConfirmation() {
-                if (refreshableEventSelectionModel.itemIsSelectedButNotVisible(eventTable.getVisibleItems())) {
+                if(refreshableEventSelectionModel.itemIsSelectedButNotVisible(eventTable.getVisibleItems())){
                     final String eventNames = refreshableEventSelectionModel.getSelectedSet().stream()
                             .map(EventDTO::getName).collect(Collectors.joining("\n"));
                     return Window.confirm(stringMessages.doYouReallyWantToRemoveNonVisibleEvents(eventNames));
@@ -328,8 +328,8 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             }
         };
         
-        final SecuredObjectOwnerColumn<EventDTO> groupColumn = SecuredObjectOwnerColumn.getGroupOwnerColumn();
-        final SecuredObjectOwnerColumn<EventDTO> userColumn = SecuredObjectOwnerColumn.getUserOwnerColumn();
+        final SecuredDTOOwnerColumn<EventDTO> groupColumn = SecuredDTOOwnerColumn.getGroupOwnerColumn();
+        final SecuredDTOOwnerColumn<EventDTO> userColumn = SecuredDTOOwnerColumn.getUserOwnerColumn();
 
         final Function<EventDTO, String> idFactory = event -> event.id.toString();
         final AccessControlledActionsColumn<EventDTO, EventConfigImagesBarCell> actionsColumn = new AccessControlledActionsColumn<>(
@@ -404,7 +404,7 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             TextColumn<EventDTO> venueNameColumn, TextColumn<EventDTO> startEndDateColumn,
             TextColumn<EventDTO> isPublicColumn, Column<EventDTO, SafeHtml> courseAreasColumn,
             Column<EventDTO, List<MultipleLinkCell.CellLink>> leaderboardGroupsColumn,
-            SecuredObjectOwnerColumn<EventDTO> groupColumn, SecuredObjectOwnerColumn<EventDTO> userColumn) {
+            SecuredDTOOwnerColumn<EventDTO> groupColumn, SecuredDTOOwnerColumn<EventDTO> userColumn) {
         ListHandler<EventDTO> result = new ListHandler<EventDTO>(eventRecords);
         result.setComparator(eventSelectionCheckboxColumn, eventSelectionCheckboxColumn.getComparator());
         result.setComparator(eventNameColumn, new Comparator<EventDTO>() {

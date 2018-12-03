@@ -25,7 +25,7 @@ import com.sap.sse.common.TimePoint;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.impl.User;
 
 public class TaggingServiceImpl implements TaggingService {
 

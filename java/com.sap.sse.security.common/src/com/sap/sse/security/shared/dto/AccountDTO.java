@@ -1,9 +1,9 @@
-package com.sap.sse.security.ui.shared;
+package com.sap.sse.security.shared.dto;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import java.io.Serializable;
 
-public abstract class AccountDTO implements IsSerializable {
-
+public abstract class AccountDTO implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String accountType;
 
     AccountDTO() {} // for serialization only

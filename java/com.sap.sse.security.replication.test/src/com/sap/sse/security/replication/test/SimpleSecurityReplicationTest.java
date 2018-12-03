@@ -12,10 +12,9 @@ import java.util.Locale;
 import org.junit.Test;
 
 import com.sap.sse.common.mail.MailException;
-import com.sap.sse.security.UserImpl;
-import com.sap.sse.security.shared.User;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
+import com.sap.sse.security.shared.impl.User;
 
 public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTest {
     @Test
@@ -27,7 +26,7 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         final String company = "Ernie's Company";
         final String validationBaseURL = "http://me.to.back.com";
         assertNull(master.getUserByName(username));
-        UserImpl user = master.createSimpleUser(username, email, password, fullName, company, Locale.ENGLISH,
+        User user = master.createSimpleUser(username, email, password, fullName, company, Locale.ENGLISH,
                 validationBaseURL);
         assertNotNull(user);
         assertSame(user, master.getUserByName(username));
@@ -62,7 +61,7 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         final String validationBaseURL = "http://me.to.back.com";
         final String fullName = "Ernie's Full Name";
         final String company = "Ernie's Company";
-        UserImpl user = master.createSimpleUser(username, email, password, fullName, company, Locale.ENGLISH,
+        User user = master.createSimpleUser(username, email, password, fullName, company, Locale.ENGLISH,
                 validationBaseURL);
         user.setFullName(fullName);
         user.setCompany(company);
@@ -113,7 +112,7 @@ public class SimpleSecurityReplicationTest extends AbstractSecurityReplicationTe
         final String password = "BertMyFriend";
         final String validationBaseURL = "http://me.to.back.com/validateemail";
         final String passwordResetBaseURL = "http://me.to.back.com/passwordreset";
-        UserImpl user = master.createSimpleUser(username, email, password,
+        User user = master.createSimpleUser(username, email, password,
                 /* fullName */ null, /* company */ null, Locale.ENGLISH, validationBaseURL);
         master.validateEmail(username, user.getValidationSecret());
         assertTrue(user.isEmailValidated());

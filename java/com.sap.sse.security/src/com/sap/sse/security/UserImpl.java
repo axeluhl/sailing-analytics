@@ -16,14 +16,16 @@ import org.apache.shiro.crypto.hash.Sha256Hash;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.Account.AccountType;
 import com.sap.sse.security.shared.HasPermissions;
-import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.User;
-import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.RoleDefinition;
+import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.shared.impl.SecurityUserImpl;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 
-public class UserImpl extends SecurityUserImpl implements User {
+public class UserImpl extends SecurityUserImpl<RoleDefinition, Role, UserGroup> implements User {
     private static final long serialVersionUID = 1788215575606546042L;
 
     /**

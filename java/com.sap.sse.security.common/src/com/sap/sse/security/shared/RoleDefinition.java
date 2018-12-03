@@ -17,7 +17,7 @@ import com.sap.sse.common.Renamable;
  * During instantiating, a {@link Role} may optionally declare a {@link Tenant} and/or {@link SecurityUser} parameter to
  * qualify the range of objects for which it implies its permissions. With no such qualifications, the role grants its
  * permissions to the user to which the role is assigned for <em>all</em> objects. If a {@link Tenant} and/or
- * {@link SecurityUser} parameter is {@link RoleImpl#RoleImpl(RoleDefinition, Tenant, SecurityUser) declared}, the
+ * {@link SecurityUser} parameter is {@link AbstractRole#RoleImpl(RoleDefinition, Tenant, SecurityUser) declared}, the
  * object's {@link Ownership owning} {@link Ownership#getTenantOwner() tenant} and/or {@link Ownership#getUserOwner()
  * user} owner must match the actual {@link Tenant}/{@link SecurityUser} object(s) used when instantiating the
  * {@link Role} from this {@link RoleDefinition} for the user to obtain the permissions from this role definition. As

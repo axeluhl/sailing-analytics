@@ -7,18 +7,18 @@ import java.util.UUID;
 import com.sap.sse.common.Named;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.security.shared.Account;
-import com.sap.sse.security.shared.Ownership;
-import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.SecurityUser;
-import com.sap.sse.security.shared.User;
-import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.Role;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
+import com.sap.sse.security.shared.impl.UserGroupImpl;
 
 /**
- * Keeps track of all {@link User}, {@link UserGroup} and {@link Role}
+ * Keeps track of all {@link User}, {@link UserGroupImpl} and {@link Role}
  * objects persistently; furthermore, aspects such as user access tokens, preferences and
  * settings are stored durably.<p>
  * 
@@ -57,11 +57,12 @@ public interface UserStore extends UserGroupProvider, Named {
     /**
      * The user with that {@link UserImpl#getEmail() email} or {@code null} if no such user exists
      */
-    SecurityUser getUserByEmail(String email);
+    User getUserByEmail(String email);
     
     User getUserByAccessToken(String accessToken);
 
-    UserImpl createUser(String name, String email, UserGroup defaultTenant, Account... accounts) throws UserManagementException;
+    User createUser(String name, String email, UserGroup defaultTenant, Account... accounts)
+            throws UserManagementException;
 
     void updateUser(User user);
 
@@ -221,7 +222,7 @@ public interface UserStore extends UserGroupProvider, Named {
 
     /**
      * If a valid default tenant name was passed to the constructor, this field will contain a valid
-     * {@link UserGroup} object whose name equals that of the default tenant name. It will have been used
+     * {@link UserGroupImpl} object whose name equals that of the default tenant name. It will have been used
      * during role migration where string-based roles are mapped to a corresponding {@link RoleDefinition}
      * and the users with the original role will obtain a corresponding {@link Role} with this default
      * tenant as the {@link Role#getQualifiedForTenant() tenant qualifier}.

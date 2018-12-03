@@ -12,12 +12,11 @@ import com.sap.sse.common.Named;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
-import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.Action;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.SecuredObject;
-import com.sap.sse.security.shared.impl.AccessControlListImpl;
+import com.sap.sse.security.shared.dto.AccessControlListDTO;
+import com.sap.sse.security.shared.dto.SecuredDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog.AclDialogResult;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -27,13 +26,13 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
     private final AclEditPanel aclEditPanel;
 
     static class AclDialogResult {
-        private final AccessControlList acl;
+        private final AccessControlListDTO acl;
 
-        private AclDialogResult(final AccessControlList acl) {
+        private AclDialogResult(final AccessControlListDTO acl) {
             this.acl = acl;
         }
 
-        public AccessControlList getAcl() {
+        public AccessControlListDTO getAcl() {
             return acl;
         }
     }
@@ -53,7 +52,7 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
                 stringMessages.ok(), stringMessages.cancel(), new Validator(), callback);
         aclEditPanel = new AclEditPanel(userManagementService, availableActions, stringMessages);
         userManagementService.getAccessControlListWithoutPruning(qualifiedObjectIdentifier,
-                new AsyncCallback<AccessControlList>() {
+                new AsyncCallback<AccessControlListDTO>() {
 
                     @Override
                     public void onFailure(Throwable caught) {
@@ -61,7 +60,7 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
                     }
 
                     @Override
-                    public void onSuccess(AccessControlList result) {
+                    public void onSuccess(AccessControlListDTO result) {
                         aclEditPanel.updateAcl(result);
                     }
                 });
@@ -74,7 +73,7 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
 
     @Override
     protected AclDialogResult getResult() {
-        return new AclDialogResult(new AccessControlListImpl(aclEditPanel.getUserGroupsWithCombinedActions()));
+        return new AclDialogResult(new AccessControlListDTO(aclEditPanel.getUserGroupsWithCombinedActions()));
     }
 
     /**
@@ -92,14 +91,14 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
      * @param errorCallback
      *            {@link Consumer callback} to execute when the dialog is confirmed and ownership update fails
      */
-    public static <T extends Named & SecuredObject> DialogConfig<T> create(
+    public static <T extends Named & SecuredDTO> DialogConfig<T> create(
             final UserManagementServiceAsync userManagementService, final HasPermissions type,
             final Function<T, String> typeRelativeIdFactory, final Consumer<T> updateCallback,
             final StringMessages stringMessages) {
         return new DialogConfig<>(userManagementService, type, typeRelativeIdFactory, updateCallback, stringMessages);
     }
 
-    public static class DialogConfig<T extends Named & SecuredObject> {
+    public static class DialogConfig<T extends Named & SecuredDTO> {
         private final UserManagementServiceAsync userManagementService;
         private final Consumer<T> updateCallback;
         private final Function<T, QualifiedObjectIdentifier> identifierFactory;
@@ -140,9 +139,9 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
             public void ok(AclDialogResult aclResult) {
                 final QualifiedObjectIdentifier objectIdentifier = identifierFactory.apply(securedObject);
                 userManagementService.overrideAccessControlList(objectIdentifier, aclResult.getAcl(),
-                        new AsyncCallback<AccessControlList>() {
+                        new AsyncCallback<AccessControlListDTO>() {
                             @Override
-                            public void onSuccess(AccessControlList result) {
+                            public void onSuccess(AccessControlListDTO result) {
                                 securedObject.setAccessControlList(result);
                                 updateCallback.accept(securedObject);
                             }

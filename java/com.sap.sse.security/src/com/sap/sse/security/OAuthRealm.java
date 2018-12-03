@@ -33,13 +33,13 @@ import org.scribe.model.Verb;
 import org.scribe.model.Verifier;
 import org.scribe.oauth.OAuthService;
 
-import com.sap.sse.security.shared.SecurityUser;
 import com.sap.sse.security.shared.SocialUserAccount;
-import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 // GWT has similar class. 
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 
 public class OAuthRealm extends AbstractCompositeAuthorizingRealm {
     private static final Logger logger = Logger.getLogger(OAuthRealm.class.getName());
@@ -181,7 +181,7 @@ public class OAuthRealm extends AbstractCompositeAuthorizingRealm {
         
         String socialname = authProviderName + "*" + socialUser.getProperty(Social.NAME.name());
 
-        SecurityUser user = getUserStore().getUserByName(socialname);
+        User user = getUserStore().getUserByName(socialname);
         if (user == null) {
             try {
                 UserGroup tenant = getUserStore().createUserGroup(UUID.randomUUID(), socialname + "-tenant");

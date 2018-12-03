@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -19,10 +20,10 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
-import com.sap.sse.security.shared.AccessControlList;
-import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
+import com.sap.sse.security.shared.dto.AccessControlListDTO;
+import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.component.EditAccessControlListDialog.AccessControlListData;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
@@ -54,18 +55,20 @@ public class EditAccessControlListDialog extends DataEntryDialog<AccessControlLi
         }
     }
     
+
     public EditAccessControlListDialog(final StringMessages stringMessages, final UserManagementServiceAsync userManagementService, 
-            final AccessControlListListDataProvider aclListDataProvider, AccessControlListAnnotation acl) {
+            final AccessControlListListDataProvider aclListDataProvider, AccessControlListAnnotationDTO acl) {
         this(stringMessages, stringMessages.editAnACL(), acl.getDisplayNameOfAnnotatedObject(), userManagementService, acl, new DialogCallback<AccessControlListData>() {
             @Override
             public void ok(AccessControlListData aclData) {
-                userManagementService.updateAccessControlList(aclData.getAccessControlledObjectId(), aclData.getActionStrings(), new AsyncCallback<AccessControlList>() {
+                        userManagementService.updateAccessControlList(aclData.getAccessControlledObjectId(),
+                                aclData.getActionStrings(), new AsyncCallback<AccessControlListDTO>() {
                     @Override
                     public void onFailure(Throwable caught) {
                         Window.alert(stringMessages.errorEditingACL());
                     }
                     @Override
-                    public void onSuccess(AccessControlList result) {
+                                    public void onSuccess(AccessControlListDTO result) {
                         aclListDataProvider.updateDisplays();
                     }
                 });
@@ -77,7 +80,7 @@ public class EditAccessControlListDialog extends DataEntryDialog<AccessControlLi
     }
     
     private EditAccessControlListDialog(final StringMessages stringMessages, final String title, final String message,
-            final UserManagementServiceAsync userManagementService, final AccessControlListAnnotation acl,
+            final UserManagementServiceAsync userManagementService, final AccessControlListAnnotationDTO acl,
             final DialogCallback<AccessControlListData> callback) {
         super(title, message, stringMessages.ok(), stringMessages.cancel(),
                 new DataEntryDialog.Validator<AccessControlListData>() {
@@ -101,7 +104,7 @@ public class EditAccessControlListDialog extends DataEntryDialog<AccessControlLi
             }
         });
         accessControlledObjectId = acl.getIdOfAnnotatedObject();
-        for (Map.Entry<UserGroup, Set<String>> entry : acl.getAnnotation().getActionsByUserGroup().entrySet()) {
+        for (Entry<StrippedUserGroupDTO, Set<String>> entry : acl.getAnnotation().getActionsByUserGroup().entrySet()) {
             Label label = new Label(entry.getKey().getName());
             labels.add(label);
             String concatenated = "";
@@ -112,6 +115,7 @@ public class EditAccessControlListDialog extends DataEntryDialog<AccessControlLi
             textBoxes.add(textBox);
         }
     }
+
 
     @Override
     protected FocusWidget getInitialFocusWidget() {

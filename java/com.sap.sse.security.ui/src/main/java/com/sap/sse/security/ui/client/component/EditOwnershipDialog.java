@@ -16,16 +16,15 @@ import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.security.shared.HasPermissions;
-import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.SecuredObject;
-import com.sap.sse.security.shared.SecurityUser;
-import com.sap.sse.security.shared.UserGroup;
-import com.sap.sse.security.shared.impl.OwnershipImpl;
+import com.sap.sse.security.shared.dto.OwnershipDTO;
+import com.sap.sse.security.shared.dto.SecuredDTO;
+import com.sap.sse.security.shared.dto.StrippedUserDTO;
+import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.OwnershipDialogResult;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> {
 
@@ -35,17 +34,17 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
     private final TextBox groupnameBox;
     private boolean resolvingUsername;
     private boolean resolvingUserGroupName;
-    private SecurityUser resolvedUser;
-    private UserGroup resolvedUserGroup;
+    private StrippedUserDTO resolvedUser;
+    private StrippedUserGroupDTO resolvedUserGroup;
     
     static class OwnershipDialogResult {
-        private final Ownership ownership;
+        private final OwnershipDTO ownership;
         private final String username;
         private final String userGroupName;
         private final boolean resolvingUsername;
         private final boolean resolvingUserGroupName;
 
-        private OwnershipDialogResult(final Ownership ownership, final String username, final String userGroupName,
+        private OwnershipDialogResult(final OwnershipDTO ownership, final String username, final String userGroupName,
                 final boolean resolvingUsername, final boolean resolvingUserGroupName) {
             this.ownership = ownership;
             this.username = username;
@@ -54,7 +53,7 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
             this.resolvingUserGroupName = resolvingUserGroupName;
         }
 
-        private Ownership getOwnership() {
+        private OwnershipDTO getOwnership() {
             return ownership;
         }
 
@@ -101,7 +100,7 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
         }
     }
     
-    private EditOwnershipDialog(UserManagementServiceAsync userManagementService, Ownership ownership,
+    private EditOwnershipDialog(UserManagementServiceAsync userManagementService, OwnershipDTO ownership,
             StringMessages stringMessages, DialogCallback<OwnershipDialogResult> callback) {
         super(stringMessages.ownership(), stringMessages.editObjectOwnership(), stringMessages.ok(),
                 stringMessages.cancel(), new Validator(stringMessages), callback);
@@ -132,9 +131,9 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
     private void resolveUserGroup() {
         resolvedUserGroup = null;
         resolvingUserGroupName = true;
-        userManagementService.getUserGroupByName(groupnameBox.getText(), new AsyncCallback<UserGroup>() {
+        userManagementService.getStrippedUserGroupByName(groupnameBox.getText(), new AsyncCallback<StrippedUserGroupDTO>() {
             @Override
-            public void onSuccess(UserGroup result) {
+            public void onSuccess(StrippedUserGroupDTO result) {
                 resolvedUserGroup = result;
                 resolvingUserGroupName = false;
                 validateAndUpdate();
@@ -167,7 +166,7 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
 
     @Override
     protected OwnershipDialogResult getResult() {
-        return new OwnershipDialogResult(new OwnershipImpl(resolvedUser, resolvedUserGroup), usernameBox.getText(),
+        return new OwnershipDialogResult(new OwnershipDTO(resolvedUser, resolvedUserGroup), usernameBox.getText(),
                 groupnameBox.getText(), resolvingUsername, resolvingUserGroupName);
     }
 
@@ -186,14 +185,14 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
      * @param errorCallback
      *            {@link Consumer callback} to execute when the dialog is confirmed and ownership update fails
      */
-    public static <T extends Named & SecuredObject> DialogConfig<T> create(
+    public static <T extends Named & SecuredDTO> DialogConfig<T> create(
             final UserManagementServiceAsync userManagementService, final HasPermissions type,
             final Function<T, String> typeRelativeIdFactory, final Consumer<T> updateCallback,
             final StringMessages stringMessages) {
         return new DialogConfig<>(userManagementService, type, typeRelativeIdFactory, updateCallback, stringMessages);
     }
 
-    public static class DialogConfig<T extends Named & SecuredObject> {
+    public static class DialogConfig<T extends Named & SecuredDTO> {
 
         private final UserManagementServiceAsync userManagementService;
         private final Consumer<T> updateCallback;

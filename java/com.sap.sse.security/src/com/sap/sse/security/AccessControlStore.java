@@ -4,11 +4,11 @@ import java.util.Set;
 
 import com.sap.sse.common.Named;
 import com.sap.sse.security.shared.AccessControlListAnnotation;
-import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.SecurityUser;
-import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 
 public interface AccessControlStore extends Named {
     Iterable<AccessControlListAnnotation> getAccessControlLists();
@@ -24,10 +24,16 @@ public interface AccessControlStore extends Named {
      * @param displayNameOfAccessControlledObject the display name of the object the ACL is attached to
      */
     AccessControlListAnnotation setEmptyAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String displayNameOfAccessControlledObject);
-    void setAclPermissions(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup, Set<String> actions);
+
+    void setAclPermissions(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup,
+            Set<String> actions);
+
     void addAclPermission(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup, String action);
+
     void removeAclPermission(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup, String action);
+
     void removeAclDenial(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup, String action);
+
     void denyAclPermission(QualifiedObjectIdentifier idOfAccessControlledObject, UserGroup userGroup, String action);
     void removeAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject);
     
@@ -42,7 +48,8 @@ public interface AccessControlStore extends Named {
      */
     OwnershipAnnotation getOwnership(QualifiedObjectIdentifier idOfOwnedObject);
     
-    OwnershipAnnotation setOwnership(QualifiedObjectIdentifier idOfOwnedObject, SecurityUser userOwner, UserGroup tenantOwner, String displayNameOfOwnedObject);
+    OwnershipAnnotation setOwnership(QualifiedObjectIdentifier idOfOwnedObject, User userOwner, UserGroup tenantOwner,
+            String displayNameOfOwnedObject);
     void removeOwnership(QualifiedObjectIdentifier idOfOwnedObject);
     
     void clear();
@@ -58,5 +65,5 @@ public interface AccessControlStore extends Named {
      * This method should be directly followed by an deletion call for the given Object. Ít will unmap and destroy all
      * references to it that are held internally. It will not modify the given argument!
      */
-    void removeAllOwnershipsFor(SecurityUser user);
+    void removeAllOwnershipsFor(User user);
 }

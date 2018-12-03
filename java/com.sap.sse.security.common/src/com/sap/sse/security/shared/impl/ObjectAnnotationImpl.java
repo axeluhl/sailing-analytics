@@ -8,9 +8,9 @@ import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 public class ObjectAnnotationImpl<T extends Serializable> implements ObjectAnnotation<T> {
     private static final long serialVersionUID = -7213142753739732703L;
     
-    private final T annotation;
-    private final QualifiedObjectIdentifier idOfAnnotatedObject;
-    private final String displayNameOfAnnotatedObject;
+    private T annotation;
+    private QualifiedObjectIdentifier idOfAnnotatedObject;
+    private String displayNameOfAnnotatedObject;
     
     public ObjectAnnotationImpl(T annotation, QualifiedObjectIdentifier idOfAnnotatedObject, String displayNameOfAnnotatedObject) {
         super();

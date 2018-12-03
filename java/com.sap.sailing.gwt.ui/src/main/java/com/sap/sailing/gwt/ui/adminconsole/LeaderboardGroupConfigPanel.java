@@ -78,7 +78,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
-import com.sap.sse.security.ui.client.component.SecuredObjectOwnerColumn;
+import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements LeaderboardGroupsDisplayer, LeaderboardsDisplayer {
@@ -496,23 +496,23 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         };
         groupsFilterablePanel.getTextBox().ensureDebugId("LeaderboardGroupsFilterTextBox");
         leaderboardGroupsContentPanel.add(groupsFilterablePanel);
-
+        
         final Button createButton = buttonPanel.addCreateAction(stringMessages.createNewLeaderboardGroup(),
                 this::addNewGroup);
         createButton.ensureDebugId("CreateLeaderboardGroupButton");
         
         final Button refreshButton = buttonPanel.addUnsecuredAction(stringMessages.refresh(), () -> {
-            leaderboardsRefresher.fillLeaderboards();
-            leaderboardGroupsRefresher.fillLeaderboardGroups();
+                leaderboardsRefresher.fillLeaderboards();
+                leaderboardGroupsRefresher.fillLeaderboardGroups();
         });
         refreshButton.ensureDebugId("RefreshLeaderboardGroupsButton");
-
+        
         removeButton = buttonPanel.addRemoveAction(stringMessages.remove(), new Command() {
-
+        
             @Override
             public void execute() {
-                if (askUserForConfirmation()) {
-                    removeLeaderboardGroups(refreshableGroupsSelectionModel.getSelectedSet());
+                if(askUserForConfirmation()){
+                    removeLeaderboardGroups(refreshableGroupsSelectionModel.getSelectedSet()); 
                 }
             }
 
@@ -522,7 +522,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                             .map(LeaderboardGroupDTO::getName).collect(Collectors.joining("\n"));
                     return Window.confirm(
                             stringMessages.doYouReallyWantToRemoveNonVisibleLeaderboardGroups(leaderboardGroupNames));
-                }
+                } 
                 return Window.confirm(stringMessages.doYouReallyWantToRemoveLeaderboardGroups());
             }
         });
@@ -538,7 +538,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                         + "&showRaceDetails=true&" + RaceBoardPerspectiveOwnSettings.PARAM_CAN_REPLAY_DURING_LIVE_RACES
                         + "=true" + (debugParam != null && !debugParam.isEmpty() ? "&gwt.codesvr=" + debugParam : ""));
                 return ANCHORTEMPLATE.cell(UriUtils.fromString(link), group.getName());
-            }
+        }
         };
         groupNameColumn.setSortable(true);
         leaderboardGroupsListHandler.setComparator(groupNameColumn, new Comparator<LeaderboardGroupDTO>() {
@@ -618,7 +618,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
                 group -> leaderboardGroupsRefresher.fillLeaderboardGroups(), stringMessages);
         actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 e -> configACL.openDialog(e));
-
+        
         final MigrateGroupOwnershipDialog.DialogConfig<LeaderboardGroupDTO> migrateDialogConfig = MigrateGroupOwnershipDialog
                 .create(userService.getUserManagementService(), (lg, dto) -> {
                     sailingService.updateGroupOwnerForLeaderboardGroupHierarchy(lg.getId(), dto,
@@ -659,7 +659,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
         groupsTable.addColumn(groupDescriptionColumn, stringMessages.description());
         groupsTable.addColumn(groupDisplayNameColumn, stringMessages.displayName());
         groupsTable.addColumn(hasOverallLeaderboardColumn, stringMessages.useOverallLeaderboard());
-        SecuredObjectOwnerColumn.configureOwnerColumns(groupsTable, leaderboardGroupsListHandler, stringMessages);
+        SecuredDTOOwnerColumn.configureOwnerColumns(groupsTable, leaderboardGroupsListHandler, stringMessages);
         groupsTable.addColumn(actionsColumn, stringMessages.actions());
         groupsTable.addColumnSortHandler(leaderboardGroupsListHandler);
 

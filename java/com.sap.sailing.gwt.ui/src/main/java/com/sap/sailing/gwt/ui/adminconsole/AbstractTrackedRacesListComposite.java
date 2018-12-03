@@ -65,7 +65,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledActionsColumn;
 import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
-import com.sap.sse.security.ui.client.component.SecuredObjectOwnerColumn;
+import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 public abstract class AbstractTrackedRacesListComposite extends AbstractCompositeComponent<TrackedRacesSettings> implements
@@ -413,9 +413,9 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
         raceTable.addColumn(raceLiveDelayColumn, stringMessages.delayInSeconds());
         
         if (userService != null) {
-            final SecuredObjectOwnerColumn<RaceDTO> groupColumn = SecuredObjectOwnerColumn.getGroupOwnerColumn();
+            final SecuredDTOOwnerColumn<RaceDTO> groupColumn = SecuredDTOOwnerColumn.getGroupOwnerColumn();
             groupColumn.setSortable(true);
-            final SecuredObjectOwnerColumn<RaceDTO> userColumn = SecuredObjectOwnerColumn.getUserOwnerColumn();
+            final SecuredDTOOwnerColumn<RaceDTO> userColumn = SecuredDTOOwnerColumn.getUserOwnerColumn();
             userColumn.setSortable(true);
 
             final HasPermissions type = SecuredDomainType.TRACKED_RACE;
@@ -425,7 +425,7 @@ public abstract class AbstractTrackedRacesListComposite extends AbstractComposit
             final DialogConfig<RaceDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), type,
                     idFactory, race -> regattaRefresher.fillRegattas(), stringMessages);
             actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openDialog);
-
+            
             final EditACLDialog.DialogConfig<RaceDTO> configACL = EditACLDialog.create(
                     userService.getUserManagementService(), type, idFactory, regatta -> regattaRefresher.fillRegattas(),
                     stringMessages);

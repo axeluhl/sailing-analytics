@@ -22,19 +22,19 @@ import com.sap.sse.gwt.client.Storage;
 import com.sap.sse.gwt.client.StorageEvent;
 import com.sap.sse.gwt.client.StorageEvent.Handler;
 import com.sap.sse.gwt.client.async.MarkedAsyncCallback;
-import com.sap.sse.security.shared.AccessControlList;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
-import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.PermissionChecker;
-import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.shared.impl.OwnershipImpl;
+import com.sap.sse.security.shared.dto.AccessControlListDTO;
+import com.sap.sse.security.shared.dto.OwnershipDTO;
+import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
+import com.sap.sse.security.shared.dto.UserDTO;
+import com.sap.sse.security.shared.impl.Ownership;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.oauth.client.util.ClientUtils;
 import com.sap.sse.security.ui.shared.SuccessInfo;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * Encapsulates the current user, remembered as a {@link UserDTO} object. The current user is determined by a call to
@@ -391,11 +391,11 @@ public class UserService {
         return hasPermission(permission, /* ownership */ null, /* acl */ null);
     }
     
-    public boolean hasPermission(WildcardPermission permission, Ownership ownership) {
+    public boolean hasPermission(WildcardPermission permission, OwnershipDTO ownership) {
         return hasPermission(permission, ownership, /* acl */ null);
     }
     
-    public boolean hasPermission(WildcardPermission permission, Ownership ownership, AccessControlList acl) {
+    public boolean hasPermission(WildcardPermission permission, OwnershipDTO ownership, AccessControlListDTO acl) {
         if (anonymousUser == null) {
             return false;
         }
@@ -412,15 +412,15 @@ public class UserService {
             return false;
         }
         return hasPermission(logicalSecuredObjectType.getPermission(DefaultActions.CREATE),
-                new OwnershipImpl(currentUser, getCurrentTenant()));
+                new OwnershipDTO(currentUser, getCurrentTenant()));
     }
 
-    public UserGroup getCurrentTenant() {
+    public StrippedUserGroupDTO getCurrentTenant() {
         return currentUser == null ? null : currentUser.getDefaultTenant();
     }
 
     public String getCurrentTenantName() {
-        final UserGroup defaultTenant = getCurrentTenant();
+        final StrippedUserGroupDTO defaultTenant = getCurrentTenant();
         return defaultTenant == null ? null : defaultTenant.getName();
     }
 
@@ -432,12 +432,12 @@ public class UserService {
         Util.addAll(hasPermissions, allKnownHasPermissions);
     }
     
-    public boolean hasCurrentUserMetaPermission(WildcardPermission permissionToCheck, Ownership ownership) {
+    public boolean hasCurrentUserMetaPermission(WildcardPermission permissionToCheck, OwnershipDTO ownership) {
         return PermissionChecker.checkMetaPermission(permissionToCheck, allKnownHasPermissions, getCurrentUser(),
                 anonymousUser, ownership);
     }
     
-    public boolean hasCurrentUserAnyPermission(WildcardPermission permissionToCheck, Ownership ownership) {
+    public boolean hasCurrentUserAnyPermission(WildcardPermission permissionToCheck, OwnershipDTO ownership) {
         return PermissionChecker.hasUserAnyPermission(permissionToCheck, allKnownHasPermissions, getCurrentUser(),
                 anonymousUser, ownership);
     }
@@ -446,7 +446,7 @@ public class UserService {
         // TODO: Additional check required
         // return hasPermission(SecuredSecurityTypes.SERVER.getPermissionForObjects(ServerActions.CREATE_OBJECT, oid));
         final WildcardPermission createPermission = type.getPermission(DefaultActions.CREATE);
-        final OwnershipImpl ownershipOfNewlyCreatedObject = new OwnershipImpl(currentUser, getCurrentTenant());
+        final OwnershipDTO ownershipOfNewlyCreatedObject = new OwnershipDTO(currentUser, getCurrentTenant());
         return this.hasCurrentUserAnyPermission(createPermission, ownershipOfNewlyCreatedObject);
     }
     

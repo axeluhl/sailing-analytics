@@ -18,7 +18,7 @@ import com.sap.sailing.server.statistics.TrackedRaceStatisticsCache;
 import com.sap.sse.gwt.dispatch.shared.exceptions.DispatchException;
 import com.sap.sse.gwt.dispatch.shared.exceptions.ServerDispatchException;
 import com.sap.sse.security.SecurityService;
-import com.sap.sse.security.shared.SecurityUser;
+import com.sap.sse.security.shared.impl.User;
 
 @GwtIncompatible
 public class SailingDispatchContextImpl implements SailingDispatchContext {
@@ -96,7 +96,7 @@ public class SailingDispatchContextImpl implements SailingDispatchContext {
     
     @Override
     public <T> T getPreferenceForCurrentUser(String preferenceKey) {
-        SecurityUser currentUser = securityService.getCurrentUser();
+        User currentUser = securityService.getCurrentUser();
         if (currentUser != null) {
             return securityService.getPreferenceObject(currentUser.getName(), preferenceKey);
         }
@@ -105,7 +105,7 @@ public class SailingDispatchContextImpl implements SailingDispatchContext {
     
     @Override
     public void setPreferenceForCurrentUser(String preferenceKey, Object preference) {
-        SecurityUser currentUser = securityService.getCurrentUser();
+        User currentUser = securityService.getCurrentUser();
         if (currentUser != null) {
             try {
                 securityService.setPreferenceObject(currentUser.getName(), preferenceKey, preference);

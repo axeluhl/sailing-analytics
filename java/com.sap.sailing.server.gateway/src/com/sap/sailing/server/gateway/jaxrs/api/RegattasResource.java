@@ -140,7 +140,7 @@ import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.OwnershipAnnotation;
-import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.impl.User;
 
 @Path("/v1/regattas")
 public class RegattasResource extends AbstractSailingServerResource {
@@ -490,17 +490,17 @@ public class RegattasResource extends AbstractSailingServerResource {
                 competitor = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                         SecuredDomainType.COMPETITOR, competitorUuid.toString(), name,
                         new ActionWithResult<CompetitorWithBoat>() {
-                            @Override
-                            public CompetitorWithBoat run() throws Exception {
-                                return getService().getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(
+                                @Override
+                                public CompetitorWithBoat run() throws Exception {
+                                    return getService().getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(
                                         competitorUuid, name, shortName, color, email, flagImageURI, team,
                                         timeOnTimeFactor,
-                                        timeOnDistanceAllowancePerNauticalMileAsMillis == null ? null
-                                                : new MillisecondsDurationImpl(
-                                                        timeOnDistanceAllowancePerNauticalMileAsMillis),
-                                        searchTag, boat);
-                            }
-                        });
+                                            timeOnDistanceAllowancePerNauticalMileAsMillis == null ? null
+                                                    : new MillisecondsDurationImpl(
+                                                            timeOnDistanceAllowancePerNauticalMileAsMillis),
+                                            searchTag, boat);
+                                }
+                            });
             } else {
                 competitor = getService().getCompetitorAndBoatStore().getOrCreateCompetitorWithBoat(competitorUuid,
                         name, shortName, color, email, flagImageURI, team, timeOnTimeFactor,
@@ -565,14 +565,14 @@ public class RegattasResource extends AbstractSailingServerResource {
         final DynamicBoat boat;
         if (SecurityUtils.getSubject().isAuthenticated()) {
             boat = getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                    SecuredDomainType.BOAT, boatUUID.toString(), name, new ActionWithResult<DynamicBoat>() {
+                SecuredDomainType.BOAT, boatUUID.toString(), name, new ActionWithResult<DynamicBoat>() {
 
-                        @Override
-                        public DynamicBoat run() throws Exception {
-                            return new BoatImpl(boatUUID, name, getService().getBaseDomainFactory()
-                                    .getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */ true), sailId);
-                        }
-                    });
+                    @Override
+                    public DynamicBoat run() throws Exception {
+                        return new BoatImpl(boatUUID, name, getService().getBaseDomainFactory()
+                                .getOrCreateBoatClass(boatClassName, /* typicallyStartsUpwind */ true), sailId);
+                    }
+                });
         } else {
             boat = new BoatImpl(boatUUID, name, getService().getBaseDomainFactory().getOrCreateBoatClass(boatClassName,
                     /* typicallyStartsUpwind */ true), sailId);

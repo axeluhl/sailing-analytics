@@ -291,9 +291,9 @@ import com.sap.sse.replication.ReplicationMasterDescriptor;
 import com.sap.sse.replication.impl.OperationWithResultWithIdWrapper;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.RoleImpl;
-import com.sap.sse.security.shared.User;
-import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.impl.Role;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.shared.media.ImageDescriptor;
 import com.sap.sse.shared.media.VideoDescriptor;
 import com.sap.sse.util.ClearStateTestSupport;
@@ -841,7 +841,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
                 final RoleDefinition viewerRole = getSecurityService()
                         .getRoleDefinition(SailingViewerRole.getInstance().getId());
                 final UserGroup defaultServerTenant = getSecurityService().getDefaultTenant();
-                final RoleImpl publicAccessForServerRole = new RoleImpl(viewerRole, defaultServerTenant, null);
+                final Role publicAccessForServerRole = new Role(viewerRole, defaultServerTenant, null);
                 getSecurityService().addRoleForUser(allUser.getName(), publicAccessForServerRole);
                 getSecurityService().setSetting(initializedKey, true);
             }

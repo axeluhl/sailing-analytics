@@ -10,47 +10,54 @@ import java.util.UUID;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
-import com.sap.sse.security.shared.AccessControlList;
-import com.sap.sse.security.shared.AccessControlListAnnotation;
-import com.sap.sse.security.shared.Ownership;
-import com.sap.sse.security.shared.OwnershipAnnotation;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
-import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
+import com.sap.sse.security.shared.dto.AccessControlListDTO;
+import com.sap.sse.security.shared.dto.OwnershipAnnotationDTO;
+import com.sap.sse.security.shared.dto.OwnershipDTO;
+import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
+import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
+import com.sap.sse.security.shared.dto.UserDTO;
+import com.sap.sse.security.shared.dto.UserGroupDTO;
 import com.sap.sse.security.ui.oauth.client.CredentialDTO;
-import com.sap.sse.security.ui.shared.RoleDefinitionDTO;
 import com.sap.sse.security.ui.shared.SuccessInfo;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 public interface UserManagementServiceAsync {
-    void setOwnership(Ownership ownership, QualifiedObjectIdentifier idOfOwnedObject, String displayNameOfOwnedObject, AsyncCallback<QualifiedObjectIdentifier> callback);
+    void setOwnership(OwnershipDTO ownership, QualifiedObjectIdentifier idOfOwnedObject,
+            String displayNameOfOwnedObject, AsyncCallback<QualifiedObjectIdentifier> callback);
     
-    void getOwnership(QualifiedObjectIdentifier idOfOwnedObject, AsyncCallback<OwnershipAnnotation> callback);
+    void getOwnership(QualifiedObjectIdentifier idOfOwnedObject, AsyncCallback<OwnershipAnnotationDTO> callback);
 
-    void getAccessControlLists(AsyncCallback<Collection<AccessControlListAnnotation>> callback);
+    void getAccessControlLists(AsyncCallback<Collection<AccessControlListAnnotationDTO>> callback);
 
-    void getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, AsyncCallback<AccessControlListAnnotation> callback);
+    void getAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, AsyncCallback<AccessControlListAnnotationDTO> callback);
 
-    void updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, Map<String, Set<String>> permissionStrings, AsyncCallback<AccessControlList> callback);
+    void updateAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject,
+            Map<String, Set<String>> permissionStrings, AsyncCallback<AccessControlListDTO> callback);
 
     void getAccessControlListWithoutPruning(QualifiedObjectIdentifier idOfAccessControlledObject,
-            AsyncCallback<AccessControlList> updateAclAsyncCallback);
+            AsyncCallback<AccessControlListDTO> updateAclAsyncCallback);
 
-    void overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, AccessControlList acl,
-            AsyncCallback<AccessControlList> updateAclAsyncCallback);
+    void overrideAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, AccessControlListDTO acl,
+            AsyncCallback<AccessControlListDTO> updateAclAsyncCallback);
 
-    void addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String permission, String name, AsyncCallback<AccessControlList> callback);
+    void addToAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String permission, String name,
+            AsyncCallback<AccessControlListDTO> callback);
 
-    void removeFromAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String permission, String name, AsyncCallback<AccessControlList> callback);
+    void removeFromAccessControlList(QualifiedObjectIdentifier idOfAccessControlledObject, String permission,
+            String name, AsyncCallback<AccessControlListDTO> callback);
 
     /**
      * Returns those user groups the requesting user can read
      */
-    void getUserGroups(AsyncCallback<Collection<UserGroup>> callback);
+    void getUserGroups(AsyncCallback<Collection<UserGroupDTO>> callback);
     
-    void getUserGroupByName(String userGroupName, AsyncCallback<UserGroup> callback);
+    void getUserGroupByName(String userGroupName, AsyncCallback<UserGroupDTO> callback);
+    
+    void getStrippedUserGroupByName(String userGroupName, AsyncCallback<StrippedUserGroupDTO> callback);
 
-    void createUserGroup(String name, AsyncCallback<UserGroup> callback);
+    void createUserGroup(String name, AsyncCallback<UserGroupDTO> callback);
     
     void deleteUserGroup(String userGroupIdAsString, AsyncCallback<SuccessInfo> asyncCallback);
 

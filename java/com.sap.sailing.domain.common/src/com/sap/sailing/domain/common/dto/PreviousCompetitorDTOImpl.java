@@ -2,7 +2,7 @@ package com.sap.sailing.domain.common.dto;
 
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
-import com.sap.sse.security.shared.NamedSecuredObjectDTO;
+import com.sap.sse.security.shared.dto.NamedSecuredObjectDTO;
 
 /**
  * Equality and hash code are based on the index pointing into a previous leaderboard's competitors list.

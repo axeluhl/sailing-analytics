@@ -50,6 +50,7 @@ Require-Bundle: com.googlecode.java-diff-utils;bundle-version="1.3.0",
  com.sap.sailing.server.gateway.serialization.shared.android,
  com.sap.sse.datamining.annotations
 Import-Package: com.sap.sse.security.shared,
+ com.sap.sse.security.shared.dto,
  com.sap.sse.security.shared.impl,
  org.apache.http,
  org.apache.http.client;version="[4.2.5,4.3.0)",

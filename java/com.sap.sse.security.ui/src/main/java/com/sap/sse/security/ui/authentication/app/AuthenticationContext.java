@@ -1,7 +1,7 @@
 package com.sap.sse.security.ui.authentication.app;
 
 import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.ui.shared.UserDTO;
+import com.sap.sse.security.shared.dto.UserDTO;
 
 /**
  * Interface for authentication context representations providing access to the current {@link UserDTO user} object and

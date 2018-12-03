@@ -28,10 +28,10 @@ import com.sap.sse.gwt.client.panels.HorizontalTabLayoutPanel;
 import com.sap.sse.gwt.client.panels.VerticalTabLayoutPanel;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.UserStatusEventHandler;
 import com.sap.sse.security.ui.loginpanel.LoginPanelCss;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * A panel that can be used to implement an administration console. Widgets can be arranged in vertical and horizontal

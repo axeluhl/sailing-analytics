@@ -15,9 +15,9 @@ import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.sap.sse.common.Util;
 import com.sap.sse.gwt.client.GWTLocaleUtil;
-import com.sap.sse.security.shared.UserGroup;
+import com.sap.sse.security.shared.dto.StrippedUserGroupDTO;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 /**
  * Base view class of the user account details page. This class implements the shared logic of the desktop and mobile
@@ -88,10 +88,10 @@ public class AbstractUserDetails extends Composite implements UserDetailsView {
     }
 
     private void updateDefaultTenantSelection(UserDTO currentUser) {
-        UserGroup defaultTennant = currentUser.getDefaultTenant();
+        StrippedUserGroupDTO defaultTennant = currentUser.getDefaultTenant();
         defaultTenantUi.clear();
         int i = 0;
-        for (UserGroup group : currentUser.getUserGroups()) {
+        for (StrippedUserGroupDTO group : currentUser.getUserGroups()) {
             defaultTenantUi.addItem(group.getName(), group.getId().toString());
             if (Util.equalsWithNull(group, defaultTennant)) {
                 defaultTenantUi.setSelectedIndex(i);

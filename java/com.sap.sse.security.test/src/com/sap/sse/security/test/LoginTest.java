@@ -24,14 +24,12 @@ import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.impl.Activator;
 import com.sap.sse.security.impl.SecurityServiceImpl;
 import com.sap.sse.security.shared.PermissionChecker;
-import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.RoleImpl;
-import com.sap.sse.security.shared.User;
-import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
+import com.sap.sse.security.shared.impl.Role;
+import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
@@ -84,7 +82,7 @@ public class LoginTest {
     public void rolesTest() throws UserManagementException, UserGroupManagementException {
         userStore.createUser("me", "me@sap.com", new UserGroupImpl(UUID.randomUUID(), "me-tenant"));
         RoleDefinition testRoleDefinition = userStore.createRoleDefinition(UUID.randomUUID(), "testRole", Collections.emptySet());
-        final RoleImpl testRole = new RoleImpl(testRoleDefinition);
+        final Role testRole = new Role(testRoleDefinition);
         userStore.addRoleForUser("me", testRole);
         UserStoreImpl store2 = new UserStoreImpl(DEFAULT_TENANT_NAME);
         assertTrue(Util.contains(store2.getUserByName("me").getRoles(), testRole));
@@ -92,10 +90,10 @@ public class LoginTest {
 
     @Test
     public void roleWithQualifiersTest() throws UserManagementException, UserGroupManagementException {
-        UserGroup userDefaultTenant = userStore.createUserGroup(UUID.randomUUID(), "me-tenant");
+        UserGroupImpl userDefaultTenant = userStore.createUserGroup(UUID.randomUUID(), "me-tenant");
         User meUser = userStore.createUser("me", "me@sap.com", userDefaultTenant);
         RoleDefinition testRoleDefinition = userStore.createRoleDefinition(UUID.randomUUID(), "testRole", Collections.emptySet());
-        final RoleImpl testRole = new RoleImpl(testRoleDefinition, userDefaultTenant, meUser);
+        final Role testRole = new Role(testRoleDefinition, userDefaultTenant, meUser);
         userStore.addRoleForUser("me", testRole);
         UserStoreImpl store2 = new UserStoreImpl(DEFAULT_TENANT_NAME);
         assertTrue(Util.contains(store2.getUserByName("me").getRoles(), testRole));

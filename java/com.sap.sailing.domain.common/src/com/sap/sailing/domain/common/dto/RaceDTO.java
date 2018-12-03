@@ -2,10 +2,10 @@ package com.sap.sailing.domain.common.dto;
 
 import com.sap.sailing.domain.common.RegattaAndRaceIdentifier;
 import com.sap.sailing.domain.common.RegattaNameAndRaceName;
-import com.sap.sse.security.shared.AccessControlList;
-import com.sap.sse.security.shared.Ownership;
-import com.sap.sse.security.shared.SecuredObject;
-import com.sap.sse.security.shared.SecurityInformationDTO;
+import com.sap.sse.security.shared.dto.AccessControlListDTO;
+import com.sap.sse.security.shared.dto.OwnershipDTO;
+import com.sap.sse.security.shared.dto.SecuredDTO;
+import com.sap.sse.security.shared.dto.SecurityInformationDTO;
 import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 
 /**
@@ -14,7 +14,7 @@ import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
  * @author Axel Uhl (d043530)
  *
  */
-public class RaceDTO extends BasicRaceDTO implements SecuredObject {
+public class RaceDTO extends BasicRaceDTO implements SecuredDTO {
     private static final long serialVersionUID = 2613189982608149975L;
     
     private SecurityInformationDTO securityInformation = new SecurityInformationDTO();
@@ -98,22 +98,22 @@ public class RaceDTO extends BasicRaceDTO implements SecuredObject {
     }
     
     @Override
-    public final AccessControlList getAccessControlList() {
+    public final AccessControlListDTO getAccessControlList() {
         return securityInformation.getAccessControlList();
     }
 
     @Override
-    public final Ownership getOwnership() {
+    public final OwnershipDTO getOwnership() {
         return securityInformation.getOwnership();
     }
 
     @Override
-    public final void setAccessControlList(final AccessControlList accessControlList) {
+    public final void setAccessControlList(final AccessControlListDTO accessControlList) {
         this.securityInformation.setAccessControlList(accessControlList);
     }
 
     @Override
-    public final void setOwnership(final Ownership ownership) {
+    public final void setOwnership(final OwnershipDTO ownership) {
         this.securityInformation.setOwnership(ownership);
     }
     

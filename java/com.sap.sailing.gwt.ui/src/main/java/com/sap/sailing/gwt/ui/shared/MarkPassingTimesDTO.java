@@ -2,7 +2,7 @@ package com.sap.sailing.gwt.ui.shared;
 
 import java.util.Date;
 
-import com.sap.sse.security.shared.NamedDTO;
+import com.sap.sse.security.shared.dto.NamedDTO;
 
 public class MarkPassingTimesDTO extends NamedDTO {
     private static final long serialVersionUID = 6582422144259670004L;

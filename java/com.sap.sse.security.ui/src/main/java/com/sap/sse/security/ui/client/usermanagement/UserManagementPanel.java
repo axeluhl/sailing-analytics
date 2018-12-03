@@ -27,8 +27,9 @@ import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.celltable.CellTableWithCheckboxResources;
 import com.sap.sse.gwt.client.celltable.RefreshableMultiSelectionModel;
 import com.sap.sse.gwt.client.panels.LabeledAbstractFilterablePanel;
-import com.sap.sse.security.shared.AccessControlListAnnotation;
 import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.dto.AccessControlListAnnotationDTO;
+import com.sap.sse.security.shared.dto.UserDTO;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.component.AccessControlListListDataProvider;
@@ -37,14 +38,16 @@ import com.sap.sse.security.ui.client.component.CreateUserDialog;
 import com.sap.sse.security.ui.client.component.EditAccessControlListDialog;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
-import com.sap.sse.security.ui.shared.UserDTO;
 
 public class UserManagementPanel<TR extends CellTableWithCheckboxResources> extends DockPanel {
     
     private final List<UserCreatedEventHandler> userCreatedHandlers = new ArrayList<>();
+    
     private final List<UserDeletedEventHandler> userDeletedHandlers = new ArrayList<>();
-    private final SingleSelectionModel<AccessControlListAnnotation> aclSingleSelectionModel;
+    
+    private final SingleSelectionModel<AccessControlListAnnotationDTO> aclSingleSelectionModel;
     private final AccessControlListListDataProvider aclListDataProvider;
+    
     private final UserTableWrapper<RefreshableMultiSelectionModel<UserDTO>, TR> userList;
     private final RefreshableMultiSelectionModel<UserDTO> userSelectionModel;
 
@@ -73,41 +76,41 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
         editACLButton.setEnabled(false);
         aclSingleSelectionModel.addSelectionChangeHandler(
                 event -> editACLButton.setEnabled(aclSingleSelectionModel.getSelectedObject() != null));
-
+        
         userList = new UserTableWrapper<>(userService, additionalPermissions, stringMessages, errorReporter,
                 /* multiSelection */ true, /* enablePager */ true, tableResources);
         userSelectionModel = userList.getSelectionModel();
         final Button deleteButton = buttonPanel.addRemoveAction(stringMessages.remove(), () -> {
-            assert userSelectionModel.getSelectedSet().size() > 0;
-            final Set<UserDTO> usersToDelete = new HashSet<>();
-            final Set<String> usernamesToDelete = new HashSet<>();
-            for (UserDTO userToDelete : userSelectionModel.getSelectedSet()) {
-                usersToDelete.add(userToDelete);
-                usernamesToDelete.add(userToDelete.getName());
-            }
-            if (Window.confirm(usernamesToDelete.size() == 1
-                    ? stringMessages.doYouReallyWantToDeleteUser(usernamesToDelete.iterator().next())
-                    : stringMessages.doYouReallyWantToDeleteNUsers(usernamesToDelete.size()))) {
-                userManagementService.deleteUsers(usernamesToDelete, new AsyncCallback<Set<SuccessInfo>>() {
-                    @Override
-                    public void onSuccess(Set<SuccessInfo> result) {
-                        for (UserDTO userToDelete : usersToDelete) {
-                            for (UserDeletedEventHandler userDeletedHandler : userDeletedHandlers) {
-                                userDeletedHandler.onUserDeleted(userToDelete);
+                assert userSelectionModel.getSelectedSet().size() > 0;
+                final Set<UserDTO> usersToDelete = new HashSet<>();
+                final Set<String> usernamesToDelete = new HashSet<>();
+                for (UserDTO userToDelete : userSelectionModel.getSelectedSet()) {
+                    usersToDelete.add(userToDelete);
+                    usernamesToDelete.add(userToDelete.getName());
+                }
+                if (Window.confirm(usernamesToDelete.size() == 1
+                        ? stringMessages.doYouReallyWantToDeleteUser(usernamesToDelete.iterator().next())
+                        : stringMessages.doYouReallyWantToDeleteNUsers(usernamesToDelete.size()))) {
+                    userManagementService.deleteUsers(usernamesToDelete, new AsyncCallback<Set<SuccessInfo>>() {
+                        @Override
+                        public void onSuccess(Set<SuccessInfo> result) {
+                            for (UserDTO userToDelete : usersToDelete) {
+                                for (UserDeletedEventHandler userDeletedHandler : userDeletedHandlers) {
+                                    userDeletedHandler.onUserDeleted(userToDelete);
+                                }
+                            }
+                            for (SuccessInfo successInfo : result) {
+                                Notification.notify(successInfo.getMessage(), NotificationType.SUCCESS);
                             }
                         }
-                        for (SuccessInfo successInfo : result) {
-                            Notification.notify(successInfo.getMessage(), NotificationType.SUCCESS);
-                        }
-                    }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
+                        @Override
+                        public void onFailure(Throwable caught) {
                         errorReporter.reportError(stringMessages.errorDeletingUser(usernamesToDelete.iterator().next(),
                                 caught.getMessage()));
-                    }
-                });
-            }
+                        }
+                    });
+                }
         });
         deleteButton.setEnabled(userSelectionModel.getSelectedSet().size() >= 1);
         userSelectionModel.addSelectionChangeHandler(event -> {
@@ -115,16 +118,16 @@ public class UserManagementPanel<TR extends CellTableWithCheckboxResources> exte
             deleteButton.setEnabled(userSelectionModel.getSelectedSet().size() >= 1);
         });
 
-        final CellTable<AccessControlListAnnotation> aclTable = new CellTable<>();
-        TextColumn<AccessControlListAnnotation> idColumn = new TextColumn<AccessControlListAnnotation>() {
+        final CellTable<AccessControlListAnnotationDTO> aclTable = new CellTable<>();
+        TextColumn<AccessControlListAnnotationDTO> idColumn = new TextColumn<AccessControlListAnnotationDTO>() {
             @Override
-            public String getValue(AccessControlListAnnotation acl) {
+            public String getValue(AccessControlListAnnotationDTO acl) {
                 return acl.getIdOfAnnotatedObject().toString();
             }
         };
-        TextColumn<AccessControlListAnnotation> displayNameColumn = new TextColumn<AccessControlListAnnotation>() {
+        TextColumn<AccessControlListAnnotationDTO> displayNameColumn = new TextColumn<AccessControlListAnnotationDTO>() {
             @Override
-            public String getValue(AccessControlListAnnotation acl) {
+            public String getValue(AccessControlListAnnotationDTO acl) {
                 return acl.getDisplayNameOfAnnotatedObject()==null?"":acl.getDisplayNameOfAnnotatedObject();
             }
         };

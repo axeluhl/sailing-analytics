@@ -51,7 +51,7 @@ import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.shared.Account;
-import com.sap.sse.security.shared.User;
+import com.sap.sse.security.shared.impl.User;
 
 public class RegattasResourceTest extends AbstractJaxRsApiTest {
     private final String boatClassName = "49er";

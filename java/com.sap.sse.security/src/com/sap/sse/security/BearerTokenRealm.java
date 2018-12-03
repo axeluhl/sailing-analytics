@@ -5,7 +5,7 @@ import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.SaltedAuthenticationInfo;
 
-import com.sap.sse.security.shared.SecurityUser;
+import com.sap.sse.security.shared.impl.User;
 
 /**
  * A realm that authenticates users by an access token which has previously been obtained through
@@ -24,7 +24,7 @@ public class BearerTokenRealm extends AbstractCompositeAuthorizingRealm {
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
         BearerAuthenticationToken accessToken = (BearerAuthenticationToken) token;
-        final SecurityUser user = getUserStore().getUserByAccessToken(accessToken.getCredentials());
+        final User user = getUserStore().getUserByAccessToken(accessToken.getCredentials());
         if (user == null) {
             return null;
         }

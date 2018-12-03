@@ -28,19 +28,18 @@ import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.Account;
 import com.sap.sse.security.shared.AdminRole;
-import com.sap.sse.security.shared.Ownership;
 import com.sap.sse.security.shared.PredefinedRoles;
-import com.sap.sse.security.shared.Role;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
 import com.sap.sse.security.shared.SecurityUser;
-import com.sap.sse.security.shared.User;
-import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.UserRole;
 import com.sap.sse.security.shared.WildcardPermission;
-import com.sap.sse.security.shared.impl.OwnershipImpl;
+import com.sap.sse.security.shared.impl.Ownership;
+import com.sap.sse.security.shared.impl.Role;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.security.userstore.mongodb.impl.FieldNames.Tenant;
 
@@ -50,8 +49,8 @@ import com.sap.sse.security.userstore.mongodb.impl.FieldNames.Tenant;
  * therefore not perform any changes to the database. This is also the reason why all access to the
  * {@link #mongoObjectFactory} field needs to be <code>null</code>-safe.<p>
  * 
- * The storage pattern for {@link UserGroup} and {@link Tenant} objects deserves some explanation. As a {@link Tenant}
- * is a specialized {@link UserGroup}, this store mainly needs to keep track of the users in that {@link Tenant}. Hence,
+ * The storage pattern for {@link UserGroupImpl} and {@link Tenant} objects deserves some explanation. As a {@link Tenant}
+ * is a specialized {@link UserGroupImpl}, this store mainly needs to keep track of the users in that {@link Tenant}. Hence,
  * the same collection is used for the storage of these user lists, and hence the same methods can be used for
  * maintaining this collection. Additionally, the tenant ID is stored in a separate collection as a "marker" which
  * entries in the user groups collection are actually tenants and not only user groups.
@@ -70,7 +69,7 @@ public class UserStoreImpl implements UserStore {
     
     /**
      * If a valid default tenant name was passed to the constructor, this field will contain a valid
-     * {@link UserGroup} object whose name equals that of the default tenant name. It will have been used
+     * {@link UserGroupImpl} object whose name equals that of the default tenant name. It will have been used
      * during role migration where string-based roles are mapped to a corresponding {@link RoleDefinition}
      * and the users with the original role will obtain a corresponding {@link Role} with this default
      * tenant as the {@link Role#getQualifiedForTenant() tenant qualifier}.
@@ -82,16 +81,16 @@ public class UserStoreImpl implements UserStore {
     
     /**
      * Protects access to the two maps {@link #userGroupsContainingUser} and {@link #usersInUserGroups} which implement
-     * an efficient lookup for the m:n association between {@link UserGroup#getUsers()} and {@link SecurityUser}. The
+     * an efficient lookup for the m:n association between {@link UserGroupImpl#getUsers()} and {@link SecurityUser}. The
      * collections also contain the relationships for the specialized {@link Tenant} objects which are not part of
      * {@link #userGroups} but of {@link #tenants}.
      */
     private final NamedReentrantReadWriteLock userGroupsUserCacheLock = new NamedReentrantReadWriteLock("User Groups Cache", /* fair */ false);
-    private final ConcurrentHashMap<SecurityUser, Set<UserGroup>> userGroupsContainingUser;
+    private final ConcurrentHashMap<User, Set<UserGroup>> userGroupsContainingUser;
     /**
-     * This collection is important in particular to detect changes when {@link #updateUserGroup(UserGroup)} is called.
+     * This collection is important in particular to detect changes when {@link #updateUserGroup(UserGroupImpl)} is called.
      */
-    private final ConcurrentHashMap<UserGroup, Set<SecurityUser>> usersInUserGroups;
+    private final ConcurrentHashMap<UserGroup, Set<User>> usersInUserGroups;
     
     private final ConcurrentHashMap<String, User> users;
     private final ConcurrentHashMap<String, Set<User>> usersByEmail;
@@ -208,11 +207,14 @@ public class UserStoreImpl implements UserStore {
             // replace them based on the username key:
             for (final UserGroup group : this.userGroups.values()) {
                 migrateProxyUsersInGroupToRealUsersByUsername(group);
-                for (final SecurityUser userInGroup : group.getUsers()) {
+                for (final User userInGroup : group.getUsers()) {
                     Util.addToValueSet(usersInUserGroups, group, userInGroup);
                     Util.addToValueSet(userGroupsContainingUser, userInGroup, group);
                 }
             }
+            // FIXME check for non migrated users, those are leftovers that are in some groups but have no user object
+            // anymore, remove them from the groups!
+
             for (Entry<String, Map<String, String>> e : preferences.entrySet()) {
                 if (e.getValue() != null) {
                     final String accessToken = e.getValue().get(ACCESS_TOKEN_KEY);
@@ -281,9 +283,9 @@ public class UserStoreImpl implements UserStore {
 
     private void migrateProxyUsersInGroupToRealUsersByUsername(final UserGroup group) {
         // copy user set before looping to avoid concurrent modification exception
-        final Set<SecurityUser> oldUsers = new HashSet<>();
+        final Set<User> oldUsers = new HashSet<>();
         Util.addAll(group.getUsers(), oldUsers);
-        for (final SecurityUser proxyUser : oldUsers) {
+        for (final User proxyUser : oldUsers) {
             group.remove(proxyUser);
             final User realUser = users.get(proxyUser.getName());
             if (realUser == null) {
@@ -353,10 +355,10 @@ public class UserStoreImpl implements UserStore {
             for (UserGroup group : newUserStore.getUserGroups()) {
                 userGroups.put(group.getId(), group);
                 userGroupsByName.put(group.getName(), group);
-                final HashSet<SecurityUser> usersInGroup = new HashSet<>();
+                final HashSet<User> usersInGroup = new HashSet<>();
                 Util.addAll(group.getUsers(), usersInGroup);
                 usersInUserGroups.put(group, usersInGroup);
-                for (final SecurityUser userInGroup : group.getUsers()) {
+                for (final User userInGroup : group.getUsers()) {
                     Util.addToValueSet(userGroupsContainingUser, userInGroup, group);
                 }
             }
@@ -477,7 +479,7 @@ public class UserStoreImpl implements UserStore {
         // only the user or an administrator may request a user's access token
         if (SecurityUtils.getSubject().hasRole(AdminRole.getInstance().getName()) ||
             SecurityUtils.getSubject().getPrincipal().toString().equals(username)) {
-            SecurityUser user = users.get(username);
+            User user = users.get(username);
             if (user != null) {
                 final String accessToken = getPreference(username, ACCESS_TOKEN_KEY);
                 if (accessToken != null) {
@@ -548,12 +550,12 @@ public class UserStoreImpl implements UserStore {
     }
     
     @Override
-    public UserGroup createUserGroup(UUID groupId, String name) throws UserGroupManagementException {
+    public UserGroupImpl createUserGroup(UUID groupId, String name) throws UserGroupManagementException {
         if (userGroups.contains(groupId)) {
             throw new UserGroupManagementException(UserGroupManagementException.USER_GROUP_ALREADY_EXISTS);
         }
         logger.info("Creating user group: " + groupId + " with name "+name);
-        UserGroup group = new UserGroupImpl(groupId, name);
+        UserGroupImpl group = new UserGroupImpl(new HashSet<User>(), groupId, name);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUserGroup(group);
         }
@@ -567,16 +569,16 @@ public class UserStoreImpl implements UserStore {
         logger.info("Updating user group " + group.getName() + " in DB");
         LockUtil.lockForWrite(userGroupsUserCacheLock);
         try {
-            Set<SecurityUser> usersInGroupBefore = new HashSet<>();
+            Set<User> usersInGroupBefore = new HashSet<>();
             Util.addAll(usersInUserGroups.get(group), usersInGroupBefore);
-            for (final SecurityUser userNowInUpdatedGroup : group.getUsers()) {
+            for (final User userNowInUpdatedGroup : group.getUsers()) {
                 if (usersInGroupBefore == null || !Util.contains(usersInGroupBefore, userNowInUpdatedGroup)) {
                     // the user was added:
                     Util.addToValueSet(usersInUserGroups, group, userNowInUpdatedGroup);
                     Util.addToValueSet(userGroupsContainingUser, userNowInUpdatedGroup, group);
                 }
             }
-            for (final SecurityUser userInGroupBefore : usersInGroupBefore) {
+            for (final User userInGroupBefore : usersInGroupBefore) {
                 if (!Util.contains(group.getUsers(), userInGroupBefore)) {
                     // the user was removed
                     Util.removeFromValueSet(usersInUserGroups, group, userInGroupBefore);
@@ -592,7 +594,7 @@ public class UserStoreImpl implements UserStore {
     }
 
     @Override
-    public Iterable<UserGroup> getUserGroupsOfUser(SecurityUser user) {
+    public Iterable<UserGroup> getUserGroupsOfUser(User user) {
         final Iterable<UserGroup> preResult;
         LockUtil.lockForRead(userGroupsUserCacheLock);
         try {
@@ -600,7 +602,7 @@ public class UserStoreImpl implements UserStore {
         } finally {
             LockUtil.unlockAfterRead(userGroupsUserCacheLock);
         }
-        return preResult == null ? Collections.<UserGroup>emptySet() : preResult;
+        return preResult == null ? Collections.<UserGroup> emptySet() : preResult;
     }
 
     @Override
@@ -613,7 +615,7 @@ public class UserStoreImpl implements UserStore {
         userGroups.remove(userGroup.getId());
         LockUtil.lockForWrite(userGroupsUserCacheLock);
         try {
-            for (final SecurityUser userInDeletedGroup : userGroup.getUsers()) {
+            for (final User userInDeletedGroup : userGroup.getUsers()) {
                 Util.removeFromValueSet(userGroupsContainingUser, userInDeletedGroup, userGroup);
             }
             usersInUserGroups.remove(userGroup);
@@ -630,13 +632,14 @@ public class UserStoreImpl implements UserStore {
     }
     
     @Override
-    public UserImpl createUser(String name, String email, UserGroup defaultTenant, Account... accounts) throws UserManagementException {
+    public User createUser(String name, String email, UserGroup defaultTenant, Account... accounts)
+            throws UserManagementException {
         if (getUserByName(name) != null) {
             throw new UserManagementException(UserManagementException.USER_ALREADY_EXISTS);
         }
         ConcurrentHashMap<String, UserGroup> tenantsForServer = new ConcurrentHashMap<>();
         tenantsForServer.put(ServerInfo.getName(), defaultTenant);
-        UserImpl user = new UserImpl(name, email, tenantsForServer, /* user group provider */ this, accounts);
+        User user = new UserImpl(name, email, tenantsForServer, /* user group provider */ this, accounts);
         logger.info("Creating user: " + user + " with e-mail "+email);
         if (mongoObjectFactory != null) {
             mongoObjectFactory.storeUser(user);
@@ -719,7 +722,7 @@ public class UserStoreImpl implements UserStore {
                         // wildcard rule exists -> return A=true
                         return new Pair<>(true, null);
                     } else {
-                        ownerships.add(new OwnershipImpl(role.getQualifiedForUser(), role.getQualifiedForTenant()));
+                        ownerships.add(new Ownership(role.getQualifiedForUser(), role.getQualifiedForTenant()));
                     }
                 }
             } catch (UserManagementException e) {

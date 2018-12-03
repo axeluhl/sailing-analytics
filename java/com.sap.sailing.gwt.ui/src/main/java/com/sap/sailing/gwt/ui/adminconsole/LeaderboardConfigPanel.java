@@ -99,7 +99,7 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 import com.sap.sse.security.ui.client.component.DefaultActionsImagesBarCell;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog;
 import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig;
-import com.sap.sse.security.ui.client.component.SecuredObjectOwnerColumn;
+import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
 public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel implements SelectedLeaderboardProvider, RegattasDisplayer,
@@ -154,10 +154,10 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         createRegattaLeaderboardWithEliminationsBtn.ensureDebugId("CreateRegattaLeaderboardWithEliminationsButton");
         
         leaderboardRemoveButton = buttonPanel.addRemoveAction(stringMessages.remove(), new Command() {
-
+        
             @Override
             public void execute() {
-                if (askUserForConfirmation()) {
+                if(askUserForConfirmation()){
                     removeLeaderboards(leaderboardSelectionModel.getSelectedSet());
                 }
             }
@@ -168,13 +168,13 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
                             .map(StrippedLeaderboardDTO::getName).collect(Collectors.joining("\n"));
                     return Window
                             .confirm(stringMessages.doYouReallyWantToRemoveNonVisibleLeaderboards(leaderboardNames));
-                }
+                } 
                 return Window.confirm(stringMessages.doYouReallyWantToRemoveLeaderboards());
             }
         });
         leaderboardRemoveButton.ensureDebugId("LeaderboardsRemoveButton");
         leaderboardRemoveButton.setEnabled(false);
-    }
+        }
     
     @Override
     protected void addColumnsToLeaderboardTableAndSetSelectionModel(final UserService userService, final FlushableCellTable<StrippedLeaderboardDTO> leaderboardTable,
@@ -391,7 +391,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         leaderboardTable.addColumn(leaderboardTypeColumn, stringMessages.type());
         leaderboardTable.addColumn(scoringSystemColumn, stringMessages.scoringSystem());
         leaderboardTable.addColumn(courseAreaColumn, stringMessages.courseArea());
-        SecuredObjectOwnerColumn.configureOwnerColumns(leaderboardTable, leaderboardColumnListHandler, stringMessages);
+        SecuredDTOOwnerColumn.configureOwnerColumns(leaderboardTable, leaderboardColumnListHandler, stringMessages);
         leaderboardTable.addColumn(leaderboardActionColumn, stringMessages.actions());
         leaderboardTable.addColumnSortHandler(leaderboardColumnListHandler);
         leaderboardTable.setSelectionModel(selectionCheckboxColumn.getSelectionModel(), selectionCheckboxColumn.getSelectionManager());

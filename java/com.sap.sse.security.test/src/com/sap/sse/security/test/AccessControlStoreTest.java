@@ -22,11 +22,12 @@ import com.sap.sse.security.UserImpl;
 import com.sap.sse.security.UserStore;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.RoleDefinition;
-import com.sap.sse.security.shared.UserGroup;
 import com.sap.sse.security.shared.UserGroupManagementException;
 import com.sap.sse.security.shared.UserManagementException;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.QualifiedObjectIdentifierImpl;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.security.shared.impl.UserGroupImpl;
 import com.sap.sse.security.userstore.mongodb.AccessControlStoreImpl;
 import com.sap.sse.security.userstore.mongodb.UserStoreImpl;
@@ -45,7 +46,7 @@ public class AccessControlStoreTest {
 
     private UserStore userStore;
     private AccessControlStore accessControlStore;
-    private UserImpl testOwner;
+    private User testOwner;
 
     @Before
     public void setUp() throws UnknownHostException, MongoException, UserGroupManagementException {
@@ -57,7 +58,7 @@ public class AccessControlStoreTest {
         db.getCollection(CollectionNames.ROLES.name()).drop();
         newStores();
         
-        UserGroupImpl adminTenant = new UserGroupImpl(UUID.randomUUID(), "admin-tenant");
+        UserGroup adminTenant = new UserGroupImpl(UUID.randomUUID(), "admin-tenant");
         Map<String, UserGroup> defaultTenantForUser = new HashMap<>();
         defaultTenantForUser.put("dummyServer", adminTenant);
         testOwner = new UserImpl("admin", "admin@sapsailing.com", defaultTenantForUser,
