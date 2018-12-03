@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
-import com.google.gwt.core.client.Callback;
 import com.google.gwt.user.cellview.client.AbstractCellTable;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.ListHandler;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -95,7 +94,7 @@ public class UserGroupTableWrapper extends
 
         final EditOwnershipDialog.DialogConfig<UserGroupDTO> configOwnership = EditOwnershipDialog.create(
                 userService.getUserManagementService(), type, idFactory,
-                user -> refreshUserList((Callback<Iterable<UserGroupDTO>, Throwable>) null), stringMessages);
+                user -> refreshUserList(null), stringMessages);
 
         final EditACLDialog.DialogConfig<UserGroupDTO> configACL = EditACLDialog.create(
                 userService.getUserManagementService(), type, idFactory, user -> user.getAccessControlList(),
@@ -138,7 +137,7 @@ public class UserGroupTableWrapper extends
      * @param callback
      *            optional; may be {@code null}
      */
-    public void refreshUserList(final Callback<Iterable<UserGroupDTO>, Throwable> callback) {
+    public void refreshUserList(final AsyncCallback<Iterable<UserGroupDTO>> callback) {
         final AsyncCallback<Collection<UserGroupDTO>> myCallback = new AsyncCallback<Collection<UserGroupDTO>>() {
             @Override
             public void onFailure(Throwable caught) {
