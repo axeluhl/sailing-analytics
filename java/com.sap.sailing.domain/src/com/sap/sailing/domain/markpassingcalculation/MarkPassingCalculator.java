@@ -1,8 +1,10 @@
 package com.sap.sailing.domain.markpassingcalculation;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -366,10 +368,10 @@ public class MarkPassingCalculator {
                 Map<Mark, List<GPSFix>> newMarkFixes) {
             logger.finer("Calculating markpassings for race "+raceName+" with " + newCompetitorFixes.size() + " new competitor Fixes and "
                     + newMarkFixes.size() + " new mark fixes.");
-            Map<Competitor, Set<GPSFixMoving>> combinedCompetitorFixes = new HashMap<>();
+            Map<Competitor, Collection<GPSFixMoving>> combinedCompetitorFixes = new HashMap<>();
 
             for (Entry<Competitor, List<GPSFixMoving>> competitorEntry : newCompetitorFixes.entrySet()) {
-                Set<GPSFixMoving> fixesForCompetitor = new HashSet<>();
+                Collection<GPSFixMoving> fixesForCompetitor = new LinkedList<>();
                 combinedCompetitorFixes.put(competitorEntry.getKey(), fixesForCompetitor);
                 fixesForCompetitor.addAll(competitorEntry.getValue());
             }
@@ -377,16 +379,16 @@ public class MarkPassingCalculator {
                 // FIXME bug 2745 use new mark fixes to invalidate chooser's mark position and mutual mark/waypoint distance cache
                 for (Entry<Competitor, List<GPSFixMoving>> fixesAffectedByNewMarkFixes : finder
                         .calculateFixesAffectedByNewMarkFixes(newMarkFixes).entrySet()) {
-                    Set<GPSFixMoving> fixes = combinedCompetitorFixes.get(fixesAffectedByNewMarkFixes.getKey());
+                    Collection<GPSFixMoving> fixes = combinedCompetitorFixes.get(fixesAffectedByNewMarkFixes.getKey());
                     if (fixes == null) {
-                        fixes = new HashSet<>();
+                        fixes = new LinkedList<>();
                         combinedCompetitorFixes.put(fixesAffectedByNewMarkFixes.getKey(), fixes);
                     }
                     fixes.addAll(fixesAffectedByNewMarkFixes.getValue());
                 }
             }
             List<Callable<Void>> tasks = new ArrayList<>();
-            for (final Entry<Competitor, Set<GPSFixMoving>> c : combinedCompetitorFixes.entrySet()) {
+            for (final Entry<Competitor, Collection<GPSFixMoving>> c : combinedCompetitorFixes.entrySet()) {
                 final Runnable runnable = new ComputeMarkPassings(c.getKey(), c.getValue());
                 tasks.add(new Callable<Void>() {
                     @Override

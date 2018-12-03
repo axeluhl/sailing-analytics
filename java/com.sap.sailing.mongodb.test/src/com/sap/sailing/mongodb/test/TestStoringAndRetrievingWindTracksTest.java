@@ -66,16 +66,15 @@ public class TestStoringAndRetrievingWindTracksTest extends AbstractTracTracLive
     }
     
     private Mongo newMongo() throws UnknownHostException, MongoException {
-        return new MongoClient(dbConfiguration.getHostName(),
-                dbConfiguration.getPort());
+        return new MongoClient(dbConfiguration.getMongoClientURI());
     }
     
     @Before
     public void dropTestDB() throws UnknownHostException, MongoException {
         mongo = newMongo();
         assertNotNull(mongo);
-        mongo.dropDatabase(dbConfiguration.getDatabaseName());
-        db = mongo.getDB(dbConfiguration.getDatabaseName());
+        mongo.dropDatabase(dbConfiguration.getMongoClientURI().getDatabase());
+        db = mongo.getDB(dbConfiguration.getMongoClientURI().getDatabase());
         assertNotNull(db);
     }
     

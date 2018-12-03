@@ -99,8 +99,8 @@ public class MongoSensorFixStoreImpl implements MongoSensorFixStore {
     
     @Override
     public <FixT extends Timed> boolean loadYoungestFix(Consumer<FixT> consumer, DeviceIdentifier device, TimeRange timeRangeToLoad) throws NoCorrespondingServiceRegisteredException, TransformationException {
-        return loadFixes(consumer, device, timeRangeToLoad.from(), timeRangeToLoad.to(), false, () -> false, (d) -> {
-        }, false, true);
+        return loadFixes(consumer, device, timeRangeToLoad.from(), timeRangeToLoad.to(), /* inclusive */ false, () -> false, (d) -> {
+        }, /* ascending */ false, /* only one result */ true);
     }
     
     @Override

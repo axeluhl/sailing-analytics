@@ -30,8 +30,8 @@
 							ui:field="raceLegsInfoProgressUi"></div>
 					</div>
 				</div>
-				<!-- IF END -->
-				<!-- <img src="{hsr.arrowRightGrey.getSafeUri}" class="{local_res.css.regattastatus_content_regatta_race_arrow}"></img> -->
+				<div class="{local_res.css.regattastatus_content_regatta_race_arrow}"
+					style="display:none;" ui:field="actionArrowUi"></div>
 			</div>
 		</a>
 	</g:HTMLPanel>

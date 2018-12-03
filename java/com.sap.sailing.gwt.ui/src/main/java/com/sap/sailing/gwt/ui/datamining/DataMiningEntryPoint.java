@@ -29,6 +29,7 @@ import com.sap.sailing.gwt.ui.shared.settings.SailingSettingsConstants;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.UUIDDataMiningSession;
+import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.ui.client.AnchorDataMiningSettingsControl;
 import com.sap.sse.datamining.ui.client.CompositeResultsPresenter;
 import com.sap.sse.datamining.ui.client.DataMiningService;
@@ -130,10 +131,10 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                             if (queryIdentifier.equals(json.get("uuid").isString().stringValue())) {
                                 String serializedQuery = json.get("payload").isString().stringValue();
                                 dataMiningService.getDeserializedQuery(serializedQuery,
-                                        new AsyncCallback<StatisticQueryDefinitionDTO>() {
+                                        new AsyncCallback<ModifiableStatisticQueryDefinitionDTO>() {
 
                                             @Override
-                                            public void onSuccess(StatisticQueryDefinitionDTO result) {
+                                            public void onSuccess(ModifiableStatisticQueryDefinitionDTO result) {
                                                 queryDefinitionProvider.applyQueryDefinition(result);
                                                 queryRunner.run(result);
                                             }

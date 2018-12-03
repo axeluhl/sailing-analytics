@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.dto.TagDTO;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.raceboard.tagging.TaggingPanelResources.TagPanelStyle;
+import com.sap.sse.common.Util;
 import com.sap.sse.gwt.adminconsole.URLFieldWithFileUpload;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog;
 import com.sap.sse.gwt.client.dialog.DataEntryDialog.DialogCallback;
@@ -266,8 +267,10 @@ public class TagInputPanel extends FlowPanel {
      *         <code>false</code>
      */
     protected boolean compareFieldsToTag(TagDTO tag) {
-        return tag != null && getTag().equals(tag.getTag()) && getComment().equals(tag.getComment())
-                && getImageURL().equals(tag.getImageURL()) && isVisibleForPublic() == tag.isVisibleForPublic();
+        return tag != null && getTag().equals(tag.getTag()) && Util.equalsWithNull(getComment(), tag.getComment())
+                && (Util.equalsWithNull(getImageURL(), tag.getImageURL())
+                        || (getImageURL() == null && tag.getImageURL() == ""))
+                && isVisibleForPublic() == tag.isVisibleForPublic();
     }
 
     /**
@@ -279,8 +282,9 @@ public class TagInputPanel extends FlowPanel {
      *         <code>false</code>
      */
     protected boolean compareFieldsToTagButton(TagButton tagButton) {
-        return tagButton != null && getTag().equals(tagButton.getTag()) && getComment().equals(tagButton.getComment())
-                && getImageURL().equals(tagButton.getImageURL())
+        return tagButton != null && getTag().equals(tagButton.getTag()) && Util.equalsWithNull(getComment(), tagButton.getComment())
+                && (Util.equalsWithNull(getImageURL(), tagButton.getImageURL())
+                        || (getImageURL() == null && tagButton.getImageURL() == ""))
                 && isVisibleForPublic() == tagButton.isVisibleForPublic();
     }
 
