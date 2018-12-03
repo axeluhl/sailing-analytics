@@ -1005,9 +1005,12 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
         for (Competitor competitor : getCompetitorAndBoatStore().getAllCompetitors()) {
             securityService.migrateOwnership(competitor, SecuredDomainType.getAllInstances());
         }
+        securityService.assumeOwnershipMigrated(SecuredDomainType.COMPETITOR.getName(),
+                SecuredDomainType.getAllInstances());
         for (Boat boat : getCompetitorAndBoatStore().getBoats()) {
             securityService.migrateOwnership(boat, SecuredDomainType.getAllInstances());
         }
+        securityService.assumeOwnershipMigrated(SecuredDomainType.BOAT.getName(), SecuredDomainType.getAllInstances());
 
         securityService.checkMigration(SecuredDomainType.getAllInstances());
     }
