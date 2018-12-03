@@ -33,7 +33,9 @@ import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
 /**
- * @param <S>
+ * A wrapper for a CellTable displaying an overview over the existing UserGroups. It shows the User-Group name, the
+ * group and user each user group is owned by and options to delete the group, change the ownership or edit the
+ * associated ACL.
  */
 public class UserGroupTableWrapper extends
         TableWrapper<UserGroupDTO, RefreshableSingleSelectionModel<UserGroupDTO>, StringMessages, CellTableWithCheckboxResources> {

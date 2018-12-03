@@ -23,28 +23,57 @@ import com.sap.sse.security.ui.client.UserService;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.shared.SuccessInfo;
 
+/**
+ * Shows a {@link UserGroupTableWrapper} with an overview over all existing user groups and allows them to be edited via
+ * a {@link UserGroupDetailPanel}.
+ */
 public class UserGroupManagementPanel extends DockPanel {
-    // private SingleSelectionModel<UserGroupDTO> userGroupSingleSelectionModel;
-    private UserGroupListDataProvider userGroupListDataProvider;
+    private final UserGroupListDataProvider userGroupListDataProvider;
     private UserGroupDetailPanel userGroupDetailPanel;
 
     private final UserGroupTableWrapper userGroupTableWrapper;
 
-    private UserService userService;
+    private final UserManagementServiceAsync userManagementService;
 
     public UserGroupManagementPanel(final UserService userService, final StringMessages stringMessages,
             Iterable<HasPermissions> additionalPermissions, ErrorReporter errorReporter,
             CellTableWithCheckboxResources tableResources) {
-        this.userService = userService;
-        final UserManagementServiceAsync userManagementService = userService.getUserManagementService();
-        VerticalPanel west = new VerticalPanel();
-        HorizontalPanel buttonPanel = new HorizontalPanel();
+        userManagementService = userService.getUserManagementService();
+        final VerticalPanel west = new VerticalPanel();
+
+        // create button bar
+        final HorizontalPanel buttonPanel = createButtonPanel(userService, stringMessages, userManagementService);
         west.add(buttonPanel);
+
+        // create UserGroup Table
+        userGroupListDataProvider = new UserGroupListDataProvider(userManagementService, new TextBox());
+        userGroupTableWrapper = new UserGroupTableWrapper(userService, additionalPermissions, stringMessages,
+                errorReporter, /* enablePager */ true, tableResources, () -> updateUserGroups());
+
+        final ScrollPanel scrollPanel = new ScrollPanel(userGroupTableWrapper.asWidget());
+        final LabeledAbstractFilterablePanel<UserGroupDTO> userGroupfilterBox = userGroupTableWrapper.getFilterField();
+        userGroupfilterBox.getElement().setPropertyString("placeholder", stringMessages.filterUserGroups());
+
+        west.add(userGroupfilterBox);
+        west.add(scrollPanel);
+
+        // create Details Panel
+        final HorizontalPanel listsWrapper = createUserGroupDetailsPanel(stringMessages, userManagementService);
+        west.add(listsWrapper);
+
+        add(west, DockPanel.WEST);
+
+    }
+
+    /** Creates the button bar with add/remove/refresh buttons. */
+    private HorizontalPanel createButtonPanel(final UserService userService, final StringMessages stringMessages,
+            final UserManagementServiceAsync userManagementService) {
+        final HorizontalPanel buttonPanel = new HorizontalPanel();
 
         buttonPanel.add(new Button(stringMessages.refresh(), new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-                updateUserGroupsAndUsers();
+                updateUserGroups();
             }
         }));
         buttonPanel.add(new Button(stringMessages.createUserGroup(), new ClickHandler() {
@@ -67,7 +96,7 @@ public class UserGroupManagementPanel extends DockPanel {
                                 public void onSuccess(SuccessInfo result) {
                                     userGroupListDataProvider.updateDisplays();
                                     Window.alert(result.getMessage());
-                                    updateUserGroupsAndUsers();
+                                    updateUserGroups();
                                 }
 
                                 @Override
@@ -78,57 +107,44 @@ public class UserGroupManagementPanel extends DockPanel {
                 }
             }
         }));
-        final TextBox filterBox = new TextBox();
-        filterBox.getElement().setPropertyString("placeholder", stringMessages.filterUserGroups());
-        userGroupListDataProvider = new UserGroupListDataProvider(userManagementService, new TextBox());
-        TextBox userFilterBox = new TextBox();
+        return buttonPanel;
+    }
+
+    /** Creates the UserGroupDetailsPanel which contains details about the selected user group */
+    private HorizontalPanel createUserGroupDetailsPanel(final StringMessages stringMessages,
+            final UserManagementServiceAsync userManagementService) {
+        final TextBox userFilterBox = new TextBox();
         userFilterBox.getElement().setPropertyString("placeholder", stringMessages.filterUsers());
-
-        // User Group Table
-        userGroupTableWrapper = new UserGroupTableWrapper(userService, additionalPermissions, stringMessages,
-                errorReporter, /* enablePager */ true, tableResources, () -> updateUserGroupsAndUsers());
-
-        ScrollPanel scrollPanel = new ScrollPanel(userGroupTableWrapper.asWidget());
-        LabeledAbstractFilterablePanel<UserGroupDTO> usergroupfilterBox = userGroupTableWrapper
-                .getFilterField();
-        usergroupfilterBox.getElement().setPropertyString("placeholder", stringMessages.filterUserGroups());
-        west.add(usergroupfilterBox);
-        west.add(scrollPanel);
-        add(west, DockPanel.WEST);
-
         userGroupDetailPanel = new UserGroupDetailPanel(userFilterBox, userGroupTableWrapper.getSelectionModel(),
                 userGroupListDataProvider, userManagementService, stringMessages);
 
-        VerticalPanel userListWrapper = new VerticalPanel();
+        final VerticalPanel userListWrapper = new VerticalPanel();
         userListWrapper.add(userFilterBox);
         userListWrapper.add(userGroupDetailPanel);
-        CaptionPanel userListCaption = new CaptionPanel(stringMessages.users());
+        final CaptionPanel userListCaption = new CaptionPanel(stringMessages.users());
         userListCaption.add(userListWrapper);
-        HorizontalPanel listsWrapper = new HorizontalPanel();
+        final HorizontalPanel listsWrapper = new HorizontalPanel();
         listsWrapper.add(userListCaption);
-        west.add(listsWrapper);
-
         listsWrapper.setVisible(false);
         userGroupTableWrapper.getSelectionModel().addSelectionChangeHandler(
                 h -> listsWrapper.setVisible(userGroupTableWrapper.getSelectionModel().getSelectedObject() != null));
-        add(west, DockPanel.WEST);
-
+        return listsWrapper;
     }
 
-    public void updateUserGroupsAndUsers() {
-        userService.getUserManagementService()
-                .getUserGroups(new AsyncCallback<Collection<UserGroupDTO>>() {
+    /** Updates the UserGroups. */
+    public void updateUserGroups() {
+        userManagementService.getUserGroups(new AsyncCallback<Collection<UserGroupDTO>>() {
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        Window.alert(caught.getMessage());
-                    }
+            @Override
+            public void onFailure(Throwable caught) {
+                Window.alert(caught.getMessage());
+            }
 
-                    @Override
-                    public void onSuccess(Collection<UserGroupDTO> result) {
-                        userGroupTableWrapper.refreshUserGroups(result);
-                    }
-                });
+            @Override
+            public void onSuccess(Collection<UserGroupDTO> result) {
+                userGroupTableWrapper.refreshUserGroups(result);
+            }
+        });
         userGroupListDataProvider.updateDisplays();
         userGroupDetailPanel.updateLists();
     }

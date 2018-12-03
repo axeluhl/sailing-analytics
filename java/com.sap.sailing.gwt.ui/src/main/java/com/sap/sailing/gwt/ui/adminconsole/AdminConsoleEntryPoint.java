@@ -329,7 +329,7 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
                 new DefaultRefreshableAdminConsolePanel<UserGroupManagementPanel>(userGroupManagementPanel) {
                     @Override
                     public void refreshAfterBecomingVisible() {
-                        userGroupManagementPanel.updateUserGroupsAndUsers();
+                        userGroupManagementPanel.updateUserGroups();
                     }
                 }, getStringMessages().userGroupManagement(), SecuredSecurityTypes.USER_GROUP.getPermission(DefaultActions.MUTATION_ACTIONS));
 
