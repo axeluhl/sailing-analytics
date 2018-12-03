@@ -283,7 +283,9 @@ public class SecurityDTOFactory {
             Iterable<StrippedUserGroupDTO> allUserGroups) {
         final AccessControlListDTO result;
         final Collection<StrippedUserGroupDTO> userGroups = Util.createSet(filterForUser.getUserGroups());
-        userGroups.addAll(Util.createSet(allUserGroups));
+        if (allUserGroups != null) {
+            userGroups.addAll(Util.createSet(allUserGroups));
+        }
 
         if (acl != null) {
             final Map<StrippedUserGroupDTO, Set<String>> actionsByUserGroup = new HashMap<>();

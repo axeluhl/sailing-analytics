@@ -111,7 +111,7 @@ public abstract class SecurityDTOUtil {
             if (user != null) {
                 StrippedUserDTO userDTO = new SecurityDTOFactory().createStrippedUserFromUser(user, securityService,
                         fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup);
-                final Iterable<StrippedUserGroupDTO> allUserGroups2 = getAlluserGroups(securityService,
+                final Iterable<StrippedUserGroupDTO> allUserGroups2 = getUserGroupsForAlluser(securityService,
                         securityDTOFactory);
                 securedObject.setAccessControlList(
                         securityDTOFactory.pruneAccessControlListForUser(accessControlListDTO, userDTO,
@@ -124,12 +124,14 @@ public abstract class SecurityDTOUtil {
                         fromOriginalToStrippedDownUser, fromOriginalToStrippedDownUserGroup));
     }
 
-    /** Get groups for the user alluser. */
-    private static Iterable<StrippedUserGroupDTO> getAlluserGroups(SecurityService securityService,
+    /** Get the UserGroups for the user alluser. */
+    private static Iterable<StrippedUserGroupDTO> getUserGroupsForAlluser(SecurityService securityService,
             SecurityDTOFactory securityDTOFactory) {
         if (allUserGroups == null) {
+            if (securityService.getAllUser() != null) {
             allUserGroups = securityDTOFactory.createStrippedUserGroupDTOFromUserGroups(
                     securityService.getAllUser().getUserGroups(), new HashMap<>());
+            }
         }
         return allUserGroups;
     }
