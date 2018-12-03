@@ -28,6 +28,7 @@ import com.sap.sailing.gwt.ui.shared.settings.SailingSettingsConstants;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.UUIDDataMiningSession;
+import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.ui.client.AnchorDataMiningSettingsControl;
 import com.sap.sse.datamining.ui.client.CompositeResultsPresenter;
 import com.sap.sse.datamining.ui.client.DataMiningService;
@@ -51,8 +52,9 @@ import com.sap.sse.security.ui.authentication.generic.GenericAuthorizedContentDe
 import com.sap.sse.security.ui.authentication.generic.sapheader.SAPHeaderWithAuthentication;
 
 public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
-    private static final Logger LOG = Logger.getLogger(DataMiningEntryPoint.class.getName());
+
     public static final ComponentResources resources = GWT.create(ComponentResources.class);
+    private static final Logger LOG = Logger.getLogger(DataMiningEntryPoint.class.getName());
 
     private final DataMiningServiceAsync dataMiningService = GWT.create(DataMiningService.class);
     private DataMiningSession session;
@@ -67,7 +69,7 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
         runWithServerInfo(serverInfo -> createDataminingPanel(serverInfo, Window.Location.getParameter("q")));
     }
 
-    private void createDataminingPanel(ServerInfoDTO serverInfo, String queryIdentifier) {
+    private void createDataminingPanel(ServerInfoDTO serverInfo, final String queryIdentifier) {
         removeUrlParameter();
         SAPHeaderWithAuthentication header = new SAPSailingHeaderWithAuthentication(getStringMessages().dataMining());
         GenericAuthentication genericSailingAuthentication = new FixedSailingAuthentication(getUserService(),
@@ -133,9 +135,10 @@ public class DataMiningEntryPoint extends AbstractSailingEntryPoint {
                             if (queryIdentifier.equals(json.get("uuid").isString().stringValue())) {
                                 String serializedQuery = json.get("payload").isString().stringValue();
                                 dataMiningService.getDeserializedQuery(serializedQuery,
-                                        new AsyncCallback<StatisticQueryDefinitionDTO>() {
+                                        new AsyncCallback<ModifiableStatisticQueryDefinitionDTO>() {
+
                                             @Override
-                                            public void onSuccess(StatisticQueryDefinitionDTO result) {
+                                            public void onSuccess(ModifiableStatisticQueryDefinitionDTO result) {
                                                 queryDefinitionProvider.applyQueryDefinition(result);
                                                 queryRunner.run(result);
                                             }
