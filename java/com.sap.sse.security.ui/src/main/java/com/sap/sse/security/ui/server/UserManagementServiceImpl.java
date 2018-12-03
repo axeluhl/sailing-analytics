@@ -494,71 +494,70 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             throws UnauthorizedException {
         final boolean isUserPermittedToGrantPermissionsForOtherUser = SecurityUtils.getSubject().isPermitted(
                 SecuredSecurityTypes.USER.getStringPermissionForObjects(UserActions.GRANT_PERMISSION, username));
-        final boolean isUserPermittedToRevokePermissionsForOtherUser = SecurityUtils.getSubject().isPermitted(SecuredSecurityTypes.USER
-                .getStringPermissionForObjects(UserActions.REVOKE_PERMISSION, username));
-        if (!isUserPermittedToGrantPermissionsForOtherUser
-                && !isUserPermittedToRevokePermissionsForOtherUser) {
-            return new SuccessInfo(false, "Not permitted to grant or revoke permissions for user " + username,
-                    /* redirectURL */null, null);
-        } else {
-            User u = getSecurityService().getUserByName(username);
-            if (u == null) {
-                return new SuccessInfo(false, "User does not exist.", /* redirectURL */ null, null);
-            }
-            Set<Role> rolesToSet = new HashSet<>();
-            for (final Triple<UUID, String, String> roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet : roleDefinitionIdAndTenantQualifierNameAndUsernames) {
-                final UserGroup tenant;
-                if (roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet.getB() == null || roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet.getB().trim().isEmpty()) {
-                    tenant = null;
-                } else {
-                    tenant = getSecurityService().getUserGroupByName(roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet.getB());
-                    if (tenant == null) {
-                        return new SuccessInfo(false, "Tenant "+roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet.getB()+
-                                " does not exist.", /* redirectURL */ null, /* userDTO */ null);
-                    }
-                }
-                try {
-                    rolesToSet.add(createRoleFromIDs(roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet.getA(),
-                            tenant==null?null:tenant.getId(), roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet.getC()));
-                } catch (UserManagementException e) {
-                    return new SuccessInfo(false, e.getMessage(), /* redirectURL */ null, /* userDTO */ null);
-                }
-            }
-            Set<Role> roleDefinitionsToRemove = new HashSet<>();
-            Util.addAll(u.getRoles(), roleDefinitionsToRemove);
-            Util.removeAll(rolesToSet, roleDefinitionsToRemove);
-            if (!roleDefinitionsToRemove.isEmpty() && !isUserPermittedToRevokePermissionsForOtherUser) {
-                return new SuccessInfo(false, "Not permitted to revoke permissions for user " + username,
-                        /* redirectURL */null, null);
-            }
-            Set<Role> rolesToAdd = new HashSet<>();
-            Util.addAll(rolesToSet, rolesToAdd);
-            Util.removeAll(u.getRoles(), rolesToAdd);
-            if (!rolesToAdd.isEmpty() && !isUserPermittedToGrantPermissionsForOtherUser) {
-                return new SuccessInfo(false, "Not permitted to grant permissions for user " + username,
-                        /* redirectURL */null, null);
-            }
-            for (Role roleToAdd : rolesToAdd) {
-                for (WildcardPermission permissionOfRoleToAdd : roleToAdd.getPermissions()) {
-                    if (!getSecurityService().hasCurrentUserMetaPermission(permissionOfRoleToAdd, roleToAdd.getQualificationAsOwnership())) {
-                        return new SuccessInfo(false,
-                                "Not permitted to grant role " + roleToAdd.getName() + " for user " + username,
-                                /* redirectURL */null, null);
-                    }
-                }
-            }
-            for (Role roleToRemove : roleDefinitionsToRemove) {
-                getSecurityService().removeRoleFromUser(u, roleToRemove);
-            }
-            for (Role roleToAdd : rolesToAdd) {
-                getSecurityService().addRoleForUser(u, roleToAdd);
-            }
-            final String message = "Set roles " + roleDefinitionIdAndTenantQualifierNameAndUsernames + " for user " + username;
-            logger.info(message);
-            final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(u, getSecurityService());
-            return new SuccessInfo(true, message, /* redirectURL */null,
-                    new Pair<UserDTO, UserDTO>(userDTO, getAllUser()));
+        final boolean isUserPermittedToRevokePermissionsForOtherUser = SecurityUtils.getSubject().isPermitted(
+                SecuredSecurityTypes.USER.getStringPermissionForObjects(UserActions.REVOKE_PERMISSION, username));
+        User u = getSecurityService().getUserByName(username);
+        if (u == null) {
+            return new SuccessInfo(false, "User does not exist.", /* redirectURL */ null, null);
         }
+        Set<Role> rolesToSet = new HashSet<>();
+        for (final Triple<UUID, String, String> roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet : roleDefinitionIdAndTenantQualifierNameAndUsernames) {
+            final UserGroup tenant;
+            if (roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet.getB() == null
+                    || roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet.getB().trim().isEmpty()) {
+                tenant = null;
+            } else {
+                tenant = getSecurityService()
+                        .getUserGroupByName(roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet.getB());
+                if (tenant == null) {
+                    return new SuccessInfo(false, "Tenant "
+                            + roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet.getB() + " does not exist.",
+                            /* redirectURL */ null, /* userDTO */ null);
+                }
+            }
+            try {
+                rolesToSet.add(createRoleFromIDs(roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet.getA(),
+                        tenant == null ? null : tenant.getId(),
+                        roleDefinitionIdAndTenantQualifierNameAndUsernameOfRoleToSet.getC()));
+            } catch (UserManagementException e) {
+                return new SuccessInfo(false, e.getMessage(), /* redirectURL */ null, /* userDTO */ null);
+            }
+        }
+        Set<Role> roleDefinitionsToRemove = new HashSet<>();
+        Util.addAll(u.getRoles(), roleDefinitionsToRemove);
+        Util.removeAll(rolesToSet, roleDefinitionsToRemove);
+        if (!roleDefinitionsToRemove.isEmpty() && !isUserPermittedToRevokePermissionsForOtherUser) {
+            return new SuccessInfo(false, "Not permitted to revoke permissions for user " + username,
+                    /* redirectURL */null, null);
+        }
+        Set<Role> rolesToAdd = new HashSet<>();
+        Util.addAll(rolesToSet, rolesToAdd);
+        Util.removeAll(u.getRoles(), rolesToAdd);
+        if (!rolesToAdd.isEmpty() && !isUserPermittedToGrantPermissionsForOtherUser) {
+            return new SuccessInfo(false, "Not permitted to grant permissions for user " + username,
+                    /* redirectURL */null, null);
+        }
+        for (Role roleToAdd : rolesToAdd) {
+            for (WildcardPermission permissionOfRoleToAdd : roleToAdd.getPermissions()) {
+                if (!getSecurityService().hasCurrentUserMetaPermission(permissionOfRoleToAdd,
+                        roleToAdd.getQualificationAsOwnership())) {
+                    return new SuccessInfo(false,
+                            "Not permitted to grant role " + roleToAdd.getName() + " for user " + username,
+                            /* redirectURL */null, null);
+                }
+            }
+        }
+        for (Role roleToRemove : roleDefinitionsToRemove) {
+            getSecurityService().removeRoleFromUser(u, roleToRemove);
+        }
+        for (Role roleToAdd : rolesToAdd) {
+            getSecurityService().addRoleForUser(u, roleToAdd);
+        }
+        final String message = "Set roles " + roleDefinitionIdAndTenantQualifierNameAndUsernames + " for user "
+                + username;
+        logger.info(message);
+        final UserDTO userDTO = securityDTOFactory.createUserDTOFromUser(u, getSecurityService());
+        return new SuccessInfo(true, message, /* redirectURL */null, new Pair<UserDTO, UserDTO>(userDTO, getAllUser()));
     }
     
     private Role createRoleFromIDs(UUID roleDefinitionId, UUID qualifyingTenantId, String qualifyingUsername) throws UserManagementException {
