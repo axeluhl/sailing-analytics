@@ -37,7 +37,7 @@ public class SecuredSecurityTypes<T> extends HasPermissionsImpl<T> {
     /**
      * type-relative identifier is the {@link User#getName() username}.
      */
-    public static final HasPermissions USER = new SecuredSecurityTypes<>("USER", IdentifierStrategy.NO_OP, DefaultActions.plus(UserActions.GRANT_PERMISSION, UserActions.REVOKE_PERMISSION));
+    public static final HasPermissions USER = new SecuredSecurityTypes<>("USER", IdentifierStrategy.NAMED, DefaultActions.plus(UserActions.GRANT_PERMISSION, UserActions.REVOKE_PERMISSION));
 
     /**
      * type-relative identifier is the {@link RoleDefinition#getId() role ID's} string representation

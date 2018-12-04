@@ -4,12 +4,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sap.sse.common.Named;
 import com.sap.sse.common.Util;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.impl.Ownership;
 
 public class UserDTO extends StrippedUserDTO
-        implements Serializable, SecuredDTO {
+        implements Named, Serializable, SecuredDTO {
 
     private static final long serialVersionUID = 7556217539893146187L;
 

@@ -3,9 +3,10 @@ package com.sap.sailing.gwt.ui.shared;
 import java.util.UUID;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import com.sap.sse.common.WithID;
 import com.sap.sse.security.shared.dto.NamedSecuredObjectDTO;
 
-public class LeaderboardGroupBaseDTO extends NamedSecuredObjectDTO implements IsSerializable {
+public class LeaderboardGroupBaseDTO extends NamedSecuredObjectDTO implements WithID, IsSerializable {
     
     private static final long serialVersionUID = -4276452763988957L;
     private UUID id;

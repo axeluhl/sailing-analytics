@@ -1,5 +1,7 @@
 package com.sap.sailing.domain.common.dto;
 
+import java.io.Serializable;
+
 import com.sap.sse.common.Color;
 import com.sap.sse.common.Duration;
 import com.sap.sse.security.shared.dto.NamedSecuredObjectDTO;
@@ -86,6 +88,12 @@ public class PreviousCompetitorDTOImpl extends NamedSecuredObjectDTO implements 
 
     @Override
     public String getIdAsString() {
+        throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
+                " need to be replaced by an object of "+CompetitorWithBoatDTOImpl.class.getName()+" after deserialization");
+    }
+
+    @Override
+    public Serializable getId() {
         throw new RuntimeException("Internal error. Objects of type "+PreviousCompetitorDTOImpl.class.getName()+
                 " need to be replaced by an object of "+CompetitorWithBoatDTOImpl.class.getName()+" after deserialization");
     }

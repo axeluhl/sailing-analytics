@@ -189,6 +189,11 @@ public class CompetitorDTOImpl extends NamedSecuredObjectDTO implements Competit
     }
 
     @Override
+    public Serializable getId() {
+        return idAsString;
+    }
+
+    @Override
     public Color getColor() {
         return color;
     }
