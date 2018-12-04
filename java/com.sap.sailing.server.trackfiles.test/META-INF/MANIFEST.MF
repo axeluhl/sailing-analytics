@@ -17,6 +17,7 @@ Require-Bundle: com.tractrac.clientmodule;bundle-version="2.0.0",
  org.mockito.mockito-core;bundle-version="1.9.5",
  org.objenesis;bundle-version="1.3.0",
  com.sap.sse.common,
+ com.sap.sse.security.common
 Import-Package:  javax.xml.bind,
  com.sun.istack,
  com.sun.istack.localization,
