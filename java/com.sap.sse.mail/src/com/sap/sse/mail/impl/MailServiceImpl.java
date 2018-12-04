@@ -163,7 +163,8 @@ public class MailServiceImpl implements ReplicableMailService {
 
     @Override
     public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
-        return new ObjectInputStreamResolvingAgainstCache<MailServiceResolver>(is, mailServiceResolver) {};
+        return new ObjectInputStreamResolvingAgainstCache<MailServiceResolver>(is, mailServiceResolver, null) {
+        };
     }
 
     @Override
