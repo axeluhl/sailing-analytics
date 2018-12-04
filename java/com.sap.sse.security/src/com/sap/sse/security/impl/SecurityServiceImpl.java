@@ -976,7 +976,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     public Iterable<RoleDefinition> getRoleDefinitions() {
         Collection<RoleDefinition> result = new ArrayList<>();
         filterObjectsWithPermissionForCurrentUser(SecuredSecurityTypes.ROLE_DEFINITION, DefaultActions.READ,
-                userStore.getRoleDefinitions(), t -> t.getId().toString(), t -> result.add(t));
+                userStore.getRoleDefinitions(), t -> result.add(t));
         return result;
     }
 
@@ -1633,11 +1633,11 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public <T> void filterObjectsWithPermissionForCurrentUser(HasPermissions permittedObject,
-            HasPermissions.Action action, Iterable<T> objectsToFilter, Function<T, String> objectIdExtractor,
+            HasPermissions.Action action, Iterable<T> objectsToFilter,
             Consumer<T> filteredObjectsConsumer) {
         objectsToFilter.forEach(objectToCheck -> {
             if (SecurityUtils.getSubject().isPermitted(
-                    permittedObject.getStringPermissionForObjects(action, objectIdExtractor.apply(objectToCheck)))) {
+                    permittedObject.getStringPermissionForObjects(action, permittedObject.identifierStrategy().getIdentifierAsString(objectToCheck)))) {
                 filteredObjectsConsumer.accept(objectToCheck);
             }
         });
@@ -1645,10 +1645,10 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public <T> void filterObjectsWithPermissionForCurrentUser(HasPermissions permittedObject,
-            HasPermissions.Action[] actions, Iterable<T> objectsToFilter, Function<T, String> objectIdExtractor,
+            HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
             Consumer<T> filteredObjectsConsumer) {
         objectsToFilter.forEach(objectToCheck -> {
-            String typeRelativeObjectIdentifier = objectIdExtractor.apply(objectToCheck);
+            String typeRelativeObjectIdentifier = permittedObject.identifierStrategy().getIdentifierAsString(objectToCheck);
             boolean isPermitted = actions.length > 0;
             for (int i = 0; i < actions.length; i++) {
                 isPermitted &= SecurityUtils.getSubject().isPermitted(
@@ -1662,19 +1662,19 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     @Override
     public <T, R> List<R> mapAndFilterByReadPermissionForCurrentUser(HasPermissions permittedObject,
-            Iterable<T> objectsToFilter, Function<T, String> objectIdExtractor, Function<T, R> filteredObjectsMapper) {
+            Iterable<T> objectsToFilter, Function<T, R> filteredObjectsMapper) {
         final List<R> result = new ArrayList<>();
         filterObjectsWithPermissionForCurrentUser(permittedObject, DefaultActions.READ, objectsToFilter,
-                objectIdExtractor, filteredObject -> result.add(filteredObjectsMapper.apply(filteredObject)));
+                filteredObject -> result.add(filteredObjectsMapper.apply(filteredObject)));
         return result;
     }
     
     @Override
     public <T, R> List<R> mapAndFilterByExplicitPermissionForCurrentUser(HasPermissions permittedObject,
-            HasPermissions.Action[] actions, Iterable<T> objectsToFilter, Function<T, String> objectIdExtractor,
+            HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
             Function<T, R> filteredObjectsMapper) {
         final List<R> result = new ArrayList<>();
-        filterObjectsWithPermissionForCurrentUser(permittedObject, actions, objectsToFilter, objectIdExtractor,
+        filterObjectsWithPermissionForCurrentUser(permittedObject, actions, objectsToFilter,
                 filteredObject -> result.add(filteredObjectsMapper.apply(filteredObject)));
         return result;
     }

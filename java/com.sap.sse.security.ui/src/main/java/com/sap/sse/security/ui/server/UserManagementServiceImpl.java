@@ -251,7 +251,7 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
         Map<User, StrippedUserDTO> fromOriginalToStrippedDownUser = new HashMap<>();
         Map<UserGroup, StrippedUserGroupDTO> fromOriginalToStrippedDownUserGroup = new HashMap<>();
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredSecurityTypes.USER_GROUP,
-                getSecurityService().getUserGroupList(), ug -> ug.getId().toString(),
+                getSecurityService().getUserGroupList(),
                 ug -> securityDTOFactory.createUserGroupDTOFromUserGroup(ug, fromOriginalToStrippedDownUser,
                         fromOriginalToStrippedDownUserGroup, getSecurityService()));
     }

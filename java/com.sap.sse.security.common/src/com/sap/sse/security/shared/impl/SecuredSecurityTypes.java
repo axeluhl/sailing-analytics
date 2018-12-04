@@ -42,12 +42,12 @@ public class SecuredSecurityTypes<T> extends HasPermissionsImpl<T> {
     /**
      * type-relative identifier is the {@link RoleDefinition#getId() role ID's} string representation
      */
-    public static final HasPermissions ROLE_DEFINITION = new SecuredSecurityTypes<>("ROLE_DEFINITION", IdentifierStrategy.NO_OP);
+    public static final HasPermissions ROLE_DEFINITION = new SecuredSecurityTypes<>("ROLE_DEFINITION", IdentifierStrategy.ID);
     
     /**
      * type-relative identifier is the {@link UserGroupImpl#getId() group ID's} string representation
      */
-    public static final HasPermissions USER_GROUP = new SecuredSecurityTypes<>("USER_GROUP", IdentifierStrategy.NO_OP);
+    public static final HasPermissions USER_GROUP = new SecuredSecurityTypes<>("USER_GROUP", IdentifierStrategy.ID);
 
     public static enum ServerActions implements Action {
         CONFIGURE_FILE_STORAGE,

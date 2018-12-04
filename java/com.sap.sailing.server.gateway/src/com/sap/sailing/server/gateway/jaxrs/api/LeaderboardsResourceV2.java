@@ -120,7 +120,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
             List<CompetitorDTO> filteredCompetitorsFromBestToWorst = new ArrayList<>();
             getSecurityService().filterObjectsWithPermissionForCurrentUser(SecuredDomainType.COMPETITOR,
                     SecuredDomainType.CompetitorAndBoatActions.LIST, competitorsFromBestToWorst,
-                    competitor -> competitor.getIdAsString(), filteredCompetitorsFromBestToWorst::add);
+                    filteredCompetitorsFromBestToWorst::add);
             for (CompetitorDTO competitor: filteredCompetitorsFromBestToWorst) {
                 LeaderboardRowDTO row = leaderboardDTO.rows.get(competitor);
                 LeaderboardEntryDTO leaderboardEntry = row.fieldsByRaceColumnName.get(raceColumnName);                
@@ -144,7 +144,7 @@ public class LeaderboardsResourceV2 extends AbstractLeaderboardsResource {
         List<CompetitorDTO> filteredCompetitors = new ArrayList<>();
         getSecurityService().filterObjectsWithPermissionForCurrentUser(SecuredDomainType.COMPETITOR,
                 SecuredDomainType.CompetitorAndBoatActions.LIST, leaderboardDTO.competitors,
-                competitor -> competitor.getIdAsString(), filteredCompetitors::add);
+                filteredCompetitors::add);
         for (CompetitorDTO competitor : filteredCompetitors) {
             LeaderboardRowDTO leaderboardRowDTO = leaderboardDTO.rows.get(competitor);
             if (maxCompetitorsCount != null && competitorCounter > maxCompetitorsCount) {

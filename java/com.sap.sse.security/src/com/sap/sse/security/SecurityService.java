@@ -352,17 +352,17 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     <T> void filterObjectsWithPermissionForCurrentUser(HasPermissions permittedObject,
             com.sap.sse.security.shared.HasPermissions.Action action, Iterable<T> objectsToFilter,
-            Function<T, String> objectIdExtractor, Consumer<T> filteredObjectsConsumer);
+            Consumer<T> filteredObjectsConsumer);
 
     <T> void filterObjectsWithPermissionForCurrentUser(HasPermissions permittedObject,
             com.sap.sse.security.shared.HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
-            Function<T, String> objectIdExtractor, Consumer<T> filteredObjectsConsumer);
+            Consumer<T> filteredObjectsConsumer);
 
     <T, R> List<R> mapAndFilterByReadPermissionForCurrentUser(HasPermissions permittedObject,
-            Iterable<T> objectsToFilter, Function<T, String> objectIdExtractor, Function<T, R> filteredObjectsMapper);
+            Iterable<T> objectsToFilter, Function<T, R> filteredObjectsMapper);
 
     <T, R> List<R> mapAndFilterByExplicitPermissionForCurrentUser(HasPermissions permittedObject,
-            HasPermissions.Action[] actions, Iterable<T> objectsToFilter, Function<T, String> objectIdExtractor,
+            HasPermissions.Action[] actions, Iterable<T> objectsToFilter,
             Function<T, R> filteredObjectsMapper);
 
     boolean hasCurrentUserReadPermission(WithQualifiedObjectIdentifier object);

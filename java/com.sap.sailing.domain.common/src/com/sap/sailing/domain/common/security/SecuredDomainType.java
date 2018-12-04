@@ -66,6 +66,7 @@ public class SecuredDomainType<T> extends HasPermissionsImpl<T> {
      * type-relative identifier is the regatta name and the race definition name, encoded using the
      * {@link WildcardPermissionEncoder#encodeStringList(String...)} method
      */
+    //TODO: RaceDTO.getTypeRelativeIdentifierAsString
     public static final HasPermissions TRACKED_RACE = new SecuredDomainType<>("TRACKED_RACE", IdentifierStrategy.TO_SPECIFY);
     
     public static enum CompetitorAndBoatActions implements Action {
@@ -113,10 +114,13 @@ public class SecuredDomainType<T> extends HasPermissionsImpl<T> {
     /**
      * type-relative identifier is the jsonurl of the configuration: TracTracConfiguration::getJsonUrl
      */
+    //TODO: TracTracConfiguration::getJSONURL
     public static final HasPermissions TRACTRAC_ACCOUNT = new SecuredDomainType<>("TRACTRAC_ACCOUNT", IdentifierStrategy.TO_SPECIFY);
     
+    //TODO: SwissTimingConfiguration::getName
     public static final HasPermissions SWISS_TIMING_ACCOUNT = new SecuredDomainType<>("SWISS_TIMING_ACCOUNT", IdentifierStrategy.TO_SPECIFY);
     
+    //TODO: SwissTimingArchiveConfiguration::getJsonUrl
     public static final HasPermissions SWISS_TIMING_ARCHIVE_ACCOUNT = new SecuredDomainType<>("SWISS_TIMING_ARCHIVE_ACCOUNT", IdentifierStrategy.TO_SPECIFY);
     
     public static enum ReplicatorActions implements Action { START, STOP, DROP_CONNECTION };
