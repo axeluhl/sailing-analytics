@@ -20,6 +20,7 @@ import com.sap.sailing.gwt.ui.shared.CourseAreaDTO;
 import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util.Pair;
@@ -139,7 +140,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
                     public void ok(RegattaName regattaIdentifier) {
                         sailingService.createRegattaLeaderboard(regattaIdentifier,
                                 /* displayName */ null, new int[] {},
-                        new AsyncCallback<StrippedLeaderboardDTO>() {
+                                new AsyncCallback<StrippedLeaderboardDTOWithSecurity>() {
                     @Override
                     public void onFailure(Throwable t) {
                         errorReporter.reportError("Error trying to create default regatta leaderboard for " + newRegatta.getName()
@@ -147,7 +148,7 @@ public class CreateRegattaCallback implements DialogCallback<RegattaDTO>{
                     }
 
                     @Override
-                    public void onSuccess(StrippedLeaderboardDTO result) {
+                                    public void onSuccess(StrippedLeaderboardDTOWithSecurity result) {
                         if (newRegatta.defaultCourseAreaUuid != null) {
                             // Show the event's leaderboard groups and allow the user to pick one to assign the regatta leaderboard to
                             final EventDTO event = getEventForCourseArea(existingEvents, newRegatta.defaultCourseAreaUuid);

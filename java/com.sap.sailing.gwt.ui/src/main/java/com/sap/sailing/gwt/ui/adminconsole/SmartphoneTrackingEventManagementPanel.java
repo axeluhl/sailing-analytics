@@ -58,6 +58,7 @@ import com.sap.sailing.gwt.ui.shared.EventDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetFinishingAndFinishTimeDTO;
 import com.sap.sailing.gwt.ui.shared.RaceLogSetStartTimeAndProcedureDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Distance;
 import com.sap.sse.common.Util;
@@ -80,7 +81,9 @@ import com.sap.sse.security.ui.client.component.AccessControlledButtonPanel;
 /**
  * Allows the user to start and stop tracking of races using the RaceLog-tracking connector.
  */
-public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardConfigPanel implements LeaderboardsDisplayer {
+public class SmartphoneTrackingEventManagementPanel
+        extends AbstractLeaderboardConfigPanel
+        implements LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> {
     private ToggleButton startStopTrackingButton;
     private TrackFileImportDeviceIdentifierTableWrapper deviceIdentifierTable;
     private CheckBox correctWindDirectionForDeclination;
@@ -90,7 +93,8 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
     private Map<Triple<String, String, String>, Pair<TimePointSpecificationFoundInLog, TimePointSpecificationFoundInLog>> raceWithStartAndEndOfTrackingTime = new HashMap<>();
     
     public SmartphoneTrackingEventManagementPanel(SailingServiceAsync sailingService, UserService userService,
-            RegattaRefresher regattaRefresher, LeaderboardsRefresher leaderboardsRefresher,
+            RegattaRefresher regattaRefresher,
+            LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher,
             ErrorReporter errorReporter, StringMessages stringMessages) {
         super(sailingService, userService, regattaRefresher, leaderboardsRefresher, errorReporter,
                 stringMessages, /* multiSelection */ true);
@@ -126,44 +130,47 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
     }
     
     @Override
-    protected void addColumnsToLeaderboardTableAndSetSelectionModel(UserService userService, FlushableCellTable<StrippedLeaderboardDTO> leaderboardTable, 
-            AdminConsoleTableResources tableResources, ListDataProvider<StrippedLeaderboardDTO> listDataProvider) {
-        ListHandler<StrippedLeaderboardDTO> leaderboardColumnListHandler = new ListHandler<StrippedLeaderboardDTO>(
+    protected void addColumnsToLeaderboardTableAndSetSelectionModel(UserService userService,
+            FlushableCellTable<StrippedLeaderboardDTOWithSecurity> leaderboardTable,
+            AdminConsoleTableResources tableResources,
+            ListDataProvider<StrippedLeaderboardDTOWithSecurity> listDataProvider) {
+        ListHandler<StrippedLeaderboardDTOWithSecurity> leaderboardColumnListHandler = new ListHandler<StrippedLeaderboardDTOWithSecurity>(
                 filteredLeaderboardList.getList());
-        SelectionCheckboxColumn<StrippedLeaderboardDTO> selectionCheckboxColumn = createSortableSelectionCheckboxColumn(
+        SelectionCheckboxColumn<StrippedLeaderboardDTOWithSecurity> selectionCheckboxColumn = createSortableSelectionCheckboxColumn(
                 leaderboardTable, tableResources, leaderboardColumnListHandler, listDataProvider);
-        TextColumn<StrippedLeaderboardDTO> leaderboardNameColumn = new TextColumn<StrippedLeaderboardDTO>() {
+        TextColumn<StrippedLeaderboardDTOWithSecurity> leaderboardNameColumn = new TextColumn<StrippedLeaderboardDTOWithSecurity>() {
             @Override
-            public String getValue(StrippedLeaderboardDTO leaderboard) {
+            public String getValue(StrippedLeaderboardDTOWithSecurity leaderboard) {
                 return leaderboard.getName();
             }
         };
         leaderboardNameColumn.setSortable(true);
-        leaderboardColumnListHandler.setComparator(leaderboardNameColumn, new Comparator<StrippedLeaderboardDTO>() {
+        leaderboardColumnListHandler.setComparator(leaderboardNameColumn,
+                new Comparator<StrippedLeaderboardDTOWithSecurity>() {
             @Override
-            public int compare(StrippedLeaderboardDTO o1, StrippedLeaderboardDTO o2) {
+                    public int compare(StrippedLeaderboardDTOWithSecurity o1, StrippedLeaderboardDTOWithSecurity o2) {
                 return new NaturalComparator(false).compare(o1.getName(), o2.getName());
             }
         });
 
-        TextColumn<StrippedLeaderboardDTO> leaderboardDisplayNameColumn = new TextColumn<StrippedLeaderboardDTO>() {
+        TextColumn<StrippedLeaderboardDTOWithSecurity> leaderboardDisplayNameColumn = new TextColumn<StrippedLeaderboardDTOWithSecurity>() {
             @Override
-            public String getValue(StrippedLeaderboardDTO leaderboard) {
+            public String getValue(StrippedLeaderboardDTOWithSecurity leaderboard) {
                 return leaderboard.getDisplayName() != null ? leaderboard.getDisplayName() : "";
             }
         };
         leaderboardDisplayNameColumn.setSortable(true);
         leaderboardColumnListHandler.setComparator(leaderboardDisplayNameColumn,
-                new Comparator<StrippedLeaderboardDTO>() {
+                new Comparator<StrippedLeaderboardDTOWithSecurity>() {
                     @Override
-                    public int compare(StrippedLeaderboardDTO o1, StrippedLeaderboardDTO o2) {
+                    public int compare(StrippedLeaderboardDTOWithSecurity o1, StrippedLeaderboardDTOWithSecurity o2) {
                         return new NaturalComparator(false).compare(o1.getDisplayName(), o2.getDisplayName());
                     }
                 });
 
-        TextColumn<StrippedLeaderboardDTO> leaderboardCanBoatsOfCompetitorsChangePerRaceColumn = new TextColumn<StrippedLeaderboardDTO>() {
+        TextColumn<StrippedLeaderboardDTOWithSecurity> leaderboardCanBoatsOfCompetitorsChangePerRaceColumn = new TextColumn<StrippedLeaderboardDTOWithSecurity>() {
             @Override
-            public String getValue(StrippedLeaderboardDTO leaderboard) {
+            public String getValue(StrippedLeaderboardDTOWithSecurity leaderboard) {
                 return leaderboard.canBoatsOfCompetitorsChangePerRace ? stringMessages.yes() : stringMessages.no();
             }
         };
@@ -171,12 +178,11 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         leaderboardColumnListHandler.setComparator(leaderboardCanBoatsOfCompetitorsChangePerRaceColumn, (l1, l2)->
             Boolean.valueOf(l1.canBoatsOfCompetitorsChangePerRace).compareTo(Boolean.valueOf(l2.canBoatsOfCompetitorsChangePerRace)));
 
-        ImagesBarColumn<StrippedLeaderboardDTO, RaceLogTrackingEventManagementImagesBarCell> leaderboardActionColumn =
-                new ImagesBarColumn<StrippedLeaderboardDTO, RaceLogTrackingEventManagementImagesBarCell>(
+        ImagesBarColumn<StrippedLeaderboardDTOWithSecurity, RaceLogTrackingEventManagementImagesBarCell> leaderboardActionColumn = new ImagesBarColumn<StrippedLeaderboardDTOWithSecurity, RaceLogTrackingEventManagementImagesBarCell>(
                 new RaceLogTrackingEventManagementImagesBarCell(stringMessages));
-        leaderboardActionColumn.setFieldUpdater(new FieldUpdater<StrippedLeaderboardDTO, String>() {
+        leaderboardActionColumn.setFieldUpdater(new FieldUpdater<StrippedLeaderboardDTOWithSecurity, String>() {
             @Override
-            public void update(int index, StrippedLeaderboardDTO leaderboardDTO, String value) {
+            public void update(int index, StrippedLeaderboardDTOWithSecurity leaderboardDTO, String value) {
                 final String leaderboardName = leaderboardDTO.getName();
                 final boolean canBoatsOfCompetitorsChangePerRace = leaderboardDTO.canBoatsOfCompetitorsChangePerRace;
                 if (RaceLogTrackingEventManagementImagesBarCell.ACTION_DENOTE_FOR_RACELOG_TRACKING.equals(value)) {
@@ -270,7 +276,8 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         leaderboardTable.setSelectionModel(selectionCheckboxColumn.getSelectionModel(), selectionCheckboxColumn.getSelectionManager());
     }
     
-    private RaceLogTrackingState getTrackingState(RaceColumnDTOAndFleetDTOWithNameBasedEquality race) {
+    private RaceLogTrackingState getTrackingState(
+            RaceColumnDTOAndFleetDTOWithNameBasedEquality race) {
         return race.getA().getRaceLogTrackingInfo(race.getB()).raceLogTrackingState;
     }
     
@@ -288,7 +295,8 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         return raceFinished;
     }
     
-    private boolean doesTrackerExist(RaceColumnDTOAndFleetDTOWithNameBasedEquality race) {
+    private boolean doesTrackerExist(
+            RaceColumnDTOAndFleetDTOWithNameBasedEquality race) {
         return race.getA().getRaceLogTrackingInfo(race.getB()).raceLogTrackerExists;
     }
 
@@ -296,15 +304,18 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         return race.getA().getRaceLogTrackingInfo(race.getB()).courseExists;
     }
 
-    private boolean doCompetitorRegistrationsExist(RaceColumnDTOAndFleetDTOWithNameBasedEquality race) {
+    private boolean doCompetitorRegistrationsExist(
+            RaceColumnDTOAndFleetDTOWithNameBasedEquality race) {
         return race.getA().getRaceLogTrackingInfo(race.getB()).competitorRegistrationsExists;
     }
     
     @Override
-    protected void addColumnsToRacesTable(CellTable<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesTable) {
+    protected void addColumnsToRacesTable(
+            CellTable<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesTable) {
         TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality> raceLogTrackingStateColumn = new TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality>() {
             @Override
-            public String getValue(RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnAndFleetName) {
+            public String getValue(
+                    RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnAndFleetName) {
                 RaceLogTrackingState state = getTrackingState(raceColumnAndFleetName);
                 return state.name();
             }
@@ -312,14 +323,16 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
 
         TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality> trackerStateColumn = new TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality>() {
             @Override
-            public String getValue(RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnAndFleetName) {
+            public String getValue(
+                    RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnAndFleetName) {
                 return doesTrackerExist(raceColumnAndFleetName) ? stringMessages.active() : stringMessages.none();
             }
         };
 
         TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality> courseStateColumn = new TextColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality>() {
             @Override
-            public String getValue(RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnAndFleetName) {
+            public String getValue(
+                    RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnAndFleetName) {
                 return doesCourseExist(raceColumnAndFleetName) ? stringMessages.ok() : stringMessages.none();
             }
         };
@@ -327,9 +340,12 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         raceActionColumn =
                 new ImagesBarColumn<RaceColumnDTOAndFleetDTOWithNameBasedEquality, RaceLogTrackingEventManagementRaceImagesBarCell>(
                         new RaceLogTrackingEventManagementRaceImagesBarCell(stringMessages, this));
-        raceActionColumn.setFieldUpdater(new FieldUpdater<RaceColumnDTOAndFleetDTOWithNameBasedEquality, String>() {
+        raceActionColumn.setFieldUpdater(
+                new FieldUpdater<RaceColumnDTOAndFleetDTOWithNameBasedEquality, String>() {
             @Override
-            public void update(int index, final RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleetDTO, String value) {
+                    public void update(int index,
+                            final RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleetDTO,
+                            String value) {
                 final String leaderboardName = getSelectedLeaderboardName();
                 final boolean canBoatsOfCompetitorsChangePerRace = canBoatsOfCompetitorsChangePerRace();
                 final String raceColumnName = raceColumnDTOAndFleetDTO.getA().getName();
@@ -367,7 +383,7 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
                         }
                     }).show();
                 } else if (RaceLogTrackingEventManagementRaceImagesBarCell.ACTION_COPY.equals(value)) {
-                    List<RaceColumnDTOAndFleetDTOWithNameBasedEquality> races =
+                            List<RaceColumnDTOAndFleetDTOWithNameBasedEquality> races =
                             new ArrayList<>(raceColumnTable.getDataProvider().getList());
                     races.remove(raceColumnDTOAndFleetDTO);
                     Distance buoyZoneRadius = getSelectedRegatta() == null
@@ -528,7 +544,8 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         });
     }
     
-    private void stopTracking(final Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> selectedSet) {
+    private void stopTracking(
+            final Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> selectedSet) {
         final List<RegattaAndRaceIdentifier> racesToStopTracking = new ArrayList<RegattaAndRaceIdentifier>();        
         for (RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleetDTOWithNameBasedEquality : selectedSet) {
             RaceDTO race = raceColumnDTOAndFleetDTOWithNameBasedEquality.getA().getRace(raceColumnDTOAndFleetDTOWithNameBasedEquality.getB());
@@ -798,7 +815,8 @@ public class SmartphoneTrackingEventManagementPanel extends AbstractLeaderboardC
         });
     }
     
-    private void startTracking(Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> races, boolean trackWind, boolean correctWindByDeclination) {
+    private void startTracking(Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> races,
+            boolean trackWind, boolean correctWindByDeclination) {
         final StrippedLeaderboardDTO leaderboard = getSelectedLeaderboard();
         //prompt user if competitor registrations are missing for same races
         String namesOfRacesMissingRegistrations = "";

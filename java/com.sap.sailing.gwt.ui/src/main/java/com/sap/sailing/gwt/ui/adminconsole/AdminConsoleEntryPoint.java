@@ -27,8 +27,8 @@ import com.sap.sailing.gwt.ui.client.RemoteServiceMappingConstants;
 import com.sap.sailing.gwt.ui.masterdataimport.MasterDataImportPanel;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.SecurityStylesheetResources;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.gwt.adminconsole.AdminConsolePanel;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
 import com.sap.sse.gwt.adminconsole.DefaultRefreshableAdminConsolePanel;
@@ -51,11 +51,12 @@ import com.sap.sse.security.ui.client.component.UserGroupManagementPanel;
 import com.sap.sse.security.ui.client.i18n.StringMessages;
 import com.sap.sse.security.ui.client.usermanagement.UserManagementPanel;
 
-public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements RegattaRefresher, LeaderboardsRefresher, LeaderboardGroupsRefresher {
+public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint
+        implements RegattaRefresher, LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity>, LeaderboardGroupsRefresher {
     private final AdminConsoleTableResources tableResources = GWT.create(AdminConsoleTableResources.class);
 
     private Set<RegattasDisplayer> regattasDisplayers;
-    private Set<LeaderboardsDisplayer> leaderboardsDisplayers;
+    private Set<LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity>> leaderboardsDisplayers;
     private Set<LeaderboardGroupsDisplayer> leaderboardGroupsDisplayers;
 
     private final MediaServiceAsync mediaService = GWT.create(MediaService.class);
@@ -346,11 +347,11 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
 
     @Override
     public void fillLeaderboards() {
-        getSailingService().getLeaderboards(new MarkedAsyncCallback<List<StrippedLeaderboardDTO>>(
-                new AsyncCallback<List<StrippedLeaderboardDTO>>() {
+        getSailingService().getLeaderboardsWithSecurity(new MarkedAsyncCallback<List<StrippedLeaderboardDTOWithSecurity>>(
+                new AsyncCallback<List<StrippedLeaderboardDTOWithSecurity>>() {
                     @Override
-                    public void onSuccess(List<StrippedLeaderboardDTO> leaderboards) {
-                        for (LeaderboardsDisplayer leaderboardsDisplayer : leaderboardsDisplayers) {
+                    public void onSuccess(List<StrippedLeaderboardDTOWithSecurity> leaderboards) {
+                        for (LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> leaderboardsDisplayer : leaderboardsDisplayers) {
                             leaderboardsDisplayer.fillLeaderboards(leaderboards);
                         }
                     }
@@ -363,8 +364,9 @@ public class AdminConsoleEntryPoint extends AbstractSailingEntryPoint implements
     }
     
     @Override
-    public void updateLeaderboards(Iterable<StrippedLeaderboardDTO> updatedLeaderboards, LeaderboardsDisplayer origin) {
-        for (LeaderboardsDisplayer leaderboardsDisplayer : leaderboardsDisplayers) {
+    public void updateLeaderboards(Iterable<StrippedLeaderboardDTOWithSecurity> updatedLeaderboards,
+            LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> origin) {
+        for (LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> leaderboardsDisplayer : leaderboardsDisplayers) {
             if (leaderboardsDisplayer != origin) {
                 leaderboardsDisplayer.fillLeaderboards(updatedLeaderboards);
             }

@@ -72,7 +72,8 @@ public class CopyCourseAndCompetitorsDialog extends DataEntryDialog<CourseAndCom
 
     @Override
     protected CourseAndCompetitorCopyOperation getResult() {
-        Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesToCopyTo = racesTable.getSelectionModel().getSelectedSet();
+        Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesToCopyTo = racesTable
+                .getSelectionModel().getSelectedSet();
         return new CourseAndCompetitorCopyOperation(racesToCopyTo, courseCheckBox.getValue(), competitorCheckBox.getValue(), sailingService, errorReporter);
     }
 

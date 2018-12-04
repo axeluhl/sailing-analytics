@@ -35,6 +35,7 @@ import com.sap.sailing.gwt.ui.client.MediaTracksRefresher;
 import com.sap.sailing.gwt.ui.client.RegattaRefresher;
 import com.sap.sailing.gwt.ui.client.SailingServiceAsync;
 import com.sap.sailing.gwt.ui.client.StringMessages;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.gwt.client.Notification;
 import com.sap.sse.gwt.client.Notification.NotificationType;
 import com.sap.sse.gwt.client.controls.progressbar.CustomProgressBar;
@@ -54,7 +55,7 @@ public class MasterDataImportPanel extends VerticalPanel {
     private CheckBox overrideSwitch;
     private final RegattaRefresher regattaRefresher;
     private final EventsRefresher eventRefresher;
-    private final LeaderboardsRefresher leaderboardsRefresher;
+    private final LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher;
     private final LeaderboardGroupsRefresher leaderboardGroupsRefresher;
     private final MediaTracksRefresher mediaTracksRefresher;
     private CheckBox compressSwitch;
@@ -65,7 +66,8 @@ public class MasterDataImportPanel extends VerticalPanel {
     private TextBox passwordBox;
 
     public MasterDataImportPanel(StringMessages stringMessages, SailingServiceAsync sailingService,
-            RegattaRefresher regattaRefresher, EventsRefresher eventsRefresher, LeaderboardsRefresher leaderboardsRefresher,
+            RegattaRefresher regattaRefresher, EventsRefresher eventsRefresher,
+            LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher,
             LeaderboardGroupsRefresher leaderboardGroupsRefresher, MediaTracksRefresher mediaTracksRefresher) {
         this.sailingService = sailingService;
         this.stringMessages = stringMessages;

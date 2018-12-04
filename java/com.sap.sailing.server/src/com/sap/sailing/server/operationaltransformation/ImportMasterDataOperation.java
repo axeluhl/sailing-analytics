@@ -19,6 +19,11 @@ import com.sap.sailing.domain.abstractlog.race.RaceLogEventVisitor;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLog;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEvent;
 import com.sap.sailing.domain.abstractlog.regatta.RegattaLogEventVisitor;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterBoatEvent;
+import com.sap.sailing.domain.abstractlog.regatta.events.RegattaLogRegisterCompetitorEvent;
+import com.sap.sailing.domain.abstractlog.regatta.impl.BaseRegattaLogEventVisitor;
+import com.sap.sailing.domain.base.Boat;
+import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.Event;
 import com.sap.sailing.domain.base.Fleet;
 import com.sap.sailing.domain.base.RaceColumn;
@@ -149,6 +154,17 @@ public class ImportMasterDataOperation extends
                 importDeviceConfigurations(toState);
             }
             toState.mediaTracksImported(masterData.getFilteredMediaTracks(), creationCount, override);
+
+            // all competitors and boats that are created via other ways already have a owner, find the unowned ones and
+            // adopt them
+            for (Competitor competitor : toState.getBaseDomainFactory().getCompetitorAndBoatStore()
+                    .getAllCompetitors()) {
+                ensureOwnership(competitor.getIdentifier(), securityService);
+            }
+            for (Boat boat : toState.getBaseDomainFactory().getCompetitorAndBoatStore().getBoats()) {
+                ensureOwnership(boat.getIdentifier(), securityService);
+            }
+
             dataImportLock.getProgress(importOperationId).setResult(creationCount);
             return creationCount;
         } catch (Exception e) {
@@ -537,6 +553,20 @@ public class ImportMasterDataOperation extends
                             toState.setRegattaForRace(regatta, raceIdAsString);
                         }
                     }
+                }
+                regatta.getRegattaLog().lockForRead();
+                for (RegattaLogEvent fix : regatta.getRegattaLog().getFixes()) {
+                    fix.accept(new BaseRegattaLogEventVisitor() {
+                        @Override
+                        public void visit(RegattaLogRegisterCompetitorEvent event) {
+                            ensureOwnership(event.getCompetitor().getIdentifier(), securityService);
+                        }
+
+                        @Override
+                        public void visit(RegattaLogRegisterBoatEvent event) {
+                            ensureOwnership(event.getBoat().getIdentifier(), securityService);
+                        }
+                    });
                 }
                 ensureOwnership(regatta.getIdentifier(), securityService);
                 creationCount.addOneRegatta(regatta.getId().toString());

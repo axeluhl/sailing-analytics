@@ -17,7 +17,8 @@ public class CourseAndCompetitorCopyOperation {
     private ErrorReporter errorReporter;
     private SailingServiceAsync sailingService;
 
-    public CourseAndCompetitorCopyOperation(Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesToCopyTo,
+    public CourseAndCompetitorCopyOperation(
+            Set<RaceColumnDTOAndFleetDTOWithNameBasedEquality> racesToCopyTo,
             boolean copyCourse, boolean copyCompetitors, SailingServiceAsync sailingService, ErrorReporter errorReporter) {
         this.raceLogsToCopyTo = racesToCopyTo;
         this.copyCourse = copyCourse;
@@ -55,7 +56,8 @@ public class CourseAndCompetitorCopyOperation {
         return new Util.Triple<String, String, String>(leaderboardName, race.getA().getName(), race.getB().getName());
     }
 
-    public void perform(String leaderboardName, RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleetDTO,
+    public void perform(String leaderboardName,
+            RaceColumnDTOAndFleetDTOWithNameBasedEquality raceColumnDTOAndFleetDTO,
             final Runnable onSuccessCallback) {
         Triple<String, String, String> fromTriple = toTriple(leaderboardName, raceColumnDTOAndFleetDTO);
         Set<Triple<String, String, String>> toRacelogs = convertToRacelogs(leaderboardName);

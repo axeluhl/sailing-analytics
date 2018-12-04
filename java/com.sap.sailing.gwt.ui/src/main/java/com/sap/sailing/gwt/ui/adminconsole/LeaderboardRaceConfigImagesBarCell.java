@@ -20,10 +20,12 @@ public class LeaderboardRaceConfigImagesBarCell extends ImagesBarCell {
     public final static String ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS = "ACTION_EDIT_COMPETITOR_TO_BOAT_MAPPINGS";
     
     private final StringMessages stringMessages;
-    private final SelectedLeaderboardProvider selectedLeaderboardProvider;
+    private final SelectedLeaderboardProvider<? extends StrippedLeaderboardDTO> selectedLeaderboardProvider;
     private static AdminConsoleResources resources = GWT.create(AdminConsoleResources.class);
 
-    public LeaderboardRaceConfigImagesBarCell(SelectedLeaderboardProvider selectedLeaderboardProvider, StringMessages stringConstants) {
+    public LeaderboardRaceConfigImagesBarCell(
+            SelectedLeaderboardProvider<? extends StrippedLeaderboardDTO> selectedLeaderboardProvider,
+            StringMessages stringConstants) {
         super();
         this.selectedLeaderboardProvider = selectedLeaderboardProvider;
         this.stringMessages = stringConstants;
