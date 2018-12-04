@@ -3003,7 +3003,7 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     @Override
     public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
-        return getBaseDomainFactory().createObjectInputStreamResolvingAgainstThisFactory(is);
+        return getBaseDomainFactory().createObjectInputStreamResolvingAgainstThisFactory(is, null);
     }
     
     @Override
