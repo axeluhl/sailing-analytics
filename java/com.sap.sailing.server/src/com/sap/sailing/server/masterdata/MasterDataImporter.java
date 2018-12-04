@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
@@ -20,11 +21,15 @@ import com.sap.sailing.domain.persistence.MongoRaceLogStoreFactory;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.ImportMasterDataOperation;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.WithQualifiedObjectIdentifier;
 import com.sap.sse.security.shared.impl.User;
 import com.sap.sse.security.shared.impl.UserGroup;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
+import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache.ResolveListener;
 
 public class MasterDataImporter {
+    private final static Logger LOG = Logger.getLogger(MasterDataImporter.class.getName());
     private final DomainFactory baseDomainFactory;
     private final RacingEventService racingEventService;
     private final User user;
@@ -42,8 +47,22 @@ public class MasterDataImporter {
     public void importFromStream(InputStream inputStream, UUID importOperationId, boolean override)
             throws IOException,
             ClassNotFoundException {
-        ObjectInputStreamResolvingAgainstCache<DomainFactory> objectInputStream = racingEventService.getBaseDomainFactory()
-                .createObjectInputStreamResolvingAgainstThisFactory(inputStream);
+        ObjectInputStreamResolvingAgainstCache<DomainFactory> objectInputStream = racingEventService
+                .getBaseDomainFactory()
+                .createObjectInputStreamResolvingAgainstThisFactory(inputStream, new ResolveListener() {
+                    @Override
+                    public void onNewObject(Object result) {
+                        if (result instanceof WithQualifiedObjectIdentifier) {
+                            QualifiedObjectIdentifier id = ((WithQualifiedObjectIdentifier) result).getIdentifier();
+                            LOG.info("Adopting " + id + " from Masterdataimport");
+                            racingEventService.getSecurityService().setOwnershipIfNotSet(id, user, tenant);
+                        }
+                    }
+
+                    @Override
+                    public void onResolvedObject(Object result) {
+                    }
+                });
         racingEventService.createOrUpdateDataImportProgressWithReplication(importOperationId, 0.03,
                 DataImportSubProgress.TRANSFER_STARTED, 0.5);
         RaceLogStore raceLogStore = MongoRaceLogStoreFactory.INSTANCE.getMongoRaceLogStore(
@@ -86,7 +105,7 @@ public class MasterDataImporter {
             UUID importOperationId, boolean override) {
         MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
         ImportMasterDataOperation op = new ImportMasterDataOperation(topLevelMasterData, importOperationId, override,
-                creationCount, user, tenant);
+                creationCount);
         creationCount = racingEventService.apply(op);
         return creationCount;
     }

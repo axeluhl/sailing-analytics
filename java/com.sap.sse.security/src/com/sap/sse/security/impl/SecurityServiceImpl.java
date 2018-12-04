@@ -1726,7 +1726,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     @Override
     public ObjectInputStream createObjectInputStreamResolvingAgainstCache(InputStream is) throws IOException {
-        return new ObjectInputStreamResolvingAgainstSecurityCache(is, userStore);
+        return new ObjectInputStreamResolvingAgainstSecurityCache(is, userStore, null);
     }
 
     @Override

@@ -7,7 +7,8 @@ import com.sap.sse.security.UserStore;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 
 public class ObjectInputStreamResolvingAgainstSecurityCache extends ObjectInputStreamResolvingAgainstCache<UserStore> {
-    ObjectInputStreamResolvingAgainstSecurityCache(InputStream in, UserStore cache) throws IOException {
-        super(in, cache);
+    ObjectInputStreamResolvingAgainstSecurityCache(InputStream in, UserStore cache, ResolveListener resolveListener)
+            throws IOException {
+        super(in, cache, resolveListener);
     }
 }
