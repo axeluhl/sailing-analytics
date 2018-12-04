@@ -14,7 +14,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.function.Function;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -44,6 +43,7 @@ import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.RoleDefinitionDTO;
+import com.sap.sse.security.shared.impl.Role;
 import com.sap.sse.security.shared.impl.SecuredSecurityTypes;
 import com.sap.sse.security.ui.client.UserManagementServiceAsync;
 import com.sap.sse.security.ui.client.UserService;
@@ -195,8 +195,6 @@ public class RoleDefinitionsPanel extends VerticalPanel {
         });
         
         final HasPermissions type = SecuredSecurityTypes.ROLE_DEFINITION;
-        final Function<RoleDefinitionDTO, String> idFactory = roleDef -> roleDef.getId().toString();
-        
         final AccessControlledActionsColumn<RoleDefinitionDTO, DefaultActionsImagesBarCell> roleActionColumn = new AccessControlledActionsColumn<>(
                 new DefaultActionsImagesBarCell(stringMessages), userService, type);
         roleActionColumn.addAction(ACTION_UPDATE, UPDATE, this::editRole);
@@ -206,10 +204,10 @@ public class RoleDefinitionsPanel extends VerticalPanel {
             }
         });
         final DialogConfig<RoleDefinitionDTO> config = EditOwnershipDialog.create(userManagementService, type,
-                idFactory, roleDefinition -> updateRoleDefinitions(), stringMessages);
+                roleDefinition -> updateRoleDefinitions(), stringMessages);
         roleActionColumn.addAction(ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openDialog);
         final EditACLDialog.DialogConfig<RoleDefinitionDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type, idFactory, roleDefinition -> updateRoleDefinitions(),
+                userService.getUserManagementService(), type, roleDefinition -> updateRoleDefinitions(),
                 stringMessages);
         roleActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 configACL::openDialog);

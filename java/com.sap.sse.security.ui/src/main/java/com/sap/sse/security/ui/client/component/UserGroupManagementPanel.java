@@ -97,7 +97,7 @@ public class UserGroupManagementPanel extends DockPanel {
                     @Override
                     public void onSuccess(AccessControlListAnnotationDTO result) {
                         final EditACLDialog.DialogConfig<UserGroupDTO> configACL = EditACLDialog.create(
-                                userService.getUserManagementService(), SecuredSecurityTypes.USER_GROUP, null,
+                                userService.getUserManagementService(), SecuredSecurityTypes.USER_GROUP,
                                 user -> result.getAnnotation(), stringMessages);
                         configACL.openDialog(null);
                     }

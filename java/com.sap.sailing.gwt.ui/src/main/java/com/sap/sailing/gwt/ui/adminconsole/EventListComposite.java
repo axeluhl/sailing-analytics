@@ -14,7 +14,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.google.gwt.cell.client.AbstractCell;
@@ -331,7 +330,6 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
         final SecuredDTOOwnerColumn<EventDTO> groupColumn = SecuredDTOOwnerColumn.getGroupOwnerColumn();
         final SecuredDTOOwnerColumn<EventDTO> userColumn = SecuredDTOOwnerColumn.getUserOwnerColumn();
 
-        final Function<EventDTO, String> idFactory = event -> event.id.toString();
         final AccessControlledActionsColumn<EventDTO, EventConfigImagesBarCell> actionsColumn = new AccessControlledActionsColumn<>(
                 new EventConfigImagesBarCell(stringMessages), userService, EVENT);
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_UPDATE, UPDATE, this::openEditEventDialog);
@@ -341,11 +339,11 @@ public class EventListComposite extends Composite implements EventsRefresher, Le
             }
         });
         final DialogConfig<EventDTO> config = EditOwnershipDialog.create(userService.getUserManagementService(), EVENT,
-                idFactory, event -> fillEvents(), stringMessages);
+                event -> fillEvents(), stringMessages);
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP, config::openDialog);
         
         final EditACLDialog.DialogConfig<EventDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), EVENT, idFactory, event -> fillEvents(), stringMessages);
+                userService.getUserManagementService(), EVENT, event -> fillEvents(), stringMessages);
         actionsColumn.addAction(EventConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 e -> configACL.openDialog(e));
 

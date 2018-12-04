@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.Function;
 
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.Callback;
@@ -325,18 +324,17 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         
         // CompetitorTableEditFeatures
         final HasPermissions type = SecuredDomainType.COMPETITOR;
-        final Function<CompetitorDTO, String> idFactory = CompetitorDTO::getIdAsString;
         AccessControlledActionsColumn<CompetitorDTO, CompetitorConfigImagesBarCell> competitorActionColumn = new AccessControlledActionsColumn<CompetitorDTO, CompetitorConfigImagesBarCell>(
                 new CompetitorConfigImagesBarCell(getStringMessages()), userService, type);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_UPDATE, HasPermissions.DefaultActions.UPDATE, this::editCompetitor);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_REFRESH, this::allowUpdate);
         final DialogConfig<CompetitorDTO> editOwnerShipDialog = EditOwnershipDialog.create(userService.getUserManagementService(), SecuredDomainType.COMPETITOR,
-                idFactory, null, stringMessages);
+                null, stringMessages);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 editOwnerShipDialog::openDialog);
         
         final EditACLDialog.DialogConfig<CompetitorDTO> configACL = EditACLDialog
-                .create(userService.getUserManagementService(), type, idFactory, null, stringMessages);
+                .create(userService.getUserManagementService(), type, null, stringMessages);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 configACL::openDialog);
         

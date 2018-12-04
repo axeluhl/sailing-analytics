@@ -16,7 +16,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -308,7 +307,6 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 (o1, o2) -> new NaturalComparator().compare(o1.defaultCourseAreaName, o2.defaultCourseAreaName));
 
         final HasPermissions type = SecuredDomainType.LEADERBOARD;
-        final Function<StrippedLeaderboardDTOWithSecurity, String> idFactory = StrippedLeaderboardDTO::getName;
         final AccessControlledActionsColumn<StrippedLeaderboardDTOWithSecurity, LeaderboardConfigImagesBarCell> leaderboardActionColumn = new AccessControlledActionsColumn<>(
                 new LeaderboardConfigImagesBarCell(stringMessages), userService, type);
 
@@ -371,13 +369,13 @@ public class LeaderboardConfigPanel extends AbstractLeaderboardConfigPanel
                 this::openPairingListEntryPoint);
 
         final DialogConfig<StrippedLeaderboardDTOWithSecurity> config = EditOwnershipDialog.create(
-                userService.getUserManagementService(), type, idFactory,
+                userService.getUserManagementService(), type,
                 leaderboardDTO -> reloadLeaderboardForTable(leaderboardDTO.getName()), stringMessages);
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 config::openDialog);
 
         final EditACLDialog.DialogConfig<StrippedLeaderboardDTOWithSecurity> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type, idFactory,
+                userService.getUserManagementService(), type,
                 leaderboardDTO -> reloadLeaderboardForTable(leaderboardDTO.getName()), stringMessages);
         leaderboardActionColumn.addAction(DefaultActionsImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 configACL::openDialog);

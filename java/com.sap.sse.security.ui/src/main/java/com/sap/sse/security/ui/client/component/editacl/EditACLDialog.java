@@ -93,9 +93,9 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
      */
     public static <T extends Named & SecuredDTO> DialogConfig<T> create(
             final UserManagementServiceAsync userManagementService, final HasPermissions type,
-            final Function<T, String> typeRelativeIdFactory, final Consumer<T> updateCallback,
+            final Consumer<T> updateCallback,
             final StringMessages stringMessages) {
-        return new DialogConfig<>(userManagementService, type, typeRelativeIdFactory, updateCallback, stringMessages);
+        return new DialogConfig<>(userManagementService, type, updateCallback, stringMessages);
     }
 
     public static class DialogConfig<T extends Named & SecuredDTO> {
@@ -106,9 +106,10 @@ public class EditACLDialog extends DataEntryDialog<AclDialogResult> {
         private final StringMessages stringMessages;
 
         private DialogConfig(final UserManagementServiceAsync userManagementService, final HasPermissions type,
-                final Function<T, String> idFactory, final Consumer<T> updateCallback,
+                final Consumer<T> updateCallback,
                 final StringMessages stringMessages) {
             this.userManagementService = userManagementService;
+            final Function<T, String> idFactory = o -> type.identifierStrategy().getIdentifierAsString(o);
             this.identifierFactory = idFactory.andThen(type::getQualifiedObjectIdentifier);
             this.availableActionsFactory = idFactory.andThen(t -> type.getAvailableActions());
             this.updateCallback = updateCallback;

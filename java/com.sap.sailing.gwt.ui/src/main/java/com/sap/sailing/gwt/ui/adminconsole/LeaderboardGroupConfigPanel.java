@@ -13,7 +13,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.google.gwt.core.client.GWT;
@@ -56,8 +55,8 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
 import com.sap.sse.gwt.adminconsole.AdminConsoleTableResources;
@@ -600,7 +599,6 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
         });
 
         final HasPermissions type = SecuredDomainType.LEADERBOARD_GROUP;
-        final Function<LeaderboardGroupDTO, String> idFactory = leaderboardGroup -> leaderboardGroup.getId().toString();
         final AccessControlledActionsColumn<LeaderboardGroupDTO, LeaderboardGroupConfigImagesBarCell> actionsColumn = new AccessControlledActionsColumn<>(
                 new LeaderboardGroupConfigImagesBarCell(stringMessages), userService, type);
         actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_UPDATE, UPDATE,
@@ -611,13 +609,13 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
             }
         });
         final DialogConfig<LeaderboardGroupDTO> config = EditOwnershipDialog.create(
-                userService.getUserManagementService(), type, idFactory,
+                userService.getUserManagementService(), type,
                 group -> leaderboardGroupsRefresher.fillLeaderboardGroups(), stringMessages);
         actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_CHANGE_OWNERSHIP, CHANGE_OWNERSHIP,
                 e -> config.openDialog(e));
         
         final EditACLDialog.DialogConfig<LeaderboardGroupDTO> configACL = EditACLDialog.create(
-                userService.getUserManagementService(), type, idFactory,
+                userService.getUserManagementService(), type,
                 group -> leaderboardGroupsRefresher.fillLeaderboardGroups(), stringMessages);
         actionsColumn.addAction(LeaderboardGroupConfigImagesBarCell.ACTION_CHANGE_ACL, DefaultActions.CHANGE_ACL,
                 e -> configACL.openDialog(e));
