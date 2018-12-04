@@ -575,8 +575,8 @@ public class ImportMasterDataOperation extends
     }
 
     private void ensureOwnership(QualifiedObjectIdentifier identifier, SecurityService securityService) {
-        logger.info(
-                "Adopting " + identifier + " from Masterdataimport to " + user.getName() + " and " + tenant.getName());
+        logger.info( "Adopting " + identifier + " from Masterdataimport to " + user.getName() +
+                " and group " + (tenant==null?"null":tenant.getName()));
         securityService.setOwnershipIfNotSet(identifier, user, tenant);
     }
 
