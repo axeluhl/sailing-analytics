@@ -99,6 +99,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaOverviewEntryDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.SliceRacePreperationDTO;
@@ -238,18 +239,19 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
             boolean addOverallDetails, String previousLeaderboardId, boolean fillTotalPointsUncorrected)
             throws Exception;
 
-    List<StrippedLeaderboardDTO> getLeaderboards();
+    List<StrippedLeaderboardDTOWithSecurity> getLeaderboardsWithSecurity();
     
-    StrippedLeaderboardDTO updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThreasholds, UUID newCourseAreaId);
+    StrippedLeaderboardDTOWithSecurity updateLeaderboard(String leaderboardName, String newLeaderboardName,
+            String newLeaderboardDisplayName, int[] newDiscardingThreasholds, UUID newCourseAreaId);
 
-    StrippedLeaderboardDTO createFlexibleLeaderboard(String leaderboardName,
+    StrippedLeaderboardDTOWithSecurity createFlexibleLeaderboard(String leaderboardName,
             String leaderboardDisplayName, int[] discardThresholds, ScoringSchemeType scoringSchemeType,
             UUID courseAreaId);
 
-    StrippedLeaderboardDTO createRegattaLeaderboard(RegattaName regattaIdentifier,
+    StrippedLeaderboardDTOWithSecurity createRegattaLeaderboard(RegattaName regattaIdentifier,
             String leaderboardDisplayName, int[] discardThresholds);
 
-    StrippedLeaderboardDTO createRegattaLeaderboardWithEliminations(String name,
+    StrippedLeaderboardDTOWithSecurity createRegattaLeaderboardWithEliminations(String name,
             String displayName, String regattaName);
 
     void removeLeaderboard(String leaderboardName);
@@ -435,6 +437,8 @@ public interface SailingService extends RemoteService, FileStorageManagementGwtS
     void removeLeaderboardColumns(String leaderboardName, List<String> columnsToRemove);
 
     StrippedLeaderboardDTO getLeaderboard(String leaderboardName);
+
+    StrippedLeaderboardDTOWithSecurity getLeaderboardWithSecurity(String leaderboardName);
 
     void suppressCompetitorInLeaderboard(String leaderboardName, String competitorIdAsString, boolean suppressed);
 

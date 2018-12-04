@@ -443,6 +443,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEn
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.SailingServiceConstants;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SidelineDTO;
@@ -2610,43 +2611,47 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public StrippedLeaderboardDTO createFlexibleLeaderboard(String leaderboardName,
+    public StrippedLeaderboardDTOWithSecurity createFlexibleLeaderboard(String leaderboardName,
             String leaderboardDisplayName, int[] discardThresholds, ScoringSchemeType scoringSchemeType,
             UUID courseAreaId) {
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.LEADERBOARD,
-                leaderboardName, leaderboardDisplayName, new ActionWithResult<StrippedLeaderboardDTO>() {
+                leaderboardName, leaderboardDisplayName, new ActionWithResult<StrippedLeaderboardDTOWithSecurity>() {
                     @Override
-                    public StrippedLeaderboardDTO run() throws Exception {
-                        return createStrippedLeaderboardDTO(getService().apply(new CreateFlexibleLeaderboard(leaderboardName, leaderboardDisplayName, discardThresholds,
+                    public StrippedLeaderboardDTOWithSecurity run() throws Exception {
+                        return createStrippedLeaderboardDTOWithSecurity(
+                                getService().apply(new CreateFlexibleLeaderboard(leaderboardName,
+                                        leaderboardDisplayName, discardThresholds,
                                 baseDomainFactory.createScoringScheme(scoringSchemeType), courseAreaId)), false, false);
                     }
                 });
     }
 
     @Override
-    public StrippedLeaderboardDTO createRegattaLeaderboard(RegattaName regattaIdentifier, String leaderboardDisplayName,
+    public StrippedLeaderboardDTOWithSecurity createRegattaLeaderboard(RegattaName regattaIdentifier,
+            String leaderboardDisplayName,
             int[] discardThresholds) {
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
                 SecuredDomainType.LEADERBOARD, regattaIdentifier.getRegattaName(), leaderboardDisplayName,
-                new ActionWithResult<StrippedLeaderboardDTO>() {
+                new ActionWithResult<StrippedLeaderboardDTOWithSecurity>() {
                     @Override
-                    public StrippedLeaderboardDTO run() throws Exception {
-                        return createStrippedLeaderboardDTO(getService().apply(new CreateRegattaLeaderboard(
+                    public StrippedLeaderboardDTOWithSecurity run() throws Exception {
+                        return createStrippedLeaderboardDTOWithSecurity(getService().apply(new CreateRegattaLeaderboard(
                                 regattaIdentifier, leaderboardDisplayName, discardThresholds)), false, false);
                     }
                 });
     }
 
     @Override
-    public StrippedLeaderboardDTO createRegattaLeaderboardWithEliminations(String name,
+    public StrippedLeaderboardDTOWithSecurity createRegattaLeaderboardWithEliminations(String name,
             String displayName,
             String fullRegattaLeaderboardName) {
         return getSecurityService().setOwnershipCheckPermissionForObjectCreationAndRevertOnError(
-                SecuredDomainType.LEADERBOARD, name, displayName, new ActionWithResult<StrippedLeaderboardDTO>() {
+                SecuredDomainType.LEADERBOARD, name, displayName,
+                new ActionWithResult<StrippedLeaderboardDTOWithSecurity>() {
                     @Override
-                    public StrippedLeaderboardDTO run() throws Exception {
-                        return createStrippedLeaderboardDTO(
+                    public StrippedLeaderboardDTOWithSecurity run() throws Exception {
+                        return createStrippedLeaderboardDTOWithSecurity(
                                 getService().apply(new CreateRegattaLeaderboardWithEliminations(name, displayName,
                                         fullRegattaLeaderboardName)),
                                 false, false);
@@ -2655,11 +2660,26 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     @Override
-    public List<StrippedLeaderboardDTO> getLeaderboards() {
+    public List<StrippedLeaderboardDTOWithSecurity> getLeaderboardsWithSecurity() {
         final Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
         return getSecurityService().mapAndFilterByReadPermissionForCurrentUser(SecuredDomainType.LEADERBOARD,
                 leaderboards.values(), Leaderboard::getName,
-                leaderboard -> createStrippedLeaderboardDTO(leaderboard, false, false));
+                leaderboard -> createStrippedLeaderboardDTOWithSecurity(leaderboard, false, false));
+    }
+
+    @Override
+    public StrippedLeaderboardDTOWithSecurity getLeaderboardWithSecurity(String leaderboardName) {
+        Map<String, Leaderboard> leaderboards = getService().getLeaderboards();
+        StrippedLeaderboardDTOWithSecurity result = null;
+        Leaderboard leaderboard = leaderboards.get(leaderboardName);
+        if (leaderboard != null) {
+            if (leaderboard instanceof RegattaLeaderboard) {
+                getSecurityService().checkCurrentUserReadPermission(((RegattaLeaderboard) leaderboard).getRegatta());
+            }
+            getSecurityService().checkCurrentUserReadPermission(leaderboard);
+            result = createStrippedLeaderboardDTOWithSecurity(leaderboard, false, false);
+        }
+        return result;
     }
 
     @Override
@@ -2711,6 +2731,30 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
      */
     private StrippedLeaderboardDTO createStrippedLeaderboardDTO(Leaderboard leaderboard, boolean withGeoLocationData, boolean withStatisticalData) {
         StrippedLeaderboardDTO leaderboardDTO = new StrippedLeaderboardDTO(convertToBoatClassDTO(leaderboard.getBoatClass()));
+        fillLeaderboardData(leaderboard, withGeoLocationData, withStatisticalData, leaderboardDTO);
+        return leaderboardDTO;
+    }
+
+    /**
+     * Creates a {@link LeaderboardDTO} for <code>leaderboard</code> and fills in the name, race master data in the form
+     * of {@link RaceColumnDTO}s, whether or not there are {@link LeaderboardDTO#hasCarriedPoints carried points} and
+     * the {@link LeaderboardDTO#discardThresholds discarding thresholds} for the leaderboard. No data about the points
+     * is filled into the result object. No data about the competitor display names is filled in; instead, an empty map
+     * is used for {@link LeaderboardDTO#competitorDisplayNames}.<br />
+     * If <code>withGeoLocationData</code> is <code>true</code> the geographical location of all races will be
+     * determined.
+     */
+    private StrippedLeaderboardDTOWithSecurity createStrippedLeaderboardDTOWithSecurity(Leaderboard leaderboard,
+            boolean withGeoLocationData, boolean withStatisticalData) {
+        StrippedLeaderboardDTOWithSecurity leaderboardDTO = new StrippedLeaderboardDTOWithSecurity(
+                convertToBoatClassDTO(leaderboard.getBoatClass()));
+        fillLeaderboardData(leaderboard, withGeoLocationData, withStatisticalData, leaderboardDTO);
+        SecurityDTOUtil.addSecurityInformation(getSecurityService(), leaderboardDTO, leaderboard.getIdentifier());
+        return leaderboardDTO;
+    }
+
+    private void fillLeaderboardData(Leaderboard leaderboard, boolean withGeoLocationData, boolean withStatisticalData,
+            StrippedLeaderboardDTO leaderboardDTO) {
         TimePoint startOfLatestRace = null;
         Long delayToLiveInMillisForLatestRace = null;
         leaderboardDTO.setName(leaderboard.getName());
@@ -2773,15 +2817,14 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 raceColumnDTO.setRaceLogTrackingInfo(fleetDTO, raceLogTrackingInfo);
             }
         }
-        SecurityDTOUtil.addSecurityInformation(getSecurityService(), leaderboardDTO, leaderboard.getIdentifier());
-        return leaderboardDTO;
     }
 
     @Override
-    public StrippedLeaderboardDTO updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName, int[] newDiscardingThresholds, UUID newCourseAreaId) {
+    public StrippedLeaderboardDTOWithSecurity updateLeaderboard(String leaderboardName, String newLeaderboardName,
+            String newLeaderboardDisplayName, int[] newDiscardingThresholds, UUID newCourseAreaId) {
         SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.UPDATE, leaderboardName));
         Leaderboard updatedLeaderboard = getService().apply(new UpdateLeaderboard(leaderboardName, newLeaderboardName, newLeaderboardDisplayName, newDiscardingThresholds, newCourseAreaId));
-        return createStrippedLeaderboardDTO(updatedLeaderboard, false, false);
+        return createStrippedLeaderboardDTOWithSecurity(updatedLeaderboard, false, false);
     }
     
     @Override

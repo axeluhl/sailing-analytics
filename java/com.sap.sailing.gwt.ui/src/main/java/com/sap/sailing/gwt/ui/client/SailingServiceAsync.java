@@ -86,6 +86,7 @@ import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO;
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.SailingServiceConstants;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SimulatorResultsDTO;
 import com.sap.sailing.gwt.ui.shared.SliceRacePreperationDTO;
@@ -267,25 +268,27 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
 
     void getLeaderboardNames(AsyncCallback<List<String>> callback);
 
-    void getLeaderboards(AsyncCallback<List<StrippedLeaderboardDTO>> callback);
+    void getLeaderboardsWithSecurity(AsyncCallback<List<StrippedLeaderboardDTOWithSecurity>> callback);
 
     void getLeaderboardsByRaceAndRegatta(String raceName, RegattaIdentifier regattaIdentifier,
             AsyncCallback<List<StrippedLeaderboardDTO>> callback);
 
     void updateLeaderboard(String leaderboardName, String newLeaderboardName, String newLeaderboardDisplayName,
-            int[] newDiscardingThreasholds, UUID newCourseAreaId, AsyncCallback<StrippedLeaderboardDTO> callback);
+            int[] newDiscardingThreasholds, UUID newCourseAreaId,
+            AsyncCallback<StrippedLeaderboardDTOWithSecurity> callback);
 
     void createFlexibleLeaderboard(String leaderboardName, String leaderboardDisplayName,
             int[] discardThresholds,
-            ScoringSchemeType scoringSchemeType, UUID courseAreaId, AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
+            ScoringSchemeType scoringSchemeType, UUID courseAreaId,
+            AsyncCallback<StrippedLeaderboardDTOWithSecurity> asyncCallback);
 
     void createRegattaLeaderboard(RegattaName regattaIdentifier,
             String leaderboardDisplayName,
-            int[] discardThresholds, AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
+            int[] discardThresholds, AsyncCallback<StrippedLeaderboardDTOWithSecurity> asyncCallback);
 
     void createRegattaLeaderboardWithEliminations(String name, String displayName,
             String regattaName,
-            AsyncCallback<StrippedLeaderboardDTO> asyncCallback);
+            AsyncCallback<StrippedLeaderboardDTOWithSecurity> asyncCallback);
 
     void removeLeaderboard(String leaderboardName, AsyncCallback<Void> asyncCallback);
 
@@ -538,6 +541,8 @@ public interface SailingServiceAsync extends ServerInfoRetriever, FileStorageMan
     void removeLeaderboardColumns(String leaderboardName, List<String> columnsToRemove, AsyncCallback<Void> callback);
 
     void getLeaderboard(String leaderboardName, AsyncCallback<StrippedLeaderboardDTO> callback);
+
+    void getLeaderboardWithSecurity(String leaderboardName, AsyncCallback<StrippedLeaderboardDTOWithSecurity> callback);
 
     void suppressCompetitorInLeaderboard(String leaderboardName, String competitorIdAsString, boolean suppressed,
             AsyncCallback<Void> asyncCallback);

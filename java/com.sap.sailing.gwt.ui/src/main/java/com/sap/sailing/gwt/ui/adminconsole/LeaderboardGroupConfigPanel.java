@@ -56,6 +56,7 @@ import com.sap.sailing.gwt.ui.client.StringMessages;
 import com.sap.sailing.gwt.ui.leaderboard.ScoringSchemeTypeFormatter;
 import com.sap.sailing.gwt.ui.shared.LeaderboardGroupDTO;
 import com.sap.sailing.gwt.ui.shared.RegattaDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
 import com.sap.sse.common.Util;
 import com.sap.sse.common.util.NaturalComparator;
@@ -81,7 +82,8 @@ import com.sap.sse.security.ui.client.component.EditOwnershipDialog.DialogConfig
 import com.sap.sse.security.ui.client.component.SecuredDTOOwnerColumn;
 import com.sap.sse.security.ui.client.component.editacl.EditACLDialog;
 
-public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements LeaderboardGroupsDisplayer, LeaderboardsDisplayer {
+public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel
+        implements LeaderboardGroupsDisplayer, LeaderboardsDisplayer<StrippedLeaderboardDTOWithSecurity> {
 
     interface AnchorTemplates extends SafeHtmlTemplates {
         @SafeHtmlTemplates.Template("<a href=\"{0}\">{1}</a>")
@@ -127,12 +129,13 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
     private ArrayList<LeaderboardGroupDTO> availableLeaderboardGroups;
     private ArrayList<StrippedLeaderboardDTO> availableLeaderboards;
     private final LeaderboardGroupsRefresher leaderboardGroupsRefresher;
-    private final LeaderboardsRefresher leaderboardsRefresher;
+    private final LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher;
 
 
     public LeaderboardGroupConfigPanel(SailingServiceAsync sailingService, UserService userService,
             RegattaRefresher regattaRefresher, LeaderboardGroupsRefresher leaderboardGroupsRefresher,
-            LeaderboardsRefresher leaderboardsRefresher, ErrorReporter errorReporter, StringMessages stringMessages) {
+            LeaderboardsRefresher<StrippedLeaderboardDTOWithSecurity> leaderboardsRefresher, ErrorReporter errorReporter,
+            StringMessages stringMessages) {
         super(sailingService, regattaRefresher, errorReporter, stringMessages);
 
         AdminConsoleTableResources tableRes = GWT.create(AdminConsoleTableResources.class);
@@ -706,7 +709,7 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
     }
 
     @Override
-    public void fillLeaderboards(Iterable<StrippedLeaderboardDTO> leaderboards) {
+    public void fillLeaderboards(Iterable<StrippedLeaderboardDTOWithSecurity> leaderboards) {
         availableLeaderboards.clear();
         leaderboardsProvider.getList().clear();
         if (leaderboards != null) {
@@ -733,15 +736,15 @@ public class LeaderboardGroupConfigPanel extends AbstractRegattaPanel implements
      */
     private void refreshLeaderboardsList() {
         if (isSingleGroupSelected && getSelectedGroup() != null) {
-            sailingService.getLeaderboards(new MarkedAsyncCallback<List<StrippedLeaderboardDTO>>(
-                    new AsyncCallback<List<StrippedLeaderboardDTO>>() {
+            sailingService.getLeaderboardsWithSecurity(new MarkedAsyncCallback<List<StrippedLeaderboardDTOWithSecurity>>(
+                    new AsyncCallback<List<StrippedLeaderboardDTOWithSecurity>>() {
                         @Override
                         public void onFailure(Throwable t) {
                             errorReporter.reportError("Error trying to obtain list of leaderboards: " + t.getMessage());
                         }
 
                         @Override
-                        public void onSuccess(List<StrippedLeaderboardDTO> leaderboards) {
+                        public void onSuccess(List<StrippedLeaderboardDTOWithSecurity> leaderboards) {
                             fillLeaderboards(leaderboards);
                         }
                     }));
