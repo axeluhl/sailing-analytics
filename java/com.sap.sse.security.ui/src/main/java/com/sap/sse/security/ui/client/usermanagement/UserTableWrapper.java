@@ -162,7 +162,7 @@ extends TableWrapper<UserDTO, S, StringMessages, TR> {
         final HasPermissions type = SecuredSecurityTypes.USER;
         final Function<UserDTO, String> idFactory = UserDTO::getName;
         final AccessControlledActionsColumn<UserDTO, DefaultActionsImagesBarCell> userActionColumn = new AccessControlledActionsColumn<>(
-                new DefaultActionsImagesBarCell(stringMessages), userService, type, idFactory);
+                new DefaultActionsImagesBarCell(stringMessages), userService, type);
         userActionColumn.addAction(ACTION_UPDATE, UPDATE, user -> editUser(user, additionalPermissions));
         userActionColumn.addAction(ACTION_DELETE, DELETE, user -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveUser(user.getName()))) {

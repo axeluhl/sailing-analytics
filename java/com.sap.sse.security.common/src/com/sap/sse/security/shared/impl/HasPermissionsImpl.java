@@ -6,11 +6,13 @@ import java.util.Collection;
 import com.sap.sse.common.impl.NamedImpl;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.IdentifierStrategy;
 import com.sap.sse.security.shared.WildcardPermission;
 
-public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
+public class HasPermissionsImpl<T> extends NamedImpl implements HasPermissions {
     private static final long serialVersionUID = -7901836864741040400L;
     private final Action[] availableActions;
+    private final IdentifierStrategy<T> identiferStrategy;
 
     /**
      * By default, all actions as provided by {@link DefaultActions} are supported by logical types with permissions
@@ -20,8 +22,8 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
      *            a type name that can be represented in a {@link WildcardPermission}'s first part without further need
      *            for encoding
      */
-    public HasPermissionsImpl(String logicalTypeName) {
-        this(logicalTypeName, DefaultActions.values());
+    public HasPermissionsImpl(String logicalTypeName, IdentifierStrategy<T> identiferStrategy) {
+        this(logicalTypeName, identiferStrategy, DefaultActions.values());
     }
 
     /**
@@ -33,11 +35,12 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
      *            a type name that can be represented in a {@link WildcardPermission}'s first part without further need
      *            for encoding
      */
-    public HasPermissionsImpl(final String logicalTypeName, final Action... availableActions) {
+    public HasPermissionsImpl(final String logicalTypeName, IdentifierStrategy<T> identiferStrategy, final Action... availableActions) {
         super(logicalTypeName);
         assert logicalTypeName.equals(new WildcardPermissionEncoder().encodeAsPermissionPart(logicalTypeName));
         final int numberOfActionsAvailable = availableActions == null ? 0 : availableActions.length;
         this.availableActions = new Action[numberOfActionsAvailable];
+        this.identiferStrategy = identiferStrategy;
         if (availableActions != null) {
             System.arraycopy(availableActions, 0, this.availableActions, 0, numberOfActionsAvailable);
         }
@@ -56,6 +59,11 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
             }
         }
         return false;
+    }
+    
+    @Override
+    public IdentifierStrategy<T> identifierStrategy() {
+        return identiferStrategy;
     }
 
     @Override
@@ -125,4 +133,5 @@ public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
         assert supports(action);
         return new WildcardPermission(getStringPermissionForObjects(action, objectIdentifiers));
     }
+
 }

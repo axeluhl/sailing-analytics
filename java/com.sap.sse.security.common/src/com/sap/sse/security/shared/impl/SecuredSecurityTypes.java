@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sap.sse.security.shared.HasPermissions;
+import com.sap.sse.security.shared.IdentifierStrategy;
 import com.sap.sse.security.shared.RoleDefinition;
 
 /**
@@ -14,19 +15,20 @@ import com.sap.sse.security.shared.RoleDefinition;
  * @author Axel Uhl (d043530)
  *
  */
-public class SecuredSecurityTypes extends HasPermissionsImpl {
+public class SecuredSecurityTypes<T> extends HasPermissionsImpl<T> {
     private static final long serialVersionUID = -5052828472297142038L;
     private static Set<HasPermissions> allInstances = new HashSet<>();
     
-    public SecuredSecurityTypes(String logicalTypeName, Action... availableActions) {
-        super(logicalTypeName, availableActions);
+    public SecuredSecurityTypes(String logicalTypeName, IdentifierStrategy<T> identifierStrategy, Action... availableActions) {
+        super(logicalTypeName, identifierStrategy, availableActions);
         allInstances.add(this);
     }
-    public SecuredSecurityTypes(String logicalTypeName) {
-        super(logicalTypeName);
+
+    public SecuredSecurityTypes(String logicalTypeName, IdentifierStrategy<T> identifierStrategy) {
+        super(logicalTypeName, identifierStrategy);
         allInstances.add(this);
     }
-    
+
     public static Iterable<HasPermissions> getAllInstances() {
         return Collections.unmodifiableSet(allInstances);
     }
@@ -35,17 +37,17 @@ public class SecuredSecurityTypes extends HasPermissionsImpl {
     /**
      * type-relative identifier is the {@link User#getName() username}.
      */
-    public static final HasPermissions USER = new SecuredSecurityTypes("USER", DefaultActions.plus(UserActions.GRANT_PERMISSION, UserActions.REVOKE_PERMISSION));
+    public static final HasPermissions USER = new SecuredSecurityTypes<>("USER", IdentifierStrategy.NO_OP, DefaultActions.plus(UserActions.GRANT_PERMISSION, UserActions.REVOKE_PERMISSION));
 
     /**
      * type-relative identifier is the {@link RoleDefinition#getId() role ID's} string representation
      */
-    public static final HasPermissions ROLE_DEFINITION = new SecuredSecurityTypes("ROLE_DEFINITION");
+    public static final HasPermissions ROLE_DEFINITION = new SecuredSecurityTypes<>("ROLE_DEFINITION", IdentifierStrategy.NO_OP);
     
     /**
      * type-relative identifier is the {@link UserGroupImpl#getId() group ID's} string representation
      */
-    public static final HasPermissions USER_GROUP = new SecuredSecurityTypes("USER_GROUP");
+    public static final HasPermissions USER_GROUP = new SecuredSecurityTypes<>("USER_GROUP", IdentifierStrategy.NO_OP);
 
     public static enum ServerActions implements Action {
         CONFIGURE_FILE_STORAGE,
@@ -59,5 +61,5 @@ public class SecuredSecurityTypes extends HasPermissionsImpl {
      * represents the logical server which may consist of a master and multiple replicas and has a unique server name;
      * type-relative identifier is the server name
      */
-    public static final HasPermissions SERVER = new SecuredSecurityTypes("SERVER", ServerActions.values());
+    public static final HasPermissions SERVER = new SecuredSecurityTypes<>("SERVER", IdentifierStrategy.NO_OP, ServerActions.values());
 }

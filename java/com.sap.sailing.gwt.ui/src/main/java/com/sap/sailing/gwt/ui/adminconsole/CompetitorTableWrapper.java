@@ -327,7 +327,7 @@ public class CompetitorTableWrapper<S extends RefreshableSelectionModel<Competit
         final HasPermissions type = SecuredDomainType.COMPETITOR;
         final Function<CompetitorDTO, String> idFactory = CompetitorDTO::getIdAsString;
         AccessControlledActionsColumn<CompetitorDTO, CompetitorConfigImagesBarCell> competitorActionColumn = new AccessControlledActionsColumn<CompetitorDTO, CompetitorConfigImagesBarCell>(
-                new CompetitorConfigImagesBarCell(getStringMessages()), userService, type, idFactory);
+                new CompetitorConfigImagesBarCell(getStringMessages()), userService, type);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_UPDATE, HasPermissions.DefaultActions.UPDATE, this::editCompetitor);
         competitorActionColumn.addAction(CompetitorConfigImagesBarCell.ACTION_REFRESH, this::allowUpdate);
         final DialogConfig<CompetitorDTO> editOwnerShipDialog = EditOwnershipDialog.create(userService.getUserManagementService(), SecuredDomainType.COMPETITOR,

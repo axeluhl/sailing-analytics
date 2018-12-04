@@ -115,5 +115,4 @@ public class WildcardPermissionEncoder implements PermissionStringEncoder<Wildca
     public static String encode(String... values) {
         WildcardPermissionEncoder encoder = new WildcardPermissionEncoder();
         return encoder.encodeStringList(values);
-    }
-}
+    }}

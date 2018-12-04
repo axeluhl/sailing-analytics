@@ -128,7 +128,7 @@ public class BoatImpl extends RenamableImpl implements DynamicBoat {
 
     @Override
     public QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getId().toString());
+        return getType().getQualifiedObjectIdentifier(getType().identifierStrategy().getIdentifierAsString(this));
     }
 
     @Override

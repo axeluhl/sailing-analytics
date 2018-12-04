@@ -250,7 +250,7 @@ public class RegattaListComposite extends Composite implements RegattasDisplayer
         final HasPermissions type = SecuredDomainType.REGATTA;
         final Function<RegattaDTO, String> idFactory = RegattaDTO::getName;
         final AccessControlledActionsColumn<RegattaDTO, RegattaConfigImagesBarCell> actionsColumn = new AccessControlledActionsColumn<>(
-                new RegattaConfigImagesBarCell(stringMessages), userService, type, idFactory);
+                new RegattaConfigImagesBarCell(stringMessages), userService, type);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_UPDATE, UPDATE, this::editRegatta);
         actionsColumn.addAction(RegattaConfigImagesBarCell.ACTION_DELETE, DELETE, regatta -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveRegatta(regatta.getName()))) {

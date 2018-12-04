@@ -23,6 +23,7 @@ import com.sap.sse.security.UsernamePasswordRealm;
 import com.sap.sse.security.shared.AdminRole;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
+import com.sap.sse.security.shared.IdentifierStrategy;
 import com.sap.sse.security.shared.PermissionChecker;
 import com.sap.sse.security.shared.RoleDefinition;
 import com.sap.sse.security.shared.RoleDefinitionImpl;
@@ -56,8 +57,8 @@ public class PermissionCheckerTest {
     private UserStore userStore;
     private AccessControlStore accessControlStore;
     private PrincipalCollection principalCollection;
-    private HasPermissions type1 = new HasPermissionsImpl("DEMO", DefaultActions.READ, DefaultActions.UPDATE);
-    private HasPermissions type2 = new HasPermissionsImpl("TEST", DefaultActions.READ, DefaultActions.DELETE);
+    private HasPermissions type1 = new HasPermissionsImpl<>("DEMO", IdentifierStrategy.NO_OP, DefaultActions.READ, DefaultActions.UPDATE);
+    private HasPermissions type2 = new HasPermissionsImpl<>("TEST", IdentifierStrategy.NO_OP, DefaultActions.READ, DefaultActions.DELETE);
     private Iterable<HasPermissions> allHasPermissions = Arrays.asList(type1, type2);
     
     @Before

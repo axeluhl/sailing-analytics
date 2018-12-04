@@ -65,7 +65,7 @@ public class UserGroupTableWrapper extends
         final HasPermissions type = SecuredSecurityTypes.USER_GROUP;
         final Function<UserGroupDTO, String> idFactory = UserGroupDTO::getName;
         final AccessControlledActionsColumn<UserGroupDTO, DefaultActionsImagesBarCell> actionColumn = new AccessControlledActionsColumn<>(
-                new DefaultActionsImagesBarCell(stringMessages), userService, type, idFactory);
+                new DefaultActionsImagesBarCell(stringMessages), userService, type);
         actionColumn.addAction(ACTION_DELETE, DELETE, userGroupDTO -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveUserGroup(userGroupDTO.getName()))) {
                 userService.getUserManagementService().deleteUserGroup(userGroupDTO.getId().toString(),

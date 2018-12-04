@@ -619,7 +619,7 @@ public interface Leaderboard extends LeaderboardBase, HasRaceColumns {
     }
 
     default QualifiedObjectIdentifier getIdentifier() {
-        return getType().getQualifiedObjectIdentifier(getName());
+        return getType().getQualifiedObjectIdentifier(getType().identifierStrategy().getIdentifierAsString(this));
     }
 
     @Override

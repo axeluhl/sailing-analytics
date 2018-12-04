@@ -23,6 +23,8 @@ public interface HasPermissions {
      *         passed that is not contained in the array returned by this method.
      */
     Action[] getAvailableActions();
+    
+    <T> IdentifierStrategy<T> identifierStrategy();
 
     /**
      * @return {@code true} if and only if objects of this logical type support the {@code action} as one of their
@@ -62,7 +64,7 @@ public interface HasPermissions {
      * "LEADERBOARD/abc". This assumes that the {@link #name()} method returns only values that do not contain a "/".
      */
     QualifiedObjectIdentifier getQualifiedObjectIdentifier(String typeRelativeObjectIdentifier);
-    
+
     /**
      * Same as {@link #getStringPermissionForObjects(Action, String...)}, only that the result is a
      * {@link WildcardPermission} instead of a {@link String}

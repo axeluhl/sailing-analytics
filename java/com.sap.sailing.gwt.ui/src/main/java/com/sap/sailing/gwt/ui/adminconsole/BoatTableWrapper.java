@@ -173,7 +173,7 @@ public class BoatTableWrapper<S extends RefreshableSelectionModel<BoatDTO>> exte
         final HasPermissions type = SecuredDomainType.BOAT;
         final Function<BoatDTO, String> idFactory = BoatDTO::getIdAsString;
         AccessControlledActionsColumn<BoatDTO, BoatConfigImagesBarCell> boatActionColumn = new AccessControlledActionsColumn<BoatDTO, BoatConfigImagesBarCell>(
-                new BoatConfigImagesBarCell(getStringMessages()), userService, type, idFactory);
+                new BoatConfigImagesBarCell(getStringMessages()), userService, type);
         boatActionColumn.addAction(BoatConfigImagesBarCell.ACTION_UPDATE, HasPermissions.DefaultActions.UPDATE,
                 this::openEditBoatDialog);
         boatActionColumn.addAction(BoatConfigImagesBarCell.ACTION_REFRESH, this::allowUpdate);

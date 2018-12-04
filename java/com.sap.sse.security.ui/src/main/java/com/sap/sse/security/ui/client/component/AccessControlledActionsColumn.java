@@ -5,16 +5,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import com.sap.sse.gwt.client.celltable.ImagesBarCell;
 import com.sap.sse.gwt.client.celltable.ImagesBarColumn;
 import com.sap.sse.security.shared.HasPermissions;
 import com.sap.sse.security.shared.HasPermissions.Action;
+import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.shared.dto.AccessControlListDTO;
 import com.sap.sse.security.shared.dto.OwnershipDTO;
 import com.sap.sse.security.shared.dto.SecuredDTO;
-import com.sap.sse.security.shared.WildcardPermission;
 import com.sap.sse.security.ui.client.UserService;
 
 public class AccessControlledActionsColumn<T extends SecuredDTO, S extends ImagesBarCell>
@@ -27,10 +26,10 @@ public class AccessControlledActionsColumn<T extends SecuredDTO, S extends Image
     private final BiFunction<Action, T, WildcardPermission> permissionFactory;
 
     public AccessControlledActionsColumn(final S imagesBarCell, final UserService userService,
-            final HasPermissions type, final Function<T, String> idFactory) {
+            final HasPermissions type) {
         super(imagesBarCell);
         this.userService = userService;
-        this.permissionFactory = (action, object) -> type.getPermissionForObjects(action, idFactory.apply(object));
+        this.permissionFactory = (action, object) -> type.getPermissionForObjects(action, type.identifierStrategy().getIdentifierAsString(object));
         this.setFieldUpdater((index, object, value) -> nameToCallbackMap.get(value).accept(object));
     }
 

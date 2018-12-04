@@ -198,7 +198,7 @@ public class RoleDefinitionsPanel extends VerticalPanel {
         final Function<RoleDefinitionDTO, String> idFactory = roleDef -> roleDef.getId().toString();
         
         final AccessControlledActionsColumn<RoleDefinitionDTO, DefaultActionsImagesBarCell> roleActionColumn = new AccessControlledActionsColumn<>(
-                new DefaultActionsImagesBarCell(stringMessages), userService, type, idFactory);
+                new DefaultActionsImagesBarCell(stringMessages), userService, type);
         roleActionColumn.addAction(ACTION_UPDATE, UPDATE, this::editRole);
         roleActionColumn.addAction(ACTION_DELETE, DELETE, roleDefinition -> {
             if (Window.confirm(stringMessages.doYouReallyWantToRemoveRole(roleDefinition.getName()))) {

@@ -321,7 +321,7 @@ TrackedRaceChangedListener, LeaderboardsDisplayer {
         final HasPermissions type = SecuredDomainType.LEADERBOARD;
         final Function<StrippedLeaderboardDTO, String> idFactory = StrippedLeaderboardDTO::getName;
         final AccessControlledActionsColumn<StrippedLeaderboardDTO, LeaderboardConfigImagesBarCell> leaderboardActionColumn = new AccessControlledActionsColumn<>(
-                new LeaderboardConfigImagesBarCell(stringMessages), userService, type, idFactory);
+                new LeaderboardConfigImagesBarCell(stringMessages), userService, type);
         
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_UPDATE, UPDATE, this::editLeaderboard);
         leaderboardActionColumn.addAction(LeaderboardConfigImagesBarCell.ACTION_DELETE, DELETE, leaderboardDTO -> {
