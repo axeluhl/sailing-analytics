@@ -589,6 +589,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
 	    #build local p2 repo
 	    echo "Using following command (pwd: java/com.sap.sailing.targetplatform.base): mvn -fae -s $MAVEN_SETTINGS $clean compile"
 	    echo "Maven version used: `mvn --version`"
+            echo "JAVA_HOME used: $JAVA_HOME"
 	    (cd com.sap.$PROJECT_TYPE.targetplatform.base; mvn -fae -s $MAVEN_SETTINGS $clean compile 2>&1 | tee -a $START_DIR/build.log)
 	    # now get the exit status from mvn, and not that of tee which is what $? contains now
 	    MVN_EXIT_CODE=${PIPESTATUS[0]}
@@ -705,6 +706,7 @@ if [[ "$@" == "build" ]] || [[ "$@" == "all" ]]; then
     
         echo "Using following command: mvn $extra -DargLine=\"$APP_PARAMETERS\" -fae -s $MAVEN_SETTINGS $clean install"
         echo "Maven version used: `mvn --version`"
+        echo "JAVA_HOME used: $JAVA_HOME"
         mvn $extra -DargLine="$APP_PARAMETERS" -fae -s $MAVEN_SETTINGS $clean install 2>&1 | tee -a $START_DIR/build.log
         # now get the exit status from mvn, and not that of tee which is what $? contains now
         MVN_EXIT_CODE=${PIPESTATUS[0]}
@@ -791,6 +793,7 @@ if [[ "$@" == "install" ]] || [[ "$@" == "all" ]]; then
     cp -v $PROJECT_HOME/java/target/start $ACDIR/
     cp -v $PROJECT_HOME/java/target/stop $ACDIR/
     cp -v $PROJECT_HOME/java/target/status $ACDIR/
+    cp -v $PROJECT_HOME/java/target/configuration/JavaSE-11.profile $ACDIR/
 
     cp -v $PROJECT_HOME/java/target/refreshInstance.sh $ACDIR/
     cp -v $PROJECT_HOME/java/target/udpmirror $ACDIR/

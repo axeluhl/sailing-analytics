@@ -10,6 +10,9 @@ Import-Package: com.sap.sailing.server,
  javax.ws.rs;version="1.1.1",
  javax.ws.rs.core;version="1.1.1",
  javax.ws.rs.ext;version="1.1.1",
+ javax.xml.bind,
+ javax.xml.ws,
+ javax.xml.ws.http,
  org.apache.commons.lang,
  org.json.simple,
  org.json.simple.parser,
@@ -57,7 +60,8 @@ Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.grib,
  com.sap.sailing.nmeaconnector,
  com.sap.sailing.geocoding,
- com.googlecode.java-diff-utils
+ com.googlecode.java-diff-utils,
+ com.sun.xml.bind.jaxb-impl;bundle-version="2.3.0"
 Bundle-ClassPath: .
 Web-ContextPath: /sailingserver
 Export-Package: com.sap.sailing.server.gateway,

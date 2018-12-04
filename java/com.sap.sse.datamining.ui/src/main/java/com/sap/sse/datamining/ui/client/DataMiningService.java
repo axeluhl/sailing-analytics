@@ -10,15 +10,15 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.sap.sse.common.settings.SerializableSettings;
 import com.sap.sse.datamining.shared.DataMiningSession;
 import com.sap.sse.datamining.shared.SerializationDummy;
-import com.sap.sse.datamining.shared.dto.StatisticQueryDefinitionDTO;
-import com.sap.sse.datamining.shared.dto.StoredDataMiningQueryDTO;
 import com.sap.sse.datamining.shared.impl.PredefinedQueryIdentifier;
 import com.sap.sse.datamining.shared.impl.dto.AggregationProcessorDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverChainDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.DataRetrieverLevelDTO;
 import com.sap.sse.datamining.shared.impl.dto.FunctionDTO;
+import com.sap.sse.datamining.shared.impl.dto.ModifiableStatisticQueryDefinitionDTO;
 import com.sap.sse.datamining.shared.impl.dto.QueryResultDTO;
 import com.sap.sse.datamining.shared.impl.dto.ReducedDimensionsDTO;
+import com.sap.sse.datamining.shared.impl.dto.StoredDataMiningQueryDTOImpl;
 
 public interface DataMiningService extends RemoteService {
 
@@ -53,24 +53,26 @@ public interface DataMiningService extends RemoteService {
             String localeInfoName);
 
     <ResultType extends Serializable> QueryResultDTO<ResultType> runQuery(DataMiningSession session,
-            StatisticQueryDefinitionDTO queryDefinition);
+            ModifiableStatisticQueryDefinitionDTO queryDefinition);
 
     HashSet<PredefinedQueryIdentifier> getPredefinedQueryIdentifiers();
     
-    StatisticQueryDefinitionDTO getPredefinedQueryDefinition(PredefinedQueryIdentifier identifier, String localeInfoName);
+    ModifiableStatisticQueryDefinitionDTO getPredefinedQueryDefinition(PredefinedQueryIdentifier identifier,
+            String localeInfoName);
 
     <ResultType extends Serializable> QueryResultDTO<ResultType> runPredefinedQuery(DataMiningSession session,
             PredefinedQueryIdentifier identifier, String localeInfoName);
     
-    StatisticQueryDefinitionDTO localize(StatisticQueryDefinitionDTO queryDefinition, String localeInfoName);
+    ModifiableStatisticQueryDefinitionDTO localize(ModifiableStatisticQueryDefinitionDTO queryDefinition,
+            String localeInfoName);
 
     SerializationDummy pseudoMethodSoThatSomeClassesAreAddedToTheGWTSerializationPolicy();
 
-    ArrayList<StoredDataMiningQueryDTO> retrieveStoredQueries();
+    ArrayList<StoredDataMiningQueryDTOImpl> retrieveStoredQueries();
 
-    StoredDataMiningQueryDTO updateOrCreateStoredQuery(StoredDataMiningQueryDTO query);
+    StoredDataMiningQueryDTOImpl updateOrCreateStoredQuery(StoredDataMiningQueryDTOImpl query);
 
-    StoredDataMiningQueryDTO removeStoredQuery(StoredDataMiningQueryDTO query);
+    StoredDataMiningQueryDTOImpl removeStoredQuery(StoredDataMiningQueryDTOImpl query);
 
-    StatisticQueryDefinitionDTO getDeserializedQuery(String serializedQuery);
+    ModifiableStatisticQueryDefinitionDTO getDeserializedQuery(String serializedQuery);
 }
