@@ -9,6 +9,12 @@ Export-Package: com.sap.sailing.xrr.schema
 Import-Package: com.sap.sailing.server,
  com.sap.sailing.server.impl,
  com.sap.sailing.server.operationaltransformation,
+ com.sun.istack;version="3.0.7",
+ javax.xml.bind,
+ javax.xml.bind.annotation,
+ javax.xml.bind.annotation.adapters,
+ javax.xml.bind.attachment,
+ javax.xml.bind.util,
  org.json.simple,
  org.json.simple.parser,
  org.osgi.framework;version="1.6.0"
