@@ -294,6 +294,9 @@ public class ImportMasterDataOperation extends
         if (existingLeaderboardGroup == null) {
             toState.addLeaderboardGroupWithoutReplication(leaderboardGroup);
             creationCount.addOneLeaderboardGroup(leaderboardGroup.getName());
+            if (leaderboardGroup.getOverallLeaderboard() != null) {
+                ensureOwnership(leaderboardGroup.getOverallLeaderboard().getIdentifier(), securityService);
+            }
             ensureOwnership(leaderboardGroup.getIdentifier(), securityService);
         } else {
             logger.info(String.format("Leaderboard Group with name %1$s already exists and hasn't been overridden.",
@@ -572,7 +575,8 @@ public class ImportMasterDataOperation extends
     }
 
     private void ensureOwnership(QualifiedObjectIdentifier identifier, SecurityService securityService) {
-        logger.info("Adopting " + identifier + " from Masterdataimport");
+        logger.info(
+                "Adopting " + identifier + " from Masterdataimport to " + user.getName() + " and " + tenant.getName());
         securityService.setOwnershipIfNotSet(identifier, user, tenant);
     }
 
