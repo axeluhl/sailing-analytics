@@ -68,6 +68,9 @@ import com.sap.sse.common.Timed;
 import com.sap.sse.common.Util;
 import com.sap.sse.concurrent.LockUtil;
 import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.impl.User;
+import com.sap.sse.security.shared.impl.UserGroup;
 
 public class ImportMasterDataOperation extends
         AbstractRacingEventServiceOperation<MasterDataImportObjectCreationCountImpl> {
@@ -88,13 +91,20 @@ public class ImportMasterDataOperation extends
 
     private DataImportProgress progress;
 
+    private User user;
+
+    private UserGroup tenant;
+
     public ImportMasterDataOperation(TopLevelMasterData topLevelMasterData, UUID importOperationId, boolean override,
-            MasterDataImportObjectCreationCountImpl existingCreationCount) {
+            MasterDataImportObjectCreationCountImpl existingCreationCount, User user, UserGroup tenant) {
+
         this.creationCount = new MasterDataImportObjectCreationCountImpl();
         this.creationCount.add(existingCreationCount);
         this.masterData = topLevelMasterData;
         this.override = override;
         this.importOperationId = importOperationId;
+        this.user = user;
+        this.tenant = tenant;
     }
 
     @Override
@@ -266,6 +276,7 @@ public class ImportMasterDataOperation extends
                 toState.addLeaderboard(leaderboard);
                 storeRaceLogEvents(leaderboard, toState.getMongoObjectFactory(), toState.getDomainObjectFactory(), override);
                 storeRegattaLogEvents(leaderboard, toState.getMongoObjectFactory(), toState.getDomainObjectFactory(), override);
+                ensureOwnership(leaderboard.getIdentifier(), securityService);
                 creationCount.addOneLeaderboard(leaderboard.getName());
                 relinkTrackedRacesIfPossible(toState, leaderboard);
                 toState.updateStoredLeaderboard(leaderboard);
@@ -283,6 +294,7 @@ public class ImportMasterDataOperation extends
         if (existingLeaderboardGroup == null) {
             toState.addLeaderboardGroupWithoutReplication(leaderboardGroup);
             creationCount.addOneLeaderboardGroup(leaderboardGroup.getName());
+            ensureOwnership(leaderboardGroup.getIdentifier(), securityService);
         } else {
             logger.info(String.format("Leaderboard Group with name %1$s already exists and hasn't been overridden.",
                     leaderboardGroup.getName()));
@@ -529,6 +541,7 @@ public class ImportMasterDataOperation extends
                     }
                 }
                 regatta.getRegattaLog().lockForRead();
+                ensureOwnership(regatta.getIdentifier(), securityService);
                 creationCount.addOneRegatta(regatta.getId().toString());
             }
         }
@@ -549,12 +562,18 @@ public class ImportMasterDataOperation extends
             }
             if (existingEvent == null) {
                 toState.addEventWithoutReplication(event);
+                ensureOwnership(event.getIdentifier(), securityService);
                 creationCount.addOneEvent(event.getId().toString());
             } else {
                 logger.info(String.format("Event with name %1$s already exists and hasn't been overridden.",
                         event.getName()));
             }
         }
+    }
+
+    private void ensureOwnership(QualifiedObjectIdentifier identifier, SecurityService securityService) {
+        logger.info("Adopting " + identifier + " from Masterdataimport");
+        securityService.setOwnershipIfNotSet(identifier, user, tenant);
     }
 
     @Override

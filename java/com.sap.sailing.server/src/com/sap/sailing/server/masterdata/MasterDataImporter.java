@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+import com.sap.sailing.domain.base.Boat;
 import com.sap.sailing.domain.base.Competitor;
 import com.sap.sailing.domain.base.CompetitorAndBoatStore;
 import com.sap.sailing.domain.base.DomainFactory;
@@ -29,7 +30,7 @@ import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache;
 import com.sap.sse.util.ObjectInputStreamResolvingAgainstCache.ResolveListener;
 
 public class MasterDataImporter {
-    private final static Logger LOG = Logger.getLogger(MasterDataImporter.class.getName());
+    private final static Logger logger = Logger.getLogger(MasterDataImporter.class.getName());
     private final DomainFactory baseDomainFactory;
     private final RacingEventService racingEventService;
     private final User user;
@@ -52,9 +53,9 @@ public class MasterDataImporter {
                 .createObjectInputStreamResolvingAgainstThisFactory(inputStream, new ResolveListener() {
                     @Override
                     public void onNewObject(Object result) {
-                        if (result instanceof WithQualifiedObjectIdentifier) {
+                        if (result instanceof Boat || result instanceof Competitor) {
                             QualifiedObjectIdentifier id = ((WithQualifiedObjectIdentifier) result).getIdentifier();
-                            LOG.info("Adopting " + id + " from Masterdataimport");
+                            logger.info("Adopting " + id + " from Masterdataimport");
                             racingEventService.getSecurityService().setOwnershipIfNotSet(id, user, tenant);
                         }
                     }
@@ -105,7 +106,7 @@ public class MasterDataImporter {
             UUID importOperationId, boolean override) {
         MasterDataImportObjectCreationCountImpl creationCount = new MasterDataImportObjectCreationCountImpl();
         ImportMasterDataOperation op = new ImportMasterDataOperation(topLevelMasterData, importOperationId, override,
-                creationCount);
+                creationCount, user, tenant);
         creationCount = racingEventService.apply(op);
         return creationCount;
     }
