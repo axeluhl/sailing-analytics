@@ -7,6 +7,7 @@ import com.sap.sailing.android.shared.services.sending.MessageSendingService.API
 import com.sap.sailing.android.shared.services.sending.MessageSendingService.APIConnectivityListener;
 import com.sap.sailing.android.shared.services.sending.MessageSendingService.MessageSendingBinder;
 import com.sap.sailing.android.shared.ui.customviews.GPSQuality;
+import com.sap.sailing.android.shared.util.LocationHelper;
 import com.sap.sailing.android.tracking.app.BuildConfig;
 import com.sap.sailing.android.tracking.app.R;
 import com.sap.sailing.android.tracking.app.services.TrackingService;
@@ -275,6 +276,21 @@ public class TrackingActivity extends BaseActivity implements GPSQualityListener
         if (trackingFragment.isAdded()) {
             trackingFragment.setAPIConnectivityStatus(apiConnectivity);
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        if (requestCode != REQUEST_PERMISSIONS_REQUEST_CODE) {
+            return;
+        }
+        // If request is cancelled, the result arrays are empty.
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            // permission was granted
+            ServiceHelper.getInstance().startTrackingService(this, checkinDigest);
+        } else {
+            LocationHelper.showNoGPSError(this, getString(R.string.enable_gps));
+        }
+        return;
     }
 
     @Override
