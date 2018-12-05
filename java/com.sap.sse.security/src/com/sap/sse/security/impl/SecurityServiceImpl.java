@@ -1628,7 +1628,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         try {
             SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.DELETE));
             final T result = actionToDeleteObject.run();
+            logger.info("Deleting ownerships for " + identifier);
             deleteOwnership(identifier);
+            logger.info("Deleting acls for " + identifier);
             deleteAccessControlList(identifier);
             return result;
         } catch (Exception e) {
