@@ -48,6 +48,7 @@ import com.sap.sailing.media.mp4.MP4ParserFakeFile;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
+import com.sap.sse.security.Action;
 import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 
@@ -106,8 +107,14 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
 
     @Override
     public void deleteMediaTrack(MediaTrack mediaTrack) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.MEDIA_TRACK.getStringPermissionForObjects(DefaultActions.DELETE, mediaTrack.dbId));
-        racingEventService().mediaTrackDeleted(mediaTrack);
+        racingEventService().getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(
+                SecuredDomainType.MEDIA_TRACK, mediaTrack.dbId, new Action() {
+
+                    @Override
+                    public void run() throws Exception {
+                        racingEventService().mediaTrackDeleted(mediaTrack);
+                    }
+                });
     }
 
     @Override
