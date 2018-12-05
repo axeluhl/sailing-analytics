@@ -12,11 +12,14 @@ Import-Package: com.sap.sailing.server,
  com.sap.sailing.server.impl,
  com.sap.sailing.server.operationaltransformation,
  com.sap.sailing.xrr.schema,
+ com.sun.istack;version="3.0.7",
+ javax.xml.bind,
  org.json.simple,
  org.json.simple.parser,
  org.osgi.framework;version="1.6.0"
 Require-Bundle: com.sap.sailing.domain,
  com.sap.sailing.domain.common,
  com.sap.sailing.resultimport,
- com.sap.sse.common
+ com.sap.sse.common,
+ com.sun.xml.bind.jaxb-impl;bundle-version="2.3.0"
 Bundle-Activator: com.sap.sailing.xrr.resultimport.impl.Activator
