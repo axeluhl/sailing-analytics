@@ -344,6 +344,12 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     User getAllUser();
 
+    void checkPermissionAndDeleteOwnershipForObjectRemoval(WithQualifiedObjectIdentifier object,
+            Action actionToDeleteObject);
+
+    <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(WithQualifiedObjectIdentifier object,
+            ActionWithResult<T> actionToDeleteObject);
+
     void checkPermissionAndDeleteOwnershipForObjectRemoval(HasPermissions type, String typeRelativeObjectIdentifier,
             Action actionToDeleteObject);
     
