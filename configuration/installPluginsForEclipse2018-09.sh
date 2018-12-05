@@ -64,4 +64,7 @@ installPlugins http://download.eclipse.org/tools/orbit/downloads/drops/R20180905
 echo "Installing Java 11 support"
 installPlugins http://download.eclipse.org/eclipse/updates/4.9-P-builds org.eclipse.jdt.java11patch.feature.group,org.eclipse.pde.java11patch.feature.group
 
+echo "Installing Java11 Patches..."
+installPlugins http://download.eclipse.org/eclipse/updates/4.9-P-builds/ org.eclipse.jdt.java11patch.feature.group
+
 echo "Installation completed!"
