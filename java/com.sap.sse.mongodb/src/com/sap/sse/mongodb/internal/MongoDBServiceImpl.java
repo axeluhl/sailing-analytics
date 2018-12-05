@@ -18,7 +18,11 @@ public class MongoDBServiceImpl implements MongoDBService {
 
     private static final Logger logger = Logger.getLogger(MongoDBServiceImpl.class.getName());
 
-    private MongoDBConfiguration configuration;
+    /**
+     * Make this volatile to ensure that when an activator writes it in one thread then another
+     * activator can read it.
+     */
+    private volatile MongoDBConfiguration configuration;
 
     private final Map<MongoClientURI, Mongo> mongos;
     
