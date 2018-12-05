@@ -1134,9 +1134,12 @@ public interface TrackedRace
 
     @Override
     default QualifiedObjectIdentifier getIdentifier() {
-        RegattaAndRaceIdentifier regattaAndRaceId = getRaceIdentifier();
+        return getIdentifier(getRaceIdentifier());
+    }
+    
+    public static QualifiedObjectIdentifier getIdentifier(RegattaAndRaceIdentifier regattaAndRaceId) {
         WildcardPermissionEncoder wildcardPermissionEncoder = new WildcardPermissionEncoder();
-        return getType().getQualifiedObjectIdentifier(wildcardPermissionEncoder
+        return getSecuredDomainType().getQualifiedObjectIdentifier(wildcardPermissionEncoder
                 .encodeStringList(regattaAndRaceId.getRegattaName(), regattaAndRaceId.getRaceName()));
     }
 
@@ -1147,6 +1150,10 @@ public interface TrackedRace
 
     @Override
     default HasPermissions getType() {
+        return getSecuredDomainType();
+    }
+    
+    public static HasPermissions getSecuredDomainType() {
         return SecuredDomainType.TRACKED_RACE;
     }
 }

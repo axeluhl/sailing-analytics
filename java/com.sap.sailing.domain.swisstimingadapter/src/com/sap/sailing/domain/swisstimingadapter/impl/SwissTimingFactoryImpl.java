@@ -24,6 +24,7 @@ import com.sap.sailing.domain.swisstimingadapter.SwissTimingFactory;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingMessageParser;
 import com.sap.sailing.domain.swisstimingadapter.SwissTimingRaceTracker;
 import com.sap.sailing.domain.tracking.RaceTracker;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sse.common.Util;
@@ -91,19 +92,21 @@ public class SwissTimingFactoryImpl implements SwissTimingFactory {
     @Override
     public SwissTimingRaceTracker createRaceTracker(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, DomainFactory domainFactory, TrackedRegattaRegistry trackedRegattaRegistry,
-            RaceLogResolver raceLogResolver, SwissTimingTrackingConnectivityParameters connectivityParams)
+            RaceLogResolver raceLogResolver, SwissTimingTrackingConnectivityParameters connectivityParams,
+            RaceTrackingHandler raceTrackingHandler)
             throws InterruptedException, UnknownHostException, IOException, ParseException, URISyntaxException {
         return new SwissTimingRaceTrackerImpl(raceLogStore, regattaLogStore, windStore, domainFactory, this,
-                trackedRegattaRegistry, raceLogResolver, connectivityParams);
+                trackedRegattaRegistry, raceLogResolver, connectivityParams, raceTrackingHandler);
     }
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, WindStore windStore, DomainFactory domainFactory,
             TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, RaceLogStore raceLogStore,
-            RegattaLogStore regattaLogStore, SwissTimingTrackingConnectivityParameters connectivityParams)
+            RegattaLogStore regattaLogStore, SwissTimingTrackingConnectivityParameters connectivityParams,
+            RaceTrackingHandler raceTrackingHandler)
             throws UnknownHostException, InterruptedException, IOException, ParseException, URISyntaxException {
         return new SwissTimingRaceTrackerImpl(regatta, windStore, domainFactory, this, trackedRegattaRegistry,
-                raceLogStore, regattaLogStore, raceLogResolver, connectivityParams);
+                raceLogStore, regattaLogStore, raceLogResolver, connectivityParams, raceTrackingHandler);
     }
 
     @Override

@@ -85,14 +85,17 @@ public class EditOwnershipDialog extends DataEntryDialog<OwnershipDialogResult> 
         @Override
         public String getErrorMessage(OwnershipDialogResult valueToValidate) {
             final String errorMessage;
+            final OwnershipDTO ownership = valueToValidate.getOwnership();
             if (valueToValidate.isResolvingUsername()) {
                 errorMessage = stringMessages.pleaseWaitUntilUsernameIsResolved();
             } else if (valueToValidate.isResolvingUserGroupName()) {
                 errorMessage = stringMessages.pleaseWaitUntilUserGroupNameIsResolved();
-            } else if (!valueToValidate.getUsername().trim().isEmpty() && valueToValidate.getOwnership().getUserOwner() == null) {
+            } else if (!valueToValidate.getUsername().trim().isEmpty() && ownership.getUserOwner() == null) {
                 errorMessage = stringMessages.userNotFound(valueToValidate.getUsername());
-            } else if (!valueToValidate.getUserGroupName().trim().isEmpty() && valueToValidate.getOwnership().getTenantOwner() == null) {
+            } else if (!valueToValidate.getUserGroupName().trim().isEmpty() && ownership.getTenantOwner() == null) {
                 errorMessage = stringMessages.usergroupNotFound(valueToValidate.getUserGroupName());
+            } else if (ownership.getUserOwner() == null && ownership.getTenantOwner() == null) {
+                errorMessage = stringMessages.enterAtLeastOneOwner();
             } else {
                 errorMessage = null;
             }

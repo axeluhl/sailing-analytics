@@ -379,15 +379,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void setOwnership(OwnershipAnnotation ownershipAnnotation) {
-        User securityUser = ownershipAnnotation.getAnnotation().getUserOwner();
-        User user = getUserByName(securityUser.getName());
-        setOwnership(ownershipAnnotation.getIdOfAnnotatedObject(), user,
-                ownershipAnnotation.getAnnotation().getTenantOwner(),
-                ownershipAnnotation.getDisplayNameOfAnnotatedObject());
-    }
-
-    @Override
     public RoleDefinition getRoleDefinition(UUID idOfRoleDefinition) {
         return userStore.getRoleDefinition(idOfRoleDefinition);
     }
@@ -519,7 +510,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (userOwner == null && tenantOwner == null) {
             throw new IllegalArgumentException("No owner is not valid, would create non changeable object");
         }
-        UUID tenantId;
+        final UUID tenantId;
         if (userOwner == null) {
             tenantId = tenantOwner.getId();
         } else {
@@ -1607,23 +1598,30 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
     
     @Override
-    public void checkPermissionAndDeleteOwnershipForObjectRemoval(HasPermissions type,
-            String typeRelativeObjectIdentifier, Action actionToDeleteObject) {
-        checkPermissionAndDeleteOwnershipForObjectRemoval(type, typeRelativeObjectIdentifier, () -> {
+    public void checkPermissionAndDeleteOwnershipForObjectRemoval(WithQualifiedObjectIdentifier object,
+            Action actionToDeleteObject) {
+        checkPermissionAndDeleteOwnershipForObjectRemoval(object, () -> {
             actionToDeleteObject.run();
             return null;
         });
     }
-    
+
     @Override
-    public <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(HasPermissions type, String typeRelativeObjectIdentifier,
+    public <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(WithQualifiedObjectIdentifier object,
             ActionWithResult<T> actionToDeleteObject) {
-        QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifier(typeRelativeObjectIdentifier);
+        QualifiedObjectIdentifier identifier = object.getIdentifier();
+        return checkPermissionAndDeleteOwnershipForObjectRemoval(identifier, actionToDeleteObject);
+    }
+
+    @Override
+    public <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(QualifiedObjectIdentifier identifier,
+            ActionWithResult<T> actionToDeleteObject) {
         try {
-            SecurityUtils.getSubject()
-                    .checkPermission(identifier.getStringPermission(DefaultActions.DELETE));
+            SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.DELETE));
             final T result = actionToDeleteObject.run();
+            logger.info("Deleting ownerships for " + identifier);
             deleteOwnership(identifier);
+            logger.info("Deleting acls for " + identifier);
             deleteAccessControlList(identifier);
             return result;
         } catch (Exception e) {

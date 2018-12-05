@@ -64,6 +64,7 @@ import com.sap.sailing.domain.tracking.AbstractRaceTrackerBaseImpl;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -99,15 +100,18 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
     private final TrackedRegattaRegistry trackedRegattaRegistry;
 
     private volatile DynamicTrackedRace trackedRace;
+    private final RaceTrackingHandler raceTrackingHandler;
 
     public RaceLogRaceTracker(DynamicTrackedRegatta regatta, RaceLogConnectivityParams params, WindStore windStore,
-            RaceLogResolver raceLogResolver, RaceLogConnectivityParams connectivityParams, TrackedRegattaRegistry trackedRegattaRegistry) {
+            RaceLogResolver raceLogResolver, RaceLogConnectivityParams connectivityParams,
+            TrackedRegattaRegistry trackedRegattaRegistry, RaceTrackingHandler raceTrackingHandler) {
         super(connectivityParams);
         this.trackedRegattaRegistry = trackedRegattaRegistry;
         this.params = params;
         this.windStore = windStore;
         this.trackedRegatta = regatta;
         this.raceLogResolver = raceLogResolver;
+        this.raceTrackingHandler = raceTrackingHandler;
 
         // add log listeners
         for (AbstractLog<?, ?> log : params.getLogHierarchy()) {
@@ -304,7 +308,7 @@ public class RaceLogRaceTracker extends AbstractRaceTrackerBaseImpl {
         // set race definition, so race is linked to leaderboard automatically
         trackedRegatta.getRegatta().addRace(raceDef);
         raceColumn.setRaceIdentifier(fleet, trackedRegatta.getRegatta().getRaceIdentifier(raceDef));
-        trackedRace = trackedRegatta.createTrackedRace(raceDef, sidelines, windStore,
+        trackedRace = raceTrackingHandler.createTrackedRace(trackedRegatta, raceDef, sidelines, windStore,
                 params.getDelayToLiveInMillis(), WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
                 boatClass.getApproximateManeuverDurationInMilliseconds(), null, /*useMarkPassingCalculator*/ true, raceLogResolver,
                 /* Not needed because the RaceTracker is not active on a replica */ Optional.empty());

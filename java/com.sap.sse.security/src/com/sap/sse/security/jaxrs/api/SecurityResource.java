@@ -174,15 +174,19 @@ public class SecurityResource extends AbstractSecurityResource {
     @Path("/user")
     @Produces("text/plain;charset=UTF-8")
     public Response deleteUser(@QueryParam("username") String username) {
-        return getService().checkPermissionAndDeleteOwnershipForObjectRemoval(SecuredSecurityTypes.USER, username,
-                () -> {
-                    try {
-                        getService().deleteUser(username);
-                        return Response.ok().build();
-                    } catch (UserManagementException e) {
-                        return Response.status(Status.PRECONDITION_FAILED).entity(e.getMessage()).build();
-                    }
-                });
+        User user = getService().getUserByName(username);
+        if (user != null) {
+            return getService().checkPermissionAndDeleteOwnershipForObjectRemoval(user, () -> {
+                try {
+                    getService().deleteUser(username);
+                    return Response.ok().build();
+                } catch (UserManagementException e) {
+                    return Response.status(Status.PRECONDITION_FAILED).entity(e.getMessage()).build();
+                }
+            });
+        } else {
+            return Response.status(Status.PRECONDITION_FAILED).entity("unknown id").build();
+        }
     }
     
     @PUT

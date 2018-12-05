@@ -23,6 +23,7 @@ import com.sap.sailing.domain.leaderboard.LeaderboardGroupResolver;
 import com.sap.sailing.domain.regattalike.HasRegattaLike;
 import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.RaceTracker;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceTrackingConnectivityParameters;
@@ -65,13 +66,16 @@ public class RaceLogConnectivityParams extends AbstractRaceTrackingConnectivityP
 
     @Override
     public RaceTracker createRaceTracker(TrackedRegattaRegistry trackedRegattaRegistry, WindStore windStore,
-            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds) {
-        return createRaceTracker(regatta, trackedRegattaRegistry, windStore, raceLogResolver, leaderboardGroupResolver, timeoutInMilliseconds);
+            RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds,
+            RaceTrackingHandler raceTrackingHandler) {
+        return createRaceTracker(regatta, trackedRegattaRegistry, windStore, raceLogResolver, leaderboardGroupResolver, timeoutInMilliseconds,
+                raceTrackingHandler);
     }
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, TrackedRegattaRegistry trackedRegattaRegistry,
-            WindStore windStore, RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds) {
+            WindStore windStore, RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, long timeoutInMilliseconds,
+            RaceTrackingHandler raceTrackingHandler) {
         if (regatta == null) {
             BoatClass boatClass = new RaceInformationFinder(getRaceLog()).analyze().getBoatClass();
             regatta = service.getOrCreateDefaultRegatta(
@@ -82,7 +86,8 @@ public class RaceLogConnectivityParams extends AbstractRaceTrackingConnectivityP
             throw new RaceNotCreatedException("No regatta for race-log tracked race");
         }
         DynamicTrackedRegatta trackedRegatta = trackedRegattaRegistry.getOrCreateTrackedRegatta(regatta);
-        return new RaceLogRaceTracker(trackedRegatta, this, windStore, raceLogResolver, this, trackedRegattaRegistry);
+        return new RaceLogRaceTracker(trackedRegatta, this, windStore, raceLogResolver, this, trackedRegattaRegistry,
+                raceTrackingHandler);
     }
 
     @Override

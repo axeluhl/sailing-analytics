@@ -57,8 +57,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     OwnershipAnnotation getOwnership(QualifiedObjectIdentifier idOfOwnedObject);
     
     OwnershipAnnotation createDefaultOwnershipForNewObject(QualifiedObjectIdentifier idOfNewObject);
-    
-    void setOwnership(OwnershipAnnotation ownership);
 
     Iterable<AccessControlListAnnotation> getAccessControlLists();
 
@@ -344,10 +342,10 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     User getAllUser();
 
-    void checkPermissionAndDeleteOwnershipForObjectRemoval(HasPermissions type, String typeRelativeObjectIdentifier,
+    void checkPermissionAndDeleteOwnershipForObjectRemoval(WithQualifiedObjectIdentifier object,
             Action actionToDeleteObject);
-    
-    <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(HasPermissions type, String typeRelativeObjectIdentifier,
+
+    <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(WithQualifiedObjectIdentifier object,
             ActionWithResult<T> actionToDeleteObject);
 
     <T> void filterObjectsWithPermissionForCurrentUser(HasPermissions permittedObject,
@@ -415,4 +413,11 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     User checkPermissionForObjectCreationAndRevertOnErrorForUserCreation(String username,
             ActionWithResult<User> createActionReturningCreatedObject);
+
+    /**
+     * Do only use this, if it is not possible to get the actual instance of the object to delete using the
+     * WithQualifiedObjectIdentifier variant
+     */
+    <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(QualifiedObjectIdentifier identifier,
+            ActionWithResult<T> actionToDeleteObject);
 }

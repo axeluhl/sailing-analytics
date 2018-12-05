@@ -48,6 +48,8 @@ import com.sap.sailing.media.mp4.MP4ParserFakeFile;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.impl.MillisecondsDurationImpl;
+import com.sap.sse.security.Action;
+import com.sap.sse.security.SecurityService;
 import com.sap.sse.security.shared.HasPermissions.DefaultActions;
 
 public class MediaServiceImpl extends RemoteServiceServlet implements MediaService {
@@ -97,13 +99,22 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
             throw new IllegalStateException("Property dbId must not be null for newly created media track.");
         }
         racingEventService().mediaTrackAdded(mediaTrack);
+        SecurityService securityService = racingEventService().getSecurityService();
+        securityService.setOwnershipIfNotSet(mediaTrack.getIdentifier(), securityService.getCurrentUser(),
+                securityService.getDefaultTenantForCurrentUser());
         return mediaTrack.dbId;
     }
 
     @Override
     public void deleteMediaTrack(MediaTrack mediaTrack) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.MEDIA_TRACK.getStringPermissionForObjects(DefaultActions.DELETE, mediaTrack.dbId));
-        racingEventService().mediaTrackDeleted(mediaTrack);
+        racingEventService().getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(
+                mediaTrack, new Action() {
+
+                    @Override
+                    public void run() throws Exception {
+                        racingEventService().mediaTrackDeleted(mediaTrack);
+                    }
+                });
     }
 
     @Override

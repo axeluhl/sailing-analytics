@@ -57,6 +57,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
@@ -123,22 +124,26 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
     private final String updateUsername;
 
     private final String updatePassword;
+
+    private final RaceTrackingHandler raceTrackingHandler;
     
     protected SwissTimingRaceTrackerImpl(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, DomainFactory domainFactory, SwissTimingFactory factory,
             TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver,
-            SwissTimingTrackingConnectivityParameters connectivityParams)
+            SwissTimingTrackingConnectivityParameters connectivityParams, RaceTrackingHandler raceTrackingHandler)
             throws InterruptedException, UnknownHostException, IOException, ParseException, URISyntaxException {
-        this(/* regatta */ null, windStore, domainFactory, factory, trackedRegattaRegistry, raceLogStore, regattaLogStore, raceLogResolver, connectivityParams);
+        this(/* regatta */ null, windStore, domainFactory, factory, trackedRegattaRegistry, raceLogStore,
+                regattaLogStore, raceLogResolver, connectivityParams, raceTrackingHandler);
     }
 
     protected SwissTimingRaceTrackerImpl(Regatta regatta, WindStore windStore, DomainFactory domainFactory,
             SwissTimingFactory factory, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogStore raceLogStore,
             RegattaLogStore regattaLogStore, RaceLogResolver raceLogResolver,
-            SwissTimingTrackingConnectivityParameters connectivityParams)
+            SwissTimingTrackingConnectivityParameters connectivityParams, RaceTrackingHandler raceTrackingHandler)
             throws InterruptedException, UnknownHostException, IOException, ParseException, URISyntaxException {
         super(connectivityParams);
         this.raceLogResolver = raceLogResolver;
+        this.raceTrackingHandler = raceTrackingHandler;
         this.tmdMessageQueue = new TMDMessageQueue(this);
         final Regatta effectiveRegatta;
         // Try to find a pre-associated event based on the Race ID
@@ -472,7 +477,7 @@ public class SwissTimingRaceTrackerImpl extends AbstractRaceTrackerImpl
                 competitorsByBoatId.put(c.getBoatID(), existingCompetitor);
             }
         }
-        trackedRace = getTrackedRegatta().createTrackedRace(race, Collections.<Sideline> emptyList(), windStore,
+        trackedRace = raceTrackingHandler.createTrackedRace(getTrackedRegatta(), race, Collections.<Sideline> emptyList(), windStore,
                 delayToLiveInMillis,
                 WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND,
                 /* time over which to average speed */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),

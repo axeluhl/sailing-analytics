@@ -121,6 +121,7 @@ import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerialize
 import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
 import com.sap.sailing.server.operationaltransformation.RemoveAndUntrackRace;
 import com.sap.sailing.server.operationaltransformation.StopTrackingRace;
+import com.sap.sailing.server.security.PermissionAwareRaceTrackingHandler;
 import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
@@ -617,7 +618,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     leaderboardAndRaceColumnAndFleetAndResponse.getRaceColumn(),
                     leaderboardAndRaceColumnAndFleetAndResponse.getFleet(),
                     trackWind == null ? true : trackWind,
-                    correctWindDirectionByMagneticDeclination == null ? true : correctWindDirectionByMagneticDeclination);
+                    correctWindDirectionByMagneticDeclination == null ? true : correctWindDirectionByMagneticDeclination,
+                    new PermissionAwareRaceTrackingHandler(getSecurityService()));
             jsonResult.put("regatta", raceHandle.getRegatta().getName());
             result = Response.ok(jsonResult.toJSONString()).build();
         } else {

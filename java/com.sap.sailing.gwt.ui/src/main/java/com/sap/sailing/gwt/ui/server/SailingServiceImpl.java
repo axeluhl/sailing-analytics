@@ -443,7 +443,6 @@ import com.sap.sailing.gwt.ui.shared.RegattaScoreCorrectionDTO.ScoreCorrectionEn
 import com.sap.sailing.gwt.ui.shared.RemoteSailingServerReferenceDTO;
 import com.sap.sailing.gwt.ui.shared.SailingServiceConstants;
 import com.sap.sailing.gwt.ui.shared.ScoreCorrectionProviderDTO;
-import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.SeriesDTO;
 import com.sap.sailing.gwt.ui.shared.ServerConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SidelineDTO;
@@ -452,6 +451,7 @@ import com.sap.sailing.gwt.ui.shared.SimulatorWindDTO;
 import com.sap.sailing.gwt.ui.shared.SliceRacePreperationDTO;
 import com.sap.sailing.gwt.ui.shared.SpeedWithBearingDTO;
 import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTO;
+import com.sap.sailing.gwt.ui.shared.StrippedLeaderboardDTOWithSecurity;
 import com.sap.sailing.gwt.ui.shared.SwissTimingArchiveConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingConfigurationDTO;
 import com.sap.sailing.gwt.ui.shared.SwissTimingEventRecordDTO;
@@ -529,6 +529,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateRaceDelayToLive;
 import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.operationaltransformation.UpdateServerConfiguration;
 import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
+import com.sap.sailing.server.security.PermissionAwareRaceTrackingHandler;
 import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.server.simulation.SimulationService;
 import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
@@ -1243,8 +1244,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
             Map<CompetitorDTO, BoatDTO> competitorAndBoatDTOs = baseDomainFactory.convertToCompetitorAndBoatDTOs(r.getCompetitorsAndTheirBoats());
             RaceWithCompetitorsAndBoatsDTO raceDTO = new RaceWithCompetitorsAndBoatsDTO(raceIdentifier, competitorAndBoatDTOs,
                     trackedRaceDTO, getService().isRaceBeingTracked(regatta, r));
-            SecurityDTOUtil.addSecurityInformation(getSecurityService(), raceDTO, trackedRace.getIdentifier());
             if (trackedRace != null) {
+                SecurityDTOUtil.addSecurityInformation(getSecurityService(), raceDTO, trackedRace.getIdentifier());
                 getBaseDomainFactory().updateRaceDTOWithTrackedRaceData(trackedRace, raceDTO);
             }
             raceDTO.boatClass = regatta.getBoatClass() == null ? null : regatta.getBoatClass().getName(); 
@@ -1379,7 +1380,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         getRegattaLogStore(), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
                         offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, tracTracUsername,
                         tracTracPassword, record.getRaceStatus(), record.getRaceVisibility(), trackWind,
-                        correctWindByDeclination);
+                        correctWindByDeclination, new PermissionAwareRaceTrackingHandler(getSecurityService()));
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error trying to load race " + rrs+". Continuing with remaining races...", e);
             }
@@ -2829,21 +2830,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     
     @Override
     public void removeLeaderboards(Collection<String> leaderboardNames) {
-        SecurityUtils.getSubject().checkPermission(SecuredDomainType.LEADERBOARD.getStringPermissionForObjects(DefaultActions.DELETE, leaderboardNames.toArray(new String[0])));
-        for (String leaderoardName : leaderboardNames) {
-            removeLeaderboard(leaderoardName);
+        for (String leaderboardName : leaderboardNames) {
+            removeLeaderboard(leaderboardName);
         }
     }
 
     @Override
     public void removeLeaderboard(String leaderboardName) {
-        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(SecuredDomainType.LEADERBOARD,
-                leaderboardName, new Action() {
-                    @Override
-                    public void run() throws Exception {
-                        getService().apply(new RemoveLeaderboard(leaderboardName));
-                    }
-                });
+        Leaderboard leaderBoard = getService().getLeaderboardByName(leaderboardName);
+        if (leaderBoard != null) {
+            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(leaderBoard, new Action() {
+                @Override
+                public void run() throws Exception {
+                    getService().apply(new RemoveLeaderboard(leaderboardName));
+                }
+            });
+        }
     }
 
     @Override
@@ -3120,7 +3122,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     rr.raceId, rr.getName(), raceDescription, boatClass, hostname, port, startList,
                     getRaceLogStore(), getRegattaLogStore(),
                     RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, useInternalMarkPassingAlgorithm, trackWind,
-                    correctWindByDeclination, updateURL, updateUsername, updatePassword);
+                    correctWindByDeclination, updateURL, updateUsername, updatePassword,
+                    new PermissionAwareRaceTrackingHandler(getSecurityService()));
         }
     }
     
@@ -3161,7 +3164,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     boatClassName = null;
                 }
                 getSwissTimingReplayService().loadRaceData(regattaIdentifier, replayRaceDTO.link, replayRaceDTO.getName(),
-                        replayRaceDTO.race_id, boatClassName, getService(), getService(), useInternalMarkPassingAlgorithm, getRaceLogStore(), getRegattaLogStore());
+                        replayRaceDTO.race_id, boatClassName, getService(), getService(), useInternalMarkPassingAlgorithm, getRaceLogStore(), getRegattaLogStore(),
+                        new PermissionAwareRaceTrackingHandler(getSecurityService()));
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error trying to load SwissTimingReplay race " + replayRaceDTO, e);
             }
@@ -3980,10 +3984,13 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private void removeLeaderboardGroup(String groupName) {
-        LeaderboardGroupDTO group = getLeaderboardGroupByName(groupName, false);
+        LeaderboardGroup group = getService().getLeaderboardGroupByName(groupName);
         if (group != null) {
-            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(SecuredDomainType.LEADERBOARD_GROUP,
-                    group.getId().toString(), new Action() {
+            if (group.getOverallLeaderboard() != null) {
+                removeLeaderboard(group.getOverallLeaderboard().getName());
+            }
+
+            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(group, new Action() {
                         @Override
                         public void run() throws Exception {
                             getService().apply(new RemoveLeaderboardGroup(groupName));
@@ -4254,13 +4261,15 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void removeEvent(UUID eventId) throws UnauthorizedException {
-        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(SecuredDomainType.EVENT,
-                eventId.toString(), new Action() {
-                    @Override
-                    public void run() throws Exception {
-                        getService().apply(new RemoveEvent(eventId));
-                    }
-                });
+        Event event = getService().getEvent(eventId);
+        if (event != null) {
+            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(event, new Action() {
+                @Override
+                public void run() throws Exception {
+                    getService().apply(new RemoveEvent(eventId));
+                }
+            });
+        }
     }
 
     @Override
@@ -4622,18 +4631,22 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     public void removeRegatta(RegattaIdentifier regattaIdentifier) {
         Regatta regatta = getService().getRegatta(regattaIdentifier);
         if (regatta != null) {
-            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(SecuredDomainType.REGATTA,
-                    regatta.getName(), new Action() {
-                        @Override
-                        public void run() throws Exception {
-                            getService().apply(new RemoveRegatta(regattaIdentifier));
-                        }
-                    });
+            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(regatta, new Action() {
+                @Override
+                public void run() throws Exception {
+                    getService().apply(new RemoveRegatta(regattaIdentifier));
+                }
+            });
         }
     }
     
     @Override
     public void removeSeries(RegattaIdentifier identifier, String seriesName) {
+        Regatta regatta = getService().getRegatta(identifier);
+        if (regatta != null) {
+            SecurityUtils.getSubject().checkPermission(
+                    SecuredDomainType.REGATTA.getStringPermissionForObjects(DefaultActions.UPDATE, regatta.getName()));
+        }
         getService().apply(new RemoveSeries(identifier, seriesName));
     }
 
@@ -6869,7 +6882,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         Leaderboard leaderboard = getLeaderboardByName(leaderboardName);
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         Fleet fleet = raceColumn.getFleetByName(fleetName);
-        getRaceLogTrackingAdapter().startTracking(getService(), leaderboard, raceColumn, fleet, trackWind, correctWindByDeclination);
+        getRaceLogTrackingAdapter().startTracking(getService(), leaderboard, raceColumn, fleet, trackWind, correctWindByDeclination,
+                new PermissionAwareRaceTrackingHandler(getSecurityService()));
     }
     
     @Override
@@ -7791,16 +7805,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
-        final Subject subject = SecurityUtils.getSubject();
-        subject.checkPermission(SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getStringPermissionForObjects(
-                DefaultActions.DELETE,
-                WildcardPermissionEncoder.encode(getServerInfo().getServerName(), deviceConfiguration.getName())));
-
-        // TODO consider replication
-        final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
-        if (expeditionConnector != null) {
-            expeditionConnector.removeDeviceConfiguration(deviceConfiguration);
-        }
+        QualifiedObjectIdentifier identifier = SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION
+                .getQualifiedObjectIdentifier(
+                        WildcardPermissionEncoder.encode(ServerInfo.getName(), deviceConfiguration.getName()));
+        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(identifier,
+                new ActionWithResult<Void>() {
+                    @Override
+                    public Void run() throws Exception {
+                        // TODO consider replication
+                        final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
+                        if (expeditionConnector != null) {
+                            expeditionConnector.removeDeviceConfiguration(deviceConfiguration);
+                        }
+                        return null;
+                    }
+                });
     }
     
     @Override
@@ -8326,7 +8345,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         raceLog.add(new RaceLogStartTrackingEventImpl(startTrackingTimePoint, author, raceLog.getCurrentPassId()));
         try {
             final RaceHandle raceHandle = getRaceLogTrackingAdapter().startTracking(getService(), regattaLeaderboard,
-                    raceColumn, fleet, /* trackWind */ true, /* correctWindDirectionByMagneticDeclination */ true);
+                    raceColumn, fleet, /* trackWind */ true, /* correctWindDirectionByMagneticDeclination */ true,
+                    new PermissionAwareRaceTrackingHandler(getSecurityService()));
             
             // wait for the RaceDefinition to be created
             raceHandle.getRace();

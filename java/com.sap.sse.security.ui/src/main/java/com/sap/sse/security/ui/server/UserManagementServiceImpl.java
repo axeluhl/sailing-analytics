@@ -31,6 +31,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.security.Action;
 import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.SecurityService;
@@ -125,8 +126,15 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public void deleteRoleDefinition(String roleIdAsString) {
-        SecurityUtils.getSubject().checkPermission(SecuredSecurityTypes.ROLE_DEFINITION.getStringPermissionForObjects(DefaultActions.DELETE, roleIdAsString));
-        getSecurityService().deleteRoleDefinition(getSecurityService().getRoleDefinition(UUID.fromString(roleIdAsString)));
+        RoleDefinition role = getSecurityService().getRoleDefinition(UUID.fromString(roleIdAsString));
+        if (role != null) {
+            getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(role, new Action() {
+                @Override
+                public void run() throws Exception {
+                    getSecurityService().deleteRoleDefinition(role);
+                }
+            });
+        }
     }
 
     @Override
@@ -162,10 +170,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             String displayNameOfOwnedObject) {
         final QualifiedObjectIdentifier result;
         if (SecurityUtils.getSubject().isPermitted(idOfOwnedObject.getStringPermission(DefaultActions.CHANGE_OWNERSHIP))) {
-            Ownership ownerShip = SecurityDTOFactory.ownerFromDTO(ownershipDTO, getSecurityService());
-            getSecurityService()
-                    .setOwnership(new OwnershipAnnotation(ownerShip,
-                    idOfOwnedObject, displayNameOfOwnedObject));
+            final Ownership ownership = SecurityDTOFactory.ownerFromDTO(ownershipDTO, getSecurityService());
+            final User userOwner = ownership.getUserOwner();
+            final UserGroup tenantOwner = ownership.getTenantOwner();
+            getSecurityService().setOwnership(idOfOwnedObject, userOwner, tenantOwner, displayNameOfOwnedObject);
             result = idOfOwnedObject;
         } else {
             result = null;
@@ -318,22 +326,21 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public SuccessInfo deleteUserGroup(String userGroupIdAsString) throws UnauthorizedException {
-        try {
-            return getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(SecuredSecurityTypes.USER_GROUP,
-                    userGroupIdAsString, () -> {
-                        try {
-                            final UUID userGroupId = UUID.fromString(userGroupIdAsString);
-                            final UserGroup userGroup = getSecurityService().getUserGroup(userGroupId);
-                            getSecurityService().deleteUserGroup(userGroup);
-                            return new SuccessInfo(true, "Deleted user group: " + userGroup.getName() + ".",
-                                    /* redirectURL */ null, null);
-                        } catch (UserGroupManagementException e) {
-                            return new SuccessInfo(false, "Could not delete user group.", /* redirectURL */ null, null);
-                        }
-                    });
-        } catch (AuthorizationException e) {
-            return new SuccessInfo(false, "You are not permitted to delete user group " + userGroupIdAsString, /* redirectURL */ null,
-                    null);
+        final UUID userGroupId = UUID.fromString(userGroupIdAsString);
+        final UserGroup userGroup = getSecurityService().getUserGroup(userGroupId);
+        if (userGroup != null) {
+            return getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(userGroup, () -> {
+                try {
+
+                    getSecurityService().deleteUserGroup(userGroup);
+                    return new SuccessInfo(true, "Deleted user group: " + userGroup.getName() + ".",
+                            /* redirectURL */ null, null);
+                } catch (UserGroupManagementException e) {
+                    return new SuccessInfo(false, "Could not delete user group.", /* redirectURL */ null, null);
+                }
+            });
+        } else {
+            return new SuccessInfo(false, "Could not delete user group.", /* redirectURL */ null, null);
         }
     }
 
@@ -629,26 +636,30 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public SuccessInfo deleteUser(String username) throws UnauthorizedException {
-        // In addition to checking the default delete permission we currently explicitly require admin role for the owning user/group
-        if (!getSecurityService().hasCurrentUserRoleForOwnedObject(SecuredSecurityTypes.USER, username,
-                AdminRole.getInstance())) {
-            return new SuccessInfo(false, "You are not permitted to delete user " + username, /* redirectURL */ null,
-                    null);
-        }
-        try {
-            return getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(SecuredSecurityTypes.USER,
-                    username, () -> {
-                        try {
-                            getSecurityService().deleteUser(username);
-                            return new SuccessInfo(true, "Deleted user: " + username + ".", /* redirectURL */ null,
-                                    null);
-                        } catch (UserManagementException e) {
-                            return new SuccessInfo(false, "Could not delete user.", /* redirectURL */ null, null);
-                        }
-                    });
-        } catch (AuthorizationException e) {
-            return new SuccessInfo(false, "You are not permitted to delete user " + username, /* redirectURL */ null,
-                    null);
+        User user = getSecurityService().getUserByName(username);
+        if (user != null) {
+            // In addition to checking the default delete permission we currently explicitly require admin role for the
+            // owning user/group
+            if (!getSecurityService().hasCurrentUserRoleForOwnedObject(SecuredSecurityTypes.USER, username,
+                    AdminRole.getInstance())) {
+                return new SuccessInfo(false, "You are not permitted to delete user " + username,
+                        /* redirectURL */ null, null);
+            }
+            try {
+                return getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(user, () -> {
+                    try {
+                        getSecurityService().deleteUser(username);
+                        return new SuccessInfo(true, "Deleted user: " + username + ".", /* redirectURL */ null, null);
+                    } catch (UserManagementException e) {
+                        return new SuccessInfo(false, "Could not delete user.", /* redirectURL */ null, null);
+                    }
+                });
+            } catch (AuthorizationException e) {
+                return new SuccessInfo(false, "You are not permitted to delete user " + username,
+                        /* redirectURL */ null, null);
+            }
+        } else {
+            return new SuccessInfo(false, "Could not delete user.", /* redirectURL */ null, null);
         }
     }
     
