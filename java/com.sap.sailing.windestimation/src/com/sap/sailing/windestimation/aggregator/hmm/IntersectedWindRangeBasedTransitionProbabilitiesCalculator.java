@@ -9,11 +9,7 @@ import com.sap.sse.common.impl.DegreeBearingImpl;
 public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
         implements GraphNodeTransitionProbabilitiesCalculator {
 
-    private static final int MIN_BEATING_ANGLE_PLUS_MIN_RUNNING_ANGLE = 40;
-
-    public IntersectedWindRange getInitialWindRange(GraphNode currentNode) {
-        return currentNode.getValidWindRange().toIntersected();
-    }
+    protected static final int MIN_BEATING_ANGLE_PLUS_MIN_RUNNING_ANGLE = 40;
 
     public Pair<IntersectedWindRange, Double> mergeWindRangeAndGetTransitionProbability(GraphNode previousNode,
             GraphLevelBase previousLevel, GraphNode currentNode, GraphLevelBase currentLevel) {
@@ -41,18 +37,6 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
         return new Pair<>(intersectedWindRangeUntilCurrentNode, normalizedTransitionProbabilityUntilCurrentNode);
     }
 
-    // public Pair<IntersectedWindRange, Double> mergeWindRangeAndGetTransitionProbability(GraphNode previousNode,
-    // GraphLevel previousLevel, BestManeuverNodeInfo previousNodeInfo, GraphNode currentNode,
-    // GraphLevel currentLevel) {
-    // IntersectedWindRange intersectedWindRangeUntilCurrentNode = previousNodeInfo.getWindRange()
-    // .intersect(currentNode.getValidWindRange());
-    // double secondsPassedSincePreviousWindRange = Math.abs(previousLevel.getManeuver().getManeuverTimePoint()
-    // .until(currentLevel.getManeuver().getManeuverTimePoint()).asSeconds());
-    // double transitionProbability = intersectedWindRangeUntilCurrentNode
-    // .getPenaltyFactorForTransition(secondsPassedSincePreviousWindRange);
-    // return new Pair<>(intersectedWindRangeUntilCurrentNode, transitionProbability);
-    // }
-
     public WindCourseRange getWindCourseRangeForManeuverType(ManeuverForEstimation maneuver,
             ManeuverTypeForClassification maneuverType) {
         switch (maneuverType) {
@@ -69,7 +53,7 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
         }
     }
 
-    private WindCourseRange getBearAwayWindRange(ManeuverForEstimation maneuver) {
+    protected WindCourseRange getBearAwayWindRange(ManeuverForEstimation maneuver) {
         Bearing invertedCourseBefore = maneuver.getSpeedWithBearingBefore().getBearing().reverse();
         double angleTowardStarboard = invertedCourseBefore
                 .getDifferenceTo(maneuver.getSpeedWithBearingAfter().getBearing()).abs().getDegrees();
@@ -85,7 +69,7 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
         return windRange;
     }
 
-    private WindCourseRange getHeadUpWindRange(ManeuverForEstimation maneuver) {
+    protected WindCourseRange getHeadUpWindRange(ManeuverForEstimation maneuver) {
         Bearing invertedCourseAfter = maneuver.getSpeedWithBearingAfter().getBearing().reverse();
         double angleTowardStarboard = invertedCourseAfter
                 .getDifferenceTo(maneuver.getSpeedWithBearingBefore().getBearing()).abs().getDegrees();
@@ -101,7 +85,7 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
         return windRange;
     }
 
-    private WindCourseRange getJibeWindRange(ManeuverForEstimation maneuver) {
+    protected WindCourseRange getJibeWindRange(ManeuverForEstimation maneuver) {
         Bearing middleCourse = maneuver.getMiddleCourse();
         double absCourseChangeDeg = Math.abs(maneuver.getCourseChangeInDegrees());
         double middleAngleRange = maneuver.getDeviationFromOptimalJibeAngleInDegrees() == null
@@ -115,7 +99,7 @@ public class IntersectedWindRangeBasedTransitionProbabilitiesCalculator
         return windRange;
     }
 
-    private WindCourseRange getTackWindRange(ManeuverForEstimation maneuver) {
+    protected WindCourseRange getTackWindRange(ManeuverForEstimation maneuver) {
         Bearing middleCourse = maneuver.getMiddleCourse();
         double absCourseChangeDeg = Math.abs(maneuver.getCourseChangeInDegrees());
         double middleAngleRange = maneuver.getDeviationFromOptimalTackAngleInDegrees() == null

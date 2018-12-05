@@ -43,12 +43,10 @@ public class PolarsFittingWindEstimation {
         for (CompetitorTrackWithEstimationData<ManeuverForEstimation> competitorTrack : competitorTracks) {
             for (ManeuverForEstimation maneuver : competitorTrack.getElements()) {
                 if (maneuver.isCleanBefore()) {
-                    addSpeedWithCourseRecord(maneuver.getAverageSpeedWithBearingBefore(),
-                            competitorTrack.getBoatClass());
+                    addSpeedWithCourseRecord(maneuver.getSpeedWithBearingBefore(), competitorTrack.getBoatClass());
                 }
                 if (maneuver.isCleanAfter()) {
-                    addSpeedWithCourseRecord(maneuver.getAverageSpeedWithBearingAfter(),
-                            competitorTrack.getBoatClass());
+                    addSpeedWithCourseRecord(maneuver.getSpeedWithBearingAfter(), competitorTrack.getBoatClass());
                 }
             }
         }
@@ -218,14 +216,14 @@ public class PolarsFittingWindEstimation {
         BoatClass boatClass = maneuver.getBoatClass();
         if (maneuver.isCleanBefore()) {
             double absTwaInDegrees = Math.abs(windCourse.reverse()
-                    .getDifferenceTo(maneuver.getAverageSpeedWithBearingBefore().getBearing()).getDegrees());
-            double avgSpeedInKnots = maneuver.getAverageSpeedWithBearingBefore().getKnots();
+                    .getDifferenceTo(maneuver.getSpeedWithBearingBefore().getBearing()).getDegrees());
+            double avgSpeedInKnots = maneuver.getSpeedWithBearingBefore().getKnots();
             windSpeedRange = getWindSpeedRange(boatClass, avgSpeedInKnots, absTwaInDegrees);
         }
         if (maneuver.isCleanAfter()) {
             double absTwaInDegrees = Math.abs(windCourse.reverse()
-                    .getDifferenceTo(maneuver.getAverageSpeedWithBearingAfter().getBearing()).getDegrees());
-            double avgSpeedInKnots = maneuver.getAverageSpeedWithBearingAfter().getKnots();
+                    .getDifferenceTo(maneuver.getSpeedWithBearingAfter().getBearing()).getDegrees());
+            double avgSpeedInKnots = maneuver.getSpeedWithBearingAfter().getKnots();
             WindSpeedRange currentTwaWindSpeedRange = getWindSpeedRange(boatClass, avgSpeedInKnots, absTwaInDegrees);
             if (currentTwaWindSpeedRange != null) {
                 windSpeedRange = windSpeedRange == null ? currentTwaWindSpeedRange

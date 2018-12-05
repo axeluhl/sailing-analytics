@@ -53,12 +53,7 @@ public class GraphLevelBase {
     }
 
     private void initBearAwayNode(GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
-        Tack tackAfter;
-        if (maneuver.getCourseChangeInDegrees() < 0) {
-            tackAfter = Tack.PORT;
-        } else {
-            tackAfter = Tack.STARBOARD;
-        }
+        Tack tackAfter = maneuver.getCourseChangeInDegrees() < 0 ? Tack.PORT : Tack.STARBOARD;
         WindCourseRange windRange = transitionProbabilitiesCalculator.getWindCourseRangeForManeuverType(maneuver,
                 ManeuverTypeForClassification.BEAR_AWAY);
         double confidence = maneuverClassification.getManeuverTypeLikelihood(ManeuverTypeForClassification.BEAR_AWAY);
@@ -66,12 +61,7 @@ public class GraphLevelBase {
     }
 
     private void initHeadUpNode(GraphNodeTransitionProbabilitiesCalculator transitionProbabilitiesCalculator) {
-        Tack tackAfter;
-        if (maneuver.getCourseChangeInDegrees() < 0) {
-            tackAfter = Tack.STARBOARD;
-        } else {
-            tackAfter = Tack.PORT;
-        }
+        Tack tackAfter = maneuver.getCourseChangeInDegrees() < 0 ? Tack.STARBOARD : Tack.PORT;
         WindCourseRange windRange = transitionProbabilitiesCalculator.getWindCourseRangeForManeuverType(maneuver,
                 ManeuverTypeForClassification.HEAD_UP);
         double confidence = maneuverClassification.getManeuverTypeLikelihood(ManeuverTypeForClassification.HEAD_UP);
