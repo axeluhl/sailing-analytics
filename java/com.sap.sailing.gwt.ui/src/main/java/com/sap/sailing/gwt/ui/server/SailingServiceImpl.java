@@ -3982,7 +3982,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
     }
 
     private void removeLeaderboardGroup(String groupName) {
-        Leaderboard group = getService().getLeaderboardByName(groupName);
+        LeaderboardGroup group = getService().getLeaderboardGroupByName(groupName);
         if (group != null) {
             getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(group, new Action() {
                         @Override
