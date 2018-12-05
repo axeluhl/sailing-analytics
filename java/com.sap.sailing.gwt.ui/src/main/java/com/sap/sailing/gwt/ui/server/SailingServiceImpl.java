@@ -7799,17 +7799,21 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
 
     @Override
     public void removeExpeditionDeviceConfiguration(ExpeditionDeviceConfiguration deviceConfiguration) {
-        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(deviceConfiguration, new Action() {
-
-            @Override
-            public void run() throws Exception {
-                // TODO consider replication
-                final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
-                if (expeditionConnector != null) {
-                    expeditionConnector.removeDeviceConfiguration(deviceConfiguration);
-                }
-            }
-        });
+        QualifiedObjectIdentifier identifier = SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION
+                .getQualifiedObjectIdentifier(
+                        WildcardPermissionEncoder.encode(ServerInfo.getName(), deviceConfiguration.getName()));
+        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(identifier,
+                new ActionWithResult<Void>() {
+                    @Override
+                    public Void run() throws Exception {
+                        // TODO consider replication
+                        final ExpeditionTrackerFactory expeditionConnector = expeditionConnectorTracker.getService();
+                        if (expeditionConnector != null) {
+                            expeditionConnector.removeDeviceConfiguration(deviceConfiguration);
+                        }
+                        return null;
+                    }
+                });
     }
     
     @Override

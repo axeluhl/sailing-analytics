@@ -415,4 +415,11 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
 
     User checkPermissionForObjectCreationAndRevertOnErrorForUserCreation(String username,
             ActionWithResult<User> createActionReturningCreatedObject);
+
+    /**
+     * Do only use this, if it is not possible to get the actual instance of the object to delete using the
+     * WithQualifiedObjectIdentifier variant
+     */
+    <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(QualifiedObjectIdentifier identifier,
+            ActionWithResult<T> actionToDeleteObject);
 }

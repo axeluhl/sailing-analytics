@@ -1606,6 +1606,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         return result;
     }
     
+    @Override
     public void checkPermissionAndDeleteOwnershipForObjectRemoval(WithQualifiedObjectIdentifier object,
             Action actionToDeleteObject) {
         checkPermissionAndDeleteOwnershipForObjectRemoval(object, () -> {
@@ -1614,9 +1615,16 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         });
     }
 
+    @Override
     public <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(WithQualifiedObjectIdentifier object,
             ActionWithResult<T> actionToDeleteObject) {
         QualifiedObjectIdentifier identifier = object.getIdentifier();
+        return checkPermissionAndDeleteOwnershipForObjectRemoval(identifier, actionToDeleteObject);
+    }
+
+    @Override
+    public <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(QualifiedObjectIdentifier identifier,
+            ActionWithResult<T> actionToDeleteObject) {
         try {
             SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.DELETE));
             final T result = actionToDeleteObject.run();
