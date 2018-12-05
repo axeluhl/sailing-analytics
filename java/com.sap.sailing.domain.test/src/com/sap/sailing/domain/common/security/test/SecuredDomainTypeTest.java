@@ -17,7 +17,7 @@ public class SecuredDomainTypeTest {
 
     @Test
     public void testNamedIdentifierStrategy()  {
-        HasPermissions t = new SecuredDomainType<>("TEST", IdentifierStrategy.NAMED);
+        HasPermissions t = new SecuredDomainType("TEST", IdentifierStrategy.NAMED);
         @SuppressWarnings("serial") Named testObject = new Named() {
             @Override
             public String getName() {
@@ -30,7 +30,7 @@ public class SecuredDomainTypeTest {
     
     @Test
     public void testWithIdIdentifierStrategy()  {
-        HasPermissions t = new SecuredDomainType<>("TEST", IdentifierStrategy.ID);
+        HasPermissions t = new SecuredDomainType("TEST", IdentifierStrategy.ID);
         WithID testObject = new WithID() {
             @Override
             public Serializable getId() {

@@ -4,74 +4,55 @@ import com.sap.sse.common.Named;
 import com.sap.sse.common.WithID;
 import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
 
-public interface IdentifierStrategy<T> {
+public interface IdentifierStrategy {
 
-    String getIdentifierAsString(T object);
+    <T> String getIdentifierAsString(T object);
 
-    String getNewIdentifer(Object... params);
-
-    static IdentifierStrategy<Named> NAMED = new IdentifierStrategy<Named>() {
+    static IdentifierStrategy NAMED = new IdentifierStrategy() {
 
         @Override
-        public String getIdentifierAsString(Named object) {
-            return WildcardPermissionEncoder.encode(object.getName());
+        public <T> String getIdentifierAsString(T object) {
+            Named namedObject = (Named) object;
+            return WildcardPermissionEncoder.encode(namedObject.getName());
         }
 
-        @Override
-        public String getNewIdentifer(Object... params) {
-            if (params.length != 1) {
-                throw new IllegalArgumentException("NAMED requires exactly one parameter for the name of the object.");
-            }
-            return WildcardPermissionEncoder.encode(params[1].toString());
-        }
     };
 
-    static IdentifierStrategy<WithID> ID = new IdentifierStrategy<WithID>() {
+    static IdentifierStrategy ID = new IdentifierStrategy() {
 
         @Override
-        public String getIdentifierAsString(WithID object) {
-            return object.getId().toString();
+        public <T> String getIdentifierAsString(T object) {
+            WithID objectWithId = (WithID) object;
+            return objectWithId.getId().toString();
         }
 
-        @Override
-        public String getNewIdentifer(Object... params) {
-            if (params.length != 0) {
-                throw new IllegalArgumentException("ID requires no parameter.");
-            }
-            return null;
-        }
-        
     };
-    
-    static IdentifierStrategy<Object> TO_SPECIFY = new IdentifierStrategy<Object>() {
+
+    static IdentifierStrategy SERVER = new IdentifierStrategy() {
+
+        @Override
+        public <T> String getIdentifierAsString(T object) {
+            return WildcardPermissionEncoder.encode((String) object);
+        }
+
+    };
+
+    static IdentifierStrategy TO_SPECIFY = new IdentifierStrategy() {
 
         @Override
         public String getIdentifierAsString(Object object) {
             return object.toString();
         }
 
-        @Override
-        public String getNewIdentifer(Object... params) {
-            if (params.length != 0) {
-                throw new IllegalArgumentException("ID requires no parameter.");
-            }
-            return null;
-        }
-        
     };
 
-    static IdentifierStrategy<Object> NO_OP = new IdentifierStrategy<Object>() {
+    static IdentifierStrategy NO_OP = new IdentifierStrategy() {
 
         @Override
         public String getIdentifierAsString(Object object) {
-            throw new  UnsupportedOperationException();
+            throw new UnsupportedOperationException();
         }
 
-        @Override
-        public String getNewIdentifer(Object... params) {
-            throw new  UnsupportedOperationException();
-        }
-        
     };
 
 }

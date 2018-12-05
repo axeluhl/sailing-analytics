@@ -9,10 +9,10 @@ import com.sap.sse.security.shared.QualifiedObjectIdentifier;
 import com.sap.sse.security.shared.IdentifierStrategy;
 import com.sap.sse.security.shared.WildcardPermission;
 
-public class HasPermissionsImpl<T> extends NamedImpl implements HasPermissions {
+public class HasPermissionsImpl extends NamedImpl implements HasPermissions {
     private static final long serialVersionUID = -7901836864741040400L;
     private final Action[] availableActions;
-    private final IdentifierStrategy<T> identiferStrategy;
+    private final IdentifierStrategy identiferStrategy;
 
     /**
      * By default, all actions as provided by {@link DefaultActions} are supported by logical types with permissions
@@ -22,7 +22,7 @@ public class HasPermissionsImpl<T> extends NamedImpl implements HasPermissions {
      *            a type name that can be represented in a {@link WildcardPermission}'s first part without further need
      *            for encoding
      */
-    public HasPermissionsImpl(String logicalTypeName, IdentifierStrategy<T> identiferStrategy) {
+    public <T> HasPermissionsImpl(String logicalTypeName, IdentifierStrategy identiferStrategy) {
         this(logicalTypeName, identiferStrategy, DefaultActions.values());
     }
 
@@ -35,7 +35,7 @@ public class HasPermissionsImpl<T> extends NamedImpl implements HasPermissions {
      *            a type name that can be represented in a {@link WildcardPermission}'s first part without further need
      *            for encoding
      */
-    public HasPermissionsImpl(final String logicalTypeName, IdentifierStrategy<T> identiferStrategy, final Action... availableActions) {
+    public <T> HasPermissionsImpl(final String logicalTypeName, IdentifierStrategy identiferStrategy, final Action... availableActions) {
         super(logicalTypeName);
         assert logicalTypeName.equals(new WildcardPermissionEncoder().encodeAsPermissionPart(logicalTypeName));
         final int numberOfActionsAvailable = availableActions == null ? 0 : availableActions.length;
@@ -60,9 +60,9 @@ public class HasPermissionsImpl<T> extends NamedImpl implements HasPermissions {
         }
         return false;
     }
-    
+
     @Override
-    public IdentifierStrategy<T> identifierStrategy() {
+    public IdentifierStrategy identifierStrategy() {
         return identiferStrategy;
     }
 
@@ -111,6 +111,11 @@ public class HasPermissionsImpl<T> extends NamedImpl implements HasPermissions {
             }
         }
         return result.toString();
+    }
+
+    @Override
+    public String getStringPermissionForObject(final Action action, final Object object) {
+        return getStringPermissionForObjects(action, identifierStrategy().getIdentifierAsString(object));
     }
 
     @Override

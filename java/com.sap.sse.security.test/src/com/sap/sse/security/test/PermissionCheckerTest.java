@@ -57,8 +57,8 @@ public class PermissionCheckerTest {
     private UserStore userStore;
     private AccessControlStore accessControlStore;
     private PrincipalCollection principalCollection;
-    private HasPermissions type1 = new HasPermissionsImpl<>("DEMO", IdentifierStrategy.NO_OP, DefaultActions.READ, DefaultActions.UPDATE);
-    private HasPermissions type2 = new HasPermissionsImpl<>("TEST", IdentifierStrategy.NO_OP, DefaultActions.READ, DefaultActions.DELETE);
+    private HasPermissions type1 = new HasPermissionsImpl("DEMO", IdentifierStrategy.NO_OP, DefaultActions.READ, DefaultActions.UPDATE);
+    private HasPermissions type2 = new HasPermissionsImpl("TEST", IdentifierStrategy.NO_OP, DefaultActions.READ, DefaultActions.DELETE);
     private Iterable<HasPermissions> allHasPermissions = Arrays.asList(type1, type2);
     
     @Before

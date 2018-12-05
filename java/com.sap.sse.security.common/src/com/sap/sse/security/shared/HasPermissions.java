@@ -24,7 +24,7 @@ public interface HasPermissions {
      */
     Action[] getAvailableActions();
     
-    <T> IdentifierStrategy<T> identifierStrategy();
+    IdentifierStrategy identifierStrategy();
 
     /**
      * @return {@code true} if and only if objects of this logical type support the {@code action} as one of their
@@ -56,7 +56,8 @@ public interface HasPermissions {
      *            the context of a permission part; see also {@link PermissionStringEncoder}
      */
     String getStringPermissionForObjects(Action action, String... typeRelativeObjectIdentifier);
-    
+    String getStringPermissionForObject(Action action, Object object);
+
     /**
      * Qualifies the {@code objectIdentifier} which only has to be unique within the scope of the type identified
      * by this permission with this permission's type name. For example, if this permission is for the "LEADERBOARD"
