@@ -1608,7 +1608,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     
     public void checkPermissionAndDeleteOwnershipForObjectRemoval(WithQualifiedObjectIdentifier object,
             Action actionToDeleteObject) {
-        checkPermissionAndDeleteOwnershipForObjectRemoval(object.getIdentifier(), () -> {
+        checkPermissionAndDeleteOwnershipForObjectRemoval(object, () -> {
             actionToDeleteObject.run();
             return null;
         });
@@ -1616,23 +1616,9 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     public <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(WithQualifiedObjectIdentifier object,
             ActionWithResult<T> actionToDeleteObject) {
-        return checkPermissionAndDeleteOwnershipForObjectRemoval(object.getIdentifier(), actionToDeleteObject);
-    }
-
-    @Override
-    public void checkPermissionAndDeleteOwnershipForObjectRemoval(HasPermissions type,
-            String typeRelativeObjectIdentifier, Action actionToDeleteObject) {
-        checkPermissionAndDeleteOwnershipForObjectRemoval(type, typeRelativeObjectIdentifier, () -> {
-            actionToDeleteObject.run();
-            return null;
-        });
-    }
-    
-    private <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(QualifiedObjectIdentifier identifier,
-            ActionWithResult<T> actionToDeleteObject) {
+        QualifiedObjectIdentifier identifier = object.getIdentifier();
         try {
-            SecurityUtils.getSubject()
-                    .checkPermission(identifier.getStringPermission(DefaultActions.DELETE));
+            SecurityUtils.getSubject().checkPermission(identifier.getStringPermission(DefaultActions.DELETE));
             final T result = actionToDeleteObject.run();
             deleteOwnership(identifier);
             deleteAccessControlList(identifier);
@@ -1640,13 +1626,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    public <T> T checkPermissionAndDeleteOwnershipForObjectRemoval(HasPermissions type,
-            String typeRelativeObjectIdentifier, ActionWithResult<T> actionToDeleteObject) {
-        QualifiedObjectIdentifier identifier = type.getQualifiedObjectIdentifier(typeRelativeObjectIdentifier);
-        return checkPermissionAndDeleteOwnershipForObjectRemoval(identifier, actionToDeleteObject);
     }
 
     @Override

@@ -212,7 +212,7 @@ public class ExpeditionTrackerFactory implements WindTrackerFactory, DeviceRegis
                 devicesPerBoatId.containsKey(deviceConfiguration.getExpeditionBoatId()) &&
                 !devicesPerBoatId.get(deviceConfiguration.getExpeditionBoatId()).equals(deviceConfiguration)) {
             throw new IllegalStateException("Trying to create an ambiguous Expedition Boat ID mapping: established is "+
-                    devicesPerBoatId.get(deviceConfiguration.getExpeditionBoatId())+
+                            devicesPerBoatId.get(deviceConfiguration.getExpeditionBoatId()) +
                     " and boat ID #"+deviceConfiguration.getExpeditionBoatId()+" therefore cannot be mapped to "+deviceConfiguration+
                     " at the same time.");
         }

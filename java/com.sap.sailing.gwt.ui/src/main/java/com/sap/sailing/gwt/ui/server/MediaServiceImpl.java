@@ -108,7 +108,7 @@ public class MediaServiceImpl extends RemoteServiceServlet implements MediaServi
     @Override
     public void deleteMediaTrack(MediaTrack mediaTrack) {
         racingEventService().getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(
-                SecuredDomainType.MEDIA_TRACK, mediaTrack.dbId, new Action() {
+                mediaTrack, new Action() {
 
                     @Override
                     public void run() throws Exception {
