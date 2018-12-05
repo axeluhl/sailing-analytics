@@ -70,6 +70,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRegatta;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
 import com.sap.sailing.domain.tracking.TrackedRegattaRegistry;
 import com.sap.sailing.domain.tracking.WindStore;
@@ -487,7 +488,7 @@ public class DomainFactoryImpl implements DomainFactory {
             TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver, LeaderboardGroupResolver leaderboardGroupResolver, 
             URI courseDesignUpdateURI, String tracTracUsername, String tracTracPassword,
             IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber, boolean useInternalMarkPassingAlgorithm,
-            long timeoutInMilliseconds, ReceiverType... types) {
+            long timeoutInMilliseconds, RaceTrackingHandler raceTrackingHandler, ReceiverType... types) {
         IEvent tractracEvent = tractracRace.getEvent();
         Collection<Receiver> result = new ArrayList<Receiver>();
         for (ReceiverType type : types) {
@@ -497,7 +498,8 @@ public class DomainFactoryImpl implements DomainFactory {
                         raceDefinitionSetToUpdate, delayToLiveInMillis,
                         WindTrack.DEFAULT_MILLISECONDS_OVER_WHICH_TO_AVERAGE_WIND, simulator, courseDesignUpdateURI,
                         tracTracUsername, tracTracPassword, eventSubscriber, raceSubscriber,
-                        useInternalMarkPassingAlgorithm, raceLogResolver, leaderboardGroupResolver, timeoutInMilliseconds));
+                        useInternalMarkPassingAlgorithm, raceLogResolver, leaderboardGroupResolver, timeoutInMilliseconds,
+                        raceTrackingHandler));
                 break;
             case MARKPOSITIONS:
                 result.add(new MarkPositionReceiver(
@@ -531,11 +533,11 @@ public class DomainFactoryImpl implements DomainFactory {
             DynamicRaceDefinitionSet raceDefinitionSetToUpdate, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver,
             LeaderboardGroupResolver leaderboardGroupResolver, IRace tractracRace, URI courseDesignUpdateURI, 
             String tracTracUsername, String tracTracPassword, IEventSubscriber eventSubscriber, IRaceSubscriber raceSubscriber,
-            boolean useInternalMarkPassingAlgorithm, long timeoutInMilliseconds) {
+            boolean useInternalMarkPassingAlgorithm, long timeoutInMilliseconds, RaceTrackingHandler raceTrackingHandler) {
         return getUpdateReceivers(trackedRegatta, tractracRace, windStore, delayToLiveInMillis, simulator,
                 raceDefinitionSetToUpdate, trackedRegattaRegistry, raceLogResolver, leaderboardGroupResolver, courseDesignUpdateURI,
                 tracTracUsername, tracTracPassword, eventSubscriber, raceSubscriber,
-                useInternalMarkPassingAlgorithm, timeoutInMilliseconds, ReceiverType.RACECOURSE,
+                useInternalMarkPassingAlgorithm, timeoutInMilliseconds, raceTrackingHandler, ReceiverType.RACECOURSE,
                 ReceiverType.MARKPASSINGS, ReceiverType.MARKPOSITIONS, ReceiverType.RACESTARTFINISH, ReceiverType.RAWPOSITIONS,
                 ReceiverType.SENSORDATA);
     }
@@ -591,7 +593,7 @@ public class DomainFactoryImpl implements DomainFactory {
 			long delayToLiveInMillis, long millisecondsOverWhichToAverageWind,
 			DynamicRaceDefinitionSet raceDefinitionSetToUpdate, URI tracTracUpdateURI, UUID tracTracEventUuid,
 			String tracTracUsername, String tracTracPassword, boolean ignoreTracTracMarkPassings, RaceLogResolver raceLogResolver,
-			Consumer<DynamicTrackedRace> runBeforeExposingRace, IRace tractracRace) {
+			Consumer<DynamicTrackedRace> runBeforeExposingRace, IRace tractracRace, RaceTrackingHandler raceTrackingHandler) {
         synchronized (raceCache) {
             RaceDefinition raceDefinition = raceCache.get(raceId);
             if (raceDefinition == null) {
@@ -607,7 +609,7 @@ public class DomainFactoryImpl implements DomainFactory {
                     trackedRegatta.getRegatta().addRace(raceDefinition);
                     trackedRace = createTrackedRace(trackedRegatta, raceDefinition, sidelines, windStore,
                             delayToLiveInMillis, millisecondsOverWhichToAverageWind, raceDefinitionSetToUpdate, ignoreTracTracMarkPassings,
-                            raceLogResolver);
+                            raceLogResolver, raceTrackingHandler);
                     logger.info("Added race " + raceDefinition + " to regatta " + trackedRegatta.getRegatta());
                     if (runBeforeExposingRace != null) {
                     	logger.fine("Running callback for tracked race creation for "+trackedRace.getRace());
@@ -697,8 +699,8 @@ public class DomainFactoryImpl implements DomainFactory {
     private DynamicTrackedRace createTrackedRace(TrackedRegatta trackedRegatta, RaceDefinition race,
             Iterable<Sideline> sidelines, WindStore windStore, long delayToLiveInMillis,
             long millisecondsOverWhichToAverageWind, DynamicRaceDefinitionSet raceDefinitionSetToUpdate,
-            boolean useMarkPassingCalculator, RaceLogResolver raceLogResolver) {
-        return trackedRegatta.createTrackedRace(race, sidelines,
+            boolean useMarkPassingCalculator, RaceLogResolver raceLogResolver, RaceTrackingHandler raceTrackingHandler) {
+        return raceTrackingHandler.createTrackedRace(trackedRegatta, race, sidelines,
                 windStore, delayToLiveInMillis, millisecondsOverWhichToAverageWind,
                 /* time over which to average speed: */ race.getBoatClass().getApproximateManeuverDurationInMilliseconds(),
                 raceDefinitionSetToUpdate, useMarkPassingCalculator, raceLogResolver, Optional.empty());
@@ -958,21 +960,22 @@ public class DomainFactoryImpl implements DomainFactory {
     public TracTracRaceTracker createRaceTracker(RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver,
             LeaderboardGroupResolver leaderboardGroupResolver,
-            RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds)
+            RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds,
+            RaceTrackingHandler raceTrackingHandler)
             throws URISyntaxException, SubscriberInitializationException, IOException, InterruptedException {
         return new TracTracRaceTrackerImpl(this, raceLogStore, regattaLogStore, windStore, trackedRegattaRegistry,
-                raceLogResolver, leaderboardGroupResolver, connectivityParams, timeoutInMilliseconds);
+                raceLogResolver, leaderboardGroupResolver, connectivityParams, timeoutInMilliseconds, raceTrackingHandler);
     }
 
     @Override
     public RaceTracker createRaceTracker(Regatta regatta, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             WindStore windStore, TrackedRegattaRegistry trackedRegattaRegistry, RaceLogResolver raceLogResolver,
             LeaderboardGroupResolver leaderboardGroupResolver,
-            RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds)
-            throws URISyntaxException, CreateModelException, SubscriberInitializationException, IOException,
-            InterruptedException {
+            RaceTrackingConnectivityParametersImpl connectivityParams, long timeoutInMilliseconds,
+            RaceTrackingHandler raceTrackingHandler) throws URISyntaxException, CreateModelException,
+            SubscriberInitializationException, IOException, InterruptedException {
         return new TracTracRaceTrackerImpl(regatta, this, raceLogStore, regattaLogStore, windStore, trackedRegattaRegistry,
-                raceLogResolver, leaderboardGroupResolver, connectivityParams, timeoutInMilliseconds);
+                raceLogResolver, leaderboardGroupResolver, connectivityParams, timeoutInMilliseconds, raceTrackingHandler);
     }
 
     @Override

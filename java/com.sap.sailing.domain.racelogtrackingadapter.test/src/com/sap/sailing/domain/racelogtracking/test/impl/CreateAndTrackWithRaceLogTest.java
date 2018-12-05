@@ -65,6 +65,7 @@ import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.impl.RacingEventServiceImpl;
@@ -228,7 +229,8 @@ public class CreateAndTrackWithRaceLogTest extends RaceLogTrackingTestHelper {
     }
 
     private TrackedRace trackAndGetRace(RaceColumn column) throws NotDenotedForRaceLogTrackingException, Exception {
-        final RaceHandle raceHandle = adapter.startTracking(service, leaderboard, column, fleet, /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ false);
+        final RaceHandle raceHandle = adapter.startTracking(service, leaderboard, column, fleet, /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ false,
+                new DefaultRaceTrackingHandler());
         raceHandle.getRace();
         return WaitForTrackedRaceUtil.waitForTrackedRace(column, fleet, 10);
     }

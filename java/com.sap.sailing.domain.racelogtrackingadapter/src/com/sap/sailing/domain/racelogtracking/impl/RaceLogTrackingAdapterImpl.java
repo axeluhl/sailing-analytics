@@ -55,6 +55,7 @@ import com.sap.sailing.domain.leaderboard.RegattaLeaderboard;
 import com.sap.sailing.domain.racelogtracking.PingDeviceIdentifierImpl;
 import com.sap.sailing.domain.racelogtracking.RaceLogTrackingAdapter;
 import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
@@ -79,7 +80,8 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
 
     @Override
     public RaceHandle startTracking(RacingEventService service, Leaderboard leaderboard, RaceColumn raceColumn,
-            Fleet fleet, boolean trackWind, boolean correctWindDirectionByMagneticDeclination)
+            Fleet fleet, boolean trackWind, boolean correctWindDirectionByMagneticDeclination,
+            RaceTrackingHandler raceTrackingHandler)
             throws NotDenotedForRaceLogTrackingException, Exception {
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         RaceLogTrackingState raceLogTrackingState = new RaceLogTrackingStateAnalyzer(raceLog).analyze();
@@ -95,7 +97,7 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
         final RaceHandle result;
         if (!isRaceLogRaceTrackerAttached(service, raceLog)) {
             result = addTracker(service, regatta, leaderboard, raceColumn, fleet, -1, trackWind,
-                    correctWindDirectionByMagneticDeclination);
+                    correctWindDirectionByMagneticDeclination, raceTrackingHandler);
         } else {
             result = null;
         }
@@ -110,14 +112,14 @@ public class RaceLogTrackingAdapterImpl implements RaceLogTrackingAdapter {
      */
     private RaceHandle addTracker(RacingEventService service, RegattaIdentifier regattaToAddTo, Leaderboard leaderboard,
             RaceColumn raceColumn, Fleet fleet, long timeoutInMilliseconds, boolean trackWind,
-            boolean correctWindDirectionByMagneticDeclination) throws RaceLogRaceTrackerExistsException, Exception {
+            boolean correctWindDirectionByMagneticDeclination, RaceTrackingHandler raceTrackingHandler) throws RaceLogRaceTrackerExistsException, Exception {
         RaceLog raceLog = raceColumn.getRaceLog(fleet);
         assert !isRaceLogRaceTrackerAttached(service, raceLog) : new RaceLogRaceTrackerExistsException(
                 leaderboard.getName() + " - " + raceColumn.getName() + " - " + fleet.getName());
         Regatta regatta = regattaToAddTo == null ? null : service.getRegatta(regattaToAddTo);
         RaceLogConnectivityParams params = new RaceLogConnectivityParams(service, regatta, raceColumn, fleet,
                 leaderboard, delayToLiveInMillis, domainFactory, trackWind, correctWindDirectionByMagneticDeclination);
-        return service.addRace(regattaToAddTo, params, timeoutInMilliseconds);
+        return service.addRace(regattaToAddTo, params, timeoutInMilliseconds, raceTrackingHandler);
     }
 
     @Override

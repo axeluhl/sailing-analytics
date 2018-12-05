@@ -12,6 +12,7 @@ import com.sap.sailing.domain.common.RegattaIdentifier;
 import com.sap.sailing.domain.racelog.RaceLogStore;
 import com.sap.sailing.domain.regattalog.RegattaLogStore;
 import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackerManager;
 import com.sap.sailing.domain.tractracadapter.DomainFactory;
@@ -49,7 +50,8 @@ public class TracTracAdapterImpl implements TracTracAdapter {
     public RaceHandle addTracTracRace(TrackerManager trackerManager, URL paramURL, URI liveURI, URI storedURI,
             URI courseDesignUpdateURI, RaceLogStore raceLogStore, RegattaLogStore regattaLogStore,
             long timeoutInMilliseconds, String tracTracUsername, String tracTracPassword, String raceStatus,
-            String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination, int timeoutInMillis) throws Exception {
+            String raceVisibility, boolean trackWind, boolean correctWindDirectionByMagneticDeclination, int timeoutInMillis,
+            RaceTrackingHandler raceTrackingHandler) throws Exception {
         return trackerManager.addRace(
                 /* regattaToAddTo */null,
                 getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI,
@@ -58,7 +60,7 @@ public class TracTracAdapterImpl implements TracTracAdapter {
                         /* endOfTracking */null, delayToLiveInMillis, /* offsetToStartTimeOfSimulatedRace */null, /* ignoreTracTracMarkPassings */ false,
                         raceLogStore, regattaLogStore, tracTracUsername, tracTracPassword, raceStatus, raceVisibility, trackWind, correctWindDirectionByMagneticDeclination,
                         /* preferReplayIfAvailable */ false, timeoutInMillis),
-                timeoutInMilliseconds);
+                timeoutInMilliseconds, raceTrackingHandler);
     }
 
     @Override
@@ -67,14 +69,14 @@ public class TracTracAdapterImpl implements TracTracAdapter {
             RaceLogStore raceLogStore, RegattaLogStore regattaLogStore, long timeoutInMilliseconds,
             Duration offsetToStartTimeOfSimulatedRace, boolean useInternalMarkPassingAlgorithm, String tracTracUsername,
             String tracTracPassword, String raceStatus, String raceVisibility, boolean trackWind,
-            boolean correctWindDirectionByMagneticDeclination) throws Exception {
+            boolean correctWindDirectionByMagneticDeclination,RaceTrackingHandler raceTrackingHandler) throws Exception {
         return trackerManager.addRace(
                 regattaToAddTo,
                 getTracTracDomainFactory().createTrackingConnectivityParameters(paramURL, liveURI, storedURI,
                         courseDesignUpdateURI, startOfTracking, endOfTracking, delayToLiveInMillis,
                         offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, raceLogStore, regattaLogStore, tracTracUsername, tracTracPassword,
                         raceStatus, raceVisibility, trackWind, correctWindDirectionByMagneticDeclination, /* preferReplayIfAvailable */ false,
-                        (int) timeoutInMilliseconds), timeoutInMilliseconds);
+                        (int) timeoutInMilliseconds), timeoutInMilliseconds, raceTrackingHandler);
     }
 
     @Override

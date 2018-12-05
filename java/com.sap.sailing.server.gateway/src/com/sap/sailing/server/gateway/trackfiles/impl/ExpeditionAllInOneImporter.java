@@ -72,6 +72,7 @@ import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceHandle;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.geocoding.ReverseGeocoder;
@@ -677,7 +678,8 @@ public class ExpeditionAllInOneImporter {
             final Fleet fleet) throws NotDenotedForRaceLogTrackingException, Exception {
         DynamicTrackedRace trackedRace;
         final RaceHandle raceHandle = adapter.startTracking(service, regattaLeaderboard, raceColumn, fleet,
-                /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ true);
+                /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ true,
+                new DefaultRaceTrackingHandler());
         // wait for the RaceDefinition to be created
         raceHandle.getRace();
         trackedRace = WaitForTrackedRaceUtil.waitForTrackedRace(raceColumn, fleet, 10);

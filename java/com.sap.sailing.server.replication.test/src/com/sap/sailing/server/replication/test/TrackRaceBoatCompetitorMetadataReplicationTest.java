@@ -32,6 +32,7 @@ import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tractracadapter.impl.DomainFactoryImpl;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.operationaltransformation.CreateTrackedRace;
@@ -109,7 +110,8 @@ public class TrackRaceBoatCompetitorMetadataReplicationTest extends AbstractServ
                 /* resultDiscardingThresholds */ null, /* startsWithZeroScore */ false, /* firstColumnIsNonDiscardableCarryForward */ false,
                 /* hasSplitFleetContiguousScoring */ false, /* maximumNumberOfDiscards */ null,
                 Arrays.asList(new FleetDTO("Red", 0, Color.RED), new FleetDTO("Green", 0, Color.GREEN), new FleetDTO("Blue", 0, Color.BLUE))));
-        racesHandle = master.addRace(/* regattaToAddTo */ regattaIdentifier, trackingParams, /* timeoutInMilliseconds */ 60000);
+        racesHandle = master.addRace(/* regattaToAddTo */ regattaIdentifier, trackingParams, /* timeoutInMilliseconds */ 60000,
+                new DefaultRaceTrackingHandler());
     }
 
     private void waitForTrackRaceReplicationTrigger() throws InterruptedException, IllegalAccessException {

@@ -106,6 +106,7 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.FlatGPSFixJsonDeserializer;
@@ -617,7 +618,8 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     leaderboardAndRaceColumnAndFleetAndResponse.getRaceColumn(),
                     leaderboardAndRaceColumnAndFleetAndResponse.getFleet(),
                     trackWind == null ? true : trackWind,
-                    correctWindDirectionByMagneticDeclination == null ? true : correctWindDirectionByMagneticDeclination);
+                    correctWindDirectionByMagneticDeclination == null ? true : correctWindDirectionByMagneticDeclination,
+                    new DefaultRaceTrackingHandler());
             jsonResult.put("regatta", raceHandle.getRegatta().getName());
             result = Response.ok(jsonResult.toJSONString()).build();
         } else {
