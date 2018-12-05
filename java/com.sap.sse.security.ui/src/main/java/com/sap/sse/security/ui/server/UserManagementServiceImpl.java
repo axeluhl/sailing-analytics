@@ -31,6 +31,7 @@ import com.sap.sse.common.Util;
 import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.mail.MailException;
+import com.sap.sse.security.Action;
 import com.sap.sse.security.ActionWithResult;
 import com.sap.sse.security.Credential;
 import com.sap.sse.security.SecurityService;
@@ -125,8 +126,14 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
 
     @Override
     public void deleteRoleDefinition(String roleIdAsString) {
-        SecurityUtils.getSubject().checkPermission(SecuredSecurityTypes.ROLE_DEFINITION.getStringPermissionForObjects(DefaultActions.DELETE, roleIdAsString));
-        getSecurityService().deleteRoleDefinition(getSecurityService().getRoleDefinition(UUID.fromString(roleIdAsString)));
+        getSecurityService().checkPermissionAndDeleteOwnershipForObjectRemoval(SecuredSecurityTypes.ROLE_DEFINITION,
+                roleIdAsString, new Action() {
+                    @Override
+                    public void run() throws Exception {
+                        getSecurityService().deleteRoleDefinition(
+                                getSecurityService().getRoleDefinition(UUID.fromString(roleIdAsString)));
+                    }
+                });
     }
 
     @Override
