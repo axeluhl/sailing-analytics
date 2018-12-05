@@ -379,15 +379,6 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void setOwnership(OwnershipAnnotation ownershipAnnotation) {
-        User securityUser = ownershipAnnotation.getAnnotation().getUserOwner();
-        User user = getUserByName(securityUser.getName());
-        setOwnership(ownershipAnnotation.getIdOfAnnotatedObject(), user,
-                ownershipAnnotation.getAnnotation().getTenantOwner(),
-                ownershipAnnotation.getDisplayNameOfAnnotatedObject());
-    }
-
-    @Override
     public RoleDefinition getRoleDefinition(UUID idOfRoleDefinition) {
         return userStore.getRoleDefinition(idOfRoleDefinition);
     }
@@ -519,7 +510,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
         if (userOwner == null && tenantOwner == null) {
             throw new IllegalArgumentException("No owner is not valid, would create non changeable object");
         }
-        UUID tenantId;
+        final UUID tenantId;
         if (userOwner == null) {
             tenantId = tenantOwner.getId();
         } else {

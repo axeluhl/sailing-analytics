@@ -57,8 +57,6 @@ public interface SecurityService extends ReplicableWithObjectInputStream<Replica
     OwnershipAnnotation getOwnership(QualifiedObjectIdentifier idOfOwnedObject);
     
     OwnershipAnnotation createDefaultOwnershipForNewObject(QualifiedObjectIdentifier idOfNewObject);
-    
-    void setOwnership(OwnershipAnnotation ownership);
 
     Iterable<AccessControlListAnnotation> getAccessControlLists();
 

@@ -170,10 +170,10 @@ public class UserManagementServiceImpl extends RemoteServiceServlet implements U
             String displayNameOfOwnedObject) {
         final QualifiedObjectIdentifier result;
         if (SecurityUtils.getSubject().isPermitted(idOfOwnedObject.getStringPermission(DefaultActions.CHANGE_OWNERSHIP))) {
-            Ownership ownerShip = SecurityDTOFactory.ownerFromDTO(ownershipDTO, getSecurityService());
-            getSecurityService()
-                    .setOwnership(new OwnershipAnnotation(ownerShip,
-                    idOfOwnedObject, displayNameOfOwnedObject));
+            final Ownership ownership = SecurityDTOFactory.ownerFromDTO(ownershipDTO, getSecurityService());
+            final User userOwner = ownership.getUserOwner();
+            final UserGroup tenantOwner = ownership.getTenantOwner();
+            getSecurityService().setOwnership(idOfOwnedObject, userOwner, tenantOwner, displayNameOfOwnedObject);
             result = idOfOwnedObject;
         } else {
             result = null;
