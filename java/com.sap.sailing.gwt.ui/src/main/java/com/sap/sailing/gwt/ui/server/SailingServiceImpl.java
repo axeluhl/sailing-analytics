@@ -362,7 +362,6 @@ import com.sap.sailing.domain.tracking.Maneuver;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.RaceTracker;
-import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.Track;
 import com.sap.sailing.domain.tracking.TrackedLeg;
 import com.sap.sailing.domain.tracking.TrackedLegOfCompetitor;
@@ -530,6 +529,7 @@ import com.sap.sailing.server.operationaltransformation.UpdateRaceDelayToLive;
 import com.sap.sailing.server.operationaltransformation.UpdateSeries;
 import com.sap.sailing.server.operationaltransformation.UpdateServerConfiguration;
 import com.sap.sailing.server.operationaltransformation.UpdateSpecificRegatta;
+import com.sap.sailing.server.security.PermissionAwareRaceTrackingHandler;
 import com.sap.sailing.server.security.SailingViewerRole;
 import com.sap.sailing.server.simulation.SimulationService;
 import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
@@ -1380,7 +1380,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                         getRegattaLogStore(), RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS,
                         offsetToStartTimeOfSimulatedRace, useInternalMarkPassingAlgorithm, tracTracUsername,
                         tracTracPassword, record.getRaceStatus(), record.getRaceVisibility(), trackWind,
-                        correctWindByDeclination, new DefaultRaceTrackingHandler());
+                        correctWindByDeclination, new PermissionAwareRaceTrackingHandler(getSecurityService()));
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error trying to load race " + rrs+". Continuing with remaining races...", e);
             }
@@ -3123,7 +3123,8 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                     rr.raceId, rr.getName(), raceDescription, boatClass, hostname, port, startList,
                     getRaceLogStore(), getRegattaLogStore(),
                     RaceTracker.TIMEOUT_FOR_RECEIVING_RACE_DEFINITION_IN_MILLISECONDS, useInternalMarkPassingAlgorithm, trackWind,
-                    correctWindByDeclination, updateURL, updateUsername, updatePassword, new DefaultRaceTrackingHandler());
+                    correctWindByDeclination, updateURL, updateUsername, updatePassword,
+                    new PermissionAwareRaceTrackingHandler(getSecurityService()));
         }
     }
     
@@ -3165,7 +3166,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
                 }
                 getSwissTimingReplayService().loadRaceData(regattaIdentifier, replayRaceDTO.link, replayRaceDTO.getName(),
                         replayRaceDTO.race_id, boatClassName, getService(), getService(), useInternalMarkPassingAlgorithm, getRaceLogStore(), getRegattaLogStore(),
-                        new DefaultRaceTrackingHandler());
+                        new PermissionAwareRaceTrackingHandler(getSecurityService()));
             } catch (Exception e) {
                 logger.log(Level.SEVERE, "Error trying to load SwissTimingReplay race " + replayRaceDTO, e);
             }
@@ -6884,7 +6885,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         RaceColumn raceColumn = leaderboard.getRaceColumnByName(raceColumnName);
         Fleet fleet = raceColumn.getFleetByName(fleetName);
         getRaceLogTrackingAdapter().startTracking(getService(), leaderboard, raceColumn, fleet, trackWind, correctWindByDeclination,
-                new DefaultRaceTrackingHandler());
+                new PermissionAwareRaceTrackingHandler(getSecurityService()));
     }
     
     @Override
@@ -8347,7 +8348,7 @@ public class SailingServiceImpl extends ProxiedRemoteServiceServlet implements S
         try {
             final RaceHandle raceHandle = getRaceLogTrackingAdapter().startTracking(getService(), regattaLeaderboard,
                     raceColumn, fleet, /* trackWind */ true, /* correctWindDirectionByMagneticDeclination */ true,
-                    new DefaultRaceTrackingHandler());
+                    new PermissionAwareRaceTrackingHandler(getSecurityService()));
             
             // wait for the RaceDefinition to be created
             raceHandle.getRace();

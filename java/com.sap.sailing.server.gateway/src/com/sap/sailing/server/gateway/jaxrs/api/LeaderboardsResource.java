@@ -106,7 +106,6 @@ import com.sap.sailing.domain.tracking.GPSFixTrack;
 import com.sap.sailing.domain.tracking.MarkPassing;
 import com.sap.sailing.domain.tracking.RaceHandle;
 import com.sap.sailing.domain.tracking.TrackedRace;
-import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.server.RacingEventService;
 import com.sap.sailing.server.gateway.deserialization.JsonDeserializationException;
 import com.sap.sailing.server.gateway.deserialization.impl.FlatGPSFixJsonDeserializer;
@@ -122,6 +121,7 @@ import com.sap.sailing.server.gateway.serialization.impl.FlatGPSFixJsonSerialize
 import com.sap.sailing.server.gateway.serialization.impl.MarkJsonSerializerWithPosition;
 import com.sap.sailing.server.operationaltransformation.RemoveAndUntrackRace;
 import com.sap.sailing.server.operationaltransformation.StopTrackingRace;
+import com.sap.sailing.server.security.PermissionAwareRaceTrackingHandler;
 import com.sap.sse.InvalidDateException;
 import com.sap.sse.common.Bearing;
 import com.sap.sse.common.Distance;
@@ -619,7 +619,7 @@ public class LeaderboardsResource extends AbstractLeaderboardsResource {
                     leaderboardAndRaceColumnAndFleetAndResponse.getFleet(),
                     trackWind == null ? true : trackWind,
                     correctWindDirectionByMagneticDeclination == null ? true : correctWindDirectionByMagneticDeclination,
-                    new DefaultRaceTrackingHandler());
+                    new PermissionAwareRaceTrackingHandler(getSecurityService()));
             jsonResult.put("regatta", raceHandle.getRegatta().getName());
             result = Response.ok(jsonResult.toJSONString()).build();
         } else {

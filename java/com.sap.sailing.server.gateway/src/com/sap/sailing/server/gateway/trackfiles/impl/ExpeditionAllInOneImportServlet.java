@@ -122,8 +122,8 @@ public class ExpeditionAllInOneImportServlet extends AbstractFileUploadServlet {
                 }
             }
             importerResult = new ExpeditionAllInOneImporter(serverStringMessages, uiLocale, getService(),
-                    getRaceLogTrackingAdapter(), getServiceFinderFactory(), getContext()).importFiles(fileName,
-                            fileItem, boatClassName, importMode, regattaName, importStartData);
+                    getSecurityService(), getRaceLogTrackingAdapter(), getServiceFinderFactory(), getContext())
+                            .importFiles(fileName, fileItem, boatClassName, importMode, regattaName, importStartData);
         } catch (AllinOneImportException e) {
             importerResult = new ImporterResult(e, e.additionalErrors);
             logger.log(Level.SEVERE, e.getMessage());

@@ -72,7 +72,6 @@ import com.sap.sailing.domain.trackimport.FormatNotSupportedException;
 import com.sap.sailing.domain.trackimport.GPSFixImporter;
 import com.sap.sailing.domain.tracking.DynamicTrackedRace;
 import com.sap.sailing.domain.tracking.RaceHandle;
-import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.WindTrack;
 import com.sap.sailing.geocoding.ReverseGeocoder;
@@ -87,6 +86,7 @@ import com.sap.sailing.server.operationaltransformation.AddSpecificRegatta;
 import com.sap.sailing.server.operationaltransformation.CreateLeaderboardGroup;
 import com.sap.sailing.server.operationaltransformation.CreateRegattaLeaderboard;
 import com.sap.sailing.server.operationaltransformation.UpdateEvent;
+import com.sap.sailing.server.security.PermissionAwareRaceTrackingHandler;
 import com.sap.sailing.server.util.WaitForTrackedRaceUtil;
 import com.sap.sse.common.Duration;
 import com.sap.sse.common.NoCorrespondingServiceRegisteredException;
@@ -97,6 +97,7 @@ import com.sap.sse.common.Util.Pair;
 import com.sap.sse.common.Util.Triple;
 import com.sap.sse.common.impl.MillisecondsTimePoint;
 import com.sap.sse.i18n.ResourceBundleStringMessages;
+import com.sap.sse.security.SecurityService;
 
 /**
  * Importer for expedition data that imports all available data for a boat:
@@ -152,6 +153,8 @@ public class ExpeditionAllInOneImporter {
     private ResourceBundleStringMessages serverStringMessages;
     private Locale uiLocale;
 
+    private final SecurityService securityService;
+
     public static class ImporterResult {
         final UUID eventId;
         final List<Triple<String, String, String>> raceNameRaceColumnNameFleetnameList = new ArrayList<>();
@@ -196,11 +199,12 @@ public class ExpeditionAllInOneImporter {
     }
 
     public ExpeditionAllInOneImporter(ResourceBundleStringMessages serverStringMessages, Locale uiLocale,
-            final RacingEventService service, RaceLogTrackingAdapter adapter,
+            final RacingEventService service, SecurityService securityService, RaceLogTrackingAdapter adapter,
             final TypeBasedServiceFinderFactory serviceFinderFactory, final BundleContext context) {
         this.serverStringMessages = serverStringMessages;
         this.uiLocale = uiLocale;
         this.service = service;
+        this.securityService = securityService;
         this.adapter = adapter;
         this.serviceFinderFactory = serviceFinderFactory;
         this.context = context;
@@ -679,7 +683,7 @@ public class ExpeditionAllInOneImporter {
         DynamicTrackedRace trackedRace;
         final RaceHandle raceHandle = adapter.startTracking(service, regattaLeaderboard, raceColumn, fleet,
                 /* trackWind */ false, /* correctWindDirectionByMagneticDeclination */ true,
-                new DefaultRaceTrackingHandler());
+                new PermissionAwareRaceTrackingHandler(securityService));
         // wait for the RaceDefinition to be created
         raceHandle.getRace();
         trackedRace = WaitForTrackedRaceUtil.waitForTrackedRace(raceColumn, fleet, 10);
