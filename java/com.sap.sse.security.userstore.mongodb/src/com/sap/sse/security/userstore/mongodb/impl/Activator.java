@@ -62,16 +62,15 @@ public class Activator implements BundleActivator {
                     securityServiceServiceTracker.open();
                     final SecurityService securityService = securityServiceServiceTracker.waitForService(0);
                     for (User user : userStore.getUsers()) {
-                        securityService.migrateOwnership(user, SecuredSecurityTypes.getAllInstances());
+                        securityService.migrateOwnership(user);
                     }
                     for (UserGroup group : userStore.getUserGroups()) {
-                        securityService.migrateOwnership(group, SecuredSecurityTypes.getAllInstances());
+                        securityService.migrateOwnership(group);
                     }
                     for (RoleDefinition role : userStore.getRoleDefinitions()) {
-                        securityService.migrateOwnership(role, SecuredSecurityTypes.getAllInstances());
+                        securityService.migrateOwnership(role);
                     }
-                    securityService.assumeOwnershipMigrated(SecuredSecurityTypes.SERVER.getName(),
-                            SecuredSecurityTypes.getAllInstances());
+                    securityService.assumeOwnershipMigrated(SecuredSecurityTypes.SERVER.getName());
                     securityService.checkMigration(SecuredSecurityTypes.getAllInstances());
                 } catch (InterruptedException e) {
                     logger.log(Level.SEVERE, "Error in migration", e);

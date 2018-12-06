@@ -22,7 +22,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -135,7 +135,7 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
 
     // private static final long MIGRATION_CHECK_DELAY = 20000;
     
-    private final Map<Pair<Class<? extends HasPermissions>, List<String>>, List<String>> migratedHasPermissionTypes = new ConcurrentHashMap<>();
+    private final Set<String> migratedHasPermissionTypes = new ConcurrentSkipListSet<>();;
 
     // private final Timer migrationTimer;
 
@@ -1816,16 +1816,13 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void migrateOwnership(WithQualifiedObjectIdentifier identifier, Iterable<HasPermissions> permissions) {
-        migrateOwnership(identifier.getIdentifier(), identifier.getName(), permissions);
+    public void migrateOwnership(WithQualifiedObjectIdentifier identifier) {
+        migrateOwnership(identifier.getIdentifier(), identifier.getName());
     }
 
     @Override
-    public void migrateOwnership(final QualifiedObjectIdentifier identifier, final String displayName,
-            final Iterable<HasPermissions> permissions) {
+    public void migrateOwnership(final QualifiedObjectIdentifier identifier, final String displayName) {
         
-        final List<String> alreadyMigrated = getMigrationInfoForKey(permissions);
-
         final OwnershipAnnotation owner = this.getOwnership(identifier);
         final UserGroup defaultTenant = this.getDefaultTenant();
         // fix unowned objects, also fix wrongly converted objects due to older codebase that could not handle null
@@ -1836,34 +1833,15 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
                     + defaultTenant);
             this.setOwnership(identifier, null, defaultTenant, displayName);
         }
-
-        if (!alreadyMigrated.contains(identifier.getTypeIdentifier())) {
-            alreadyMigrated.add(identifier.getTypeIdentifier());
-        }
-    }
-
-    private List<String> getMigrationInfoForKey(final Iterable<HasPermissions> permissions) {
-        final List<String> allRequiredPermissionsAsString = new ArrayList<>();
-        for (HasPermissions permission : permissions) {
-            allRequiredPermissionsAsString.add(permission.getName());
-        }
-        // the given Iterable cannot guarantee, that the order is always the same
-        Collections.sort(allRequiredPermissionsAsString);
-
-        Pair<Class<? extends HasPermissions>, List<String>> key = new Pair<>(Util.first(permissions).getClass(),
-                allRequiredPermissionsAsString);
-        final List<String> alreadyMigrated = migratedHasPermissionTypes.computeIfAbsent(key,
-                t -> new CopyOnWriteArrayList<>());
-        return alreadyMigrated;
+        migratedHasPermissionTypes.add(identifier.getTypeIdentifier());
     }
 
     @Override
     public void checkMigration(Iterable<HasPermissions> allInstances) {
         Class<? extends HasPermissions> clazz = Util.first(allInstances).getClass();
-        List<String> alreadyMigrated = getMigrationInfoForKey(allInstances);
         boolean allChecksSucessfull = true;
         for (HasPermissions shouldBeMigrated : allInstances) {
-            if (!alreadyMigrated.contains(shouldBeMigrated.getName())) {
+            if (!migratedHasPermissionTypes.contains(shouldBeMigrated.getName())) {
                 logger.severe("Permission-Vertical Migration: Did not migrate all Types for " + clazz.getName()
                         + " missing: " + shouldBeMigrated);
                 allChecksSucessfull = false;
@@ -1944,9 +1922,8 @@ public class SecurityServiceImpl implements ReplicableSecurityService, ClearStat
     }
 
     @Override
-    public void assumeOwnershipMigrated(String typeName, Iterable<HasPermissions> permissions) {
-        final List<String> alreadyMigrated = getMigrationInfoForKey(permissions);
-        alreadyMigrated.add(typeName);
+    public void assumeOwnershipMigrated(String typeName) {
+        migratedHasPermissionTypes.add(typeName);
     }
     
     @Override

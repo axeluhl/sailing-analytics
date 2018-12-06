@@ -12,9 +12,12 @@ import java.util.logging.Logger;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
 
+import com.sap.sailing.domain.common.security.SecuredDomainType;
 import com.sap.sailing.domain.racelogtracking.DeviceIdentifierStringSerializationHandler;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
+import com.sap.sailing.expeditionconnector.ExpeditionDeviceConfiguration;
 import com.sap.sailing.expeditionconnector.ExpeditionSensorDeviceIdentifier;
 import com.sap.sailing.expeditionconnector.ExpeditionTrackerFactory;
 import com.sap.sailing.expeditionconnector.persistence.DomainObjectFactory;
@@ -23,7 +26,12 @@ import com.sap.sailing.expeditionconnector.persistence.ExpeditionGpsDeviceIdenti
 import com.sap.sailing.expeditionconnector.persistence.MongoObjectFactory;
 import com.sap.sailing.expeditionconnector.persistence.PersistenceFactory;
 import com.sap.sailing.server.gateway.serialization.racelog.tracking.DeviceIdentifierJsonHandler;
+import com.sap.sse.ServerInfo;
 import com.sap.sse.common.TypeBasedServiceFinder;
+import com.sap.sse.security.SecurityService;
+import com.sap.sse.security.shared.QualifiedObjectIdentifier;
+import com.sap.sse.security.shared.impl.WildcardPermissionEncoder;
+import com.sap.sse.util.ServiceTrackerFactory;
 import com.sap.sse.util.impl.ThreadFactoryWithPriority;
 
 public class Activator implements BundleActivator {
@@ -81,6 +89,25 @@ public class Activator implements BundleActivator {
             registrations.add(context.registerService(DeviceIdentifierStringSerializationHandler.class, new ExpeditionGpsStringSerializationHandler(), getDict(ExpeditionGpsDeviceIdentifier.TYPE)));
             registrations.add(context.registerService(DeviceIdentifierJsonHandler.class, new ExpeditionSensorDeviceIdentifierJsonHandler(), getDict(ExpeditionSensorDeviceIdentifier.TYPE)));
             registrations.add(context.registerService(DeviceIdentifierStringSerializationHandler.class, new ExpeditionSensorStringSerializationHandler(), getDict(ExpeditionSensorDeviceIdentifier.TYPE)));
+
+            new Thread(() -> {
+                final ServiceTracker<SecurityService, SecurityService> securityServiceServiceTracker = ServiceTrackerFactory
+                        .createAndOpen(context, SecurityService.class);
+                try {
+                    final SecurityService securityService = securityServiceServiceTracker.waitForService(0);
+                    for (ExpeditionDeviceConfiguration deviceConfiguration : expeditionTrackerFactory
+                            .getDeviceConfigurations()) {
+                        QualifiedObjectIdentifier identifier = SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION
+                                .getQualifiedObjectIdentifier(WildcardPermissionEncoder.encode(ServerInfo.getName(),
+                                        deviceConfiguration.getName()));
+                        securityService.migrateOwnership(identifier, identifier.getTypeRelativeObjectIdentifier());
+                    }
+                    securityService.assumeOwnershipMigrated(SecuredDomainType.IGTIMI_ACCOUNT.getName());
+                } catch (Exception e) {
+                    logger.log(Level.SEVERE, "Exception trying to migrate IgtimiAccounts implementation", e);
+                }
+            }, getClass().getName() + " registering connectivity handler").start();
+
         });
     }
     

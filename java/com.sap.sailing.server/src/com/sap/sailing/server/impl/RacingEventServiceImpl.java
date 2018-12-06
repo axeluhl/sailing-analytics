@@ -187,6 +187,7 @@ import com.sap.sailing.domain.tracking.RaceListener;
 import com.sap.sailing.domain.tracking.RaceTracker;
 import com.sap.sailing.domain.tracking.RaceTrackingConnectivityParameters;
 import com.sap.sailing.domain.tracking.RaceTrackingHandler;
+import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.TrackedRace;
 import com.sap.sailing.domain.tracking.TrackedRaceStatus;
 import com.sap.sailing.domain.tracking.TrackedRegatta;
@@ -194,7 +195,6 @@ import com.sap.sailing.domain.tracking.TrackedRegattaListener;
 import com.sap.sailing.domain.tracking.WindStore;
 import com.sap.sailing.domain.tracking.WindTracker;
 import com.sap.sailing.domain.tracking.WindTrackerFactory;
-import com.sap.sailing.domain.tracking.RaceTrackingHandler.DefaultRaceTrackingHandler;
 import com.sap.sailing.domain.tracking.impl.AbstractRaceChangeListener;
 import com.sap.sailing.domain.tracking.impl.DynamicTrackedRegattaImpl;
 import com.sap.sailing.domain.tracking.impl.TrackedRaceImpl;
@@ -948,73 +948,56 @@ public class RacingEventServiceImpl implements RacingEventService, ClearStateTes
 
     public void ensureOwnerships() {
         SecurityService securityService = getSecurityService();
-        securityService.assumeOwnershipMigrated(SecuredDomainType.MANAGE_MARK_PASSINGS.getName(),
-                SecuredDomainType.getAllInstances());
-        securityService.assumeOwnershipMigrated(SecuredDomainType.EXPEDITION_DEVICE_CONFIGURATION.getName(),
-                SecuredDomainType.getAllInstances());
-        securityService.assumeOwnershipMigrated(SecuredDomainType.RACE_MANAGER_APP_DEVICE_CONFIGURATION.getName(),
-                SecuredDomainType.getAllInstances());
-        securityService.assumeOwnershipMigrated(SecuredDomainType.RESULT_IMPORT_URL.getName(),
-                SecuredDomainType.getAllInstances());
-        securityService.assumeOwnershipMigrated(SecuredDomainType.MANAGE_MARK_POSITIONS.getName(),
-                SecuredDomainType.getAllInstances());
-        securityService.assumeOwnershipMigrated(SecuredDomainType.CAN_REPLAY_DURING_LIVE_RACES.getName(),
-                SecuredDomainType.getAllInstances());
-        securityService.assumeOwnershipMigrated(SecuredDomainType.DETAIL_TIMER.getName(),
-                SecuredDomainType.getAllInstances());
-        securityService.assumeOwnershipMigrated(SecuredDomainType.DATA_MINING.getName(),
-                SecuredDomainType.getAllInstances());
-        securityService.assumeOwnershipMigrated(SecuredDomainType.REPLICATOR.getName(),
-                SecuredDomainType.getAllInstances());
+        securityService.assumeOwnershipMigrated(SecuredDomainType.MANAGE_MARK_PASSINGS.getName());
+        securityService.assumeOwnershipMigrated(SecuredDomainType.RACE_MANAGER_APP_DEVICE_CONFIGURATION.getName());
+        securityService.assumeOwnershipMigrated(SecuredDomainType.RESULT_IMPORT_URL.getName());
+        securityService.assumeOwnershipMigrated(SecuredDomainType.MANAGE_MARK_POSITIONS.getName());
+        securityService.assumeOwnershipMigrated(SecuredDomainType.CAN_REPLAY_DURING_LIVE_RACES.getName());
+        securityService.assumeOwnershipMigrated(SecuredDomainType.DETAIL_TIMER.getName());
+        securityService.assumeOwnershipMigrated(SecuredDomainType.DATA_MINING.getName());
+        securityService.assumeOwnershipMigrated(SecuredDomainType.REPLICATOR.getName());
 
         for (Event event : getAllEvents()) {
-            securityService.migrateOwnership(event, SecuredDomainType.getAllInstances());
+            securityService.migrateOwnership(event);
         }
-        securityService.assumeOwnershipMigrated(SecuredDomainType.EVENT.getName(), SecuredDomainType.getAllInstances());
+        securityService.assumeOwnershipMigrated(SecuredDomainType.EVENT.getName());
         for (Regatta regatta : getAllRegattas()) {
-            securityService.migrateOwnership(regatta, SecuredDomainType.getAllInstances());
+            securityService.migrateOwnership(regatta);
             // FIXME add listener for all TrackedRaces here and migrate them as they become available!
             DynamicTrackedRegatta trackedRegatta = getTrackedRegatta(regatta);
             if (trackedRegatta != null) {
                 trackedRegatta.lockTrackedRacesForRead();
                 try {
                     for (DynamicTrackedRace trackedRace : trackedRegatta.getTrackedRaces()) {
-                        securityService.migrateOwnership(trackedRace, SecuredDomainType.getAllInstances());
+                        securityService.migrateOwnership(trackedRace);
                     }
                 } finally {
                     trackedRegatta.unlockTrackedRacesAfterRead();
                 }
             }
         }
-        securityService.assumeOwnershipMigrated(SecuredDomainType.TRACKED_RACE.getName(),
-                SecuredDomainType.getAllInstances());
-        securityService.assumeOwnershipMigrated(SecuredDomainType.REGATTA.getName(),
-                SecuredDomainType.getAllInstances());
+        securityService.assumeOwnershipMigrated(SecuredDomainType.TRACKED_RACE.getName());
+        securityService.assumeOwnershipMigrated(SecuredDomainType.REGATTA.getName());
         for (Leaderboard leaderboard : getLeaderboards().values()) {
-            securityService.migrateOwnership(leaderboard, SecuredDomainType.getAllInstances());
+            securityService.migrateOwnership(leaderboard);
         }
-        securityService.assumeOwnershipMigrated(SecuredDomainType.LEADERBOARD.getName(),
-                SecuredDomainType.getAllInstances());
+        securityService.assumeOwnershipMigrated(SecuredDomainType.LEADERBOARD.getName());
         for (LeaderboardGroup leaderboardGroup : getLeaderboardGroups().values()) {
-            securityService.migrateOwnership(leaderboardGroup, SecuredDomainType.getAllInstances());
+            securityService.migrateOwnership(leaderboardGroup);
         }
-        securityService.assumeOwnershipMigrated(SecuredDomainType.LEADERBOARD_GROUP.getName(),
-                SecuredDomainType.getAllInstances());
+        securityService.assumeOwnershipMigrated(SecuredDomainType.LEADERBOARD_GROUP.getName());
         for (MediaTrack mediaTrack : getAllMediaTracks()) {
-            securityService.migrateOwnership(mediaTrack, SecuredDomainType.getAllInstances());
+            securityService.migrateOwnership(mediaTrack);
         }
-        securityService.assumeOwnershipMigrated(SecuredDomainType.MEDIA_TRACK.getName(),
-                SecuredDomainType.getAllInstances());
+        securityService.assumeOwnershipMigrated(SecuredDomainType.MEDIA_TRACK.getName());
         for (Competitor competitor : getCompetitorAndBoatStore().getAllCompetitors()) {
-            securityService.migrateOwnership(competitor, SecuredDomainType.getAllInstances());
+            securityService.migrateOwnership(competitor);
         }
-        securityService.assumeOwnershipMigrated(SecuredDomainType.COMPETITOR.getName(),
-                SecuredDomainType.getAllInstances());
+        securityService.assumeOwnershipMigrated(SecuredDomainType.COMPETITOR.getName());
         for (Boat boat : getCompetitorAndBoatStore().getBoats()) {
-            securityService.migrateOwnership(boat, SecuredDomainType.getAllInstances());
+            securityService.migrateOwnership(boat);
         }
-        securityService.assumeOwnershipMigrated(SecuredDomainType.BOAT.getName(), SecuredDomainType.getAllInstances());
-
+        securityService.assumeOwnershipMigrated(SecuredDomainType.BOAT.getName());
         securityService.checkMigration(SecuredDomainType.getAllInstances());
     }
 
