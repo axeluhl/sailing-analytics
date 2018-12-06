@@ -1,14 +1,5 @@
-.allowedActionsTable {
-    margin-right: 5px;
-    margin-left: 5px;
-    margin-top: 10px;
-    display: inline;
-}
-
-.deniedActionsTable {
-    margin-right: 5px;
-    margin-left: 5px;
-    margin-top: 10px;
+.allowedActionsTable, .deniedActionsTable {
+    margin: 0 3px inherit 2px;
     display: inline;
 }
 
